@@ -24,6 +24,7 @@ IN_PATH = path.normpath(f"{DIR_PATH}/../../proto")
 OUT_PATH = path.normpath(f"{DIR_PATH}/../flower/proto")
 PROTO_FILES = glob.glob(f"{IN_PATH}/*.proto")
 
+
 def compile_proto():
     # get the path of grpc_tools protofiles
     command = [
