@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Helper functions for protobuf serialization and deserialization"""
+"""This module contains functions for protobuf serialization and deserialization."""
 
 from io import BytesIO
 
@@ -21,14 +21,14 @@ import numpy as np
 from flower.proto.transport_pb2 import NDArray
 
 
-def ndarray_to_proto(ndarr: np.ndarray) -> NDArray:
-    """Serializes a numpy array to NDArray protobuf message"""
-    ndarr_bytes = BytesIO()
-    np.save(ndarr_bytes, ndarr, allow_pickle=False)
-    return NDArray(ndarray=ndarr_bytes.getvalue())
+def ndarray_to_proto(ndarray: np.ndarray) -> NDArray:
+    """Serialize numpy array to NDArray protobuf message"""
+    ndarray_bytes = BytesIO()
+    np.save(ndarray_bytes, ndarray, allow_pickle=False)
+    return NDArray(ndarray=ndarray_bytes.getvalue())
 
 
-def proto_to_ndarray(ndarr_proto: NDArray) -> np.ndarray:
-    """Deserializes a NDArray protobuf message to a numpy array"""
-    ndarr_bytes = BytesIO(ndarr_proto.ndarray)
-    return np.load(ndarr_bytes, allow_pickle=False)
+def proto_to_ndarray(ndarray_proto: NDArray) -> np.ndarray:
+    """Deserialize NDArray protobuf message to a numpy array"""
+    ndarray_bytes = BytesIO(ndarray_proto.ndarray)
+    return np.load(ndarray_bytes, allow_pickle=False)

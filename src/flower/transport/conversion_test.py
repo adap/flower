@@ -16,11 +16,11 @@
 import numpy as np
 import pytest
 
-from flower.transport.data import ndarray_to_proto, proto_to_ndarray
+from flower.transport.conversion import ndarray_to_proto, proto_to_ndarray
 
 
 def test_serialisation_deserialisation():
-    """Tests if after serialization/deserialisation the np.ndarray is still identical"""
+    """Test if after serialization/deserialisation the np.ndarray is still identical"""
     arr = np.array([[1, 2], [3, 4], [5, 6]])
 
     arr_serialized = ndarray_to_proto(arr)
