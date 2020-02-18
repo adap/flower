@@ -18,6 +18,7 @@ import glob
 from os import path
 
 import grpc_tools
+from grpc_tools import protoc
 
 DIR_PATH = path.dirname(path.realpath(__file__))
 GRPC_PATH = grpc_tools.__path__[0]
@@ -37,7 +38,7 @@ def compile_all():
         f"--mypy_out={OUT_PATH}",
     ] + PROTO_FILES
 
-    exit_code = grpc_tools.protoc.main(command)
+    exit_code = protoc.main(command)
 
     if exit_code != 0:
         raise Exception(f"Error: {command} failed")
