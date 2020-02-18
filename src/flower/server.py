@@ -33,7 +33,7 @@ class Server:
     def fit(self, num_rounds: int) -> None:
         """Run federated averaging for a number of rounds"""
         # Initialize weights by asking one client to return theirs
-        self.weights = random.choice(self.clients).get_weights()
+        self.weights = _get_initial_weights()
 
         # Run federated averaging for num_rounds
         for _ in range(num_rounds):
@@ -51,6 +51,10 @@ class Server:
         # Aggregate training results and replace previous global model
         weights_prime = aggregate(results)
         self.weights = weights_prime
+
+    def _get_initial_weights(self) -> Weights:
+        """Get initial weights from one of the available clients"""
+        return random.choice(self.clients).get_weights()
 
 
 def fit_clients(clients: List[Client], weights: Weights) -> List[Tuple[Weights, int]]:
