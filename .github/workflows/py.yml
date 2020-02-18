@@ -25,7 +25,7 @@ jobs:
           poetry config virtualenvs.create false
       - name: Install dependencies
         run: python -m poetry install
-      - name: Lint + Test (isort/black/mypy/pylint/pytest)
+      - name: Detect if protos need recompilation
         run: ./dev/check_protos.sh
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test.sh
