@@ -26,5 +26,5 @@ def test_directories():
 
 
 def test_proto_file_count():
-    """Test if the correct number of proto files was captured by the glob"""
+    """Test if the correct number of proto files were captured by the glob"""
     assert len(PROTO_FILES) == 1
