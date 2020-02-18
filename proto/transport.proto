@@ -15,30 +15,6 @@
 
 syntax = "proto3";
 
-service ClientManager {
-  rpc Connect(stream ClientMessage) returns (stream ServerMessage) {}
-}
-
 message NDArray {
   bytes ndarray = 1;
-}
-
-message ClientMessage {
-  message TrainResult { repeated NDArray theta = 1; }
-
-  oneof request {
-    TrainResult result = 1;
-    bool unkown_instruction = 1000;
-  }
-}
-
-message ServerMessage {
-  message TrainConfig {
-    repeated NDArray theta = 1;
-  }
-
-  oneof instruction {
-    int32 reconnect_in = 1;
-    TrainConfig train_config = 2;
-  }
 }
