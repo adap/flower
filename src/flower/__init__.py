@@ -12,3 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""Flower main package"""
+
+from .client import Client
+from .server import Server
+from .typing import Weights

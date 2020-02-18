@@ -12,23 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server tests"""
+"""Flower client (abstract base class)"""
+
+from abc import ABC
+from typing import Tuple
+
+from flower.typing import Weights
 
 
-import numpy as np
+class Client(ABC):
+    """Abstract base class for Flower clients"""
 
-from .server import aggregate
+    def __init__(self, cid: str):
+        self.cid = cid
 
+    def get_weights(self) -> Weights:
+        """Return the current local model weights"""
+        raise NotImplementedError()
 
-def test_aggregate():
-    """Test aggregate function"""
-
-    # Prepare
-    expected = np.array([[1, 2, 3], [4, 5, 6]])
-    not_expected = np.array([[4, 5, 6], [1, 2, 3],])
-
-    # Execute
-    actual = aggregate([(expected, 1), (not_expected, 2)])
-
-    # Assert
-    np.testing.assert_equal(expected, actual)
+    def fit(self, weights: Weights) -> Tuple[Weights, int]:
+        """Refine the provided weights using the locally held dataset"""
+        raise NotImplementedError()

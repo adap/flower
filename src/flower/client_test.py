@@ -12,23 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server tests"""
+"""Flower client tests"""
+
+import pytest
+
+from .client import Client
 
 
-import numpy as np
-
-from .server import aggregate
-
-
-def test_aggregate():
-    """Test aggregate function"""
-
+def test_method_get_weights_not_implemented():
+    """Test method get_weights raises NotImplementedError"""
     # Prepare
-    expected = np.array([[1, 2, 3], [4, 5, 6]])
-    not_expected = np.array([[4, 5, 6], [1, 2, 3],])
+    client = Client(cid="1")
 
-    # Execute
-    actual = aggregate([(expected, 1), (not_expected, 2)])
+    # Execute & assert
+    with pytest.raises(NotImplementedError):
+        client.get_weights()
 
-    # Assert
-    np.testing.assert_equal(expected, actual)
+
+def test_method_fit_not_implemented():
+    """Test method fit raises NotImplementedError"""
+    # Prepare
+    client = Client(cid="1")
+
+    # Execute & assert
+    with pytest.raises(NotImplementedError):
+        client.fit(weights=None)
