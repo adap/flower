@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""This module contains functions related to proto compilation"""
+
 import glob
 from os import path
 
@@ -26,6 +28,7 @@ PROTO_FILES = glob.glob(f"{IN_PATH}/*.proto")
 
 
 def compile_all():
+    """Compiles all protos in the proto directory into the src/flower/proto directory"""
     # get the path of grpc_tools protofiles
     command = [
         "grpc_tools.protoc",
