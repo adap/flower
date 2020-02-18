@@ -18,7 +18,6 @@ import glob
 from os import path
 
 import grpc_tools
-from grpc_tools import protoc
 
 DIR_PATH = path.dirname(path.realpath(__file__))
 GRPC_PATH = grpc_tools.__path__[0]
@@ -28,8 +27,7 @@ PROTO_FILES = glob.glob(f"{IN_PATH}/*.proto")
 
 
 def compile_all():
-    """Compiles all protos in the proto directory into the src/flower/proto directory"""
-    # get the path of grpc_tools protofiles
+    """Compile all protos in the proto directory into the src/flower/proto directory"""
     command = [
         "grpc_tools.protoc",
         f"--proto_path={GRPC_PATH}/_proto",  # path to google .proto fiels
@@ -39,10 +37,10 @@ def compile_all():
         f"--mypy_out={OUT_PATH}",
     ] + PROTO_FILES
 
-    exit_code = protoc.main(command)
+    exit_code = grpc_tools.protoc.main(command)
 
     if exit_code != 0:
-        raise Exception("Error: {} failed".format(command))
+        raise Exception(f"Error: {command} failed")
 
 
 if __name__ == "__main__":
