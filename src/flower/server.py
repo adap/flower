@@ -33,7 +33,7 @@ class Server:
     def fit(self, num_rounds: int) -> None:
         """Run federated averaging for a number of rounds"""
         # Initialize weights by asking one client to return theirs
-        self.weights = _get_initial_weights()
+        self.weights = self._get_initial_weights()
 
         # Run federated averaging for num_rounds
         for _ in range(num_rounds):
