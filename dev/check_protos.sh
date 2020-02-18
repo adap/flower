@@ -9,9 +9,12 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 python -m flower_tools.grpc > /dev/null 2>&1
 
 # Fail if user forgot to recompile
-CHANGED=$(git diff-index --name-only HEAD --)
+CHANGED=$(git diff --name-only HEAD src/flower/proto)
 
 if [ -n "$CHANGED" ]; then
-    echo "Proto files changed"
+    echo "Changes detected"
     exit 1
 fi
+
+echo "No changes detected"
+exit 0
