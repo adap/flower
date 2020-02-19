@@ -37,3 +37,13 @@ def test_method_fit_not_implemented():
     # Execute & assert
     with pytest.raises(NotImplementedError):
         client.fit(weights=None)
+
+
+def test_method_evaluate_not_implemented():
+    """Test method fit raises NotImplementedError"""
+    # Prepare
+    client = Client(cid="1")
+
+    # Execute & assert
+    with pytest.raises(NotImplementedError):
+        client.evaluate(weights=None)

@@ -33,3 +33,7 @@ class Client(ABC):
     def fit(self, weights: Weights) -> Tuple[Weights, int]:
         """Refine the provided weights using the locally held dataset"""
         raise NotImplementedError()
+
+    def evaluate(self, weights: Weights) -> Tuple[int, float]:
+        """Evaluate the provided weights using the locally held dataset"""
+        raise NotImplementedError()
