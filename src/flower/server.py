@@ -36,9 +36,23 @@ class Server:
         self.weights = self._get_initial_weights()
 
         # Run federated averaging for num_rounds
-        for _ in range(num_rounds):
+        for current_round in range(num_rounds):
             # Refine model
             self.fit_round()
+            # Evaluate refined model
+            loss_avg = self.evaluate()
+            print(f"Round {current_round}: weighted loss average {loss_avg}")
+
+    def evaluate(self) -> float:
+        """Validate current global model on a number of clients"""
+        # Sample clients for evaluation
+        clients = random.sample(self.clients, 3)
+
+        # Evaluate current global weights on those clients
+        results = eval_clients(clients, self.weights)
+
+        # Aggregate the evaluation results
+        return weighted_loss_avg(results)
 
     def fit_round(self) -> None:
         """Perform a single round of federated averaging"""
@@ -76,3 +90,27 @@ def fit_client(client: Client, weights: Weights) -> Tuple[Weights, int]:
 def aggregate(results: List[Tuple[Weights, int]]) -> Weights:
     """Stub for weight aggregation"""
     return results[0][0]
+
+
+def eval_clients(clients: List[Client], weights: Weights) -> List[Tuple[int, float]]:
+    """Evaluate weights concurrently on all selected clients"""
+    results: List[Tuple[int, float]] = []
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(eval_client, c, weights) for c in clients]
+        concurrent.futures.wait(futures)
+        for future in futures:
+            results.append(future.result())
+    return results
+
+
+def eval_client(client: Client, weights: Weights) -> Tuple[int, float]:
+    """Evaluate weights on a single client"""
+    return client.evaluate(weights)
+
+
+def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
+    """Aggregate evaluation results obtained from multiple clients"""
+    print(f"results: {results}")
+    num_total_evaluation_examples = sum([num_examples for num_examples, _ in results])
+    weighted_losses = [num_examples * loss for num_examples, loss in results]
+    return sum(weighted_losses) / num_total_evaluation_examples
