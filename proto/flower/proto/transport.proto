@@ -15,6 +15,20 @@
 
 syntax = "proto3";
 
-message NDArray {
-  bytes ndarray = 1;
+package flower.transport;
+
+service Instructions {
+  rpc Connect(stream Instruction) returns (stream Report) {}
+}
+
+message NDArray { bytes ndarray = 1; }
+
+message Instruction {
+  message Weights { repeated NDArray weight = 1; }
+  oneof instruction { Weights weights = 1; }
+}
+
+message Report {
+  message Weights { repeated NDArray weight = 1; }
+  oneof report { Weights weights = 1; }
 }

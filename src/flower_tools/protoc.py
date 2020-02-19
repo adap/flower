@@ -23,16 +23,23 @@ from grpc_tools import protoc
 DIR_PATH = path.dirname(path.realpath(__file__))
 GRPC_PATH = grpc_tools.__path__[0]
 IN_PATH = path.normpath(f"{DIR_PATH}/../../proto")
-OUT_PATH = path.normpath(f"{DIR_PATH}/../flower/proto")
-PROTO_FILES = glob.glob(f"{IN_PATH}/*.proto")
+OUT_PATH = path.normpath(f"{DIR_PATH}/..")
+PROTO_FILES = glob.glob(f"{IN_PATH}/flower/**/*.proto")
 
 
 def compile_all():
-    """Compile all protos in the proto directory into the src/flower/proto directory"""
+    """Compile all protos in the proto directory into the respective directories
+
+    The directory structure of the proto directory will be mirrored in src.
+    This is needed as otherwise grpc_tools.protoc will have broken imports
+    """
     command = [
         "grpc_tools.protoc",
-        f"--proto_path={GRPC_PATH}/_proto",  # path to google .proto fiels
+        # Path to google .proto files
+        f"--proto_path={GRPC_PATH}/_proto",
+        # Path to root of our proto files
         f"--proto_path={IN_PATH}",
+        # Output path
         f"--python_out={OUT_PATH}",
         f"--grpc_python_out={OUT_PATH}",
         f"--mypy_out={OUT_PATH}",
