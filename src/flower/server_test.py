@@ -20,7 +20,7 @@ import numpy as np
 from .server import aggregate, weighted_loss_avg
 
 
-def test_aggregate():
+def test_aggregate() -> None:
     """Test aggregate function"""
 
     # Prepare
@@ -39,7 +39,7 @@ def test_aggregate():
     np.testing.assert_equal(expected, actual)
 
 
-def test_weighted_loss_avg_single_value():
+def test_weighted_loss_avg_single_value() -> None:
     """Test weighted loss averaging"""
     # Prepare
     results = [(5, 0.5)]
@@ -52,7 +52,7 @@ def test_weighted_loss_avg_single_value():
     assert expected == actual
 
 
-def test_weighted_loss_avg_multiple_values():
+def test_weighted_loss_avg_multiple_values() -> None:
     """Test weighted loss averaging"""
     # Prepare
     results = [(1, 2.0), (2, 1.0), (1, 2.0)]

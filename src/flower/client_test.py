@@ -19,7 +19,7 @@ import pytest
 from .client import Client
 
 
-def test_method_get_weights_not_implemented():
+def test_method_get_weights_not_implemented() -> None:
     """Test method get_weights raises NotImplementedError"""
     # Prepare
     client = Client(cid="1")
@@ -29,21 +29,21 @@ def test_method_get_weights_not_implemented():
         client.get_weights()
 
 
-def test_method_fit_not_implemented():
+def test_method_fit_not_implemented() -> None:
     """Test method fit raises NotImplementedError"""
     # Prepare
     client = Client(cid="1")
 
     # Execute & assert
     with pytest.raises(NotImplementedError):
-        client.fit(weights=None)
+        client.fit(weights=[])
 
 
-def test_method_evaluate_not_implemented():
+def test_method_evaluate_not_implemented() -> None:
     """Test method fit raises NotImplementedError"""
     # Prepare
     client = Client(cid="1")
 
     # Execute & assert
     with pytest.raises(NotImplementedError):
-        client.evaluate(weights=None)
+        client.evaluate(weights=[])
