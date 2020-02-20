@@ -8,7 +8,7 @@ build-backend = "poetry.masonry.api"
 name = "flower"
 version = "0.0.1"
 description = "See `README.md`"
-license = "Apache License Version 2.0"
+license = "Apache-2.0"
 authors = [
     "Daniel J. Beutel <daniel@adap.com>",
     "Taner Topal <taner@adap.com>",
