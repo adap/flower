@@ -4,7 +4,7 @@ import grpc
 from flower.proto import transport_pb2 as flower_dot_proto_dot_transport__pb2
 
 
-class BiStreamStub(object):
+class FlowerServerStub(object):
   # missing associated documentation comment in .proto file
   pass
 
@@ -14,18 +14,18 @@ class BiStreamStub(object):
     Args:
       channel: A grpc.Channel.
     """
-    self.Connect = channel.stream_stream(
-        '/flower.transport.BiStream/Connect',
+    self.Join = channel.stream_stream(
+        '/flower.transport.FlowerServer/Join',
         request_serializer=flower_dot_proto_dot_transport__pb2.ClientRequest.SerializeToString,
         response_deserializer=flower_dot_proto_dot_transport__pb2.ServerResponse.FromString,
         )
 
 
-class BiStreamServicer(object):
+class FlowerServerServicer(object):
   # missing associated documentation comment in .proto file
   pass
 
-  def Connect(self, request_iterator, context):
+  def Join(self, request_iterator, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -33,14 +33,14 @@ class BiStreamServicer(object):
     raise NotImplementedError('Method not implemented!')
 
 
-def add_BiStreamServicer_to_server(servicer, server):
+def add_FlowerServerServicer_to_server(servicer, server):
   rpc_method_handlers = {
-      'Connect': grpc.stream_stream_rpc_method_handler(
-          servicer.Connect,
+      'Join': grpc.stream_stream_rpc_method_handler(
+          servicer.Join,
           request_deserializer=flower_dot_proto_dot_transport__pb2.ClientRequest.FromString,
           response_serializer=flower_dot_proto_dot_transport__pb2.ServerResponse.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
-      'flower.transport.BiStream', rpc_method_handlers)
+      'flower.transport.FlowerServer', rpc_method_handlers)
   server.add_generic_rpc_handlers((generic_handler,))
