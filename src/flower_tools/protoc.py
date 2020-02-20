@@ -27,7 +27,7 @@ OUT_PATH = path.normpath(f"{DIR_PATH}/..")
 PROTO_FILES = glob.glob(f"{IN_PATH}/flower/**/*.proto")
 
 
-def compile_all():
+def compile_all() -> None:
     """Compile all protos in the proto directory into the respective directories
 
     The directory structure of the proto directory will be mirrored in src.

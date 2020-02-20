@@ -15,6 +15,7 @@
 """This module contains functions for protobuf serialization and deserialization."""
 
 from io import BytesIO
+from typing import cast
 
 import numpy as np
 
@@ -31,4 +32,5 @@ def ndarray_to_proto(ndarray: np.ndarray) -> NDArray:
 def proto_to_ndarray(ndarray_proto: NDArray) -> np.ndarray:
     """Deserialize NDArray protobuf message to a numpy array"""
     ndarray_bytes = BytesIO(ndarray_proto.ndarray)
-    return np.load(ndarray_bytes, allow_pickle=False)
+    ndarray_deserialized = np.load(ndarray_bytes, allow_pickle=False)
+    return cast(np.ndarray, ndarray_deserialized)
