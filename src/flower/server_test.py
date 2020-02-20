@@ -24,11 +24,16 @@ def test_aggregate():
     """Test aggregate function"""
 
     # Prepare
-    expected = np.array([[1, 2, 3], [4, 5, 6]])
-    not_expected = np.array([[4, 5, 6], [1, 2, 3],])
+    weights0_0 = np.array([[1, 2, 3], [4, 5, 6]])
+    weights0_1 = np.array([7, 8, 9, 10])
+    weights1_0 = np.array([[1, 2, 3], [4, 5, 6]])
+    weights1_1 = np.array([7, 8, 9, 10])
+    results = [([weights0_0, weights0_1], 1), ([weights1_0, weights1_1], 2)]
+
+    expected = [np.array([[1, 2, 3], [4, 5, 6]]), np.array([7, 8, 9, 10])]
 
     # Execute
-    actual = aggregate([(expected, 1), (not_expected, 2)])
+    actual = aggregate(results)
 
     # Assert
     np.testing.assert_equal(expected, actual)
