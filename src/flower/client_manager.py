@@ -12,12 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides abstract base class for Flower ClientManager.
-
-    TODO:
-        - Add implementation of local ClientManager
-        - Add implementation of networked ClientManager
-"""
+"""Flower ClientManager."""
 
 from abc import ABC, abstractmethod
 
