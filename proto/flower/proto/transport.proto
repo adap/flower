@@ -17,18 +17,38 @@ syntax = "proto3";
 
 package flower.transport;
 
-service Instructions {
-  rpc Connect(stream Instruction) returns (stream Report) {}
+service FlowerServer {
+  rpc Join(stream ClientRequest) returns (stream ServerResponse) {}
 }
 
 message NDArray { bytes ndarray = 1; }
 
-message Instruction {
-  message Weights { repeated NDArray weight = 1; }
-  oneof instruction { Weights weights = 1; }
+message Weights { repeated NDArray weights = 1; }
+
+message ClientRequest {
+  message Connect { string uuid = 1; }
+
+  message WeightUpdate {
+    Weights weigths = 1;
+    int64 num_examples = 2;
+  }
+
+  oneof report {
+    Connect connect = 1;
+    WeightUpdate weight_update = 2;
+  }
 }
 
-message Report {
-  message Weights { repeated NDArray weight = 1; }
-  oneof report { Weights weights = 1; }
+message ServerResponse {
+  message Reconnect { int64 seconds = 1; }
+
+  message Train {
+    Weights weights = 1;
+    int32 epochs = 2;   
+  }
+
+  oneof instruction {
+    Reconnect reconnect = 1;
+    Train train = 2;
+  }
 }
