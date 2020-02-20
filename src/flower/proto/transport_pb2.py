@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='flower.transport',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x1c\x66lower/proto/transport.proto\x12\x10\x66lower.transport\"\x1a\n\x07NDArray\x12\x0f\n\x07ndarray\x18\x01 \x01(\x0c\"\x8c\x01\n\x0bInstruction\x12\x38\n\x07weights\x18\x01 \x01(\x0b\x32%.flower.transport.Instruction.WeightsH\x00\x1a\x34\n\x07Weights\x12)\n\x06weight\x18\x01 \x03(\x0b\x32\x19.flower.transport.NDArrayB\r\n\x0binstruction\"}\n\x06Report\x12\x33\n\x07weights\x18\x01 \x01(\x0b\x32 .flower.transport.Report.WeightsH\x00\x1a\x34\n\x07Weights\x12)\n\x06weight\x18\x01 \x03(\x0b\x32\x19.flower.transport.NDArrayB\x08\n\x06report2X\n\x0cInstructions\x12H\n\x07\x43onnect\x12\x1d.flower.transport.Instruction\x1a\x18.flower.transport.Report\"\x00(\x01\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\x1c\x66lower/proto/transport.proto\x12\x10\x66lower.transport\"\x1a\n\x07NDArray\x12\x0f\n\x07ndarray\x18\x01 \x01(\x0c\"\xe5\x01\n\rClientRequest\x12\x34\n\x04info\x18\x01 \x01(\x0b\x32$.flower.transport.ClientRequest.InfoH\x00\x12\x43\n\x0ctrain_result\x18\x02 \x01(\x0b\x32+.flower.transport.ClientRequest.TrainResultH\x00\x1a\x14\n\x04Info\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x1a\x39\n\x0bTrainResult\x12*\n\x07weights\x18\x01 \x03(\x0b\x32\x19.flower.transport.NDArrayB\x08\n\x06report\"\xa0\x01\n\x0eServerResponse\x12\x44\n\x0ctrain_config\x18\x01 \x01(\x0b\x32,.flower.transport.ServerResponse.TrainConfigH\x00\x1a\x39\n\x0bTrainConfig\x12*\n\x07weights\x18\x01 \x03(\x0b\x32\x19.flower.transport.NDArrayB\r\n\x0binstruction2^\n\x08\x42iStream\x12R\n\x07\x43onnect\x12\x1f.flower.transport.ClientRequest\x1a .flower.transport.ServerResponse\"\x00(\x01\x30\x01\x62\x06proto3'
 )
 
 
@@ -55,15 +55,45 @@ _NDARRAY = _descriptor.Descriptor(
 )
 
 
-_INSTRUCTION_WEIGHTS = _descriptor.Descriptor(
-  name='Weights',
-  full_name='flower.transport.Instruction.Weights',
+_CLIENTREQUEST_INFO = _descriptor.Descriptor(
+  name='Info',
+  full_name='flower.transport.ClientRequest.Info',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='weight', full_name='flower.transport.Instruction.Weights.weight', index=0,
+      name='uuid', full_name='flower.transport.ClientRequest.Info.uuid', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=219,
+  serialized_end=239,
+)
+
+_CLIENTREQUEST_TRAINRESULT = _descriptor.Descriptor(
+  name='TrainResult',
+  full_name='flower.transport.ClientRequest.TrainResult',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='weights', full_name='flower.transport.ClientRequest.TrainResult.weights', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -81,20 +111,27 @@ _INSTRUCTION_WEIGHTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=152,
-  serialized_end=204,
+  serialized_start=241,
+  serialized_end=298,
 )
 
-_INSTRUCTION = _descriptor.Descriptor(
-  name='Instruction',
-  full_name='flower.transport.Instruction',
+_CLIENTREQUEST = _descriptor.Descriptor(
+  name='ClientRequest',
+  full_name='flower.transport.ClientRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='weights', full_name='flower.transport.Instruction.weights', index=0,
+      name='info', full_name='flower.transport.ClientRequest.info', index=0,
       number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='train_result', full_name='flower.transport.ClientRequest.train_result', index=1,
+      number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -102,7 +139,7 @@ _INSTRUCTION = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_INSTRUCTION_WEIGHTS, ],
+  nested_types=[_CLIENTREQUEST_INFO, _CLIENTREQUEST_TRAINRESULT, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -111,23 +148,23 @@ _INSTRUCTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
-      name='instruction', full_name='flower.transport.Instruction.instruction',
+      name='report', full_name='flower.transport.ClientRequest.report',
       index=0, containing_type=None, fields=[]),
   ],
   serialized_start=79,
-  serialized_end=219,
+  serialized_end=308,
 )
 
 
-_REPORT_WEIGHTS = _descriptor.Descriptor(
-  name='Weights',
-  full_name='flower.transport.Report.Weights',
+_SERVERRESPONSE_TRAINCONFIG = _descriptor.Descriptor(
+  name='TrainConfig',
+  full_name='flower.transport.ServerResponse.TrainConfig',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='weight', full_name='flower.transport.Report.Weights.weight', index=0,
+      name='weights', full_name='flower.transport.ServerResponse.TrainConfig.weights', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -145,19 +182,19 @@ _REPORT_WEIGHTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=152,
-  serialized_end=204,
+  serialized_start=399,
+  serialized_end=456,
 )
 
-_REPORT = _descriptor.Descriptor(
-  name='Report',
-  full_name='flower.transport.Report',
+_SERVERRESPONSE = _descriptor.Descriptor(
+  name='ServerResponse',
+  full_name='flower.transport.ServerResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='weights', full_name='flower.transport.Report.weights', index=0,
+      name='train_config', full_name='flower.transport.ServerResponse.train_config', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -166,7 +203,7 @@ _REPORT = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_REPORT_WEIGHTS, ],
+  nested_types=[_SERVERRESPONSE_TRAINCONFIG, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -175,28 +212,33 @@ _REPORT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
-      name='report', full_name='flower.transport.Report.report',
+      name='instruction', full_name='flower.transport.ServerResponse.instruction',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=221,
-  serialized_end=346,
+  serialized_start=311,
+  serialized_end=471,
 )
 
-_INSTRUCTION_WEIGHTS.fields_by_name['weight'].message_type = _NDARRAY
-_INSTRUCTION_WEIGHTS.containing_type = _INSTRUCTION
-_INSTRUCTION.fields_by_name['weights'].message_type = _INSTRUCTION_WEIGHTS
-_INSTRUCTION.oneofs_by_name['instruction'].fields.append(
-  _INSTRUCTION.fields_by_name['weights'])
-_INSTRUCTION.fields_by_name['weights'].containing_oneof = _INSTRUCTION.oneofs_by_name['instruction']
-_REPORT_WEIGHTS.fields_by_name['weight'].message_type = _NDARRAY
-_REPORT_WEIGHTS.containing_type = _REPORT
-_REPORT.fields_by_name['weights'].message_type = _REPORT_WEIGHTS
-_REPORT.oneofs_by_name['report'].fields.append(
-  _REPORT.fields_by_name['weights'])
-_REPORT.fields_by_name['weights'].containing_oneof = _REPORT.oneofs_by_name['report']
+_CLIENTREQUEST_INFO.containing_type = _CLIENTREQUEST
+_CLIENTREQUEST_TRAINRESULT.fields_by_name['weights'].message_type = _NDARRAY
+_CLIENTREQUEST_TRAINRESULT.containing_type = _CLIENTREQUEST
+_CLIENTREQUEST.fields_by_name['info'].message_type = _CLIENTREQUEST_INFO
+_CLIENTREQUEST.fields_by_name['train_result'].message_type = _CLIENTREQUEST_TRAINRESULT
+_CLIENTREQUEST.oneofs_by_name['report'].fields.append(
+  _CLIENTREQUEST.fields_by_name['info'])
+_CLIENTREQUEST.fields_by_name['info'].containing_oneof = _CLIENTREQUEST.oneofs_by_name['report']
+_CLIENTREQUEST.oneofs_by_name['report'].fields.append(
+  _CLIENTREQUEST.fields_by_name['train_result'])
+_CLIENTREQUEST.fields_by_name['train_result'].containing_oneof = _CLIENTREQUEST.oneofs_by_name['report']
+_SERVERRESPONSE_TRAINCONFIG.fields_by_name['weights'].message_type = _NDARRAY
+_SERVERRESPONSE_TRAINCONFIG.containing_type = _SERVERRESPONSE
+_SERVERRESPONSE.fields_by_name['train_config'].message_type = _SERVERRESPONSE_TRAINCONFIG
+_SERVERRESPONSE.oneofs_by_name['instruction'].fields.append(
+  _SERVERRESPONSE.fields_by_name['train_config'])
+_SERVERRESPONSE.fields_by_name['train_config'].containing_oneof = _SERVERRESPONSE.oneofs_by_name['instruction']
 DESCRIPTOR.message_types_by_name['NDArray'] = _NDARRAY
-DESCRIPTOR.message_types_by_name['Instruction'] = _INSTRUCTION
-DESCRIPTOR.message_types_by_name['Report'] = _REPORT
+DESCRIPTOR.message_types_by_name['ClientRequest'] = _CLIENTREQUEST
+DESCRIPTOR.message_types_by_name['ServerResponse'] = _SERVERRESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 NDArray = _reflection.GeneratedProtocolMessageType('NDArray', (_message.Message,), {
@@ -206,59 +248,67 @@ NDArray = _reflection.GeneratedProtocolMessageType('NDArray', (_message.Message,
   })
 _sym_db.RegisterMessage(NDArray)
 
-Instruction = _reflection.GeneratedProtocolMessageType('Instruction', (_message.Message,), {
+ClientRequest = _reflection.GeneratedProtocolMessageType('ClientRequest', (_message.Message,), {
 
-  'Weights' : _reflection.GeneratedProtocolMessageType('Weights', (_message.Message,), {
-    'DESCRIPTOR' : _INSTRUCTION_WEIGHTS,
+  'Info' : _reflection.GeneratedProtocolMessageType('Info', (_message.Message,), {
+    'DESCRIPTOR' : _CLIENTREQUEST_INFO,
     '__module__' : 'flower.proto.transport_pb2'
-    # @@protoc_insertion_point(class_scope:flower.transport.Instruction.Weights)
+    # @@protoc_insertion_point(class_scope:flower.transport.ClientRequest.Info)
     })
   ,
-  'DESCRIPTOR' : _INSTRUCTION,
-  '__module__' : 'flower.proto.transport_pb2'
-  # @@protoc_insertion_point(class_scope:flower.transport.Instruction)
-  })
-_sym_db.RegisterMessage(Instruction)
-_sym_db.RegisterMessage(Instruction.Weights)
 
-Report = _reflection.GeneratedProtocolMessageType('Report', (_message.Message,), {
-
-  'Weights' : _reflection.GeneratedProtocolMessageType('Weights', (_message.Message,), {
-    'DESCRIPTOR' : _REPORT_WEIGHTS,
+  'TrainResult' : _reflection.GeneratedProtocolMessageType('TrainResult', (_message.Message,), {
+    'DESCRIPTOR' : _CLIENTREQUEST_TRAINRESULT,
     '__module__' : 'flower.proto.transport_pb2'
-    # @@protoc_insertion_point(class_scope:flower.transport.Report.Weights)
+    # @@protoc_insertion_point(class_scope:flower.transport.ClientRequest.TrainResult)
     })
   ,
-  'DESCRIPTOR' : _REPORT,
+  'DESCRIPTOR' : _CLIENTREQUEST,
   '__module__' : 'flower.proto.transport_pb2'
-  # @@protoc_insertion_point(class_scope:flower.transport.Report)
+  # @@protoc_insertion_point(class_scope:flower.transport.ClientRequest)
   })
-_sym_db.RegisterMessage(Report)
-_sym_db.RegisterMessage(Report.Weights)
+_sym_db.RegisterMessage(ClientRequest)
+_sym_db.RegisterMessage(ClientRequest.Info)
+_sym_db.RegisterMessage(ClientRequest.TrainResult)
+
+ServerResponse = _reflection.GeneratedProtocolMessageType('ServerResponse', (_message.Message,), {
+
+  'TrainConfig' : _reflection.GeneratedProtocolMessageType('TrainConfig', (_message.Message,), {
+    'DESCRIPTOR' : _SERVERRESPONSE_TRAINCONFIG,
+    '__module__' : 'flower.proto.transport_pb2'
+    # @@protoc_insertion_point(class_scope:flower.transport.ServerResponse.TrainConfig)
+    })
+  ,
+  'DESCRIPTOR' : _SERVERRESPONSE,
+  '__module__' : 'flower.proto.transport_pb2'
+  # @@protoc_insertion_point(class_scope:flower.transport.ServerResponse)
+  })
+_sym_db.RegisterMessage(ServerResponse)
+_sym_db.RegisterMessage(ServerResponse.TrainConfig)
 
 
 
-_INSTRUCTIONS = _descriptor.ServiceDescriptor(
-  name='Instructions',
-  full_name='flower.transport.Instructions',
+_BISTREAM = _descriptor.ServiceDescriptor(
+  name='BiStream',
+  full_name='flower.transport.BiStream',
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=348,
-  serialized_end=436,
+  serialized_start=473,
+  serialized_end=567,
   methods=[
   _descriptor.MethodDescriptor(
     name='Connect',
-    full_name='flower.transport.Instructions.Connect',
+    full_name='flower.transport.BiStream.Connect',
     index=0,
     containing_service=None,
-    input_type=_INSTRUCTION,
-    output_type=_REPORT,
+    input_type=_CLIENTREQUEST,
+    output_type=_SERVERRESPONSE,
     serialized_options=None,
   ),
 ])
-_sym_db.RegisterServiceDescriptor(_INSTRUCTIONS)
+_sym_db.RegisterServiceDescriptor(_BISTREAM)
 
-DESCRIPTOR.services_by_name['Instructions'] = _INSTRUCTIONS
+DESCRIPTOR.services_by_name['BiStream'] = _BISTREAM
 
 # @@protoc_insertion_point(module_scope)
