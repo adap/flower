@@ -16,8 +16,8 @@
 
 import concurrent.futures
 
+import flower_testing
 from flower.client_manager import SimpleClientManager
-from flower.helper_test import unused_tcp_port
 from flower.proto import transport_pb2_grpc
 from flower.proto.transport_pb2 import ClientRequest, ServerResponse, Weights
 from flower.transport import flower_service_servicer
@@ -45,7 +45,7 @@ def test_integration_connection(monkeypatch):
     with multiple roundtrips between server and client.
     """
     # Prepare
-    port = unused_tcp_port()
+    port = flower_testing.network.unused_tcp_port()
     expected_reconnect_seconds = 60
     expected_num_train_messages = 10
 

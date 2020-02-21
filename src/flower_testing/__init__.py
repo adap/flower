@@ -12,25 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for module server."""
-
-import flower_testing
-from flower.client_manager import SimpleClientManager
-from flower.transport.flower_service_servicer import FlowerServiceServicer
-from flower.transport.server import create_server
-
-
-def test_integration_create_and_shutdown_server():
-    """Create server and check if FlowerServiceServicer is returned."""
-    # Prepare
-    port = flower_testing.network.unused_tcp_port()
-    client_manager = SimpleClientManager()
-
-    # Execute
-    servicer, server = create_server(client_manager=client_manager, port=port)
-
-    # Assert
-    assert isinstance(servicer, FlowerServiceServicer)
-
-    # Teardown
-    server.stop(1)
+from . import network
