@@ -44,7 +44,7 @@ class ClientManager(ABC):
         raise NotImplementedError()
 
 
-class SimpleClientManager:
+class SimpleClientManager(ClientManager):
     """Provides a pool of available clients."""
 
     def __init__(self) -> None:
