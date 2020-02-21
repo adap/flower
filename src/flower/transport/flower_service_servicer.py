@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Servicer for for FlowerService."""
+"""Servicer for FlowerService."""
 from typing import Iterator
 
 import grpc
