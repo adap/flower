@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='flower.transport',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x1c\x66lower/proto/transport.proto\x12\x10\x66lower.transport\"\x1a\n\x07NDArray\x12\x0f\n\x07ndarray\x18\x01 \x01(\x0c\"5\n\x07Weights\x12*\n\x07weights\x18\x01 \x03(\x0b\x32\x19.flower.transport.NDArray\"\x87\x02\n\rClientRequest\x12:\n\x07\x63onnect\x18\x01 \x01(\x0b\x32\'.flower.transport.ClientRequest.ConnectH\x00\x12\x45\n\rweight_update\x18\x02 \x01(\x0b\x32,.flower.transport.ClientRequest.WeightUpdateH\x00\x1a\x17\n\x07\x43onnect\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x1aP\n\x0cWeightUpdate\x12*\n\x07weigths\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x14\n\x0cnum_examples\x18\x02 \x01(\x03\x42\x08\n\x06report\"\xfc\x01\n\x0eServerResponse\x12?\n\treconnect\x18\x01 \x01(\x0b\x32*.flower.transport.ServerResponse.ReconnectH\x00\x12\x37\n\x05train\x18\x02 \x01(\x0b\x32&.flower.transport.ServerResponse.TrainH\x00\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x43\n\x05Train\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x0e\n\x06\x65pochs\x18\x02 \x01(\x05\x42\r\n\x0binstruction2_\n\x0c\x46lowerServer\x12O\n\x04Join\x12\x1f.flower.transport.ClientRequest\x1a .flower.transport.ServerResponse\"\x00(\x01\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\x1c\x66lower/proto/transport.proto\x12\x10\x66lower.transport\"\x1a\n\x07NDArray\x12\x0f\n\x07ndarray\x18\x01 \x01(\x0c\"5\n\x07Weights\x12*\n\x07weights\x18\x01 \x03(\x0b\x32\x19.flower.transport.NDArray\"\x87\x02\n\rClientRequest\x12:\n\x07\x63onnect\x18\x01 \x01(\x0b\x32\'.flower.transport.ClientRequest.ConnectH\x00\x12\x45\n\rweight_update\x18\x02 \x01(\x0b\x32,.flower.transport.ClientRequest.WeightUpdateH\x00\x1a\x17\n\x07\x43onnect\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x1aP\n\x0cWeightUpdate\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x14\n\x0cnum_examples\x18\x02 \x01(\x03\x42\x08\n\x06report\"\xfc\x01\n\x0eServerResponse\x12?\n\treconnect\x18\x01 \x01(\x0b\x32*.flower.transport.ServerResponse.ReconnectH\x00\x12\x37\n\x05train\x18\x02 \x01(\x0b\x32&.flower.transport.ServerResponse.TrainH\x00\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x43\n\x05Train\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x0e\n\x06\x65pochs\x18\x02 \x01(\x05\x42\r\n\x0binstruction2`\n\rFlowerService\x12O\n\x04Join\x12\x1f.flower.transport.ClientRequest\x1a .flower.transport.ServerResponse\"\x00(\x01\x30\x01\x62\x06proto3'
 )
 
 
@@ -124,7 +124,7 @@ _CLIENTREQUEST_WEIGHTUPDATE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='weigths', full_name='flower.transport.ClientRequest.WeightUpdate.weigths', index=0,
+      name='weights', full_name='flower.transport.ClientRequest.WeightUpdate.weights', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -303,7 +303,7 @@ _SERVERRESPONSE = _descriptor.Descriptor(
 
 _WEIGHTS.fields_by_name['weights'].message_type = _NDARRAY
 _CLIENTREQUEST_CONNECT.containing_type = _CLIENTREQUEST
-_CLIENTREQUEST_WEIGHTUPDATE.fields_by_name['weigths'].message_type = _WEIGHTS
+_CLIENTREQUEST_WEIGHTUPDATE.fields_by_name['weights'].message_type = _WEIGHTS
 _CLIENTREQUEST_WEIGHTUPDATE.containing_type = _CLIENTREQUEST
 _CLIENTREQUEST.fields_by_name['connect'].message_type = _CLIENTREQUEST_CONNECT
 _CLIENTREQUEST.fields_by_name['weight_update'].message_type = _CLIENTREQUEST_WEIGHTUPDATE
@@ -392,18 +392,18 @@ _sym_db.RegisterMessage(ServerResponse.Train)
 
 
 
-_FLOWERSERVER = _descriptor.ServiceDescriptor(
-  name='FlowerServer',
-  full_name='flower.transport.FlowerServer',
+_FLOWERSERVICE = _descriptor.ServiceDescriptor(
+  name='FlowerService',
+  full_name='flower.transport.FlowerService',
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
   serialized_start=654,
-  serialized_end=749,
+  serialized_end=750,
   methods=[
   _descriptor.MethodDescriptor(
     name='Join',
-    full_name='flower.transport.FlowerServer.Join',
+    full_name='flower.transport.FlowerService.Join',
     index=0,
     containing_service=None,
     input_type=_CLIENTREQUEST,
@@ -411,8 +411,8 @@ _FLOWERSERVER = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
 ])
-_sym_db.RegisterServiceDescriptor(_FLOWERSERVER)
+_sym_db.RegisterServiceDescriptor(_FLOWERSERVICE)
 
-DESCRIPTOR.services_by_name['FlowerServer'] = _FLOWERSERVER
+DESCRIPTOR.services_by_name['FlowerService'] = _FLOWERSERVICE
 
 # @@protoc_insertion_point(module_scope)
