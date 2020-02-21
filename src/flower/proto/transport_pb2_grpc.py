@@ -4,7 +4,7 @@ import grpc
 from flower.proto import transport_pb2 as flower_dot_proto_dot_transport__pb2
 
 
-class FlowerServerStub(object):
+class FlowerServiceStub(object):
   # missing associated documentation comment in .proto file
   pass
 
@@ -15,13 +15,13 @@ class FlowerServerStub(object):
       channel: A grpc.Channel.
     """
     self.Join = channel.stream_stream(
-        '/flower.transport.FlowerServer/Join',
+        '/flower.transport.FlowerService/Join',
         request_serializer=flower_dot_proto_dot_transport__pb2.ClientRequest.SerializeToString,
         response_deserializer=flower_dot_proto_dot_transport__pb2.ServerResponse.FromString,
         )
 
 
-class FlowerServerServicer(object):
+class FlowerServiceServicer(object):
   # missing associated documentation comment in .proto file
   pass
 
@@ -33,7 +33,7 @@ class FlowerServerServicer(object):
     raise NotImplementedError('Method not implemented!')
 
 
-def add_FlowerServerServicer_to_server(servicer, server):
+def add_FlowerServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
       'Join': grpc.stream_stream_rpc_method_handler(
           servicer.Join,
@@ -42,5 +42,5 @@ def add_FlowerServerServicer_to_server(servicer, server):
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
-      'flower.transport.FlowerServer', rpc_method_handlers)
+      'flower.transport.FlowerService', rpc_method_handlers)
   server.add_generic_rpc_handlers((generic_handler,))
