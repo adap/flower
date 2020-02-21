@@ -17,21 +17,21 @@
 
 import concurrent.futures
 from functools import reduce
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 
 from flower.client import Client
-from flower.client_manager import ClientManager
+from flower.client_manager import SimpleClientManager
 from flower.typing import Weights
 
 
 class Server:
     """Flower server"""
 
-    def __init__(self, client_manager: ClientManager):
+    def __init__(self, client_manager: Union[SimpleClientManager]):
         self.weights: Weights = []
-        self.client_manager: ClientManager = client_manager
+        self.client_manager = client_manager
 
     def fit(self, num_rounds: int) -> None:
         """Run federated averaging for a number of rounds"""
