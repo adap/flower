@@ -14,7 +14,7 @@
 # ==============================================================================
 """Flower client (abstract base class)"""
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Tuple
 
 from flower.typing import Weights
@@ -26,14 +26,17 @@ class Client(ABC):
     def __init__(self, cid: str):
         self.cid = cid
 
+    @abstractmethod
     def get_weights(self) -> Weights:
         """Return the current local model weights"""
         raise NotImplementedError()
 
+    @abstractmethod
     def fit(self, weights: Weights) -> Tuple[Weights, int]:
         """Refine the provided weights using the locally held dataset"""
         raise NotImplementedError()
 
+    @abstractmethod
     def evaluate(self, weights: Weights) -> Tuple[int, float]:
         """Evaluate the provided weights using the locally held dataset"""
         raise NotImplementedError()
