@@ -17,17 +17,19 @@
 import flower_testing
 from flower.client_manager import SimpleClientManager
 from flower.transport.flower_service_servicer import FlowerServiceServicer
-from flower.transport.server import create_server
+from flower.transport.server import start_insecure_grpc_server
 
 
-def test_integration_create_and_shutdown_server():
+def test_integration_start_and_shutdown_server():
     """Create server and check if FlowerServiceServicer is returned."""
     # Prepare
     port = flower_testing.network.unused_tcp_port()
     client_manager = SimpleClientManager()
 
     # Execute
-    servicer, server = create_server(client_manager=client_manager, port=port)
+    servicer, server = start_insecure_grpc_server(
+        client_manager=client_manager, port=port
+    )
 
     # Assert
     assert isinstance(servicer, FlowerServiceServicer)

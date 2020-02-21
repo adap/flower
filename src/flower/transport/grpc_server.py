@@ -24,7 +24,7 @@ from flower.transport import DEFAULT_PORT, DEFAULT_SERVER_ADDRESS
 from flower.transport import flower_service_servicer as fss
 
 
-def create_server(  # type: ignore
+def start_insecure_grpc_server(  # type: ignore
     client_manager: ClientManager,
     server_address: str = DEFAULT_SERVER_ADDRESS,
     port: int = DEFAULT_PORT,
