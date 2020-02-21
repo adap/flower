@@ -54,9 +54,13 @@ numpy-stubs = { git = "https://github.com/numpy/numpy-stubs.git", rev = "f3c6315
 server = "flower.server:main"
 
 [tool.isort]
-line_length = 88  # Black defaults to 88
+line_length = 88
 indent = "    "
 multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+
 
 [tool.black]
 target-version = ['py37']
