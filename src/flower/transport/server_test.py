@@ -20,7 +20,7 @@ from flower.transport.flower_service_servicer import FlowerServiceServicer
 from flower.transport.server import create_server
 
 
-def test_create_and_shutdown_server():
+def test_integration_create_and_shutdown_server():
     """Create server and check if FlowerServiceServicer is returned"""
     # Prepare
     port = unused_tcp_port()
