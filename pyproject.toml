@@ -32,6 +32,7 @@ packages = [
 ]
 exclude = [
     "src/**/*_test.py",
+    "src/flower_testing/**/*",
 ]
 
 [tool.poetry.dependencies]

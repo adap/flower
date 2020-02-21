@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for module server"""
+"""Tests for module server."""
 
 from flower.client_manager import SimpleClientManager
-from flower.helper_test import unused_tcp_port
 from flower.transport.flower_service_servicer import FlowerServiceServicer
 from flower.transport.server import create_server
+from flower_testing import network
 
 
 def test_integration_create_and_shutdown_server():
-    """Create server and check if FlowerServiceServicer is returned"""
+    """Create server and check if FlowerServiceServicer is returned."""
     # Prepare
-    port = unused_tcp_port()
+    port = network.unused_tcp_port()
     client_manager = SimpleClientManager()
 
     # Execute
