@@ -14,25 +14,12 @@
 # ==============================================================================
 """Flower ClientManager."""
 
-from typing import Dict
-
-from .client import Client
+from flower.client_manager import ClientManager, NetworkClientManager
 
 
-class ClientManager:
-    """Manages clients for various other classes."""
+def test_adding():
+    # Execute
+    cm = NetworkClientManager()
 
-    def __init__(self):
-        self.clients: Dict[str, Client] = {}
-
-    def register(self, client: Client) -> bool:
-        """Register Flower Client instance.
-
-        Returns:
-            bool: Indicating if registration was successful
-        """
-        self.clients[client.cid] = client
-
-    def unregister(self, client: Client) -> None:
-        """Unregister Flower Client instance."""
-        del self.clients[client.cid]
+    # Assert
+    isinstance(cm, ClientManager)
