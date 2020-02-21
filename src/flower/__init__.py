@@ -15,5 +15,6 @@
 """Flower main package"""
 
 from .client import Client
+from .client_manager import SimpleClientManager
 from .server import Server
 from .typing import Weights

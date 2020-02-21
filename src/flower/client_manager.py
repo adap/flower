@@ -14,8 +14,9 @@
 # ==============================================================================
 """Flower ClientManager."""
 
+import random
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, List
 
 from .client import Client
 
@@ -35,6 +36,11 @@ class ClientManager(ABC):
     @abstractmethod
     def unregister(self, client: Client) -> None:
         """Unregister Flower Client instance."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def sample(self, num_clients: int) -> List[Client]:
+        """Sample a number of Flower Client instances."""
         raise NotImplementedError()
 
 
@@ -67,3 +73,8 @@ class SimpleClientManager:
         """
         if client.cid in self.clients:
             del self.clients[client.cid]
+
+    def sample(self, num_clients: int) -> List[Client]:
+        """Sample a number of Flower Client instances."""
+        cids = random.sample(list(self.clients), num_clients)
+        return [self.clients[cid] for cid in cids]
