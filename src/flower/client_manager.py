@@ -15,6 +15,7 @@
 """Flower ClientManager."""
 
 from abc import ABC, abstractmethod
+from typing import Dict
 
 from .client import Client
 
@@ -35,3 +36,34 @@ class ClientManager(ABC):
     def unregister(self, client: Client) -> None:
         """Unregister Flower Client instance."""
         raise NotImplementedError()
+
+
+class SimpleClientManager:
+    """Provides a pool of available clients."""
+
+    def __init__(self) -> None:
+        self.clients: Dict[str, Client] = {}
+
+    def __len__(self):
+        return len(self.clients)
+
+    def register(self, client: Client) -> bool:
+        """Register Flower Client instance.
+
+        Returns:
+            bool: Indicating if registration was successful. False if client is already
+                registered or can not be registered for any reason
+        """
+        if client.cid in self.clients:
+            return False
+
+        self.clients[client.cid] = client
+        return True
+
+    def unregister(self, client: Client) -> None:
+        """Unregister Flower Client instance.
+
+        This method is idempotent.
+        """
+        if client.cid in self.clients:
+            del self.clients[client.cid]
