@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for FlowerServiceServicer"""
+"""Tests for FlowerServiceServicer."""
 from flower.client_manager import SimpleClientManager
 from flower.proto.transport_pb2 import ClientRequest, ServerResponse
 from flower.transport.flower_service_servicer import FlowerServiceServicer
@@ -22,7 +22,7 @@ SERVER_RESPONSE = ServerResponse()
 
 
 def test_join():
-    """Test Join method of FlowerServiceServicer"""
+    """Test Join method of FlowerServiceServicer."""
     # Prepare
     client_manager = SimpleClientManager()
     servicer = FlowerServiceServicer(client_manager=client_manager)
