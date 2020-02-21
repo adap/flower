@@ -17,7 +17,7 @@
 import flower_testing
 from flower.client_manager import SimpleClientManager
 from flower.transport.flower_service_servicer import FlowerServiceServicer
-from flower.transport.server import start_insecure_grpc_server
+from flower.transport.grpc_server import start_insecure_grpc_server
 
 
 def test_integration_start_and_shutdown_server():

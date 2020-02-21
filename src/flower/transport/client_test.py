@@ -22,7 +22,7 @@ from flower.proto import transport_pb2_grpc
 from flower.proto.transport_pb2 import ClientRequest, ServerResponse, Weights
 from flower.transport import flower_service_servicer
 from flower.transport.client import connection
-from flower.transport.server import create_server
+from flower.transport.grpc_server import start_insecure_grpc_server
 
 SERVER_RESPONSE_RECONNECT = ServerResponse(
     reconnect=ServerResponse.Reconnect(seconds=60)
@@ -68,7 +68,9 @@ def test_integration_connection(monkeypatch):
         flower_service_servicer, "FlowerServiceServicer", MockFlowerServiceServicer
     )
 
-    _, server = create_server(client_manager=SimpleClientManager(), port=port)
+    _, server = start_insecure_grpc_server(
+        client_manager=SimpleClientManager(), port=port
+    )
 
     # Execute
     # Multiple clients in parallel
