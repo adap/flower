@@ -16,22 +16,22 @@
 
 
 import concurrent.futures
-import random
 from functools import reduce
 from typing import List, Tuple
 
 import numpy as np
 
 from flower.client import Client
+from flower.client_manager import ClientManager
 from flower.typing import Weights
 
 
 class Server:
     """Flower server"""
 
-    def __init__(self, clients: List[Client]):
+    def __init__(self, client_manager: ClientManager):
         self.weights: Weights = []
-        self.clients: List[Client] = clients
+        self.client_manager: ClientManager = client_manager
 
     def fit(self, num_rounds: int) -> None:
         """Run federated averaging for a number of rounds"""
@@ -49,7 +49,7 @@ class Server:
     def evaluate(self) -> float:
         """Validate current global model on a number of clients"""
         # Sample clients for evaluation
-        clients = random.sample(self.clients, 3)
+        clients = self.client_manager.sample(3)
 
         # Evaluate current global weights on those clients
         results = eval_clients(clients, self.weights)
@@ -60,7 +60,7 @@ class Server:
     def fit_round(self) -> None:
         """Perform a single round of federated averaging"""
         # Sample three clients
-        clients = random.sample(self.clients, 3)
+        clients = self.client_manager.sample(3)
 
         # Collect training results from all clients participating in this round
         results = fit_clients(clients, self.weights)
@@ -71,7 +71,7 @@ class Server:
 
     def _get_initial_weights(self) -> Weights:
         """Get initial weights from one of the available clients"""
-        return random.choice(self.clients).get_weights()
+        return self.client_manager.sample(1)[0].get_weights()
 
 
 def fit_clients(clients: List[Client], weights: Weights) -> List[Tuple[Weights, int]]:
