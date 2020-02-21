@@ -38,7 +38,7 @@ CLIENT_REQUEST_WEIGHT_UPDATES = ClientRequest(
 )
 
 
-def test_connection(monkeypatch):
+def test_integration_connection(monkeypatch):
     """Create a server and establish a connection to it.
 
     Purpose of this integration test is to simulate multiple clients
