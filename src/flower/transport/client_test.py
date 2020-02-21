@@ -21,11 +21,14 @@ from flower.client_manager import SimpleClientManager
 from flower.proto import transport_pb2_grpc
 from flower.proto.transport_pb2 import ClientRequest, ServerResponse, Weights
 from flower.transport import flower_service_servicer
-from flower.transport.client import connection
+from flower.transport.client import insecure_grpc_connection
 from flower.transport.grpc_server import start_insecure_grpc_server
 
+EXPECTED_RECONNECT_SECONDS = 60
+EXPECTED_NUM_TRAIN_MESSAGES = 10
+
 SERVER_RESPONSE_RECONNECT = ServerResponse(
-    reconnect=ServerResponse.Reconnect(seconds=60)
+    reconnect=ServerResponse.Reconnect(seconds=EXPECTED_RECONNECT_SECONDS)
 )
 SERVER_RESPONSE_TRAIN = ServerResponse(
     train=ServerResponse.Train(weights=Weights(weights=[]), epochs=10)
@@ -46,8 +49,6 @@ def test_integration_connection(monkeypatch):
     """
     # Prepare
     port = flower_testing.network.unused_tcp_port()
-    expected_reconnect_seconds = 60
-    expected_num_train_messages = 10
 
     class MockFlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         """Mock for FlowerServiceServicer"""
@@ -58,7 +59,7 @@ def test_integration_connection(monkeypatch):
         def Join(self, request_iterator, context):
             counter = 0
             for _ in request_iterator:
-                if counter < expected_num_train_messages:
+                if counter < EXPECTED_NUM_TRAIN_MESSAGES:
                     counter += 1
                     yield SERVER_RESPONSE_TRAIN
                 else:
@@ -78,33 +79,29 @@ def test_integration_connection(monkeypatch):
         reconnect_seconds = 0
         num_train_messages = 0
 
-        with connection(port=port) as conn:
-            consume, dispatch = conn
+        with insecure_grpc_connection(port=port) as conn:
+            receive, send = conn
 
             # Send connect message
-            dispatch(CLIENT_REQUEST_CONNECT)
+            send(CLIENT_REQUEST_CONNECT)
 
             # Setup processing loop
             while True:
                 # Block until server responds with a message
-                instruction = consume()
+                instruction = receive()
 
                 if instruction.HasField("train"):
                     num_train_messages += 1
-                    dispatch(CLIENT_REQUEST_WEIGHT_UPDATES)
-
+                    send(CLIENT_REQUEST_WEIGHT_UPDATES)
                 elif instruction.HasField("reconnect"):
                     reconnect_seconds = instruction.reconnect.seconds
                     break
-
                 else:
-                    # if message is empty
-                    break
+                    raise Exception("This should never happen")
 
         return reconnect_seconds, num_train_messages
 
     results = []
-
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(run_client) for _ in range(3)]
         concurrent.futures.wait(futures)
@@ -114,8 +111,8 @@ def test_integration_connection(monkeypatch):
     # Assert
     for res in results:
         reconnect_seconds, num_train_messages = res
-        assert reconnect_seconds == expected_reconnect_seconds
-        assert num_train_messages == expected_num_train_messages
+        assert reconnect_seconds == EXPECTED_RECONNECT_SECONDS
+        assert num_train_messages == EXPECTED_NUM_TRAIN_MESSAGES
 
     # Teardown
     server.stop(1)

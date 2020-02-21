@@ -30,15 +30,17 @@ from flower.transport import DEFAULT_PORT, DEFAULT_SERVER_ADDRESS
 # os.environ["GRPC_TRACE"] = "connectivity_state"
 
 
+def on_channel_state_change(*args, **kwargs):
+    """Print all args and kwargs."""
+    print(*args, **kwargs)
+
+
 @contextmanager
-def connection(
+def insecure_grpc_connection(
     server_address: str = DEFAULT_SERVER_ADDRESS, port: int = DEFAULT_PORT
 ) -> Iterator[Tuple[Callable[[], ServerResponse], Callable[[ClientRequest], None]]]:
-    """ContextManager establishes a connection to a gRPC server and """
+    """Establishe an insecure gRPC connection to a gRPC server."""
     channel = grpc.insecure_channel(f"{server_address}:{port}")
-
-    def on_channel_state_change(*args, **kwargs):
-        print(*args, **kwargs)
 
     channel.subscribe(on_channel_state_change)
 
@@ -49,13 +51,13 @@ def connection(
 
     response_iterator: Iterator[ServerResponse] = stub.Join(iter(queue.get, None))
 
-    consume: Callable[[], ServerResponse] = lambda: next(response_iterator)
-    dispatch: Callable[[ClientRequest], None] = lambda request: queue.put(
+    receive: Callable[[], ServerResponse] = lambda: next(response_iterator)
+    send: Callable[[ClientRequest], None] = lambda request: queue.put(
         request, block=True
     )
 
     try:
-        yield (consume, dispatch)
+        yield (receive, send)
     finally:
         # Make sure to have a final
         channel.close()
