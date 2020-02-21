@@ -30,10 +30,10 @@ def create_server(  # type: ignore
     port: int = DEFAULT_PORT,
     max_concurrent_workers: int = 100,
 ) -> Tuple[fss.FlowerServiceServicer, grpc.Server]:
-    """Create grpc server and return registered FlowerServiceServicer instance
+    """Create grpc server and return registered FlowerServiceServicer instance.
 
     If used in a main function server.wait_for_termination(timeout=None) should
-    be called as otherwise the server will immediately stop
+    be called as otherwise the server will immediately stop.
     """
     server = grpc.server(
         concurrent.futures.ThreadPoolExecutor(max_workers=max_concurrent_workers),
