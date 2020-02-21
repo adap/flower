@@ -23,7 +23,7 @@ from flower.proto.transport_pb2 import ClientRequest, ServerResponse
 
 
 class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
-    """FlowerServiceServicer for bi-directional grpc instructions stream"""
+    """FlowerServiceServicer for bi-directional grpc instructions stream."""
 
     def __init__(self, client_manager: ClientManager) -> None:
         self.client_manager = client_manager
