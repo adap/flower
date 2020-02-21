@@ -12,6 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""This module deals with all things related to networking."""
-DEFAULT_SERVER_ADDRESS = "[::]"
-DEFAULT_PORT = 8080
+"""Tests for module server"""
+
+from flower.client_manager import SimpleClientManager
+from flower.helper_test import unused_tcp_port
+from flower.transport.flower_service_servicer import FlowerServiceServicer
+from flower.transport.server import create_server
+
+
+def test_create_and_shutdown_server():
+    """Create server and check if FlowerServiceServicer is returned"""
+    # Prepare
+    port = unused_tcp_port()
+    client_manager = SimpleClientManager()
+
+    # Execute
+    servicer, server = create_server(client_manager=client_manager, port=port)
+
+    # Assert
+    assert isinstance(servicer, FlowerServiceServicer)
+
+    # Teardown
+    server.stop(1)
