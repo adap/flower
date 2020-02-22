@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server"""
+"""Flower server."""
 
 
 import concurrent.futures
@@ -23,28 +23,30 @@ import numpy as np
 
 from flower.client import Client
 from flower.client_manager import ClientManager
+from flower.history import History
 from flower.typing import Weights
 
 
 class Server:
-    """Flower server"""
+    """Flower server."""
 
-    def __init__(self, client_manager: ClientManager):
-        self.weights: Weights = []
+    def __init__(self, client_manager: ClientManager) -> None:
         self.client_manager: ClientManager = client_manager
+        self.weights: Weights = []
 
-    def fit(self, num_rounds: int) -> None:
+    def fit(self, num_rounds: int) -> History:
         """Run federated averaging for a number of rounds"""
         # Initialize weights by asking one client to return theirs
         self.weights = self._get_initial_weights()
-
         # Run federated averaging for num_rounds
+        history = History()
         for current_round in range(num_rounds):
             # Refine model
             self.fit_round()
             # Evaluate refined model
             loss_avg = self.evaluate()
-            print(f"Round {current_round}: weighted loss average {loss_avg}")
+            history.add_loss(current_round, loss_avg)
+        return history
 
     def evaluate(self) -> float:
         """Validate current global model on a number of clients"""

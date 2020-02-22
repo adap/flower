@@ -12,10 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower main package."""
+"""Training history."""
 
-from .client import Client
-from .client_manager import SimpleClientManager
-from .history import History
-from .server import Server
-from .typing import Weights
+from functools import reduce
+from typing import List, Tuple
+
+
+class History:
+    """History class for training and/or evaluation metrics collection."""
+
+    def __init__(self) -> None:
+        self.losses: List[Tuple[int, float]] = []
+
+    def add_loss(self, rnd: int, loss: float) -> None:
+        """Add one loss entry."""
+        self.losses.append((rnd, loss))
+
+    def __repr__(self) -> str:
+        return "History:\n" + reduce(
+            lambda a, b: a + b,
+            [f"\tround {rnd}: {loss}\n" for rnd, loss in self.losses],
+        )
