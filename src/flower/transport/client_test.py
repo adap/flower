@@ -15,12 +15,14 @@
 """Tests for module server"""
 
 import concurrent.futures
+from typing import Iterator
+from unittest.mock import patch
+
+import grpc
 
 import flower_testing
 from flower.client_manager import SimpleClientManager
-from flower.proto import transport_pb2_grpc
 from flower.proto.transport_pb2 import ClientRequest, ServerResponse, Weights
-from flower.transport import flower_service_servicer
 from flower.transport.client import insecure_grpc_connection
 from flower.transport.grpc_server import start_insecure_grpc_server
 
@@ -41,7 +43,21 @@ CLIENT_REQUEST_WEIGHT_UPDATES = ClientRequest(
 )
 
 
-def test_integration_connection(monkeypatch):
+def mock_join(  # type: ignore # pylint: disable=invalid-name
+    _self, request_iterator: Iterator[ClientRequest], _context: grpc.ServicerContext
+) -> Iterator[ServerResponse]:
+    """Serve as mock for the Join method of class FlowerServiceServicer."""
+    counter = 0
+    for _ in request_iterator:
+        if counter < EXPECTED_NUM_TRAIN_MESSAGES:
+            counter += 1
+            yield SERVER_RESPONSE_TRAIN
+        else:
+            yield SERVER_RESPONSE_RECONNECT
+
+
+@patch("flower.transport.flower_service_servicer.FlowerServiceServicer.Join", mock_join)
+def test_integration_connection():
     """Create a server and establish a connection to it.
 
     Purpose of this integration test is to simulate multiple clients
@@ -49,25 +65,6 @@ def test_integration_connection(monkeypatch):
     """
     # Prepare
     port = flower_testing.network.unused_tcp_port()
-
-    class MockFlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
-        """Mock for FlowerServiceServicer"""
-
-        def __init__(self, client_manager):
-            pass
-
-        def Join(self, request_iterator, context):
-            counter = 0
-            for _ in request_iterator:
-                if counter < EXPECTED_NUM_TRAIN_MESSAGES:
-                    counter += 1
-                    yield SERVER_RESPONSE_TRAIN
-                else:
-                    yield SERVER_RESPONSE_RECONNECT
-
-    monkeypatch.setattr(
-        flower_service_servicer, "FlowerServiceServicer", MockFlowerServiceServicer
-    )
 
     _, server = start_insecure_grpc_server(
         client_manager=SimpleClientManager(), port=port
