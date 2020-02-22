@@ -12,6 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Networking package."""
-DEFAULT_SERVER_ADDRESS = "[::]"
-DEFAULT_PORT = 8080
+from . import network
