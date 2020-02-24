@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='flower.transport',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x1c\x66lower/proto/transport.proto\x12\x10\x66lower.transport\"\x1a\n\x07NDArray\x12\x0f\n\x07ndarray\x18\x01 \x01(\x0c\"5\n\x07Weights\x12*\n\x07weights\x18\x01 \x03(\x0b\x32\x19.flower.transport.NDArray\"\x87\x02\n\rClientRequest\x12:\n\x07\x63onnect\x18\x01 \x01(\x0b\x32\'.flower.transport.ClientRequest.ConnectH\x00\x12\x45\n\rweight_update\x18\x02 \x01(\x0b\x32,.flower.transport.ClientRequest.WeightUpdateH\x00\x1a\x17\n\x07\x43onnect\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x1aP\n\x0cWeightUpdate\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x14\n\x0cnum_examples\x18\x02 \x01(\x03\x42\x08\n\x06report\"\xfc\x01\n\x0eServerResponse\x12?\n\treconnect\x18\x01 \x01(\x0b\x32*.flower.transport.ServerResponse.ReconnectH\x00\x12\x37\n\x05train\x18\x02 \x01(\x0b\x32&.flower.transport.ServerResponse.TrainH\x00\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x43\n\x05Train\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x0e\n\x06\x65pochs\x18\x02 \x01(\x05\x42\r\n\x0binstruction2`\n\rFlowerService\x12O\n\x04Join\x12\x1f.flower.transport.ClientRequest\x1a .flower.transport.ServerResponse\"\x00(\x01\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\x1c\x66lower/proto/transport.proto\x12\x10\x66lower.transport\"\x1a\n\x07NDArray\x12\x0f\n\x07ndarray\x18\x01 \x01(\x0c\"5\n\x07Weights\x12*\n\x07weights\x18\x01 \x03(\x0b\x32\x19.flower.transport.NDArray\"\x19\n\nClientInfo\x12\x0b\n\x03gpu\x18\x01 \x01(\x08\"\xa5\x02\n\rClientRequest\x12:\n\x07\x63onnect\x18\x01 \x01(\x0b\x32\'.flower.transport.ClientRequest.ConnectH\x00\x12\x45\n\rweight_update\x18\x02 \x01(\x0b\x32,.flower.transport.ClientRequest.WeightUpdateH\x00\x1a\x35\n\x07\x43onnect\x12*\n\x04info\x18\x01 \x01(\x0b\x32\x1c.flower.transport.ClientInfo\x1aP\n\x0cWeightUpdate\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x14\n\x0cnum_examples\x18\x02 \x01(\x03\x42\x08\n\x06report\"\xfc\x01\n\x0eServerResponse\x12?\n\treconnect\x18\x01 \x01(\x0b\x32*.flower.transport.ServerResponse.ReconnectH\x00\x12\x37\n\x05train\x18\x02 \x01(\x0b\x32&.flower.transport.ServerResponse.TrainH\x00\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x43\n\x05Train\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x0e\n\x06\x65pochs\x18\x02 \x01(\x05\x42\r\n\x0binstruction2`\n\rFlowerService\x12O\n\x04Join\x12\x1f.flower.transport.ClientRequest\x1a .flower.transport.ServerResponse\"\x00(\x01\x30\x01\x62\x06proto3'
 )
 
 
@@ -86,17 +86,17 @@ _WEIGHTS = _descriptor.Descriptor(
 )
 
 
-_CLIENTREQUEST_CONNECT = _descriptor.Descriptor(
-  name='Connect',
-  full_name='flower.transport.ClientRequest.Connect',
+_CLIENTINFO = _descriptor.Descriptor(
+  name='ClientInfo',
+  full_name='flower.transport.ClientInfo',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='uuid', full_name='flower.transport.ClientRequest.Connect.uuid', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      name='gpu', full_name='flower.transport.ClientInfo.gpu', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -112,8 +112,39 @@ _CLIENTREQUEST_CONNECT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=282,
-  serialized_end=305,
+  serialized_start=133,
+  serialized_end=158,
+)
+
+
+_CLIENTREQUEST_CONNECT = _descriptor.Descriptor(
+  name='Connect',
+  full_name='flower.transport.ClientRequest.Connect',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='info', full_name='flower.transport.ClientRequest.Connect.info', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=309,
+  serialized_end=362,
 )
 
 _CLIENTREQUEST_WEIGHTUPDATE = _descriptor.Descriptor(
@@ -149,8 +180,8 @@ _CLIENTREQUEST_WEIGHTUPDATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=307,
-  serialized_end=387,
+  serialized_start=364,
+  serialized_end=444,
 )
 
 _CLIENTREQUEST = _descriptor.Descriptor(
@@ -189,8 +220,8 @@ _CLIENTREQUEST = _descriptor.Descriptor(
       name='report', full_name='flower.transport.ClientRequest.report',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=134,
-  serialized_end=397,
+  serialized_start=161,
+  serialized_end=454,
 )
 
 
@@ -220,8 +251,8 @@ _SERVERRESPONSE_RECONNECT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=540,
-  serialized_end=568,
+  serialized_start=597,
+  serialized_end=625,
 )
 
 _SERVERRESPONSE_TRAIN = _descriptor.Descriptor(
@@ -257,8 +288,8 @@ _SERVERRESPONSE_TRAIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=570,
-  serialized_end=637,
+  serialized_start=627,
+  serialized_end=694,
 )
 
 _SERVERRESPONSE = _descriptor.Descriptor(
@@ -297,11 +328,12 @@ _SERVERRESPONSE = _descriptor.Descriptor(
       name='instruction', full_name='flower.transport.ServerResponse.instruction',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=400,
-  serialized_end=652,
+  serialized_start=457,
+  serialized_end=709,
 )
 
 _WEIGHTS.fields_by_name['weights'].message_type = _NDARRAY
+_CLIENTREQUEST_CONNECT.fields_by_name['info'].message_type = _CLIENTINFO
 _CLIENTREQUEST_CONNECT.containing_type = _CLIENTREQUEST
 _CLIENTREQUEST_WEIGHTUPDATE.fields_by_name['weights'].message_type = _WEIGHTS
 _CLIENTREQUEST_WEIGHTUPDATE.containing_type = _CLIENTREQUEST
@@ -326,6 +358,7 @@ _SERVERRESPONSE.oneofs_by_name['instruction'].fields.append(
 _SERVERRESPONSE.fields_by_name['train'].containing_oneof = _SERVERRESPONSE.oneofs_by_name['instruction']
 DESCRIPTOR.message_types_by_name['NDArray'] = _NDARRAY
 DESCRIPTOR.message_types_by_name['Weights'] = _WEIGHTS
+DESCRIPTOR.message_types_by_name['ClientInfo'] = _CLIENTINFO
 DESCRIPTOR.message_types_by_name['ClientRequest'] = _CLIENTREQUEST
 DESCRIPTOR.message_types_by_name['ServerResponse'] = _SERVERRESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -343,6 +376,13 @@ Weights = _reflection.GeneratedProtocolMessageType('Weights', (_message.Message,
   # @@protoc_insertion_point(class_scope:flower.transport.Weights)
   })
 _sym_db.RegisterMessage(Weights)
+
+ClientInfo = _reflection.GeneratedProtocolMessageType('ClientInfo', (_message.Message,), {
+  'DESCRIPTOR' : _CLIENTINFO,
+  '__module__' : 'flower.proto.transport_pb2'
+  # @@protoc_insertion_point(class_scope:flower.transport.ClientInfo)
+  })
+_sym_db.RegisterMessage(ClientInfo)
 
 ClientRequest = _reflection.GeneratedProtocolMessageType('ClientRequest', (_message.Message,), {
 
@@ -398,8 +438,8 @@ _FLOWERSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=654,
-  serialized_end=750,
+  serialized_start=711,
+  serialized_end=807,
   methods=[
   _descriptor.MethodDescriptor(
     name='Join',

@@ -35,7 +35,7 @@ SERVER_RESPONSE_RECONNECT = ServerResponse(
 SERVER_RESPONSE_TRAIN = ServerResponse(
     train=ServerResponse.Train(weights=Weights(weights=[]), epochs=10)
 )
-CLIENT_REQUEST_CONNECT = ClientRequest(connect=ClientRequest.Connect(uuid="123"))
+CLIENT_REQUEST_CONNECT = ClientRequest(connect=ClientRequest.Connect())
 CLIENT_REQUEST_WEIGHT_UPDATES = ClientRequest(
     weight_update=ClientRequest.WeightUpdate(
         weights=Weights(weights=[]), num_examples=10

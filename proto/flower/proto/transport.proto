@@ -23,9 +23,10 @@ service FlowerService {
 
 message NDArray { bytes ndarray = 1; }
 message Weights { repeated NDArray weights = 1; }
+message ClientInfo { bool gpu = 1; }
 
 message ClientRequest {
-  message Connect { string uuid = 1; }
+  message Connect { ClientInfo info = 1; }
 
   message WeightUpdate {
     Weights weights = 1;
