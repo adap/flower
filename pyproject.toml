@@ -32,13 +32,18 @@ packages = [
 ]
 exclude = [
     "src/**/*_test.py",
-    "src/flower_testing/**/*",
 ]
 
 [tool.poetry.dependencies]
+# Mandatory dependencies
 python = "==3.7.6"
 numpy = "==1.18.1"
 grpcio = "==1.27.2"
+# Optional dependencies
+tensorflow = { version = "==2.1.0", optional = true }
+
+[tool.poetry.extras]
+examples-tensorflow = ["tensorflow"]
 
 [tool.poetry.dev-dependencies]
 isort = "==4.3.21"
@@ -61,7 +66,6 @@ multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
-
 
 [tool.black]
 target-version = ['py37']
