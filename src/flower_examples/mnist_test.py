@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+# type: ignore
 """Tests for MNIST example."""
 
-import tensorflow as tf
 
 from .mnist import load_model
 
@@ -22,11 +22,11 @@ from .mnist import load_model
 def test_model_input_shape():
     """Test if the Keras model input shape is compatible with MNIST."""
     # Prepare
-    expected = tf.TensorShape([None, 28, 28])
+    expected = [None, 28, 28]
     model = load_model()
 
     # Execute
-    actual = model.layers[0].get_input_at(0).get_shape()
+    actual = model.layers[0].get_input_at(0).get_shape().as_list()
 
     # Assert
     assert expected == actual
