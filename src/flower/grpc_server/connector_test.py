@@ -31,42 +31,12 @@ def test_run():
         """Simulate processing loop."""
         # Wait until the ServerResponse is available and extract
         # although here we do nothing with the return value
-        _ = connector.get_response()
-        # Put ClientRequest into connector
-        connector.put_request(ClientRequest())
+        _ = connector.get_response(ClientRequest())
 
     Thread(target=worker).start()
 
     # Execute
-    result_actual = connector.run(ServerResponse())
-
-    # Assert
-    assert result_actual == result_expected
-
-
-def test_put_get_request():
-    """Test put/get request methods."""
-    # Prepare
-    connector = Connector()
-    result_expected = ClientRequest()
-
-    # Execute
-    connector.put_request(result_expected)
-    result_actual = connector.get_request()
-
-    # Assert
-    assert result_actual == result_expected
-
-
-def test_put_get_response():
-    """Test put/get response methods."""
-    # Prepare
-    connector = Connector()
-    result_expected = ServerResponse()
-
-    # Execute
-    connector.put_response(result_expected)
-    result_actual = connector.get_response()
+    result_actual = connector.get_request(ServerResponse())
 
     # Assert
     assert result_actual == result_expected
