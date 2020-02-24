@@ -29,23 +29,12 @@ class Connector:
         self.requests: Queue[ClientRequest] = Queue(maxsize=1)
         self.responses: Queue[ServerResponse] = Queue(maxsize=1)
 
-    def get_request(self) -> ClientRequest:
+    def get_request(self, response: ServerResponse) -> ClientRequest:
         """Return next request."""
-        return self.requests.get()
-
-    def put_request(self, request: ClientRequest) -> None:
-        """Queue next request."""
-        self.requests.put(request)
-
-    def get_response(self) -> ServerResponse:
-        """Return next response."""
-        return self.responses.get()
-
-    def put_response(self, response: ServerResponse) -> None:
-        """Queue next response."""
         self.responses.put(response)
-
-    def run(self, instruction: ServerResponse) -> ClientRequest:
-        """Send instruction (ServerResponse) to grpc_client and return results (ClientRequest)."""
-        self.responses.put(instruction)
         return self.requests.get()
+
+    def get_response(self, request: ClientRequest) -> ServerResponse:
+        """Return next response."""
+        self.requests.put(request)
+        return self.responses.get()
