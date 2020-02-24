@@ -25,7 +25,10 @@ message NDArray { bytes ndarray = 1; }
 message Weights { repeated NDArray weights = 1; }
 
 message ClientRequest {
-  message Connect { string uuid = 1; }
+  message Connect {
+    message Info { bool gpu = 1; }
+    Info info = 1;
+  }
 
   message WeightUpdate {
     Weights weights = 1;
