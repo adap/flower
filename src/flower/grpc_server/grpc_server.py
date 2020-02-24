@@ -19,9 +19,9 @@ from typing import Tuple
 import grpc
 
 from flower.client_manager import ClientManager
+from flower.grpc_server import DEFAULT_PORT, DEFAULT_SERVER_ADDRESS
+from flower.grpc_server import flower_service_servicer as fss
 from flower.proto import transport_pb2_grpc
-from flower.transport import DEFAULT_PORT, DEFAULT_SERVER_ADDRESS
-from flower.transport import flower_service_servicer as fss
 
 
 def start_insecure_grpc_server(  # type: ignore

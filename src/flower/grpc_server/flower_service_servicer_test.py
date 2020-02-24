@@ -14,8 +14,8 @@
 # ==============================================================================
 """Tests for FlowerServiceServicer."""
 from flower.client_manager import SimpleClientManager
+from flower.grpc_server.flower_service_servicer import FlowerServiceServicer
 from flower.proto.transport_pb2 import ClientRequest, ServerResponse
-from flower.transport.flower_service_servicer import FlowerServiceServicer
 
 CLIENT_REQUEST = ClientRequest()
 SERVER_RESPONSE = ServerResponse()

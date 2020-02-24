@@ -21,9 +21,9 @@ from typing import Callable, Iterator, Tuple
 
 import grpc
 
+from flower.grpc_server import DEFAULT_PORT, DEFAULT_SERVER_ADDRESS
 from flower.proto.transport_pb2 import ClientRequest, ServerResponse
 from flower.proto.transport_pb2_grpc import FlowerServiceStub
-from flower.transport import DEFAULT_PORT, DEFAULT_SERVER_ADDRESS
 
 # Uncomment these flags in case you are debugging
 # os.environ["GRPC_VERBOSITY"] = "debug"
