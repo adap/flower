@@ -72,7 +72,13 @@ class MnistClient(flwr.Client):
         return len(self.x_local), float(loss)
 
 
-def main() -> None:
+def main() -> None:  # pylint: disable-msg=too-many-locals
+    """Basic Flower usage:
+        1. Create clients (each holding their respective local data partition)
+        2. Create server
+        3. Start learning
+    """
+
     # Load training and test data
     (x_train, y_train), (_, _) = tf.keras.datasets.mnist.load_data()
     x_train = x_train / 255.0
@@ -84,18 +90,18 @@ def main() -> None:
     x_2, y_2 = x_train[40000:], y_train[40000:]
 
     # Create three clients (each holding their own dataset)
-    c0 = MnistClient("c0", load_model(), x_0, y_0)
-    c1 = MnistClient("c1", load_model(), x_1, y_1)
-    c2 = MnistClient("c2", load_model(), x_2, y_2)
+    c_0 = MnistClient("c0", load_model(), x_0, y_0)
+    c_1 = MnistClient("c1", load_model(), x_1, y_1)
+    c_2 = MnistClient("c2", load_model(), x_2, y_2)
 
     # Create ClientManager and register clients
-    cm = flwr.SimpleClientManager()
-    cm.register(c0)
-    cm.register(c1)
-    cm.register(c2)
+    mngr = flwr.SimpleClientManager()
+    mngr.register(c_0)
+    mngr.register(c_1)
+    mngr.register(c_2)
 
     # Start server and train four rounds
-    server = flwr.Server(client_manager=cm)
+    server = flwr.Server(client_manager=mngr)
     hist = server.fit(num_rounds=2)
     print(hist)
 
