@@ -16,11 +16,10 @@
 
 import random
 from abc import ABC, abstractmethod
-from typing import Callable, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from .client import Client
-
-Criteria = Callable[[Client], bool]
+from .criterion import Criterion
 
 
 class ClientManager(ABC):
@@ -42,7 +41,7 @@ class ClientManager(ABC):
 
     @abstractmethod
     def sample(
-        self, num_clients: int, criteria: Optional[Criteria] = None
+        self, num_clients: int, criterion: Optional[Criterion] = None
     ) -> List[Client]:
         """Sample a number of Flower Client instances."""
         raise NotImplementedError()
@@ -79,13 +78,13 @@ class SimpleClientManager(ClientManager):
             del self.clients[client.cid]
 
     def sample(
-        self, num_clients: int, criteria: Optional[Criteria] = None
+        self, num_clients: int, criterion: Optional[Criterion] = None
     ) -> List[Client]:
         """Sample a number of Flower Client instances."""
         available_cids = list(self.clients)
-        if criteria is not None:
+        if criterion is not None:
             available_cids = [
-                cid for cid in available_cids if criteria(self.clients[cid])
+                cid for cid in available_cids if criterion.select(self.clients[cid])
             ]
         sampled_cids = random.sample(available_cids, num_clients)
         return [self.clients[cid] for cid in sampled_cids]
