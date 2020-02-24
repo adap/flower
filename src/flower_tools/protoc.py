@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""This module contains functions related to proto compilation"""
+"""This module contains functions related to proto compilation."""
 
 import glob
 from os import path
@@ -28,10 +28,10 @@ PROTO_FILES = glob.glob(f"{IN_PATH}/flower/**/*.proto")
 
 
 def compile_all() -> None:
-    """Compile all protos in the proto directory into the respective directories
+    """Compile all protos in the proto directory into the respective directories.
 
     The directory structure of the proto directory will be mirrored in src.
-    This is needed as otherwise grpc_tools.protoc will have broken imports
+    This is needed as otherwise grpc_tools.protoc will have broken imports.
     """
     command = [
         "grpc_tools.protoc",
