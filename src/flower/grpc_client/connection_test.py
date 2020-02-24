@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for module server."""
+"""Tests for module connection."""
 
 import concurrent.futures
 from typing import Iterator
