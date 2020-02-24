@@ -16,7 +16,7 @@
 import numpy as np
 import pytest
 
-from flower.transport.serde import ndarray_to_proto, proto_to_ndarray
+from flower.grpc_server.serde import ndarray_to_proto, proto_to_ndarray
 
 
 def test_serialisation_deserialisation() -> None:

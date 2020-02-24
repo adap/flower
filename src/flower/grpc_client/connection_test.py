@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for module server"""
+"""Tests for module connection."""
 
 import concurrent.futures
 from typing import Iterator
@@ -22,9 +22,9 @@ import grpc
 
 import flower_testing
 from flower.client_manager import SimpleClientManager
+from flower.grpc_client.connection import insecure_grpc_connection
+from flower.grpc_server.grpc_server import start_insecure_grpc_server
 from flower.proto.transport_pb2 import ClientRequest, ServerResponse, Weights
-from flower.transport.client import insecure_grpc_connection
-from flower.transport.grpc_server import start_insecure_grpc_server
 
 EXPECTED_RECONNECT_SECONDS = 60
 EXPECTED_NUM_TRAIN_MESSAGES = 10
@@ -56,7 +56,9 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
             yield SERVER_RESPONSE_RECONNECT
 
 
-@patch("flower.transport.flower_service_servicer.FlowerServiceServicer.Join", mock_join)
+@patch(
+    "flower.grpc_server.flower_service_servicer.FlowerServiceServicer.Join", mock_join
+)
 def test_integration_connection():
     """Create a server and establish a connection to it.
 
