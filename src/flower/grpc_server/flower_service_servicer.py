@@ -82,7 +82,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
             [str, Dict[str, str]], NetworkClient
         ] = client_factory
 
-    def Join(  # type: ignore # pylint: disable=invalid-name
+    def Join(  # pylint: disable=invalid-name
         self, request_iterator: Iterator[ClientRequest], context: grpc.ServicerContext
     ) -> Iterator[ServerResponse]:
         """Method will be invoked by each NetworkClient which participates in the network.
