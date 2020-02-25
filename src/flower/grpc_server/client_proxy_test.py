@@ -31,7 +31,7 @@ def test_run():
         """Simulate processing loop."""
         # Wait until the ServerResponse is available and extract
         # although here we do nothing with the return value
-        _ = proxy.return_result_and_get_next_instruction(result=ClientRequest())
+        _ = proxy.push_result_and_get_next_instruction(result=ClientRequest())
 
     Thread(target=worker).start()
 

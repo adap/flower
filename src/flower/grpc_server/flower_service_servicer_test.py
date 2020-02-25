@@ -50,7 +50,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         # methods where called and requests are getting passed to it
         self.network_client_mock = MagicMock()
         self.network_client_mock.cid = CLIENT_CID
-        self.network_client_mock.proxy.return_result_and_get_next_instruction.return_value = (
+        self.network_client_mock.proxy.push_result_and_get_next_instruction.return_value = (
             ServerResponse()
         )
 

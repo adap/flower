@@ -37,10 +37,19 @@ class ClientProxy:
         self.responses.put(instruction)
         return self.requests.get()
 
-    def return_result_and_get_next_instruction(
+    def push_result_and_get_next_instruction(
         self, result: Optional[ClientRequest] = None
     ) -> ServerResponse:
-        """Return next response."""
+        """Push result of last instruction and get next instruction of remote client.
+
+        Args:
+            result (ClientRequest, optional): Result of last instruction if available.
+                This argument is optional as in case of the first remote client request
+                no instruction was present and therefore no result should be pushed.
+
+        Returns:
+            ServerResponse: Next instruction to be processed by remote client
+        """
         if result is not None:
             self.requests.put(result)
 

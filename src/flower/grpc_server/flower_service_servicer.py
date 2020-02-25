@@ -117,7 +117,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
 
         # Call get response with an empty ClientRequest as it will be discarded
         # and we have already processed it above.
-        yield client.proxy.return_result_and_get_next_instruction(result=None)
+        yield client.proxy.push_result_and_get_next_instruction(result=None)
 
         # All subsequent requests will be pushed to client proxy directly
         for request in request_iterator:
@@ -128,6 +128,6 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                     grpc.StatusCode.INVALID_ARGUMENT,
                     "connect field only allowed in first message!",
                 )
-            yield client.proxy.return_result_and_get_next_instruction(result=request)
+            yield client.proxy.push_result_and_get_next_instruction(result=request)
 
         self.client_manager.unregister(client)
