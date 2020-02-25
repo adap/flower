@@ -15,42 +15,30 @@
 """Provides class ClientProxy."""
 
 from queue import Queue
-from typing import Optional
 
-from flower.proto.transport_pb2 import ClientRequest, ServerResponse
+from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
 class ClientProxy:
-    """ClientProxy holding requests and responses."""
+    """ClientProxy holding client_message and server_message."""
 
     def __init__(self) -> None:
-        """Create request/response queues."""
+        """Create message queues."""
         # Disable all unsubscriptable-object violations in __init__ method
         # pylint: disable=unsubscriptable-object
-        self.requests: Queue[ClientRequest] = Queue(maxsize=1)
-        self.responses: Queue[ServerResponse] = Queue(maxsize=1)
+        self.client_message: Queue[ClientMessage] = Queue(maxsize=1)
+        self.server_message: Queue[ServerMessage] = Queue(maxsize=1)
 
-    def send_instruction_and_get_result(
-        self, instruction: ServerResponse
-    ) -> ClientRequest:
-        """Return next request."""
-        self.responses.put(instruction)
-        return self.requests.get()
+    def set_server_message_get_client_message(
+        self, server_message: ServerMessage
+    ) -> ClientMessage:
+        """Set server message and return next client message."""
+        self.server_message.put(server_message)
+        return self.client_message.get()
 
-    def push_result_and_get_next_instruction(
-        self, result: Optional[ClientRequest] = None
-    ) -> ServerResponse:
-        """Push result of last instruction and get next instruction of remote client.
-
-        Args:
-            result (ClientRequest, optional): Result of last instruction if available.
-                This argument is optional as in case of the first remote client request
-                no instruction was present and therefore no result should be pushed.
-
-        Returns:
-            ServerResponse: Next instruction to be processed by remote client
-        """
-        if result is not None:
-            self.requests.put(result)
-
-        return self.responses.get()
+    def set_client_message_get_server_message(
+        self, client_message: ClientMessage
+    ) -> ServerMessage:
+        """Set client message and return next server message."""
+        self.client_message.put(client_message)
+        return self.server_message.get()

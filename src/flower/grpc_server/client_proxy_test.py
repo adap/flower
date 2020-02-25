@@ -12,31 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for Connector class."""
+"""Tests for ClientProxy class."""
 from threading import Thread
 
 from flower.grpc_server.client_proxy import ClientProxy
-from flower.proto.transport_pb2 import ClientRequest, ServerResponse
+from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
 def test_run():
     """Test run method."""
     # Prepare
     proxy = ClientProxy()
-    result_expected = ClientRequest()
+    client_message_expected = ClientMessage()
 
-    # As connector.run is blocking we will need to put the ClientRequest
+    # As connector.run is blocking we will need to put the ClientMessage
     # in a background thread
     def worker():
         """Simulate processing loop."""
-        # Wait until the ServerResponse is available and extract
+        # Wait until the ServerMessage is available and extract
         # although here we do nothing with the return value
-        _ = proxy.push_result_and_get_next_instruction(result=ClientRequest())
+        _ = proxy.set_client_message_get_server_message(client_message=ClientMessage())
 
     Thread(target=worker).start()
 
     # Execute
-    result_actual = proxy.send_instruction_and_get_result(instruction=ServerResponse())
+    client_message_actual = proxy.set_server_message_get_client_message(
+        server_message=ServerMessage()
+    )
 
     # Assert
-    assert result_actual == result_expected
+    assert client_message_actual == client_message_expected

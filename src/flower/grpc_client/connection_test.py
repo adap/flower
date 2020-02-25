@@ -24,36 +24,42 @@ import flower_testing
 from flower.client_manager import SimpleClientManager
 from flower.grpc_client.connection import insecure_grpc_connection
 from flower.grpc_server.grpc_server import start_insecure_grpc_server
-from flower.proto.transport_pb2 import ClientRequest, ServerResponse, Weights
+from flower.proto.transport_pb2 import ClientInfo, ClientMessage, ServerMessage, Weights
 
 EXPECTED_RECONNECT_SECONDS = 60
 EXPECTED_NUM_TRAIN_MESSAGES = 10
 
-SERVER_RESPONSE_RECONNECT = ServerResponse(
-    reconnect=ServerResponse.Reconnect(seconds=EXPECTED_RECONNECT_SECONDS)
+SERVER_MESSAGE_INFO = ServerMessage(info=ServerMessage.GetClientInfo())
+SERVER_MESSAGE_RECONNECT = ServerMessage(
+    reconnect=ServerMessage.Reconnect(seconds=EXPECTED_RECONNECT_SECONDS)
 )
-SERVER_RESPONSE_TRAIN = ServerResponse(
-    train=ServerResponse.Train(weights=Weights(weights=[]), epochs=10)
+SERVER_MESSAGE_TRAIN = ServerMessage(
+    train=ServerMessage.Train(weights=Weights(weights=[]), epochs=10)
 )
-CLIENT_REQUEST_CONNECT = ClientRequest(connect=ClientRequest.Connect())
-CLIENT_REQUEST_WEIGHT_UPDATES = ClientRequest(
-    weight_update=ClientRequest.WeightUpdate(
+CLIENT_MESSAGE_INFO = ClientMessage(info=ClientInfo(gpu=False))
+CLIENT_MESSAGE_WEIGHT_UPDATES = ClientMessage(
+    weight_update=ClientMessage.WeightUpdate(
         weights=Weights(weights=[]), num_examples=10
     )
 )
 
 
 def mock_join(  # type: ignore # pylint: disable=invalid-name
-    _self, request_iterator: Iterator[ClientRequest], _context: grpc.ServicerContext
-) -> Iterator[ServerResponse]:
+    _self,
+    server_message_iterator: Iterator[ClientMessage],
+    _context: grpc.ServicerContext,
+) -> Iterator[ServerMessage]:
     """Serve as mock for the Join method of class FlowerServiceServicer."""
     counter = 0
-    for _ in request_iterator:
+
+    yield SERVER_MESSAGE_INFO
+
+    for _ in server_message_iterator:
         if counter < EXPECTED_NUM_TRAIN_MESSAGES:
             counter += 1
-            yield SERVER_RESPONSE_TRAIN
+            yield SERVER_MESSAGE_TRAIN
         else:
-            yield SERVER_RESPONSE_RECONNECT
+            yield SERVER_MESSAGE_RECONNECT
 
 
 @patch(
@@ -81,19 +87,18 @@ def test_integration_connection():
         with insecure_grpc_connection(port=port) as conn:
             receive, send = conn
 
-            # Send connect message
-            send(CLIENT_REQUEST_CONNECT)
-
             # Setup processing loop
             while True:
                 # Block until server responds with a message
-                instruction = receive()
+                message = receive()
 
-                if instruction.HasField("train"):
+                if message.HasField("info"):
+                    send(CLIENT_MESSAGE_INFO)
+                elif message.HasField("train"):
                     num_train_messages += 1
-                    send(CLIENT_REQUEST_WEIGHT_UPDATES)
-                elif instruction.HasField("reconnect"):
-                    reconnect_seconds = instruction.reconnect.seconds
+                    send(CLIENT_MESSAGE_WEIGHT_UPDATES)
+                elif message.HasField("reconnect"):
+                    reconnect_seconds = message.reconnect.seconds
                     break
                 else:
                     raise Exception("This should never happen")

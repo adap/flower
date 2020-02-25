@@ -16,8 +16,8 @@ class FlowerServiceStub(object):
     """
     self.Join = channel.stream_stream(
         '/flower.transport.FlowerService/Join',
-        request_serializer=flower_dot_proto_dot_transport__pb2.ClientRequest.SerializeToString,
-        response_deserializer=flower_dot_proto_dot_transport__pb2.ServerResponse.FromString,
+        request_serializer=flower_dot_proto_dot_transport__pb2.ClientMessage.SerializeToString,
+        response_deserializer=flower_dot_proto_dot_transport__pb2.ServerMessage.FromString,
         )
 
 
@@ -37,8 +37,8 @@ def add_FlowerServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
       'Join': grpc.stream_stream_rpc_method_handler(
           servicer.Join,
-          request_deserializer=flower_dot_proto_dot_transport__pb2.ClientRequest.FromString,
-          response_serializer=flower_dot_proto_dot_transport__pb2.ServerResponse.SerializeToString,
+          request_deserializer=flower_dot_proto_dot_transport__pb2.ClientMessage.FromString,
+          response_serializer=flower_dot_proto_dot_transport__pb2.ServerMessage.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

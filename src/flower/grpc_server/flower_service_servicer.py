@@ -25,11 +25,11 @@ from google.protobuf.json_format import MessageToDict
 from flower.client import NetworkClient
 from flower.client_manager import ClientManager
 from flower.proto import transport_pb2_grpc
-from flower.proto.transport_pb2 import ClientRequest, ServerResponse
+from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
-class ConnectRequestError(Exception):
-    """Signifies the first request did not contain a ClientRequest.Connect message."""
+class ClientInfoMessageError(Exception):
+    """Signifies the first message did not contain a ClientMessage.Info message."""
 
 
 class ClientManagerRejectionError(Exception):
@@ -55,16 +55,16 @@ def register_client(
     context.add_callback(rpc_termination_callback)
 
 
-def is_connect_message(request: ClientRequest) -> None:
-    """Check if message contains a ClientRequest.Connect message"""
-    if not request.HasField("connect"):
-        raise ConnectRequestError()
+def is_client_message_info(message: ClientMessage) -> None:
+    """Check if message contains a ClientMessage.Info message"""
+    if not message.HasField("info"):
+        raise ClientInfoMessageError()
 
 
-def is_not_connect_message(request: ClientRequest) -> None:
-    """Check if message contains other than ClientRequest.Connect message"""
-    if request.HasField("connect"):
-        raise ConnectRequestError()
+def is_not_client_message_info(message: ClientMessage) -> None:
+    """Check if message contains other than ClientMessage.Info message"""
+    if message.HasField("info"):
+        raise ClientInfoMessageError()
 
 
 class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
@@ -83,31 +83,34 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         ] = client_factory
 
     def Join(  # pylint: disable=invalid-name
-        self, request_iterator: Iterator[ClientRequest], context: grpc.ServicerContext
-    ) -> Iterator[ServerResponse]:
+        self, request_iterator: Iterator[ClientMessage], context: grpc.ServicerContext,
+    ) -> Iterator[ServerMessage]:
         """Method will be invoked by each NetworkClient which participates in the network.
 
         Protocol:
-            - The first ClientRequest has always have the connect field set
+            - The first ClientMessage has always have the connect field set
             - Subsequent messages should not have the connect field set
         """
         # A string identifying the peer that invoked the RPC being serviced.
+        client_message_iterator = request_iterator
         peer = context.peer()
 
+        yield ServerMessage(info=ServerMessage.GetClientInfo())
+
         try:
-            request = next(request_iterator)
+            client_message = next(client_message_iterator)
         except StopIteration:
             return
 
         try:
-            is_connect_message(request)
-        except ConnectRequestError:
+            is_client_message_info(client_message)
+        except ClientInfoMessageError:
             context.abort(
                 grpc.StatusCode.INVALID_ARGUMENT,
                 "First message has to be a connect message!",
             )
 
-        info = MessageToDict(request.connect.info)
+        info = MessageToDict(client_message.info)
         client = self.client_factory(peer, info)
 
         try:
@@ -115,19 +118,10 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         except ClientManagerRejectionError:
             context.abort(grpc.StatusCode.UNAVAILABLE, "Client registeration failed!")
 
-        # Call get response with an empty ClientRequest as it will be discarded
-        # and we have already processed it above.
-        yield client.proxy.push_result_and_get_next_instruction(result=None)
-
-        # All subsequent requests will be pushed to client proxy directly
-        for request in request_iterator:
-            try:
-                is_not_connect_message(request)
-            except ConnectRequestError:
-                context.abort(
-                    grpc.StatusCode.INVALID_ARGUMENT,
-                    "connect field only allowed in first message!",
-                )
-            yield client.proxy.push_result_and_get_next_instruction(result=request)
+        # All subsequent messages will be pushed to client proxy directly
+        for client_message in client_message_iterator:
+            yield client.proxy.set_client_message_get_server_message(
+                client_message=client_message
+            )
 
         self.client_manager.unregister(client)
