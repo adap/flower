@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-# type: ignore
 """Minimal example on how to use the Flower framework with
   - TensorFlow 2.0+ (Keras)
   - MNIST image classification
 """
-from typing import Tuple
+from typing import Tuple, cast
 
 import numpy as np
 import tensorflow as tf
@@ -53,7 +52,7 @@ class MnistClient(flwr.Client):
         self.y_local = y_local
 
     def get_weights(self) -> flwr.Weights:
-        return self.model.get_weights()
+        return cast(flwr.Weights, self.model.get_weights())
 
     def fit(self, weights: flwr.Weights) -> Tuple[flwr.Weights, int]:
         # Use provided weights to update the local model

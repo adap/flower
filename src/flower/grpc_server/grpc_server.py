@@ -24,7 +24,7 @@ from flower.grpc_server import flower_service_servicer as fss
 from flower.proto import transport_pb2_grpc
 
 
-def start_insecure_grpc_server(  # type: ignore
+def start_insecure_grpc_server(
     client_manager: ClientManager,
     server_address: str = DEFAULT_SERVER_ADDRESS,
     port: int = DEFAULT_PORT,

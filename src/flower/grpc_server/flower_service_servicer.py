@@ -28,7 +28,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
     def __init__(self, client_manager: ClientManager) -> None:
         self.client_manager = client_manager
 
-    def Join(  # type: ignore # pylint: disable=invalid-name
+    def Join(  # pylint: disable=invalid-name
         self, request_iterator: Iterator[ClientRequest], context: grpc.ServicerContext
     ) -> Iterator[ServerResponse]:
         for _ in request_iterator:
