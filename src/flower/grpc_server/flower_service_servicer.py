@@ -41,7 +41,7 @@ def default_client_factory(cid: str, info: Dict[str, str]) -> NetworkClient:
     return NetworkClient(cid=cid, info=info)
 
 
-def register_client(  # type: ignore
+def register_client(
     client_manager: ClientManager, client: NetworkClient, context: grpc.ServicerContext
 ) -> None:
     """Try registering NetworkClient with ClientManager.
@@ -63,7 +63,7 @@ def is_connect_message(request: ClientRequest) -> None:
 
 def is_not_connect_message(request: ClientRequest) -> None:
     """Check if message contains other than ClientRequest.Connect message"""
-    if not request.HasField("connect"):
+    if request.HasField("connect"):
         raise ConnectRequestError()
 
 
@@ -117,9 +117,9 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
 
         # Call get response with an empty ClientRequest as it will be discarded
         # and we have already processed it above.
-        yield client.connector.get_response(ClientRequest())
+        yield client.proxy.return_result_and_get_next_instruction(result=None)
 
-        # All subsequent requests will be pushed to client connector directly
+        # All subsequent requests will be pushed to client proxy directly
         for request in request_iterator:
             try:
                 is_not_connect_message(request)
@@ -128,6 +128,6 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                     grpc.StatusCode.INVALID_ARGUMENT,
                     "connect field only allowed in first message!",
                 )
-            yield client.connector.get_response(request)
+            yield client.proxy.return_result_and_get_next_instruction(result=request)
 
         self.client_manager.unregister(client)
