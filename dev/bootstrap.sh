@@ -8,4 +8,4 @@ python -m pip install -U setuptools==45.1.0
 python -m pip install -U poetry==1.0.3
 
 # Use `poetry` to install project dependencies
-python -m poetry install
+python -m poetry install --extras "examples-tensorflow"

@@ -9,7 +9,7 @@ on:
       - master
 
 jobs:
-  test:
+  test_core:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -23,9 +23,28 @@ jobs:
           python -m pip install -U setuptools==45.1.0
           python -m pip install -U poetry==1.0.3
           poetry config virtualenvs.create false
-      - name: Install dependencies
+      - name: Install dependencies (mandatory only)
         run: python -m poetry install
       - name: Check if protos need recompilation
         run: ./dev/check_protos.sh
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test.sh
+
+  test_examples:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7.6
+      - name: Install build tools
+        run: |
+          python -m pip install -U pip==20.0.2
+          python -m pip install -U setuptools==45.1.0
+          python -m pip install -U poetry==1.0.3
+          poetry config virtualenvs.create false
+      - name: Install dependencies (mandatory + optional)
+        run: python -m poetry install --extras "examples-tensorflow"
+      - name: Lint + Test (isort/black/mypy/pylint/pytest)
+        run: ./dev/test-examples.sh
