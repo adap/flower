@@ -17,7 +17,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, Tuple
 
-from flower.grpc_server.connector import Connector
+from flower.grpc_server.client_proxy import ClientProxy
 from flower.typing import Weights
 
 
@@ -49,7 +49,7 @@ class NetworkClient(Client):
 
     def __init__(self, cid: str, info: Optional[Dict[str, str]] = None):
         super().__init__(cid, info)
-        self.connector = Connector()
+        self.proxy = ClientProxy()
 
     def get_weights(self) -> Weights:
         """Return the current local model weights"""

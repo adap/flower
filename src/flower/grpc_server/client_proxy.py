@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides class Connector handling request/response queuing and matching."""
+"""Provides class ClientProxy."""
 
 from queue import Queue
+from typing import Optional
 
 from flower.proto.transport_pb2 import ClientRequest, ServerResponse
 
 
-class Connector:
-    """Connector handling request/response queuing and matching."""
+class ClientProxy:
+    """ClientProxy holding requests and responses."""
 
     def __init__(self) -> None:
         """Create request/response queues."""
@@ -29,12 +30,18 @@ class Connector:
         self.requests: Queue[ClientRequest] = Queue(maxsize=1)
         self.responses: Queue[ServerResponse] = Queue(maxsize=1)
 
-    def get_request(self, response: ServerResponse) -> ClientRequest:
+    def send_instruction_and_get_result(
+        self, instruction: ServerResponse
+    ) -> ClientRequest:
         """Return next request."""
-        self.responses.put(response)
+        self.responses.put(instruction)
         return self.requests.get()
 
-    def get_response(self, request: ClientRequest) -> ServerResponse:
+    def return_result_and_get_next_instruction(
+        self, result: Optional[ClientRequest] = None
+    ) -> ServerResponse:
         """Return next response."""
-        self.requests.put(request)
+        if result is not None:
+            self.requests.put(result)
+
         return self.responses.get()

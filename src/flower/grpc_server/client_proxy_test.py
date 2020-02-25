@@ -15,14 +15,14 @@
 """Tests for Connector class."""
 from threading import Thread
 
-from flower.grpc_server.connector import Connector
+from flower.grpc_server.client_proxy import ClientProxy
 from flower.proto.transport_pb2 import ClientRequest, ServerResponse
 
 
 def test_run():
     """Test run method."""
     # Prepare
-    connector = Connector()
+    proxy = ClientProxy()
     result_expected = ClientRequest()
 
     # As connector.run is blocking we will need to put the ClientRequest
@@ -31,12 +31,12 @@ def test_run():
         """Simulate processing loop."""
         # Wait until the ServerResponse is available and extract
         # although here we do nothing with the return value
-        _ = connector.get_response(ClientRequest())
+        _ = proxy.return_result_and_get_next_instruction(result=ClientRequest())
 
     Thread(target=worker).start()
 
     # Execute
-    result_actual = connector.get_request(ServerResponse())
+    result_actual = proxy.send_instruction_and_get_result(instruction=ServerResponse())
 
     # Assert
     assert result_actual == result_expected
