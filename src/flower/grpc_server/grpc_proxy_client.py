@@ -50,7 +50,7 @@ class GRPCProxyClient(Client):
 
         # self.bridge.set_server_message(server_message=server_message)
         # client_message = self.bridge.get_client_message()
-    
+        client_message = self.bridge.abc(server_message)
 
         weights = [
             proto_to_ndarray(weight)

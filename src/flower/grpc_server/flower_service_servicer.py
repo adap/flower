@@ -23,22 +23,20 @@ import grpc
 from google.protobuf.json_format import MessageToDict
 
 from flower.client_manager import ClientManager
+from flower.grpc_server.grpc_bridge import GRPCBridge
 from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
 from flower.proto import transport_pb2_grpc
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
-class ClientInfoMessageError(Exception):
-    """Signifies the first message did not contain a ClientMessage.Info message."""
-
-
-class ClientManagerRejectionError(Exception):
-    """Signifies the client has been rejected by the client manager."""
-
-
-def default_client_factory(cid: str, info: Dict[str, str]) -> GRPCProxyClient:
+def default_bridge_factory() -> GRPCBridge:
     """Return NetworkClient instance."""
-    return GRPCProxyClient(cid=cid, info=info)
+    return GRPCBridge()
+
+
+def default_grpc_client_factory(cid: str, bridge: GRPCBridge) -> GRPCProxyClient:
+    """Return NetworkClient instance."""
+    return GRPCProxyClient(cid=cid, info={}, bridge=bridge)
 
 
 def register_client(
@@ -48,26 +46,17 @@ def register_client(
 ) -> None:
     """Try registering NetworkClient with ClientManager.
     If not successful raise Exception."""
-    if not client_manager.register(client):
-        raise ClientManagerRejectionError()
+    is_success = client_manager.register(client)
 
-    def rpc_termination_callback():
-        client.bridge.close()
-        client_manager.unregister(client)
+    if is_success:
 
-    context.add_callback(rpc_termination_callback)
+        def rpc_termination_callback():
+            client.bridge.close()
+            client_manager.unregister(client)
 
+        context.add_callback(rpc_termination_callback)
 
-def is_client_message_info(message: ClientMessage) -> None:
-    """Check if message contains a ClientMessage.Info message"""
-    if not message.HasField("info"):
-        raise ClientInfoMessageError()
-
-
-def is_not_client_message_info(message: ClientMessage) -> None:
-    """Check if message contains other than ClientMessage.Info message"""
-    if message.HasField("info"):
-        raise ClientInfoMessageError()
+    return is_success
 
 
 class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
@@ -76,14 +65,14 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
     def __init__(
         self,
         client_manager: ClientManager,
-        client_factory: Callable[
-            [str, Dict[str, str]], GRPCProxyClient
-        ] = default_client_factory,
+        grpc_bridge_factory: Callable[[], GRPCBridge] = default_bridge_factory,
+        grpc_client_factory: Callable[
+            [str, GRPCBridge], GRPCProxyClient
+        ] = default_grpc_client_factory,
     ) -> None:
         self.client_manager: ClientManager = client_manager
-        self.client_factory: Callable[
-            [str, Dict[str, str]], GRPCProxyClient
-        ] = client_factory
+        self.grpc_bridge_factory = grpc_bridge_factory
+        self.client_factory = grpc_client_factory
 
     def Join(  # pylint: disable=invalid-name
         self, request_iterator: Iterator[ClientMessage], context: grpc.ServicerContext,
@@ -94,58 +83,27 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
             - The first ClientMessage has always have the connect field set
             - Subsequent messages should not have the connect field set
         """
-        client_message_iterator = request_iterator
-
-        yield ServerMessage(info=ServerMessage.GetClientInfo())
-
-        try:
-            # TODO: How to timeout this?
-            client_message = next(client_message_iterator)
-        except StopIteration:
-            # This might happen if the remote client side operator
-            # is also raising StopIteration. In that case we will
-            # just return as nothing happend yet
-            return
-
-        try:
-            is_client_message_info(client_message)
-        except ClientInfoMessageError:
-            context.abort(
-                grpc.StatusCode.INVALID_ARGUMENT, "Wrong answer!",
-            )
-            return
-
-        # A string identifying the peer that invoked the RPC being serviced.
         peer = context.peer()
-        info = MessageToDict(client_message.info, including_default_value_fields=True)
-        client = self.client_factory(peer, info)
+        bridge = self.grpc_bridge_factory()
+        client = self.client_factory(cid=peer, bridge=bridge)
+        is_success = register_client(self.client_manager, client, context)
 
-        try:
-            # A rpc_termination_callback is registered in the register_client function.
-            # The rpc_termination_callback will take care of unregistering the client
-            # from the client_manager.
-            register_client(self.client_manager, client, context)
-        except ClientManagerRejectionError:
-            # Definitoin of gRPC Status Code UNAVAILABLE:
-            # The service is currently unavailable. This is most likely a transient
-            # condition, which can be corrected by retrying with a backoff. Note that
-            # it is not always safe to retry non-idempotent operations.
-            context.abort(grpc.StatusCode.UNAVAILABLE, "Client registeration failed!")
+        if not is_success:
             return
+
+        # Get iterators
+        client_message_iterator = request_iterator
+        server_message_iterator = bridge.server_message_iterator()
 
         # All subsequent messages will be pushed to client bridge directly
         while True:
-            server_message = client.bridge.get_server_message()
-            yield server_message
-
             try:
+                # Get server message from bridge and yield it
+                server_message = next(server_message_iterator)
+                yield server_message
+                # Wait for client message
                 client_message = next(client_message_iterator)
+                bridge.set_client_message(client_message)
             except StopIteration:
                 break
 
-            client.bridge.set_client_message(client_message)
-
-            # In case its a disconnect message we break out of the
-            # loop and unregister the client.
-            if client_message.HasField("disconnect"):
-                break
