@@ -24,17 +24,23 @@ service FlowerService {
 message NDArray { bytes ndarray = 1; }
 message Weights { repeated NDArray weights = 1; }
 message ClientInfo { bool gpu = 1; }
+message Disconnect { 
+  enum Reason {
+    POWER_OFF = 0;
+  }
+  Reason reason = 1;
+}
 
 message ClientMessage {
-  message WeightUpdate {
-    ClientInfo info = 1;
-    Weights weights = 2;
-    int64 num_examples = 3;
+  message WeightUpdateMsg {
+    Weights weights = 1;
+    int64 num_examples = 2;
   }
 
-  oneof report {
+  oneof msg {
     ClientInfo info = 1;
-    WeightUpdate weight_update = 2;
+    Disconnect disconnect = 2;
+    WeightUpdate weight_update = 3;
   }
 }
 
@@ -47,7 +53,7 @@ message ServerMessage {
     int32 epochs = 2;
   }
 
-  oneof instruction {
+  oneof msg {
     GetClientInfo info = 1;
     Reconnect reconnect = 2;
     Train train = 3;

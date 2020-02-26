@@ -14,16 +14,18 @@
 # ==============================================================================
 """Tests for Flower ClientManager."""
 
+import threading
+import time
 
-from flower.client import NetworkClient
 from flower.client_manager import SimpleClientManager
+from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
 
 
 def test_simple_client_manager_register():
     """Tests if the register method works correctly"""
     # Prepare
     cid = "1"
-    client = NetworkClient(cid=cid)
+    client = GRPCProxyClient(cid=cid)
     client_manager = SimpleClientManager()
 
     # Execute
@@ -40,7 +42,7 @@ def test_simple_client_manager_unregister():
     """Tests if the unregister method works correctly"""
     # Prepare
     cid = "1"
-    client = NetworkClient(cid=cid)
+    client = GRPCProxyClient(cid=cid)
     client_manager = SimpleClientManager()
     client_manager.register(client)
 
@@ -49,3 +51,30 @@ def test_simple_client_manager_unregister():
 
     # Assert
     assert len(client_manager) == 0
+
+
+def test_wait_for_clients():
+    """Test if wait for clients is blocking correctly."""
+    # Prepare
+    start_time = time.time()
+    client_manager = SimpleClientManager()
+
+    def add_clients():
+        """Block for a second and register couple clients with client_manager."""
+        time.sleep(1)
+
+        # This usually takes less than 1ms so waiting for one second above
+        # is sufficent in all reasonable scenarios although there is a
+        # theoretical chance this test might fail in the assert section
+        client_manager.register(GRPCProxyClient(cid="1"))
+        client_manager.register(GRPCProxyClient(cid="2"))
+
+    threading.Thread(target=add_clients).start()
+
+    # Execute
+    client_manager.wait_for_clients(2)
+
+    # Assert
+    elapsed_time = time.time() - start_time
+    assert len(client_manager) == 2
+    assert elapsed_time >= 1

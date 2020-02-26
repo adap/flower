@@ -46,4 +46,4 @@ def start_insecure_grpc_server(
     server.add_insecure_port(f"{server_address}:{port}")
     server.start()
 
-    return servicer, server
+    return server

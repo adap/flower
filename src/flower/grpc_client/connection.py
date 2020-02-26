@@ -52,10 +52,11 @@ def insecure_grpc_connection(
     server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
 
     receive: Callable[[], ServerMessage] = lambda: next(server_message_iterator)
-    send: Callable[[ClientMessage], None] = queue.put
+    send: Callable[[ClientMessage], None] = lambda msg: queue.put(msg, block=False)
 
     try:
         yield (receive, send)
     finally:
         # Make sure to have a final
         channel.close()
+        print("Insecure gRPC channel closed")

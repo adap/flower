@@ -18,7 +18,6 @@ from unittest.mock import MagicMock
 
 from google.protobuf.json_format import MessageToDict
 
-from flower.client import NetworkClient
 from flower.grpc_server.flower_service_servicer import (
     ClientInfoMessageError,
     ClientManagerRejectionError,
@@ -28,11 +27,18 @@ from flower.grpc_server.flower_service_servicer import (
     is_not_client_message_info,
     register_client,
 )
-from flower.proto.transport_pb2 import ClientInfo, ClientMessage, ServerMessage
+from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
+from flower.proto.transport_pb2 import (
+    ClientInfo,
+    ClientMessage,
+    Disconnect,
+    ServerMessage,
+)
 
 CLIENT_INFO = ClientInfo(gpu=True)
 CLIENT_MESSAGE_INFO = ClientMessage(info=CLIENT_INFO)
 CLIENT_MESSAGE_TRAIN = ClientMessage(weight_update=ClientMessage.WeightUpdate())
+CLIENT_MESSAGE_DISCONNECT = ClientMessage(disconnect=Disconnect(reason="POWER_OFF"))
 SERVER_MESSAGE = ServerMessage()
 CLIENT_CID = "some_client_cid"
 
@@ -48,14 +54,14 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
 
         # Create a NetworkClient mock which we will use to test if correct
         # methods where called and client_messages are getting passed to it
-        self.network_client_mock = MagicMock()
-        self.network_client_mock.cid = CLIENT_CID
-        self.network_client_mock.proxy.set_client_message_get_server_message.return_value = (
+        self.grpc_client_proxy_mock = MagicMock()
+        self.grpc_client_proxy_mock.cid = CLIENT_CID
+        self.grpc_client_proxy_mock.bridge.get_server_message.return_value = (
             ServerMessage()
         )
 
         self.client_factory_mock = MagicMock()
-        self.client_factory_mock.return_value = self.network_client_mock
+        self.client_factory_mock.return_value = self.grpc_client_proxy_mock
 
         self.client_manager_mock = MagicMock()
 
@@ -65,7 +71,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         client = default_client_factory(cid="any", info={})
 
         # Assert
-        self.assertIsInstance(client, NetworkClient)
+        self.assertIsInstance(client, GRPCProxyClient)
 
     def test_register_client(self):
         """Test register_client function."""
@@ -75,22 +81,22 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         # Execute
         register_client(
             client_manager=self.client_manager_mock,
-            client=self.network_client_mock,
+            client=self.grpc_client_proxy_mock,
             context=self.context_mock,
         )
 
         # call_args contains the arguments each wrapped in a unittest.mock.call object
         # which holds the args in wrapped in a tuple. Therefore we need to take [0][0]
-        callback = self.context_mock.add_callback.call_args[0][0]
-        callback()
+        rpc_termination_callback = self.context_mock.add_callback.call_args[0][0]
+        rpc_termination_callback()
 
         # Assert
         self.client_manager_mock.register.assert_called_once_with(
-            self.network_client_mock
+            self.grpc_client_proxy_mock
         )
         self.context_mock.add_callback.assert_called_once()
         self.client_manager_mock.unregister.assert_called_once_with(
-            self.network_client_mock
+            self.grpc_client_proxy_mock
         )
 
     def test_register_client_exception(self):
@@ -103,7 +109,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
             ClientManagerRejectionError,
             lambda: register_client(
                 client_manager=self.client_manager_mock,
-                client=self.network_client_mock,
+                client=self.grpc_client_proxy_mock,
                 context=self.context_mock,
             ),
         )
@@ -161,6 +167,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
             CLIENT_MESSAGE_INFO,
             CLIENT_MESSAGE_TRAIN,
             CLIENT_MESSAGE_TRAIN,
+            CLIENT_MESSAGE_DISCONNECT,
         ]
         client_messages_iter = iter(client_messages)
 
@@ -175,7 +182,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
             assert isinstance(server_message, ServerMessage)
 
         assert len(client_messages) == num_server_messages
-        assert self.network_client_mock.cid == CLIENT_CID
+        assert self.grpc_client_proxy_mock.cid == CLIENT_CID
 
         # After the first client_message is processed the CLIENT_MESSAGE_CONNECT
         # the ClientFactory should have been called
@@ -185,11 +192,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
 
         # Check if the client was registered with the client_manager
         self.client_manager_mock.register.assert_called_once_with(
-            self.network_client_mock
-        )
-        # Check if the client was unregistered with the client_manager
-        self.client_manager_mock.unregister.assert_called_once_with(
-            self.network_client_mock
+            self.grpc_client_proxy_mock
         )
 
 

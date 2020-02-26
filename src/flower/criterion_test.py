@@ -14,18 +14,19 @@
 # ==============================================================================
 """Tests for criterion sampling."""
 
-from flower.client import Client, NetworkClient
+from flower.client import Client
 from flower.client_manager import SimpleClientManager
 from flower.criterion import Criterion
+from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
 
 
 def test_criterion_applied():
     """Test sampling w/ criterion."""
     # Prepare
-    client1 = NetworkClient(cid="train_client_1")
-    client2 = NetworkClient(cid="train_client_2")
-    client3 = NetworkClient(cid="test_client_1")
-    client4 = NetworkClient(cid="test_client_2")
+    client1 = GRPCProxyClient(cid="train_client_1")
+    client2 = GRPCProxyClient(cid="train_client_2")
+    client3 = GRPCProxyClient(cid="test_client_1")
+    client4 = GRPCProxyClient(cid="test_client_2")
 
     client_manager = SimpleClientManager()
     client_manager.register(client1)
@@ -51,10 +52,10 @@ def test_criterion_not_applied():
     """Test sampling w/o criterion."""
 
     # Prepare
-    client1 = NetworkClient(cid="train_client_1")
-    client2 = NetworkClient(cid="train_client_2")
-    client3 = NetworkClient(cid="test_client_1")
-    client4 = NetworkClient(cid="test_client_2")
+    client1 = GRPCProxyClient(cid="train_client_1")
+    client2 = GRPCProxyClient(cid="train_client_2")
+    client3 = GRPCProxyClient(cid="test_client_1")
+    client4 = GRPCProxyClient(cid="test_client_2")
 
     client_manager = SimpleClientManager()
     client_manager.register(client1)

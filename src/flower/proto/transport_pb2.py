@@ -18,10 +18,28 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='flower.transport',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x1c\x66lower/proto/transport.proto\x12\x10\x66lower.transport\"\x1a\n\x07NDArray\x12\x0f\n\x07ndarray\x18\x01 \x01(\x0c\"5\n\x07Weights\x12*\n\x07weights\x18\x01 \x03(\x0b\x32\x19.flower.transport.NDArray\"\x19\n\nClientInfo\x12\x0b\n\x03gpu\x18\x01 \x01(\x08\"\x8c\x02\n\rClientMessage\x12,\n\x04info\x18\x01 \x01(\x0b\x32\x1c.flower.transport.ClientInfoH\x00\x12\x45\n\rweight_update\x18\x02 \x01(\x0b\x32,.flower.transport.ClientMessage.WeightUpdateH\x00\x1a|\n\x0cWeightUpdate\x12*\n\x04info\x18\x01 \x01(\x0b\x32\x1c.flower.transport.ClientInfo\x12*\n\x07weights\x18\x02 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x14\n\x0cnum_examples\x18\x03 \x01(\x03\x42\x08\n\x06report\"\xc9\x02\n\rServerMessage\x12=\n\x04info\x18\x01 \x01(\x0b\x32-.flower.transport.ServerMessage.GetClientInfoH\x00\x12>\n\treconnect\x18\x02 \x01(\x0b\x32).flower.transport.ServerMessage.ReconnectH\x00\x12\x36\n\x05train\x18\x03 \x01(\x0b\x32%.flower.transport.ServerMessage.TrainH\x00\x1a\x0f\n\rGetClientInfo\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x43\n\x05Train\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x0e\n\x06\x65pochs\x18\x02 \x01(\x05\x42\r\n\x0binstruction2_\n\rFlowerService\x12N\n\x04Join\x12\x1f.flower.transport.ClientMessage\x1a\x1f.flower.transport.ServerMessage\"\x00(\x01\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\x1c\x66lower/proto/transport.proto\x12\x10\x66lower.transport\"\x1a\n\x07NDArray\x12\x0f\n\x07ndarray\x18\x01 \x01(\x0c\"5\n\x07Weights\x12*\n\x07weights\x18\x01 \x03(\x0b\x32\x19.flower.transport.NDArray\"\x19\n\nClientInfo\x12\x0b\n\x03gpu\x18\x01 \x01(\x08\"Z\n\nDisconnect\x12\x33\n\x06reason\x18\x01 \x01(\x0e\x32#.flower.transport.Disconnect.Reason\"\x17\n\x06Reason\x12\r\n\tPOWER_OFF\x10\x00\"\xc0\x02\n\rClientMessage\x12,\n\x04info\x18\x01 \x01(\x0b\x32\x1c.flower.transport.ClientInfoH\x00\x12\x32\n\ndisconnect\x18\x02 \x01(\x0b\x32\x1c.flower.transport.DisconnectH\x00\x12\x45\n\rweight_update\x18\x03 \x01(\x0b\x32,.flower.transport.ClientMessage.WeightUpdateH\x00\x1a|\n\x0cWeightUpdate\x12*\n\x04info\x18\x01 \x01(\x0b\x32\x1c.flower.transport.ClientInfo\x12*\n\x07weights\x18\x02 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x14\n\x0cnum_examples\x18\x03 \x01(\x03\x42\x08\n\x06report\"\xc9\x02\n\rServerMessage\x12=\n\x04info\x18\x01 \x01(\x0b\x32-.flower.transport.ServerMessage.GetClientInfoH\x00\x12>\n\treconnect\x18\x02 \x01(\x0b\x32).flower.transport.ServerMessage.ReconnectH\x00\x12\x36\n\x05train\x18\x03 \x01(\x0b\x32%.flower.transport.ServerMessage.TrainH\x00\x1a\x0f\n\rGetClientInfo\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x43\n\x05Train\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x0e\n\x06\x65pochs\x18\x02 \x01(\x05\x42\r\n\x0binstruction2_\n\rFlowerService\x12N\n\x04Join\x12\x1f.flower.transport.ClientMessage\x1a\x1f.flower.transport.ServerMessage\"\x00(\x01\x30\x01\x62\x06proto3'
 )
 
 
+
+_DISCONNECT_REASON = _descriptor.EnumDescriptor(
+  name='Reason',
+  full_name='flower.transport.Disconnect.Reason',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='POWER_OFF', index=0, number=0,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=227,
+  serialized_end=250,
+)
+_sym_db.RegisterEnumDescriptor(_DISCONNECT_REASON)
 
 
 _NDARRAY = _descriptor.Descriptor(
@@ -117,6 +135,38 @@ _CLIENTINFO = _descriptor.Descriptor(
 )
 
 
+_DISCONNECT = _descriptor.Descriptor(
+  name='Disconnect',
+  full_name='flower.transport.Disconnect',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='reason', full_name='flower.transport.Disconnect.reason', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _DISCONNECT_REASON,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=160,
+  serialized_end=250,
+)
+
+
 _CLIENTMESSAGE_WEIGHTUPDATE = _descriptor.Descriptor(
   name='WeightUpdate',
   full_name='flower.transport.ClientMessage.WeightUpdate',
@@ -157,8 +207,8 @@ _CLIENTMESSAGE_WEIGHTUPDATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=295,
-  serialized_end=419,
+  serialized_start=439,
+  serialized_end=563,
 )
 
 _CLIENTMESSAGE = _descriptor.Descriptor(
@@ -176,8 +226,15 @@ _CLIENTMESSAGE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='weight_update', full_name='flower.transport.ClientMessage.weight_update', index=1,
+      name='disconnect', full_name='flower.transport.ClientMessage.disconnect', index=1,
       number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='weight_update', full_name='flower.transport.ClientMessage.weight_update', index=2,
+      number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -197,8 +254,8 @@ _CLIENTMESSAGE = _descriptor.Descriptor(
       name='report', full_name='flower.transport.ClientMessage.report',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=161,
-  serialized_end=429,
+  serialized_start=253,
+  serialized_end=573,
 )
 
 
@@ -221,8 +278,8 @@ _SERVERMESSAGE_GETCLIENTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=632,
-  serialized_end=647,
+  serialized_start=776,
+  serialized_end=791,
 )
 
 _SERVERMESSAGE_RECONNECT = _descriptor.Descriptor(
@@ -251,8 +308,8 @@ _SERVERMESSAGE_RECONNECT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=649,
-  serialized_end=677,
+  serialized_start=793,
+  serialized_end=821,
 )
 
 _SERVERMESSAGE_TRAIN = _descriptor.Descriptor(
@@ -288,8 +345,8 @@ _SERVERMESSAGE_TRAIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=679,
-  serialized_end=746,
+  serialized_start=823,
+  serialized_end=890,
 )
 
 _SERVERMESSAGE = _descriptor.Descriptor(
@@ -335,19 +392,25 @@ _SERVERMESSAGE = _descriptor.Descriptor(
       name='instruction', full_name='flower.transport.ServerMessage.instruction',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=432,
-  serialized_end=761,
+  serialized_start=576,
+  serialized_end=905,
 )
 
 _WEIGHTS.fields_by_name['weights'].message_type = _NDARRAY
+_DISCONNECT.fields_by_name['reason'].enum_type = _DISCONNECT_REASON
+_DISCONNECT_REASON.containing_type = _DISCONNECT
 _CLIENTMESSAGE_WEIGHTUPDATE.fields_by_name['info'].message_type = _CLIENTINFO
 _CLIENTMESSAGE_WEIGHTUPDATE.fields_by_name['weights'].message_type = _WEIGHTS
 _CLIENTMESSAGE_WEIGHTUPDATE.containing_type = _CLIENTMESSAGE
 _CLIENTMESSAGE.fields_by_name['info'].message_type = _CLIENTINFO
+_CLIENTMESSAGE.fields_by_name['disconnect'].message_type = _DISCONNECT
 _CLIENTMESSAGE.fields_by_name['weight_update'].message_type = _CLIENTMESSAGE_WEIGHTUPDATE
 _CLIENTMESSAGE.oneofs_by_name['report'].fields.append(
   _CLIENTMESSAGE.fields_by_name['info'])
 _CLIENTMESSAGE.fields_by_name['info'].containing_oneof = _CLIENTMESSAGE.oneofs_by_name['report']
+_CLIENTMESSAGE.oneofs_by_name['report'].fields.append(
+  _CLIENTMESSAGE.fields_by_name['disconnect'])
+_CLIENTMESSAGE.fields_by_name['disconnect'].containing_oneof = _CLIENTMESSAGE.oneofs_by_name['report']
 _CLIENTMESSAGE.oneofs_by_name['report'].fields.append(
   _CLIENTMESSAGE.fields_by_name['weight_update'])
 _CLIENTMESSAGE.fields_by_name['weight_update'].containing_oneof = _CLIENTMESSAGE.oneofs_by_name['report']
@@ -370,6 +433,7 @@ _SERVERMESSAGE.fields_by_name['train'].containing_oneof = _SERVERMESSAGE.oneofs_
 DESCRIPTOR.message_types_by_name['NDArray'] = _NDARRAY
 DESCRIPTOR.message_types_by_name['Weights'] = _WEIGHTS
 DESCRIPTOR.message_types_by_name['ClientInfo'] = _CLIENTINFO
+DESCRIPTOR.message_types_by_name['Disconnect'] = _DISCONNECT
 DESCRIPTOR.message_types_by_name['ClientMessage'] = _CLIENTMESSAGE
 DESCRIPTOR.message_types_by_name['ServerMessage'] = _SERVERMESSAGE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -394,6 +458,13 @@ ClientInfo = _reflection.GeneratedProtocolMessageType('ClientInfo', (_message.Me
   # @@protoc_insertion_point(class_scope:flower.transport.ClientInfo)
   })
 _sym_db.RegisterMessage(ClientInfo)
+
+Disconnect = _reflection.GeneratedProtocolMessageType('Disconnect', (_message.Message,), {
+  'DESCRIPTOR' : _DISCONNECT,
+  '__module__' : 'flower.proto.transport_pb2'
+  # @@protoc_insertion_point(class_scope:flower.transport.Disconnect)
+  })
+_sym_db.RegisterMessage(Disconnect)
 
 ClientMessage = _reflection.GeneratedProtocolMessageType('ClientMessage', (_message.Message,), {
 
@@ -449,8 +520,8 @@ _FLOWERSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=763,
-  serialized_end=858,
+  serialized_start=907,
+  serialized_end=1002,
   methods=[
   _descriptor.MethodDescriptor(
     name='Join',

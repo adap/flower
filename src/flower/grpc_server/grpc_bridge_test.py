@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for ClientProxy class."""
+"""Tests for GRPCBridge class."""
 from threading import Thread
 
-from flower.grpc_server.client_proxy import ClientProxy
+from flower.grpc_server.grpc_bridge import GRPCBridge
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
 def test_run():
     """Test run method."""
     # Prepare
-    proxy = ClientProxy()
+    bridge = GRPCBridge()
     client_message_expected = ClientMessage()
 
     # As connector.run is blocking we will need to put the ClientMessage
@@ -31,14 +31,14 @@ def test_run():
         """Simulate processing loop."""
         # Wait until the ServerMessage is available and extract
         # although here we do nothing with the return value
-        _ = proxy.set_client_message_get_server_message(client_message=ClientMessage())
+        _ = bridge.get_server_message()
+        bridge.set_client_message(client_message=ClientMessage())
 
     Thread(target=worker).start()
 
     # Execute
-    client_message_actual = proxy.set_server_message_get_client_message(
-        server_message=ServerMessage()
-    )
+    bridge.set_server_message(ServerMessage())
+    client_message_actual = bridge.get_client_message()
 
     # Assert
     assert client_message_actual == client_message_expected
