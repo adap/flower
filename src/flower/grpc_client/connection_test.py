@@ -74,9 +74,7 @@ def test_integration_connection():
     # Prepare
     port = flower_testing.network.unused_tcp_port()
 
-    server = start_insecure_grpc_server(
-        client_manager=SimpleClientManager(), port=port
-    )
+    server = start_insecure_grpc_server(client_manager=SimpleClientManager(), port=port)
 
     # Execute
     # Multiple clients in parallel

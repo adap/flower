@@ -18,10 +18,9 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
+from flower import typing
 from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
 from flower.proto.transport_pb2 import ClientMessage, Weights
-from flower import typing
-
 
 CLIENT_MESSAGE_WEIGHT_UPDATES = ClientMessage(
     weight_update=ClientMessage.WeightUpdate(

@@ -20,8 +20,8 @@ from typing import Callable, Dict, Optional, Tuple
 from flower import typing
 from flower.client import Client
 from flower.grpc_server.grpc_bridge import GRPCBridge
-from flower.proto.transport_pb2 import ServerMessage, Weights
 from flower.grpc_server.serde import ndarray_to_proto, proto_to_ndarray
+from flower.proto.transport_pb2 import ServerMessage, Weights
 
 
 class GRPCProxyClient(Client):

@@ -14,10 +14,11 @@
 # ==============================================================================
 """Provides class GRPCBridge."""
 
-from typing import Iterator
 from queue import Queue
+from typing import Iterator
 
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
+
 
 class GRPCBridge:
     """GRPCBridge holding client_message and server_message."""

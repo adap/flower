@@ -65,7 +65,7 @@ def create_worker(port):
                 break
             else:
                 raise Exception("Unhandled message")
-        
+
         return
 
 
@@ -115,4 +115,3 @@ class ClientServerE2ETestCase(unittest.TestCase):
 
         for worker_thread in threads:
             worker_thread.join()
-

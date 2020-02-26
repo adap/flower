@@ -16,14 +16,13 @@
 import unittest
 from unittest.mock import MagicMock, call
 
-
 from flower.grpc_server.flower_service_servicer import (
     FlowerServiceServicer,
     default_grpc_client_factory,
     register_client,
 )
-from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
 from flower.grpc_server.grpc_bridge import GRPCBridge
+from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
 from flower.proto.transport_pb2 import (
     ClientInfo,
     ClientMessage,

@@ -17,10 +17,9 @@
 Relevant knowledge for reading this modules code:
     - https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
 """
-from typing import Callable, Dict, Iterator
+from typing import Callable, Iterator
 
 import grpc
-from google.protobuf.json_format import MessageToDict
 
 from flower.client_manager import ClientManager
 from flower.grpc_server.grpc_bridge import GRPCBridge
@@ -106,4 +105,3 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                 bridge.set_client_message(client_message)
             except StopIteration:
                 break
-
