@@ -1,10 +1,10 @@
-# Flower - The Friendly Federated Learning Framework
+# Flower - The Friendly Federated Learning Research Framework
 
 [![GitHub license](https://img.shields.io/github/license/adap/flower)](https://github.com/adap/flower/blob/master/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/master/CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/workflows/Build/badge.svg)
 
-Flower is a framework for building federated learning systems. The design of Flower is based on a few guiding principles:
+Flower is a research framework for building federated learning systems. The design of Flower is based on a few guiding principles:
 
 - **Customizable**: Federated learning systems vary wildly from one use case to another. Flower allows for a wide range of different configurations depending on the needs of each individual use case.
 - **Extendable**: Flower originated from a research project at the Univerity of Oxford, so it was build with AI research in mind. Many components can be extended and overridden to build new state-of-the-art systems. 
