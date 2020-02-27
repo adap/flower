@@ -36,7 +36,7 @@ class Status(Enum):
 
 
 class GRPCBridge:
-    git 
+    """GRPCBridge holding client_message and server_message."""
 
     def __init__(self) -> None:
         """Create message queues."""
