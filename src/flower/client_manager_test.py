@@ -14,8 +14,6 @@
 # ==============================================================================
 """Tests for Flower ClientManager."""
 
-import threading
-import time
 from unittest.mock import MagicMock
 
 from flower.client_manager import SimpleClientManager
