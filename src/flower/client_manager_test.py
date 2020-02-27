@@ -14,16 +14,18 @@
 # ==============================================================================
 """Tests for Flower ClientManager."""
 
+from unittest.mock import MagicMock
 
-from flower.client import NetworkClient
 from flower.client_manager import SimpleClientManager
+from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
 
 
 def test_simple_client_manager_register():
     """Tests if the register method works correctly"""
     # Prepare
     cid = "1"
-    client = NetworkClient(cid=cid)
+    bridge = MagicMock()
+    client = GRPCProxyClient(cid=cid, info={}, bridge=bridge)
     client_manager = SimpleClientManager()
 
     # Execute
@@ -40,7 +42,8 @@ def test_simple_client_manager_unregister():
     """Tests if the unregister method works correctly"""
     # Prepare
     cid = "1"
-    client = NetworkClient(cid=cid)
+    bridge = MagicMock()
+    client = GRPCProxyClient(cid=cid, info={}, bridge=bridge)
     client_manager = SimpleClientManager()
     client_manager.register(client)
 

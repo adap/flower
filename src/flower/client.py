@@ -17,7 +17,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, Tuple
 
-from flower.grpc_server.connector import Connector
 from flower.typing import Weights
 
 
@@ -42,23 +41,3 @@ class Client(ABC):
     def evaluate(self, weights: Weights) -> Tuple[int, float]:
         """Evaluate the provided weights using the locally held dataset"""
         raise NotImplementedError()
-
-
-class NetworkClient(Client):
-    """Client interface which delegates over the network."""
-
-    def __init__(self, cid: str, info: Optional[Dict[str, str]] = None):
-        super().__init__(cid, info)
-        self.connector = Connector()
-
-    def get_weights(self) -> Weights:
-        """Return the current local model weights"""
-        return []
-
-    def fit(self, weights: Weights) -> Tuple[Weights, int]:
-        """Refine the provided weights using the locally held dataset"""
-        return ([], 1)
-
-    def evaluate(self, weights: Weights) -> Tuple[int, float]:
-        """Evaluate the provided weights using the locally held dataset"""
-        return (1, 1.0)

@@ -13,31 +13,123 @@
 # limitations under the License.
 # ==============================================================================
 """Tests for FlowerServiceServicer."""
-from flower.client_manager import SimpleClientManager
-from flower.grpc_server.flower_service_servicer import FlowerServiceServicer
-from flower.proto.transport_pb2 import ClientRequest, ServerResponse
+import unittest
+from unittest.mock import MagicMock, call
 
-CLIENT_REQUEST = ClientRequest()
-SERVER_RESPONSE = ServerResponse()
+from flower.grpc_server.flower_service_servicer import (
+    FlowerServiceServicer,
+    register_client,
+)
+from flower.proto.transport_pb2 import ClientMessage, ServerMessage
+
+CLIENT_MESSAGE = ClientMessage()
+SERVER_MESSAGE = ServerMessage()
+CLIENT_CID = "some_client_cid"
 
 
-def test_join():
-    """Test Join method of FlowerServiceServicer."""
-    # Prepare
-    client_manager = SimpleClientManager()
-    servicer = FlowerServiceServicer(client_manager=client_manager)
+class FlowerServiceServicerTestCase(unittest.TestCase):
+    """Test suite for class FlowerServiceServicer and helper functions."""
 
-    requests = [CLIENT_REQUEST for _ in range(10)]
-    request_iterator = iter(requests)
+    # pylint: disable=too-many-instance-attributes
 
-    # Execute
-    response_iterator = servicer.Join(request_iterator, {})
+    def setUp(self) -> None:
+        """Create mocks for tests."""
+        # Mock for the gRPC context argument
+        self.context_mock = MagicMock()
+        self.context_mock.peer.return_value = CLIENT_CID
 
-    # Assert
-    num_responses = 0
+        # Define client_messages to be processed by FlowerServiceServicer instance
+        self.client_messages = [CLIENT_MESSAGE for _ in range(5)]
+        self.client_messages_iterator = iter(self.client_messages)
 
-    for response in response_iterator:
-        num_responses += 1
-        assert isinstance(response, ServerResponse)
+        # Define corosponding responses from bridge
+        self.server_messages = [SERVER_MESSAGE for _ in self.client_messages]
+        self.server_messages_iterator = iter(self.server_messages)
 
-    assert len(requests) == num_responses
+        # Mock for GRPCBridge
+        self.grpc_bridge_mock = MagicMock()
+        self.grpc_bridge_mock.server_message_iterator.return_value = (
+            self.server_messages_iterator
+        )
+
+        self.grpc_bridge_factory_mock = MagicMock()
+        self.grpc_bridge_factory_mock.return_value = self.grpc_bridge_mock
+
+        # Create a GRPCProxyClient mock which we will use to test if correct
+        # methods where called and client_messages are getting passed to it
+        self.grpc_client_proxy_mock = MagicMock()
+        self.grpc_client_proxy_mock.cid = CLIENT_CID
+
+        self.client_factory_mock = MagicMock()
+        self.client_factory_mock.return_value = self.grpc_client_proxy_mock
+
+        self.client_manager_mock = MagicMock()
+
+    def test_register_client(self):
+        """Test register_client function."""
+        # Prepare
+        self.client_manager_mock.register.return_value = True
+
+        # Execute
+        register_client(
+            client_manager=self.client_manager_mock,
+            client=self.grpc_client_proxy_mock,
+            context=self.context_mock,
+        )
+
+        # Assert
+        self.context_mock.add_callback.assert_called_once()
+
+        # call_args contains the arguments each wrapped in a unittest.mock.call object
+        # which holds the args in wrapped a tuple. We therefore we need to take [0][0]
+        rpc_termination_callback = self.context_mock.add_callback.call_args[0][0]
+        rpc_termination_callback()
+
+        self.client_manager_mock.register.assert_called_once_with(
+            self.grpc_client_proxy_mock
+        )
+        self.client_manager_mock.unregister.assert_called_once_with(
+            self.grpc_client_proxy_mock
+        )
+
+    def test_join(self):
+        """Test Join method of FlowerServiceServicer."""
+        # Prepare
+
+        # Create a instance of FlowerServiceServicer
+        servicer = FlowerServiceServicer(
+            client_manager=self.client_manager_mock,
+            grpc_bridge_factory=self.grpc_bridge_factory_mock,
+            grpc_client_factory=self.client_factory_mock,
+        )
+
+        # Execute
+        server_message_iterator = servicer.Join(
+            self.client_messages_iterator, self.context_mock
+        )
+
+        # Assert
+        num_server_messages = 0
+
+        for _ in server_message_iterator:
+            num_server_messages += 1
+
+        assert len(self.client_messages) == num_server_messages
+        assert self.grpc_client_proxy_mock.cid == CLIENT_CID
+
+        self.client_factory_mock.assert_called_once_with(
+            CLIENT_CID, self.grpc_bridge_mock
+        )
+
+        # Check if the client was registered with the client_manager
+        self.client_manager_mock.register.assert_called_once_with(
+            self.grpc_client_proxy_mock
+        )
+
+        self.grpc_bridge_mock.set_client_message.assert_has_calls(
+            [call(message) for message in self.client_messages]
+        )
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

@@ -22,7 +22,7 @@ from typing import Callable, Iterator, Tuple
 import grpc
 
 from flower.grpc_server import DEFAULT_PORT, DEFAULT_SERVER_ADDRESS
-from flower.proto.transport_pb2 import ClientRequest, ServerResponse
+from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 from flower.proto.transport_pb2_grpc import FlowerServiceStub
 
 # Uncomment these flags in case you are debugging
@@ -38,26 +38,25 @@ def on_channel_state_change(*args, **kwargs):
 @contextmanager
 def insecure_grpc_connection(
     server_address: str = DEFAULT_SERVER_ADDRESS, port: int = DEFAULT_PORT
-) -> Iterator[Tuple[Callable[[], ServerResponse], Callable[[ClientRequest], None]]]:
+) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establishe an insecure gRPC connection to a gRPC server."""
     channel = grpc.insecure_channel(f"{server_address}:{port}")
 
     channel.subscribe(on_channel_state_change)
 
-    queue: Queue[ClientRequest] = Queue(  # pylint: disable=unsubscriptable-object
+    queue: Queue[ClientMessage] = Queue(  # pylint: disable=unsubscriptable-object
         maxsize=1
     )
     stub = FlowerServiceStub(channel)  # type: ignore
 
-    response_iterator: Iterator[ServerResponse] = stub.Join(iter(queue.get, None))
+    server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
 
-    receive: Callable[[], ServerResponse] = lambda: next(response_iterator)
-    send: Callable[[ClientRequest], None] = lambda request: queue.put(
-        request, block=True
-    )
+    receive: Callable[[], ServerMessage] = lambda: next(server_message_iterator)
+    send: Callable[[ClientMessage], None] = lambda msg: queue.put(msg, block=False)
 
     try:
         yield (receive, send)
     finally:
         # Make sure to have a final
         channel.close()
+        print("Insecure gRPC channel closed")

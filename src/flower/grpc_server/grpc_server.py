@@ -14,7 +14,6 @@
 # ==============================================================================
 """Implements utility function to create a grpc server."""
 import concurrent.futures
-from typing import Tuple
 
 import grpc
 
@@ -29,7 +28,7 @@ def start_insecure_grpc_server(
     server_address: str = DEFAULT_SERVER_ADDRESS,
     port: int = DEFAULT_PORT,
     max_concurrent_workers: int = 100,
-) -> Tuple[fss.FlowerServiceServicer, grpc.Server]:
+) -> grpc.Server:
     """Create grpc server and return registered FlowerServiceServicer instance.
 
     If used in a main function server.wait_for_termination(timeout=None) should
@@ -46,4 +45,4 @@ def start_insecure_grpc_server(
     server.add_insecure_port(f"{server_address}:{port}")
     server.start()
 
-    return servicer, server
+    return server

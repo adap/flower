@@ -67,6 +67,7 @@ class SimpleClientManager(ClientManager):
             return False
 
         self.clients[client.cid] = client
+
         return True
 
     def unregister(self, client: Client) -> None:
