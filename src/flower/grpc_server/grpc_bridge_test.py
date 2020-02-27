@@ -70,10 +70,10 @@ def test_workflow_successful():
     assert len(client_messages_received) == rounds
 
 
-def test_workflow_clean_close():
+def test_workflow_close():
     """Test interrupted workflow.
 
-    Close bridge while NOT blocking for next server message
+    Close bridge after setting three client messages.
     """
     # Prepare
     rounds = 5
@@ -93,10 +93,11 @@ def test_workflow_clean_close():
             bridge.set_client_message(ClientMessage())
 
             # Close the bridge after the third client message is set.
-            # This should interrupt consumption of the message
+            # This might interrupt consumption of the message.
             if i == 2:
                 # As the bridge is closed while server_message_iterator is not
                 # waiting/blocking for next message it should raise StopIteration
+                # on next invocation.
                 bridge.close()
 
         except GRPCBridgeClosed as err:
@@ -131,7 +132,7 @@ def test_server_message_iterator_close_while_blocking():
     raised_error: Union[GRPCBridgeClosed, StopIteration, None] = None
 
     def close_bridge_delayed(secs: int) -> None:
-        """Close brige after a {secs} seconds."""
+        """Close brige after {secs} second(s)."""
         time.sleep(secs)
         bridge.close()
 
@@ -140,7 +141,7 @@ def test_server_message_iterator_close_while_blocking():
         try:
             # Close the bridge while the iterator is waiting/blocking
             # for a server message
-            if i == 2:
+            if i == 3:
                 Thread(target=close_bridge_delayed, args=(1,)).start()
 
             _ = next(server_message_iterator)
