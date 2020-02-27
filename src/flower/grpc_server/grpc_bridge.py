@@ -61,7 +61,7 @@ class GRPCBridge:
             raise GRPCBridgeClosed()
 
     def _transition(self, next_status: Status) -> None:
-        """Validates and transitions bridge.
+        """Validate status transition and set next status.
 
         The caller of the transition method will have to make sure
         to aquire the lock himself.
