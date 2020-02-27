@@ -83,14 +83,13 @@ def test_integration_connection():
             while True:
                 # Block until server responds with a message
                 server_message = receive()
-                # client_message = do_work(message)
 
                 messages_received += 1
-
                 if server_message.HasField("reconnect"):
                     send(CLIENT_MESSAGE_DISCONNECT)
                     break
 
+                # Process server_message and send client_message...
                 send(CLIENT_MESSAGE)
 
         return messages_received
