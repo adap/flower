@@ -54,31 +54,3 @@ def test_simple_client_manager_unregister():
 
     # Assert
     assert len(client_manager) == 0
-
-
-def test_wait_for_clients():
-    """Test if wait for clients is blocking correctly."""
-    # Prepare
-    bridge = MagicMock()
-    start_time = time.time()
-    client_manager = SimpleClientManager()
-
-    def add_clients():
-        """Block for a second and register couple clients with client_manager."""
-        time.sleep(1)
-
-        # This usually takes less than 1ms so waiting for one second above
-        # is sufficent in all reasonable scenarios although there is a
-        # theoretical chance this test might fail in the assert section
-        client_manager.register(GRPCProxyClient(cid="1", info={}, bridge=bridge))
-        client_manager.register(GRPCProxyClient(cid="2", info={}, bridge=bridge))
-
-    threading.Thread(target=add_clients).start()
-
-    # Execute
-    client_manager.wait_for_clients(2)
-
-    # Assert
-    elapsed_time = time.time() - start_time
-    assert len(client_manager) == 2
-    assert elapsed_time >= 1

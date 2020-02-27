@@ -58,15 +58,6 @@ class SimpleClientManager(ClientManager):
     def __len__(self):
         return len(self.clients)
 
-    def wait_for_clients(self, num_clients: int, timeout: int = 86400) -> None:
-        """Blocks until num_clients number of clients are registered.
-        Timeouts after one day.
-        """
-        with self.condition:
-            self.condition.wait_for(
-                lambda: len(self.clients) >= num_clients, timeout=timeout
-            )
-
     def register(self, client: Client) -> bool:
         """Register Flower Client instance.
 
