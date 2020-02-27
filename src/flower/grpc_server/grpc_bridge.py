@@ -70,21 +70,29 @@ class GRPCBridge:
         elif (
             self._status == Status.AWAITING_SERVER_MESSAGE
             and next_status == Status.SERVER_MESSAGE_AVAILABLE
+            and self._server_message is not None
+            and self._client_message is None
         ):
             self._status = next_status
         elif (
             self._status == Status.SERVER_MESSAGE_AVAILABLE
             and next_status == Status.AWAITING_CLIENT_MESSAGE
+            and self._server_message is None
+            and self._client_message is None
         ):
             self._status = next_status
         elif (
             self._status == Status.AWAITING_CLIENT_MESSAGE
             and next_status == Status.CLIENT_MESSAGE_AVAILABLE
+            and self._server_message is None
+            and self._client_message is not None
         ):
             self._status = next_status
         elif (
             self._status == Status.CLIENT_MESSAGE_AVAILABLE
             and next_status == Status.AWAITING_SERVER_MESSAGE
+            and self._server_message is None
+            and self._client_message is None
         ):
             self._status = next_status
         else:
@@ -101,10 +109,11 @@ class GRPCBridge:
         """Set server massage and wait for client message."""
         # Set server message and transition to SERVER_MESSAGE_AVAILABLE
         with self._cv:
-            self._cv.wait_for(
-                lambda: self._status in [Status.CLOSED, Status.AWAITING_SERVER_MESSAGE]
-            )
             self._raise_if_closed()
+
+            if self._status != Status.AWAITING_SERVER_MESSAGE:
+                raise Exception("This should not happen")
+
             self._server_message = server_message  # Write
             self._transition(Status.SERVER_MESSAGE_AVAILABLE)
 
@@ -150,12 +159,11 @@ class GRPCBridge:
 
     def set_client_message(self, client_message: ClientMessage) -> None:
         """Set client message for consumption."""
-        self._raise_if_closed()
-
         with self._cv:
-            self._cv.wait_for(
-                lambda: self._status in [Status.CLOSED, Status.AWAITING_CLIENT_MESSAGE]
-            )
             self._raise_if_closed()
+
+            if self._status != Status.AWAITING_CLIENT_MESSAGE:
+                raise Exception("This should not happen")
+
             self._client_message = client_message  # Write
             self._transition(Status.CLIENT_MESSAGE_AVAILABLE)
