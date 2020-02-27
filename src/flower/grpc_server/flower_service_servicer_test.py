@@ -18,10 +18,8 @@ from unittest.mock import MagicMock, call
 
 from flower.grpc_server.flower_service_servicer import (
     FlowerServiceServicer,
-    default_grpc_client_factory,
     register_client,
 )
-from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 CLIENT_MESSAGE = ClientMessage()
@@ -31,6 +29,7 @@ CLIENT_CID = "some_client_cid"
 
 class FlowerServiceServicerTestCase(unittest.TestCase):
     """Test suite for class FlowerServiceServicer and helper functions."""
+
     # pylint: disable=too-many-instance-attributes
 
     def setUp(self) -> None:
@@ -66,17 +65,6 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
 
         self.client_manager_mock = MagicMock()
 
-    def test_default_client_factory(self):
-        """Confirm that the default client factory returns a GRPCProxyClient."""
-        # Prepare
-        bridge = self.grpc_bridge_mock
-
-        # Execute
-        client = default_grpc_client_factory(cid=CLIENT_CID, bridge=bridge)
-
-        # Assert
-        self.assertIsInstance(client, GRPCProxyClient)
-
     def test_register_client(self):
         """Test register_client function."""
         # Prepare
@@ -91,7 +79,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
 
         # Assert
         self.context_mock.add_callback.assert_called_once()
-        
+
         # call_args contains the arguments each wrapped in a unittest.mock.call object
         # which holds the args in wrapped a tuple. We therefore we need to take [0][0]
         rpc_termination_callback = self.context_mock.add_callback.call_args[0][0]
@@ -123,15 +111,12 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         # Assert
         num_server_messages = 0
 
-        for server_message in server_message_iterator:
+        for _ in server_message_iterator:
             num_server_messages += 1
-            assert isinstance(server_message, ServerMessage)
 
         assert len(self.client_messages) == num_server_messages
         assert self.grpc_client_proxy_mock.cid == CLIENT_CID
 
-        # After the first client_message is processed the CLIENT_MESSAGE_CONNECT
-        # the ClientFactory should have been called
         self.client_factory_mock.assert_called_once_with(
             CLIENT_CID, self.grpc_bridge_mock
         )

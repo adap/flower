@@ -79,7 +79,8 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
 
         Protocol:
             - The first message is sent from the server to the client
-            - Both ServerMessage and ClientMessage are message "wrappers" wrapping the actual message
+            - Both ServerMessage and ClientMessage are message "wrappers"
+                wrapping the actual message
             - The Join method is (pretty much) protocol unaware
         """
         peer = context.peer()
