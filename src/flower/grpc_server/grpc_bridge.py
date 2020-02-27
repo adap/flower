@@ -26,7 +26,7 @@ class GRPCBridgeClosed(Exception):
 
 
 class Status(Enum):
-    """Status through which the brige can transition."""
+    """Status through which the bridge can transition."""
 
     AWAITING_SERVER_MESSAGE = 1
     SERVER_MESSAGE_AVAILABLE = 2
@@ -44,7 +44,7 @@ class GRPCBridge:
     """
 
     def __init__(self) -> None:
-        """Create message queues."""
+        """Init bridge."""
         # Disable all unsubscriptable-object violations in __init__ method
         # pylint: disable=unsubscriptable-object
         self._cv = Condition()  # cv stands for condition variable
