@@ -47,8 +47,6 @@ class GRPCProxyClient(Client):
             )
         )
 
-        # self.bridge.set_server_message(server_message=server_message)
-        # client_message = self.bridge.get_client_message()
         client_message = self.bridge.request(server_message)
 
         weights = [
