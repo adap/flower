@@ -13,8 +13,9 @@
 # limitations under the License.
 # ==============================================================================
 """Tests for GRPCBridge class."""
+import time
 from threading import Thread
-from typing import List
+from typing import List, Union
 
 from flower.grpc_server.grpc_bridge import GRPCBridge, GRPCBridgeClosed
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
@@ -55,25 +56,25 @@ def test_workflow_successful():
 
     # Execute
     # Simluate remote client side
-    for _ in range(rounds):
+    for i in range(rounds):
         try:
-            # First read the server message
-            next(server_message_iterator)
-
-            # Set the next client message
+            _ = next(server_message_iterator)
             bridge.set_client_message(ClientMessage())
-        except GRPCBridgeClosed:
-            break
+        except Exception:
+            raise Exception
+
+    # Wait until worker_thread is finished
+    worker_thread.join(timeout=1)
+
     # Assert
-    for msg in client_messages_received:
-        assert isinstance(msg, ClientMessage)
-
-    # Teardown
-    worker_thread.join()
+    assert len(client_messages_received) == rounds
 
 
-def test_workflow_interruption():
-    """Test interrupted workflow."""
+def test_workflow_clean_close():
+    """Test interrupted workflow.
+
+    Close bridge while NOT blocking for next server message
+    """
     # Prepare
     rounds = 5
     client_messages_received: List[ClientMessage] = []
@@ -83,30 +84,82 @@ def test_workflow_interruption():
 
     worker_thread = start_worker(rounds, bridge, client_messages_received)
 
+    raised_error: Union[GRPCBridgeClosed, StopIteration, None] = None
+
     # Execute
     for i in range(rounds):
         try:
-            next(server_message_iterator)
-
+            _ = next(server_message_iterator)
             bridge.set_client_message(ClientMessage())
 
             # Close the bridge after the third client message is set.
             # This should interrupt consumption of the message
             if i == 2:
+                # As the bridge is closed while server_message_iterator is not
+                # waiting/blocking for next message it should raise StopIteration
                 bridge.close()
 
-        except GRPCBridgeClosed:
-            print("GRPCBridgeClosed raised")
+        except GRPCBridgeClosed as err:
+            raised_error = err
             break
-        except StopIteration:
-            print("StopIteration raised")
+        except StopIteration as err:
+            raised_error = err
             break
-
-    # Assert
-    for msg in client_messages_received:
-        assert isinstance(msg, ClientMessage)
-
-    assert len(client_messages_received) == 2
 
     # Wait for thread join before finishing the test
     worker_thread.join(timeout=1)
+
+    # Assert
+    assert len(client_messages_received) == 2
+    assert isinstance(raised_error, StopIteration)
+
+
+def test_server_message_iterator_close_while_blocking():
+    """Test interrupted workflow.
+
+    Close bridge while blocking for next server_message.
+    """
+    # Prepare
+    rounds = 5
+    client_messages_received: List[ClientMessage] = []
+
+    bridge = GRPCBridge()
+    server_message_iterator = bridge.server_message_iterator()
+
+    worker_thread = start_worker(rounds, bridge, client_messages_received)
+
+    raised_error: Union[GRPCBridgeClosed, StopIteration, None] = None
+
+    def close_bridge_delayed(secs: int) -> None:
+        """Close brige after a {secs} seconds."""
+        time.sleep(secs)
+        bridge.close()
+
+    # Execute
+    for i in range(rounds):
+        try:
+            # Close the bridge while the iterator is waiting/blocking
+            # for a server message
+            if i == 2:
+                Thread(target=close_bridge_delayed, args=(1,)).start()
+
+            _ = next(server_message_iterator)
+
+            # Do not set a client message and wait until
+            # the thread above closes the bridge
+            if i < 2:
+                bridge.set_client_message(ClientMessage())
+
+        except GRPCBridgeClosed as err:
+            raised_error = err
+            break
+        except StopIteration as err:
+            raised_error = err
+            break
+
+    # Wait for thread join before finishing the test
+    worker_thread.join(timeout=1)
+
+    # Assert
+    assert len(client_messages_received) == 2
+    assert isinstance(raised_error, GRPCBridgeClosed)
