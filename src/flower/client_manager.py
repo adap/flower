@@ -15,7 +15,6 @@
 """Flower ClientManager."""
 
 import random
-import threading
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
@@ -53,7 +52,6 @@ class SimpleClientManager(ClientManager):
 
     def __init__(self) -> None:
         self.clients: Dict[str, Client] = {}
-        self.condition = threading.Condition()
 
     def __len__(self):
         return len(self.clients)
@@ -69,9 +67,6 @@ class SimpleClientManager(ClientManager):
             return False
 
         self.clients[client.cid] = client
-
-        with self.condition:
-            self.condition.notify_all()
 
         return True
 

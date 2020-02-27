@@ -29,12 +29,12 @@ from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
 def default_bridge_factory() -> GRPCBridge:
-    """Return NetworkClient instance."""
+    """Return GRPCBridge instance."""
     return GRPCBridge()
 
 
 def default_grpc_client_factory(cid: str, bridge: GRPCBridge) -> GRPCProxyClient:
-    """Return NetworkClient instance."""
+    """Return GRPCProxyClient instance."""
     return GRPCProxyClient(cid=cid, info={}, bridge=bridge)
 
 
@@ -43,7 +43,7 @@ def register_client(
     client: GRPCProxyClient,
     context: grpc.ServicerContext,
 ) -> bool:
-    """Try registering NetworkClient with ClientManager.
+    """Try registering GRPCProxyClient with ClientManager.
     If not successful raise Exception."""
     is_success = client_manager.register(client)
 
@@ -59,7 +59,7 @@ def register_client(
 
 
 class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
-    """FlowerServiceServicer for bi-directional gRPC instruction stream."""
+    """FlowerServiceServicer for bi-directional gRPC message stream."""
 
     def __init__(
         self,
@@ -76,7 +76,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
     def Join(  # pylint: disable=invalid-name
         self, request_iterator: Iterator[ClientMessage], context: grpc.ServicerContext,
     ) -> Iterator[ServerMessage]:
-        """Method will be invoked by each NetworkClient which participates in the network.
+        """Method will be invoked by each GRPCProxyClient which participates in the network.
 
         Protocol:
             - The first ClientMessage has always have the connect field set

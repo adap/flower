@@ -58,7 +58,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         self.grpc_bridge_factory_mock = MagicMock()
         self.grpc_bridge_factory_mock.return_value = self.grpc_bridge_mock
 
-        # Create a NetworkClient mock which we will use to test if correct
+        # Create a GRPCProxyClient mock which we will use to test if correct
         # methods where called and client_messages are getting passed to it
         self.grpc_client_proxy_mock = MagicMock()
         self.grpc_client_proxy_mock.cid = CLIENT_CID
@@ -69,7 +69,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         self.client_manager_mock = MagicMock()
 
     def test_default_client_factory(self):
-        """Confirm that the default client factory returns a NetworkClient."""
+        """Confirm that the default client factory returns a GRPCProxyClient."""
         # Prepare
         bridge = self.grpc_bridge_mock
 
