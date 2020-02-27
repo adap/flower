@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Networked Flower client implementation."""
+"""Tests for networked Flower client implementation."""
 import unittest
 from unittest.mock import MagicMock
 
