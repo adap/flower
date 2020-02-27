@@ -15,7 +15,7 @@
 """Tests for MNIST example."""
 
 
-from .mnist import load_model
+from .tensorflow_mnist import load_model
 
 
 def test_model_input_shape():
