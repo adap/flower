@@ -89,16 +89,17 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
             context=self.context_mock,
         )
 
+        # Assert
+        self.context_mock.add_callback.assert_called_once()
+        
         # call_args contains the arguments each wrapped in a unittest.mock.call object
-        # which holds the args in wrapped in a tuple. Therefore we need to take [0][0]
+        # which holds the args in wrapped a tuple. We therefore we need to take [0][0]
         rpc_termination_callback = self.context_mock.add_callback.call_args[0][0]
         rpc_termination_callback()
 
-        # Assert
         self.client_manager_mock.register.assert_called_once_with(
             self.grpc_client_proxy_mock
         )
-        self.context_mock.add_callback.assert_called_once()
         self.client_manager_mock.unregister.assert_called_once_with(
             self.grpc_client_proxy_mock
         )
