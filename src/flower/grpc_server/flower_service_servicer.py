@@ -42,7 +42,7 @@ def register_client(
     client_manager: ClientManager,
     client: GRPCProxyClient,
     context: grpc.ServicerContext,
-) -> None:
+) -> bool:
     """Try registering NetworkClient with ClientManager.
     If not successful raise Exception."""
     is_success = client_manager.register(client)
@@ -84,24 +84,22 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         """
         peer = context.peer()
         bridge = self.grpc_bridge_factory()
-        client = self.client_factory(cid=peer, bridge=bridge)
+        client = self.client_factory(peer, bridge)
         is_success = register_client(self.client_manager, client, context)
 
-        if not is_success:
-            return
+        if is_success:
+            # Get iterators
+            client_message_iterator = request_iterator
+            server_message_iterator = bridge.server_message_iterator()
 
-        # Get iterators
-        client_message_iterator = request_iterator
-        server_message_iterator = bridge.server_message_iterator()
-
-        # All subsequent messages will be pushed to client bridge directly
-        while True:
-            try:
-                # Get server message from bridge and yield it
-                server_message = next(server_message_iterator)
-                yield server_message
-                # Wait for client message
-                client_message = next(client_message_iterator)
-                bridge.set_client_message(client_message)
-            except StopIteration:
-                break
+            # All subsequent messages will be pushed to client bridge directly
+            while True:
+                try:
+                    # Get server message from bridge and yield it
+                    server_message = next(server_message_iterator)
+                    yield server_message
+                    # Wait for client message
+                    client_message = next(client_message_iterator)
+                    bridge.set_client_message(client_message)
+                except StopIteration:
+                    break

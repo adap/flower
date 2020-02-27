@@ -15,6 +15,7 @@
 """Tests for criterion sampling."""
 
 from unittest.mock import MagicMock
+
 from flower.client import Client
 from flower.client_manager import SimpleClientManager
 from flower.criterion import Criterion

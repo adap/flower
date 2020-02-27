@@ -16,20 +16,22 @@
 from threading import Thread
 from typing import List
 
-from flower.grpc_server.grpc_bridge import GRPCBridge
+from flower.grpc_server.grpc_bridge import GRPCBridge, GRPCBridgeClosed
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
-def start_worker(rounds: int, bridge: GRPCBridge, results: List) -> Thread:
+def start_worker(
+    rounds: int, bridge: GRPCBridge, results: List[ClientMessage]
+) -> Thread:
     """Simulate processing loop with five calls."""
 
     def _worker():
         # Wait until the ServerMessage is available and extract
         # although here we do nothing with the return value
         for _ in range(rounds):
-            client_message = bridge.request(ServerMessage())
-
-            if client_message is None:
+            try:
+                client_message = bridge.request(ServerMessage())
+            except GRPCBridgeClosed:
                 break
 
             results.append(client_message)
@@ -44,7 +46,7 @@ def test_workflow_successful():
     """Test full workflow."""
     # Prepare
     rounds = 5
-    client_messages_received = []
+    client_messages_received: List[ClientMessage] = []
 
     bridge = GRPCBridge()
     server_message_iterator = bridge.server_message_iterator()
@@ -54,12 +56,14 @@ def test_workflow_successful():
     # Execute
     # Simluate remote client side
     for _ in range(rounds):
-        # First read the server message
-        next(server_message_iterator)
+        try:
+            # First read the server message
+            next(server_message_iterator)
 
-        # Set the next client message
-        bridge.set_client_message(ClientMessage())
-
+            # Set the next client message
+            bridge.set_client_message(ClientMessage())
+        except GRPCBridgeClosed:
+            break
     # Assert
     for msg in client_messages_received:
         assert isinstance(msg, ClientMessage)
@@ -72,7 +76,7 @@ def test_workflow_interruption():
     """Test interrupted workflow."""
     # Prepare
     rounds = 5
-    client_messages_received = []
+    client_messages_received: List[ClientMessage] = []
 
     bridge = GRPCBridge()
     server_message_iterator = bridge.server_message_iterator()
@@ -83,16 +87,20 @@ def test_workflow_interruption():
     for i in range(rounds):
         try:
             next(server_message_iterator)
+
+            bridge.set_client_message(ClientMessage())
+
+            # Close the bridge after the third client message is set.
+            # This should interrupt consumption of the message
+            if i == 2:
+                bridge.close()
+
+        except GRPCBridgeClosed:
+            print("GRPCBridgeClosed raised")
+            break
         except StopIteration:
             print("StopIteration raised")
             break
-
-        bridge.set_client_message(ClientMessage())
-
-        # Close the bridge after the third client message is set.
-        # This should interrupt consumption of the message
-        if i == 2:
-            bridge.close()
 
     # Assert
     for msg in client_messages_received:

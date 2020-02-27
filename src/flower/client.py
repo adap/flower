@@ -41,9 +41,3 @@ class Client(ABC):
     def evaluate(self, weights: Weights) -> Tuple[int, float]:
         """Evaluate the provided weights using the locally held dataset"""
         raise NotImplementedError()
-
-    def reconnect(self, seconds: int = 60) -> None:
-        """Tell the client to reconnect later.
-        Implementation might differ significantly for local and networked clients.
-        """
-        raise NotImplementedError()

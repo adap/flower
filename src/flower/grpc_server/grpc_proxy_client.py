@@ -14,8 +14,7 @@
 # ==============================================================================
 """Flower client (abstract base class)"""
 
-from abc import ABC, abstractmethod
-from typing import Callable, Dict, Optional, Tuple
+from typing import Dict, Tuple
 
 from flower import typing
 from flower.client import Client
@@ -33,11 +32,11 @@ class GRPCProxyClient(Client):
         super().__init__(cid, info)
         self.bridge = bridge
 
-    def get_weights(self) -> Weights:
+    def get_weights(self) -> typing.Weights:
         """Return the current local model weights"""
         return []
 
-    def fit(self, weights: typing.Weights) -> Tuple[Weights, int]:
+    def fit(self, weights: typing.Weights) -> Tuple[typing.Weights, int]:
         """Refine the provided weights using the locally held dataset."""
 
         weights_proto = [ndarray_to_proto(weight) for weight in weights]
@@ -60,18 +59,6 @@ class GRPCProxyClient(Client):
 
         return (weights, num_examples)
 
-    def evaluate(self, weights: Weights) -> Tuple[int, float]:
+    def evaluate(self, weights: typing.Weights) -> Tuple[int, float]:
         """Evaluate the provided weights using the locally held dataset"""
         return (1, 1.0)
-
-    def reconnect(self, seconds: int = 60) -> None:
-        """Set reconnect message for remote client."""
-        message = ServerMessage(reconnect=ServerMessage.Reconnect(seconds=seconds))
-        self.bridge.set_server_message(server_message=message)
-
-    def validate_client_message(self):
-        # if not valid
-        self._close_bridge()
-
-    def _close_bridge(self):
-        self.bridge.close()

@@ -18,7 +18,6 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
-from flower import typing
 from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
 from flower.proto.transport_pb2 import ClientMessage, Weights
 
@@ -30,7 +29,10 @@ CLIENT_MESSAGE_WEIGHT_UPDATES = ClientMessage(
 
 
 class GRPCProxyClientTestCase(unittest.TestCase):
+    """Tests for GRPCProxyClient."""
+
     def setUp(self):
+        """Setup mocks for tests."""
         self.bridge_mock = MagicMock()
         # Set return_value for usually blocking get_client_message method
         self.bridge_mock.request.return_value = CLIENT_MESSAGE_WEIGHT_UPDATES

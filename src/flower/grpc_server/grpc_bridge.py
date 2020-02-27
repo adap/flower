@@ -16,7 +16,7 @@
 
 from enum import Enum
 from threading import Condition
-from typing import Iterator, Optional, Union
+from typing import Iterator, Optional
 
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
@@ -36,9 +36,7 @@ class Status(Enum):
 
 
 class GRPCBridge:
-    """GRPCBridge holding client_message and server_message.
-
-    """
+    git 
 
     def __init__(self) -> None:
         """Create message queues."""
@@ -46,13 +44,18 @@ class GRPCBridge:
         # pylint: disable=unsubscriptable-object
         self._cv = Condition()
         self._status = Status.AWAITING_SERVER_MESSAGE
-        self._message: Optional[Union[ServerMessage, ClientMessage]] = None
+        self._server_message: Optional[ServerMessage] = None
+        self._client_message: Optional[ClientMessage] = None
 
     def _is_closed(self) -> bool:
         """Return True if closed and False otherwise."""
         return self._status == Status.CLOSED
 
-    def _transition(self, next_status: Status):
+    def _raise_if_closed(self) -> None:
+        if self._status == Status.CLOSED:
+            raise GRPCBridgeClosed()
+
+    def _transition(self, next_status: Status) -> None:
         """Validates and transitions bridge."""
         with self._cv:
             if next_status == Status.CLOSED:
@@ -86,24 +89,30 @@ class GRPCBridge:
         """Set bridge status to closed."""
         self._transition(Status.CLOSED)
 
-    def request(self, server_message: ServerMessage) -> Optional[ClientMessage]:
+    def request(self, server_message: ServerMessage) -> ClientMessage:
         """Set server massage and wait for client message."""
         print("request")
-        if self._status == Status.CLOSED:
-            raise GRPCBridgeClosed()
-
         # Set server message and transition to SERVER_MESSAGE_AVAILABLE
         with self._cv:
-            self._cv.wait_for(lambda: self._status == Status.AWAITING_SERVER_MESSAGE)
-        self._message = server_message
+            self._cv.wait_for(
+                lambda: self._status in [Status.CLOSED, Status.AWAITING_SERVER_MESSAGE]
+            )
+        self._raise_if_closed()
+        self._server_message = server_message  # Write
         self._transition(Status.SERVER_MESSAGE_AVAILABLE)
 
         # Read client message and transition to AWAITING_SERVER_MESSAGE
         with self._cv:
-            self._cv.wait_for(lambda: self._status == Status.CLIENT_MESSAGE_AVAILABLE)
-        client_message = self._message
-        self._message = None
+            self._cv.wait_for(
+                lambda: self._status in [Status.CLOSED, Status.CLIENT_MESSAGE_AVAILABLE]
+            )
+        self._raise_if_closed()
+        client_message = self._client_message  # Read
+        self._client_message = None  # Reset
         self._transition(Status.AWAITING_SERVER_MESSAGE)
+
+        if client_message is None:
+            raise Exception("Client message can not be None")
 
         return client_message
 
@@ -113,30 +122,34 @@ class GRPCBridge:
         while not self._is_closed():
             with self._cv:
                 self._cv.wait_for(
-                    lambda: self._status == Status.SERVER_MESSAGE_AVAILABLE
+                    lambda: self._status
+                    in [Status.CLOSED, Status.SERVER_MESSAGE_AVAILABLE]
                 )
-
-            server_message = self._message
-            self._message = None
+            self._raise_if_closed()
+            server_message = self._server_message  # Read
+            self._server_message = None  # Reset
 
             # Transition before yielding as after the yield the execution of this
             # function is paused and will resume when next is called again
             self._transition(Status.AWAITING_CLIENT_MESSAGE)
+
+            if server_message is None:
+                raise Exception("Server message can not be None")
 
             yield server_message
 
     def set_client_message(self, client_message: ClientMessage) -> None:
         """Set client message for consumption."""
         print("set_client_message")
-        if not self._is_closed():
-            with self._cv:
-                self._cv.wait_for(
-                    lambda: self._status == Status.AWAITING_CLIENT_MESSAGE
-                )
-            self._message = client_message
-            self._transition(Status.CLIENT_MESSAGE_AVAILABLE)
-        else:
-            raise GRPCBridgeClosed()
+        self._raise_if_closed()
+
+        with self._cv:
+            self._cv.wait_for(
+                lambda: self._status in [Status.CLOSED, Status.AWAITING_CLIENT_MESSAGE]
+            )
+        self._raise_if_closed()
+        self._client_message = client_message  # Write
+        self._transition(Status.CLIENT_MESSAGE_AVAILABLE)
 
 
 # class GRPCBridge:

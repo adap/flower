@@ -21,14 +21,8 @@ from flower.grpc_server.flower_service_servicer import (
     default_grpc_client_factory,
     register_client,
 )
-from flower.grpc_server.grpc_bridge import GRPCBridge
 from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
-from flower.proto.transport_pb2 import (
-    ClientInfo,
-    ClientMessage,
-    Disconnect,
-    ServerMessage,
-)
+from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 CLIENT_MESSAGE = ClientMessage()
 SERVER_MESSAGE = ServerMessage()
@@ -37,6 +31,9 @@ CLIENT_CID = "some_client_cid"
 
 class FlowerServiceServicerTestCase(unittest.TestCase):
     """Test suite for class FlowerServiceServicer and helper functions."""
+
+    # Disable linter error as I think its accetable in this test
+    # pylint: disable=too-many-instance-attributes
 
     def setUp(self) -> None:
         """Create mocks for tests."""
@@ -137,7 +134,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         # After the first client_message is processed the CLIENT_MESSAGE_CONNECT
         # the ClientFactory should have been called
         self.client_factory_mock.assert_called_once_with(
-            cid=CLIENT_CID, bridge=self.grpc_bridge_mock
+            CLIENT_CID, self.grpc_bridge_mock
         )
 
         # Check if the client was registered with the client_manager
