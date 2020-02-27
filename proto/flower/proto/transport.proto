@@ -18,28 +18,34 @@ syntax = "proto3";
 package flower.transport;
 
 service FlowerService {
-  rpc Join(stream ClientRequest) returns (stream ServerResponse) {}
+  rpc Join(stream ClientMessage) returns (stream ServerMessage) {}
 }
 
 message NDArray { bytes ndarray = 1; }
 message Weights { repeated NDArray weights = 1; }
 message ClientInfo { bool gpu = 1; }
+message Disconnect { 
+  enum Reason {
+    POWER_OFF = 0;
+  }
+  Reason reason = 1;
+}
 
-message ClientRequest {
-  message Connect { ClientInfo info = 1; }
-
+message ClientMessage {
   message WeightUpdate {
     Weights weights = 1;
     int64 num_examples = 2;
   }
 
-  oneof report {
-    Connect connect = 1;
-    WeightUpdate weight_update = 2;
+  oneof msg {
+    ClientInfo info = 1;
+    Disconnect disconnect = 2;
+    WeightUpdate weight_update = 3;
   }
 }
 
-message ServerResponse {
+message ServerMessage {
+  message GetClientInfo {}
   message Reconnect { int64 seconds = 1; }
 
   message Train {
@@ -47,8 +53,9 @@ message ServerResponse {
     int32 epochs = 2;
   }
 
-  oneof instruction {
-    Reconnect reconnect = 1;
-    Train train = 2;
+  oneof msg {
+    GetClientInfo info = 1;
+    Reconnect reconnect = 2;
+    Train train = 3;
   }
 }

@@ -24,36 +24,37 @@ import flower_testing
 from flower.client_manager import SimpleClientManager
 from flower.grpc_client.connection import insecure_grpc_connection
 from flower.grpc_server.grpc_server import start_insecure_grpc_server
-from flower.proto.transport_pb2 import ClientRequest, ServerResponse, Weights
+from flower.proto.transport_pb2 import ClientMessage, Disconnect, ServerMessage
 
-EXPECTED_RECONNECT_SECONDS = 60
-EXPECTED_NUM_TRAIN_MESSAGES = 10
+EXPECTED_NUM_SERVER_MESSAGE = 10
 
-SERVER_RESPONSE_RECONNECT = ServerResponse(
-    reconnect=ServerResponse.Reconnect(seconds=EXPECTED_RECONNECT_SECONDS)
-)
-SERVER_RESPONSE_TRAIN = ServerResponse(
-    train=ServerResponse.Train(weights=Weights(weights=[]), epochs=10)
-)
-CLIENT_REQUEST_CONNECT = ClientRequest(connect=ClientRequest.Connect())
-CLIENT_REQUEST_WEIGHT_UPDATES = ClientRequest(
-    weight_update=ClientRequest.WeightUpdate(
-        weights=Weights(weights=[]), num_examples=10
-    )
-)
+SERVER_MESSAGE = ServerMessage()
+SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect=ServerMessage.Reconnect())
+
+CLIENT_MESSAGE = ClientMessage()
+CLIENT_MESSAGE_DISCONNECT = ClientMessage(disconnect=Disconnect())
 
 
 def mock_join(  # type: ignore # pylint: disable=invalid-name
-    _self, request_iterator: Iterator[ClientRequest], _context: grpc.ServicerContext
-) -> Iterator[ServerResponse]:
+    _self, request_iterator: Iterator[ClientMessage], _context: grpc.ServicerContext,
+) -> Iterator[ServerMessage]:
     """Serve as mock for the Join method of class FlowerServiceServicer."""
     counter = 0
-    for _ in request_iterator:
-        if counter < EXPECTED_NUM_TRAIN_MESSAGES:
-            counter += 1
-            yield SERVER_RESPONSE_TRAIN
+
+    while True:
+        counter += 1
+
+        if counter < EXPECTED_NUM_SERVER_MESSAGE:
+            yield SERVER_MESSAGE
         else:
-            yield SERVER_RESPONSE_RECONNECT
+            yield SERVER_MESSAGE_RECONNECT
+
+        try:
+            client_message = next(request_iterator)
+            if client_message.HasField("disconnect"):
+                break
+        except StopIteration:
+            break
 
 
 @patch(
@@ -68,37 +69,30 @@ def test_integration_connection():
     # Prepare
     port = flower_testing.network.unused_tcp_port()
 
-    _, server = start_insecure_grpc_server(
-        client_manager=SimpleClientManager(), port=port
-    )
+    server = start_insecure_grpc_server(client_manager=SimpleClientManager(), port=port)
 
     # Execute
     # Multiple clients in parallel
-    def run_client():
-        reconnect_seconds = 0
-        num_train_messages = 0
+    def run_client() -> int:
+        messages_received: int = 0
 
         with insecure_grpc_connection(port=port) as conn:
             receive, send = conn
 
-            # Send connect message
-            send(CLIENT_REQUEST_CONNECT)
-
             # Setup processing loop
             while True:
                 # Block until server responds with a message
-                instruction = receive()
+                server_message = receive()
 
-                if instruction.HasField("train"):
-                    num_train_messages += 1
-                    send(CLIENT_REQUEST_WEIGHT_UPDATES)
-                elif instruction.HasField("reconnect"):
-                    reconnect_seconds = instruction.reconnect.seconds
+                messages_received += 1
+                if server_message.HasField("reconnect"):
+                    send(CLIENT_MESSAGE_DISCONNECT)
                     break
-                else:
-                    raise Exception("This should never happen")
 
-        return reconnect_seconds, num_train_messages
+                # Process server_message and send client_message...
+                send(CLIENT_MESSAGE)
+
+        return messages_received
 
     results = []
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -108,10 +102,8 @@ def test_integration_connection():
             results.append(future.result())
 
     # Assert
-    for res in results:
-        reconnect_seconds, num_train_messages = res
-        assert reconnect_seconds == EXPECTED_RECONNECT_SECONDS
-        assert num_train_messages == EXPECTED_NUM_TRAIN_MESSAGES
+    for messages_received in results:
+        assert messages_received == EXPECTED_NUM_SERVER_MESSAGE
 
     # Teardown
     server.stop(1)

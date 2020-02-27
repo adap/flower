@@ -16,7 +16,6 @@
 
 import flower_testing
 from flower.client_manager import SimpleClientManager
-from flower.grpc_server.flower_service_servicer import FlowerServiceServicer
 from flower.grpc_server.grpc_server import start_insecure_grpc_server
 
 
@@ -27,12 +26,7 @@ def test_integration_start_and_shutdown_server():
     client_manager = SimpleClientManager()
 
     # Execute
-    servicer, server = start_insecure_grpc_server(
-        client_manager=client_manager, port=port
-    )
-
-    # Assert
-    assert isinstance(servicer, FlowerServiceServicer)
+    server = start_insecure_grpc_server(client_manager=client_manager, port=port)
 
     # Teardown
     server.stop(1)
