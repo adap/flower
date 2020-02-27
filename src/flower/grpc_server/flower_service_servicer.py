@@ -78,8 +78,9 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         """Method will be invoked by each GRPCProxyClient which participates in the network.
 
         Protocol:
-            - The first ClientMessage has always have the connect field set
-            - Subsequent messages should not have the connect field set
+            - The first message is sent from the server to the client
+            - Both ServerMessage and ClientMessage are message "wrappers" wrapping the actual message
+            - The Join method is (pretty much) protocol unaware
         """
         peer = context.peer()
         bridge = self.grpc_bridge_factory()
@@ -91,7 +92,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
             client_message_iterator = request_iterator
             server_message_iterator = bridge.server_message_iterator()
 
-            # All subsequent messages will be pushed to client bridge directly
+            # All messages will be pushed to client bridge directly
             while True:
                 try:
                     # Get server message from bridge and yield it

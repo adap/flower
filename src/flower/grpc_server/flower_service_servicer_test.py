@@ -31,8 +31,6 @@ CLIENT_CID = "some_client_cid"
 
 class FlowerServiceServicerTestCase(unittest.TestCase):
     """Test suite for class FlowerServiceServicer and helper functions."""
-
-    # Disable linter error as I think its accetable in this test
     # pylint: disable=too-many-instance-attributes
 
     def setUp(self) -> None:
