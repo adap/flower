@@ -43,8 +43,7 @@ def register_client(
     client: GRPCProxyClient,
     context: grpc.ServicerContext,
 ) -> bool:
-    """Try registering GRPCProxyClient with ClientManager.
-    If not successful raise Exception."""
+    """Try registering GRPCProxyClient with ClientManager."""
     is_success = client_manager.register(client)
 
     if is_success:
