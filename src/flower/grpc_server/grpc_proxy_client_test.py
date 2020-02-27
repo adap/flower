@@ -32,15 +32,13 @@ CLIENT_MESSAGE_WEIGHT_UPDATES = ClientMessage(
 class GRPCProxyClientTestCase(unittest.TestCase):
     def setUp(self):
         self.bridge_mock = MagicMock()
-        self.bridge_factory = lambda: self.bridge_mock
-
         # Set return_value for usually blocking get_client_message method
-        self.bridge_mock.get_client_message.return_value = CLIENT_MESSAGE_WEIGHT_UPDATES
+        self.bridge_mock.request.return_value = CLIENT_MESSAGE_WEIGHT_UPDATES
 
     def test_get_weights(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
-        client = GRPCProxyClient(cid="1", bridge_factory=self.bridge_factory)
+        client = GRPCProxyClient(cid="1", info={}, bridge=self.bridge_mock)
 
         # Execute
         value = client.get_weights()
@@ -51,7 +49,7 @@ class GRPCProxyClientTestCase(unittest.TestCase):
     def test_fit(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
-        client = GRPCProxyClient(cid="1", bridge_factory=self.bridge_factory)
+        client = GRPCProxyClient(cid="1", info={}, bridge=self.bridge_mock)
 
         # Execute
         weights = [np.ones((2, 2))]
@@ -63,7 +61,7 @@ class GRPCProxyClientTestCase(unittest.TestCase):
     def test_evaluate(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
-        client = GRPCProxyClient(cid="1", bridge_factory=self.bridge_factory)
+        client = GRPCProxyClient(cid="1", info={}, bridge=self.bridge_mock)
 
         # Execute
         value = client.evaluate([])

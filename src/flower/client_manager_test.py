@@ -16,6 +16,7 @@
 
 import threading
 import time
+from unittest.mock import MagicMock
 
 from flower.client_manager import SimpleClientManager
 from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
@@ -25,7 +26,8 @@ def test_simple_client_manager_register():
     """Tests if the register method works correctly"""
     # Prepare
     cid = "1"
-    client = GRPCProxyClient(cid=cid)
+    bridge = MagicMock()
+    client = GRPCProxyClient(cid=cid, info={}, bridge=bridge)
     client_manager = SimpleClientManager()
 
     # Execute
@@ -42,7 +44,8 @@ def test_simple_client_manager_unregister():
     """Tests if the unregister method works correctly"""
     # Prepare
     cid = "1"
-    client = GRPCProxyClient(cid=cid)
+    bridge = MagicMock()
+    client = GRPCProxyClient(cid=cid, info={}, bridge=bridge)
     client_manager = SimpleClientManager()
     client_manager.register(client)
 
@@ -56,6 +59,7 @@ def test_simple_client_manager_unregister():
 def test_wait_for_clients():
     """Test if wait for clients is blocking correctly."""
     # Prepare
+    bridge = MagicMock()
     start_time = time.time()
     client_manager = SimpleClientManager()
 
@@ -66,8 +70,8 @@ def test_wait_for_clients():
         # This usually takes less than 1ms so waiting for one second above
         # is sufficent in all reasonable scenarios although there is a
         # theoretical chance this test might fail in the assert section
-        client_manager.register(GRPCProxyClient(cid="1"))
-        client_manager.register(GRPCProxyClient(cid="2"))
+        client_manager.register(GRPCProxyClient(cid="1", info={}, bridge=bridge))
+        client_manager.register(GRPCProxyClient(cid="2", info={}, bridge=bridge))
 
     threading.Thread(target=add_clients).start()
 
