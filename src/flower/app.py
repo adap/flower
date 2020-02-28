@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""App."""
+"""Flower App."""
 from typing import Dict
 
 from flower.client import Client
@@ -23,8 +23,8 @@ from flower.server import Server
 
 
 def start_server(server: Server, config: Dict[str, int]) -> None:
-    """Starts training server including a gRPC server."""
-    start_insecure_grpc_server(client_manager=server.client_manager())
+    """Start a Flower server using the gRPC transport layer."""
+    grpc_server = start_insecure_grpc_server(client_manager=server.client_manager())
 
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
@@ -34,9 +34,12 @@ def start_server(server: Server, config: Dict[str, int]) -> None:
     loss = server.evaluate()
     print(f"Final loss after training: {loss}")
 
+    # Stop the gRPC server
+    grpc_server.stop()
+
 
 def start_client(client: Client) -> None:
-    """Starts training client and connect to gRPC server"""
+    """Start a Flower client which connects to a gRPC server."""
     with insecure_grpc_connection() as conn:
         receive, send = conn
 

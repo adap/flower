@@ -59,8 +59,8 @@ class SimpleClientManager(ClientManager):
         return len(self.clients)
 
     def _wait_for_clients(self, num_clients: int, timeout: int = 86400) -> None:
-        """Blocks until num_clients number of clients are registered.
-        Timeouts after one day.
+        """Block until num_clients number of clients are available or until a timeout
+        is reached. Current timeout default: 1 day.
         """
         with self._cv:
             self._cv.wait_for(lambda: len(self.clients) >= num_clients, timeout=timeout)
@@ -76,10 +76,9 @@ class SimpleClientManager(ClientManager):
             return False
 
         self.clients[client.cid] = client
-
         with self._cv:
             self._cv.notify_all()
-
+            
         return True
 
     def unregister(self, client: Client) -> None:
