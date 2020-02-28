@@ -23,7 +23,7 @@ import tensorflow as tf
 import flower as flwr
 
 
-def main() -> None:  # pylint: disable-msg=too-many-locals
+def main() -> None:
     """Load data, create and start MnistClient."""
     x_local, y_local = load_data()
     client = MnistClient("client_id", load_model(), x_local, y_local)
