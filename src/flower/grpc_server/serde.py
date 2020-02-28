@@ -13,13 +13,20 @@
 # limitations under the License.
 # ==============================================================================
 """This module contains functions for protobuf serialization and deserialization."""
-
+# pylint: disable=missing-function-docstring
 from io import BytesIO
-from typing import cast
+from typing import Tuple, cast
 
 import numpy as np
 
-from flower.proto.transport_pb2 import NDArray
+from flower import typing
+from flower.proto.transport_pb2 import (
+    ClientMessage,
+    NDArray,
+    Reason,
+    ServerMessage,
+    Weights,
+)
 
 
 def ndarray_to_proto(ndarray: np.ndarray) -> NDArray:
@@ -34,3 +41,98 @@ def proto_to_ndarray(ndarray_proto: NDArray) -> np.ndarray:
     ndarray_bytes = BytesIO(ndarray_proto.ndarray)
     ndarray_deserialized = np.load(ndarray_bytes, allow_pickle=False)
     return cast(np.ndarray, ndarray_deserialized)
+
+
+# Reconnect / Disconnect messages
+def server_reconnect_to_proto(seconds: int) -> ServerMessage.Reconnect:
+    return ServerMessage.Reconnect(seconds=seconds)
+
+
+def server_reconnect_from_proto(msg: ServerMessage.Reconnect) -> int:
+    return msg.seconds
+
+
+def client_disconnect_to_proto(reason: str) -> ClientMessage.Disconnect:
+    reason_proto = Reason.UNKNOWN
+    if reason == "RECONNECT":
+        reason_proto = Reason.RECONNECT
+    elif reason == "POWER_DISCONNECTED":
+        reason_proto = Reason.POWER_DISCONNECTED
+    elif reason == "WIFI_UNAVAILABLE":
+        reason_proto = Reason.WIFI_UNAVAILABLE
+
+    return ClientMessage.Disconnect(reason=reason_proto)
+
+
+def client_disconnect_from_proto(msg: ClientMessage.Disconnect) -> str:
+    if msg.reason == Reason.RECONNECT:
+        return "RECONNECT"
+    if msg.reason == Reason.POWER_DISCONNECTED:
+        return "POWER_DISCONNECTED"
+    if msg.reason == Reason.WIFI_UNAVAILABLE:
+        return "WIFI_UNAVAILABLE"
+    return "UNKNOWN"
+
+
+# GetWeights messages
+def server_get_weights_to_proto() -> ServerMessage.GetWeights:
+    return ServerMessage.GetWeights()
+
+
+# Not required:
+# def server_get_weights_from_proto(msg: ServerMessage.GetWeights) -> None:
+
+
+def client_get_weights_to_proto(weights: typing.Weights) -> ClientMessage.GetWeights:
+    weights_proto = [ndarray_to_proto(weight) for weight in weights]
+    return ClientMessage.GetWeights(weights=Weights(weights=weights_proto))
+
+
+def client_get_weights_from_proto(msg: ClientMessage.GetWeights) -> typing.Weights:
+    weights = [proto_to_ndarray(weight) for weight in msg.weights.weights]
+    return weights
+
+
+# Fit messages
+def server_fit_to_proto(weights: typing.Weights) -> ServerMessage.Fit:
+    weights_proto = [ndarray_to_proto(weight) for weight in weights]
+    return ServerMessage.Fit(weights=Weights(weights=weights_proto))
+
+
+def server_fit_from_proto(msg: ServerMessage.Fit) -> typing.Weights:
+    weights = [proto_to_ndarray(weight) for weight in msg.weights.weights]
+    return weights
+
+
+def client_fit_to_proto(
+    weights: typing.Weights, num_examples: int
+) -> ClientMessage.Fit:
+    weights_proto = [ndarray_to_proto(weight) for weight in weights]
+    return ClientMessage.Fit(
+        weights=Weights(weights=weights_proto), num_examples=num_examples
+    )
+
+
+def client_fit_from_proto(msg: ClientMessage.Fit) -> Tuple[typing.Weights, int]:
+    weights = [proto_to_ndarray(weight) for weight in msg.weights.weights]
+    num_examples = msg.num_examples
+    return weights, num_examples
+
+
+# Evaluate messages
+def server_evaluate_to_proto(weights: typing.Weights) -> ServerMessage.Evaluate:
+    weights_proto = [ndarray_to_proto(weight) for weight in weights]
+    return ServerMessage.Evaluate(weights=Weights(weights=weights_proto))
+
+
+def server_evaluate_from_proto(msg: ServerMessage.Evaluate) -> typing.Weights:
+    weights = [proto_to_ndarray(weight) for weight in msg.weights.weights]
+    return weights
+
+
+def client_evaluate_to_proto(num_examples: int, loss: float) -> ClientMessage.Evaluate:
+    return ClientMessage.Evaluate(num_examples=num_examples, loss=loss)
+
+
+def client_evaluate_from_proto(msg: ClientMessage.Evaluate) -> Tuple[int, float]:
+    return msg.num_examples, msg.loss

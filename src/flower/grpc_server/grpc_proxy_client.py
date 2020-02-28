@@ -18,9 +18,9 @@ from typing import Dict, Tuple
 
 from flower import typing
 from flower.client import Client
+from flower.grpc_server import serde
 from flower.grpc_server.grpc_bridge import GRPCBridge
-from flower.grpc_server.serde import ndarray_to_proto, proto_to_ndarray
-from flower.proto.transport_pb2 import ServerMessage, Weights
+from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
 class GRPCProxyClient(Client):
@@ -34,26 +34,25 @@ class GRPCProxyClient(Client):
 
     def get_weights(self) -> typing.Weights:
         """Return the current local model weights"""
-        return []
+        get_weights_msg = serde.server_get_weights_to_proto()
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(get_weights=get_weights_msg)
+        )
+        weights = serde.client_get_weights_from_proto(client_msg.get_weights)
+        return weights
 
     def fit(self, weights: typing.Weights) -> Tuple[typing.Weights, int]:
         """Refine the provided weights using the locally held dataset."""
-
-        weights_proto = [ndarray_to_proto(weight) for weight in weights]
-
-        server_message = ServerMessage(
-            fit=ServerMessage.Fit(weights=Weights(weights=weights_proto))
-        )
-
-        client_message = self.bridge.request(server_message)
-
-        weights = [
-            proto_to_ndarray(weight) for weight in client_message.fit.weights.weights
-        ]
-        num_examples = client_message.fit.num_examples
-
-        return (weights, num_examples)
+        fit_msg = serde.server_fit_to_proto(weights)
+        client_msg: ClientMessage = self.bridge.request(ServerMessage(fit=fit_msg))
+        weights, num_examples = serde.client_fit_from_proto(client_msg.fit)
+        return weights, num_examples
 
     def evaluate(self, weights: typing.Weights) -> Tuple[int, float]:
         """Evaluate the provided weights using the locally held dataset"""
-        return (1, 1.0)
+        evaluate_msg = serde.server_evaluate_to_proto(weights)
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(evaluate=evaluate_msg)
+        )
+        num_examples, loss = serde.client_evaluate_from_proto(client_msg.evaluate)
+        return num_examples, loss

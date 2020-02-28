@@ -49,12 +49,14 @@ class Reason(builtin___int):
     def values(cls) -> typing___List['Reason']: ...
     @classmethod
     def items(cls) -> typing___List[typing___Tuple[builtin___str, 'Reason']]: ...
-    RECONNECT = typing___cast('Reason', 0)
-    POWER_DISCONNECTED = typing___cast('Reason', 1)
-    WIFI_UNAVAILABLE = typing___cast('Reason', 2)
-RECONNECT = typing___cast('Reason', 0)
-POWER_DISCONNECTED = typing___cast('Reason', 1)
-WIFI_UNAVAILABLE = typing___cast('Reason', 2)
+    UNKNOWN = typing___cast('Reason', 0)
+    RECONNECT = typing___cast('Reason', 1)
+    POWER_DISCONNECTED = typing___cast('Reason', 2)
+    WIFI_UNAVAILABLE = typing___cast('Reason', 3)
+UNKNOWN = typing___cast('Reason', 0)
+RECONNECT = typing___cast('Reason', 1)
+POWER_DISCONNECTED = typing___cast('Reason', 2)
+WIFI_UNAVAILABLE = typing___cast('Reason', 3)
 
 class NDArray(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
