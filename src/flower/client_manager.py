@@ -78,7 +78,7 @@ class SimpleClientManager(ClientManager):
         self.clients[client.cid] = client
         with self._cv:
             self._cv.notify_all()
-            
+
         return True
 
     def unregister(self, client: Client) -> None:

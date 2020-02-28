@@ -35,7 +35,7 @@ def start_server(server: Server, config: Dict[str, int]) -> None:
     print(f"Final loss after training: {loss}")
 
     # Stop the gRPC server
-    grpc_server.stop()
+    grpc_server.stop(1)
 
 
 def start_client(client: Client) -> None:

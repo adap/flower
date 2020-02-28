@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Minimal example on how to use the Flower framework with
-  - TensorFlow 2.0+ (Keras)
-  - MNIST image classification
-"""
+"""Minimal example on how to build a Flower client using TensorFlow/Keras for MNIST."""
+
 import random
 from typing import Tuple, cast
 
@@ -25,20 +23,11 @@ import tensorflow as tf
 import flower as flwr
 
 
-def load_model() -> tf.keras.Model:
-    """Create simple fully-connected neural network"""
-    model = tf.keras.models.Sequential(
-        [
-            tf.keras.layers.Flatten(input_shape=(28, 28)),
-            tf.keras.layers.Dense(128, activation="relu"),
-            tf.keras.layers.Dropout(0.2),
-            tf.keras.layers.Dense(10, activation="softmax"),
-        ]
-    )
-    model.compile(
-        optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
-    )
-    return model
+def main() -> None:  # pylint: disable-msg=too-many-locals
+    """Load data, create and start MnistClient."""
+    x_local, y_local = load_data()
+    client = MnistClient("client_id", load_model(), x_local, y_local)
+    flwr.app.start_client(client)
 
 
 class MnistClient(flwr.Client):
@@ -72,30 +61,34 @@ class MnistClient(flwr.Client):
         return len(self.x_local), float(loss)
 
 
-def example_client() -> None:  # pylint: disable-msg=too-many-locals
-    """Example client"""
+def load_model() -> tf.keras.Model:
+    """Create simple fully-connected neural network"""
+    model = tf.keras.models.Sequential(
+        [
+            tf.keras.layers.Flatten(input_shape=(28, 28)),
+            tf.keras.layers.Dense(128, activation="relu"),
+            tf.keras.layers.Dropout(0.2),
+            tf.keras.layers.Dense(10, activation="softmax"),
+        ]
+    )
+    model.compile(
+        optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
+    )
+    return model
 
-    # Load training and test data
+
+def load_data() -> Tuple[np.ndarray, np.ndarray]:
+    # Load training and test data (ignoring the test data for now)
     (x_train, y_train), (_, _) = tf.keras.datasets.mnist.load_data()
     x_train = x_train / 255.0
 
-    # Split the data into three partitions (holding 20k examples and labels each) to
-    # simulate three distinct datasets
-    i_1 = random.randrange(0, 60000, 1)
-    i_0 = i_1 // 2
+    # Take a random subset of the dataset to simulate different local datasets
+    idx = np.random.choice(np.arange(len(x_train)), 20000, replace=False)
+    x_sample, y_sample = x_train[idx], y_train[idx]
 
-    x_0, y_0 = x_train[i_0:i_1], y_train[i_0:i_1]
-
-    # Create the client
-    client = MnistClient("client_id", load_model(), x_0, y_0)
-
-    # Run the client
-    flwr.app.start_client(client)
+    # Return the random subset
+    return x_sample, y_sample
 
 
-def example_server() -> None:
-    """Start server and train four rounds."""
-    client_manager = flwr.SimpleClientManager()
-    server = flwr.Server(client_manager=client_manager)
-    config = {"num_rounds": 4}
-    flwr.app.start_server(server, config)
+if __name__ == "__main__":
+    main()
