@@ -24,7 +24,7 @@ import flower_testing
 from flower.client_manager import SimpleClientManager
 from flower.grpc_client.connection import insecure_grpc_connection
 from flower.grpc_server.grpc_server import start_insecure_grpc_server
-from flower.proto.transport_pb2 import ClientMessage, Disconnect, ServerMessage
+from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 EXPECTED_NUM_SERVER_MESSAGE = 10
 
@@ -32,7 +32,7 @@ SERVER_MESSAGE = ServerMessage()
 SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect=ServerMessage.Reconnect())
 
 CLIENT_MESSAGE = ClientMessage()
-CLIENT_MESSAGE_DISCONNECT = ClientMessage(disconnect=Disconnect())
+CLIENT_MESSAGE_DISCONNECT = ClientMessage(disconnect=ClientMessage.Disconnect())
 
 
 def mock_join(  # type: ignore # pylint: disable=invalid-name
