@@ -24,9 +24,10 @@ service FlowerService {
 message NDArray { bytes ndarray = 1; }
 message Weights { repeated NDArray weights = 1; }
 enum Reason {
-  RECONNECT = 0;
-  POWER_DISCONNECTED = 1;
-  WIFI_UNAVAILABLE = 2;
+  UNKNOWN = 0;
+  RECONNECT = 1;
+  POWER_DISCONNECTED = 2;
+  WIFI_UNAVAILABLE = 3;
 }
 
 message ServerMessage {

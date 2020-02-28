@@ -67,4 +67,4 @@ class GRPCProxyClientTestCase(unittest.TestCase):
         value = client.evaluate([])
 
         # Assert
-        assert (1, 1.0) == value
+        assert (0, 0.0) == value

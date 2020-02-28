@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='flower.transport',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x1c\x66lower/proto/transport.proto\x12\x10\x66lower.transport\"\x1a\n\x07NDArray\x12\x0f\n\x07ndarray\x18\x01 \x01(\x0c\"5\n\x07Weights\x12*\n\x07weights\x18\x01 \x03(\x0b\x32\x19.flower.transport.NDArray\"\xa2\x03\n\rServerMessage\x12>\n\treconnect\x18\x01 \x01(\x0b\x32).flower.transport.ServerMessage.ReconnectH\x00\x12\x41\n\x0bget_weights\x18\x02 \x01(\x0b\x32*.flower.transport.ServerMessage.GetWeightsH\x00\x12\x32\n\x03\x66it\x18\x03 \x01(\x0b\x32#.flower.transport.ServerMessage.FitH\x00\x12<\n\x08\x65valuate\x18\x04 \x01(\x0b\x32(.flower.transport.ServerMessage.EvaluateH\x00\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x0c\n\nGetWeights\x1a\x31\n\x03\x46it\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x1a\x36\n\x08\x45valuate\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.WeightsB\x05\n\x03msg\"\xf8\x03\n\rClientMessage\x12@\n\ndisconnect\x18\x01 \x01(\x0b\x32*.flower.transport.ClientMessage.DisconnectH\x00\x12\x41\n\x0bget_weights\x18\x02 \x01(\x0b\x32*.flower.transport.ClientMessage.GetWeightsH\x00\x12\x32\n\x03\x66it\x18\x03 \x01(\x0b\x32#.flower.transport.ClientMessage.FitH\x00\x12<\n\x08\x65valuate\x18\x04 \x01(\x0b\x32(.flower.transport.ClientMessage.EvaluateH\x00\x1a\x36\n\nDisconnect\x12(\n\x06reason\x18\x01 \x01(\x0e\x32\x18.flower.transport.Reason\x1a\x38\n\nGetWeights\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x1aG\n\x03\x46it\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x14\n\x0cnum_examples\x18\x02 \x01(\x03\x1a.\n\x08\x45valuate\x12\x14\n\x0cnum_examples\x18\x01 \x01(\x03\x12\x0c\n\x04loss\x18\x02 \x01(\x02\x42\x05\n\x03msg*E\n\x06Reason\x12\r\n\tRECONNECT\x10\x00\x12\x16\n\x12POWER_DISCONNECTED\x10\x01\x12\x14\n\x10WIFI_UNAVAILABLE\x10\x02\x32_\n\rFlowerService\x12N\n\x04Join\x12\x1f.flower.transport.ClientMessage\x1a\x1f.flower.transport.ServerMessage\"\x00(\x01\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\x1c\x66lower/proto/transport.proto\x12\x10\x66lower.transport\"\x1a\n\x07NDArray\x12\x0f\n\x07ndarray\x18\x01 \x01(\x0c\"5\n\x07Weights\x12*\n\x07weights\x18\x01 \x03(\x0b\x32\x19.flower.transport.NDArray\"\xa2\x03\n\rServerMessage\x12>\n\treconnect\x18\x01 \x01(\x0b\x32).flower.transport.ServerMessage.ReconnectH\x00\x12\x41\n\x0bget_weights\x18\x02 \x01(\x0b\x32*.flower.transport.ServerMessage.GetWeightsH\x00\x12\x32\n\x03\x66it\x18\x03 \x01(\x0b\x32#.flower.transport.ServerMessage.FitH\x00\x12<\n\x08\x65valuate\x18\x04 \x01(\x0b\x32(.flower.transport.ServerMessage.EvaluateH\x00\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x0c\n\nGetWeights\x1a\x31\n\x03\x46it\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x1a\x36\n\x08\x45valuate\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.WeightsB\x05\n\x03msg\"\xf8\x03\n\rClientMessage\x12@\n\ndisconnect\x18\x01 \x01(\x0b\x32*.flower.transport.ClientMessage.DisconnectH\x00\x12\x41\n\x0bget_weights\x18\x02 \x01(\x0b\x32*.flower.transport.ClientMessage.GetWeightsH\x00\x12\x32\n\x03\x66it\x18\x03 \x01(\x0b\x32#.flower.transport.ClientMessage.FitH\x00\x12<\n\x08\x65valuate\x18\x04 \x01(\x0b\x32(.flower.transport.ClientMessage.EvaluateH\x00\x1a\x36\n\nDisconnect\x12(\n\x06reason\x18\x01 \x01(\x0e\x32\x18.flower.transport.Reason\x1a\x38\n\nGetWeights\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x1aG\n\x03\x46it\x12*\n\x07weights\x18\x01 \x01(\x0b\x32\x19.flower.transport.Weights\x12\x14\n\x0cnum_examples\x18\x02 \x01(\x03\x1a.\n\x08\x45valuate\x12\x14\n\x0cnum_examples\x18\x01 \x01(\x03\x12\x0c\n\x04loss\x18\x02 \x01(\x02\x42\x05\n\x03msg*R\n\x06Reason\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tRECONNECT\x10\x01\x12\x16\n\x12POWER_DISCONNECTED\x10\x02\x12\x14\n\x10WIFI_UNAVAILABLE\x10\x03\x32_\n\rFlowerService\x12N\n\x04Join\x12\x1f.flower.transport.ClientMessage\x1a\x1f.flower.transport.ServerMessage\"\x00(\x01\x30\x01\x62\x06proto3'
 )
 
 _REASON = _descriptor.EnumDescriptor(
@@ -29,29 +29,34 @@ _REASON = _descriptor.EnumDescriptor(
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='RECONNECT', index=0, number=0,
+      name='UNKNOWN', index=0, number=0,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='POWER_DISCONNECTED', index=1, number=1,
+      name='RECONNECT', index=1, number=1,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='WIFI_UNAVAILABLE', index=2, number=2,
+      name='POWER_DISCONNECTED', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='WIFI_UNAVAILABLE', index=3, number=3,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=1061,
-  serialized_end=1130,
+  serialized_end=1143,
 )
 _sym_db.RegisterEnumDescriptor(_REASON)
 
 Reason = enum_type_wrapper.EnumTypeWrapper(_REASON)
-RECONNECT = 0
-POWER_DISCONNECTED = 1
-WIFI_UNAVAILABLE = 2
+UNKNOWN = 0
+RECONNECT = 1
+POWER_DISCONNECTED = 2
+WIFI_UNAVAILABLE = 3
 
 
 
@@ -626,8 +631,8 @@ _FLOWERSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=1132,
-  serialized_end=1227,
+  serialized_start=1145,
+  serialized_end=1240,
   methods=[
   _descriptor.MethodDescriptor(
     name='Join',
