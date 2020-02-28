@@ -12,11 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower main package."""
+"""Tests for MNIST example."""
 
-from . import app
-from .client import Client
-from .client_manager import SimpleClientManager
-from .history import History
-from .server import Server
-from .typing import Weights
+
+from .tf_mnist_local import load_model
+
+
+def test_model_input_shape():
+    """Test if the Keras model input shape is compatible with MNIST."""
+    # Prepare
+    expected = [None, 28, 28]
+    model = load_model()
+
+    # Execute
+    actual = model.layers[0].get_input_at(0).get_shape().as_list()
+
+    # Assert
+    assert expected == actual

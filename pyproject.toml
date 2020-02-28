@@ -57,7 +57,8 @@ rope = "==0.16.0"
 numpy-stubs = { git = "https://github.com/numpy/numpy-stubs.git", rev = "f3c6315738489983f5f37e1477ac68373d71b470" }
 
 [tool.poetry.scripts]
-server = "flower.server:main"
+flower-example-server = "flower_examples.tf_mnist_grpc_server:main"
+flower-example-client = "flower_examples.tf_mnist_grpc_client:main"
 
 [tool.isort]
 line_length = 88

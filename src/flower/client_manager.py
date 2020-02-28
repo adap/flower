@@ -15,6 +15,7 @@
 """Flower ClientManager."""
 
 import random
+import threading
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
@@ -52,9 +53,17 @@ class SimpleClientManager(ClientManager):
 
     def __init__(self) -> None:
         self.clients: Dict[str, Client] = {}
+        self._cv = threading.Condition()
 
     def __len__(self):
         return len(self.clients)
+
+    def _wait_for_clients(self, num_clients: int, timeout: int = 86400) -> None:
+        """Block until num_clients number of clients are available or until a timeout
+        is reached. Current timeout default: 1 day.
+        """
+        with self._cv:
+            self._cv.wait_for(lambda: len(self.clients) >= num_clients, timeout=timeout)
 
     def register(self, client: Client) -> bool:
         """Register Flower Client instance.
@@ -67,6 +76,8 @@ class SimpleClientManager(ClientManager):
             return False
 
         self.clients[client.cid] = client
+        with self._cv:
+            self._cv.notify_all()
 
         return True
 
@@ -78,10 +89,15 @@ class SimpleClientManager(ClientManager):
         if client.cid in self.clients:
             del self.clients[client.cid]
 
+            with self._cv:
+                self._cv.notify_all()
+
     def sample(
         self, num_clients: int, criterion: Optional[Criterion] = None
     ) -> List[Client]:
         """Sample a number of Flower Client instances."""
+        # Block until at least num_clients are connected.
+        self._wait_for_clients(num_clients)
         available_cids = list(self.clients)
         if criterion is not None:
             available_cids = [

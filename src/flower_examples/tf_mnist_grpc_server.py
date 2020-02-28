@@ -12,20 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for MNIST example."""
+"""Minimal example on how to start a simple Flower server."""
+
+import flower as flwr
 
 
-from .tensorflow_mnist import load_model
+def main() -> None:
+    """Start server and train four rounds."""
+    server = flwr.Server(client_manager=flwr.SimpleClientManager())
+    flwr.app.start_server(server, config={"num_rounds": 4})
 
 
-def test_model_input_shape():
-    """Test if the Keras model input shape is compatible with MNIST."""
-    # Prepare
-    expected = [None, 28, 28]
-    model = load_model()
-
-    # Execute
-    actual = model.layers[0].get_input_at(0).get_shape().as_list()
-
-    # Assert
-    assert expected == actual
+if __name__ == "__main__":
+    main()
