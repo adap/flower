@@ -14,7 +14,6 @@
 # ==============================================================================
 """Minimal example on how to build a Flower client using TensorFlow/Keras for MNIST."""
 
-import random
 from typing import Tuple, cast
 
 import numpy as np
@@ -78,6 +77,7 @@ def load_model() -> tf.keras.Model:
 
 
 def load_data() -> Tuple[np.ndarray, np.ndarray]:
+    """Load random MNIST subset."""
     # Load training and test data (ignoring the test data for now)
     (x_train, y_train), (_, _) = tf.keras.datasets.mnist.load_data()
     x_train = x_train / 255.0
