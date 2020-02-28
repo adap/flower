@@ -31,8 +31,12 @@ class Server:
     """Flower server."""
 
     def __init__(self, client_manager: ClientManager) -> None:
-        self.client_manager: ClientManager = client_manager
+        self._client_manager: ClientManager = client_manager
         self.weights: Weights = []
+
+    def client_manager(self) -> ClientManager:
+        """Return ClientManager."""
+        return self._client_manager
 
     def fit(self, num_rounds: int) -> History:
         """Run federated averaging for a number of rounds"""
@@ -51,7 +55,7 @@ class Server:
     def evaluate(self) -> float:
         """Validate current global model on a number of clients"""
         # Sample clients for evaluation
-        clients = self.client_manager.sample(3)
+        clients = self._client_manager.sample(3)
 
         # Evaluate current global weights on those clients
         results = eval_clients(clients, self.weights)
@@ -62,7 +66,7 @@ class Server:
     def fit_round(self) -> None:
         """Perform a single round of federated averaging"""
         # Sample three clients
-        clients = self.client_manager.sample(3)
+        clients = self._client_manager.sample(3)
 
         # Collect training results from all clients participating in this round
         results = fit_clients(clients, self.weights)
@@ -73,7 +77,7 @@ class Server:
 
     def _get_initial_weights(self) -> Weights:
         """Get initial weights from one of the available clients"""
-        return self.client_manager.sample(1)[0].get_weights()
+        return self._client_manager.sample(1)[0].get_weights()
 
 
 def fit_clients(clients: List[Client], weights: Weights) -> List[Tuple[Weights, int]]:
