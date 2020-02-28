@@ -23,39 +23,42 @@ service FlowerService {
 
 message NDArray { bytes ndarray = 1; }
 message Weights { repeated NDArray weights = 1; }
-message ClientInfo { bool gpu = 1; }
-message Disconnect { 
-  enum Reason {
-    POWER_OFF = 0;
-  }
-  Reason reason = 1;
-}
-
-message ClientMessage {
-  message WeightUpdate {
-    Weights weights = 1;
-    int64 num_examples = 2;
-  }
-
-  oneof msg {
-    ClientInfo info = 1;
-    Disconnect disconnect = 2;
-    WeightUpdate weight_update = 3;
-  }
+enum Reason {
+  RECONNECT = 0;
+  POWER_DISCONNECTED = 1;
+  WIFI_UNAVAILABLE = 2;
 }
 
 message ServerMessage {
-  message GetClientInfo {}
   message Reconnect { int64 seconds = 1; }
+  message GetWeights {}
+  message Fit { Weights weights = 1; }
+  message Evaluate { Weights weights = 1; }
 
-  message Train {
+  oneof msg {
+    Reconnect reconnect = 1;
+    GetWeights get_weights = 2;
+    Fit fit = 3;
+    Evaluate evaluate = 4;
+  }
+}
+
+message ClientMessage {
+  message Disconnect { Reason reason = 1; }
+  message GetWeights { Weights weights = 1; }
+  message Fit {
     Weights weights = 1;
-    int32 epochs = 2;
+    int64 num_examples = 2;
+  }
+  message Evaluate {
+    int64 num_examples = 1;
+    float loss = 2;
   }
 
   oneof msg {
-    GetClientInfo info = 1;
-    Reconnect reconnect = 2;
-    Train train = 3;
+    Disconnect disconnect = 1;
+    GetWeights get_weights = 2;
+    Fit fit = 3;
+    Evaluate evaluate = 4;
   }
 }

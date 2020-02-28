@@ -42,18 +42,15 @@ class GRPCProxyClient(Client):
         weights_proto = [ndarray_to_proto(weight) for weight in weights]
 
         server_message = ServerMessage(
-            train=ServerMessage.Train(
-                weights=Weights(weights=weights_proto), epochs=10,
-            )
+            fit=ServerMessage.Fit(weights=Weights(weights=weights_proto))
         )
 
         client_message = self.bridge.request(server_message)
 
         weights = [
-            proto_to_ndarray(weight)
-            for weight in client_message.weight_update.weights.weights
+            proto_to_ndarray(weight) for weight in client_message.fit.weights.weights
         ]
-        num_examples = client_message.weight_update.num_examples
+        num_examples = client_message.fit.num_examples
 
         return (weights, num_examples)
 

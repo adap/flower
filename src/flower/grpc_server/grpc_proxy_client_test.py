@@ -21,10 +21,8 @@ import numpy as np
 from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
 from flower.proto.transport_pb2 import ClientMessage, Weights
 
-CLIENT_MESSAGE_WEIGHT_UPDATES = ClientMessage(
-    weight_update=ClientMessage.WeightUpdate(
-        weights=Weights(weights=[]), num_examples=10
-    )
+CLIENT_MESSAGE_FIT = ClientMessage(
+    fit=ClientMessage.Fit(weights=Weights(weights=[]), num_examples=10)
 )
 
 
@@ -35,7 +33,7 @@ class GRPCProxyClientTestCase(unittest.TestCase):
         """Setup mocks for tests."""
         self.bridge_mock = MagicMock()
         # Set return_value for usually blocking get_client_message method
-        self.bridge_mock.request.return_value = CLIENT_MESSAGE_WEIGHT_UPDATES
+        self.bridge_mock.request.return_value = CLIENT_MESSAGE_FIT
 
     def test_get_weights(self):
         """This test is currently quite simple and should be improved"""
