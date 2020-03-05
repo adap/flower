@@ -15,7 +15,7 @@
 """This module contains functions for protobuf serialization and deserialization."""
 # pylint: disable=missing-function-docstring
 from io import BytesIO
-from typing import Tuple, cast
+from typing import Dict, Tuple, cast
 
 import numpy as np
 
@@ -43,7 +43,9 @@ def proto_to_ndarray(ndarray_proto: NDArray) -> np.ndarray:
     return cast(np.ndarray, ndarray_deserialized)
 
 
-# Reconnect / Disconnect messages
+#  === Reconnect / Disconnect messages ===
+
+
 def server_reconnect_to_proto(seconds: int) -> ServerMessage.Reconnect:
     return ServerMessage.Reconnect(seconds=seconds)
 
@@ -74,7 +76,9 @@ def client_disconnect_from_proto(msg: ClientMessage.Disconnect) -> str:
     return "UNKNOWN"
 
 
-# GetWeights messages
+# === GetWeights messages ===
+
+
 def server_get_weights_to_proto() -> ServerMessage.GetWeights:
     return ServerMessage.GetWeights()
 
@@ -93,7 +97,9 @@ def client_get_weights_from_proto(msg: ClientMessage.GetWeights) -> typing.Weigh
     return weights
 
 
-# Fit messages
+# === Fit messages ===
+
+
 def server_fit_to_proto(weights: typing.Weights) -> ServerMessage.Fit:
     weights_proto = [ndarray_to_proto(weight) for weight in weights]
     return ServerMessage.Fit(weights=Weights(weights=weights_proto))
@@ -119,7 +125,9 @@ def client_fit_from_proto(msg: ClientMessage.Fit) -> Tuple[typing.Weights, int]:
     return weights, num_examples
 
 
-# Evaluate messages
+# === Evaluate messages ===
+
+
 def server_evaluate_to_proto(weights: typing.Weights) -> ServerMessage.Evaluate:
     weights_proto = [ndarray_to_proto(weight) for weight in weights]
     return ServerMessage.Evaluate(weights=Weights(weights=weights_proto))
@@ -136,3 +144,26 @@ def client_evaluate_to_proto(num_examples: int, loss: float) -> ClientMessage.Ev
 
 def client_evaluate_from_proto(msg: ClientMessage.Evaluate) -> Tuple[int, float]:
     return msg.num_examples, msg.loss
+
+
+# === Property messages ===
+
+
+def server_get_properties_to_proto() -> ServerMessage.GetProperties:
+    return ServerMessage.GetProperties()
+
+
+# Not required:
+# def server_get_properties_from_proto(msg: ServerMessage.Evaluate) -> None:
+
+
+def client_get_properties_to_proto(
+    properties: Dict[str, str]
+) -> ClientMessage.GetProperties:
+    return ClientMessage.GetProperties(properties=properties)
+
+
+def client_get_properties_from_proto(
+    msg: ClientMessage.GetProperties,
+) -> Dict[str, str]:
+    return dict(msg.properties)

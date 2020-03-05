@@ -25,7 +25,7 @@ def test_simple_client_manager_register():
     # Prepare
     cid = "1"
     bridge = MagicMock()
-    client = GRPCProxyClient(cid=cid, info={}, bridge=bridge)
+    client = GRPCProxyClient(cid=cid, bridge=bridge)
     client_manager = SimpleClientManager()
 
     # Execute
@@ -43,7 +43,7 @@ def test_simple_client_manager_unregister():
     # Prepare
     cid = "1"
     bridge = MagicMock()
-    client = GRPCProxyClient(cid=cid, info={}, bridge=bridge)
+    client = GRPCProxyClient(cid=cid, bridge=bridge)
     client_manager = SimpleClientManager()
     client_manager.register(client)
 
