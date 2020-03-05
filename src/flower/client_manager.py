@@ -28,7 +28,7 @@ class ClientManager(ABC):
 
     @abstractmethod
     def num_available(self) -> int:
-        """."""
+        """Return the number of available clients."""
         raise NotImplementedError()
 
     @abstractmethod
