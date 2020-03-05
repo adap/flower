@@ -15,7 +15,7 @@
 """Flower client (abstract base class)"""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Tuple
+from typing import Tuple
 
 from flower.typing import Weights
 
@@ -23,9 +23,8 @@ from flower.typing import Weights
 class Client(ABC):
     """Abstract base class for Flower clients"""
 
-    def __init__(self, cid: str, info: Optional[Dict[str, str]] = None):
+    def __init__(self, cid: str):
         self.cid = cid
-        self.info: Optional[Dict[str, str]] = info if info is None else {}
 
     @abstractmethod
     def get_weights(self) -> Weights:
