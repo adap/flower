@@ -14,7 +14,7 @@
 # ==============================================================================
 """Networked Flower client implementation."""
 
-from typing import Dict, Tuple
+from typing import Tuple
 
 from flower import typing
 from flower.client import Client
@@ -24,12 +24,12 @@ from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
 class GRPCProxyClient(Client):
-    """Client interface which delegates over the network."""
+    """Client implementation which delegates over the network using gRPC."""
 
     def __init__(
-        self, cid: str, info: Dict[str, str], bridge: GRPCBridge,
+        self, cid: str, bridge: GRPCBridge,
     ):
-        super().__init__(cid, info)
+        super().__init__(cid)
         self.bridge = bridge
 
     def get_weights(self) -> typing.Weights:
