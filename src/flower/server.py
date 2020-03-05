@@ -17,22 +17,26 @@
 
 import concurrent.futures
 from functools import reduce
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 
 from flower.client import Client
 from flower.client_manager import ClientManager
 from flower.history import History
+from flower.strategy import DefaultStrategy, Strategy
 from flower.typing import Weights
 
 
 class Server:
     """Flower server."""
 
-    def __init__(self, client_manager: ClientManager) -> None:
+    def __init__(
+        self, client_manager: ClientManager, strategy: Optional[Strategy] = None
+    ) -> None:
         self._client_manager: ClientManager = client_manager
         self.weights: Weights = []
+        self.strategy: Strategy = strategy if strategy is not None else DefaultStrategy()
 
     def client_manager(self) -> ClientManager:
         """Return ClientManager."""
@@ -48,14 +52,20 @@ class Server:
             # Refine model
             self.fit_round()
             # Evaluate refined model
-            loss_avg = self.evaluate()
-            history.add_loss(current_round, loss_avg)
+            if self.strategy.should_evaluate():
+                loss_avg = self.evaluate()
+                history.add_loss(current_round, loss_avg)
+            # Inform strategy that we're moving on to the next round
+            self.strategy.next_round()
         return history
 
     def evaluate(self) -> float:
         """Validate current global model on a number of clients"""
         # Sample clients for evaluation
-        clients = self._client_manager.sample(3)
+        sample_size = self.strategy.num_evaluation_clients(
+            self._client_manager.num_available()
+        )
+        clients = self._client_manager.sample(sample_size)
 
         # Evaluate current global weights on those clients
         results = eval_clients(clients, self.weights)
@@ -65,8 +75,11 @@ class Server:
 
     def fit_round(self) -> None:
         """Perform a single round of federated averaging"""
-        # Sample three clients
-        clients = self._client_manager.sample(3)
+        # Sample a number of clients (dependent on the strategy)
+        sample_size = self.strategy.num_evaluation_clients(
+            self._client_manager.num_available()
+        )
+        clients = self._client_manager.sample(sample_size)
 
         # Collect training results from all clients participating in this round
         results = fit_clients(clients, self.weights)
@@ -77,7 +90,8 @@ class Server:
 
     def _get_initial_weights(self) -> Weights:
         """Get initial weights from one of the available clients"""
-        return self._client_manager.sample(1)[0].get_weights()
+        random_client = self._client_manager.sample(1)[0]
+        return random_client.get_weights()
 
 
 def fit_clients(clients: List[Client], weights: Weights) -> List[Tuple[Weights, int]]:
