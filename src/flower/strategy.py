@@ -28,7 +28,7 @@ class Strategy(ABC):
         self.current_round += 1
 
     @abstractmethod
-    def evaluate(self) -> bool:
+    def should_evaluate(self) -> bool:
         """Decide if the current global model should be evaluated or not."""
 
     @abstractmethod
@@ -43,7 +43,7 @@ class Strategy(ABC):
 class DefaultStrategy(Strategy):
     """Strategy implementation used when no custom strategy is provided."""
 
-    def evaluate(self) -> bool:
+    def should_evaluate(self) -> bool:
         """Evaluate every round."""
         return True
 

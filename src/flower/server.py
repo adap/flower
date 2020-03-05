@@ -49,13 +49,14 @@ class Server:
         # Run federated averaging for num_rounds
         history = History()
         for current_round in range(num_rounds):
-            self.strategy.next_round()
             # Refine model
             self.fit_round()
             # Evaluate refined model
-            if self.strategy.evaluate():
+            if self.strategy.should_evaluate():
                 loss_avg = self.evaluate()
                 history.add_loss(current_round, loss_avg)
+            # Inform strategy that we're moving on to the next round
+            self.strategy.next_round()
         return history
 
     def evaluate(self) -> float:
@@ -74,7 +75,7 @@ class Server:
 
     def fit_round(self) -> None:
         """Perform a single round of federated averaging"""
-        # Sample three clients
+        # Sample a number of clients (dependent on the strategy)
         sample_size = self.strategy.num_evaluation_clients(
             self._client_manager.num_available()
         )

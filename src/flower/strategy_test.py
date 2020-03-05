@@ -18,7 +18,7 @@
 from .strategy import DefaultStrategy
 
 
-def test_default_strategy_evaluate_every_round() -> None:
+def test_default_strategy_should_evaluate_every_round() -> None:
     """Test evaluate function."""
 
     # Prepare
@@ -26,7 +26,7 @@ def test_default_strategy_evaluate_every_round() -> None:
 
     # Execute & assert
     for _ in range(5):
-        assert strategy.evaluate()
+        assert strategy.should_evaluate()
 
 
 def test_default_strategy_num_fit_clients_40_available() -> None:
