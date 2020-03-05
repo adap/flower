@@ -71,6 +71,7 @@ class SimpleClientManager(ClientManager):
             self._cv.wait_for(lambda: len(self.clients) >= num_clients, timeout=timeout)
 
     def num_available(self) -> int:
+        """Return the number of available clients."""
         return len(self)
 
     def register(self, client: Client) -> bool:
