@@ -10,7 +10,7 @@ Flower is a research framework for building federated learning systems. The desi
 
 * **Extendable**: Flower originated from a research project at the Univerity of Oxford, so it was build with AI research in mind. Many components can be extended and overridden to build new state-of-the-art systems. 
 
-* **Framework-independent**: Different machine learning frameworks have different strengths. Flower can be used with any machine learning framework, for example, [PyTorch](https://pytorch.org), [TensorFlow](https://tensorflow.org), or even raw [NumPy](https://numpy.org/) if you enjoy computing gradients by hand :)
+* **Framework-agnostic**: Different machine learning frameworks have different strengths. Flower can be used with any machine learning framework, for example, [PyTorch](https://pytorch.org), [TensorFlow](https://tensorflow.org), or even raw [NumPy](https://numpy.org/) if you enjoy computing gradients by hand :)
 
 * **Understandable**: Flower is written with maintainability in mind. The community is encouraged to both read and contribute to the codebase.
 

@@ -35,7 +35,7 @@ def default_bridge_factory() -> GRPCBridge:
 
 def default_grpc_client_factory(cid: str, bridge: GRPCBridge) -> GRPCProxyClient:
     """Return GRPCProxyClient instance."""
-    return GRPCProxyClient(cid=cid, info={}, bridge=bridge)
+    return GRPCProxyClient(cid=cid, bridge=bridge)
 
 
 def register_client(

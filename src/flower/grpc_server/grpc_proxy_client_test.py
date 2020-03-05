@@ -38,7 +38,7 @@ class GRPCProxyClientTestCase(unittest.TestCase):
     def test_get_weights(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
-        client = GRPCProxyClient(cid="1", info={}, bridge=self.bridge_mock)
+        client = GRPCProxyClient(cid="1", bridge=self.bridge_mock)
 
         # Execute
         value = client.get_weights()
@@ -49,7 +49,7 @@ class GRPCProxyClientTestCase(unittest.TestCase):
     def test_fit(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
-        client = GRPCProxyClient(cid="1", info={}, bridge=self.bridge_mock)
+        client = GRPCProxyClient(cid="1", bridge=self.bridge_mock)
 
         # Execute
         weights = [np.ones((2, 2))]
@@ -61,7 +61,7 @@ class GRPCProxyClientTestCase(unittest.TestCase):
     def test_evaluate(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
-        client = GRPCProxyClient(cid="1", info={}, bridge=self.bridge_mock)
+        client = GRPCProxyClient(cid="1", bridge=self.bridge_mock)
 
         # Execute
         value = client.evaluate([])
