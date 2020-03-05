@@ -26,10 +26,10 @@ def test_criterion_applied():
     """Test sampling w/ criterion."""
     # Prepare
     bridge = MagicMock()
-    client1 = GRPCProxyClient(cid="train_client_1", info={}, bridge=bridge)
-    client2 = GRPCProxyClient(cid="train_client_2", info={}, bridge=bridge)
-    client3 = GRPCProxyClient(cid="test_client_1", info={}, bridge=bridge)
-    client4 = GRPCProxyClient(cid="test_client_2", info={}, bridge=bridge)
+    client1 = GRPCProxyClient(cid="train_client_1", bridge=bridge)
+    client2 = GRPCProxyClient(cid="train_client_2", bridge=bridge)
+    client3 = GRPCProxyClient(cid="test_client_1", bridge=bridge)
+    client4 = GRPCProxyClient(cid="test_client_2", bridge=bridge)
 
     client_manager = SimpleClientManager()
     client_manager.register(client1)
@@ -55,10 +55,10 @@ def test_criterion_not_applied():
     """Test sampling w/o criterion."""
     # Prepare
     bridge = MagicMock()
-    client1 = GRPCProxyClient(cid="train_client_1", info={}, bridge=bridge)
-    client2 = GRPCProxyClient(cid="train_client_2", info={}, bridge=bridge)
-    client3 = GRPCProxyClient(cid="test_client_1", info={}, bridge=bridge)
-    client4 = GRPCProxyClient(cid="test_client_2", info={}, bridge=bridge)
+    client1 = GRPCProxyClient(cid="train_client_1", bridge=bridge)
+    client2 = GRPCProxyClient(cid="train_client_2", bridge=bridge)
+    client3 = GRPCProxyClient(cid="test_client_1", bridge=bridge)
+    client4 = GRPCProxyClient(cid="test_client_2", bridge=bridge)
 
     client_manager = SimpleClientManager()
     client_manager.register(client1)
