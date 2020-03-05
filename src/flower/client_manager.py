@@ -27,6 +27,11 @@ class ClientManager(ABC):
     """Abstract base class for managing Flower clients."""
 
     @abstractmethod
+    def num_available(self) -> int:
+        """."""
+        raise NotImplementedError()
+
+    @abstractmethod
     def register(self, client: Client) -> bool:
         """Register Flower Client instance.
 
@@ -64,6 +69,9 @@ class SimpleClientManager(ClientManager):
         """
         with self._cv:
             self._cv.wait_for(lambda: len(self.clients) >= num_clients, timeout=timeout)
+
+    def num_available(self) -> int:
+        return len(self)
 
     def register(self, client: Client) -> bool:
         """Register Flower Client instance.
