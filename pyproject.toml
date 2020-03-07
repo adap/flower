@@ -35,10 +35,10 @@ exclude = [
 ]
 
 [tool.poetry.dependencies]
+python = "^3.7"
 # Mandatory dependencies
-python = "==3.7.6"
-numpy = "==1.18.1"
-grpcio = "==1.27.2"
+numpy = "^1.18.1"
+grpcio = "^1.27.2"
 # Optional dependencies
 tensorflow = { version = "==2.1.0", optional = true }
 
