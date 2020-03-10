@@ -102,7 +102,7 @@ def main() -> None:  # pylint: disable-msg=too-many-locals
     # Start server and train four rounds
     server = flwr.Server(client_manager=mngr)
     hist = server.fit(num_rounds=2)
-    print(hist)
+    print(f"Flower training: {hist}")
 
     # Evaluate the final trained model
     loss = server.evaluate()

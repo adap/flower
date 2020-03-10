@@ -25,14 +25,15 @@ from flower.server import Server
 def start_server(server: Server, config: Dict[str, int]) -> None:
     """Start a Flower server using the gRPC transport layer."""
     grpc_server = start_insecure_grpc_server(client_manager=server.client_manager())
+    print("[start_server] Flower server running (insecure)")
 
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
-    print(hist)
+    print(f"[start_server] {hist}")
 
     # Evaluate the final trained model
     loss = server.evaluate()
-    print(f"Final loss after training: {loss}")
+    print(f"[start_server] Final loss after training: {loss}")
 
     # Stop the gRPC server
     grpc_server.stop(1)
@@ -40,8 +41,9 @@ def start_server(server: Server, config: Dict[str, int]) -> None:
 
 def start_client(client: Client) -> None:
     """Start a Flower client which connects to a gRPC server."""
-    with insecure_grpc_connection() as conn:
+    with insecure_grpc_connection(cid=client.cid) as conn:
         receive, send = conn
+        print(f"[start_client|cid:{client.cid}] Opened (insecure) gRPC connection")
 
         while True:
             server_message = receive()

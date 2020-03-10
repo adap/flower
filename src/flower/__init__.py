@@ -19,4 +19,5 @@ from .client import Client
 from .client_manager import SimpleClientManager
 from .history import History
 from .server import Server
+from .strategy import Strategy
 from .typing import Weights

@@ -17,10 +17,28 @@
 import flower as flwr
 
 
+class MnistStrategy(flwr.Strategy):
+    """Strategy using at least three clients for training and evaluation."""
+
+    def should_evaluate(self) -> bool:
+        """Evaluate every round."""
+        return True
+
+    def num_fit_clients(self, num_available_clients: int) -> int:
+        """Use 10% of available clients for training (minimum: 3)."""
+        return int(max(num_available_clients * 0.1, 3))
+
+    def num_evaluation_clients(self, num_available_clients: int) -> int:
+        """Use 5% of available clients for evaluation (minimum: 3)."""
+        return int(max(num_available_clients * 0.05, 3))
+
+
 def main() -> None:
-    """Start server and train four rounds."""
-    server = flwr.Server(client_manager=flwr.SimpleClientManager())
-    flwr.app.start_server(server, config={"num_rounds": 4})
+    """Start server and train five rounds."""
+    client_manager = flwr.SimpleClientManager()
+    strategy = MnistStrategy()
+    server = flwr.Server(client_manager=client_manager, strategy=strategy)
+    flwr.app.start_server(server, config={"num_rounds": 5})
 
 
 if __name__ == "__main__":
