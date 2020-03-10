@@ -76,7 +76,7 @@ def test_integration_connection():
     def run_client() -> int:
         messages_received: int = 0
 
-        with insecure_grpc_connection(port=port) as conn:
+        with insecure_grpc_connection(cid="0", port=port) as conn:
             receive, send = conn
 
             # Setup processing loop
