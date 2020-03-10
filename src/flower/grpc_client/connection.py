@@ -37,11 +37,10 @@ def on_channel_state_change(*args, **kwargs):
 
 @contextmanager
 def insecure_grpc_connection(
-    cid: str, server_address: str = DEFAULT_SERVER_ADDRESS, port: int = DEFAULT_PORT
+    server_address: str = DEFAULT_SERVER_ADDRESS, port: int = DEFAULT_PORT
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish an insecure gRPC connection to a gRPC server."""
     channel = grpc.insecure_channel(f"{server_address}:{port}")
-
     channel.subscribe(on_channel_state_change)
 
     queue: Queue[ClientMessage] = Queue(  # pylint: disable=unsubscriptable-object
@@ -59,4 +58,4 @@ def insecure_grpc_connection(
     finally:
         # Make sure to have a final
         channel.close()
-        print(f"[insecure_grpc_connection|cid:{cid}] Insecure gRPC channel closed")
+        print("[insecure_grpc_connection] Insecure gRPC channel closed")

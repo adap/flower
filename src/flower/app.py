@@ -41,7 +41,7 @@ def start_server(server: Server, config: Dict[str, int]) -> None:
 
 def start_client(client: Client) -> None:
     """Start a Flower client which connects to a gRPC server."""
-    with insecure_grpc_connection(cid=client.cid) as conn:
+    with insecure_grpc_connection() as conn:
         receive, send = conn
         print(f"[start_client|cid:{client.cid}] Opened (insecure) gRPC connection")
 
