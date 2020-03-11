@@ -12,16 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Minimal example on how to start a simple Flower server."""
-
-import flower as flwr
-
-
-def main() -> None:
-    """Start server and train four rounds."""
-    server = flwr.Server(client_manager=flwr.SimpleClientManager())
-    flwr.app.start_server(server, config={"num_rounds": 4})
-
-
-if __name__ == "__main__":
-    main()
+"""Example on how to use Flower with TensorFlow for MNIST image classification."""

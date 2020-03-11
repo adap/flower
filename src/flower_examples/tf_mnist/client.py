@@ -14,6 +14,7 @@
 # ==============================================================================
 """Minimal example on how to build a Flower client using TensorFlow/Keras for MNIST."""
 
+import argparse
 from typing import Tuple, cast
 
 import numpy as np
@@ -21,11 +22,18 @@ import tensorflow as tf
 
 import flower as flwr
 
+tf.get_logger().setLevel("ERROR")
+
 
 def main() -> None:
     """Load data, create and start MnistClient."""
+    parser = argparse.ArgumentParser(description="Flower/TensorFlower")
+    parser.add_argument("--cid", type=str, help="Client CID (no default)")
+    args = parser.parse_args()
+
+    # Load data and start client
     x_local, y_local = load_data()
-    client = MnistClient("client_id", load_model(), x_local, y_local)
+    client = MnistClient(args.cid, load_model(), x_local, y_local)
     flwr.app.start_client(client)
 
 

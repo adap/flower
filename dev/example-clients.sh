@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,12 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower main package."""
 
-from . import app
-from .client import Client
-from .client_manager import SimpleClientManager
-from .history import History
-from .server import Server
-from .strategy import Strategy
-from .typing import Weights
+set -e
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+
+# Start five clients
+python -m flower_examples.tf_mnist.client --cid=0 &
+python -m flower_examples.tf_mnist.client --cid=1 &
+python -m flower_examples.tf_mnist.client --cid=2 &
+python -m flower_examples.tf_mnist.client --cid=3 &
+python -m flower_examples.tf_mnist.client --cid=4 &
+echo "Started five clients"

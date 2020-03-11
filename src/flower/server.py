@@ -66,6 +66,7 @@ class Server:
             self._client_manager.num_available()
         )
         clients = self._client_manager.sample(sample_size)
+        print(f"[server]: evaluate sampled cids {[c.cid for c in clients]}")
 
         # Evaluate current global weights on those clients
         results = eval_clients(clients, self.weights)
@@ -80,6 +81,7 @@ class Server:
             self._client_manager.num_available()
         )
         clients = self._client_manager.sample(sample_size)
+        print(f"[server]: fit_round sampled cids {[c.cid for c in clients]}")
 
         # Collect training results from all clients participating in this round
         results = fit_clients(clients, self.weights)
@@ -146,7 +148,6 @@ def eval_client(client: Client, weights: Weights) -> Tuple[int, float]:
 
 def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
     """Aggregate evaluation results obtained from multiple clients"""
-    print(f"results: {results}")
     num_total_evaluation_examples = sum([num_examples for num_examples, _ in results])
     weighted_losses = [num_examples * loss for num_examples, loss in results]
     return sum(weighted_losses) / num_total_evaluation_examples

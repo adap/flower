@@ -58,8 +58,8 @@ numpy-stubs = { git = "https://github.com/numpy/numpy-stubs.git", rev = "f3c6315
 sphinx = "==2.4.4"
 
 [tool.poetry.scripts]
-flower-example-server = "flower_examples.tf_mnist_grpc_server:main"
-flower-example-client = "flower_examples.tf_mnist_grpc_client:main"
+flower-example-server = "flower_examples.tf_mnist.server:main"
+flower-example-client = "flower_examples.tf_mnist.client:main"
 
 [tool.isort]
 line_length = 88
