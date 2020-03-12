@@ -40,7 +40,13 @@ def insecure_grpc_connection(
     server_address: str = DEFAULT_SERVER_ADDRESS, port: int = DEFAULT_PORT
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish an insecure gRPC connection to a gRPC server."""
-    channel = grpc.insecure_channel(f"{server_address}:{port}")
+    channel = grpc.insecure_channel(
+        f"{server_address}:{port}",
+        options=[
+            ("grpc.max_send_message_length", 256 * 1024 * 1024),
+            ("grpc.max_receive_message_length", 256 * 1024 * 1024),
+        ],
+    )
     channel.subscribe(on_channel_state_change)
 
     queue: Queue[ClientMessage] = Queue(  # pylint: disable=unsubscriptable-object

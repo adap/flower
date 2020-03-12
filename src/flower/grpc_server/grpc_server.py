@@ -37,6 +37,10 @@ def start_insecure_grpc_server(
     server = grpc.server(
         concurrent.futures.ThreadPoolExecutor(max_workers=max_concurrent_workers),
         maximum_concurrent_rpcs=max_concurrent_workers,
+        options=[
+            ("grpc.max_send_message_length", 256 * 1024 * 1024),
+            ("grpc.max_receive_message_length", 256 * 1024 * 1024),
+        ],
     )
 
     servicer = fss.FlowerServiceServicer(client_manager)
