@@ -18,10 +18,13 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+GRPC_SERVER_ADDRESS="[::]"
+GRPC_SERVER_PORT=8080
+
 # Start five clients
-python -m flower_examples.tf_mnist.client --cid=0 &
-python -m flower_examples.tf_mnist.client --cid=1 &
-python -m flower_examples.tf_mnist.client --cid=2 &
-python -m flower_examples.tf_mnist.client --cid=3 &
-python -m flower_examples.tf_mnist.client --cid=4 &
+python -m flower_examples.tf_mnist.client --cid=0 --grpc_server_address=$GRPC_SERVER_ADDRESS --grpc_server_port=$GRPC_SERVER_PORT &
+python -m flower_examples.tf_mnist.client --cid=1 --grpc_server_address=$GRPC_SERVER_ADDRESS --grpc_server_port=$GRPC_SERVER_PORT &
+python -m flower_examples.tf_mnist.client --cid=2 --grpc_server_address=$GRPC_SERVER_ADDRESS --grpc_server_port=$GRPC_SERVER_PORT &
+python -m flower_examples.tf_mnist.client --cid=3 --grpc_server_address=$GRPC_SERVER_ADDRESS --grpc_server_port=$GRPC_SERVER_PORT &
+python -m flower_examples.tf_mnist.client --cid=4 --grpc_server_address=$GRPC_SERVER_ADDRESS --grpc_server_port=$GRPC_SERVER_PORT &
 echo "Started five clients"

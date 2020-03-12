@@ -18,5 +18,8 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+GRPC_SERVER_ADDRESS="[::]"
+GRPC_SERVER_PORT=8080
+
 # Start five clients
-python -m flower_examples.tf_mnist.server
+python -m flower_examples.tf_mnist.server --grpc_server_address=$GRPC_SERVER_ADDRESS --grpc_server_port=$GRPC_SERVER_PORT
