@@ -23,7 +23,10 @@ from flower.server import Server
 
 
 def start_server(
-    grpc_server_address: str, grpc_server_port: int, server: Server, config: Dict[str, int]
+    grpc_server_address: str,
+    grpc_server_port: int,
+    server: Server,
+    config: Dict[str, int],
 ) -> None:
     """Start a Flower server using the gRPC transport layer."""
     grpc_server = start_insecure_grpc_server(
@@ -45,7 +48,9 @@ def start_server(
     grpc_server.stop(1)
 
 
-def start_client(grpc_server_address: str, grpc_server_port: int, client: Client) -> None:
+def start_client(
+    grpc_server_address: str, grpc_server_port: int, client: Client
+) -> None:
     """Start a Flower client which connects to a gRPC server."""
     with insecure_grpc_connection(
         server_address=grpc_server_address, port=grpc_server_port
