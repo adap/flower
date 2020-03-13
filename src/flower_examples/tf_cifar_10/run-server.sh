@@ -19,4 +19,4 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
 # Start five clients
-python -m flower_examples.tf_cifar_100.server
+python -m flower_examples.tf_cifar_10.server
