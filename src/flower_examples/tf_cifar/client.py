@@ -19,7 +19,7 @@ from typing import Tuple, cast
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.datasets import cifar10, cifar100
+from tensorflow.keras import datasets
 
 import flower as flwr
 
@@ -109,7 +109,7 @@ def load_data(
     num_classes: int, subtract_pixel_mean: bool = True
 ) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
     """Load, normalize, and sample CIFAR-10/100."""
-    cifar = cifar10 if num_classes == 10 else cifar100
+    cifar = datasets.cifar10 if num_classes == 10 else datasets.cifar100
     (x_train, y_train), (x_test, y_test) = cifar.load_data()
 
     # Normalize data.
