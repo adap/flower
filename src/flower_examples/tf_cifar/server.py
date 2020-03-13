@@ -13,8 +13,11 @@
 # limitations under the License.
 # ==============================================================================
 """Example on how to start a simple Flower server."""
+import argparse
 
 import flower as flwr
+
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 
 
 class CifarStrategy(flwr.Strategy):
@@ -35,10 +38,31 @@ class CifarStrategy(flwr.Strategy):
 
 def main() -> None:
     """Start server and train for three rounds."""
+    parser = argparse.ArgumentParser(description="Flower/TensorFlower")
+    parser.add_argument(
+        "--grpc_server_address",
+        type=str,
+        default=DEFAULT_GRPC_SERVER_ADDRESS,
+        help="gRPC server address (default: [::])",
+    )
+    parser.add_argument(
+        "--grpc_server_port",
+        type=int,
+        default=DEFAULT_GRPC_SERVER_PORT,
+        help="gRPC server port (default: 8080)",
+    )
+    parser.add_argument("--cid", type=str, help="Client CID (no default)")
+    args = parser.parse_args()
+
     client_manager = flwr.SimpleClientManager()
     strategy = CifarStrategy()
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
-    flwr.app.start_server(server, config={"num_rounds": 3})
+    flwr.app.start_server(
+        args.grpc_server_address,
+        args.grpc_server_port,
+        server,
+        config={"num_rounds": 3},
+    )
 
 
 if __name__ == "__main__":
