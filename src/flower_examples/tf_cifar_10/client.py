@@ -12,37 +12,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Minimal example on how to build a Flower client using TensorFlow for CIFAR-10."""
+"""Minimal example on how to build a Flower client using TensorFlow for CIFAR-10/100."""
 
 import argparse
 from typing import Tuple, cast
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.datasets import cifar10, cifar100
 
 import flower as flwr
 
 tf.get_logger().setLevel("ERROR")
 
-INPUT_SHAPE = (32, 32, 3)
-NUM_CLASSES = 10
 BATCH_SIZE = 32
 SAMPLE_TRAIN = 150
 SAMPLE_TEST = 50
 
 
 def main() -> None:
-    """Load data, create and start MnistClient."""
+    """Load data and start CifarClient."""
+
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
     parser.add_argument("--partition", type=int, help="Partition index (no default)")
+    parser.add_argument(
+        "--cifar",
+        type=int,
+        choices=[10, 100],
+        default=100,
+        help="CIFAR version, allowed values: 10 or 100 (default: 100)",
+    )
     args = parser.parse_args()
-    print(f"Starting client with cid {args.cid} using partition {args.partition}")
+    print(f"Run client, cid {args.cid}, partition {args.partition}, CIFAR-{args.cifar}")
 
     # Load model and data
-    model = load_model(INPUT_SHAPE, NUM_CLASSES)
-    xy_train, xy_test = load_data(NUM_CLASSES)
+    model = load_model(input_shape=(32, 32, 3), num_classes=args.cifar)
+    xy_train, xy_test = load_data(num_classes=args.cifar)
 
     # Start client
     client = CifarClient(args.cid, model, xy_train, xy_test)
@@ -50,7 +57,7 @@ def main() -> None:
 
 
 class CifarClient(flwr.Client):
-    """Flower client implementing CIAFR-10 image classification using TensorFlow."""
+    """Flower client implementing CIAFR-10/100 image classification using TensorFlow."""
 
     def __init__(
         self,
@@ -101,8 +108,9 @@ def load_model(input_shape: Tuple[int, int, int], num_classes: int) -> tf.keras.
 def load_data(
     num_classes: int, subtract_pixel_mean: bool = True
 ) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
-    """Load, normalize, and sample CIFAR-10."""
-    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+    """Load, normalize, and sample CIFAR-10/100."""
+    cifar = cifar10 if num_classes == 10 else cifar100
+    (x_train, y_train), (x_test, y_test) = cifar.load_data()
 
     # Normalize data.
     x_train = x_train.astype("float32") / 255.0
