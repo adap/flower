@@ -43,13 +43,13 @@ def main() -> None:
         "--grpc_server_address",
         type=str,
         default=DEFAULT_GRPC_SERVER_ADDRESS,
-        help="gRPC server address ([::])",
+        help="gRPC server address (default: [::])",
     )
     parser.add_argument(
         "--grpc_server_port",
         type=int,
         default=DEFAULT_GRPC_SERVER_PORT,
-        help="gRPC server port (8080)",
+        help="gRPC server port (default: 8080)",
     )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
     args = parser.parse_args()
