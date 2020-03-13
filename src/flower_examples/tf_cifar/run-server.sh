@@ -16,12 +16,7 @@
 # ==============================================================================
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
 # Start five clients
-python -m flower_examples.tf_cifar_10.client --cid=0 --partition=0 &
-python -m flower_examples.tf_cifar_10.client --cid=1 --partition=1 &
-python -m flower_examples.tf_cifar_10.client --cid=2 --partition=2 &
-python -m flower_examples.tf_cifar_10.client --cid=3 --partition=3 &
-python -m flower_examples.tf_cifar_10.client --cid=4 --partition=4 &
-echo "Started five clients"
+python -m flower_examples.tf_cifar.server

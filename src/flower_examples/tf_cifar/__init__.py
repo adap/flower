@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
-set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
-
-# Start five clients
-python -m flower_examples.tf_cifar_10.server
+"""Flower example using TensorFlow for CIFAR-10/100 image classification."""
