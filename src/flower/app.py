@@ -22,9 +22,18 @@ from flower.grpc_server.grpc_server import start_insecure_grpc_server
 from flower.server import Server
 
 
-def start_server(server: Server, config: Dict[str, int]) -> None:
+def start_server(
+    grpc_server_address: str,
+    grpc_server_port: int,
+    server: Server,
+    config: Dict[str, int],
+) -> None:
     """Start a Flower server using the gRPC transport layer."""
-    grpc_server = start_insecure_grpc_server(client_manager=server.client_manager())
+    grpc_server = start_insecure_grpc_server(
+        address=grpc_server_address,
+        port=grpc_server_port,
+        client_manager=server.client_manager(),
+    )
     print("[start_server] Flower server running (insecure)")
 
     # Fit model
@@ -39,9 +48,13 @@ def start_server(server: Server, config: Dict[str, int]) -> None:
     grpc_server.stop(1)
 
 
-def start_client(client: Client) -> None:
+def start_client(
+    grpc_server_address: str, grpc_server_port: int, client: Client
+) -> None:
     """Start a Flower client which connects to a gRPC server."""
-    with insecure_grpc_connection() as conn:
+    with insecure_grpc_connection(
+        address=grpc_server_address, port=grpc_server_port
+    ) as conn:
         receive, send = conn
         print(f"[start_client|cid:{client.cid}] Opened (insecure) gRPC connection")
 

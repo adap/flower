@@ -13,5 +13,3 @@
 # limitations under the License.
 # ==============================================================================
 """Server-side networking package."""
-DEFAULT_SERVER_ADDRESS = "[::]"
-DEFAULT_PORT = 8080

@@ -22,6 +22,8 @@ import tensorflow as tf
 
 import flower as flwr
 
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
+
 tf.get_logger().setLevel("ERROR")
 
 BATCH_SIZE = 32
@@ -34,6 +36,18 @@ def main() -> None:
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Flower")
+    parser.add_argument(
+        "--grpc_server_address",
+        type=str,
+        default=DEFAULT_GRPC_SERVER_ADDRESS,
+        help="gRPC server address (default: [::])",
+    )
+    parser.add_argument(
+        "--grpc_server_port",
+        type=int,
+        default=DEFAULT_GRPC_SERVER_PORT,
+        help="gRPC server port (default: 8080)",
+    )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
     parser.add_argument("--partition", type=int, help="Partition index (no default)")
     parser.add_argument(
@@ -52,7 +66,7 @@ def main() -> None:
 
     # Start client
     client = CifarClient(args.cid, model, xy_train, xy_test)
-    flwr.app.start_client(client)
+    flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
 
 
 class CifarClient(flwr.Client):

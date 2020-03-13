@@ -21,7 +21,6 @@ from typing import Callable, Iterator, Tuple
 
 import grpc
 
-from flower.grpc_server import DEFAULT_PORT, DEFAULT_SERVER_ADDRESS
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 from flower.proto.transport_pb2_grpc import FlowerServiceStub
 
@@ -37,11 +36,11 @@ def on_channel_state_change(*args, **kwargs):
 
 @contextmanager
 def insecure_grpc_connection(
-    server_address: str = DEFAULT_SERVER_ADDRESS, port: int = DEFAULT_PORT
+    address: str, port: int
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish an insecure gRPC connection to a gRPC server."""
     channel = grpc.insecure_channel(
-        f"{server_address}:{port}",
+        f"{address}:{port}",
         options=[
             ("grpc.max_send_message_length", 256 * 1024 * 1024),
             ("grpc.max_receive_message_length", 256 * 1024 * 1024),

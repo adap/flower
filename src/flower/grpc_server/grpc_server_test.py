@@ -26,7 +26,9 @@ def test_integration_start_and_shutdown_server():
     client_manager = SimpleClientManager()
 
     # Execute
-    server = start_insecure_grpc_server(client_manager=client_manager, port=port)
+    server = start_insecure_grpc_server(
+        client_manager=client_manager, address="[::]", port=port
+    )
 
     # Teardown
     server.stop(1)

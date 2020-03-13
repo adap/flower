@@ -24,6 +24,7 @@ design goals was to make this simple. Read on to learn more.
 
    installation
    examples
+   howto-aws
 
 
 Contributor Guide
