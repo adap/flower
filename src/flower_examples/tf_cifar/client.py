@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Minimal example on how to build a Flower client using TensorFlow for CIFAR-10/100."""
+"""Example on how to build a Flower client using TensorFlow for CIFAR-10/100."""
 
 import argparse
 from typing import Tuple, cast

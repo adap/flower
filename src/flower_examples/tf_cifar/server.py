@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Minimal example on how to start a simple Flower server."""
+"""Example on how to start a simple Flower server."""
 
 import flower as flwr
 
