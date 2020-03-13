@@ -30,7 +30,7 @@ def start_server(
 ) -> None:
     """Start a Flower server using the gRPC transport layer."""
     grpc_server = start_insecure_grpc_server(
-        server_address=grpc_server_address,
+        address=grpc_server_address,
         port=grpc_server_port,
         client_manager=server.client_manager(),
     )
@@ -53,7 +53,7 @@ def start_client(
 ) -> None:
     """Start a Flower client which connects to a gRPC server."""
     with insecure_grpc_connection(
-        server_address=grpc_server_address, port=grpc_server_port
+        address=grpc_server_address, port=grpc_server_port
     ) as conn:
         receive, send = conn
         print(f"[start_client|cid:{client.cid}] Opened (insecure) gRPC connection")

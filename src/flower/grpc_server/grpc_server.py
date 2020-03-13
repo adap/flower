@@ -24,7 +24,7 @@ from flower.proto import transport_pb2_grpc
 
 def start_insecure_grpc_server(
     client_manager: ClientManager,
-    server_address: str,
+    address: str,
     port: int,
     max_concurrent_workers: int = 100,
 ) -> grpc.Server:
@@ -45,7 +45,7 @@ def start_insecure_grpc_server(
     servicer = fss.FlowerServiceServicer(client_manager)
     transport_pb2_grpc.add_FlowerServiceServicer_to_server(servicer, server)  # type: ignore
 
-    server.add_insecure_port(f"{server_address}:{port}")
+    server.add_insecure_port(f"{address}:{port}")
     server.start()
 
     return server
