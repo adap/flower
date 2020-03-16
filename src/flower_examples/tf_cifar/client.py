@@ -26,6 +26,7 @@ from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 
 tf.get_logger().setLevel("ERROR")
 
+SEED = 2020
 BATCH_SIZE = 32
 SAMPLE_TRAIN = 150
 SAMPLE_TEST = 50
@@ -57,12 +58,17 @@ def main() -> None:
         default=100,
         help="CIFAR version, allowed values: 10 or 100 (default: 100)",
     )
+    parser.add_argument(
+        "--clients", type=int, help="Number of clients (no default)",
+    )
     args = parser.parse_args()
     print(f"Run client, cid {args.cid}, partition {args.partition}, CIFAR-{args.cifar}")
 
     # Load model and data
     model = load_model(input_shape=(32, 32, 3), num_classes=args.cifar)
-    xy_train, xy_test = load_data(num_classes=args.cifar)
+    xy_train, xy_test = load_data(
+        args.partition, num_classes=args.cifar, num_clients=args.clients
+    )
 
     # Start client
     client = CifarClient(args.cid, model, xy_train, xy_test)
@@ -119,13 +125,23 @@ def load_model(input_shape: Tuple[int, int, int], num_classes: int) -> tf.keras.
 
 
 def load_data(
-    num_classes: int, subtract_pixel_mean: bool = True
+    partition: int,
+    num_classes: int,
+    num_clients: int,
+    subtract_pixel_mean: bool = True,
 ) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
     """Load, normalize, and sample CIFAR-10/100."""
     cifar = (
         tf.keras.datasets.cifar10 if num_classes == 10 else tf.keras.datasets.cifar100
     )
     (x_train, y_train), (x_test, y_test) = cifar.load_data()
+
+    # Take a subset
+    x_train, y_train = shuffle(x_train, y_train, seed=SEED)
+    x_test, y_test = shuffle(x_test, y_test, seed=SEED)
+
+    x_train, y_train = get_partition(x_train, y_train, partition, num_clients)
+    x_test, y_test = get_partition(x_test, y_test, partition, num_clients)
 
     # Normalize data.
     x_train = x_train.astype("float32") / 255.0
@@ -139,13 +155,26 @@ def load_data(
     y_train = tf.keras.utils.to_categorical(y_train, num_classes)
     y_test = tf.keras.utils.to_categorical(y_test, num_classes)
 
-    # Take a random subset of the dataset to simulate having different local datasets
-    idxs_train = np.random.choice(np.arange(len(x_train)), SAMPLE_TRAIN, replace=False)
-    x_train_sample, y_train_sample = x_train[idxs_train], y_train[idxs_train]
-    idxs_test = np.random.choice(np.arange(len(x_test)), SAMPLE_TEST, replace=False)
-    x_test_sample, y_test_sample = x_test[idxs_test], y_test[idxs_test]
+    return (x_train, y_train), (x_test, y_test)
 
-    return (x_train_sample, y_train_sample), (x_test_sample, y_test_sample)
+
+def shuffle(
+    x_orig: np.ndarray, y_orig: np.ndarray, seed: int
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Shuffle x and y in the same way."""
+    np.random.seed(seed)
+    idx = np.random.permutation(len(x_orig))
+    return x_orig[idx], y_orig[idx]
+
+
+def get_partition(
+    x_orig: np.ndarray, y_orig: np.ndarray, partition: int, num_clients: int
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Return a single partition of an equally partitioned dataset."""
+    step_size = len(x_orig) / num_clients
+    start_index = int(step_size * partition)
+    end_index = int(start_index + step_size)
+    return x_orig[start_index:end_index], y_orig[start_index:end_index]
 
 
 if __name__ == "__main__":
