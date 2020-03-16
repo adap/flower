@@ -7,3 +7,5 @@ COPY . /opt/flower
 WORKDIR /opt/flower
 
 RUN NO_VIRTUALENV=1 ./dev/bootstrap.sh
+
+RUN pip install tensorflow==2.1
