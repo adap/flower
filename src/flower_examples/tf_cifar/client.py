@@ -21,6 +21,7 @@ import numpy as np
 import tensorflow as tf
 
 import flower as flwr
+from flower.logger import log
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 
@@ -62,7 +63,10 @@ def main() -> None:
         "--clients", type=int, help="Number of clients (no default)",
     )
     args = parser.parse_args()
-    print(f"Run client, cid {args.cid}, partition {args.partition}, CIFAR-{args.cifar}")
+    log(
+        "DEBUG",
+        f"Run client, cid {args.cid}, partition {args.partition}, CIFAR-{args.cifar}",
+    )
 
     # Load model and data
     model = load_model(input_shape=(32, 32, 3), num_classes=args.cifar)
@@ -92,11 +96,11 @@ class CifarClient(flwr.Client):
         self.datagen: Optional[tf.keras.preprocessing.image.ImageDataGenerator] = None
 
     def get_weights(self) -> flwr.Weights:
-        print(f"[client:{self.cid}] get_weights")
+        log("DEBUG", "get_weights")
         return cast(flwr.Weights, self.model.get_weights())
 
     def fit(self, weights: flwr.Weights) -> Tuple[flwr.Weights, int]:
-        print(f"[client:{self.cid}] fit")
+        log("DEBUG", "fit")
 
         # Lazy initialization of the ImageDataGenerator
         if self.datagen is None:
@@ -115,7 +119,7 @@ class CifarClient(flwr.Client):
         return self.model.get_weights(), len(self.x_train)
 
     def evaluate(self, weights: flwr.Weights) -> Tuple[int, float]:
-        print(f"[client:{self.cid}] evaluate")
+        log("DEBUG", "evaluate")
         # Use provided weights to update the local model
         self.model.set_weights(weights)
         # Evaluate the updated model on the local dataset
