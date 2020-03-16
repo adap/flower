@@ -22,6 +22,7 @@ import numpy as np
 import tensorflow as tf
 
 import flower as flwr
+from flower.logger import log
 
 
 def load_model() -> tf.keras.Model:
@@ -102,11 +103,11 @@ def main() -> None:  # pylint: disable-msg=too-many-locals
     # Start server and train four rounds
     server = flwr.Server(client_manager=mngr)
     hist = server.fit(num_rounds=2)
-    print(f"Flower training: {hist}")
+    log("DEBUG", f"Flower training: {hist}")
 
     # Evaluate the final trained model
     loss = server.evaluate()
-    print(f"Final loss after training: {loss}")
+    log("DEBUG", f"Final loss after training: {loss}")
 
 
 if __name__ == "__main__":

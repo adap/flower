@@ -21,6 +21,7 @@ from typing import Callable, Iterator, Tuple
 
 import grpc
 
+from flower.logger import log
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 from flower.proto.transport_pb2_grpc import FlowerServiceStub
 
@@ -29,9 +30,9 @@ from flower.proto.transport_pb2_grpc import FlowerServiceStub
 # os.environ["GRPC_TRACE"] = "connectivity_state"
 
 
-def on_channel_state_change(*args, **kwargs):
+def on_channel_state_change(channel_connectivity: str) -> None:
     """Print all args and kwargs."""
-    print("[on_channel_state_change]", *args, **kwargs)
+    log("DEBUG", channel_connectivity)
 
 
 @contextmanager
@@ -63,4 +64,4 @@ def insecure_grpc_connection(
     finally:
         # Make sure to have a final
         channel.close()
-        print("[insecure_grpc_connection] Insecure gRPC channel closed")
+        log("DEBUG", "Insecure gRPC channel closed")
