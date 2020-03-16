@@ -31,7 +31,7 @@ from flower.proto.transport_pb2_grpc import FlowerServiceStub
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
-    """Print all args and kwargs."""
+    """Log channel connectivity."""
     log("DEBUG", channel_connectivity)
 
 

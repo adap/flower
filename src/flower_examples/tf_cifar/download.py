@@ -18,6 +18,8 @@ import argparse
 
 import tensorflow as tf
 
+from flower.logger import log
+
 tf.get_logger().setLevel("ERROR")
 
 
@@ -32,7 +34,7 @@ def main() -> None:
         help="CIFAR version, allowed values: 10 or 100 (default: 100)",
     )
     args = parser.parse_args()
-    print(f"Download CIFAR-{args.cifar}")
+    log("INFO", f"Download CIFAR-{args.cifar}")
 
     # Load model and data
     download_data(num_classes=args.cifar)
