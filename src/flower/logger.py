@@ -33,23 +33,24 @@ DEFAULT_LOGFILE = f"flower_{os.getpid()}_{datetime.utcnow().strftime('%Y-%m-%d_%
 
 def configure(logfile: str = DEFAULT_LOGFILE) -> None:
     """Configure logger."""
-    # set up logging to file - see previous section for more details
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s",
-    )
-
     # create logger
     logger = logging.getLogger(LOGGER_NAME)
     logger.setLevel(logging.DEBUG)
 
+    # create formatter
+    formatter = logging.Formatter(
+        "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
+    )
+
     # create console handler and set level to debug
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.DEBUG)
+    console_handler.setFormatter(formatter)
 
     # create file handler which logs even debug messages
     file_handler = logging.FileHandler(logfile)
     file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
 
     # add ch and fh to logger
     logger.addHandler(console_handler)
