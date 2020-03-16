@@ -15,7 +15,7 @@
 """Example on how to build a Flower client using TensorFlow for CIFAR-10/100."""
 
 import argparse
-from typing import Tuple, cast
+from typing import Optional, Tuple, cast
 
 import numpy as np
 import tensorflow as tf
@@ -76,7 +76,7 @@ def main() -> None:
 
 
 class CifarClient(flwr.Client):
-    """Flower client implementing CIAFR-10/100 image classification using TensorFlow."""
+    """Flower client implementing CIAFR-10/100 image classification using TF."""
 
     def __init__(
         self,
@@ -89,6 +89,7 @@ class CifarClient(flwr.Client):
         self.model = model
         self.x_train, self.y_train = xy_train
         self.x_test, self.y_test = xy_test
+        self.datagen: Optional[tf.keras.preprocessing.image.ImageDataGenerator] = None
 
     def get_weights(self) -> flwr.Weights:
         print(f"[client:{self.cid}] get_weights")
@@ -96,10 +97,20 @@ class CifarClient(flwr.Client):
 
     def fit(self, weights: flwr.Weights) -> Tuple[flwr.Weights, int]:
         print(f"[client:{self.cid}] fit")
+
+        # Lazy initialization of the ImageDataGenerator
+        if self.datagen is None:
+            self.datagen = load_datagen(self.x_train)
+
         # Use provided weights to update the local model
         self.model.set_weights(weights)
+
         # Train the local model using the local dataset
-        self.model.fit(self.x_train, self.y_train, batch_size=BATCH_SIZE, epochs=1)
+        self.model.fit_generator(
+            self.datagen.flow(self.x_train, self.y_train, batch_size=BATCH_SIZE),
+            epochs=1,
+        )
+
         # Return the refined weights and the number of examples used for training
         return self.model.get_weights(), len(self.x_train)
 
@@ -175,6 +186,35 @@ def get_partition(
     start_index = int(step_size * partition)
     end_index = int(start_index + step_size)
     return x_orig[start_index:end_index], y_orig[start_index:end_index]
+
+
+def load_datagen(
+    x_train: np.ndarray,
+) -> tf.keras.preprocessing.image.ImageDataGenerator:
+    """Create an ImageDataGenerator for CIFAR-10/100."""
+    datagen = tf.keras.preprocessing.image.ImageDataGenerator(
+        featurewise_center=False,
+        samplewise_center=False,
+        featurewise_std_normalization=False,
+        samplewise_std_normalization=False,
+        zca_whitening=False,
+        zca_epsilon=1e-06,
+        rotation_range=0,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        shear_range=0.0,
+        zoom_range=0.0,
+        channel_shift_range=0.0,
+        fill_mode="nearest",
+        horizontal_flip=True,
+        vertical_flip=False,
+        rescale=None,
+        preprocessing_function=None,
+        data_format=None,
+        validation_split=0.0,
+    )
+    datagen.fit(x_train)
+    return datagen
 
 
 if __name__ == "__main__":
