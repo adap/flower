@@ -24,6 +24,7 @@ import numpy as np
 from flower.client import Client
 from flower.client_manager import ClientManager
 from flower.history import History
+from flower.logger import log
 from flower.strategy import DefaultStrategy, Strategy
 from flower.typing import Weights
 
@@ -66,7 +67,7 @@ class Server:
             self._client_manager.num_available()
         )
         clients = self._client_manager.sample(sample_size)
-        print(f"[server]: evaluate sampled cids {[c.cid for c in clients]}")
+        log("DEBUG", f"evaluate sampled cids {[c.cid for c in clients]}")
 
         # Evaluate current global weights on those clients
         results = eval_clients(clients, self.weights)
@@ -81,7 +82,7 @@ class Server:
             self._client_manager.num_available()
         )
         clients = self._client_manager.sample(sample_size)
-        print(f"[server]: fit_round sampled cids {[c.cid for c in clients]}")
+        log("DEBUG", f"fit_round sampled cids {[c.cid for c in clients]}")
 
         # Collect training results from all clients participating in this round
         results = fit_clients(clients, self.weights)
