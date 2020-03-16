@@ -15,17 +15,19 @@
 """Example on how to build a Flower client using TensorFlow for CIFAR-10/100."""
 
 import argparse
-from typing import Tuple, cast
+from typing import Optional, Tuple, cast
 
 import numpy as np
 import tensorflow as tf
 
 import flower as flwr
+from flower.logger import log
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 
 tf.get_logger().setLevel("ERROR")
 
+SEED = 2020
 BATCH_SIZE = 32
 SAMPLE_TRAIN = 150
 SAMPLE_TEST = 50
@@ -57,12 +59,20 @@ def main() -> None:
         default=100,
         help="CIFAR version, allowed values: 10 or 100 (default: 100)",
     )
+    parser.add_argument(
+        "--clients", type=int, help="Number of clients (no default)",
+    )
     args = parser.parse_args()
-    print(f"Run client, cid {args.cid}, partition {args.partition}, CIFAR-{args.cifar}")
+    log(
+        "DEBUG",
+        f"Run client, cid {args.cid}, partition {args.partition}, CIFAR-{args.cifar}",
+    )
 
     # Load model and data
     model = load_model(input_shape=(32, 32, 3), num_classes=args.cifar)
-    xy_train, xy_test = load_data(num_classes=args.cifar)
+    xy_train, xy_test = load_data(
+        args.partition, num_classes=args.cifar, num_clients=args.clients
+    )
 
     # Start client
     client = CifarClient(args.cid, model, xy_train, xy_test)
@@ -70,7 +80,7 @@ def main() -> None:
 
 
 class CifarClient(flwr.Client):
-    """Flower client implementing CIAFR-10/100 image classification using TensorFlow."""
+    """Flower client implementing CIAFR-10/100 image classification using TF."""
 
     def __init__(
         self,
@@ -83,22 +93,33 @@ class CifarClient(flwr.Client):
         self.model = model
         self.x_train, self.y_train = xy_train
         self.x_test, self.y_test = xy_test
+        self.datagen: Optional[tf.keras.preprocessing.image.ImageDataGenerator] = None
 
     def get_weights(self) -> flwr.Weights:
-        print(f"[client:{self.cid}] get_weights")
+        log("DEBUG", "get_weights")
         return cast(flwr.Weights, self.model.get_weights())
 
     def fit(self, weights: flwr.Weights) -> Tuple[flwr.Weights, int]:
-        print(f"[client:{self.cid}] fit")
+        log("DEBUG", "fit")
+
+        # Lazy initialization of the ImageDataGenerator
+        if self.datagen is None:
+            self.datagen = load_datagen(self.x_train)
+
         # Use provided weights to update the local model
         self.model.set_weights(weights)
+
         # Train the local model using the local dataset
-        self.model.fit(self.x_train, self.y_train, batch_size=BATCH_SIZE, epochs=1)
+        self.model.fit_generator(
+            self.datagen.flow(self.x_train, self.y_train, batch_size=BATCH_SIZE),
+            epochs=1,
+        )
+
         # Return the refined weights and the number of examples used for training
         return self.model.get_weights(), len(self.x_train)
 
     def evaluate(self, weights: flwr.Weights) -> Tuple[int, float]:
-        print(f"[client:{self.cid}] evaluate")
+        log("DEBUG", "evaluate")
         # Use provided weights to update the local model
         self.model.set_weights(weights)
         # Evaluate the updated model on the local dataset
@@ -119,13 +140,23 @@ def load_model(input_shape: Tuple[int, int, int], num_classes: int) -> tf.keras.
 
 
 def load_data(
-    num_classes: int, subtract_pixel_mean: bool = True
+    partition: int,
+    num_classes: int,
+    num_clients: int,
+    subtract_pixel_mean: bool = True,
 ) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
     """Load, normalize, and sample CIFAR-10/100."""
     cifar = (
         tf.keras.datasets.cifar10 if num_classes == 10 else tf.keras.datasets.cifar100
     )
     (x_train, y_train), (x_test, y_test) = cifar.load_data()
+
+    # Take a subset
+    x_train, y_train = shuffle(x_train, y_train, seed=SEED)
+    x_test, y_test = shuffle(x_test, y_test, seed=SEED)
+
+    x_train, y_train = get_partition(x_train, y_train, partition, num_clients)
+    x_test, y_test = get_partition(x_test, y_test, partition, num_clients)
 
     # Normalize data.
     x_train = x_train.astype("float32") / 255.0
@@ -139,13 +170,55 @@ def load_data(
     y_train = tf.keras.utils.to_categorical(y_train, num_classes)
     y_test = tf.keras.utils.to_categorical(y_test, num_classes)
 
-    # Take a random subset of the dataset to simulate having different local datasets
-    idxs_train = np.random.choice(np.arange(len(x_train)), SAMPLE_TRAIN, replace=False)
-    x_train_sample, y_train_sample = x_train[idxs_train], y_train[idxs_train]
-    idxs_test = np.random.choice(np.arange(len(x_test)), SAMPLE_TEST, replace=False)
-    x_test_sample, y_test_sample = x_test[idxs_test], y_test[idxs_test]
+    return (x_train, y_train), (x_test, y_test)
 
-    return (x_train_sample, y_train_sample), (x_test_sample, y_test_sample)
+
+def shuffle(
+    x_orig: np.ndarray, y_orig: np.ndarray, seed: int
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Shuffle x and y in the same way."""
+    np.random.seed(seed)
+    idx = np.random.permutation(len(x_orig))
+    return x_orig[idx], y_orig[idx]
+
+
+def get_partition(
+    x_orig: np.ndarray, y_orig: np.ndarray, partition: int, num_clients: int
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Return a single partition of an equally partitioned dataset."""
+    step_size = len(x_orig) / num_clients
+    start_index = int(step_size * partition)
+    end_index = int(start_index + step_size)
+    return x_orig[start_index:end_index], y_orig[start_index:end_index]
+
+
+def load_datagen(
+    x_train: np.ndarray,
+) -> tf.keras.preprocessing.image.ImageDataGenerator:
+    """Create an ImageDataGenerator for CIFAR-10/100."""
+    datagen = tf.keras.preprocessing.image.ImageDataGenerator(
+        featurewise_center=False,
+        samplewise_center=False,
+        featurewise_std_normalization=False,
+        samplewise_std_normalization=False,
+        zca_whitening=False,
+        zca_epsilon=1e-06,
+        rotation_range=0,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        shear_range=0.0,
+        zoom_range=0.0,
+        channel_shift_range=0.0,
+        fill_mode="nearest",
+        horizontal_flip=True,
+        vertical_flip=False,
+        rescale=None,
+        preprocessing_function=None,
+        data_format=None,
+        validation_split=0.0,
+    )
+    datagen.fit(x_train)
+    return datagen
 
 
 if __name__ == "__main__":
