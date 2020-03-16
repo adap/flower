@@ -7,5 +7,9 @@ python -m pip install -U pip==20.0.2
 python -m pip install -U setuptools==45.2.0
 python -m pip install -U poetry==1.0.5
 
+if [ ! -z $NO_VIRTUALENV ]; then
+    poetry config virtualenvs.create false --local
+fi
+
 # Use `poetry` to install project dependencies
 python -m poetry install --extras "examples-tensorflow"
