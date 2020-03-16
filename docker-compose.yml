@@ -1,0 +1,18 @@
+version: '3'
+services:
+  server:
+    build: .
+    command: python -m flower_examples.tf_mnist.server --grpc_server_address="[::]" --grpc_server_port=8080
+    networks:
+      - flower
+    ports:
+      - "8080:8080"
+  clients:
+    depends_on:
+      - server
+    build: .
+    command: python -m flower_examples.tf_mnist.client --grpc_server_address="server" --grpc_server_port=8080
+    networks:
+      - flower
+networks:
+  flower:
