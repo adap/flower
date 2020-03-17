@@ -36,6 +36,7 @@ SEED = 2020
 BATCH_SIZE = 32
 SAMPLE_TRAIN = 150
 SAMPLE_TEST = 50
+NUM_EPOCHS = 1
 
 
 def main() -> None:
@@ -127,13 +128,12 @@ class CifarClient(flwr.Client):
         callbacks = [lr_reducer, lr_scheduler]
 
         # Train the local model using the local dataset
-        num_epochs = 1
         self.model.fit_generator(
             self.datagen.flow(self.x_train, self.y_train, batch_size=BATCH_SIZE),
-            epochs=num_epochs,
+            epochs=NUM_EPOCHS,
             callbacks=callbacks,
         )
-        self.epoch += num_epochs
+        self.epoch += NUM_EPOCHS
 
         # Return the refined weights and the number of examples used for training
         return self.model.get_weights(), len(self.x_train)
