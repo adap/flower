@@ -16,6 +16,7 @@
   - TensorFlow 2.0+ (Keras)
   - MNIST image classification
 """
+from logging import DEBUG
 from typing import Tuple, cast
 
 import numpy as np
@@ -103,11 +104,11 @@ def main() -> None:  # pylint: disable-msg=too-many-locals
     # Start server and train four rounds
     server = flwr.Server(client_manager=mngr)
     hist = server.fit(num_rounds=2)
-    log("DEBUG", f"Flower training: {hist}")
+    log(DEBUG, "Flower training: %s", hist)
 
     # Evaluate the final trained model
     loss = server.evaluate()
-    log("DEBUG", f"Final loss after training: {loss}")
+    log(DEBUG, "Final loss after training: %s", loss)
 
 
 if __name__ == "__main__":
