@@ -15,6 +15,7 @@
 """Example on how to build a Flower client using TensorFlow for CIFAR-10/100."""
 
 import argparse
+from logging import DEBUG
 from typing import Optional, Tuple, cast
 
 import numpy as np
@@ -64,8 +65,11 @@ def main() -> None:
     )
     args = parser.parse_args()
     log(
-        "DEBUG",
-        f"Run client, cid {args.cid}, partition {args.partition}, CIFAR-{args.cifar}",
+        DEBUG,
+        "Run client, cid %s, partition %s, CIFAR-%s",
+        args.cid,
+        args.partition,
+        args.cifar,
     )
 
     # Load model and data
@@ -96,11 +100,11 @@ class CifarClient(flwr.Client):
         self.datagen: Optional[tf.keras.preprocessing.image.ImageDataGenerator] = None
 
     def get_weights(self) -> flwr.Weights:
-        log("DEBUG", "get_weights")
+        log(DEBUG, "get_weights")
         return cast(flwr.Weights, self.model.get_weights())
 
     def fit(self, weights: flwr.Weights) -> Tuple[flwr.Weights, int]:
-        log("DEBUG", "fit")
+        log(DEBUG, "fit")
 
         # Lazy initialization of the ImageDataGenerator
         if self.datagen is None:
@@ -119,7 +123,7 @@ class CifarClient(flwr.Client):
         return self.model.get_weights(), len(self.x_train)
 
     def evaluate(self, weights: flwr.Weights) -> Tuple[int, float]:
-        log("DEBUG", "evaluate")
+        log(DEBUG, "evaluate")
         # Use provided weights to update the local model
         self.model.set_weights(weights)
         # Evaluate the updated model on the local dataset
