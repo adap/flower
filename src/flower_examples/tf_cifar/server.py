@@ -51,6 +51,12 @@ def main() -> None:
         default=DEFAULT_GRPC_SERVER_PORT,
         help="gRPC server port (default: 8080)",
     )
+    parser.add_argument(
+        "--rounds",
+        type=int,
+        default=1,
+        help="Number of rounds of federated learning (default: 1)",
+    )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
     args = parser.parse_args()
 
@@ -61,7 +67,7 @@ def main() -> None:
         args.grpc_server_address,
         args.grpc_server_port,
         server,
-        config={"num_rounds": 3},
+        config={"num_rounds": args.rounds},
     )
 
 
