@@ -16,6 +16,7 @@
 from __future__ import annotations  # pylint: disable=unused-import
 
 from contextlib import contextmanager
+from logging import DEBUG
 from queue import Queue
 from typing import Callable, Iterator, Tuple
 
@@ -32,7 +33,7 @@ from flower.proto.transport_pb2_grpc import FlowerServiceStub
 
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""
-    log("DEBUG", channel_connectivity)
+    log(DEBUG, channel_connectivity)
 
 
 @contextmanager
@@ -64,4 +65,4 @@ def insecure_grpc_connection(
     finally:
         # Make sure to have a final
         channel.close()
-        log("DEBUG", "Insecure gRPC channel closed")
+        log(DEBUG, "Insecure gRPC channel closed")
