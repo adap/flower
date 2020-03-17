@@ -14,7 +14,7 @@
 # ==============================================================================
 """Example on how to build a Flower client using TensorFlow for CIFAR-10/100.
 
-Many components are translated from the official Keras ResNet/CIFAR example:
+Several components are translated from the official Keras ResNet/CIFAR example:
 https://keras.io/examples/cifar10_resnet/
 """
 
