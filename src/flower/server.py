@@ -24,6 +24,7 @@ import numpy as np
 
 from flower.client import Client
 from flower.client_manager import ClientManager
+from flower.grpc_server.grpc_bridge import GRPCBridgeClosed
 from flower.history import History
 from flower.logger import log
 from flower.strategy import DefaultStrategy, Strategy
@@ -139,7 +140,12 @@ def eval_clients(clients: List[Client], weights: Weights) -> List[Tuple[int, flo
         futures = [executor.submit(eval_client, c, weights) for c in clients]
         concurrent.futures.wait(futures)
         for future in futures:
-            results.append(future.result())
+            try:
+                results.append(future.result())
+            except GRPCBridgeClosed as ex:
+                print("Bridge exception")
+                print(ex)
+
     return results
 
 

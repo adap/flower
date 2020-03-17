@@ -61,6 +61,13 @@ def start_client(
         log(DEBUG, "Opened (insecure) gRPC connection")
 
         while True:
+            log(DEBUG, "CID: %s | Receive server message", client.cid)
             server_message = receive()
+            
+            log(DEBUG, "CID: %s | Handle server message", client.cid)
             client_message = handle(client, server_message)
+
+            log(DEBUG, "CID: %s | Send client message", client.cid)
             send(client_message)
+
+        print("Exiting while loop - this should not happen as there is no break")

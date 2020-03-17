@@ -17,8 +17,9 @@
 from enum import Enum
 from threading import Condition
 from typing import Iterator, Optional
-
+from logging import DEBUG
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
+from flower.logger import log
 
 
 class GRPCBridgeClosed(Exception):
@@ -108,6 +109,7 @@ class GRPCBridge:
     def request(self, server_message: ServerMessage) -> ClientMessage:
         """Set server massage and wait for client message."""
         # Set server message and transition to SERVER_MESSAGE_AVAILABLE
+        log(DEBUG, "request()")
         with self._cv:
             self._raise_if_closed()
 
@@ -135,6 +137,7 @@ class GRPCBridge:
 
     def server_message_iterator(self) -> Iterator[ServerMessage]:
         """Return iterator over server messages."""
+        log(DEBUG, "server_message_iterator()")
         while not self._is_closed():
             with self._cv:
                 self._cv.wait_for(
@@ -159,6 +162,7 @@ class GRPCBridge:
 
     def set_client_message(self, client_message: ClientMessage) -> None:
         """Set client message for consumption."""
+        log(DEBUG, "set_client_message()")
         with self._cv:
             self._raise_if_closed()
 

@@ -16,6 +16,8 @@
 
 import argparse
 from typing import Tuple, cast
+from logging import DEBUG
+from flower.logger import log
 
 import numpy as np
 import tensorflow as tf
@@ -67,18 +69,24 @@ class MnistClient(flwr.Client):
 
     def fit(self, weights: flwr.Weights) -> Tuple[flwr.Weights, int]:
         # Use provided weights to update the local model
+        log(DEBUG, "self.model.set_weights(weights)")
         self.model.set_weights(weights)
         # Train the local model using the local dataset
+        log(DEBUG, "self.model.fit(self.x_local, self.y_local, epochs=4, verbose=2)")
         self.model.fit(self.x_local, self.y_local, epochs=4, verbose=2)
         # Return the refined weights and the number of examples used for training
+        log(DEBUG, "return self.model.get_weights(), len(self.x_local)")
         return self.model.get_weights(), len(self.x_local)
 
     def evaluate(self, weights: flwr.Weights) -> Tuple[int, float]:
         # Use provided weights to update the local model
+        log(DEBUG, "self.model.set_weights(weights)")
         self.model.set_weights(weights)
         # Evaluate the updated model on the local dataset
-        loss, _ = self.model.evaluate(self.x_local, self.y_local, verbose=0)
+        log(DEBUG, "self.model.evaluate()")
+        loss, _ = self.model.evaluate(self.x_local, self.y_local, verbose=1)
         # Return the number of examples used for evaluation along with the evaltion result (loss)
+        log(DEBUG, "%s", loss)
         return len(self.x_local), float(loss)
 
 

@@ -16,7 +16,7 @@
 from __future__ import annotations  # pylint: disable=unused-import
 
 from contextlib import contextmanager
-from logging import DEBUG
+from logging import DEBUG, ERROR
 from queue import Queue
 from typing import Callable, Iterator, Tuple
 
@@ -62,6 +62,8 @@ def insecure_grpc_connection(
 
     try:
         yield (receive, send)
+    except Exception as ex:
+        log(ERROR, ex)
     finally:
         # Make sure to have a final
         channel.close()

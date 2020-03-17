@@ -21,7 +21,8 @@ from flower.client import Client
 from flower.grpc_server import serde
 from flower.grpc_server.grpc_bridge import GRPCBridge
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
-
+from flower.logger import log
+from logging import DEBUG
 
 class GRPCProxyClient(Client):
     """Client implementation which delegates over the network using gRPC."""
@@ -33,7 +34,8 @@ class GRPCProxyClient(Client):
         self.bridge = bridge
 
     def get_weights(self) -> typing.Weights:
-        """Return the current local model weights"""
+        """Return the current local model weights."""
+        log(DEBUG, "CID: %s | get_weights()", self.cid)
         get_weights_msg = serde.server_get_weights_to_proto()
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(get_weights=get_weights_msg)
@@ -43,13 +45,15 @@ class GRPCProxyClient(Client):
 
     def fit(self, weights: typing.Weights) -> Tuple[typing.Weights, int]:
         """Refine the provided weights using the locally held dataset."""
+        log(DEBUG, "CID: %s | fit()", self.cid)
         fit_msg = serde.server_fit_to_proto(weights)
         client_msg: ClientMessage = self.bridge.request(ServerMessage(fit=fit_msg))
         weights, num_examples = serde.client_fit_from_proto(client_msg.fit)
         return weights, num_examples
 
     def evaluate(self, weights: typing.Weights) -> Tuple[int, float]:
-        """Evaluate the provided weights using the locally held dataset"""
+        """Evaluate the provided weights using the locally held dataset."""
+        log(DEBUG, "CID: %s | evaluate()", self.cid)
         evaluate_msg = serde.server_evaluate_to_proto(weights)
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(evaluate=evaluate_msg)

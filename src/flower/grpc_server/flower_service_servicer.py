@@ -20,9 +20,10 @@ Relevant knowledge for reading this modules code:
 from typing import Callable, Iterator
 
 import grpc
-
+from logging import DEBUG
+from flower.logger import log
 from flower.client_manager import ClientManager
-from flower.grpc_server.grpc_bridge import GRPCBridge
+from flower.grpc_server.grpc_bridge import GRPCBridge, GRPCBridgeClosed
 from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
 from flower.proto import transport_pb2_grpc
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
@@ -49,6 +50,7 @@ def register_client(
     if is_success:
 
         def rpc_termination_callback():
+            log(DEBUG, "CID: %s | rpc_termination_callback()", client.cid)
             client.bridge.close()
             client_manager.unregister(client)
 
@@ -103,4 +105,6 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                     client_message = next(client_message_iterator)
                     bridge.set_client_message(client_message)
                 except StopIteration:
+                    break
+                except GRPCBridgeClosed:
                     break
