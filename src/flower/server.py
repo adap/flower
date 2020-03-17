@@ -17,6 +17,7 @@
 
 import concurrent.futures
 from functools import reduce
+from logging import DEBUG
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -67,7 +68,7 @@ class Server:
             self._client_manager.num_available()
         )
         clients = self._client_manager.sample(sample_size)
-        log("DEBUG", f"evaluate sampled cids {[c.cid for c in clients]}")
+        log(DEBUG, "evaluate sampled cids %s", [c.cid for c in clients])
 
         # Evaluate current global weights on those clients
         results = eval_clients(clients, self.weights)
@@ -82,7 +83,7 @@ class Server:
             self._client_manager.num_available()
         )
         clients = self._client_manager.sample(sample_size)
-        log("DEBUG", f"fit_round sampled cids {[c.cid for c in clients]}")
+        log(DEBUG, "fit_round sampled cids %s", [c.cid for c in clients])
 
         # Collect training results from all clients participating in this round
         results = fit_clients(clients, self.weights)

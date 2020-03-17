@@ -15,6 +15,7 @@
 """Helper script to download CIFAR-10/100."""
 
 import argparse
+from logging import INFO
 
 import tensorflow as tf
 
@@ -34,7 +35,7 @@ def main() -> None:
         help="CIFAR version, allowed values: 10 or 100 (default: 100)",
     )
     args = parser.parse_args()
-    log("INFO", f"Download CIFAR-{args.cifar}")
+    log(INFO, "Download CIFAR-%s", args.cifar)
 
     # Load model and data
     download_data(num_classes=args.cifar)

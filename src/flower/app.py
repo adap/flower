@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Flower App."""
+from logging import DEBUG
 from typing import Dict
 
 from flower.client import Client
@@ -35,15 +36,15 @@ def start_server(
         port=grpc_server_port,
         client_manager=server.client_manager(),
     )
-    log("DEBUG", "Flower server running (insecure)")
+    log(DEBUG, "Flower server running (insecure)")
 
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
-    log("DEBUG", f"{hist}")
+    log(DEBUG, hist)
 
     # Evaluate the final trained model
     loss = server.evaluate()
-    log("DEBUG", f"Final loss after training: {loss}")
+    log(DEBUG, "Final loss after training: %s", loss)
 
     # Stop the gRPC server
     grpc_server.stop(1)
@@ -57,9 +58,7 @@ def start_client(
         address=grpc_server_address, port=grpc_server_port
     ) as conn:
         receive, send = conn
-        log(
-            "DEBUG", f"Opened (insecure) gRPC connection",
-        )
+        log(DEBUG, "Opened (insecure) gRPC connection")
 
         while True:
             server_message = receive()
