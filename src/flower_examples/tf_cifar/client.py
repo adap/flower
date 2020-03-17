@@ -12,10 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Example on how to build a Flower client using TensorFlow for CIFAR-10/100."""
+"""Example on how to build a Flower client using TensorFlow for CIFAR-10/100.
+
+Many components are translated from the official Keras ResNet/CIFAR example:
+https://keras.io/examples/cifar10_resnet/
+"""
 
 import argparse
-from typing import Optional, Tuple, cast
+from typing import Callable, Optional, Tuple, cast
 
 import numpy as np
 import tensorflow as tf
@@ -94,6 +98,7 @@ class CifarClient(flwr.Client):
         self.x_train, self.y_train = xy_train
         self.x_test, self.y_test = xy_test
         self.datagen: Optional[tf.keras.preprocessing.image.ImageDataGenerator] = None
+        self.epoch = 0
 
     def get_weights(self) -> flwr.Weights:
         log("DEBUG", "get_weights")
@@ -109,11 +114,22 @@ class CifarClient(flwr.Client):
         # Use provided weights to update the local model
         self.model.set_weights(weights)
 
+        # Learning rate
+        lr_schedule = get_lr_schedule(self.epoch)
+        lr_scheduler = tf.keras.callbacks.LearningRateScheduler(lr_schedule)
+        lr_reducer = tf.keras.callbacks.ReduceLROnPlateau(
+            factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6
+        )
+        callbacks = [lr_reducer, lr_scheduler]
+
         # Train the local model using the local dataset
+        num_epochs = 1
         self.model.fit_generator(
             self.datagen.flow(self.x_train, self.y_train, batch_size=BATCH_SIZE),
-            epochs=1,
+            epochs=num_epochs,
+            callbacks=callbacks,
         )
+        self.epoch += num_epochs
 
         # Return the refined weights and the number of examples used for training
         return self.model.get_weights(), len(self.x_train)
@@ -219,6 +235,36 @@ def load_datagen(
     )
     datagen.fit(x_train)
     return datagen
+
+
+def get_lr_schedule(epoch_base: int) -> Callable[[int], float]:
+    """Return a learning rate function."""
+
+    def lr_schedule(epoch: int) -> float:
+        """Learning Rate Schedule
+
+        Learning rate is scheduled to be reduced after 80, 120, 160, 180 epochs.
+        Called automatically every epoch as part of callbacks during training.
+
+        # Arguments
+            epoch (int): The number of epochs
+
+        # Returns
+            lr (float32): learning rate
+        """
+        epoch += epoch_base
+        learning_rate = 1e-3
+        if epoch > 180:
+            learning_rate *= 0.5e-3
+        elif epoch > 160:
+            learning_rate *= 1e-3
+        elif epoch > 120:
+            learning_rate *= 1e-2
+        elif epoch > 80:
+            learning_rate *= 1e-1
+        return learning_rate
+
+    return lr_schedule
 
 
 if __name__ == "__main__":
