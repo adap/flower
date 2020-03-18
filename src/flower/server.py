@@ -89,8 +89,9 @@ class Server:
         results, _ = fit_clients(clients, self.weights)
 
         # Aggregate training results and replace previous global model
-        weights_prime = aggregate(results)
-        self.weights = weights_prime
+        if results:
+            weights_prime = aggregate(results)
+            self.weights = weights_prime
 
     def _get_initial_weights(self) -> Weights:
         """Get initial weights from one of the available clients"""
