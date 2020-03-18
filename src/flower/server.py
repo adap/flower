@@ -71,8 +71,13 @@ class Server:
         log(DEBUG, "evaluate sampled cids %s", [c.cid for c in clients])
 
         # Evaluate current global weights on those clients
-        results, _ = eval_clients(clients, self.weights)
-
+        results, failures = eval_clients(clients, self.weights)
+        log(
+            DEBUG,
+            "evaluate received %s results and %s failures",
+            len(results),
+            len(failures),
+        )
         # Aggregate the evaluation results
         return weighted_loss_avg(results)
 
@@ -86,7 +91,13 @@ class Server:
         log(DEBUG, "fit_round sampled cids %s", [c.cid for c in clients])
 
         # Collect training results from all clients participating in this round
-        results, _ = fit_clients(clients, self.weights)
+        results, failures = fit_clients(clients, self.weights)
+        log(
+            DEBUG,
+            "fit_round received %s results and %s failures",
+            len(results),
+            len(failures),
+        )
 
         # Aggregate training results and replace previous global model
         if results:
