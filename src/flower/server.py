@@ -71,7 +71,7 @@ class Server:
         log(DEBUG, "evaluate sampled cids %s", [c.cid for c in clients])
 
         # Evaluate current global weights on those clients
-        results = eval_clients(clients, self.weights)
+        results, _ = eval_clients(clients, self.weights)
 
         # Aggregate the evaluation results
         return weighted_loss_avg(results)
@@ -86,11 +86,12 @@ class Server:
         log(DEBUG, "fit_round sampled cids %s", [c.cid for c in clients])
 
         # Collect training results from all clients participating in this round
-        results = fit_clients(clients, self.weights)
+        results, _ = fit_clients(clients, self.weights)
 
         # Aggregate training results and replace previous global model
-        weights_prime = aggregate(results)
-        self.weights = weights_prime
+        if results:
+            weights_prime = aggregate(results)
+            self.weights = weights_prime
 
     def _get_initial_weights(self) -> Weights:
         """Get initial weights from one of the available clients"""
@@ -98,20 +99,54 @@ class Server:
         return random_client.get_weights()
 
 
-def fit_clients(clients: List[Client], weights: Weights) -> List[Tuple[Weights, int]]:
+def fit_clients(
+    clients: List[Client], weights: Weights
+) -> Tuple[List[Tuple[Weights, int]], List[BaseException]]:
     """Refine weights concurrently on all selected clients"""
-    results: List[Tuple[Weights, int]] = []
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(fit_client, c, weights) for c in clients]
         concurrent.futures.wait(futures)
-        for future in futures:
+    # Gather results
+    results: List[Tuple[Weights, int]] = []
+    failures: List[BaseException] = []
+    for future in futures:
+        failure = future.exception()
+        if failure is not None:
+            failures.append(failure)
+        else:
+            # Success case
             results.append(future.result())
-    return results
+    return results, failures
 
 
 def fit_client(client: Client, weights: Weights) -> Tuple[Weights, int]:
     """Refine weights on a single client"""
     return client.fit(weights)
+
+
+def eval_clients(
+    clients: List[Client], weights: Weights
+) -> Tuple[List[Tuple[int, float]], List[BaseException]]:
+    """Evaluate weights concurrently on all selected clients"""
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(eval_client, c, weights) for c in clients]
+        concurrent.futures.wait(futures)
+    # Gather results
+    results: List[Tuple[int, float]] = []
+    failures: List[BaseException] = []
+    for future in futures:
+        failure = future.exception()
+        if failure is not None:
+            failures.append(failure)
+        else:
+            # Success case
+            results.append(future.result())
+    return results, failures
+
+
+def eval_client(client: Client, weights: Weights) -> Tuple[int, float]:
+    """Evaluate weights on a single client"""
+    return client.evaluate(weights)
 
 
 def aggregate(results: List[Tuple[Weights, int]]) -> Weights:
@@ -130,22 +165,6 @@ def aggregate(results: List[Tuple[Weights, int]]) -> Weights:
         for layer_updates in zip(*weighted_weights)
     ]
     return weights_prime
-
-
-def eval_clients(clients: List[Client], weights: Weights) -> List[Tuple[int, float]]:
-    """Evaluate weights concurrently on all selected clients"""
-    results: List[Tuple[int, float]] = []
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(eval_client, c, weights) for c in clients]
-        concurrent.futures.wait(futures)
-        for future in futures:
-            results.append(future.result())
-    return results
-
-
-def eval_client(client: Client, weights: Weights) -> Tuple[int, float]:
-    """Evaluate weights on a single client"""
-    return client.evaluate(weights)
 
 
 def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:

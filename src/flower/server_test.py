@@ -15,9 +15,77 @@
 """Flower server tests"""
 
 
+from typing import List, Tuple
+
 import numpy as np
 
-from .server import aggregate, weighted_loss_avg
+from .client import Client
+from .server import aggregate, eval_clients, fit_clients, weighted_loss_avg
+from .typing import Weights
+
+
+class SuccessClient(Client):
+    """Test class."""
+
+    def get_weights(self) -> Weights:
+        # This method is not expected to be called
+        raise Exception()
+
+    def fit(self, weights: Weights) -> Tuple[Weights, int]:
+        return [], 1
+
+    def evaluate(self, weights: Weights) -> Tuple[int, float]:
+        return 1, 1.0
+
+
+class FailingCLient(Client):
+    """Test class."""
+
+    def get_weights(self) -> Weights:
+        raise Exception()
+
+    def fit(self, weights: Weights) -> Tuple[Weights, int]:
+        raise Exception()
+
+    def evaluate(self, weights: Weights) -> Tuple[int, float]:
+        raise Exception()
+
+
+def test_fit_clients() -> None:
+    """Test fit_clients."""
+    # Prepare
+    clients: List[Client] = [
+        FailingCLient("0"),
+        SuccessClient("1"),
+    ]
+    weights: Weights = []
+
+    # Execute
+    results, failures = fit_clients(clients, weights)
+
+    # Assert
+    assert len(results) == 1
+    assert len(failures) == 1
+    assert results[0][1] == 1
+
+
+def test_eval_clients() -> None:
+    """Test eval_clients."""
+    # Prepare
+    clients: List[Client] = [
+        FailingCLient("0"),
+        SuccessClient("1"),
+    ]
+    weights: Weights = []
+
+    # Execute
+    results, failures = eval_clients(clients, weights)
+
+    # Assert
+    assert len(results) == 1
+    assert len(failures) == 1
+    assert results[0][0] == 1
+    assert results[0][1] == 1.0
 
 
 def test_aggregate() -> None:
