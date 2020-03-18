@@ -42,7 +42,12 @@ def start_server(
         port=grpc_server_port,
         client_manager=server.client_manager(),
     )
-    log(DEBUG, "Flower server running (insecure, %s rounds)", config["num_rounds"])
+    log(
+        DEBUG,
+        "Flower server running (insecure, %s rounds, faulthandler %s)",
+        config["num_rounds"],
+        enable_fault_handler,
+    )
 
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
