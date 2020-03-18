@@ -18,7 +18,7 @@ import os
 from datetime import datetime
 
 LOGGER_NAME = "flower"
-DEFAULT_LOGFILE = f"flower_{os.getpid()}_{datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S.%f')[:-3]}.log"  # pylint: disable=C0301
+DEFAULT_LOGFILE = f"flower_{datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S.%f')[:-3]}_{os.getpid()}.log"  # pylint: disable=C0301
 
 
 def configure(logfile: str = DEFAULT_LOGFILE) -> None:
