@@ -68,6 +68,7 @@ def main() -> None:
         args.grpc_server_port,
         server,
         config={"num_rounds": args.rounds},
+        enable_fault_handler=True,
     )
 
 

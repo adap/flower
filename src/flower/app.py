@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Flower App."""
+import faulthandler
 from logging import DEBUG
 from typing import Dict
 
@@ -29,8 +30,13 @@ def start_server(
     grpc_server_port: int,
     server: Server,
     config: Dict[str, int],
+    enable_fault_handler: bool = False,
 ) -> None:
     """Start a Flower server using the gRPC transport layer."""
+    if enable_fault_handler:
+        faulthandler.enable()
+
+    # Start gRPC server with the appropriate client_manager
     grpc_server = start_insecure_grpc_server(
         address=grpc_server_address,
         port=grpc_server_port,
