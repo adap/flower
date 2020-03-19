@@ -40,10 +40,10 @@ python = "^3.7"
 numpy = "^1.18.1"
 grpcio = "^1.27.2"
 # Optional dependencies
-tensorflow = { version = "==2.1.0", optional = true }
+tensorflow-cpu = { version = "==2.1.0", optional = true }
 
 [tool.poetry.extras]
-examples-tensorflow = ["tensorflow"]
+examples-tensorflow = ["tensorflow-cpu"]
 
 [tool.poetry.dev-dependencies]
 isort = "==4.3.21"
