@@ -15,6 +15,7 @@
 """Flower server strategy."""
 
 from abc import ABC, abstractmethod
+from typing import Tuple
 
 
 class Strategy(ABC):
@@ -32,11 +33,11 @@ class Strategy(ABC):
         """Decide if the current global model should be evaluated or not."""
 
     @abstractmethod
-    def num_fit_clients(self, num_available_clients: int) -> int:
+    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Determine the number of clients used for training."""
 
     @abstractmethod
-    def num_evaluation_clients(self, num_available_clients: int) -> int:
+    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Determine the number of clients used for evaluation."""
 
 
@@ -47,10 +48,10 @@ class DefaultStrategy(Strategy):
         """Evaluate every round."""
         return True
 
-    def num_fit_clients(self, num_available_clients: int) -> int:
+    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use 10% of available clients for training (minimum: 1)."""
-        return int(max(num_available_clients * 0.1, 1))
+        return int(max(num_available_clients * 0.1, 1)), 1
 
-    def num_evaluation_clients(self, num_available_clients: int) -> int:
+    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use 5% of available clients for evaluation (minimum: 1)."""
-        return int(max(num_available_clients * 0.05, 1))
+        return int(max(num_available_clients * 0.05, 1)), 1

@@ -37,7 +37,7 @@ def test_default_strategy_num_fit_clients_20_available() -> None:
     expected = 2
 
     # Execute
-    actual = strategy.num_fit_clients(num_available_clients=20)
+    actual, _ = strategy.num_fit_clients(num_available_clients=20)
 
     # Assert
     assert expected == actual
@@ -51,7 +51,7 @@ def test_default_strategy_num_fit_clients_19_available() -> None:
     expected = 1
 
     # Execute
-    actual = strategy.num_fit_clients(num_available_clients=19)
+    actual, _ = strategy.num_fit_clients(num_available_clients=19)
 
     # Assert
     assert expected == actual
@@ -65,7 +65,7 @@ def test_default_strategy_num_fit_clients_10_available() -> None:
     expected = 1
 
     # Execute
-    actual = strategy.num_fit_clients(num_available_clients=10)
+    actual, _ = strategy.num_fit_clients(num_available_clients=10)
 
     # Assert
     assert expected == actual
@@ -79,7 +79,7 @@ def test_default_strategy_num_fit_clients_minimum() -> None:
     expected = 1
 
     # Execute
-    actual = strategy.num_fit_clients(num_available_clients=9)
+    actual, _ = strategy.num_fit_clients(num_available_clients=9)
 
     # Assert
     assert expected == actual
@@ -93,7 +93,7 @@ def test_default_strategy_num_evaluation_clients_40_available() -> None:
     expected = 2
 
     # Execute
-    actual = strategy.num_evaluation_clients(num_available_clients=40)
+    actual, _ = strategy.num_evaluation_clients(num_available_clients=40)
 
     # Assert
     assert expected == actual
@@ -107,7 +107,7 @@ def test_default_strategy_num_evaluation_clients_39_available() -> None:
     expected = 1
 
     # Execute
-    actual = strategy.num_evaluation_clients(num_available_clients=39)
+    actual, _ = strategy.num_evaluation_clients(num_available_clients=39)
 
     # Assert
     assert expected == actual
@@ -121,7 +121,7 @@ def test_default_strategy_num_evaluation_clients_20_available() -> None:
     expected = 1
 
     # Execute
-    actual = strategy.num_evaluation_clients(num_available_clients=20)
+    actual, _ = strategy.num_evaluation_clients(num_available_clients=20)
 
     # Assert
     assert expected == actual
@@ -135,7 +135,7 @@ def test_default_strategy_num_evaluation_clients_minimum() -> None:
     expected = 1
 
     # Execute
-    actual = strategy.num_evaluation_clients(num_available_clients=19)
+    actual, _ = strategy.num_evaluation_clients(num_available_clients=19)
 
     # Assert
     assert expected == actual

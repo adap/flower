@@ -18,5 +18,9 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
-# Start five clients
-python -m flower_examples.tf_cifar.server --rounds=10
+# Start a Flower server
+python -m flower_examples.tf_cifar.server \
+  --rounds=10 \
+  --sample_fraction=0.5 \
+  --min_sample_size=10 \
+  --min_num_clients=80
