@@ -62,8 +62,8 @@ def main() -> None:
         "--cifar",
         type=int,
         choices=[10, 100],
-        default=100,
-        help="CIFAR version, allowed values: 10 or 100 (default: 100)",
+        default=10,
+        help="CIFAR version, allowed values: 10 or 100 (default: 10)",
     )
     parser.add_argument(
         "--clients", type=int, help="Number of clients (no default)",
