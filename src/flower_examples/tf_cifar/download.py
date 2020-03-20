@@ -31,8 +31,8 @@ def main() -> None:
         "--cifar",
         type=int,
         choices=[10, 100],
-        default=100,
-        help="CIFAR version, allowed values: 10 or 100 (default: 100)",
+        default=10,
+        help="CIFAR version, allowed values: 10 or 100 (default: 10)",
     )
     args = parser.parse_args()
     log(INFO, "Download CIFAR-%s", args.cifar)
