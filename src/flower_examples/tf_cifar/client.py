@@ -78,7 +78,9 @@ def main() -> None:
     )
 
     # Load model and data
-    model = load_model(input_shape=(32, 32, 3), num_classes=args.cifar)
+    model = load_model(
+        input_shape=(32, 32, 3), num_classes=args.cifar, learning_rate=get_lr_initial()
+    )
     xy_train, xy_test = load_data(
         partition=args.partition, num_classes=args.cifar, num_clients=args.clients
     )
@@ -148,13 +150,17 @@ class CifarClient(flwr.Client):
         return len(self.x_test), float(loss)
 
 
-def load_model(input_shape: Tuple[int, int, int], num_classes: int) -> tf.keras.Model:
+def load_model(
+    input_shape: Tuple[int, int, int], num_classes: int, learning_rate: float
+) -> tf.keras.Model:
     """Create a ResNet-50 (v2) instance"""
     model = tf.keras.applications.ResNet50V2(
         weights=None, include_top=True, input_shape=input_shape, classes=num_classes
     )
     model.compile(
-        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+        optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+        loss="categorical_crossentropy",
+        metrics=["accuracy"],
     )
     return model
 
@@ -269,6 +275,11 @@ def get_lr_schedule(epoch_base: int) -> Callable[[int], float]:
         return learning_rate
 
     return lr_schedule
+
+
+def get_lr_initial() -> float:
+    """Return the initial learning rate."""
+    return get_lr_schedule(0)(0)
 
 
 if __name__ == "__main__":
