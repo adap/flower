@@ -53,11 +53,19 @@ class Server:
         for current_round in range(num_rounds):
             # Refine model
             self.fit_round()
-            # Evaluate refined model
+
+            # Evaluate model using strategy implementation
+            res = self.strategy.evaluate(weights=self.weights)
+            if res is not None:
+                history.add_loss_centralized(rnd=current_round, loss=res[0])
+                history.add_accuracy_centralized(rnd=current_round, acc=res[1])
+
+            # Evaluate model on a sample of available clients
             if self.strategy.should_evaluate():
                 loss_avg = self.evaluate()
-                history.add_loss(current_round, loss_avg)
-            # Inform strategy that we're moving on to the next round
+                history.add_loss_distributed(rnd=current_round, loss=loss_avg)
+
+            # Inform strategy that the next round is about to begin
             self.strategy.next_round()
         return history
 
