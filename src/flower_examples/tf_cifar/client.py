@@ -158,7 +158,7 @@ def load_model(
         weights=None, include_top=True, input_shape=input_shape, classes=num_classes
     )
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=lr),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
         loss="categorical_crossentropy",
         metrics=["accuracy"],
     )
