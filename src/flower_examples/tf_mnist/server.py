@@ -16,7 +16,7 @@
 
 
 import argparse
-from typing import Tuple
+from typing import Optional, Tuple
 
 import flower as flwr
 
@@ -37,6 +37,10 @@ class MnistStrategy(flwr.Strategy):
     def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use 5% of available clients for evaluation (minimum: 3)."""
         return int(max(num_available_clients * 0.05, 3)), 5
+
+    def evaluate(self, weights: flwr.Weights) -> Optional[Tuple[float, float]]:
+        """Do not evaluate using stretegy."""
+        return None
 
 
 def main() -> None:

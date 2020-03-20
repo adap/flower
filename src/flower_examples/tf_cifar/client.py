@@ -80,7 +80,7 @@ def main() -> None:
     # Load model and data
     model = load_model(input_shape=(32, 32, 3), num_classes=args.cifar)
     xy_train, xy_test = load_data(
-        args.partition, num_classes=args.cifar, num_clients=args.clients
+        partition=args.partition, num_classes=args.cifar, num_clients=args.clients
     )
 
     # Start client
