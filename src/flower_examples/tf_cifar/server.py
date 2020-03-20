@@ -45,7 +45,7 @@ class CifarStrategy(flwr.Strategy):
 
     def should_evaluate(self) -> bool:
         """Evaluate every round."""
-        return True
+        return False
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Determine number of clients used for training."""
