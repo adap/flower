@@ -79,7 +79,7 @@ def main() -> None:
 
     # Load model and data
     model = load_model(
-        input_shape=(32, 32, 3), num_classes=args.cifar, lr=get_lr_initial()
+        input_shape=(32, 32, 3), num_classes=args.cifar, learning_rate=get_lr_initial()
     )
     xy_train, xy_test = load_data(
         partition=args.partition, num_classes=args.cifar, num_clients=args.clients
@@ -151,7 +151,7 @@ class CifarClient(flwr.Client):
 
 
 def load_model(
-    input_shape: Tuple[int, int, int], num_classes: int, lr: float
+    input_shape: Tuple[int, int, int], num_classes: int, learning_rate: float
 ) -> tf.keras.Model:
     """Create a ResNet-50 (v2) instance"""
     model = tf.keras.applications.ResNet50V2(

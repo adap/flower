@@ -64,7 +64,9 @@ class CifarStrategy(flwr.Strategy):
     def evaluate(self, weights: flwr.Weights) -> Optional[Tuple[float, float]]:
         """Use entire CIFAR test set for evaluation."""
         model = load_model(
-            input_shape=(32, 32, 3), num_classes=self.num_classes, lr=get_lr_initial()
+            input_shape=(32, 32, 3),
+            num_classes=self.num_classes,
+            learning_rate=get_lr_initial(),
         )
         model.set_weights(weights)
         loss, acc = model.evaluate(
