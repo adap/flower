@@ -13,7 +13,10 @@
 # limitations under the License.
 # ==============================================================================
 """Minimal example on how to start a simple Flower server."""
+
+
 import argparse
+from typing import Tuple
 
 import flower as flwr
 
@@ -27,13 +30,13 @@ class MnistStrategy(flwr.Strategy):
         """Evaluate every round."""
         return True
 
-    def num_fit_clients(self, num_available_clients: int) -> int:
+    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use 10% of available clients for training (minimum: 3)."""
-        return int(max(num_available_clients * 0.1, 3))
+        return int(max(num_available_clients * 0.1, 3)), 5
 
-    def num_evaluation_clients(self, num_available_clients: int) -> int:
+    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use 5% of available clients for evaluation (minimum: 3)."""
-        return int(max(num_available_clients * 0.05, 3))
+        return int(max(num_available_clients * 0.05, 3)), 5
 
 
 def main() -> None:

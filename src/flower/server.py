@@ -64,11 +64,24 @@ class Server:
     def evaluate(self) -> float:
         """Validate current global model on a number of clients"""
         # Sample clients for evaluation
-        sample_size = self.strategy.num_evaluation_clients(
+        sample_size, min_num_clients = self.strategy.num_evaluation_clients(
             self._client_manager.num_available()
         )
-        clients = self._client_manager.sample(sample_size)
-        log(DEBUG, "evaluate sampled cids %s", [c.cid for c in clients])
+        log(
+            DEBUG,
+            "evaluate: sample %s cids once %s clients are available",
+            sample_size,
+            min_num_clients,
+        )
+        clients = self._client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
+        log(
+            DEBUG,
+            "evaluate: sampled %s cids: %s",
+            len(clients),
+            [c.cid for c in clients],
+        )
 
         # Evaluate current global weights on those clients
         results, failures = eval_clients(clients, self.weights)
@@ -84,11 +97,24 @@ class Server:
     def fit_round(self) -> None:
         """Perform a single round of federated averaging"""
         # Sample a number of clients (dependent on the strategy)
-        sample_size = self.strategy.num_evaluation_clients(
+        sample_size, min_num_clients = self.strategy.num_fit_clients(
             self._client_manager.num_available()
         )
-        clients = self._client_manager.sample(sample_size)
-        log(DEBUG, "fit_round sampled cids %s", [c.cid for c in clients])
+        log(
+            DEBUG,
+            "fit_round: sample %s cids once %s clients are available",
+            sample_size,
+            min_num_clients,
+        )
+        clients = self._client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
+        log(
+            DEBUG,
+            "fit_round: sampled %s cids: %s",
+            len(clients),
+            [c.cid for c in clients],
+        )
 
         # Collect training results from all clients participating in this round
         results, failures = fit_clients(clients, self.weights)

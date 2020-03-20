@@ -47,7 +47,10 @@ class ClientManager(ABC):
 
     @abstractmethod
     def sample(
-        self, num_clients: int, criterion: Optional[Criterion] = None
+        self,
+        num_clients: int,
+        min_num_clients: Optional[int] = None,
+        criterion: Optional[Criterion] = None,
     ) -> List[Client]:
         """Sample a number of Flower Client instances."""
         raise NotImplementedError()
@@ -102,11 +105,17 @@ class SimpleClientManager(ClientManager):
                 self._cv.notify_all()
 
     def sample(
-        self, num_clients: int, criterion: Optional[Criterion] = None
+        self,
+        num_clients: int,
+        min_num_clients: Optional[int] = None,
+        criterion: Optional[Criterion] = None,
     ) -> List[Client]:
         """Sample a number of Flower Client instances."""
         # Block until at least num_clients are connected.
-        self._wait_for_clients(num_clients)
+        if min_num_clients is None:
+            min_num_clients = num_clients
+        self._wait_for_clients(min_num_clients)
+        # Sample clients which meet the criterion
         available_cids = list(self.clients)
         if criterion is not None:
             available_cids = [

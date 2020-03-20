@@ -14,6 +14,7 @@
 # ==============================================================================
 """Example on how to start a simple Flower server."""
 import argparse
+from typing import Tuple
 
 import flower as flwr
 
@@ -23,17 +24,31 @@ from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 class CifarStrategy(flwr.Strategy):
     """Strategy using at least three clients for training and evaluation."""
 
+    def __init__(
+        self, sample_fraction: float, min_sample_size: int, min_num_clients: int
+    ) -> None:
+        super().__init__()
+        self.sample_fraction = sample_fraction
+        self.min_sample_size = min_sample_size
+        self.min_num_clients = min_num_clients
+
     def should_evaluate(self) -> bool:
         """Evaluate every round."""
         return True
 
-    def num_fit_clients(self, num_available_clients: int) -> int:
-        """Use 10% of available clients for training (minimum: 3)."""
-        return int(max(num_available_clients * 0.1, 3))
+    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
+        """Determine number of clients used for training."""
+        sample_size = int(
+            max(num_available_clients * self.sample_fraction, self.min_sample_size)
+        )
+        return sample_size, self.min_num_clients
 
-    def num_evaluation_clients(self, num_available_clients: int) -> int:
-        """Use 10% of available clients for evaluation (minimum: 3)."""
-        return int(max(num_available_clients * 0.1, 3))
+    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
+        """Determine number of clients used for evaluation."""
+        sample_size = int(
+            max(num_available_clients * self.sample_fraction, self.min_sample_size)
+        )
+        return sample_size, self.min_num_clients
 
 
 def main() -> None:
@@ -57,11 +72,31 @@ def main() -> None:
         default=1,
         help="Number of rounds of federated learning (default: 1)",
     )
+    parser.add_argument(
+        "--sample_fraction",
+        type=float,
+        default=0.1,
+        help="Fraction of available clients used for fit/evaluate (default: 0.1)",
+    )
+    parser.add_argument(
+        "--min_sample_size",
+        type=int,
+        default=1,
+        help="Minimum number of clients used for fit/evaluate (default: 1)",
+    )
+    parser.add_argument(
+        "--min_num_clients",
+        type=int,
+        default=1,
+        help="Minimum number of available clients required for sampling (default: 1)",
+    )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
     args = parser.parse_args()
 
     client_manager = flwr.SimpleClientManager()
-    strategy = CifarStrategy()
+    strategy = CifarStrategy(
+        args.sample_fraction, args.min_sample_size, args.min_num_clients
+    )
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
     flwr.app.start_server(
         args.grpc_server_address,
