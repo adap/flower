@@ -33,10 +33,7 @@ from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 tf.get_logger().setLevel("ERROR")
 
 SEED = 2020
-BATCH_SIZE = 32
-SAMPLE_TRAIN = 150
-SAMPLE_TEST = 50
-NUM_EPOCHS = 1
+BATCH_SIZE = 64
 
 
 def main() -> None:
@@ -90,6 +87,7 @@ def main() -> None:
     flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
 
 
+# pylint: disable-msg=too-many-instance-attributes
 class CifarClient(flwr.Client):
     """Flower client implementing CIAFR-10/100 image classification using TF."""
 
@@ -106,13 +104,15 @@ class CifarClient(flwr.Client):
         self.x_test, self.y_test = xy_test
         self.datagen: Optional[tf.keras.preprocessing.image.ImageDataGenerator] = None
         self.epoch = 0
+        self.rnd = 0
 
     def get_weights(self) -> flwr.Weights:
         log(DEBUG, "get_weights")
         return cast(flwr.Weights, self.model.get_weights())
 
     def fit(self, weights: flwr.Weights) -> Tuple[flwr.Weights, int]:
-        log(DEBUG, "fit")
+        self.rnd += 1
+        log(DEBUG, "fit, round %s", self.rnd)
 
         # Lazy initialization of the ImageDataGenerator
         if self.datagen is None:
@@ -130,12 +130,13 @@ class CifarClient(flwr.Client):
         callbacks = [lr_reducer, lr_scheduler]
 
         # Train the local model using the local dataset
+        epochs = num_epochs(self.rnd)
         self.model.fit_generator(
             self.datagen.flow(self.x_train, self.y_train, batch_size=BATCH_SIZE),
-            epochs=NUM_EPOCHS,
+            epochs=num_epochs(self.rnd),
             callbacks=callbacks,
         )
-        self.epoch += NUM_EPOCHS
+        self.epoch += epochs
 
         # Return the refined weights and the number of examples used for training
         return self.model.get_weights(), len(self.x_train)
@@ -145,9 +146,22 @@ class CifarClient(flwr.Client):
         # Use provided weights to update the local model
         self.model.set_weights(weights)
         # Evaluate the updated model on the local dataset
-        loss, _ = self.model.evaluate(self.x_test, self.y_test, batch_size=SAMPLE_TEST)
+        loss, _ = self.model.evaluate(
+            self.x_test, self.y_test, batch_size=len(self.x_test)
+        )
         # Return the number of evaluation examples and the evaltion result (loss)
         return len(self.x_test), float(loss)
+
+
+def num_epochs(rnd: int) -> int:
+    """Determine the number of local epochs."""
+    if rnd <= 20:
+        return 2
+    if rnd <= 40:
+        return 4
+    if rnd <= 60:
+        return 6
+    return 8
 
 
 def load_model(
