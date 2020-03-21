@@ -87,6 +87,7 @@ def main() -> None:
     flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
 
 
+# pylint: disable-msg=too-many-instance-attributes
 class CifarClient(flwr.Client):
     """Flower client implementing CIAFR-10/100 image classification using TF."""
 
