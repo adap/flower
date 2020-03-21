@@ -17,7 +17,7 @@
 
 import concurrent.futures
 from functools import reduce
-from logging import DEBUG
+from logging import DEBUG, INFO
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -48,15 +48,28 @@ class Server:
         """Run federated averaging for a number of rounds"""
         # Initialize weights by asking one client to return theirs
         self.weights = self._get_initial_weights()
+        res = self.strategy.evaluate(weights=self.weights)
+        if res is not None:
+            log(
+                INFO, "initial weights (loss/accuracy): %s, %s", res[0], res[1],
+            )
+
         # Run federated averaging for num_rounds
         history = History()
-        for current_round in range(num_rounds):
+        for current_round in range(1, num_rounds + 1):
             # Refine model
             self.fit_round()
 
             # Evaluate model using strategy implementation
             res = self.strategy.evaluate(weights=self.weights)
             if res is not None:
+                log(
+                    INFO,
+                    "progress (round/loss/accuracy): %s, %s, %s",
+                    current_round,
+                    res[0],
+                    res[1],
+                )
                 history.add_loss_centralized(rnd=current_round, loss=res[0])
                 history.add_accuracy_centralized(rnd=current_round, acc=res[1])
 
