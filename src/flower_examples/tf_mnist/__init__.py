@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Example on how to use Flower with TensorFlow for MNIST image classification."""
+"""Flower example using TensorFlow for Fashion-MNIST image classification."""
+
+
 DEFAULT_GRPC_SERVER_ADDRESS = "[::]"
 DEFAULT_GRPC_SERVER_PORT = 8080
