@@ -42,7 +42,9 @@ python src/flower_examples/mnist.py
 
 ## Documentation
 
-Documentation is still WIP and will be stored stored in `doc`.
+* [Documentation](https://flower.adap.com/docs/)
+
+Documentation is still WIP, please consider contributing.
 
 ## Contributing to Flower
 
