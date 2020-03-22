@@ -33,7 +33,10 @@ from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 tf.get_logger().setLevel("ERROR")
 
 SEED = 2020
-BATCH_SIZE = 64
+BATCH_SIZE = 50
+NUM_EPOCHS = 5
+LR_INITIAL = 0.15
+LR_DECAY = 0.99
 
 
 def main() -> None:
@@ -122,19 +125,17 @@ class CifarClient(flwr.Client):
         self.model.set_weights(weights)
 
         # Learning rate
-        lr_schedule = get_lr_schedule(self.epoch)
-        lr_scheduler = tf.keras.callbacks.LearningRateScheduler(lr_schedule)
-        lr_reducer = tf.keras.callbacks.ReduceLROnPlateau(
-            factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6
+        lr_schedule = get_lr_schedule_rnd(
+            self.rnd, lr_initial=LR_INITIAL, lr_decay=LR_DECAY
         )
-        callbacks = [lr_reducer, lr_scheduler]
+        lr_scheduler = tf.keras.callbacks.LearningRateScheduler(lr_schedule)
 
         # Train the local model using the local dataset
         epochs = num_epochs(self.rnd)
         self.model.fit_generator(
             self.datagen.flow(self.x_train, self.y_train, batch_size=BATCH_SIZE),
-            epochs=num_epochs(self.rnd),
-            callbacks=callbacks,
+            epochs=NUM_EPOCHS,
+            callbacks=[lr_scheduler],
         )
         self.epoch += epochs
 
@@ -172,7 +173,7 @@ def load_model(
         weights=None, include_top=True, input_shape=input_shape, classes=num_classes
     )
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+        optimizer=tf.keras.optimizers.SGD(learning_rate=learning_rate),
         loss="categorical_crossentropy",
         metrics=["accuracy"],
     )
@@ -261,7 +262,7 @@ def load_datagen(
     return datagen
 
 
-def get_lr_schedule(epoch_base: int) -> Callable[[int], float]:
+def get_lr_schedule_adam(epoch_base: int) -> Callable[[int], float]:
     """Return a learning rate function."""
 
     def lr_schedule(epoch: int) -> float:
@@ -291,9 +292,36 @@ def get_lr_schedule(epoch_base: int) -> Callable[[int], float]:
     return lr_schedule
 
 
+def get_lr_schedule_epoch(
+    epoch_base: int, lr_initial: float, lr_decay: float
+) -> Callable[[int], float]:
+    """Return a schedule which decays the learning rate after each epoch."""
+
+    def lr_schedule(epoch: int) -> float:
+        """Learning rate schedule."""
+        epoch += epoch_base
+        return lr_initial * lr_decay ** epoch
+
+    return lr_schedule
+
+
+def get_lr_schedule_rnd(
+    rnd: int, lr_initial: float, lr_decay: float
+) -> Callable[[int], float]:
+    """Return a schedule which decays the learning rate after each round."""
+    lr_rnd = lr_initial * lr_decay ** rnd
+
+    # pylint: disable-msg=unused-argument
+    def lr_schedule(epoch: int) -> float:
+        """Learning rate schedule."""
+        return lr_rnd
+
+    return lr_schedule
+
+
 def get_lr_initial() -> float:
     """Return the initial learning rate."""
-    return get_lr_schedule(0)(0)
+    return get_lr_schedule_rnd(rnd=0, lr_initial=LR_INITIAL, lr_decay=LR_DECAY)(0)
 
 
 if __name__ == "__main__":
