@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Example on how to use Flower with TensorFlow for MNIST image classification."""
-DEFAULT_GRPC_SERVER_ADDRESS = "[::]"
-DEFAULT_GRPC_SERVER_PORT = 8080
+
+set -e
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
+
+GRPC_SERVER_ADDRESS="[::]"
+GRPC_SERVER_PORT=8080
+
+# Start a Flower server
+python -m flower_examples.tf_fashion_mnist.server \
+  --grpc_server_address=$GRPC_SERVER_ADDRESS \
+  --grpc_server_port=$GRPC_SERVER_PORT
