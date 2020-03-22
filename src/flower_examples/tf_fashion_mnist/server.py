@@ -23,7 +23,7 @@ import flower as flwr
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 
 
-class MnistStrategy(flwr.Strategy):
+class FashionMnistStrategy(flwr.Strategy):
     """Strategy using at least three clients for training and evaluation."""
 
     def should_evaluate(self) -> bool:
@@ -45,7 +45,7 @@ class MnistStrategy(flwr.Strategy):
 
 def main() -> None:
     """Start server and train five rounds."""
-    parser = argparse.ArgumentParser(description="Flower/TensorFlower")
+    parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
         "--grpc_server_address",
         type=str,
@@ -62,7 +62,7 @@ def main() -> None:
     args = parser.parse_args()
 
     client_manager = flwr.SimpleClientManager()
-    strategy = MnistStrategy()
+    strategy = FashionMnistStrategy()
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
     flwr.app.start_server(
         args.grpc_server_address,

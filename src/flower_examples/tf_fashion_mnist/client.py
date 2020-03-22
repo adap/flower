@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Minimal example on how to build a Flower client using TensorFlow/Keras for MNIST."""
+"""Flower client example using TensorFlow for Fashion-MNIST image classification."""
+
 
 import argparse
 from typing import Tuple, cast
@@ -28,8 +29,8 @@ tf.get_logger().setLevel("ERROR")
 
 
 def main() -> None:
-    """Load data, create and start MnistClient."""
-    parser = argparse.ArgumentParser(description="Flower/TensorFlower")
+    """Load data, create and start FashionMnistClient."""
+    parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
         "--grpc_server_address",
         type=str,
@@ -47,12 +48,12 @@ def main() -> None:
 
     # Load data and start client
     x_local, y_local = load_data()
-    client = MnistClient(args.cid, load_model(), x_local, y_local)
+    client = FashionMnistClient(args.cid, load_model(), x_local, y_local)
     flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
 
 
-class MnistClient(flwr.Client):
-    """Flower client implementing MNIST image classification using TensorFlow/Keras."""
+class FashionMnistClient(flwr.Client):
+    """Flower client implementing Fashion-MNIST image classification using TensorFlow/Keras."""
 
     def __init__(
         self, cid: str, model: tf.keras.Model, x_local: np.ndarray, y_local: np.ndarray
@@ -99,9 +100,9 @@ def load_model() -> tf.keras.Model:
 
 
 def load_data() -> Tuple[np.ndarray, np.ndarray]:
-    """Load random MNIST subset."""
+    """Load random Fashion-MNIST subset."""
     # Load training and test data (ignoring the test data for now)
-    (x_train, y_train), (_, _) = tf.keras.datasets.mnist.load_data()
+    (x_train, y_train), (_, _) = tf.keras.datasets.fashion_mnist.load_data()
     x_train = x_train / 255.0
 
     # Take a random subset of the dataset to simulate different local datasets
