@@ -62,7 +62,7 @@ class FashionMnistStrategy(flwr.Strategy):
         return sample_size, self.min_num_clients
 
     def evaluate(self, weights: flwr.Weights) -> Optional[Tuple[float, float]]:
-        """Use entire CIFAR test set for evaluation."""
+        """Use entire Fashion-MNIST test set for evaluation."""
         model = load_model()
         model.set_weights(weights)
         loss, acc = model.evaluate(
