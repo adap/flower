@@ -188,9 +188,11 @@ def load_data(
     return (x_train, y_train), (x_test, y_test)
 
 
-def adjust_x_shape(x: np.ndarray) -> np.ndarray:
+def adjust_x_shape(nda: np.ndarray) -> np.ndarray:
     """Turn shape (x,y,z) into (x,y,z, 1)."""
-    return cast(np.ndarray, np.reshape(x, (x.shape[0], x.shape[1], x.shape[2], 1)))
+    return cast(
+        np.ndarray, np.reshape(nda, (nda.shape[0], nda.shape[1], nda.shape[2], 1))
+    )
 
 
 def shuffle(
