@@ -56,8 +56,12 @@ def main() -> None:
         default=DEFAULT_GRPC_SERVER_PORT,
         help="gRPC server port (default: 8080)",
     )
-    parser.add_argument("--cid", type=str, help="Client CID (no default)")
-    parser.add_argument("--partition", type=int, help="Partition index (no default)")
+    parser.add_argument(
+        "--cid", type=str, required=True, help="Client CID (no default)"
+    )
+    parser.add_argument(
+        "--partition", type=int, required=True, help="Partition index (no default)"
+    )
     parser.add_argument(
         "--cifar",
         type=int,
@@ -66,7 +70,7 @@ def main() -> None:
         help="CIFAR version, allowed values: 10 or 100 (default: 10)",
     )
     parser.add_argument(
-        "--clients", type=int, help="Number of clients (no default)",
+        "--clients", type=int, required=True, help="Number of clients (no default)",
     )
     args = parser.parse_args()
     log(
