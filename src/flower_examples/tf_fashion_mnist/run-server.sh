@@ -23,5 +23,7 @@ GRPC_SERVER_PORT=8080
 
 # Start a Flower server
 python -m flower_examples.tf_fashion_mnist.server \
-  --grpc_server_address=$GRPC_SERVER_ADDRESS \
-  --grpc_server_port=$GRPC_SERVER_PORT
+  --rounds=75 \
+  --sample_fraction=1.0 \
+  --min_sample_size=75 \
+  --min_num_clients=75

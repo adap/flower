@@ -58,17 +58,43 @@ def main() -> None:
         default=DEFAULT_GRPC_SERVER_PORT,
         help="gRPC server port (default: 8080)",
     )
+    parser.add_argument(
+        "--rounds",
+        type=int,
+        default=1,
+        help="Number of rounds of federated learning (default: 1)",
+    )
+    parser.add_argument(
+        "--sample_fraction",
+        type=float,
+        default=0.1,
+        help="Fraction of available clients used for fit/evaluate (default: 0.1)",
+    )
+    parser.add_argument(
+        "--min_sample_size",
+        type=int,
+        default=1,
+        help="Minimum number of clients used for fit/evaluate (default: 1)",
+    )
+    parser.add_argument(
+        "--min_num_clients",
+        type=int,
+        default=1,
+        help="Minimum number of available clients required for sampling (default: 1)",
+    )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
     args = parser.parse_args()
 
     client_manager = flwr.SimpleClientManager()
     strategy = FashionMnistStrategy()
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
+
+    # Run server
     flwr.app.start_server(
         args.grpc_server_address,
         args.grpc_server_port,
         server,
-        config={"num_rounds": 5},
+        config={"num_rounds": args.rounds},
     )
 
 
