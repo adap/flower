@@ -150,7 +150,7 @@ class CifarClient(flwr.Client):
         loss, _ = self.model.evaluate(
             self.x_test, self.y_test, batch_size=len(self.x_test)
         )
-        # Return the number of evaluation examples and the evaltion result (loss)
+        # Return the number of evaluation examples and the evaluation result (loss)
         return len(self.x_test), float(loss)
 
 
