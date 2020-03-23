@@ -23,7 +23,7 @@ import numpy as np
 import flower as flwr
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
-from .client import load_data, load_model
+from .client import get_lr_initial, load_data, load_model
 
 
 class FashionMnistStrategy(flwr.Strategy):
@@ -63,7 +63,7 @@ class FashionMnistStrategy(flwr.Strategy):
 
     def evaluate(self, weights: flwr.Weights) -> Optional[Tuple[float, float]]:
         """Use entire Fashion-MNIST test set for evaluation."""
-        model = load_model()
+        model = load_model(learning_rate=get_lr_initial())
         model.set_weights(weights)
         loss, acc = model.evaluate(
             self.x_test, self.y_test, batch_size=len(self.x_test)
