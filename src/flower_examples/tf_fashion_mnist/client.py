@@ -16,7 +16,6 @@
 
 
 import argparse
-import math
 from logging import DEBUG
 from typing import Tuple, cast
 
@@ -33,8 +32,6 @@ tf.get_logger().setLevel("ERROR")
 SEED = 2020
 BATCH_SIZE = 50
 NUM_EPOCHS = 1
-LR_INITIAL = 0.002
-EXP_DECAY_BASE = 0.01
 
 
 def main() -> None:
@@ -145,14 +142,10 @@ def load_model(
 
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
-    # Compile model with exponential learning rate decay
-    def exp_decay(epoch_optimizer: int) -> float:
-        epoch = epoch_base + epoch_optimizer
-        return LR_INITIAL * math.exp(-EXP_DECAY_BASE * epoch)
-
+    # Compile model
     model.compile(
         loss=tf.keras.losses.categorical_crossentropy,
-        optimizer=tf.keras.optimizers.Adam(lr=exp_decay(0)),
+        optimizer=tf.keras.optimizers.Adam(),
         metrics=["accuracy"],
     )
 
