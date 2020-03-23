@@ -16,6 +16,7 @@
 
 
 import argparse
+import math
 from logging import DEBUG
 from typing import Tuple, cast
 
@@ -31,7 +32,9 @@ tf.get_logger().setLevel("ERROR")
 
 SEED = 2020
 BATCH_SIZE = 50
-NUM_EPOCHS = 5
+NUM_EPOCHS = 1
+LR_INITIAL = 0.002
+EXP_DECAY_BASE = 0.01
 
 
 def main() -> None:
@@ -49,10 +52,14 @@ def main() -> None:
         default=DEFAULT_GRPC_SERVER_PORT,
         help="gRPC server port (default: 8080)",
     )
-    parser.add_argument("--cid", type=str, help="Client CID (no default)")
-    parser.add_argument("--partition", type=int, help="Partition index (no default)")
     parser.add_argument(
-        "--clients", type=int, help="Number of clients (no default)",
+        "--cid", type=str, required=True, help="Client CID (no default)"
+    )
+    parser.add_argument(
+        "--partition", type=int, required=True, help="Partition index (no default)"
+    )
+    parser.add_argument(
+        "--clients", type=int, required=True, help="Number of clients (no default)",
     )
     args = parser.parse_args()
 
@@ -104,19 +111,51 @@ class FashionMnistClient(flwr.Client):
         return len(self.x_test), float(loss)
 
 
-def load_model() -> tf.keras.Model:
-    """Create simple fully-connected neural network"""
-    model = tf.keras.models.Sequential(
-        [
-            tf.keras.layers.Flatten(input_shape=(28, 28)),
-            tf.keras.layers.Dense(128, activation="relu"),
-            tf.keras.layers.Dropout(0.2),
-            tf.keras.layers.Dense(10, activation="softmax"),
-        ]
-    )
+# pylint: disable-msg=unused-argument
+def load_model(
+    input_shape=(28, 28, 1), momentum: float = 0.0, epoch_base: int = 0,
+) -> tf.keras.Model:
+    # Kernel initializer
+    ki = tf.keras.initializers.glorot_uniform(seed=SEED)
+
+    # Architecture
+    inputs = tf.keras.layers.Input(shape=input_shape)
+    x = tf.keras.layers.Conv2D(
+        32,
+        kernel_size=(5, 5),
+        strides=(1, 1),
+        kernel_initializer=ki,
+        padding="same",
+        activation="relu",
+    )(inputs)
+    x = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(x)
+    x = tf.keras.layers.Conv2D(
+        64,
+        kernel_size=(5, 5),
+        strides=(1, 1),
+        kernel_initializer=ki,
+        padding="same",
+        activation="relu",
+    )(x)
+    x = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(x)
+    x = tf.keras.layers.Flatten()(x)
+    x = tf.keras.layers.Dense(512, kernel_initializer=ki, activation="relu")(x)
+
+    outputs = tf.keras.layers.Dense(10, kernel_initializer=ki, activation="softmax")(x)
+
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
+
+    # Compile model with exponential learning rate decay
+    def exp_decay(epoch_optimizer: int) -> float:
+        epoch = epoch_base + epoch_optimizer
+        return LR_INITIAL * math.exp(-EXP_DECAY_BASE * epoch)
+
     model.compile(
-        optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
+        loss=tf.keras.losses.categorical_crossentropy,
+        optimizer=tf.keras.optimizers.Adam(lr=exp_decay(0)),
+        metrics=["accuracy"],
     )
+
     return model
 
 
@@ -134,11 +173,23 @@ def load_data(
     x_train, y_train = get_partition(x_train, y_train, partition, num_clients)
     x_test, y_test = get_partition(x_test, y_test, partition, num_clients)
 
+    # Adjust x sets shape for model
+    x_train = adjust_x_shape(x_train)
+    x_test = adjust_x_shape(x_test)
+
     # Normalize data
-    x_train = x_train / 255.0
-    x_test = x_test / 255.0
+    x_train = x_train.astype("float32") / 255.0
+    x_test = x_test.astype("float32") / 255.0
+
+    # Convert class vectors to one-hot encoded labels
+    y_train = tf.keras.utils.to_categorical(y_train, 10)
+    y_test = tf.keras.utils.to_categorical(y_test, 10)
 
     return (x_train, y_train), (x_test, y_test)
+
+
+def adjust_x_shape(x):
+    return np.reshape(x, (x.shape[0], x.shape[1], x.shape[2], 1))
 
 
 def shuffle(
