@@ -110,35 +110,42 @@ class FashionMnistClient(flwr.Client):
 
 # pylint: disable-msg=unused-argument
 def load_model(
-    input_shape=(28, 28, 1), momentum: float = 0.0, epoch_base: int = 0,
+    input_shape: Tuple[int, int, int] = (28, 28, 1),
+    momentum: float = 0.0,
+    epoch_base: int = 0,
 ) -> tf.keras.Model:
+    """Load model for Fashion-MNIST."""
     # Kernel initializer
-    ki = tf.keras.initializers.glorot_uniform(seed=SEED)
+    kernel_initializer = tf.keras.initializers.glorot_uniform(seed=SEED)
 
     # Architecture
     inputs = tf.keras.layers.Input(shape=input_shape)
-    x = tf.keras.layers.Conv2D(
+    layers = tf.keras.layers.Conv2D(
         32,
         kernel_size=(5, 5),
         strides=(1, 1),
-        kernel_initializer=ki,
+        kernel_initializer=kernel_initializer,
         padding="same",
         activation="relu",
     )(inputs)
-    x = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(x)
-    x = tf.keras.layers.Conv2D(
+    layers = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(layers)
+    layers = tf.keras.layers.Conv2D(
         64,
         kernel_size=(5, 5),
         strides=(1, 1),
-        kernel_initializer=ki,
+        kernel_initializer=kernel_initializer,
         padding="same",
         activation="relu",
-    )(x)
-    x = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(x)
-    x = tf.keras.layers.Flatten()(x)
-    x = tf.keras.layers.Dense(512, kernel_initializer=ki, activation="relu")(x)
+    )(layers)
+    layers = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(layers)
+    layers = tf.keras.layers.Flatten()(layers)
+    layers = tf.keras.layers.Dense(
+        512, kernel_initializer=kernel_initializer, activation="relu"
+    )(layers)
 
-    outputs = tf.keras.layers.Dense(10, kernel_initializer=ki, activation="softmax")(x)
+    outputs = tf.keras.layers.Dense(
+        10, kernel_initializer=kernel_initializer, activation="softmax"
+    )(layers)
 
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
@@ -181,8 +188,9 @@ def load_data(
     return (x_train, y_train), (x_test, y_test)
 
 
-def adjust_x_shape(x):
-    return np.reshape(x, (x.shape[0], x.shape[1], x.shape[2], 1))
+def adjust_x_shape(x: np.ndarray) -> np.ndarray:
+    """Turn shape (x,y,z) into (x,y,z, 1)."""
+    return cast(np.ndarray, np.reshape(x, (x.shape[0], x.shape[1], x.shape[2], 1)))
 
 
 def shuffle(
