@@ -17,7 +17,7 @@
 
 import argparse
 from logging import DEBUG
-from typing import Tuple, cast
+from typing import Callable, Tuple, cast
 
 import numpy as np
 import tensorflow as tf
@@ -32,6 +32,8 @@ tf.get_logger().setLevel("ERROR")
 SEED = 2020
 BATCH_SIZE = 50
 NUM_EPOCHS = 1
+LR_INITIAL = 0.15
+LR_DECAY = 0.99
 
 
 def main() -> None:
@@ -61,7 +63,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Load model and data
-    model = load_model()
+    model = load_model(learning_rate=get_lr_initial())
 
     xy_train, xy_test = load_data(partition=args.partition, num_clients=args.clients)
 
@@ -84,15 +86,36 @@ class FashionMnistClient(flwr.Client):
         self.model = model
         self.x_train, self.y_train = xy_train
         self.x_test, self.y_test = xy_test
+        self.epoch = 0
+        self.rnd = 0
 
     def get_weights(self) -> flwr.Weights:
         return cast(flwr.Weights, self.model.get_weights())
 
     def fit(self, weights: flwr.Weights) -> Tuple[flwr.Weights, int]:
+        self.rnd += 1
+        log(DEBUG, "fit, round %s", self.rnd)
+
         # Use provided weights to update the local model
         self.model.set_weights(weights)
+
+        # Learning rate
+        lr_schedule = get_lr_schedule_rnd(
+            self.rnd, lr_initial=LR_INITIAL, lr_decay=LR_DECAY
+        )
+        lr_scheduler = tf.keras.callbacks.LearningRateScheduler(lr_schedule)
+
         # Train the local model using the local dataset
-        self.model.fit(self.x_train, self.y_train, epochs=NUM_EPOCHS, verbose=2)
+        epochs = num_epochs(self.rnd)
+        self.model.fit(
+            self.x_train,
+            self.y_train,
+            epochs=NUM_EPOCHS,
+            callbacks=[lr_scheduler],
+            verbose=2,
+        )
+        self.epoch += epochs
+
         # Return the refined weights and the number of examples used for training
         return self.model.get_weights(), len(self.x_train)
 
@@ -108,11 +131,19 @@ class FashionMnistClient(flwr.Client):
         return len(self.x_test), float(loss)
 
 
-# pylint: disable-msg=unused-argument
+def num_epochs(rnd: int) -> int:
+    """Determine the number of local epochs."""
+    if rnd <= 20:
+        return 2
+    if rnd <= 40:
+        return 4
+    if rnd <= 60:
+        return 6
+    return 8
+
+
 def load_model(
-    input_shape: Tuple[int, int, int] = (28, 28, 1),
-    momentum: float = 0.0,
-    epoch_base: int = 0,
+    learning_rate: float, input_shape: Tuple[int, int, int] = (28, 28, 1)
 ) -> tf.keras.Model:
     """Load model for Fashion-MNIST."""
     # Kernel initializer
@@ -151,8 +182,8 @@ def load_model(
 
     # Compile model
     model.compile(
+        optimizer=tf.keras.optimizers.SGD(learning_rate=learning_rate),
         loss=tf.keras.losses.categorical_crossentropy,
-        optimizer=tf.keras.optimizers.Adam(),
         metrics=["accuracy"],
     )
 
@@ -212,6 +243,25 @@ def get_partition(
     start_index = int(step_size * partition)
     end_index = int(start_index + step_size)
     return x_orig[start_index:end_index], y_orig[start_index:end_index]
+
+
+def get_lr_schedule_rnd(
+    rnd: int, lr_initial: float, lr_decay: float
+) -> Callable[[int], float]:
+    """Return a schedule which decays the learning rate after each round."""
+    lr_rnd = lr_initial * lr_decay ** rnd
+
+    # pylint: disable-msg=unused-argument
+    def lr_schedule(epoch: int) -> float:
+        """Learning rate schedule."""
+        return lr_rnd
+
+    return lr_schedule
+
+
+def get_lr_initial() -> float:
+    """Return the initial learning rate."""
+    return get_lr_schedule_rnd(rnd=0, lr_initial=LR_INITIAL, lr_decay=LR_DECAY)(0)
 
 
 if __name__ == "__main__":
