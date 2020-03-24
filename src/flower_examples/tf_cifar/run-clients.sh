@@ -21,10 +21,13 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 GRPC_SERVER_ADDRESS="[::]"
 GRPC_SERVER_PORT=8080
 NUM_CLIENTS=100
+I_START=0
+I_END=99
 
-echo "Starting $NUM_CLIENTS clients"
-for ((i=0;i< $NUM_CLIENTS;i++))
+echo "Starting $NUM_CLIENTS clients."
+for ((i = $I_START; i <= $I_END; i++))
 do
+    echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
     python -m flower_examples.tf_cifar.client \
       --cid=$i \
       --partition=$i \
@@ -32,4 +35,4 @@ do
       --grpc_server_address=$GRPC_SERVER_ADDRESS \
       --grpc_server_port=$GRPC_SERVER_PORT &
 done
-echo "Started $NUM_CLIENTS clients"
+echo "Started $NUM_CLIENTS clients."
