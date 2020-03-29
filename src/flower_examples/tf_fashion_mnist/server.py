@@ -26,7 +26,7 @@ from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 from .client import get_lr_initial, load_data, load_model
 
 
-class FashionMnistStrategy(flwr.Strategy):
+class FashionMnistStrategy(flwr.strategy.Strategy):
     """Strategy using at least three clients for training and evaluation."""
 
     # pylint: disable-msg=too-many-arguments
