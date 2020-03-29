@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower server strategy."""
 
+
 from abc import ABC, abstractmethod
 from typing import Optional, Tuple
 
@@ -45,23 +46,3 @@ class Strategy(ABC):
     @abstractmethod
     def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
         """Evaluate the current model weights."""
-
-
-class DefaultStrategy(Strategy):
-    """Strategy implementation used when no custom strategy is provided."""
-
-    def should_evaluate(self) -> bool:
-        """Evaluate every round."""
-        return True
-
-    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Use 10% of available clients for training (minimum: 1)."""
-        return int(max(num_available_clients * 0.1, 1)), 1
-
-    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Use 5% of available clients for evaluation (minimum: 1)."""
-        return int(max(num_available_clients * 0.05, 1)), 1
-
-    def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
-        """Do not evaluate."""
-        return None

@@ -12,12 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower main package."""
+"""Contains the strategy abstraction and different implementations."""
 
 
-from . import app
-from .client import Client
-from .client_manager import SimpleClientManager
-from .history import History
-from .server import Server
-from .typing import Weights
+from .default import DefaultStrategy
+from .strategy import Strategy

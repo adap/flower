@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Strategy tests"""
+"""DefaultStrategy tests."""
 
 
-from .strategy import DefaultStrategy
+from .default import DefaultStrategy
 
 
 def test_default_strategy_should_evaluate_every_round() -> None:
