@@ -26,4 +26,3 @@ class Criterion(ABC):
     @abstractmethod
     def select(self, client: Client) -> bool:
         """Decide whether a client should be eligible for sampling or not."""
-        raise NotImplementedError()
