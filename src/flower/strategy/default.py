@@ -15,10 +15,11 @@
 """Configurable strategy implementation."""
 
 
-from typing import Callable, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 from flower.typing import Weights
 
+from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
 
@@ -64,3 +65,15 @@ class DefaultStrategy(Strategy):
             # No evaluation function provided
             return None
         return self.eval_fn(weights)
+
+    def on_aggregate_fit(
+        self, results: List[Tuple[Weights, int]], failures: List[BaseException]
+    ) -> Optional[Weights]:
+        """Aggregate fit results using weighted average (as in FedAvg)."""
+        return aggregate(results)
+
+    def on_aggregate_evaluate(
+        self, results: List[Tuple[int, float]], failures: List[BaseException]
+    ) -> Optional[float]:
+        """Aggregate evaluation losses using weighted average."""
+        return weighted_loss_avg(results)

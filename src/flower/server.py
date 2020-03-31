@@ -16,11 +16,8 @@
 
 
 import concurrent.futures
-from functools import reduce
 from logging import DEBUG, INFO
 from typing import List, Optional, Tuple
-
-import numpy as np
 
 from flower.client import Client
 from flower.client_manager import ClientManager
@@ -45,7 +42,7 @@ class Server:
         return self._client_manager
 
     def fit(self, num_rounds: int) -> History:
-        """Run federated averaging for a number of rounds"""
+        """Run federated averaging for a number of rounds."""
         # Initialize weights by asking one client to return theirs
         self.weights = self._get_initial_weights()
         res = self.strategy.evaluate(weights=self.weights)
@@ -57,8 +54,10 @@ class Server:
         # Run federated averaging for num_rounds
         history = History()
         for current_round in range(1, num_rounds + 1):
-            # Refine model
-            self.fit_round()
+            # Train model and replace previous global model
+            weights_prime = self.fit_round()
+            if weights_prime is not None:
+                self.weights = weights_prime
 
             # Evaluate model using strategy implementation
             res = self.strategy.evaluate(weights=self.weights)
@@ -76,14 +75,15 @@ class Server:
             # Evaluate model on a sample of available clients
             if self.strategy.should_evaluate():
                 loss_avg = self.evaluate()
-                history.add_loss_distributed(rnd=current_round, loss=loss_avg)
+                if loss_avg is not None:
+                    history.add_loss_distributed(rnd=current_round, loss=loss_avg)
 
             # Inform strategy that the next round is about to begin
             self.strategy.next_round()
         return history
 
-    def evaluate(self) -> float:
-        """Validate current global model on a number of clients"""
+    def evaluate(self) -> Optional[float]:
+        """Validate current global model on a number of clients."""
         # Sample clients for evaluation
         sample_size, min_num_clients = self.strategy.num_evaluation_clients(
             self._client_manager.num_available()
@@ -113,10 +113,10 @@ class Server:
             len(failures),
         )
         # Aggregate the evaluation results
-        return weighted_loss_avg(results)
+        return self.strategy.on_aggregate_evaluate(results, failures)
 
-    def fit_round(self) -> None:
-        """Perform a single round of federated averaging"""
+    def fit_round(self) -> Optional[Weights]:
+        """Perform a single round of federated averaging."""
         # Sample a number of clients (dependent on the strategy)
         sample_size, min_num_clients = self.strategy.num_fit_clients(
             self._client_manager.num_available()
@@ -146,13 +146,11 @@ class Server:
             len(failures),
         )
 
-        # Aggregate training results and replace previous global model
-        if results:
-            weights_prime = aggregate(results)
-            self.weights = weights_prime
+        # Aggregate training results
+        return self.strategy.on_aggregate_fit(results, failures)
 
     def _get_initial_weights(self) -> Weights:
-        """Get initial weights from one of the available clients"""
+        """Get initial weights from one of the available clients."""
         random_client = self._client_manager.sample(1)[0]
         return random_client.get_weights()
 
@@ -160,7 +158,7 @@ class Server:
 def fit_clients(
     clients: List[Client], weights: Weights
 ) -> Tuple[List[Tuple[Weights, int]], List[BaseException]]:
-    """Refine weights concurrently on all selected clients"""
+    """Refine weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(fit_client, c, weights) for c in clients]
         concurrent.futures.wait(futures)
@@ -178,14 +176,14 @@ def fit_clients(
 
 
 def fit_client(client: Client, weights: Weights) -> Tuple[Weights, int]:
-    """Refine weights on a single client"""
+    """Refine weights on a single client."""
     return client.fit(weights)
 
 
 def eval_clients(
     clients: List[Client], weights: Weights
 ) -> Tuple[List[Tuple[int, float]], List[BaseException]]:
-    """Evaluate weights concurrently on all selected clients"""
+    """Evaluate weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(eval_client, c, weights) for c in clients]
         concurrent.futures.wait(futures)
@@ -203,30 +201,5 @@ def eval_clients(
 
 
 def eval_client(client: Client, weights: Weights) -> Tuple[int, float]:
-    """Evaluate weights on a single client"""
+    """Evaluate weights on a single client."""
     return client.evaluate(weights)
-
-
-def aggregate(results: List[Tuple[Weights, int]]) -> Weights:
-    """Compute weighted average"""
-    # Calculate the total number of examples used during training
-    num_examples_total = sum([num_examples for _, num_examples in results])
-
-    # Create a list of weights, each multiplied by the related number of examples
-    weighted_weights = [
-        [layer * num_examples for layer in weights] for weights, num_examples in results
-    ]
-
-    # Compute average weights of each layer
-    weights_prime: Weights = [
-        reduce(np.add, layer_updates) / num_examples_total
-        for layer_updates in zip(*weighted_weights)
-    ]
-    return weights_prime
-
-
-def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
-    """Aggregate evaluation results obtained from multiple clients"""
-    num_total_evaluation_examples = sum([num_examples for num_examples, _ in results])
-    weighted_losses = [num_examples * loss for num_examples, loss in results]
-    return sum(weighted_losses) / num_total_evaluation_examples
