@@ -34,10 +34,31 @@ We built a number of examples showcasing different usage scenarios in `src/flowe
 pip install git+https://github.com/adap/flower.git#egg=flower[examples-tensorflow]
 ```
 
-Once the necessary extras (e.g., TensorFlow) are installed, you can run, for example, the `mnist.py` example:
+Once the necessary extras (e.g., TensorFlow) are installed, you might want to run the Fashion-MNIST example by starting
+a single server and client in two terminals using the following commands:
 
 ```bash
-python src/flower_examples/mnist.py
+# Terminal one
+$ python -m flower_examples.tf_fashion_mnist.server
+
+# Terminal two
+$ python -m flower_examples.tf_fashion_mnist.client --cid=0 --partition=0 --clients=1
+```
+
+### Docker
+
+If you have Docker on your machine you might want to skip most of the setup and try out the example using the following commands:
+
+```bash
+# Build docker container and create docker network
+$ ./dev/docker_build.sh
+$ docker network create flower
+
+# Terminal one
+$ docker run --rm --network flower -p 8080:8080 --name server flower:latest flower_examples.tf_fashion_mnist.server
+
+# Terminal two
+$ docker run --rm --network flower flower:latest flower_examples.tf_fashion_mnist.client --cid=0 --partition=0 --clients=1 --grpc_server_address=server
 ```
 
 ## Documentation
