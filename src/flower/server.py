@@ -57,7 +57,6 @@ class Server:
             # Train model and replace previous global model
             weights_prime = self.fit_round()
             if weights_prime is not None:
-                log(INFO, "TODO")
                 self.weights = weights_prime
 
             # Evaluate model using strategy implementation
