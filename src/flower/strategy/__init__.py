@@ -12,17 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract class for criterion sampling."""
+"""Contains the strategy abstraction and different implementations."""
 
 
-from abc import ABC, abstractmethod
-
-from .client import Client
-
-
-class Criterion(ABC):
-    """Abstract class which allows subclasses to implement criterion sampling."""
-
-    @abstractmethod
-    def select(self, client: Client) -> bool:
-        """Decide whether a client should be eligible for sampling or not."""
+from .default import DefaultStrategy
+from .strategy import Strategy

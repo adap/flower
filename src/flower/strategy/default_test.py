@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Strategy tests"""
+"""DefaultStrategy tests."""
 
 
-from .strategy import DefaultStrategy
+from .default import DefaultStrategy
 
 
 def test_default_strategy_should_evaluate_every_round() -> None:
@@ -89,7 +89,7 @@ def test_default_strategy_num_evaluation_clients_40_available() -> None:
     """Test num_evaluation_clients function."""
 
     # Prepare
-    strategy = DefaultStrategy()
+    strategy = DefaultStrategy(fraction_eval=0.05)
     expected = 2
 
     # Execute
@@ -103,7 +103,7 @@ def test_default_strategy_num_evaluation_clients_39_available() -> None:
     """Test num_evaluation_clients function."""
 
     # Prepare
-    strategy = DefaultStrategy()
+    strategy = DefaultStrategy(fraction_eval=0.05)
     expected = 1
 
     # Execute
@@ -117,7 +117,7 @@ def test_default_strategy_num_evaluation_clients_20_available() -> None:
     """Test num_evaluation_clients function."""
 
     # Prepare
-    strategy = DefaultStrategy()
+    strategy = DefaultStrategy(fraction_eval=0.05)
     expected = 1
 
     # Execute
@@ -131,7 +131,7 @@ def test_default_strategy_num_evaluation_clients_minimum() -> None:
     """Test num_evaluation_clients function."""
 
     # Prepare
-    strategy = DefaultStrategy()
+    strategy = DefaultStrategy(fraction_eval=0.05)
     expected = 1
 
     # Execute

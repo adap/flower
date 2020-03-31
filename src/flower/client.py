@@ -28,15 +28,12 @@ class Client(ABC):
 
     @abstractmethod
     def get_weights(self) -> Weights:
-        """Return the current local model weights"""
-        raise NotImplementedError()
+        """Return the current local model weights."""
 
     @abstractmethod
     def fit(self, weights: Weights) -> Tuple[Weights, int]:
-        """Refine the provided weights using the locally held dataset"""
-        raise NotImplementedError()
+        """Refine the provided weights using the locally held dataset."""
 
     @abstractmethod
     def evaluate(self, weights: Weights) -> Tuple[int, float]:
-        """Evaluate the provided weights using the locally held dataset"""
-        raise NotImplementedError()
+        """Evaluate the provided weights using the locally held dataset."""

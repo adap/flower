@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower ClientManager."""
 
+
 import random
 import threading
 from abc import ABC, abstractmethod
@@ -29,7 +30,6 @@ class ClientManager(ABC):
     @abstractmethod
     def num_available(self) -> int:
         """Return the number of available clients."""
-        raise NotImplementedError()
 
     @abstractmethod
     def register(self, client: Client) -> bool:
@@ -38,12 +38,10 @@ class ClientManager(ABC):
         Returns:
             bool: Indicating if registration was successful
         """
-        raise NotImplementedError()
 
     @abstractmethod
     def unregister(self, client: Client) -> None:
         """Unregister Flower Client instance."""
-        raise NotImplementedError()
 
     @abstractmethod
     def sample(
@@ -53,7 +51,6 @@ class ClientManager(ABC):
         criterion: Optional[Criterion] = None,
     ) -> List[Client]:
         """Sample a number of Flower Client instances."""
-        raise NotImplementedError()
 
 
 class SimpleClientManager(ClientManager):
