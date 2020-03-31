@@ -60,8 +60,9 @@ class DefaultStrategy(Strategy):
         return max(num_clients, self.min_eval_clients), self.min_available_clients
 
     def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
-        """Do not implement centralized evaluation."""
+        """Evaluate model weights using an evaluation function (if provided)."""
         if self.eval_fn is None:
+            # No evaluation function provided
             return None
         return self.eval_fn(weights)
 
