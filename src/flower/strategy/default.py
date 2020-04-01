@@ -15,61 +15,8 @@
 """Configurable strategy implementation."""
 
 
-from typing import Callable, List, Optional, Tuple
-
-from flower.typing import Weights
-
 from .fedavg import FedAvg
-from .strategy import Strategy
 
 
-class DefaultStrategy(Strategy):
+class DefaultStrategy(FedAvg):
     """Configurable default strategy."""
-
-    # pylint: disable-msg=too-many-arguments
-    def __init__(
-        self,
-        fraction_fit: float = 0.1,
-        fraction_eval: float = 0.1,
-        min_fit_clients: int = 1,
-        min_eval_clients: int = 1,
-        min_available_clients: int = 1,
-        eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
-    ) -> None:
-        super().__init__()
-        self.fedavg = FedAvg(
-            fraction_fit=fraction_fit,
-            fraction_eval=fraction_eval,
-            min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
-            min_available_clients=min_available_clients,
-            eval_fn=eval_fn,
-        )
-
-    def should_evaluate(self) -> bool:
-        """Forward decision to FedAvg strategy."""
-        return self.fedavg.should_evaluate()
-
-    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Forward decision to FedAvg strategy."""
-        return self.fedavg.num_fit_clients(num_available_clients)
-
-    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Forward decision to FedAvg strategy."""
-        return self.fedavg.num_evaluation_clients(num_available_clients)
-
-    def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
-        """Forward decision to FedAvg strategy."""
-        return self.fedavg.evaluate(weights)
-
-    def on_aggregate_fit(
-        self, results: List[Tuple[Weights, int]], failures: List[BaseException]
-    ) -> Optional[Weights]:
-        """Forward decision to FedAvg strategy."""
-        return self.fedavg.on_aggregate_fit(results, failures)
-
-    def on_aggregate_evaluate(
-        self, results: List[Tuple[int, float]], failures: List[BaseException]
-    ) -> Optional[float]:
-        """Forward decision to FedAvg strategy."""
-        return self.fedavg.on_aggregate_evaluate(results, failures)
