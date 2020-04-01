@@ -16,4 +16,5 @@
 
 
 from .default import DefaultStrategy
+from .fedavg import FedAvg
 from .strategy import Strategy
