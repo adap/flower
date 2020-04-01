@@ -1,4 +1,3 @@
-# FROM python:tensorflow:2.1.0-gpu-py3
 FROM python:3.7.7-slim-stretch AS base
 
 RUN apt-get update && apt-get install -y git
