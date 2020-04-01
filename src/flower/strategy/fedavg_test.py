@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""DefaultStrategy tests."""
+"""FedAvg tests."""
 
 
 from .fedavg import FedAvg
 
 
-def test_default_strategy_should_evaluate_every_round() -> None:
-    """Test evaluate function."""
-
+def test_fedavg_should_evaluate_every_round() -> None:
+    """Test should_evaluate function."""
     # Prepare
     strategy = FedAvg()
 
@@ -29,9 +28,8 @@ def test_default_strategy_should_evaluate_every_round() -> None:
         assert strategy.should_evaluate()
 
 
-def test_default_strategy_num_fit_clients_20_available() -> None:
+def test_fedavg_num_fit_clients_20_available() -> None:
     """Test num_fit_clients function."""
-
     # Prepare
     strategy = FedAvg()
     expected = 2
@@ -43,9 +41,8 @@ def test_default_strategy_num_fit_clients_20_available() -> None:
     assert expected == actual
 
 
-def test_default_strategy_num_fit_clients_19_available() -> None:
+def test_fedavg_num_fit_clients_19_available() -> None:
     """Test num_fit_clients function."""
-
     # Prepare
     strategy = FedAvg()
     expected = 1
@@ -57,9 +54,8 @@ def test_default_strategy_num_fit_clients_19_available() -> None:
     assert expected == actual
 
 
-def test_default_strategy_num_fit_clients_10_available() -> None:
+def test_fedavg_num_fit_clients_10_available() -> None:
     """Test num_fit_clients function."""
-
     # Prepare
     strategy = FedAvg()
     expected = 1
@@ -71,9 +67,8 @@ def test_default_strategy_num_fit_clients_10_available() -> None:
     assert expected == actual
 
 
-def test_default_strategy_num_fit_clients_minimum() -> None:
+def test_fedavg_num_fit_clients_minimum() -> None:
     """Test num_fit_clients function."""
-
     # Prepare
     strategy = FedAvg()
     expected = 1
@@ -85,9 +80,8 @@ def test_default_strategy_num_fit_clients_minimum() -> None:
     assert expected == actual
 
 
-def test_default_strategy_num_evaluation_clients_40_available() -> None:
+def test_fedavg_num_evaluation_clients_40_available() -> None:
     """Test num_evaluation_clients function."""
-
     # Prepare
     strategy = FedAvg(fraction_eval=0.05)
     expected = 2
@@ -99,9 +93,8 @@ def test_default_strategy_num_evaluation_clients_40_available() -> None:
     assert expected == actual
 
 
-def test_default_strategy_num_evaluation_clients_39_available() -> None:
+def test_fedavg_num_evaluation_clients_39_available() -> None:
     """Test num_evaluation_clients function."""
-
     # Prepare
     strategy = FedAvg(fraction_eval=0.05)
     expected = 1
@@ -113,9 +106,8 @@ def test_default_strategy_num_evaluation_clients_39_available() -> None:
     assert expected == actual
 
 
-def test_default_strategy_num_evaluation_clients_20_available() -> None:
+def test_fedavg_num_evaluation_clients_20_available() -> None:
     """Test num_evaluation_clients function."""
-
     # Prepare
     strategy = FedAvg(fraction_eval=0.05)
     expected = 1
@@ -127,9 +119,8 @@ def test_default_strategy_num_evaluation_clients_20_available() -> None:
     assert expected == actual
 
 
-def test_default_strategy_num_evaluation_clients_minimum() -> None:
+def test_fedavg_num_evaluation_clients_minimum() -> None:
     """Test num_evaluation_clients function."""
-
     # Prepare
     strategy = FedAvg(fraction_eval=0.05)
     expected = 1
