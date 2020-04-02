@@ -22,7 +22,7 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 # but did not recompile or commit the new proto python files
 
 # Recompile protos
-python -m flower_tools.protoc
+python -m flower_tool.protoc
 
 # Fail if user forgot to recompile
 CHANGED=$(git diff --name-only HEAD src/flower/proto)

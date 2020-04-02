@@ -45,15 +45,15 @@ classification model over those partitions.
 
 First, start a Flower server:
 
-  $ python -m flower_examples.tf_mnist_grpc_server
+  $ python -m flower_example.tf_mnist_grpc_server
 
 For each Flower client that should participate in the trainig, open a new
 terminal window and type:
 
-  $ python -m flower_examples.tf_mnist_grpc_client
+  $ python -m flower_example.tf_mnist_grpc_client
 
-For more details, see :code:`src/flower_examples/tf_mnist_grpc_server.py` and
-:code:`src/flower_examples/tf_mnist_grpc_client.py`. 
+For more details, see :code:`src/flower_example/tf_mnist_grpc_server.py` and
+:code:`src/flower_example/tf_mnist_grpc_client.py`. 
 
 MNIST Image Classification (single-machine)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -62,4 +62,4 @@ There is also a single-machine version of the previous MNIST image
 classification example. It executes both client and server in a single process,
 which might be handy for some types of experimentation. To run it, type::
 
-  $ python src/flower_examples/mnist.py
+  $ python src/flower_example/mnist.py

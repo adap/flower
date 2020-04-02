@@ -19,4 +19,4 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
 # Trigger CIFAR-10/100 download
-python -m flower_examples.tf_cifar.download
+python -m flower_example.tf_cifar.download

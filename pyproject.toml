@@ -29,7 +29,7 @@ classifiers = [
 ]
 packages = [
     { include = "flower", from = "src" },
-    { include = "flower_examples", from = "src" },
+    { include = "flower_example", from = "src" },
 ]
 exclude = [
     "src/**/*_test.py",
@@ -60,8 +60,8 @@ numpy-stubs = { git = "https://github.com/numpy/numpy-stubs.git", rev = "f3c6315
 sphinx = "==2.4.4"
 
 [tool.poetry.scripts]
-flower_examples_fashion_mnist_server = "flower_examples.tf_fashion_mnist.server:main"
-flower_examples_fashion_mnist_client = "flower_examples.tf_fashion_mnist.client:main"
+flower_example_fashion_mnist_server = "flower_example.tf_fashion_mnist.server:main"
+flower_example_fashion_mnist_client = "flower_example.tf_fashion_mnist.client:main"
 
 [tool.isort]
 line_length = 88
