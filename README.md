@@ -28,7 +28,7 @@ Official [PyPI](https://pypi.org/) releases will follow once the API matures.
 
 ## Run Examples
 
-We built a number of examples showcasing different usage scenarios in `src/flower_examples`. To run an example, first install the necessary extras (available extras: `examples-tensorflow`):
+We built a number of examples showcasing different usage scenarios in `src/flower_example`. To run an example, first install the necessary extras (available extras: `examples-tensorflow`):
 
 ```bash
 pip install git+https://github.com/adap/flower.git#egg=flower[examples-tensorflow]
@@ -39,10 +39,10 @@ a single server and client in two terminals using the following commands:
 
 ```bash
 # Terminal one
-$ python -m flower_examples.tf_fashion_mnist.server
+$ python -m flower_example.tf_fashion_mnist.server
 
 # Terminal two
-$ python -m flower_examples.tf_fashion_mnist.client --cid=0 --partition=0 --clients=1
+$ python -m flower_example.tf_fashion_mnist.client --cid=0 --partition=0 --clients=1
 ```
 
 ### Docker
@@ -55,10 +55,10 @@ $ ./dev/docker_build.sh
 $ docker network create flower
 
 # Terminal one
-$ docker run --rm --network flower -p 8080:8080 --name server flower:latest flower_examples_fashion_mnist_server
+$ docker run --rm --network flower -p 8080:8080 --name server flower:latest flower_example_fashion_mnist_server
 
 # Terminal two
-$ docker run --rm --network flower flower:latest flower_examples_fashion_mnist_client --cid=0 --partition=0 --clients=1 --grpc_server_address=server
+$ docker run --rm --network flower flower:latest flower_example_fashion_mnist_client --cid=0 --partition=0 --clients=1 --grpc_server_address=server
 ```
 
 ## Documentation
