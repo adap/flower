@@ -55,10 +55,10 @@ $ ./dev/docker_build.sh
 $ docker network create flower
 
 # Terminal one
-$ docker run --rm --network flower -p 8080:8080 --name server flower:latest flower_examples.tf_fashion_mnist.server
+$ docker run --rm --network flower -p 8080:8080 --name server flower:latest flower_examples_fashion_mnist_server
 
 # Terminal two
-$ docker run --rm --network flower flower:latest flower_examples.tf_fashion_mnist.client --cid=0 --partition=0 --clients=1 --grpc_server_address=server
+$ docker run --rm --network flower flower:latest flower_examples_fashion_mnist_client --cid=0 --partition=0 --clients=1 --grpc_server_address=server
 ```
 
 ## Documentation
