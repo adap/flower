@@ -25,7 +25,7 @@ from .fault_tolerant_fedavg import FaultTolerantFedAvg
 def test_on_aggregate_fit_no_results_no_failures() -> None:
     """Test evaluate function."""
     # Prepare
-    strategy = FaultTolerantFedAvg(completion_rate_fit=0.1)
+    strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.1)
     results: List[Tuple[Weights, int]] = []
     failures: List[BaseException] = []
     expected: Optional[Weights] = None
@@ -40,7 +40,7 @@ def test_on_aggregate_fit_no_results_no_failures() -> None:
 def test_on_aggregate_fit_no_results() -> None:
     """Test evaluate function."""
     # Prepare
-    strategy = FaultTolerantFedAvg(completion_rate_fit=0.1)
+    strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.1)
     results: List[Tuple[Weights, int]] = []
     failures: List[BaseException] = [Exception()]
     expected: Optional[Weights] = None
@@ -55,7 +55,7 @@ def test_on_aggregate_fit_no_results() -> None:
 def test_on_aggregate_fit_not_enough_results() -> None:
     """Test evaluate function."""
     # Prepare
-    strategy = FaultTolerantFedAvg(completion_rate_fit=0.5)
+    strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.5)
     results: List[Tuple[Weights, int]] = [([], 1)]
     failures: List[BaseException] = [Exception(), Exception()]
     expected: Optional[Weights] = None
@@ -70,7 +70,7 @@ def test_on_aggregate_fit_not_enough_results() -> None:
 def test_on_aggregate_fit_just_enough_results() -> None:
     """Test evaluate function."""
     # Prepare
-    strategy = FaultTolerantFedAvg(completion_rate_fit=0.5)
+    strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.5)
     results: List[Tuple[Weights, int]] = [([], 1)]
     failures: List[BaseException] = [Exception()]
     expected: Optional[Weights] = []
@@ -85,7 +85,7 @@ def test_on_aggregate_fit_just_enough_results() -> None:
 def test_on_aggregate_fit_no_failures() -> None:
     """Test evaluate function."""
     # Prepare
-    strategy = FaultTolerantFedAvg(completion_rate_fit=0.99)
+    strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.99)
     results: List[Tuple[Weights, int]] = [([], 1)]
     failures: List[BaseException] = []
     expected: Optional[Weights] = []
@@ -100,7 +100,7 @@ def test_on_aggregate_fit_no_failures() -> None:
 def test_on_aggregate_evaluate_no_results_no_failures() -> None:
     """Test evaluate function."""
     # Prepare
-    strategy = FaultTolerantFedAvg(completion_rate_evaluate=0.1)
+    strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.1)
     results: List[Tuple[int, float]] = []
     failures: List[BaseException] = []
     expected: Optional[float] = None
@@ -115,7 +115,7 @@ def test_on_aggregate_evaluate_no_results_no_failures() -> None:
 def test_on_aggregate_evaluate_no_results() -> None:
     """Test evaluate function."""
     # Prepare
-    strategy = FaultTolerantFedAvg(completion_rate_evaluate=0.1)
+    strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.1)
     results: List[Tuple[int, float]] = []
     failures: List[BaseException] = [Exception()]
     expected: Optional[float] = None
@@ -130,7 +130,7 @@ def test_on_aggregate_evaluate_no_results() -> None:
 def test_on_aggregate_evaluate_not_enough_results() -> None:
     """Test evaluate function."""
     # Prepare
-    strategy = FaultTolerantFedAvg(completion_rate_evaluate=0.5)
+    strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.5)
     results: List[Tuple[int, float]] = [(1, 2.3)]
     failures: List[BaseException] = [Exception(), Exception()]
     expected: Optional[float] = None
@@ -145,7 +145,7 @@ def test_on_aggregate_evaluate_not_enough_results() -> None:
 def test_on_aggregate_evaluate_just_enough_results() -> None:
     """Test evaluate function."""
     # Prepare
-    strategy = FaultTolerantFedAvg(completion_rate_evaluate=0.5)
+    strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.5)
     results: List[Tuple[int, float]] = [(1, 2.3)]
     failures: List[BaseException] = [Exception()]
     expected: Optional[float] = 2.3
@@ -160,7 +160,7 @@ def test_on_aggregate_evaluate_just_enough_results() -> None:
 def test_on_aggregate_evaluate_no_failures() -> None:
     """Test evaluate function."""
     # Prepare
-    strategy = FaultTolerantFedAvg(completion_rate_evaluate=0.99)
+    strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.99)
     results: List[Tuple[int, float]] = [(1, 2.3)]
     failures: List[BaseException] = []
     expected: Optional[float] = 2.3

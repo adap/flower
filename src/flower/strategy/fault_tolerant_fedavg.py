@@ -35,8 +35,8 @@ class FaultTolerantFedAvg(FedAvg):
         min_eval_clients: int = 1,
         min_available_clients: int = 1,
         eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
-        completion_rate_fit: float = 0.5,
-        completion_rate_evaluate: float = 0.5,
+        min_completion_rate_fit: float = 0.5,
+        min_completion_rate_evaluate: float = 0.5,
     ) -> None:
         super().__init__(
             min_fit_clients=min_fit_clients,
@@ -46,8 +46,8 @@ class FaultTolerantFedAvg(FedAvg):
             min_available_clients=min_available_clients,
             eval_fn=eval_fn,
         )
-        self.completion_rate_fit = completion_rate_fit
-        self.completion_rate_evaluate = completion_rate_evaluate
+        self.completion_rate_fit = min_completion_rate_fit
+        self.completion_rate_evaluate = min_completion_rate_evaluate
 
     def on_aggregate_fit(
         self, results: List[Tuple[Weights, int]], failures: List[BaseException]
