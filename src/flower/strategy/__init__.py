@@ -16,5 +16,6 @@
 
 
 from .default import DefaultStrategy
+from .fault_tolerant_fedavg import FaultTolerantFedAvg
 from .fedavg import FedAvg
 from .strategy import Strategy
