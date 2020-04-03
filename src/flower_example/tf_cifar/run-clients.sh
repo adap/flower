@@ -28,7 +28,7 @@ echo "Starting $NUM_CLIENTS clients."
 for ((i = $I_START; i <= $I_END; i++))
 do
     echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
-    python -m flower_examples.tf_fashion_mnist.client \
+    python -m flower_example.tf_cifar.client \
       --cid=$i \
       --partition=$i \
       --clients=$NUM_CLIENTS \

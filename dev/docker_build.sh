@@ -20,4 +20,5 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 HASH=$(printf "$(git rev-parse HEAD)\n$(git diff)" | sha1sum | cut -c1-7)
 
-docker build . -t flower:latest -t flower:$HASH
+poetry build
+docker build -t flower:latest -t flower:$HASH .

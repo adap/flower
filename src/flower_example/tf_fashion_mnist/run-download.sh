@@ -18,9 +18,5 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
-# Start a Flower server
-python -m flower_examples.tf_cifar.server \
-  --rounds=10 \
-  --sample_fraction=1.0 \
-  --min_sample_size=10 \
-  --min_num_clients=75
+# Trigger Fashion-MNIST download
+python -m flower_example.tf_fashion_mnist.download
