@@ -74,9 +74,10 @@ class FedAvg(Strategy):
         self, results: List[Tuple[Weights, int]], failures: List[BaseException]
     ) -> Optional[Weights]:
         """Aggregate fit results using weighted average."""
-        if not self.accept_failures and failures:
-            return None
         if not results:
+            return None
+        # Do not aggregate if there are failures and failures are not accepted
+        if not self.accept_failures and failures:
             return None
         return aggregate(results)
 
@@ -84,8 +85,9 @@ class FedAvg(Strategy):
         self, results: List[Tuple[int, float]], failures: List[BaseException]
     ) -> Optional[float]:
         """Aggregate evaluation losses using weighted average."""
-        if not self.accept_failures and failures:
-            return None
         if not results:
+            return None
+        # Do not aggregate if there are failures and failures are not accepted
+        if not self.accept_failures and failures:
             return None
         return weighted_loss_avg(results)
