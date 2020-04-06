@@ -12,5 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides helpers for testing."""
-from . import network
+"""Provides a varity of modules for running benchmarks and result aggreagation."""

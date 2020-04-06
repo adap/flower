@@ -12,5 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides helpers for testing."""
-from . import network
+"""Compute implements a standard interface which can be used to create a compute cluster."""
