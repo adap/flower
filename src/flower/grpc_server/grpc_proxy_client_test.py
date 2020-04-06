@@ -65,7 +65,7 @@ class GRPCProxyClientTestCase(unittest.TestCase):
         client = GRPCProxyClient(cid="1", bridge=self.bridge_mock)
 
         # Execute
-        value = client.evaluate([])
+        value = client.evaluate(([], {}))
 
         # Assert
         assert (0, 0.0) == value

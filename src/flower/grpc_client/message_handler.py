@@ -31,8 +31,8 @@ def handle(client: Client, server_msg: ServerMessage) -> ClientMessage:
         return _get_weights(client)
     if server_msg.HasField("fit_ins"):
         return _fit(client, server_msg.fit_ins)
-    if server_msg.HasField("evaluate"):
-        return _evaluate(client, server_msg.evaluate)
+    if server_msg.HasField("evaluate_ins"):
+        return _evaluate(client, server_msg.evaluate_ins)
     raise UnkownServerMessage()
 
 
@@ -53,8 +53,11 @@ def _fit(client: Client, fit_msg: ServerMessage.FitIns) -> ClientMessage:
     return ClientMessage(fit_res=fit_res_proto)
 
 
-def _evaluate(client: Client, evaluate_msg: ServerMessage.Evaluate) -> ClientMessage:
-    weights = serde.server_evaluate_from_proto(evaluate_msg)
-    num_examples, loss = client.evaluate(weights)
-    evaluate_proto = serde.client_evaluate_to_proto(num_examples, loss)
-    return ClientMessage(evaluate=evaluate_proto)
+def _evaluate(client: Client, evaluate_msg: ServerMessage.EvaluateIns) -> ClientMessage:
+    # Deserialize evaluate instruction
+    evaluate_ins = serde.evaluate_ins_from_proto(evaluate_msg)
+    # Perform evaluation
+    evaluate_res = client.evaluate(evaluate_ins)
+    # Serialize evaluate result
+    evaluate_res_proto = serde.evaluate_res_to_proto(evaluate_res)
+    return ClientMessage(evaluate_res=evaluate_res_proto)

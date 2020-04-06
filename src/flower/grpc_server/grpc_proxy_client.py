@@ -14,7 +14,6 @@
 # ==============================================================================
 """Networked Flower client implementation."""
 
-from typing import Tuple
 
 from flower import typing
 from flower.client import Client
@@ -50,11 +49,11 @@ class GRPCProxyClient(Client):
         weights, num_examples = serde.fit_res_from_proto(client_msg.fit_res)
         return weights, num_examples
 
-    def evaluate(self, weights: typing.Weights) -> Tuple[int, float]:
+    def evaluate(self, ins: typing.EvaluateIns) -> typing.EvaluateRes:
         """Evaluate the provided weights using the locally held dataset"""
-        evaluate_msg = serde.server_evaluate_to_proto(weights)
+        evaluate_msg = serde.evaluate_ins_to_proto(ins)
         client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(evaluate=evaluate_msg)
+            ServerMessage(evaluate_ins=evaluate_msg)
         )
-        num_examples, loss = serde.client_evaluate_from_proto(client_msg.evaluate)
+        num_examples, loss = serde.evaluate_res_from_proto(client_msg.evaluate_res)
         return num_examples, loss

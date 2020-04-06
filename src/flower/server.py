@@ -24,7 +24,7 @@ from flower.client_manager import ClientManager
 from flower.history import History
 from flower.logger import log
 from flower.strategy import DefaultStrategy, Strategy
-from flower.typing import FitIns, FitRes, Weights
+from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 
 class Server:
@@ -105,7 +105,8 @@ class Server:
         )
 
         # Evaluate current global weights on those clients
-        results, failures = eval_clients(clients, self.weights)
+        evaluate_ins: FitIns = (self.weights, {})
+        results, failures = evaluate_clients(clients, evaluate_ins)
         log(
             DEBUG,
             "evaluate received %s results and %s failures",
@@ -181,15 +182,15 @@ def fit_client(client: Client, ins: FitIns) -> FitRes:
     return client.fit(ins)
 
 
-def eval_clients(
-    clients: List[Client], weights: Weights
-) -> Tuple[List[Tuple[int, float]], List[BaseException]]:
+def evaluate_clients(
+    clients: List[Client], ins: EvaluateIns
+) -> Tuple[List[EvaluateRes], List[BaseException]]:
     """Evaluate weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(eval_client, c, weights) for c in clients]
+        futures = [executor.submit(evaluate_client, c, ins) for c in clients]
         concurrent.futures.wait(futures)
     # Gather results
-    results: List[Tuple[int, float]] = []
+    results: List[EvaluateRes] = []
     failures: List[BaseException] = []
     for future in futures:
         failure = future.exception()
@@ -201,6 +202,6 @@ def eval_clients(
     return results, failures
 
 
-def eval_client(client: Client, weights: Weights) -> Tuple[int, float]:
+def evaluate_client(client: Client, ins: EvaluateIns) -> EvaluateRes:
     """Evaluate weights on a single client."""
-    return client.evaluate(weights)
+    return client.evaluate(ins)

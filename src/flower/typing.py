@@ -24,3 +24,5 @@ Weights = List[np.ndarray]
 
 FitIns = Tuple[Weights, Mapping]  # weights, config
 FitRes = Tuple[Weights, int]  # weights, num_examples
+EvaluateIns = Tuple[Weights, Mapping]  # weights, config
+EvaluateRes = Tuple[int, float]  # num_examples, loss

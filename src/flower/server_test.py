@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server tests"""
+"""Flower server tests."""
 
 
-from typing import List, Tuple
+from typing import List
 
 from .client import Client
-from .server import eval_clients, fit_clients
-from .typing import FitIns, FitRes, Weights
+from .server import evaluate_clients, fit_clients
+from .typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 
 class SuccessClient(Client):
@@ -32,7 +32,7 @@ class SuccessClient(Client):
     def fit(self, ins: FitIns) -> FitRes:
         return [], 1
 
-    def evaluate(self, weights: Weights) -> Tuple[int, float]:
+    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         return 1, 1.0
 
 
@@ -45,7 +45,7 @@ class FailingCLient(Client):
     def fit(self, ins: FitIns) -> FitRes:
         raise Exception()
 
-    def evaluate(self, weights: Weights) -> Tuple[int, float]:
+    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         raise Exception()
 
 
@@ -74,10 +74,10 @@ def test_eval_clients() -> None:
         FailingCLient("0"),
         SuccessClient("1"),
     ]
-    weights: Weights = []
+    ins: EvaluateIns = ([], {})
 
     # Execute
-    results, failures = eval_clients(clients, weights)
+    results, failures = evaluate_clients(clients, ins)
 
     # Assert
     assert len(results) == 1
