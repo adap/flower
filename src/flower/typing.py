@@ -15,8 +15,12 @@
 """Flower type definitions"""
 
 
-from typing import List
+from collections.abc import Mapping
+from typing import List, Tuple
 
 import numpy as np
 
 Weights = List[np.ndarray]
+
+FitIns = Tuple[Weights, Mapping]  # weights, config
+FitRes = Tuple[Weights, int]  # weights, num_examples

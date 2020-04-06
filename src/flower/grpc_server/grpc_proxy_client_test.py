@@ -18,11 +18,12 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
+from flower import FitIns
 from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
 from flower.proto.transport_pb2 import ClientMessage, Weights
 
 CLIENT_MESSAGE_FIT = ClientMessage(
-    fit=ClientMessage.Fit(weights=Weights(weights=[]), num_examples=10)
+    fit_res=ClientMessage.FitRes(weights=Weights(weights=[]), num_examples=10)
 )
 
 
@@ -52,8 +53,8 @@ class GRPCProxyClientTestCase(unittest.TestCase):
         client = GRPCProxyClient(cid="1", bridge=self.bridge_mock)
 
         # Execute
-        weights = [np.ones((2, 2))]
-        value = client.fit(weights=weights)
+        ins: FitIns = ([np.ones((2, 2))], {})
+        value = client.fit(ins=ins)
 
         # Assert
         assert ([], 10) == value

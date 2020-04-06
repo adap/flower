@@ -33,14 +33,17 @@ enum Reason {
 message ServerMessage {
   message Reconnect { int64 seconds = 1; }
   message GetWeights {}
-  message Fit { Weights weights = 1; }
+  message FitIns {
+    Weights weights = 1;
+    map<string, string> config = 2;
+  }
   message Evaluate { Weights weights = 1; }
   message GetProperties {}
 
   oneof msg {
     Reconnect reconnect = 1;
     GetWeights get_weights = 2;
-    Fit fit = 3;
+    FitIns fit_ins = 3;
     Evaluate evaluate = 4;
     GetProperties get_properties = 5;
   }
@@ -49,7 +52,7 @@ message ServerMessage {
 message ClientMessage {
   message Disconnect { Reason reason = 1; }
   message GetWeights { Weights weights = 1; }
-  message Fit {
+  message FitRes {
     Weights weights = 1;
     int64 num_examples = 2;
   }
@@ -62,7 +65,7 @@ message ClientMessage {
   oneof msg {
     Disconnect disconnect = 1;
     GetWeights get_weights = 2;
-    Fit fit = 3;
+    FitRes fit_res = 3;
     Evaluate evaluate = 4;
     GetProperties get_properties = 5;
   }

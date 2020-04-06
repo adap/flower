@@ -19,7 +19,7 @@ from typing import List, Tuple
 
 from .client import Client
 from .server import eval_clients, fit_clients
-from .typing import Weights
+from .typing import FitIns, FitRes, Weights
 
 
 class SuccessClient(Client):
@@ -29,7 +29,7 @@ class SuccessClient(Client):
         # This method is not expected to be called
         raise Exception()
 
-    def fit(self, weights: Weights) -> Tuple[Weights, int]:
+    def fit(self, ins: FitIns) -> FitRes:
         return [], 1
 
     def evaluate(self, weights: Weights) -> Tuple[int, float]:
@@ -42,7 +42,7 @@ class FailingCLient(Client):
     def get_weights(self) -> Weights:
         raise Exception()
 
-    def fit(self, weights: Weights) -> Tuple[Weights, int]:
+    def fit(self, ins: FitIns) -> FitRes:
         raise Exception()
 
     def evaluate(self, weights: Weights) -> Tuple[int, float]:
@@ -56,10 +56,10 @@ def test_fit_clients() -> None:
         FailingCLient("0"),
         SuccessClient("1"),
     ]
-    weights: Weights = []
+    ins: FitIns = ([], {})
 
     # Execute
-    results, failures = fit_clients(clients, weights)
+    results, failures = fit_clients(clients, ins)
 
     # Assert
     assert len(results) == 1

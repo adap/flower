@@ -24,7 +24,7 @@ from flower.client_manager import ClientManager
 from flower.history import History
 from flower.logger import log
 from flower.strategy import DefaultStrategy, Strategy
-from flower.typing import Weights
+from flower.typing import FitIns, FitRes, Weights
 
 
 class Server:
@@ -138,7 +138,8 @@ class Server:
         )
 
         # Collect training results from all clients participating in this round
-        results, failures = fit_clients(clients, self.weights)
+        fit_ins: FitIns = (self.weights, {})
+        results, failures = fit_clients(clients, fit_ins)
         log(
             DEBUG,
             "fit_round received %s results and %s failures",
@@ -156,14 +157,14 @@ class Server:
 
 
 def fit_clients(
-    clients: List[Client], weights: Weights
-) -> Tuple[List[Tuple[Weights, int]], List[BaseException]]:
+    clients: List[Client], ins: FitIns
+) -> Tuple[List[FitRes], List[BaseException]]:
     """Refine weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(fit_client, c, weights) for c in clients]
+        futures = [executor.submit(fit_client, c, ins) for c in clients]
         concurrent.futures.wait(futures)
     # Gather results
-    results: List[Tuple[Weights, int]] = []
+    results: List[FitRes] = []
     failures: List[BaseException] = []
     for future in futures:
         failure = future.exception()
@@ -175,9 +176,9 @@ def fit_clients(
     return results, failures
 
 
-def fit_client(client: Client, weights: Weights) -> Tuple[Weights, int]:
+def fit_client(client: Client, ins: FitIns) -> FitRes:
     """Refine weights on a single client."""
-    return client.fit(weights)
+    return client.fit(ins)
 
 
 def eval_clients(

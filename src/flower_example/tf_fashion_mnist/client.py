@@ -92,9 +92,12 @@ class FashionMnistClient(flwr.Client):
     def get_weights(self) -> flwr.Weights:
         return cast(flwr.Weights, self.model.get_weights())
 
-    def fit(self, weights: flwr.Weights) -> Tuple[flwr.Weights, int]:
+    def fit(self, ins: flwr.FitIns) -> flwr.FitRes:
+        weights: flwr.Weights = ins[0]
+        config = ins[1]
+
         self.rnd += 1
-        log(DEBUG, "fit, round %s", self.rnd)
+        log(DEBUG, "fit, round %s, config %s", self.rnd, config)
 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
