@@ -22,5 +22,5 @@ import numpy as np
 
 Weights = List[np.ndarray]
 
-FitIns = Tuple[Weights, Mapping]
-FitRes = Tuple[Weights, int]
+FitIns = Tuple[Weights, Mapping]  # weights, config
+FitRes = Tuple[Weights, int]  # weights, num_examples
