@@ -46,15 +46,12 @@ INSTANCE_TYPES = [
 
 
 def find_instance_type(num_cpu: int, num_ram: float) -> str:
-    """Return a matching instance type if one exists otherwise raise."""
-    valid_instance_types = [
-        it for it in INSTANCE_TYPES if it[1] == num_cpu and it[2] == num_ram
-    ]
+    """Return the first matching instance type if one exists, raise otherwise."""
+    for instance_type in INSTANCE_TYPES:
+        if instance_type[1] == num_cpu and instance_type[2] == num_ram:
+            return instance_type[0]
 
-    if len(valid_instance_types) is None:
-        raise NoMatchingInstanceType
-
-    return valid_instance_types[0][0]
+    raise NoMatchingInstanceType
 
 
 class EC2Bridge:
