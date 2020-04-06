@@ -100,26 +100,29 @@ def client_get_weights_from_proto(msg: ClientMessage.GetWeights) -> typing.Weigh
 # === Fit messages ===
 
 
-def server_fit_to_proto(weights: typing.Weights) -> ServerMessage.Fit:
+def fit_ins_to_proto(ins: typing.FitIns) -> ServerMessage.FitIns:
+    """Serialize flower.FitIns to ProtoBuf message."""
+    weights, config = ins
     weights_proto = [ndarray_to_proto(weight) for weight in weights]
-    return ServerMessage.Fit(weights=Weights(weights=weights_proto))
+    return ServerMessage.FitIns(weights=Weights(weights=weights_proto), config=config)
 
 
-def server_fit_from_proto(msg: ServerMessage.Fit) -> typing.Weights:
+def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
+    """Deserialize flower.FitIns from ProtoBuf message."""
     weights = [proto_to_ndarray(weight) for weight in msg.weights.weights]
-    return weights
+    config = msg.config
+    return (weights, config)
 
 
-def client_fit_to_proto(
-    weights: typing.Weights, num_examples: int
-) -> ClientMessage.Fit:
+def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
+    weights, num_examples = res
     weights_proto = [ndarray_to_proto(weight) for weight in weights]
-    return ClientMessage.Fit(
+    return ClientMessage.FitRes(
         weights=Weights(weights=weights_proto), num_examples=num_examples
     )
 
 
-def client_fit_from_proto(msg: ClientMessage.Fit) -> Tuple[typing.Weights, int]:
+def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     weights = [proto_to_ndarray(weight) for weight in msg.weights.weights]
     num_examples = msg.num_examples
     return weights, num_examples

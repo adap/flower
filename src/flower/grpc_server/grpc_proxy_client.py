@@ -41,11 +41,13 @@ class GRPCProxyClient(Client):
         weights = serde.client_get_weights_from_proto(client_msg.get_weights)
         return weights
 
-    def fit(self, weights: typing.Weights) -> Tuple[typing.Weights, int]:
+    def fit(self, ins: typing.FitIns) -> typing.FitRes:
         """Refine the provided weights using the locally held dataset."""
-        fit_msg = serde.server_fit_to_proto(weights)
-        client_msg: ClientMessage = self.bridge.request(ServerMessage(fit=fit_msg))
-        weights, num_examples = serde.client_fit_from_proto(client_msg.fit)
+        fit_ins_msg = serde.fit_ins_to_proto(ins)
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(fit_ins=fit_ins_msg)
+        )
+        weights, num_examples = serde.fit_res_from_proto(client_msg.fit_res)
         return weights, num_examples
 
     def evaluate(self, weights: typing.Weights) -> Tuple[int, float]:
