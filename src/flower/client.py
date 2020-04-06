@@ -16,9 +16,8 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Tuple
 
-from flower.typing import FitIns, FitRes, Weights
+from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 
 class Client(ABC):
@@ -36,5 +35,5 @@ class Client(ABC):
         """Refine the provided weights using the locally held dataset."""
 
     @abstractmethod
-    def evaluate(self, weights: Weights) -> Tuple[int, float]:
+    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""

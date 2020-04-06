@@ -13,9 +13,10 @@
 # limitations under the License.
 # ==============================================================================
 """This module contains functions for protobuf serialization and deserialization."""
-# pylint: disable=missing-function-docstring
+
+
 from io import BytesIO
-from typing import Dict, Tuple, cast
+from typing import Dict, cast
 
 import numpy as np
 
@@ -27,6 +28,8 @@ from flower.proto.transport_pb2 import (
     ServerMessage,
     Weights,
 )
+
+# pylint: disable=missing-function-docstring
 
 
 def ndarray_to_proto(ndarray: np.ndarray) -> NDArray:
@@ -115,6 +118,7 @@ def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
 
 
 def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
+    """Serialize flower.FitIns to ProtoBuf message."""
     weights, num_examples = res
     weights_proto = [ndarray_to_proto(weight) for weight in weights]
     return ClientMessage.FitRes(
@@ -123,6 +127,7 @@ def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
 
 
 def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
+    """Deserialize flower.FitRes from ProtoBuf message."""
     weights = [proto_to_ndarray(weight) for weight in msg.weights.weights]
     num_examples = msg.num_examples
     return weights, num_examples
@@ -131,21 +136,30 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
 # === Evaluate messages ===
 
 
-def server_evaluate_to_proto(weights: typing.Weights) -> ServerMessage.Evaluate:
+def evaluate_ins_to_proto(ins: typing.EvaluateIns) -> ServerMessage.EvaluateIns:
+    """Serialize flower.EvaluateIns to ProtoBuf message."""
+    weights, config = ins
     weights_proto = [ndarray_to_proto(weight) for weight in weights]
-    return ServerMessage.Evaluate(weights=Weights(weights=weights_proto))
+    return ServerMessage.EvaluateIns(
+        weights=Weights(weights=weights_proto), config=config
+    )
 
 
-def server_evaluate_from_proto(msg: ServerMessage.Evaluate) -> typing.Weights:
+def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIns:
+    """Deserialize flower.EvaluateIns from ProtoBuf message."""
     weights = [proto_to_ndarray(weight) for weight in msg.weights.weights]
-    return weights
+    config = msg.config
+    return weights, config
 
 
-def client_evaluate_to_proto(num_examples: int, loss: float) -> ClientMessage.Evaluate:
-    return ClientMessage.Evaluate(num_examples=num_examples, loss=loss)
+def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
+    """Serialize flower.EvaluateIns to ProtoBuf message."""
+    num_examples, loss = res
+    return ClientMessage.EvaluateRes(num_examples=num_examples, loss=loss)
 
 
-def client_evaluate_from_proto(msg: ClientMessage.Evaluate) -> Tuple[int, float]:
+def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRes:
+    """Deserialize flower.EvaluateRes from ProtoBuf message."""
     return msg.num_examples, msg.loss
 
 

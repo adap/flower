@@ -64,7 +64,6 @@ def main() -> None:
 
     # Load model and data
     model = load_model(learning_rate=get_lr_initial())
-
     xy_train, xy_test = load_data(partition=args.partition, num_clients=args.clients)
 
     # Start client
@@ -122,8 +121,9 @@ class FashionMnistClient(flwr.Client):
         # Return the refined weights and the number of examples used for training
         return self.model.get_weights(), len(self.x_train)
 
-    def evaluate(self, weights: flwr.Weights) -> Tuple[int, float]:
-        log(DEBUG, "evaluate")
+    def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
+        weights, config = ins
+        log(DEBUG, "evaluate, config %s", config)
         # Use provided weights to update the local model
         self.model.set_weights(weights)
         # Evaluate the updated model on the local dataset

@@ -20,4 +20,4 @@ from .client import Client
 from .client_manager import SimpleClientManager
 from .history import History
 from .server import Server
-from .typing import FitIns, FitRes, Weights
+from .typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights

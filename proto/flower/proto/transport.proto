@@ -37,14 +37,17 @@ message ServerMessage {
     Weights weights = 1;
     map<string, string> config = 2;
   }
-  message Evaluate { Weights weights = 1; }
+  message EvaluateIns {
+    Weights weights = 1; 
+    map<string, string> config = 2;
+  }
   message GetProperties {}
 
   oneof msg {
     Reconnect reconnect = 1;
     GetWeights get_weights = 2;
     FitIns fit_ins = 3;
-    Evaluate evaluate = 4;
+    EvaluateIns evaluate_ins = 4;
     GetProperties get_properties = 5;
   }
 }
@@ -56,7 +59,7 @@ message ClientMessage {
     Weights weights = 1;
     int64 num_examples = 2;
   }
-  message Evaluate {
+  message EvaluateRes {
     int64 num_examples = 1;
     float loss = 2;
   }
@@ -66,7 +69,7 @@ message ClientMessage {
     Disconnect disconnect = 1;
     GetWeights get_weights = 2;
     FitRes fit_res = 3;
-    Evaluate evaluate = 4;
+    EvaluateRes evaluate_res = 4;
     GetProperties get_properties = 5;
   }
 }
