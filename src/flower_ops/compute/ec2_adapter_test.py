@@ -12,14 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests EC2Bridge."""
+"""Tests EC2Adapter."""
 import time
 import unittest
-import warnings
+from unittest.mock import MagicMock
 
-import boto3
-
-from .ec2_bridge import EC2Bridge
+from .ec2_adapter import EC2Adapter
 
 IMAGE_ID = "ami-0b418580298265d5c"
 INSTANCE_TYPE = "t3.nano"
@@ -30,69 +28,45 @@ TAGS = [f"test_case_{int(time.time())}"]
 USER_DATA = "#!/bin/bash\nsudo shutdown -P 1"
 
 
-def create_instance() -> str:
-    "Create EC2 instance and return ID."
-    ec2 = boto3.client("ec2")
-    res = ec2.run_instances(
-        ImageId=IMAGE_ID,
-        MinCount=1,
-        MaxCount=1,
-        InstanceType=INSTANCE_TYPE,
-        KeyName=KEY_NAME,
-        SubnetId=SUBNET_ID,
-        SecurityGroupIds=SECURITY_GROUP_IDS,
-        TagSpecifications=[
-            {
-                "ResourceType": "instance",
-                "Tags": [{"Key": "Name", "Value": tag} for tag in TAGS],
-            }
-        ],
-        InstanceInitiatedShutdownBehavior="terminate",
-        UserData=USER_DATA,
-    )
-
-    instance_id: str = res["Instances"][0]["InstanceId"]
-
-    return instance_id
-
-
-class EC2BridgeTestCase(unittest.TestCase):
-    """Test suite for class EC2Bridge.
-
-    This is an integration test with the boto3 API.
-    """
+class EC2AdapterTestCase(unittest.TestCase):
+    """Test suite for class EC2Adapter."""
 
     def setUp(self) -> None:
         """Create an instance."""
-        # This warning seems to be a false positiv
-        # https://github.com/boto/boto3/issues/454
-        warnings.filterwarnings(
-            "ignore", category=ResourceWarning, message="unclosed.*<ssl.SSLSocket.*>"
-        )
+        self.boto_ec2_client_mock = MagicMock()
 
-        self.bridge = EC2Bridge(
+        self.bridge = EC2Adapter(
             image_id="ami-0b418580298265d5c",
             key_name="flower",
             subnet_id="subnet-23da286f",
             security_group_ids=["sg-0dd0f0080bcf86400"],
             tags=TAGS,
+            boto_ec2_client=self.boto_ec2_client_mock,
         )
 
     def test_create_instances(self):
         """Create and start an instance."""
+        # Prepare
+        result = {"Instances": [{"InstanceId": "1", "PrivateIpAddress": "2"}]}
+        self.boto_ec2_client_mock.run_instances.return_value = result
+
         # Execute
         instances = self.bridge.create_instances(num_cpu=2, num_ram=0.5, timeout=1)
 
         # Assert
         for ins in instances:
             assert isinstance(ins, tuple)
-            assert isinstance(ins[0], str)
-            assert isinstance(ins[1], str)
+            assert ins[0] == result["Instances"][0]["InstanceId"]
+            assert ins[1] == result["Instances"][0]["PrivateIpAddress"]
 
     def test_terminate_instances(self):
         """Destroy all instances."""
         # Prepare
-        instance_id = create_instance()
+        instance_id = "1"
+        result = {"TerminatingInstances": [{"CurrentState": {"Name": "shutting-down"}}]}
+        self.boto_ec2_client_mock.terminate_instances.return_value = result
+
+        # Execute
         self.bridge.terminate_instances([instance_id])
 
 

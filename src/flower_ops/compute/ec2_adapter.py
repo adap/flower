@@ -45,16 +45,18 @@ INSTANCE_TYPES = [
 ]
 
 
-def find_instance_type(num_cpu: int, num_ram: float) -> str:
+def find_instance_type(
+    num_cpu: int, num_ram: float, instance_types: List[Tuple[str, int, float]]
+) -> str:
     """Return the first matching instance type if one exists, raise otherwise."""
-    for instance_type in INSTANCE_TYPES:
+    for instance_type in instance_types:
         if instance_type[1] == num_cpu and instance_type[2] == num_ram:
             return instance_type[0]
 
     raise NoMatchingInstanceType
 
 
-class EC2Bridge:
+class EC2Adapter:
     """Base class for diffrent runners like AWS EC2."""
 
     # pylint: disable=too-many-arguments
@@ -65,9 +67,8 @@ class EC2Bridge:
         subnet_id: str,
         security_group_ids: List[str],
         tags: List[str],
+        boto_ec2_client: Optional[boto3.session.Session] = None,
     ):
-        self.ec2 = boto3.client("ec2")
-
         self.image_id = image_id
         self.key_name = key_name
         self.subnet_id = subnet_id
@@ -78,6 +79,7 @@ class EC2Bridge:
                 "Tags": [{"Key": "Name", "Value": tag} for tag in tags],
             }
         ]
+        self.ec2 = boto3.client("ec2") if boto_ec2_client is None else boto_ec2_client
 
     # pylint: disable=too-many-arguments
     def create_instances(
@@ -88,14 +90,15 @@ class EC2Bridge:
         timeout: int = 300,
         commands: Optional[List[str]] = None,
     ) -> List[Tuple[str, str]]:
-        """Create an EC2 instance.
+        """Create one or more EC2 instance(s) of the same type.
 
             Args:
-                num_cpu (int): Number of instance vCPU (values in ec2_bridge.INSTANCE_TYPES)
-                num_ram (int): RAM in GB (values in ec2_bridge.INSTANCE_TYPES)
+                num_cpu (int): Number of instance vCPU (values in ec2_adapter.INSTANCE_TYPES)
+                num_ram (int): RAM in GB (values in ec2_adapter.INSTANCE_TYPES)
+                num_instances (int): Number of instances to start if currently available in EC2
                 timeout (int): Timeout in minutes
                 commands ([str]): List of bash commands which will be joined into a single string
-                    with "\n" as a seperator.F
+                    with "\n" as a seperator.
         """
         # The instance will be set to terminate after stutdown
         # This is a fail safe in case something happens and the instances
@@ -112,7 +115,7 @@ class EC2Bridge:
             # We always want an exact number of instances
             MinCount=num_instances,
             MaxCount=num_instances,
-            InstanceType=find_instance_type(num_cpu, num_ram),
+            InstanceType=find_instance_type(num_cpu, num_ram, INSTANCE_TYPES),
             KeyName=self.key_name,
             SubnetId=self.subnet_id,
             SecurityGroupIds=self.security_group_ids,
