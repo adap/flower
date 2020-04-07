@@ -43,9 +43,11 @@ grpcio = "^1.27.2"
 google = "^2.0.3"
 # Optional dependencies
 tensorflow-cpu = { version = "==2.1.0", optional = true }
+boto3 = { version = "^1.12.36", optional = true }
 
 [tool.poetry.extras]
 examples-tensorflow = ["tensorflow-cpu"]
+ops = ["boto3"]
 
 [tool.poetry.dev-dependencies]
 isort = "==4.3.21"
