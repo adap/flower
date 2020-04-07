@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides the abstract base class."""
+"""Provides standard interface for compute resources."""
 
 from typing import List, Optional, Tuple
 
