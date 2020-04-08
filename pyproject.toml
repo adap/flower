@@ -29,6 +29,7 @@ classifiers = [
 ]
 packages = [
     { include = "flower", from = "src" },
+    { include = "flower_benchmark", from = "src" },
     { include = "flower_example", from = "src" },
 ]
 exclude = [
@@ -46,6 +47,7 @@ tensorflow-cpu = { version = "==2.1.0", optional = true }
 boto3 = { version = "^1.12.36", optional = true }
 
 [tool.poetry.extras]
+benchmark = ["tensorflow-cpu"]
 examples-tensorflow = ["tensorflow-cpu"]
 ops = ["boto3"]
 
