@@ -13,7 +13,7 @@ on:
       - "src/flower_tool/**"
 
 jobs:
-  test_ops:
+  test_tool:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
