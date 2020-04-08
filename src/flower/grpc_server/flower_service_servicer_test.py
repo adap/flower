@@ -55,7 +55,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         self.grpc_bridge_factory_mock = MagicMock()
         self.grpc_bridge_factory_mock.return_value = self.grpc_bridge_mock
 
-        # Create a GRPCProxyClient mock which we will use to test if correct
+        # Create a GrpcClientProxy mock which we will use to test if correct
         # methods where called and client_messages are getting passed to it
         self.grpc_client_proxy_mock = MagicMock()
         self.grpc_client_proxy_mock.cid = CLIENT_CID

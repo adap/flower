@@ -12,17 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Abstract class for criterion sampling."""
+"""Flower client (abstract base class)."""
 
 
 from abc import ABC, abstractmethod
 
-from .client_proxy import ClientProxy
+from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
 
 
-class Criterion(ABC):
-    """Abstract class which allows subclasses to implement criterion sampling."""
+class ClientProxy(ABC):
+    """Abstract base class for Flower client proxies."""
+
+    def __init__(self, cid: str):
+        self.cid = cid
 
     @abstractmethod
-    def select(self, client: ClientProxy) -> bool:
-        """Decide whether a client should be eligible for sampling or not."""
+    def get_parameters(self) -> ParametersRes:
+        """Return the current local model parameters."""
+
+    @abstractmethod
+    def fit(self, ins: FitIns) -> FitRes:
+        """Refine the provided weights using the locally held dataset."""
+
+    @abstractmethod
+    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
+        """Evaluate the provided weights using the locally held dataset."""

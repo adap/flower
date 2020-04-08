@@ -13,13 +13,15 @@
 # limitations under the License.
 # ==============================================================================
 """Tests for networked Flower client implementation."""
+
+
 import unittest
 from unittest.mock import MagicMock
 
 import numpy as np
 
 import flower
-from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
+from flower.grpc_server.grpc_client_proxy import GrpcClientProxy
 from flower.proto.transport_pb2 import ClientMessage, Parameters
 
 MESSAGE_PARAMETERS = Parameters(tensors=[], tensor_type="np")
@@ -28,8 +30,8 @@ MESSAGE_FIT_RES = ClientMessage(
 )
 
 
-class GRPCProxyClientTestCase(unittest.TestCase):
-    """Tests for GRPCProxyClient."""
+class GrpcClientProxyTestCase(unittest.TestCase):
+    """Tests for GrpcClientProxy."""
 
     def setUp(self):
         """Setup mocks for tests."""
@@ -40,7 +42,7 @@ class GRPCProxyClientTestCase(unittest.TestCase):
     def test_get_parameters(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
-        client = GRPCProxyClient(cid="1", bridge=self.bridge_mock)
+        client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
 
         # Execute
         value: flower.ParametersRes = client.get_parameters()
@@ -51,7 +53,7 @@ class GRPCProxyClientTestCase(unittest.TestCase):
     def test_fit(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
-        client = GRPCProxyClient(cid="1", bridge=self.bridge_mock)
+        client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
         parameters = flower.weights_to_parameters([np.ones((2, 2))])
         ins: flower.FitIns = (parameters, {})
 
@@ -66,7 +68,7 @@ class GRPCProxyClientTestCase(unittest.TestCase):
     def test_evaluate(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
-        client = GRPCProxyClient(cid="1", bridge=self.bridge_mock)
+        client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
         parameters = flower.Parameters(tensors=[], tensor_type="np")
         evaluate_ins: flower.EvaluateIns = (parameters, {})
 

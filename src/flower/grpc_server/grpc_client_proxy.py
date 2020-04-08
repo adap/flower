@@ -16,14 +16,14 @@
 
 
 from flower import typing
-from flower.client import Client
+from flower.client_proxy import ClientProxy
 from flower.grpc_server import serde
 from flower.grpc_server.grpc_bridge import GRPCBridge
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
-class GRPCProxyClient(Client):
-    """Client implementation which delegates over the network using gRPC."""
+class GrpcClientProxy(ClientProxy):
+    """Flower client proxy which delegates over the network using gRPC."""
 
     def __init__(
         self, cid: str, bridge: GRPCBridge,
