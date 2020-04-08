@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides standard interface for compute resources."""
+"""Provides a standardised interface for provisioning compute resources."""
+
 
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
@@ -23,7 +24,7 @@ Instance = Tuple[
 
 
 class Adapter(ABC):
-    """Base class for diffrent runners like AWS EC2."""
+    """Base class for different Adapter implementations, for example, AWS EC2."""
 
     # pylint: disable=too-many-arguments
     @abstractmethod
@@ -43,7 +44,7 @@ class Adapter(ABC):
                 num_instances (int): Number of instances to start if currently available
                 timeout (int): Timeout in minutes
                 commands ([str]): List of bash commands which will be joined into a single string
-                    with "\n" as a seperator.
+                    with "\n" as a seperator
         """
 
     @abstractmethod
