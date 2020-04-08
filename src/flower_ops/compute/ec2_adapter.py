@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides standard interface for compute resources."""
+"""Provides an Adapter implementation for AWS EC2."""
+
 
 import itertools
 from typing import List, Optional, Tuple
