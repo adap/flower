@@ -47,17 +47,75 @@ class EC2AdapterTestCase(unittest.TestCase):
     def test_create_instances(self):
         """Create and start an instance."""
         # Prepare
-        result = {"Instances": [{"InstanceId": "1", "PrivateIpAddress": "2"}]}
+        state = {"Name": "pending"}
+        result = {
+            "Instances": [
+                {
+                    "InstanceId": "1",
+                    "PrivateIpAddress": "1.1.1.1",
+                    "PublicIpAddress": "2.1.1.1",
+                    "State": state,
+                }
+            ]
+        }
         self.boto_ec2_client_mock.run_instances.return_value = result
 
         # Execute
         instances = self.bridge.create_instances(num_cpu=2, num_ram=0.5, timeout=1)
 
         # Assert
-        for ins in instances:
+        assert len(instances) == 1
+        assert isinstance(instances[0], tuple)
+        assert instances[0] == (
+            result["Instances"][0]["InstanceId"],
+            result["Instances"][0]["PrivateIpAddress"],
+            result["Instances"][0]["PublicIpAddress"],
+            state["Name"],
+        )
+
+    def test_list_instances(self):
+        """List all instances."""
+        # Prepare
+        # The actual return value is far more extensive but these
+        # are the properties we are extracting
+        result = {
+            "Reservations": [
+                {
+                    "Instances": [
+                        {
+                            "InstanceId": "1",
+                            "PrivateIpAddress": "1.1.1.1",
+                            "PublicIpAddress": "2.1.1.1",
+                            "State": {"Name": "pending"},
+                        }
+                    ]
+                },
+                {
+                    "Instances": [
+                        {
+                            "InstanceId": "2",
+                            "PrivateIpAddress": "1.1.1.2",
+                            "PubicIpAddress": "2.1.1.2",
+                            "State": {"Name": "pending"},
+                        }
+                    ]
+                },
+            ]
+        }
+        self.boto_ec2_client_mock.run_instances.return_value = result
+
+        # Execute
+        instances = self.bridge.list_instances()
+
+        # Assert
+        for index, ins in enumerate(instances):
             assert isinstance(ins, tuple)
-            assert ins[0] == result["Instances"][0]["InstanceId"]
-            assert ins[1] == result["Instances"][0]["PrivateIpAddress"]
+            assert ins == (
+                result["Reservations"][index]["Instances"][0]["InstanceId"],
+                result["Reservations"][index]["Instances"][0]["PrivateIpAddress"],
+                result["Reservations"][index]["Instances"][0]["PublicIpAddress"],
+                result["Reservations"][index]["Instances"][0]["State"],
+            )
 
     def test_terminate_instances(self):
         """Destroy all instances."""
