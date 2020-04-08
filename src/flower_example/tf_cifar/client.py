@@ -20,7 +20,7 @@ https://keras.io/examples/cifar10_resnet/
 
 import argparse
 from logging import DEBUG
-from typing import Callable, Optional, Tuple, cast
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 import tensorflow as tf
@@ -113,16 +113,16 @@ class CifarClient(flwr.Client):
         self.epoch = 0
         self.rnd = 0
 
-    def get_weights(self) -> flwr.Weights:
-        log(DEBUG, "get_weights")
-        return cast(flwr.Weights, self.model.get_weights())
+    def get_parameters(self) -> flwr.ParametersRes:
+        parameters = flwr.weights_to_parameters(self.model.get_weights())
+        return flwr.ParametersRes(parameters=parameters)
 
     def fit(self, ins: flwr.FitIns) -> flwr.FitRes:
-        weights: flwr.Weights = ins[0]
-        # config = ins[1]
+        weights: flwr.Weights = flwr.parameters_to_weights(ins[0])
+        config = ins[1]
 
         self.rnd += 1
-        log(DEBUG, "fit, round %s", self.rnd)
+        log(DEBUG, "fit, round %s, config %s", self.rnd, config)
 
         # Lazy initialization of the ImageDataGenerator
         if self.datagen is None:
@@ -147,10 +147,11 @@ class CifarClient(flwr.Client):
         self.epoch += epochs
 
         # Return the refined weights and the number of examples used for training
-        return self.model.get_weights(), len(self.x_train)
+        return flwr.weights_to_parameters(self.model.get_weights()), len(self.x_train)
 
     def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
-        weights, config = ins
+        weights = flwr.parameters_to_weights(ins[0])
+        config = ins[1]
         log(DEBUG, "evaluate, config %s", config)
         # Use provided weights to update the local model
         self.model.set_weights(weights)

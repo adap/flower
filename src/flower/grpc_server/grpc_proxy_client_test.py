@@ -18,12 +18,13 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
-from flower import FitIns
+import flower
 from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
-from flower.proto.transport_pb2 import ClientMessage, Weights
+from flower.proto.transport_pb2 import ClientMessage, Parameters
 
-CLIENT_MESSAGE_FIT = ClientMessage(
-    fit_res=ClientMessage.FitRes(weights=Weights(weights=[]), num_examples=10)
+MESSAGE_PARAMETERS = Parameters(tensors=[], tensor_type="np")
+MESSAGE_FIT_RES = ClientMessage(
+    fit_res=ClientMessage.FitRes(parameters=MESSAGE_PARAMETERS, num_examples=10)
 )
 
 
@@ -34,38 +35,43 @@ class GRPCProxyClientTestCase(unittest.TestCase):
         """Setup mocks for tests."""
         self.bridge_mock = MagicMock()
         # Set return_value for usually blocking get_client_message method
-        self.bridge_mock.request.return_value = CLIENT_MESSAGE_FIT
+        self.bridge_mock.request.return_value = MESSAGE_FIT_RES
 
-    def test_get_weights(self):
+    def test_get_parameters(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
         client = GRPCProxyClient(cid="1", bridge=self.bridge_mock)
 
         # Execute
-        value = client.get_weights()
+        value: flower.ParametersRes = client.get_parameters()
 
         # Assert
-        assert [] == value
+        assert value.parameters.tensors == []
 
     def test_fit(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
         client = GRPCProxyClient(cid="1", bridge=self.bridge_mock)
+        parameters = flower.weights_to_parameters([np.ones((2, 2))])
+        ins: flower.FitIns = (parameters, {})
 
         # Execute
-        ins: FitIns = ([np.ones((2, 2))], {})
-        value = client.fit(ins=ins)
+        parameters_prime, num_examples = client.fit(ins=ins)
 
         # Assert
-        assert ([], 10) == value
+        assert parameters_prime.tensor_type == "np"
+        assert flower.parameters_to_weights(parameters_prime) == []
+        assert num_examples == 10
 
     def test_evaluate(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
         client = GRPCProxyClient(cid="1", bridge=self.bridge_mock)
+        parameters = flower.Parameters(tensors=[], tensor_type="np")
+        evaluate_ins: flower.EvaluateIns = (parameters, {})
 
         # Execute
-        value = client.evaluate(([], {}))
+        value = client.evaluate(evaluate_ins)
 
         # Assert
         assert (0, 0.0) == value

@@ -15,35 +15,23 @@
 """This module contains functions for protobuf serialization and deserialization."""
 
 
-from io import BytesIO
-from typing import Dict, cast
-
-import numpy as np
+from typing import List
 
 from flower import typing
-from flower.proto.transport_pb2 import (
-    ClientMessage,
-    NDArray,
-    Reason,
-    ServerMessage,
-    Weights,
-)
+from flower.proto.transport_pb2 import ClientMessage, Parameters, Reason, ServerMessage
 
 # pylint: disable=missing-function-docstring
 
 
-def ndarray_to_proto(ndarray: np.ndarray) -> NDArray:
-    """Serialize numpy array to NDArray protobuf message"""
-    ndarray_bytes = BytesIO()
-    np.save(ndarray_bytes, ndarray, allow_pickle=False)
-    return NDArray(ndarray=ndarray_bytes.getvalue())
+def parameters_to_proto(parameters: typing.Parameters) -> Parameters:
+    """."""
+    return Parameters(tensors=parameters.tensors, tensor_type=parameters.tensor_type)
 
 
-def proto_to_ndarray(ndarray_proto: NDArray) -> np.ndarray:
-    """Deserialize NDArray protobuf message to a numpy array"""
-    ndarray_bytes = BytesIO(ndarray_proto.ndarray)
-    ndarray_deserialized = np.load(ndarray_bytes, allow_pickle=False)
-    return cast(np.ndarray, ndarray_deserialized)
+def parameters_from_proto(msg: Parameters) -> typing.Parameters:
+    """."""
+    tensors: List[bytes] = list(msg.tensors)
+    return typing.Parameters(tensors=tensors, tensor_type=msg.tensor_type)
 
 
 #  === Reconnect / Disconnect messages ===
@@ -82,22 +70,25 @@ def client_disconnect_from_proto(msg: ClientMessage.Disconnect) -> str:
 # === GetWeights messages ===
 
 
-def server_get_weights_to_proto() -> ServerMessage.GetWeights:
-    return ServerMessage.GetWeights()
+def get_parameters_to_proto() -> ServerMessage.GetParameters:
+    """."""
+    return ServerMessage.GetParameters()
 
 
 # Not required:
-# def server_get_weights_from_proto(msg: ServerMessage.GetWeights) -> None:
+# def get_weights_from_proto(msg: ServerMessage.GetWeights) -> None:
 
 
-def client_get_weights_to_proto(weights: typing.Weights) -> ClientMessage.GetWeights:
-    weights_proto = [ndarray_to_proto(weight) for weight in weights]
-    return ClientMessage.GetWeights(weights=Weights(weights=weights_proto))
+def parameters_res_to_proto(res: typing.ParametersRes) -> ClientMessage.ParametersRes:
+    """."""
+    parameters_proto = parameters_to_proto(res.parameters)
+    return ClientMessage.ParametersRes(parameters=parameters_proto)
 
 
-def client_get_weights_from_proto(msg: ClientMessage.GetWeights) -> typing.Weights:
-    weights = [proto_to_ndarray(weight) for weight in msg.weights.weights]
-    return weights
+def parameters_res_from_proto(msg: ClientMessage.ParametersRes) -> typing.ParametersRes:
+    """."""
+    parameters = parameters_from_proto(msg.parameters)
+    return typing.ParametersRes(parameters=parameters)
 
 
 # === Fit messages ===
@@ -105,32 +96,30 @@ def client_get_weights_from_proto(msg: ClientMessage.GetWeights) -> typing.Weigh
 
 def fit_ins_to_proto(ins: typing.FitIns) -> ServerMessage.FitIns:
     """Serialize flower.FitIns to ProtoBuf message."""
-    weights, config = ins
-    weights_proto = [ndarray_to_proto(weight) for weight in weights]
-    return ServerMessage.FitIns(weights=Weights(weights=weights_proto), config=config)
+    parameters, config = ins
+    parameters_proto = parameters_to_proto(parameters)
+    return ServerMessage.FitIns(parameters=parameters_proto, config=config)
 
 
 def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
     """Deserialize flower.FitIns from ProtoBuf message."""
-    weights = [proto_to_ndarray(weight) for weight in msg.weights.weights]
+    parameters = parameters_from_proto(msg.parameters)
     config = msg.config
-    return (weights, config)
+    return (parameters, config)
 
 
 def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
     """Serialize flower.FitIns to ProtoBuf message."""
-    weights, num_examples = res
-    weights_proto = [ndarray_to_proto(weight) for weight in weights]
-    return ClientMessage.FitRes(
-        weights=Weights(weights=weights_proto), num_examples=num_examples
-    )
+    parameters, num_examples = res
+    parameters_proto = parameters_to_proto(parameters)
+    return ClientMessage.FitRes(parameters=parameters_proto, num_examples=num_examples)
 
 
 def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     """Deserialize flower.FitRes from ProtoBuf message."""
-    weights = [proto_to_ndarray(weight) for weight in msg.weights.weights]
+    parameters = parameters_from_proto(msg.parameters)
     num_examples = msg.num_examples
-    return weights, num_examples
+    return parameters, num_examples
 
 
 # === Evaluate messages ===
@@ -138,18 +127,16 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
 
 def evaluate_ins_to_proto(ins: typing.EvaluateIns) -> ServerMessage.EvaluateIns:
     """Serialize flower.EvaluateIns to ProtoBuf message."""
-    weights, config = ins
-    weights_proto = [ndarray_to_proto(weight) for weight in weights]
-    return ServerMessage.EvaluateIns(
-        weights=Weights(weights=weights_proto), config=config
-    )
+    parameters, config = ins
+    parameters_proto = parameters_to_proto(parameters)
+    return ServerMessage.EvaluateIns(parameters=parameters_proto, config=config)
 
 
 def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIns:
     """Deserialize flower.EvaluateIns from ProtoBuf message."""
-    weights = [proto_to_ndarray(weight) for weight in msg.weights.weights]
+    parameters = parameters_from_proto(msg.parameters)
     config = msg.config
-    return weights, config
+    return parameters, config
 
 
 def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
@@ -161,26 +148,3 @@ def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
 def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRes:
     """Deserialize flower.EvaluateRes from ProtoBuf message."""
     return msg.num_examples, msg.loss
-
-
-# === Property messages ===
-
-
-def server_get_properties_to_proto() -> ServerMessage.GetProperties:
-    return ServerMessage.GetProperties()
-
-
-# Not required:
-# def server_get_properties_from_proto(msg: ServerMessage.Evaluate) -> None:
-
-
-def client_get_properties_to_proto(
-    properties: Dict[str, str]
-) -> ClientMessage.GetProperties:
-    return ClientMessage.GetProperties(properties=properties)
-
-
-def client_get_properties_from_proto(
-    msg: ClientMessage.GetProperties,
-) -> Dict[str, str]:
-    return dict(msg.properties)

@@ -31,14 +31,14 @@ class GRPCProxyClient(Client):
         super().__init__(cid)
         self.bridge = bridge
 
-    def get_weights(self) -> typing.Weights:
-        """Return the current local model weights"""
-        get_weights_msg = serde.server_get_weights_to_proto()
+    def get_parameters(self) -> typing.ParametersRes:
+        """Return the current local model parameters."""
+        get_parameters_msg = serde.get_parameters_to_proto()
         client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(get_weights=get_weights_msg)
+            ServerMessage(get_parameters=get_parameters_msg)
         )
-        weights = serde.client_get_weights_from_proto(client_msg.get_weights)
-        return weights
+        parameters_res = serde.parameters_res_from_proto(client_msg.parameters_res)
+        return parameters_res
 
     def fit(self, ins: typing.FitIns) -> typing.FitRes:
         """Refine the provided weights using the locally held dataset."""
@@ -46,11 +46,11 @@ class GRPCProxyClient(Client):
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(fit_ins=fit_ins_msg)
         )
-        weights, num_examples = serde.fit_res_from_proto(client_msg.fit_res)
-        return weights, num_examples
+        parameters, num_examples = serde.fit_res_from_proto(client_msg.fit_res)
+        return parameters, num_examples
 
     def evaluate(self, ins: typing.EvaluateIns) -> typing.EvaluateRes:
-        """Evaluate the provided weights using the locally held dataset"""
+        """Evaluate the provided weights using the locally held dataset."""
         evaluate_msg = serde.evaluate_ins_to_proto(ins)
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(evaluate_ins=evaluate_msg)

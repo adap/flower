@@ -12,17 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower type definitions"""
+"""Flower type definitions."""
 
 
 from collections.abc import Mapping
+from dataclasses import dataclass
 from typing import List, Tuple
 
 import numpy as np
 
 Weights = List[np.ndarray]
 
-FitIns = Tuple[Weights, Mapping]  # weights, config
-FitRes = Tuple[Weights, int]  # weights, num_examples
-EvaluateIns = Tuple[Weights, Mapping]  # weights, config
+
+@dataclass
+class Parameters:
+    """Model parameters."""
+
+    tensors: List[bytes]
+    tensor_type: str
+
+
+@dataclass
+class ParametersRes:
+    """Response when asked to return parameters."""
+
+    parameters: Parameters
+
+
+FitIns = Tuple[Parameters, Mapping]  # model parameters, config
+FitRes = Tuple[Parameters, int]  # model parameters, num_examples
+EvaluateIns = Tuple[Parameters, Mapping]  # model parameters, config
 EvaluateRes = Tuple[int, float]  # num_examples, loss

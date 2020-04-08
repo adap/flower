@@ -88,11 +88,12 @@ class FashionMnistClient(flwr.Client):
         self.epoch = 0
         self.rnd = 0
 
-    def get_weights(self) -> flwr.Weights:
-        return cast(flwr.Weights, self.model.get_weights())
+    def get_parameters(self) -> flwr.ParametersRes:
+        parameters = flwr.weights_to_parameters(self.model.get_weights())
+        return flwr.ParametersRes(parameters=parameters)
 
     def fit(self, ins: flwr.FitIns) -> flwr.FitRes:
-        weights: flwr.Weights = ins[0]
+        weights: flwr.Weights = flwr.parameters_to_weights(ins[0])
         config = ins[1]
 
         self.rnd += 1
@@ -119,10 +120,11 @@ class FashionMnistClient(flwr.Client):
         self.epoch += epochs
 
         # Return the refined weights and the number of examples used for training
-        return self.model.get_weights(), len(self.x_train)
+        return flwr.weights_to_parameters(self.model.get_weights()), len(self.x_train)
 
     def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
-        weights, config = ins
+        weights = flwr.parameters_to_weights(ins[0])
+        config = ins[1]
         log(DEBUG, "evaluate, config %s", config)
         # Use provided weights to update the local model
         self.model.set_weights(weights)

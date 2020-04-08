@@ -16,15 +16,18 @@
 
 
 import concurrent.futures
+from io import BytesIO
 from logging import DEBUG, INFO
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, cast
+
+import numpy as np
 
 from flower.client import Client
 from flower.client_manager import ClientManager
 from flower.history import History
 from flower.logger import log
 from flower.strategy import DefaultStrategy, Strategy
-from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Weights
 
 
 class Server:
@@ -105,7 +108,8 @@ class Server:
         )
 
         # Evaluate current global weights on those clients
-        evaluate_ins: FitIns = (self.weights, {})
+        parameters = weights_to_parameters(self.weights)
+        evaluate_ins: FitIns = (parameters, {})
         results, failures = evaluate_clients(clients, evaluate_ins)
         log(
             DEBUG,
@@ -139,7 +143,8 @@ class Server:
         )
 
         # Collect training results from all clients participating in this round
-        fit_ins: FitIns = (self.weights, {})
+        parameters = weights_to_parameters(self.weights)
+        fit_ins: FitIns = (parameters, {})
         results, failures = fit_clients(clients, fit_ins)
         log(
             DEBUG,
@@ -149,12 +154,17 @@ class Server:
         )
 
         # Aggregate training results
-        return self.strategy.on_aggregate_fit(results, failures)
+        weights_results = [
+            (parameters_to_weights(parameters), num_examples)
+            for parameters, num_examples in results
+        ]
+        return self.strategy.on_aggregate_fit(weights_results, failures)
 
     def _get_initial_weights(self) -> Weights:
         """Get initial weights from one of the available clients."""
         random_client = self._client_manager.sample(1)[0]
-        return random_client.get_weights()
+        parameters_res = random_client.get_parameters()
+        return parameters_to_weights(parameters_res.parameters)
 
 
 def fit_clients(
@@ -205,3 +215,28 @@ def evaluate_clients(
 def evaluate_client(client: Client, ins: EvaluateIns) -> EvaluateRes:
     """Evaluate weights on a single client."""
     return client.evaluate(ins)
+
+
+def weights_to_parameters(weights: Weights) -> Parameters:
+    """Convert NumPy weights to parameters object."""
+    tensors = [ndarray_to_bytes(ndarray) for ndarray in weights]
+    return Parameters(tensors=tensors, tensor_type="numpy.nda")
+
+
+def parameters_to_weights(parameters: Parameters) -> Weights:
+    """Convert parameters object to NumPy weights."""
+    return [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
+
+
+def ndarray_to_bytes(ndarray: np.ndarray) -> bytes:
+    """Serialize NumPy array to bytes."""
+    bytes_io = BytesIO()
+    np.save(bytes_io, ndarray, allow_pickle=False)
+    return bytes_io.getvalue()
+
+
+def bytes_to_ndarray(tensor: bytes) -> np.ndarray:
+    """Deserialize NumPy array from bytes."""
+    bytes_io = BytesIO(tensor)
+    ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
+    return cast(np.ndarray, ndarray_deserialized)
