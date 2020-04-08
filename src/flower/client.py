@@ -17,7 +17,7 @@
 
 from abc import ABC, abstractmethod
 
-from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
 
 
 class Client(ABC):
@@ -27,8 +27,8 @@ class Client(ABC):
         self.cid = cid
 
     @abstractmethod
-    def get_weights(self) -> Weights:
-        """Return the current local model weights."""
+    def get_parameters(self) -> ParametersRes:
+        """Return the current local model parameters."""
 
     @abstractmethod
     def fit(self, ins: FitIns) -> FitRes:

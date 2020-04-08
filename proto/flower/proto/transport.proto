@@ -21,8 +21,10 @@ service FlowerService {
   rpc Join(stream ClientMessage) returns (stream ServerMessage) {}
 }
 
-message NDArray { bytes ndarray = 1; }
-message Weights { repeated NDArray weights = 1; }
+message Parameters {
+  repeated bytes tensors = 1;
+  string tensor_type = 2;
+}
 enum Reason {
   UNKNOWN = 0;
   RECONNECT = 1;
@@ -32,44 +34,40 @@ enum Reason {
 
 message ServerMessage {
   message Reconnect { int64 seconds = 1; }
-  message GetWeights {}
+  message GetParameters {}
   message FitIns {
-    Weights weights = 1;
+    Parameters parameters = 1;
     map<string, string> config = 2;
   }
   message EvaluateIns {
-    Weights weights = 1; 
+    Parameters parameters = 1; 
     map<string, string> config = 2;
   }
-  message GetProperties {}
 
   oneof msg {
     Reconnect reconnect = 1;
-    GetWeights get_weights = 2;
+    GetParameters get_parameters = 2;
     FitIns fit_ins = 3;
     EvaluateIns evaluate_ins = 4;
-    GetProperties get_properties = 5;
   }
 }
 
 message ClientMessage {
   message Disconnect { Reason reason = 1; }
-  message GetWeights { Weights weights = 1; }
+  message ParametersRes { Parameters parameters = 1; }
   message FitRes {
-    Weights weights = 1;
+    Parameters parameters = 1;
     int64 num_examples = 2;
   }
   message EvaluateRes {
     int64 num_examples = 1;
     float loss = 2;
   }
-  message GetProperties { map<string, string> properties = 1; }
 
   oneof msg {
     Disconnect disconnect = 1;
-    GetWeights get_weights = 2;
+    ParametersRes parameters_res = 2;
     FitRes fit_res = 3;
     EvaluateRes evaluate_res = 4;
-    GetProperties get_properties = 5;
   }
 }

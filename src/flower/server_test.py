@@ -17,20 +17,25 @@
 
 from typing import List
 
+import numpy as np
+import pytest
+
+from flower.server import bytes_to_ndarray, ndarray_to_bytes
+
 from .client import Client
 from .server import evaluate_clients, fit_clients
-from .typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from .typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, ParametersRes
 
 
 class SuccessClient(Client):
     """Test class."""
 
-    def get_weights(self) -> Weights:
+    def get_parameters(self) -> ParametersRes:
         # This method is not expected to be called
         raise Exception()
 
     def fit(self, ins: FitIns) -> FitRes:
-        return [], 1
+        return Parameters(tensors=[], tensor_type=""), 1
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         return 1, 1.0
@@ -39,7 +44,7 @@ class SuccessClient(Client):
 class FailingCLient(Client):
     """Test class."""
 
-    def get_weights(self) -> Weights:
+    def get_parameters(self) -> ParametersRes:
         raise Exception()
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -56,7 +61,7 @@ def test_fit_clients() -> None:
         FailingCLient("0"),
         SuccessClient("1"),
     ]
-    ins: FitIns = ([], {})
+    ins: FitIns = (Parameters(tensors=[], tensor_type=""), {})
 
     # Execute
     results, failures = fit_clients(clients, ins)
@@ -74,7 +79,7 @@ def test_eval_clients() -> None:
         FailingCLient("0"),
         SuccessClient("1"),
     ]
-    ins: EvaluateIns = ([], {})
+    ins: EvaluateIns = (Parameters(tensors=[], tensor_type=""), {})
 
     # Execute
     results, failures = evaluate_clients(clients, ins)
@@ -84,3 +89,18 @@ def test_eval_clients() -> None:
     assert len(failures) == 1
     assert results[0][0] == 1
     assert results[0][1] == 1.0
+
+
+def test_serialisation_deserialisation() -> None:
+    """Test if after serialization/deserialisation the np.ndarray is identical."""
+    arr = np.array([[1, 2], [3, 4], [5, 6]])
+
+    arr_serialized = ndarray_to_bytes(arr)
+    arr_deserialized = bytes_to_ndarray(arr_serialized)
+
+    # Assert deserialized array is equal to original
+    np.testing.assert_equal(arr_deserialized, arr)
+
+    # Test false positive
+    with pytest.raises(AssertionError, match="Arrays are not equal"):
+        np.testing.assert_equal(arr_deserialized, np.ones((3, 2)))

@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Handle server messages by calling appropriate client methods."""
+
+
 from flower.client import Client
 from flower.grpc_server import serde
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
@@ -27,8 +29,8 @@ class UnkownServerMessage(Exception):
 def handle(client: Client, server_msg: ServerMessage) -> ClientMessage:
     if server_msg.HasField("reconnect"):
         raise UnkownServerMessage()
-    if server_msg.HasField("get_weights"):
-        return _get_weights(client)
+    if server_msg.HasField("get_parameters"):
+        return _get_parameters(client)
     if server_msg.HasField("fit_ins"):
         return _fit(client, server_msg.fit_ins)
     if server_msg.HasField("evaluate_ins"):
@@ -36,11 +38,11 @@ def handle(client: Client, server_msg: ServerMessage) -> ClientMessage:
     raise UnkownServerMessage()
 
 
-def _get_weights(client: Client) -> ClientMessage:
-    # No need to deserialize get_weights_msg as its empty
-    weights = client.get_weights()
-    weights_proto = serde.client_get_weights_to_proto(weights)
-    return ClientMessage(get_weights=weights_proto)
+def _get_parameters(client: Client) -> ClientMessage:
+    # No need to deserialize get_parameters_msg (it's empty)
+    parameters_res = client.get_parameters()
+    parameters_res_proto = serde.parameters_res_to_proto(parameters_res)
+    return ClientMessage(parameters_res=parameters_res_proto)
 
 
 def _fit(client: Client, fit_msg: ServerMessage.FitIns) -> ClientMessage:

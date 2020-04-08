@@ -19,5 +19,13 @@ from . import app
 from .client import Client
 from .client_manager import SimpleClientManager
 from .history import History
-from .server import Server
-from .typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from .server import Server, parameters_to_weights, weights_to_parameters
+from .typing import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    Parameters,
+    ParametersRes,
+    Weights,
+)
