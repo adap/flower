@@ -12,4 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides a varity of modules for running benchmarks and result aggreagation."""
+"""Flower ops provides an opinionated way to provision necessary compute infrastructure
+for running Flower workloads."""
