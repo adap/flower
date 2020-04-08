@@ -35,7 +35,7 @@ class EC2AdapterTestCase(unittest.TestCase):
         """Create an instance."""
         self.boto_ec2_client_mock = MagicMock()
 
-        self.bridge = EC2Adapter(
+        self.adapter = EC2Adapter(
             image_id="ami-0b418580298265d5c",
             key_name="flower",
             subnet_id="subnet-23da286f",
@@ -61,7 +61,7 @@ class EC2AdapterTestCase(unittest.TestCase):
         self.boto_ec2_client_mock.run_instances.return_value = result
 
         # Execute
-        instances = self.bridge.create_instances(num_cpu=2, num_ram=0.5, timeout=1)
+        instances = self.adapter.create_instances(num_cpu=2, num_ram=0.5, timeout=1)
 
         # Assert
         assert len(instances) == 1
@@ -105,7 +105,7 @@ class EC2AdapterTestCase(unittest.TestCase):
         self.boto_ec2_client_mock.run_instances.return_value = result
 
         # Execute
-        instances = self.bridge.list_instances()
+        instances = self.adapter.list_instances()
 
         # Assert
         for index, ins in enumerate(instances):
@@ -125,7 +125,7 @@ class EC2AdapterTestCase(unittest.TestCase):
         self.boto_ec2_client_mock.terminate_instances.return_value = result
 
         # Execute
-        self.bridge.terminate_instances([instance_id])
+        self.adapter.terminate_instances([instance_id])
 
 
 if __name__ == "__main__":
