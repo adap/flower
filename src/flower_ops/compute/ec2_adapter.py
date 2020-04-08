@@ -12,11 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides standard interface for compute resources."""
+"""Provides an Adapter implementation for AWS EC2."""
 
+
+import itertools
 from typing import List, Optional, Tuple
 
 import boto3
+
+from .adapter import Adapter, Instance
 
 
 class NoMatchingInstanceType(Exception):
@@ -56,8 +60,8 @@ def find_instance_type(
     raise NoMatchingInstanceType
 
 
-class EC2Adapter:
-    """Base class for diffrent runners like AWS EC2."""
+class EC2Adapter(Adapter):
+    """Adapter for AWS EC2."""
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -73,12 +77,14 @@ class EC2Adapter:
         self.key_name = key_name
         self.subnet_id = subnet_id
         self.security_group_ids = security_group_ids
+        self.tags = tags
         self.tag_specifications = [
             {
                 "ResourceType": "instance",
                 "Tags": [{"Key": "Name", "Value": tag} for tag in tags],
             }
         ]
+
         self.ec2 = boto3.client("ec2") if boto_ec2_client is None else boto_ec2_client
 
     # pylint: disable=too-many-arguments
@@ -89,7 +95,7 @@ class EC2Adapter:
         num_instances: int = 1,
         timeout: int = 300,
         commands: Optional[List[str]] = None,
-    ) -> List[Tuple[str, str]]:
+    ) -> List[Instance]:
         """Create one or more EC2 instance(s) of the same type.
 
             Args:
@@ -124,11 +130,41 @@ class EC2Adapter:
             UserData=user_data_str,
         )
 
-        instance_ids = [
-            (ins["InstanceId"], ins["PrivateIpAddress"]) for ins in res["Instances"]
+        instances = [
+            (
+                ins["InstanceId"],
+                ins["PrivateIpAddress"],
+                ins["PublicIpAddress"],
+                ins["State"]["Name"],
+            )
+            for ins in res["Instances"]
         ]
 
-        return instance_ids
+        return instances
+
+    def list_instances(self) -> List[Instance]:
+        """List all instances with tags belonging to this adapter."""
+        result = self.ec2.describe_instances(
+            Filters=[{"Name": "tag:Name", "Values": self.tags}]
+        )
+
+        instances = list(
+            itertools.chain.from_iterable(
+                [res["Instances"] for res in result["Reservations"]]
+            )
+        )
+
+        instances = [
+            (
+                ins["InstanceId"],
+                ins["PrivateIpAddress"],
+                ins["PublicIpAddress"],
+                ins["State"]["Name"],
+            )
+            for ins in instances
+        ]
+
+        return instances
 
     def terminate_instances(self, instance_ids: List[str]) -> None:
         """Terminate instances.
@@ -140,3 +176,12 @@ class EC2Adapter:
         for tin in res["TerminatingInstances"]:
             if tin["CurrentState"]["Name"] != "shutting-down":
                 raise EC2TerminationFailure
+
+    def terminate_all_instances(self) -> None:
+        """Terminate all instances.
+
+        Will raise an error if something goes wrong.
+        """
+        instances = self.list_instances()
+        instance_ids = [ins[0] for ins in instances]
+        self.terminate_instances(instance_ids)
