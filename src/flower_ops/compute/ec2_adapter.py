@@ -14,13 +14,17 @@
 # ==============================================================================
 """Provides an Adapter implementation for AWS EC2."""
 
-
-import itertools
-from typing import List, Optional, Tuple
+import math
+import time
+from typing import Dict, List, Optional, Tuple
 
 import boto3
+from boto3_type_annotations import ec2
 
 from .adapter import Adapter, Instance
+
+EC2RunInstancesResult = Dict[str, List[ec2.Instance]]
+EC2DescribeInstancesResult = Dict[str, List[Dict[str, List[ec2.Instance]]]]
 
 
 class NoMatchingInstanceType(Exception):
@@ -60,6 +64,28 @@ def find_instance_type(
     raise NoMatchingInstanceType
 
 
+def flatten_reservations(
+    reservations: EC2DescribeInstancesResult,
+) -> List[ec2.Instance]:
+    """Extract instances from reservations returned by a call to describe_instances."""
+    instances: List[ec2.Instance] = []
+
+    # Flatten list of lists
+    for ins in [res["Instances"] for res in reservations["Reservations"]]:
+        instances += ins
+
+    return instances
+
+
+def are_all_instances_running(instances: List[ec2.Instance]) -> bool:
+    """Return True if all instances are running."""
+    for ins in instances:
+        if ins["State"]["Name"] != "running":
+            return False
+
+    return True
+
+
 class EC2Adapter(Adapter):
     """Adapter for AWS EC2."""
 
@@ -92,8 +118,8 @@ class EC2Adapter(Adapter):
         self,
         num_cpu: int,
         num_ram: float,
+        timeout: int,
         num_instances: int = 1,
-        timeout: int = 300,
         commands: Optional[List[str]] = None,
     ) -> List[Instance]:
         """Create one or more EC2 instance(s) of the same type.
@@ -101,8 +127,8 @@ class EC2Adapter(Adapter):
             Args:
                 num_cpu (int): Number of instance vCPU (values in ec2_adapter.INSTANCE_TYPES)
                 num_ram (int): RAM in GB (values in ec2_adapter.INSTANCE_TYPES)
-                num_instances (int): Number of instances to start if currently available in EC2
                 timeout (int): Timeout in minutes
+                num_instances (int): Number of instances to start if currently available in EC2
                 commands ([str]): List of bash commands which will be joined into a single string
                     with "\n" as a seperator.
         """
@@ -116,7 +142,7 @@ class EC2Adapter(Adapter):
 
         user_data_str = "\n".join(user_data)
 
-        res = self.ec2.run_instances(
+        result: EC2RunInstancesResult = self.ec2.run_instances(
             ImageId=self.image_id,
             # We always want an exact number of instances
             MinCount=num_instances,
@@ -130,29 +156,44 @@ class EC2Adapter(Adapter):
             UserData=user_data_str,
         )
 
-        instances = [
-            (
-                ins["InstanceId"],
-                ins["PrivateIpAddress"],
-                ins["PublicIpAddress"],
-                ins["State"]["Name"],
+        instance_ids = [ins["InstanceId"] for ins in result["Instances"]]
+
+        return self.list_instances(instance_ids=instance_ids)
+
+    def list_instances(
+        self, instance_ids: Optional[List[str]] = None
+    ) -> List[Instance]:
+        """List all instances with tags belonging to this adapter.
+
+        Args:
+            instance_ids ([str[]]): If provided, filter by instance_ids
+        """
+
+        if instance_ids is None:
+            instance_ids = []
+
+        for i in range(5):
+            result: EC2DescribeInstancesResult = self.ec2.describe_instances(
+                InstanceIds=instance_ids,
+                Filters=[{"Name": "tag:Name", "Values": self.tags}],
             )
-            for ins in res["Instances"]
-        ]
 
-        return instances
+            instances = flatten_reservations(result)
 
-    def list_instances(self) -> List[Instance]:
-        """List all instances with tags belonging to this adapter."""
-        result = self.ec2.describe_instances(
-            Filters=[{"Name": "tag:Name", "Values": self.tags}]
-        )
+            # Block until all instances have state running as otherwise
+            # the public IP address will not be available
+            if are_all_instances_running(instances):
+                break
 
-        instances = list(
-            itertools.chain.from_iterable(
-                [res["Instances"] for res in result["Reservations"]]
-            )
-        )
+            secs = int(math.pow(2, i))
+            print(f"Waiting for all instances to be ready... Retry in {secs}s")
+            time.sleep(secs)
+
+        # Return empty list and terminate every instance which is in
+        # any state (e.g. pending, running, etc.)
+        if not are_all_instances_running(instances):
+            self.terminate_all_instances()
+            return []
 
         instances = [
             (
@@ -182,6 +223,14 @@ class EC2Adapter(Adapter):
 
         Will raise an error if something goes wrong.
         """
-        instances = self.list_instances()
-        instance_ids = [ins[0] for ins in instances]
+        result: EC2DescribeInstancesResult = self.ec2.describe_instances(
+            Filters=[{"Name": "tag:Name", "Values": self.tags}],
+        )
+
+        instances = flatten_reservations(result)
+        instance_ids = [ins["InstanceId"] for ins in instances]
+
+        if not instance_ids:
+            return
+
         self.terminate_instances(instance_ids)

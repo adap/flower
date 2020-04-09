@@ -33,52 +33,20 @@ class EC2AdapterTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         """Create an instance."""
-        self.boto_ec2_client_mock = MagicMock()
+        self.ec2_mock = MagicMock()
 
-        self.adapter = EC2Adapter(
-            image_id="ami-0b418580298265d5c",
-            key_name="flower",
-            subnet_id="subnet-23da286f",
-            security_group_ids=["sg-0dd0f0080bcf86400"],
-            tags=TAGS,
-            boto_ec2_client=self.boto_ec2_client_mock,
-        )
-
-    def test_create_instances(self):
-        """Create and start an instance."""
-        # Prepare
-        state = {"Name": "pending"}
-        result = {
+        self.ec2_mock.run_instances.return_value = {
             "Instances": [
                 {
                     "InstanceId": "1",
                     "PrivateIpAddress": "1.1.1.1",
                     "PublicIpAddress": "2.1.1.1",
-                    "State": state,
+                    "State": {"Name": "pending"},
                 }
             ]
         }
-        self.boto_ec2_client_mock.run_instances.return_value = result
 
-        # Execute
-        instances = self.adapter.create_instances(num_cpu=2, num_ram=0.5, timeout=1)
-
-        # Assert
-        assert len(instances) == 1
-        assert isinstance(instances[0], tuple)
-        assert instances[0] == (
-            result["Instances"][0]["InstanceId"],
-            result["Instances"][0]["PrivateIpAddress"],
-            result["Instances"][0]["PublicIpAddress"],
-            state["Name"],
-        )
-
-    def test_list_instances(self):
-        """List all instances."""
-        # Prepare
-        # The actual return value is far more extensive but these
-        # are the properties we are extracting
-        result = {
+        self.ec2_mock.describe_instances.return_value = {
             "Reservations": [
                 {
                     "Instances": [
@@ -86,43 +54,69 @@ class EC2AdapterTestCase(unittest.TestCase):
                             "InstanceId": "1",
                             "PrivateIpAddress": "1.1.1.1",
                             "PublicIpAddress": "2.1.1.1",
-                            "State": {"Name": "pending"},
+                            "State": {"Name": "running"},
                         }
                     ]
-                },
-                {
-                    "Instances": [
-                        {
-                            "InstanceId": "2",
-                            "PrivateIpAddress": "1.1.1.2",
-                            "PubicIpAddress": "2.1.1.2",
-                            "State": {"Name": "pending"},
-                        }
-                    ]
-                },
+                }
             ]
         }
-        self.boto_ec2_client_mock.run_instances.return_value = result
+
+        self.adapter = EC2Adapter(
+            image_id="ami-0b418580298265d5c",
+            key_name="flower",
+            subnet_id="subnet-23da286f",
+            security_group_ids=["sg-0dd0f0080bcf86400"],
+            tags=TAGS,
+            boto_ec2_client=self.ec2_mock,
+        )
+
+    def test_create_instances(self):
+        """Create and start an instance."""
+        # Prepare
+        reservations = self.ec2_mock.describe_instances.return_value["Reservations"]
+        ec2_instance = reservations[0]["Instances"][0]
+
+        expected_return_value = (
+            ec2_instance["InstanceId"],
+            ec2_instance["PrivateIpAddress"],
+            ec2_instance["PublicIpAddress"],
+            ec2_instance["State"]["Name"],
+        )
+
+        # Execute
+        instances = self.adapter.create_instances(num_cpu=2, num_ram=0.5, timeout=1)
+
+        # Assert
+        assert len(instances) == 1
+        assert isinstance(instances[0], tuple)
+        assert instances[0] == expected_return_value
+
+    def test_list_instances(self):
+        """List all instances."""
+        # Prepare
+        reservations = self.ec2_mock.describe_instances.return_value["Reservations"]
+        ec2_instance = reservations[0]["Instances"][0]
+
+        expected_return_value = (
+            ec2_instance["InstanceId"],
+            ec2_instance["PrivateIpAddress"],
+            ec2_instance["PublicIpAddress"],
+            ec2_instance["State"]["Name"],
+        )
 
         # Execute
         instances = self.adapter.list_instances()
 
         # Assert
-        for index, ins in enumerate(instances):
-            assert isinstance(ins, tuple)
-            assert ins == (
-                result["Reservations"][index]["Instances"][0]["InstanceId"],
-                result["Reservations"][index]["Instances"][0]["PrivateIpAddress"],
-                result["Reservations"][index]["Instances"][0]["PublicIpAddress"],
-                result["Reservations"][index]["Instances"][0]["State"],
-            )
+        assert len(instances) == 1
+        assert instances[0] == expected_return_value
 
     def test_terminate_instances(self):
         """Destroy all instances."""
         # Prepare
         instance_id = "1"
         result = {"TerminatingInstances": [{"CurrentState": {"Name": "shutting-down"}}]}
-        self.boto_ec2_client_mock.terminate_instances.return_value = result
+        self.ec2_mock.terminate_instances.return_value = result
 
         # Execute
         self.adapter.terminate_instances([instance_id])
