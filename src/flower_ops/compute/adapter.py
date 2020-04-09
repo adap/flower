@@ -19,7 +19,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
 
 Instance = Tuple[
-    str, str, str, str
+    str, str, Optional[str], str
 ]  # (InstanceId, PrivateIpAddress, PublicIpAddress, State)
 
 
@@ -32,8 +32,8 @@ class Adapter(ABC):
         self,
         num_cpu: int,
         num_ram: float,
+        timeout: int,
         num_instances: int = 1,
-        timeout: int = 300,
         commands: Optional[List[str]] = None,
     ) -> List[Instance]:
         """Create one or more instance(s) of the same type.
@@ -48,8 +48,14 @@ class Adapter(ABC):
         """
 
     @abstractmethod
-    def list_instances(self) -> List[Instance]:
-        """List all instances with tags belonging to this adapter."""
+    def list_instances(
+        self, instance_ids: Optional[List[str]] = None
+    ) -> List[Instance]:
+        """List all instances with tags belonging to this adapter.
+
+        Args:
+            instance_ids ([str[]]): If provided, filter by instance_ids
+        """
 
     @abstractmethod
     def terminate_instances(self, instance_ids: List[str]) -> None:
