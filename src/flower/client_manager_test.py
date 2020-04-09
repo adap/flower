@@ -17,7 +17,7 @@
 from unittest.mock import MagicMock
 
 from flower.client_manager import SimpleClientManager
-from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
+from flower.grpc_server.grpc_client_proxy import GrpcClientProxy
 
 
 def test_simple_client_manager_register():
@@ -25,7 +25,7 @@ def test_simple_client_manager_register():
     # Prepare
     cid = "1"
     bridge = MagicMock()
-    client = GRPCProxyClient(cid=cid, bridge=bridge)
+    client = GrpcClientProxy(cid=cid, bridge=bridge)
     client_manager = SimpleClientManager()
 
     # Execute
@@ -43,7 +43,7 @@ def test_simple_client_manager_unregister():
     # Prepare
     cid = "1"
     bridge = MagicMock()
-    client = GRPCProxyClient(cid=cid, bridge=bridge)
+    client = GrpcClientProxy(cid=cid, bridge=bridge)
     client_manager = SimpleClientManager()
     client_manager.register(client)
 

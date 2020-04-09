@@ -23,7 +23,7 @@ import grpc
 
 from flower.client_manager import ClientManager
 from flower.grpc_server.grpc_bridge import GRPCBridge
-from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
+from flower.grpc_server.grpc_client_proxy import GrpcClientProxy
 from flower.proto import transport_pb2_grpc
 from flower.proto.transport_pb2 import ClientMessage, ServerMessage
 
@@ -33,17 +33,17 @@ def default_bridge_factory() -> GRPCBridge:
     return GRPCBridge()
 
 
-def default_grpc_client_factory(cid: str, bridge: GRPCBridge) -> GRPCProxyClient:
-    """Return GRPCProxyClient instance."""
-    return GRPCProxyClient(cid=cid, bridge=bridge)
+def default_grpc_client_factory(cid: str, bridge: GRPCBridge) -> GrpcClientProxy:
+    """Return GrpcClientProxy instance."""
+    return GrpcClientProxy(cid=cid, bridge=bridge)
 
 
 def register_client(
     client_manager: ClientManager,
-    client: GRPCProxyClient,
+    client: GrpcClientProxy,
     context: grpc.ServicerContext,
 ) -> bool:
-    """Try registering GRPCProxyClient with ClientManager."""
+    """Try registering GrpcClientProxy with ClientManager."""
     is_success = client_manager.register(client)
 
     if is_success:
@@ -65,7 +65,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         client_manager: ClientManager,
         grpc_bridge_factory: Callable[[], GRPCBridge] = default_bridge_factory,
         grpc_client_factory: Callable[
-            [str, GRPCBridge], GRPCProxyClient
+            [str, GRPCBridge], GrpcClientProxy
         ] = default_grpc_client_factory,
     ) -> None:
         self.client_manager: ClientManager = client_manager
@@ -75,7 +75,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
     def Join(  # pylint: disable=invalid-name
         self, request_iterator: Iterator[ClientMessage], context: grpc.ServicerContext,
     ) -> Iterator[ServerMessage]:
-        """Method will be invoked by each GRPCProxyClient which participates in the network.
+        """Method will be invoked by each GrpcClientProxy which participates in the network.
 
         Protocol:
             - The first message is sent from the server to the client

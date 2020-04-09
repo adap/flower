@@ -20,7 +20,7 @@ import threading
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
-from .client import Client
+from .client_proxy import ClientProxy
 from .criterion import Criterion
 
 
@@ -32,16 +32,16 @@ class ClientManager(ABC):
         """Return the number of available clients."""
 
     @abstractmethod
-    def register(self, client: Client) -> bool:
-        """Register Flower Client instance.
+    def register(self, client: ClientProxy) -> bool:
+        """Register Flower ClientProxy instance.
 
         Returns:
             bool: Indicating if registration was successful
         """
 
     @abstractmethod
-    def unregister(self, client: Client) -> None:
-        """Unregister Flower Client instance."""
+    def unregister(self, client: ClientProxy) -> None:
+        """Unregister Flower ClientProxy instance."""
 
     @abstractmethod
     def sample(
@@ -49,15 +49,15 @@ class ClientManager(ABC):
         num_clients: int,
         min_num_clients: Optional[int] = None,
         criterion: Optional[Criterion] = None,
-    ) -> List[Client]:
-        """Sample a number of Flower Client instances."""
+    ) -> List[ClientProxy]:
+        """Sample a number of Flower ClientProxy instances."""
 
 
 class SimpleClientManager(ClientManager):
     """Provides a pool of available clients."""
 
     def __init__(self) -> None:
-        self.clients: Dict[str, Client] = {}
+        self.clients: Dict[str, ClientProxy] = {}
         self._cv = threading.Condition()
 
     def __len__(self):
@@ -74,12 +74,12 @@ class SimpleClientManager(ClientManager):
         """Return the number of available clients."""
         return len(self)
 
-    def register(self, client: Client) -> bool:
-        """Register Flower Client instance.
+    def register(self, client: ClientProxy) -> bool:
+        """Register Flower ClientProxy instance.
 
         Returns:
-            bool: Indicating if registration was successful. False if client is already
-                registered or can not be registered for any reason
+            bool: Indicating if registration was successful. False if ClientProxy is
+                already registered or can not be registered for any reason
         """
         if client.cid in self.clients:
             return False
@@ -90,8 +90,8 @@ class SimpleClientManager(ClientManager):
 
         return True
 
-    def unregister(self, client: Client) -> None:
-        """Unregister Flower Client instance.
+    def unregister(self, client: ClientProxy) -> None:
+        """Unregister Flower ClientProxy instance.
 
         This method is idempotent.
         """
@@ -106,8 +106,8 @@ class SimpleClientManager(ClientManager):
         num_clients: int,
         min_num_clients: Optional[int] = None,
         criterion: Optional[Criterion] = None,
-    ) -> List[Client]:
-        """Sample a number of Flower Client instances."""
+    ) -> List[ClientProxy]:
+        """Sample a number of Flower ClientProxy instances."""
         # Block until at least num_clients are connected.
         if min_num_clients is None:
             min_num_clients = num_clients

@@ -22,8 +22,8 @@ from typing import List, Optional, Tuple, cast
 
 import numpy as np
 
-from flower.client import Client
 from flower.client_manager import ClientManager
+from flower.client_proxy import ClientProxy
 from flower.history import History
 from flower.logger import log
 from flower.strategy import DefaultStrategy, Strategy
@@ -168,7 +168,7 @@ class Server:
 
 
 def fit_clients(
-    clients: List[Client], ins: FitIns
+    clients: List[ClientProxy], ins: FitIns
 ) -> Tuple[List[FitRes], List[BaseException]]:
     """Refine weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -187,13 +187,13 @@ def fit_clients(
     return results, failures
 
 
-def fit_client(client: Client, ins: FitIns) -> FitRes:
+def fit_client(client: ClientProxy, ins: FitIns) -> FitRes:
     """Refine weights on a single client."""
     return client.fit(ins)
 
 
 def evaluate_clients(
-    clients: List[Client], ins: EvaluateIns
+    clients: List[ClientProxy], ins: EvaluateIns
 ) -> Tuple[List[EvaluateRes], List[BaseException]]:
     """Evaluate weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -212,7 +212,7 @@ def evaluate_clients(
     return results, failures
 
 
-def evaluate_client(client: Client, ins: EvaluateIns) -> EvaluateRes:
+def evaluate_client(client: ClientProxy, ins: EvaluateIns) -> EvaluateRes:
     """Evaluate weights on a single client."""
     return client.evaluate(ins)
 

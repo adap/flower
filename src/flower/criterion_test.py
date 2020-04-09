@@ -16,20 +16,20 @@
 
 from unittest.mock import MagicMock
 
-from flower.client import Client
 from flower.client_manager import SimpleClientManager
+from flower.client_proxy import ClientProxy
 from flower.criterion import Criterion
-from flower.grpc_server.grpc_proxy_client import GRPCProxyClient
+from flower.grpc_server.grpc_client_proxy import GrpcClientProxy
 
 
 def test_criterion_applied():
     """Test sampling w/ criterion."""
     # Prepare
     bridge = MagicMock()
-    client1 = GRPCProxyClient(cid="train_client_1", bridge=bridge)
-    client2 = GRPCProxyClient(cid="train_client_2", bridge=bridge)
-    client3 = GRPCProxyClient(cid="test_client_1", bridge=bridge)
-    client4 = GRPCProxyClient(cid="test_client_2", bridge=bridge)
+    client1 = GrpcClientProxy(cid="train_client_1", bridge=bridge)
+    client2 = GrpcClientProxy(cid="train_client_2", bridge=bridge)
+    client3 = GrpcClientProxy(cid="test_client_1", bridge=bridge)
+    client4 = GrpcClientProxy(cid="test_client_2", bridge=bridge)
 
     client_manager = SimpleClientManager()
     client_manager.register(client1)
@@ -40,7 +40,7 @@ def test_criterion_applied():
     class TestCriterion(Criterion):
         """Criterion to select only test clients."""
 
-        def select(self, client: Client) -> bool:
+        def select(self, client: ClientProxy) -> bool:
             return client.cid.startswith("test_")
 
     # Execute
@@ -55,10 +55,10 @@ def test_criterion_not_applied():
     """Test sampling w/o criterion."""
     # Prepare
     bridge = MagicMock()
-    client1 = GRPCProxyClient(cid="train_client_1", bridge=bridge)
-    client2 = GRPCProxyClient(cid="train_client_2", bridge=bridge)
-    client3 = GRPCProxyClient(cid="test_client_1", bridge=bridge)
-    client4 = GRPCProxyClient(cid="test_client_2", bridge=bridge)
+    client1 = GrpcClientProxy(cid="train_client_1", bridge=bridge)
+    client2 = GrpcClientProxy(cid="train_client_2", bridge=bridge)
+    client3 = GrpcClientProxy(cid="test_client_1", bridge=bridge)
+    client4 = GrpcClientProxy(cid="test_client_2", bridge=bridge)
 
     client_manager = SimpleClientManager()
     client_manager.register(client1)

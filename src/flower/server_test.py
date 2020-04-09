@@ -22,12 +22,12 @@ import pytest
 
 from flower.server import bytes_to_ndarray, ndarray_to_bytes
 
-from .client import Client
+from .client_proxy import ClientProxy
 from .server import evaluate_clients, fit_clients
 from .typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, ParametersRes
 
 
-class SuccessClient(Client):
+class SuccessClient(ClientProxy):
     """Test class."""
 
     def get_parameters(self) -> ParametersRes:
@@ -41,7 +41,7 @@ class SuccessClient(Client):
         return 1, 1.0
 
 
-class FailingCLient(Client):
+class FailingCLient(ClientProxy):
     """Test class."""
 
     def get_parameters(self) -> ParametersRes:
@@ -57,7 +57,7 @@ class FailingCLient(Client):
 def test_fit_clients() -> None:
     """Test fit_clients."""
     # Prepare
-    clients: List[Client] = [
+    clients: List[ClientProxy] = [
         FailingCLient("0"),
         SuccessClient("1"),
     ]
@@ -75,7 +75,7 @@ def test_fit_clients() -> None:
 def test_eval_clients() -> None:
     """Test eval_clients."""
     # Prepare
-    clients: List[Client] = [
+    clients: List[ClientProxy] = [
         FailingCLient("0"),
         SuccessClient("1"),
     ]
