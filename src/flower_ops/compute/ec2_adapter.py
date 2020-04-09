@@ -19,7 +19,6 @@ import time
 from typing import Dict, List, Optional, Tuple
 
 import boto3
-
 from boto3_type_annotations import ec2
 
 from .adapter import Adapter, Instance
