@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.7.6
+          python-version: 3.7.7
       - name: Install build tools
         run: |
           python -m pip install -U pip==20.0.2
@@ -37,7 +37,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.7.6
+          python-version: 3.7.7
       - name: Install build tools
         run: |
           python -m pip install -U pip==20.0.2
@@ -58,7 +58,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.7.6
+          python-version: 3.7.7
       - name: Install build tools
         run: |
           python -m pip install -U pip==20.0.2
