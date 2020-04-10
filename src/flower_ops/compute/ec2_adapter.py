@@ -14,7 +14,6 @@
 # ==============================================================================
 """Provides an Adapter implementation for AWS EC2."""
 
-import math
 import time
 from typing import Dict, List, Optional, Tuple
 
@@ -37,6 +36,14 @@ class EC2TerminationFailure(Exception):
     EC2 should be manually checked to check what went wrong and
     the instances might need manual shutdown and terminatation.
     """
+
+
+class EC2CreateInstanceFailure(Exception):
+    """Instance provisioning failed."""
+
+
+class EC2StatusTimeout(Exception):
+    """Indicates that the status check timed out."""
 
 
 # List of AWS instance types with
@@ -86,6 +93,15 @@ def are_all_instances_running(instances: List[ec2.Instance]) -> bool:
     return True
 
 
+def are_all_status_ok(instance_status: List[Dict[str, str]]) -> bool:
+    """Return True if all instances are ok."""
+    for status in instance_status:
+        if status["Status"] != "ok":
+            return False
+
+    return True
+
+
 class EC2Adapter(Adapter):
     """Adapter for AWS EC2."""
 
@@ -112,6 +128,32 @@ class EC2Adapter(Adapter):
         ]
 
         self.ec2 = boto3.client("ec2") if boto_ec2_client is None else boto_ec2_client
+
+    def wait_until_instances_are_reachable(self, instance_ids: List[str]) -> None:
+        """Block until all instances are reachable.
+        Raises TimeoutException after 300s.
+
+        Returns:
+            bool: True if all are reachable otherwise False.
+        """
+
+        for _ in range(30):
+            result = self.ec2.describe_instance_status(
+                InstanceIds=instance_ids,
+                # Also include instances which don't have state "running" yet
+                IncludeAllInstances=True,
+            )
+
+            instance_status = [
+                ins["InstanceStatus"] for ins in result["InstanceStatuses"]
+            ]
+
+            if are_all_status_ok(instance_status):
+                return
+
+            time.sleep(10)
+
+        raise EC2StatusTimeout()
 
     # pylint: disable=too-many-arguments
     def create_instances(
@@ -158,6 +200,15 @@ class EC2Adapter(Adapter):
 
         instance_ids = [ins["InstanceId"] for ins in result["Instances"]]
 
+        # As soon as all instances status is "running" we have to check the InstanceStatus which
+        # reports impaired functionality that stems from issues internal to the instance, such as
+        # impaired reachability
+        try:
+            self.wait_until_instances_are_reachable(instance_ids=instance_ids)
+        except EC2StatusTimeout:
+            self.terminate_instances(instance_ids)
+            raise EC2CreateInstanceFailure()
+
         return self.list_instances(instance_ids=instance_ids)
 
     def list_instances(
@@ -168,32 +219,15 @@ class EC2Adapter(Adapter):
         Args:
             instance_ids ([str[]]): If provided, filter by instance_ids
         """
-
         if instance_ids is None:
             instance_ids = []
 
-        for i in range(5):
-            result: EC2DescribeInstancesResult = self.ec2.describe_instances(
-                InstanceIds=instance_ids,
-                Filters=[{"Name": "tag:Name", "Values": self.tags}],
-            )
+        result: EC2DescribeInstancesResult = self.ec2.describe_instances(
+            InstanceIds=instance_ids,
+            Filters=[{"Name": "tag:Name", "Values": self.tags}],
+        )
 
-            instances = flatten_reservations(result)
-
-            # Block until all instances have state running as otherwise
-            # the public IP address will not be available
-            if are_all_instances_running(instances):
-                break
-
-            secs = int(math.pow(2, i))
-            print(f"Waiting for all instances to be ready... Retry in {secs}s")
-            time.sleep(secs)
-
-        # Return empty list and terminate every instance which is in
-        # any state (e.g. pending, running, etc.)
-        if not are_all_instances_running(instances):
-            self.terminate_all_instances()
-            return []
+        instances = flatten_reservations(result)
 
         instances = [
             (
