@@ -18,7 +18,7 @@ Paper: https://arxiv.org/abs/1602.05629
 """
 
 
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from flower.typing import Weights
 

@@ -77,13 +77,13 @@ class Server:
 
             # Evaluate model on a sample of available clients
             if self.strategy.should_evaluate():
-                loss_avg = self.evaluate()
+                loss_avg = self.evaluate(rnd=current_round)
                 if loss_avg is not None:
                     history.add_loss_distributed(rnd=current_round, loss=loss_avg)
 
         return history
 
-    def evaluate(self) -> Optional[float]:
+    def evaluate(self, rnd: int) -> Optional[float]:
         """Validate current global model on a number of clients."""
         # Sample clients for evaluation
         sample_size, min_num_clients = self.strategy.num_evaluation_clients(
@@ -107,7 +107,7 @@ class Server:
 
         # Evaluate current global weights on those clients
         parameters = weights_to_parameters(self.weights)
-        config = self.strategy.on_evaluate_config(rnd=current_round)
+        config = self.strategy.on_evaluate_config(rnd=rnd)
         evaluate_ins: FitIns = (parameters, config)
         results, failures = evaluate_clients(clients, evaluate_ins)
         log(
