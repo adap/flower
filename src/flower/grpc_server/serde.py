@@ -104,7 +104,7 @@ def fit_ins_to_proto(ins: typing.FitIns) -> ServerMessage.FitIns:
 def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
     """Deserialize flower.FitIns from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
-    config = msg.config
+    config = dict(msg.config)
     return (parameters, config)
 
 
@@ -135,7 +135,7 @@ def evaluate_ins_to_proto(ins: typing.EvaluateIns) -> ServerMessage.EvaluateIns:
 def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIns:
     """Deserialize flower.EvaluateIns from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
-    config = msg.config
+    config = dict(msg.config)
     return parameters, config
 
 

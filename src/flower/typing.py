@@ -15,9 +15,8 @@
 """Flower type definitions."""
 
 
-from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 
@@ -39,7 +38,7 @@ class ParametersRes:
     parameters: Parameters
 
 
-FitIns = Tuple[Parameters, Mapping]  # model parameters, config
+FitIns = Tuple[Parameters, Dict[str, str]]  # model parameters, config
 FitRes = Tuple[Parameters, int]  # model parameters, num_examples
-EvaluateIns = Tuple[Parameters, Mapping]  # model parameters, config
+EvaluateIns = Tuple[Parameters, Dict[str, str]]  # model parameters, config
 EvaluateRes = Tuple[int, float]  # num_examples, loss
