@@ -81,8 +81,6 @@ class Server:
                 if loss_avg is not None:
                     history.add_loss_distributed(rnd=current_round, loss=loss_avg)
 
-            # Inform strategy that the next round is about to begin
-            self.strategy.next_round()
         return history
 
     def evaluate(self) -> Optional[float]:

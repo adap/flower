@@ -24,13 +24,6 @@ from flower.typing import Weights
 class Strategy(ABC):
     """Abstract class to implement custom server strategies."""
 
-    def __init__(self) -> None:
-        self.current_round: int = 0
-
-    def next_round(self) -> None:
-        """Inform the strategy implementation that the next round of FL has begun."""
-        self.current_round += 1
-
     @abstractmethod
     def should_evaluate(self) -> bool:
         """Decide if the current global model should be evaluated or not."""
