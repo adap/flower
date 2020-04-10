@@ -41,6 +41,14 @@ class Strategy(ABC):
         """Evaluate the current model weights."""
 
     @abstractmethod
+    def on_fit_config(self, rnd: int) -> Dict[str, str]:
+        """Get configuration for the next round of training."""
+
+    @abstractmethod
+    def on_evaluate_config(self, rnd: int) -> Dict[str, str]:
+        """Get configuration for the next round of evaluation."""
+
+    @abstractmethod
     def on_aggregate_fit(
         self, results: List[Tuple[Weights, int]], failures: List[BaseException]
     ) -> Optional[Weights]:

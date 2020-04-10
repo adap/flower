@@ -70,6 +70,14 @@ class FedAvg(Strategy):
             return None
         return self.eval_fn(weights)
 
+    def on_fit_config(self, rnd: int) -> Dict[str, str]:
+        """Return an empty configuration."""
+        return {}
+
+    def on_evaluate_config(self, rnd: int) -> Dict[str, str]:
+        """Return an empty configuration."""
+        return {}
+
     def on_aggregate_fit(
         self, results: List[Tuple[Weights, int]], failures: List[BaseException]
     ) -> Optional[Weights]:
