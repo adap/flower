@@ -18,7 +18,7 @@ Paper: https://arxiv.org/abs/1602.05629
 """
 
 
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from flower.typing import Weights
 
@@ -69,6 +69,14 @@ class FedAvg(Strategy):
             # No evaluation function provided
             return None
         return self.eval_fn(weights)
+
+    def on_fit_config(self, rnd: int) -> Dict[str, str]:
+        """Return an empty configuration."""
+        return {}
+
+    def on_evaluate_config(self, rnd: int) -> Dict[str, str]:
+        """Return an empty configuration."""
+        return {}
 
     def on_aggregate_fit(
         self, results: List[Tuple[Weights, int]], failures: List[BaseException]

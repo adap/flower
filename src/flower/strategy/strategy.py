@@ -16,7 +16,7 @@
 
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from flower.typing import Weights
 
@@ -39,6 +39,14 @@ class Strategy(ABC):
     @abstractmethod
     def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
         """Evaluate the current model weights."""
+
+    @abstractmethod
+    def on_fit_config(self, rnd: int) -> Dict[str, str]:
+        """Get configuration for the next round of training."""
+
+    @abstractmethod
+    def on_evaluate_config(self, rnd: int) -> Dict[str, str]:
+        """Get configuration for the next round of evaluation."""
 
     @abstractmethod
     def on_aggregate_fit(

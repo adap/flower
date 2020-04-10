@@ -54,11 +54,11 @@ class Server:
                 INFO, "initial weights (loss/accuracy): %s, %s", res[0], res[1],
             )
 
-        # Run federated averaging for num_rounds
+        # Run federated learning for num_rounds
         history = History()
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
-            weights_prime = self.fit_round()
+            weights_prime = self.fit_round(rnd=current_round)
             if weights_prime is not None:
                 self.weights = weights_prime
 
@@ -77,13 +77,13 @@ class Server:
 
             # Evaluate model on a sample of available clients
             if self.strategy.should_evaluate():
-                loss_avg = self.evaluate()
+                loss_avg = self.evaluate(rnd=current_round)
                 if loss_avg is not None:
                     history.add_loss_distributed(rnd=current_round, loss=loss_avg)
 
         return history
 
-    def evaluate(self) -> Optional[float]:
+    def evaluate(self, rnd: int) -> Optional[float]:
         """Validate current global model on a number of clients."""
         # Sample clients for evaluation
         sample_size, min_num_clients = self.strategy.num_evaluation_clients(
@@ -107,7 +107,8 @@ class Server:
 
         # Evaluate current global weights on those clients
         parameters = weights_to_parameters(self.weights)
-        evaluate_ins: FitIns = (parameters, {})
+        config = self.strategy.on_evaluate_config(rnd=rnd)
+        evaluate_ins: FitIns = (parameters, config)
         results, failures = evaluate_clients(clients, evaluate_ins)
         log(
             DEBUG,
@@ -118,7 +119,7 @@ class Server:
         # Aggregate the evaluation results
         return self.strategy.on_aggregate_evaluate(results, failures)
 
-    def fit_round(self) -> Optional[Weights]:
+    def fit_round(self, rnd: int) -> Optional[Weights]:
         """Perform a single round of federated averaging."""
         # Sample a number of clients (dependent on the strategy)
         sample_size, min_num_clients = self.strategy.num_fit_clients(
@@ -142,7 +143,8 @@ class Server:
 
         # Collect training results from all clients participating in this round
         parameters = weights_to_parameters(self.weights)
-        fit_ins: FitIns = (parameters, {})
+        config = self.strategy.on_fit_config(rnd=rnd)
+        fit_ins: FitIns = (parameters, config)
         results, failures = fit_clients(clients, fit_ins)
         log(
             DEBUG,
