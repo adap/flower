@@ -13,8 +13,10 @@
 # limitations under the License.
 # ==============================================================================
 """Tests EC2Adapter."""
+import os
 import time
 import unittest
+import warnings
 from unittest.mock import MagicMock
 
 from .ec2_adapter import EC2Adapter
@@ -120,6 +122,41 @@ class EC2AdapterTestCase(unittest.TestCase):
 
         # Execute
         self.adapter.terminate_instances([instance_id])
+
+
+if os.getenv("INTEGRATION"):
+
+    class EC2AdapterIntegrationTestCase(unittest.TestCase):
+        """Test suite for class EC2Adapter."""
+
+        def setUp(self) -> None:
+            """Create an instance."""
+            # Filter false positiv warning
+            warnings.filterwarnings(
+                "ignore",
+                category=ResourceWarning,
+                message="unclosed.*<ssl.SSLSocket.*>",
+            )
+
+            self.adapter = EC2Adapter(
+                image_id="ami-0b418580298265d5c",
+                key_name="flower",
+                subnet_id="subnet-23da286f",
+                security_group_ids=["sg-0dd0f0080bcf86400"],
+                tags=TAGS,
+            )
+
+        def test_workflow(self):
+            """Create, list and terminate an instance."""
+            # Execute & Assert
+            instances = self.adapter.create_instances(
+                num_cpu=2, num_ram=0.5, num_instances=1, timeout=10
+            )
+            instances = self.adapter.list_instances()
+
+            assert len(instances) == 1
+
+            self.adapter.terminate_instances([instances[0][0]])
 
 
 if __name__ == "__main__":
