@@ -29,7 +29,7 @@ from .strategy import Strategy
 class FedAvg(Strategy):
     """Configurable FedAvg strategy implementation."""
 
-    # pylint: disable-msg=too-many-arguments
+    # pylint: disable-msg=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         fraction_fit: float = 0.1,
@@ -38,6 +38,8 @@ class FedAvg(Strategy):
         min_eval_clients: int = 1,
         min_available_clients: int = 1,
         eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
+        on_fit_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
+        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         accept_failures: bool = True,
     ) -> None:
         super().__init__()
@@ -47,6 +49,8 @@ class FedAvg(Strategy):
         self.fraction_eval = fraction_eval
         self.min_available_clients = min_available_clients
         self.eval_fn = eval_fn
+        self.on_fit_config_fn = on_fit_config_fn
+        self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
 
     def should_evaluate(self) -> bool:
@@ -71,12 +75,18 @@ class FedAvg(Strategy):
         return self.eval_fn(weights)
 
     def on_fit_config(self, rnd: int) -> Dict[str, str]:
-        """Return an empty configuration."""
-        return {}
+        """Return a configuration for the next round of training."""
+        if self.on_fit_config_fn is None:
+            # No fit config function provided
+            return {}
+        return self.on_fit_config_fn(rnd)
 
     def on_evaluate_config(self, rnd: int) -> Dict[str, str]:
-        """Return an empty configuration."""
-        return {}
+        """Return a configuration for the next round of evaluation."""
+        if self.on_evaluate_config_fn is None:
+            # No evaluation config function provided
+            return {}
+        return self.on_evaluate_config_fn(rnd)
 
     def on_aggregate_fit(
         self, results: List[Tuple[Weights, int]], failures: List[BaseException]

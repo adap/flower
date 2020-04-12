@@ -16,18 +16,18 @@
 
 
 import argparse
-from typing import Callable, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 import numpy as np
 
 import flower as flwr
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
-from .client import get_lr_initial, load_data, load_model
+from .client import load_data, load_model
 
 
 def main() -> None:
-    """Start server and train five rounds."""
+    """Start server and train `--rounds` number of rounds."""
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
         "--grpc_server_address",
@@ -65,6 +65,12 @@ def main() -> None:
         default=1,
         help="Minimum number of available clients required for sampling (default: 1)",
     )
+    parser.add_argument(
+        "--lr_initial",
+        type=float,
+        default=0.1,
+        help="Initial learning rate (default: 0.1)",
+    )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
     args = parser.parse_args()
 
@@ -77,7 +83,8 @@ def main() -> None:
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
-        eval_fn=get_eval_fn(xy_test=xy_test),
+        eval_fn=get_eval_fn(xy_test),
+        on_fit_config_fn=get_on_fit_config_fn(args.lr_initial),
     )
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
 
@@ -90,6 +97,23 @@ def main() -> None:
     )
 
 
+def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
+    """Return a function which returns training configurations."""
+
+    def fit_config(rnd: int) -> Dict[str, str]:
+        """Return a configuration with static batch size and (local) epochs."""
+        config = {
+            "epoch_global": str(rnd),
+            "epochs": str(1),
+            "batch_size": str(32),
+            "lr_initial": str(lr_initial),
+            "lr_decay": str(0.99),
+        }
+        return config
+
+    return fit_config
+
+
 def get_eval_fn(
     xy_test: Tuple[np.ndarray, np.ndarray]
 ) -> Callable[[flwr.Weights], Optional[Tuple[float, float]]]:
@@ -97,7 +121,7 @@ def get_eval_fn(
 
     def evaluate(weights: flwr.Weights) -> Optional[Tuple[float, float]]:
         """Use entire Fashion-MNIST test set for evaluation."""
-        model = load_model(learning_rate=get_lr_initial())
+        model = load_model()
         model.set_weights(weights)
         loss, acc = model.evaluate(xy_test[0], xy_test[1], batch_size=len(xy_test))
         return float(loss), float(acc)
