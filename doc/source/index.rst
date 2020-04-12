@@ -1,3 +1,10 @@
+.. image:: _static/flower-logo.png
+    :alt: Flower: A friendly federated learning research framework
+    :align: center
+    :width: 200
+    :target: https://flower.adap.com/
+
+
 Welcome to Flower's documentation!
 ==================================
 
