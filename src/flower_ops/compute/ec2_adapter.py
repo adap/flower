@@ -14,8 +14,9 @@
 # ==============================================================================
 """Provides an Adapter implementation for AWS EC2."""
 
+
 import time
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import boto3
 from boto3_type_annotations import ec2
@@ -102,6 +103,13 @@ def are_all_status_ok(instance_status: List[Dict[str, str]]) -> bool:
     return True
 
 
+def tags_to_filter(
+    tags: List[Tuple[str, str]]
+) -> List[Dict[str, Union[str, List[str]]]]:
+    """Turn list of tuples with tag name and value in to AWS format."""
+    return [{"Name": f"tag:{tag[0]}", "Values": [tag[1]]} for tag in tags]
+
+
 class EC2Adapter(Adapter):
     """Adapter for AWS EC2."""
 
@@ -112,18 +120,22 @@ class EC2Adapter(Adapter):
         key_name: str,
         subnet_id: str,
         security_group_ids: List[str],
-        tags: List[str],
+        tags: Optional[List[Tuple[str, str]]] = None,
         boto_ec2_client: Optional[boto3.session.Session] = None,
     ):
         self.image_id = image_id
         self.key_name = key_name
         self.subnet_id = subnet_id
         self.security_group_ids = security_group_ids
-        self.tags = tags
+        self.tags = [("Flower EC2 Adapter ID", f"{int(time.time())}")]
+
+        if tags is not None:
+            self.tags += tags
+
         self.tag_specifications = [
             {
                 "ResourceType": "instance",
-                "Tags": [{"Key": "Name", "Value": tag} for tag in tags],
+                "Tags": [{"Key": tag[0], "Value": tag[1]} for tag in self.tags],
             }
         ]
 
@@ -145,8 +157,14 @@ class EC2Adapter(Adapter):
             )
 
             instance_status = [
-                ins["InstanceStatus"] for ins in result["InstanceStatuses"]
+                # Instead of SystemStatus we might want to use InstanceStatus
+                # InstanceStatus is a slightly more reliable although takes far longer
+                # to turn into "Ok" status
+                ins["SystemStatus"]
+                for ins in result["InstanceStatuses"]
             ]
+
+            print(instance_status)
 
             if are_all_status_ok(instance_status):
                 return
@@ -223,8 +241,7 @@ class EC2Adapter(Adapter):
             instance_ids = []
 
         result: EC2DescribeInstancesResult = self.ec2.describe_instances(
-            InstanceIds=instance_ids,
-            Filters=[{"Name": "tag:Name", "Values": self.tags}],
+            InstanceIds=instance_ids, Filters=tags_to_filter(self.tags),
         )
 
         instances = flatten_reservations(result)
@@ -258,7 +275,7 @@ class EC2Adapter(Adapter):
         Will raise an error if something goes wrong.
         """
         result: EC2DescribeInstancesResult = self.ec2.describe_instances(
-            Filters=[{"Name": "tag:Name", "Values": self.tags}],
+            Filters=tags_to_filter(self.tags),
         )
 
         instances = flatten_reservations(result)

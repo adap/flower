@@ -15,7 +15,6 @@
 """Implments compute classes for EC2."""
 
 import os
-import time
 import unittest
 import warnings
 
@@ -27,7 +26,6 @@ KEY_NAME = "flower"
 SSH_CREDENTIALS = ("ubuntu", "/Users/tanto/.ssh/flower.pem")
 SUBNET_ID = "subnet-23da286f"
 SECURITY_GROUP_IDS = ["sg-0dd0f0080bcf86400"]
-TAGS = [f"test_case_{int(time.time())}"]
 
 
 if os.getenv("INTEGRATION"):
@@ -55,7 +53,10 @@ if os.getenv("INTEGRATION"):
                 key_name=KEY_NAME,
                 subnet_id=SUBNET_ID,
                 security_group_ids=SECURITY_GROUP_IDS,
-                tags=TAGS,
+                tags=[
+                    ("Purpose", "integration_test"),
+                    ("Test Name", "ClusterIntegrationTestCase"),
+                ],
             )
             self.cluster = Cluster(
                 adapter=adapter,

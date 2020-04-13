@@ -51,7 +51,7 @@ paramiko = { version = "^2.7.1", optional = true }
 [tool.poetry.extras]
 benchmark = ["tensorflow-cpu"]
 examples-tensorflow = ["tensorflow-cpu"]
-ops = ["boto3", "boto3_type_annotations"]
+ops = ["boto3", "boto3_type_annotations", "paramiko"]
 
 [tool.poetry.dev-dependencies]
 isort = "==4.3.21"
