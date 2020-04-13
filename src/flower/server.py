@@ -46,6 +46,7 @@ class Server:
 
     def fit(self, num_rounds: int) -> History:
         """Run federated averaging for a number of rounds."""
+        history = History()
         # Initialize weights by asking one client to return theirs
         self.weights = self._get_initial_weights()
         res = self.strategy.evaluate(weights=self.weights)
@@ -53,9 +54,10 @@ class Server:
             log(
                 INFO, "initial weights (loss/accuracy): %s, %s", res[0], res[1],
             )
+            history.add_loss_centralized(rnd=0, loss=res[0])
+            history.add_accuracy_centralized(rnd=0, acc=res[1])
 
         # Run federated learning for num_rounds
-        history = History()
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
             weights_prime = self.fit_round(rnd=current_round)
