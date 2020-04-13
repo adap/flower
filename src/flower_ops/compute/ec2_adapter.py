@@ -157,11 +157,7 @@ class EC2Adapter(Adapter):
             )
 
             instance_status = [
-                # Instead of SystemStatus we might want to use InstanceStatus
-                # InstanceStatus is a slightly more reliable although takes far longer
-                # to turn into "Ok" status
-                ins["SystemStatus"]
-                for ins in result["InstanceStatuses"]
+                ins["InstanceStatus"] for ins in result["InstanceStatuses"]
             ]
 
             print(instance_status)
