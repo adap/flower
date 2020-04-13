@@ -23,7 +23,7 @@ GRPC_SERVER_PORT=8080
 
 # Start a Flower server
 python -m flower_benchmark.tf_fashion_mnist.server \
-  --rounds=2 \
-  --sample_fraction=0.5 \
-  --min_sample_size=2 \
-  --min_num_clients=4
+  --rounds=10 \
+  --sample_fraction=1.0 \
+  --min_sample_size=10 \
+  --min_num_clients=10

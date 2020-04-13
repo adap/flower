@@ -20,19 +20,19 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
 GRPC_SERVER_ADDRESS="[::]"
 GRPC_SERVER_PORT=8080
-NUM_CLIENTS=5
+NUM_CLIENTS=10
 I_START=0
-I_END=4
+I_END=9
 
 echo "Starting $NUM_CLIENTS clients."
 for ((i = $I_START; i <= $I_END; i++))
 do
     echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
     python -m flower_benchmark.tf_fashion_mnist.client \
+      --grpc_server_address=$GRPC_SERVER_ADDRESS \
+      --grpc_server_port=$GRPC_SERVER_PORT \
       --cid=$i \
       --partition=$i \
-      --clients=$NUM_CLIENTS \
-      --grpc_server_address=$GRPC_SERVER_ADDRESS \
-      --grpc_server_port=$GRPC_SERVER_PORT &
+      --clients=$NUM_CLIENTS &
 done
 echo "Started $NUM_CLIENTS clients."
