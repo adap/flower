@@ -28,7 +28,7 @@ SUBNET_ID = "subnet-23da286f"
 SECURITY_GROUP_IDS = ["sg-0dd0f0080bcf86400"]
 
 
-if os.getenv("INTEGRATION"):
+if os.getenv("FLOWER_INTEGRATION"):
 
     class ClusterIntegrationTestCase(unittest.TestCase):
         """Integration tests class Cluster.
