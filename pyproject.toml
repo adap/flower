@@ -46,11 +46,12 @@ google = "^2.0.3"
 tensorflow-cpu = { version = "==2.1.0", optional = true }
 boto3 = { version = "^1.12.36", optional = true }
 boto3_type_annotations = { version = "^0.3.1", optional = true }
+paramiko = { version = "^2.7.1", optional = true }
 
 [tool.poetry.extras]
 benchmark = ["tensorflow-cpu"]
 examples-tensorflow = ["tensorflow-cpu"]
-ops = ["boto3", "boto3_type_annotations"]
+ops = ["boto3", "boto3_type_annotations", "paramiko"]
 
 [tool.poetry.dev-dependencies]
 isort = "==4.3.21"

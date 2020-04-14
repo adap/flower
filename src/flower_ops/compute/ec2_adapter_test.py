@@ -13,19 +13,17 @@
 # limitations under the License.
 # ==============================================================================
 """Tests EC2Adapter."""
-import time
+import os
 import unittest
+import warnings
 from unittest.mock import MagicMock
 
 from .ec2_adapter import EC2Adapter
 
 IMAGE_ID = "ami-0b418580298265d5c"
-INSTANCE_TYPE = "t3.nano"
 KEY_NAME = "flower"
 SUBNET_ID = "subnet-23da286f"
 SECURITY_GROUP_IDS = ["sg-0dd0f0080bcf86400"]
-TAGS = [f"test_case_{int(time.time())}"]
-USER_DATA = "#!/bin/bash\nsudo shutdown -P 1"
 
 
 class EC2AdapterTestCase(unittest.TestCase):
@@ -66,7 +64,7 @@ class EC2AdapterTestCase(unittest.TestCase):
             key_name="flower",
             subnet_id="subnet-23da286f",
             security_group_ids=["sg-0dd0f0080bcf86400"],
-            tags=TAGS,
+            tags=[("Purpose", "integration_test"), ("Test Name", "EC2AdapterTestCase")],
             boto_ec2_client=self.ec2_mock,
         )
 
@@ -120,6 +118,40 @@ class EC2AdapterTestCase(unittest.TestCase):
 
         # Execute
         self.adapter.terminate_instances([instance_id])
+
+
+if os.getenv("FLOWER_INTEGRATION"):
+
+    class EC2AdapterIntegrationTestCase(unittest.TestCase):
+        """Test suite for class EC2Adapter."""
+
+        def setUp(self) -> None:
+            """Create an instance."""
+            # Filter false positiv warning
+            warnings.filterwarnings(
+                "ignore",
+                category=ResourceWarning,
+                message="unclosed.*<ssl.SSLSocket.*>",
+            )
+
+            self.adapter = EC2Adapter(
+                image_id="ami-0b418580298265d5c",
+                key_name="flower",
+                subnet_id="subnet-23da286f",
+                security_group_ids=["sg-0dd0f0080bcf86400"],
+            )
+
+        def test_workflow(self):
+            """Create, list and terminate an instance."""
+            # Execute & Assert
+            instances = self.adapter.create_instances(
+                num_cpu=2, num_ram=0.5, num_instances=1, timeout=10
+            )
+            instances = self.adapter.list_instances()
+
+            assert len(instances) == 1
+
+            self.adapter.terminate_instances([instances[0][0]])
 
 
 if __name__ == "__main__":
