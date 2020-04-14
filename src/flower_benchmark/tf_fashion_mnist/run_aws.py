@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Helper script to download CIFAR-10/100."""
+"""Execute FashionMnist benchmark on AWS."""
 
 import configparser
 from os import path
 
-from flower_ops.cluster import Cluster
+from flower_ops.cluster import Cluster, Spec
 from flower_ops.compute.ec2_adapter import EC2Adapter
 
 OPS_INI_PATH = path.normpath(
@@ -55,11 +55,12 @@ def watch_and_shutdown_command() -> str:
 
 
 def run(
-    rounds: int = 2,
-    num_clients: int = 6,
-    sample_fraction: float = 1.0,
-    min_sample_size: int = 6,
-    min_num_clients: int = 6,
+    rounds: int,
+    num_clients: int,
+    sample_fraction: float,
+    min_sample_size: int,
+    min_num_clients: int,
+    cluster_specs: Dict[str, Spec],
 ) -> None:
     """Run benchmark."""
 
@@ -90,7 +91,7 @@ def run(
     cluster = Cluster(
         adapter=ec2_adapter,
         ssh_credentials=("ubuntu", ssh_private_key_path),
-        specs={"server": (2, 2, 1), "clients": (2, 4, 2)},
+        specs=cluster_specs,
         timeout=20,
     )
 
@@ -133,5 +134,17 @@ def run(
     cluster.exec_all(watch_and_shutdown_command())
 
 
+def run_10_clients():
+    """Run 10 clients"""
+    run(
+        rounds=2,
+        num_clients=10,
+        sample_fraction=1.0,
+        min_sample_size=10,
+        min_num_clients=10,
+        cluster_specs={"server": (2, 2, 1), "clients": (2, 4, 2)},
+    )
+
+
 if __name__ == "__main__":
-    run()
+    run_10_clients()

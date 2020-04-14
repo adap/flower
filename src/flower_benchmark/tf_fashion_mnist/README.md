@@ -26,7 +26,7 @@ Adjust the wheel directory according to the localation of the repo on your
 machine.
 
 #### Security Group
-The security group needs to have port 8080 open the the clients can connect to the server.
+The security group needs to have port 8080 open the clients can connect to the server.
 
 #### Subnet Id
 We are starting all instances in the same subnet to be more cost efficent (traffic between EC2
@@ -38,6 +38,6 @@ The provided AMI is a bare Ubuntu 18.04 image which was modified with the
 
 ### Execution
 To execute the script simply do:
-```
+```bash
 python -m flower_benchmark.tf_fashion_mnist.run-aws
 ```
