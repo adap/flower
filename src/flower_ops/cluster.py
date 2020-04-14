@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Implments compute classes for EC2."""
+import concurrent.futures
 from contextlib import contextmanager
 from typing import Dict, Iterator, List, Tuple
 
@@ -122,17 +123,24 @@ class Cluster:
     def start(self) -> None:
         """Start the instance."""
         # Create Instances
-        for group, spec in self.specs.items():
-            print(f"Starting group: {group}")
-
+        def job(
+            group: str, num_cpu: int, num_ram: float, num_instances: int, timeout: int
+        ) -> None:
             instances = self.adapter.create_instances(
-                num_cpu=spec[0],
-                num_ram=spec[1],
-                num_instances=spec[2],
-                timeout=self.timeout,
+                num_cpu=num_cpu,
+                num_ram=num_ram,
+                num_instances=num_instances,
+                timeout=timeout,
             )
 
             self.instances[group] = instances
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(job, group, spec[0], spec[1], spec[2], self.timeout,)
+                for group, spec in self.specs.items()
+            ]
+            concurrent.futures.wait(futures)
 
     def terminate(self) -> None:
         """Terminate all instances and shutdown cluster."""
