@@ -126,7 +126,7 @@ def run(
     cluster.exec_all(watch_and_shutdown_command())
 
 
-def run_10_clients():
+def run_10_clients() -> None:
     """Run 10 clients."""
     run(
         rounds=2,
