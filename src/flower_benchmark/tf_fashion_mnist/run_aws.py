@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Execute FashionMnist benchmark on AWS."""
+"""Execute Fashion-MNIST benchmark on AWS."""
 
 import configparser
 from os import path

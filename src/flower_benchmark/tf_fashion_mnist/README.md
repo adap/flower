@@ -1,4 +1,4 @@
-# FashionMnist
+# Fashion-MNIST
 
 ## Ops
 To execute the `run_aws.py` script you will have to create a `.flower_ops` file in the
@@ -22,11 +22,10 @@ private_key = PATH_TO_YOU_PRIVATE_KEY_TO_SSH_INTO_THE_MACHINES
 ### Remarks
 
 #### Wheel directory
-Adjust the wheel directory according to the localation of the repo on your
-machine.
+Adjust the wheel directory according to the localation of the repo on your machine.
 
 #### Security Group
-The security group needs to have port 8080 open the clients can connect to the server.
+The security group needs to have port 8080 open so that the clients can connect to the server.
 
 #### Subnet Id
 We are starting all instances in the same subnet to be more cost efficent (traffic between EC2
