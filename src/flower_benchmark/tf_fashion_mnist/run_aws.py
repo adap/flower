@@ -17,12 +17,16 @@
 import configparser
 from os import path
 
-from flower_ops.cluster import Cluster, Spec
+from flower_ops.cluster import Cluster
 from flower_ops.compute.ec2_adapter import EC2Adapter
 
 OPS_INI_PATH = path.normpath(
     f"{path.dirname(path.realpath(__file__))}/../../../.flower_ops"
 )
+
+# Read config file and extract all values which are needed further down.
+CONFIG = configparser.ConfigParser()
+CONFIG.read(OPS_INI_PATH)
 
 
 def server_command(
@@ -62,34 +66,23 @@ def run(
     min_num_clients: int,
 ) -> None:
     """Run benchmark."""
-
-    # Read config file and extract all values which are needed further down.
-    config = configparser.ConfigParser()
-    config.read(OPS_INI_PATH)
-    image_id = config.get("aws", "image_id")
-    key_name = path.expanduser(config.get("aws", "key_name"))
-    subnet_id = config.get("aws", "subnet_id")
-    security_group_ids = config.get("aws", "security_group_ids").split(",")
-    tags = [("Purpose", "benchmark"), ("Benchmark Name", "fashion_mnist")]
-
-    ssh_private_key_path = path.expanduser(config.get("ssh", "private_key"))
-
-    wheel_dir = path.expanduser(config.get("paths", "wheel_dir"))
-    wheel_filename = config.get("paths", "wheel_filename")
-    wheel_local_path = wheel_dir + wheel_filename
+    wheel_filename = CONFIG.get("paths", "wheel_filename")
+    wheel_local_path = (
+        path.expanduser(CONFIG.get("paths", "wheel_dir")) + wheel_filename
+    )
     wheel_remote_path = "/home/ubuntu/" + wheel_filename
 
     ec2_adapter = EC2Adapter(
-        image_id=image_id,
-        key_name=key_name,
-        subnet_id=subnet_id,
-        security_group_ids=security_group_ids,
-        tags=tags,
+        image_id=CONFIG.get("aws", "image_id"),
+        key_name=path.expanduser(CONFIG.get("aws", "key_name")),
+        subnet_id=CONFIG.get("aws", "subnet_id"),
+        security_group_ids=CONFIG.get("aws", "security_group_ids").split(","),
+        tags=[("Purpose", "benchmark"), ("Benchmark Name", "fashion_mnist")],
     )
 
     cluster = Cluster(
         adapter=ec2_adapter,
-        ssh_credentials=("ubuntu", ssh_private_key_path),
+        ssh_credentials=("ubuntu", path.expanduser(CONFIG.get("ssh", "private_key"))),
         specs={"server": (2, 2, 1), "clients": (2, 4, 2)},
         timeout=20,
     )
