@@ -120,7 +120,7 @@ class EC2AdapterTestCase(unittest.TestCase):
         self.adapter.terminate_instances([instance_id])
 
 
-if os.getenv("INTEGRATION"):
+if os.getenv("FLOWER_INTEGRATION"):
 
     class EC2AdapterIntegrationTestCase(unittest.TestCase):
         """Test suite for class EC2Adapter."""
