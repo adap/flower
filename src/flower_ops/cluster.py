@@ -79,7 +79,7 @@ class Cluster:
             second one has two instances you might define the spec as following:
 
             specs = {
-                [group_name]: (vCPU count, RAM in GB, number of instances)
+                group_name: (vCPU count, RAM in GB, number of instances)
             }
 
             e.g.
