@@ -60,7 +60,6 @@ def run(
     sample_fraction: float,
     min_sample_size: int,
     min_num_clients: int,
-    cluster_specs: Dict[str, Spec],
 ) -> None:
     """Run benchmark."""
 
@@ -91,7 +90,7 @@ def run(
     cluster = Cluster(
         adapter=ec2_adapter,
         ssh_credentials=("ubuntu", ssh_private_key_path),
-        specs=cluster_specs,
+        specs={"server": (2, 2, 1), "clients": (2, 4, 2)},
         timeout=20,
     )
 
@@ -135,14 +134,13 @@ def run(
 
 
 def run_10_clients():
-    """Run 10 clients"""
+    """Run 10 clients."""
     run(
         rounds=2,
         num_clients=10,
         sample_fraction=1.0,
         min_sample_size=10,
         min_num_clients=10,
-        cluster_specs={"server": (2, 2, 1), "clients": (2, 4, 2)},
     )
 
 
