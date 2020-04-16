@@ -19,10 +19,11 @@ import argparse
 from typing import Callable, Dict, Optional, Tuple
 
 import numpy as np
+import tensorflow as tf
 
 import flower as flwr
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, cifar
 from .client import load_data, load_model
 
 
@@ -79,10 +80,15 @@ def main() -> None:
         help="CIFAR version, allowed values: 10 or 100 (default: 10)",
     )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
+    parser.add_argument(
+        "--dry_run", type=bool, default=True, help="Dry run (default: False)"
+    )
     args = parser.parse_args()
 
     # Load evaluation data
-    _, xy_test = load_data(partition=0, num_classes=args.cifar, num_clients=1)
+    _, xy_test = load_data(
+        partition=0, num_classes=args.cifar, num_clients=1, dry_run=args.dry_run
+    )
 
     # Create client_manager, strategy, and server
     client_manager = flwr.SimpleClientManager()
@@ -126,11 +132,22 @@ def get_eval_fn(
 ) -> Callable[[flwr.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
+    ds_test = cifar.build_dataset(
+        xy_test[0],
+        xy_test[1],
+        num_classes=10,
+        shuffle_buffer_size=len(xy_test[0]),
+        augment=False,
+    )
+    ds_test = ds_test.batch(batch_size=32, drop_remainder=False).prefetch(
+        buffer_size=tf.data.experimental.AUTOTUNE
+    )
+
     def evaluate(weights: flwr.Weights) -> Optional[Tuple[float, float]]:
         """Use entire CIFAR test set for evaluation."""
-        model = load_model(input_shape=(32, 32, 3), num_classes=num_classes,)
+        model = load_model(input_shape=(32, 32, 3), num_classes=num_classes)
         model.set_weights(weights)
-        loss, acc = model.evaluate(xy_test[0], xy_test[1], batch_size=len(xy_test[0]))
+        loss, acc = model.evaluate(x=ds_test)
         return float(loss), float(acc)
 
     return evaluate
