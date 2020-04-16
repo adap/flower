@@ -17,7 +17,7 @@
 
 import argparse
 from logging import DEBUG
-from typing import Callable, Optional, Tuple
+from typing import Callable, Tuple
 
 import numpy as np
 import tensorflow as tf
@@ -25,7 +25,8 @@ import tensorflow as tf
 import flower as flwr
 from flower.logger import log
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, cifar
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
+from .cifar import build_dataset
 
 tf.get_logger().setLevel("ERROR")
 
@@ -94,14 +95,14 @@ class CifarClient(flwr.Client):
     ) -> None:
         super().__init__(cid)
         self.model = model
-        self.ds_train = cifar.build_dataset(
+        self.ds_train = build_dataset(
             xy_train[0],
             xy_train[1],
             num_classes=10,
             shuffle_buffer_size=len(xy_train[0]),
             augment=True,
         )
-        self.ds_test = cifar.build_dataset(
+        self.ds_test = build_dataset(
             xy_test[0],
             xy_test[1],
             num_classes=10,
@@ -197,11 +198,7 @@ def get_lr_schedule(
 
 
 def load_data(
-    partition: int,
-    num_classes: int,
-    num_clients: int,
-    subtract_pixel_mean: bool = True,
-    dry_run: bool = False,
+    partition: int, num_classes: int, num_clients: int, dry_run: bool = False,
 ) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
     """Load, normalize, and sample CIFAR-10/100."""
     cifar = (

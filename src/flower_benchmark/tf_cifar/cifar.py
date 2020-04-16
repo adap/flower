@@ -21,6 +21,7 @@ import numpy as np
 import tensorflow as tf
 
 
+# pylint: disable-msg=too-many-arguments,invalid-name
 def build_dataset(
     x: np.ndarray,
     y: np.ndarray,
@@ -28,10 +29,10 @@ def build_dataset(
     shuffle_buffer_size: int = 0,
     augment: bool = False,
     seed: Optional[int] = None,
-):
+) -> tf.data.Dataset:
     """Divide images by 255, one-hot encode labels, optionally shuffle and augment."""
-    ds = tf.data.Dataset.from_tensor_slices((x, y))
-    ds = ds.map(
+    tf_ds = tf.data.Dataset.from_tensor_slices((x, y))
+    tf_ds = tf_ds.map(
         lambda x, y: (
             tf.cast(x, tf.float32) / 255.0,
             tf.one_hot(indices=tf.cast(y, tf.int64), depth=num_classes, axis=1),
@@ -39,19 +40,22 @@ def build_dataset(
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )
     if shuffle_buffer_size > 0:
-        ds = ds.shuffle(
+        tf_ds = tf_ds.shuffle(
             buffer_size=shuffle_buffer_size, seed=seed, reshuffle_each_iteration=True
         )
     if augment:
-        ds = ds.map(
+        tf_ds = tf_ds.map(
             lambda x, y: (_augment(x, seed=seed), y),
             num_parallel_calls=tf.data.experimental.AUTOTUNE,
         )
-    return ds
+    return tf_ds
 
 
 def _augment(
-    img: tf.Tensor, seed: int, color: bool = True, horizontal_flip: bool = True
+    img: tf.Tensor,
+    seed: Optional[int],
+    color: bool = True,
+    horizontal_flip: bool = True,
 ) -> tf.Tensor:
     if color:
         img = tf.image.random_hue(img, 0.08, seed=seed)
