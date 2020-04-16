@@ -33,7 +33,7 @@ def main() -> None:
         "--grpc_server_address",
         type=str,
         default=DEFAULT_GRPC_SERVER_ADDRESS,
-        help="gRPC server address (default: [::])",
+        help="gRPC server address (IPv6, default: [::])",
     )
     parser.add_argument(
         "--grpc_server_port",
