@@ -56,11 +56,16 @@ def main() -> None:
     parser.add_argument(
         "--clients", type=int, required=True, help="Number of clients (no default)",
     )
+    parser.add_argument(
+        "--dry_run", type=bool, default=False, help="Dry run (default: False)"
+    )
     args = parser.parse_args()
 
     # Load model and data
     model = load_model()
-    xy_train, xy_test = load_data(partition=args.partition, num_clients=args.clients)
+    xy_train, xy_test = load_data(
+        partition=args.partition, num_clients=args.clients, dry_run=args.dry_run
+    )
 
     # Start client
     client = FashionMnistClient(args.cid, model, xy_train, xy_test)
@@ -204,7 +209,7 @@ def get_lr_schedule(
 
 
 def load_data(
-    partition: int, num_clients: int
+    partition: int, num_clients: int, dry_run: bool
 ) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
     """Load partition of randomly shuffled Fashion-MNIST subset."""
     # Load training and test data (ignoring the test data for now)
@@ -229,6 +234,9 @@ def load_data(
     y_train = tf.keras.utils.to_categorical(y_train, 10)
     y_test = tf.keras.utils.to_categorical(y_test, 10)
 
+    # Return a small subset of the data if dry_run is set
+    if dry_run:
+        return (x_train[0:100], y_train[0:100]), (x_test[0:50], y_test[0:50])
     return (x_train, y_train), (x_test, y_test)
 
 
