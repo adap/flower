@@ -72,10 +72,13 @@ def main() -> None:
         help="Initial learning rate (default: 0.1)",
     )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
+    parser.add_argument(
+        "--dry_run", type=bool, default=False, help="Dry run (default: False)"
+    )
     args = parser.parse_args()
 
     # Load evaluation data
-    _, xy_test = load_data(partition=0, num_clients=1)
+    _, xy_test = load_data(partition=0, num_clients=1, dry_run=args.dry_run)
 
     # Create client_manager, strategy, and server
     client_manager = flwr.SimpleClientManager()
