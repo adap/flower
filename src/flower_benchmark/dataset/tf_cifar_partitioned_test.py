@@ -12,30 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for Federated Cifar Dataset generation."""
+"""Tests for partitioned CIFAR-10/100 dataset generation."""
 
 import unittest
+
 import numpy as np
 import tensorflow as tf
-from typing import List
 
-from flower_benchmark.dataset.tf_cifar_federated import (
+from flower_benchmark.dataset.tf_cifar_partitioned import (
     XY,
+    combine_partitions,
     load,
+    partition,
+    shuffle,
     sort_by_label,
     sort_by_label_repeating,
     split_at_fraction,
-    shuffle,
-    partition,
-    combine_partitions,
 )
 
+
 # pylint: disable=no-self-use, invalid-name
-SEED_1 = 2003
-SEED_2 = 3000
-
-
-def hash_xy(xy: XY) -> List[str]:
+def hash_xy(xy: XY) -> int:
     """Return hash of xy."""
     hashes = set()
     for x, y in zip(xy[0], xy[1]):
@@ -43,18 +40,20 @@ def hash_xy(xy: XY) -> List[str]:
     return hash(frozenset(hashes))
 
 
-def assert_identity(xy_0: XY, xy_1: XY):
+def assert_identity(xy_0: XY, xy_1: XY) -> None:
     """Assert that both datasets contain the same examples."""
     assert xy_0[0].shape == xy_1[0].shape
     assert xy_0[1].shape == xy_1[1].shape
     assert hash_xy(xy_0) == hash_xy(xy_1)
 
 
-class CifarFederatedTestCase(unittest.TestCase):
+class CifarPartitionedTestCase(unittest.TestCase):
+    """Tests for partitioned CIFAR-10/100 dataset generation."""
+
     def setUp(self):
         (x, y), (_, _) = tf.keras.datasets.cifar10.load_data()
 
-        np.random.seed(SEED_1)
+        np.random.seed(2000)
         idx = np.random.permutation(x.shape[0])
         x, y = x[idx], y[idx]
 
@@ -62,7 +61,7 @@ class CifarFederatedTestCase(unittest.TestCase):
 
         # Make sure subsequent shuffle in tests
         # produce other permuations
-        np.random.seed(SEED_2)
+        np.random.seed(3000)
 
     def test_assert_identity(self):
         """Test assert_identity function."""
@@ -94,7 +93,7 @@ class CifarFederatedTestCase(unittest.TestCase):
 
         # Assert
         assert_identity(self.ds, (x, y))
-        assert set([y[0] for y in y[:10]]) == set(range(10))
+        assert {y[0] for y in y[:10]} == set(range(10))
 
     def test_split_at_fraction(self):
         """Test split_at_fraction function."""
@@ -159,6 +158,7 @@ class CifarFederatedTestCase(unittest.TestCase):
         """Test partition function."""
         # Execute
         _, (_, _) = load(0.5, 10)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

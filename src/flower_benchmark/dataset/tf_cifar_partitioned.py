@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated versions of CIFAR-10/100 datasets."""
+"""Partitioned versions of CIFAR-10/100 datasets."""
 # pylint: disable=invalid-name
 
 from typing import List, Tuple
@@ -23,8 +23,7 @@ import tensorflow as tf
 XY = Tuple[np.ndarray, np.ndarray]
 XYList = List[XY]
 
-SEED = 2020
-np.random.seed(SEED)
+np.random.seed(2020)
 
 
 def float_to_int(i: float) -> int:
@@ -48,20 +47,17 @@ def sort_by_label_repeating(x: np.ndarray, y: np.ndarray) -> XY:
     Example:
         # given:
         y = [
-            0 0 1 1 2 2 3 3 4 4
-            5 5 6 6 7 7 8 8 9 9
+            0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9
         ]
 
         use:
         idx = [
-            0 2 4 6 8 10 12 14 16 18
-            1 3 5 7 9 11 13 15 17 19
+            0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19
         ]
 
         so that y[idx] becomes:
         y = [
-            0 1 2 3 4 5 6 7 8 9
-            0 1 2 3 4 5 6 7 8 9
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
         ]
     """
     x, y = sort_by_label(x, y)
@@ -79,12 +75,12 @@ def sort_by_label_repeating(x: np.ndarray, y: np.ndarray) -> XY:
 
 
 def split_at_fraction(x: np.ndarray, y: np.ndarray, fraction: float) -> Tuple[XY, XY]:
-    """Split x,y at a certain fraction."""
-    spliting_indice = float_to_int(x.shape[0] * fraction)
-    # Take everything BEFORE spliting_indice
-    x_0, y_0 = x[:spliting_indice], y[:spliting_indice]
-    # Take everything AFTER spliting_indice
-    x_1, y_1 = x[spliting_indice:], y[spliting_indice:]
+    """Split x, y at a certain fraction."""
+    splitting_index = float_to_int(x.shape[0] * fraction)
+    # Take everything BEFORE splitting_index
+    x_0, y_0 = x[:splitting_index], y[:splitting_index]
+    # Take everything AFTER splitting_index
+    x_1, y_1 = x[splitting_index:], y[splitting_index:]
     return (x_0, y_0), (x_1, y_1)
 
 
@@ -95,7 +91,7 @@ def shuffle(x: np.ndarray, y: np.ndarray) -> XY:
 
 
 def partition(x: np.ndarray, y: np.ndarray, num_partitions: int) -> List[XY]:
-    """Return x,y as list of partitions."""
+    """Return x, y as list of partitions."""
     return list(zip(np.split(x, num_partitions), np.split(y, num_partitions)))
 
 
@@ -121,18 +117,16 @@ def shift(x: np.ndarray, y: np.ndarray) -> XY:
 def load(
     iid_fraction: float, num_partitions: int, cifar100: bool = False
 ) -> Tuple[XYList, XY]:
-    """Load federated version of CIFAR-10/100."""
+    """Load partitioned version of CIFAR-10/100."""
 
     cifar = tf.keras.datasets.cifar100 if cifar100 else tf.keras.datasets.cifar10
     (x, y), (x_test, y_test) = cifar.load_data()
 
     x, y = shuffle(x, y)
-
-    # Make dataset IID
     x, y = sort_by_label_repeating(x, y)
 
-    # Split IID dataset
-    # TO_DO: handle fraction 0 and 1.0 edge cases
+    # pylint: disable=fixme
+    # TODO: handle fraction 0 and 1.0 edge cases
     (x_0, y_0), (x_1, y_1) = split_at_fraction(x, y, fraction=iid_fraction)
 
     # Shift in second split of dataset the classes into two groups
@@ -147,7 +141,7 @@ def load(
 
 
 if __name__ == "__main__":
-    # Load a federated dataset and show distribution of examples
+    # Load a partitioned dataset and show distribution of examples
     xy_par, _ = load(iid_fraction=0.5, num_partitions=100)
     distro = [np.unique(y, return_counts=True) for _, y in xy_par]
 
