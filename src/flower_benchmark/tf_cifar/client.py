@@ -26,7 +26,7 @@ import flower as flwr
 from flower.logger import log
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
-from .cifar import build_dataset
+from .cifar import build_dataset, keras_evaluate, keras_fit
 
 tf.get_logger().setLevel("ERROR")
 
@@ -128,13 +128,6 @@ class CifarClient(flwr.Client):
         lr_initial = float(config["lr_initial"])
         lr_decay = float(config["lr_decay"])
 
-        # Dataset
-        ds_train = (
-            self.ds_train.repeat(count=epochs)
-            .batch(batch_size=batch_size, drop_remainder=False)
-            .prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-        )
-
         # Use provided weights to update the local model
         self.model.set_weights(weights)
 
@@ -146,7 +139,13 @@ class CifarClient(flwr.Client):
         callbacks = [lr_scheduler]
 
         # Train the local model using the local dataset
-        self.model.fit(x=ds_train, callbacks=callbacks, verbose=2)
+        keras_fit(
+            model=self.model,
+            dataset=self.ds_train,
+            num_epochs=epochs,
+            batch_size=batch_size,
+            callbacks=callbacks,
+        )
 
         # Return the refined weights and the number of examples used for training
         parameters = flwr.weights_to_parameters(self.model.get_weights())
@@ -162,13 +161,10 @@ class CifarClient(flwr.Client):
         self.model.set_weights(weights)
 
         # Evaluate the updated model on the local dataset
-        ds_test = self.ds_test.batch(batch_size=32, drop_remainder=False).prefetch(
-            buffer_size=tf.data.experimental.AUTOTUNE
-        )
-        loss, _ = self.model.evaluate(x=ds_test)
+        loss, _ = keras_evaluate(self.model, self.ds_test)
 
         # Return the number of evaluation examples and the evaluation result (loss)
-        return self.num_examples_test, float(loss)
+        return self.num_examples_test, loss
 
 
 def load_model(input_shape: Tuple[int, int, int], num_classes: int) -> tf.keras.Model:
