@@ -17,7 +17,7 @@
 
 import argparse
 from logging import DEBUG
-from typing import Callable, Tuple, cast
+from typing import Callable, Optional, Tuple, cast
 
 import numpy as np
 import tensorflow as tf
@@ -39,7 +39,7 @@ def main() -> None:
         "--grpc_server_address",
         type=str,
         default=DEFAULT_GRPC_SERVER_ADDRESS,
-        help="gRPC server address (default: [::])",
+        help="gRPC server address (IPv6, default: [::])",
     )
     parser.add_argument(
         "--grpc_server_port",
@@ -81,8 +81,7 @@ class FashionMnistClient(flwr.Client):
         self.model = model
         self.x_train, self.y_train = xy_train
         self.x_test, self.y_test = xy_test
-        self.epoch = 0
-        self.rnd = 0
+        self.datagen: Optional[tf.keras.preprocessing.image.ImageDataGenerator] = None
 
     def get_parameters(self) -> flwr.ParametersRes:
         parameters = flwr.weights_to_parameters(self.model.get_weights())
@@ -99,6 +98,10 @@ class FashionMnistClient(flwr.Client):
         batch_size = int(config["batch_size"])
         lr_initial = float(config["lr_initial"])
         lr_decay = float(config["lr_decay"])
+
+        # Lazy initialization of the ImageDataGenerator
+        if self.datagen is None:
+            self.datagen = load_datagen(self.x_train)
 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
@@ -120,7 +123,9 @@ class FashionMnistClient(flwr.Client):
         )
 
         # Return the refined weights and the number of examples used for training
-        return flwr.weights_to_parameters(self.model.get_weights()), len(self.x_train)
+        parameters = flwr.weights_to_parameters(self.model.get_weights())
+        num_examples = len(self.x_train)
+        return parameters, num_examples
 
     def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
         weights = flwr.parameters_to_weights(ins[0])
@@ -185,6 +190,19 @@ def load_model(input_shape: Tuple[int, int, int] = (28, 28, 1)) -> tf.keras.Mode
     return model
 
 
+def get_lr_schedule(
+    epoch_global: int, lr_initial: float, lr_decay: float
+) -> Callable[[int], float]:
+    """Return a schedule which decays the learning rate after each epoch."""
+
+    def lr_schedule(epoch: int) -> float:
+        """Learning rate schedule."""
+        epoch += epoch_global
+        return lr_initial * lr_decay ** epoch
+
+    return lr_schedule
+
+
 def load_data(
     partition: int, num_clients: int
 ) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
@@ -239,17 +257,33 @@ def get_partition(
     return x_orig[start_index:end_index], y_orig[start_index:end_index]
 
 
-def get_lr_schedule(
-    epoch_global: int, lr_initial: float, lr_decay: float
-) -> Callable[[int], float]:
-    """Return a schedule which decays the learning rate after each epoch."""
-
-    def lr_schedule(epoch: int) -> float:
-        """Learning rate schedule."""
-        epoch += epoch_global
-        return lr_initial * lr_decay ** epoch
-
-    return lr_schedule
+def load_datagen(
+    x_train: np.ndarray,
+) -> tf.keras.preprocessing.image.ImageDataGenerator:
+    """Create an ImageDataGenerator for Fashion-MNIST."""
+    datagen = tf.keras.preprocessing.image.ImageDataGenerator(
+        featurewise_center=False,
+        samplewise_center=False,
+        featurewise_std_normalization=False,
+        samplewise_std_normalization=False,
+        zca_whitening=False,
+        zca_epsilon=1e-06,
+        rotation_range=0,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        shear_range=0.0,
+        zoom_range=0.0,
+        channel_shift_range=0.0,
+        fill_mode="nearest",
+        horizontal_flip=False,
+        vertical_flip=False,
+        rescale=None,
+        preprocessing_function=None,
+        data_format=None,
+        validation_split=0.0,
+    )
+    datagen.fit(x_train)
+    return datagen
 
 
 if __name__ == "__main__":

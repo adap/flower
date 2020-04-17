@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower client using TensorFlow for CIFAR-10/100.
+"""Flower client using TensorFlow for CIFAR-10/100."""
 
-Several components are translated from the official Keras ResNet/CIFAR example:
-https://keras.io/examples/cifar10_resnet/
-"""
 
 import argparse
 from logging import DEBUG
@@ -33,22 +30,16 @@ from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 tf.get_logger().setLevel("ERROR")
 
 SEED = 2020
-BATCH_SIZE = 50
-NUM_EPOCHS = 5
-LR_INITIAL = 0.15
-LR_DECAY = 0.99
 
 
 def main() -> None:
-    """Load data and start CifarClient."""
-
-    # Parse command line arguments
+    """Load data, create and start CifarClient."""
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
         "--grpc_server_address",
         type=str,
         default=DEFAULT_GRPC_SERVER_ADDRESS,
-        help="gRPC server address (default: [::])",
+        help="gRPC server address (IPv6, default: [::])",
     )
     parser.add_argument(
         "--grpc_server_port",
@@ -73,18 +64,9 @@ def main() -> None:
         "--clients", type=int, required=True, help="Number of clients (no default)",
     )
     args = parser.parse_args()
-    log(
-        DEBUG,
-        "Run client, cid %s, partition %s, CIFAR-%s",
-        args.cid,
-        args.partition,
-        args.cifar,
-    )
 
     # Load model and data
-    model = load_model(
-        input_shape=(32, 32, 3), num_classes=args.cifar, learning_rate=get_lr_initial()
-    )
+    model = load_model(input_shape=(32, 32, 3), num_classes=args.cifar)
     xy_train, xy_test = load_data(
         partition=args.partition, num_classes=args.cifar, num_clients=args.clients
     )
@@ -94,7 +76,6 @@ def main() -> None:
     flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
 
 
-# pylint: disable-msg=too-many-instance-attributes
 class CifarClient(flwr.Client):
     """Flower client implementing CIAFR-10/100 image classification using TF."""
 
@@ -110,8 +91,6 @@ class CifarClient(flwr.Client):
         self.x_train, self.y_train = xy_train
         self.x_test, self.y_test = xy_test
         self.datagen: Optional[tf.keras.preprocessing.image.ImageDataGenerator] = None
-        self.epoch = 0
-        self.rnd = 0
 
     def get_parameters(self) -> flwr.ParametersRes:
         parameters = flwr.weights_to_parameters(self.model.get_weights())
@@ -120,9 +99,14 @@ class CifarClient(flwr.Client):
     def fit(self, ins: flwr.FitIns) -> flwr.FitRes:
         weights: flwr.Weights = flwr.parameters_to_weights(ins[0])
         config = ins[1]
+        log(DEBUG, "fit, config %s", config)
 
-        self.rnd += 1
-        log(DEBUG, "fit, round %s, config %s", self.rnd, config)
+        # Training configuration
+        epoch_global = int(config["epoch_global"])
+        epochs = int(config["epochs"])
+        batch_size = int(config["batch_size"])
+        lr_initial = float(config["lr_initial"])
+        lr_decay = float(config["lr_decay"])
 
         # Lazy initialization of the ImageDataGenerator
         if self.datagen is None:
@@ -132,61 +116,65 @@ class CifarClient(flwr.Client):
         self.model.set_weights(weights)
 
         # Learning rate
-        lr_schedule = get_lr_schedule_rnd(
-            self.rnd, lr_initial=LR_INITIAL, lr_decay=LR_DECAY
+        lr_schedule = get_lr_schedule(
+            epoch_global, lr_initial=lr_initial, lr_decay=lr_decay
         )
         lr_scheduler = tf.keras.callbacks.LearningRateScheduler(lr_schedule)
 
         # Train the local model using the local dataset
-        epochs = num_epochs(self.rnd)
         self.model.fit_generator(
-            self.datagen.flow(self.x_train, self.y_train, batch_size=BATCH_SIZE),
-            epochs=NUM_EPOCHS,
+            self.datagen.flow(self.x_train, self.y_train, batch_size=batch_size),
+            epochs=epochs,
             callbacks=[lr_scheduler],
+            verbose=2,
         )
-        self.epoch += epochs
 
         # Return the refined weights and the number of examples used for training
-        return flwr.weights_to_parameters(self.model.get_weights()), len(self.x_train)
+        parameters = flwr.weights_to_parameters(self.model.get_weights())
+        num_examples = len(self.x_train)
+        return parameters, num_examples
 
     def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
         weights = flwr.parameters_to_weights(ins[0])
         config = ins[1]
         log(DEBUG, "evaluate, config %s", config)
+
         # Use provided weights to update the local model
         self.model.set_weights(weights)
+
         # Evaluate the updated model on the local dataset
         loss, _ = self.model.evaluate(
             self.x_test, self.y_test, batch_size=len(self.x_test)
         )
+
         # Return the number of evaluation examples and the evaluation result (loss)
         return len(self.x_test), float(loss)
 
 
-def num_epochs(rnd: int) -> int:
-    """Determine the number of local epochs."""
-    if rnd <= 20:
-        return 2
-    if rnd <= 40:
-        return 4
-    if rnd <= 60:
-        return 6
-    return 8
-
-
-def load_model(
-    input_shape: Tuple[int, int, int], num_classes: int, learning_rate: float
-) -> tf.keras.Model:
+def load_model(input_shape: Tuple[int, int, int], num_classes: int) -> tf.keras.Model:
     """Create a ResNet-50 (v2) instance"""
     model = tf.keras.applications.ResNet50V2(
         weights=None, include_top=True, input_shape=input_shape, classes=num_classes
     )
     model.compile(
-        optimizer=tf.keras.optimizers.SGD(learning_rate=learning_rate),
+        optimizer=tf.keras.optimizers.Adam(),
         loss="categorical_crossentropy",
         metrics=["accuracy"],
     )
     return model
+
+
+def get_lr_schedule(
+    epoch_global: int, lr_initial: float, lr_decay: float
+) -> Callable[[int], float]:
+    """Return a schedule which decays the learning rate after each epoch."""
+
+    def lr_schedule(epoch: int) -> float:
+        """Learning rate schedule."""
+        epoch += epoch_global
+        return lr_initial * lr_decay ** epoch
+
+    return lr_schedule
 
 
 def load_data(
@@ -269,68 +257,6 @@ def load_datagen(
     )
     datagen.fit(x_train)
     return datagen
-
-
-def get_lr_schedule_adam(epoch_base: int) -> Callable[[int], float]:
-    """Return a learning rate function."""
-
-    def lr_schedule(epoch: int) -> float:
-        """Learning Rate Schedule
-
-        Learning rate is scheduled to be reduced after 80, 120, 160, 180 epochs.
-        Called automatically every epoch as part of callbacks during training.
-
-        # Arguments
-            epoch (int): The number of epochs
-
-        # Returns
-            lr (float32): learning rate
-        """
-        epoch += epoch_base
-        learning_rate = 1e-3
-        if epoch > 180:
-            learning_rate *= 0.5e-3
-        elif epoch > 160:
-            learning_rate *= 1e-3
-        elif epoch > 120:
-            learning_rate *= 1e-2
-        elif epoch > 80:
-            learning_rate *= 1e-1
-        return learning_rate
-
-    return lr_schedule
-
-
-def get_lr_schedule_epoch(
-    epoch_base: int, lr_initial: float, lr_decay: float
-) -> Callable[[int], float]:
-    """Return a schedule which decays the learning rate after each epoch."""
-
-    def lr_schedule(epoch: int) -> float:
-        """Learning rate schedule."""
-        epoch += epoch_base
-        return lr_initial * lr_decay ** epoch
-
-    return lr_schedule
-
-
-def get_lr_schedule_rnd(
-    rnd: int, lr_initial: float, lr_decay: float
-) -> Callable[[int], float]:
-    """Return a schedule which decays the learning rate after each round."""
-    lr_rnd = lr_initial * lr_decay ** rnd
-
-    # pylint: disable-msg=unused-argument
-    def lr_schedule(epoch: int) -> float:
-        """Learning rate schedule."""
-        return lr_rnd
-
-    return lr_schedule
-
-
-def get_lr_initial() -> float:
-    """Return the initial learning rate."""
-    return get_lr_schedule_rnd(rnd=0, lr_initial=LR_INITIAL, lr_decay=LR_DECAY)(0)
 
 
 if __name__ == "__main__":
