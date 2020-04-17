@@ -17,7 +17,7 @@
 
 import argparse
 from logging import DEBUG
-from typing import Callable, Optional, Tuple
+from typing import Callable, Tuple
 
 import numpy as np
 import tensorflow as tf
@@ -26,6 +26,7 @@ import flower as flwr
 from flower.logger import log
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
+from .cifar import build_dataset
 
 tf.get_logger().setLevel("ERROR")
 
@@ -63,12 +64,18 @@ def main() -> None:
     parser.add_argument(
         "--clients", type=int, required=True, help="Number of clients (no default)",
     )
+    parser.add_argument(
+        "--dry_run", type=bool, default=True, help="Dry run (default: False)"
+    )
     args = parser.parse_args()
 
     # Load model and data
     model = load_model(input_shape=(32, 32, 3), num_classes=args.cifar)
     xy_train, xy_test = load_data(
-        partition=args.partition, num_classes=args.cifar, num_clients=args.clients
+        partition=args.partition,
+        num_classes=args.cifar,
+        num_clients=args.clients,
+        dry_run=args.dry_run,
     )
 
     # Start client
@@ -88,9 +95,22 @@ class CifarClient(flwr.Client):
     ) -> None:
         super().__init__(cid)
         self.model = model
-        self.x_train, self.y_train = xy_train
-        self.x_test, self.y_test = xy_test
-        self.datagen: Optional[tf.keras.preprocessing.image.ImageDataGenerator] = None
+        self.ds_train = build_dataset(
+            xy_train[0],
+            xy_train[1],
+            num_classes=10,
+            shuffle_buffer_size=len(xy_train[0]),
+            augment=True,
+        )
+        self.ds_test = build_dataset(
+            xy_test[0],
+            xy_test[1],
+            num_classes=10,
+            shuffle_buffer_size=len(xy_test[0]),
+            augment=False,
+        )
+        self.num_examples_train = len(xy_train[0])
+        self.num_examples_test = len(xy_test[0])
 
     def get_parameters(self) -> flwr.ParametersRes:
         parameters = flwr.weights_to_parameters(self.model.get_weights())
@@ -108,9 +128,12 @@ class CifarClient(flwr.Client):
         lr_initial = float(config["lr_initial"])
         lr_decay = float(config["lr_decay"])
 
-        # Lazy initialization of the ImageDataGenerator
-        if self.datagen is None:
-            self.datagen = load_datagen(self.x_train)
+        # Dataset
+        ds_train = (
+            self.ds_train.repeat(count=epochs)
+            .batch(batch_size=batch_size, drop_remainder=False)
+            .prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+        )
 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
@@ -120,18 +143,14 @@ class CifarClient(flwr.Client):
             epoch_global, lr_initial=lr_initial, lr_decay=lr_decay
         )
         lr_scheduler = tf.keras.callbacks.LearningRateScheduler(lr_schedule)
+        callbacks = [lr_scheduler]
 
         # Train the local model using the local dataset
-        self.model.fit_generator(
-            self.datagen.flow(self.x_train, self.y_train, batch_size=batch_size),
-            epochs=epochs,
-            callbacks=[lr_scheduler],
-            verbose=2,
-        )
+        self.model.fit(x=ds_train, callbacks=callbacks, verbose=2)
 
         # Return the refined weights and the number of examples used for training
         parameters = flwr.weights_to_parameters(self.model.get_weights())
-        num_examples = len(self.x_train)
+        num_examples = self.num_examples_train
         return parameters, num_examples
 
     def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
@@ -143,12 +162,13 @@ class CifarClient(flwr.Client):
         self.model.set_weights(weights)
 
         # Evaluate the updated model on the local dataset
-        loss, _ = self.model.evaluate(
-            self.x_test, self.y_test, batch_size=len(self.x_test)
+        ds_test = self.ds_test.batch(batch_size=32, drop_remainder=False).prefetch(
+            buffer_size=tf.data.experimental.AUTOTUNE
         )
+        loss, _ = self.model.evaluate(x=ds_test)
 
         # Return the number of evaluation examples and the evaluation result (loss)
-        return len(self.x_test), float(loss)
+        return self.num_examples_test, float(loss)
 
 
 def load_model(input_shape: Tuple[int, int, int], num_classes: int) -> tf.keras.Model:
@@ -178,10 +198,7 @@ def get_lr_schedule(
 
 
 def load_data(
-    partition: int,
-    num_classes: int,
-    num_clients: int,
-    subtract_pixel_mean: bool = True,
+    partition: int, num_classes: int, num_clients: int, dry_run: bool = False,
 ) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
     """Load, normalize, and sample CIFAR-10/100."""
     cifar = (
@@ -189,25 +206,15 @@ def load_data(
     )
     (x_train, y_train), (x_test, y_test) = cifar.load_data()
 
-    # Take a subset
+    # Shuffle, then take a subset
     x_train, y_train = shuffle(x_train, y_train, seed=SEED)
     x_test, y_test = shuffle(x_test, y_test, seed=SEED)
-
     x_train, y_train = get_partition(x_train, y_train, partition, num_clients)
     x_test, y_test = get_partition(x_test, y_test, partition, num_clients)
 
-    # Normalize data.
-    x_train = x_train.astype("float32") / 255.0
-    x_test = x_test.astype("float32") / 255.0
-    if subtract_pixel_mean:
-        x_train_mean = np.mean(x_train, axis=0)
-        x_train -= x_train_mean
-        x_test -= x_train_mean
-
-    # Convert class vectors to one-hot encoded labels
-    y_train = tf.keras.utils.to_categorical(y_train, num_classes)
-    y_test = tf.keras.utils.to_categorical(y_test, num_classes)
-
+    # Return a small subset of the data if dry_run is set
+    if dry_run:
+        return (x_train[0:100], y_train[0:100]), (x_test[0:50], y_test[0:50])
     return (x_train, y_train), (x_test, y_test)
 
 
@@ -228,35 +235,6 @@ def get_partition(
     start_index = int(step_size * partition)
     end_index = int(start_index + step_size)
     return x_orig[start_index:end_index], y_orig[start_index:end_index]
-
-
-def load_datagen(
-    x_train: np.ndarray,
-) -> tf.keras.preprocessing.image.ImageDataGenerator:
-    """Create an ImageDataGenerator for CIFAR-10/100."""
-    datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-        featurewise_center=False,
-        samplewise_center=False,
-        featurewise_std_normalization=False,
-        samplewise_std_normalization=False,
-        zca_whitening=False,
-        zca_epsilon=1e-06,
-        rotation_range=0,
-        width_shift_range=0.1,
-        height_shift_range=0.1,
-        shear_range=0.0,
-        zoom_range=0.0,
-        channel_shift_range=0.0,
-        fill_mode="nearest",
-        horizontal_flip=True,
-        vertical_flip=False,
-        rescale=None,
-        preprocessing_function=None,
-        data_format=None,
-        validation_split=0.0,
-    )
-    datagen.fit(x_train)
-    return datagen
 
 
 if __name__ == "__main__":
