@@ -65,7 +65,7 @@ def main() -> None:
         "--clients", type=int, required=True, help="Number of clients (no default)",
     )
     parser.add_argument(
-        "--dry_run", type=bool, default=True, help="Dry run (default: False)"
+        "--dry_run", type=bool, default=False, help="Dry run (default: False)"
     )
     args = parser.parse_args()
 

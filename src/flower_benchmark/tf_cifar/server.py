@@ -81,7 +81,7 @@ def main() -> None:
     )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
     parser.add_argument(
-        "--dry_run", type=bool, default=True, help="Dry run (default: False)"
+        "--dry_run", type=bool, default=False, help="Dry run (default: False)"
     )
     args = parser.parse_args()
 
