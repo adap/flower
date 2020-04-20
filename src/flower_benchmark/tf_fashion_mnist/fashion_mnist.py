@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Create and augment a CIFAR-10 TensorFlow Dataset."""
+"""Flower client using TensorFlow for Fashion-MNIST image classification."""
 
 
 from typing import List, Optional, Tuple
@@ -26,7 +26,7 @@ def keras_evaluate(
 ) -> Tuple[float, float]:
     """Evaluate the model using model.evaluate(...)."""
     ds_test = dataset.batch(batch_size=batch_size, drop_remainder=False)
-    loss, acc = model.evaluate(ds_test)
+    loss, acc = model.evaluate(x=ds_test)
     return float(loss), float(acc)
 
 
@@ -52,31 +52,31 @@ def build_dataset(
     seed: Optional[int] = None,
 ) -> tf.data.Dataset:
     """Divide images by 255, one-hot encode labels, optionally shuffle and augment."""
-    tf_ds = tf.data.Dataset.from_tensor_slices((x, y))
-    tf_ds = tf_ds.map(
+    dataset = tf.data.Dataset.from_tensor_slices((x, y))
+    dataset = dataset.map(
         lambda x, y: (
             tf.cast(x, tf.float32) / 255.0,
-            tf.one_hot(indices=tf.cast(y, tf.int64), depth=num_classes),
+            tf.one_hot(indices=tf.cast(y, tf.int32), depth=num_classes),
         ),
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )
     if shuffle_buffer_size > 0:
-        tf_ds = tf_ds.shuffle(
+        dataset = dataset.shuffle(
             buffer_size=shuffle_buffer_size, seed=seed, reshuffle_each_iteration=True
         )
     if augment:
-        tf_ds = tf_ds.map(
-            lambda x, y: (_augment(x, seed=seed), y),
+        dataset = dataset.map(
+            lambda x, y: (
+                _augment(x, seed=seed, color=False, horizontal_flip=False),
+                y,
+            ),
             num_parallel_calls=tf.data.experimental.AUTOTUNE,
         )
-    return tf_ds
+    return dataset
 
 
 def _augment(
-    img: tf.Tensor,
-    seed: Optional[int],
-    color: bool = True,
-    horizontal_flip: bool = True,
+    img: tf.Tensor, seed: Optional[int], color: bool, horizontal_flip: bool,
 ) -> tf.Tensor:
     if color:
         img = tf.image.random_hue(img, 0.08, seed=seed)
@@ -85,5 +85,5 @@ def _augment(
         img = tf.image.random_contrast(img, 0.7, 1.3, seed=seed)
     if horizontal_flip:
         img = tf.image.random_flip_left_right(img, seed=seed)
-    img_padded = tf.image.pad_to_bounding_box(img, 4, 4, 40, 40)
-    return tf.image.random_crop(img_padded, size=[32, 32, 3], seed=seed)
+    img_padded = tf.image.pad_to_bounding_box(img, 2, 2, 32, 32)
+    return tf.image.random_crop(img_padded, size=[28, 28, 1], seed=seed)
