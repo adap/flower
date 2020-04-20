@@ -135,12 +135,19 @@ class Cluster:
 
             self.instances[group] = instances
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = [
                 executor.submit(job, group, spec[0], spec[1], spec[2], self.timeout,)
                 for group, spec in self.specs.items()
             ]
             concurrent.futures.wait(futures)
+
+            for future in futures:
+                try:
+                    future.result()
+                # pylint: disable=broad-except
+                except Exception as exc:
+                    print(exc)
 
     def terminate(self) -> None:
         """Terminate all instances and shutdown cluster."""
