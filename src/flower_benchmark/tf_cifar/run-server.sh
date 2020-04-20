@@ -23,4 +23,4 @@ python -m flower_benchmark.tf_cifar.server \
   --rounds=10 \
   --sample_fraction=1.0 \
   --min_sample_size=10 \
-  --min_num_clients=75
+  --min_num_clients=10
