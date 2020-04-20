@@ -77,7 +77,7 @@ def run(
         key_name=path.expanduser(CONFIG.get("aws", "key_name")),
         subnet_id=CONFIG.get("aws", "subnet_id"),
         security_group_ids=CONFIG.get("aws", "security_group_ids").split(","),
-        tags=[("Purpose", "benchmark"), ("Benchmark Name", "fashion_mnist")],
+        tags=[("Purpose", "benchmark"), ("Benchmark Name", "CIFAR-10/100")],
     )
 
     cluster = Cluster(
