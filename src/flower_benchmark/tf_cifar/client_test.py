@@ -13,32 +13,3 @@
 # limitations under the License.
 # ==============================================================================
 """Tests for CIFAR-10/100 Flower client."""
-
-
-import numpy as np
-
-from .client import shuffle
-
-
-def test_shuffle():
-    """Test if shuffle is deterministic depending on the the provided seed."""
-    # Prepare
-    x_tt = np.arange(8)
-    y_tt = np.arange(8)
-
-    x_expected_2019 = np.array([1, 4, 3, 6, 7, 5, 2, 0])
-    y_expected_2019 = np.array([1, 4, 3, 6, 7, 5, 2, 0])
-
-    x_expected_2020 = np.array([6, 2, 1, 4, 5, 3, 7, 0])
-    y_expected_2020 = np.array([6, 2, 1, 4, 5, 3, 7, 0])
-
-    # Execute & assert
-    for _ in range(3):
-        x_actual, y_actual = shuffle(x_tt, y_tt, seed=2019)
-        np.testing.assert_array_equal(x_expected_2019, x_actual)
-        np.testing.assert_array_equal(y_expected_2019, y_actual)
-
-    for _ in range(3):
-        x_actual, y_actual = shuffle(x_tt, y_tt, seed=2020)
-        np.testing.assert_array_equal(x_expected_2020, x_actual)
-        np.testing.assert_array_equal(y_expected_2020, y_actual)

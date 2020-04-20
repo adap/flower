@@ -24,6 +24,7 @@ import tensorflow as tf
 
 import flower as flwr
 from flower.logger import log
+from flower_benchmark.dataset import tf_cifar_partitioned
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 from .cifar import build_dataset, keras_evaluate, keras_fit
@@ -197,40 +198,18 @@ def load_data(
     partition: int, num_classes: int, num_clients: int, dry_run: bool = False,
 ) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
     """Load, normalize, and sample CIFAR-10/100."""
-    cifar = (
-        tf.keras.datasets.cifar10 if num_classes == 10 else tf.keras.datasets.cifar100
+    use_cifar100 = num_classes == 100
+    xy_partitions, (x_test, y_test) = tf_cifar_partitioned.load_data(
+        iid_fraction=0.5, num_partitions=num_clients, cifar100=use_cifar100
     )
-    (x_train, y_train), (x_test, y_test) = cifar.load_data()
+    x_train, y_train = xy_partitions[partition]
 
-    # Shuffle, then take a subset
-    x_train, y_train = shuffle(x_train, y_train, seed=SEED)
-    x_test, y_test = shuffle(x_test, y_test, seed=SEED)
-    x_train, y_train = get_partition(x_train, y_train, partition, num_clients)
-    x_test, y_test = get_partition(x_test, y_test, partition, num_clients)
+    log(DEBUG, "Data distribution %s", np.unique(y_train, return_counts=True))
 
     # Return a small subset of the data if dry_run is set
     if dry_run:
         return (x_train[0:100], y_train[0:100]), (x_test[0:50], y_test[0:50])
     return (x_train, y_train), (x_test, y_test)
-
-
-def shuffle(
-    x_orig: np.ndarray, y_orig: np.ndarray, seed: int
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Shuffle x and y in the same way."""
-    np.random.seed(seed)
-    idx = np.random.permutation(len(x_orig))
-    return x_orig[idx], y_orig[idx]
-
-
-def get_partition(
-    x_orig: np.ndarray, y_orig: np.ndarray, partition: int, num_clients: int
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Return a single partition of an equally partitioned dataset."""
-    step_size = len(x_orig) / num_clients
-    start_index = int(step_size * partition)
-    end_index = int(start_index + step_size)
-    return x_orig[start_index:end_index], y_orig[start_index:end_index]
 
 
 if __name__ == "__main__":

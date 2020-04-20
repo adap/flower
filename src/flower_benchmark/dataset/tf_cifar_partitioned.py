@@ -114,7 +114,7 @@ def shift(x: np.ndarray, y: np.ndarray) -> XY:
     return x, y
 
 
-def load(
+def load_data(
     iid_fraction: float, num_partitions: int, cifar100: bool = False
 ) -> Tuple[XYList, XY]:
     """Load partitioned version of CIFAR-10/100."""
@@ -142,7 +142,7 @@ def load(
 
 if __name__ == "__main__":
     # Load a partitioned dataset and show distribution of examples
-    xy_par, _ = load(iid_fraction=0.5, num_partitions=100)
+    xy_par, _ = load_data(iid_fraction=0.5, num_partitions=100)
     distro = [np.unique(y, return_counts=True) for _, y in xy_par]
 
     assert np.sum([d[1] for d in distro]) == 50000
