@@ -32,7 +32,7 @@ following convenience script::
 Third, install the Flower package in development mode (think
 :code:`pip install -e`) along with all necessary dependencies::
 
-  (flower-3.7.6) $ ./dev/bootstrap.sh
+  (flower-3.7.7) $ ./dev/bootstrap.sh
 
 
 Convenience Scripts

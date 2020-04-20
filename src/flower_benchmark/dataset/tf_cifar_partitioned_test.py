@@ -22,7 +22,7 @@ import tensorflow as tf
 from flower_benchmark.dataset.tf_cifar_partitioned import (
     XY,
     combine_partitions,
-    load,
+    load_data,
     partition,
     shuffle,
     sort_by_label,
@@ -154,10 +154,10 @@ class CifarPartitionedTestCase(unittest.TestCase):
         np.testing.assert_equal(x_01, r_0_10)
         np.testing.assert_equal(y_01, r_0_10)
 
-    def test_load_integration(self):
+    def test_load_data_integration(self):
         """Test partition function."""
         # Execute
-        _, (_, _) = load(0.5, 10)
+        _, (_, _) = load_data(0.5, 10)
 
 
 if __name__ == "__main__":
