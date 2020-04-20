@@ -17,7 +17,7 @@
 
 import argparse
 from logging import DEBUG
-from typing import Callable, Optional, Tuple, cast
+from typing import Callable, Tuple, cast
 
 import numpy as np
 import tensorflow as tf
@@ -26,6 +26,7 @@ import flower as flwr
 from flower.logger import log
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
+from .fashion_mnist import build_dataset, keras_evaluate, keras_fit
 
 tf.get_logger().setLevel("ERROR")
 
@@ -84,9 +85,22 @@ class FashionMnistClient(flwr.Client):
     ):
         super().__init__(cid)
         self.model = model
-        self.x_train, self.y_train = xy_train
-        self.x_test, self.y_test = xy_test
-        self.datagen: Optional[tf.keras.preprocessing.image.ImageDataGenerator] = None
+        self.ds_train = build_dataset(
+            xy_train[0],
+            xy_train[1],
+            num_classes=10,
+            shuffle_buffer_size=len(xy_train[0]),
+            augment=False,
+        )
+        self.ds_test = build_dataset(
+            xy_test[0],
+            xy_test[1],
+            num_classes=10,
+            shuffle_buffer_size=0,
+            augment=False,
+        )
+        self.num_examples_train = len(xy_train[0])
+        self.num_examples_test = len(xy_test[0])
 
     def get_parameters(self) -> flwr.ParametersRes:
         parameters = flwr.weights_to_parameters(self.model.get_weights())
@@ -95,58 +109,59 @@ class FashionMnistClient(flwr.Client):
     def fit(self, ins: flwr.FitIns) -> flwr.FitRes:
         weights: flwr.Weights = flwr.parameters_to_weights(ins[0])
         config = ins[1]
-        log(DEBUG, "fit, config %s", config)
+        log(
+            DEBUG,
+            "fit on %s (examples: %s), config %s",
+            self.cid,
+            self.num_examples_train,
+            config,
+        )
 
         # Training configuration
-        epoch_global = int(config["epoch_global"])
+        # epoch_global = int(config["epoch_global"])
         epochs = int(config["epochs"])
         batch_size = int(config["batch_size"])
-        lr_initial = float(config["lr_initial"])
-        lr_decay = float(config["lr_decay"])
-
-        # Lazy initialization of the ImageDataGenerator
-        if self.datagen is None:
-            self.datagen = load_datagen(self.x_train)
+        # lr_initial = float(config["lr_initial"])
+        # lr_decay = float(config["lr_decay"])
 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
 
-        # Learning rate
-        lr_schedule = get_lr_schedule(
-            epoch_global, lr_initial=lr_initial, lr_decay=lr_decay
-        )
-        lr_scheduler = tf.keras.callbacks.LearningRateScheduler(lr_schedule)
-
         # Train the local model using the local dataset
-        self.model.fit(
-            self.x_train,
-            self.y_train,
-            epochs=epochs,
+        keras_fit(
+            model=self.model,
+            dataset=self.ds_train,
+            num_epochs=epochs,
             batch_size=batch_size,
-            callbacks=[lr_scheduler],
-            verbose=2,
+            callbacks=[],
         )
 
         # Return the refined weights and the number of examples used for training
         parameters = flwr.weights_to_parameters(self.model.get_weights())
-        num_examples = len(self.x_train)
+        num_examples = self.num_examples_train
         return parameters, num_examples
 
     def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
         weights = flwr.parameters_to_weights(ins[0])
         config = ins[1]
-        log(DEBUG, "evaluate, config %s", config)
+        log(
+            DEBUG,
+            "evaluate on %s (examples: %s), config %s",
+            self.cid,
+            self.num_examples_test,
+            config,
+        )
 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
 
         # Evaluate the updated model on the local dataset
-        loss, _ = self.model.evaluate(
-            self.x_test, self.y_test, batch_size=len(self.x_test)
+        loss, _ = keras_evaluate(
+            self.model, self.ds_test, batch_size=self.num_examples_test
         )
 
         # Return the number of evaluation examples and the evaluation result (loss)
-        return len(self.x_test), float(loss)
+        return self.num_examples_test, loss
 
 
 def load_model(input_shape: Tuple[int, int, int] = (28, 28, 1)) -> tf.keras.Model:
@@ -187,7 +202,7 @@ def load_model(input_shape: Tuple[int, int, int] = (28, 28, 1)) -> tf.keras.Mode
 
     # Compile model
     model.compile(
-        optimizer=tf.keras.optimizers.SGD(),
+        optimizer=tf.keras.optimizers.Adam(),
         loss=tf.keras.losses.categorical_crossentropy,
         metrics=["accuracy"],
     )
@@ -218,21 +233,12 @@ def load_data(
     # Take a subset
     x_train, y_train = shuffle(x_train, y_train, seed=SEED)
     x_test, y_test = shuffle(x_test, y_test, seed=SEED)
-
     x_train, y_train = get_partition(x_train, y_train, partition, num_clients)
     x_test, y_test = get_partition(x_test, y_test, partition, num_clients)
 
     # Adjust x sets shape for model
     x_train = adjust_x_shape(x_train)
     x_test = adjust_x_shape(x_test)
-
-    # Normalize data
-    x_train = x_train.astype("float32") / 255.0
-    x_test = x_test.astype("float32") / 255.0
-
-    # Convert class vectors to one-hot encoded labels
-    y_train = tf.keras.utils.to_categorical(y_train, 10)
-    y_test = tf.keras.utils.to_categorical(y_test, 10)
 
     # Return a small subset of the data if dry_run is set
     if dry_run:
@@ -263,35 +269,6 @@ def get_partition(
     start_index = int(step_size * partition)
     end_index = int(start_index + step_size)
     return x_orig[start_index:end_index], y_orig[start_index:end_index]
-
-
-def load_datagen(
-    x_train: np.ndarray,
-) -> tf.keras.preprocessing.image.ImageDataGenerator:
-    """Create an ImageDataGenerator for Fashion-MNIST."""
-    datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-        featurewise_center=False,
-        samplewise_center=False,
-        featurewise_std_normalization=False,
-        samplewise_std_normalization=False,
-        zca_whitening=False,
-        zca_epsilon=1e-06,
-        rotation_range=0,
-        width_shift_range=0.1,
-        height_shift_range=0.1,
-        shear_range=0.0,
-        zoom_range=0.0,
-        channel_shift_range=0.0,
-        fill_mode="nearest",
-        horizontal_flip=False,
-        vertical_flip=False,
-        rescale=None,
-        preprocessing_function=None,
-        data_format=None,
-        validation_split=0.0,
-    )
-    datagen.fit(x_train)
-    return datagen
 
 
 if __name__ == "__main__":

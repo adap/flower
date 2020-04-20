@@ -17,7 +17,7 @@
 
 import argparse
 from logging import DEBUG
-from typing import Callable, Tuple
+from typing import Callable, Tuple, cast
 
 import numpy as np
 import tensorflow as tf
@@ -80,16 +80,18 @@ def main() -> None:
     )
 
     # Start client
-    client = CifarClient(args.cid, model, xy_train, xy_test)
+    client = CifarClient(args.cid, args.cifar, model, xy_train, xy_test)
     flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
 
 
 class CifarClient(flwr.Client):
     """Flower client implementing CIAFR-10/100 image classification using TF."""
 
+    # pylint: disable-msg=too-many-arguments
     def __init__(
         self,
         cid: str,
+        num_classes: int,
         model: tf.keras.Model,
         xy_train: Tuple[np.ndarray, np.ndarray],
         xy_test: Tuple[np.ndarray, np.ndarray],
@@ -99,14 +101,14 @@ class CifarClient(flwr.Client):
         self.ds_train = build_dataset(
             xy_train[0],
             xy_train[1],
-            num_classes=10,
+            num_classes=num_classes,
             shuffle_buffer_size=len(xy_train[0]),
-            augment=True,
+            augment=False,
         )
         self.ds_test = build_dataset(
             xy_test[0],
             xy_test[1],
-            num_classes=10,
+            num_classes=num_classes,
             shuffle_buffer_size=len(xy_test[0]),
             augment=False,
         )
@@ -123,21 +125,14 @@ class CifarClient(flwr.Client):
         log(DEBUG, "fit, config %s", config)
 
         # Training configuration
-        epoch_global = int(config["epoch_global"])
+        # epoch_global = int(config["epoch_global"])
         epochs = int(config["epochs"])
         batch_size = int(config["batch_size"])
-        lr_initial = float(config["lr_initial"])
-        lr_decay = float(config["lr_decay"])
+        # lr_initial = float(config["lr_initial"])
+        # lr_decay = float(config["lr_decay"])
 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
-
-        # Learning rate
-        lr_schedule = get_lr_schedule(
-            epoch_global, lr_initial=lr_initial, lr_decay=lr_decay
-        )
-        lr_scheduler = tf.keras.callbacks.LearningRateScheduler(lr_schedule)
-        callbacks = [lr_scheduler]
 
         # Train the local model using the local dataset
         keras_fit(
@@ -145,7 +140,7 @@ class CifarClient(flwr.Client):
             dataset=self.ds_train,
             num_epochs=epochs,
             batch_size=batch_size,
-            callbacks=callbacks,
+            callbacks=[],
         )
 
         # Return the refined weights and the number of examples used for training
@@ -162,7 +157,9 @@ class CifarClient(flwr.Client):
         self.model.set_weights(weights)
 
         # Evaluate the updated model on the local dataset
-        loss, _ = keras_evaluate(self.model, self.ds_test)
+        loss, _ = keras_evaluate(
+            self.model, self.ds_test, batch_size=self.num_examples_test
+        )
 
         # Return the number of evaluation examples and the evaluation result (loss)
         return self.num_examples_test, loss
@@ -200,16 +197,25 @@ def load_data(
     """Load, normalize, and sample CIFAR-10/100."""
     use_cifar100 = num_classes == 100
     xy_partitions, (x_test, y_test) = tf_cifar_partitioned.load_data(
-        iid_fraction=0.5, num_partitions=num_clients, cifar100=use_cifar100
+        iid_fraction=0.9, num_partitions=num_clients, cifar100=use_cifar100
     )
     x_train, y_train = xy_partitions[partition]
 
     log(DEBUG, "Data distribution %s", np.unique(y_train, return_counts=True))
 
+    y_train = adjust_y_shape(y_train)
+    y_test = adjust_y_shape(y_test)
+
     # Return a small subset of the data if dry_run is set
     if dry_run:
         return (x_train[0:100], y_train[0:100]), (x_test[0:50], y_test[0:50])
     return (x_train, y_train), (x_test, y_test)
+
+
+def adjust_y_shape(nda: np.ndarray) -> np.ndarray:
+    """Turn shape (x, 1) into (x)."""
+    nda_adjusted = np.reshape(nda, (nda.shape[0]))
+    return cast(np.ndarray, nda_adjusted)
 
 
 if __name__ == "__main__":

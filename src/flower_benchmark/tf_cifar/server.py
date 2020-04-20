@@ -19,7 +19,6 @@ import argparse
 from typing import Callable, Dict, Optional, Tuple
 
 import numpy as np
-import tensorflow as tf
 
 import flower as flwr
 
@@ -117,8 +116,8 @@ def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
         """Return a configuration with static batch size and (local) epochs."""
         config = {
             "epoch_global": str(rnd),
-            "epochs": str(4),
-            "batch_size": str(32),
+            "epochs": str(1),
+            "batch_size": str(64),
             "lr_initial": str(lr_initial),
             "lr_decay": str(0.99),
         }
@@ -135,19 +134,17 @@ def get_eval_fn(
     ds_test = cifar.build_dataset(
         xy_test[0],
         xy_test[1],
-        num_classes=10,
+        num_classes=num_classes,
         shuffle_buffer_size=len(xy_test[0]),
         augment=False,
     )
-    ds_test = ds_test.batch(batch_size=32, drop_remainder=False).prefetch(
-        buffer_size=tf.data.experimental.AUTOTUNE
-    )
+    ds_test = ds_test.batch(batch_size=len(xy_test[0]), drop_remainder=False)
 
     def evaluate(weights: flwr.Weights) -> Optional[Tuple[float, float]]:
         """Use entire CIFAR test set for evaluation."""
         model = load_model(input_shape=(32, 32, 3), num_classes=num_classes)
         model.set_weights(weights)
-        loss, acc = model.evaluate(x=ds_test)
+        loss, acc = model.evaluate(ds_test)
         return float(loss), float(acc)
 
     return evaluate
