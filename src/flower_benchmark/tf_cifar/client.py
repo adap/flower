@@ -204,6 +204,8 @@ def load_data(
     )
     x_train, y_train = xy_partitions[partition]
 
+    log(DEBUG, "Data distribution %s", np.unique(y_train, return_counts=True))
+
     # Return a small subset of the data if dry_run is set
     if dry_run:
         return (x_train[0:100], y_train[0:100]), (x_test[0:50], y_test[0:50])
