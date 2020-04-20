@@ -59,3 +59,7 @@ class Strategy(ABC):
         self, results: List[Tuple[int, float]], failures: List[BaseException]
     ) -> Optional[float]:
         """Aggregate evaluation results."""
+
+    @abstractmethod
+    def on_centralized_evaluation_result(self, loss: float, acc: float) -> bool:
+        """Stop training depending on centralized evaluation result."""

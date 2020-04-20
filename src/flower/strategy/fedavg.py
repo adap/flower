@@ -109,3 +109,7 @@ class FedAvg(Strategy):
         if not self.accept_failures and failures:
             return None
         return weighted_loss_avg(results)
+
+    def on_centralized_evaluation_result(self, loss: float, acc: float) -> bool:
+        """Stop training depending on centralized evaluation result."""
+        return False
