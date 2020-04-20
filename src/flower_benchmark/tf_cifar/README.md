@@ -1,4 +1,4 @@
-# Fashion-MNIST
+# CIFAR-10/100
 
 ## Ops
 To execute the `run_aws.py` script you will have to create a `.flower_ops` file in the
@@ -38,5 +38,5 @@ The provided AMI is a bare Ubuntu 18.04 image which was modified with the
 ### Execution
 To execute the script simply do:
 ```bash
-python -m flower_benchmark.tf_fashion_mnist.run_aws
+python -m flower_benchmark.tf_cifar.run_aws
 ```
