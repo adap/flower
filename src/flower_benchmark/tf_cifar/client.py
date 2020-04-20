@@ -25,7 +25,7 @@ import tensorflow as tf
 import flower as flwr
 from flower.logger import log
 
-from ..dataset import tf_cifar_partitioned
+from flower_benchmark.dataset import tf_cifar_partitioned
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 from .cifar import build_dataset, keras_evaluate, keras_fit
 
