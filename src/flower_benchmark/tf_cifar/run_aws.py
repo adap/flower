@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Execute Fashion-MNIST benchmark on AWS."""
+"""Execute CIFAR-10/100 benchmark on AWS."""
 
 import configparser
 from os import path
@@ -33,7 +33,7 @@ def server_command(
     rounds: int, sample_fraction: float, min_sample_size: int, min_num_clients: int
 ) -> str:
     """Build command to run server."""
-    return f"screen -d -m python3.7 -m flower_benchmark.tf_fashion_mnist.server \
+    return f"screen -d -m python3.7 -m flower_benchmark.tf_cifar.server \
             --rounds={rounds} \
             --sample_fraction={sample_fraction} \
             --min_sample_size={min_sample_size} \
@@ -42,7 +42,7 @@ def server_command(
 
 def client_command(cid: int, num_clients: int, server_ip: str) -> str:
     """Build command to run client."""
-    return f"screen -d -m python3.7 -m flower_benchmark.tf_fashion_mnist.client \
+    return f"screen -d -m python3.7 -m flower_benchmark.tf_cifar.client \
                     --cid={cid} \
                     --partition={cid} \
                     --clients={num_clients} \
@@ -77,14 +77,14 @@ def run(
         key_name=path.expanduser(CONFIG.get("aws", "key_name")),
         subnet_id=CONFIG.get("aws", "subnet_id"),
         security_group_ids=CONFIG.get("aws", "security_group_ids").split(","),
-        tags=[("Purpose", "benchmark"), ("Benchmark Name", "fashion_mnist")],
+        tags=[("Purpose", "benchmark"), ("Benchmark Name", "CIFAR-10/100")],
     )
 
     cluster = Cluster(
         adapter=ec2_adapter,
         ssh_credentials=("ubuntu", path.expanduser(CONFIG.get("ssh", "private_key"))),
-        specs={"server": (2, 2, 1), "clients": (2, 4, 2)},
-        timeout=20,
+        specs={"server": (4, 16, 1), "clients": (16, 64, 2)},
+        timeout=300,
     )
 
     # Start the cluster; this takes some time

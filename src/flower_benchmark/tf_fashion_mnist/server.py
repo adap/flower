@@ -22,8 +22,12 @@ import numpy as np
 
 import flower as flwr
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
-from .client import load_data, load_model
+from . import (
+    DEFAULT_GRPC_SERVER_ADDRESS,
+    DEFAULT_GRPC_SERVER_PORT,
+    client,
+    fashion_mnist,
+)
 
 
 def main() -> None:
@@ -78,7 +82,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Load evaluation data
-    _, xy_test = load_data(partition=0, num_clients=1, dry_run=args.dry_run)
+    _, xy_test = client.load_data(partition=0, num_clients=1, dry_run=args.dry_run)
 
     # Create client_manager, strategy, and server
     client_manager = flwr.SimpleClientManager()
@@ -86,7 +90,7 @@ def main() -> None:
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
-        eval_fn=get_eval_fn(xy_test),
+        eval_fn=get_eval_fn(num_classes=10, xy_test=xy_test),
         on_fit_config_fn=get_on_fit_config_fn(args.lr_initial),
     )
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
@@ -108,7 +112,7 @@ def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
         config = {
             "epoch_global": str(rnd),
             "epochs": str(1),
-            "batch_size": str(32),
+            "batch_size": str(64),
             "lr_initial": str(lr_initial),
             "lr_decay": str(0.99),
         }
@@ -118,16 +122,25 @@ def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
 
 
 def get_eval_fn(
-    xy_test: Tuple[np.ndarray, np.ndarray]
+    num_classes: int, xy_test: Tuple[np.ndarray, np.ndarray]
 ) -> Callable[[flwr.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
+    ds_test = fashion_mnist.build_dataset(
+        xy_test[0],
+        xy_test[1],
+        num_classes=num_classes,
+        shuffle_buffer_size=0,
+        augment=False,
+    )
 
     def evaluate(weights: flwr.Weights) -> Optional[Tuple[float, float]]:
         """Use entire Fashion-MNIST test set for evaluation."""
-        model = load_model()
+        model = client.load_model(input_shape=(28, 28, 1))
         model.set_weights(weights)
-        loss, acc = model.evaluate(xy_test[0], xy_test[1], batch_size=len(xy_test))
-        return float(loss), float(acc)
+        loss, acc = fashion_mnist.keras_evaluate(
+            model, ds_test, batch_size=len(xy_test[0])
+        )
+        return loss, acc
 
     return evaluate
 
