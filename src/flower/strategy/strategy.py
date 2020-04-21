@@ -59,3 +59,9 @@ class Strategy(ABC):
         self, results: List[Tuple[int, float]], failures: List[BaseException]
     ) -> Optional[float]:
         """Aggregate evaluation results."""
+
+    @abstractmethod
+    def on_conclude_round(
+        self, rnd: int, loss: Optional[float], acc: Optional[float]
+    ) -> bool:
+        """Conclude federated learning round and decide whether to continue or not."""

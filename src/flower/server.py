@@ -16,6 +16,7 @@
 
 
 import concurrent.futures
+import timeit
 from io import BytesIO
 from logging import DEBUG, INFO
 from typing import List, Optional, Tuple, cast
@@ -58,6 +59,9 @@ class Server:
             history.add_accuracy_centralized(rnd=0, acc=res[1])
 
         # Run federated learning for num_rounds
+        log(INFO, "[TIME] FL starting")
+        start_time = timeit.default_timer()
+
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
             weights_prime = self.fit_round(rnd=current_round)
@@ -65,24 +69,35 @@ class Server:
                 self.weights = weights_prime
 
             # Evaluate model using strategy implementation
+            loss, acc = None, None
             res = self.strategy.evaluate(weights=self.weights)
             if res is not None:
+                loss, acc = res
                 log(
                     INFO,
                     "progress (round/loss/accuracy): %s, %s, %s",
                     current_round,
-                    res[0],
-                    res[1],
+                    loss,
+                    acc,
                 )
-                history.add_loss_centralized(rnd=current_round, loss=res[0])
-                history.add_accuracy_centralized(rnd=current_round, acc=res[1])
+                history.add_loss_centralized(rnd=current_round, loss=loss)
+                history.add_accuracy_centralized(rnd=current_round, acc=acc)
 
             # Evaluate model on a sample of available clients
             if self.strategy.should_evaluate():
                 loss_avg = self.evaluate(rnd=current_round)
                 if loss_avg is not None:
                     history.add_loss_distributed(rnd=current_round, loss=loss_avg)
+                    loss, acc = loss_avg, None
 
+            # Conclude round
+            should_continue = self.strategy.on_conclude_round(current_round, loss, acc)
+            if not should_continue:
+                break
+
+        end_time = timeit.default_timer()
+        elapsed = end_time - start_time
+        log(INFO, "[TIME] FL finished in %s", elapsed)
         return history
 
     def evaluate(self, rnd: int) -> Optional[float]:
@@ -184,8 +199,12 @@ def fit_clients(
         if failure is not None:
             failures.append(failure)
         else:
-            # Success case
-            results.append(future.result())
+            # Potential success case
+            result = future.result()
+            if len(result[0].tensors) > 0:
+                results.append(result)
+            else:
+                failures.append(Exception("Empty client update"))
     return results, failures
 
 
