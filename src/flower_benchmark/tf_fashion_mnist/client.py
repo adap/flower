@@ -26,7 +26,7 @@ import flower as flwr
 from flower.logger import log
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
-from .fashion_mnist import build_dataset, keras_evaluate, keras_fit
+from .fashion_mnist import build_dataset, custom_fit, keras_evaluate
 
 tf.get_logger().setLevel("ERROR")
 
@@ -58,6 +58,12 @@ def main() -> None:
         "--clients", type=int, required=True, help="Number of clients (no default)",
     )
     parser.add_argument(
+        "--delay_factor",
+        type=float,
+        default=0.0,
+        help="Delay factor increases the time batches take to compute (default: 0.0)",
+    )
+    parser.add_argument(
         "--dry_run", type=bool, default=False, help="Dry run (default: False)"
     )
     args = parser.parse_args()
@@ -69,19 +75,21 @@ def main() -> None:
     )
 
     # Start client
-    client = FashionMnistClient(args.cid, model, xy_train, xy_test)
+    client = FashionMnistClient(args.cid, model, xy_train, xy_test, args.delay_factor)
     flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
 
 
 class FashionMnistClient(flwr.Client):
     """Flower client implementing Fashion-MNIST image classification using TensorFlow/Keras."""
 
+    # pylint: disable-msg=too-many-arguments
     def __init__(
         self,
         cid: str,
         model: tf.keras.Model,
         xy_train: Tuple[np.ndarray, np.ndarray],
         xy_test: Tuple[np.ndarray, np.ndarray],
+        delay_factor: float,
     ):
         super().__init__(cid)
         self.model = model
@@ -101,6 +109,7 @@ class FashionMnistClient(flwr.Client):
         )
         self.num_examples_train = len(xy_train[0])
         self.num_examples_test = len(xy_test[0])
+        self.delay_factor = delay_factor
 
     def get_parameters(self) -> flwr.ParametersRes:
         parameters = flwr.weights_to_parameters(self.model.get_weights())
@@ -123,22 +132,30 @@ class FashionMnistClient(flwr.Client):
         batch_size = int(config["batch_size"])
         # lr_initial = float(config["lr_initial"])
         # lr_decay = float(config["lr_decay"])
+        timeout = int(config["timeout"])
 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
 
         # Train the local model using the local dataset
-        keras_fit(
+        completed, fit_duration, num_examples = custom_fit(
             model=self.model,
             dataset=self.ds_train,
             num_epochs=epochs,
             batch_size=batch_size,
             callbacks=[],
+            delay_factor=self.delay_factor,
+            timeout=timeout,
         )
+        log(DEBUG, "client %s had fit_duration %s", self.cid, fit_duration)
+
+        # Return empty update if local update could not be completed in time
+        if not completed:
+            parameters = flwr.weights_to_parameters([])
+            return parameters, num_examples
 
         # Return the refined weights and the number of examples used for training
         parameters = flwr.weights_to_parameters(self.model.get_weights())
-        num_examples = self.num_examples_train
         return parameters, num_examples
 
     def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
