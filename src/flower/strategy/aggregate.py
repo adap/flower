@@ -24,7 +24,7 @@ from flower.typing import Weights
 
 
 def aggregate(results: List[Tuple[Weights, int]]) -> Weights:
-    """Compute weighted average"""
+    """Compute weighted average."""
     # Calculate the total number of examples used during training
     num_examples_total = sum([num_examples for _, num_examples in results])
 
@@ -42,7 +42,7 @@ def aggregate(results: List[Tuple[Weights, int]]) -> Weights:
 
 
 def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
-    """Aggregate evaluation results obtained from multiple clients"""
+    """Aggregate evaluation results obtained from multiple clients."""
     num_total_evaluation_examples = sum([num_examples for num_examples, _ in results])
     weighted_losses = [num_examples * loss for num_examples, loss in results]
     return sum(weighted_losses) / num_total_evaluation_examples

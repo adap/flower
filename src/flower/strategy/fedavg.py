@@ -109,3 +109,9 @@ class FedAvg(Strategy):
         if not self.accept_failures and failures:
             return None
         return weighted_loss_avg(results)
+
+    def on_conclude_round(
+        self, rnd: int, loss: Optional[float], acc: Optional[float]
+    ) -> bool:
+        """Always continue training."""
+        return True
