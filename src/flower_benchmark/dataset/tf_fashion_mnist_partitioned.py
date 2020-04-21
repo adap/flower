@@ -121,12 +121,13 @@ def load_data(iid_fraction: float, num_partitions: int) -> Tuple[XYList, XY]:
 
     if iid_fraction == 1.0:
         xy_partitions = partition(x, y, num_partitions)
+    elif iid_fraction == 0.0:
+        x, y = shift(x, y)
+        xy_partitions = partition(x, y, num_partitions)
     else:
         x, y = shuffle(x, y)
         x, y = sort_by_label_repeating(x, y)
 
-        # pylint: disable=fixme
-        # TODO: handle fraction 0 and 1.0 edge cases
         (x_0, y_0), (x_1, y_1) = split_at_fraction(x, y, fraction=iid_fraction)
 
         # Shift in second split of dataset the classes into two groups
@@ -140,12 +141,15 @@ def load_data(iid_fraction: float, num_partitions: int) -> Tuple[XYList, XY]:
     return xy_partitions, (x_test, y_test)
 
 
-if __name__ == "__main__":
-    # Load a partitioned dataset and show distribution of examples
-    xy_par, _ = load_data(iid_fraction=0.5, num_partitions=100)
-    distro = [np.unique(y, return_counts=True) for _, y in xy_par]
-
-    assert np.sum([d[1] for d in distro]) == 60000
-
+def log_distribution(xy_partitions: XYList) -> None:
+    distro = [np.unique(y, return_counts=True) for _, y in xy_partitions]
     for d in distro:
         print(d)
+
+
+if __name__ == "__main__":
+    # Load a partitioned dataset and show distribution of examples
+    for fraction in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
+        xy_par, (_, _) = load_data(fraction, 10)
+        print(f"\nfraction: {fraction}; num_partitions: 10")
+        log_distribution(xy_par)

@@ -30,7 +30,6 @@ from flower_benchmark.dataset.tf_fashion_mnist_partitioned import (
     split_at_fraction,
 )
 
-
 # pylint: disable=no-self-use, invalid-name
 def hash_xy(xy: XY) -> int:
     """Return hash of xy."""
@@ -157,8 +156,8 @@ class FashionMnistPartitionedTestCase(unittest.TestCase):
     def test_load_data_integration(self):
         """Test partition function."""
         # Execute
-        _, (_, _) = load_data(0.5, 10)
-        _, (_, _) = load_data(1.0, 10)
+        for fraction in [0.0, 0.1, 0.2, 0.5, 1.0]:
+            _, (_, _) = load_data(fraction, 10)
 
 
 if __name__ == "__main__":
