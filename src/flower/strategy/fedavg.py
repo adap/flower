@@ -110,6 +110,8 @@ class FedAvg(Strategy):
             return None
         return weighted_loss_avg(results)
 
-    def on_centralized_evaluation_result(self, loss: float, acc: float) -> bool:
-        """Stop training depending on centralized evaluation result."""
-        return False
+    def on_conclude_round(
+        self, rnd: int, loss: Optional[float], acc: Optional[float]
+    ) -> bool:
+        """Always continue training."""
+        return True

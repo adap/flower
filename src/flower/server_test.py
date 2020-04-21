@@ -35,7 +35,9 @@ class SuccessClient(ClientProxy):
         raise Exception()
 
     def fit(self, ins: FitIns) -> FitRes:
-        return Parameters(tensors=[], tensor_type=""), 1
+        arr = np.array([[1, 2], [3, 4], [5, 6]])
+        arr_serialized = ndarray_to_bytes(arr)
+        return Parameters(tensors=[arr_serialized], tensor_type=""), 1
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         return 1, 1.0
@@ -61,7 +63,9 @@ def test_fit_clients() -> None:
         FailingCLient("0"),
         SuccessClient("1"),
     ]
-    ins: FitIns = (Parameters(tensors=[], tensor_type=""), {})
+    arr = np.array([[1, 2], [3, 4], [5, 6]])
+    arr_serialized = ndarray_to_bytes(arr)
+    ins: FitIns = (Parameters(tensors=[arr_serialized], tensor_type=""), {})
 
     # Execute
     results, failures = fit_clients(clients, ins)
@@ -79,7 +83,9 @@ def test_eval_clients() -> None:
         FailingCLient("0"),
         SuccessClient("1"),
     ]
-    ins: EvaluateIns = (Parameters(tensors=[], tensor_type=""), {})
+    arr = np.array([[1, 2], [3, 4], [5, 6]])
+    arr_serialized = ndarray_to_bytes(arr)
+    ins: EvaluateIns = (Parameters(tensors=[arr_serialized], tensor_type=""), {})
 
     # Execute
     results, failures = evaluate_clients(clients, ins)

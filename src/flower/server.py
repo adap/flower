@@ -69,6 +69,7 @@ class Server:
                 self.weights = weights_prime
 
             # Evaluate model using strategy implementation
+            loss, acc = None, None
             res = self.strategy.evaluate(weights=self.weights)
             if res is not None:
                 loss, acc = res
@@ -81,14 +82,18 @@ class Server:
                 )
                 history.add_loss_centralized(rnd=current_round, loss=loss)
                 history.add_accuracy_centralized(rnd=current_round, acc=acc)
-                if self.strategy.on_centralized_evaluation_result(loss=loss, acc=acc):
-                    break
 
             # Evaluate model on a sample of available clients
             if self.strategy.should_evaluate():
                 loss_avg = self.evaluate(rnd=current_round)
                 if loss_avg is not None:
                     history.add_loss_distributed(rnd=current_round, loss=loss_avg)
+                    loss, acc = loss_avg, None
+
+            # Conclude round
+            should_continue = self.strategy.on_conclude_round(current_round, loss, acc)
+            if not should_continue:
+                break
 
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
@@ -199,7 +204,6 @@ def fit_clients(
             if len(result[0].tensors) > 0:
                 results.append(result)
             else:
-                # FIXME use custom exception type?
                 failures.append(Exception("Empty client update"))
     return results, failures
 

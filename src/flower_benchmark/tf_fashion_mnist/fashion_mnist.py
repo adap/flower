@@ -15,10 +15,100 @@
 """Flower client using TensorFlow for Fashion-MNIST image classification."""
 
 
+import time
+import timeit
+from logging import INFO
 from typing import List, Optional, Tuple
 
 import numpy as np
 import tensorflow as tf
+
+from flower.logger import log
+
+
+# pylint: disable-msg=unused-argument,invalid-name,too-many-arguments,too-many-locals
+def custom_fit(
+    model: tf.keras.Model,
+    dataset: tf.data.Dataset,
+    num_epochs: int,
+    batch_size: int,
+    callbacks: List[tf.keras.callbacks.Callback],
+    delay_factor: float = 0.0,
+    timeout: Optional[int] = None,
+) -> Tuple[bool, float, int]:
+    """Train the model using a custom training loop."""
+    ds_train = dataset.batch(batch_size=batch_size, drop_remainder=False)
+
+    # Keep results for plotting
+    train_loss_results = []
+    train_accuracy_results = []
+
+    # Optimizer
+    optimizer = tf.keras.optimizers.Adam()
+
+    fit_begin = timeit.default_timer()
+    num_examples = 0
+    for epoch in range(num_epochs):
+        log(INFO, "Starting epoch %s", epoch)
+
+        epoch_loss_avg = tf.keras.metrics.Mean()
+        epoch_accuracy = tf.keras.metrics.CategoricalAccuracy()
+
+        # Single loop over the dataset
+        batch_begin = timeit.default_timer()
+        for x, y in ds_train:
+            # Optimize the model
+            loss_value, grads = grad(model, x, y)
+            optimizer.apply_gradients(zip(grads, model.trainable_variables))
+
+            # Track progress
+            epoch_loss_avg.update_state(loss_value)  # Add the current batch loss
+            epoch_accuracy.update_state(y, model(x, training=True))
+
+            # Track the number of examples used for training
+            num_examples += x.shape[0]
+
+            # Delay
+            batch_duration = timeit.default_timer() - batch_begin
+            if delay_factor > 0.0:
+                time.sleep(batch_duration * delay_factor)
+            if timeout is not None:
+                fit_duration = timeit.default_timer() - fit_begin
+                if fit_duration > timeout:
+                    log(INFO, "client timeout")
+                    return (False, fit_duration, num_examples)
+            batch_begin = timeit.default_timer()
+
+    # End epoch
+    train_loss_results.append(epoch_loss_avg.result())
+    train_accuracy_results.append(epoch_accuracy.result())
+    log(
+        INFO,
+        "Epoch {:03d}: Loss: {:.3f}, Accuracy: {:.3%}".format(
+            epoch, epoch_loss_avg.result(), epoch_accuracy.result()
+        ),
+    )
+
+    fit_duration = timeit.default_timer() - fit_begin
+    return True, fit_duration, num_examples
+
+
+def loss(
+    model: tf.keras.Model, x: tf.Tensor, y: tf.Tensor, training: bool
+) -> tf.Tensor:
+    """Calculate categorical crossentropy loss."""
+    loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
+    y_ = model(x, training=training)
+    return loss_object(y_true=y, y_pred=y_)
+
+
+def grad(
+    model: tf.keras.Model, x: tf.Tensor, y: tf.Tensor
+) -> Tuple[tf.Tensor, List[tf.Tensor]]:
+    """Calculate gradients."""
+    with tf.GradientTape() as tape:
+        loss_value = loss(model, x, y, training=True)
+    return loss_value, tape.gradient(loss_value, model.trainable_variables)
 
 
 def keras_evaluate(
@@ -26,8 +116,8 @@ def keras_evaluate(
 ) -> Tuple[float, float]:
     """Evaluate the model using model.evaluate(...)."""
     ds_test = dataset.batch(batch_size=batch_size, drop_remainder=False)
-    loss, acc = model.evaluate(x=ds_test)
-    return float(loss), float(acc)
+    test_loss, acc = model.evaluate(x=ds_test)
+    return float(test_loss), float(acc)
 
 
 def keras_fit(

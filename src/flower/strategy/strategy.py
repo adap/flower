@@ -61,5 +61,7 @@ class Strategy(ABC):
         """Aggregate evaluation results."""
 
     @abstractmethod
-    def on_centralized_evaluation_result(self, loss: float, acc: float) -> bool:
-        """Stop training depending on centralized evaluation result."""
+    def on_conclude_round(
+        self, rnd: int, loss: Optional[float], acc: Optional[float]
+    ) -> bool:
+        """Conclude federated learning round and decide whether to continue or not."""
