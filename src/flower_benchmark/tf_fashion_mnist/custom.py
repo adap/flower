@@ -17,9 +17,12 @@
 
 import time
 import timeit
+from logging import INFO
 from typing import List, Optional, Tuple
 
 import tensorflow as tf
+
+from flower.logger import log
 
 
 # pylint: disable-msg=unused-argument,invalid-name
@@ -28,7 +31,7 @@ def custom_fit(
     dataset: tf.data.Dataset,
     num_epochs: int,
     batch_size: int,
-    callbacks: List[tf.keras.callbacks.callbacks.Callback],
+    callbacks: List[tf.keras.callbacks.Callback],
     delay_factor: float = 0.0,
     timeout: Optional[int] = None,
 ) -> Tuple[bool, float]:
@@ -44,7 +47,7 @@ def custom_fit(
 
     fit_begin = timeit.default_timer()
     for epoch in range(num_epochs):
-        print(f"Starting epoch {epoch}")
+        log(INFO, "Starting epoch %s", epoch)
 
         epoch_loss_avg = tf.keras.metrics.Mean()
         epoch_accuracy = tf.keras.metrics.CategoricalAccuracy()
@@ -70,23 +73,23 @@ def custom_fit(
             if timeout is not None:
                 fit_duration = timeit.default_timer() - fit_begin
                 if fit_duration > timeout:
-                    print("TIMEOUT!!!!1111!!!")
+                    log(INFO, "client timeout")
                     return (
                         False,
                         fit_duration,
                     )  # FIXME: also return num examples (see below)
             batch_begin = timeit.default_timer()
-
-        print(f"Trained for {batches} batches during epoch {epoch}")
+        log(INFO, "Trained for %s batches during epoch %s", batches, epoch)
 
     # End epoch
     train_loss_results.append(epoch_loss_avg.result())
     train_accuracy_results.append(epoch_accuracy.result())
-    print(
+    log(
+        INFO,
         "Epoch {:03d}: Loss: {:.3f}, Accuracy: {:.3%}".format(
             epoch, epoch_loss_avg.result(), epoch_accuracy.result()
-        )
-    )  # FIXME use log
+        ),
+    )
 
     # FIXME collect and return the actual number of examples (incl. remainders)
     fit_duration = timeit.default_timer() - fit_begin
