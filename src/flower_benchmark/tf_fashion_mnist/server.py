@@ -116,7 +116,7 @@ def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
             "lr_initial": str(lr_initial),
             "lr_decay": str(0.99),
             "timeout": str(
-                20
+                60
             ),  # TODO BENCHMARK: two values (short/long, e.g., 20 and 40)
         }
         return config

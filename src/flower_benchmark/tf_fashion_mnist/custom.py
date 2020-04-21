@@ -28,7 +28,7 @@ def custom_fit(
     dataset: tf.data.Dataset,
     num_epochs: int,
     batch_size: int,
-    callbacks: List[tf.keras.callbacks.callbacks.Callback],
+    callbacks: List[tf.keras.callbacks.Callback],
     delay_factor: float = 0.0,
     timeout: Optional[int] = None,
 ) -> Tuple[bool, float]:
@@ -70,7 +70,7 @@ def custom_fit(
             if timeout is not None:
                 fit_duration = timeit.default_timer() - fit_begin
                 if fit_duration > timeout:
-                    print("TIMEOUT!!!!1111!!!")
+                    print("TIMEOUT!!!")
                     return (
                         False,
                         fit_duration,

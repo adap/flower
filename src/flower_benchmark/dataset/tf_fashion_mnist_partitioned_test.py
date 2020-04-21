@@ -158,6 +158,7 @@ class FashionMnistPartitionedTestCase(unittest.TestCase):
         """Test partition function."""
         # Execute
         _, (_, _) = load_data(0.5, 10)
+        _, (_, _) = load_data(1.0, 10)
 
 
 if __name__ == "__main__":

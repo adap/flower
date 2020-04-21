@@ -119,20 +119,23 @@ def load_data(iid_fraction: float, num_partitions: int) -> Tuple[XYList, XY]:
 
     (x, y), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
 
-    x, y = shuffle(x, y)
-    x, y = sort_by_label_repeating(x, y)
+    if iid_fraction == 1.0:
+        xy_partitions = partition(x, y, num_partitions)
+    else:
+        x, y = shuffle(x, y)
+        x, y = sort_by_label_repeating(x, y)
 
-    # pylint: disable=fixme
-    # TODO: handle fraction 0 and 1.0 edge cases
-    (x_0, y_0), (x_1, y_1) = split_at_fraction(x, y, fraction=iid_fraction)
+        # pylint: disable=fixme
+        # TODO: handle fraction 0 and 1.0 edge cases
+        (x_0, y_0), (x_1, y_1) = split_at_fraction(x, y, fraction=iid_fraction)
 
-    # Shift in second split of dataset the classes into two groups
-    x_1, y_1 = shift(x_1, y_1)
+        # Shift in second split of dataset the classes into two groups
+        x_1, y_1 = shift(x_1, y_1)
 
-    xy_0_partitions = partition(x_0, y_0, num_partitions)
-    xy_1_partitions = partition(x_1, y_1, num_partitions)
+        xy_0_partitions = partition(x_0, y_0, num_partitions)
+        xy_1_partitions = partition(x_1, y_1, num_partitions)
 
-    xy_partitions = combine_partitions(xy_0_partitions, xy_1_partitions)
+        xy_partitions = combine_partitions(xy_0_partitions, xy_1_partitions)
 
     return xy_partitions, (x_test, y_test)
 
