@@ -25,8 +25,8 @@ import tensorflow as tf
 import flower as flwr
 from flower.logger import log
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, custom
-from .fashion_mnist import build_dataset, keras_evaluate
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
+from .fashion_mnist import build_dataset, custom_fit, keras_evaluate
 
 tf.get_logger().setLevel("ERROR")
 
@@ -58,12 +58,15 @@ def main() -> None:
         "--clients", type=int, required=True, help="Number of clients (no default)",
     )
     parser.add_argument(
+        "--delay_factor",
+        type=float,
+        default=0.0,
+        help="Delay factor increases the time batches take to compute (default: 0.0)",
+    )
+    parser.add_argument(
         "--dry_run", type=bool, default=False, help="Dry run (default: False)"
     )
     args = parser.parse_args()
-
-    # Delay factor used to slow down local update computation
-    delay_factor = 0.0 if int(args.cid) % 2.0 == 0 else 3.0  # FIXME pass in via args?
 
     # Load model and data
     model = load_model()
@@ -72,13 +75,14 @@ def main() -> None:
     )
 
     # Start client
-    client = FashionMnistClient(args.cid, model, xy_train, xy_test, delay_factor)
+    client = FashionMnistClient(args.cid, model, xy_train, xy_test, args.delay_factor)
     flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
 
 
 class FashionMnistClient(flwr.Client):
     """Flower client implementing Fashion-MNIST image classification using TensorFlow/Keras."""
 
+    # pylint: disable-msg=too-many-arguments
     def __init__(
         self,
         cid: str,
@@ -134,7 +138,7 @@ class FashionMnistClient(flwr.Client):
         self.model.set_weights(weights)
 
         # Train the local model using the local dataset
-        completed, fit_duration = custom.custom_fit(
+        completed, fit_duration, num_examples = custom_fit(
             model=self.model,
             dataset=self.ds_train,
             num_epochs=epochs,
@@ -148,13 +152,10 @@ class FashionMnistClient(flwr.Client):
         # Return empty update if local update could not be completed in time
         if not completed:
             parameters = flwr.weights_to_parameters([])
-            return parameters, self.num_examples_train
+            return parameters, num_examples
 
         # Return the refined weights and the number of examples used for training
         parameters = flwr.weights_to_parameters(self.model.get_weights())
-        num_examples = (
-            self.num_examples_train
-        )  # FIXME return the actual number of examples used
         return parameters, num_examples
 
     def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
@@ -243,7 +244,6 @@ def load_data(
     partition: int, num_clients: int, dry_run: bool
 ) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
     """Load partition of randomly shuffled Fashion-MNIST subset."""
-    # TODO BENCHMARK: load Fashion-MNIST partition, then run training with two values (high vs low IID fraction, e.g., 0.9 and 0.3)
     # Load training and test data (ignoring the test data for now)
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
 
