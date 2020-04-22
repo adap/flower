@@ -115,7 +115,8 @@ def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
             "batch_size": str(64),
             "lr_initial": str(lr_initial),
             "lr_decay": str(0.99),
-            "timeout": str(30),
+            "timeout": str(20),
+            "partial_updates": "1",
         }
         return config
 
