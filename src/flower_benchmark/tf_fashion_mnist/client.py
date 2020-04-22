@@ -24,6 +24,7 @@ import tensorflow as tf
 
 import flower as flwr
 from flower.logger import log
+from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
 from .fashion_mnist import build_dataset, custom_fit, keras_evaluate
@@ -245,12 +246,15 @@ def load_data(
 ) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
     """Load partition of randomly shuffled Fashion-MNIST subset."""
     # Load training and test data (ignoring the test data for now)
-    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
+    xy_partitions, (x_test, y_test) = tf_fashion_mnist_partitioned.load_data(
+        iid_fraction=0.5, num_partitions=num_clients
+    )
+
+    # Take partition
+    x_train, y_train = xy_partitions[partition]
 
     # Take a subset
-    x_train, y_train = shuffle(x_train, y_train, seed=SEED)
     x_test, y_test = shuffle(x_test, y_test, seed=SEED)
-    x_train, y_train = get_partition(x_train, y_train, partition, num_clients)
     x_test, y_test = get_partition(x_test, y_test, partition, num_clients)
 
     # Adjust x sets shape for model
