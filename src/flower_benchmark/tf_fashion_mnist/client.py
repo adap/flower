@@ -134,6 +134,7 @@ class FashionMnistClient(flwr.Client):
         # lr_initial = float(config["lr_initial"])
         # lr_decay = float(config["lr_decay"])
         timeout = int(config["timeout"])
+        partial_updates = bool(int(config["partial_updates"]))
 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
@@ -151,7 +152,7 @@ class FashionMnistClient(flwr.Client):
         log(DEBUG, "client %s had fit_duration %s", self.cid, fit_duration)
 
         # Return empty update if local update could not be completed in time
-        if not completed:
+        if not completed and not partial_updates:
             parameters = flwr.weights_to_parameters([])
             return parameters, num_examples
 
@@ -247,7 +248,7 @@ def load_data(
     """Load partition of randomly shuffled Fashion-MNIST subset."""
     # Load training and test data (ignoring the test data for now)
     xy_partitions, (x_test, y_test) = tf_fashion_mnist_partitioned.load_data(
-        iid_fraction=0.5, num_partitions=num_clients
+        iid_fraction=0.0, num_partitions=num_clients
     )
 
     # Take partition
