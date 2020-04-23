@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Execute CIFAR-10/100 benchmark on AWS."""
+"""Execute Fashion-MNIST benchmark locally in Docker."""
 
 import configparser
 from os import path
 
 from flower_ops.cluster import Cluster
-from flower_ops.compute.ec2_adapter import EC2Adapter
+from flower_ops.compute.docker_adapter import DockerAdapter
 
 OPS_INI_PATH = path.normpath(
     f"{path.dirname(path.realpath(__file__))}/../../../.flower_ops"
@@ -33,7 +33,7 @@ def server_command(
     rounds: int, sample_fraction: float, min_sample_size: int, min_num_clients: int
 ) -> str:
     """Build command to run server."""
-    return f"screen -d -m python3.7 -m flower_benchmark.tf_cifar.server \
+    return f"screen -d -m python3.7 -m flower_benchmark.tf_fashion_mnist.server \
             --rounds={rounds} \
             --sample_fraction={sample_fraction} \
             --min_sample_size={min_sample_size} \
@@ -42,7 +42,7 @@ def server_command(
 
 def client_command(cid: int, num_clients: int, server_ip: str) -> str:
     """Build command to run client."""
-    return f"screen -d -m python3.7 -m flower_benchmark.tf_cifar.client \
+    return f"screen -d -m python3.7 -m flower_benchmark.tf_fashion_mnist.client \
                     --cid={cid} \
                     --partition={cid} \
                     --clients={num_clients} \
@@ -54,7 +54,7 @@ def watch_and_shutdown_command() -> str:
     """Return command which shuts down the instance after no benchmark is running anymore."""
     return (
         "screen -d -m bash -c 'while [[ $(ps a | grep [f]lower_benchmark) ]]; "
-        + "do sleep 1; done; sudo shutdown -P now'"
+        + "do sleep 1; done; kill 1'"
     )
 
 
@@ -70,21 +70,14 @@ def run(
     wheel_local_path = (
         path.expanduser(CONFIG.get("paths", "wheel_dir")) + wheel_filename
     )
-    wheel_remote_path = "/home/ubuntu/" + wheel_filename
+    wheel_remote_path = "/root/" + wheel_filename
 
-    ec2_adapter = EC2Adapter(
-        image_id=CONFIG.get("aws", "image_id"),
-        key_name=path.expanduser(CONFIG.get("aws", "key_name")),
-        subnet_id=CONFIG.get("aws", "subnet_id"),
-        security_group_ids=CONFIG.get("aws", "security_group_ids").split(","),
-        tags=[("Purpose", "benchmark"), ("Benchmark Name", "CIFAR-10/100")],
-    )
-
+    docker_adapter = DockerAdapter(name="flower")
     cluster = Cluster(
-        adapter=ec2_adapter,
-        ssh_credentials=("ubuntu", path.expanduser(CONFIG.get("ssh", "private_key"))),
-        specs={"server": (4, 16, 1), "clients": (16, 64, 2)},
-        timeout=300,
+        adapter=docker_adapter,
+        ssh_credentials=("root", path.expanduser(CONFIG.get("ssh", "private_key"))),
+        specs={"server": (2, 2, 1), "clients": (2, 4, 1)},
+        timeout=20,
     )
 
     # Start the cluster; this takes some time
@@ -96,6 +89,9 @@ def run(
     # Install the wheel on all instances
     cluster.exec_all(f"python3.7 -m pip install {wheel_remote_path}")
 
+    # Download datasets on all instances
+    cluster.exec_all(f"python3 -m flower_benchmark.tf_fashion_mnist.download")
+
     # An instance is a tuple of the following values
     # (InstanceId, PrivateIpAddress, PublicIpAddress, State)
     server_id, server_private_ip, _, _, _ = cluster.instances["server"][0]
@@ -106,20 +102,12 @@ def run(
         server_command(rounds, sample_fraction, min_sample_size, min_num_clients),
     )
 
-    client_instances = cluster.instances["clients"]
+    client_id, _, _, _, _ = cluster.instances["clients"][0]
 
-    # Start flower clients on first client instance
-    for i in range(0, int(num_clients / 2)):
+    # Start flower clients
+    for i in range(0, int(num_clients)):
         cluster.exec(
-            client_instances[0][0],  # first client instance
-            client_command(i, num_clients, server_private_ip),
-        )
-
-    # Start flower clients on second client instance
-    for i in range(int(num_clients / 2), num_clients):
-        cluster.exec(
-            client_instances[1][0],
-            client_command(i, num_clients, server_private_ip),  # second client instance
+            client_id, client_command(i, num_clients, server_private_ip),
         )
 
     # Shutdown any instance after 10min if not at least one flower_benchmark is running it
@@ -129,7 +117,7 @@ def run(
 def run_10_clients() -> None:
     """Run 10 clients."""
     run(
-        rounds=2,
+        rounds=5,
         num_clients=10,
         sample_fraction=1.0,
         min_sample_size=10,

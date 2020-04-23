@@ -51,12 +51,14 @@ def ssh_connection(
     instance: Instance, ssh_credentials: SSHCredentials
 ) -> Iterator[SSHClient]:
     """Connect to server and yield SSH client."""
-    _, _, public_ip, _ = instance
+    _, _, public_ip, ssh_port, _ = instance
     username, key_filename = ssh_credentials
 
     client = SSHClient()
     client.set_missing_host_key_policy(IgnoreHostKeyPolicy)
-    client.connect(hostname=public_ip, username=username, key_filename=key_filename)
+    client.connect(
+        hostname=public_ip, port=ssh_port, username=username, key_filename=key_filename
+    )
 
     yield client
 
