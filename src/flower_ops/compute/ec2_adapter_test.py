@@ -78,6 +78,7 @@ class EC2AdapterTestCase(unittest.TestCase):
             ec2_instance["InstanceId"],
             ec2_instance["PrivateIpAddress"],
             ec2_instance["PublicIpAddress"],
+            22,
             ec2_instance["State"]["Name"],
         )
 
@@ -99,6 +100,7 @@ class EC2AdapterTestCase(unittest.TestCase):
             ec2_instance["InstanceId"],
             ec2_instance["PrivateIpAddress"],
             ec2_instance["PublicIpAddress"],
+            22,
             ec2_instance["State"]["Name"],
         )
 
@@ -126,7 +128,7 @@ if os.getenv("FLOWER_INTEGRATION"):
         """Test suite for class EC2Adapter."""
 
         def setUp(self) -> None:
-            """Create an instance."""
+            """Prepare tests."""
             # Filter false positiv warning
             warnings.filterwarnings(
                 "ignore",
