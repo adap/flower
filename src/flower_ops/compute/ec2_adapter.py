@@ -141,7 +141,7 @@ class EC2Adapter(Adapter):
 
         self.ec2 = boto3.client("ec2") if boto_ec2_client is None else boto_ec2_client
 
-    def wait_until_instances_are_reachable(self, instance_ids: List[str]) -> None:
+    def _wait_until_instances_are_reachable(self, instance_ids: List[str]) -> None:
         """Block until all instances are reachable.
         Raises TimeoutException after 300s.
 
@@ -171,12 +171,7 @@ class EC2Adapter(Adapter):
 
     # pylint: disable=too-many-arguments
     def create_instances(
-        self,
-        num_cpu: int,
-        num_ram: float,
-        timeout: int,
-        num_instances: int = 1,
-        commands: Optional[List[str]] = None,
+        self, num_cpu: int, num_ram: float, timeout: int, num_instances: int = 1,
     ) -> List[Instance]:
         """Create one or more EC2 instance(s) of the same type.
 
@@ -185,17 +180,11 @@ class EC2Adapter(Adapter):
                 num_ram (int): RAM in GB (values in ec2_adapter.INSTANCE_TYPES)
                 timeout (int): Timeout in minutes
                 num_instances (int): Number of instances to start if currently available in EC2
-                commands ([str]): List of bash commands which will be joined into a single string
-                    with "\n" as a seperator.
         """
         # The instance will be set to terminate after stutdown
         # This is a fail safe in case something happens and the instances
         # are not correctly shutdown
         user_data = ["#!/bin/bash", f"sudo shutdown -P {timeout}"]
-
-        if commands:
-            user_data += commands
-
         user_data_str = "\n".join(user_data)
 
         result: EC2RunInstancesResult = self.ec2.run_instances(
@@ -218,7 +207,7 @@ class EC2Adapter(Adapter):
         # reports impaired functionality that stems from issues internal to the instance, such as
         # impaired reachability
         try:
-            self.wait_until_instances_are_reachable(instance_ids=instance_ids)
+            self._wait_until_instances_are_reachable(instance_ids=instance_ids)
         except EC2StatusTimeout:
             self.terminate_instances(instance_ids)
             raise EC2CreateInstanceFailure()
@@ -247,6 +236,7 @@ class EC2Adapter(Adapter):
                 ins["InstanceId"],
                 ins["PrivateIpAddress"],
                 ins["PublicIpAddress"],
+                22,
                 ins["State"]["Name"],
             )
             for ins in instances

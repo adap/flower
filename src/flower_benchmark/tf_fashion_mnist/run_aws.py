@@ -98,7 +98,7 @@ def run(
 
     # An instance is a tuple of the following values
     # (InstanceId, PrivateIpAddress, PublicIpAddress, State)
-    server_id, server_private_ip, _, _ = cluster.instances["server"][0]
+    server_id, server_private_ip, _, _, _ = cluster.instances["server"][0]
 
     # Start flower server on flower server instances
     cluster.exec(
