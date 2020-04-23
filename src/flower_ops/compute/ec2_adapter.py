@@ -180,8 +180,6 @@ class EC2Adapter(Adapter):
                 num_ram (int): RAM in GB (values in ec2_adapter.INSTANCE_TYPES)
                 timeout (int): Timeout in minutes
                 num_instances (int): Number of instances to start if currently available in EC2
-                commands ([str]): List of bash commands which will be joined into a single string
-                    with "\n" as a seperator.
         """
         # The instance will be set to terminate after stutdown
         # This is a fail safe in case something happens and the instances

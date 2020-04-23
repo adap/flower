@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides an Adapter implementation for AWS EC2."""
+"""Provides an Adapter implementation for Docker."""
 
 
 import socket
@@ -48,7 +48,7 @@ def _get_container_port(container_id: str) -> int:
 
 
 class DockerAdapter(Adapter):
-    """Adapter for AWS EC2."""
+    """Adapter for Docker."""
 
     def __init__(self, name: str):
         self.name = name
@@ -56,15 +56,13 @@ class DockerAdapter(Adapter):
     def create_instances(
         self, num_cpu: int, num_ram: float, timeout: int, num_instances: int = 1,
     ) -> List[Instance]:
-        """Create one or more EC2 instance(s) of the same type.
+        """Create one or more docker container instance(s) of the same type.
 
             Args:
-                num_cpu (int): Number of instance vCPU (values in ec2_adapter.INSTANCE_TYPES)
-                num_ram (int): RAM in GB (values in ec2_adapter.INSTANCE_TYPES)
+                num_cpu (int): Number of instance CPU cores (currently ignored)
+                num_ram (int): RAM in GB (currently ignored)
                 timeout (int): Timeout in minutes
-                num_instances (int): Number of instances to start if currently available in EC2
-                commands ([str]): List of bash commands which will be joined into a single string
-                    with "\n" as a seperator.
+                num_instances (int): Number of instances to start
         """
         instances: List[Instance] = []
 
@@ -95,7 +93,7 @@ class DockerAdapter(Adapter):
     def list_instances(
         self, instance_ids: Optional[List[str]] = None
     ) -> List[Instance]:
-        """List all instances with tags belonging to this adapter.
+        """List all container instances with tags belonging to this adapter.
 
         Args:
             instance_ids ([str[]]): If provided, filter by instance_ids
@@ -114,7 +112,7 @@ class DockerAdapter(Adapter):
         return instances
 
     def terminate_instances(self, instance_ids: List[str]) -> None:
-        """Terminate instances.
+        """Terminate container instance(s).
 
         Will raise an error if something goes wrong.
         """
