@@ -136,31 +136,13 @@ class Server:
 
     def fit_round(self, rnd: int) -> Optional[Weights]:
         """Perform a single round of federated averaging."""
-        # Sample a number of clients (dependent on the strategy)
-        sample_size, min_num_clients = self.strategy.num_fit_clients(
-            self._client_manager.num_available()
-        )
-        log(
-            DEBUG,
-            "fit_round: sample %s cids once %s clients are available",
-            sample_size,
-            min_num_clients,
-        )
-        clients = self._client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
-        )
-        log(
-            DEBUG,
-            "fit_round: sampled %s cids: %s",
-            len(clients),
-            [c.cid for c in clients],
+        # Get clients and their respective instructions from strategy
+        client_instructions = self.strategy.on_configure_fit(
+            rnd=rnd, weights=self.weights, client_manager=self._client_manager
         )
 
         # Collect training results from all clients participating in this round
-        parameters = weights_to_parameters(self.weights)
-        config = self.strategy.on_fit_config(rnd=rnd)
-        fit_ins: FitIns = (parameters, config)
-        results, failures = fit_clients(clients, fit_ins)
+        results, failures = fit_clients(client_instructions)
         log(
             DEBUG,
             "fit_round received %s results and %s failures",
@@ -179,11 +161,13 @@ class Server:
 
 
 def fit_clients(
-    clients: List[ClientProxy], ins: FitIns
+    client_instructions: List[Tuple[ClientProxy, FitIns]]
 ) -> Tuple[List[FitRes], List[BaseException]]:
     """Refine weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(fit_client, c, ins) for c in clients]
+        futures = [
+            executor.submit(fit_client, c, ins) for c, ins in client_instructions
+        ]
         concurrent.futures.wait(futures)
     # Gather results
     results: List[FitRes] = []
