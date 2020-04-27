@@ -90,7 +90,7 @@ def run(
     cluster.exec_all(f"python3.7 -m pip install {wheel_remote_path}")
 
     # Download datasets on all instances
-    cluster.exec_all(f"python3 -m flower_benchmark.tf_fashion_mnist.download")
+    cluster.exec_all(f"python3.7 -m flower_benchmark.tf_fashion_mnist.download")
 
     # An instance is a tuple of the following values
     # (InstanceId, PrivateIpAddress, PublicIpAddress, State)
