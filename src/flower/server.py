@@ -17,18 +17,16 @@
 
 import concurrent.futures
 import timeit
-from io import BytesIO
 from logging import DEBUG, INFO
-from typing import List, Optional, Tuple, cast
-
-import numpy as np
+from typing import List, Optional, Tuple
 
 from flower.client_manager import ClientManager
 from flower.client_proxy import ClientProxy
 from flower.history import History
 from flower.logger import log
 from flower.strategy import DefaultStrategy, Strategy
-from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Weights
+from flower.strategy.parameter import parameters_to_weights, weights_to_parameters
+from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 
 class Server:
@@ -171,11 +169,7 @@ class Server:
         )
 
         # Aggregate training results
-        weights_results = [
-            (parameters_to_weights(parameters), num_examples)
-            for parameters, num_examples in results
-        ]
-        return self.strategy.on_aggregate_fit(weights_results, failures)
+        return self.strategy.on_aggregate_fit(results, failures)
 
     def _get_initial_weights(self) -> Weights:
         """Get initial weights from one of the available clients."""
@@ -236,28 +230,3 @@ def evaluate_clients(
 def evaluate_client(client: ClientProxy, ins: EvaluateIns) -> EvaluateRes:
     """Evaluate weights on a single client."""
     return client.evaluate(ins)
-
-
-def weights_to_parameters(weights: Weights) -> Parameters:
-    """Convert NumPy weights to parameters object."""
-    tensors = [ndarray_to_bytes(ndarray) for ndarray in weights]
-    return Parameters(tensors=tensors, tensor_type="numpy.nda")
-
-
-def parameters_to_weights(parameters: Parameters) -> Weights:
-    """Convert parameters object to NumPy weights."""
-    return [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
-
-
-def ndarray_to_bytes(ndarray: np.ndarray) -> bytes:
-    """Serialize NumPy array to bytes."""
-    bytes_io = BytesIO()
-    np.save(bytes_io, ndarray, allow_pickle=False)
-    return bytes_io.getvalue()
-
-
-def bytes_to_ndarray(tensor: bytes) -> np.ndarray:
-    """Deserialize NumPy array from bytes."""
-    bytes_io = BytesIO(tensor)
-    ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
-    return cast(np.ndarray, ndarray_deserialized)
