@@ -16,33 +16,27 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from flower.client_manager import ClientManager
 from flower.client_proxy import ClientProxy
-from flower.typing import EvaluateRes, FitIns, FitRes, Weights
+from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 
 class Strategy(ABC):
     """Abstract class to implement custom server strategies."""
 
     @abstractmethod
-    def should_evaluate(self) -> bool:
-        """Decide if the current global model should be evaluated or not."""
-
-    @abstractmethod
-    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Determine the number of clients used for evaluation."""
-
-    @abstractmethod
-    def on_evaluate_config(self, rnd: int) -> Dict[str, str]:
-        """Get configuration for the next round of evaluation."""
-
-    @abstractmethod
     def on_configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
+
+    @abstractmethod
+    def on_configure_evaluate(
+        self, rnd: int, weights: Weights, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation."""
 
     @abstractmethod
     def on_aggregate_fit(
