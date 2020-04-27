@@ -37,10 +37,6 @@ class Strategy(ABC):
         """Determine the number of clients used for evaluation."""
 
     @abstractmethod
-    def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
-        """Evaluate the current model weights."""
-
-    @abstractmethod
     def on_fit_config(self, rnd: int) -> Dict[str, str]:
         """Get configuration for the next round of training."""
 
@@ -59,6 +55,10 @@ class Strategy(ABC):
         self, results: List[EvaluateRes], failures: List[BaseException]
     ) -> Optional[float]:
         """Aggregate evaluation results."""
+
+    @abstractmethod
+    def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
+        """Evaluate the current model weights."""
 
     @abstractmethod
     def on_conclude_round(
