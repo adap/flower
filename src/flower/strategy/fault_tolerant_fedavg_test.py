@@ -17,7 +17,7 @@
 
 from typing import List, Optional, Tuple
 
-from flower import Weights
+from flower import FitRes, Parameters, Weights
 
 from .fault_tolerant_fedavg import FaultTolerantFedAvg
 
@@ -26,7 +26,7 @@ def test_on_aggregate_fit_no_results_no_failures() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.1)
-    results: List[Tuple[Weights, int]] = []
+    results: List[FitRes] = []
     failures: List[BaseException] = []
     expected: Optional[Weights] = None
 
@@ -41,7 +41,7 @@ def test_on_aggregate_fit_no_results() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.1)
-    results: List[Tuple[Weights, int]] = []
+    results: List[FitRes] = []
     failures: List[BaseException] = [Exception()]
     expected: Optional[Weights] = None
 
@@ -56,7 +56,7 @@ def test_on_aggregate_fit_not_enough_results() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.5)
-    results: List[Tuple[Weights, int]] = [([], 1)]
+    results: List[FitRes] = [(Parameters(tensors=[], tensor_type=""), 1)]
     failures: List[BaseException] = [Exception(), Exception()]
     expected: Optional[Weights] = None
 
@@ -71,7 +71,7 @@ def test_on_aggregate_fit_just_enough_results() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.5)
-    results: List[Tuple[Weights, int]] = [([], 1)]
+    results: List[FitRes] = [(Parameters(tensors=[], tensor_type=""), 1)]
     failures: List[BaseException] = [Exception()]
     expected: Optional[Weights] = []
 
@@ -86,7 +86,7 @@ def test_on_aggregate_fit_no_failures() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.99)
-    results: List[Tuple[Weights, int]] = [([], 1)]
+    results: List[FitRes] = [(Parameters(tensors=[], tensor_type=""), 1)]
     failures: List[BaseException] = []
     expected: Optional[Weights] = []
 
