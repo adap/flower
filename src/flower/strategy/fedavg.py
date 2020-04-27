@@ -20,9 +20,10 @@ Paper: https://arxiv.org/abs/1602.05629
 
 from typing import Callable, Dict, List, Optional, Tuple
 
-from flower.typing import Weights
+from flower.typing import EvaluateRes, FitRes, Weights
 
 from .aggregate import aggregate, weighted_loss_avg
+from .parameter import parameters_to_weights
 from .strategy import Strategy
 
 
@@ -89,7 +90,7 @@ class FedAvg(Strategy):
         return self.on_evaluate_config_fn(rnd)
 
     def on_aggregate_fit(
-        self, results: List[Tuple[Weights, int]], failures: List[BaseException]
+        self, results: List[FitRes], failures: List[BaseException]
     ) -> Optional[Weights]:
         """Aggregate fit results using weighted average."""
         if not results:
@@ -97,10 +98,15 @@ class FedAvg(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None
-        return aggregate(results)
+        # Convert results
+        weights_results = [
+            (parameters_to_weights(parameters), num_examples)
+            for parameters, num_examples in results
+        ]
+        return aggregate(weights_results)
 
     def on_aggregate_evaluate(
-        self, results: List[Tuple[int, float]], failures: List[BaseException]
+        self, results: List[EvaluateRes], failures: List[BaseException]
     ) -> Optional[float]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
