@@ -18,9 +18,8 @@
 from typing import List
 
 import numpy as np
-import pytest
 
-from flower.server import bytes_to_ndarray, ndarray_to_bytes
+from flower.strategy.parameter import ndarray_to_bytes
 
 from .client_proxy import ClientProxy
 from .server import evaluate_clients, fit_clients
@@ -95,18 +94,3 @@ def test_eval_clients() -> None:
     assert len(failures) == 1
     assert results[0][0] == 1
     assert results[0][1] == 1.0
-
-
-def test_serialisation_deserialisation() -> None:
-    """Test if after serialization/deserialisation the np.ndarray is identical."""
-    arr = np.array([[1, 2], [3, 4], [5, 6]])
-
-    arr_serialized = ndarray_to_bytes(arr)
-    arr_deserialized = bytes_to_ndarray(arr_serialized)
-
-    # Assert deserialized array is equal to original
-    np.testing.assert_equal(arr_deserialized, arr)
-
-    # Test false positive
-    with pytest.raises(AssertionError, match="Arrays are not equal"):
-        np.testing.assert_equal(arr_deserialized, np.ones((3, 2)))
