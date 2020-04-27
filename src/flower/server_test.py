@@ -65,9 +65,10 @@ def test_fit_clients() -> None:
     arr = np.array([[1, 2], [3, 4], [5, 6]])
     arr_serialized = ndarray_to_bytes(arr)
     ins: FitIns = (Parameters(tensors=[arr_serialized], tensor_type=""), {})
+    client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = fit_clients(clients, ins)
+    results, failures = fit_clients(client_instructions)
 
     # Assert
     assert len(results) == 1

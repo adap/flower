@@ -20,10 +20,12 @@ Paper: https://arxiv.org/abs/1602.05629
 
 from typing import Callable, Dict, List, Optional, Tuple
 
-from flower.typing import EvaluateRes, FitRes, Weights
+from flower.client_manager import ClientManager
+from flower.client_proxy import ClientProxy
+from flower.typing import EvaluateRes, FitIns, FitRes, Weights
 
 from .aggregate import aggregate, weighted_loss_avg
-from .parameter import parameters_to_weights
+from .parameter import parameters_to_weights, weights_to_parameters
 from .strategy import Strategy
 
 
@@ -58,11 +60,6 @@ class FedAvg(Strategy):
         """Evaluate every round (if no evaluation fn is provided)."""
         return self.eval_fn is None
 
-    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Use a fraction of available clients for training."""
-        num_clients = int(num_available_clients * self.fraction_fit)
-        return max(num_clients, self.min_fit_clients), self.min_available_clients
-
     def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
         num_clients = int(num_available_clients * self.fraction_eval)
@@ -75,19 +72,39 @@ class FedAvg(Strategy):
             return None
         return self.eval_fn(weights)
 
-    def on_fit_config(self, rnd: int) -> Dict[str, str]:
-        """Return a configuration for the next round of training."""
-        if self.on_fit_config_fn is None:
-            # No fit config function provided
-            return {}
-        return self.on_fit_config_fn(rnd)
-
     def on_evaluate_config(self, rnd: int) -> Dict[str, str]:
         """Return a configuration for the next round of evaluation."""
         if self.on_evaluate_config_fn is None:
             # No evaluation config function provided
             return {}
         return self.on_evaluate_config_fn(rnd)
+
+    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
+        """Return the sample size and the required number of available clients."""
+        num_clients = int(num_available_clients * self.fraction_fit)
+        return max(num_clients, self.min_fit_clients), self.min_available_clients
+
+    def on_configure_fit(
+        self, rnd: int, weights: Weights, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
+        parameters = weights_to_parameters(weights)
+        config = {}
+        if self.on_fit_config_fn is not None:
+            # Custom fit config function provided
+            config = self.on_fit_config_fn(rnd)
+        fit_ins = (parameters, config)
+
+        # Sample clients
+        sample_size, min_num_clients = self.num_fit_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
+
+        # Return client/config pairs
+        return [(client, fit_ins) for client in clients]
 
     def on_aggregate_fit(
         self, results: List[FitRes], failures: List[BaseException]
