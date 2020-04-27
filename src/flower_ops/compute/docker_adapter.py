@@ -17,8 +17,9 @@
 
 import socket
 import time
+from uuid import uuid4
 from contextlib import closing
-from typing import Iterator, List, Optional
+from typing import List, Optional
 
 import docker
 
@@ -47,13 +48,6 @@ def _get_container_port(container_id: str) -> int:
     return int(result[0]["HostPort"])
 
 
-def _get_cid() -> Iterator[int]:
-    cid = 0
-    while True:
-        yield cid
-        cid += 1
-
-
 class DockerAdapter(Adapter):
     """Adapter for Docker."""
 
@@ -61,8 +55,6 @@ class DockerAdapter(Adapter):
         self.name = name
         self.network = network
         self._create_network()
-
-        self._container_cid = _get_cid()
 
     def _create_network(self) -> None:
         """Create Docker network if it does not exist."""
@@ -91,11 +83,14 @@ class DockerAdapter(Adapter):
             port = get_free_port()
             container = client.containers.run(
                 "flower-sshd:latest",
-                name=f"{self.name}_{next(self._container_cid)}",
                 auto_remove=True,
                 detach=True,
                 ports={"22/tcp": port},
                 network=self.network,
+                labels={"adapter_name": self.name},
+                # we have to assign a name as the default random name will not work
+                # as hostname so the containers can reach each other
+                name=str(uuid4().hex[:8])
             )
 
             # Docker needs a little time to start the container
@@ -107,6 +102,8 @@ class DockerAdapter(Adapter):
             )
 
         client.close()
+
+        print(instances)
 
         return instances
 
@@ -121,7 +118,9 @@ class DockerAdapter(Adapter):
         instances: List[Instance] = []
 
         client = docker.from_env()
-        containers = client.containers.list(filters={"name": self.name})
+        containers = client.containers.list(
+            filters={"label": f"adapter_name={self.name}"}
+        )
         for container in containers:
             port = _get_container_port(container.short_id)
             instances.append(
@@ -154,7 +153,9 @@ class DockerAdapter(Adapter):
         Will raise an error if something goes wrong.
         """
         client = docker.from_env()
-        containers = client.containers.list(filters={"name": self.name})
+        containers = client.containers.list(
+            filters={"label": f"adapter_name={self.name}"}
+        )
         for container in containers:
             container.remove(force=True)
         client.close()
