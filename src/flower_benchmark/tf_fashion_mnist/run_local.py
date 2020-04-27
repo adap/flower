@@ -14,9 +14,11 @@
 # ==============================================================================
 """Execute Fashion-MNIST benchmark locally in Docker."""
 
+import argparse
 import configparser
 from os import path
 
+from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 from flower_ops.cluster import Cluster
 from flower_ops.compute.docker_adapter import DockerAdapter
 
@@ -30,30 +32,35 @@ CONFIG.read(OPS_INI_PATH)
 
 
 def server_command(
-    rounds: int, sample_fraction: float, min_sample_size: int, min_num_clients: int
+    rounds: int,
+    sample_fraction: float,
+    min_sample_size: int,
+    min_num_clients: int,
+    training_round_timeout: int,
 ) -> str:
     """Build command to run server."""
-    return f"screen -d -m python3.7 -m flower_benchmark.tf_fashion_mnist.server \
-            --rounds={rounds} \
-            --sample_fraction={sample_fraction} \
-            --min_sample_size={min_sample_size} \
-            --min_num_clients={min_num_clients}"
+    return f"nohup sh -c 'python3.7 -m flower_benchmark.tf_fashion_mnist.server \
+--rounds={rounds} \
+--sample_fraction={sample_fraction} \
+--min_sample_size={min_sample_size} \
+--min_num_clients={min_num_clients} \
+--training_round_timeout={training_round_timeout}' > server.log &"
 
 
 def client_command(cid: int, num_clients: int, server_ip: str) -> str:
     """Build command to run client."""
-    return f"screen -d -m python3.7 -m flower_benchmark.tf_fashion_mnist.client \
-                    --cid={cid} \
-                    --partition={cid} \
-                    --clients={num_clients} \
-                    --grpc_server_address={server_ip} \
-                    --grpc_server_port=8080"
+    return f"nohup sh -c 'python3.7 -m flower_benchmark.tf_fashion_mnist.client \
+--cid={cid} \
+--partition={cid} \
+--clients={num_clients} \
+--grpc_server_address={server_ip} \
+--grpc_server_port=8080' > client_{cid}.log &"
 
 
 def watch_and_shutdown_command() -> str:
     """Return command which shuts down the instance after no benchmark is running anymore."""
     return (
-        "screen -d -m bash -c 'while [[ $(ps a | grep [f]lower_benchmark) ]]; "
+        "nohup bash -c 'while [[ $(ps a | grep [f]lower_benchmark) ]]; "
         + "do sleep 1; done; kill 1'"
     )
 
@@ -64,6 +71,7 @@ def run(
     sample_fraction: float,
     min_sample_size: int,
     min_num_clients: int,
+    training_round_timeout: int,
 ) -> None:
     """Run benchmark."""
     wheel_filename = CONFIG.get("paths", "wheel_filename")
@@ -87,7 +95,7 @@ def run(
     cluster.upload_all(wheel_local_path, wheel_remote_path)
 
     # Install the wheel on all instances
-    cluster.exec_all(f"python3.7 -m pip install {wheel_remote_path}")
+    print(cluster.exec_all(f"python3.7 -m pip install {wheel_remote_path}"))
 
     # Download datasets on all instances
     cluster.exec_all(f"python3.7 -m flower_benchmark.tf_fashion_mnist.download")
@@ -99,7 +107,13 @@ def run(
     # Start flower server on flower server instances
     cluster.exec(
         server_id,
-        server_command(rounds, sample_fraction, min_sample_size, min_num_clients),
+        server_command(
+            rounds,
+            sample_fraction,
+            min_sample_size,
+            min_num_clients,
+            training_round_timeout,
+        ),
     )
 
     client_id, _, _, _, _ = cluster.instances["clients"][0]
@@ -114,16 +128,31 @@ def run(
     cluster.exec_all(watch_and_shutdown_command())
 
 
-def run_10_clients() -> None:
-    """Run 10 clients."""
+def main() -> None:
+    """Start server and train `--rounds` number of rounds."""
+    parser = argparse.ArgumentParser(description="Flower")
+    parser.add_argument(
+        "--setting",
+        type=str,
+        required=True,
+        help=f"Name of setting to run. Possible options: {list(SETTINGS.keys())}",
+    )
+    args = parser.parse_args()
+
+    setting = get_setting(args.setting)
+
+    print("Starting benchmark with the following settings:")
+    print(setting)
+
     run(
-        rounds=5,
-        num_clients=10,
-        sample_fraction=1.0,
-        min_sample_size=10,
-        min_num_clients=10,
+        rounds=setting.rounds,
+        num_clients=setting.num_clients,
+        sample_fraction=setting.sample_fraction,
+        min_sample_size=setting.min_sample_size,
+        min_num_clients=setting.min_num_clients,
+        training_round_timeout=setting.training_round_timeout,
     )
 
 
 if __name__ == "__main__":
-    run_10_clients()
+    main()
