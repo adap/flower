@@ -53,7 +53,7 @@ if os.getenv("FLOWER_INTEGRATION"):
 
             # Assert
             assert len(instances) == 2
-            
+
             containers = self.client.containers.list(
                 filters={"label": f"adapter_name={self.name}"}
             )

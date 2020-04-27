@@ -17,9 +17,9 @@
 
 import socket
 import time
-from uuid import uuid4
 from contextlib import closing
 from typing import List, Optional
+from uuid import uuid4
 
 import docker
 
@@ -90,7 +90,7 @@ class DockerAdapter(Adapter):
                 labels={"adapter_name": self.name},
                 # we have to assign a name as the default random name will not work
                 # as hostname so the containers can reach each other
-                name=str(uuid4().hex[:8])
+                name=str(uuid4().hex[:8]),
             )
 
             # Docker needs a little time to start the container
