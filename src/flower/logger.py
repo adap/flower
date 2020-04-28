@@ -41,14 +41,14 @@ def configure() -> None:
     _logger.addHandler(console_handler)
 
     if isinstance(FLOWER_LOG_FILE, str):
-        # create file handler and log to disk
+        # Create file handler and log to disk
         file_handler = logging.FileHandler(FLOWER_LOG_FILE)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
         _logger.addHandler(file_handler)
 
     if isinstance(FLOWER_LOG_HTTP, str):
-        # create http handler which logs even debug messages
+        # Create http handler which logs even debug messages
         http_handler = logging.handlers.HTTPHandler(
             FLOWER_LOG_HTTP, "/log", method="POST",
         )
