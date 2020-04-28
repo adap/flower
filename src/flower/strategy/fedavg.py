@@ -99,8 +99,8 @@ class FedAvg(Strategy):
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        # Do not configure federated evaluation if a centralized evaluation a
-        # centralized evaluation function is provided
+        # Do not configure federated evaluation if a centralized evaluation
+        # function is provided
         if self.eval_fn is None:
             return []
 
