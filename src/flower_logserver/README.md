@@ -3,7 +3,7 @@ A simple server which receives logs from the python standard library `logging.ha
 and prints them to the console.
 
 # Quickstart
-A very minimal example showcasing how centrailized logging works
+A minimal example showing how centralized logging works
 
 Run these commands in 3 different terminals. Start the log server
 ```bash
