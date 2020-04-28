@@ -20,6 +20,8 @@ RUN echo $SSH_PUBLIC_KEY > /root/.ssh/authorized_keys
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+WORKDIR /root
+
 EXPOSE 22
 
 CMD    ["/usr/sbin/sshd", "-D"]

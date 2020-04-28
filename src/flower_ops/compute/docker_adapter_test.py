@@ -37,7 +37,9 @@ if os.getenv("FLOWER_INTEGRATION"):
 
         def tearDown(self) -> None:
             """Cleanup tests"""
-            containers = self.client.containers.list(filters={"name": self.name})
+            containers = self.client.containers.list(
+                filters={"label": f"adapter_name={self.name}"}
+            )
             for container in containers:
                 container.remove(force=True)
             self.client.close()
@@ -52,6 +54,11 @@ if os.getenv("FLOWER_INTEGRATION"):
             # Assert
             assert len(instances) == 2
 
+            containers = self.client.containers.list(
+                filters={"label": f"adapter_name={self.name}"}
+            )
+            assert len(containers) == 2
+
         def test_list_instances(self):
             """List all instances."""
             # Prepare
@@ -59,10 +66,10 @@ if os.getenv("FLOWER_INTEGRATION"):
                 port = get_free_port()
                 self.client.containers.run(
                     "flower-sshd:latest",
-                    name=f"{self.name}_{int(time.time() * 1000)}",
                     auto_remove=True,
                     detach=True,
                     ports={"22/tcp": port},
+                    labels={"adapter_name": self.name},
                 )
 
             # Execute
@@ -83,13 +90,16 @@ if os.getenv("FLOWER_INTEGRATION"):
                 auto_remove=True,
                 detach=True,
                 ports={"22/tcp": port},
+                labels={"adapter_name": self.name},
             )
 
             # Execute
             self.adapter.terminate_instances([container.short_id])
 
             # Assert
-            containers = self.client.containers.list(filters={"name": self.name})
+            containers = self.client.containers.list(
+                filters={"label": f"adapter_name={self.name}"}
+            )
             assert len(containers) == 0
 
         def test_terminate_all_instances(self):
@@ -109,7 +119,9 @@ if os.getenv("FLOWER_INTEGRATION"):
             self.adapter.terminate_all_instances()
 
             # Assert
-            containers = self.client.containers.list(filters={"name": self.name})
+            containers = self.client.containers.list(
+                filters={"label": f"adapter_name={self.name}"}
+            )
             assert len(containers) == 0
 
 

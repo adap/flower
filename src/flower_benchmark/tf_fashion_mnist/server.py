@@ -75,6 +75,12 @@ def main() -> None:
         default=0.1,
         help="Initial learning rate (default: 0.1)",
     )
+    parser.add_argument(
+        "--training_round_timeout",
+        type=int,
+        default=60,
+        help="Round timeout in seconds (default: 60)",
+    )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
     parser.add_argument(
         "--dry_run", type=bool, default=False, help="Dry run (default: False)"
@@ -91,7 +97,9 @@ def main() -> None:
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
         eval_fn=get_eval_fn(num_classes=10, xy_test=xy_test),
-        on_fit_config_fn=get_on_fit_config_fn(args.lr_initial),
+        on_fit_config_fn=get_on_fit_config_fn(
+            args.lr_initial, args.training_round_timeout
+        ),
     )
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
 
@@ -104,7 +112,9 @@ def main() -> None:
     )
 
 
-def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
+def get_on_fit_config_fn(
+    lr_initial: float, timeout: int
+) -> Callable[[int], Dict[str, str]]:
     """Return a function which returns training configurations."""
 
     def fit_config(rnd: int) -> Dict[str, str]:
@@ -115,7 +125,7 @@ def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
             "batch_size": str(64),
             "lr_initial": str(lr_initial),
             "lr_decay": str(0.99),
-            "timeout": str(20),
+            "timeout": str(timeout),
             "partial_updates": "1",
         }
         return config
