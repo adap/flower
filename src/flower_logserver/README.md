@@ -1,16 +1,16 @@
 # Flower LogServer
-A simple server which receives logs from the python standard library `logging.handlers.HTTPHandler`
-and prints them to the console.
+A simple server which receives logs from the python standard library `logging.handlers.HTTPHandler` and prints them to the console.
 
 # Quickstart
-A minimal example showing how centralized logging works
+A minimal example showing how centralized logging works.
 
-Run these commands in 3 different terminals. Start the log server
+Run these commands in 3 different terminals.
+Start the log server.
 ```bash
 python -m flower_logserver
 ```
 
-Now start the FL server and client.
+Start the FL server and client.
 ```bash
 FLOWER_LOG_HTTP=localhost:8081 python -m flower_benchmark.tf_fashion_mnist.server
 ```
