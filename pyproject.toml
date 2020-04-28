@@ -56,7 +56,6 @@ examples-tensorflow = ["tensorflow-cpu"]
 ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
 http-logger = ["flask"]
 
-
 [tool.poetry.dev-dependencies]
 isort = "==4.3.21"
 black = "==19.10b0"
