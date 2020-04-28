@@ -18,17 +18,6 @@
 from .default import DefaultStrategy
 
 
-def test_default_strategy_should_evaluate_every_round() -> None:
-    """Test evaluate function."""
-
-    # Prepare
-    strategy = DefaultStrategy()
-
-    # Execute & assert
-    for _ in range(5):
-        assert strategy.should_evaluate()
-
-
 def test_default_strategy_num_fit_clients_20_available() -> None:
     """Test num_fit_clients function."""
 

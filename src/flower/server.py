@@ -25,7 +25,7 @@ from flower.client_proxy import ClientProxy
 from flower.history import History
 from flower.logger import log
 from flower.strategy import DefaultStrategy, Strategy
-from flower.strategy.parameter import parameters_to_weights, weights_to_parameters
+from flower.strategy.parameter import parameters_to_weights
 from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 
@@ -82,11 +82,10 @@ class Server:
                 history.add_accuracy_centralized(rnd=current_round, acc=acc)
 
             # Evaluate model on a sample of available clients
-            if self.strategy.should_evaluate():
-                loss_avg = self.evaluate(rnd=current_round)
-                if loss_avg is not None:
-                    history.add_loss_distributed(rnd=current_round, loss=loss_avg)
-                    loss, acc = loss_avg, None
+            loss_avg = self.evaluate(rnd=current_round)
+            if loss_avg is not None:
+                history.add_loss_distributed(rnd=current_round, loss=loss_avg)
+                loss, acc = loss_avg, None
 
             # Conclude round
             should_continue = self.strategy.on_conclude_round(current_round, loss, acc)
@@ -100,31 +99,15 @@ class Server:
 
     def evaluate(self, rnd: int) -> Optional[float]:
         """Validate current global model on a number of clients."""
-        # Sample clients for evaluation
-        sample_size, min_num_clients = self.strategy.num_evaluation_clients(
-            self._client_manager.num_available()
+        # Get clients and their respective instructions from strategy
+        client_instructions = self.strategy.on_configure_evaluate(
+            rnd=rnd, weights=self.weights, client_manager=self._client_manager
         )
-        log(
-            DEBUG,
-            "evaluate: sample %s cids once %s clients are available",
-            sample_size,
-            min_num_clients,
-        )
-        clients = self._client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
-        )
-        log(
-            DEBUG,
-            "evaluate: sampled %s cids: %s",
-            len(clients),
-            [c.cid for c in clients],
-        )
+        if not client_instructions:
+            return None
 
         # Evaluate current global weights on those clients
-        parameters = weights_to_parameters(self.weights)
-        config = self.strategy.on_evaluate_config(rnd=rnd)
-        evaluate_ins: FitIns = (parameters, config)
-        results, failures = evaluate_clients(clients, evaluate_ins)
+        results, failures = evaluate_clients(client_instructions)
         log(
             DEBUG,
             "evaluate received %s results and %s failures",
@@ -140,6 +123,8 @@ class Server:
         client_instructions = self.strategy.on_configure_fit(
             rnd=rnd, weights=self.weights, client_manager=self._client_manager
         )
+        if not client_instructions:
+            return None
 
         # Collect training results from all clients participating in this round
         results, failures = fit_clients(client_instructions)
@@ -192,11 +177,13 @@ def fit_client(client: ClientProxy, ins: FitIns) -> FitRes:
 
 
 def evaluate_clients(
-    clients: List[ClientProxy], ins: EvaluateIns
+    client_instructions: List[Tuple[ClientProxy, FitIns]]
 ) -> Tuple[List[EvaluateRes], List[BaseException]]:
     """Evaluate weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(evaluate_client, c, ins) for c in clients]
+        futures = [
+            executor.submit(evaluate_client, c, ins) for c, ins in client_instructions
+        ]
         concurrent.futures.wait(futures)
     # Gather results
     results: List[EvaluateRes] = []
