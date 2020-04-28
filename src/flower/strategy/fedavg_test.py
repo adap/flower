@@ -18,16 +18,6 @@
 from .fedavg import FedAvg
 
 
-def test_fedavg_should_evaluate_every_round() -> None:
-    """Test should_evaluate function."""
-    # Prepare
-    strategy = FedAvg()
-
-    # Execute & assert
-    for _ in range(5):
-        assert strategy.should_evaluate()
-
-
 def test_fedavg_num_fit_clients_20_available() -> None:
     """Test num_fit_clients function."""
     # Prepare
