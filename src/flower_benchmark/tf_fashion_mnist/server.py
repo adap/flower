@@ -79,7 +79,7 @@ def main() -> None:
         "--training_round_timeout",
         type=int,
         default=60,
-        help="Round timeout in seconds (default: 1)",
+        help="Round timeout in seconds (default: 60)",
     )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
     parser.add_argument(

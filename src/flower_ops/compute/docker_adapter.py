@@ -88,7 +88,7 @@ class DockerAdapter(Adapter):
                 ports={"22/tcp": port},
                 network=self.network,
                 labels={"adapter_name": self.name},
-                # we have to assign a name as the default random name will not work
+                # We have to assign a name as the default random name will not work
                 # as hostname so the containers can reach each other
                 name=str(uuid4().hex[:8]),
             )

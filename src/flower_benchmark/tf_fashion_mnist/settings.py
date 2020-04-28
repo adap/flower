@@ -15,7 +15,6 @@
 """Provides a variaty of benchmark settings."""
 
 from dataclasses import dataclass
-from typing import Dict
 
 
 @dataclass

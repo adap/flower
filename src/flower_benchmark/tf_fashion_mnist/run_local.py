@@ -47,7 +47,7 @@ def server_command(
 --training_round_timeout={training_round_timeout}' > server.log &"
 
 
-def client_command(cid: int, num_clients: int, server_ip: str) -> str:
+def client_command(cid: str, num_clients: int, server_ip: str) -> str:
     """Build command to run client."""
     return f"nohup sh -c 'python3.7 -m flower_benchmark.tf_fashion_mnist.client \
 --cid={cid} \
@@ -65,6 +65,7 @@ def watch_and_shutdown_command() -> str:
     )
 
 
+# pylint: disable=too-many-arguments, too-many-locals
 def run(
     rounds: int,
     num_clients: int,
@@ -121,7 +122,7 @@ def run(
     # Start flower clients
     for i in range(0, int(num_clients)):
         cluster.exec(
-            client_id, client_command(i, num_clients, server_private_ip),
+            client_id, client_command(str(i), num_clients, server_private_ip),
         )
 
     # Shutdown any instance after 10min if not at least one flower_benchmark is running it
