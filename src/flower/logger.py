@@ -14,14 +14,16 @@
 # ==============================================================================
 """Flower Logger."""
 import logging
+import logging.handlers
 import os
-from datetime import datetime
 
 LOGGER_NAME = "flower"
-DEFAULT_LOGFILE = f"flower_{datetime.utcnow().strftime('%Y-%m-%d_%H:%M:%S.%f')[:-3]}_{os.getpid()}.log"  # pylint: disable=C0301
+
+FLOWER_LOG_FILE = os.getenv("FLOWER_LOG_FILE")
+FLOWER_LOG_HTTP = os.getenv("FLOWER_LOG_HTTP")
 
 
-def configure(logfile: str = DEFAULT_LOGFILE) -> None:
+def configure() -> None:
     """Configure logger."""
     # create logger
     _logger = logging.getLogger(LOGGER_NAME)
@@ -32,19 +34,27 @@ def configure(logfile: str = DEFAULT_LOGFILE) -> None:
         "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
     )
 
-    # create console handler and set level to debug
+    # Console logger
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.DEBUG)
     console_handler.setFormatter(formatter)
-
-    # create file handler which logs even debug messages
-    file_handler = logging.FileHandler(logfile)
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-
-    # add ch and fh to logger
     _logger.addHandler(console_handler)
-    _logger.addHandler(file_handler)
+
+    if isinstance(FLOWER_LOG_FILE, str):
+        # Create file handler and log to disk
+        file_handler = logging.FileHandler(FLOWER_LOG_FILE)
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        _logger.addHandler(file_handler)
+
+    if isinstance(FLOWER_LOG_HTTP, str):
+        # Create http handler which logs even debug messages
+        http_handler = logging.handlers.HTTPHandler(
+            FLOWER_LOG_HTTP, "/log", method="POST",
+        )
+        http_handler.setLevel(logging.DEBUG)
+        http_handler.setFormatter(formatter)
+        _logger.addHandler(http_handler)
 
 
 configure()
