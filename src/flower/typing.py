@@ -39,6 +39,8 @@ class ParametersRes:
 
 
 FitIns = Tuple[Parameters, Dict[str, str]]  # model parameters, config
-FitRes = Tuple[Parameters, int]  # model parameters, num_examples
+FitRes = Tuple[
+    Parameters, int, int
+]  # model parameters, num_examples_processed, num_examples_ceil
 EvaluateIns = Tuple[Parameters, Dict[str, str]]  # model parameters, config
 EvaluateRes = Tuple[int, float]  # num_examples, loss

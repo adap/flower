@@ -30,7 +30,20 @@ class Strategy(ABC):
     def on_configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
-        """Configure the next round of training."""
+        """Configure the next round of training.
+
+        Arguments:
+            rnd: Integer. The current round of federated learning.
+            weights: Weights. The current (global) model weights.
+            client_manager: ClientManager. The client manger which knows about all
+                currently connected clients.
+
+        Returns:
+            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
+            `FitIns` for this particular `ClientProxy`. If a particular `ClientProxy` is not
+            included in this list, it means that this `ClientProxy` will not participate
+            in the next round of federated learning.
+        """
 
     @abstractmethod
     def on_configure_evaluate(
@@ -40,13 +53,19 @@ class Strategy(ABC):
 
     @abstractmethod
     def on_aggregate_fit(
-        self, results: List[FitRes], failures: List[BaseException]
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[BaseException],
     ) -> Optional[Weights]:
         """Aggregate training results."""
 
     @abstractmethod
     def on_aggregate_evaluate(
-        self, results: List[EvaluateRes], failures: List[BaseException]
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[BaseException],
     ) -> Optional[float]:
         """Aggregate evaluation results."""
 

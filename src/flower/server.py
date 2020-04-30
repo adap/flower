@@ -115,7 +115,7 @@ class Server:
             len(failures),
         )
         # Aggregate the evaluation results
-        return self.strategy.on_aggregate_evaluate(results, failures)
+        return self.strategy.on_aggregate_evaluate(rnd, results, failures)
 
     def fit_round(self, rnd: int) -> Optional[Weights]:
         """Perform a single round of federated averaging."""
@@ -136,7 +136,7 @@ class Server:
         )
 
         # Aggregate training results
-        return self.strategy.on_aggregate_fit(results, failures)
+        return self.strategy.on_aggregate_fit(rnd, results, failures)
 
     def _get_initial_weights(self) -> Weights:
         """Get initial weights from one of the available clients."""
@@ -147,7 +147,7 @@ class Server:
 
 def fit_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]]
-) -> Tuple[List[FitRes], List[BaseException]]:
+) -> Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]:
     """Refine weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
@@ -155,7 +155,7 @@ def fit_clients(
         ]
         concurrent.futures.wait(futures)
     # Gather results
-    results: List[FitRes] = []
+    results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = []
     for future in futures:
         failure = future.exception()
@@ -164,21 +164,22 @@ def fit_clients(
         else:
             # Potential success case
             result = future.result()
-            if len(result[0].tensors) > 0:
+            if len(result[1][0].tensors) > 0:
                 results.append(result)
             else:
                 failures.append(Exception("Empty client update"))
     return results, failures
 
 
-def fit_client(client: ClientProxy, ins: FitIns) -> FitRes:
+def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
     """Refine weights on a single client."""
-    return client.fit(ins)
+    fit_res = client.fit(ins)
+    return client, fit_res
 
 
 def evaluate_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]]
-) -> Tuple[List[EvaluateRes], List[BaseException]]:
+) -> Tuple[List[Tuple[ClientProxy, EvaluateRes]], List[BaseException]]:
     """Evaluate weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
@@ -186,7 +187,7 @@ def evaluate_clients(
         ]
         concurrent.futures.wait(futures)
     # Gather results
-    results: List[EvaluateRes] = []
+    results: List[Tuple[ClientProxy, EvaluateRes]] = []
     failures: List[BaseException] = []
     for future in futures:
         failure = future.exception()
@@ -198,6 +199,9 @@ def evaluate_clients(
     return results, failures
 
 
-def evaluate_client(client: ClientProxy, ins: EvaluateIns) -> EvaluateRes:
+def evaluate_client(
+    client: ClientProxy, ins: EvaluateIns
+) -> Tuple[ClientProxy, EvaluateRes]:
     """Evaluate weights on a single client."""
-    return client.evaluate(ins)
+    evaluate_res = client.evaluate(ins)
+    return client, evaluate_res

@@ -160,14 +160,17 @@ class FashionMnistClient(flwr.Client):
         )
         log(DEBUG, "client %s had fit_duration %s", self.cid, fit_duration)
 
+        # Compute the maximum number of examples which could have been processed
+        num_examples_ceil = self.num_examples_train * epochs
+
         # Return empty update if local update could not be completed in time
         if not completed and not partial_updates:
             parameters = flwr.weights_to_parameters([])
-            return parameters, num_examples
+            return parameters, num_examples, num_examples_ceil
 
         # Return the refined weights and the number of examples used for training
         parameters = flwr.weights_to_parameters(self.model.get_weights())
-        return parameters, num_examples
+        return parameters, num_examples, num_examples_ceil
 
     def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
         weights = flwr.parameters_to_weights(ins[0])
