@@ -124,7 +124,10 @@ class FedAvg(Strategy):
         return [(client, evaluate_ins) for client in clients]
 
     def on_aggregate_fit(
-        self, results: List[FitRes], failures: List[BaseException]
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[BaseException],
     ) -> Optional[Weights]:
         """Aggregate fit results using weighted average."""
         if not results:
@@ -135,12 +138,15 @@ class FedAvg(Strategy):
         # Convert results
         weights_results = [
             (parameters_to_weights(parameters), num_examples)
-            for parameters, num_examples in results
+            for client, (parameters, num_examples, _) in results
         ]
         return aggregate(weights_results)
 
     def on_aggregate_evaluate(
-        self, results: List[EvaluateRes], failures: List[BaseException]
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[BaseException],
     ) -> Optional[float]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
@@ -148,7 +154,7 @@ class FedAvg(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None
-        return weighted_loss_avg(results)
+        return weighted_loss_avg([evaluate_res for client, evaluate_res in results])
 
     def on_conclude_round(
         self, rnd: int, loss: Optional[float], acc: Optional[float]

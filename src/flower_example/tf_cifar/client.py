@@ -147,7 +147,11 @@ class CifarClient(flwr.Client):
         self.epoch += epochs
 
         # Return the refined weights and the number of examples used for training
-        return flwr.weights_to_parameters(self.model.get_weights()), len(self.x_train)
+        return (
+            flwr.weights_to_parameters(self.model.get_weights()),
+            len(self.x_train),
+            len(self.x_train),
+        )
 
     def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
         weights = flwr.parameters_to_weights(ins[0])

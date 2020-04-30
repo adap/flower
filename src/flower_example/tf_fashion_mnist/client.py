@@ -64,7 +64,7 @@ class FashionMnistClient(fl.Client):
         # Return the refined weights and the number of examples used for training
         weights_prime = fl.weights_to_parameters(self.model.get_weights())
         num_examples = len(self.x_train)
-        return weights_prime, num_examples
+        return weights_prime, num_examples, num_examples
 
     def evaluate(self, ins: fl.EvaluateIns) -> fl.EvaluateRes:
         weights = fl.parameters_to_weights(ins[0])

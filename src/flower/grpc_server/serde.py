@@ -110,16 +110,21 @@ def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
 
 def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
     """Serialize flower.FitIns to ProtoBuf message."""
-    parameters, num_examples = res
+    parameters, num_examples, num_examples_ceil = res
     parameters_proto = parameters_to_proto(parameters)
-    return ClientMessage.FitRes(parameters=parameters_proto, num_examples=num_examples)
+    return ClientMessage.FitRes(
+        parameters=parameters_proto,
+        num_examples=num_examples,
+        num_examples_ceil=num_examples_ceil,
+    )
 
 
 def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     """Deserialize flower.FitRes from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
     num_examples = msg.num_examples
-    return parameters, num_examples
+    num_examples_ceil = msg.num_examples_ceil
+    return parameters, num_examples, num_examples_ceil
 
 
 # === Evaluate messages ===

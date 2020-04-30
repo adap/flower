@@ -36,7 +36,7 @@ class SuccessClient(ClientProxy):
     def fit(self, ins: FitIns) -> FitRes:
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
-        return Parameters(tensors=[arr_serialized], tensor_type=""), 1
+        return Parameters(tensors=[arr_serialized], tensor_type=""), 1, 1
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         return 1, 1.0
@@ -73,7 +73,7 @@ def test_fit_clients() -> None:
     # Assert
     assert len(results) == 1
     assert len(failures) == 1
-    assert results[0][1] == 1
+    assert results[0][1][1] == 1
 
 
 def test_eval_clients() -> None:
@@ -94,5 +94,5 @@ def test_eval_clients() -> None:
     # Assert
     assert len(results) == 1
     assert len(failures) == 1
-    assert results[0][0] == 1
-    assert results[0][1] == 1.0
+    assert results[0][1][0] == 1
+    assert results[0][1][1] == 1.0
