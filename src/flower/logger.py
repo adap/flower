@@ -15,15 +15,12 @@
 """Flower Logger."""
 import logging
 import logging.handlers
-import os
+from typing import Optional
 
 LOGGER_NAME = "flower"
 
-FLOWER_LOG_FILE = os.getenv("FLOWER_LOG_FILE")
-FLOWER_LOG_HTTP = os.getenv("FLOWER_LOG_HTTP")
 
-
-def configure() -> None:
+def configure(filename: Optional[str] = None, host: Optional[str] = None) -> None:
     """Configure logger."""
     # create logger
     _logger = logging.getLogger(LOGGER_NAME)
@@ -40,24 +37,20 @@ def configure() -> None:
     console_handler.setFormatter(formatter)
     _logger.addHandler(console_handler)
 
-    if isinstance(FLOWER_LOG_FILE, str):
+    if filename:
         # Create file handler and log to disk
-        file_handler = logging.FileHandler(FLOWER_LOG_FILE)
+        file_handler = logging.FileHandler(filename)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
         _logger.addHandler(file_handler)
 
-    if isinstance(FLOWER_LOG_HTTP, str):
+    if host:
         # Create http handler which logs even debug messages
-        http_handler = logging.handlers.HTTPHandler(
-            FLOWER_LOG_HTTP, "/log", method="POST",
-        )
+        http_handler = logging.handlers.HTTPHandler(host, "/log", method="POST",)
         http_handler.setLevel(logging.DEBUG)
         http_handler.setFormatter(formatter)
         _logger.addHandler(http_handler)
 
-
-configure()
 
 logger = logging.getLogger(LOGGER_NAME)  # pylint: disable=invalid-name
 log = logger.log  # pylint: disable=invalid-name

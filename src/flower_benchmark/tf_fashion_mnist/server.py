@@ -21,6 +21,7 @@ from typing import Callable, Dict, Optional, Tuple
 import numpy as np
 
 import flower as flwr
+from flower.logger import configure
 
 from . import (
     DEFAULT_GRPC_SERVER_ADDRESS,
@@ -85,7 +86,16 @@ def main() -> None:
     parser.add_argument(
         "--dry_run", type=bool, default=False, help="Dry run (default: False)"
     )
+    parser.add_argument(
+        "--log_file", type=str, help="Log file path (no default)",
+    )
+    parser.add_argument(
+        "--log_host", type=str, help="HTTP log handler host (no default)",
+    )
     args = parser.parse_args()
+
+    # Configure logger
+    configure(args.log_file, args.log_host)
 
     # Load evaluation data
     _, xy_test = client.load_data(partition=0, num_clients=1, dry_run=args.dry_run)

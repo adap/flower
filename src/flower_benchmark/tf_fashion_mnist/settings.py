@@ -40,6 +40,14 @@ def get_setting(name: str) -> Setting:
 
 
 SETTINGS = {
+    "minimal": Setting(
+        rounds=2,
+        num_clients=1,
+        sample_fraction=1.0,
+        min_sample_size=1,
+        min_num_clients=1,
+        training_round_timeout=3600,
+    ),
     "fixed_delay_variable_timeout_60": Setting(
         rounds=5,
         num_clients=10,
@@ -47,5 +55,5 @@ SETTINGS = {
         min_sample_size=10,
         min_num_clients=10,
         training_round_timeout=60,
-    )
+    ),
 }
