@@ -18,6 +18,7 @@ import argparse
 import configparser
 from os import path
 
+from flower_benchmark.ip import get_ip_address
 from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 from flower_ops.cluster import Cluster
 from flower_ops.compute.docker_adapter import DockerAdapter
@@ -39,28 +40,32 @@ def server_command(
     training_round_timeout: int,
 ) -> str:
     """Build command to run server."""
-    return f"nohup sh -c 'python3.7 -m flower_benchmark.tf_fashion_mnist.server \
+    return f"screen -d -m python3.7 -m \
+flower_benchmark.tf_fashion_mnist.server \
 --rounds={rounds} \
 --sample_fraction={sample_fraction} \
 --min_sample_size={min_sample_size} \
 --min_num_clients={min_num_clients} \
---training_round_timeout={training_round_timeout}' > server.log &"
+--training_round_timeout={training_round_timeout} \
+--log_host={get_ip_address()}:8081"
 
 
 def client_command(cid: str, num_clients: int, server_ip: str) -> str:
     """Build command to run client."""
-    return f"nohup sh -c 'python3.7 -m flower_benchmark.tf_fashion_mnist.client \
+    return f"screen -d -m python3.7 -m \
+flower_benchmark.tf_fashion_mnist.client \
 --cid={cid} \
 --partition={cid} \
 --clients={num_clients} \
 --grpc_server_address={server_ip} \
---grpc_server_port=8080' > client_{cid}.log &"
+--grpc_server_port=8080 \
+--log_host={get_ip_address()}:8081"
 
 
 def watch_and_shutdown_command() -> str:
     """Return command which shuts down the instance after no benchmark is running anymore."""
     return (
-        "nohup bash -c 'while [[ $(ps a | grep [f]lower_benchmark) ]]; "
+        "screen -d -m bash -c 'while [[ $(ps a | grep [f]lower_benchmark) ]]; "
         + "do sleep 1; done; kill 1'"
     )
 
@@ -96,7 +101,10 @@ def run(
     cluster.upload_all(wheel_local_path, wheel_remote_path)
 
     # Install the wheel on all instances
-    print(cluster.exec_all(f"python3.7 -m pip install {wheel_remote_path}"))
+    cluster.exec_all(f"python3.7 -m pip install {wheel_remote_path}")
+
+    # Export logging server IP
+    cluster.exec_all(f"python3.7 -m pip install {wheel_remote_path}")
 
     # Download datasets on all instances
     cluster.exec_all(f"python3.7 -m flower_benchmark.tf_fashion_mnist.download")

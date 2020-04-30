@@ -12,22 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simple flask server log server."""
+"""Provide method to get the ip address of a network interface."""
 
-import logging
-
-from flask import Flask, request
-
-logging.getLogger("werkzeug").setLevel(logging.ERROR)
-
-APP = Flask(__name__)
+from subprocess import check_output
 
 
-@APP.route("/log", methods=["POST"])
-def index() -> str:
-    """Handle logs."""
-    line = request.form
-    print(
-        f"{line['levelname']} | {line['filename']}:{line['lineno']} | {line['message']}\n"
-    )
-    return ""
+def get_ip_address() -> str:
+    """Return IP address."""
+    ips = check_output(["hostname", "--all-ip-addresses"])
+    ips_decoded = ips.decode("utf-8").split(" ")
+    return ips_decoded[0]

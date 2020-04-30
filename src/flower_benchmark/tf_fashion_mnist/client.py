@@ -23,7 +23,7 @@ import numpy as np
 import tensorflow as tf
 
 import flower as flwr
-from flower.logger import log
+from flower.logger import configure, log
 from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
@@ -67,7 +67,16 @@ def main() -> None:
     parser.add_argument(
         "--dry_run", type=bool, default=False, help="Dry run (default: False)"
     )
+    parser.add_argument(
+        "--log_file", type=str, help="Log file path (no default)",
+    )
+    parser.add_argument(
+        "--log_host", type=str, help="HTTP log handler host (no default)",
+    )
     args = parser.parse_args()
+
+    # Configure logger
+    configure(args.log_file, args.log_host)
 
     # Load model and data
     model = load_model()
