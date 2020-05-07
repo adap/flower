@@ -18,43 +18,63 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
 
-from flower.typing import Weights
+from flower.client_manager import ClientManager
+from flower.client_proxy import ClientProxy
+from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 
 class Strategy(ABC):
     """Abstract class to implement custom server strategies."""
 
-    def __init__(self) -> None:
-        self.current_round: int = 0
+    @abstractmethod
+    def on_configure_fit(
+        self, rnd: int, weights: Weights, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training.
 
-    def next_round(self) -> None:
-        """Inform the strategy implementation that the next round of FL has begun."""
-        self.current_round += 1
+        Arguments:
+            rnd: Integer. The current round of federated learning.
+            weights: Weights. The current (global) model weights.
+            client_manager: ClientManager. The client manger which knows about all
+                currently connected clients.
+
+        Returns:
+            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
+            `FitIns` for this particular `ClientProxy`. If a particular `ClientProxy` is not
+            included in this list, it means that this `ClientProxy` will not participate
+            in the next round of federated learning.
+        """
 
     @abstractmethod
-    def should_evaluate(self) -> bool:
-        """Decide if the current global model should be evaluated or not."""
+    def on_configure_evaluate(
+        self, rnd: int, weights: Weights, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation."""
 
     @abstractmethod
-    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Determine the number of clients used for training."""
+    def on_aggregate_fit(
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[BaseException],
+    ) -> Optional[Weights]:
+        """Aggregate training results."""
 
     @abstractmethod
-    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Determine the number of clients used for evaluation."""
+    def on_aggregate_evaluate(
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[BaseException],
+    ) -> Optional[float]:
+        """Aggregate evaluation results."""
 
     @abstractmethod
     def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
         """Evaluate the current model weights."""
 
     @abstractmethod
-    def on_aggregate_fit(
-        self, results: List[Tuple[Weights, int]], failures: List[BaseException]
-    ) -> Optional[Weights]:
-        """Aggregate training results."""
-
-    @abstractmethod
-    def on_aggregate_evaluate(
-        self, results: List[Tuple[int, float]], failures: List[BaseException]
-    ) -> Optional[float]:
-        """Aggregate evaluation results."""
+    def on_conclude_round(
+        self, rnd: int, loss: Optional[float], acc: Optional[float]
+    ) -> bool:
+        """Conclude federated learning round and decide whether to continue or not."""

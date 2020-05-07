@@ -58,6 +58,7 @@ message ClientMessage {
   message FitRes {
     Parameters parameters = 1;
     int64 num_examples = 2;
+    int64 num_examples_ceil = 3;
   }
   message EvaluateRes {
     int64 num_examples = 1;

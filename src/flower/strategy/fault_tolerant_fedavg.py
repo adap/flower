@@ -17,10 +17,12 @@
 
 from typing import Callable, List, Optional, Tuple
 
-from flower.typing import Weights
+from flower.client_proxy import ClientProxy
+from flower.typing import EvaluateRes, FitRes, Weights
 
 from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg
+from .parameter import parameters_to_weights
 
 
 class FaultTolerantFedAvg(FedAvg):
@@ -50,7 +52,10 @@ class FaultTolerantFedAvg(FedAvg):
         self.completion_rate_evaluate = min_completion_rate_evaluate
 
     def on_aggregate_fit(
-        self, results: List[Tuple[Weights, int]], failures: List[BaseException]
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[BaseException],
     ) -> Optional[Weights]:
         """Aggregate fit results using weighted average."""
         if not results:
@@ -60,10 +65,18 @@ class FaultTolerantFedAvg(FedAvg):
         if completion_rate < self.completion_rate_fit:
             # Not enough results for aggregation
             return None
-        return aggregate(results)
+        # Convert results
+        weights_results = [
+            (parameters_to_weights(parameters), num_examples)
+            for client, (parameters, num_examples, _) in results
+        ]
+        return aggregate(weights_results)
 
     def on_aggregate_evaluate(
-        self, results: List[Tuple[int, float]], failures: List[BaseException]
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[BaseException],
     ) -> Optional[float]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
@@ -73,4 +86,4 @@ class FaultTolerantFedAvg(FedAvg):
         if completion_rate < self.completion_rate_evaluate:
             # Not enough results for aggregation
             return None
-        return weighted_loss_avg(results)
+        return weighted_loss_avg([evaluate_res for _, evaluate_res in results])

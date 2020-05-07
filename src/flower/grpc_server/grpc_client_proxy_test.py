@@ -58,7 +58,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         ins: flower.FitIns = (parameters, {})
 
         # Execute
-        parameters_prime, num_examples = client.fit(ins=ins)
+        parameters_prime, num_examples, _ = client.fit(ins=ins)
 
         # Assert
         assert parameters_prime.tensor_type == "np"

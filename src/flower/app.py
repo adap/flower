@@ -45,7 +45,7 @@ def start_server(
     log(DEBUG, hist)
 
     # Evaluate the final trained model
-    loss = server.evaluate()
+    loss = server.evaluate(rnd=0)
     log(DEBUG, "Final loss after training: %s", loss)
 
     # Stop the gRPC server

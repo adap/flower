@@ -18,9 +18,8 @@
 from typing import List
 
 import numpy as np
-import pytest
 
-from flower.server import bytes_to_ndarray, ndarray_to_bytes
+from flower.strategy.parameter import ndarray_to_bytes
 
 from .client_proxy import ClientProxy
 from .server import evaluate_clients, fit_clients
@@ -35,7 +34,9 @@ class SuccessClient(ClientProxy):
         raise Exception()
 
     def fit(self, ins: FitIns) -> FitRes:
-        return Parameters(tensors=[], tensor_type=""), 1
+        arr = np.array([[1, 2], [3, 4], [5, 6]])
+        arr_serialized = ndarray_to_bytes(arr)
+        return Parameters(tensors=[arr_serialized], tensor_type=""), 1, 1
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         return 1, 1.0
@@ -61,15 +62,18 @@ def test_fit_clients() -> None:
         FailingCLient("0"),
         SuccessClient("1"),
     ]
-    ins: FitIns = (Parameters(tensors=[], tensor_type=""), {})
+    arr = np.array([[1, 2], [3, 4], [5, 6]])
+    arr_serialized = ndarray_to_bytes(arr)
+    ins: FitIns = (Parameters(tensors=[arr_serialized], tensor_type=""), {})
+    client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = fit_clients(clients, ins)
+    results, failures = fit_clients(client_instructions)
 
     # Assert
     assert len(results) == 1
     assert len(failures) == 1
-    assert results[0][1] == 1
+    assert results[0][1][1] == 1
 
 
 def test_eval_clients() -> None:
@@ -79,28 +83,16 @@ def test_eval_clients() -> None:
         FailingCLient("0"),
         SuccessClient("1"),
     ]
-    ins: EvaluateIns = (Parameters(tensors=[], tensor_type=""), {})
+    arr = np.array([[1, 2], [3, 4], [5, 6]])
+    arr_serialized = ndarray_to_bytes(arr)
+    ins: EvaluateIns = (Parameters(tensors=[arr_serialized], tensor_type=""), {})
+    client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = evaluate_clients(clients, ins)
+    results, failures = evaluate_clients(client_instructions)
 
     # Assert
     assert len(results) == 1
     assert len(failures) == 1
-    assert results[0][0] == 1
-    assert results[0][1] == 1.0
-
-
-def test_serialisation_deserialisation() -> None:
-    """Test if after serialization/deserialisation the np.ndarray is identical."""
-    arr = np.array([[1, 2], [3, 4], [5, 6]])
-
-    arr_serialized = ndarray_to_bytes(arr)
-    arr_deserialized = bytes_to_ndarray(arr_serialized)
-
-    # Assert deserialized array is equal to original
-    np.testing.assert_equal(arr_deserialized, arr)
-
-    # Test false positive
-    with pytest.raises(AssertionError, match="Arrays are not equal"):
-        np.testing.assert_equal(arr_deserialized, np.ones((3, 2)))
+    assert results[0][1][0] == 1
+    assert results[0][1][1] == 1.0

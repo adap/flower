@@ -19,8 +19,8 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
 
 Instance = Tuple[
-    str, str, Optional[str], str
-]  # (InstanceId, PrivateIpAddress, PublicIpAddress, State)
+    str, str, Optional[str], int, str
+]  # (InstanceId, PrivateIpAddress, PublicIpAddress, SSHPort, State)
 
 
 class Adapter(ABC):
@@ -29,12 +29,7 @@ class Adapter(ABC):
     # pylint: disable=too-many-arguments
     @abstractmethod
     def create_instances(
-        self,
-        num_cpu: int,
-        num_ram: float,
-        timeout: int,
-        num_instances: int = 1,
-        commands: Optional[List[str]] = None,
+        self, num_cpu: int, num_ram: float, timeout: int, num_instances: int = 1,
     ) -> List[Instance]:
         """Create one or more instance(s) of the same type.
 

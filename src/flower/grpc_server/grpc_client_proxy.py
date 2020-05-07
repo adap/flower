@@ -46,8 +46,8 @@ class GrpcClientProxy(ClientProxy):
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(fit_ins=fit_ins_msg)
         )
-        parameters, num_examples = serde.fit_res_from_proto(client_msg.fit_res)
-        return parameters, num_examples
+        fit_res = serde.fit_res_from_proto(client_msg.fit_res)
+        return fit_res
 
     def evaluate(self, ins: typing.EvaluateIns) -> typing.EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
@@ -55,5 +55,5 @@ class GrpcClientProxy(ClientProxy):
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(evaluate_ins=evaluate_msg)
         )
-        num_examples, loss = serde.evaluate_res_from_proto(client_msg.evaluate_res)
-        return num_examples, loss
+        evaluate_res = serde.evaluate_res_from_proto(client_msg.evaluate_res)
+        return evaluate_res
