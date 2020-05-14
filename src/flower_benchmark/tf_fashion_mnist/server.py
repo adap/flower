@@ -102,6 +102,7 @@ def main() -> None:
 
     # Create client_manager, strategy, and server
     client_manager = flwr.SimpleClientManager()
+
     strategy = flwr.strategy.DefaultStrategy(
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
@@ -111,6 +112,20 @@ def main() -> None:
             args.lr_initial, args.training_round_timeout
         ),
     )
+    # strategy = flwr.strategy.FastAndSlow(
+    #     fraction_fit=args.sample_fraction,
+    #     min_fit_clients=args.min_sample_size,
+    #     min_available_clients=args.min_num_clients,
+    #     eval_fn=get_eval_fn(num_classes=10, xy_test=xy_test),
+    #     on_fit_config_fn=get_on_fit_config_fn(
+    #         args.lr_initial, args.training_round_timeout
+    #     ),
+    #     r_fast=1,
+    #     r_slow=1,
+    #     t_fast=20,
+    #     t_slow=40,
+    # )
+
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
 
     # Run server
