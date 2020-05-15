@@ -44,6 +44,14 @@ class ClientManager(ABC):
         """Unregister Flower ClientProxy instance."""
 
     @abstractmethod
+    def all(self) -> Dict[str, ClientProxy]:
+        """Return all available clients."""
+
+    @abstractmethod
+    def wait_for(self, num_clients: int, timeout: int) -> bool:
+        """Wait until at least `num_clients` are available."""
+
+    @abstractmethod
     def sample(
         self,
         num_clients: int,
@@ -63,12 +71,14 @@ class SimpleClientManager(ClientManager):
     def __len__(self):
         return len(self.clients)
 
-    def _wait_for_clients(self, num_clients: int, timeout: int = 86400) -> None:
-        """Block until num_clients number of clients are available or until a timeout
+    def wait_for(self, num_clients: int, timeout: int = 86400) -> bool:
+        """Block until at least `num_clients` are available or until a timeout
         is reached. Current timeout default: 1 day.
         """
         with self._cv:
-            self._cv.wait_for(lambda: len(self.clients) >= num_clients, timeout=timeout)
+            return self._cv.wait_for(
+                lambda: len(self.clients) >= num_clients, timeout=timeout
+            )
 
     def num_available(self) -> int:
         """Return the number of available clients."""
@@ -101,6 +111,10 @@ class SimpleClientManager(ClientManager):
             with self._cv:
                 self._cv.notify_all()
 
+    def all(self) -> Dict[str, ClientProxy]:
+        """Return all available clients."""
+        return self.clients
+
     def sample(
         self,
         num_clients: int,
@@ -111,7 +125,7 @@ class SimpleClientManager(ClientManager):
         # Block until at least num_clients are connected.
         if min_num_clients is None:
             min_num_clients = num_clients
-        self._wait_for_clients(min_num_clients)
+        self.wait_for(min_num_clients)
         # Sample clients which meet the criterion
         available_cids = list(self.clients)
         if criterion is not None:
