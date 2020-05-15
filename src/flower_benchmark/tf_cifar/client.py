@@ -23,7 +23,7 @@ import numpy as np
 import tensorflow as tf
 
 import flower as flwr
-from flower.logger import log
+from flower.logger import configure, log
 from flower_benchmark.dataset import tf_cifar_partitioned
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
@@ -56,19 +56,34 @@ def main() -> None:
         "--partition", type=int, required=True, help="Partition index (no default)"
     )
     parser.add_argument(
+        "--clients", type=int, required=True, help="Number of clients (no default)",
+    )
+    parser.add_argument(
+        "--delay_factor",
+        type=float,
+        default=0.0,
+        help="Delay factor increases the time batches take to compute (default: 0.0)",
+    )
+    parser.add_argument(
+        "--dry_run", type=bool, default=False, help="Dry run (default: False)"
+    )
+    parser.add_argument(
+        "--log_file", type=str, help="Log file path (no default)",
+    )
+    parser.add_argument(
+        "--log_host", type=str, help="HTTP log handler host (no default)",
+    )
+    parser.add_argument(
         "--cifar",
         type=int,
         choices=[10, 100],
         default=10,
         help="CIFAR version, allowed values: 10 or 100 (default: 10)",
     )
-    parser.add_argument(
-        "--clients", type=int, required=True, help="Number of clients (no default)",
-    )
-    parser.add_argument(
-        "--dry_run", type=bool, default=False, help="Dry run (default: False)"
-    )
     args = parser.parse_args()
+
+    # Configure logger
+    configure(args.log_file, args.log_host)
 
     # Load model and data
     model = load_model(input_shape=(32, 32, 3), num_classes=args.cifar)
@@ -80,7 +95,9 @@ def main() -> None:
     )
 
     # Start client
-    client = CifarClient(args.cid, args.cifar, model, xy_train, xy_test)
+    client = CifarClient(
+        args.cid, model, xy_train, xy_test, args.delay_factor, args.cifar
+    )
     flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
 
 
@@ -91,10 +108,11 @@ class CifarClient(flwr.Client):
     def __init__(
         self,
         cid: str,
-        num_classes: int,
         model: tf.keras.Model,
         xy_train: Tuple[np.ndarray, np.ndarray],
         xy_test: Tuple[np.ndarray, np.ndarray],
+        delay_factor: float,
+        num_classes: int,
     ) -> None:
         super().__init__(cid)
         self.model = model
@@ -109,11 +127,12 @@ class CifarClient(flwr.Client):
             xy_test[0],
             xy_test[1],
             num_classes=num_classes,
-            shuffle_buffer_size=len(xy_test[0]),
+            shuffle_buffer_size=0,
             augment=False,
         )
         self.num_examples_train = len(xy_train[0])
         self.num_examples_test = len(xy_test[0])
+        self.delay_factor = delay_factor
 
     def get_parameters(self) -> flwr.ParametersRes:
         parameters = flwr.weights_to_parameters(self.model.get_weights())

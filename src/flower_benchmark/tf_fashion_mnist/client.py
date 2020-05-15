@@ -85,7 +85,9 @@ def main() -> None:
     )
 
     # Start client
-    client = FashionMnistClient(args.cid, model, xy_train, xy_test, args.delay_factor)
+    client = FashionMnistClient(
+        args.cid, model, xy_train, xy_test, args.delay_factor, 10
+    )
     flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
 
 
@@ -100,20 +102,21 @@ class FashionMnistClient(flwr.Client):
         xy_train: Tuple[np.ndarray, np.ndarray],
         xy_test: Tuple[np.ndarray, np.ndarray],
         delay_factor: float,
+        num_classes: int,
     ):
         super().__init__(cid)
         self.model = model
         self.ds_train = build_dataset(
             xy_train[0],
             xy_train[1],
-            num_classes=10,
+            num_classes=num_classes,
             shuffle_buffer_size=len(xy_train[0]),
             augment=False,
         )
         self.ds_test = build_dataset(
             xy_test[0],
             xy_test[1],
-            num_classes=10,
+            num_classes=num_classes,
             shuffle_buffer_size=0,
             augment=False,
         )
