@@ -36,6 +36,7 @@ def logserver_command() -> str:
     return f"screen -d -m python3.7 -m flower_logserver"
 
 
+# pylint: disable=too-many-arguments
 def server_command(
     log_host: str,
     rounds: int,
