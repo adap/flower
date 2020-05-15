@@ -30,6 +30,7 @@ classifiers = [
 packages = [
     { include = "flower", from = "src" },
     { include = "flower_benchmark", from = "src" },
+    { include = "flower_logserver", from = "src" },
     { include = "flower_example", from = "src" },
 ]
 exclude = [
