@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for CIFAR-10/100 Flower client example."""
+"""Tests for Fashion-MNIST."""
 
 
 import numpy as np
 
-from .client import shuffle
+from .fashion_mnist import shuffle
 
 
 def test_shuffle():
