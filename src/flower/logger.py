@@ -15,12 +15,36 @@
 """Flower Logger."""
 import logging
 import logging.handlers
+from logging import LogRecord
+from typing import Any, Dict, Callable
+
 from typing import Optional
 
 LOGGER_NAME = "flower"
 
+# pylint: disable=invalid-name
+def create_mapLogRecordFunction(identifier: str) -> Callable[[LogRecord], Dict[str, Any]]:
+    """Return a mapLogRecord function for a logging.handlers.HTTPHandler instance."""
 
-def configure(filename: Optional[str] = None, host: Optional[str] = None) -> None:
+    def mapLogRecord(record: LogRecord) -> Dict[str, Any]:
+        """Filter for the properties to be send to the logserver."""
+        record_dict = record.__dict__
+        return {
+            "identifier": identifier,
+            "levelname": record_dict["levelname"],
+            "filename": record_dict["filename"],
+            "lineno": record_dict["lineno"],
+            "message": record_dict["message"]
+        }
+    return mapLogRecord
+
+
+# pylint: enable=invalid-name
+
+
+def configure(
+    identifier: str, filename: Optional[str] = None, host: Optional[str] = None
+) -> None:
     """Configure logger."""
     # create logger
     _logger = logging.getLogger(LOGGER_NAME)
@@ -28,7 +52,7 @@ def configure(filename: Optional[str] = None, host: Optional[str] = None) -> Non
 
     # create formatter
     formatter = logging.Formatter(
-        "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
+        f"{identifier} | %(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
     )
 
     # Console logger
@@ -48,7 +72,8 @@ def configure(filename: Optional[str] = None, host: Optional[str] = None) -> Non
         # Create http handler which logs even debug messages
         http_handler = logging.handlers.HTTPHandler(host, "/log", method="POST",)
         http_handler.setLevel(logging.DEBUG)
-        http_handler.setFormatter(formatter)
+        # Override mapLogRecords as setFormatter has no effect on what is send via http
+        http_handler.mapLogRecord = create_mapLogRecordFunction(identifier)
         _logger.addHandler(http_handler)
 
 

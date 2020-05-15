@@ -76,7 +76,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure logger
-    configure(args.log_file, args.log_host)
+    configure(f"client:{args.cid}", args.log_file, args.log_host)
 
     # Load model and data
     model = load_model()

@@ -13,6 +13,27 @@
 # limitations under the License.
 # ==============================================================================
 """Start log server."""
-from .app import APP
+import argparse
 
-APP.run(host="0.0.0.0", port=8081, debug=True)
+from .app import app
+
+
+def main() -> None:
+    """Start server."""
+    parser = argparse.ArgumentParser(description="Flower")
+    parser.add_argument(
+        "--s3_bucket", type=str, help=f"S3 bucket for logfile",
+    )
+    parser.add_argument(
+        "--s3_key", type=str, help=f"S3 key for logfile",
+    )
+    args = parser.parse_args()
+
+    app.config["S3_BUCKET"] = args.s3_bucket if args.s3_bucket else None
+    app.config["S3_KEY"] = args.s3_key if args.s3_key else None
+
+
+    app.run(host="0.0.0.0", port=8081, debug=True)
+
+
+main()

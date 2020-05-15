@@ -15,19 +15,33 @@
 """Simple flask server log server."""
 
 import logging
+import json 
+from pathlib import Path
+from datetime import datetime
 
 from flask import Flask, request
 
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
 
-APP = Flask(__name__)
+# pylint: disable=invalid-name
+app = Flask(__name__)
 
+logfile = "{:%Y-%m-%d}.log".format(datetime.now())
 
-@APP.route("/log", methods=["POST"])
+# Create a flower_logs directory to store the logfiles.
+Path("flower_logs").mkdir(exist_ok=True)
+
+def write_to_logfile(line: str) -> None:
+    """Write line to logfile."""
+    with open(f"flower_logs/{logfile}", "a+") as lfd:
+        lfd.write(line + "\n")
+
+@app.route("/log", methods=["POST"])
 def index() -> str:
     """Handle logs."""
-    line = request.form
-    print(
-        f"{line['levelname']} | {line['filename']}:{line['lineno']} | {line['message']}\n"
-    )
+    data = json.dumps(request.form)
+
+    print(data)
+    write_to_logfile(str(data))
+
     return ""
