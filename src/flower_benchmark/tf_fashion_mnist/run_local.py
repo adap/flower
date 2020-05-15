@@ -18,7 +18,6 @@ import argparse
 import configparser
 from os import path
 
-from flower_benchmark.ip import get_ip_address
 from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 from flower_ops.cluster import Cluster
 from flower_ops.compute.docker_adapter import DockerAdapter
@@ -32,7 +31,14 @@ CONFIG = configparser.ConfigParser()
 CONFIG.read(OPS_INI_PATH)
 
 
+def logserver_command() -> str:
+    """Run log server."""
+    return f"screen -d -m python3.7 -m flower_logserver"
+
+
+# pylint: disable=too-many-arguments
 def server_command(
+    log_host: str,
     rounds: int,
     sample_fraction: float,
     min_sample_size: int,
@@ -42,42 +48,52 @@ def server_command(
     """Build command to run server."""
     return f"screen -d -m python3.7 -m \
 flower_benchmark.tf_fashion_mnist.server \
+--log_host={log_host} \
 --rounds={rounds} \
 --sample_fraction={sample_fraction} \
 --min_sample_size={min_sample_size} \
 --min_num_clients={min_num_clients} \
---training_round_timeout={training_round_timeout} \
---log_host={get_ip_address()}:8081"
+--training_round_timeout={training_round_timeout}"
 
 
-def client_command(cid: str, num_clients: int, server_ip: str) -> str:
+def client_command(
+    log_host: str,
+    grpc_server_address: str,
+    cid: str,
+    partition: int,
+    num_partitions: int,
+) -> str:
     """Build command to run client."""
     return f"screen -d -m python3.7 -m \
 flower_benchmark.tf_fashion_mnist.client \
---cid={cid} \
---partition={cid} \
---clients={num_clients} \
---grpc_server_address={server_ip} \
+--log_host={log_host} \
+--grpc_server_address={grpc_server_address} \
 --grpc_server_port=8080 \
---log_host={get_ip_address()}:8081"
+--cid={cid} \
+--partition={partition} \
+--clients={num_partitions} \
+"
 
 
-def watch_and_shutdown_command() -> str:
+def watch_and_shutdown_command(keyword: str) -> str:
     """Return command which shuts down the instance after no benchmark is running anymore."""
     return (
-        "screen -d -m bash -c 'while [[ $(ps a | grep [f]lower_benchmark) ]]; "
+        f"screen -d -m bash -c 'while [[ $(ps a | grep {keyword}) ]]; "
         + "do sleep 1; done; kill 1'"
     )
 
 
 # pylint: disable=too-many-arguments, too-many-locals
 def run(
+    # Global paramters
     rounds: int,
-    num_clients: int,
+    # Server paramters
     sample_fraction: float,
     min_sample_size: int,
     min_num_clients: int,
     training_round_timeout: int,
+    # Client parameters
+    num_clients: int,
 ) -> None:
     """Run benchmark."""
     wheel_filename = CONFIG.get("paths", "wheel_filename")
@@ -90,7 +106,7 @@ def run(
     cluster = Cluster(
         adapter=docker_adapter,
         ssh_credentials=("root", path.expanduser(CONFIG.get("ssh", "private_key"))),
-        specs={"server": (2, 2, 1), "clients": (2, 4, 1)},
+        specs={"logserver": (1, 1, 1), "server": (2, 2, 1), "clients": (2, 4, 1)},
         timeout=20,
     )
 
@@ -103,38 +119,50 @@ def run(
     # Install the wheel on all instances
     cluster.exec_all(f"python3.7 -m pip install {wheel_remote_path}")
 
-    # Export logging server IP
-    cluster.exec_all(f"python3.7 -m pip install {wheel_remote_path}")
-
-    # Download datasets on all instances
-    cluster.exec_all(f"python3.7 -m flower_benchmark.tf_fashion_mnist.download")
-
     # An instance is a tuple of the following values
     # (InstanceId, PrivateIpAddress, PublicIpAddress, State)
-    server_id, server_private_ip, _, _, _ = cluster.instances["server"][0]
+    logserver_id, logserver_private_ip, _, _, _ = cluster.instances["logserver"][0]
+    cluster.exec(
+        logserver_id, logserver_command(),
+    )
 
     # Start flower server on flower server instances
+    server_id, server_private_ip, _, _, _ = cluster.instances["server"][0]
+    cluster.exec(server_id, f"python3.7 -m flower_benchmark.tf_fashion_mnist.download")
     cluster.exec(
         server_id,
         server_command(
-            rounds,
-            sample_fraction,
-            min_sample_size,
-            min_num_clients,
-            training_round_timeout,
+            log_host=f"{logserver_private_ip}:8081",
+            rounds=rounds,
+            sample_fraction=sample_fraction,
+            min_sample_size=min_sample_size,
+            min_num_clients=min_num_clients,
+            training_round_timeout=training_round_timeout,
         ),
     )
 
-    client_id, _, _, _, _ = cluster.instances["clients"][0]
-
     # Start flower clients
+    client_id, _, _, _, _ = cluster.instances["clients"][0]
+    cluster.exec(client_id, f"python3.7 -m flower_benchmark.tf_fashion_mnist.download")
     for i in range(0, int(num_clients)):
         cluster.exec(
-            client_id, client_command(str(i), num_clients, server_private_ip),
+            client_id,
+            client_command(
+                log_host=f"{logserver_private_ip}:8081",
+                grpc_server_address=server_private_ip,
+                cid=str(i),
+                partition=i,
+                num_partitions=num_clients,
+            ),
         )
 
-    # Shutdown any instance after 10min if not at least one flower_benchmark is running it
-    cluster.exec_all(watch_and_shutdown_command())
+    # Shutdown server and client instance after 10min if not at least
+    # one flower_benchmark is running it
+    cluster.exec(logserver_id, watch_and_shutdown_command("[f]lower_logserver"))
+    cluster.exec(server_id, watch_and_shutdown_command("[f]lower_benchmark"))
+    cluster.exec(client_id, watch_and_shutdown_command("[f]lower_benchmark"))
+
+    print(cluster.instances)
 
 
 def main() -> None:
@@ -155,11 +183,11 @@ def main() -> None:
 
     run(
         rounds=setting.rounds,
-        num_clients=setting.num_clients,
         sample_fraction=setting.sample_fraction,
         min_sample_size=setting.min_sample_size,
         min_num_clients=setting.min_num_clients,
         training_round_timeout=setting.training_round_timeout,
+        num_clients=setting.num_clients,
     )
 
 
