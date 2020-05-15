@@ -89,11 +89,11 @@ class FastAndSlow(FedAvg):
         if self.on_fit_config_fn is not None:
             # Use custom fit config function if provided
             config = self.on_fit_config_fn(rnd)
-        fast_timeout = is_fast_round(rnd, self.r_fast, self.r_slow)
-        config["timeout"] = str(self.t_fast if fast_timeout else self.t_slow)
+        use_fast_timeout = is_fast_round(rnd, self.r_fast, self.r_slow)
+        config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
         fit_ins = (parameters, config)
 
-        # Get all clients and build up `a` and `p`
+        # Get all clients and gather their contributions
         all_clients: Dict[str, ClientProxy] = client_manager.all()
         cid_idx: Dict[int, str] = {}
         logits: List[float] = []
