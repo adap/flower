@@ -28,7 +28,7 @@ from pathlib import Path
 import boto3
 
 LOGDIR = "flower_logs"
-LOGFILE = "flower_logs/{:%Y-%m-%d}.log".format(datetime.now())
+LOGFILE = "{logdir}/{:%Y-%m-%d}.log".format(datetime.now(), logdir=LOGDIR)
 LOGFILE_UPLOAD_INTERVAL = 15
 SERVER_TIMEOUT = 60
 
