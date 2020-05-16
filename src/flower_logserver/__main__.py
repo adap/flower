@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-# type: ignore
 """Start log server.
 
 The server will shutdown automatically if it does not receive a message for more
@@ -61,7 +60,7 @@ def write_to_logfile(line: str) -> None:
 class RequestHandler(BaseHTTPRequestHandler):
     """Provides custom POST handler."""
 
-    def _set_response(self):
+    def _set_response(self) -> None:
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
@@ -70,8 +69,10 @@ class RequestHandler(BaseHTTPRequestHandler):
         """POST handler."""
         content_length = int(self.headers["Content-Length"])
         post_qs = self.rfile.read(content_length).decode("utf-8")
-        post_data = urllib.parse.parse_qs(post_qs)
-        post_data = dict((k, v if len(v) > 1 else v[0]) for k, v in post_data.items())
+        post_data = {}
+
+        for key, val in urllib.parse.parse_qs(post_qs).items():
+            post_data[key] = val[0] if len(val) == 1 else val
 
         self._set_response()
         self.wfile.write("POST request for {}".format(self.path).encode("utf-8"))
@@ -92,7 +93,7 @@ class LogServer(HTTPServer):
         raise TimeoutError()
 
 
-def main():
+def main() -> None:
     """Start log server."""
     logging.basicConfig(level=logging.INFO)
 
