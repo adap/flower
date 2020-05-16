@@ -14,32 +14,41 @@
 # ==============================================================================
 """Flower Logger."""
 import logging
-import logging.handlers
 from logging import LogRecord
-from typing import Any, Dict, Callable
-
-from typing import Optional
+from logging.handlers import HTTPHandler
+from typing import Any, Dict, Optional, Tuple
 
 LOGGER_NAME = "flower"
 
-# pylint: disable=invalid-name
-def create_mapLogRecordFunction(identifier: str) -> Callable[[LogRecord], Dict[str, Any]]:
-    """Return a mapLogRecord function for a logging.handlers.HTTPHandler instance."""
 
-    def mapLogRecord(record: LogRecord) -> Dict[str, Any]:
+class CustomHTTPHandler(HTTPHandler):
+    """Custom HTTPHandler which overrides the mapLogRecords method."""
+
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        identifier: str,
+        host: str,
+        url: str,
+        method: str = "GET",
+        secure: bool = False,
+        credentials: Optional[Tuple[str, str]] = None,
+    ) -> None:
+        super(CustomHTTPHandler, self).__init__(host, url, method, secure, credentials)
+        self.identifier = identifier
+
+    def mapLogRecord(self, record: LogRecord) -> Dict[str, Any]:  # type: ignore
         """Filter for the properties to be send to the logserver."""
         record_dict = record.__dict__
         return {
-            "identifier": identifier,
+            "identifier": self.identifier,
             "levelname": record_dict["levelname"],
+            "name": record_dict["name"],
+            "asctime": record_dict["asctime"],
             "filename": record_dict["filename"],
             "lineno": record_dict["lineno"],
-            "message": record_dict["message"]
+            "message": record_dict["message"],
         }
-    return mapLogRecord
-
-
-# pylint: enable=invalid-name
 
 
 def configure(
@@ -70,10 +79,9 @@ def configure(
 
     if host:
         # Create http handler which logs even debug messages
-        http_handler = logging.handlers.HTTPHandler(host, "/log", method="POST",)
+        http_handler = CustomHTTPHandler(identifier, host, "/log", method="POST",)
         http_handler.setLevel(logging.DEBUG)
         # Override mapLogRecords as setFormatter has no effect on what is send via http
-        http_handler.mapLogRecord = create_mapLogRecordFunction(identifier)
         _logger.addHandler(http_handler)
 
 
