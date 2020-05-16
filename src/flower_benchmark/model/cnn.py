@@ -15,6 +15,8 @@
 """CNN."""
 
 
+from typing import Tuple
+
 import tensorflow as tf
 
 
