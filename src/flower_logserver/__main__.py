@@ -66,7 +66,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):  # pylint: disable=invalid-name
-        """POST handler."""
+        """Handle POST request."""
         content_length = int(self.headers["Content-Length"])
         post_qs = self.rfile.read(content_length).decode("utf-8")
         post_data = {}
