@@ -58,7 +58,7 @@ def write_to_logfile(line: str) -> None:
 
 
 class RequestHandler(BaseHTTPRequestHandler):
-    """Provides custom POST handler."""
+    """Provide custom POST handler."""
 
     def _set_response(self) -> None:
         self.send_response(200)
@@ -104,7 +104,7 @@ def main() -> None:
         help="S3 bucket where the logfile should be uploaded to.",
     )
     parser.add_argument(
-        "--s3_key", type=str, help="S3 key under which the logfile should be upload.",
+        "--s3_key", type=str, help="S3 key under which the logfile should be uploaded.",
     )
     args = parser.parse_args()
 
