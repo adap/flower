@@ -15,15 +15,17 @@
 """CNN."""
 
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 import tensorflow as tf
 
 
-def orig_cnn(input_shape: Tuple[int, int, int] = (28, 28, 1)) -> tf.keras.Model:
+def orig_cnn(
+    input_shape: Tuple[int, int, int] = (28, 28, 1), seed: Optional[int] = None
+) -> tf.keras.Model:
     """Create a CNN instance."""
     # Kernel initializer
-    kernel_initializer = tf.keras.initializers.glorot_uniform(seed=SEED)
+    kernel_initializer = tf.keras.initializers.glorot_uniform(seed=seed)
 
     # Architecture
     inputs = tf.keras.layers.Input(shape=input_shape)

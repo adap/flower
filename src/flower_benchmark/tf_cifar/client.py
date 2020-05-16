@@ -27,12 +27,10 @@ from flower.logger import configure, log
 from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
 from .cifar import build_dataset, keras_evaluate, keras_fit
 
 tf.get_logger().setLevel("ERROR")
-
-SEED = 2020
 
 
 def main() -> None:
@@ -87,7 +85,7 @@ def main() -> None:
     configure(args.log_file, args.log_host)
 
     # Load model and data
-    model = resnet50v2(input_shape=(32, 32, 3), num_classes=args.cifar)
+    model = resnet50v2(input_shape=(32, 32, 3), num_classes=args.cifar, seed=SEED)
     xy_train, xy_test = load_data(
         partition=args.partition,
         num_classes=args.cifar,
