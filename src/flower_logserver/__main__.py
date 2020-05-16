@@ -39,7 +39,7 @@ Path(LOGDIR).mkdir(exist_ok=True)
 
 
 def upload_logfile() -> None:
-    """Uploads logfile to S3."""
+    """Upload logfile to S3."""
     if any([v is None for v in CONFIG.values()]):
         logging.info(
             "Skipping S3 logfile upload as s3_bucket or s3_key was not provided."
