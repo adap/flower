@@ -95,7 +95,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure logger
-    configure(args.log_file, args.log_host)
+    configure("server", args.log_file, args.log_host)
 
     # Load evaluation data
     _, xy_test = client.load_data(partition=0, num_clients=1, dry_run=args.dry_run)

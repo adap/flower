@@ -49,13 +49,12 @@ boto3 = { version = "^1.12.36", optional = true }
 boto3_type_annotations = { version = "^0.3.1", optional = true }
 paramiko = { version = "^2.7.1", optional = true }
 docker = { version = "^4.2.0", optional = true }
-flask = { version = "^1.1.2", optional = true }
 
 [tool.poetry.extras]
 benchmark = ["tensorflow-cpu"]
 examples-tensorflow = ["tensorflow-cpu"]
 ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
-http-logger = ["flask"]
+http-logger = ["boto3", "boto3_type_annotations"]
 
 [tool.poetry.dev-dependencies]
 isort = "==4.3.21"

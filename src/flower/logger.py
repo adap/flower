@@ -14,13 +14,46 @@
 # ==============================================================================
 """Flower Logger."""
 import logging
-import logging.handlers
-from typing import Optional
+from logging import LogRecord
+from logging.handlers import HTTPHandler
+from typing import Any, Dict, Optional, Tuple
 
 LOGGER_NAME = "flower"
 
 
-def configure(filename: Optional[str] = None, host: Optional[str] = None) -> None:
+class CustomHTTPHandler(HTTPHandler):
+    """Custom HTTPHandler which overrides the mapLogRecords method."""
+
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        identifier: str,
+        host: str,
+        url: str,
+        method: str = "GET",
+        secure: bool = False,
+        credentials: Optional[Tuple[str, str]] = None,
+    ) -> None:
+        super(CustomHTTPHandler, self).__init__(host, url, method, secure, credentials)
+        self.identifier = identifier
+
+    def mapLogRecord(self, record: LogRecord) -> Dict[str, Any]:  # type: ignore
+        """Filter for the properties to be send to the logserver."""
+        record_dict = record.__dict__
+        return {
+            "identifier": self.identifier,
+            "levelname": record_dict["levelname"],
+            "name": record_dict["name"],
+            "asctime": record_dict["asctime"],
+            "filename": record_dict["filename"],
+            "lineno": record_dict["lineno"],
+            "message": record_dict["message"],
+        }
+
+
+def configure(
+    identifier: str, filename: Optional[str] = None, host: Optional[str] = None
+) -> None:
     """Configure logger."""
     # create logger
     _logger = logging.getLogger(LOGGER_NAME)
@@ -28,7 +61,7 @@ def configure(filename: Optional[str] = None, host: Optional[str] = None) -> Non
 
     # create formatter
     formatter = logging.Formatter(
-        "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
+        f"{identifier} | %(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
     )
 
     # Console logger
@@ -46,9 +79,9 @@ def configure(filename: Optional[str] = None, host: Optional[str] = None) -> Non
 
     if host:
         # Create http handler which logs even debug messages
-        http_handler = logging.handlers.HTTPHandler(host, "/log", method="POST",)
+        http_handler = CustomHTTPHandler(identifier, host, "/log", method="POST",)
         http_handler.setLevel(logging.DEBUG)
-        http_handler.setFormatter(formatter)
+        # Override mapLogRecords as setFormatter has no effect on what is send via http
         _logger.addHandler(http_handler)
 
 

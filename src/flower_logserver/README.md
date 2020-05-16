@@ -12,10 +12,17 @@ python -m flower_logserver
 
 Start the FL server and client.
 ```bash
-FLOWER_LOG_HTTP=localhost:8081 python -m flower_benchmark.tf_fashion_mnist.server
+python -m flower_benchmark.tf_fashion_mnist.server --log_host=localhost:8081
 ```
 
 ```bash
-FLOWER_LOG_HTTP=localhost:8081 python -m flower_benchmark.tf_fashion_mnist.client \
-    --cid=0 --partition=0 --clients=1 --grpc_server_address=localhost --grpc_server_port=8080
+python -m flower_benchmark.tf_fashion_mnist.client \
+    --cid=0 --partition=0 --clients=1 --grpc_server_address=localhost --grpc_server_port=8080 \
+    --log_host=localhost:8081
+```
+
+# Persist logs to S3
+If you would like to upload your logs regularly to S3 you can pass the following command line arguments on start.
+```bash
+python -m flower_logserver --s3_bucket=MY_BUCKET --s3_key=MY_S3_KEY
 ```
