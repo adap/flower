@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Tests for GRPCBridge class."""
+
+
 import time
 from threading import Thread
 from typing import List, Union
@@ -56,7 +58,7 @@ def test_workflow_successful():
 
     # Execute
     # Simluate remote client side
-    for i in range(rounds):
+    for _ in range(rounds):
         try:
             _ = next(server_message_iterator)
             bridge.set_client_message(ClientMessage())
