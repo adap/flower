@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower benchmark using TensorFlow for Fashion-MNIST image classification."""
+"""Benchmark models."""
 
-
-DEFAULT_GRPC_SERVER_ADDRESS = "[::]"
-DEFAULT_GRPC_SERVER_PORT = 8080
-
-SEED = 2020
+from .cnn import orig_cnn
+from .resnet import resnet50v2

@@ -22,10 +22,12 @@ import numpy as np
 
 import flower as flwr
 from flower.logger import configure
+from flower_benchmark.model import orig_cnn
 
 from . import (
     DEFAULT_GRPC_SERVER_ADDRESS,
     DEFAULT_GRPC_SERVER_PORT,
+    SEED,
     client,
     fashion_mnist,
 )
@@ -172,7 +174,7 @@ def get_eval_fn(
 
     def evaluate(weights: flwr.Weights) -> Optional[Tuple[float, float]]:
         """Use entire Fashion-MNIST test set for evaluation."""
-        model = client.load_model(input_shape=(28, 28, 1))
+        model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
         model.set_weights(weights)
         loss, acc = fashion_mnist.keras_evaluate(
             model, ds_test, batch_size=len(xy_test[0])
