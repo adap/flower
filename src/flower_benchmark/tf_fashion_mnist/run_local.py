@@ -33,7 +33,7 @@ CONFIG.read(OPS_INI_PATH)
 
 def logserver_command() -> str:
     """Run log server."""
-    return f"screen -d -m python3.7 -m flower_logserver"
+    return "screen -d -m python3.7 -m flower_logserver"
 
 
 # pylint: disable=too-many-arguments
@@ -128,7 +128,7 @@ def run(
 
     # Start flower server on flower server instances
     server_id, server_private_ip, _, _, _ = cluster.instances["server"][0]
-    cluster.exec(server_id, f"python3.7 -m flower_benchmark.tf_fashion_mnist.download")
+    cluster.exec(server_id, "python3.7 -m flower_benchmark.tf_fashion_mnist.download")
     cluster.exec(
         server_id,
         server_command(
@@ -143,7 +143,7 @@ def run(
 
     # Start flower clients
     client_id, _, _, _, _ = cluster.instances["clients"][0]
-    cluster.exec(client_id, f"python3.7 -m flower_benchmark.tf_fashion_mnist.download")
+    cluster.exec(client_id, "python3.7 -m flower_benchmark.tf_fashion_mnist.download")
     for i in range(0, int(num_clients)):
         cluster.exec(
             client_id,
