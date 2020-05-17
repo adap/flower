@@ -61,7 +61,7 @@ http-logger = ["boto3", "boto3_type_annotations"]
 isort = "==4.3.21"
 black = "==19.10b0"
 mypy = "==0.761"
-pylint = "==2.4.4"
+pylint = "==2.5.2"
 pytest = "==5.3.4"
 grpcio-tools = "==1.27.2"
 mypy-protobuf = "==1.18"
@@ -83,3 +83,6 @@ use_parentheses = true
 
 [tool.black]
 target-version = ['py37']
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = "bad-continuation,duplicate-code,too-few-public-methods"
