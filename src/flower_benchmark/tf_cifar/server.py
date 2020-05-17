@@ -21,6 +21,7 @@ from typing import Callable, Dict, Optional, Tuple
 import numpy as np
 
 import flower as flwr
+from flower_benchmark.common import keras_evaluate
 from flower_benchmark.model import resnet50v2
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED, cifar
@@ -145,8 +146,8 @@ def get_eval_fn(
         """Use entire CIFAR test set for evaluation."""
         model = resnet50v2(input_shape=(32, 32, 3), num_classes=num_classes, seed=SEED)
         model.set_weights(weights)
-        loss, acc = model.evaluate(ds_test)
-        return float(loss), float(acc)
+        loss, acc = keras_evaluate(model, ds_test, batch_size=len(xy_test[0]))
+        return loss, acc
 
     return evaluate
 

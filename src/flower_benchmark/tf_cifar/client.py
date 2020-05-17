@@ -24,12 +24,12 @@ import tensorflow as tf
 
 import flower as flwr
 from flower.logger import configure, log
-from flower_benchmark.common import custom_fit
+from flower_benchmark.common import custom_fit, keras_evaluate
 from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
-from .cifar import build_dataset, keras_evaluate
+from .cifar import build_dataset
 
 tf.get_logger().setLevel("ERROR")
 

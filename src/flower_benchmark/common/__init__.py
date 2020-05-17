@@ -15,4 +15,4 @@
 """Common benchmark components."""
 
 
-from .common import custom_fit
+from .common import custom_fit, keras_evaluate, keras_fit
