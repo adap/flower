@@ -25,13 +25,12 @@ import tensorflow as tf
 import flower as flwr
 from flower.logger import configure, log
 from flower_benchmark.dataset import tf_cifar_partitioned
+from flower_benchmark.model import resnet50v2
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
 from .cifar import build_dataset, keras_evaluate, keras_fit
 
 tf.get_logger().setLevel("ERROR")
-
-SEED = 2020
 
 
 def main() -> None:
@@ -86,7 +85,7 @@ def main() -> None:
     configure(args.log_file, args.log_host)
 
     # Load model and data
-    model = load_model(input_shape=(32, 32, 3), num_classes=args.cifar)
+    model = resnet50v2(input_shape=(32, 32, 3), num_classes=args.cifar, seed=SEED)
     xy_train, xy_test = load_data(
         partition=args.partition,
         num_classes=args.cifar,
@@ -185,19 +184,6 @@ class CifarClient(flwr.Client):
 
         # Return the number of evaluation examples and the evaluation result (loss)
         return self.num_examples_test, loss
-
-
-def load_model(input_shape: Tuple[int, int, int], num_classes: int) -> tf.keras.Model:
-    """Create a ResNet-50 (v2) instance"""
-    model = tf.keras.applications.ResNet50V2(
-        weights=None, include_top=True, input_shape=input_shape, classes=num_classes
-    )
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(),
-        loss="categorical_crossentropy",
-        metrics=["accuracy"],
-    )
-    return model
 
 
 def get_lr_schedule(

@@ -12,4 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Partitioned versions of popular datasets."""
+"""ResNet."""
+
+
+from typing import Optional, Tuple
+
+import tensorflow as tf
+
+
+# pylint: disable-msg=unused-argument
+def resnet50v2(
+    input_shape: Tuple[int, int, int], num_classes: int, seed: Optional[int] = None
+) -> tf.keras.Model:
+    """Create a ResNet-50 (v2) instance"""
+    model = tf.keras.applications.ResNet50V2(
+        weights=None, include_top=True, input_shape=input_shape, classes=num_classes
+    )
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(),
+        loss="categorical_crossentropy",
+        metrics=["accuracy"],
+    )
+    return model

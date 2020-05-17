@@ -25,13 +25,12 @@ import tensorflow as tf
 import flower as flwr
 from flower.logger import configure, log
 from flower_benchmark.dataset import tf_fashion_mnist_partitioned
+from flower_benchmark.model import orig_cnn
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
 from .fashion_mnist import build_dataset, custom_fit, keras_evaluate
 
 tf.get_logger().setLevel("ERROR")
-
-SEED = 2020
 
 
 def main() -> None:
@@ -79,7 +78,7 @@ def main() -> None:
     configure(f"client:{args.cid}", args.log_file, args.log_host)
 
     # Load model and data
-    model = load_model()
+    model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
     xy_train, xy_test = load_data(
         partition=args.partition, num_clients=args.clients, dry_run=args.dry_run
     )
@@ -196,52 +195,6 @@ class FashionMnistClient(flwr.Client):
 
         # Return the number of evaluation examples and the evaluation result (loss)
         return self.num_examples_test, loss
-
-
-def load_model(input_shape: Tuple[int, int, int] = (28, 28, 1)) -> tf.keras.Model:
-    """Load model for Fashion-MNIST."""
-    # Kernel initializer
-    kernel_initializer = tf.keras.initializers.glorot_uniform(seed=SEED)
-
-    # Architecture
-    inputs = tf.keras.layers.Input(shape=input_shape)
-    layers = tf.keras.layers.Conv2D(
-        32,
-        kernel_size=(5, 5),
-        strides=(1, 1),
-        kernel_initializer=kernel_initializer,
-        padding="same",
-        activation="relu",
-    )(inputs)
-    layers = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(layers)
-    layers = tf.keras.layers.Conv2D(
-        64,
-        kernel_size=(5, 5),
-        strides=(1, 1),
-        kernel_initializer=kernel_initializer,
-        padding="same",
-        activation="relu",
-    )(layers)
-    layers = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(layers)
-    layers = tf.keras.layers.Flatten()(layers)
-    layers = tf.keras.layers.Dense(
-        512, kernel_initializer=kernel_initializer, activation="relu"
-    )(layers)
-
-    outputs = tf.keras.layers.Dense(
-        10, kernel_initializer=kernel_initializer, activation="softmax"
-    )(layers)
-
-    model = tf.keras.Model(inputs=inputs, outputs=outputs)
-
-    # Compile model
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(),
-        loss=tf.keras.losses.categorical_crossentropy,
-        metrics=["accuracy"],
-    )
-
-    return model
 
 
 def get_lr_schedule(

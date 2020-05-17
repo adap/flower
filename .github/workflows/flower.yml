@@ -19,8 +19,8 @@ jobs:
           python-version: 3.7.7
       - name: Install build tools
         run: |
-          python -m pip install -U pip==20.0.2
-          python -m pip install -U setuptools==45.2.0
+          python -m pip install -U pip==20.1
+          python -m pip install -U setuptools==46.3.1
           python -m pip install -U poetry==1.0.5
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory only)
@@ -40,8 +40,8 @@ jobs:
           python-version: 3.7.7
       - name: Install build tools
         run: |
-          python -m pip install -U pip==20.0.2
-          python -m pip install -U setuptools==45.2.0
+          python -m pip install -U pip==20.1
+          python -m pip install -U setuptools==46.3.1
           python -m pip install -U poetry==1.0.5
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory + optional)
@@ -61,8 +61,8 @@ jobs:
           python-version: 3.7.7
       - name: Install build tools
         run: |
-          python -m pip install -U pip==20.0.2
-          python -m pip install -U setuptools==45.2.0
+          python -m pip install -U pip==20.1
+          python -m pip install -U setuptools==46.3.1
           python -m pip install -U poetry==1.0.5
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory + optional)

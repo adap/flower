@@ -12,4 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Partitioned versions of popular datasets."""
+"""Benchmark models."""
+
+from .cnn import orig_cnn
+from .resnet import resnet50v2
