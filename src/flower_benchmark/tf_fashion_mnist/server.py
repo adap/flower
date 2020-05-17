@@ -22,16 +22,10 @@ import numpy as np
 
 import flower as flwr
 from flower.logger import configure
-from flower_benchmark.common import keras_evaluate
+from flower_benchmark.common import build_dataset, keras_evaluate
 from flower_benchmark.model import orig_cnn
 
-from . import (
-    DEFAULT_GRPC_SERVER_ADDRESS,
-    DEFAULT_GRPC_SERVER_PORT,
-    SEED,
-    client,
-    fashion_mnist,
-)
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED, client
 
 
 def main() -> None:
@@ -165,7 +159,7 @@ def get_eval_fn(
     num_classes: int, xy_test: Tuple[np.ndarray, np.ndarray]
 ) -> Callable[[flwr.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
-    ds_test = fashion_mnist.build_dataset(
+    ds_test = build_dataset(
         xy_test[0],
         xy_test[1],
         num_classes=num_classes,

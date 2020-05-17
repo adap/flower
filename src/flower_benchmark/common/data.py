@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower client using TensorFlow for Fashion-MNIST image classification."""
+"""Benchmark utilities for data loading."""
 
 
 from typing import Optional
@@ -28,6 +28,9 @@ def build_dataset(
     num_classes: int,
     shuffle_buffer_size: int = 0,
     augment: bool = False,
+    augment_color: bool = False,
+    augment_horizontal_flip: bool = False,
+    augment_offset: int = 0,
     seed: Optional[int] = None,
 ) -> tf.data.Dataset:
     """Divide images by 255, one-hot encode labels, optionally shuffle and augment."""
@@ -46,7 +49,13 @@ def build_dataset(
     if augment:
         dataset = dataset.map(
             lambda x, y: (
-                _augment(x, seed=seed, color=False, horizontal_flip=False),
+                apply_augmentation(
+                    x,
+                    seed=seed,
+                    color=augment_color,
+                    horizontal_flip=augment_horizontal_flip,
+                    offset=augment_offset,
+                ),
                 y,
             ),
             num_parallel_calls=tf.data.experimental.AUTOTUNE,
@@ -54,9 +63,14 @@ def build_dataset(
     return dataset
 
 
-def _augment(
-    img: tf.Tensor, seed: Optional[int], color: bool, horizontal_flip: bool,
+def apply_augmentation(
+    img: tf.Tensor,
+    seed: Optional[int],
+    color: bool,
+    horizontal_flip: bool,
+    offset: int,
 ) -> tf.Tensor:
+    """Apply different augmentations to a single example."""
     if color:
         img = tf.image.random_hue(img, 0.08, seed=seed)
         img = tf.image.random_saturation(img, 0.6, 1.6, seed=seed)
@@ -64,5 +78,11 @@ def _augment(
         img = tf.image.random_contrast(img, 0.7, 1.3, seed=seed)
     if horizontal_flip:
         img = tf.image.random_flip_left_right(img, seed=seed)
-    img_padded = tf.image.pad_to_bounding_box(img, 2, 2, 32, 32)
-    return tf.image.random_crop(img_padded, size=[28, 28, 1], seed=seed)
+    # Get image size from tensor
+    size = img.shape.as_list()  # E.g., [28, 28, 1] or [32, 32, 3]
+    height = size[0]
+    width = size[1]
+    img_padded = tf.image.pad_to_bounding_box(
+        img, offset, offset, height + 2 * offset, width + 2 * offset
+    )
+    return tf.image.random_crop(img_padded, size=size, seed=seed)
