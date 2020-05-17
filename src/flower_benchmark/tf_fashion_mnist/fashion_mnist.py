@@ -15,15 +15,10 @@
 """Flower client using TensorFlow for Fashion-MNIST image classification."""
 
 
-import time
-import timeit
-from logging import INFO
 from typing import List, Optional, Tuple
 
 import numpy as np
 import tensorflow as tf
-
-from flower.logger import log
 
 
 def keras_evaluate(
