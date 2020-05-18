@@ -24,11 +24,12 @@ import tensorflow as tf
 
 import flower as flwr
 from flower.logger import configure, log
+from flower_benchmark.common import custom_fit
 from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
-from .cifar import build_dataset, keras_evaluate, keras_fit
+from .cifar import build_dataset, keras_evaluate
 
 tf.get_logger().setLevel("ERROR")
 
@@ -82,7 +83,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure logger
-    configure(args.log_file, args.log_host)
+    configure(f"client:{args.cid}", args.log_file, args.log_host)
 
     # Load model and data
     model = resnet50v2(input_shape=(32, 32, 3), num_classes=args.cifar, seed=SEED)
@@ -140,7 +141,13 @@ class CifarClient(flwr.Client):
     def fit(self, ins: flwr.FitIns) -> flwr.FitRes:
         weights: flwr.Weights = flwr.parameters_to_weights(ins[0])
         config = ins[1]
-        log(DEBUG, "fit, config %s", config)
+        log(
+            DEBUG,
+            "fit on %s (examples: %s), config %s",
+            self.cid,
+            self.num_examples_train,
+            config,
+        )
 
         # Training configuration
         # epoch_global = int(config["epoch_global"])
@@ -148,31 +155,46 @@ class CifarClient(flwr.Client):
         batch_size = int(config["batch_size"])
         # lr_initial = float(config["lr_initial"])
         # lr_decay = float(config["lr_decay"])
+        timeout = int(config["timeout"])
+        partial_updates = bool(int(config["partial_updates"]))
 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
 
         # Train the local model using the local dataset
-        keras_fit(
+        completed, fit_duration, num_examples = custom_fit(
             model=self.model,
             dataset=self.ds_train,
             num_epochs=epochs,
             batch_size=batch_size,
             callbacks=[],
+            delay_factor=self.delay_factor,
+            timeout=timeout,
         )
+        log(DEBUG, "client %s had fit_duration %s", self.cid, fit_duration)
 
         # Compute the maximum number of examples which could have been processed
         num_examples_ceil = self.num_examples_train * epochs
 
+        # Return empty update if local update could not be completed in time
+        if not completed and not partial_updates:
+            parameters = flwr.weights_to_parameters([])
+            return parameters, num_examples, num_examples_ceil
+
         # Return the refined weights and the number of examples used for training
         parameters = flwr.weights_to_parameters(self.model.get_weights())
-        num_examples = self.num_examples_train
         return parameters, num_examples, num_examples_ceil
 
     def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
         weights = flwr.parameters_to_weights(ins[0])
         config = ins[1]
-        log(DEBUG, "evaluate, config %s", config)
+        log(
+            DEBUG,
+            "evaluate on %s (examples: %s), config %s",
+            self.cid,
+            self.num_examples_test,
+            config,
+        )
 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
@@ -205,12 +227,17 @@ def load_data(
     """Load, normalize, and sample CIFAR-10/100."""
     use_cifar100 = num_classes == 100
     xy_partitions, (x_test, y_test) = tf_cifar_partitioned.load_data(
-        iid_fraction=0.9, num_partitions=num_clients, cifar100=use_cifar100
+        iid_fraction=0.0, num_partitions=num_clients, cifar100=use_cifar100
     )
+
+    # Take partition
     x_train, y_train = xy_partitions[partition]
 
-    log(DEBUG, "Data distribution %s", np.unique(y_train, return_counts=True))
+    # Take a subset of the test set
+    x_test, y_test = shuffle(x_test, y_test, seed=SEED)
+    x_test, y_test = get_partition(x_test, y_test, partition, num_clients)
 
+    # Adjust y shape for model
     y_train = adjust_y_shape(y_train)
     y_test = adjust_y_shape(y_test)
 
@@ -218,6 +245,25 @@ def load_data(
     if dry_run:
         return (x_train[0:100], y_train[0:100]), (x_test[0:50], y_test[0:50])
     return (x_train, y_train), (x_test, y_test)
+
+
+def shuffle(
+    x_orig: np.ndarray, y_orig: np.ndarray, seed: int
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Shuffle x and y in the same way."""
+    np.random.seed(seed)
+    idx = np.random.permutation(len(x_orig))
+    return x_orig[idx], y_orig[idx]
+
+
+def get_partition(
+    x_orig: np.ndarray, y_orig: np.ndarray, partition: int, num_clients: int
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Return a single partition of an equally partitioned dataset."""
+    step_size = len(x_orig) / num_clients
+    start_index = int(step_size * partition)
+    end_index = int(start_index + step_size)
+    return x_orig[start_index:end_index], y_orig[start_index:end_index]
 
 
 def adjust_y_shape(nda: np.ndarray) -> np.ndarray:

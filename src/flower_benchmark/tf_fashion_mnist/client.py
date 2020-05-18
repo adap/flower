@@ -24,11 +24,12 @@ import tensorflow as tf
 
 import flower as flwr
 from flower.logger import configure, log
+from flower_benchmark.common import custom_fit
 from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 from flower_benchmark.model import orig_cnn
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
-from .fashion_mnist import build_dataset, custom_fit, keras_evaluate
+from .fashion_mnist import build_dataset, keras_evaluate
 
 tf.get_logger().setLevel("ERROR")
 
@@ -80,7 +81,7 @@ def main() -> None:
     # Load model and data
     model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
     xy_train, xy_test = load_data(
-        partition=args.partition, num_clients=args.clients, dry_run=args.dry_run
+        partition=args.partition, num_clients=args.clients, dry_run=args.dry_run,
     )
 
     # Start client
