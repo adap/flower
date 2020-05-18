@@ -50,10 +50,8 @@ class EC2StatusTimeout(Exception):
 # List of AWS instance types with
 # (instance_type, vCPU, Mem)
 INSTANCE_TYPES = [
-    ("t3.nano", 2, 0.5),  # 6 CPU Credits/hour
-    ("t3.micro", 2, 1),  # 12 CPU Credits/hour
-    ("t3.small", 2, 2),  # 24 CPU Credits/hour
-    ("t3.medium", 2, 4),  # 24 CPU Credits/hour
+    ("t3.small", 2, 2),  # 24 CPU Credits/hour; $0.0209/hour
+    ("t3.medium", 2, 4),  # 24 CPU Credits/hour; $0.0418/hour
     ("m5a.large", 2, 8),
     ("m5a.xlarge", 4, 16),
     ("m5a.2xlarge", 8, 32),
@@ -67,6 +65,7 @@ def find_instance_type(
     """Return the first matching instance type if one exists, raise otherwise."""
     for instance_type in instance_types:
         if instance_type[1] == num_cpu and instance_type[2] == num_ram:
+            
             return instance_type[0]
 
     raise NoMatchingInstanceType
