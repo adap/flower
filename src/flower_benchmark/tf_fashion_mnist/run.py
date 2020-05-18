@@ -37,11 +37,13 @@ CONFIG.read(OPS_INI_PATH)
 
 def configure_cluster(adapter: str, benchmark_name: str) -> Cluster:
     """Return configured compute cluster."""
+    adapter_instance: Optional[Adapter] = None
+
     if adapter == "docker":
-        adapter_instance: Adapter = DockerAdapter(name="flower")
+        adapter_instance = DockerAdapter(name="flower")
         user = "root"
     elif adapter == "ec2":
-        adapter_instance: Adapter = EC2Adapter(
+        adapter_instance = EC2Adapter(
             image_id=CONFIG.get("aws", "image_id"),
             key_name=path.expanduser(CONFIG.get("aws", "key_name")),
             subnet_id=CONFIG.get("aws", "subnet_id"),
