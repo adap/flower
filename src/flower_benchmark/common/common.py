@@ -20,9 +20,13 @@ import timeit
 from logging import INFO
 from typing import Callable, List, Optional, Tuple
 
+import numpy as np
 import tensorflow as tf
 
+import flower as flwr
 from flower.logger import log
+
+from .data import build_dataset
 
 
 # pylint: disable-msg=unused-argument,invalid-name,too-many-arguments,too-many-locals
@@ -142,3 +146,25 @@ def get_lr_schedule(
         return lr_initial * lr_decay ** epoch
 
     return lr_schedule
+
+
+def get_eval_fn(
+    model: tf.keras.Model, num_classes: int, xy_test: Tuple[np.ndarray, np.ndarray]
+) -> Callable[[flwr.Weights], Optional[Tuple[float, float]]]:
+    """Return an evaluation function for centralized evaluation."""
+
+    ds_test = build_dataset(
+        xy_test[0],
+        xy_test[1],
+        num_classes=num_classes,
+        shuffle_buffer_size=0,
+        augment=False,
+    )
+
+    def evaluate(weights: flwr.Weights) -> Optional[Tuple[float, float]]:
+        """Use entire test set for evaluation."""
+        model.set_weights(weights)
+        lss, acc = keras_evaluate(model, ds_test, batch_size=len(xy_test[0]))
+        return lss, acc
+
+    return evaluate

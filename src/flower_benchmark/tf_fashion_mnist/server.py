@@ -16,13 +16,11 @@
 
 
 import argparse
-from typing import Callable, Dict, Optional, Tuple
-
-import numpy as np
+from typing import Callable, Dict
 
 import flower as flwr
 from flower.logger import configure
-from flower_benchmark.common import build_dataset, keras_evaluate, load_partition
+from flower_benchmark.common import get_eval_fn, load_partition
 from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 from flower_benchmark.model import orig_cnn
 
@@ -108,6 +106,9 @@ def main() -> None:
         seed=SEED,
     )
 
+    # Load model (for centralized evaluation)
+    model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
+
     # Create client_manager, strategy, and server
     client_manager = flwr.SimpleClientManager()
 
@@ -115,7 +116,7 @@ def main() -> None:
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
-        eval_fn=get_eval_fn(num_classes=10, xy_test=xy_test),
+        eval_fn=get_eval_fn(model=model, num_classes=10, xy_test=xy_test),
         on_fit_config_fn=get_on_fit_config_fn(
             args.lr_initial, args.training_round_timeout
         ),
@@ -124,7 +125,7 @@ def main() -> None:
     #     fraction_fit=args.sample_fraction,
     #     min_fit_clients=args.min_sample_size,
     #     min_available_clients=args.min_num_clients,
-    #     eval_fn=get_eval_fn(num_classes=10, xy_test=xy_test),
+    #     eval_fn=get_eval_fn(model=model, num_classes=10, xy_test=xy_test),
     #     on_fit_config_fn=get_on_fit_config_fn(
     #         args.lr_initial, args.training_round_timeout
     #     ),
@@ -164,28 +165,6 @@ def get_on_fit_config_fn(
         return config
 
     return fit_config
-
-
-def get_eval_fn(
-    num_classes: int, xy_test: Tuple[np.ndarray, np.ndarray]
-) -> Callable[[flwr.Weights], Optional[Tuple[float, float]]]:
-    """Return an evaluation function for centralized evaluation."""
-    ds_test = build_dataset(
-        xy_test[0],
-        xy_test[1],
-        num_classes=num_classes,
-        shuffle_buffer_size=0,
-        augment=False,
-    )
-
-    def evaluate(weights: flwr.Weights) -> Optional[Tuple[float, float]]:
-        """Use entire Fashion-MNIST test set for evaluation."""
-        model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
-        model.set_weights(weights)
-        loss, acc = keras_evaluate(model, ds_test, batch_size=len(xy_test[0]))
-        return loss, acc
-
-    return evaluate
 
 
 if __name__ == "__main__":
