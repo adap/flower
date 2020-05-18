@@ -108,3 +108,24 @@ def grad(
     with tf.GradientTape() as tape:
         loss_value = loss(model, x, y, training=True)
     return loss_value, tape.gradient(loss_value, model.trainable_variables)
+
+
+def keras_evaluate(
+    model: tf.keras.Model, dataset: tf.data.Dataset, batch_size: int
+) -> Tuple[float, float]:
+    """Evaluate the model using model.evaluate(...)."""
+    ds_test = dataset.batch(batch_size=batch_size, drop_remainder=False)
+    test_loss, acc = model.evaluate(x=ds_test)
+    return float(test_loss), float(acc)
+
+
+def keras_fit(
+    model: tf.keras.Model,
+    dataset: tf.data.Dataset,
+    num_epochs: int,
+    batch_size: int,
+    callbacks: List[tf.keras.callbacks.Callback],
+) -> None:
+    """Train the model using model.fit(...)."""
+    ds_train = dataset.batch(batch_size=batch_size, drop_remainder=False)
+    model.fit(ds_train, epochs=num_epochs, callbacks=callbacks, verbose=2)

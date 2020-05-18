@@ -15,31 +15,10 @@
 """Create and augment a CIFAR-10 TensorFlow Dataset."""
 
 
-from typing import List, Optional, Tuple
+from typing import Optional
 
 import numpy as np
 import tensorflow as tf
-
-
-def keras_evaluate(
-    model: tf.keras.Model, dataset: tf.data.Dataset, batch_size: int
-) -> Tuple[float, float]:
-    """Evaluate the model using model.evaluate(...)."""
-    ds_test = dataset.batch(batch_size=batch_size, drop_remainder=False)
-    loss, acc = model.evaluate(ds_test)
-    return float(loss), float(acc)
-
-
-def keras_fit(
-    model: tf.keras.Model,
-    dataset: tf.data.Dataset,
-    num_epochs: int,
-    batch_size: int,
-    callbacks: List[tf.keras.callbacks.Callback],
-) -> None:
-    """Train the model using model.fit(...)."""
-    ds_train = dataset.batch(batch_size=batch_size, drop_remainder=False)
-    model.fit(ds_train, epochs=num_epochs, callbacks=callbacks, verbose=2)
 
 
 # pylint: disable-msg=too-many-arguments,invalid-name

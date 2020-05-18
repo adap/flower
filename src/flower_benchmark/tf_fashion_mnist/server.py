@@ -22,6 +22,7 @@ import numpy as np
 
 import flower as flwr
 from flower.logger import configure
+from flower_benchmark.common import keras_evaluate
 from flower_benchmark.model import orig_cnn
 
 from . import (
@@ -176,9 +177,7 @@ def get_eval_fn(
         """Use entire Fashion-MNIST test set for evaluation."""
         model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
         model.set_weights(weights)
-        loss, acc = fashion_mnist.keras_evaluate(
-            model, ds_test, batch_size=len(xy_test[0])
-        )
+        loss, acc = keras_evaluate(model, ds_test, batch_size=len(xy_test[0]))
         return loss, acc
 
     return evaluate
