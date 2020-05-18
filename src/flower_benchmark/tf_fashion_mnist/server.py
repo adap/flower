@@ -16,12 +16,13 @@
 
 
 import argparse
+from logging import ERROR
 from typing import Callable, Dict, Optional, Tuple
 
 import numpy as np
 
 import flower as flwr
-from flower.logger import configure
+from flower.logger import configure, log
 from flower_benchmark.common import build_dataset, keras_evaluate, load_partition
 from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 from flower_benchmark.model import orig_cnn
@@ -189,4 +190,8 @@ def get_eval_fn(
 
 
 if __name__ == "__main__":
-    main()
+    # pylint: disable=broad-except
+    try:
+        main()
+    except Exception:
+        log(ERROR, "Fatal error in main", exc_info=True)

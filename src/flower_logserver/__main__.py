@@ -18,6 +18,7 @@ The server will shutdown automatically if it does not receive a message for more
 than an hour.
 """
 import argparse
+import json
 import logging
 import time
 import urllib.parse
@@ -29,8 +30,8 @@ import boto3
 
 LOGDIR = "flower_logs"
 LOGFILE = "{logdir}/{:%Y-%m-%d}.log".format(datetime.now(), logdir=LOGDIR)
-LOGFILE_UPLOAD_INTERVAL = 15
-SERVER_TIMEOUT = 60
+LOGFILE_UPLOAD_INTERVAL = 60
+SERVER_TIMEOUT = 3600
 
 CONFIG = {"s3_bucket": None, "s3_key": None}
 
@@ -77,8 +78,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         self._set_response()
         self.wfile.write("POST request for {}".format(self.path).encode("utf-8"))
 
-        print(post_data)
-        write_to_logfile(str(post_data))
+        line = str(json.dumps(post_data))
+        print(line)
+        write_to_logfile(line)
 
 
 class LogServer(HTTPServer):
@@ -122,13 +124,13 @@ def main() -> None:
 
             time_elapsed = int(time.time()) - last_logfile_upload
 
-            print(time_elapsed)
-
             if time_elapsed > LOGFILE_UPLOAD_INTERVAL:
                 upload_logfile()
                 last_logfile_upload = int(time.time())
     except TimeoutError:
-        pass
+        print(
+            f"TimeoutError raised as no request was received for {SERVER_TIMEOUT} seconds."
+        )
 
     logging.info("Stopping logging server...\n")
 

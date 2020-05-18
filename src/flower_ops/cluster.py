@@ -77,6 +77,11 @@ class Cluster:
     ):
         """Create cluster.
 
+        Args:
+            timeout (int): Minutes after which the machine will shutdown and terminate.
+                           This is a safety mechanism to avoid run aways cost. The user should still
+                           make sure to monitor the progress in case this mechanism fails.
+
         Example:
             To start two groups of instances where the first one has one instance and the
             second one has two instances you might define the spec as following:
@@ -139,7 +144,7 @@ class Cluster:
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = [
-                executor.submit(job, group, spec[0], spec[1], spec[2], self.timeout,)
+                executor.submit(job, group, spec[0], spec[1], spec[2], self.timeout)
                 for group, spec in self.specs.items()
             ]
             concurrent.futures.wait(futures)

@@ -16,7 +16,7 @@
 
 
 import argparse
-from logging import DEBUG
+from logging import DEBUG, ERROR
 from typing import Tuple
 
 import numpy as np
@@ -213,4 +213,8 @@ class FashionMnistClient(flwr.Client):
 
 
 if __name__ == "__main__":
-    main()
+    # pylint: disable=broad-except
+    try:
+        main()
+    except Exception:
+        log(ERROR, "Fatal error in main", exc_info=True)
