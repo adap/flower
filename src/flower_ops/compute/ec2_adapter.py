@@ -60,12 +60,11 @@ INSTANCE_TYPES = [
 
 
 def find_instance_type(
-    num_cpu: int, num_ram: float, instance_types: List[Tuple[str, int, float]]
+    num_cpu: int, num_ram: float, instance_types: List[Tuple[str, int, int]]
 ) -> str:
     """Return the first matching instance type if one exists, raise otherwise."""
     for instance_type in instance_types:
         if instance_type[1] == num_cpu and instance_type[2] == num_ram:
-
             return instance_type[0]
 
     raise NoMatchingInstanceType

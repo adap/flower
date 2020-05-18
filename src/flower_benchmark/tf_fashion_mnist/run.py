@@ -38,7 +38,7 @@ CONFIG.read(OPS_INI_PATH)
 def configure_cluster(adapter: str, benchmark_name: str) -> Cluster:
     """Return configured compute cluster."""
     adapter_instance: Optional[Adapter] = None
-    private_key: str = None
+    private_key: Optional[str] = None
 
     if adapter == "docker":
         adapter_instance = DockerAdapter(name="flower")
