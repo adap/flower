@@ -22,6 +22,7 @@ from typing import Optional
 from flower_benchmark.tf_fashion_mnist import command
 from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 from flower_ops.cluster import Cluster
+from flower_ops.compute.adapter import Adapter
 from flower_ops.compute.docker_adapter import DockerAdapter
 from flower_ops.compute.ec2_adapter import EC2Adapter
 
@@ -37,36 +38,28 @@ CONFIG.read(OPS_INI_PATH)
 def configure_cluster(adapter: str, benchmark_name: str) -> Cluster:
     """Return configured compute cluster."""
     if adapter == "docker":
-        docker_adapter = DockerAdapter(name="flower")
-        cluster = Cluster(
-            adapter=docker_adapter,
-            ssh_credentials=("root", path.expanduser(CONFIG.get("ssh", "private_key"))),
-            specs={"logserver": (2, 1, 1), "server": (2, 8, 1), "clients": (4, 16, 1)},
-            timeout=20,
-        )
-        return cluster
-
-    if adapter == "ec2":
-        ec2_adapter = EC2Adapter(
+        adapter_instance: Adapter = DockerAdapter(name="flower")
+        user = "root"
+    elif adapter == "ec2":
+        adapter_instance: Adapter = EC2Adapter(
             image_id=CONFIG.get("aws", "image_id"),
             key_name=path.expanduser(CONFIG.get("aws", "key_name")),
             subnet_id=CONFIG.get("aws", "subnet_id"),
             security_group_ids=CONFIG.get("aws", "security_group_ids").split(","),
             tags=[("Purpose", "flower_benchmark"), ("Benchmark Name", benchmark_name)],
         )
+        user = "ubuntu"
+    else:
+        raise Exception(f"Adapter of type {adapter} does not exist.")
 
-        cluster = Cluster(
-            adapter=ec2_adapter,
-            ssh_credentials=(
-                "ubuntu",
-                path.expanduser(CONFIG.get("ssh", "private_key")),
-            ),
-            specs={"logserver": (2, 1, 1), "server": (2, 8, 1), "clients": (4, 16, 2)},
-            timeout=20,
-        )
-        return cluster
+    cluster = Cluster(
+        adapter=adapter_instance,
+        ssh_credentials=(user, path.expanduser(CONFIG.get("ssh", "private_key"))),
+        specs={"logserver": (2, 1, 1), "server": (2, 8, 1), "clients": (4, 16, 2)},
+        timeout=20,
+    )
 
-    raise Exception(f"Adapter of type {adapter} does not exist.")
+    return cluster
 
 
 # pylint: disable=too-many-arguments, too-many-locals
@@ -107,7 +100,7 @@ def run(
     cluster.upload_all(wheel_local_path, wheel_remote_path)
 
     # Install the wheel on all instances
-    print(cluster.exec_all(command.install_wheel(wheel_remote_path)))
+    cluster.exec_all(command.install_wheel(wheel_remote_path))
 
     # An instance is a tuple of the following values
     # (InstanceId, PrivateIpAddress, PublicIpAddress, State)
@@ -140,15 +133,14 @@ def run(
 
     # Make dataset locally available
     cluster.exec(client_instances[0][0], command.download_dataset())
-    # cluster.exec(client_instances[1][0], command.download_dataset())
+    cluster.exec(client_instances[1][0], command.download_dataset())
 
     for i in range(0, num_clients):
-        # client_id = (
-        #     client_instances[0][0]
-        #     if i < int(num_clients / 2)
-        #     else client_instances[1][0]
-        # )
-        client_id = client_instances[0][0]
+        client_id = (
+            client_instances[0][0]
+            if i < int(num_clients / 2)
+            else client_instances[1][0]
+        )
         cluster.exec(
             client_id,
             command.start_client(
@@ -163,19 +155,15 @@ def run(
 
     # Shutdown server and client instance after 10min if not at least one flower
     # process is running it
-    # shutdown_command = (
-    #     command.watch_and_shutdown_docker
-    #     if adapter == "docker"
-    #     else command.watch_and_shutdown
-    # )
-
-    # cluster.exec_group('logserver', shutdown_command("[f]lower_logserver"))
-    # cluster.exec_group(
-    #     "server", shutdown_command("[f]lower_benchmark")
-    # )
-    # cluster.exec_group(
-    #     "clients", shutdown_command("[f]lower_benchmark")
-    # )
+    cluster.exec_group(
+        "logserver", command.watch_and_shutdown("[f]lower_logserver", adapter)
+    )
+    cluster.exec_group(
+        "server", command.watch_and_shutdown("[f]lower_benchmark", adapter)
+    )
+    cluster.exec_group(
+        "clients", command.watch_and_shutdown("[f]lower_benchmark", adapter)
+    )
 
     print(cluster.instances)
 
@@ -190,7 +178,11 @@ def main() -> None:
         help=f"Name of setting to run. Possible options: {list(SETTINGS.keys())}.",
     )
     parser.add_argument(
-        "--adapter", type=str, choices=["docker", "ec2"], help="Set adapter to be used."
+        "--adapter",
+        type=str,
+        required=True,
+        choices=["docker", "ec2"],
+        help="Set adapter to be used.",
     )
     parser.add_argument(
         "--logserver_s3_bucket",

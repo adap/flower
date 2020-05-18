@@ -48,7 +48,10 @@ def upload_logfile() -> None:
     else:
         logging.warn("Uploading logfile to S3.")
         boto3.resource("s3").meta.client.upload_file(
-            LOGFILE, CONFIG["s3_bucket"], CONFIG["s3_key"]
+            Filename=LOGFILE,
+            Bucket=CONFIG["s3_bucket"],
+            Key=CONFIG["s3_key"],
+            ExtraArgs={"ContentType": "text/plain"},
         )
 
 

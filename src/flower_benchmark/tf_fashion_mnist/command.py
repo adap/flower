@@ -83,17 +83,15 @@ def download_dataset() -> str:
     return "python3.7 -m flower_benchmark.tf_fashion_mnist.download"
 
 
-def watch_and_shutdown() -> str:
+def watch_and_shutdown(keyword: str, adapter: str) -> str:
     """Return command which shuts down the instance after no benchmark is running anymore."""
-    return (
-        "screen -d -m bash -c 'while [[ $(ps a | grep [f]lower_benchmark) ]]; "
-        + "do sleep 1; done; sudo shutdown -P now'"
-    )
+    cmd = f"screen -d -m bash -c 'while [[ $(ps a | grep {keyword}) ]]; do sleep 1; done; "
 
+    if adapter == "docker":
+        cmd += "kill 1'"
+    elif adapter == "ec2":
+        cmd += "sudo shutdown -P now'"
+    else:
+        raise Exception("Unknown Adapter")
 
-def watch_and_shutdown_docker(keyword: str) -> str:
-    """Return command which shuts down the instance after no benchmark is running anymore."""
-    return (
-        f"screen -d -m bash -c 'while [[ $(ps a | grep {keyword}) ]]; "
-        + "do sleep 1; done; kill 1'"
-    )
+    return cmd

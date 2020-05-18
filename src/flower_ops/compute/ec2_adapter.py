@@ -194,6 +194,7 @@ class EC2Adapter(Adapter):
             MaxCount=num_instances,
             InstanceType=find_instance_type(num_cpu, num_ram, INSTANCE_TYPES),
             KeyName=self.key_name,
+            IamInstanceProfile={"Name": "FlowerInstanceProfile"},
             SubnetId=self.subnet_id,
             SecurityGroupIds=self.security_group_ids,
             TagSpecifications=self.tag_specifications,
