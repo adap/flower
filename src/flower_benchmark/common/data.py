@@ -15,10 +15,75 @@
 """Benchmark utilities for data loading."""
 
 
-from typing import Optional
+from typing import List, Optional, Tuple, cast
 
 import numpy as np
 import tensorflow as tf
+
+
+# pylint: disable-msg=too-many-arguments
+def load_partition(
+    xy_partitions: List[Tuple[np.ndarray, np.ndarray]],
+    xy_test: Tuple[np.ndarray, np.ndarray],
+    partition: int,
+    num_clients: int,
+    seed: int,
+    dry_run: bool = False,
+) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
+    """Load, normalize, and sample CIFAR-10/100."""
+
+    # Take partition
+    x_train, y_train = xy_partitions[partition]
+
+    # Take a subset of the test set
+    x_test, y_test = shuffle(xy_test[0], xy_test[1], seed=seed)
+    x_test, y_test = get_partition(x_test, y_test, partition, num_clients)
+
+    # Adjust x shape for model
+    if x_train.ndim == 3:
+        x_train = adjust_x_shape(x_train)
+        x_test = adjust_x_shape(x_test)
+
+    # Adjust y shape for model
+    if y_train.ndim == 2:
+        y_train = adjust_y_shape(y_train)
+        y_test = adjust_y_shape(y_test)
+
+    # Return a small subset of the data if dry_run is set
+    if dry_run:
+        return (x_train[0:100], y_train[0:100]), (x_test[0:50], y_test[0:50])
+    return (x_train, y_train), (x_test, y_test)
+
+
+def shuffle(
+    x_orig: np.ndarray, y_orig: np.ndarray, seed: int
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Shuffle x and y in the same way."""
+    np.random.seed(seed)
+    idx = np.random.permutation(len(x_orig))
+    return x_orig[idx], y_orig[idx]
+
+
+def get_partition(
+    x_orig: np.ndarray, y_orig: np.ndarray, partition: int, num_clients: int
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Return a single partition of an equally partitioned dataset."""
+    step_size = len(x_orig) / num_clients
+    start_index = int(step_size * partition)
+    end_index = int(start_index + step_size)
+    return x_orig[start_index:end_index], y_orig[start_index:end_index]
+
+
+def adjust_x_shape(nda: np.ndarray) -> np.ndarray:
+    """Turn shape (x, y, z) into (x, y, z, 1)."""
+    nda_adjusted = np.reshape(nda, (nda.shape[0], nda.shape[1], nda.shape[2], 1))
+    return cast(np.ndarray, nda_adjusted)
+
+
+def adjust_y_shape(nda: np.ndarray) -> np.ndarray:
+    """Turn shape (x, 1) into (x)."""
+    nda_adjusted = np.reshape(nda, (nda.shape[0]))
+    return cast(np.ndarray, nda_adjusted)
 
 
 # pylint: disable-msg=too-many-arguments,invalid-name

@@ -17,14 +17,19 @@
 
 import argparse
 from logging import DEBUG
-from typing import Callable, Tuple, cast
+from typing import Tuple
 
 import numpy as np
 import tensorflow as tf
 
 import flower as flwr
 from flower.logger import configure, log
-from flower_benchmark.common import build_dataset, custom_fit, keras_evaluate
+from flower_benchmark.common import (
+    build_dataset,
+    custom_fit,
+    keras_evaluate,
+    load_partition,
+)
 from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 from flower_benchmark.model import orig_cnn
 
@@ -77,10 +82,20 @@ def main() -> None:
     # Configure logger
     configure(f"client:{args.cid}", args.log_file, args.log_host)
 
-    # Load model and data
+    # Load model
     model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
-    xy_train, xy_test = load_data(
-        partition=args.partition, num_clients=args.clients, dry_run=args.dry_run,
+
+    # Load local data partition
+    xy_partitions, xy_test = tf_fashion_mnist_partitioned.load_data(
+        iid_fraction=0.0, num_partitions=args.clients
+    )
+    xy_train, xy_test = load_partition(
+        xy_partitions,
+        xy_test,
+        partition=args.partition,
+        num_clients=args.clients,
+        dry_run=args.dry_run,
+        seed=SEED,
     )
 
     # Start client
@@ -195,70 +210,6 @@ class FashionMnistClient(flwr.Client):
 
         # Return the number of evaluation examples and the evaluation result (loss)
         return self.num_examples_test, loss
-
-
-def get_lr_schedule(
-    epoch_global: int, lr_initial: float, lr_decay: float
-) -> Callable[[int], float]:
-    """Return a schedule which decays the learning rate after each epoch."""
-
-    def lr_schedule(epoch: int) -> float:
-        """Learning rate schedule."""
-        epoch += epoch_global
-        return lr_initial * lr_decay ** epoch
-
-    return lr_schedule
-
-
-def load_data(
-    partition: int, num_clients: int, dry_run: bool
-) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
-    """Load partition of randomly shuffled Fashion-MNIST subset."""
-    # Load training and test data (ignoring the test data for now)
-    xy_partitions, (x_test, y_test) = tf_fashion_mnist_partitioned.load_data(
-        iid_fraction=0.0, num_partitions=num_clients
-    )
-
-    # Take partition
-    x_train, y_train = xy_partitions[partition]
-
-    # Take a subset
-    x_test, y_test = shuffle(x_test, y_test, seed=SEED)
-    x_test, y_test = get_partition(x_test, y_test, partition, num_clients)
-
-    # Adjust x sets shape for model
-    x_train = adjust_x_shape(x_train)
-    x_test = adjust_x_shape(x_test)
-
-    # Return a small subset of the data if dry_run is set
-    if dry_run:
-        return (x_train[0:100], y_train[0:100]), (x_test[0:50], y_test[0:50])
-    return (x_train, y_train), (x_test, y_test)
-
-
-def adjust_x_shape(nda: np.ndarray) -> np.ndarray:
-    """Turn shape (x, y, z) into (x, y, z, 1)."""
-    nda_adjusted = np.reshape(nda, (nda.shape[0], nda.shape[1], nda.shape[2], 1))
-    return cast(np.ndarray, nda_adjusted)
-
-
-def shuffle(
-    x_orig: np.ndarray, y_orig: np.ndarray, seed: int
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Shuffle x and y in the same way."""
-    np.random.seed(seed)
-    idx = np.random.permutation(len(x_orig))
-    return x_orig[idx], y_orig[idx]
-
-
-def get_partition(
-    x_orig: np.ndarray, y_orig: np.ndarray, partition: int, num_clients: int
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Return a single partition of an equally partitioned dataset."""
-    step_size = len(x_orig) / num_clients
-    start_index = int(step_size * partition)
-    end_index = int(start_index + step_size)
-    return x_orig[start_index:end_index], y_orig[start_index:end_index]
 
 
 if __name__ == "__main__":
