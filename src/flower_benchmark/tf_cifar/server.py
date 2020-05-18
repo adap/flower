@@ -21,11 +21,11 @@ from typing import Callable, Dict, Optional, Tuple
 import numpy as np
 
 import flower as flwr
-from flower_benchmark.common import build_dataset, keras_evaluate
+from flower_benchmark.common import build_dataset, keras_evaluate, load_partition
+from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
-from .client import load_data
 
 
 def main() -> None:
@@ -87,8 +87,17 @@ def main() -> None:
     args = parser.parse_args()
 
     # Load evaluation data
-    _, xy_test = load_data(
-        partition=0, num_classes=args.cifar, num_clients=1, dry_run=args.dry_run
+    use_cifar100 = args.cifar == 100
+    xy_partitions, xy_test = tf_cifar_partitioned.load_data(
+        iid_fraction=0.0, num_partitions=1, cifar100=use_cifar100
+    )
+    _, xy_test = load_partition(
+        xy_partitions,
+        xy_test,
+        partition=0,
+        num_clients=1,
+        seed=SEED,
+        dry_run=args.dry_run,
     )
 
     # Create client_manager, strategy, and server

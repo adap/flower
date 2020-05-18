@@ -15,5 +15,5 @@
 """Common benchmark components."""
 
 
-from .common import custom_fit, keras_evaluate, keras_fit
-from .data import build_dataset
+from .common import custom_fit, get_lr_schedule, keras_evaluate, keras_fit
+from .data import build_dataset, load_partition

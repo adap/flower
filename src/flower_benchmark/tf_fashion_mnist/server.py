@@ -22,10 +22,11 @@ import numpy as np
 
 import flower as flwr
 from flower.logger import configure
-from flower_benchmark.common import build_dataset, keras_evaluate
+from flower_benchmark.common import build_dataset, keras_evaluate, load_partition
+from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 from flower_benchmark.model import orig_cnn
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED, client
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
 
 
 def main() -> None:
@@ -95,7 +96,17 @@ def main() -> None:
     configure("server", args.log_file, args.log_host)
 
     # Load evaluation data
-    _, xy_test = client.load_data(partition=0, num_clients=1, dry_run=args.dry_run)
+    xy_partitions, xy_test = tf_fashion_mnist_partitioned.load_data(
+        iid_fraction=0.0, num_partitions=1
+    )
+    _, xy_test = load_partition(
+        xy_partitions,
+        xy_test,
+        partition=0,
+        num_clients=1,
+        dry_run=args.dry_run,
+        seed=SEED,
+    )
 
     # Create client_manager, strategy, and server
     client_manager = flwr.SimpleClientManager()

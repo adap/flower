@@ -18,7 +18,7 @@
 import time
 import timeit
 from logging import INFO
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import tensorflow as tf
 
@@ -129,3 +129,16 @@ def keras_fit(
     """Train the model using model.fit(...)."""
     ds_train = dataset.batch(batch_size=batch_size, drop_remainder=False)
     model.fit(ds_train, epochs=num_epochs, callbacks=callbacks, verbose=2)
+
+
+def get_lr_schedule(
+    epoch_global: int, lr_initial: float, lr_decay: float
+) -> Callable[[int], float]:
+    """Return a schedule which decays the learning rate after each epoch."""
+
+    def lr_schedule(epoch: int) -> float:
+        """Learning rate schedule."""
+        epoch += epoch_global
+        return lr_initial * lr_decay ** epoch
+
+    return lr_schedule

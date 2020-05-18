@@ -17,14 +17,19 @@
 
 import argparse
 from logging import DEBUG
-from typing import Callable, Tuple, cast
+from typing import Tuple
 
 import numpy as np
 import tensorflow as tf
 
 import flower as flwr
 from flower.logger import configure, log
-from flower_benchmark.common import build_dataset, custom_fit, keras_evaluate
+from flower_benchmark.common import (
+    build_dataset,
+    custom_fit,
+    keras_evaluate,
+    load_partition,
+)
 from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
 
@@ -84,12 +89,20 @@ def main() -> None:
     # Configure logger
     configure(f"client:{args.cid}", args.log_file, args.log_host)
 
-    # Load model and data
+    # Load model
     model = resnet50v2(input_shape=(32, 32, 3), num_classes=args.cifar, seed=SEED)
-    xy_train, xy_test = load_data(
+
+    # Load local data partition
+    use_cifar100 = args.cifar == 100
+    xy_partitions, xy_test = tf_cifar_partitioned.load_data(
+        iid_fraction=0.0, num_partitions=args.clients, cifar100=use_cifar100
+    )
+    xy_train, xy_test = load_partition(
+        xy_partitions,
+        xy_test,
         partition=args.partition,
-        num_classes=args.cifar,
         num_clients=args.clients,
+        seed=SEED,
         dry_run=args.dry_run,
     )
 
@@ -205,70 +218,6 @@ class CifarClient(flwr.Client):
 
         # Return the number of evaluation examples and the evaluation result (loss)
         return self.num_examples_test, loss
-
-
-def get_lr_schedule(
-    epoch_global: int, lr_initial: float, lr_decay: float
-) -> Callable[[int], float]:
-    """Return a schedule which decays the learning rate after each epoch."""
-
-    def lr_schedule(epoch: int) -> float:
-        """Learning rate schedule."""
-        epoch += epoch_global
-        return lr_initial * lr_decay ** epoch
-
-    return lr_schedule
-
-
-def load_data(
-    partition: int, num_classes: int, num_clients: int, dry_run: bool = False,
-) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
-    """Load, normalize, and sample CIFAR-10/100."""
-    use_cifar100 = num_classes == 100
-    xy_partitions, (x_test, y_test) = tf_cifar_partitioned.load_data(
-        iid_fraction=0.0, num_partitions=num_clients, cifar100=use_cifar100
-    )
-
-    # Take partition
-    x_train, y_train = xy_partitions[partition]
-
-    # Take a subset of the test set
-    x_test, y_test = shuffle(x_test, y_test, seed=SEED)
-    x_test, y_test = get_partition(x_test, y_test, partition, num_clients)
-
-    # Adjust y shape for model
-    y_train = adjust_y_shape(y_train)
-    y_test = adjust_y_shape(y_test)
-
-    # Return a small subset of the data if dry_run is set
-    if dry_run:
-        return (x_train[0:100], y_train[0:100]), (x_test[0:50], y_test[0:50])
-    return (x_train, y_train), (x_test, y_test)
-
-
-def shuffle(
-    x_orig: np.ndarray, y_orig: np.ndarray, seed: int
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Shuffle x and y in the same way."""
-    np.random.seed(seed)
-    idx = np.random.permutation(len(x_orig))
-    return x_orig[idx], y_orig[idx]
-
-
-def get_partition(
-    x_orig: np.ndarray, y_orig: np.ndarray, partition: int, num_clients: int
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Return a single partition of an equally partitioned dataset."""
-    step_size = len(x_orig) / num_clients
-    start_index = int(step_size * partition)
-    end_index = int(start_index + step_size)
-    return x_orig[start_index:end_index], y_orig[start_index:end_index]
-
-
-def adjust_y_shape(nda: np.ndarray) -> np.ndarray:
-    """Turn shape (x, 1) into (x)."""
-    nda_adjusted = np.reshape(nda, (nda.shape[0]))
-    return cast(np.ndarray, nda_adjusted)
 
 
 if __name__ == "__main__":
