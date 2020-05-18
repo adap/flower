@@ -53,7 +53,7 @@ INSTANCE_TYPES = [
     ("t3.small", 2, 2),  # 24 CPU Credits/hour; $0.0209/hour
     ("t3.medium", 2, 4),  # 24 CPU Credits/hour; $0.0418/hour
     ("m5a.large", 2, 8),
-    ("m5a.xlarge", 4, 16),
+    ("m5a.xlarge", 4, 16), # Minimum size of Fashion-MNIST server/client
     ("m5a.2xlarge", 8, 32),
     ("m5a.4xlarge", 16, 64),
 ]
