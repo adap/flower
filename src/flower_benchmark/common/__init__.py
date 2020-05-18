@@ -15,5 +15,6 @@
 """Common benchmark components."""
 
 
+from .client import VisionClassificationClient
 from .common import custom_fit, get_lr_schedule, keras_evaluate, keras_fit
 from .data import build_dataset, load_partition
