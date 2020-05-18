@@ -53,7 +53,7 @@ INSTANCE_TYPES = [
     ("t3.small", 2, 2),  # 24 CPU Credits/hour; $0.0209/hour
     ("t3.medium", 2, 4),  # 24 CPU Credits/hour; $0.0418/hour
     ("m5a.large", 2, 8),
-    ("m5a.xlarge", 4, 16), # Minimum size of Fashion-MNIST server/client
+    ("m5a.xlarge", 4, 16),  # Minimum size of Fashion-MNIST server/client
     ("m5a.2xlarge", 8, 32),
     ("m5a.4xlarge", 16, 64),
 ]
@@ -65,7 +65,7 @@ def find_instance_type(
     """Return the first matching instance type if one exists, raise otherwise."""
     for instance_type in instance_types:
         if instance_type[1] == num_cpu and instance_type[2] == num_ram:
-            
+
             return instance_type[0]
 
     raise NoMatchingInstanceType
