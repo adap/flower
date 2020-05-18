@@ -194,4 +194,5 @@ if __name__ == "__main__":
     try:
         main()
     except Exception:
-        log(ERROR, "Fatal error in main", exc_info=True)
+        log(ERROR, "Fatal error in main")
+        log(ERROR, err, exc_info=True, stack_info=True)

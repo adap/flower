@@ -102,5 +102,7 @@ if __name__ == "__main__":
     # pylint: disable=broad-except
     try:
         main()
-    except Exception:
-        log(ERROR, "Fatal error in main", exc_info=True)
+    except Exception as err:
+        log(ERROR, "Fatal error in main")
+        log(ERROR, err, exc_info=True, stack_info=True)
+
