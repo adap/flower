@@ -38,10 +38,12 @@ CONFIG.read(OPS_INI_PATH)
 def configure_cluster(adapter: str, benchmark_name: str) -> Cluster:
     """Return configured compute cluster."""
     adapter_instance: Optional[Adapter] = None
+    private_key: str = None
 
     if adapter == "docker":
         adapter_instance = DockerAdapter(name="flower")
         user = "root"
+        private_key = f"{path.dirname(path.realpath(__file__))}/../../../docker/ssh_key"
     elif adapter == "ec2":
         adapter_instance = EC2Adapter(
             image_id=CONFIG.get("aws", "image_id"),
@@ -51,14 +53,15 @@ def configure_cluster(adapter: str, benchmark_name: str) -> Cluster:
             tags=[("Purpose", "flower_benchmark"), ("Benchmark Name", benchmark_name)],
         )
         user = "ubuntu"
+        private_key = path.expanduser(CONFIG.get("ssh", "private_key"))
     else:
         raise Exception(f"Adapter of type {adapter} does not exist.")
 
     cluster = Cluster(
         adapter=adapter_instance,
-        ssh_credentials=(user, path.expanduser(CONFIG.get("ssh", "private_key"))),
-        specs={"logserver": (2, 1, 1), "server": (2, 8, 1), "clients": (4, 16, 2)},
-        timeout=20,
+        ssh_credentials=(user, private_key),
+        specs={"logserver": (2, 2, 1), "server": (4, 16, 1), "clients": (4, 16, 2)},
+        timeout=60,
     )
 
     return cluster
