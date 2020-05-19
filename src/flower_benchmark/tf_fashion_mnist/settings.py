@@ -28,13 +28,6 @@ class ServerSetting:
     min_sample_size: int = 100
     training_round_timeout: int = 3600
     lr_initial: float = 0.1
-    # int: epochs
-    # str: strategy = "fast-and-slow", "sync-fedavg", "async-fedavg"
-    # for fast-and-slow:
-    # - Bool: partial updates
-    # - Bool: importance sampling
-    # - int: t_fast, t_slow
-    # - int: r_fast, r_slow
     dry_run: bool = False
 
 
@@ -44,8 +37,6 @@ class ClientSetting:
 
     num_clients: int = 100
     dry_run: bool = False
-    # delay_factor per client
-    # iid fraction
 
 
 @dataclass
@@ -74,9 +65,9 @@ SETTINGS = {
             sample_fraction=1.0,
             min_sample_size=1,
             training_round_timeout=600,
-            dry_run=True
+            dry_run=True,
         ),
-        clients=[ClientSetting(num_clients=1)],
+        clients=[ClientSetting(num_clients=4, dry_run=True)],
     ),
     "minimal": Setting(
         server=ServerSetting(
@@ -87,5 +78,5 @@ SETTINGS = {
             training_round_timeout=3600,
         ),
         clients=[ClientSetting(num_clients=4)],
-    )
+    ),
 }
