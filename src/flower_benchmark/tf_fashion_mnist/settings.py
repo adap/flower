@@ -67,6 +67,17 @@ def get_setting(name: str) -> Setting:
 
 
 SETTINGS = {
+    "dry": Setting(
+        server=ServerSetting(
+            rounds=1,
+            min_num_clients=1,
+            sample_fraction=1.0,
+            min_sample_size=1,
+            training_round_timeout=600,
+            dry_run=True
+        ),
+        clients=[ClientSetting(num_clients=1)],
+    ),
     "minimal": Setting(
         server=ServerSetting(
             rounds=2,
