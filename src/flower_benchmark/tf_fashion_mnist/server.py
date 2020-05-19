@@ -16,10 +16,11 @@
 
 
 import argparse
+from logging import ERROR
 from typing import Callable, Dict
 
 import flower as flwr
-from flower.logger import configure
+from flower.logger import configure, log
 from flower_benchmark.common import get_eval_fn, load_partition
 from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 from flower_benchmark.model import orig_cnn
@@ -168,4 +169,12 @@ def get_on_fit_config_fn(
 
 
 if __name__ == "__main__":
-    main()
+    # pylint: disable=broad-except
+    try:
+        main()
+    except Exception as err:
+        log(ERROR, "Fatal error in main")
+        log(ERROR, err, exc_info=True, stack_info=True)
+
+        # Raise the error again so the exit code is correct
+        raise err

@@ -18,7 +18,7 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-HASH=$(printf "$(git rev-parse HEAD)\n$(git diff)" | sha1sum | cut -c1-7)
+HASH=$(printf "$(git rev-parse HEAD)\n$(git diff | sha1sum)" | sha1sum | cut -c1-7)
 
 poetry build
 docker build -f docker/default.Dockerfile -t flower:latest -t flower:$HASH .

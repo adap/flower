@@ -21,12 +21,18 @@ from dataclasses import dataclass
 class Setting:
     """One specific training setting."""
 
-    rounds: int
-    num_clients: int
-    sample_fraction: float
-    min_sample_size: int
-    min_num_clients: int
-    training_round_timeout: int
+    # Global paramters
+    rounds: int = 100
+
+    # Server parameters
+    sample_fraction: float = 1.0
+    min_sample_size: int = 100
+    min_num_clients: int = 100
+    training_round_timeout: int = 3600
+
+    # Client parameters
+    num_clients: int = 100
+    dry_run: bool = False
 
 
 def get_setting(name: str) -> Setting:
@@ -42,18 +48,10 @@ def get_setting(name: str) -> Setting:
 SETTINGS = {
     "minimal": Setting(
         rounds=2,
-        num_clients=1,
         sample_fraction=1.0,
-        min_sample_size=1,
-        min_num_clients=1,
+        min_sample_size=3,
+        min_num_clients=4,
         training_round_timeout=3600,
-    ),
-    "fixed_delay_variable_timeout_60": Setting(
-        rounds=5,
-        num_clients=10,
-        sample_fraction=1.0,
-        min_sample_size=10,
-        min_num_clients=10,
-        training_round_timeout=60,
-    ),
+        num_clients=4,
+    )
 }

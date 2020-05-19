@@ -50,19 +50,17 @@ class EC2StatusTimeout(Exception):
 # List of AWS instance types with
 # (instance_type, vCPU, Mem)
 INSTANCE_TYPES = [
-    ("t3.nano", 2, 0.5),  # 6 CPU Credits/hour
-    ("t3.micro", 2, 1),  # 12 CPU Credits/hour
-    ("t3.small", 2, 2),  # 24 CPU Credits/hour
-    ("t3.medium", 2, 4),  # 24 CPU Credits/hour
+    ("t3.small", 2, 2),  # 24 CPU Credits/hour; $0.0209/hour
+    ("t3.medium", 2, 4),  # 24 CPU Credits/hour; $0.0418/hour
     ("m5a.large", 2, 8),
-    ("m5a.xlarge", 4, 16),
+    ("m5a.xlarge", 4, 16),  # Minimum size of Fashion-MNIST server/client
     ("m5a.2xlarge", 8, 32),
     ("m5a.4xlarge", 16, 64),
 ]
 
 
 def find_instance_type(
-    num_cpu: int, num_ram: float, instance_types: List[Tuple[str, int, float]]
+    num_cpu: int, num_ram: float, instance_types: List[Tuple[str, int, int]]
 ) -> str:
     """Return the first matching instance type if one exists, raise otherwise."""
     for instance_type in instance_types:
@@ -194,6 +192,7 @@ class EC2Adapter(Adapter):
             MaxCount=num_instances,
             InstanceType=find_instance_type(num_cpu, num_ram, INSTANCE_TYPES),
             KeyName=self.key_name,
+            IamInstanceProfile={"Name": "FlowerInstanceProfile"},
             SubnetId=self.subnet_id,
             SecurityGroupIds=self.security_group_ids,
             TagSpecifications=self.tag_specifications,
