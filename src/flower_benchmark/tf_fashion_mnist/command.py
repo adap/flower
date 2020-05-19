@@ -19,7 +19,7 @@ from typing import Optional
 
 def install_wheel(wheel_remote_path: str) -> str:
     """Return install command for wheel.
-    
+
     Remove previous versions if existing.
     """
     return f"python3.7 -m pip uninstall -y flower && python3.7 -m pip install {wheel_remote_path}"
@@ -58,7 +58,7 @@ def start_client(
 ) -> str:
     """Build command to run client."""
     cmd = (
-        f"screen -d -m"
+        "screen -d -m"
         + " python3.7 -m flower_benchmark.tf_fashion_mnist.client"
         + f" --log_host={log_host}"
         + f" --grpc_server_address={grpc_server_address}"
