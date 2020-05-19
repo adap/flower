@@ -64,6 +64,55 @@ def get_setting(name: str) -> Setting:
     return SETTINGS[name]
 
 
+def configure_uniform_clients(
+    iid_fraction: float, num_clients: int, dry_run: bool,
+) -> List[ClientSetting]:
+    """Configure `num_clients`, all using the same delay factor."""
+    clients = []
+    for i in range(num_clients):
+        client = ClientSetting(
+            # Individual
+            cid=str(i),
+            partition=i,
+            delay_factor=0.0,
+            # Shared
+            iid_fraction=iid_fraction,
+            num_clients=num_clients,
+            dry_run=dry_run,
+        )
+        clients.append(client)
+
+    return clients
+
+
+def configure_clients(
+    iid_fraction: float,
+    num_clients: int,
+    dry_run: bool,
+    delay_factor_fast: float,
+    delay_factor_slow: float,
+) -> List[ClientSetting]:
+    """Configure `num_clients` with different delay factors."""
+    clients = []
+    for i in range(num_clients):
+        client = ClientSetting(
+            # Individual
+            cid=str(i),
+            partition=i,
+            # Indices 0 to 49 fast, 50 to 99 slow
+            delay_factor=delay_factor_fast
+            if i < int(num_clients / 2)
+            else delay_factor_slow,
+            # Shared
+            iid_fraction=iid_fraction,
+            num_clients=num_clients,
+            dry_run=dry_run,
+        )
+        clients.append(client)
+
+    return clients
+
+
 SETTINGS = {
     "dry": Setting(
         server=ServerSetting(
@@ -130,52 +179,3 @@ SETTINGS = {
         ),
     ),
 }
-
-
-def configure_uniform_clients(
-    iid_fraction: float, num_clients: int, dry_run: bool,
-) -> List[ClientSetting]:
-    """Configure `num_clients`, all using the same delay factor."""
-    clients = []
-    for i in range(num_clients):
-        client = ClientSetting(
-            # Individual
-            cid=str(i),
-            partition=i,
-            delay_factor=0.0,
-            # Shared
-            iid_fraction=iid_fraction,
-            num_clients=num_clients,
-            dry_run=dry_run,
-        )
-        clients.append(client)
-
-    return clients
-
-
-def configure_clients(
-    iid_fraction: float,
-    num_clients: int,
-    dry_run: bool,
-    delay_factor_fast: float,
-    delay_factor_slow: float,
-) -> List[ClientSetting]:
-    """Configure `num_clients` with different delay factors."""
-    clients = []
-    for i in range(num_clients):
-        client = ClientSetting(
-            # Individual
-            cid=str(i),
-            partition=i,
-            # Indices 0 to 49 fast, 50 to 99 slow
-            delay_factor=delay_factor_fast
-            if i < int(num_clients / 2)
-            else delay_factor_slow,
-            # Shared
-            iid_fraction=iid_fraction,
-            num_clients=num_clients,
-            dry_run=dry_run,
-        )
-        clients.append(client)
-
-    return clients

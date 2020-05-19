@@ -25,14 +25,15 @@ from flower.logger import configure, log
 from flower_benchmark.common import VisionClassificationClient, load_partition
 from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 from flower_benchmark.model import orig_cnn
+from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
 
 tf.get_logger().setLevel("ERROR")
 
 
-def main() -> None:
-    """Load data, create and start FashionMnistClient."""
+def parse_args() -> argparse.Namespace:
+    """Parse and return commandline arguments."""
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
         "--grpc_server_address",
@@ -41,61 +42,48 @@ def main() -> None:
         help="gRPC server address (IPv6, default: [::])",
     )
     parser.add_argument(
-        "--grpc_server_port",
-        type=int,
-        default=DEFAULT_GRPC_SERVER_PORT,
-        help="gRPC server port (default: 8080)",
-    )
-    parser.add_argument(
-        "--cid", type=str, required=True, help="Client CID (no default)"
-    )
-    parser.add_argument(
-        "--partition", type=int, required=True, help="Partition index (no default)"
-    )
-    parser.add_argument(
-        "--clients", type=int, required=True, help="Number of clients (no default)",
-    )
-    parser.add_argument(
-        "--delay_factor",
-        type=float,
-        default=0.0,
-        help="Delay factor increases the time batches take to compute (default: 0.0)",
-    )
-    parser.add_argument(
-        "--dry_run", type=bool, default=False, help="Dry run (default: False)"
-    )
-    parser.add_argument(
-        "--log_file", type=str, help="Log file path (no default)",
-    )
-    parser.add_argument(
         "--log_host", type=str, help="HTTP log handler host (no default)",
     )
-    args = parser.parse_args()
+    parser.add_argument(
+        "--setting", type=str, choices=SETTINGS.keys(), help="Setting to run.",
+    )
+    parser.add_argument(
+        "--index", type=int, required=True, help="Client index in settings."
+    )
+    return parser.parse_args()
+
+
+def main() -> None:
+    """Load data, create and start FashionMnistClient."""
+    args = parse_args()
+
+    client_setting = get_setting(args.setting).clients[args.index]
 
     # Configure logger
-    configure(f"client:{args.cid}", args.log_file, args.log_host)
+    configure(identifier=f"client:{client_setting.cid}", host=args.log_host)
 
     # Load model
     model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
 
     # Load local data partition
     xy_partitions, xy_test = tf_fashion_mnist_partitioned.load_data(
-        iid_fraction=0.0, num_partitions=args.clients
+        iid_fraction=client_setting.iid_fraction,
+        num_partitions=client_setting.num_clients,
     )
     xy_train, xy_test = load_partition(
         xy_partitions,
         xy_test,
-        partition=args.partition,
-        num_clients=args.clients,
-        dry_run=args.dry_run,
+        partition=client_setting.partition,
+        num_clients=client_setting.num_clients,
+        dry_run=client_setting.dry_run,
         seed=SEED,
     )
 
     # Start client
     client = VisionClassificationClient(
-        args.cid, model, xy_train, xy_test, args.delay_factor, 10
+        client_setting.cid, model, xy_train, xy_test, client_setting.delay_factor, 10
     )
-    flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
+    flwr.app.start_client(args.grpc_server_address, DEFAULT_GRPC_SERVER_PORT, client)
 
 
 if __name__ == "__main__":

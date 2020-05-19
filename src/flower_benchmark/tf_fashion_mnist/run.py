@@ -71,15 +71,13 @@ def configure_cluster(adapter: str, benchmark_name: str) -> Cluster:
 def run(
     # Server paramters
     setting: str,
-    # Client parameters
-    num_clients: int,
-    dry_run: bool,
     # Environment
-    logserver_s3_bucket: Optional[str] = None,
     adapter: str = "docker",
     benchmark_name: str = "fashion_mnist",
 ) -> None:
     """Run benchmark."""
+    print(f"Starting benchmark with {setting} settings.")
+
     wheel_filename = CONFIG.get("paths", "wheel_filename")
     wheel_local_path = (
         path.expanduser(CONFIG.get("paths", "wheel_dir")) + wheel_filename
@@ -108,7 +106,7 @@ def run(
     cluster.exec(
         logserver_id,
         command.start_logserver(
-            logserver_s3_bucket=logserver_s3_bucket,
+            logserver_s3_bucket=CONFIG.get("aws", "logserver_s3_bucket"),
             logserver_s3_key=f"{benchmark_name}.log",
         ),
     )
@@ -125,24 +123,23 @@ def run(
     client_instances = cluster.instances["clients"]
 
     # Make dataset locally available
-    cluster.exec(client_instances[0][0], command.download_dataset())
-    cluster.exec(client_instances[1][0], command.download_dataset())
+    cluster.exec_group("clients", command.download_dataset())
 
-    for i in range(0, num_clients):
-        client_id = (
+    num_client_processes = len(get_setting(setting).clients)
+
+    for i in range(0, num_client_processes):
+        instance_id = (
             client_instances[0][0]
-            if i < int(num_clients / 2)
+            if i < int(num_client_processes / 2)
             else client_instances[1][0]
         )
         cluster.exec(
-            client_id,
+            instance_id,
             command.start_client(
                 log_host=f"{logserver_private_ip}:8081",
                 grpc_server_address=server_private_ip,
-                cid=str(i),
-                partition=i,
-                num_partitions=num_clients,
-                dry_run=dry_run,
+                setting=setting,
+                index=i,
             ),
         )
 
@@ -177,25 +174,10 @@ def main() -> None:
         choices=["docker", "ec2"],
         help="Set adapter to be used.",
     )
-    parser.add_argument(
-        "--logserver_s3_bucket",
-        type=str,
-        help="S3 bucket where the logfile should be uploaded to.",
-    )
     args = parser.parse_args()
 
-    client_setting = get_setting(args.setting).clients[0]
-
-    print(f"Starting benchmark with {args.setting} settings.")
-
     run(
-        setting=args.setting,
-        # Client settings
-        num_clients=client_setting.num_clients,
-        dry_run=client_setting.dry_run,
-        adapter=args.adapter,
-        benchmark_name=args.setting,
-        logserver_s3_bucket=args.logserver_s3_bucket,
+        setting=args.setting, adapter=args.adapter, benchmark_name=args.setting,
     )
 
 
