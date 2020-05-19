@@ -196,3 +196,6 @@ if __name__ == "__main__":
     except Exception as err:
         log(ERROR, "Fatal error in main")
         log(ERROR, err, exc_info=True, stack_info=True)
+        
+        # Raise the error again so the exit code is correct
+        raise err
