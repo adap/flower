@@ -24,75 +24,32 @@ from flower.logger import configure, log
 from flower_benchmark.common import get_eval_fn, load_partition
 from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 from flower_benchmark.model import orig_cnn
+from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
 
 
-def main() -> None:
-    """Start server and train `--rounds` number of rounds."""
+def parse_args() -> argparse.Namespace:
+    """Parse and return commandline arguments."""
     parser = argparse.ArgumentParser(description="Flower")
-    parser.add_argument(
-        "--grpc_server_address",
-        type=str,
-        default=DEFAULT_GRPC_SERVER_ADDRESS,
-        help="gRPC server address (IPv6, default: [::])",
-    )
-    parser.add_argument(
-        "--grpc_server_port",
-        type=int,
-        default=DEFAULT_GRPC_SERVER_PORT,
-        help="gRPC server port (default: 8080)",
-    )
-    parser.add_argument(
-        "--rounds",
-        type=int,
-        default=1,
-        help="Number of rounds of federated learning (default: 1)",
-    )
-    parser.add_argument(
-        "--sample_fraction",
-        type=float,
-        default=0.1,
-        help="Fraction of available clients used for fit/evaluate (default: 0.1)",
-    )
-    parser.add_argument(
-        "--min_sample_size",
-        type=int,
-        default=1,
-        help="Minimum number of clients used for fit/evaluate (default: 1)",
-    )
-    parser.add_argument(
-        "--min_num_clients",
-        type=int,
-        default=1,
-        help="Minimum number of available clients required for sampling (default: 1)",
-    )
-    parser.add_argument(
-        "--lr_initial",
-        type=float,
-        default=0.1,
-        help="Initial learning rate (default: 0.1)",
-    )
-    parser.add_argument(
-        "--training_round_timeout",
-        type=int,
-        default=60,
-        help="Round timeout in seconds (default: 60)",
-    )
-    parser.add_argument("--cid", type=str, help="Client CID (no default)")
-    parser.add_argument(
-        "--dry_run", type=bool, default=False, help="Dry run (default: False)"
-    )
-    parser.add_argument(
-        "--log_file", type=str, help="Log file path (no default)",
-    )
     parser.add_argument(
         "--log_host", type=str, help="HTTP log handler host (no default)",
     )
-    args = parser.parse_args()
+    parser.add_argument(
+        "--setting", type=str, choices=SETTINGS.keys(), help="Setting to run.",
+    )
+
+    return parser.parse_args()
+
+
+def main() -> None:
+    """Start server and train `--rounds` number of rounds."""
+    args = parse_args()
 
     # Configure logger
-    configure("server", args.log_file, args.log_host)
+    configure(identifier="server", host=args.log_host)
+
+    server_setting = get_setting(args.setting).server
 
     # Load evaluation data
     xy_partitions, xy_test = tf_fashion_mnist_partitioned.load_data(
@@ -103,7 +60,7 @@ def main() -> None:
         xy_test,
         partition=0,
         num_clients=1,
-        dry_run=args.dry_run,
+        dry_run=server_setting.dry_run,
         seed=SEED,
     )
 
@@ -114,12 +71,12 @@ def main() -> None:
     client_manager = flwr.SimpleClientManager()
 
     strategy = flwr.strategy.DefaultStrategy(
-        fraction_fit=args.sample_fraction,
-        min_fit_clients=args.min_sample_size,
-        min_available_clients=args.min_num_clients,
+        fraction_fit=server_setting.sample_fraction,
+        min_fit_clients=server_setting.min_sample_size,
+        min_available_clients=server_setting.min_num_clients,
         eval_fn=get_eval_fn(model=model, num_classes=10, xy_test=xy_test),
         on_fit_config_fn=get_on_fit_config_fn(
-            args.lr_initial, args.training_round_timeout
+            server_setting.lr_initial, server_setting.training_round_timeout
         ),
     )
     # strategy = flwr.strategy.FastAndSlow(
@@ -140,10 +97,10 @@ def main() -> None:
 
     # Run server
     flwr.app.start_server(
-        args.grpc_server_address,
-        args.grpc_server_port,
+        DEFAULT_GRPC_SERVER_ADDRESS,
+        DEFAULT_GRPC_SERVER_PORT,
         server,
-        config={"num_rounds": args.rounds},
+        config={"num_rounds": server_setting.rounds},
     )
 
 
