@@ -16,10 +16,10 @@
 # ==============================================================================
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
-HASH=$(printf "$(git rev-parse HEAD)\n$(git diff | sha1sum)" | sha1sum | cut -c1-7)
+# Build `.whl` from current state
+./dev/build.sh
 
-python -m poetry build
-docker build -f docker/default.Dockerfile -t flower:latest -t flower:$HASH .
-docker build -f docker/sshd.Dockerfile --build-arg SSH_PUBLIC_KEY="$(cat docker/ssh_key.pub)" -t flower-sshd:latest -t flower-sshd:$HASH .
+# Execute `run.py`
+python -m flower_benchmark.tf_fashion_mnist.run --adapter="docker" --setting="minimal"
