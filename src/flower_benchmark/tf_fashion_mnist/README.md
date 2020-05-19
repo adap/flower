@@ -44,7 +44,13 @@ not incure any cost).
 The provided AMI is a bare Ubuntu 18.04 image which was modified using the
 `dev/aws_ami_bootstrap.sh` script.
 
-## Build
+## Build Docker Container
+
+```bash
+./docker/build.sh
+```
+
+## Build Python Wheel
 
 To execute the latest version of your benchmarks during development, please 
 ensure that the `.whl` build in `dist/` reflects your changes. Re-build
