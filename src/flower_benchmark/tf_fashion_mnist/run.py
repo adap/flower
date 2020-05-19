@@ -41,7 +41,7 @@ def configure_cluster(adapter: str, benchmark_name: str) -> Cluster:
     private_key: Optional[str] = None
 
     if adapter == "docker":
-        adapter_instance = DockerAdapter(name="flower")
+        adapter_instance = DockerAdapter()
         user = "root"
         private_key = f"{path.dirname(path.realpath(__file__))}/../../../docker/ssh_key"
     elif adapter == "ec2":
@@ -118,7 +118,7 @@ def run(
         ),
     )
 
-    # Start flower server on flower server instances
+    # Start Flower server on Flower server instances
     server_id, server_private_ip, _, _, _ = cluster.instances["server"][0]
     cluster.exec(server_id, command.download_dataset())
     cluster.exec(
@@ -133,7 +133,7 @@ def run(
         ),
     )
 
-    # Start flower clients
+    # Start Flower clients
     client_instances = cluster.instances["clients"]
 
     # Make dataset locally available
@@ -158,7 +158,7 @@ def run(
             ),
         )
 
-    # Shutdown server and client instance after 10min if not at least one flower
+    # Shutdown server and client instance after 10min if not at least one Flower
     # process is running it
     cluster.exec_group(
         "logserver", command.watch_and_shutdown("[f]lower_logserver", adapter)
@@ -174,7 +174,7 @@ def run(
 
 
 def main() -> None:
-    """Start flower benchmark."""
+    """Start Flower benchmark."""
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
         "--setting",

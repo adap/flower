@@ -24,7 +24,7 @@ class Setting:
     # Global paramters
     rounds: int = 100
 
-    # Server paramters
+    # Server parameters
     sample_fraction: float = 1.0
     min_sample_size: int = 100
     min_num_clients: int = 100

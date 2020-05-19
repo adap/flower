@@ -19,7 +19,6 @@ import argparse
 from logging import ERROR
 from typing import Callable, Dict
 
-
 import flower as flwr
 from flower.logger import configure, log
 from flower_benchmark.common import get_eval_fn, load_partition
