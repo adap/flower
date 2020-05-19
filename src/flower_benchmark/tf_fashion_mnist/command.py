@@ -18,15 +18,18 @@ from typing import Optional
 
 
 def install_wheel(wheel_remote_path: str) -> str:
-    "Return install command for wheel."
-    return f"python3.7 -m pip install {wheel_remote_path}"
+    """Return install command for wheel.
+    
+    Remove previous versions if existing.
+    """
+    return f"python3.7 -m pip uninstall -y flower && python3.7 -m pip install {wheel_remote_path}"
 
 
 def start_logserver(
     logserver_s3_bucket: Optional[str] = None, logserver_s3_key: Optional[str] = None
 ) -> str:
     """Return command to run logserver."""
-    cmd = "screen -L -Logfile logserver.log -d -m python3.7 -m flower_logserver"
+    cmd = "screen -d -m python3.7 -m flower_logserver"
 
     if logserver_s3_bucket is not None and logserver_s3_key is not None:
         cmd += f" --s3_bucket={logserver_s3_bucket}" + f" --s3_key={logserver_s3_key}"
@@ -38,7 +41,7 @@ def start_logserver(
 def start_server(log_host: str, setting: str) -> str:
     """Build command to run server."""
     return (
-        "screen -L -Logfile server.log -d -m"
+        "screen -d -m"
         + " python3.7 -m flower_benchmark.tf_fashion_mnist.server"
         + f" --log_host={log_host}"
         + f" --setting={setting}"
@@ -55,7 +58,7 @@ def start_client(
 ) -> str:
     """Build command to run client."""
     cmd = (
-        f"screen -L -Logfile client_{cid}.log -d -m"
+        f"screen -d -m"
         + " python3.7 -m flower_benchmark.tf_fashion_mnist.client"
         + f" --log_host={log_host}"
         + f" --grpc_server_address={grpc_server_address}"
