@@ -49,15 +49,14 @@ def start_server(log_host: str, setting: str) -> str:
 
 
 def start_client(
-    log_host: str, grpc_server_address: str, setting: str, index: int
+    grpc_server_address: str, log_host: str, setting: str, index: int
 ) -> str:
     """Build command to run client."""
     return (
         "screen -d -m"
         + " python3.7 -m flower_benchmark.tf_fashion_mnist.client"
-        + f" --log_host={log_host}"
         + f" --grpc_server_address={grpc_server_address}"
-        + " --grpc_server_port=8080"
+        + f" --log_host={log_host}"
         + f" --setting={setting}"
         + f" --index={index}"
     )

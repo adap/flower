@@ -145,15 +145,15 @@ def run(
 
     # Shutdown server and client instance after 10min if not at least one Flower
     # process is running it
-    # cluster.exec_group(
-    #     "logserver", command.watch_and_shutdown("[f]lower_logserver", adapter)
-    # )
-    # cluster.exec_group(
-    #     "server", command.watch_and_shutdown("[f]lower_benchmark", adapter)
-    # )
-    # cluster.exec_group(
-    #     "clients", command.watch_and_shutdown("[f]lower_benchmark", adapter)
-    # )
+    cluster.exec_group(
+        "logserver", command.watch_and_shutdown("[f]lower_logserver", adapter)
+    )
+    cluster.exec_group(
+        "server", command.watch_and_shutdown("[f]lower_benchmark", adapter)
+    )
+    cluster.exec_group(
+        "clients", command.watch_and_shutdown("[f]lower_benchmark", adapter)
+    )
 
     print(cluster.instances)
 

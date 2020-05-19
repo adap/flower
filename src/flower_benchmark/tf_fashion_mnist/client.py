@@ -42,12 +42,6 @@ def parse_args() -> argparse.Namespace:
         help="gRPC server address (IPv6, default: [::])",
     )
     parser.add_argument(
-        "--grpc_server_port",
-        type=int,
-        default=DEFAULT_GRPC_SERVER_PORT,
-        help="gRPC server port (default: 8080)",
-    )
-    parser.add_argument(
         "--log_host", type=str, help="HTTP log handler host (no default)",
     )
     parser.add_argument(
@@ -89,7 +83,7 @@ def main() -> None:
     client = VisionClassificationClient(
         client_setting.cid, model, xy_train, xy_test, client_setting.delay_factor, 10
     )
-    flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
+    flwr.app.start_client(args.grpc_server_address, DEFAULT_GRPC_SERVER_PORT, client)
 
 
 if __name__ == "__main__":

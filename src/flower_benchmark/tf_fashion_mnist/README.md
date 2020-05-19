@@ -15,6 +15,7 @@ image_id = ami-05c2bf7b7f41b7df6
 key_name = AWS_KEY_NAME
 subnet_id = YOUR_AWS_SUBNET_ID
 security_group_ids = YOUR_AWS_SECURITY_GROUP_ID
+logserver_s3_bucket = YOUR_S3_BUCKET
 
 [ssh]
 private_key = PATH_TO_YOU_PRIVATE_KEY_TO_SSH_INTO_THE_MACHINES
@@ -64,5 +65,5 @@ python -m flower_benchmark.tf_fashion_mnist.run --adapter="docker" --setting="mi
 To execute a benchmark setting remotely on AWS:
 
 ```bash
-python -m flower_benchmark.tf_fashion_mnist.run --adapter="ec2" --logserver_s3_bucket="your-s3-bucket" --setting="minimal"
+python -m flower_benchmark.tf_fashion_mnist.run --adapter="ec2" --setting="minimal"
 ```
