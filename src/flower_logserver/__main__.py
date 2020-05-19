@@ -52,24 +52,31 @@ def upload_logfile() -> None:
         logging.info(
             "Skipping S3 logfile upload as s3_bucket or s3_key was not provided."
         )
+    elif not Path(LOGFILE).is_file():
+        logging.info("No logfile found")
     else:
-        logging.warn("Uploading logfile to S3.")
-        boto3.resource("s3").meta.client.upload_file(
-            Filename=LOGFILE,
-            Bucket=CONFIG["s3_bucket"],
-            Key=CONFIG["s3_key"],
-            ExtraArgs={"ContentType": "text/plain"},
-        )
+        try:
+            logging.info("Uploading logfile to S3.")
+            boto3.resource("s3").meta.client.upload_file(
+                Filename=LOGFILE,
+                Bucket=CONFIG["s3_bucket"],
+                Key=CONFIG["s3_key"],
+                ExtraArgs={"ContentType": "text/plain"},
+            )
+        # pylint: disable=broad-except
+        except Exception as err:
+            logging.error(err)
 
 
-def continous_logfile_upload(stop_condition: Event) -> None:
+def continous_logfile_upload(stop_condition: Event, interval: int) -> None:
+    """Call upload_logfile function regularly until stop_condition Event is set."""
     while True:
         upload_logfile()
 
         if stop_condition.is_set():
             break
 
-        time.sleep(LOGFILE_UPLOAD_INTERVAL)
+        time.sleep(interval)
 
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -132,7 +139,8 @@ def main() -> None:
     # Start file upload loop
     sync_loop_stop_condition = Event()
     sync_loop = Thread(
-        target=continous_logfile_upload, args=(sync_loop_stop_condition,)
+        target=continous_logfile_upload,
+        args=(sync_loop_stop_condition, LOGFILE_UPLOAD_INTERVAL),
     )
     sync_loop.start()
 
