@@ -103,7 +103,7 @@ SETTINGS = {
             lr_initial=0.1,
             dry_run=False,
         ),
-        cients=configure_clients(
+        clients=configure_clients(
             iid_fraction=0.0,
             num_clients=100,
             dry_run=False,
@@ -121,7 +121,7 @@ SETTINGS = {
             lr_initial=0.1,
             dry_run=False,
         ),
-        cients=configure_clients(
+        clients=configure_clients(
             iid_fraction=0.0,
             num_clients=100,
             dry_run=False,
