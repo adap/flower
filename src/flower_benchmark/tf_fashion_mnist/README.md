@@ -1,8 +1,9 @@
-# Fashion-MNIST
+# Fashion-MNIST Benchmarks
 
-## Ops
-To execute the `run_aws.py` script you will have to create a `.flower_ops` file in the
-git root of this project. The file needs to contain the following fields
+## Prepare
+
+To execute the `run.py` script you need to create a `.flower_ops` file in the
+git root of this project. The file needs to contain the following fields:
 
 ```
 [paths]
@@ -22,21 +23,46 @@ private_key = PATH_TO_YOU_PRIVATE_KEY_TO_SSH_INTO_THE_MACHINES
 ### Remarks
 
 #### Wheel directory
-Adjust the wheel directory according to the localation of the repo on your machine.
+
+Adjust the wheel directory according to the localation of the repo on your
+machine.
 
 #### Security Group
-The security group needs to have port 8080 open so that the clients can connect to the server.
+
+The security group needs to have port 8080 open so that the clients can connect
+to the server.
 
 #### Subnet Id
-We are starting all instances in the same subnet to be more cost efficent (traffic between EC2
-instances in the same subnet over their private IP does not incure any cost).
+
+We are starting all instances in the same subnet to be more cost efficent
+(traffic between EC2 instances in the same subnet over their private IP does
+not incure any cost).
 
 #### AMI
-The provided AMI is a bare Ubuntu 18.04 image which was modified with the
+
+The provided AMI is a bare Ubuntu 18.04 image which was modified using the
 `dev/aws_ami_bootstrap.sh` script.
 
-### Execution
-To execute the script simply do:
+## Build
+
+To execute the latest version of your benchmarks during development, please 
+ensure that the `.whl` build in `dist/` reflects your changes. Re-build
+if necessary:
+
 ```bash
-python -m flower_benchmark.tf_fashion_mnist.run_aws
+./dev/build.sh
+```
+
+## Execute
+
+To execute a benchmark setting locally using docker:
+
+```bash
+python -m flower_benchmark.tf_fashion_mnist.run --adapter="docker" --setting="minimal"
+```
+
+To execute a benchmark setting remotely on AWS:
+
+```bash
+python -m flower_benchmark.tf_fashion_mnist.run --adapter="ec2" --logserver_s3_bucket="your-s3-bucket" --setting="minimal"
 ```
