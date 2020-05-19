@@ -1,9 +1,9 @@
 # Flower Ops
 ## Compute
 ### EC2 Adapter
-For permission management a IAM instance profile named `FlowerInstanceProfile` is expected.
+For permission management an IAM instance profile named `FlowerInstanceProfile` is expected.
 The instances will use that profile for all nessecary permissions. In case of logfile upload
-the profile should include the right to upload the logfile from the machine to the respective
+the profile must include the permission to upload the logfile from the machine to the respective
 S3 bucket.
 
 An example policy attached to the profile for the logfiles might look like:
