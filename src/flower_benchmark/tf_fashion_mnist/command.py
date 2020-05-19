@@ -45,7 +45,7 @@ def start_server(
 ) -> str:
     """Build command to run server."""
     return (
-        "screen -d -m python3.7 -m flower_benchmark.tf_fashion_mnist.server"
+        "screen -L 'server.log' -d -m python3.7 -m flower_benchmark.tf_fashion_mnist.server"
         + f" --log_host={log_host}"
         + f" --rounds={rounds}"
         + f" --sample_fraction={sample_fraction}"
@@ -65,7 +65,7 @@ def start_client(
 ) -> str:
     """Build command to run client."""
     cmd = (
-        "screen -d -m python3.7 -m flower_benchmark.tf_fashion_mnist.client"
+        f"screen -L 'client_{cid}.log' -d -m python3.7 -m flower_benchmark.tf_fashion_mnist.client"
         + f" --log_host={log_host}"
         + f" --grpc_server_address={grpc_server_address}"
         + " --grpc_server_port=8080"
@@ -74,7 +74,7 @@ def start_client(
         + f" --clients={num_partitions}"
     )
     if dry_run:
-        cmd += " --dry_run"
+        cmd += " --dry_run=1"
     return cmd
 
 
@@ -90,7 +90,7 @@ def watch_and_shutdown(keyword: str, adapter: str) -> str:
     if adapter == "docker":
         cmd += "kill 1'"
     elif adapter == "ec2":
-        cmd += "sudo shutdown -P now'"
+        cmd += "sudo shutdown -P 30'"
     else:
         raise Exception("Unknown Adapter")
 

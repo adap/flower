@@ -25,6 +25,7 @@ import urllib.parse
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+from threading import Event, Thread
 
 import boto3
 
@@ -37,6 +38,12 @@ CONFIG = {"s3_bucket": None, "s3_key": None}
 
 # Create a flower_logs directory to store the logfiles.
 Path(LOGDIR).mkdir(exist_ok=True)
+
+
+def write_to_logfile(line: str) -> None:
+    """Write line to logfile."""
+    with open(f"{LOGFILE}", "a+") as lfd:
+        lfd.write(line + "\n")
 
 
 def upload_logfile() -> None:
@@ -55,10 +62,14 @@ def upload_logfile() -> None:
         )
 
 
-def write_to_logfile(line: str) -> None:
-    """Write line to logfile."""
-    with open(f"{LOGFILE}", "a+") as lfd:
-        lfd.write(line + "\n")
+def continous_logfile_upload(stop_condition: Event) -> None:
+    while True:
+        upload_logfile()
+
+        if stop_condition.is_set():
+            break
+
+        time.sleep(LOGFILE_UPLOAD_INTERVAL)
 
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -93,7 +104,6 @@ class LogServer(HTTPServer):
 
     def handle_timeout(self):
         """Cleanup and upload logfile to S3."""
-        upload_logfile()
         self.server_close()
         raise TimeoutError()
 
@@ -119,21 +129,25 @@ def main() -> None:
     server = LogServer(("", 8081), RequestHandler)
     logging.info("Starting logging server...\n")
 
-    last_logfile_upload = int(time.time())
+    # Start file upload loop
+    sync_loop_stop_condition = Event()
+    sync_loop = Thread(
+        target=continous_logfile_upload, args=(sync_loop_stop_condition,)
+    )
+    sync_loop.start()
 
     try:
         while True:
             server.handle_request()
-
-            time_elapsed = int(time.time()) - last_logfile_upload
-
-            if time_elapsed > LOGFILE_UPLOAD_INTERVAL:
-                upload_logfile()
-                last_logfile_upload = int(time.time())
     except TimeoutError:
         print(
             f"TimeoutError raised as no request was received for {SERVER_TIMEOUT} seconds."
         )
+        sync_loop_stop_condition.set()
+        sync_loop.join()
+
+    # Final upload
+    upload_logfile()
 
     logging.info("Stopping logging server...\n")
 

@@ -83,7 +83,7 @@ class EC2AdapterTestCase(unittest.TestCase):
         )
 
         # Execute
-        instances = self.adapter.create_instances(num_cpu=2, num_ram=0.5, timeout=1)
+        instances = self.adapter.create_instances(num_cpu=2, num_ram=2, timeout=1)
 
         # Assert
         assert len(instances) == 1

@@ -48,7 +48,7 @@ if os.getenv("FLOWER_INTEGRATION"):
             """Create and start an instance."""
             # Execute
             instances = self.adapter.create_instances(
-                num_cpu=2, num_ram=0.5, timeout=1, num_instances=2,
+                num_cpu=2, num_ram=2, timeout=1, num_instances=2,
             )
 
             # Assert
