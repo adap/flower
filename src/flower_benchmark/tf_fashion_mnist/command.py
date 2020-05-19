@@ -46,7 +46,7 @@ def start_server(
     """Build command to run server."""
     return (
         "screen -L -Logfile server.log -d -m"
-        + "python3.7 -m flower_benchmark.tf_fashion_mnist.server"
+        + " python3.7 -m flower_benchmark.tf_fashion_mnist.server"
         + f" --log_host={log_host}"
         + f" --rounds={rounds}"
         + f" --sample_fraction={sample_fraction}"
@@ -67,7 +67,7 @@ def start_client(
     """Build command to run client."""
     cmd = (
         f"screen -L -Logfile client_{cid}.log -d -m"
-        + "python3.7 -m flower_benchmark.tf_fashion_mnist.client"
+        + " python3.7 -m flower_benchmark.tf_fashion_mnist.client"
         + f" --log_host={log_host}"
         + f" --grpc_server_address={grpc_server_address}"
         + " --grpc_server_port=8080"
