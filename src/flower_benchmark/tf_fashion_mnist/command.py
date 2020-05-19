@@ -35,24 +35,13 @@ def start_logserver(
 
 
 # pylint: disable=too-many-arguments
-def start_server(
-    log_host: str,
-    rounds: int,
-    sample_fraction: float,
-    min_sample_size: int,
-    min_num_clients: int,
-    training_round_timeout: int,
-) -> str:
+def start_server(log_host: str, setting: str) -> str:
     """Build command to run server."""
     return (
         "screen -L -Logfile server.log -d -m"
         + " python3.7 -m flower_benchmark.tf_fashion_mnist.server"
         + f" --log_host={log_host}"
-        + f" --rounds={rounds}"
-        + f" --sample_fraction={sample_fraction}"
-        + f" --min_sample_size={min_sample_size}"
-        + f" --min_num_clients={min_num_clients}"
-        + f" --training_round_timeout={training_round_timeout}"
+        + f" --setting={setting}"
     )
 
 

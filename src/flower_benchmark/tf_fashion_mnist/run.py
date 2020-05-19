@@ -69,13 +69,8 @@ def configure_cluster(adapter: str, benchmark_name: str) -> Cluster:
 
 # pylint: disable=too-many-arguments, too-many-locals
 def run(
-    # Global paramters
-    rounds: int,
     # Server paramters
-    sample_fraction: float,
-    min_sample_size: int,
-    min_num_clients: int,
-    training_round_timeout: int,
+    setting: str,
     # Client parameters
     num_clients: int,
     dry_run: bool,
@@ -123,14 +118,7 @@ def run(
     cluster.exec(server_id, command.download_dataset())
     cluster.exec(
         server_id,
-        command.start_server(
-            log_host=f"{logserver_private_ip}:8081",
-            rounds=rounds,
-            sample_fraction=sample_fraction,
-            min_sample_size=min_sample_size,
-            min_num_clients=min_num_clients,
-            training_round_timeout=training_round_timeout,
-        ),
+        command.start_server(log_host=f"{logserver_private_ip}:8081", setting=setting),
     )
 
     # Start Flower clients
@@ -196,19 +184,15 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    setting = get_setting(args.setting)
+    client_setting = get_setting(args.setting).clients[0]
 
-    print("Starting benchmark with the following settings:")
-    print(setting)
+    print(f"Starting benchmark with {args.setting} settings.")
 
     run(
-        rounds=setting.rounds,
-        sample_fraction=setting.sample_fraction,
-        min_sample_size=setting.min_sample_size,
-        min_num_clients=setting.min_num_clients,
-        training_round_timeout=setting.training_round_timeout,
-        num_clients=setting.num_clients,
-        dry_run=setting.dry_run,
+        setting=args.setting,
+        # Client settings
+        num_clients=client_setting.num_clients,
+        dry_run=client_setting.dry_run,
         adapter=args.adapter,
         benchmark_name=args.setting,
         logserver_s3_bucket=args.logserver_s3_bucket,
