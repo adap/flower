@@ -134,7 +134,7 @@ SETTINGS = {
 
 def configure_uniform_clients(
     iid_fraction: float, num_clients: int, dry_run: bool,
-):
+) -> List[ClientSetting]:
     """Configure `num_clients`, all using the same delay factor."""
     clients = []
     for i in range(num_clients):
@@ -159,7 +159,7 @@ def configure_clients(
     dry_run: bool,
     delay_factor_fast: float,
     delay_factor_slow: float,
-):
+) -> List[ClientSetting]:
     """Configure `num_clients` with different delay factors."""
     clients = []
     for i in range(num_clients):
