@@ -27,7 +27,7 @@ from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
 from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, NUM_CLASSES, SEED
 
 tf.get_logger().setLevel("ERROR")
 
@@ -54,7 +54,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    """Load data, create and start CIFAR-10 client."""
+    """Load data, create and start CIFAR-10/100 client."""
     args = parse_args()
 
     client_setting = get_setting(args.setting).clients[args.index]
@@ -63,7 +63,7 @@ def main() -> None:
     configure(identifier=f"client:{client_setting.cid}", host=args.log_host)
 
     # Load model
-    model = resnet50v2(input_shape=(32, 32, 3), num_classes=10, seed=SEED)
+    model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
 
     # Load local data partition
     xy_partitions, xy_test = tf_cifar_partitioned.load_data(
@@ -82,7 +82,12 @@ def main() -> None:
 
     # Start client
     client = VisionClassificationClient(
-        client_setting.cid, model, xy_train, xy_test, client_setting.delay_factor, 10
+        client_setting.cid,
+        model,
+        xy_train,
+        xy_test,
+        client_setting.delay_factor,
+        NUM_CLASSES,
     )
     flwr.app.start_client(args.grpc_server_address, DEFAULT_GRPC_SERVER_PORT, client)
 
