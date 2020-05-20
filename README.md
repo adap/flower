@@ -58,7 +58,7 @@ $ docker network create flower
 $ docker run --rm --network flower -p 8080:8080 --name server flower:latest flower_example_fashion_mnist_server
 
 # Terminal two
-$ docker run --rm --network flower flower:latest flower_example_fashion_mnist_client --cid=0 --partition=0 --clients=1 --grpc_server_address=server
+$ docker run --rm --network flower flower:latest flower_example_fashion_mnist_client --cid=0 --partition=0 --clients=1 --server_address=server:8080
 ```
 
 ## Documentation

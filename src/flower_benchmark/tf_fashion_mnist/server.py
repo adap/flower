@@ -26,7 +26,7 @@ from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 from flower_benchmark.model import orig_cnn
 from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
+from . import DEFAULT_SERVER_ADDRESS, SEED
 
 
 def parse_args() -> argparse.Namespace:
@@ -96,10 +96,7 @@ def main() -> None:
 
     # Run server
     flwr.app.start_server(
-        DEFAULT_GRPC_SERVER_ADDRESS,
-        DEFAULT_GRPC_SERVER_PORT,
-        server,
-        config={"num_rounds": server_setting.rounds},
+        DEFAULT_SERVER_ADDRESS, server, config={"num_rounds": server_setting.rounds},
     )
 
 
