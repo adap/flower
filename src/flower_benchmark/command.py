@@ -22,7 +22,10 @@ def install_wheel(wheel_remote_path: str) -> str:
 
     Remove previous versions if existing.
     """
-    return f"python3.7 -m pip uninstall -y flower && python3.7 -m pip install {wheel_remote_path}"
+    return (
+        "python3.7 -m pip uninstall -y flower && "
+        + f"python3.7 -m pip install '{wheel_remote_path}[examples-tensorflow,http-logger]'"
+    )
 
 
 def start_logserver(
@@ -38,23 +41,23 @@ def start_logserver(
 
 
 # pylint: disable=too-many-arguments
-def start_server(log_host: str, setting: str) -> str:
+def start_server(log_host: str, benchmark: str, setting: str) -> str:
     """Build command to run server."""
     return (
         "screen -d -m"
-        + " python3.7 -m flower_benchmark.tf_fashion_mnist.server"
+        + f" python3.7 -m flower_benchmark.{benchmark}.server"
         + f" --log_host={log_host}"
         + f" --setting={setting}"
     )
 
 
 def start_client(
-    grpc_server_address: str, log_host: str, setting: str, index: int
+    grpc_server_address: str, log_host: str, benchmark: str, setting: str, index: int
 ) -> str:
     """Build command to run client."""
     return (
         "screen -d -m"
-        + " python3.7 -m flower_benchmark.tf_fashion_mnist.client"
+        + f" python3.7 -m flower_benchmark.{benchmark}.client"
         + f" --grpc_server_address={grpc_server_address}"
         + f" --log_host={log_host}"
         + f" --setting={setting}"
@@ -62,9 +65,9 @@ def start_client(
     )
 
 
-def download_dataset() -> str:
+def download_dataset(benchmark: str) -> str:
     "Return command which makes dataset locally available."
-    return "python3.7 -m flower_benchmark.tf_fashion_mnist.download"
+    return f"python3.7 -m flower_benchmark.{benchmark}.download"
 
 
 def watch_and_shutdown(keyword: str, adapter: str) -> str:
@@ -72,7 +75,7 @@ def watch_and_shutdown(keyword: str, adapter: str) -> str:
     cmd = f"screen -d -m bash -c 'while [[ $(ps a | grep {keyword}) ]]; do sleep 1; done; "
 
     if adapter == "docker":
-        cmd += "kill 1'"
+        cmd += "sleep 300 && kill 1'"
     elif adapter == "ec2":
         # Shutdown after 2 minutes to allow a logged in user
         # to chancel the shutdown manually just in case

@@ -54,7 +54,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    """Load data, create and start FashionMnistClient."""
+    """Load data, create and start Fashion-MNIST client."""
     args = parse_args()
 
     client_setting = get_setting(args.setting).clients[args.index]
