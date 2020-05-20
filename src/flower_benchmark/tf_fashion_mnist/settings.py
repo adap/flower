@@ -224,6 +224,7 @@ SETTINGS = {
         ),
         clients=configure_clients(
             iid_fraction=0.0,
+            instance_names=["client_0", "client_1"],
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,
