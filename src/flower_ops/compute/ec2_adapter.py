@@ -93,10 +93,10 @@ def are_all_instances_running(instances: List[ec2.Instance]) -> bool:
     return True
 
 
-def are_all_status_ok(instance_status: List[Dict[str, str]]) -> bool:
+def are_all_status_ok(instance_status: List[Tuple[str, str]]) -> bool:
     """Return True if all instances are ok."""
     for status in instance_status:
-        if status["Status"] != "ok":
+        if status[1] != "ok":
             return False
 
     return True
@@ -156,7 +156,8 @@ class EC2Adapter(Adapter):
             )
 
             instance_status = [
-                ins["InstanceStatus"] for ins in result["InstanceStatuses"]
+                (ins["InstanceId"], ins["InstanceStatus"]["Status"])
+                for ins in result["InstanceStatuses"]
             ]
 
             print(instance_status)
