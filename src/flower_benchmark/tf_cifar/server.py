@@ -103,6 +103,7 @@ def main() -> None:
 
     # Create client_manager, strategy, and server
     client_manager = flwr.SimpleClientManager()
+
     strategy = flwr.strategy.DefaultStrategy(
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
@@ -110,6 +111,20 @@ def main() -> None:
         eval_fn=get_eval_fn(model=model, num_classes=args.cifar, xy_test=xy_test),
         on_fit_config_fn=get_on_fit_config_fn(args.lr_initial),
     )
+    # strategy = flwr.strategy.FastAndSlow(
+    #     fraction_fit=args.sample_fraction,
+    #     min_fit_clients=args.min_sample_size,
+    #     min_available_clients=args.min_num_clients,
+    #     eval_fn=get_eval_fn(model=model, num_classes=args.cifar, xy_test=xy_test),
+    #     on_fit_config_fn=get_on_fit_config_fn(
+    #         args.lr_initial, args.training_round_timeout
+    #     ),
+    #     r_fast=1,
+    #     r_slow=1,
+    #     t_fast=20,
+    #     t_slow=40,
+    # )
+
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
 
     # Run server
@@ -132,6 +147,8 @@ def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
             "batch_size": str(64),
             "lr_initial": str(lr_initial),
             "lr_decay": str(0.99),
+            "timeout": str(60),
+            "partial_updates": "1",
         }
         return config
 

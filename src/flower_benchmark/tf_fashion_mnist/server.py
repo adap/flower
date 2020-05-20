@@ -60,8 +60,8 @@ def main() -> None:
         xy_test,
         partition=0,
         num_clients=1,
-        dry_run=server_setting.dry_run,
         seed=SEED,
+        dry_run=server_setting.dry_run,
     )
 
     # Load model (for centralized evaluation)
