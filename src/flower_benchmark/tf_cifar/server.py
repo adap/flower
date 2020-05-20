@@ -26,7 +26,7 @@ from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
 from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, NUM_CLASSES, SEED
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,7 +53,7 @@ def main() -> None:
 
     # Load evaluation data
     xy_partitions, xy_test = tf_cifar_partitioned.load_data(
-        iid_fraction=0.0, num_partitions=1, cifar100=False
+        iid_fraction=0.0, num_partitions=1, cifar100=NUM_CLASSES == 100
     )
     _, xy_test = load_partition(
         xy_partitions,
@@ -65,7 +65,7 @@ def main() -> None:
     )
 
     # Load model (for centralized evaluation)
-    model = resnet50v2(input_shape=(32, 32, 3), num_classes=10, seed=SEED)
+    model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
 
     # Create client_manager, strategy, and server
     client_manager = flwr.SimpleClientManager()
@@ -73,7 +73,7 @@ def main() -> None:
         fraction_fit=server_setting.sample_fraction,
         min_fit_clients=server_setting.min_sample_size,
         min_available_clients=server_setting.min_num_clients,
-        eval_fn=get_eval_fn(model=model, num_classes=10, xy_test=xy_test),
+        eval_fn=get_eval_fn(model=model, num_classes=NUM_CLASSES, xy_test=xy_test),
         on_fit_config_fn=get_on_fit_config_fn(
             server_setting.lr_initial, server_setting.training_round_timeout
         ),
@@ -82,7 +82,7 @@ def main() -> None:
     #     fraction_fit=args.sample_fraction,
     #     min_fit_clients=args.min_sample_size,
     #     min_available_clients=args.min_num_clients,
-    #     eval_fn=get_eval_fn(model=model, num_classes=10, xy_test=xy_test),
+    #     eval_fn=get_eval_fn(model=model, num_classes=NUM_CLASSES, xy_test=xy_test),
     #     on_fit_config_fn=get_on_fit_config_fn(
     #         args.lr_initial, args.training_round_timeout
     #     ),
