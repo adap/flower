@@ -56,6 +56,7 @@ INSTANCE_TYPES = [
     ("m5a.xlarge", 4, 16),  # Minimum size of Fashion-MNIST server/client
     ("m5a.2xlarge", 8, 32),
     ("m5a.4xlarge", 16, 64),
+    ("m5ad.24xlarge", 96, 384),
 ]
 
 
