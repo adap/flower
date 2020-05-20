@@ -26,7 +26,7 @@ from flower.logger import log
 from flower.server import Server
 
 
-def start_server(address: str, server: Server, config: Dict[str, int],) -> None:
+def start_server(address: str, server: Server, config: Dict[str, int]) -> None:
     """Start a Flower server using the gRPC transport layer."""
     grpc_server = start_insecure_grpc_server(
         client_manager=server.client_manager(), address=address
