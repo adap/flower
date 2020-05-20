@@ -167,10 +167,8 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
         command.watch_and_shutdown("[f]lower_logserver", adapter), groups=["logserver"]
     )
     cluster.exec_all(
-        command.watch_and_shutdown("[f]lower_benchmark", adapter), groups=["server"]
-    )
-    cluster.exec_all(
-        command.watch_and_shutdown("[f]lower_benchmark", adapter), groups=["clients"]
+        command.watch_and_shutdown("[f]lower_benchmark", adapter),
+        groups=["server", "clients"],
     )
 
     print(cluster.instances)
