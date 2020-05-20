@@ -154,7 +154,7 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
             instance_id,
             command.start_client(
                 log_host=f"{logserver_private_ip}:8081",
-                grpc_server_address=server_private_ip,
+                server_address=f"{server_private_ip}:8080",
                 benchmark=benchmark,
                 setting=setting,
                 index=i,

@@ -18,8 +18,6 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
-GRPC_SERVER_ADDRESS="[::]"
-GRPC_SERVER_PORT=8080
 
 # Start a Flower server
 python -m flower_example.tf_fashion_mnist.server \
