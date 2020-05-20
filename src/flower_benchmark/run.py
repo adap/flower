@@ -46,7 +46,7 @@ def now() -> str:
     return strftime("%Y%m%dT%H%M%S")
 
 
-def configure_cluster(adapter: str, benchmark: str) -> Cluster:
+def configure_cluster(adapter: str, benchmark: str, setting: str) -> Cluster:
     """Return configured compute cluster."""
     adapter_instance: Optional[Adapter] = None
     private_key: Optional[str] = None
@@ -61,7 +61,11 @@ def configure_cluster(adapter: str, benchmark: str) -> Cluster:
             key_name=path.expanduser(CONFIG.get("aws", "key_name")),
             subnet_id=CONFIG.get("aws", "subnet_id"),
             security_group_ids=CONFIG.get("aws", "security_group_ids").split(","),
-            tags=[("Purpose", "flower_benchmark"), ("Benchmark Name", benchmark)],
+            tags=[
+                ("Purpose", "flower_benchmark"),
+                ("Benchmark Name", benchmark),
+                ("Benchmark Setting", setting),
+            ],
         )
         user = "ubuntu"
         private_key = path.expanduser(CONFIG.get("ssh", "private_key"))
@@ -99,7 +103,7 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
         raise Exception("Setting not found.")
 
     # Configure cluster
-    cluster = configure_cluster(adapter, benchmark)
+    cluster = configure_cluster(adapter, benchmark, setting)
 
     # Start the cluster; this takes some time
     cluster.start()
@@ -109,6 +113,11 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
 
     # Install the wheel on all instances
     cluster.exec_all(command.install_wheel(wheel_remote_path))
+
+    # Download datasets in server and clients
+    cluster.exec_all(
+        command.download_dataset(benchmark=benchmark), groups=["server", "clients"]
+    )
 
     # An instance is a tuple of the following values
     # (InstanceId, PrivateIpAddress, PublicIpAddress, State)
@@ -123,7 +132,6 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
 
     # Start Flower server on Flower server instances
     server_id, server_private_ip, _, _, _ = cluster.instances["server"][0]
-    cluster.exec(server_id, command.download_dataset(benchmark=benchmark))
     cluster.exec(
         server_id,
         command.start_server(
@@ -135,12 +143,7 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
 
     # Start Flower clients
     client_instances = cluster.instances["clients"]
-
-    # Make dataset locally available
-    cluster.exec_group("clients", command.download_dataset(benchmark=benchmark))
-
     num_client_processes = len(client_settings)
-
     for i in range(0, num_client_processes):
         instance_id = (
             client_instances[0][0]
@@ -160,14 +163,12 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
 
     # Shutdown server and client instance after 10min if not at least one Flower
     # process is running it
-    cluster.exec_group(
-        "logserver", command.watch_and_shutdown("[f]lower_logserver", adapter)
+    cluster.exec_all(
+        command.watch_and_shutdown("[f]lower_logserver", adapter), groups=["logserver"]
     )
-    cluster.exec_group(
-        "server", command.watch_and_shutdown("[f]lower_benchmark", adapter)
-    )
-    cluster.exec_group(
-        "clients", command.watch_and_shutdown("[f]lower_benchmark", adapter)
+    cluster.exec_all(
+        command.watch_and_shutdown("[f]lower_benchmark", adapter),
+        groups=["server", "clients"],
     )
 
     print(cluster.instances)

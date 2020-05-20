@@ -15,14 +15,21 @@
 """Implments compute classes for EC2."""
 import concurrent.futures
 from contextlib import contextmanager
-from typing import Dict, Iterator, List, Tuple
+from logging import ERROR
+from typing import Dict, Iterator, List, Optional, Tuple
 
 from paramiko.client import SSHClient
 from paramiko.sftp_attr import SFTPAttributes
 
+from flower.logger import log
+
 from .compute.adapter import Adapter, Instance
 
 Spec = Tuple[int, float, int]  # (num_cpu, num_ram, num_instances)
+
+
+class StartFailedException(Exception):
+    """Raised when cluster could not start."""
 
 
 class InstanceIdNotFound(Exception):
@@ -107,6 +114,7 @@ class Cluster:
         self.specs = specs
         self.timeout = timeout
 
+        # The keys in the dict are the group names used in self.specs
         self.instances: Dict[str, List[Instance]] = {}
 
     def get_instance(self, instance_id: str) -> Instance:
@@ -119,12 +127,23 @@ class Cluster:
         # If instance_id could not be found raise an exception
         raise InstanceIdNotFound()
 
-    def get_instance_ids(self) -> List[str]:
+    def get_instance_ids(self, groups: Optional[List[str]] = None) -> List[str]:
         """Return a list of all instance_ids."""
         ids: List[str] = []
-        for ins_group in self.instances.values():
-            for ins in ins_group:
-                ids.append(ins[0])
+
+        selected_instances: List[Instance] = []
+
+        if groups is None:
+            for instances in self.instances.values():
+                selected_instances += instances
+        else:
+            for group in groups:
+                if group in self.instances:
+                    selected_instances += self.instances[group]
+
+        for ins in selected_instances:
+            ids.append(ins[0])
+
         return ids
 
     def start(self) -> None:
@@ -149,12 +168,21 @@ class Cluster:
             ]
             concurrent.futures.wait(futures)
 
-            for future in futures:
-                try:
+            try:
+                for future in futures:
                     future.result()
-                # pylint: disable=broad-except
-                except Exception as exc:
-                    print(exc)
+            # pylint: disable=broad-except
+            except Exception as exc:
+                log(
+                    ERROR, "Failed to start the cluster completely. Shutting down...",
+                )
+                log(ERROR, exc)
+
+                for future in futures:
+                    future.cancel()
+
+                self.terminate()
+                raise StartFailedException()
 
     def terminate(self) -> None:
         """Terminate all instances and shutdown cluster."""
@@ -192,12 +220,29 @@ class Cluster:
 
         return stdout, stderr
 
-    def exec_all(self, command: str) -> List[Tuple[str, str]]:
-        """Run command on all instances and return List of (stdout, stderr) tuples."""
-        return [
-            self.exec(instance_id, command) for instance_id in self.get_instance_ids()
-        ]
+    def exec_all(
+        self, command: str, groups: Optional[List[str]] = None
+    ) -> Dict[str, Tuple[str, str]]:
+        """Run command on all instances. If provided filter by group."""
+        instance_ids = (
+            self.get_instance_ids() if groups is None else self.get_instance_ids(groups)
+        )
 
-    def exec_group(self, group: str, command: str) -> List[Tuple[str, str]]:
-        """Run command on all instances in group and return List of (stdout, stderr) tuples."""
-        return [self.exec(ins[0], command) for ins in self.instances[group]]
+        results: Dict[str, Tuple[str, str]] = {}
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            # Start the load operations and mark each future with its URL
+            future_to_result = {
+                executor.submit(self.exec, instance_id, command): instance_id
+                for instance_id in instance_ids
+            }
+
+            for future in concurrent.futures.as_completed(future_to_result):
+                instance_id = future_to_result[future]
+                try:
+                    results[instance_id] = future.result()
+                # pylint: disable=broad-except
+                except Exception as exc:
+                    log(ERROR, (instance_id, exc))
+
+        return results

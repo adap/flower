@@ -26,7 +26,7 @@ from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
 from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
+from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, NUM_CLASSES, SEED
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,7 +53,7 @@ def main() -> None:
 
     # Load evaluation data
     xy_partitions, xy_test = tf_cifar_partitioned.load_data(
-        iid_fraction=0.0, num_partitions=1, cifar100=False
+        iid_fraction=0.0, num_partitions=1, cifar100=NUM_CLASSES == 100
     )
     _, xy_test = load_partition(
         xy_partitions,
@@ -65,7 +65,7 @@ def main() -> None:
     )
 
     # Load model (for centralized evaluation)
-    model = resnet50v2(input_shape=(32, 32, 3), num_classes=10, seed=SEED)
+    model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
 
     # Create client_manager
     client_manager = flwr.SimpleClientManager()
