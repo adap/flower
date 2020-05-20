@@ -73,3 +73,17 @@ To execute a benchmark setting remotely on AWS:
 ```bash
 python -m flower_benchmark.tf_fashion_mnist.run --adapter="ec2" --setting="minimal"
 ```
+
+## Get Results
+
+See all current and past results on the S3 website of your S3 bucket:
+
+```
+http://[your-flower-log-s3-bucket].s3-website.eu-central-1.amazonaws.com/
+```
+
+Download and filter invididual logs using `cURL` and `jq`:
+
+```bash
+curl http://[your-flower-log-s3-bucket].s3-eu-central-1.amazonaws.com/[your-experiment].log | jq '.identifier + " => " + .message'
+```

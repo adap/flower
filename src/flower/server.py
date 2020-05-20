@@ -103,7 +103,11 @@ class Server:
         client_instructions = self.strategy.on_configure_evaluate(
             rnd=rnd, weights=self.weights, client_manager=self._client_manager
         )
+        log(
+            DEBUG, "evaluate: strategy sampled %s clients", len(client_instructions),
+        )
         if not client_instructions:
+            log(INFO, "evaluate: no clients sampled, cancel evaluation")
             return None
 
         # Evaluate current global weights on those clients
@@ -123,7 +127,11 @@ class Server:
         client_instructions = self.strategy.on_configure_fit(
             rnd=rnd, weights=self.weights, client_manager=self._client_manager
         )
+        log(
+            DEBUG, "fit_round: strategy sampled %s clients", len(client_instructions),
+        )
         if not client_instructions:
+            log(INFO, "fit_round: no clients sampled, cancel fit")
             return None
 
         # Collect training results from all clients participating in this round
