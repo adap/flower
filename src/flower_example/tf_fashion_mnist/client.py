@@ -23,7 +23,7 @@ import tensorflow as tf
 
 import flower as fl
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, fashion_mnist
+from . import DEFAULT_SERVER_ADDRESS, fashion_mnist
 
 
 class FashionMnistClient(fl.Client):
@@ -85,16 +85,10 @@ def main() -> None:
     """Load data, create and start FashionMnistClient."""
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--grpc_server_address",
+        "--server_address",
         type=str,
-        default=DEFAULT_GRPC_SERVER_ADDRESS,
-        help="gRPC server address (default: [::])",
-    )
-    parser.add_argument(
-        "--grpc_server_port",
-        type=int,
-        default=DEFAULT_GRPC_SERVER_PORT,
-        help="gRPC server port (default: 8080)",
+        default=DEFAULT_SERVER_ADDRESS,
+        help=f"gRPC server address (default: {DEFAULT_SERVER_ADDRESS})",
     )
     parser.add_argument(
         "--cid", type=str, required=True, help="Client CID (no default)"
@@ -115,7 +109,7 @@ def main() -> None:
 
     # Start client
     client = FashionMnistClient(args.cid, model, xy_train, xy_test)
-    fl.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
+    fl.app.start_client(args.server_address, client)
 
 
 if __name__ == "__main__":

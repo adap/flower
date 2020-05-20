@@ -27,7 +27,7 @@ def test_integration_start_and_shutdown_server():
 
     # Execute
     server = start_insecure_grpc_server(
-        client_manager=client_manager, address="[::]", port=port
+        client_manager=client_manager, server_address=f"[::]:{port}"
     )
 
     # Teardown

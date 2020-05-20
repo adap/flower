@@ -17,7 +17,7 @@ python -m flower_benchmark.tf_fashion_mnist.server --log_host=localhost:8081
 
 ```bash
 python -m flower_benchmark.tf_fashion_mnist.client \
-    --cid=0 --partition=0 --clients=1 --grpc_server_address=localhost --grpc_server_port=8080 \
+    --cid=0 --partition=0 --clients=1 --server_address=localhost:8080 \
     --log_host=localhost:8081
 ```
 

@@ -52,13 +52,13 @@ def start_server(log_host: str, benchmark: str, setting: str) -> str:
 
 
 def start_client(
-    grpc_server_address: str, log_host: str, benchmark: str, setting: str, index: int
+    server_address: str, log_host: str, benchmark: str, setting: str, index: int
 ) -> str:
     """Build command to run client."""
     return (
         "screen -d -m"
         + f" python3.7 -m flower_benchmark.{benchmark}.client"
-        + f" --grpc_server_address={grpc_server_address}"
+        + f" --server_address={server_address}"
         + f" --log_host={log_host}"
         + f" --setting={setting}"
         + f" --index={index}"
