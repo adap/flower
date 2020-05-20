@@ -124,7 +124,7 @@ def main() -> None:
     #     t_fast=20,
     #     t_slow=40,
     # )
-    
+
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
 
     # Run server
