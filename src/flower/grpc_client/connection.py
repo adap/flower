@@ -38,11 +38,11 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 @contextmanager
 def insecure_grpc_connection(
-    address: str, port: int
+    server_address: str,
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish an insecure gRPC connection to a gRPC server."""
     channel = grpc.insecure_channel(
-        f"{address}:{port}",
+        server_address,
         options=[
             ("grpc.max_send_message_length", 256 * 1024 * 1024),
             ("grpc.max_receive_message_length", 256 * 1024 * 1024),

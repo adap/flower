@@ -15,8 +15,7 @@
 """Flower benchmark using TensorFlow for CIFAR-10/100 image classification."""
 
 
-DEFAULT_GRPC_SERVER_ADDRESS = "[::]"
-DEFAULT_GRPC_SERVER_PORT = 8080
+DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 SEED = 2020
 

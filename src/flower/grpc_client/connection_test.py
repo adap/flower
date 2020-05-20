@@ -70,7 +70,7 @@ def test_integration_connection():
     port = flower_testing.network.unused_tcp_port()
 
     server = start_insecure_grpc_server(
-        client_manager=SimpleClientManager(), address="[::]", port=port
+        client_manager=SimpleClientManager(), server_address=f"[::]:{port}"
     )
 
     # Execute
@@ -78,7 +78,7 @@ def test_integration_connection():
     def run_client() -> int:
         messages_received: int = 0
 
-        with insecure_grpc_connection(address="[::]", port=port) as conn:
+        with insecure_grpc_connection(server_address=f"[::]:{port}") as conn:
             receive, send = conn
 
             # Setup processing loop
