@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides a variaty of benchmark settings for Fashion-MNIST."""
+"""Provides a variaty of benchmark settings for CIFAR."""
 
 from typing import List
 
@@ -105,42 +105,6 @@ SETTINGS = {
         ),
         clients=configure_uniform_clients(
             iid_fraction=0.0, num_clients=4, dry_run=False
-        ),
-    ),
-    "fedavg-sync": Setting(
-        server=ServerSetting(
-            rounds=10,
-            min_num_clients=80,
-            sample_fraction=1.0,
-            min_sample_size=80,
-            training_round_timeout=40,
-            lr_initial=0.1,
-            dry_run=False,
-        ),
-        clients=configure_clients(
-            iid_fraction=0.0,
-            num_clients=100,
-            dry_run=False,
-            delay_factor_fast=0.0,
-            delay_factor_slow=3.0,
-        ),
-    ),
-    "fedavg-async": Setting(
-        server=ServerSetting(
-            rounds=10,
-            min_num_clients=80,
-            sample_fraction=1.0,
-            min_sample_size=80,
-            training_round_timeout=20,
-            lr_initial=0.1,
-            dry_run=False,
-        ),
-        clients=configure_clients(
-            iid_fraction=0.0,
-            num_clients=100,
-            dry_run=False,
-            delay_factor_fast=0.0,
-            delay_factor_slow=3.0,
         ),
     ),
 }

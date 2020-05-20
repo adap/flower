@@ -43,7 +43,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    """Start server and train `--rounds` number of rounds."""
+    """Start server and train a number of rounds."""
     args = parse_args()
 
     # Configure logger
@@ -69,7 +69,6 @@ def main() -> None:
 
     # Create client_manager, strategy, and server
     client_manager = flwr.SimpleClientManager()
-
     strategy = flwr.strategy.DefaultStrategy(
         fraction_fit=server_setting.sample_fraction,
         min_fit_clients=server_setting.min_sample_size,

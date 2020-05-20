@@ -16,78 +16,44 @@
 
 
 import argparse
+from logging import ERROR
 from typing import Callable, Dict
 
 import flower as flwr
+from flower.logger import configure, log
 from flower_benchmark.common import get_eval_fn, load_partition
 from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
+from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
 
 
-def main() -> None:
-    """Start Flower server and train for a number rounds."""
+def parse_args() -> argparse.Namespace:
+    """Parse and return commandline arguments."""
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--grpc_server_address",
-        type=str,
-        default=DEFAULT_GRPC_SERVER_ADDRESS,
-        help="gRPC server address (IPv6, default: [::])",
+        "--log_host", type=str, help="HTTP log handler host (no default)",
     )
     parser.add_argument(
-        "--grpc_server_port",
-        type=int,
-        default=DEFAULT_GRPC_SERVER_PORT,
-        help="gRPC server port (default: 8080)",
+        "--setting", type=str, choices=SETTINGS.keys(), help="Setting to run.",
     )
-    parser.add_argument(
-        "--rounds",
-        type=int,
-        default=1,
-        help="Number of rounds of federated learning (default: 1)",
-    )
-    parser.add_argument(
-        "--sample_fraction",
-        type=float,
-        default=0.1,
-        help="Fraction of available clients used for fit/evaluate (default: 0.1)",
-    )
-    parser.add_argument(
-        "--min_sample_size",
-        type=int,
-        default=1,
-        help="Minimum number of clients used for fit/evaluate (default: 1)",
-    )
-    parser.add_argument(
-        "--min_num_clients",
-        type=int,
-        default=1,
-        help="Minimum number of available clients required for sampling (default: 1)",
-    )
-    parser.add_argument(
-        "--lr_initial",
-        type=float,
-        default=0.1,
-        help="Initial learning rate (default: 0.1)",
-    )
-    parser.add_argument(
-        "--cifar",
-        type=int,
-        choices=[10, 100],
-        default=10,
-        help="CIFAR version, allowed values: 10 or 100 (default: 10)",
-    )
-    parser.add_argument("--cid", type=str, help="Client CID (no default)")
-    parser.add_argument(
-        "--dry_run", type=bool, default=False, help="Dry run (default: False)"
-    )
-    args = parser.parse_args()
+
+    return parser.parse_args()
+
+
+def main() -> None:
+    """Start server and train a number of rounds."""
+    args = parse_args()
+
+    # Configure logger
+    configure(identifier="server", host=args.log_host)
+
+    server_setting = get_setting(args.setting).server
 
     # Load evaluation data
-    use_cifar100 = args.cifar == 100
     xy_partitions, xy_test = tf_cifar_partitioned.load_data(
-        iid_fraction=0.0, num_partitions=1, cifar100=use_cifar100
+        iid_fraction=0.0, num_partitions=1, cifar100=False
     )
     _, xy_test = load_partition(
         xy_partitions,
@@ -95,27 +61,28 @@ def main() -> None:
         partition=0,
         num_clients=1,
         seed=SEED,
-        dry_run=args.dry_run,
+        dry_run=server_setting.dry_run,
     )
 
     # Load model (for centralized evaluation)
-    model = resnet50v2(input_shape=(32, 32, 3), num_classes=args.cifar, seed=SEED)
+    model = resnet50v2(input_shape=(32, 32, 3), num_classes=10, seed=SEED)
 
     # Create client_manager, strategy, and server
     client_manager = flwr.SimpleClientManager()
-
     strategy = flwr.strategy.DefaultStrategy(
-        fraction_fit=args.sample_fraction,
-        min_fit_clients=args.min_sample_size,
-        min_available_clients=args.min_num_clients,
-        eval_fn=get_eval_fn(model=model, num_classes=args.cifar, xy_test=xy_test),
-        on_fit_config_fn=get_on_fit_config_fn(args.lr_initial),
+        fraction_fit=server_setting.sample_fraction,
+        min_fit_clients=server_setting.min_sample_size,
+        min_available_clients=server_setting.min_num_clients,
+        eval_fn=get_eval_fn(model=model, num_classes=10, xy_test=xy_test),
+        on_fit_config_fn=get_on_fit_config_fn(
+            server_setting.lr_initial, server_setting.training_round_timeout
+        ),
     )
     # strategy = flwr.strategy.FastAndSlow(
     #     fraction_fit=args.sample_fraction,
     #     min_fit_clients=args.min_sample_size,
     #     min_available_clients=args.min_num_clients,
-    #     eval_fn=get_eval_fn(model=model, num_classes=args.cifar, xy_test=xy_test),
+    #     eval_fn=get_eval_fn(model=model, num_classes=10, xy_test=xy_test),
     #     on_fit_config_fn=get_on_fit_config_fn(
     #         args.lr_initial, args.training_round_timeout
     #     ),
@@ -129,14 +96,16 @@ def main() -> None:
 
     # Run server
     flwr.app.start_server(
-        args.grpc_server_address,
-        args.grpc_server_port,
+        DEFAULT_GRPC_SERVER_ADDRESS,
+        DEFAULT_GRPC_SERVER_PORT,
         server,
-        config={"num_rounds": args.rounds},
+        config={"num_rounds": server_setting.rounds},
     )
 
 
-def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
+def get_on_fit_config_fn(
+    lr_initial: float, timeout: int
+) -> Callable[[int], Dict[str, str]]:
     """Return a function which returns training configurations."""
 
     def fit_config(rnd: int) -> Dict[str, str]:
@@ -147,7 +116,7 @@ def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
             "batch_size": str(64),
             "lr_initial": str(lr_initial),
             "lr_decay": str(0.99),
-            "timeout": str(60),
+            "timeout": str(timeout),
             "partial_updates": "1",
         }
         return config
@@ -156,4 +125,12 @@ def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
 
 
 if __name__ == "__main__":
-    main()
+    # pylint: disable=broad-except
+    try:
+        main()
+    except Exception as err:
+        log(ERROR, "Fatal error in main")
+        log(ERROR, err, exc_info=True, stack_info=True)
+
+        # Raise the error again so the exit code is correct
+        raise err

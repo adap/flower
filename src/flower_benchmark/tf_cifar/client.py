@@ -16,22 +16,24 @@
 
 
 import argparse
+from logging import ERROR
 
 import tensorflow as tf
 
 import flower as flwr
-from flower.logger import configure
+from flower.logger import configure, log
 from flower_benchmark.common import VisionClassificationClient, load_partition
 from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
+from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
 
 tf.get_logger().setLevel("ERROR")
 
 
-def main() -> None:
-    """Load data, create and start CifarClient."""
+def parse_args() -> argparse.Namespace:
+    """Parse and return commandline arguments."""
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
         "--grpc_server_address",
@@ -40,70 +42,58 @@ def main() -> None:
         help="gRPC server address (IPv6, default: [::])",
     )
     parser.add_argument(
-        "--grpc_server_port",
-        type=int,
-        default=DEFAULT_GRPC_SERVER_PORT,
-        help="gRPC server port (default: 8080)",
-    )
-    parser.add_argument(
-        "--cid", type=str, required=True, help="Client CID (no default)"
-    )
-    parser.add_argument(
-        "--partition", type=int, required=True, help="Partition index (no default)"
-    )
-    parser.add_argument(
-        "--clients", type=int, required=True, help="Number of clients (no default)",
-    )
-    parser.add_argument(
-        "--delay_factor",
-        type=float,
-        default=0.0,
-        help="Delay factor increases the time batches take to compute (default: 0.0)",
-    )
-    parser.add_argument(
-        "--dry_run", type=bool, default=False, help="Dry run (default: False)"
-    )
-    parser.add_argument(
-        "--log_file", type=str, help="Log file path (no default)",
-    )
-    parser.add_argument(
         "--log_host", type=str, help="HTTP log handler host (no default)",
     )
     parser.add_argument(
-        "--cifar",
-        type=int,
-        choices=[10, 100],
-        default=10,
-        help="CIFAR version, allowed values: 10 or 100 (default: 10)",
+        "--setting", type=str, choices=SETTINGS.keys(), help="Setting to run.",
     )
-    args = parser.parse_args()
+    parser.add_argument(
+        "--index", type=int, required=True, help="Client index in settings."
+    )
+    return parser.parse_args()
+
+
+def main() -> None:
+    """Load data, create and start CIFAR-10 client."""
+    args = parse_args()
+
+    client_setting = get_setting(args.setting).clients[args.index]
 
     # Configure logger
-    configure(f"client:{args.cid}", args.log_file, args.log_host)
+    configure(identifier=f"client:{client_setting.cid}", host=args.log_host)
 
     # Load model
-    model = resnet50v2(input_shape=(32, 32, 3), num_classes=args.cifar, seed=SEED)
+    model = resnet50v2(input_shape=(32, 32, 3), num_classes=10, seed=SEED)
 
     # Load local data partition
-    use_cifar100 = args.cifar == 100
     xy_partitions, xy_test = tf_cifar_partitioned.load_data(
-        iid_fraction=0.0, num_partitions=args.clients, cifar100=use_cifar100
+        iid_fraction=client_setting.iid_fraction,
+        num_partitions=client_setting.num_clients,
+        cifar100=False,
     )
     xy_train, xy_test = load_partition(
         xy_partitions,
         xy_test,
-        partition=args.partition,
-        num_clients=args.clients,
+        partition=client_setting.partition,
+        num_clients=client_setting.num_clients,
+        dry_run=client_setting.dry_run,
         seed=SEED,
-        dry_run=args.dry_run,
     )
 
     # Start client
     client = VisionClassificationClient(
-        args.cid, model, xy_train, xy_test, args.delay_factor, args.cifar
+        client_setting.cid, model, xy_train, xy_test, client_setting.delay_factor, 10
     )
-    flwr.app.start_client(args.grpc_server_address, args.grpc_server_port, client)
+    flwr.app.start_client(args.grpc_server_address, DEFAULT_GRPC_SERVER_PORT, client)
 
 
 if __name__ == "__main__":
-    main()
+    # pylint: disable=broad-except
+    try:
+        main()
+    except Exception as err:
+        log(ERROR, "Fatal error in main")
+        log(ERROR, err, exc_info=True, stack_info=True)
+
+        # Raise the error again so the exit code is correct
+        raise err
