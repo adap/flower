@@ -27,7 +27,7 @@ from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
 from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, NUM_CLASSES, SEED
+from . import DEFAULT_SERVER_ADDRESS, NUM_CLASSES, SEED
 
 tf.get_logger().setLevel("ERROR")
 
@@ -36,10 +36,10 @@ def parse_args() -> argparse.Namespace:
     """Parse and return commandline arguments."""
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--grpc_server_address",
+        "--server_address",
         type=str,
-        default=DEFAULT_GRPC_SERVER_ADDRESS,
-        help="gRPC server address (IPv6, default: [::])",
+        default=DEFAULT_SERVER_ADDRESS,
+        help=f"gRPC server address (IPv6, default: {DEFAULT_SERVER_ADDRESS})",
     )
     parser.add_argument(
         "--log_host", type=str, help="HTTP log handler host (no default)",
@@ -89,7 +89,7 @@ def main() -> None:
         client_setting.delay_factor,
         NUM_CLASSES,
     )
-    flwr.app.start_client(args.grpc_server_address, DEFAULT_GRPC_SERVER_PORT, client)
+    flwr.app.start_client(args.server_address, client)
 
 
 if __name__ == "__main__":
