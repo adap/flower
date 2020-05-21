@@ -98,7 +98,7 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
     if benchmark == "tf_cifar":
         client_settings = tf_cifar_settings.get_setting(setting).clients
     elif benchmark == "tf_fashion_mnist":
-        client_settings = tf_cifar_settings.get_setting(setting).clients
+        client_settings = tf_fashion_mnist_settings.get_setting(setting).clients
     else:
         raise Exception("Setting not found.")
 
@@ -188,8 +188,12 @@ def main() -> None:
         "--setting",
         type=str,
         required=True,
-        choices=list(tf_cifar_settings.SETTINGS.keys())
-        + list(tf_fashion_mnist_settings.SETTINGS.keys()),
+        choices=list(
+            set(
+                list(tf_cifar_settings.SETTINGS.keys())
+                + list(tf_fashion_mnist_settings.SETTINGS.keys())
+            )
+        ),
         help="Name of setting to run.",
     )
     parser.add_argument(
