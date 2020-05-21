@@ -52,7 +52,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--setting", type=str, choices=SETTINGS.keys(), help="Setting to run.",
     )
-    parser.add_argument("--cid", type=int, required=True, help="Client cid.")
+    parser.add_argument("--cid", type=str, required=True, help="Client cid.")
     return parser.parse_args()
 
 
