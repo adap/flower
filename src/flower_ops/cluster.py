@@ -211,7 +211,7 @@ class Cluster:
 
     def exec(self, instance_name: str, command: str) -> ExecInfo:
         """Run command on instance and return stdout."""
-        log(DEBUG, f"Exec on {instance_name}: {command}")
+        log(DEBUG, "Exec on %s: %s", instance_name, command)
 
         instance = self.get_instance(instance_name)
 
