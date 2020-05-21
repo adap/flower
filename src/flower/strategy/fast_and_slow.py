@@ -93,8 +93,15 @@ class FastAndSlow(FedAvg):
         if self.on_fit_config_fn is not None:
             # Use custom fit config function if provided
             config = self.on_fit_config_fn(rnd)
-        use_fast_timeout = is_fast_round(rnd, self.r_fast, self.r_slow)
-        config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
+        
+        # Set timeout for this round
+        if self.dynamic_timeout:
+            use_fast_timeout = is_fast_round(rnd, self.r_fast, self.r_slow)
+            config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
+        else:
+            config["timeout"] = str(self.t_fast)
+
+        # Fit instructions
         fit_ins = (parameters, config)
 
         # Sample clients
