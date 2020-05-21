@@ -12,10 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Common benchmark components."""
+"""Provides a variaty of benchmark settings for Fashion-MNIST."""
 
 
-from .client import VisionClassificationClient
-from .common import custom_fit, get_eval_fn, get_lr_schedule, keras_evaluate, keras_fit
-from .config import sample_delay_factors
-from .data import build_dataset, load_partition
+from typing import List, Optional
+
+import numpy as np
+
+
+def sample_delay_factors(
+    num_clients: int, max_delay: float, seed: Optional[int]
+) -> List[float]:
+    """Sample delay factors."""
+    np.random.seed(seed)
+    # pylint: disable-msg=invalid-name
+    ps = [float(p) for p in np.random.rand(num_clients)]
+    step_size = max_delay / num_clients
+    ds = [(i + 1) * step_size for i in range(num_clients)]
+    return [p * d for p, d in zip(ps, ds)]
