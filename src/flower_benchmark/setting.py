@@ -15,19 +15,22 @@
 """Provides a variaty of benchmark settings base classes."""
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 
+# pylint: disable-msg=too-many-instance-attributes
 @dataclass
 class ServerSetting:
     """Settings for the server."""
 
+    strategy: str
     rounds: int
     min_num_clients: int
     sample_fraction: float
     min_sample_size: int
-    training_round_timeout: int
+    training_round_timeout: Optional[int]
     lr_initial: float
+    partial_updates: bool
     dry_run: bool
 
 

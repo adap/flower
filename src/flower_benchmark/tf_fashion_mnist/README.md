@@ -74,6 +74,12 @@ To execute a benchmark setting remotely on AWS:
 python -m flower_benchmark.tf_fashion_mnist.run --adapter="ec2" --setting="minimal"
 ```
 
+Or alternatively, customize the wrapper script `run.sh` and run it using your AWS profile:
+ 
+```bash
+AWS_PROFILE=your-aws-profile src/flower_benchmark/run.sh
+```
+
 ## Get Results
 
 See all current and past results on the S3 website of your S3 bucket:

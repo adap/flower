@@ -39,7 +39,7 @@ def start_server(server_address: str, server: Server, config: Dict[str, int]) ->
 
     # Evaluate the final trained model
     loss = server.evaluate(rnd=0)
-    log(DEBUG, "Final loss after training: %s", loss)
+    log(DEBUG, "Final (federated) loss after training: %s", loss)
 
     # Stop the gRPC server
     grpc_server.stop(1)

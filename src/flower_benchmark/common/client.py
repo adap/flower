@@ -84,7 +84,7 @@ class VisionClassificationClient(flwr.Client):
         batch_size = int(config["batch_size"])
         # lr_initial = float(config["lr_initial"])
         # lr_decay = float(config["lr_decay"])
-        timeout = int(config["timeout"])
+        timeout = int(config["timeout"]) if "timeout" in config else None
         partial_updates = bool(int(config["partial_updates"]))
 
         # Use provided weights to update the local model
