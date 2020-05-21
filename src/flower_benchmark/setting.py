@@ -17,10 +17,19 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
+from flower_ops.cluster import Instance
+
+
+@dataclass
+class BaseSetting:
+    """Base class for all settings."""
+
+    instance_name: str
+
 
 # pylint: disable-msg=too-many-instance-attributes
 @dataclass
-class ServerSetting:
+class ServerSetting(BaseSetting):
     """Settings for the server."""
 
     strategy: str
@@ -36,7 +45,7 @@ class ServerSetting:
 
 
 @dataclass
-class ClientSetting:
+class ClientSetting(BaseSetting):
     """Settings for the client."""
 
     # Individual per client
@@ -54,5 +63,6 @@ class ClientSetting:
 class Setting:
     """One specific training setting."""
 
+    instances: List[Instance]
     server: ServerSetting
     clients: List[ClientSetting]

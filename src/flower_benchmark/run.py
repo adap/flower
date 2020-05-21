@@ -24,7 +24,6 @@ import flower_benchmark.tf_cifar.settings as tf_cifar_settings
 import flower_benchmark.tf_fashion_mnist.settings as tf_fashion_mnist_settings
 from flower.logger import configure
 from flower_benchmark import command
-from flower_benchmark.setting import ClientSetting
 from flower_ops.cluster import Cluster, Instance
 from flower_ops.compute.adapter import Adapter
 from flower_ops.compute.docker_adapter import DockerAdapter
@@ -47,7 +46,9 @@ def now() -> str:
     return strftime("%Y%m%dT%H%M%S")
 
 
-def configure_cluster(adapter: str, benchmark: str, setting: str) -> Cluster:
+def configure_cluster(
+    adapter: str, instances: List[Instance], benchmark: str, setting: str
+) -> Cluster:
     """Return configured compute cluster."""
     adapter_instance: Optional[Adapter] = None
     private_key: Optional[str] = None
@@ -76,12 +77,7 @@ def configure_cluster(adapter: str, benchmark: str, setting: str) -> Cluster:
     cluster = Cluster(
         adapter=adapter_instance,
         ssh_credentials=(user, private_key),
-        instances=[
-            Instance(name="logserver", group="logserver", num_cpu=2, num_ram=2),
-            Instance(name="server", group="server", num_cpu=4, num_ram=16),
-            Instance(name="client_0", group="clients", num_cpu=4, num_ram=16),
-            Instance(name="client_1", group="clients", num_cpu=4, num_ram=16),
-        ],
+        instances=instances,
         timeout=60,
     )
 
@@ -99,17 +95,21 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
         else f"/home/ubuntu/{WHEEL_FILENAME}"
     )
 
-    client_settings: Optional[List[ClientSetting]] = None
-
     if benchmark == "tf_cifar":
-        client_settings = tf_cifar_settings.get_setting(setting).clients
+        settings = tf_cifar_settings.get_setting(setting)
     elif benchmark == "tf_fashion_mnist":
-        client_settings = tf_fashion_mnist_settings.get_setting(setting).clients
+        settings = tf_fashion_mnist_settings.get_setting(setting)
     else:
         raise Exception("Setting not found.")
 
+    # Get instances and add a logserver to the list
+    instances = settings.instances
+    instances.append(
+        Instance(name="logserver", group="logserver", num_cpu=2, num_ram=2)
+    )
+
     # Configure cluster
-    cluster = configure_cluster(adapter, benchmark, setting)
+    cluster = configure_cluster(adapter, instances, benchmark, setting)
 
     # Start the cluster; this takes some time
     cluster.start()
@@ -147,29 +147,22 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
 
     # Start Flower clients
     server = cluster.get_instance("server")
-    num_client_processes = len(client_settings)
-    for i in range(0, num_client_processes):
-        instance_name = "client_0" if i < int(num_client_processes / 2) else "client_1"
+
+    for client_setting in settings.clients:
         cluster.exec(
-            instance_name,
+            client_setting.instance_name,
             command.start_client(
                 log_host=f"{logserver.private_ip}:8081",
                 server_address=f"{server.private_ip}:8080",
                 benchmark=benchmark,
                 setting=setting,
-                index=i,
+                cid=client_setting.cid,
             ),
         )
 
     # Shutdown server and client instance after 10min if not at least one Flower
     # process is running it
-    cluster.exec_all(
-        command.watch_and_shutdown("[f]lower_logserver", adapter), groups=["logserver"]
-    )
-    cluster.exec_all(
-        command.watch_and_shutdown("[f]lower_benchmark", adapter),
-        groups=["server", "clients"],
-    )
+    cluster.exec_all(command.watch_and_shutdown("[f]lower", adapter))
 
 
 def main() -> None:
