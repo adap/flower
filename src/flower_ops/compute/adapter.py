@@ -29,14 +29,14 @@ class Adapter(ABC):
     # pylint: disable=too-many-arguments
     @abstractmethod
     def create_instances(
-        self, num_cpu: int, num_ram: float, timeout: int, num_instances: int = 1,
+        self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
     ) -> List[Instance]:
         """Create one or more instance(s) of the same type.
 
             Args:
                 num_cpu (int): Number of instance CPU
                 num_ram (int): RAM in GB
-                num_instances (int): Number of instances to start if currently available
+                num_instance (int): Number of instances to start if currently available
                 timeout (int): Timeout in minutes
                 commands ([str]): List of bash commands which will be joined into a single string
                     with "\n" as a seperator

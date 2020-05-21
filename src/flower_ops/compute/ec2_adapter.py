@@ -171,7 +171,7 @@ class EC2Adapter(Adapter):
 
     # pylint: disable=too-many-arguments
     def create_instances(
-        self, num_cpu: int, num_ram: float, timeout: int, num_instances: int = 1,
+        self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
     ) -> List[Instance]:
         """Create one or more EC2 instance(s) of the same type.
 
@@ -179,7 +179,7 @@ class EC2Adapter(Adapter):
                 num_cpu (int): Number of instance vCPU (values in ec2_adapter.INSTANCE_TYPES)
                 num_ram (int): RAM in GB (values in ec2_adapter.INSTANCE_TYPES)
                 timeout (int): Timeout in minutes
-                num_instances (int): Number of instances to start if currently available in EC2
+                num_instance (int): Number of instances to start if currently available in EC2
         """
         # The instance will be set to terminate after stutdown
         # This is a fail safe in case something happens and the instances
@@ -190,8 +190,8 @@ class EC2Adapter(Adapter):
         result: EC2RunInstancesResult = self.ec2.run_instances(
             ImageId=self.image_id,
             # We always want an exact number of instances
-            MinCount=num_instances,
-            MaxCount=num_instances,
+            MinCount=num_instance,
+            MaxCount=num_instance,
             InstanceType=find_instance_type(num_cpu, num_ram, INSTANCE_TYPES),
             KeyName=self.key_name,
             IamInstanceProfile={"Name": "FlowerInstanceProfile"},

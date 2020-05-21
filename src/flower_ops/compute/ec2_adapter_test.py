@@ -147,7 +147,7 @@ if os.getenv("FLOWER_INTEGRATION"):
             """Create, list and terminate an instance."""
             # Execute & Assert
             instances = self.adapter.create_instances(
-                num_cpu=2, num_ram=2, num_instances=1, timeout=10
+                num_cpu=2, num_ram=2, num_instance=1, timeout=10
             )
             instances = self.adapter.list_instances()
 

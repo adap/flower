@@ -66,7 +66,7 @@ class DockerAdapter(Adapter):
         client.close()
 
     def create_instances(
-        self, num_cpu: int, num_ram: float, timeout: int, num_instances: int = 1,
+        self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
     ) -> List[Instance]:
         """Create one or more docker container instance(s) of the same type.
 
@@ -74,12 +74,12 @@ class DockerAdapter(Adapter):
                 num_cpu (int): Number of instance CPU cores (currently ignored)
                 num_ram (int): RAM in GB (currently ignored)
                 timeout (int): Timeout in minutes
-                num_instances (int): Number of instances to start
+                num_instance (int): Number of instances to start
         """
         instances: List[Instance] = []
 
         client = docker.from_env()
-        for _ in range(num_instances):
+        for _ in range(num_instance):
             port = get_free_port()
             container = client.containers.run(
                 "flower-sshd:latest",
@@ -98,7 +98,7 @@ class DockerAdapter(Adapter):
 
             port = _get_container_port(container.short_id)
             instances.append(
-                (container.short_id, container.name, "127.0.0.1", port, "started")
+                Instance(container.short_id, container.name, None, port, "started")
             )
 
         client.close()
