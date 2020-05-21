@@ -22,9 +22,10 @@ from typing import List, Optional
 
 import flower_benchmark.tf_cifar.settings as tf_cifar_settings
 import flower_benchmark.tf_fashion_mnist.settings as tf_fashion_mnist_settings
+from flower.logger import configure
 from flower_benchmark import command
 from flower_benchmark.setting import ClientSetting
-from flower_ops.cluster import Cluster
+from flower_ops.cluster import Cluster, Instance
 from flower_ops.compute.adapter import Adapter
 from flower_ops.compute.docker_adapter import DockerAdapter
 from flower_ops.compute.ec2_adapter import EC2Adapter
@@ -75,7 +76,12 @@ def configure_cluster(adapter: str, benchmark: str, setting: str) -> Cluster:
     cluster = Cluster(
         adapter=adapter_instance,
         ssh_credentials=(user, private_key),
-        specs={"logserver": (2, 2, 1), "server": (4, 16, 1), "clients": (4, 16, 2)},
+        instances=[
+            Instance(name="logserver", group="logserver", num_cpu=2, num_ram=2),
+            Instance(name="server", group="server", num_cpu=4, num_ram=16),
+            Instance(name="client_0", group="clients", num_cpu=4, num_ram=16),
+            Instance(name="client_1", group="clients", num_cpu=4, num_ram=16),
+        ],
         timeout=60,
     )
 
@@ -119,11 +125,9 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
         command.download_dataset(benchmark=benchmark), groups=["server", "clients"]
     )
 
-    # An instance is a tuple of the following values
-    # (InstanceId, PrivateIpAddress, PublicIpAddress, State)
-    logserver_id, logserver_private_ip, _, _, _ = cluster.instances["logserver"][0]
+    # Start logserver
     cluster.exec(
-        logserver_id,
+        "logserver",
         command.start_logserver(
             logserver_s3_bucket=CONFIG.get("aws", "logserver_s3_bucket"),
             logserver_s3_key=f"{benchmark}_{setting}_{now()}.log",
@@ -131,30 +135,26 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
     )
 
     # Start Flower server on Flower server instances
-    server_id, server_private_ip, _, _, _ = cluster.instances["server"][0]
+    logserver = cluster.get_instance("logserver")
     cluster.exec(
-        server_id,
+        "server",
         command.start_server(
-            log_host=f"{logserver_private_ip}:8081",
+            log_host=f"{logserver.private_ip}:8081",
             benchmark=benchmark,
             setting=setting,
         ),
     )
 
     # Start Flower clients
-    client_instances = cluster.instances["clients"]
+    server = cluster.get_instance("server")
     num_client_processes = len(client_settings)
     for i in range(0, num_client_processes):
-        instance_id = (
-            client_instances[0][0]
-            if i < int(num_client_processes / 2)
-            else client_instances[1][0]
-        )
+        instance_name = "client_0" if i < int(num_client_processes / 2) else "client_1"
         cluster.exec(
-            instance_id,
+            instance_name,
             command.start_client(
-                log_host=f"{logserver_private_ip}:8081",
-                server_address=f"{server_private_ip}:8080",
+                log_host=f"{logserver.private_ip}:8081",
+                server_address=f"{server.private_ip}:8080",
                 benchmark=benchmark,
                 setting=setting,
                 index=i,
@@ -170,8 +170,6 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
         command.watch_and_shutdown("[f]lower_benchmark", adapter),
         groups=["server", "clients"],
     )
-
-    print(cluster.instances)
 
 
 def main() -> None:
@@ -204,6 +202,9 @@ def main() -> None:
         help="Set adapter to be used.",
     )
     args = parser.parse_args()
+
+    # Configure logger
+    configure(f"flower_{args.benchmark}_{args.setting}")
 
     run(benchmark=args.benchmark, setting=args.setting, adapter=args.adapter)
 

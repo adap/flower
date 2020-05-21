@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set +e # continue if one script fails
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/
 
 

@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import boto3
 from boto3_type_annotations import ec2
 
-from .adapter import Adapter, Instance
+from .adapter import Adapter, AdapterInstance
 
 EC2RunInstancesResult = Dict[str, List[ec2.Instance]]
 EC2DescribeInstancesResult = Dict[str, List[Dict[str, List[ec2.Instance]]]]
@@ -172,15 +172,15 @@ class EC2Adapter(Adapter):
 
     # pylint: disable=too-many-arguments
     def create_instances(
-        self, num_cpu: int, num_ram: float, timeout: int, num_instances: int = 1,
-    ) -> List[Instance]:
+        self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
+    ) -> List[AdapterInstance]:
         """Create one or more EC2 instance(s) of the same type.
 
             Args:
                 num_cpu (int): Number of instance vCPU (values in ec2_adapter.INSTANCE_TYPES)
                 num_ram (int): RAM in GB (values in ec2_adapter.INSTANCE_TYPES)
                 timeout (int): Timeout in minutes
-                num_instances (int): Number of instances to start if currently available in EC2
+                num_instance (int): Number of instances to start if currently available in EC2
         """
         # The instance will be set to terminate after stutdown
         # This is a fail safe in case something happens and the instances
@@ -191,8 +191,8 @@ class EC2Adapter(Adapter):
         result: EC2RunInstancesResult = self.ec2.run_instances(
             ImageId=self.image_id,
             # We always want an exact number of instances
-            MinCount=num_instances,
-            MaxCount=num_instances,
+            MinCount=num_instance,
+            MaxCount=num_instance,
             InstanceType=find_instance_type(num_cpu, num_ram, INSTANCE_TYPES),
             KeyName=self.key_name,
             IamInstanceProfile={"Name": "FlowerInstanceProfile"},
@@ -218,7 +218,7 @@ class EC2Adapter(Adapter):
 
     def list_instances(
         self, instance_ids: Optional[List[str]] = None
-    ) -> List[Instance]:
+    ) -> List[AdapterInstance]:
         """List all instances with tags belonging to this adapter.
 
         Args:

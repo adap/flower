@@ -18,7 +18,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
 
-Instance = Tuple[
+AdapterInstance = Tuple[
     str, str, Optional[str], int, str
 ]  # (InstanceId, PrivateIpAddress, PublicIpAddress, SSHPort, State)
 
@@ -29,14 +29,14 @@ class Adapter(ABC):
     # pylint: disable=too-many-arguments
     @abstractmethod
     def create_instances(
-        self, num_cpu: int, num_ram: float, timeout: int, num_instances: int = 1,
-    ) -> List[Instance]:
+        self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
+    ) -> List[AdapterInstance]:
         """Create one or more instance(s) of the same type.
 
             Args:
                 num_cpu (int): Number of instance CPU
                 num_ram (int): RAM in GB
-                num_instances (int): Number of instances to start if currently available
+                num_instance (int): Number of instances to start if currently available
                 timeout (int): Timeout in minutes
                 commands ([str]): List of bash commands which will be joined into a single string
                     with "\n" as a seperator
@@ -45,7 +45,7 @@ class Adapter(ABC):
     @abstractmethod
     def list_instances(
         self, instance_ids: Optional[List[str]] = None
-    ) -> List[Instance]:
+    ) -> List[AdapterInstance]:
         """List all instances with tags belonging to this adapter.
 
         Args:

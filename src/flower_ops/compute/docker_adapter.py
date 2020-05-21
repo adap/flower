@@ -23,7 +23,7 @@ from uuid import uuid4
 
 import docker
 
-from .adapter import Adapter, Instance
+from .adapter import Adapter, AdapterInstance
 
 
 class NoPublicFacingPortFound(Exception):
@@ -66,20 +66,20 @@ class DockerAdapter(Adapter):
         client.close()
 
     def create_instances(
-        self, num_cpu: int, num_ram: float, timeout: int, num_instances: int = 1,
-    ) -> List[Instance]:
+        self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
+    ) -> List[AdapterInstance]:
         """Create one or more docker container instance(s) of the same type.
 
             Args:
                 num_cpu (int): Number of instance CPU cores (currently ignored)
                 num_ram (int): RAM in GB (currently ignored)
                 timeout (int): Timeout in minutes
-                num_instances (int): Number of instances to start
+                num_instance (int): Number of instances to start
         """
-        instances: List[Instance] = []
+        instances: List[AdapterInstance] = []
 
         client = docker.from_env()
-        for _ in range(num_instances):
+        for _ in range(num_instance):
             port = get_free_port()
             container = client.containers.run(
                 "flower-sshd:latest",
@@ -103,19 +103,17 @@ class DockerAdapter(Adapter):
 
         client.close()
 
-        print(instances)
-
         return instances
 
     def list_instances(
         self, instance_ids: Optional[List[str]] = None
-    ) -> List[Instance]:
+    ) -> List[AdapterInstance]:
         """List all container instances with tags belonging to this adapter.
 
         Args:
             instance_ids ([str[]]): If provided, filter by instance_ids
         """
-        instances: List[Instance] = []
+        instances: List[AdapterInstance] = []
 
         client = docker.from_env()
         containers = client.containers.list(
