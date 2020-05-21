@@ -31,6 +31,7 @@ class ServerSetting:
     training_round_timeout: Optional[int]
     lr_initial: float
     partial_updates: bool
+    importance_sampling: bool
     dry_run: bool
 
 

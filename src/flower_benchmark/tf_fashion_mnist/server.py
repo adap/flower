@@ -94,6 +94,7 @@ def main() -> None:
             min_available_clients=server_setting.min_num_clients,
             eval_fn=eval_fn,
             on_fit_config_fn=on_fit_config_fn,
+            importance_sampling=server_setting.importance_sampling,
             r_fast=1,
             r_slow=1,
             t_fast=20,

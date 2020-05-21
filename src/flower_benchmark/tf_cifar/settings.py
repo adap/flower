@@ -78,7 +78,7 @@ def configure_clients(
 
 
 SETTINGS = {
-    "dry": Setting(
+    "dry-run": Setting(
         server=ServerSetting(
             strategy="fedavg",
             rounds=1,
@@ -88,6 +88,7 @@ SETTINGS = {
             training_round_timeout=600,
             lr_initial=0.1,
             partial_updates=False,
+            importance_sampling=False,
             dry_run=True,
         ),
         clients=configure_uniform_clients(
@@ -104,6 +105,7 @@ SETTINGS = {
             training_round_timeout=3600,
             lr_initial=0.1,
             partial_updates=False,
+            importance_sampling=False,
             dry_run=False,
         ),
         clients=configure_uniform_clients(
@@ -120,6 +122,7 @@ SETTINGS = {
             training_round_timeout=None,
             lr_initial=0.1,
             partial_updates=False,
+            importance_sampling=False,
             dry_run=False,
         ),
         clients=configure_clients(
@@ -140,6 +143,7 @@ SETTINGS = {
             training_round_timeout=60,
             lr_initial=0.1,
             partial_updates=False,
+            importance_sampling=False,
             dry_run=False,
         ),
         clients=configure_clients(
