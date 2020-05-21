@@ -17,6 +17,7 @@ Paper: https://openreview.net/pdf?id=ByexElSYDr
 """
 
 
+import numpy as np
 from typing import Callable, Dict, List, Optional, Tuple
 
 from flower.client_manager import ClientManager
@@ -26,7 +27,6 @@ from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 from .aggregate import aggregate, weighted_loss_avg, aggregate_qffl
 from .parameter import parameters_to_weights, weights_to_parameters
 from .strategy import Strategy
-import numpy as np
 
 class QffedAvg(Strategy):
     """Configurable QffedAvg strategy implementation."""

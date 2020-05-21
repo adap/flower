@@ -16,8 +16,8 @@
 
 
 from .default import DefaultStrategy
+from .qffedavg import QffedAvg
 from .fast_and_slow import FastAndSlow
 from .fault_tolerant_fedavg import FaultTolerantFedAvg
 from .fedavg import FedAvg
 from .strategy import Strategy
-from .qffedavg import QffedAvg
