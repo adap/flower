@@ -89,9 +89,9 @@ def main() -> None:
 
     if server_setting.strategy == "fast-and-slow":
         strategy = flwr.strategy.FastAndSlow(
-            fraction_fit=args.sample_fraction,
-            min_fit_clients=args.min_sample_size,
-            min_available_clients=args.min_num_clients,
+            fraction_fit=server_setting.sample_fraction,
+            min_fit_clients=server_setting.min_sample_size,
+            min_available_clients=server_setting.min_num_clients,
             eval_fn=eval_fn,
             on_fit_config_fn=on_fit_config_fn,
             r_fast=1,
