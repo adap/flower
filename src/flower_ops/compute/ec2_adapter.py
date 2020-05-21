@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import boto3
 from boto3_type_annotations import ec2
 
-from .adapter import Adapter, Instance
+from .adapter import Adapter, AdapterInstance
 
 EC2RunInstancesResult = Dict[str, List[ec2.Instance]]
 EC2DescribeInstancesResult = Dict[str, List[Dict[str, List[ec2.Instance]]]]
@@ -172,7 +172,7 @@ class EC2Adapter(Adapter):
     # pylint: disable=too-many-arguments
     def create_instances(
         self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
-    ) -> List[Instance]:
+    ) -> List[AdapterInstance]:
         """Create one or more EC2 instance(s) of the same type.
 
             Args:
@@ -217,7 +217,7 @@ class EC2Adapter(Adapter):
 
     def list_instances(
         self, instance_ids: Optional[List[str]] = None
-    ) -> List[Instance]:
+    ) -> List[AdapterInstance]:
         """List all instances with tags belonging to this adapter.
 
         Args:

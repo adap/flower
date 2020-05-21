@@ -18,7 +18,7 @@ import os
 import unittest
 import warnings
 
-from .cluster import Cluster
+from .cluster import Cluster, Instance
 from .compute.ec2_adapter import EC2Adapter
 
 IMAGE_ID = "ami-0b418580298265d5c"
@@ -61,7 +61,9 @@ if os.getenv("FLOWER_INTEGRATION"):
             self.cluster = Cluster(
                 adapter=adapter,
                 ssh_credentials=SSH_CREDENTIALS,
-                specs={"server": (2, 0.5, 1)},
+                instances=[
+                    Instance(name="server", group="server", num_cpu=2, num_ram=2)
+                ],
                 # In case the tearDown fails for some reason the machines
                 # should automatically terminate after 10 minutes
                 timeout=10,
@@ -78,8 +80,7 @@ if os.getenv("FLOWER_INTEGRATION"):
             expected_result = "2\n"
 
             # Execute
-            instance_id = self.cluster.instances["server"][0][0]
-            stdout, stderr = self.cluster.exec(instance_id, command)
+            stdout, stderr = self.cluster.exec("server", command)
 
             # Assert
             assert len(stderr) == 0

@@ -23,7 +23,7 @@ from uuid import uuid4
 
 import docker
 
-from .adapter import Adapter, Instance
+from .adapter import Adapter, AdapterInstance
 
 
 class NoPublicFacingPortFound(Exception):
@@ -67,7 +67,7 @@ class DockerAdapter(Adapter):
 
     def create_instances(
         self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
-    ) -> List[Instance]:
+    ) -> List[AdapterInstance]:
         """Create one or more docker container instance(s) of the same type.
 
             Args:
@@ -76,7 +76,7 @@ class DockerAdapter(Adapter):
                 timeout (int): Timeout in minutes
                 num_instance (int): Number of instances to start
         """
-        instances: List[Instance] = []
+        instances: List[AdapterInstance] = []
 
         client = docker.from_env()
         for _ in range(num_instance):
@@ -98,24 +98,22 @@ class DockerAdapter(Adapter):
 
             port = _get_container_port(container.short_id)
             instances.append(
-                Instance(container.short_id, container.name, None, port, "started")
+                (container.short_id, container.name, "127.0.0.1", port, "started")
             )
 
         client.close()
-
-        print(instances)
 
         return instances
 
     def list_instances(
         self, instance_ids: Optional[List[str]] = None
-    ) -> List[Instance]:
+    ) -> List[AdapterInstance]:
         """List all container instances with tags belonging to this adapter.
 
         Args:
             instance_ids ([str[]]): If provided, filter by instance_ids
         """
-        instances: List[Instance] = []
+        instances: List[AdapterInstance] = []
 
         client = docker.from_env()
         containers = client.containers.list(

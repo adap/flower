@@ -18,7 +18,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
 
-Instance = Tuple[
+AdapterInstance = Tuple[
     str, str, Optional[str], int, str
 ]  # (InstanceId, PrivateIpAddress, PublicIpAddress, SSHPort, State)
 
@@ -30,7 +30,7 @@ class Adapter(ABC):
     @abstractmethod
     def create_instances(
         self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
-    ) -> List[Instance]:
+    ) -> List[AdapterInstance]:
         """Create one or more instance(s) of the same type.
 
             Args:
@@ -45,7 +45,7 @@ class Adapter(ABC):
     @abstractmethod
     def list_instances(
         self, instance_ids: Optional[List[str]] = None
-    ) -> List[Instance]:
+    ) -> List[AdapterInstance]:
         """List all instances with tags belonging to this adapter.
 
         Args:
