@@ -89,6 +89,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=False,
             importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=True,
         ),
         clients=configure_uniform_clients(
@@ -106,6 +107,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=False,
             importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_uniform_clients(
@@ -123,6 +125,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=False,
             importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
@@ -144,6 +147,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=False,
             importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
@@ -165,6 +169,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=True,
             importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
@@ -175,27 +180,28 @@ SETTINGS = {
             delay_factor_slow=3.0,
         ),
     ),
-    # "fast-and-slow-only-dynamic-timeouts": Setting(
-    #     server=ServerSetting(
-    #         strategy="fast-and-slow",
-    #         rounds=25,
-    #         min_num_clients=80,
-    #         sample_fraction=0.1,
-    #         min_sample_size=10,
-    #         training_round_timeout=20,
-    #         lr_initial=0.1,
-    #         partial_updates=False,
-    #         importance_sampling=False,
-    #         dry_run=False,
-    #     ),
-    #     clients=configure_clients(
-    #         iid_fraction=0.0,
-    #         num_clients=100,
-    #         dry_run=False,
-    #         delay_factor_fast=0.0,
-    #         delay_factor_slow=3.0,
-    #     ),
-    # ),
+    "fast-and-slow-only-dynamic-timeouts": Setting(
+        server=ServerSetting(
+            strategy="fast-and-slow",
+            rounds=25,
+            min_num_clients=80,
+            sample_fraction=0.1,
+            min_sample_size=10,
+            training_round_timeout=20,
+            lr_initial=0.1,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=True,
+            dry_run=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=0.0,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=3.0,
+        ),
+    ),
     "fast-and-slow-only-importance-sampling": Setting(
         server=ServerSetting(
             strategy="fast-and-slow",
@@ -207,6 +213,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=False,
             importance_sampling=True,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
@@ -228,6 +235,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=True,
             importance_sampling=True,
+            dynamic_timeout=True,
             dry_run=False,
         ),
         clients=configure_clients(

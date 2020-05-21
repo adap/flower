@@ -32,6 +32,7 @@ class ServerSetting:
     lr_initial: float
     partial_updates: bool
     importance_sampling: bool
+    dynamic_timeout: bool
     dry_run: bool
 
 

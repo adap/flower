@@ -46,6 +46,7 @@ class FastAndSlow(FedAvg):
         on_fit_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         importance_sampling: bool = True,
+        dynamic_timeout: bool = True,
         r_fast: int = 1,
         r_slow: int = 1,
         t_fast: int = 10,
@@ -64,6 +65,7 @@ class FastAndSlow(FedAvg):
         self.min_completion_rate_fit = min_completion_rate_fit
         self.min_completion_rate_evaluate = min_completion_rate_evaluate
         self.importance_sampling = importance_sampling
+        self.dynamic_timeout = dynamic_timeout
         self.r_fast = r_fast
         self.r_slow = r_slow
         self.t_fast = t_fast
