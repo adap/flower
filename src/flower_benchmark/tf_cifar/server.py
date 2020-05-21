@@ -71,7 +71,7 @@ def main() -> None:
     client_manager = flwr.SimpleClientManager()
 
     # Strategy
-    eval_fn = get_eval_fn(model=model, num_classes=10, xy_test=xy_test)
+    eval_fn = get_eval_fn(model=model, num_classes=NUM_CLASSES, xy_test=xy_test)
     fit_config_fn = get_on_fit_config_fn(
         lr_initial=server_setting.lr_initial,
         timeout=server_setting.training_round_timeout,

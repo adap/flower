@@ -23,9 +23,8 @@ def get_setting(name: str) -> Setting:
     """Return appropriate setting."""
     if name not in SETTINGS:
         raise Exception(
-            "Setting does not exist. Valid settings are: %s" % list(SETTINGS.keys())
+            f"Setting {name} does not exist. Valid settings are: {list(SETTINGS.keys())}"
         )
-
     return SETTINGS[name]
 
 

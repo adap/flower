@@ -23,9 +23,8 @@ def get_setting(name: str) -> Setting:
     """Return appropriate setting."""
     if name not in SETTINGS:
         raise Exception(
-            "Setting does not exist. Valid settings are: %s" % list(SETTINGS.keys())
+            f"Setting {name} does not exist. Valid settings are: {list(SETTINGS.keys())}"
         )
-
     return SETTINGS[name]
 
 
@@ -171,6 +170,46 @@ SETTINGS = {
             delay_factor_slow=3.0,
         ),
     ),
+    # "fast-and-slow-only-dynamic-timeouts": Setting(
+    #     server=ServerSetting(
+    #         strategy="fast-and-slow",
+    #         rounds=25,
+    #         min_num_clients=80,
+    #         sample_fraction=0.1,
+    #         min_sample_size=10,
+    #         training_round_timeout=20,
+    #         lr_initial=0.1,
+    #         partial_updates=True,
+    #         dry_run=False,
+    #     ),
+    #     clients=configure_clients(
+    #         iid_fraction=0.0,
+    #         num_clients=100,
+    #         dry_run=False,
+    #         delay_factor_fast=0.0,
+    #         delay_factor_slow=3.0,
+    #     ),
+    # ),
+    # "fast-and-slow-only-importance-sampling": Setting(
+    #     server=ServerSetting(
+    #         strategy="fast-and-slow",
+    #         rounds=25,
+    #         min_num_clients=80,
+    #         sample_fraction=0.1,
+    #         min_sample_size=10,
+    #         training_round_timeout=20,
+    #         lr_initial=0.1,
+    #         partial_updates=True,
+    #         dry_run=False,
+    #     ),
+    #     clients=configure_clients(
+    #         iid_fraction=0.0,
+    #         num_clients=100,
+    #         dry_run=False,
+    #         delay_factor_fast=0.0,
+    #         delay_factor_slow=3.0,
+    #     ),
+    # ),
     "fast-and-slow": Setting(
         server=ServerSetting(
             strategy="fast-and-slow",
