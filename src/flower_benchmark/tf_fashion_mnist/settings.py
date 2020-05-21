@@ -238,4 +238,25 @@ SETTINGS = {
             delay_factor_slow=3.0,
         ),
     ),
+    "qffedavg": Setting(
+        server=ServerSetting(
+            strategy="qffedavg",
+            rounds=25,
+            min_num_clients=80,
+            sample_fraction=0.1,
+            min_sample_size=10,
+            training_round_timeout=None,
+            lr_initial=0.1,
+            partial_updates=False,
+            importance_sampling=False,
+            dry_run=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=0.0,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=3.0,
+        ),
+    )    
 }

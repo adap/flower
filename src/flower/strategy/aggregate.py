@@ -46,3 +46,19 @@ def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
     num_total_evaluation_examples = sum([num_examples for num_examples, _ in results])
     weighted_losses = [num_examples * loss for num_examples, loss in results]
     return sum(weighted_losses) / num_total_evaluation_examples
+
+def aggregate_qffl(weights: Weights, Deltas: List, hs: List) -> Weights:    
+    """Compute weighted average based on  Q-FFL paper."""
+    demominator = np.sum(np.asarray(hs))
+    num_clients = len(Deltas)
+    scaled_deltas = []
+    for client_delta in Deltas:
+        scaled_deltas.append([layer * 1.0 / demominator for layer in client_delta])
+    updates = []
+    for i in range(len(Deltas[0])):
+        tmp = scaled_deltas[0][i]
+        for j in range(1, len(Deltas)):
+            tmp += scaled_deltas[j][i]
+        updates.append(tmp)
+    new_weights = [(u - v) * 1.0 for u, v in zip(weights, updates)]
+    return new_weights
