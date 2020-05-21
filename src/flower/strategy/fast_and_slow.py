@@ -32,7 +32,7 @@ from .parameter import parameters_to_weights, weights_to_parameters
 class FastAndSlow(FedAvg):
     """Strategy implementation which alternates between fast and slow rounds."""
 
-    # pylint: disable-msg=too-many-arguments,too-many-instance-attributes
+    # pylint: disable-msg=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         fraction_fit: float = 0.1,
@@ -45,6 +45,7 @@ class FastAndSlow(FedAvg):
         min_completion_rate_evaluate: float = 0.5,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
+        importance_sampling: bool = True,
         r_fast: int = 1,
         r_slow: int = 1,
         t_fast: int = 10,
@@ -62,6 +63,7 @@ class FastAndSlow(FedAvg):
         )
         self.min_completion_rate_fit = min_completion_rate_fit
         self.min_completion_rate_evaluate = min_completion_rate_evaluate
+        self.importance_sampling = importance_sampling
         self.r_fast = r_fast
         self.r_slow = r_slow
         self.t_fast = t_fast
@@ -93,27 +95,36 @@ class FastAndSlow(FedAvg):
         config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
         fit_ins = (parameters, config)
 
-        # Get all clients and gather their contributions
-        all_clients: Dict[str, ClientProxy] = client_manager.all()
-        cid_idx: Dict[int, str] = {}
-        logits: List[float] = []
-        for idx, (cid, _) in enumerate(all_clients.items()):
-            cid_idx[idx] = cid
-            penalty = 0.0
-            if cid in self.contributions.keys():
-                contribs: List[Tuple[int, float]] = self.contributions[cid]
-                penalty = statistics.mean([c for _, c in contribs])
-            # `p` should be:
-            #   - High for clients which have never been picked before
-            #   - Medium for clients which have contributed, but not used their entire budget
-            #   - Low (but not 0) for clients which have been picked and used their budget
-            logits.append(1.1 - penalty)
-
         # Sample clients
-        indices = np.arange(len(all_clients.keys()))
-        probs = softmax(np.array(logits))
-        idxs = np.random.choice(indices, size=sample_size, replace=False, p=probs)
-        clients = [all_clients[cid_idx[idx]] for idx in idxs]
+        if self.importance_sampling:
+            # Get all clients and gather their contributions
+            all_clients: Dict[str, ClientProxy] = client_manager.all()
+            cid_idx: Dict[int, str] = {}
+            logits: List[float] = []
+            for idx, (cid, _) in enumerate(all_clients.items()):
+                cid_idx[idx] = cid
+                penalty = 0.0
+                if cid in self.contributions.keys():
+                    contribs: List[Tuple[int, float]] = self.contributions[cid]
+                    penalty = statistics.mean([c for _, c in contribs])
+                # `p` should be:
+                #   - High for clients which have never been picked before
+                #   - Medium for clients which have contributed, but not used their entire budget
+                #   - Low (but not 0) for clients which have been picked and used their budget
+                logits.append(1.1 - penalty)
+
+            # Sample clients
+            indices = np.arange(len(all_clients.keys()))
+            probs = softmax(np.array(logits))
+            idxs = np.random.choice(indices, size=sample_size, replace=False, p=probs)
+            clients = [all_clients[cid_idx[idx]] for idx in idxs]
+        else:
+            sample_size, min_num_clients = self.num_evaluation_clients(
+                client_manager.num_available()
+            )
+            clients = client_manager.sample(
+                num_clients=sample_size, min_num_clients=min_num_clients
+            )
 
         # Return client/config pairs
         return [(client, fit_ins) for client in clients]
@@ -141,13 +152,14 @@ class FastAndSlow(FedAvg):
         ]
         weights_prime = aggregate(weights_results)
 
-        # Track contributions to the global model
-        for client, fit_res in results:
-            cid = client.cid
-            contribution: Tuple[int, float] = (rnd, fit_res[1] / fit_res[2])
-            if cid not in self.contributions.keys():
-                self.contributions[cid] = []
-            self.contributions[cid].append(contribution)
+        if self.importance_sampling:
+            # Track contributions to the global model
+            for client, fit_res in results:
+                cid = client.cid
+                contribution: Tuple[int, float] = (rnd, fit_res[1] / fit_res[2])
+                if cid not in self.contributions.keys():
+                    self.contributions[cid] = []
+                self.contributions[cid].append(contribution)
 
         return weights_prime
 
