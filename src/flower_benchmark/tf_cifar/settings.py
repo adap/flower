@@ -23,9 +23,8 @@ def get_setting(name: str) -> Setting:
     """Return appropriate setting."""
     if name not in SETTINGS:
         raise Exception(
-            "Setting does not exist. Valid settings are: %s" % list(SETTINGS.keys())
+            f"Setting {name} does not exist. Valid settings are: {list(SETTINGS.keys())}"
         )
-
     return SETTINGS[name]
 
 
@@ -81,12 +80,14 @@ def configure_clients(
 SETTINGS = {
     "dry": Setting(
         server=ServerSetting(
+            strategy="fedavg",
             rounds=1,
             min_num_clients=1,
             sample_fraction=1.0,
             min_sample_size=1,
             training_round_timeout=600,
             lr_initial=0.1,
+            partial_updates=False,
             dry_run=True,
         ),
         clients=configure_uniform_clients(
@@ -95,16 +96,58 @@ SETTINGS = {
     ),
     "minimal": Setting(
         server=ServerSetting(
+            strategy="fedavg",
             rounds=2,
             min_num_clients=4,
             sample_fraction=1.0,
             min_sample_size=3,
             training_round_timeout=3600,
             lr_initial=0.1,
+            partial_updates=False,
             dry_run=False,
         ),
         clients=configure_uniform_clients(
             iid_fraction=0.0, num_clients=4, dry_run=False
+        ),
+    ),
+    "fedavg-sync": Setting(
+        server=ServerSetting(
+            strategy="fedavg",
+            rounds=10,
+            min_num_clients=80,
+            sample_fraction=0.1,
+            min_sample_size=10,
+            training_round_timeout=None,
+            lr_initial=0.1,
+            partial_updates=False,
+            dry_run=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=0.5,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=0.0,
+        ),
+    ),
+    "fedavg-async": Setting(
+        server=ServerSetting(
+            strategy="fedavg",
+            rounds=10,
+            min_num_clients=80,
+            sample_fraction=0.1,
+            min_sample_size=10,
+            training_round_timeout=60,
+            lr_initial=0.1,
+            partial_updates=False,
+            dry_run=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=0.5,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=0.0,
         ),
     ),
 }

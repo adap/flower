@@ -17,7 +17,7 @@
 
 import argparse
 from logging import ERROR
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional
 
 import flower as flwr
 from flower.logger import configure, log
@@ -67,41 +67,48 @@ def main() -> None:
     # Load model (for centralized evaluation)
     model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
 
-    # Create client_manager, strategy, and server
+    # Create client_manager
     client_manager = flwr.SimpleClientManager()
-    strategy = flwr.strategy.DefaultStrategy(
-        fraction_fit=server_setting.sample_fraction,
-        min_fit_clients=server_setting.min_sample_size,
-        min_available_clients=server_setting.min_num_clients,
-        eval_fn=get_eval_fn(model=model, num_classes=NUM_CLASSES, xy_test=xy_test),
-        on_fit_config_fn=get_on_fit_config_fn(
-            server_setting.lr_initial, server_setting.training_round_timeout
-        ),
-    )
-    # strategy = flwr.strategy.FastAndSlow(
-    #     fraction_fit=args.sample_fraction,
-    #     min_fit_clients=args.min_sample_size,
-    #     min_available_clients=args.min_num_clients,
-    #     eval_fn=get_eval_fn(model=model, num_classes=NUM_CLASSES, xy_test=xy_test),
-    #     on_fit_config_fn=get_on_fit_config_fn(
-    #         args.lr_initial, args.training_round_timeout
-    #     ),
-    #     r_fast=1,
-    #     r_slow=1,
-    #     t_fast=20,
-    #     t_slow=40,
-    # )
 
-    server = flwr.Server(client_manager=client_manager, strategy=strategy)
+    # Strategy
+    eval_fn = get_eval_fn(model=model, num_classes=NUM_CLASSES, xy_test=xy_test)
+    fit_config_fn = get_on_fit_config_fn(
+        lr_initial=server_setting.lr_initial,
+        timeout=server_setting.training_round_timeout,
+        partial_updates=server_setting.partial_updates,
+    )
+
+    if server_setting.strategy == "fedavg":
+        strategy = flwr.strategy.FedAvg(
+            fraction_fit=server_setting.sample_fraction,
+            min_fit_clients=server_setting.min_sample_size,
+            min_available_clients=server_setting.min_num_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=fit_config_fn,
+        )
+
+    if server_setting.strategy == "fast-and-slow":
+        strategy = flwr.strategy.FastAndSlow(
+            fraction_fit=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=fit_config_fn,
+            r_fast=1,
+            r_slow=1,
+            t_fast=20,
+            t_slow=40,
+        )
 
     # Run server
+    server = flwr.Server(client_manager=client_manager, strategy=strategy)
     flwr.app.start_server(
         DEFAULT_SERVER_ADDRESS, server, config={"num_rounds": server_setting.rounds},
     )
 
 
 def get_on_fit_config_fn(
-    lr_initial: float, timeout: int
+    lr_initial: float, timeout: Optional[int], partial_updates: bool
 ) -> Callable[[int], Dict[str, str]]:
     """Return a function which returns training configurations."""
 
@@ -110,12 +117,14 @@ def get_on_fit_config_fn(
         config = {
             "epoch_global": str(rnd),
             "epochs": str(1),
-            "batch_size": str(64),
+            "batch_size": str(32),
             "lr_initial": str(lr_initial),
             "lr_decay": str(0.99),
-            "timeout": str(timeout),
-            "partial_updates": "1",
+            "partial_updates": "1" if partial_updates else "0",
         }
+        if timeout is not None:
+            config["timeout"] = str(timeout)
+
         return config
 
     return fit_config
