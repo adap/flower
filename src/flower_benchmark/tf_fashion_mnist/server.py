@@ -87,17 +87,6 @@ def main() -> None:
             on_fit_config_fn=on_fit_config_fn,
         )
 
-    if server_setting.strategy == "qffedavg":
-        strategy = flwr.strategy.QffedAvg(
-            q=0.2,
-            qffl_learning_rate = 0.1,            
-            fraction_fit=server_setting.sample_fraction,
-            min_fit_clients=server_setting.min_sample_size,
-            min_available_clients=server_setting.min_num_clients,
-            eval_fn=eval_fn,
-            on_fit_config_fn=on_fit_config_fn,
-        )
-
     if server_setting.strategy == "fast-and-slow":
         strategy = flwr.strategy.FastAndSlow(
             fraction_fit=server_setting.sample_fraction,
@@ -110,6 +99,17 @@ def main() -> None:
             r_slow=1,
             t_fast=20,
             t_slow=40,
+        )
+
+    if server_setting.strategy == "qffedavg":
+        strategy = flwr.strategy.QffedAvg(
+            q=0.2,
+            qffl_learning_rate=0.1,            
+            fraction_fit=server_setting.sample_fraction,
+            min_fit_clients=server_setting.min_sample_size,
+            min_available_clients=server_setting.min_num_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
         )
 
     # Run server
