@@ -258,5 +258,5 @@ SETTINGS = {
             delay_factor_fast=0.0,
             delay_factor_slow=3.0,
         ),
-    )    
+    ),
 }
