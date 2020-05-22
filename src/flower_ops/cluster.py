@@ -48,7 +48,7 @@ class Instance:
     state: Optional[str] = None
 
 
-class StartFailedException(Exception):
+class StartFailed(Exception):
     """Raised when cluster could not start."""
 
 
@@ -181,7 +181,7 @@ class Cluster:
                     future.cancel()
 
                 self.terminate()
-                raise StartFailedException()
+                raise StartFailed()
 
         for ins in self.instances:
             log(DEBUG, ins)
