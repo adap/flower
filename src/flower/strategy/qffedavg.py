@@ -17,9 +17,9 @@ Paper: https://openreview.net/pdf?id=ByexElSYDr
 """
 
 
-import numpy as np
 from typing import Callable, Dict, List, Optional, Tuple
 
+import numpy as np
 from flower.client_manager import ClientManager
 from flower.client_proxy import ClientProxy
 from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
