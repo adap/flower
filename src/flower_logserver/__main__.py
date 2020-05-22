@@ -40,6 +40,7 @@ CONFIG = {"s3_bucket": None, "s3_key": None}
 Path(LOGDIR).mkdir(exist_ok=True)
 Path(LOGFILE).touch()
 
+
 def write_to_logfile(line: str) -> None:
     """Write line to logfile."""
     with open(f"{LOGFILE}", "a+") as lfd:
