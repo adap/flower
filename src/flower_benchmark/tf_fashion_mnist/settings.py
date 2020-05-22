@@ -110,6 +110,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=False,
             importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=True,
         ),
         clients=configure_uniform_clients(
@@ -133,6 +134,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=False,
             importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_uniform_clients(
@@ -159,6 +161,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=False,
             importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
@@ -187,6 +190,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=False,
             importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
@@ -215,6 +219,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=True,
             importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
@@ -226,34 +231,35 @@ SETTINGS = {
             delay_factor_slow=3.0,
         ),
     ),
-    # "fast-and-slow-only-dynamic-timeouts": Setting(
-    #     instances=[
-    #         Instance(name="server", group="server", num_cpu=4, num_ram=16),
-    #         Instance(name="client_0", group="clients", num_cpu=48, num_ram=192),
-    #         Instance(name="client_1", group="clients", num_cpu=48, num_ram=192),
-    #     ],
-    #     server=ServerSetting(
-    #         instance_name="server",
-    #         strategy="fast-and-slow",
-    #         rounds=25,
-    #         min_num_clients=80,
-    #         sample_fraction=0.1,
-    #         min_sample_size=10,
-    #         training_round_timeout=20,
-    #         lr_initial=0.1,
-    #         partial_updates=False,
-    #         importance_sampling=False,
-    #         dry_run=False,
-    #     ),
-    #     clients=configure_clients(
-    #         iid_fraction=0.0,
-    #         instance_names=["client_0", "client_1"],
-    #         num_clients=100,
-    #         dry_run=False,
-    #         delay_factor_fast=0.0,
-    #         delay_factor_slow=3.0,
-    #     ),
-    # ),
+    "fast-and-slow-only-dynamic-timeouts": Setting(
+        instances=[
+            Instance(name="server", group="server", num_cpu=4, num_ram=16),
+            Instance(name="client_0", group="clients", num_cpu=48, num_ram=192),
+            Instance(name="client_1", group="clients", num_cpu=48, num_ram=192),
+        ],
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fast-and-slow",
+            rounds=25,
+            min_num_clients=80,
+            sample_fraction=0.1,
+            min_sample_size=10,
+            training_round_timeout=20,
+            lr_initial=0.1,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=True,
+            dry_run=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=0.0,
+            instance_names=["client_0", "client_1"],
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=3.0,
+        ),
+    ),
     "fast-and-slow-only-importance-sampling": Setting(
         instances=[
             Instance(name="server", group="server", num_cpu=4, num_ram=16),
@@ -271,6 +277,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=False,
             importance_sampling=True,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
@@ -299,6 +306,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=True,
             importance_sampling=True,
+            dynamic_timeout=True,
             dry_run=False,
         ),
         clients=configure_clients(
@@ -327,6 +335,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=False,
             importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
