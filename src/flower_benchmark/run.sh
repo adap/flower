@@ -22,4 +22,4 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
 ./dev/build.sh
 
 # Execute `run.py`
-python -m flower_benchmark.run --adapter="docker" --benchmark="tf_fashion_mnist" --setting="dry"
+python -m flower_benchmark.run --adapter="docker" --benchmark="tf_fashion_mnist" --setting="dry-run"

@@ -52,7 +52,7 @@ def start_server(log_host: str, benchmark: str, setting: str) -> str:
 
 
 def start_client(
-    server_address: str, log_host: str, benchmark: str, setting: str, index: int
+    server_address: str, log_host: str, benchmark: str, setting: str, cid: str
 ) -> str:
     """Build command to run client."""
     return (
@@ -61,7 +61,7 @@ def start_client(
         + f" --server_address={server_address}"
         + f" --log_host={log_host}"
         + f" --setting={setting}"
-        + f" --index={index}"
+        + f" --cid={cid}"
     )
 
 
