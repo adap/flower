@@ -22,7 +22,6 @@ import json
 import logging
 import time
 import urllib.parse
-from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from threading import Event, Thread
