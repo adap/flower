@@ -94,6 +94,7 @@ def tail_logfile(adapter: str, private_key: str, logserver: Instance) -> str:
     username = "root" if adapter == "docker" else "ubuntu"
 
     return (
-        f"ssh {ssh_key} -o StrictHostKeyChecking=no -p {logserver.ssh_port} {username}@{logserver.public_ip}"
+        f"ssh {ssh_key} -o StrictHostKeyChecking=no -p {logserver.ssh_port} "
+        + f"{username}@{logserver.public_ip}"
         + ' "tail -n 1000 -f flower_logs/flower.log"'
     )
