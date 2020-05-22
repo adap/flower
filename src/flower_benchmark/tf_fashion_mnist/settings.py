@@ -335,6 +335,7 @@ SETTINGS = {
             lr_initial=0.1,
             partial_updates=False,
             importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
