@@ -30,7 +30,7 @@ from threading import Event, Thread
 import boto3
 
 LOGDIR = "flower_logs"
-LOGFILE = "{logdir}/{:%Y-%m-%d}.log".format(datetime.now(), logdir=LOGDIR)
+LOGFILE = "{logdir}/flower.log".format(logdir=LOGDIR)
 LOGFILE_UPLOAD_INTERVAL = 60
 SERVER_TIMEOUT = 3600
 
@@ -38,7 +38,7 @@ CONFIG = {"s3_bucket": None, "s3_key": None}
 
 # Create a flower_logs directory to store the logfiles.
 Path(LOGDIR).mkdir(exist_ok=True)
-
+Path(LOGFILE).touch()
 
 def write_to_logfile(line: str) -> None:
     """Write line to logfile."""
