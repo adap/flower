@@ -103,7 +103,7 @@ def main() -> None:
 
     if server_setting.strategy == "qffedavg":
         strategy = flwr.strategy.QffedAvg(
-            q=0.2,
+            q_param=0.2,
             qffl_learning_rate=0.1,
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,

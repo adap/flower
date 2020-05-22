@@ -20,21 +20,23 @@ Paper: https://openreview.net/pdf?id=ByexElSYDr
 from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
+
 from flower.client_manager import ClientManager
 from flower.client_proxy import ClientProxy
 from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
-from .aggregate import aggregate, weighted_loss_avg, aggregate_qffl
+from .aggregate import aggregate_qffl, weighted_loss_avg
+from .fedavg import FedAvg
 from .parameter import parameters_to_weights, weights_to_parameters
-from .strategy import Strategy
 
-class QffedAvg(Strategy):
+
+class QffedAvg(FedAvg):
     """Configurable QffedAvg strategy implementation."""
 
     # pylint: disable-msg=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
-        q: float = 0.2,
+        q_param: float = 0.2,
         qffl_learning_rate: float = 0.1,
         fraction_fit: float = 0.1,
         fraction_eval: float = 0.1,
@@ -57,7 +59,8 @@ class QffedAvg(Strategy):
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
         self.learning_rate = qffl_learning_rate
-        self.q = q
+        self.q_param = q_param
+        self.pre_weights: Weights
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Return the sample size and the required number of available clients."""
@@ -81,7 +84,7 @@ class QffedAvg(Strategy):
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         self.pre_weights = weights
-        parameters = weights_to_parameters(weights)        
+        parameters = weights_to_parameters(weights)
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
@@ -141,37 +144,44 @@ class QffedAvg(Strategy):
             return None
         # Convert results
 
-
-        def norm_grad(grad_list):
+        def norm_grad(grad_list: List[Weights]) -> float:
             # input: nested gradients
             # output: square of the L-2 norm
             client_grads = grad_list[0]
             for i in range(1, len(grad_list)):
-                client_grads = np.append(client_grads, grad_list[i]) # output a flattened array
-            return np.sum(np.square(client_grads))
+                client_grads = np.append(
+                    client_grads, grad_list[i]
+                )  # output a flattened array
+            return float(np.sum(np.square(client_grads)))
 
-        Deltas = []
-        hs = []
+        deltas = []
+        hs_ffl = []
 
         weights_before = self.pre_weights
-        loss, _ = self.evaluate(weights_before)
+        eval_result = self.evaluate(weights_before)
+        if eval_result is not None:
+            loss, _ = eval_result
 
-        for client, (parameters, num_examples, _) in results:
+        for _, (parameters, _, _) in results:
             new_weights = parameters_to_weights(parameters)
             # plug in the weight updates into the gradient
-            grads = [(u - v) * 1.0 / self.learning_rate for u, v in zip(weights_before, new_weights)]        
-            Deltas.append([np.float_power(loss+1e-10, self.q) * grad for grad in grads])        
+            grads = [
+                (u - v) * 1.0 / self.learning_rate
+                for u, v in zip(weights_before, new_weights)
+            ]
+            deltas.append(
+                [np.float_power(loss + 1e-10, self.q_param) * grad for grad in grads]
+            )
             # estimation of the local Lipchitz constant
-            hs.append(self.q * np.float_power(loss+1e-10, (self.q-1)) * norm_grad(grads) + (1.0/self.learning_rate) * np.float_power(loss+1e-10, self.q))
+            hs_ffl.append(
+                self.q_param
+                * np.float_power(loss + 1e-10, (self.q_param - 1))
+                * norm_grad(grads)
+                + (1.0 / self.learning_rate)
+                * np.float_power(loss + 1e-10, self.q_param)
+            )
 
-        return aggregate_qffl(weights_before, Deltas, hs)
-
-    def _get_initial_weights(self) -> Weights:
-        """Get initial weights from one of the available clients."""
-        random_client = self._client_manager.sample(1)[0]
-        parameters_res = random_client.get_parameters()
-        return parameters_to_weights(parameters_res.parameters)
-
+        return aggregate_qffl(weights_before, deltas, hs_ffl)
 
     def on_aggregate_evaluate(
         self,
