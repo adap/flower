@@ -17,6 +17,7 @@
 from typing import List
 
 from flower_benchmark.setting import ClientSetting, ServerSetting, Setting
+from flower_ops.cluster import Instance
 
 
 def get_setting(name: str) -> Setting:
@@ -28,13 +29,24 @@ def get_setting(name: str) -> Setting:
     return SETTINGS[name]
 
 
+def get_instance_name(
+    instance_names: List[str], num_clients: int, client_index: int
+) -> str:
+    """Return instance_name."""
+    idx = client_index // (num_clients // len(instance_names))
+    idx = min([idx, len(instance_names) - 1])
+    return instance_names[min(idx, len(instance_names))]
+
+
 def configure_uniform_clients(
-    iid_fraction: float, num_clients: int, dry_run: bool,
+    iid_fraction: float, instance_names: List[str], num_clients: int, dry_run: bool,
 ) -> List[ClientSetting]:
     """Configure `num_clients`, all using the same delay factor."""
     clients = []
     for i in range(num_clients):
         client = ClientSetting(
+            # Set instance on which to run
+            instance_name=get_instance_name(instance_names, num_clients, i),
             # Individual
             cid=str(i),
             partition=i,
@@ -49,8 +61,10 @@ def configure_uniform_clients(
     return clients
 
 
+# pylint: disable=too-many-arguments
 def configure_clients(
     iid_fraction: float,
+    instance_names: List[str],
     num_clients: int,
     dry_run: bool,
     delay_factor_fast: float,
@@ -60,6 +74,8 @@ def configure_clients(
     clients = []
     for i in range(num_clients):
         client = ClientSetting(
+            # Set instance on which to run
+            instance_name=get_instance_name(instance_names, num_clients, i),
             # Individual
             cid=str(i),
             partition=i,
@@ -79,7 +95,12 @@ def configure_clients(
 
 SETTINGS = {
     "dry-run": Setting(
+        instances=[
+            Instance(name="server", group="server", num_cpu=2, num_ram=8),
+            Instance(name="client", group="clients", num_cpu=2, num_ram=8),
+        ],
         server=ServerSetting(
+            instance_name="server",
             strategy="fedavg",
             rounds=1,
             min_num_clients=1,
@@ -92,11 +113,17 @@ SETTINGS = {
             dry_run=True,
         ),
         clients=configure_uniform_clients(
-            iid_fraction=0.0, num_clients=4, dry_run=True
+            iid_fraction=0.0, instance_names=["client"], num_clients=4, dry_run=True
         ),
     ),
     "minimal": Setting(
+        instances=[
+            Instance(name="server", group="server", num_cpu=2, num_ram=8),
+            Instance(name="client_0", group="clients", num_cpu=2, num_ram=8),
+            Instance(name="client_1", group="clients", num_cpu=2, num_ram=8),
+        ],
         server=ServerSetting(
+            instance_name="server",
             strategy="fedavg",
             rounds=2,
             min_num_clients=4,
@@ -109,11 +136,20 @@ SETTINGS = {
             dry_run=False,
         ),
         clients=configure_uniform_clients(
-            iid_fraction=0.0, num_clients=4, dry_run=False
+            iid_fraction=0.0,
+            instance_names=["client_0", "client_1"],
+            num_clients=4,
+            dry_run=False,
         ),
     ),
     "fedavg-sync": Setting(
+        instances=[
+            Instance(name="server", group="server", num_cpu=4, num_ram=16),
+            Instance(name="client_0", group="clients", num_cpu=48, num_ram=192),
+            Instance(name="client_1", group="clients", num_cpu=48, num_ram=192),
+        ],
         server=ServerSetting(
+            instance_name="server",
             strategy="fedavg",
             rounds=25,
             min_num_clients=80,
@@ -127,6 +163,7 @@ SETTINGS = {
         ),
         clients=configure_clients(
             iid_fraction=0.0,
+            instance_names=["client_0", "client_1"],
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,
@@ -134,7 +171,13 @@ SETTINGS = {
         ),
     ),
     "fedavg-async": Setting(
+        instances=[
+            Instance(name="server", group="server", num_cpu=4, num_ram=16),
+            Instance(name="client_0", group="clients", num_cpu=48, num_ram=192),
+            Instance(name="client_1", group="clients", num_cpu=48, num_ram=192),
+        ],
         server=ServerSetting(
+            instance_name="server",
             strategy="fedavg",
             rounds=25,
             min_num_clients=80,
@@ -148,6 +191,7 @@ SETTINGS = {
         ),
         clients=configure_clients(
             iid_fraction=0.0,
+            instance_names=["client_0", "client_1"],
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,
@@ -155,7 +199,13 @@ SETTINGS = {
         ),
     ),
     "fast-and-slow-only-partial-updates": Setting(
+        instances=[
+            Instance(name="server", group="server", num_cpu=4, num_ram=16),
+            Instance(name="client_0", group="clients", num_cpu=48, num_ram=192),
+            Instance(name="client_1", group="clients", num_cpu=48, num_ram=192),
+        ],
         server=ServerSetting(
+            instance_name="server",
             strategy="fast-and-slow",
             rounds=25,
             min_num_clients=80,
@@ -169,6 +219,7 @@ SETTINGS = {
         ),
         clients=configure_clients(
             iid_fraction=0.0,
+            instance_names=["client_0", "client_1"],
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,
@@ -176,7 +227,13 @@ SETTINGS = {
         ),
     ),
     # "fast-and-slow-only-dynamic-timeouts": Setting(
+    #     instances=[
+    #         Instance(name="server", group="server", num_cpu=4, num_ram=16),
+    #         Instance(name="client_0", group="clients", num_cpu=48, num_ram=192),
+    #         Instance(name="client_1", group="clients", num_cpu=48, num_ram=192),
+    #     ],
     #     server=ServerSetting(
+    #         instance_name="server",
     #         strategy="fast-and-slow",
     #         rounds=25,
     #         min_num_clients=80,
@@ -190,6 +247,7 @@ SETTINGS = {
     #     ),
     #     clients=configure_clients(
     #         iid_fraction=0.0,
+    #         instance_names=["client_0", "client_1"],
     #         num_clients=100,
     #         dry_run=False,
     #         delay_factor_fast=0.0,
@@ -197,7 +255,13 @@ SETTINGS = {
     #     ),
     # ),
     "fast-and-slow-only-importance-sampling": Setting(
+        instances=[
+            Instance(name="server", group="server", num_cpu=4, num_ram=16),
+            Instance(name="client_0", group="clients", num_cpu=48, num_ram=192),
+            Instance(name="client_1", group="clients", num_cpu=48, num_ram=192),
+        ],
         server=ServerSetting(
+            instance_name="server",
             strategy="fast-and-slow",
             rounds=25,
             min_num_clients=80,
@@ -211,6 +275,7 @@ SETTINGS = {
         ),
         clients=configure_clients(
             iid_fraction=0.0,
+            instance_names=["client_0", "client_1"],
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,
@@ -218,7 +283,13 @@ SETTINGS = {
         ),
     ),
     "fast-and-slow": Setting(
+        instances=[
+            Instance(name="server", group="server", num_cpu=4, num_ram=16),
+            Instance(name="client_0", group="clients", num_cpu=48, num_ram=192),
+            Instance(name="client_1", group="clients", num_cpu=48, num_ram=192),
+        ],
         server=ServerSetting(
+            instance_name="server",
             strategy="fast-and-slow",
             rounds=25,
             min_num_clients=80,
@@ -232,6 +303,7 @@ SETTINGS = {
         ),
         clients=configure_clients(
             iid_fraction=0.0,
+            instance_names=["client_0", "client_1"],
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,

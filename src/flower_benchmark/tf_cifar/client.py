@@ -25,11 +25,16 @@ from flower.logger import configure, log
 from flower_benchmark.common import VisionClassificationClient, load_partition
 from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
+from flower_benchmark.setting import ClientSetting
 from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 
 from . import DEFAULT_SERVER_ADDRESS, NUM_CLASSES, SEED
 
 tf.get_logger().setLevel("ERROR")
+
+
+class ClientSettingNotFound(Exception):
+    """Raise when client setting could not be found."""
 
 
 def parse_args() -> argparse.Namespace:
@@ -47,10 +52,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--setting", type=str, choices=SETTINGS.keys(), help="Setting to run.",
     )
-    parser.add_argument(
-        "--index", type=int, required=True, help="Client index in settings."
-    )
+    parser.add_argument("--cid", type=str, required=True, help="Client cid.")
     return parser.parse_args()
+
+
+def get_client_setting(setting: str, cid: str) -> ClientSetting:
+    """Return client setting based on setting name and cid."""
+    for client_setting in get_setting(setting).clients:
+        if client_setting.cid == cid:
+            return client_setting
+
+    raise ClientSettingNotFound()
 
 
 def main() -> None:
