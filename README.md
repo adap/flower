@@ -69,16 +69,16 @@ If you have Docker on your machine you might want to skip most of the setup and
 try out the example using the following commands:
 
 ```bash
-# Create docker network for flower so machines reach each other by name
+# Create docker network `flower` so that containers can reach each other by name
 $ docker network create flower
-# Build the flower docker containers
+# Build the Flower docker containers
 $ ./dev/docker_build.sh
 
 # Run the docker containers (will tail a logfile created by a central logserver)
 $ ./src/flower_example/tf_fashion_mnist/run-docker.sh
 ```
 
-Although this is a slightly reduced setup with only two clients.
+This will start a slightly reduced setup with only four clients.
 
 ## Documentation
 
