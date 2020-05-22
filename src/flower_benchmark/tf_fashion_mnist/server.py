@@ -101,6 +101,17 @@ def main() -> None:
             t_slow=40,
         )
 
+    if server_setting.strategy == "qffedavg":
+        strategy = flwr.strategy.QffedAvg(
+            q_param=0.2,
+            qffl_learning_rate=0.1,
+            fraction_fit=server_setting.sample_fraction,
+            min_fit_clients=server_setting.min_sample_size,
+            min_available_clients=server_setting.min_num_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+        )
+
     # Run server
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
     flwr.app.start_server(
