@@ -58,8 +58,13 @@ def main() -> None:
         default=1,
         help="Minimum number of available clients required for sampling (default: 1)",
     )
+    parser.add_argument(
+        "--log_host", type=str, help="Logserver address (no default)",
+    )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
     args = parser.parse_args()
+
+    fl.logger.configure("server", host=args.log_host)
 
     # Load evaluation data
     _, xy_test = fashion_mnist.load_data(partition=0, num_partitions=1)
