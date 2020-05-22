@@ -69,16 +69,16 @@ If you have Docker on your machine you might want to skip most of the setup and
 try out the example using the following commands:
 
 ```bash
-# Build docker container and create docker network
-$ ./dev/docker_build.sh
+# Create docker network `flower` so that containers can reach each other by name
 $ docker network create flower
+# Build the Flower docker containers
+$ ./dev/docker_build.sh
 
-# Terminal one
-$ docker run --rm --network flower -p 8080:8080 --name server flower:latest flower_example_fashion_mnist_server
-
-# Terminal two
-$ docker run --rm --network flower flower:latest flower_example_fashion_mnist_client --cid=0 --partition=0 --clients=1 --server_address=server:8080
+# Run the docker containers (will tail a logfile created by a central logserver)
+$ ./src/flower_example/tf_fashion_mnist/run-docker.sh
 ```
+
+This will start a slightly reduced setup with only four clients.
 
 ## Documentation
 

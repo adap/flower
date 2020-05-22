@@ -16,6 +16,8 @@
 
 from typing import Optional
 
+from flower_ops.cluster import Instance
+
 
 def install_wheel(wheel_remote_path: str) -> str:
     """Return install command for wheel.
@@ -75,7 +77,7 @@ def watch_and_shutdown(keyword: str, adapter: str) -> str:
     cmd = f"screen -d -m bash -c 'while [[ $(ps a | grep {keyword}) ]]; do sleep 1; done; "
 
     if adapter == "docker":
-        cmd += "sleep 15 && kill 1'"
+        cmd += "sleep 120 && kill 1'"
     elif adapter == "ec2":
         # Shutdown after 2 minutes to allow a logged in user
         # to chancel the shutdown manually just in case
@@ -84,3 +86,15 @@ def watch_and_shutdown(keyword: str, adapter: str) -> str:
         raise Exception("Unknown Adapter")
 
     return cmd
+
+
+def tail_logfile(adapter: str, private_key: str, logserver: Instance) -> str:
+    "Return command which can be used to tail the logfile on the logserver."
+    ssh_key = f"-i {private_key}"
+    username = "root" if adapter == "docker" else "ubuntu"
+
+    return (
+        f"ssh {ssh_key} -o StrictHostKeyChecking=no -p {logserver.ssh_port} "
+        + f"{username}@{logserver.public_ip}"
+        + ' "tail -n 1000 -f flower_logs/flower.log"'
+    )

@@ -99,7 +99,12 @@ def main() -> None:
     parser.add_argument(
         "--clients", type=int, required=True, help="Number of clients (no default)",
     )
+    parser.add_argument(
+        "--log_host", type=str, help="Logserver address (no default)",
+    )
     args = parser.parse_args()
+
+    fl.logger.configure(f"client_{args.cid}", host=args.log_host)
 
     # Load model and data
     model = fashion_mnist.load_model()
