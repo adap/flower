@@ -16,13 +16,14 @@
 
 import argparse
 import configparser
+from logging import INFO
 from os import path
 from time import strftime
 from typing import List, Optional
 
 import flower_benchmark.tf_cifar.settings as tf_cifar_settings
 import flower_benchmark.tf_fashion_mnist.settings as tf_fashion_mnist_settings
-from flower.logger import configure
+from flower.logger import configure, log
 from flower_benchmark import command
 from flower_ops.cluster import Cluster, Instance
 from flower_ops.compute.adapter import Adapter
@@ -56,7 +57,7 @@ def configure_cluster(
     if adapter == "docker":
         adapter_instance = DockerAdapter()
         user = "root"
-        private_key = f"{path.dirname(path.realpath(__file__))}/../../docker/ssh_key"
+        private_key = path.realpath(path.dirname(__file__) + "/../../docker/ssh_key")
     elif adapter == "ec2":
         adapter_instance = EC2Adapter(
             image_id=CONFIG.get("aws", "image_id"),
@@ -126,8 +127,9 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
     )
 
     # Start logserver
+    logserver = cluster.get_instance("logserver")
     cluster.exec(
-        "logserver",
+        logserver.name,
         command.start_logserver(
             logserver_s3_bucket=CONFIG.get("aws", "logserver_s3_bucket"),
             logserver_s3_key=f"{benchmark}_{setting}_{now()}.log",
@@ -135,7 +137,6 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
     )
 
     # Start Flower server on Flower server instances
-    logserver = cluster.get_instance("logserver")
     cluster.exec(
         "server",
         command.start_server(
@@ -163,6 +164,19 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
     # Shutdown server and client instance after 10min if not at least one Flower
     # process is running it
     cluster.exec_all(command.watch_and_shutdown("[f]lower", adapter))
+
+    # Give user info how to tail logfile
+    private_key = (
+        path.realpath(path.dirname(__file__) + "/../../docker/ssh_key")
+        if adapter == "docker"
+        else path.expanduser(CONFIG.get("ssh", "private_key"))
+    )
+
+    log(
+        INFO,
+        "If you would like to tail the central logfile run:\n\n\t%s\n",
+        command.tail_logfile(adapter, private_key, logserver),
+    )
 
 
 def main() -> None:
