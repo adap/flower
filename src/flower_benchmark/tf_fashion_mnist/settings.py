@@ -311,7 +311,13 @@ SETTINGS = {
         ),
     ),
     "qffedavg": Setting(
+        instances=[
+            Instance(name="server", group="server", num_cpu=4, num_ram=16),
+            Instance(name="client_0", group="clients", num_cpu=48, num_ram=192),
+            Instance(name="client_1", group="clients", num_cpu=48, num_ram=192),
+        ],
         server=ServerSetting(
+            instance_name="server",
             strategy="qffedavg",
             rounds=25,
             min_num_clients=80,
@@ -325,6 +331,7 @@ SETTINGS = {
         ),
         clients=configure_clients(
             iid_fraction=0.0,
+            instance_names=["client_0", "client_1"],
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,

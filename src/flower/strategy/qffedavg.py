@@ -172,7 +172,7 @@ class QffedAvg(FedAvg):
             deltas.append(
                 [np.float_power(loss + 1e-10, self.q_param) * grad for grad in grads]
             )
-            # estimation of the local Lipchitz constant
+            # estimation of the local Lipschitz constant
             hs_ffl.append(
                 self.q_param
                 * np.float_power(loss + 1e-10, (self.q_param - 1))
