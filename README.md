@@ -78,7 +78,7 @@ $ ./dev/docker_build.sh
 $ ./src/flower_example/tf_fashion_mnist/run-docker.sh
 ```
 
-Although this is a slightly reduced setup with only two clients.
+This will start a slightly reduced setup with only four clients.
 
 ## Documentation
 
