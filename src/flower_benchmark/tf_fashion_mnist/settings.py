@@ -14,8 +14,10 @@
 # ==============================================================================
 """Provides a variaty of benchmark settings for Fashion-MNIST."""
 
+
 from typing import List
 
+from flower_benchmark.common import sample_delay_factors
 from flower_benchmark.setting import ClientSetting, ServerSetting, Setting
 from flower_ops.cluster import Instance
 
@@ -69,8 +71,30 @@ def configure_clients(
     dry_run: bool,
     delay_factor_fast: float,
     delay_factor_slow: float,
+    sample_delays: bool = True,
 ) -> List[ClientSetting]:
     """Configure `num_clients` with different delay factors."""
+    if sample_delays:
+        # Configure clients with sampled delay factors
+        delay_factors = sample_delay_factors(
+            num_clients=num_clients, max_delay=delay_factor_slow, seed=2020
+        )
+        return [
+            ClientSetting(
+                # Set instance on which to run
+                instance_name=get_instance_name(instance_names, num_clients, i),
+                # Individual
+                cid=str(i),
+                partition=i,
+                delay_factor=delay_factors[i],
+                # Shared
+                iid_fraction=iid_fraction,
+                num_clients=num_clients,
+                dry_run=dry_run,
+            )
+            for i in range(num_clients)
+        ]
+    # Configure clients with fixed delay factors
     clients = []
     for i in range(num_clients):
         client = ClientSetting(
@@ -137,11 +161,13 @@ SETTINGS = {
             dynamic_timeout=False,
             dry_run=False,
         ),
-        clients=configure_uniform_clients(
+        clients=configure_clients(
             iid_fraction=0.0,
             instance_names=["client_0", "client_1"],
-            num_clients=4,
+            num_clients=10,
             dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=3.0,
         ),
     ),
     "fedavg-sync": Setting(
