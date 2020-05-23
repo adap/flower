@@ -18,7 +18,7 @@
 import concurrent.futures
 import timeit
 from logging import DEBUG, INFO
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, cast
 
 from flower.client_manager import ClientManager
 from flower.client_proxy import ClientProxy
@@ -48,6 +48,7 @@ class Server:
         """Return ClientManager."""
         return self._client_manager
 
+    # pylint: disable-msg=too-many-locals
     def fit(self, num_rounds: int) -> History:
         """Run federated averaging for a number of rounds."""
         history = History()
@@ -89,7 +90,9 @@ class Server:
             res_fed = self.evaluate(rnd=current_round)
             if res_fed is not None and res_fed[0] is not None:
                 loss_fed, _ = res_fed
-                history.add_loss_distributed(rnd=current_round, loss=loss_fed)
+                history.add_loss_distributed(
+                    rnd=current_round, loss=cast(float, loss_fed)
+                )
 
             # Conclude round
             loss = res_cen[0] if res_cen is not None else None
@@ -114,12 +117,9 @@ class Server:
         if not client_instructions:
             log(INFO, "evaluate: no clients sampled, cancel federated evaluation")
             return None
-        else:
-            log(
-                DEBUG,
-                "evaluate: strategy sampled %s clients",
-                len(client_instructions),
-            )
+        log(
+            DEBUG, "evaluate: strategy sampled %s clients", len(client_instructions),
+        )
 
         # Evaluate current global weights on those clients
         results_and_failures = evaluate_clients(client_instructions)
