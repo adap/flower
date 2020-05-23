@@ -1,5 +1,6 @@
 # Flower files
 .flower_ops
+plot/
 
 # Editor
 .vscode
