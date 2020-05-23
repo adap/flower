@@ -40,7 +40,7 @@ Path(PLOT_DIR).mkdir(exist_ok=True)
 
 MARKERSIZE = 3  # Size of the symbols on a linecharts
 
-    
+
 class LegendLoc(Enum):
     """Enumerates possible legend location in a plot."""
 
