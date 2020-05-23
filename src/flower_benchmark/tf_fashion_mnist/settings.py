@@ -97,7 +97,6 @@ def configure_clients(
                 delay_factor=delay_factors[i],
                 # Shared
                 iid_fraction=iid_fraction,
-                num_clients=num_clients,
                 dry_run=dry_run,
             )
             for i in range(num_clients)

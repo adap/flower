@@ -40,6 +40,9 @@ def start_server(server_address: str, server: Server, config: Dict[str, int]) ->
     log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
     log(INFO, "app_fit: accuracies_centralized %s", str(hist.accuracies_centralized))
 
+    # Temporary workaround to force distributed evaluation
+    server.strategy.eval_fn = None  # type: ignore
+
     # Evaluate the final trained model
     res = server.evaluate(rnd=0)
     if res is not None:

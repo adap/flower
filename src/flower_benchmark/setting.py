@@ -56,7 +56,6 @@ class ClientSetting(BaseSetting):
 
     # Same across all clients
     iid_fraction: float
-    num_clients: int
     dry_run: bool
 
 

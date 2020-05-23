@@ -86,7 +86,6 @@ def configure_clients(
             else delay_factor_slow,
             # Shared
             iid_fraction=iid_fraction,
-            num_clients=num_clients,
             dry_run=dry_run,
         )
         clients.append(client)
