@@ -35,15 +35,20 @@ def start_server(server_address: str, server: Server, config: Dict[str, int]) ->
 
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
-    log(DEBUG, hist)
-    log(INFO, "losses_distributed: %s", str(hist.losses_distributed))
-    log(INFO, "accuracies_distributed: %s", str(hist.accuracies_distributed))
-    log(INFO, "losses_centralized: %s", str(hist.losses_centralized))
-    log(INFO, "accuracies_centralized: %s", str(hist.accuracies_centralized))
+    log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
+    log(INFO, "app_fit: accuracies_distributed %s", str(hist.accuracies_distributed))
+    log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
+    log(INFO, "app_fit: accuracies_centralized %s", str(hist.accuracies_centralized))
 
     # Evaluate the final trained model
-    loss = server.evaluate(rnd=0)
-    log(DEBUG, "Final (federated) loss after training: %s", loss)
+    res = server.evaluate(rnd=0)
+    if res is not None:
+        loss, (results, failures) = res
+        log(INFO, "app_evaluate: federated loss: %s", str(loss))
+        log(INFO, "app_evaluate: results %s", str(results))
+        log(INFO, "app_evaluate: failures %s", str(failures))
+    else:
+        log(INFO, "app_evaluate: no evaluation result")
 
     # Stop the gRPC server
     grpc_server.stop(1)

@@ -87,23 +87,6 @@ class FastAndSlow(FedAvg):
             # Do not continue if not enough clients are available
             return []
 
-        # Prepare parameters and config
-        parameters = weights_to_parameters(weights)
-        config = {}
-        if self.on_fit_config_fn is not None:
-            # Use custom fit config function if provided
-            config = self.on_fit_config_fn(rnd)
-
-        # Set timeout for this round
-        if self.dynamic_timeout:
-            use_fast_timeout = is_fast_round(rnd, self.r_fast, self.r_slow)
-            config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
-        else:
-            config["timeout"] = str(self.t_fast)
-
-        # Fit instructions
-        fit_ins = (parameters, config)
-
         # Sample clients
         if self.importance_sampling:
             # Get all clients and gather their contributions
@@ -134,6 +117,24 @@ class FastAndSlow(FedAvg):
             clients = client_manager.sample(
                 num_clients=sample_size, min_num_clients=min_num_clients
             )
+
+        # Prepare parameters and config
+        parameters = weights_to_parameters(weights)
+        config = {}
+        if self.on_fit_config_fn is not None:
+            # Use custom fit config function if provided
+            config = self.on_fit_config_fn(rnd)
+
+        # Set timeout for this round
+        if self.dynamic_timeout:
+            # Alternating timeout
+            use_fast_timeout = is_fast_round(rnd, self.r_fast, self.r_slow)
+            config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
+        else:
+            config["timeout"] = str(self.t_fast)
+
+        # Fit instructions
+        fit_ins = (parameters, config)
 
         # Return client/config pairs
         return [(client, fit_ins) for client in clients]

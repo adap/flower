@@ -28,6 +28,11 @@ from flower.strategy import DefaultStrategy, Strategy
 from flower.strategy.parameter import parameters_to_weights
 from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
+FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
+EvaluateResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, EvaluateRes]], List[BaseException]
+]
+
 
 class Server:
     """Flower server."""
@@ -67,27 +72,28 @@ class Server:
                 self.weights = weights_prime
 
             # Evaluate model using strategy implementation
-            loss, acc = None, None
-            res = self.strategy.evaluate(weights=self.weights)
-            if res is not None:
-                loss, acc = res
+            res_cen = self.strategy.evaluate(weights=self.weights)
+            if res_cen is not None:
+                loss_cen, acc_cen = res_cen
                 log(
                     INFO,
                     "progress (round/loss/accuracy): %s, %s, %s",
                     current_round,
-                    loss,
-                    acc,
+                    loss_cen,
+                    acc_cen,
                 )
-                history.add_loss_centralized(rnd=current_round, loss=loss)
-                history.add_accuracy_centralized(rnd=current_round, acc=acc)
+                history.add_loss_centralized(rnd=current_round, loss=loss_cen)
+                history.add_accuracy_centralized(rnd=current_round, acc=acc_cen)
 
             # Evaluate model on a sample of available clients
-            loss_avg = self.evaluate(rnd=current_round)
-            if loss_avg is not None:
-                history.add_loss_distributed(rnd=current_round, loss=loss_avg)
-                loss, acc = loss_avg, None
+            res_fed = self.evaluate(rnd=current_round)
+            if res_fed is not None and res_fed[0] is not None:
+                loss_fed, _ = res_fed
+                history.add_loss_distributed(rnd=current_round, loss=loss_fed)
 
             # Conclude round
+            loss = res_cen[0] if res_cen is not None else None
+            acc = res_cen[1] if res_cen is not None else None
             should_continue = self.strategy.on_conclude_round(current_round, loss, acc)
             if not should_continue:
                 break
@@ -97,21 +103,27 @@ class Server:
         log(INFO, "[TIME] FL finished in %s", elapsed)
         return history
 
-    def evaluate(self, rnd: int) -> Optional[float]:
+    def evaluate(
+        self, rnd: int
+    ) -> Optional[Tuple[Optional[float], EvaluateResultsAndFailures]]:
         """Validate current global model on a number of clients."""
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.on_configure_evaluate(
             rnd=rnd, weights=self.weights, client_manager=self._client_manager
         )
-        log(
-            DEBUG, "evaluate: strategy sampled %s clients", len(client_instructions),
-        )
         if not client_instructions:
-            log(INFO, "evaluate: no clients sampled, cancel evaluation")
+            log(INFO, "evaluate: no clients sampled, cancel federated evaluation")
             return None
+        else:
+            log(
+                DEBUG,
+                "evaluate: strategy sampled %s clients",
+                len(client_instructions),
+            )
 
         # Evaluate current global weights on those clients
-        results, failures = evaluate_clients(client_instructions)
+        results_and_failures = evaluate_clients(client_instructions)
+        results, failures = results_and_failures
         log(
             DEBUG,
             "evaluate received %s results and %s failures",
@@ -119,7 +131,8 @@ class Server:
             len(failures),
         )
         # Aggregate the evaluation results
-        return self.strategy.on_aggregate_evaluate(rnd, results, failures)
+        loss_aggregated = self.strategy.on_aggregate_evaluate(rnd, results, failures)
+        return loss_aggregated, results_and_failures
 
     def fit_round(self, rnd: int) -> Optional[Weights]:
         """Perform a single round of federated averaging."""
@@ -155,7 +168,7 @@ class Server:
 
 def fit_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]]
-) -> Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]:
+) -> FitResultsAndFailures:
     """Refine weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
@@ -187,7 +200,7 @@ def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
 
 def evaluate_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]]
-) -> Tuple[List[Tuple[ClientProxy, EvaluateRes]], List[BaseException]]:
+) -> EvaluateResultsAndFailures:
     """Evaluate weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
