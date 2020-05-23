@@ -15,28 +15,34 @@
 """Partitioned versions of CIFAR-10/100 datasets."""
 # pylint: disable=invalid-name
 
+from typing import Tuple
+
 import tensorflow as tf
 
-from .dataset import PartitionedDataset, create_partitioned_dataset, log_distribution
+from .dataset import (
+    XY,
+    PartitionedDataset,
+    create_partitioned_dataset,
+    log_distribution,
+)
 
 
 def load_data(
     iid_fraction: float, num_partitions: int, cifar100: bool = False
-) -> PartitionedDataset:
+) -> Tuple[PartitionedDataset, XY]:
     """Load partitioned version of CIFAR-10/100."""
-
     cifar = tf.keras.datasets.cifar100 if cifar100 else tf.keras.datasets.cifar10
-    xy_partitions, (x_test, y_test) = create_partitioned_dataset(
+    (xy_train_partitions, xy_test_partitions), xy_test = create_partitioned_dataset(
         cifar.load_data(), iid_fraction, num_partitions
     )
-
-    return xy_partitions, (x_test, y_test)
+    return (xy_train_partitions, xy_test_partitions), xy_test
 
 
 if __name__ == "__main__":
     # Load a partitioned dataset and show distribution of examples
     for _num_partitions in [10, 100]:
         for _fraction in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
-            xy_par, (_, _) = load_data(_fraction, _num_partitions)
+            (xy_train_par, xy_test_par), _ = load_data(_fraction, _num_partitions)
             print(f"\nfraction: {_fraction}; num_partitions: {_num_partitions}")
-            log_distribution(xy_par)
+            log_distribution(xy_train_par)
+            log_distribution(xy_test_par)
