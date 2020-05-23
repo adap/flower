@@ -36,10 +36,10 @@ def start_server(server_address: str, server: Server, config: Dict[str, int]) ->
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
     log(DEBUG, hist)
-    log(INFO, "losses_distributed: " + str(hist.losses_distributed))
-    log(INFO, "accuracies_distributed: " + str(hist.accuracies_distributed))
-    log(INFO, "losses_centralized: " + str(hist.losses_centralized))
-    log(INFO, "accuracies_centralized: " + str(hist.accuracies_centralized))
+    log(INFO, "losses_distributed: %s", str(hist.losses_distributed))
+    log(INFO, "accuracies_distributed: %s", str(hist.accuracies_distributed))
+    log(INFO, "losses_centralized: %s", str(hist.losses_centralized))
+    log(INFO, "accuracies_centralized: %s", str(hist.accuracies_centralized))
 
     # Evaluate the final trained model
     loss = server.evaluate(rnd=0)
