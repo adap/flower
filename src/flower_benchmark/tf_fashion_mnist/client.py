@@ -101,6 +101,8 @@ def main() -> None:
         (x_test, y_test),
         client_setting.delay_factor,
         10,
+        augment=True,
+        augment_offset=1,
     )
     flwr.app.start_client(args.server_address, client)
 
