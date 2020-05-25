@@ -16,7 +16,7 @@
 
 
 import argparse
-from logging import ERROR
+from logging import ERROR, INFO
 from typing import Callable, Dict, Optional
 
 import flower as flwr
@@ -50,6 +50,7 @@ def main() -> None:
     configure(identifier="server", host=args.log_host)
 
     server_setting = get_setting(args.setting).server
+    log(INFO, "server_setting: %s", server_setting)
 
     # Load evaluation data
     xy_partitions, xy_test = tf_fashion_mnist_partitioned.load_data(

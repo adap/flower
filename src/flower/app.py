@@ -15,7 +15,7 @@
 """Flower App."""
 
 
-from logging import DEBUG
+from logging import DEBUG, INFO
 from typing import Dict
 
 from flower.client import Client
@@ -36,6 +36,10 @@ def start_server(server_address: str, server: Server, config: Dict[str, int]) ->
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
     log(DEBUG, hist)
+    log(INFO, "losses_distributed: %s", str(hist.losses_distributed))
+    log(INFO, "accuracies_distributed: %s", str(hist.accuracies_distributed))
+    log(INFO, "losses_centralized: %s", str(hist.losses_centralized))
+    log(INFO, "accuracies_centralized: %s", str(hist.accuracies_centralized))
 
     # Evaluate the final trained model
     loss = server.evaluate(rnd=0)
