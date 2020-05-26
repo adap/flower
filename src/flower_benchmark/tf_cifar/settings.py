@@ -14,7 +14,7 @@
 # ==============================================================================
 """Provides a variaty of benchmark settings for CIFAR."""
 
-from typing import List
+from typing import List, Tuple
 
 from flower_benchmark.setting import ClientSetting, ServerSetting, Setting
 from flower_ops.cluster import Instance
@@ -27,6 +27,18 @@ def get_setting(name: str) -> Setting:
             f"Setting {name} does not exist. Valid settings are: {list(SETTINGS.keys())}"
         )
     return SETTINGS[name]
+
+
+def configure_client_instances(num_clients: int) -> Tuple[List[Instance], List[str]]:
+    """Return list of client instances and a list of instance names."""
+    instance_names = [f"client_{i}" for i in range(num_clients)]
+
+    instances = [
+        Instance(name=instance_name, group="clients", num_cpu=4, num_ram=8)
+        for instance_name in instance_names
+    ]
+
+    return instances, instance_names
 
 
 def get_instance_name(
@@ -118,11 +130,8 @@ SETTINGS = {
         ),
     ),
     "minimal": Setting(
-        instances=[
-            Instance(name="server", group="server", num_cpu=2, num_ram=8),
-            Instance(name="client_0", group="clients", num_cpu=2, num_ram=8),
-            Instance(name="client_1", group="clients", num_cpu=2, num_ram=8),
-        ],
+        instances=[Instance(name="server", group="server", num_cpu=2, num_ram=8)]
+        + configure_client_instances(10)[0],
         server=ServerSetting(
             instance_name="server",
             strategy="fedavg",
@@ -139,17 +148,14 @@ SETTINGS = {
         ),
         clients=configure_uniform_clients(
             iid_fraction=0.1,
-            instance_names=["client_0", "client_1"],
+            instance_names=configure_client_instances(100)[1],
             num_clients=4,
             dry_run=False,
         ),
     ),
     "fedavg-sync": Setting(
-        instances=[
-            Instance(name="server", group="server", num_cpu=4, num_ram=16),
-            Instance(name="client_0", group="clients", num_cpu=48, num_ram=192),
-            Instance(name="client_1", group="clients", num_cpu=48, num_ram=192),
-        ],
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + configure_client_instances(100)[0],
         server=ServerSetting(
             instance_name="server",
             strategy="fedavg",
@@ -166,7 +172,7 @@ SETTINGS = {
         ),
         clients=configure_clients(
             iid_fraction=0.5,
-            instance_names=["client_0", "client_1"],
+            instance_names=configure_client_instances(100)[1],
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,
@@ -174,11 +180,8 @@ SETTINGS = {
         ),
     ),
     "fedavg-async": Setting(
-        instances=[
-            Instance(name="server", group="server", num_cpu=4, num_ram=16),
-            Instance(name="client_0", group="clients", num_cpu=48, num_ram=192),
-            Instance(name="client_1", group="clients", num_cpu=48, num_ram=192),
-        ],
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + configure_client_instances(100)[0],
         server=ServerSetting(
             instance_name="server",
             strategy="fedavg",
@@ -195,7 +198,7 @@ SETTINGS = {
         ),
         clients=configure_clients(
             iid_fraction=0.5,
-            instance_names=["client_0", "client_1"],
+            instance_names=configure_client_instances(100)[1],
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,

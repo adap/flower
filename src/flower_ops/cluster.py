@@ -268,7 +268,7 @@ class Cluster:
 
         results: Dict[str, ExecInfo] = {}
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             # Start the load operations and mark each future with its URL
             future_to_result = {
                 executor.submit(self.exec, instance_name, command): instance_name
