@@ -194,13 +194,14 @@ class Cluster:
 
     def start(self) -> None:
         """Start the instance."""
-        # Create Instances
+        instance_groups = group_instances_by_specs(self.instances)
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = [
                 executor.submit(
-                    create_instances, self.adapter, [instance], self.timeout
+                    create_instances, self.adapter, instance_group, self.timeout
                 )
-                for instance in self.instances
+                for instance_group in instance_groups
             ]
             concurrent.futures.wait(futures)
 
