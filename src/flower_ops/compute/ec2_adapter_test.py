@@ -20,7 +20,7 @@ from unittest.mock import MagicMock
 
 from .ec2_adapter import EC2Adapter
 
-IMAGE_ID = "ami-0b418580298265d5c"
+IMAGE_ID = "ami-0370b0294d7241341"
 KEY_NAME = "flower"
 SUBNET_ID = "subnet-23da286f"
 SECURITY_GROUP_IDS = ["sg-0dd0f0080bcf86400"]
@@ -60,7 +60,7 @@ class EC2AdapterTestCase(unittest.TestCase):
         }
 
         self.adapter = EC2Adapter(
-            image_id="ami-0b418580298265d5c",
+            image_id="ami-0370b0294d7241341",
             key_name="flower",
             subnet_id="subnet-23da286f",
             security_group_ids=["sg-0dd0f0080bcf86400"],
@@ -137,7 +137,7 @@ if os.getenv("FLOWER_INTEGRATION"):
             )
 
             self.adapter = EC2Adapter(
-                image_id="ami-0b418580298265d5c",
+                image_id="ami-0370b0294d7241341",
                 key_name="flower",
                 subnet_id="subnet-23da286f",
                 security_group_ids=["sg-0dd0f0080bcf86400"],

@@ -15,21 +15,21 @@
 # limitations under the License.
 # ==============================================================================
 
-# This script is regularly used to create an AWS EC2 AMI which has most dependencies needed
-# for the flower benchmarks to execute. The AWS EC2 AMI might not always up to date but we will
-# try to keep it so.
+# This script can be used to create an AWS EC2 AMI which contains the dependencies required
+# to execute Flower benchmarks. The AWS EC2 AMI might not always reflect all dependencies listed
+# in `pyproject.toml`, but it should at least have most of them.
 
-# This script was last time used on 2020-04-13 to create an AMI with ID ami-0396b4e13e2f040cc
-# The AMI name is flower-2020-04-20
+# This script was last used on 2020-05-26 to create an AMI with ID `ami-0370b0294d7241341`.
+# The AMI name is `flower-2020-05-26`.
 
 # Prepare machine dependencies
 sudo apt update
 sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
-sudo apt install python3.7
-sudo apt install python3-pip
+sudo apt install -y python3.7 python3-pip
 
 # Install project dependencies
-python3.7 -m pip install numpy==1.18.1 grpcio==1.27.2 google==2.0.3 tensorflow-cpu==2.1.0 boto3==1.12.36 boto3_type_annotations==0.3.1 paramiko==2.7.1
+python3.7 -m pip install -U pip==20.1 setuptools==46.3.1
+python3.7 -m pip install -U numpy==1.18.1 grpcio==1.27.2 google==2.0.3 protobuf==3.12.0 tensorflow-cpu==2.1.0 boto3==1.12.36 boto3_type_annotations==0.3.1 paramiko==2.7.1 docker==4.2.0 matplotlib==3.2.1
 
 # Preload datasets
 python3.7 -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"

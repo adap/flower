@@ -28,7 +28,7 @@ from .cluster import (
 )
 from .compute.ec2_adapter import EC2Adapter
 
-IMAGE_ID = "ami-0b418580298265d5c"
+IMAGE_ID = "ami-0370b0294d7241341"
 KEY_NAME = "flower"
 SSH_CREDENTIALS = ("ubuntu", "/Users/tanto/.ssh/flower.pem")
 SUBNET_ID = "subnet-23da286f"
