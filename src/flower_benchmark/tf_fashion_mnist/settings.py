@@ -153,7 +153,6 @@ SETTINGS = {
             importance_sampling=False,
             dynamic_timeout=False,
             alternating_timeout=True,
-            dry_run=False,
         ),
         clients=configure_clients(
             iid_fraction=IID_FRACTION,
@@ -180,7 +179,6 @@ SETTINGS = {
             importance_sampling=False,
             dynamic_timeout=False,
             alternating_timeout=True,
-            dry_run=False,
         ),
         clients=configure_clients(
             iid_fraction=IID_FRACTION,
@@ -206,7 +204,7 @@ SETTINGS = {
             partial_updates=True,
             importance_sampling=True,
             dynamic_timeout=True,
-            dry_run=False,
+            alternating_timeout=False,
         ),
         clients=configure_clients(
             iid_fraction=IID_FRACTION,
@@ -232,7 +230,7 @@ SETTINGS = {
             partial_updates=True,
             importance_sampling=True,
             dynamic_timeout=True,
-            dry_run=False,
+            alternating_timeout=False,
         ),
         clients=configure_clients(
             iid_fraction=IID_FRACTION,
@@ -258,7 +256,7 @@ SETTINGS = {
             partial_updates=False,
             importance_sampling=False,
             dynamic_timeout=False,
-            dry_run=False,
+            alternating_timeout=False,
         ),
         clients=configure_clients(
             iid_fraction=IID_FRACTION,
@@ -284,7 +282,7 @@ SETTINGS = {
             partial_updates=False,
             importance_sampling=False,
             dynamic_timeout=False,
-            dry_run=False,
+            alternating_timeout=False,
         ),
         clients=configure_clients(
             iid_fraction=IID_FRACTION,

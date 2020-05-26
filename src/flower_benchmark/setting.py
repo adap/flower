@@ -43,7 +43,7 @@ class ServerSetting(BaseSetting):
     importance_sampling: bool
     dynamic_timeout: bool
     alternating_timeout: bool = False
-    dry_run: bool
+    dry_run: bool = False
 
 
 @dataclass
