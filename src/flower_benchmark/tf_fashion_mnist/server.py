@@ -21,7 +21,7 @@ from typing import Callable, Dict, Optional
 
 import flower as flwr
 from flower.logger import configure, log
-from flower_benchmark.common import get_eval_fn, load_partition
+from flower_benchmark.common import get_eval_fn
 from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 from flower_benchmark.model import orig_cnn
 from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
@@ -53,17 +53,11 @@ def main() -> None:
     log(INFO, "server_setting: %s", server_setting)
 
     # Load evaluation data
-    xy_partitions, xy_test = tf_fashion_mnist_partitioned.load_data(
+    (_, _), xy_test = tf_fashion_mnist_partitioned.load_data(
         iid_fraction=0.0, num_partitions=1
     )
-    _, xy_test = load_partition(
-        xy_partitions,
-        xy_test,
-        partition=0,
-        num_clients=1,
-        seed=SEED,
-        dry_run=server_setting.dry_run,
-    )
+    if server_setting.dry_run:
+        xy_test = xy_test[0:50]
 
     # Load model (for centralized evaluation)
     model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)

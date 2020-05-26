@@ -21,7 +21,7 @@ import numpy as np
 
 XY = Tuple[np.ndarray, np.ndarray]
 XYList = List[XY]
-PartitionedDataset = Tuple[XYList, XY]
+PartitionedDataset = Tuple[XYList, XYList]
 
 np.random.seed(2020)
 
@@ -114,14 +114,14 @@ def shift(x: np.ndarray, y: np.ndarray) -> XY:
     return x, y
 
 
-def create_partitioned_dataset(
-    keras_dataset: Tuple[XY, XY], iid_fraction: float, num_partitions: int,
-) -> PartitionedDataset:
-    """Create partitioned version of keras dataset.
+def create_partitions(
+    unpartitioned_dataset: XY, iid_fraction: float, num_partitions: int,
+) -> XYList:
+    """Create partitioned version of a training or test set.
 
     Currently tested and supported are MNIST, FashionMNIST and CIFAR-10/100
     """
-    (x, y), (x_test, y_test) = keras_dataset
+    x, y = unpartitioned_dataset
 
     x, y = shuffle(x, y)
     x, y = sort_by_label_repeating(x, y)
@@ -136,7 +136,31 @@ def create_partitioned_dataset(
 
     xy_partitions = combine_partitions(xy_0_partitions, xy_1_partitions)
 
-    return xy_partitions, (x_test, y_test)
+    return xy_partitions
+
+
+def create_partitioned_dataset(
+    keras_dataset: Tuple[XY, XY], iid_fraction: float, num_partitions: int,
+) -> Tuple[PartitionedDataset, XY]:
+    """Create partitioned version of keras dataset.
+
+    Currently tested and supported are MNIST, FashionMNIST and CIFAR-10/100
+    """
+    xy_train, xy_test = keras_dataset
+
+    xy_train_partitions = create_partitions(
+        unpartitioned_dataset=xy_train,
+        iid_fraction=iid_fraction,
+        num_partitions=num_partitions,
+    )
+
+    xy_test_partitions = create_partitions(
+        unpartitioned_dataset=xy_test,
+        iid_fraction=iid_fraction,
+        num_partitions=num_partitions,
+    )
+
+    return (xy_train_partitions, xy_test_partitions), xy_test
 
 
 def log_distribution(xy_partitions: XYList) -> None:

@@ -22,7 +22,7 @@ import tensorflow as tf
 
 import flower as flwr
 from flower.logger import configure, log
-from flower_benchmark.common import VisionClassificationClient, load_partition
+from flower_benchmark.common import VisionClassificationClient
 from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
 from flower_benchmark.setting import ClientSetting
@@ -78,19 +78,16 @@ def main() -> None:
     model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
 
     # Load local data partition
-    xy_partitions, xy_test = tf_cifar_partitioned.load_data(
+    (xy_train_partitions, xy_test_partitions), _ = tf_cifar_partitioned.load_data(
         iid_fraction=client_setting.iid_fraction,
         num_partitions=client_setting.num_clients,
         cifar100=False,
     )
-    xy_train, xy_test = load_partition(
-        xy_partitions,
-        xy_test,
-        partition=client_setting.partition,
-        num_clients=client_setting.num_clients,
-        dry_run=client_setting.dry_run,
-        seed=SEED,
-    )
+    xy_train = xy_train_partitions[client_setting.partitions]
+    xy_test = xy_test_partitions[client_setting.partitions]
+    if client_setting.dry_run:
+        xy_train = xy_train[0:100]
+        xy_test = xy_test[0:50]
 
     # Start client
     client = VisionClassificationClient(
