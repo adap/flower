@@ -229,10 +229,10 @@ class Cluster:
         self.adapter.terminate_all_instances()
 
     def upload(
-        self, instance_id: str, local_path: str, remote_path: str
+        self, instance_name: str, local_path: str, remote_path: str
     ) -> SFTPAttributes:
         """Upload local file to remote instance."""
-        instance = self.get_instance(instance_id)
+        instance = self.get_instance(instance_name)
 
         with ssh_connection(instance, self.ssh_credentials) as client:
             sftp = client.open_sftp()
@@ -240,12 +240,30 @@ class Cluster:
 
         return sftp_file_attributes
 
-    def upload_all(self, local_path: str, remote_path: str) -> List[SFTPAttributes]:
+    def upload_all(
+        self, local_path: str, remote_path: str
+    ) -> Dict[str, SFTPAttributes]:
         """Upload file to all instances."""
-        return [
-            self.upload(instance_id, local_path, remote_path)
-            for instance_id in self.get_instance_names()
-        ]
+        results: Dict[str, SFTPAttributes] = {}
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            # Start the load operations and mark each future with its URL
+            future_to_result = {
+                executor.submit(
+                    self.upload, instance_name, local_path, remote_path
+                ): instance_name
+                for instance_name in self.get_instance_names()
+            }
+
+            for future in concurrent.futures.as_completed(future_to_result):
+                instance_name = future_to_result[future]
+                try:
+                    results[instance_name] = future.result()
+                # pylint: disable=broad-except
+                except Exception as exc:
+                    log(ERROR, (instance_name, exc))
+
+        return results
 
     def exec(self, instance_name: str, command: str) -> ExecInfo:
         """Run command on instance and return stdout."""
@@ -268,7 +286,7 @@ class Cluster:
 
         results: Dict[str, ExecInfo] = {}
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             # Start the load operations and mark each future with its URL
             future_to_result = {
                 executor.submit(self.exec, instance_name, command): instance_name

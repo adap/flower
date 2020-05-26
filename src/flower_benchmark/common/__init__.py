@@ -17,5 +17,5 @@
 
 from .client import VisionClassificationClient
 from .common import custom_fit, get_eval_fn, get_lr_schedule, keras_evaluate, keras_fit
-from .config import sample_delay_factors
+from .config import configure_client_instances, sample_delay_factors
 from .data import build_dataset, load_partition
