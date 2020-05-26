@@ -17,14 +17,18 @@
 
 from typing import List
 
-from flower_benchmark.common import configure_client_instances, sample_delay_factors
+from flower_benchmark.common import (
+    configure_client_instances,
+    sample_delay_factors,
+    sample_real_delay_factors,
+)
 from flower_benchmark.setting import ClientSetting, ServerSetting, Setting
 from flower_ops.cluster import Instance
 
 ROUNDS = 20
-MIN_NUM_CLIENTS = 80
-SAMPLE_FRACTION = 0.5
-MIN_SAMPLE_SIZE = 50
+MIN_NUM_CLIENTS = 90
+SAMPLE_FRACTION = 0.1
+MIN_SAMPLE_SIZE = 10
 
 LR_INITIAL = 0.01
 
@@ -82,13 +86,19 @@ def configure_clients(
     delay_factor_fast: float,
     delay_factor_slow: float,
     sample_delays: bool = True,
+    real_delays: bool = False,
 ) -> List[ClientSetting]:
     """Configure `num_clients` with different delay factors."""
     if sample_delays:
         # Configure clients with sampled delay factors
-        delay_factors = sample_delay_factors(
-            num_clients=num_clients, max_delay=delay_factor_slow, seed=2020
-        )
+        if real_delays:
+            delay_factors = sample_real_delay_factors(
+                num_clients=num_clients, seed=2020
+            )
+        else:
+            delay_factors = sample_delay_factors(
+                num_clients=num_clients, max_delay=delay_factor_slow, seed=2020
+            )
         return [
             ClientSetting(
                 # Set instance on which to run
@@ -161,6 +171,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     "n2020-fedfs-v0-15": Setting(
@@ -187,6 +198,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     "n2020-fedfs-v1-10": Setting(
@@ -213,6 +225,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     "n2020-fedfs-v1-15": Setting(
@@ -239,6 +252,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     "n2020-fedavg-async-10": Setting(
@@ -265,6 +279,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     "n2020-fedavg-async-15": Setting(
@@ -291,6 +306,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     ########################################
