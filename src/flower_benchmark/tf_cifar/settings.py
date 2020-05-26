@@ -131,7 +131,7 @@ SETTINGS = {
     ),
     "minimal": Setting(
         instances=[Instance(name="server", group="server", num_cpu=2, num_ram=8)]
-        + configure_client_instances(10)[0],
+        + configure_client_instances(4)[0],
         server=ServerSetting(
             instance_name="server",
             strategy="fedavg",
@@ -148,7 +148,7 @@ SETTINGS = {
         ),
         clients=configure_uniform_clients(
             iid_fraction=0.1,
-            instance_names=configure_client_instances(100)[1],
+            instance_names=configure_client_instances(4)[1],
             num_clients=4,
             dry_run=False,
         ),
