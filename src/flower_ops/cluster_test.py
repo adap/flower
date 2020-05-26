@@ -17,8 +17,9 @@
 import os
 import unittest
 import warnings
+from unittest.mock import MagicMock
 
-from .cluster import Cluster, Instance
+from .cluster import Cluster, Instance, InstanceMismatch, create_instances
 from .compute.ec2_adapter import EC2Adapter
 
 IMAGE_ID = "ami-0b418580298265d5c"
@@ -26,6 +27,60 @@ KEY_NAME = "flower"
 SSH_CREDENTIALS = ("ubuntu", "/Users/tanto/.ssh/flower.pem")
 SUBNET_ID = "subnet-23da286f"
 SECURITY_GROUP_IDS = ["sg-0dd0f0080bcf86400"]
+
+
+class CreateInstancesTestCase(unittest.TestCase):
+    """Test cases for create_instances."""
+
+    def setUp(self) -> None:
+        """Prepare tests."""
+        self.mock_adapter = MagicMock()
+        self.mock_adapter.create_instances.return_value = [
+            (1, "1.1.1.1", "2.2.2.1", 22, "running"),
+            (2, "1.1.1.2", "2.2.2.2", 22, "running"),
+        ]
+        self.timeout = 10
+
+    def test_create_instances(self):
+        """Test if create_instances works correctly."""
+        # Prepare
+        instances = [
+            Instance(name="client_0", group="clients", num_cpu=2, num_ram=8),
+            Instance(name="client_1", group="clients", num_cpu=2, num_ram=8),
+        ]
+
+        # Execute
+        create_instances(
+            adapter=self.mock_adapter, instances=instances, timeout=self.timeout
+        )
+
+        # Assert
+        self.mock_adapter.create_instances.assert_called_once_with(
+            num_cpu=instances[0].num_cpu,
+            num_ram=instances[0].num_ram,
+            num_instance=len(instances),
+            timeout=10,
+        )
+        for ins in instances:
+            assert ins.instance_id is not None
+            assert ins.private_ip is not None
+            assert ins.public_ip is not None
+            assert ins.ssh_port is not None
+            assert ins.state is not None
+
+    def test_create_instances_fail(self):
+        """Test if create_instances fails when instances list is invalid."""
+        # Prepare
+        instances = [
+            Instance(name="client_0", group="clients", num_cpu=2, num_ram=8),
+            Instance(name="client_1", group="clients", num_cpu=1, num_ram=4),
+        ]
+
+        # Execute
+        with self.assertRaises(InstanceMismatch):
+            create_instances(
+                adapter=self.mock_adapter, instances=instances, timeout=self.timeout
+            )
 
 
 if os.getenv("FLOWER_INTEGRATION"):

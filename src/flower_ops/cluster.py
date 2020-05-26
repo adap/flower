@@ -56,6 +56,11 @@ class InstanceIdNotFound(Exception):
     """Raised when there was no instance with given id."""
 
 
+class InstanceMismatch(Exception):
+    """Raised when instances passed to create_instances do not
+    have the same values for RAM or CPU."""
+
+
 class IgnoreHostKeyPolicy:
     """Policy for accepting any unknown host key. This is used by `paramiko.client.SSHClient`."""
 
@@ -94,6 +99,37 @@ def ssh_connection(
     client.close()
 
 
+def create_instances(adapter: Adapter, instances: List[Instance], timeout: int) -> None:
+    """Start instances and set props of each instance.
+
+    Fails if CPU and RAM of instances are not all the same."""
+    if not all(
+        [
+            ins.num_cpu == instances[0].num_cpu and ins.num_ram == instances[0].num_ram
+            for ins in instances
+        ]
+    ):
+        raise InstanceMismatch(
+            "Values of num_cpu and num_ram have to be equal for all instances."
+        )
+
+    adapter_instances = adapter.create_instances(
+        num_cpu=instances[0].num_cpu,
+        num_ram=instances[0].num_ram,
+        num_instance=len(instances),
+        timeout=timeout,
+    )
+
+    for i, adp_ins in enumerate(adapter_instances):
+        instance_id, private_ip, public_ip, ssh_port, state = adp_ins
+
+        instances[i].instance_id = instance_id
+        instances[i].private_ip = private_ip
+        instances[i].public_ip = public_ip
+        instances[i].ssh_port = ssh_port
+        instances[i].state = state
+
+
 class Cluster:
     """Compute enviroment independend compute cluster."""
 
@@ -102,7 +138,7 @@ class Cluster:
         adapter: Adapter,
         ssh_credentials: SSHCredentials,
         instances: List[Instance],
-        timeout: int = 10,
+        timeout: int,
     ):
         """Create cluster.
 
@@ -148,21 +184,11 @@ class Cluster:
     def start(self) -> None:
         """Start the instance."""
         # Create Instances
-        def job(instance: Instance, timeout: int) -> None:
-            adapter_instances = self.adapter.create_instances(
-                num_cpu=instance.num_cpu, num_ram=instance.num_ram, timeout=timeout,
-            )
-            instance_id, private_ip, public_ip, ssh_port, state = adapter_instances[0]
-
-            instance.instance_id = instance_id
-            instance.private_ip = private_ip
-            instance.public_ip = public_ip
-            instance.ssh_port = ssh_port
-            instance.state = state
-
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = [
-                executor.submit(job, instance, self.timeout)
+                executor.submit(
+                    create_instances, self.adapter, [instance], self.timeout
+                )
                 for instance in self.instances
             ]
             concurrent.futures.wait(futures)
