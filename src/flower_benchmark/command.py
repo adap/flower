@@ -74,7 +74,10 @@ def download_dataset(benchmark: str) -> str:
 
 def watch_and_shutdown(keyword: str, adapter: str) -> str:
     """Return command which shuts down the instance after no benchmark is running anymore."""
-    cmd = f"screen -d -m bash -c 'while [[ $(ps a | grep {keyword}) ]]; do sleep 1; done; "
+    cmd = (
+        f"screen -d -m bash -c 'while [[ $(ps a | grep -v grep | grep {keyword}) ]]; "
+        + "do sleep 1; done; "
+    )
 
     if adapter == "docker":
         cmd += "sleep 120 && kill 1'"
