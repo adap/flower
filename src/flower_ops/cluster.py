@@ -16,6 +16,7 @@
 import concurrent.futures
 from contextlib import contextmanager
 from dataclasses import dataclass
+from itertools import groupby
 from logging import DEBUG, ERROR
 from typing import Dict, Iterator, List, Optional, Tuple
 
@@ -128,6 +129,16 @@ def create_instances(adapter: Adapter, instances: List[Instance], timeout: int) 
         instances[i].public_ip = public_ip
         instances[i].ssh_port = ssh_port
         instances[i].state = state
+
+
+def group_instances_by_specs(instances: List[Instance]) -> List[List[Instance]]:
+    """Group instances by num_cpu and num_ram."""
+    groups: List[List[Instance]] = []
+    keyfunc = lambda ins: f"{ins.num_cpu}-{ins.num_ram}"
+    instances = sorted(instances, key=keyfunc)
+    for _, group in groupby(instances, keyfunc):
+        groups.append(list(group))
+    return groups
 
 
 class Cluster:
