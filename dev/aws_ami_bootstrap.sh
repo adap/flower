@@ -19,8 +19,8 @@
 # for the flower benchmarks to execute. The AWS EC2 AMI might not always up to date but we will
 # try to keep it so.
 
-# This script was last time used on 2020-04-13 to create an AMI with ID ami-0396b4e13e2f040cc
-# The AMI name is flower-2020-04-20
+# This script was last time used on 2020-05-26 to create an AMI with ID ami-0370b0294d7241341
+# The AMI name is flower-2020-05-26
 
 # Prepare machine dependencies
 sudo apt update

@@ -11,7 +11,7 @@ wheel_dir = ~/development/adap/flower/dist/
 wheel_filename = flower-0.0.1-py3-none-any.whl
 
 [aws]
-image_id = ami-0396b4e13e2f040cc
+image_id = ami-0370b0294d7241341
 key_name = AWS_KEY_NAME
 subnet_id = YOUR_AWS_SUBNET_ID
 security_group_ids = YOUR_AWS_SECURITY_GROUP_ID
