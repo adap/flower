@@ -112,7 +112,7 @@ def wall_clock_time_fedavg_vs_fedfs() -> None:
         x_label="Timeout",
         x_tick_labels=["T=10", "T=20", "T=30", "T=40"],
         y_label="Completion time",
-        filename="accuracy_fedavg_vs_fedfs",
+        filename="wall_clock_time_fedavg_vs_fedfs",
     )
 
 

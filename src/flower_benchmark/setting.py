@@ -42,6 +42,7 @@ class ServerSetting(BaseSetting):
     partial_updates: bool
     importance_sampling: bool
     dynamic_timeout: bool
+    alternating_timeout: bool = False
     dry_run: bool
 
 

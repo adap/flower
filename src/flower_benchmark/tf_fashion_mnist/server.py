@@ -98,7 +98,7 @@ def main() -> None:
             importance_sampling=server_setting.importance_sampling,
             dynamic_timeout=server_setting.dynamic_timeout,
             dynamic_timeout_percentile=0.8,
-            alternating_timeout=False,
+            alternating_timeout=server_setting.alternating_timeout,
             r_fast=1,
             r_slow=1,
             t_fast=math.ceil(0.5 * server_setting.training_round_timeout),
