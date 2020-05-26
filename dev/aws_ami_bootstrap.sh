@@ -15,12 +15,12 @@
 # limitations under the License.
 # ==============================================================================
 
-# This script is regularly used to create an AWS EC2 AMI which has most dependencies needed
-# for the flower benchmarks to execute. The AWS EC2 AMI might not always up to date but we will
-# try to keep it so.
+# This script can be used to create an AWS EC2 AMI which contains the dependencies required
+# to execute Flower benchmarks. The AWS EC2 AMI might not always reflect all dependencies listed
+# in `pyproject.toml`, but it should at least have most of them.
 
-# This script was last time used on 2020-05-26 to create an AMI with ID ami-0370b0294d7241341
-# The AMI name is flower-2020-05-26
+# This script was last used on 2020-05-26 to create an AMI with ID `ami-0370b0294d7241341`.
+# The AMI name is `flower-2020-05-26`.
 
 # Prepare machine dependencies
 sudo apt update
