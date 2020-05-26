@@ -110,23 +110,29 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
     )
 
     # Configure cluster
+    log(INFO, "(1/9) Configure cluster.")
     cluster = configure_cluster(adapter, instances, benchmark, setting)
 
     # Start the cluster; this takes some time
+    log(INFO, "(2/9) Start cluster.")
     cluster.start()
 
     # Upload wheel to all instances
+    log(INFO, "(3/9) Upload wheel to all instances.")
     cluster.upload_all(WHEEL_LOCAL_PATH, wheel_remote_path)
 
     # Install the wheel on all instances
+    log(INFO, "(4/9) Install wheel on all instances.")
     cluster.exec_all(command.install_wheel(wheel_remote_path))
 
     # Download datasets in server and clients
+    log(INFO, "(5/9) Download dataset on server and clients.")
     cluster.exec_all(
         command.download_dataset(benchmark=benchmark), groups=["server", "clients"]
     )
 
     # Start logserver
+    log(INFO, "(6/9) Start logserver.")
     logserver = cluster.get_instance("logserver")
     cluster.exec(
         logserver.name,
@@ -137,6 +143,7 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
     )
 
     # Start Flower server on Flower server instances
+    log(INFO, "(7/9) Start server.")
     cluster.exec(
         "server",
         command.start_server(
@@ -147,8 +154,8 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
     )
 
     # Start Flower clients
+    log(INFO, "(8/9) Start clients.")
     server = cluster.get_instance("server")
-
     for client_setting in settings.clients:
         cluster.exec(
             client_setting.instance_name,
@@ -163,7 +170,8 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
 
     # Shutdown server and client instance after 10min if not at least one Flower
     # process is running it
-    cluster.exec_all(command.watch_and_shutdown("[f]lower", adapter))
+    log(INFO, "(9/9) Start shutdown watcher script.")
+    cluster.exec_all(command.watch_and_shutdown("flower", adapter))
 
     # Give user info how to tail logfile
     private_key = (
