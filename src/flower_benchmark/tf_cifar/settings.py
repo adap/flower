@@ -14,8 +14,9 @@
 # ==============================================================================
 """Provides a variaty of benchmark settings for CIFAR."""
 
-from typing import List, Tuple
+from typing import List
 
+from flower_benchmark.common import configure_client_instances
 from flower_benchmark.setting import ClientSetting, ServerSetting, Setting
 from flower_ops.cluster import Instance
 
@@ -27,18 +28,6 @@ def get_setting(name: str) -> Setting:
             f"Setting {name} does not exist. Valid settings are: {list(SETTINGS.keys())}"
         )
     return SETTINGS[name]
-
-
-def configure_client_instances(num_clients: int) -> Tuple[List[Instance], List[str]]:
-    """Return list of client instances and a list of instance names."""
-    instance_names = [f"client_{i}" for i in range(num_clients)]
-
-    instances = [
-        Instance(name=instance_name, group="clients", num_cpu=4, num_ram=8)
-        for instance_name in instance_names
-    ]
-
-    return instances, instance_names
 
 
 def get_instance_name(
@@ -105,6 +94,14 @@ def configure_clients(
     return clients
 
 
+client_instances_100, client_names_100 = configure_client_instances(
+    num_clients=10, num_cpu=4, num_ram=8
+)
+
+client_instances_4, client_names_4 = configure_client_instances(
+    num_clients=4, num_cpu=4, num_ram=8
+)
+
 SETTINGS = {
     "dry-run": Setting(
         instances=[
@@ -131,7 +128,7 @@ SETTINGS = {
     ),
     "minimal": Setting(
         instances=[Instance(name="server", group="server", num_cpu=2, num_ram=8)]
-        + configure_client_instances(4)[0],
+        + client_instances_4,
         server=ServerSetting(
             instance_name="server",
             strategy="fedavg",
@@ -148,14 +145,14 @@ SETTINGS = {
         ),
         clients=configure_uniform_clients(
             iid_fraction=0.1,
-            instance_names=configure_client_instances(4)[1],
+            instance_names=client_names_4,
             num_clients=4,
             dry_run=False,
         ),
     ),
     "fedavg-sync": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
-        + configure_client_instances(100)[0],
+        + client_instances_100,
         server=ServerSetting(
             instance_name="server",
             strategy="fedavg",
@@ -172,7 +169,7 @@ SETTINGS = {
         ),
         clients=configure_clients(
             iid_fraction=0.5,
-            instance_names=configure_client_instances(100)[1],
+            instance_names=client_names_100,
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,
@@ -181,7 +178,7 @@ SETTINGS = {
     ),
     "fedavg-async": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
-        + configure_client_instances(100)[0],
+        + client_instances_100,
         server=ServerSetting(
             instance_name="server",
             strategy="fedavg",
@@ -198,7 +195,7 @@ SETTINGS = {
         ),
         clients=configure_clients(
             iid_fraction=0.5,
-            instance_names=configure_client_instances(100)[1],
+            instance_names=client_names_100,
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,
