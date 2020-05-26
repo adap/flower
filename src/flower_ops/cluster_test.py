@@ -19,7 +19,13 @@ import unittest
 import warnings
 from unittest.mock import MagicMock
 
-from .cluster import Cluster, Instance, InstanceMismatch, create_instances
+from .cluster import (
+    Cluster,
+    Instance,
+    InstanceMismatch,
+    create_instances,
+    group_instances_by_specs,
+)
 from .compute.ec2_adapter import EC2Adapter
 
 IMAGE_ID = "ami-0b418580298265d5c"
@@ -81,6 +87,25 @@ class CreateInstancesTestCase(unittest.TestCase):
             create_instances(
                 adapter=self.mock_adapter, instances=instances, timeout=self.timeout
             )
+
+
+def test_group_instances_by_specs():
+    """Test that function works correctly."""
+    # Prepare
+    instances = [
+        Instance(name="server", group="server", num_cpu=2, num_ram=4),
+        Instance(name="client_0", group="clients", num_cpu=2, num_ram=8),
+        Instance(name="logserver", group="logserver", num_cpu=2, num_ram=4),
+        Instance(name="client_1", group="clients", num_cpu=2, num_ram=8),
+    ]
+    expected_groups = [[instances[0], instances[2]], [instances[1], instances[3]]]
+
+    # Execute
+    groups = group_instances_by_specs(instances)
+
+    # Assert
+    assert len(groups) == 2
+    assert groups == expected_groups
 
 
 if os.getenv("FLOWER_INTEGRATION"):
