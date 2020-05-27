@@ -53,11 +53,12 @@ def main() -> None:
     log(INFO, "server_setting: %s", server_setting)
 
     # Load evaluation data
-    (_, _), xy_test = tf_fashion_mnist_partitioned.load_data(
+    (_, _), (x_test, y_test) = tf_fashion_mnist_partitioned.load_data(
         iid_fraction=0.0, num_partitions=1
     )
     if server_setting.dry_run:
-        xy_test = xy_test[0:50]
+        x_test = x_test[0:50]
+        y_test = y_test[0:50]
 
     # Load model (for centralized evaluation)
     model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
@@ -66,7 +67,7 @@ def main() -> None:
     client_manager = flwr.SimpleClientManager()
 
     # Strategy
-    eval_fn = get_eval_fn(model=model, num_classes=10, xy_test=xy_test,)
+    eval_fn = get_eval_fn(model=model, num_classes=10, xy_test=(x_test, y_test))
     on_fit_config_fn = get_on_fit_config_fn(
         lr_initial=server_setting.lr_initial,
         timeout=server_setting.training_round_timeout,
