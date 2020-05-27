@@ -70,7 +70,11 @@ def upload_file(local_filepath: str, s3_key: Optional[str]) -> None:
                 Filename=local_filepath,
                 Bucket=CONFIG["s3_bucket"],
                 Key=s3_key,
-                ExtraArgs={"ContentType": "text/plain"},
+                ExtraArgs={
+                    "ContentType": "application/pdf"
+                    if s3_key.endswith(".pdf")
+                    else "text/plain"
+                },
             )
         # pylint: disable=broad-except
         except Exception as err:
@@ -134,7 +138,7 @@ def plot_accuracies(values: Accuracies) -> str:
         filename=filename,
     )
 
-    upload_file(local_path, filename)
+    upload_file(local_path, filename + ".pdf")
 
     return local_path
 
