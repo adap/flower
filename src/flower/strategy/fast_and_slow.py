@@ -16,17 +16,21 @@
 
 
 import statistics
+from logging import DEBUG
 from typing import Callable, Dict, List, Optional, Tuple, cast
 
 import numpy as np
 
 from flower.client_manager import ClientManager
 from flower.client_proxy import ClientProxy
+from flower.logger import log
 from flower.typing import EvaluateRes, FitIns, FitRes, Weights
 
 from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg
 from .parameter import parameters_to_weights, weights_to_parameters
+
+E = 0.001
 
 
 class FastAndSlow(FedAvg):
@@ -95,12 +99,25 @@ class FastAndSlow(FedAvg):
 
             if rnd == 1:
                 # Sample with 1/k in the first round
+                log(
+                    DEBUG,
+                    "FedFS round %s, sample %s clients with 1/k",
+                    str(rnd),
+                    str(sample_size),
+                )
                 clients = self._one_over_k_sampling(
                     sample_size=sample_size, client_manager=client_manager
                 )
             else:
                 fast_round = is_fast_round(
                     rnd - 1, r_fast=self.r_fast, r_slow=self.r_slow
+                )
+                log(
+                    DEBUG,
+                    "FedFS round %s, sample %s clients, fast_round %s",
+                    str(rnd),
+                    str(sample_size),
+                    str(fast_round),
                 )
                 clients = self._fs_based_sampling(
                     sample_size=sample_size,
@@ -195,9 +212,9 @@ class FastAndSlow(FedAvg):
                 # pylint: enable-msg=invalid-name
 
                 if fast_round:
-                    importance = (1 / k) * c_over_m
+                    importance = (1 / k) * c_over_m + E
                 else:
-                    importance = 1 - c_over_m
+                    importance = 1 - c_over_m + E
             else:
                 # Previously unselected clients
                 if fast_round:
@@ -205,6 +222,13 @@ class FastAndSlow(FedAvg):
                 else:
                     importance = 1
             raw.append(importance)
+
+        log(
+            DEBUG,
+            "FedFS _fs_based_sampling, sample %s clients, raw %s",
+            str(sample_size),
+            str(raw),
+        )
 
         return normalize_and_sample(
             all_clients=all_clients,
@@ -292,6 +316,14 @@ def normalize_and_sample(
         probs = softmax(np.array(raw))
     else:
         probs = raw / sum(raw)
+
+    log(
+        DEBUG,
+        "FedFS normalize_and_sample, sample %s clients from %s, probs: %s",
+        str(sample_size),
+        str(len(indices)),
+        str(probs),
+    )
     sampled_indices = np.random.choice(
         indices, size=sample_size, replace=False, p=probs
     )
