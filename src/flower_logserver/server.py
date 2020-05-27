@@ -63,7 +63,7 @@ def upload_file(local_filepath: str, s3_key: Optional[str]) -> None:
         )
     elif not Path(LOGFILE).is_file():
         logging.info("No logfile found.")
-    else:
+    elif s3_key is not None:
         try:
             logging.info("Uploading logfile to S3.")
             boto3.resource("s3").meta.client.upload_file(
