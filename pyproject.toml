@@ -68,7 +68,7 @@ matplotlib = { version = "^3.2.1", optional = true }
 benchmark = ["tensorflow-cpu", "boto3", "boto3_type_annotations", "paramiko", "docker", "matplotlib"]
 examples-tensorflow = ["tensorflow-cpu"]
 ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
-http-logger = ["boto3", "boto3_type_annotations"]
+http-logger = ["boto3", "boto3_type_annotations", "tensorflow-cpu", "boto3", "boto3_type_annotations", "paramiko", "docker", "matplotlib"]
 
 [tool.poetry.dev-dependencies]
 isort = "==4.3.21"
