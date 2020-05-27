@@ -70,7 +70,7 @@ class FastAndSlow(FedAvg):
         self.r_slow = r_slow
         self.t_fast = t_fast
         self.t_slow = t_slow
-        self.contributions: Dict[str, List[Tuple[int, float]]] = {}
+        self.contributions: Dict[str, List[Tuple[int, int, int]]] = {}
 
     # pylint: disable-msg=too-many-locals
     def on_configure_fit(
@@ -89,9 +89,24 @@ class FastAndSlow(FedAvg):
 
         # Sample clients
         if self.importance_sampling:
-            clients = self._contribution_based_sampling(
-                sample_size=sample_size, client_manager=client_manager
-            )
+            # clients = self._contribution_based_sampling(
+            #     sample_size=sample_size, client_manager=client_manager
+            # )
+
+            if rnd == 1:
+                # Sample with 1/k in the first round
+                clients = self._one_over_k_sampling(
+                    sample_size=sample_size, client_manager=client_manager
+                )
+            else:
+                fast_round = is_fast_round(
+                    rnd - 1, r_fast=self.r_fast, r_slow=self.r_slow
+                )
+                clients = self._fs_based_sampling(
+                    sample_size=sample_size,
+                    client_manager=client_manager,
+                    fast_round=fast_round,
+                )
         else:
             clients = self._one_over_k_sampling(
                 sample_size=sample_size, client_manager=client_manager
@@ -107,7 +122,7 @@ class FastAndSlow(FedAvg):
         # Set timeout for this round
         if self.dynamic_timeout:
             # Alternating timeout
-            use_fast_timeout = is_fast_round(rnd, self.r_fast, self.r_slow)
+            use_fast_timeout = is_fast_round(rnd - 1, self.r_fast, self.r_slow)
             config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
         else:
             config["timeout"] = str(self.t_fast)
@@ -137,25 +152,67 @@ class FastAndSlow(FedAvg):
         # Get all clients and gather their contributions
         all_clients: Dict[str, ClientProxy] = client_manager.all()
         cid_idx: Dict[int, str] = {}
-        logits: List[float] = []
+        raw: List[float] = []
         for idx, (cid, _) in enumerate(all_clients.items()):
             cid_idx[idx] = cid
             penalty = 0.0
             if cid in self.contributions.keys():
-                contribs: List[Tuple[int, float]] = self.contributions[cid]
-                penalty = statistics.mean([c for _, c in contribs])
+                contribs: List[Tuple[int, int, int]] = self.contributions[cid]
+                penalty = statistics.mean([c / m for _, c, m in contribs])
             # `p` should be:
             #   - High for clients which have never been picked before
             #   - Medium for clients which have contributed, but not used their entire budget
             #   - Low (but not 0) for clients which have been picked and used their budget
-            logits.append(1.1 - penalty)
+            raw.append(1.1 - penalty)
 
         # Sample clients
-        indices = np.arange(len(all_clients.keys()))
-        probs = softmax(np.array(logits))
-        idxs = np.random.choice(indices, size=sample_size, replace=False, p=probs)
-        clients = [all_clients[cid_idx[idx]] for idx in idxs]
-        return clients
+        return normalize_and_sample(
+            all_clients=all_clients,
+            cid_idx=cid_idx,
+            raw=np.array(raw),
+            sample_size=sample_size,
+            use_softmax=True,
+        )
+
+    def _fs_based_sampling(
+        self, sample_size: int, client_manager: ClientManager, fast_round: bool
+    ) -> List[ClientProxy]:
+        """Sample clients with 1/k * c/m in fast rounds and 1 - c/m in slow rounds."""
+        all_clients: Dict[str, ClientProxy] = client_manager.all()
+        k = len(all_clients)
+        cid_idx: Dict[int, str] = {}
+        raw: List[float] = []
+        for idx, (cid, _) in enumerate(all_clients.items()):
+            cid_idx[idx] = cid
+
+            if cid in self.contributions.keys():
+                # Previously selected clients
+                contribs: List[Tuple[int, int, int]] = self.contributions[cid]
+
+                # pylint: disable-msg=invalid-name
+                _, c, m = contribs[-1]
+                c_over_m = c / m
+                # pylint: enable-msg=invalid-name
+
+                if fast_round:
+                    importance = (1 / k) * c_over_m
+                else:
+                    importance = 1 - c_over_m
+            else:
+                # Previously unselected clients
+                if fast_round:
+                    importance = 1 / k
+                else:
+                    importance = 1
+            raw.append(importance)
+
+        return normalize_and_sample(
+            all_clients=all_clients,
+            cid_idx=cid_idx,
+            raw=np.array(raw),
+            sample_size=sample_size,
+            use_softmax=False,
+        )
 
     def on_aggregate_fit(
         self,
@@ -184,7 +241,7 @@ class FastAndSlow(FedAvg):
             # Track contributions to the global model
             for client, fit_res in results:
                 cid = client.cid
-                contribution: Tuple[int, float] = (rnd, fit_res[1] / fit_res[2])
+                contribution: Tuple[int, int, int] = (rnd, fit_res[1], fit_res[2])
                 if cid not in self.contributions.keys():
                     self.contributions[cid] = []
                 self.contributions[cid].append(contribution)
@@ -220,3 +277,23 @@ def softmax(logits: np.ndarray) -> np.ndarray:
     """Compute softmax."""
     e_x = np.exp(logits - np.max(logits))
     return cast(np.ndarray, e_x / e_x.sum(axis=0))
+
+
+def normalize_and_sample(
+    all_clients: Dict[str, ClientProxy],
+    cid_idx: Dict[int, str],
+    raw: np.ndarray,
+    sample_size: int,
+    use_softmax: bool = False,
+) -> List[ClientProxy]:
+    """Normalize the relative importance and sample clients accordingly."""
+    indices = np.arange(len(all_clients.keys()))
+    if use_softmax:
+        probs = softmax(np.array(raw))
+    else:
+        probs = raw / sum(raw)
+    sampled_indices = np.random.choice(
+        indices, size=sample_size, replace=False, p=probs
+    )
+    clients = [all_clients[cid_idx[idx]] for idx in sampled_indices]
+    return clients
