@@ -95,7 +95,12 @@ def main() -> None:
 
     # Start client
     client = VisionClassificationClient(
-        client_setting.cid, model, (x_train, y_train), (x_test, y_test), client_setting.delay_factor, 10
+        client_setting.cid,
+        model,
+        (x_train, y_train),
+        (x_test, y_test),
+        client_setting.delay_factor,
+        10,
     )
     flwr.app.start_client(args.server_address, client)
 
