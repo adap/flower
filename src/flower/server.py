@@ -78,10 +78,11 @@ class Server:
                 loss_cen, acc_cen = res_cen
                 log(
                     INFO,
-                    "progress (round/loss/accuracy): %s, %s, %s",
+                    "fit progress: (%s, %s, %s, %s)",
                     current_round,
                     loss_cen,
                     acc_cen,
+                    timeit.default_timer() - start_time,
                 )
                 history.add_loss_centralized(rnd=current_round, loss=loss_cen)
                 history.add_accuracy_centralized(rnd=current_round, acc=acc_cen)
