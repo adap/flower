@@ -64,7 +64,7 @@ def configure_uniform_clients(
 
 
 client_instances_100, client_names_100 = configure_client_instances(
-    num_clients=10, num_cpu=2, num_ram=4
+    num_clients=100, num_cpu=2, num_ram=4
 )
 
 client_instances_10, client_names_10 = configure_client_instances(
