@@ -35,7 +35,7 @@ LOGFILE = "{logdir}/flower.log".format(logdir=LOGDIR)
 LOGFILE_UPLOAD_INTERVAL = 60
 SERVER_TIMEOUT = 3600
 
-CONFIG = {"s3_bucket": None, "s3_key": None}
+CONFIG: Dict[str, Optional[str]] = {"s3_bucket": None, "s3_key": None}
 
 # Create a flower_logs directory to store the logfiles.
 Path(LOGDIR).mkdir(exist_ok=True)
@@ -50,11 +50,12 @@ def write_to_logfile(line: str) -> None:
         lfd.write(line + "\n")
 
 
-def is_credentials_available():
+def is_credentials_available() -> bool:
+    """Return True is credentials are available in CONFIG."""
     return all([v is not None for v in CONFIG.values()])
 
 
-def upload_file(local_filepath: str, s3_key: str) -> None:
+def upload_file(local_filepath: str, s3_key: Optional[str]) -> None:
     """Upload logfile to S3."""
     if not is_credentials_available():
         logging.info(
@@ -87,7 +88,7 @@ def continous_logfile_upload(stop_condition: Event, interval: int) -> None:
         time.sleep(interval)
 
 
-def on_record(record: Dict) -> None:
+def on_record(record: Dict[str, str]) -> None:
     """Call on each new line."""
 
     # Print record as JSON and write it to a logfile
@@ -213,7 +214,7 @@ def main() -> None:
         sync_loop.join()
 
     # Final upload
-    upload_logfile()
+    upload_file(LOGFILE, CONFIG["s3_key"])
 
     logging.info("Stopping logging server...\n")
 
