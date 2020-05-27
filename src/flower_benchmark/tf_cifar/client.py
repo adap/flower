@@ -83,18 +83,20 @@ def main() -> None:
         num_partitions=client_setting.num_clients,
         cifar100=False,
     )
-    xy_train = xy_train_partitions[client_setting.partitions]
-    xy_test = xy_test_partitions[client_setting.partitions]
+    x_train, y_train = xy_train_partitions[client_setting.partitions]
+    x_test, y_test = xy_test_partitions[client_setting.partitions]
     if client_setting.dry_run:
-        xy_train = xy_train[0:100]
-        xy_test = xy_test[0:50]
+        x_train = x_train[0:100]
+        y_train = y_train[0:100]
+        x_test = x_test[0:50]
+        y_test = y_test[0:50]
 
     # Start client
     client = VisionClassificationClient(
         client_setting.cid,
         model,
-        xy_train,
-        xy_test,
+        (x_train, y_train),
+        (x_test, y_test),
         client_setting.delay_factor,
         NUM_CLASSES,
     )

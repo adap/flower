@@ -15,7 +15,7 @@
 """Partitioned versions of CIFAR-10/100 datasets."""
 # pylint: disable=invalid-name
 
-from typing import List, Tuple
+from typing import List, Tuple, cast
 
 import numpy as np
 
@@ -136,7 +136,8 @@ def create_partitions(
 
     xy_partitions = combine_partitions(xy_0_partitions, xy_1_partitions)
 
-    return xy_partitions
+    # Adjust x and y shape
+    return [adjust_xy_shape(xy) for xy in xy_partitions]
 
 
 def create_partitioned_dataset(
@@ -160,7 +161,7 @@ def create_partitioned_dataset(
         num_partitions=num_partitions,
     )
 
-    return (xy_train_partitions, xy_test_partitions), xy_test
+    return (xy_train_partitions, xy_test_partitions), adjust_xy_shape(xy_test)
 
 
 def log_distribution(xy_partitions: XYList) -> None:
@@ -168,3 +169,25 @@ def log_distribution(xy_partitions: XYList) -> None:
     distro = [np.unique(y, return_counts=True) for _, y in xy_partitions]
     for d in distro:
         print(d)
+
+
+def adjust_xy_shape(xy: XY) -> XY:
+    """Adjust shape of both x and y."""
+    x, y = xy
+    if x.ndim == 3:
+        x = adjust_x_shape(x)
+    if y.ndim == 2:
+        y = adjust_y_shape(y)
+    return (x, y)
+
+
+def adjust_x_shape(nda: np.ndarray) -> np.ndarray:
+    """Turn shape (x, y, z) into (x, y, z, 1)."""
+    nda_adjusted = np.reshape(nda, (nda.shape[0], nda.shape[1], nda.shape[2], 1))
+    return cast(np.ndarray, nda_adjusted)
+
+
+def adjust_y_shape(nda: np.ndarray) -> np.ndarray:
+    """Turn shape (x, 1) into (x)."""
+    nda_adjusted = np.reshape(nda, (nda.shape[0]))
+    return cast(np.ndarray, nda_adjusted)

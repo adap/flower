@@ -85,15 +85,22 @@ def main() -> None:
         iid_fraction=client_setting.iid_fraction,
         num_partitions=client_setting.num_clients,
     )
-    xy_train = xy_train_partitions[client_setting.partition]
-    xy_test = xy_test_partitions[client_setting.partition]
+    (x_train, y_train) = xy_train_partitions[client_setting.partition]
+    (x_test, y_test) = xy_test_partitions[client_setting.partition]
     if client_setting.dry_run:
-        xy_train = xy_train[0:100]
-        xy_test = xy_test[0:50]
+        x_train = x_train[0:100]
+        y_train = y_train[0:100]
+        x_test = x_test[0:50]
+        y_test = y_test[0:50]
 
     # Start client
     client = VisionClassificationClient(
-        client_setting.cid, model, xy_train, xy_test, client_setting.delay_factor, 10
+        client_setting.cid,
+        model,
+        (x_train, y_train),
+        (x_test, y_test),
+        client_setting.delay_factor,
+        10,
     )
     flwr.app.start_client(args.server_address, client)
 
