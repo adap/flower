@@ -89,33 +89,12 @@ class FastAndSlow(FedAvg):
 
         # Sample clients
         if self.importance_sampling:
-            # Get all clients and gather their contributions
-            all_clients: Dict[str, ClientProxy] = client_manager.all()
-            cid_idx: Dict[int, str] = {}
-            logits: List[float] = []
-            for idx, (cid, _) in enumerate(all_clients.items()):
-                cid_idx[idx] = cid
-                penalty = 0.0
-                if cid in self.contributions.keys():
-                    contribs: List[Tuple[int, float]] = self.contributions[cid]
-                    penalty = statistics.mean([c for _, c in contribs])
-                # `p` should be:
-                #   - High for clients which have never been picked before
-                #   - Medium for clients which have contributed, but not used their entire budget
-                #   - Low (but not 0) for clients which have been picked and used their budget
-                logits.append(1.1 - penalty)
-
-            # Sample clients
-            indices = np.arange(len(all_clients.keys()))
-            probs = softmax(np.array(logits))
-            idxs = np.random.choice(indices, size=sample_size, replace=False, p=probs)
-            clients = [all_clients[cid_idx[idx]] for idx in idxs]
-        else:
-            sample_size, min_num_clients = self.num_evaluation_clients(
-                client_manager.num_available()
+            clients = self._contribution_based_sampling(
+                sample_size=sample_size, client_manager=client_manager
             )
-            clients = client_manager.sample(
-                num_clients=sample_size, min_num_clients=min_num_clients
+        else:
+            clients = self._one_over_k_sampling(
+                sample_size=sample_size, client_manager=client_manager
             )
 
         # Prepare parameters and config
@@ -138,6 +117,45 @@ class FastAndSlow(FedAvg):
 
         # Return client/config pairs
         return [(client, fit_ins) for client in clients]
+
+    def _one_over_k_sampling(
+        self, sample_size: int, client_manager: ClientManager
+    ) -> List[ClientProxy]:
+        """Sample clients with probability 1/k."""
+        sample_size, min_num_clients = self.num_fit_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
+        return clients
+
+    def _contribution_based_sampling(
+        self, sample_size: int, client_manager: ClientManager
+    ) -> List[ClientProxy]:
+        """Sample clients depending on their past contributions."""
+        # Get all clients and gather their contributions
+        all_clients: Dict[str, ClientProxy] = client_manager.all()
+        cid_idx: Dict[int, str] = {}
+        logits: List[float] = []
+        for idx, (cid, _) in enumerate(all_clients.items()):
+            cid_idx[idx] = cid
+            penalty = 0.0
+            if cid in self.contributions.keys():
+                contribs: List[Tuple[int, float]] = self.contributions[cid]
+                penalty = statistics.mean([c for _, c in contribs])
+            # `p` should be:
+            #   - High for clients which have never been picked before
+            #   - Medium for clients which have contributed, but not used their entire budget
+            #   - Low (but not 0) for clients which have been picked and used their budget
+            logits.append(1.1 - penalty)
+
+        # Sample clients
+        indices = np.arange(len(all_clients.keys()))
+        probs = softmax(np.array(logits))
+        idxs = np.random.choice(indices, size=sample_size, replace=False, p=probs)
+        clients = [all_clients[cid_idx[idx]] for idx in idxs]
+        return clients
 
     def on_aggregate_fit(
         self,
