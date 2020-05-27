@@ -24,12 +24,31 @@ class FastAndSlowTestCase(unittest.TestCase):
     def test_fast_round(self):
         # Prepare
         values = [
+            # 1 fast, 1 slow
             (0, 1, 1, True),
             (1, 1, 1, False),
             (2, 1, 1, True),
+            # 2 fast, 1 slow
+            (0, 2, 1, True),
             (1, 2, 1, True),
             (2, 2, 1, False),
             (3, 2, 1, True),
+            (4, 2, 1, True),
+            (5, 2, 1, False),
+            # 1 fast, 2 slow
+            (0, 1, 2, True),
+            (1, 1, 2, False),
+            (2, 1, 2, False),
+            (3, 1, 2, True),
+            (4, 1, 2, False),
+            (5, 1, 2, False),
+            # 3 fast, 2 slow
+            (0, 3, 2, True),
+            (1, 3, 2, True),
+            (2, 3, 2, True),
+            (3, 3, 2, False),
+            (4, 3, 2, False),
+            (5, 3, 2, True),
         ]
 
         # Execute and assert
