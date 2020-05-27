@@ -14,9 +14,9 @@
 # ==============================================================================
 """Provides plotting functions."""
 
+import os.path
 import random
 from enum import Enum
-from os import path
 from pathlib import Path
 from typing import List
 
@@ -31,7 +31,7 @@ matplotlib.rcParams["hatch.linewidth"] = 1.0
 matplotlib.use("Agg")
 
 
-ROOT_DIR = path.realpath(path.dirname(__file__) + "/../../..")
+ROOT_DIR = os.path.realpath(os.path.dirname(__file__) + "/../../..")
 PLOT_DIR = ROOT_DIR + "/plot"
 
 # If it does not exist create the output directory for the plots
@@ -58,9 +58,14 @@ class LegendLoc(Enum):
 # pylint: disable=too-many-arguments
 
 
-def full_path(dir_name: str, filename: str, suffix: str = "pdf") -> str:
+def final_path(dir_name: str, filename: str, suffix: str = "pdf") -> str:
     """Join path components and return as string."""
-    return path.join(dir_name, filename + "." + suffix)
+    filename_with_suffix = filename + "." + suffix
+
+    if os.path.isabs(filename_with_suffix):
+        return filename_with_suffix
+
+    return os.path.join(dir_name, filename_with_suffix)
 
 
 def plot_single_bar_chart(
@@ -69,7 +74,7 @@ def plot_single_bar_chart(
     x_label: str,
     y_label: str,
     filename: str = "single_bar_chart",
-) -> None:
+) -> str:
     """Plot and save a single bar chart."""
 
     x_values = np.arange(y_values.size)
@@ -111,9 +116,9 @@ def plot_single_bar_chart(
     ax_subplot.set_xticklabels(tick_labels, fontsize=14)
 
     fig.tight_layout()
-    plt.savefig(
-        full_path(PLOT_DIR, filename), dpi=1000, bbox_inches="tight", transparent=True
-    )
+    path = final_path(PLOT_DIR, filename)
+    plt.savefig(path, dpi=1000, bbox_inches="tight", transparent=True)
+    return path
 
 
 def plot_bar_chart(
@@ -122,7 +127,7 @@ def plot_bar_chart(
     x_label: str,
     y_label: str,
     filename: str = "bar_chart",
-) -> None:
+) -> str:
     """Plot and save a bar chart.
 
     Note:
@@ -182,13 +187,15 @@ def plot_bar_chart(
     )
 
     fig.tight_layout()
+    path = final_path(PLOT_DIR, filename)
     plt.savefig(
-        full_path(PLOT_DIR, filename),
+        path,
         dpi=1000,
         bbox_inches="tight",
         bbox_extra_artists=(lgd,),
         transparent=True,
     )
+    return path
 
 
 def line_chart(
@@ -198,7 +205,7 @@ def line_chart(
     y_label: str,
     legend_location: LegendLoc = LegendLoc.UR,
     filename: str = "line_chart",
-) -> None:
+) -> str:
     """Plot and save a line chart."""
 
     assert len({line.size for line in lines}) == 1, "Each line must be of same size."
@@ -226,9 +233,9 @@ def line_chart(
     plt.xlabel(x_label, fontsize=16)
     plt.ylabel(y_label, fontsize=16)
 
-    plt.savefig(
-        full_path(PLOT_DIR, filename), dpi=1000, bbox_inches="tight", transparent=True
-    )
+    path = final_path(PLOT_DIR, filename)
+    plt.savefig(path, dpi=1000, bbox_inches="tight", transparent=True)
+    return path
 
 
 if __name__ == "__main__":
