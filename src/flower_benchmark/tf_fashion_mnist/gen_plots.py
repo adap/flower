@@ -20,7 +20,8 @@ import numpy as np
 from flower_benchmark.plot import line_chart
 
 
-def main():
+def main() -> None:
+    """Generate plots."""
     # Raw data
     fedavg = [
         (0, 0.03759999945759773),
