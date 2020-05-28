@@ -15,6 +15,7 @@
 """Federating: Fast and Slow."""
 
 
+import math
 import statistics
 from logging import DEBUG
 from typing import Callable, Dict, List, Optional, Tuple, cast
@@ -31,6 +32,7 @@ from .fedavg import FedAvg
 from .parameter import parameters_to_weights, weights_to_parameters
 
 E = 0.001
+E_TIMEOUT = 0.0001
 
 
 class FastAndSlow(FedAvg):
@@ -51,6 +53,8 @@ class FastAndSlow(FedAvg):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         importance_sampling: bool = True,
         dynamic_timeout: bool = True,
+        dynamic_timeout_percentile: float = 0.8,
+        alternating_timeout: bool = False,
         r_fast: int = 1,
         r_slow: int = 1,
         t_fast: int = 10,
@@ -70,11 +74,14 @@ class FastAndSlow(FedAvg):
         self.min_completion_rate_evaluate = min_completion_rate_evaluate
         self.importance_sampling = importance_sampling
         self.dynamic_timeout = dynamic_timeout
+        self.dynamic_timeout_percentile = dynamic_timeout_percentile
+        self.alternating_timeout = alternating_timeout
         self.r_fast = r_fast
         self.r_slow = r_slow
         self.t_fast = t_fast
         self.t_slow = t_slow
         self.contributions: Dict[str, List[Tuple[int, int, int]]] = {}
+        self.durations: List[Tuple[str, float, int, int]] = []
 
     # pylint: disable-msg=too-many-locals
     def on_configure_fit(
@@ -138,7 +145,18 @@ class FastAndSlow(FedAvg):
 
         # Set timeout for this round
         if self.dynamic_timeout:
-            # Alternating timeout
+            if self.durations:
+                candidates = timeout_candidates(
+                    durations=self.durations, max_timeout=self.t_slow,
+                )
+                timeout = next_timeout(
+                    candidates=candidates, percentile=self.dynamic_timeout_percentile,
+                )
+                config["timeout"] = str(timeout)
+            else:
+                # Initial round has not past durations, use max_timeout
+                config["timeout"] = str(self.t_slow)
+        elif self.alternating_timeout:
             use_fast_timeout = is_fast_round(rnd - 1, self.r_fast, self.r_slow)
             config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
         else:
@@ -270,6 +288,17 @@ class FastAndSlow(FedAvg):
                     self.contributions[cid] = []
                 self.contributions[cid].append(contribution)
 
+        if self.dynamic_timeout:
+            self.durations = []
+            for client, (_, num_examples, num_examples_ceil, fit_duration) in results:
+                cid_duration = (
+                    client.cid,
+                    fit_duration,
+                    num_examples,
+                    num_examples_ceil,
+                )
+                self.durations.append(cid_duration)
+
         return weights_prime
 
     def on_aggregate_evaluate(
@@ -329,3 +358,23 @@ def normalize_and_sample(
     )
     clients = [all_clients[cid_idx[idx]] for idx in sampled_indices]
     return clients
+
+
+def timeout_candidates(
+    durations: List[Tuple[str, float, int, int]], max_timeout: int
+) -> List[float]:
+    """Calculate timeout candidates based on previous round training durations."""
+    scaled_timeout_candidates = [
+        fit_duration * float(num_ex_ceil) / (float(num_ex) + E_TIMEOUT)
+        for _, fit_duration, num_ex, num_ex_ceil in durations
+    ]
+    return [min(st, max_timeout) for st in scaled_timeout_candidates]
+
+
+def next_timeout(candidates: List[float], percentile: float) -> int:
+    """Cacluate timeout for the next round."""
+    candidates.sort()
+    num_included = math.ceil(len(candidates) * percentile)
+    timeout_raw = candidates[num_included - 1]
+    timeout_ceil = math.ceil(timeout_raw)
+    return timeout_ceil
