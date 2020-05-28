@@ -113,7 +113,7 @@ class FedAvg(Strategy):
         evaluate_ins = (parameters, config)
 
         # Sample clients
-        if rnd < 0:
+        if rnd >= 0:
             sample_size, min_num_clients = self.num_evaluation_clients(
                 client_manager.num_available()
             )
