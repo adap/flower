@@ -110,12 +110,13 @@ def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
 
 def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
     """Serialize flower.FitIns to ProtoBuf message."""
-    parameters, num_examples, num_examples_ceil = res
+    parameters, num_examples, num_examples_ceil, fit_duration = res
     parameters_proto = parameters_to_proto(parameters)
     return ClientMessage.FitRes(
         parameters=parameters_proto,
         num_examples=num_examples,
         num_examples_ceil=num_examples_ceil,
+        fit_duration=fit_duration,
     )
 
 
@@ -124,7 +125,7 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     parameters = parameters_from_proto(msg.parameters)
     num_examples = msg.num_examples
     num_examples_ceil = msg.num_examples_ceil
-    return parameters, num_examples, num_examples_ceil
+    return parameters, num_examples, num_examples_ceil, msg.fit_duration
 
 
 # === Evaluate messages ===
@@ -146,10 +147,10 @@ def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIn
 
 def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
     """Serialize flower.EvaluateIns to ProtoBuf message."""
-    num_examples, loss = res
-    return ClientMessage.EvaluateRes(num_examples=num_examples, loss=loss)
+    num_examples, loss, acc = res
+    return ClientMessage.EvaluateRes(num_examples=num_examples, loss=loss, accuracy=acc)
 
 
 def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRes:
     """Deserialize flower.EvaluateRes from ProtoBuf message."""
-    return msg.num_examples, msg.loss
+    return msg.num_examples, msg.loss, msg.accuracy

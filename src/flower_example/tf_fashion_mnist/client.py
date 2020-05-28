@@ -16,6 +16,7 @@
 
 
 import argparse
+import timeit
 from typing import Tuple
 
 import numpy as np
@@ -48,6 +49,7 @@ class FashionMnistClient(fl.Client):
     def fit(self, ins: fl.FitIns) -> fl.FitRes:
         weights: fl.Weights = fl.parameters_to_weights(ins[0])
         config = ins[1]
+        fit_begin = timeit.default_timer()
 
         # Get training
         epochs = int(config["epochs"])
@@ -64,7 +66,8 @@ class FashionMnistClient(fl.Client):
         # Return the refined weights and the number of examples used for training
         weights_prime = fl.weights_to_parameters(self.model.get_weights())
         num_examples = len(self.x_train)
-        return weights_prime, num_examples, num_examples
+        fit_duration = timeit.default_timer() - fit_begin
+        return weights_prime, num_examples, num_examples, fit_duration
 
     def evaluate(self, ins: fl.EvaluateIns) -> fl.EvaluateRes:
         weights = fl.parameters_to_weights(ins[0])
@@ -73,12 +76,12 @@ class FashionMnistClient(fl.Client):
         self.model.set_weights(weights)
 
         # Evaluate the updated model on the local dataset
-        loss, _ = self.model.evaluate(
+        loss, accuracy = self.model.evaluate(
             self.x_test, self.y_test, batch_size=len(self.x_test), verbose=2
         )
 
         # Return the number of evaluation examples and the evaluation result (loss)
-        return len(self.x_test), float(loss)
+        return len(self.x_test), float(loss), float(accuracy)
 
 
 def main() -> None:

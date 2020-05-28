@@ -257,7 +257,7 @@ class FastAndSlow(FedAvg):
         # Convert results
         weights_results = [
             (parameters_to_weights(parameters), num_examples)
-            for client, (parameters, num_examples, _) in results
+            for client, (parameters, num_examples, _, _) in results
         ]
         weights_prime = aggregate(weights_results)
 

@@ -105,14 +105,13 @@ class VisionClassificationClient(flwr.Client):
         # Compute the maximum number of examples which could have been processed
         num_examples_ceil = self.num_examples_train * epochs
 
-        # Return empty update if local update could not be completed in time
         if not completed and not partial_updates:
+            # Return empty update if local update could not be completed in time
             parameters = flwr.weights_to_parameters([])
-            return parameters, num_examples, num_examples_ceil
-
-        # Return the refined weights and the number of examples used for training
-        parameters = flwr.weights_to_parameters(self.model.get_weights())
-        return parameters, num_examples, num_examples_ceil
+        else:
+            # Return the refined weights and the number of examples used for training
+            parameters = flwr.weights_to_parameters(self.model.get_weights())
+        return parameters, num_examples, num_examples_ceil, fit_duration
 
     def evaluate(self, ins: flwr.EvaluateIns) -> flwr.EvaluateRes:
         weights = flwr.parameters_to_weights(ins[0])
@@ -129,9 +128,9 @@ class VisionClassificationClient(flwr.Client):
         self.model.set_weights(weights)
 
         # Evaluate the updated model on the local dataset
-        loss, _ = keras_evaluate(
+        loss, acc = keras_evaluate(
             self.model, self.ds_test, batch_size=self.num_examples_test
         )
 
         # Return the number of evaluation examples and the evaluation result (loss)
-        return self.num_examples_test, loss
+        return self.num_examples_test, loss, acc

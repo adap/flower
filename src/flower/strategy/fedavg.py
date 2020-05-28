@@ -138,7 +138,7 @@ class FedAvg(Strategy):
         # Convert results
         weights_results = [
             (parameters_to_weights(parameters), num_examples)
-            for client, (parameters, num_examples, _) in results
+            for client, (parameters, num_examples, _, _) in results
         ]
         return aggregate(weights_results)
 
@@ -154,7 +154,7 @@ class FedAvg(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None
-        return weighted_loss_avg([evaluate_res for client, evaluate_res in results])
+        return weighted_loss_avg([evaluate_res for _, evaluate_res in results])
 
     def on_conclude_round(
         self, rnd: int, loss: Optional[float], acc: Optional[float]

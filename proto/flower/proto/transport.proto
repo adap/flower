@@ -59,10 +59,12 @@ message ClientMessage {
     Parameters parameters = 1;
     int64 num_examples = 2;
     int64 num_examples_ceil = 3;
+    float fit_duration = 4;
   }
   message EvaluateRes {
     int64 num_examples = 1;
     float loss = 2;
+    float accuracy = 3;
   }
 
   oneof msg {

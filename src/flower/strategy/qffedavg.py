@@ -162,7 +162,7 @@ class QffedAvg(FedAvg):
         if eval_result is not None:
             loss, _ = eval_result
 
-        for _, (parameters, _, _) in results:
+        for _, (parameters, _, _, _) in results:
             new_weights = parameters_to_weights(parameters)
             # plug in the weight updates into the gradient
             grads = [
