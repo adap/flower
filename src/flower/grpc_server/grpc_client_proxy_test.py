@@ -26,7 +26,12 @@ from flower.proto.transport_pb2 import ClientMessage, Parameters
 
 MESSAGE_PARAMETERS = Parameters(tensors=[], tensor_type="np")
 MESSAGE_FIT_RES = ClientMessage(
-    fit_res=ClientMessage.FitRes(parameters=MESSAGE_PARAMETERS, num_examples=10)
+    fit_res=ClientMessage.FitRes(
+        parameters=MESSAGE_PARAMETERS,
+        num_examples=10,
+        num_examples_ceil=16,
+        fit_duration=12.3,
+    )
 )
 
 
@@ -58,7 +63,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         ins: flower.FitIns = (parameters, {})
 
         # Execute
-        parameters_prime, num_examples, _ = client.fit(ins=ins)
+        parameters_prime, num_examples, _, _ = client.fit(ins=ins)
 
         # Assert
         assert parameters_prime.tensor_type == "np"
@@ -76,4 +81,4 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         value = client.evaluate(evaluate_ins)
 
         # Assert
-        assert (0, 0.0) == value
+        assert (0, 0.0, 0.0) == value
