@@ -43,7 +43,7 @@ class ShakespeareClient(fl.Client):
 
         super().__init__(cid) # need to modify
         self.model = model 
-        '''
+        
         self.ds_train = build_dataset(
             xy_train[0],
             xy_train[1],
@@ -58,14 +58,15 @@ class ShakespeareClient(fl.Client):
             shuffle_buffer_size=0,
             augment=False, 
         )
-        '''
+        
         self.num_examples_train = len(xy_train[0])
         self.num_examples_test = len(xy_test[0])
         self.delay_factor = delay_factor
 
     def get_parameters(self) -> fl.ParametersRes:
-        weights: fl.Weights = []  # TODO get current weights from local model (not get from server?)
-        parameters = fl.weights_to_parameters(weights)
+        #weights: fl.Weights = []  
+        # TODO get current weights from local model (not get from server?)
+        parameters = fl.weights_to_parameters(self.model.get_weights())
         return fl.ParametersRes(parameters=parameters)
 
     def fit(self, ins: fl.FitIns) -> fl.FitRes:
@@ -99,7 +100,7 @@ class ShakespeareClient(fl.Client):
 
         # Return empty update if local update could not be completed in time
         if not completed and not partial_updates:
-            parameters = flwr.weights_to_parameters([])
+            parameters = fl.weights_to_parameters([])
             return parameters, num_examples, num_examples_ceil
 
         # Return the refined weights and the number of examples used for training
