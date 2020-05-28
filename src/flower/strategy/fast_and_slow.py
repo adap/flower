@@ -145,13 +145,17 @@ class FastAndSlow(FedAvg):
 
         # Set timeout for this round
         if self.dynamic_timeout:
-            candidates = timeout_candidates(
-                durations=self.durations, max_timeout=self.t_slow,
-            )
-            timeout = next_timeout(
-                candidates=candidates, percentile=self.dynamic_timeout_percentile,
-            )
-            config["timeout"] = str(timeout)
+            if self.durations:
+                candidates = timeout_candidates(
+                    durations=self.durations, max_timeout=self.t_slow,
+                )
+                timeout = next_timeout(
+                    candidates=candidates, percentile=self.dynamic_timeout_percentile,
+                )
+                config["timeout"] = str(timeout)
+            else:
+                # Initial round has not past durations, use max_timeout
+                config["timeout"] = str(self.t_slow)
         elif self.alternating_timeout:
             use_fast_timeout = is_fast_round(rnd - 1, self.r_fast, self.r_slow)
             config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
