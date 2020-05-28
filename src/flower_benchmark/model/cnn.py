@@ -19,7 +19,6 @@ from typing import Optional, Tuple
 
 import tensorflow as tf
 
-
 CNN_REG = 1e-5
 DENSE_REG = 1e-3
 
