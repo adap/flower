@@ -44,7 +44,7 @@ def start_server(server_address: str, server: Server, config: Dict[str, int]) ->
     server.strategy.eval_fn = None  # type: ignore
 
     # Evaluate the final trained model
-    res = server.evaluate(rnd=0)
+    res = server.evaluate(rnd=-1)
     if res is not None:
         loss, (results, failures) = res
         log(INFO, "app_evaluate: federated loss: %s", str(loss))
