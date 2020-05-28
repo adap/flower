@@ -203,7 +203,7 @@ def line_chart(
     labels: List[str],
     x_label: str,
     y_label: str,
-    legend_location: LegendLoc = LegendLoc.UR,
+    legend_location: LegendLoc = LegendLoc.LR,
     filename: str = "line_chart",
 ) -> str:
     """Plot and save a line chart."""
