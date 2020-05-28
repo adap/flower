@@ -126,7 +126,7 @@ def get_on_fit_config_fn(
         config = {
             "epoch_global": str(rnd),
             "epochs": str(5),
-            "batch_size": str(32),
+            "batch_size": str(10),
             "lr_initial": str(lr_initial),
             "lr_decay": str(0.99),
             "partial_updates": "1" if partial_updates else "0",
