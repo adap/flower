@@ -13,3 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 """Provides plotting functionality."""
+
+
+from .plot import line_chart
