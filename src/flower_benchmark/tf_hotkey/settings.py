@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides a variaty of benchmark settings for Fashion-MNIST."""
+"""Provides a variaty of benchmark settings for Spoken Keyword classification."""
 
 
 from typing import List
