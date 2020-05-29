@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower benchmark using TensorFlow for Spoken Keyword Detection."""
+"""Flower benchmark using TensorFlow for Spoken Keyword classification."""
 
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
