@@ -43,6 +43,7 @@ class VisionClassificationClient(flwr.Client):
         delay_factor: float,
         num_classes: int,
         augment: bool = False,
+        augment_horizontal_flip: bool = False,
         augment_offset: int = 0,
     ):
         super().__init__(cid)
@@ -53,6 +54,7 @@ class VisionClassificationClient(flwr.Client):
             num_classes=num_classes,
             shuffle_buffer_size=len(xy_train[0]),
             augment=augment,
+            augment_horizontal_flip=augment_horizontal_flip,
             augment_offset=augment_offset,
         )
         self.ds_test = build_dataset(

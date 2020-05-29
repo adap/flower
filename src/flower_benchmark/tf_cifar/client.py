@@ -99,6 +99,9 @@ def main() -> None:
         (x_test, y_test),
         client_setting.delay_factor,
         NUM_CLASSES,
+        augment=True,
+        augment_horizontal_flip=True,
+        augment_offset=2,
     )
     flwr.app.start_client(args.server_address, client)
 
