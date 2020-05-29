@@ -27,22 +27,26 @@ import os
 import random
 import re
 import sys
+
 RANDOM_SEED = 1234
 # Regular expression to capture an actors name, and line continuation
-CHARACTER_RE = re.compile(r'^  ([a-zA-Z][a-zA-Z ]*)\. (.*)')
-CONT_RE = re.compile(r'^    (.*)')
+CHARACTER_RE = re.compile(r"^  ([a-zA-Z][a-zA-Z ]*)\. (.*)")
+CONT_RE = re.compile(r"^    (.*)")
 # The Comedy of Errors has errors in its indentation so we need to use
 # different regular expressions.
-COE_CHARACTER_RE = re.compile(r'^([a-zA-Z][a-zA-Z ]*)\. (.*)')
-COE_CONT_RE = re.compile(r'^(.*)')
+COE_CHARACTER_RE = re.compile(r"^([a-zA-Z][a-zA-Z ]*)\. (.*)")
+COE_CONT_RE = re.compile(r"^(.*)")
+
 
 def _match_character_regex(line, comedy_of_errors=False):
-    return (COE_CHARACTER_RE.match(line) if comedy_of_errors
-            else CHARACTER_RE.match(line))
+    return (
+        COE_CHARACTER_RE.match(line) if comedy_of_errors else CHARACTER_RE.match(line)
+    )
+
 
 def _match_continuation_regex(line, comedy_of_errors=False):
-    return (
-        COE_CONT_RE.match(line) if comedy_of_errors else CONT_RE.match(line))
+    return COE_CONT_RE.match(line) if comedy_of_errors else CONT_RE.match(line)
+
 
 def _split_into_plays(shakespeare_full):
     """Splits the full data by play."""
@@ -55,7 +59,7 @@ def _split_into_plays(shakespeare_full):
     author_count = 0
     start_i = 0
     for i, l in enumerate(slines):
-        if 'by William Shakespeare' in l:
+        if "by William Shakespeare" in l:
             author_count += 1
         if author_count == 2:
             start_i = i - 5
@@ -69,7 +73,7 @@ def _split_into_plays(shakespeare_full):
         if i > 124195 - start_i:
             break
         # This is a pretty good heuristic for detecting the start of a new play:
-        if 'by William Shakespeare' in line:
+        if "by William Shakespeare" in line:
             current_character = None
             characters = collections.defaultdict(list)
             # The title will be 2, 3, 4, 5, 6, or 7 lines above "by William Shakespeare".
@@ -88,9 +92,9 @@ def _split_into_plays(shakespeare_full):
             title = title.strip()
 
             assert title, (
-                'Parsing error on line %d. Expecting title 2 or 3 lines above.' %
-                i)
-            comedy_of_errors = (title == 'THE COMEDY OF ERRORS')
+                "Parsing error on line %d. Expecting title 2 or 3 lines above." % i
+            )
+            comedy_of_errors = title == "THE COMEDY OF ERRORS"
             # Degenerate plays are removed at the end of the method.
             plays.append((title, characters))
             continue
@@ -102,7 +106,7 @@ def _split_into_plays(shakespeare_full):
             # Note that this was not done in the original preprocessing and is a
             # recent fix.
             character = character.upper()
-            if not (comedy_of_errors and character.startswith('ACT ')):
+            if not (comedy_of_errors and character.startswith("ACT ")):
                 characters[character].append(snippet)
                 current_character = character
                 continue
@@ -112,7 +116,7 @@ def _split_into_plays(shakespeare_full):
         elif current_character:
             match = _match_continuation_regex(line, comedy_of_errors)
             if match:
-                if comedy_of_errors and match.group(1).startswith('<'):
+                if comedy_of_errors and match.group(1).startswith("<"):
                     current_character = None
                     continue
                 else:
@@ -122,15 +126,18 @@ def _split_into_plays(shakespeare_full):
         line = line.strip()
         if line and i > 2646:
             # Before 2646 are the sonnets, which we expect to discard.
-            discarded_lines.append('%d:%s' % (i, line))
+            discarded_lines.append("%d:%s" % (i, line))
     # Remove degenerate "plays".
     return [play for play in plays if len(play[1]) > 1], discarded_lines
 
+
 def _remove_nonalphanumerics(filename):
-    return re.sub('\\W+', '_', filename)
+    return re.sub("\\W+", "_", filename)
+
 
 def play_and_character(play, character):
-    return _remove_nonalphanumerics((play + '_' + character).replace(' ', '_'))
+    return _remove_nonalphanumerics((play + "_" + character).replace(" ", "_"))
+
 
 def _get_train_test_by_character(plays, test_fraction=0.2):
     """
@@ -145,8 +152,7 @@ def _get_train_test_by_character(plays, test_fraction=0.2):
 
     def add_examples(example_dict, example_tuple_list):
         for play, character, sound_bite in example_tuple_list:
-            example_dict[play_and_character(
-                play, character)].append(sound_bite)
+            example_dict[play_and_character(play, character)].append(sound_bite)
 
     users_and_plays = {}
     for play, characters in plays:
@@ -154,8 +160,7 @@ def _get_train_test_by_character(plays, test_fraction=0.2):
         for c in curr_characters:
             users_and_plays[play_and_character(play, c)] = play
         for character, sound_bites in characters.items():
-            examples = [(play, character, sound_bite)
-                        for sound_bite in sound_bites]
+            examples = [(play, character, sound_bite) for sound_bite in sound_bites]
             if len(examples) <= 2:
                 skipped_characters += 1
                 # Skip characters with fewer than 2 lines since we need at least one
@@ -172,30 +177,35 @@ def _get_train_test_by_character(plays, test_fraction=0.2):
             add_examples(all_train_examples, train_examples)
     return users_and_plays, all_train_examples, all_test_examples
 
+
 def _write_data_by_character(examples, output_directory):
     """Writes a collection of data files by play & character."""
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
     for character_name, sound_bites in examples.items():
-        filename = os.path.join(output_directory, character_name + '.txt')
-        with open(filename, 'w') as output:
+        filename = os.path.join(output_directory, character_name + ".txt")
+        with open(filename, "w") as output:
             for sound_bite in sound_bites:
-                output.write(sound_bite + '\n')
+                output.write(sound_bite + "\n")
+
 
 def main(argv):
-    print('Splitting .txt data between users')
+    print("Splitting .txt data between users")
     input_filename = argv[0]
-    with open(input_filename, 'r') as input_file:
+    with open(input_filename, "r") as input_file:
         shakespeare_full = input_file.read()
     plays, discarded_lines = _split_into_plays(shakespeare_full)
-    print('Discarded %d lines' % len(discarded_lines))
-    users_and_plays, all_examples, _ = _get_train_test_by_character(plays, test_fraction=-1.0)
+    print("Discarded %d lines" % len(discarded_lines))
+    users_and_plays, all_examples, _ = _get_train_test_by_character(
+        plays, test_fraction=-1.0
+    )
     output_directory = argv[1]
-    with open(os.path.join(output_directory, 'users_and_plays.json'), 'w') as ouf:
+    with open(os.path.join(output_directory, "users_and_plays.json"), "w") as ouf:
         json.dump(users_and_plays, ouf)
-    _write_data_by_character(all_examples,
-                             os.path.join(output_directory,
-                                          'by_play_and_character/'))
+    _write_data_by_character(
+        all_examples, os.path.join(output_directory, "by_play_and_character/")
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main(sys.argv[1:])

@@ -15,7 +15,9 @@
 import argparse
 from logging import ERROR
 from typing import Callable, Dict
+
 import flower as fl
+
 
 def parse_args() -> argparse.Namespace:
     """Parse and return commandline arguments."""
@@ -28,6 +30,7 @@ def parse_args() -> argparse.Namespace:
     )
 
     return parser.parse_args()
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="FlowerSpeechBrain")
@@ -60,10 +63,13 @@ def main() -> None:
         server,
         config={"num_rounds": 10},
     )
+
+
 def get_on_fit_config_fn(
     lr_initial: float, timeout: int
 ) -> Callable[[int], Dict[str, str]]:
     """Return a function which returns training configurations."""
+
     def fit_config(rnd: int) -> Dict[str, str]:
         """Return a configuration with static batch size and (local) epochs."""
         config = {
@@ -73,7 +79,9 @@ def get_on_fit_config_fn(
             "timeout": str(timeout),
         }
         return config
+
     return fit_config
-    
+
+
 if __name__ == "__main__":
     main()

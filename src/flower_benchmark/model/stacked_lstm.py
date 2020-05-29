@@ -14,30 +14,34 @@
 # ==============================================================================
 """Stacked LSTM"""
 from typing import Optional, Tuple
+
 import tensorflow as tf
 from tensorflow.contrib import rnn
 
 seq_len = 80
 emb_dim = 80
 
+
 def stacked_lstm(
-    input_len, hidden_size: int, num_classes:int, embedding_size: int, seed: int
+    input_len, hidden_size: int, num_classes: int, embedding_dim: int, seed: int
 ) -> tf.keras.Model:
     # Kernel initializer
     kernel_initializer = tf.keras.initializers.glorot_uniform(seed=seed)
 
     # Architecture
-    inputs = tf.keras.layers.Input(shape=input_len) # input_len = 80
-    embedding = tf.keras.layers.Embedding(input_dim = num_classes, output_dim = embedding_dim)(inputs)
-    lstm = tf.keras.layers.LSTM(units = hidden_size)(embedding)
-    lstm = tf.keras.layers.LSTM(units = hidden_size)(lstm)
-    #rnn = tf.keras.layers.RNN()
+    inputs = tf.keras.layers.Input(shape=input_len)  # input_len = 80
+    embedding = tf.keras.layers.Embedding(
+        input_dim=num_classes, output_dim=embedding_dim
+    )(inputs)
+    lstm = tf.keras.layers.LSTM(units=hidden_size)(embedding)
+    lstm = tf.keras.layers.LSTM(units=hidden_size)(lstm)
+    # rnn = tf.keras.layers.RNN()
     outputs = tf.keras.layers.Dense(
         num_classes, kernel_initializer=kernel_initializer, activation="softmax"
     )(rnn)
 
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
-    
+
     # Compile model
     model.compile(
         optimizer=tf.keras.optimizers.Adam(),
@@ -47,7 +51,8 @@ def stacked_lstm(
 
     return model
 
-''' Model from Leaf
+
+""" Model from Leaf
 
 def create_model(self):
         features = tf.placeholder(tf.int32, [None, self.seq_len])
@@ -74,4 +79,4 @@ def create_model(self):
 shakespeare.stacked_lstm': (0.0003, 80, 80, 256), # lr, seq_len, num_classes, num_hidden
 seq_len = 80 = max length sentence we want fo r asingle input in characters
 outputs' is a tensor of shape [batch_size, max_time, cell_state_size
-'''
+"""
