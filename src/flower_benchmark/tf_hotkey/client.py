@@ -66,7 +66,7 @@ def get_client_setting(setting: str, cid: str) -> ClientSetting:
 
 
 def main() -> None:
-    """Load data, create and start Fashion-MNIST client."""
+    """Load data, create and start client."""
     args = parse_args()
 
     client_setting = get_client_setting(args.setting, args.cid)
