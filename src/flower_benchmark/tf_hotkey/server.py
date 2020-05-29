@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server for Fashion-MNIST image classification."""
+"""Flower server for Spoken Keyword classification."""
 
 
 import argparse
