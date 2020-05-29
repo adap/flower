@@ -81,3 +81,62 @@ def orig_cnn(
         metrics=["accuracy"],
     )
     return model
+
+
+def keyword_cnn(
+    input_shape: Tuple[int, int, int] = (80, 40, 1), seed: Optional[int] = None
+) -> tf.keras.Model:
+    """Create a keyword detection model instance."""
+    # Kernel initializer
+    kernel_initializer = tf.keras.initializers.glorot_uniform(seed=seed)
+
+    # Architecture
+    inputs = tf.keras.layers.Input(shape=input_shape)
+    layers = tf.keras.layers.Conv2D(
+        32,
+        kernel_size=(20, 8),
+        strides=(1, 1),
+        kernel_initializer=kernel_initializer,
+        padding="same",
+        activation="relu",
+    )(inputs)
+    layers = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(layers)
+    layers = tf.keras.layers.Dropout(0.5)(layers)
+    layers = tf.keras.layers.Conv2D(
+        64,
+        kernel_size=(10, 4),
+        strides=(1, 1),
+        kernel_initializer=kernel_initializer,
+        padding="same",
+        activation="relu",
+    )(layers)
+    layers = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(layers)
+
+    layers = tf.keras.layers.Conv2D(
+        64,
+        kernel_size=(2, 2),
+        strides=(1, 1),
+        kernel_initializer=kernel_initializer,
+        padding="same",
+        activation="relu",
+    )(layers)
+
+    layers = tf.keras.layers.GlobalAveragePooling2D()(layers)
+    layers = tf.keras.layers.Dense(
+        256, kernel_initializer=kernel_initializer, activation="relu"
+    )(layers)
+
+    outputs = tf.keras.layers.Dense(
+        10, kernel_initializer=kernel_initializer, activation="softmax"
+    )(layers)
+
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
+
+    # Compile model
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(),
+        loss=tf.keras.losses.categorical_crossentropy,
+        metrics=["accuracy"],
+    )
+
+    return model

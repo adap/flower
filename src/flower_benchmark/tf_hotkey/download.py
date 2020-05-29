@@ -12,8 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Benchmark models."""
+"""Helper script to download Spoken Keyword dataset."""
 
 
-from .cnn import keyword_cnn, orig_cnn
-from .resnet import resnet50v2
+from logging import INFO
+
+from flower.logger import log
+from flower_benchmark.dataset import tf_hotkey_partitioned
+
+
+def main() -> None:
+    """Download data."""
+    log(INFO, "Download Keyword Detection")
+    tf_hotkey_partitioned.hotkey_load()
+
+
+if __name__ == "__main__":
+    main()

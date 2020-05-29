@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Benchmark models."""
+"""Flower benchmark using TensorFlow for Spoken Keyword classification."""
 
 
-from .cnn import keyword_cnn, orig_cnn
-from .resnet import resnet50v2
+DEFAULT_SERVER_ADDRESS = "[::]:8080"
+
+SEED = 2020
