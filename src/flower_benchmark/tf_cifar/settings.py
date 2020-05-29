@@ -20,6 +20,16 @@ from flower_benchmark.common import configure_client_instances
 from flower_benchmark.setting import ClientSetting, ServerSetting, Setting
 from flower_ops.cluster import Instance
 
+ROUNDS = 20
+MIN_NUM_CLIENTS = 80
+SAMPLE_FRACTION = 0.1
+MIN_SAMPLE_SIZE = 10
+
+LR_INITIAL = 0.01
+
+IID_FRACTION = 0.1
+MAX_DELAY_FACTOR = 4.0
+
 
 def get_setting(name: str) -> Setting:
     """Return appropriate setting."""
@@ -156,24 +166,24 @@ SETTINGS = {
         server=ServerSetting(
             instance_name="server",
             strategy="fedavg",
-            rounds=10,
-            min_num_clients=80,
-            sample_fraction=0.5,
-            min_sample_size=50,
+            rounds=ROUNDS,
+            min_num_clients=MIN_NUM_CLIENTS,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=MIN_SAMPLE_SIZE,
             training_round_timeout=None,
-            lr_initial=0.01,
+            lr_initial=LR_INITIAL,
             partial_updates=False,
             importance_sampling=False,
             dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
-            iid_fraction=0.5,
+            iid_fraction=IID_FRACTION,
             instance_names=client_names_100,
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,
-            delay_factor_slow=0.0,
+            delay_factor_slow=MAX_DELAY_FACTOR,
         ),
     ),
     "fedavg-async": Setting(
@@ -182,24 +192,50 @@ SETTINGS = {
         server=ServerSetting(
             instance_name="server",
             strategy="fedavg",
-            rounds=10,
-            min_num_clients=80,
-            sample_fraction=0.5,
-            min_sample_size=50,
-            training_round_timeout=60,
-            lr_initial=0.01,
+            rounds=ROUNDS,
+            min_num_clients=MIN_NUM_CLIENTS,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=MIN_SAMPLE_SIZE,
+            training_round_timeout=40,
+            lr_initial=LR_INITIAL,
             partial_updates=False,
             importance_sampling=False,
             dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
-            iid_fraction=0.5,
+            iid_fraction=IID_FRACTION,
             instance_names=client_names_100,
             num_clients=100,
             dry_run=False,
             delay_factor_fast=0.0,
-            delay_factor_slow=0.0,
+            delay_factor_slow=MAX_DELAY_FACTOR,
+        ),
+    ),
+    "fedfs": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fast-and-slow",
+            rounds=ROUNDS,
+            min_num_clients=MIN_NUM_CLIENTS,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=MIN_SAMPLE_SIZE,
+            training_round_timeout=40,
+            lr_initial=LR_INITIAL,
+            partial_updates=True,
+            importance_sampling=True,
+            dynamic_timeout=True,
+            dry_run=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=MAX_DELAY_FACTOR,
         ),
     ),
 }
