@@ -23,6 +23,7 @@ from typing import List, Optional
 
 import flower_benchmark.tf_cifar.settings as tf_cifar_settings
 import flower_benchmark.tf_fashion_mnist.settings as tf_fashion_mnist_settings
+import flower_benchmark.tf_hotkey.settings as tf_hotkey_settings
 from flower.logger import configure, log
 from flower_benchmark import command
 from flower_ops.cluster import Cluster, Instance
@@ -100,6 +101,8 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
         settings = tf_cifar_settings.get_setting(setting)
     elif benchmark == "tf_fashion_mnist":
         settings = tf_fashion_mnist_settings.get_setting(setting)
+    elif benchmark == "tf_hotkey":
+        settings = tf_hotkey_settings.get_setting(setting)
     else:
         raise Exception("Setting not found.")
 
@@ -194,7 +197,7 @@ def main() -> None:
         "--benchmark",
         type=str,
         required=True,
-        choices=["tf_cifar", "tf_fashion_mnist"],
+        choices=["tf_cifar", "tf_fashion_mnist", "tf_hotkey"],
         help="Name of benchmark name to run.",
     )
     parser.add_argument(
@@ -205,6 +208,7 @@ def main() -> None:
             set(
                 list(tf_cifar_settings.SETTINGS.keys())
                 + list(tf_fashion_mnist_settings.SETTINGS.keys())
+                + list(tf_hotkey_settings.SETTINGS.keys())
             )
         ),
         help="Name of setting to run.",
