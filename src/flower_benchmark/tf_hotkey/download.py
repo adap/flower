@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Helper script to download CIFAR-10/100."""
+"""Helper script to download Spoken Keyword dataset."""
 
 
 from logging import INFO
