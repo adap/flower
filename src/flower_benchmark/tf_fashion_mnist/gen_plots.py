@@ -17,10 +17,10 @@
 
 import numpy as np
 
-from flower_benchmark.plot import line_chart
+from flower_benchmark.plot import bar_chart, line_chart
 
 
-def main() -> None:
+def accuracy() -> None:
     """Generate plots."""
     # Raw data
     fedavg = [
@@ -87,6 +87,40 @@ def main() -> None:
     values = [np.array([x * 100 for _, x in val]) for _, val in lines]
     labels = [label for label, _ in lines]
     line_chart(values, labels, "Round", "Accuracy (centralized test set)")
+
+
+def accuracy_fedavg_vs_fedfs() -> None:
+    """Comparision of FedAvg vs FedFS."""
+    bar_chart(
+        y_values=[
+            np.array([40.5, 85.3, 86.1, 87.2]),
+            np.array([80.5, 84.3, 86.5, 89.2]),
+        ],
+        bar_labels=["FedAvg", "FedFS"],
+        x_label="Timeout",
+        x_tick_labels=["T=10", "T=20", "T=30", "T=40"],
+        y_label="Final Accuracy",
+        filename="accuracy_fedavg_vs_fedfs",
+    )
+
+
+def wall_clock_time_fedavg_vs_fedfs() -> None:
+    """Comparision of FedAvg vs FedFS."""
+    bar_chart(
+        y_values=[np.array([0, 1600, 1750, 2000]), np.array([650, 750, 900, 1100])],
+        bar_labels=["FedAvg", "FedFS"],
+        x_label="Timeout",
+        x_tick_labels=["T=10", "T=20", "T=30", "T=40"],
+        y_label="Completion time",
+        filename="accuracy_fedavg_vs_fedfs",
+    )
+
+
+def main() -> None:
+    """Call all plot functions."""
+    accuracy()
+    accuracy_fedavg_vs_fedfs()
+    wall_clock_time_fedavg_vs_fedfs()
 
 
 if __name__ == "__main__":

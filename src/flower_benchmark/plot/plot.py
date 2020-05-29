@@ -14,11 +14,11 @@
 # ==============================================================================
 """Provides plotting functions."""
 
+import math
 import os.path
-import random
 from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -55,7 +55,12 @@ class LegendLoc(Enum):
 
 
 # Disable too many arguments for all functions
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments too-many-locals
+
+
+def roundup_nearest(max_num: Union[int, float], div: int = 10) -> int:
+    """Roundup to nearst number divideable by n."""
+    return int(math.ceil(max_num / float(div))) * div
 
 
 def final_path(dir_name: str, filename: str, suffix: str = "pdf") -> str:
@@ -68,7 +73,7 @@ def final_path(dir_name: str, filename: str, suffix: str = "pdf") -> str:
     return os.path.join(dir_name, filename_with_suffix)
 
 
-def plot_single_bar_chart(
+def single_bar_chart(
     y_values: np.ndarray,
     tick_labels: List[str],
     x_label: str,
@@ -106,7 +111,7 @@ def plot_single_bar_chart(
     plt.ylim((0, 100))
 
     plt.grid(linestyle="dotted")
-    # plt.ylim((0, 100))
+
     gca = plt.gca()
     gca.set_yticklabels(gca.get_yticks(), fontsize=16)
     ax_subplot.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter("%.0f"))
@@ -121,11 +126,13 @@ def plot_single_bar_chart(
     return path
 
 
-def plot_bar_chart(
+def bar_chart(
     y_values: List[np.ndarray],
     bar_labels: List[str],
     x_label: str,
+    x_tick_labels: List[str],
     y_label: str,
+    legend_location: LegendLoc = LegendLoc.LR,
     filename: str = "bar_chart",
 ) -> str:
     """Plot and save a bar chart.
@@ -166,23 +173,22 @@ def plot_bar_chart(
     plt.xlabel(x_label, fontsize=16)
 
     plt.xlim((-1, y_values[0].size))
-    plt.ylim((0, 100))
+    plt.ylim((0, roundup_nearest(np.max(y_values), 20)))
 
     plt.grid(linestyle="dotted")
-    # plt.ylim((0, 100))
     gca = plt.gca()
     gca.set_yticklabels(gca.get_yticks(), fontsize=16)
     ax_subplot.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter("%.0f"))
 
-    ax_subplot.set_xticks([0, 1, 2])
-
-    ax_subplot.set_xticklabels(("E=1", "E=2", "E=3"), fontsize=14)
+    # xticks
+    ax_subplot.set_xticks(range(len(x_tick_labels)))
+    ax_subplot.set_xticklabels(x_tick_labels, fontsize=14)
 
     lgd = ax_subplot.legend(
         tuple([rect[0] for rect in rects]),
         tuple(bar_labels),
+        loc=legend_location.value,
         fontsize=14,
-        loc="best",
         ncol=2,
     )
 
@@ -236,27 +242,3 @@ def line_chart(
     path = final_path(PLOT_DIR, filename)
     plt.savefig(path, dpi=1000, bbox_inches="tight", transparent=True)
     return path
-
-
-if __name__ == "__main__":
-    e1 = np.array([random.uniform(0, i / 5) + 50 for i in range(100)])
-    e5 = np.array([random.uniform(0, i / 5) + 25 for i in range(100)])
-    e10 = np.array([random.uniform(0, i / 5) + 0 for i in range(100)])
-
-    line_chart(
-        [e1, e5, e10], ["E=1", "E=5", "E=10"], "Rounds", "Test Accuracy",
-    )
-
-    plot_bar_chart(
-        [np.array([51.1, 52.3, 10.0]), np.array([59.3, 73.5, 80.0])],
-        ["GPU-fast", "GPU-mixed"],
-        "Local Epochs",
-        "Training time",
-    )
-
-    plot_single_bar_chart(
-        np.array([50.0, 70.0, 80.0]),
-        ["10", "100", "1000"],
-        "Number of Clients",
-        "Test Accuracy",
-    )
