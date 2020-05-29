@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+# Copyright 2020 The Flower Authors. All Rights Reserved.
+=======
 # Copyright 2020 Adap GmbH. All Rights Reserved.
+>>>>>>> de5c086d84d0f41cf137add07c784a71e2ff0abb
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
