@@ -12,7 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower example using TensorFlow for Fashion-MNIST image classification."""
+"""Tests for CNN models."""
 
 
-DEFAULT_SERVER_ADDRESS = "[::]:8080"
+from .cnn import orig_cnn
+
+
+def test_cnn_size_mnist():
+    """Test number of parameters with MNIST-sized inputs."""
+    # Prepare
+    model = orig_cnn(input_shape=(28, 28, 1))
+    expected = 1_663_370
+
+    # Execute
+    actual = model.count_params()
+
+    # Assert
+    assert actual == expected
+
+
+def test_cnn_size_cifar():
+    """Test number of parameters with CIFAR-sized inputs."""
+    # Prepare
+    model = orig_cnn(input_shape=(32, 32, 3))
+    expected = 2_156_490
+
+    # Execute
+    actual = model.count_params()
+
+    # Assert
+    assert actual == expected

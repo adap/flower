@@ -22,24 +22,29 @@ import tensorflow as tf
 
 import flower as flwr
 from flower.logger import configure, log
-from flower_benchmark.common import VisionClassificationClient, load_partition
+from flower_benchmark.common import VisionClassificationClient
 from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 from flower_benchmark.model import orig_cnn
+from flower_benchmark.setting import ClientSetting
 from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
+from . import DEFAULT_SERVER_ADDRESS, SEED
 
 tf.get_logger().setLevel("ERROR")
+
+
+class ClientSettingNotFound(Exception):
+    """Raise when client setting could not be found."""
 
 
 def parse_args() -> argparse.Namespace:
     """Parse and return commandline arguments."""
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--grpc_server_address",
+        "--server_address",
         type=str,
-        default=DEFAULT_GRPC_SERVER_ADDRESS,
-        help="gRPC server address (IPv6, default: [::])",
+        default=DEFAULT_SERVER_ADDRESS,
+        help=f"Server address (IPv6, default: {DEFAULT_SERVER_ADDRESS})",
     )
     parser.add_argument(
         "--log_host", type=str, help="HTTP log handler host (no default)",
@@ -47,17 +52,24 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--setting", type=str, choices=SETTINGS.keys(), help="Setting to run.",
     )
-    parser.add_argument(
-        "--index", type=int, required=True, help="Client index in settings."
-    )
+    parser.add_argument("--cid", type=str, required=True, help="Client cid.")
     return parser.parse_args()
+
+
+def get_client_setting(setting: str, cid: str) -> ClientSetting:
+    """Return client setting based on setting name and cid."""
+    for client_setting in get_setting(setting).clients:
+        if client_setting.cid == cid:
+            return client_setting
+
+    raise ClientSettingNotFound()
 
 
 def main() -> None:
     """Load data, create and start Fashion-MNIST client."""
     args = parse_args()
 
-    client_setting = get_setting(args.setting).clients[args.index]
+    client_setting = get_client_setting(args.setting, args.cid)
 
     # Configure logger
     configure(identifier=f"client:{client_setting.cid}", host=args.log_host)
@@ -66,24 +78,31 @@ def main() -> None:
     model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
 
     # Load local data partition
-    xy_partitions, xy_test = tf_fashion_mnist_partitioned.load_data(
+    (
+        (xy_train_partitions, xy_test_partitions),
+        _,
+    ) = tf_fashion_mnist_partitioned.load_data(
         iid_fraction=client_setting.iid_fraction,
         num_partitions=client_setting.num_clients,
     )
-    xy_train, xy_test = load_partition(
-        xy_partitions,
-        xy_test,
-        partition=client_setting.partition,
-        num_clients=client_setting.num_clients,
-        dry_run=client_setting.dry_run,
-        seed=SEED,
-    )
+    (x_train, y_train) = xy_train_partitions[client_setting.partition]
+    (x_test, y_test) = xy_test_partitions[client_setting.partition]
+    if client_setting.dry_run:
+        x_train = x_train[0:100]
+        y_train = y_train[0:100]
+        x_test = x_test[0:50]
+        y_test = y_test[0:50]
 
     # Start client
     client = VisionClassificationClient(
-        client_setting.cid, model, xy_train, xy_test, client_setting.delay_factor, 10
+        client_setting.cid,
+        model,
+        (x_train, y_train),
+        (x_test, y_test),
+        client_setting.delay_factor,
+        10,
     )
-    flwr.app.start_client(args.grpc_server_address, DEFAULT_GRPC_SERVER_PORT, client)
+    flwr.app.start_client(args.server_address, client)
 
 
 if __name__ == "__main__":

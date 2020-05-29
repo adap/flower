@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower example using TensorFlow for Fashion-MNIST image classification."""
+"""Provides plotting functionality."""
 
 
-DEFAULT_SERVER_ADDRESS = "[::]:8080"
+from .plot import line_chart

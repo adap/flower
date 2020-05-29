@@ -16,6 +16,8 @@
 
 from typing import Optional
 
+from flower_ops.cluster import Instance
+
 
 def install_wheel(wheel_remote_path: str) -> str:
     """Return install command for wheel.
@@ -52,16 +54,16 @@ def start_server(log_host: str, benchmark: str, setting: str) -> str:
 
 
 def start_client(
-    grpc_server_address: str, log_host: str, benchmark: str, setting: str, index: int
+    server_address: str, log_host: str, benchmark: str, setting: str, cid: str
 ) -> str:
     """Build command to run client."""
     return (
         "screen -d -m"
         + f" python3.7 -m flower_benchmark.{benchmark}.client"
-        + f" --grpc_server_address={grpc_server_address}"
+        + f" --server_address={server_address}"
         + f" --log_host={log_host}"
         + f" --setting={setting}"
-        + f" --index={index}"
+        + f" --cid={cid}"
     )
 
 
@@ -72,10 +74,13 @@ def download_dataset(benchmark: str) -> str:
 
 def watch_and_shutdown(keyword: str, adapter: str) -> str:
     """Return command which shuts down the instance after no benchmark is running anymore."""
-    cmd = f"screen -d -m bash -c 'while [[ $(ps a | grep {keyword}) ]]; do sleep 1; done; "
+    cmd = (
+        f"screen -d -m bash -c 'while [[ $(ps a | grep -v grep | grep {keyword}) ]]; "
+        + "do sleep 1; done; "
+    )
 
     if adapter == "docker":
-        cmd += "sleep 300 && kill 1'"
+        cmd += "sleep 120 && kill 1'"
     elif adapter == "ec2":
         # Shutdown after 2 minutes to allow a logged in user
         # to chancel the shutdown manually just in case
@@ -84,3 +89,15 @@ def watch_and_shutdown(keyword: str, adapter: str) -> str:
         raise Exception("Unknown Adapter")
 
     return cmd
+
+
+def tail_logfile(adapter: str, private_key: str, logserver: Instance) -> str:
+    "Return command which can be used to tail the logfile on the logserver."
+    ssh_key = f"-i {private_key}"
+    username = "root" if adapter == "docker" else "ubuntu"
+
+    return (
+        f"ssh {ssh_key} -o StrictHostKeyChecking=no -p {logserver.ssh_port} "
+        + f"{username}@{logserver.public_ip}"
+        + ' "tail -n 1000 -f flower_logs/flower.log"'
+    )

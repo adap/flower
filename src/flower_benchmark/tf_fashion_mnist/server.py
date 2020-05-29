@@ -16,17 +16,17 @@
 
 
 import argparse
-from logging import ERROR
-from typing import Callable, Dict
+from logging import ERROR, INFO
+from typing import Callable, Dict, Optional
 
 import flower as flwr
 from flower.logger import configure, log
-from flower_benchmark.common import get_eval_fn, load_partition
+from flower_benchmark.common import get_eval_fn
 from flower_benchmark.dataset import tf_fashion_mnist_partitioned
 from flower_benchmark.model import orig_cnn
 from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
+from . import DEFAULT_SERVER_ADDRESS, SEED
 
 
 def parse_args() -> argparse.Namespace:
@@ -50,61 +50,74 @@ def main() -> None:
     configure(identifier="server", host=args.log_host)
 
     server_setting = get_setting(args.setting).server
+    log(INFO, "server_setting: %s", server_setting)
 
     # Load evaluation data
-    xy_partitions, xy_test = tf_fashion_mnist_partitioned.load_data(
+    (_, _), (x_test, y_test) = tf_fashion_mnist_partitioned.load_data(
         iid_fraction=0.0, num_partitions=1
     )
-    _, xy_test = load_partition(
-        xy_partitions,
-        xy_test,
-        partition=0,
-        num_clients=1,
-        seed=SEED,
-        dry_run=server_setting.dry_run,
-    )
+    if server_setting.dry_run:
+        x_test = x_test[0:50]
+        y_test = y_test[0:50]
 
     # Load model (for centralized evaluation)
     model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
 
-    # Create client_manager, strategy, and server
+    # Create client_manager
     client_manager = flwr.SimpleClientManager()
-    strategy = flwr.strategy.DefaultStrategy(
-        fraction_fit=server_setting.sample_fraction,
-        min_fit_clients=server_setting.min_sample_size,
-        min_available_clients=server_setting.min_num_clients,
-        eval_fn=get_eval_fn(model=model, num_classes=10, xy_test=xy_test),
-        on_fit_config_fn=get_on_fit_config_fn(
-            server_setting.lr_initial, server_setting.training_round_timeout
-        ),
-    )
-    # strategy = flwr.strategy.FastAndSlow(
-    #     fraction_fit=args.sample_fraction,
-    #     min_fit_clients=args.min_sample_size,
-    #     min_available_clients=args.min_num_clients,
-    #     eval_fn=get_eval_fn(model=model, num_classes=10, xy_test=xy_test),
-    #     on_fit_config_fn=get_on_fit_config_fn(
-    #         args.lr_initial, args.training_round_timeout
-    #     ),
-    #     r_fast=1,
-    #     r_slow=1,
-    #     t_fast=20,
-    #     t_slow=40,
-    # )
 
-    server = flwr.Server(client_manager=client_manager, strategy=strategy)
+    # Strategy
+    eval_fn = get_eval_fn(model=model, num_classes=10, xy_test=(x_test, y_test))
+    on_fit_config_fn = get_on_fit_config_fn(
+        lr_initial=server_setting.lr_initial,
+        timeout=server_setting.training_round_timeout,
+        partial_updates=server_setting.partial_updates,
+    )
+
+    if server_setting.strategy == "fedavg":
+        strategy = flwr.strategy.FedAvg(
+            fraction_fit=server_setting.sample_fraction,
+            min_fit_clients=server_setting.min_sample_size,
+            min_available_clients=server_setting.min_num_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+        )
+
+    if server_setting.strategy == "fast-and-slow":
+        strategy = flwr.strategy.FastAndSlow(
+            fraction_fit=server_setting.sample_fraction,
+            min_fit_clients=server_setting.min_sample_size,
+            min_available_clients=server_setting.min_num_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+            importance_sampling=server_setting.importance_sampling,
+            dynamic_timeout=server_setting.dynamic_timeout,
+            r_fast=1,
+            r_slow=1,
+            t_fast=20,
+            t_slow=40,
+        )
+
+    if server_setting.strategy == "qffedavg":
+        strategy = flwr.strategy.QffedAvg(
+            q_param=0.2,
+            qffl_learning_rate=0.1,
+            fraction_fit=server_setting.sample_fraction,
+            min_fit_clients=server_setting.min_sample_size,
+            min_available_clients=server_setting.min_num_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+        )
 
     # Run server
+    server = flwr.Server(client_manager=client_manager, strategy=strategy)
     flwr.app.start_server(
-        DEFAULT_GRPC_SERVER_ADDRESS,
-        DEFAULT_GRPC_SERVER_PORT,
-        server,
-        config={"num_rounds": server_setting.rounds},
+        DEFAULT_SERVER_ADDRESS, server, config={"num_rounds": server_setting.rounds},
     )
 
 
 def get_on_fit_config_fn(
-    lr_initial: float, timeout: int
+    lr_initial: float, timeout: Optional[int], partial_updates: bool
 ) -> Callable[[int], Dict[str, str]]:
     """Return a function which returns training configurations."""
 
@@ -112,13 +125,15 @@ def get_on_fit_config_fn(
         """Return a configuration with static batch size and (local) epochs."""
         config = {
             "epoch_global": str(rnd),
-            "epochs": str(1),
-            "batch_size": str(64),
+            "epochs": str(5),
+            "batch_size": str(32),
             "lr_initial": str(lr_initial),
             "lr_decay": str(0.99),
-            "timeout": str(timeout),
-            "partial_updates": "1",
+            "partial_updates": "1" if partial_updates else "0",
         }
+        if timeout is not None:
+            config["timeout"] = str(timeout)
+
         return config
 
     return fit_config

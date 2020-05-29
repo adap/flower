@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2020 The Flower Authors. All Rights Reserved.
+=======
+# Copyright 2020 Adap GmbH. All Rights Reserved.
+>>>>>>> de5c086d84d0f41cf137add07c784a71e2ff0abb
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -139,7 +143,7 @@ def parse_args() -> argparse.Namespace:
     """Parse and return commandline arguments."""
     parser = argparse.ArgumentParser(description="Flower Shakespeare")
     parser.add_argument(
-        "--grpc_server_address",
+        "--server_address",
         type=str,
         default=DEFAULT_GRPC_SERVER_ADDRESS,
         help="gRPC server address (IPv6, default: [::])",
@@ -186,7 +190,7 @@ def main() -> None:
         client_setting.cid, model, xy_train, xy_test, client_setting.delay_factor, 80
     )
 
-    fl.app.start_client(args.grpc_server_address, DEFAULT_GRPC_SERVER_PORT, client)
+    fl.app.start_client(args.server_address, client)
 
 
 if __name__ == "__main__":

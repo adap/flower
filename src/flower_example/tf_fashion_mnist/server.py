@@ -22,23 +22,17 @@ import numpy as np
 
 import flower as fl
 
-from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, fashion_mnist
+from . import DEFAULT_SERVER_ADDRESS, fashion_mnist
 
 
 def main() -> None:
     """Start server and train five rounds."""
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--grpc_server_address",
+        "--server_address",
         type=str,
-        default=DEFAULT_GRPC_SERVER_ADDRESS,
-        help="gRPC server address (default: [::])",
-    )
-    parser.add_argument(
-        "--grpc_server_port",
-        type=int,
-        default=DEFAULT_GRPC_SERVER_PORT,
-        help="gRPC server port (default: 8080)",
+        default=DEFAULT_SERVER_ADDRESS,
+        help=f"gRPC server address (default: {DEFAULT_SERVER_ADDRESS})",
     )
     parser.add_argument(
         "--rounds",
@@ -64,8 +58,13 @@ def main() -> None:
         default=1,
         help="Minimum number of available clients required for sampling (default: 1)",
     )
+    parser.add_argument(
+        "--log_host", type=str, help="Logserver address (no default)",
+    )
     parser.add_argument("--cid", type=str, help="Client CID (no default)")
     args = parser.parse_args()
+
+    fl.logger.configure("server", host=args.log_host)
 
     # Load evaluation data
     _, xy_test = fashion_mnist.load_data(partition=0, num_partitions=1)
@@ -83,10 +82,7 @@ def main() -> None:
 
     # Run server
     fl.app.start_server(
-        args.grpc_server_address,
-        args.grpc_server_port,
-        server,
-        config={"num_rounds": args.rounds},
+        args.server_address, server, config={"num_rounds": args.rounds},
     )
 
 

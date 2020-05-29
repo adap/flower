@@ -16,7 +16,7 @@
 
 
 from functools import reduce
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 
@@ -41,8 +41,28 @@ def aggregate(results: List[Tuple[Weights, int]]) -> Weights:
     return weights_prime
 
 
-def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
+def weighted_loss_avg(results: List[Tuple[int, float, Optional[float]]]) -> float:
     """Aggregate evaluation results obtained from multiple clients."""
-    num_total_evaluation_examples = sum([num_examples for num_examples, _ in results])
-    weighted_losses = [num_examples * loss for num_examples, loss in results]
+    num_total_evaluation_examples = sum(
+        [num_examples for num_examples, _, _ in results]
+    )
+    weighted_losses = [num_examples * loss for num_examples, loss, _ in results]
     return sum(weighted_losses) / num_total_evaluation_examples
+
+
+def aggregate_qffl(
+    weights: Weights, deltas: List[Weights], hs_fll: List[Weights]
+) -> Weights:
+    """Compute weighted average based on  Q-FFL paper."""
+    demominator = np.sum(np.asarray(hs_fll))
+    scaled_deltas = []
+    for client_delta in deltas:
+        scaled_deltas.append([layer * 1.0 / demominator for layer in client_delta])
+    updates = []
+    for i in range(len(deltas[0])):
+        tmp = scaled_deltas[0][i]
+        for j in range(1, len(deltas)):
+            tmp += scaled_deltas[j][i]
+        updates.append(tmp)
+    new_weights = [(u - v) * 1.0 for u, v in zip(weights, updates)]
+    return new_weights

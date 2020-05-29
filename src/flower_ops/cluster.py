@@ -15,18 +15,51 @@
 """Implments compute classes for EC2."""
 import concurrent.futures
 from contextlib import contextmanager
-from typing import Dict, Iterator, List, Tuple
+from dataclasses import dataclass
+from itertools import groupby
+from logging import DEBUG, ERROR
+from typing import Dict, Iterator, List, Optional, Tuple
 
 from paramiko.client import SSHClient
 from paramiko.sftp_attr import SFTPAttributes
 
-from .compute.adapter import Adapter, Instance
+from flower.logger import log
 
-Spec = Tuple[int, float, int]  # (num_cpu, num_ram, num_instances)
+from .compute.adapter import Adapter
+
+ExecInfo = Tuple[str, str]
+
+
+# pylint: disable=too-many-instance-attributes
+@dataclass
+class Instance:
+    """Represents an instance."""
+
+    # Specs
+    name: str
+    group: str
+    num_cpu: int
+    num_ram: float
+
+    # Runtime information
+    instance_id: Optional[str] = None
+    private_ip: Optional[str] = None
+    public_ip: Optional[str] = None
+    ssh_port: Optional[int] = None
+    state: Optional[str] = None
+
+
+class StartFailed(Exception):
+    """Raised when cluster could not start."""
 
 
 class InstanceIdNotFound(Exception):
     """Raised when there was no instance with given id."""
+
+
+class InstanceMismatch(Exception):
+    """Raised when instances passed to create_instances do not
+    have the same values for RAM or CPU."""
 
 
 class IgnoreHostKeyPolicy:
@@ -51,18 +84,61 @@ def ssh_connection(
     instance: Instance, ssh_credentials: SSHCredentials
 ) -> Iterator[SSHClient]:
     """Connect to server and yield SSH client."""
-    _, _, public_ip, ssh_port, _ = instance
     username, key_filename = ssh_credentials
 
     client = SSHClient()
     client.set_missing_host_key_policy(IgnoreHostKeyPolicy)
     client.connect(
-        hostname=public_ip, port=ssh_port, username=username, key_filename=key_filename
+        hostname=instance.public_ip,
+        port=instance.ssh_port,
+        username=username,
+        key_filename=key_filename,
     )
 
     yield client
 
     client.close()
+
+
+def create_instances(adapter: Adapter, instances: List[Instance], timeout: int) -> None:
+    """Start instances and set props of each instance.
+
+    Fails if CPU and RAM of instances are not all the same."""
+    if not all(
+        [
+            ins.num_cpu == instances[0].num_cpu and ins.num_ram == instances[0].num_ram
+            for ins in instances
+        ]
+    ):
+        raise InstanceMismatch(
+            "Values of num_cpu and num_ram have to be equal for all instances."
+        )
+
+    adapter_instances = adapter.create_instances(
+        num_cpu=instances[0].num_cpu,
+        num_ram=instances[0].num_ram,
+        num_instance=len(instances),
+        timeout=timeout,
+    )
+
+    for i, adp_ins in enumerate(adapter_instances):
+        instance_id, private_ip, public_ip, ssh_port, state = adp_ins
+
+        instances[i].instance_id = instance_id
+        instances[i].private_ip = private_ip
+        instances[i].public_ip = public_ip
+        instances[i].ssh_port = ssh_port
+        instances[i].state = state
+
+
+def group_instances_by_specs(instances: List[Instance]) -> List[List[Instance]]:
+    """Group instances by num_cpu and num_ram."""
+    groups: List[List[Instance]] = []
+    keyfunc = lambda ins: f"{ins.num_cpu}-{ins.num_ram}"
+    instances = sorted(instances, key=keyfunc)
+    for _, group in groupby(instances, keyfunc):
+        groups.append(list(group))
+    return groups
 
 
 class Cluster:
@@ -72,8 +148,8 @@ class Cluster:
         self,
         adapter: Adapter,
         ssh_credentials: SSHCredentials,
-        specs: Dict[str, Spec],
-        timeout: int = 10,
+        instances: List[Instance],
+        timeout: int,
     ):
         """Create cluster.
 
@@ -84,87 +160,79 @@ class Cluster:
 
         Example:
             To start two groups of instances where the first one has one instance and the
-            second one has two instances you might define the spec as following:
+            second one has two instances you might define the following list of instances:
 
-            specs = {
-                group_name: (vCPU count, RAM in GB, number of instances)
-            }
-
-            e.g.
-
-            specs = {
-                 # First group named server with total 3 instances.
-                 # The first group has 2 vCPU and 1.0 GB RAM per instance consists of 1 instance
-                'server': (2, 1.0, 1),
-                # The second group has 4 vCPU and 2.0 GB RAM per instance consists of 2 instances
-                'clients': (4, 2.0, 2),
-            }
+            instances = [
+                Instance(name='server', group='server', num_cpu=2, num_ram=1.0),
+                Instance(name='client_0', group='clients', num_cpu=4, num_ram=16.0),
+                Instance(name='client_1', group='clients', num_cpu=4, num_ram=16.0),
+            ]
 
             Depending on the adapter used not every combination of vCPU and RAM might be available.
         """
+        instance_names = {ins.name for ins in instances}
+        assert len(instance_names) == len(instances), "Instance names must be unique."
+
         self.adapter = adapter
         self.ssh_credentials = ssh_credentials
-        self.specs = specs
+        self.instances = instances
         self.timeout = timeout
 
-        self.instances: Dict[str, List[Instance]] = {}
+    def get_instance(self, instance_name: str) -> Instance:
+        """Return instance by instance_name."""
+        for ins in self.instances:
+            if ins.name == instance_name:
+                return ins
 
-    def get_instance(self, instance_id: str) -> Instance:
-        """Return instance by instance_id."""
-        for ins_group in self.instances.values():
-            for ins in ins_group:
-                if ins[0] == instance_id:
-                    return ins
-
-        # If instance_id could not be found raise an exception
         raise InstanceIdNotFound()
 
-    def get_instance_ids(self) -> List[str]:
-        """Return a list of all instance_ids."""
-        ids: List[str] = []
-        for ins_group in self.instances.values():
-            for ins in ins_group:
-                ids.append(ins[0])
-        return ids
+    def get_instance_names(self, groups: Optional[List[str]] = None) -> List[str]:
+        """Return a list of all instance names."""
+        return [
+            ins.name for ins in self.instances if groups is None or ins.group in groups
+        ]
 
     def start(self) -> None:
         """Start the instance."""
-        # Create Instances
-        def job(
-            group: str, num_cpu: int, num_ram: float, num_instances: int, timeout: int
-        ) -> None:
-            instances = self.adapter.create_instances(
-                num_cpu=num_cpu,
-                num_ram=num_ram,
-                num_instances=num_instances,
-                timeout=timeout,
-            )
-
-            self.instances[group] = instances
+        instance_groups = group_instances_by_specs(self.instances)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = [
-                executor.submit(job, group, spec[0], spec[1], spec[2], self.timeout)
-                for group, spec in self.specs.items()
+                executor.submit(
+                    create_instances, self.adapter, instance_group, self.timeout
+                )
+                for instance_group in instance_groups
             ]
             concurrent.futures.wait(futures)
 
-            for future in futures:
-                try:
+            try:
+                for future in futures:
                     future.result()
-                # pylint: disable=broad-except
-                except Exception as exc:
-                    print(exc)
+            # pylint: disable=broad-except
+            except Exception as exc:
+                log(
+                    ERROR, "Failed to start the cluster completely. Shutting down...",
+                )
+                log(ERROR, exc)
+
+                for future in futures:
+                    future.cancel()
+
+                self.terminate()
+                raise StartFailed()
+
+        for ins in self.instances:
+            log(DEBUG, ins)
 
     def terminate(self) -> None:
         """Terminate all instances and shutdown cluster."""
         self.adapter.terminate_all_instances()
 
     def upload(
-        self, instance_id: str, local_path: str, remote_path: str
+        self, instance_name: str, local_path: str, remote_path: str
     ) -> SFTPAttributes:
         """Upload local file to remote instance."""
-        instance = self.get_instance(instance_id)
+        instance = self.get_instance(instance_name)
 
         with ssh_connection(instance, self.ssh_credentials) as client:
             sftp = client.open_sftp()
@@ -172,18 +240,36 @@ class Cluster:
 
         return sftp_file_attributes
 
-    def upload_all(self, local_path: str, remote_path: str) -> List[SFTPAttributes]:
+    def upload_all(
+        self, local_path: str, remote_path: str
+    ) -> Dict[str, SFTPAttributes]:
         """Upload file to all instances."""
-        return [
-            self.upload(instance_id, local_path, remote_path)
-            for instance_id in self.get_instance_ids()
-        ]
+        results: Dict[str, SFTPAttributes] = {}
 
-    def exec(self, instance_id: str, command: str) -> Tuple[str, str]:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            # Start the load operations and mark each future with its URL
+            future_to_result = {
+                executor.submit(
+                    self.upload, instance_name, local_path, remote_path
+                ): instance_name
+                for instance_name in self.get_instance_names()
+            }
+
+            for future in concurrent.futures.as_completed(future_to_result):
+                instance_name = future_to_result[future]
+                try:
+                    results[instance_name] = future.result()
+                # pylint: disable=broad-except
+                except Exception as exc:
+                    log(ERROR, (instance_name, exc))
+
+        return results
+
+    def exec(self, instance_name: str, command: str) -> ExecInfo:
         """Run command on instance and return stdout."""
-        print(f"Exec on {instance_id}: {command}")
+        log(DEBUG, "Exec on %s: %s", instance_name, command)
 
-        instance = self.get_instance(instance_id)
+        instance = self.get_instance(instance_name)
 
         with ssh_connection(instance, self.ssh_credentials) as client:
             _, stdout, stderr = client.exec_command(command)
@@ -192,12 +278,27 @@ class Cluster:
 
         return stdout, stderr
 
-    def exec_all(self, command: str) -> List[Tuple[str, str]]:
-        """Run command on all instances and return List of (stdout, stderr) tuples."""
-        return [
-            self.exec(instance_id, command) for instance_id in self.get_instance_ids()
-        ]
+    def exec_all(
+        self, command: str, groups: Optional[List[str]] = None
+    ) -> Dict[str, ExecInfo]:
+        """Run command on all instances. If provided filter by group."""
+        instance_names = self.get_instance_names(groups)
 
-    def exec_group(self, group: str, command: str) -> List[Tuple[str, str]]:
-        """Run command on all instances in group and return List of (stdout, stderr) tuples."""
-        return [self.exec(ins[0], command) for ins in self.instances[group]]
+        results: Dict[str, ExecInfo] = {}
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            # Start the load operations and mark each future with its URL
+            future_to_result = {
+                executor.submit(self.exec, instance_name, command): instance_name
+                for instance_name in instance_names
+            }
+
+            for future in concurrent.futures.as_completed(future_to_result):
+                instance_name = future_to_result[future]
+                try:
+                    results[instance_name] = future.result()
+                # pylint: disable=broad-except
+                except Exception as exc:
+                    log(ERROR, (instance_name, exc))
+
+        return results

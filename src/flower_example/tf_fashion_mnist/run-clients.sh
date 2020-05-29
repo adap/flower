@@ -18,8 +18,7 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
-GRPC_SERVER_ADDRESS="[::]"
-GRPC_SERVER_PORT=8080
+SERVER_ADDRESS="[::]:8080"
 NUM_CLIENTS=10
 I_START=0
 I_END=9
@@ -32,7 +31,6 @@ do
       --cid=$i \
       --partition=$i \
       --clients=$NUM_CLIENTS \
-      --grpc_server_address=$GRPC_SERVER_ADDRESS \
-      --grpc_server_port=$GRPC_SERVER_PORT &
+      --server_address=$SERVER_ADDRESS &
 done
 echo "Started $NUM_CLIENTS clients."

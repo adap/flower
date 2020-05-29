@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2020 The Flower Authors. All Rights Reserved.
+=======
+# Copyright 2020 Adap GmbH. All Rights Reserved.
+>>>>>>> de5c086d84d0f41cf137add07c784a71e2ff0abb
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,57 +16,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+
+
 import argparse
-from logging import ERROR
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional, Tuple
 
 import flower as fl
 
-
-def parse_args() -> argparse.Namespace:
-    """Parse and return commandline arguments."""
-    parser = argparse.ArgumentParser(description="Flower")
-    parser.add_argument(
-        "--log_host", type=str, help="HTTP log handler host (no default)",
-    )
-    parser.add_argument(
-        "--setting", type=str, choices=SETTINGS.keys(), help="Setting to run.",
-    )
-
-    return parser.parse_args()
+from . import DEFAULT_SERVER_ADDRESS
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="FlowerSpeechBrain")
-    parser.add_argument(
-        "--grpc_server_address",
-        type=str,
-        default=DEFAULT_GRPC_SERVER_ADDRESS,
-        help="gRPC server address (IPv6, default: [::])",
-    )
-    parser.add_argument(
-        "--grpc_server_port",
-        type=int,
-        default=DEFAULT_GRPC_SERVER_PORT,
-        help="gRPC server port (default: 8080)",
-    )
-    args = parser.parse_args()
     # Create ClientManager & Strategy
     client_manager = fl.SimpleClientManager()
     strategy = fl.strategy.DefaultStrategy(
         fraction_fit=0.1,
         min_fit_clients=2,
         min_available_clients=2,
+        eval_fn=centralized_evaluation_function,
         on_fit_config_fn=get_on_fit_config_fn(0.01, 60),
     )
+
     # Run server
     server = fl.Server(client_manager=client_manager, strategy=strategy)
     fl.app.start_server(
-        args.grpc_server_address,
-        args.grpc_server_port,
-        server,
-        config={"num_rounds": 10},
+        DEFAULT_SERVER_ADDRESS, server, config={"num_rounds": 10},
     )
+
+
+def centralized_evaluation_function(
+    weights: fl.Weights,
+) -> Optional[Tuple[float, float]]:
+    """Use entire test set for evaluation."""
+    # TODO Evaluate weights and return
+    lss, acc = 0.1, 0.1
+
+    return lss, acc
 
 
 def get_on_fit_config_fn(

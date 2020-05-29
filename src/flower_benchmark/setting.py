@@ -15,24 +15,38 @@
 """Provides a variaty of benchmark settings base classes."""
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
+
+from flower_ops.cluster import Instance
 
 
 @dataclass
-class ServerSetting:
+class BaseSetting:
+    """Base class for all settings."""
+
+    instance_name: str
+
+
+# pylint: disable-msg=too-many-instance-attributes
+@dataclass
+class ServerSetting(BaseSetting):
     """Settings for the server."""
 
+    strategy: str
     rounds: int
     min_num_clients: int
     sample_fraction: float
     min_sample_size: int
-    training_round_timeout: int
+    training_round_timeout: Optional[int]
     lr_initial: float
+    partial_updates: bool
+    importance_sampling: bool
+    dynamic_timeout: bool
     dry_run: bool
 
 
 @dataclass
-class ClientSetting:
+class ClientSetting(BaseSetting):
     """Settings for the client."""
 
     # Individual per client
@@ -50,5 +64,6 @@ class ClientSetting:
 class Setting:
     """One specific training setting."""
 
+    instances: List[Instance]
     server: ServerSetting
     clients: List[ClientSetting]

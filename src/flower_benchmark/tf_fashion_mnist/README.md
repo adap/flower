@@ -11,7 +11,7 @@ wheel_dir = ~/development/adap/flower/dist/
 wheel_filename = flower-0.0.1-py3-none-any.whl
 
 [aws]
-image_id = ami-0396b4e13e2f040cc
+image_id = ami-0370b0294d7241341
 key_name = AWS_KEY_NAME
 subnet_id = YOUR_AWS_SUBNET_ID
 security_group_ids = YOUR_AWS_SECURITY_GROUP_ID
@@ -72,4 +72,24 @@ To execute a benchmark setting remotely on AWS:
 
 ```bash
 python -m flower_benchmark.tf_fashion_mnist.run --adapter="ec2" --setting="minimal"
+```
+
+Or alternatively, customize the wrapper script `run.sh` and run it using your AWS profile:
+ 
+```bash
+AWS_PROFILE=your-aws-profile src/flower_benchmark/run.sh
+```
+
+## Get Results
+
+See all current and past results on the S3 website of your S3 bucket:
+
+```
+http://[your-flower-log-s3-bucket].s3-website.eu-central-1.amazonaws.com/
+```
+
+Download and filter invididual logs using `cURL` and `jq`:
+
+```bash
+curl http://[your-flower-log-s3-bucket].s3-eu-central-1.amazonaws.com/[your-experiment].log | jq '.identifier + " => " + .message'
 ```

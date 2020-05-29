@@ -16,15 +16,16 @@
 
 import argparse
 import configparser
+from logging import INFO
 from os import path
 from time import strftime
 from typing import List, Optional
 
 import flower_benchmark.tf_cifar.settings as tf_cifar_settings
 import flower_benchmark.tf_fashion_mnist.settings as tf_fashion_mnist_settings
+from flower.logger import configure, log
 from flower_benchmark import command
-from flower_benchmark.setting import ClientSetting
-from flower_ops.cluster import Cluster
+from flower_ops.cluster import Cluster, Instance
 from flower_ops.compute.adapter import Adapter
 from flower_ops.compute.docker_adapter import DockerAdapter
 from flower_ops.compute.ec2_adapter import EC2Adapter
@@ -46,7 +47,9 @@ def now() -> str:
     return strftime("%Y%m%dT%H%M%S")
 
 
-def configure_cluster(adapter: str, benchmark: str) -> Cluster:
+def configure_cluster(
+    adapter: str, instances: List[Instance], benchmark: str, setting: str
+) -> Cluster:
     """Return configured compute cluster."""
     adapter_instance: Optional[Adapter] = None
     private_key: Optional[str] = None
@@ -54,14 +57,18 @@ def configure_cluster(adapter: str, benchmark: str) -> Cluster:
     if adapter == "docker":
         adapter_instance = DockerAdapter()
         user = "root"
-        private_key = f"{path.dirname(path.realpath(__file__))}/../../docker/ssh_key"
+        private_key = path.realpath(path.dirname(__file__) + "/../../docker/ssh_key")
     elif adapter == "ec2":
         adapter_instance = EC2Adapter(
             image_id=CONFIG.get("aws", "image_id"),
             key_name=path.expanduser(CONFIG.get("aws", "key_name")),
             subnet_id=CONFIG.get("aws", "subnet_id"),
             security_group_ids=CONFIG.get("aws", "security_group_ids").split(","),
-            tags=[("Purpose", "flower_benchmark"), ("Benchmark Name", benchmark)],
+            tags=[
+                ("Purpose", "flower_benchmark"),
+                ("Benchmark Name", benchmark),
+                ("Benchmark Setting", setting),
+            ],
         )
         user = "ubuntu"
         private_key = path.expanduser(CONFIG.get("ssh", "private_key"))
@@ -71,7 +78,7 @@ def configure_cluster(adapter: str, benchmark: str) -> Cluster:
     cluster = Cluster(
         adapter=adapter_instance,
         ssh_credentials=(user, private_key),
-        specs={"logserver": (2, 2, 1), "server": (4, 16, 1), "clients": (4, 16, 2)},
+        instances=instances,
         timeout=60,
     )
 
@@ -89,32 +96,46 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
         else f"/home/ubuntu/{WHEEL_FILENAME}"
     )
 
-    client_settings: Optional[List[ClientSetting]] = None
-
     if benchmark == "tf_cifar":
-        client_settings = tf_cifar_settings.get_setting(setting).clients
+        settings = tf_cifar_settings.get_setting(setting)
     elif benchmark == "tf_fashion_mnist":
-        client_settings = tf_cifar_settings.get_setting(setting).clients
+        settings = tf_fashion_mnist_settings.get_setting(setting)
     else:
         raise Exception("Setting not found.")
 
+    # Get instances and add a logserver to the list
+    instances = settings.instances
+    instances.append(
+        Instance(name="logserver", group="logserver", num_cpu=2, num_ram=2)
+    )
+
     # Configure cluster
-    cluster = configure_cluster(adapter, benchmark)
+    log(INFO, "(1/9) Configure cluster.")
+    cluster = configure_cluster(adapter, instances, benchmark, setting)
 
     # Start the cluster; this takes some time
+    log(INFO, "(2/9) Start cluster.")
     cluster.start()
 
     # Upload wheel to all instances
+    log(INFO, "(3/9) Upload wheel to all instances.")
     cluster.upload_all(WHEEL_LOCAL_PATH, wheel_remote_path)
 
     # Install the wheel on all instances
+    log(INFO, "(4/9) Install wheel on all instances.")
     cluster.exec_all(command.install_wheel(wheel_remote_path))
 
-    # An instance is a tuple of the following values
-    # (InstanceId, PrivateIpAddress, PublicIpAddress, State)
-    logserver_id, logserver_private_ip, _, _, _ = cluster.instances["logserver"][0]
+    # Download datasets in server and clients
+    log(INFO, "(5/9) Download dataset on server and clients.")
+    cluster.exec_all(
+        command.download_dataset(benchmark=benchmark), groups=["server", "clients"]
+    )
+
+    # Start logserver
+    log(INFO, "(6/9) Start logserver.")
+    logserver = cluster.get_instance("logserver")
     cluster.exec(
-        logserver_id,
+        logserver.name,
         command.start_logserver(
             logserver_s3_bucket=CONFIG.get("aws", "logserver_s3_bucket"),
             logserver_s3_key=f"{benchmark}_{setting}_{now()}.log",
@@ -122,55 +143,48 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
     )
 
     # Start Flower server on Flower server instances
-    server_id, server_private_ip, _, _, _ = cluster.instances["server"][0]
-    cluster.exec(server_id, command.download_dataset(benchmark=benchmark))
+    log(INFO, "(7/9) Start server.")
     cluster.exec(
-        server_id,
+        "server",
         command.start_server(
-            log_host=f"{logserver_private_ip}:8081",
+            log_host=f"{logserver.private_ip}:8081",
             benchmark=benchmark,
             setting=setting,
         ),
     )
 
     # Start Flower clients
-    client_instances = cluster.instances["clients"]
-
-    # Make dataset locally available
-    cluster.exec_group("clients", command.download_dataset(benchmark=benchmark))
-
-    num_client_processes = len(client_settings)
-
-    for i in range(0, num_client_processes):
-        instance_id = (
-            client_instances[0][0]
-            if i < int(num_client_processes / 2)
-            else client_instances[1][0]
-        )
+    log(INFO, "(8/9) Start clients.")
+    server = cluster.get_instance("server")
+    for client_setting in settings.clients:
         cluster.exec(
-            instance_id,
+            client_setting.instance_name,
             command.start_client(
-                log_host=f"{logserver_private_ip}:8081",
-                grpc_server_address=server_private_ip,
+                log_host=f"{logserver.private_ip}:8081",
+                server_address=f"{server.private_ip}:8080",
                 benchmark=benchmark,
                 setting=setting,
-                index=i,
+                cid=client_setting.cid,
             ),
         )
 
     # Shutdown server and client instance after 10min if not at least one Flower
     # process is running it
-    cluster.exec_group(
-        "logserver", command.watch_and_shutdown("[f]lower_logserver", adapter)
-    )
-    cluster.exec_group(
-        "server", command.watch_and_shutdown("[f]lower_benchmark", adapter)
-    )
-    cluster.exec_group(
-        "clients", command.watch_and_shutdown("[f]lower_benchmark", adapter)
+    log(INFO, "(9/9) Start shutdown watcher script.")
+    cluster.exec_all(command.watch_and_shutdown("flower", adapter))
+
+    # Give user info how to tail logfile
+    private_key = (
+        path.realpath(path.dirname(__file__) + "/../../docker/ssh_key")
+        if adapter == "docker"
+        else path.expanduser(CONFIG.get("ssh", "private_key"))
     )
 
-    print(cluster.instances)
+    log(
+        INFO,
+        "If you would like to tail the central logfile run:\n\n\t%s\n",
+        command.tail_logfile(adapter, private_key, logserver),
+    )
 
 
 def main() -> None:
@@ -187,8 +201,12 @@ def main() -> None:
         "--setting",
         type=str,
         required=True,
-        choices=list(tf_cifar_settings.SETTINGS.keys())
-        + list(tf_fashion_mnist_settings.SETTINGS.keys()),
+        choices=list(
+            set(
+                list(tf_cifar_settings.SETTINGS.keys())
+                + list(tf_fashion_mnist_settings.SETTINGS.keys())
+            )
+        ),
         help="Name of setting to run.",
     )
     parser.add_argument(
@@ -199,6 +217,9 @@ def main() -> None:
         help="Set adapter to be used.",
     )
     args = parser.parse_args()
+
+    # Configure logger
+    configure(f"flower_{args.benchmark}_{args.setting}")
 
     run(benchmark=args.benchmark, setting=args.setting, adapter=args.adapter)
 

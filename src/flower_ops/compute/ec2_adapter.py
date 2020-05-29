@@ -14,14 +14,16 @@
 # ==============================================================================
 """Provides an Adapter implementation for AWS EC2."""
 
-
 import time
+from logging import INFO
 from typing import Dict, List, Optional, Tuple, Union
 
 import boto3
 from boto3_type_annotations import ec2
 
-from .adapter import Adapter, Instance
+from flower.logger import log
+
+from .adapter import Adapter, AdapterInstance
 
 EC2RunInstancesResult = Dict[str, List[ec2.Instance]]
 EC2DescribeInstancesResult = Dict[str, List[Dict[str, List[ec2.Instance]]]]
@@ -50,23 +52,24 @@ class EC2StatusTimeout(Exception):
 # List of AWS instance types with
 # (instance_type, vCPU, Mem)
 INSTANCE_TYPES = [
-    ("t3.small", 2, 2),  # 24 CPU Credits/hour; $0.0209/hour
-    ("t3.medium", 2, 4),  # 24 CPU Credits/hour; $0.0418/hour
-    ("m5a.large", 2, 8),
-    ("m5a.xlarge", 4, 16),  # Minimum size of Fashion-MNIST server/client
-    ("m5a.2xlarge", 8, 32),
-    ("m5a.4xlarge", 16, 64),
-    ("m5ad.24xlarge", 96, 384),
+    ("t3.small", 2, 2, 0.0209),  # Beware CPU credit limited
+    ("c5.large", 2, 4, 0.097),
+    ("m5a.large", 2, 8, 0.104),
+    ("m5a.xlarge", 4, 16, 0.208),
+    ("m5a.2xlarge", 8, 32, 0.416),
+    ("m5a.4xlarge", 16, 64, 0.832),
+    ("m5ad.12xlarge", 48, 192, 2.496),
+    ("m5ad.24xlarge", 96, 384, 4.992),
 ]
 
 
 def find_instance_type(
-    num_cpu: int, num_ram: float, instance_types: List[Tuple[str, int, int]]
-) -> str:
+    num_cpu: int, num_ram: float, instance_types: List[Tuple[str, int, int, float]]
+) -> Tuple[str, float]:
     """Return the first matching instance type if one exists, raise otherwise."""
     for instance_type in instance_types:
         if instance_type[1] == num_cpu and instance_type[2] == num_ram:
-            return instance_type[0]
+            return instance_type[0], instance_type[3]
 
     raise NoMatchingInstanceType
 
@@ -93,10 +96,10 @@ def are_all_instances_running(instances: List[ec2.Instance]) -> bool:
     return True
 
 
-def are_all_status_ok(instance_status: List[Dict[str, str]]) -> bool:
+def are_all_status_ok(instance_status: List[Tuple[str, str]]) -> bool:
     """Return True if all instances are ok."""
     for status in instance_status:
-        if status["Status"] != "ok":
+        if status[1] != "ok":
             return False
 
     return True
@@ -156,7 +159,8 @@ class EC2Adapter(Adapter):
             )
 
             instance_status = [
-                ins["InstanceStatus"] for ins in result["InstanceStatuses"]
+                (ins["InstanceId"], ins["InstanceStatus"]["Status"])
+                for ins in result["InstanceStatuses"]
             ]
 
             print(instance_status)
@@ -170,28 +174,41 @@ class EC2Adapter(Adapter):
 
     # pylint: disable=too-many-arguments
     def create_instances(
-        self, num_cpu: int, num_ram: float, timeout: int, num_instances: int = 1,
-    ) -> List[Instance]:
+        self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
+    ) -> List[AdapterInstance]:
         """Create one or more EC2 instance(s) of the same type.
 
             Args:
                 num_cpu (int): Number of instance vCPU (values in ec2_adapter.INSTANCE_TYPES)
                 num_ram (int): RAM in GB (values in ec2_adapter.INSTANCE_TYPES)
                 timeout (int): Timeout in minutes
-                num_instances (int): Number of instances to start if currently available in EC2
+                num_instance (int): Number of instances to start if currently available in EC2
         """
         # The instance will be set to terminate after stutdown
         # This is a fail safe in case something happens and the instances
         # are not correctly shutdown
         user_data = ["#!/bin/bash", f"sudo shutdown -P {timeout}"]
         user_data_str = "\n".join(user_data)
+        instance_type, hourly_price = find_instance_type(
+            num_cpu, num_ram, INSTANCE_TYPES
+        )
+
+        hourly_price_total = round(num_instance * hourly_price, 2)
+
+        log(
+            INFO,
+            "Starting %s instances of type %s which in total will roughly cost $%s an hour.",
+            num_instance,
+            instance_type,
+            hourly_price_total,
+        )
 
         result: EC2RunInstancesResult = self.ec2.run_instances(
             ImageId=self.image_id,
             # We always want an exact number of instances
-            MinCount=num_instances,
-            MaxCount=num_instances,
-            InstanceType=find_instance_type(num_cpu, num_ram, INSTANCE_TYPES),
+            MinCount=num_instance,
+            MaxCount=num_instance,
+            InstanceType=instance_type,
             KeyName=self.key_name,
             IamInstanceProfile={"Name": "FlowerInstanceProfile"},
             SubnetId=self.subnet_id,
@@ -216,7 +233,7 @@ class EC2Adapter(Adapter):
 
     def list_instances(
         self, instance_ids: Optional[List[str]] = None
-    ) -> List[Instance]:
+    ) -> List[AdapterInstance]:
         """List all instances with tags belonging to this adapter.
 
         Args:
