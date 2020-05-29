@@ -99,11 +99,17 @@ class FastAndSlow(FedAvg):
             return []
 
         # Sample clients
-        if self.importance_sampling:
-            # clients = self._contribution_based_sampling(
-            #     sample_size=sample_size, client_manager=client_manager
-            # )
-
+        if self.alternating_timeout:
+            log(
+                DEBUG,
+                "FedFS round %s, sample %s clients (based on all previous contributions)",
+                str(rnd),
+                str(sample_size),
+            )
+            clients = self._contribution_based_sampling(
+                sample_size=sample_size, client_manager=client_manager
+            )
+        elif self.importance_sampling:
             if rnd == 1:
                 # Sample with 1/k in the first round
                 log(
@@ -160,7 +166,7 @@ class FastAndSlow(FedAvg):
             use_fast_timeout = is_fast_round(rnd - 1, self.r_fast, self.r_slow)
             config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
         else:
-            config["timeout"] = str(self.t_fast)
+            config["timeout"] = str(self.t_slow)
 
         # Fit instructions
         fit_ins = (parameters, config)
@@ -206,7 +212,7 @@ class FastAndSlow(FedAvg):
             cid_idx=cid_idx,
             raw=np.array(raw),
             sample_size=sample_size,
-            use_softmax=True,
+            use_softmax=False,
         )
 
     def _fs_based_sampling(

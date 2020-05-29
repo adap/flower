@@ -16,6 +16,7 @@
 
 
 import argparse
+import math
 from logging import ERROR, INFO
 from typing import Callable, Dict, Optional
 
@@ -86,6 +87,10 @@ def main() -> None:
         )
 
     if server_setting.strategy == "fast-and-slow":
+        if server_setting.training_round_timeout is None:
+            raise ValueError(
+                "No `training_round_timeout` set for `fast-and-slow` strategy"
+            )
         strategy = flwr.strategy.FastAndSlow(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
@@ -94,10 +99,12 @@ def main() -> None:
             on_fit_config_fn=fit_config_fn,
             importance_sampling=server_setting.importance_sampling,
             dynamic_timeout=server_setting.dynamic_timeout,
+            dynamic_timeout_percentile=0.8,
+            alternating_timeout=False,
             r_fast=1,
             r_slow=1,
-            t_fast=20,
-            t_slow=40,
+            t_fast=math.ceil(0.5 * server_setting.training_round_timeout),
+            t_slow=server_setting.training_round_timeout,
         )
 
     # Run server
