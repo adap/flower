@@ -23,7 +23,7 @@ from flower_benchmark.common import load_partition
 #from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import stacked_lstm
 from flower_benchmark.tf_shakespeare.settings import SETTINGS, get_setting
-from flower_benchmark.tf_shakespeare.load_data import read_data, load_data, process_x, process_y
+from flower_benchmark.tf_shakespeare.load_data import load_data
 
 from . import DEFAULT_GRPC_SERVER_ADDRESS, DEFAULT_GRPC_SERVER_PORT, SEED
 
@@ -41,7 +41,7 @@ class ShakespeareClient(fl.Client):
         num_classes: int,
         ):
 
-        super().__init__(cid) # need to modify
+        super().__init__(cid)
         self.model = model 
         
         self.ds_train = build_dataset(
@@ -165,6 +165,8 @@ def main() -> None:
 
     # dataset is already partitioned, since natural partition
     # TODO: how to determine the clients.cid, total 660 clients, not sure about client_setting.cid
+    # need to download and preprocess the dataset, make sure to have 2 .json data one for training and one for testing
+
     xy_train, xy_test = load_data("../dataset/shakespeare/train","../dataset/shakespeare/train",client_setting.cid)
 
     # Start client

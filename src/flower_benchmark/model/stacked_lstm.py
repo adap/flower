@@ -27,7 +27,7 @@ def stacked_lstm(
     kernel_initializer = tf.keras.initializers.glorot_uniform(seed=seed)
 
     # Architecture
-    inputs = tf.keras.layers.Input(shape=input_len)
+    inputs = tf.keras.layers.Input(shape=input_len) # input_len = 80
     embedding = tf.keras.layers.Embedding(input_dim = num_classes, output_dim = embedding_dim)(inputs)
     lstm = tf.keras.layers.LSTM(units = hidden_size)(embedding)
     lstm = tf.keras.layers.LSTM(units = hidden_size)(lstm)
