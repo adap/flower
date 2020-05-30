@@ -29,7 +29,12 @@ class Adapter(ABC):
     # pylint: disable=too-many-arguments
     @abstractmethod
     def create_instances(
-        self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
+        self,
+        num_cpu: int,
+        num_ram: float,
+        timeout: int,
+        num_instance: int = 1,
+        gpu: bool = False,
     ) -> List[AdapterInstance]:
         """Create one or more instance(s) of the same type.
 
@@ -40,6 +45,7 @@ class Adapter(ABC):
                 timeout (int): Timeout in minutes
                 commands ([str]): List of bash commands which will be joined into a single string
                     with "\n" as a seperator
+                gpu (bool): If true will only consider instances with GPU
         """
 
     @abstractmethod
