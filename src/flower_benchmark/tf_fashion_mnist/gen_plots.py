@@ -21,6 +21,7 @@ from flower_benchmark.plot import bar_chart, line_chart
 
 
 def accuracy_t15() -> None:
+    """Generate plots."""
     fedavg = [
         (0, 0.03759999945759773),
         (1, 0.7396000027656555),
