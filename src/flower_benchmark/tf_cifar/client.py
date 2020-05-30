@@ -69,7 +69,7 @@ def main() -> None:
     """Load data, create and start CIFAR-10/100 client."""
     args = parse_args()
 
-    client_setting = get_setting(args.setting).clients[args.index]
+    client_setting = get_client_setting(args.setting, args.cid)
 
     # Configure logger
     configure(identifier=f"client:{client_setting.cid}", host=args.log_host)
