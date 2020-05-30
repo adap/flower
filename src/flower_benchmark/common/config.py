@@ -49,8 +49,7 @@ def sample_delay_factors(
 
 def real_sample_delay_factors(num_clients: int, max_delay: int) -> List[int]:
     """Sample delay factors.
-    
-    
+
     Examples:
         real_sample_delay_factors(10, 40) =>
             [0, 0, 7, 7, 7, 7, 20, 20, 21, 28]
@@ -65,7 +64,6 @@ def real_sample_delay_factors(num_clients: int, max_delay: int) -> List[int]:
                 21, 28, 28, 28, 28, 28, 28, 28, 28, 28, 29, 29, 29, 29,
                 29, 29, 29, 29
             ]
-    
     """
     shares = [round(num_clients * dev[2]) for dev in DEVICE_DISTRIBUTION]
     factors = []
