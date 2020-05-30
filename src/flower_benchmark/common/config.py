@@ -47,9 +47,7 @@ def sample_delay_factors(
     return [p * d for p, d in zip(ps, ds)]
 
 
-def real_sample_delay_factors(
-    num_clients: int, max_delay
-) -> List[float]:
+def real_sample_delay_factors(num_clients: int, max_delay: int) -> List[int]:
     """Sample delay factors.
     
     

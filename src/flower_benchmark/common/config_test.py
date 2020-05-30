@@ -16,6 +16,7 @@
 
 from .config import real_sample_delay_factors
 
+
 def test_real_sample_delay_factors_100():
     """Test dealy factors."""
     # Prepare
@@ -27,6 +28,7 @@ def test_real_sample_delay_factors_100():
     # Assert
     assert len(factors) == num_clients
 
+
 def test_real_sample_delay_factors_10():
     """Test dealy factors."""
     # Prepare
@@ -37,4 +39,3 @@ def test_real_sample_delay_factors_10():
 
     # Assert
     assert len(factors) == num_clients
-
