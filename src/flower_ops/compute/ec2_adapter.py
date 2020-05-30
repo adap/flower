@@ -51,7 +51,7 @@ class EC2StatusTimeout(Exception):
 
 # List of AWS instance types with
 # (instance_type, vCPU, Mem)
-INSTANCE_TYPES = [
+INSTANCE_TYPES_CPU = [
     ("t3.small", 2, 2, 0.0209),  # Beware CPU credit limited
     ("c5.large", 2, 4, 0.097),
     ("m5a.large", 2, 8, 0.104),
@@ -61,6 +61,8 @@ INSTANCE_TYPES = [
     ("m5ad.12xlarge", 48, 192, 2.496),
     ("m5ad.24xlarge", 96, 384, 4.992),
 ]
+
+INSTANCE_TYPES_GPU = [("p3.2xlarge", 8, 61, 3.823)]
 
 
 def find_instance_type(
@@ -174,13 +176,20 @@ class EC2Adapter(Adapter):
 
     # pylint: disable=too-many-arguments
     def create_instances(
-        self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
+        self,
+        num_cpu: int,
+        num_ram: float,
+        timeout: int,
+        num_instance: int = 1,
+        gpu: bool = False,
     ) -> List[AdapterInstance]:
         """Create one or more EC2 instance(s) of the same type.
 
             Args:
-                num_cpu (int): Number of instance vCPU (values in ec2_adapter.INSTANCE_TYPES)
-                num_ram (int): RAM in GB (values in ec2_adapter.INSTANCE_TYPES)
+                num_cpu (int): Number of instance vCPU (values in
+                               ec2_adapter.INSTANCE_TYPES_CPU or INSTANCE_TYPES_GPU)
+                num_ram (int): RAM in GB (values in ec2_adapter.INSTANCE_TYPES_CPU
+                               or INSTANCE_TYPES_GPU)
                 timeout (int): Timeout in minutes
                 num_instance (int): Number of instances to start if currently available in EC2
         """
@@ -189,8 +198,9 @@ class EC2Adapter(Adapter):
         # are not correctly shutdown
         user_data = ["#!/bin/bash", f"sudo shutdown -P {timeout}"]
         user_data_str = "\n".join(user_data)
+
         instance_type, hourly_price = find_instance_type(
-            num_cpu, num_ram, INSTANCE_TYPES
+            num_cpu, num_ram, INSTANCE_TYPES_GPU if gpu else INSTANCE_TYPES_CPU
         )
 
         hourly_price_total = round(num_instance * hourly_price, 2)

@@ -40,6 +40,7 @@ class Instance:
     group: str
     num_cpu: int
     num_ram: float
+    gpu: bool = False
 
     # Runtime information
     instance_id: Optional[str] = None
@@ -114,10 +115,13 @@ def create_instances(adapter: Adapter, instances: List[Instance], timeout: int) 
             "Values of num_cpu and num_ram have to be equal for all instances."
         )
 
+    # As checked before that each instance has the same num_cpu and num_ram
+    # we can just take the values from the first => instances[0]
     adapter_instances = adapter.create_instances(
         num_cpu=instances[0].num_cpu,
         num_ram=instances[0].num_ram,
         num_instance=len(instances),
+        gpu=instances[0].gpu,
         timeout=timeout,
     )
 

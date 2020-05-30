@@ -65,8 +65,14 @@ class DockerAdapter(Adapter):
             client.networks.create(self.network, driver="bridge")
         client.close()
 
+    # pylint: disable=too-many-arguments
     def create_instances(
-        self, num_cpu: int, num_ram: float, timeout: int, num_instance: int = 1,
+        self,
+        num_cpu: int,
+        num_ram: float,
+        timeout: int,
+        num_instance: int = 1,
+        gpu: bool = False,
     ) -> List[AdapterInstance]:
         """Create one or more docker container instance(s) of the same type.
 
