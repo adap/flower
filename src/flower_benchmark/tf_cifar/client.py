@@ -84,8 +84,8 @@ def main() -> None:
         num_partitions=client_setting.num_clients,
         cifar100=False,
     )
-    x_train, y_train = xy_train_partitions[client_setting.partitions]
-    x_test, y_test = xy_test_partitions[client_setting.partitions]
+    x_train, y_train = xy_train_partitions[client_setting.partition]
+    x_test, y_test = xy_test_partitions[client_setting.partition]
     if client_setting.dry_run:
         x_train = x_train[0:100]
         y_train = y_train[0:100]
