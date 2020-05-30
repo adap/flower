@@ -16,7 +16,7 @@
 
 
 import argparse
-from logging import ERROR
+from logging import ERROR, INFO
 
 import tensorflow as tf
 
@@ -73,6 +73,7 @@ def main() -> None:
 
     # Configure logger
     configure(identifier=f"client:{client_setting.cid}", host=args.log_host)
+    log(INFO, "Starting client, settings: %s", client_setting)
 
     # Load model
     model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
