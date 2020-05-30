@@ -25,7 +25,7 @@ from flower.logger import configure, log
 from flower_benchmark.common import get_eval_fn
 from flower_benchmark.dataset import tf_cifar_partitioned
 from flower_benchmark.model import resnet50v2
-from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
+from flower_benchmark.tf_cifar.settings import SETTINGS, get_setting
 
 from . import DEFAULT_SERVER_ADDRESS, NUM_CLASSES, SEED
 
