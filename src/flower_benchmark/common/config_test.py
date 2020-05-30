@@ -22,7 +22,7 @@ def test_real_sample_delay_factors_100():
     num_clients = 100
 
     # Execute
-    factors = real_sample_delay_factors(num_clients=num_clients, max_delay=40, seed=2020)
+    factors = real_sample_delay_factors(num_clients=num_clients, max_delay=40)
 
     # Assert
     assert len(factors) == num_clients
@@ -33,7 +33,7 @@ def test_real_sample_delay_factors_10():
     num_clients = 10
 
     # Execute
-    factors = real_sample_delay_factors(num_clients=num_clients, max_delay=40, seed=2020)
+    factors = real_sample_delay_factors(num_clients=num_clients, max_delay=40)
 
     # Assert
     assert len(factors) == num_clients

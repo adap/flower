@@ -48,11 +48,27 @@ def sample_delay_factors(
 
 
 def real_sample_delay_factors(
-    num_clients: int, max_delay, seed: Optional[int]
+    num_clients: int, max_delay
 ) -> List[float]:
-    """Sample delay factors."""
-    np.random.seed(seed)
+    """Sample delay factors.
+    
+    
+    Examples:
+        real_sample_delay_factors(10, 40) =>
+            [0, 0, 7, 7, 7, 7, 20, 20, 21, 28]
 
+        real_sample_delay_factors(100, 40) =>
+            [
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7,
+                7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+                7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 20,
+                20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+                20, 20, 20, 20, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
+                21, 28, 28, 28, 28, 28, 28, 28, 28, 28, 29, 29, 29, 29,
+                29, 29, 29, 29
+            ]
+    
+    """
     shares = [round(num_clients * dev[2]) for dev in DEVICE_DISTRIBUTION]
     factors = []
 
