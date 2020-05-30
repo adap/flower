@@ -16,7 +16,7 @@
 
 from typing import List
 
-from flower_benchmark.common import configure_client_instances
+from flower_benchmark.common import configure_client_instances, sample_delay_factors
 from flower_benchmark.setting import ClientSetting, ServerSetting, Setting
 from flower_ops.cluster import Instance
 
@@ -80,8 +80,30 @@ def configure_clients(
     dry_run: bool,
     delay_factor_fast: float,
     delay_factor_slow: float,
+    sample_delays: bool = True,
 ) -> List[ClientSetting]:
     """Configure `num_clients` with different delay factors."""
+    if sample_delays:
+        # Configure clients with sampled delay factors
+        delay_factors = sample_delay_factors(
+            num_clients=num_clients, max_delay=delay_factor_slow, seed=2020
+        )
+        return [
+            ClientSetting(
+                # Set instance on which to run
+                instance_name=get_instance_name(instance_names, num_clients, i),
+                # Individual
+                cid=str(i),
+                partition=i,
+                delay_factor=delay_factors[i],
+                # Shared
+                iid_fraction=iid_fraction,
+                num_clients=num_clients,
+                dry_run=dry_run,
+            )
+            for i in range(num_clients)
+        ]
+    # Configure clients with fixed delay factors
     clients = []
     for i in range(num_clients):
         client = ClientSetting(
@@ -112,6 +134,7 @@ client_instances_4, client_names_4 = configure_client_instances(
     num_clients=4, num_cpu=2, num_ram=8
 )
 
+
 SETTINGS = {
     "n2020-fedfs-v0-20": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
@@ -139,7 +162,7 @@ SETTINGS = {
             delay_factor_slow=MAX_DELAY_FACTOR,
         ),
     ),
-    "n2020-fedfs-v1-10": Setting(
+    "n2020-fedfs-v1-20": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -149,7 +172,7 @@ SETTINGS = {
             min_num_clients=MIN_NUM_CLIENTS,
             sample_fraction=SAMPLE_FRACTION,
             min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=10,
+            training_round_timeout=20,
             lr_initial=LR_INITIAL,
             partial_updates=True,
             importance_sampling=True,
@@ -165,7 +188,7 @@ SETTINGS = {
             delay_factor_slow=MAX_DELAY_FACTOR,
         ),
     ),
-    "n2020-fedavg-async-10": Setting(
+    "n2020-fedavg-async-20": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -175,7 +198,7 @@ SETTINGS = {
             min_num_clients=MIN_NUM_CLIENTS,
             sample_fraction=SAMPLE_FRACTION,
             min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=10,
+            training_round_timeout=20,
             lr_initial=LR_INITIAL,
             partial_updates=False,
             importance_sampling=False,
@@ -222,23 +245,25 @@ SETTINGS = {
         + client_instances_4,
         server=ServerSetting(
             instance_name="server",
-            strategy="fedavg",
+            strategy="fast-and-slow",
             rounds=2,
             min_num_clients=4,
-            sample_fraction=1.0,
+            sample_fraction=0.75,
             min_sample_size=3,
             training_round_timeout=3600,
             lr_initial=0.01,
-            partial_updates=False,
-            importance_sampling=False,
-            dynamic_timeout=False,
+            partial_updates=True,
+            importance_sampling=True,
+            dynamic_timeout=True,
             dry_run=False,
         ),
-        clients=configure_uniform_clients(
-            iid_fraction=0.1,
+        clients=configure_clients(
+            iid_fraction=IID_FRACTION,
             instance_names=client_names_4,
             num_clients=4,
             dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=MAX_DELAY_FACTOR,
         ),
     ),
     "fedavg-sync": Setting(
@@ -277,7 +302,7 @@ SETTINGS = {
             min_num_clients=MIN_NUM_CLIENTS,
             sample_fraction=SAMPLE_FRACTION,
             min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=40,
+            training_round_timeout=20,
             lr_initial=LR_INITIAL,
             partial_updates=False,
             importance_sampling=False,
@@ -303,7 +328,7 @@ SETTINGS = {
             min_num_clients=MIN_NUM_CLIENTS,
             sample_fraction=SAMPLE_FRACTION,
             min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=40,
+            training_round_timeout=20,
             lr_initial=LR_INITIAL,
             partial_updates=True,
             importance_sampling=True,

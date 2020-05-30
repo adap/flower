@@ -16,7 +16,7 @@
 
 
 import argparse
-from logging import ERROR
+from logging import ERROR, INFO
 
 import tensorflow as tf
 
@@ -69,10 +69,11 @@ def main() -> None:
     """Load data, create and start CIFAR-10/100 client."""
     args = parse_args()
 
-    client_setting = get_setting(args.setting).clients[args.index]
+    client_setting = get_client_setting(args.setting, args.cid)
 
     # Configure logger
     configure(identifier=f"client:{client_setting.cid}", host=args.log_host)
+    log(INFO, "Starting client, settings: %s", client_setting)
 
     # Load model
     model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
@@ -83,8 +84,8 @@ def main() -> None:
         num_partitions=client_setting.num_clients,
         cifar100=False,
     )
-    x_train, y_train = xy_train_partitions[client_setting.partitions]
-    x_test, y_test = xy_test_partitions[client_setting.partitions]
+    x_train, y_train = xy_train_partitions[client_setting.partition]
+    x_test, y_test = xy_test_partitions[client_setting.partition]
     if client_setting.dry_run:
         x_train = x_train[0:100]
         y_train = y_train[0:100]

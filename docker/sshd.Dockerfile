@@ -24,6 +24,9 @@ COPY dist/flower-0.0.1-py3-none-any.whl flower-0.0.1-py3-none-any.whl
 RUN python -m pip install --no-cache-dir 'flower-0.0.1-py3-none-any.whl[examples-tensorflow,http-logger,benchmark,ops]' && \
     rm flower-0.0.1-py3-none-any.whl
 
+RUN python3.7 -m flower_benchmark.tf_fashion_mnist.download
+RUN python3.7 -m flower_benchmark.tf_cifar.download
+
 EXPOSE 22
 
 CMD ["/usr/sbin/sshd", "-D"]
