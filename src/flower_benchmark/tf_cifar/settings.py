@@ -137,7 +137,7 @@ client_instances_4, client_names_4 = configure_client_instances(
 
 SETTINGS = {
     "n2020-fedfs-v0-20": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_100,
         server=ServerSetting(
             instance_name="server",
