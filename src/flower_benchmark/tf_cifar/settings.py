@@ -105,11 +105,11 @@ def configure_clients(
 
 
 client_instances_100, client_names_100 = configure_client_instances(
-    num_clients=100, num_cpu=4, num_ram=8
+    num_clients=100, num_cpu=2, num_ram=8
 )
 
 client_instances_4, client_names_4 = configure_client_instances(
-    num_clients=4, num_cpu=4, num_ram=8
+    num_clients=4, num_cpu=2, num_ram=8
 )
 
 SETTINGS = {
