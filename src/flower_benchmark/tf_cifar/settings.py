@@ -22,8 +22,8 @@ from flower_ops.cluster import Instance
 
 ROUNDS = 20
 MIN_NUM_CLIENTS = 80
-SAMPLE_FRACTION = 0.5
-MIN_SAMPLE_SIZE = 50
+SAMPLE_FRACTION = 0.1
+MIN_SAMPLE_SIZE = 10
 
 LR_INITIAL = 0.01
 
