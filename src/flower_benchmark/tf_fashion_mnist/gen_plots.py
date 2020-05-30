@@ -94,7 +94,7 @@ def accuracy() -> None:
     ]
 
     # Configure labels and data
-    lines = [("FedAvg", fedavg), ("FedFSv0", fedfs_v0), ("FedFSv0", fedfs_v0)]
+    lines = [("FedAvg", fedavg), ("FedFSv0", fedfs_v0), ("FedFSv1", fedfs_v1)]
 
     # Plot
     values = [np.array([x * 100 for _, x in val]) for _, val in lines]
