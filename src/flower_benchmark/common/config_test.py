@@ -14,7 +14,7 @@
 # ==============================================================================
 """Implments compute classes for EC2."""
 
-from .config import get_delay_factor, sample_real_delay_factors
+from .config import sample_real_delay_factors
 
 
 def test_sample_real_delay_factors_100():
