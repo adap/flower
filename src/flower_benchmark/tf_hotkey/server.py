@@ -24,7 +24,7 @@ from flower.logger import configure, log
 from flower_benchmark.common import get_eval_fn
 from flower_benchmark.dataset import tf_hotkey_partitioned
 from flower_benchmark.model import keyword_cnn
-from flower_benchmark.tf_fashion_mnist.settings import SETTINGS, get_setting
+from flower_benchmark.tf_hotkey.settings import SETTINGS, get_setting
 
 from . import DEFAULT_SERVER_ADDRESS, SEED
 
