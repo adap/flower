@@ -74,11 +74,11 @@ def configure_uniform_clients(
 
 
 client_instances_100, client_names_100 = configure_client_instances(
-    num_clients=100, num_cpu=2, num_ram=4
+    num_clients=100, num_cpu=4, num_ram=16
 )
 
 client_instances_10, client_names_10 = configure_client_instances(
-    num_clients=10, num_cpu=2, num_ram=4
+    num_clients=10, num_cpu=4, num_ram=16
 )
 
 # pylint: disable=too-many-arguments
@@ -138,8 +138,8 @@ def configure_clients(
 SETTINGS = {
     "dry-run": Setting(
         instances=[
-            Instance(name="server", group="server", num_cpu=2, num_ram=8),
-            Instance(name="client", group="clients", num_cpu=2, num_ram=4),
+            Instance(name="server", group="server", num_cpu=4, num_ram=16),
+            Instance(name="client", group="clients", num_cpu=4, num_ram=16),
         ],
         server=ServerSetting(
             instance_name="server",
@@ -163,7 +163,7 @@ SETTINGS = {
         ),
     ),
     "minimal": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=2, num_ram=8)]
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_10,
         server=ServerSetting(
             instance_name="server",
