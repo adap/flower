@@ -15,11 +15,27 @@
 """Provides a variaty of benchmark settings for Fashion-MNIST."""
 
 
+import random
 from typing import List, Optional, Tuple
 
 import numpy as np
 
 from flower_ops.cluster import Instance
+
+# We assume that devices which are older will have at most
+# ~80% of the the Samsung Galaxy Note 5 compute performance.
+SCORE_MISSING = int(226 * 0.80)
+
+DEVICE_DISTRIBUTION = [
+    ("10.0", "Note 10", 0.1612, 729),
+    ("Pie 9", "Samsung Galaxy Note 9", 0.374, 607),
+    ("Oreo 8.0/8.1", "Samsung Galaxy S8", 0.1129 + 0.0737, 359),
+    ("Nougat 7.0/7.1", "Samsung Galaxy S7", 0.0624 + 0.043, 343),
+    ("Marshmallow 6.0", "Samsung Galaxy Note 5", 0.0872, 226),
+    ("Lollipop 5.1", "Samsung Galaxy Note 4", 0.0484, SCORE_MISSING),
+    ("Kikkat 4.4", "Samsung Galaxy Note 4", 0.0187, SCORE_MISSING),
+    ("Other", "Samsung Galaxy S III", 0.0185, SCORE_MISSING),
+]
 
 
 def sample_delay_factors(
@@ -32,6 +48,50 @@ def sample_delay_factors(
     step_size = max_delay / num_clients
     ds = [(i + 1) * step_size for i in range(num_clients)]
     return [p * d for p, d in zip(ps, ds)]
+
+
+def sample_real_delay_factors(num_clients: int, seed: int = 2021) -> List[float]:
+    """Split list of floats into two buckets."""
+    random.seed(seed)
+
+    if num_clients % 2 != 0:
+        raise Exception("num_clients has to be divisible by two")
+
+    factors = sorted([get_delay_factor() for _ in range(num_clients)])
+
+    buckets: Tuple[List[float], List[float]] = (
+        factors[: num_clients // 2],  # fast, lower factor
+        factors[num_clients // 2 :],  # slow, higher factor
+    )
+
+    final_factors: List[float] = []
+
+    for idx in range(num_clients):
+        # higher probability to pick bucket 0 with low idx
+        bucket_idx = random.choices([0, 1], [num_clients - idx, idx])[0]
+        picked_bucket = buckets[bucket_idx]
+        other_bucket = buckets[bucket_idx - 1]
+
+        if picked_bucket == other_bucket:
+            raise Exception("Picked and other bucket can't be same")
+
+        if len(picked_bucket) > 0:
+            value = picked_bucket.pop(0)
+        else:
+            value = other_bucket.pop(0)
+
+        final_factors.append(value)
+
+    return final_factors
+
+
+def get_delay_factor() -> float:
+    """Return a delay factor"""
+    values_prob = [val[2] for val in DEVICE_DISTRIBUTION]
+    values_perf = [val[3] for val in DEVICE_DISTRIBUTION]
+    max_perf = max(values_perf)
+    chosen_score = random.choices(values_perf, values_prob)[0]
+    return round(max_perf / chosen_score - 1, 4)
 
 
 def configure_client_instances(
