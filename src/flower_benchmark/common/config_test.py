@@ -14,28 +14,34 @@
 # ==============================================================================
 """Implments compute classes for EC2."""
 
-from .config import real_sample_delay_factors
+from .config import sample_real_delay_factors
 
 
-def test_real_sample_delay_factors_100():
+def test_sample_real_delay_factors_100():
     """Test dealy factors."""
     # Prepare
     num_clients = 100
 
     # Execute
-    factors = real_sample_delay_factors(num_clients=num_clients, max_delay=40)
+    factors = sample_real_delay_factors(num_clients=num_clients)
+    print()
+    print(factors[:50])
+    print(factors[50:])
 
     # Assert
     assert len(factors) == num_clients
 
 
-def test_real_sample_delay_factors_10():
+def test_sample_real_delay_factors_10():
     """Test dealy factors."""
     # Prepare
     num_clients = 10
 
     # Execute
-    factors = real_sample_delay_factors(num_clients=num_clients, max_delay=40)
+    factors = sample_real_delay_factors(num_clients=num_clients)
+    print()
+    print(factors[:50])
+    print(factors[50:])
 
     # Assert
     assert len(factors) == num_clients
