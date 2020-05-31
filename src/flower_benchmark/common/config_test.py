@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Implments compute classes for EC2."""
+"""Implements tests for config module."""
 
 from .config import sample_real_delay_factors
 
