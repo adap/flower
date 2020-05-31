@@ -50,9 +50,9 @@ def sample_delay_factors(
     return [p * d for p, d in zip(ps, ds)]
 
 
-def sample_real_delay_factors(num_clients: int) -> List[float]:
+def sample_real_delay_factors(num_clients: int, seed: int = 2021) -> List[float]:
     """Split list of floats into two buckets."""
-    random.seed(2021)
+    random.seed(seed)
 
     if num_clients % 2 != 0:
         raise Exception("num_clients has to be divisible by two")

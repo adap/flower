@@ -39,3 +39,30 @@ def test_sample_real_delay_factors_10():
 
     # Assert
     assert len(factors) == num_clients
+
+
+def test_sample_real_delay_factors_seed():
+    """Test delay factors."""
+    # Prepare
+    num_clients = 100
+
+    # Execute
+    factors_a = sample_real_delay_factors(num_clients=num_clients, seed=0)
+    factors_b = sample_real_delay_factors(num_clients=num_clients, seed=0)
+    factors_c = sample_real_delay_factors(num_clients=num_clients, seed=1)
+
+    # Assert
+    assert len(factors_a) == num_clients
+    assert len(factors_b) == num_clients
+    assert len(factors_c) == num_clients
+
+    # pylint: disable-msg=invalid-name
+    all_same_in_a_and_b = True
+    all_same_in_a_and_c = True
+
+    for a, b, c in zip(factors_a, factors_b, factors_c):
+        all_same_in_a_and_b = all_same_in_a_and_b and (a == b)
+        all_same_in_a_and_c = all_same_in_a_and_c and (a == c)
+
+    assert all_same_in_a_and_b
+    assert not all_same_in_a_and_c
