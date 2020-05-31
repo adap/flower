@@ -32,9 +32,9 @@ DEVICE_DISTRIBUTION = [
     ("Oreo 8.0/8.1", "Samsung Galaxy S8", 0.1129 + 0.0737, 359),
     ("Nougat 7.0/7.1", "Samsung Galaxy S7", 0.0624 + 0.043, 343),
     ("Marshmallow 6.0", "Samsung Galaxy Note 5", 0.0872, 226),
-    # ("Lollipop 5.1", "Samsung Galaxy Note 4", 0.0484, SCORE_MISSING),
-    # ("Kikkat 4.4", "Samsung Galaxy Note 4", 0.0187, SCORE_MISSING),
-    # ("Other", "Samsung Galaxy S III", 0.0185, SCORE_MISSING),
+    ("Lollipop 5.1", "Samsung Galaxy Note 4", 0.0484, SCORE_MISSING),
+    ("Kikkat 4.4", "Samsung Galaxy Note 4", 0.0187, SCORE_MISSING),
+    ("Other", "Samsung Galaxy S III", 0.0185, SCORE_MISSING),
 ]
 
 
@@ -55,11 +55,11 @@ def sample_real_delay_factors(num_clients: int) -> List[float]:
     random.seed(2021)
 
     if num_clients % 2 != 0:
-        raise Exception("num_clients has to be dividable by two")
+        raise Exception("num_clients has to be divisible by two")
 
     factors = sorted([get_delay_factor() for _ in range(num_clients)])
 
-    buckets: Tuple[List[float]] = (
+    buckets: Tuple[List[float], List[float]] = (
         factors[: num_clients // 2],  # fast, lower factor
         factors[num_clients // 2 :],  # slow, higher factor
     )
