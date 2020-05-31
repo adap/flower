@@ -34,7 +34,7 @@ def start_logserver(
     logserver_s3_bucket: Optional[str] = None, logserver_s3_key: Optional[str] = None
 ) -> str:
     """Return command to run logserver."""
-    cmd = "screen -d -m python3.7 -m flower_logserver"
+    cmd = "screen -d -m -L python3.7 -m flower_logserver"
 
     if logserver_s3_bucket is not None and logserver_s3_key is not None:
         cmd += f" --s3_bucket={logserver_s3_bucket}" + f" --s3_key={logserver_s3_key}"
@@ -46,7 +46,7 @@ def start_logserver(
 def start_server(log_host: str, benchmark: str, setting: str) -> str:
     """Build command to run server."""
     return (
-        "screen -d -m"
+        "screen -d -m -L"
         + f" python3.7 -m flower_benchmark.{benchmark}.server"
         + f" --log_host={log_host}"
         + f" --setting={setting}"
@@ -58,7 +58,7 @@ def start_client(
 ) -> str:
     """Build command to run client."""
     return (
-        "screen -d -m"
+        "screen -d -m -L"
         + f" python3.7 -m flower_benchmark.{benchmark}.client"
         + f" --server_address={server_address}"
         + f" --log_host={log_host}"
