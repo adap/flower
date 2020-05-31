@@ -18,7 +18,7 @@ from .config import sample_real_delay_factors
 
 
 def test_sample_real_delay_factors_100():
-    """Test dealy factors."""
+    """Test delay factors."""
     # Prepare
     num_clients = 100
 
@@ -33,7 +33,7 @@ def test_sample_real_delay_factors_100():
 
 
 def test_sample_real_delay_factors_10():
-    """Test dealy factors."""
+    """Test delay factors."""
     # Prepare
     num_clients = 10
 
