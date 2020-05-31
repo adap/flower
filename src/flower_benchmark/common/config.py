@@ -86,6 +86,7 @@ def sample_real_delay_factors(num_clients: int) -> List[float]:
 
 
 def get_delay_factor() -> float:
+    """Return a delay factor"""
     values_prob = [val[2] for val in DEVICE_DISTRIBUTION]
     values_perf = [val[3] for val in DEVICE_DISTRIBUTION]
     max_perf = max(values_perf)
