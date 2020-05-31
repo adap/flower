@@ -15,9 +15,9 @@
 """Provides a variaty of benchmark settings for Fashion-MNIST."""
 
 
+import random
 from typing import List, Optional, Tuple
 
-import random
 import numpy as np
 
 from flower_ops.cluster import Instance
