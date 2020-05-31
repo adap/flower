@@ -24,9 +24,6 @@ def test_sample_real_delay_factors_100():
 
     # Execute
     factors = sample_real_delay_factors(num_clients=num_clients)
-    print()
-    print(factors[:50])
-    print(factors[50:])
 
     # Assert
     assert len(factors) == num_clients
@@ -39,9 +36,6 @@ def test_sample_real_delay_factors_10():
 
     # Execute
     factors = sample_real_delay_factors(num_clients=num_clients)
-    print()
-    print(factors[:50])
-    print(factors[50:])
 
     # Assert
     assert len(factors) == num_clients
