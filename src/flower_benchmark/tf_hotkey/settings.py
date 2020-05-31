@@ -189,7 +189,7 @@ SETTINGS = {
         ),
     ),
     "fedavg-sync": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_100,
         server=ServerSetting(
             instance_name="server",
@@ -215,7 +215,7 @@ SETTINGS = {
         ),
     ),
     "fedavg-async": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_100,
         server=ServerSetting(
             instance_name="server",
@@ -241,7 +241,7 @@ SETTINGS = {
         ),
     ),
     "fast-and-slow-only-partial-updates": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_100,
         server=ServerSetting(
             instance_name="server",
@@ -267,7 +267,7 @@ SETTINGS = {
         ),
     ),
     "fast-and-slow-only-dynamic-timeouts": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_100,
         server=ServerSetting(
             instance_name="server",
@@ -293,7 +293,7 @@ SETTINGS = {
         ),
     ),
     "fast-and-slow-only-importance-sampling": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_100,
         server=ServerSetting(
             instance_name="server",
@@ -319,7 +319,7 @@ SETTINGS = {
         ),
     ),
     "fast-and-slow": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_100,
         server=ServerSetting(
             instance_name="server",
@@ -345,7 +345,7 @@ SETTINGS = {
         ),
     ),
     "qffedavg": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_100,
         server=ServerSetting(
             instance_name="server",
