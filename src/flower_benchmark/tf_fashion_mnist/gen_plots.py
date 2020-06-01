@@ -15,6 +15,8 @@
 """Generate plots for Fashion-MNIST results."""
 
 
+from typing import List, Tuple
+
 import numpy as np
 
 from flower_benchmark.plot import bar_chart, line_chart
@@ -282,7 +284,7 @@ def wall_clock_time_fedavg_vs_fedfs() -> None:
     )
 
 
-def plot(lines, filename) -> None:
+def plot(lines: List[Tuple[str, List[Tuple[int, float]]]], filename: str) -> None:
     """Plot a single line chart."""
     values = [np.array([x * 100 for _, x in val]) for _, val in lines]
     labels = [label for label, _ in lines]
