@@ -62,7 +62,10 @@ INSTANCE_TYPES_CPU = [
     ("m5ad.24xlarge", 96, 384, 4.992),
 ]
 
-INSTANCE_TYPES_GPU = [("p3.2xlarge", 8, 61, 3.823)]
+INSTANCE_TYPES_GPU = [
+    ("p3.2xlarge", 8, 61, 3.823),
+    ("p2.xlarge", 4, 61, 0.900),
+]
 
 
 def find_instance_type(
