@@ -17,7 +17,7 @@
 
 import math
 import statistics
-from logging import DEBUG
+from logging import DEBUG, INFO
 from typing import Callable, Dict, List, Optional, Tuple, cast
 
 import numpy as np
@@ -33,6 +33,7 @@ from .parameter import parameters_to_weights, weights_to_parameters
 
 E = 0.001
 E_TIMEOUT = 0.0001
+WAIT_TIMEOUT = 600
 
 
 class FastAndSlow(FedAvg):
@@ -93,9 +94,16 @@ class FastAndSlow(FedAvg):
         sample_size, min_num_clients = self.num_fit_clients(
             client_manager.num_available()
         )
-        success = client_manager.wait_for(num_clients=min_num_clients, timeout=60)
+        success = client_manager.wait_for(
+            num_clients=min_num_clients, timeout=WAIT_TIMEOUT
+        )
         if not success:
             # Do not continue if not enough clients are available
+            log(
+                INFO,
+                "FedFS: not enough clients available after timeout %s",
+                WAIT_TIMEOUT,
+            )
             return []
 
         # Sample clients
