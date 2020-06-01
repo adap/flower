@@ -123,7 +123,7 @@ def keyword_cnn(
 
     layers = tf.keras.layers.GlobalAveragePooling2D()(layers)
     layers = tf.keras.layers.Dense(
-        256, kernel_initializer=kernel_initializer, activation="relu"
+        128, kernel_initializer=kernel_initializer, activation="relu"
     )(layers)
 
     outputs = tf.keras.layers.Dense(
