@@ -155,7 +155,10 @@ class RequestHandler(BaseHTTPRequestHandler):
         """Handle POST request."""
         content_length = int(self.headers["Content-Length"])
         post_qs = self.rfile.read(content_length).decode("utf-8")
-        record = {}
+        ip, port = self.client_address
+        record = {
+            "client_address": f"{ip}:{port}"
+        }
 
         for key, val in urllib.parse.parse_qs(post_qs).items():
             record[key] = val[0] if len(val) == 1 else val
