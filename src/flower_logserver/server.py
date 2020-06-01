@@ -155,10 +155,12 @@ class RequestHandler(BaseHTTPRequestHandler):
         """Handle POST request."""
         content_length = int(self.headers["Content-Length"])
         post_qs = self.rfile.read(content_length).decode("utf-8")
-        record = {}
+        record: Dict[str, str] = {
+            "client_address": f"{self.client_address[0]}:{self.client_address[1]}"
+        }
 
         for key, val in urllib.parse.parse_qs(post_qs).items():
-            record[key] = val[0] if len(val) == 1 else val
+            record[key] = str(val[0]) if len(val) == 1 else str(val)
 
         self._set_response()
         self.wfile.write("POST request for {}".format(self.path).encode("utf-8"))
