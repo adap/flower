@@ -17,7 +17,11 @@
 
 from typing import List
 
-from flower_benchmark.common import configure_client_instances, sample_delay_factors, sample_real_delay_factors
+from flower_benchmark.common import (
+    configure_client_instances,
+    sample_delay_factors,
+    sample_real_delay_factors,
+)
 from flower_benchmark.setting import ClientSetting, ServerSetting, Setting
 from flower_ops.cluster import Instance
 
@@ -100,9 +104,9 @@ def configure_clients(
                 num_clients=num_clients, seed=2020
             )
         else:
-        delay_factors = sample_delay_factors(
-            num_clients=num_clients, max_delay=delay_factor_slow, seed=2020
-        )
+            delay_factors = sample_delay_factors(
+                num_clients=num_clients, max_delay=delay_factor_slow, seed=2020
+            )
         return [
             ClientSetting(
                 # Set instance on which to run
@@ -232,7 +236,7 @@ SETTINGS = {
             min_num_clients=MIN_NUM_CLIENTS,
             sample_fraction=SAMPLE_FRACTION,
             min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=None,
+            training_round_timeout=20,
             lr_initial=LR_INITIAL,
             partial_updates=False,
             importance_sampling=False,
