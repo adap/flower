@@ -147,7 +147,7 @@ client_instances_10, client_names_10 = configure_client_instances(
 
 
 SETTINGS = {
-    "n2020-fedfs-v0-10": Setting(
+    "n2020-fedfs-v0-12": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -157,7 +157,7 @@ SETTINGS = {
             min_num_clients=MIN_NUM_CLIENTS,
             sample_fraction=SAMPLE_FRACTION,
             min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=10,
+            training_round_timeout=12,
             lr_initial=LR_INITIAL,
             partial_updates=True,
             importance_sampling=False,
@@ -201,7 +201,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "n2020-fedfs-v1-10": Setting(
+    "n2020-fedfs-v1-12": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -211,7 +211,7 @@ SETTINGS = {
             min_num_clients=MIN_NUM_CLIENTS,
             sample_fraction=SAMPLE_FRACTION,
             min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=10,
+            training_round_timeout=12,
             lr_initial=LR_INITIAL,
             partial_updates=True,
             importance_sampling=True,
@@ -255,7 +255,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "n2020-fedavg-async-10": Setting(
+    "n2020-fedavg-async-12": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -265,7 +265,7 @@ SETTINGS = {
             min_num_clients=MIN_NUM_CLIENTS,
             sample_fraction=SAMPLE_FRACTION,
             min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=10,
+            training_round_timeout=12,
             lr_initial=LR_INITIAL,
             partial_updates=False,
             importance_sampling=False,

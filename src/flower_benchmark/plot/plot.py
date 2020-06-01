@@ -211,6 +211,8 @@ def line_chart(
     y_label: str,
     legend_location: LegendLoc = LegendLoc.LR,
     filename: str = "line_chart",
+    y_floor: int = 0,
+    y_ceil: int = 100,
 ) -> str:
     """Plot and save a line chart."""
 
@@ -225,14 +227,14 @@ def line_chart(
         line, label = zipped
         ax_subplot.plot(x_values, line, symbols[i], label=label, markersize=MARKERSIZE)
 
-    plt.yticks(np.arange(0, 100, 10.0), fontsize=14)
+    plt.yticks(np.arange(y_floor, y_ceil, 10.0), fontsize=14)
     plt.xticks(np.arange(min(x_values), max(x_values) + 1, 10.0), fontsize=10)
 
     gca = plt.gca()
     gca.set_yticklabels(gca.get_yticks(), fontsize=10)
     ax_subplot.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter("%.0f"))
 
-    plt.ylim((0, 101))
+    plt.ylim((y_floor, y_ceil + 1))
     plt.xlim((-1, len(x_values)))
     plt.legend(loc=legend_location.value, fontsize=14)
     # ax.set_xticklabels(('15s', '30s', '60s', '90s', '120s'), fontsize=15)
