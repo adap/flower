@@ -17,7 +17,7 @@
 
 import math
 import statistics
-from logging import DEBUG
+from logging import DEBUG, INFO
 from typing import Callable, Dict, List, Optional, Tuple, cast
 
 import numpy as np
