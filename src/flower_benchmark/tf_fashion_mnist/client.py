@@ -16,7 +16,7 @@
 
 
 import argparse
-from logging import ERROR
+from logging import ERROR, INFO
 
 import tensorflow as tf
 
@@ -44,7 +44,7 @@ def parse_args() -> argparse.Namespace:
         "--server_address",
         type=str,
         default=DEFAULT_SERVER_ADDRESS,
-        help=f"Server address (IPv6, default: {DEFAULT_SERVER_ADDRESS})",
+        help=f"gRPC server address (IPv6, default: {DEFAULT_SERVER_ADDRESS})",
     )
     parser.add_argument(
         "--log_host", type=str, help="HTTP log handler host (no default)",
@@ -73,6 +73,7 @@ def main() -> None:
 
     # Configure logger
     configure(identifier=f"client:{client_setting.cid}", host=args.log_host)
+    log(INFO, "Starting client, settings: %s", client_setting)
 
     # Load model
     model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
@@ -85,8 +86,8 @@ def main() -> None:
         iid_fraction=client_setting.iid_fraction,
         num_partitions=client_setting.num_clients,
     )
-    (x_train, y_train) = xy_train_partitions[client_setting.partition]
-    (x_test, y_test) = xy_test_partitions[client_setting.partition]
+    x_train, y_train = xy_train_partitions[client_setting.partition]
+    x_test, y_test = xy_test_partitions[client_setting.partition]
     if client_setting.dry_run:
         x_train = x_train[0:100]
         y_train = y_train[0:100]
@@ -101,6 +102,9 @@ def main() -> None:
         (x_test, y_test),
         client_setting.delay_factor,
         10,
+        augment=True,
+        augment_horizontal_flip=False,
+        augment_offset=1,
     )
     flwr.app.start_client(args.server_address, client)
 

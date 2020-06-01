@@ -12,23 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower client using TensorFlow for CIFAR-10/100."""
+"""Flower client using TensorFlow for Spoken Keyword classification."""
 
 
 import argparse
-from logging import ERROR, INFO
+from logging import ERROR
 
 import tensorflow as tf
 
 import flower as flwr
 from flower.logger import configure, log
 from flower_benchmark.common import VisionClassificationClient
-from flower_benchmark.dataset import tf_cifar_partitioned
-from flower_benchmark.model import resnet50v2
+from flower_benchmark.dataset import tf_hotkey_partitioned
+from flower_benchmark.model import keyword_cnn
 from flower_benchmark.setting import ClientSetting
-from flower_benchmark.tf_cifar.settings import SETTINGS, get_setting
+from flower_benchmark.tf_hotkey.settings import SETTINGS, get_setting
 
-from . import DEFAULT_SERVER_ADDRESS, NUM_CLASSES, SEED
+from . import DEFAULT_SERVER_ADDRESS, SEED
 
 tf.get_logger().setLevel("ERROR")
 
@@ -44,7 +44,7 @@ def parse_args() -> argparse.Namespace:
         "--server_address",
         type=str,
         default=DEFAULT_SERVER_ADDRESS,
-        help=f"gRPC server address (IPv6, default: {DEFAULT_SERVER_ADDRESS})",
+        help=f"Server address (IPv6, default: {DEFAULT_SERVER_ADDRESS})",
     )
     parser.add_argument(
         "--log_host", type=str, help="HTTP log handler host (no default)",
@@ -66,26 +66,24 @@ def get_client_setting(setting: str, cid: str) -> ClientSetting:
 
 
 def main() -> None:
-    """Load data, create and start CIFAR-10/100 client."""
+    """Load data, create and start client."""
     args = parse_args()
 
     client_setting = get_client_setting(args.setting, args.cid)
 
     # Configure logger
     configure(identifier=f"client:{client_setting.cid}", host=args.log_host)
-    log(INFO, "Starting client, settings: %s", client_setting)
 
     # Load model
-    model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
+    model = keyword_cnn(input_shape=(80, 40, 1), seed=SEED)
 
     # Load local data partition
-    (xy_train_partitions, xy_test_partitions), _ = tf_cifar_partitioned.load_data(
+    ((xy_train_partitions, xy_test_partitions), _,) = tf_hotkey_partitioned.load_data(
         iid_fraction=client_setting.iid_fraction,
         num_partitions=client_setting.num_clients,
-        cifar100=False,
     )
-    x_train, y_train = xy_train_partitions[client_setting.partition]
-    x_test, y_test = xy_test_partitions[client_setting.partition]
+    (x_train, y_train) = xy_train_partitions[client_setting.partition]
+    (x_test, y_test) = xy_test_partitions[client_setting.partition]
     if client_setting.dry_run:
         x_train = x_train[0:100]
         y_train = y_train[0:100]
@@ -99,10 +97,7 @@ def main() -> None:
         (x_train, y_train),
         (x_test, y_test),
         client_setting.delay_factor,
-        NUM_CLASSES,
-        augment=True,
-        augment_horizontal_flip=True,
-        augment_offset=2,
+        10,
     )
     flwr.app.start_client(args.server_address, client)
 

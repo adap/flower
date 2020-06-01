@@ -15,5 +15,5 @@
 """Benchmark models."""
 
 
-from .cnn import orig_cnn
+from .cnn import keyword_cnn, orig_cnn
 from .resnet import resnet50v2

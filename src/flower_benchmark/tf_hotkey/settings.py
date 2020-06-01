@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides a variaty of benchmark settings for CIFAR."""
+"""Provides a variaty of benchmark settings for Spoken Keyword classification."""
+
 
 from typing import List
 
@@ -22,13 +23,13 @@ from flower_ops.cluster import Instance
 
 ROUNDS = 20
 MIN_NUM_CLIENTS = 80
-SAMPLE_FRACTION = 0.1
-MIN_SAMPLE_SIZE = 10
+SAMPLE_FRACTION = 0.5
+MIN_SAMPLE_SIZE = 50
 
 LR_INITIAL = 0.01
 
 IID_FRACTION = 0.1
-MAX_DELAY_FACTOR = 4.0  # Equals a 5x slowdown
+MAX_DELAY_FACTOR = 4.0
 
 
 def get_setting(name: str) -> Setting:
@@ -71,6 +72,14 @@ def configure_uniform_clients(
 
     return clients
 
+
+client_instances_100, client_names_100 = configure_client_instances(
+    num_clients=100, num_cpu=4, num_ram=16
+)
+
+client_instances_10, client_names_10 = configure_client_instances(
+    num_clients=10, num_cpu=4, num_ram=16
+)
 
 # pylint: disable=too-many-arguments
 def configure_clients(
@@ -126,101 +135,11 @@ def configure_clients(
     return clients
 
 
-client_instances_100, client_names_100 = configure_client_instances(
-    num_clients=100, num_cpu=2, num_ram=8
-)
-
-client_instances_4, client_names_4 = configure_client_instances(
-    num_clients=4, num_cpu=2, num_ram=8
-)
-
-
 SETTINGS = {
-    "n2020-fedfs-v0-20": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
-        + client_instances_100,
-        server=ServerSetting(
-            instance_name="server",
-            strategy="fast-and-slow",
-            rounds=ROUNDS,
-            min_num_clients=MIN_NUM_CLIENTS,
-            sample_fraction=SAMPLE_FRACTION,
-            min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=20,
-            lr_initial=LR_INITIAL,
-            partial_updates=True,
-            importance_sampling=False,
-            dynamic_timeout=False,
-            alternating_timeout=True,
-        ),
-        clients=configure_clients(
-            iid_fraction=IID_FRACTION,
-            instance_names=client_names_100,
-            num_clients=100,
-            dry_run=False,
-            delay_factor_fast=0.0,
-            delay_factor_slow=MAX_DELAY_FACTOR,
-        ),
-    ),
-    "n2020-fedfs-v1-20": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
-        + client_instances_100,
-        server=ServerSetting(
-            instance_name="server",
-            strategy="fast-and-slow",
-            rounds=ROUNDS,
-            min_num_clients=MIN_NUM_CLIENTS,
-            sample_fraction=SAMPLE_FRACTION,
-            min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=20,
-            lr_initial=LR_INITIAL,
-            partial_updates=True,
-            importance_sampling=True,
-            dynamic_timeout=True,
-            alternating_timeout=False,
-        ),
-        clients=configure_clients(
-            iid_fraction=IID_FRACTION,
-            instance_names=client_names_100,
-            num_clients=100,
-            dry_run=False,
-            delay_factor_fast=0.0,
-            delay_factor_slow=MAX_DELAY_FACTOR,
-        ),
-    ),
-    "n2020-fedavg-async-20": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
-        + client_instances_100,
-        server=ServerSetting(
-            instance_name="server",
-            strategy="fedavg",
-            rounds=ROUNDS,
-            min_num_clients=MIN_NUM_CLIENTS,
-            sample_fraction=SAMPLE_FRACTION,
-            min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=20,
-            lr_initial=LR_INITIAL,
-            partial_updates=False,
-            importance_sampling=False,
-            dynamic_timeout=False,
-            alternating_timeout=False,
-        ),
-        clients=configure_clients(
-            iid_fraction=IID_FRACTION,
-            instance_names=client_names_100,
-            num_clients=100,
-            dry_run=False,
-            delay_factor_fast=0.0,
-            delay_factor_slow=MAX_DELAY_FACTOR,
-        ),
-    ),
-    ########################################
-    ### PREVIOUS ###
-    ########################################
     "dry-run": Setting(
         instances=[
-            Instance(name="server", group="server", num_cpu=2, num_ram=8),
-            Instance(name="client", group="clients", num_cpu=2, num_ram=8),
+            Instance(name="server", group="server", num_cpu=4, num_ram=16),
+            Instance(name="client", group="clients", num_cpu=4, num_ram=16),
         ],
         server=ServerSetting(
             instance_name="server",
@@ -230,44 +149,47 @@ SETTINGS = {
             sample_fraction=1.0,
             min_sample_size=1,
             training_round_timeout=600,
-            lr_initial=0.01,
+            lr_initial=LR_INITIAL,
             partial_updates=False,
             importance_sampling=False,
             dynamic_timeout=False,
             dry_run=True,
         ),
         clients=configure_uniform_clients(
-            iid_fraction=0.1, instance_names=["client"], num_clients=4, dry_run=True
+            iid_fraction=IID_FRACTION,
+            instance_names=["client"],
+            num_clients=4,
+            dry_run=True,
         ),
     ),
     "minimal": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=2, num_ram=8)]
-        + client_instances_4,
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_10,
         server=ServerSetting(
             instance_name="server",
-            strategy="fast-and-slow",
+            strategy="fedavg",
             rounds=2,
             min_num_clients=4,
-            sample_fraction=0.75,
+            sample_fraction=1.0,
             min_sample_size=3,
             training_round_timeout=3600,
-            lr_initial=0.01,
-            partial_updates=True,
-            importance_sampling=True,
-            dynamic_timeout=True,
+            lr_initial=LR_INITIAL,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(
             iid_fraction=IID_FRACTION,
-            instance_names=client_names_4,
-            num_clients=4,
+            instance_names=client_names_10,
+            num_clients=10,
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
         ),
     ),
     "fedavg-sync": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_100,
         server=ServerSetting(
             instance_name="server",
@@ -293,7 +215,7 @@ SETTINGS = {
         ),
     ),
     "fedavg-async": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_100,
         server=ServerSetting(
             instance_name="server",
@@ -318,8 +240,8 @@ SETTINGS = {
             delay_factor_slow=MAX_DELAY_FACTOR,
         ),
     ),
-    "fedfs": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+    "fast-and-slow-only-partial-updates": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_100,
         server=ServerSetting(
             instance_name="server",
@@ -331,8 +253,112 @@ SETTINGS = {
             training_round_timeout=20,
             lr_initial=LR_INITIAL,
             partial_updates=True,
+            importance_sampling=False,
+            dynamic_timeout=False,
+            dry_run=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=MAX_DELAY_FACTOR,
+        ),
+    ),
+    "fast-and-slow-only-dynamic-timeouts": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fast-and-slow",
+            rounds=ROUNDS,
+            min_num_clients=MIN_NUM_CLIENTS,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=MIN_SAMPLE_SIZE,
+            training_round_timeout=20,
+            lr_initial=LR_INITIAL,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=True,
+            dry_run=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=MAX_DELAY_FACTOR,
+        ),
+    ),
+    "fast-and-slow-only-importance-sampling": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fast-and-slow",
+            rounds=ROUNDS,
+            min_num_clients=MIN_NUM_CLIENTS,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=MIN_SAMPLE_SIZE,
+            training_round_timeout=20,
+            lr_initial=LR_INITIAL,
+            partial_updates=False,
+            importance_sampling=True,
+            dynamic_timeout=False,
+            dry_run=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=MAX_DELAY_FACTOR,
+        ),
+    ),
+    "fast-and-slow": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fast-and-slow",
+            rounds=ROUNDS,
+            min_num_clients=MIN_NUM_CLIENTS,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=MIN_SAMPLE_SIZE,
+            training_round_timeout=60,
+            lr_initial=LR_INITIAL,
+            partial_updates=True,
             importance_sampling=True,
             dynamic_timeout=True,
+            dry_run=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=MAX_DELAY_FACTOR,
+        ),
+    ),
+    "qffedavg": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="qffedavg",
+            rounds=ROUNDS,
+            min_num_clients=MIN_NUM_CLIENTS,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=MIN_SAMPLE_SIZE,
+            training_round_timeout=None,
+            lr_initial=LR_INITIAL,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=False,
             dry_run=False,
         ),
         clients=configure_clients(

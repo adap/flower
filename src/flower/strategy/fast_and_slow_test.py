@@ -56,6 +56,18 @@ class FastAndSlowTestCase(unittest.TestCase):
             actual = fast_and_slow.is_fast_round(rnd, r_fast, r_slow)
             assert actual == expected
 
+    def test_next_timeout_below_max(self):
+        # Prepare
+        durations = [15.6, 13.1, 18.7]
+        percentile = 0.5
+        expected = 16
+
+        # Execute
+        actual = fast_and_slow.next_timeout(durations, percentile)
+
+        # Assert
+        assert actual == expected
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

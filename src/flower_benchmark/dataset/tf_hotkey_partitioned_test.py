@@ -12,7 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides plotting functionality."""
+"""Tests for partitioned hotkey dataset generation."""
+# pylint: disable=no-self-use
+
+import unittest
+
+from flower_benchmark.dataset.tf_hotkey_partitioned import load_data
 
 
-from .plot import bar_chart, line_chart, single_bar_chart
+class HotkeyPartitionedTestCase(unittest.TestCase):
+    """Tests for partitioned Hotkey dataset generation."""
+
+    def test_load_data_integration(self):
+        """Test partition function."""
+        # Execute
+        for num_partitions in [10, 100]:
+            for fraction in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
+                (_, _), _ = load_data(fraction, num_partitions)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

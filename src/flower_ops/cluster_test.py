@@ -66,6 +66,7 @@ class CreateInstancesTestCase(unittest.TestCase):
             num_ram=instances[0].num_ram,
             num_instance=len(instances),
             timeout=10,
+            gpu=False,
         )
         for ins in instances:
             assert ins.instance_id is not None
