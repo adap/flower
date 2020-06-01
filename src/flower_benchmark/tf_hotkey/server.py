@@ -125,7 +125,7 @@ def get_on_fit_config_fn(
         """Return a configuration with static batch size and (local) epochs."""
         config = {
             "epoch_global": str(rnd),
-            "epochs": str(5),
+            "epochs": str(8),
             "batch_size": str(32),
             "lr_initial": str(lr_initial),
             "lr_decay": str(0.99),
