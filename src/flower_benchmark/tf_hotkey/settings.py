@@ -17,7 +17,7 @@
 
 from typing import List
 
-from flower_benchmark.common import configure_client_instances, sample_delay_factors
+from flower_benchmark.common import configure_client_instances, sample_delay_factors, sample_real_delay_factors
 from flower_benchmark.setting import ClientSetting, ServerSetting, Setting
 from flower_ops.cluster import Instance
 
@@ -74,11 +74,11 @@ def configure_uniform_clients(
 
 
 client_instances_100, client_names_100 = configure_client_instances(
-    num_clients=100, num_cpu=4, num_ram=16
+    num_clients=100, num_cpu=2, num_ram=8
 )
 
 client_instances_10, client_names_10 = configure_client_instances(
-    num_clients=10, num_cpu=4, num_ram=16
+    num_clients=10, num_cpu=2, num_ram=8
 )
 
 # pylint: disable=too-many-arguments
@@ -90,10 +90,16 @@ def configure_clients(
     delay_factor_fast: float,
     delay_factor_slow: float,
     sample_delays: bool = True,
+    real_delays: bool = False,
 ) -> List[ClientSetting]:
     """Configure `num_clients` with different delay factors."""
     if sample_delays:
         # Configure clients with sampled delay factors
+        if real_delays:
+            delay_factors = sample_real_delay_factors(
+                num_clients=num_clients, seed=2020
+            )
+        else:
         delay_factors = sample_delay_factors(
             num_clients=num_clients, max_delay=delay_factor_slow, seed=2020
         )
@@ -186,6 +192,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     "fedavg-sync": Setting(
@@ -212,6 +219,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     "fedavg-async": Setting(
@@ -224,7 +232,7 @@ SETTINGS = {
             min_num_clients=MIN_NUM_CLIENTS,
             sample_fraction=SAMPLE_FRACTION,
             min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=20,
+            training_round_timeout=None,
             lr_initial=LR_INITIAL,
             partial_updates=False,
             importance_sampling=False,
@@ -238,6 +246,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     "fast-and-slow-only-partial-updates": Setting(
@@ -264,6 +273,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     "fast-and-slow-only-dynamic-timeouts": Setting(
@@ -290,6 +300,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     "fast-and-slow-only-importance-sampling": Setting(
@@ -316,6 +327,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     "fast-and-slow": Setting(
@@ -342,6 +354,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
     "qffedavg": Setting(
@@ -368,6 +381,7 @@ SETTINGS = {
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
         ),
     ),
 }
