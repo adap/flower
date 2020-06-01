@@ -45,6 +45,7 @@ class VisionClassificationClient(flwr.Client):
         augment: bool = False,
         augment_horizontal_flip: bool = False,
         augment_offset: int = 0,
+        normalization_factor: float = 255.0,
     ):
         super().__init__(cid)
         self.model = model
@@ -56,6 +57,7 @@ class VisionClassificationClient(flwr.Client):
             augment=augment,
             augment_horizontal_flip=augment_horizontal_flip,
             augment_offset=augment_offset,
+            normalization_factor=normalization_factor,
         )
         self.ds_test = build_dataset(
             xy_test[0],
@@ -63,6 +65,7 @@ class VisionClassificationClient(flwr.Client):
             num_classes=num_classes,
             shuffle_buffer_size=0,
             augment=False,
+            normalization_factor=normalization_factor,
         )
         self.num_examples_train = len(xy_train[0])
         self.num_examples_test = len(xy_test[0])

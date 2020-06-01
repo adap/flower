@@ -98,6 +98,7 @@ def main() -> None:
         (x_test, y_test),
         client_setting.delay_factor,
         10,
+        normalization_factor=100.0,
     )
     flwr.app.start_client(args.server_address, client)
 

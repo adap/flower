@@ -97,12 +97,13 @@ def build_dataset(
     augment_horizontal_flip: bool = False,
     augment_offset: int = 0,
     seed: Optional[int] = None,
+    normalization_factor: float = 255.0,
 ) -> tf.data.Dataset:
-    """Divide images by 255, one-hot encode labels, optionally shuffle and augment."""
+    """Normalize images, one-hot encode labels, optionally shuffle and augment."""
     dataset = tf.data.Dataset.from_tensor_slices((x, y))
     dataset = dataset.map(
         lambda x, y: (
-            tf.cast(x, tf.float32) / 255.0,
+            tf.cast(x, tf.float32) / normalization_factor,
             tf.one_hot(indices=tf.cast(y, tf.int32), depth=num_classes),
         ),
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
