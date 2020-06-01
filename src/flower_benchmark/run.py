@@ -15,6 +15,7 @@
 """Execute Fashion-MNIST benchmark locally in Docker."""
 
 import argparse
+import concurrent.futures
 import configparser
 from logging import INFO
 from os import path
@@ -159,16 +160,24 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
     # Start Flower clients
     log(INFO, "(8/9) Start clients.")
     server = cluster.get_instance("server")
-    for client_setting in settings.clients:
-        cluster.exec(
-            client_setting.instance_name,
-            command.start_client(
-                log_host=f"{logserver.private_ip}:8081",
-                server_address=f"{server.private_ip}:8080",
-                benchmark=benchmark,
-                setting=setting,
-                cid=client_setting.cid,
-            ),
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        # Start the load operations and mark each future with its URL
+        concurrent.futures.wait(
+            [
+                executor.submit(
+                    cluster.exec,
+                    client_setting.instance_name,
+                    command.start_client(
+                        log_host=f"{logserver.private_ip}:8081",
+                        server_address=f"{server.private_ip}:8080",
+                        benchmark=benchmark,
+                        setting=setting,
+                        cid=client_setting.cid,
+                    ),
+                )
+                for client_setting in settings.clients
+            ]
         )
 
     # Shutdown server and client instance after 10min if not at least one Flower
