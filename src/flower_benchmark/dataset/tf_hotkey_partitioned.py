@@ -89,7 +89,7 @@ def load_data(
 
 if __name__ == "__main__":
     # Load a partitioned dataset and show distribution of examples
-    for _num_partitions in [10, 100]:
+    for _num_partitions in [10, 50, 100]:
         for _fraction in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
             (xy_train_par, xy_test_par), _ = load_data(_fraction, _num_partitions)
             print(f"\nfraction: {_fraction}; num_partitions: {_num_partitions}")
