@@ -147,7 +147,7 @@ client_instances_10, client_names_10 = configure_client_instances(
 
 
 SETTINGS = {
-    "n2020-fedfs-v0-12": Setting(
+    "n2020-fedfs-10": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -157,12 +157,12 @@ SETTINGS = {
             min_num_clients=MIN_NUM_CLIENTS,
             sample_fraction=SAMPLE_FRACTION,
             min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=12,
+            training_round_timeout=10,
             lr_initial=LR_INITIAL,
             partial_updates=True,
-            importance_sampling=False,
-            dynamic_timeout=False,
-            alternating_timeout=True,
+            importance_sampling=True,
+            dynamic_timeout=True,
+            alternating_timeout=False,
         ),
         clients=configure_clients(
             iid_fraction=IID_FRACTION,
@@ -174,34 +174,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "n2020-fedfs-v0-15": Setting(
-        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
-        + client_instances_100,
-        server=ServerSetting(
-            instance_name="server",
-            strategy="fast-and-slow",
-            rounds=ROUNDS,
-            min_num_clients=MIN_NUM_CLIENTS,
-            sample_fraction=SAMPLE_FRACTION,
-            min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=15,
-            lr_initial=LR_INITIAL,
-            partial_updates=True,
-            importance_sampling=False,
-            dynamic_timeout=False,
-            alternating_timeout=True,
-        ),
-        clients=configure_clients(
-            iid_fraction=IID_FRACTION,
-            instance_names=client_names_100,
-            num_clients=100,
-            dry_run=False,
-            delay_factor_fast=0.0,
-            delay_factor_slow=MAX_DELAY_FACTOR,
-            real_delays=True,
-        ),
-    ),
-    "n2020-fedfs-v1-12": Setting(
+    "n2020-fedfs-12": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -228,7 +201,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "n2020-fedfs-v1-15": Setting(
+    "n2020-fedfs-14": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -238,7 +211,7 @@ SETTINGS = {
             min_num_clients=MIN_NUM_CLIENTS,
             sample_fraction=SAMPLE_FRACTION,
             min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=15,
+            training_round_timeout=14,
             lr_initial=LR_INITIAL,
             partial_updates=True,
             importance_sampling=True,
@@ -255,7 +228,61 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "n2020-fedavg-async-12": Setting(
+    "n2020-fedfs-16": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fast-and-slow",
+            rounds=ROUNDS,
+            min_num_clients=MIN_NUM_CLIENTS,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=MIN_SAMPLE_SIZE,
+            training_round_timeout=16,
+            lr_initial=LR_INITIAL,
+            partial_updates=True,
+            importance_sampling=True,
+            dynamic_timeout=True,
+            alternating_timeout=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
+        ),
+    ),
+    "n2020-fedavg-10": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedavg",
+            rounds=ROUNDS,
+            min_num_clients=MIN_NUM_CLIENTS,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=MIN_SAMPLE_SIZE,
+            training_round_timeout=10,
+            lr_initial=LR_INITIAL,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=False,
+            alternating_timeout=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
+        ),
+    ),
+    "n2020-fedavg-12": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -282,7 +309,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "n2020-fedavg-async-15": Setting(
+    "n2020-fedavg-14": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -292,7 +319,34 @@ SETTINGS = {
             min_num_clients=MIN_NUM_CLIENTS,
             sample_fraction=SAMPLE_FRACTION,
             min_sample_size=MIN_SAMPLE_SIZE,
-            training_round_timeout=15,
+            training_round_timeout=14,
+            lr_initial=LR_INITIAL,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=False,
+            alternating_timeout=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=MAX_DELAY_FACTOR,
+            real_delays=True,
+        ),
+    ),
+    "n2020-fedavg-16": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedavg",
+            rounds=ROUNDS,
+            min_num_clients=MIN_NUM_CLIENTS,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=MIN_SAMPLE_SIZE,
+            training_round_timeout=16,
             lr_initial=LR_INITIAL,
             partial_updates=False,
             importance_sampling=False,

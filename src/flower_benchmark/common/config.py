@@ -33,7 +33,7 @@ DEVICE_DISTRIBUTION = [
     ("Nougat 7.0/7.1", "Samsung Galaxy S7", 0.0624 + 0.043, 343),
     ("Marshmallow 6.0", "Samsung Galaxy Note 5", 0.0872, 226),
     ("Lollipop 5.1", "Samsung Galaxy Note 4", 0.0484, SCORE_MISSING),
-    ("Kikkat 4.4", "Samsung Galaxy Note 4", 0.0187, SCORE_MISSING),
+    ("KitKat 4.4", "Samsung Galaxy Note 4", 0.0187, SCORE_MISSING),
     ("Other", "Samsung Galaxy S III", 0.0185, SCORE_MISSING),
 ]
 
