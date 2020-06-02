@@ -208,6 +208,13 @@ RESULTS = {
     ],
 }
 
+RESULTS_WALL_CLOCK_TIME = {
+    "fedavg-14": 218.49,
+    "fedfs-14": 61.16,
+    "fedavg-16": 153.56,
+    "fedfs-16": 66.84,
+}
+
 
 def accuracy_t10() -> None:
     """Generate plots."""
@@ -274,11 +281,25 @@ def accuracy_fedavg_vs_fedfs() -> None:
 
 def wall_clock_time_fedavg_vs_fedfs() -> None:
     """Comparision of FedAvg vs FedFS."""
+
     bar_chart(
-        y_values=[np.array([0, 1600, 1750, 2000]), np.array([650, 750, 900, 1100])],
+        y_values=[
+            np.array(
+                [
+                    RESULTS_WALL_CLOCK_TIME["fedavg-14"],
+                    RESULTS_WALL_CLOCK_TIME["fedavg-16"],
+                ]
+            ),
+            np.array(
+                [
+                    RESULTS_WALL_CLOCK_TIME["fedfs-t14"],
+                    RESULTS_WALL_CLOCK_TIME["fedfs-16"],
+                ]
+            ),
+        ],
         bar_labels=["FedAvg", "FedFS"],
         x_label="Timeout",
-        x_tick_labels=["T=10", "T=20", "T=30", "T=40"],
+        x_tick_labels=["T=14", "T=16"],
         y_label="Completion time",
         filename="fmnist-time_fedavg_vs_fedfs",
     )
