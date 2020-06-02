@@ -132,9 +132,12 @@ def keyword_cnn(
 
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
-    # Compile model
+    # Compile model w/ learning rate schedule
+    lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+        initial_learning_rate=1e-3, decay_steps=10000, decay_rate=0.9,
+    )
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(),
+        optimizer=tf.keras.optimizers.SGD(learning_rate=lr_schedule, momentum=0.9),
         loss=tf.keras.losses.categorical_crossentropy,
         metrics=["accuracy"],
     )
