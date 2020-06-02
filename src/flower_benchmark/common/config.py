@@ -33,9 +33,22 @@ DEVICE_DISTRIBUTION = [
     ("Nougat 7.0/7.1", "Samsung Galaxy S7", 0.0624 + 0.043, 343),
     ("Marshmallow 6.0", "Samsung Galaxy Note 5", 0.0872, 226),
     ("Lollipop 5.1", "Samsung Galaxy Note 4", 0.0484, SCORE_MISSING),
-    ("Kikkat 4.4", "Samsung Galaxy Note 4", 0.0187, SCORE_MISSING),
+    ("KitKat 4.4", "Samsung Galaxy Note 4", 0.0187, SCORE_MISSING),
     ("Other", "Samsung Galaxy S III", 0.0185, SCORE_MISSING),
 ]
+
+for version, device, share, performance in DEVICE_DISTRIBUTION:
+    print(" & ".join([str(version), str(device), str(performance), str(100*share) + "% \\\\"]))
+
+
+10.0 & Note 10 & 729 & 16.12 \\
+Pie 9 & Samsung Galaxy Note 9 & 607 & 37.4 \\
+Oreo 8.0/8.1 & Samsung Galaxy S8 & 359 & 18.66 \\
+Nougat 7.0/7.1 & Samsung Galaxy S7 & 343 & 10.54 \\
+Marshmallow 6.0 & Samsung Galaxy Note 5 & 226 & 8.72 \\
+Lollipop 5.1 & Samsung Galaxy Note 4 & 180 & 4.84 \\
+KitKat 4.4 & Samsung Galaxy Note 4 & 180 & 1.87 \\
+Other & Samsung Galaxy S III & 180 & 1.85 \\
 
 
 def sample_delay_factors(
