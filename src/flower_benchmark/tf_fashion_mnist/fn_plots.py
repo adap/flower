@@ -19,7 +19,7 @@ from typing import List, Tuple
 
 import numpy as np
 
-from flower_benchmark.plot import bar_chart, line_chart
+from flower_benchmark.plot import line_chart
 
 RESULTS = {
     "fn-c10-r40-fedfs-v1-16": [
