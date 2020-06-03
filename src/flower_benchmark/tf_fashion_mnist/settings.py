@@ -37,6 +37,19 @@ IID_FRACTION = 0.1
 MAX_DELAY_FACTOR = 4.0  # Equals a 5x slowdown
 
 
+FN_ROUNDS = 40
+FN_MIN_NUM_CLIENTS = 90
+FN_LR_INITIAL = 0.001
+FN_IID_FRACTION = 0.1
+FN_MAX_DELAY_FACTOR = 4.0
+
+FN_SAMPLE_FRACTION_50 = 0.5
+FN_MIN_SAMPLE_SIZE_50 = 50
+
+FN_SAMPLE_FRACTION_10 = 0.1
+FN_MIN_SAMPLE_SIZE_10 = 10
+
+
 def get_setting(name: str) -> Setting:
     """Return appropriate setting."""
     if name not in SETTINGS:
@@ -146,8 +159,222 @@ client_instances_10, client_names_10 = configure_client_instances(
     num_clients=10, num_cpu=2, num_ram=4
 )
 
-
 SETTINGS = {
+    ###
+    ### FedFS vs FedAvg
+    ###
+    "fn-c50-r40-fedavg-16": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedavg",
+            rounds=FN_ROUNDS,
+            min_num_clients=FN_MIN_NUM_CLIENTS,
+            sample_fraction=FN_SAMPLE_FRACTION_50,
+            min_sample_size=FN_MIN_SAMPLE_SIZE_50,
+            training_round_timeout=16,
+            lr_initial=FN_LR_INITIAL,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=FN_IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=FN_MAX_DELAY_FACTOR,
+            real_delays=True,
+        ),
+    ),
+    "fn-c50-r40-fedfs-v0-16-08": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedfs-v0",
+            rounds=FN_ROUNDS,
+            min_num_clients=FN_MIN_NUM_CLIENTS,
+            sample_fraction=FN_SAMPLE_FRACTION_50,
+            min_sample_size=FN_MIN_SAMPLE_SIZE_50,
+            training_round_timeout=16,
+            lr_initial=FN_LR_INITIAL,
+            partial_updates=True,
+            importance_sampling=False,
+            dynamic_timeout=False,
+            training_round_timeout_short=8,
+        ),
+        clients=configure_clients(
+            iid_fraction=FN_IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=FN_MAX_DELAY_FACTOR,
+            real_delays=True,
+        ),
+    ),
+    "fn-c50-r40-fedfs-v0-16-16": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedfs-v0",
+            rounds=FN_ROUNDS,
+            min_num_clients=FN_MIN_NUM_CLIENTS,
+            sample_fraction=FN_SAMPLE_FRACTION_50,
+            min_sample_size=FN_MIN_SAMPLE_SIZE_50,
+            training_round_timeout=16,
+            lr_initial=FN_LR_INITIAL,
+            partial_updates=True,
+            importance_sampling=False,
+            dynamic_timeout=False,
+            training_round_timeout_short=16,
+        ),
+        clients=configure_clients(
+            iid_fraction=FN_IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=FN_MAX_DELAY_FACTOR,
+            real_delays=True,
+        ),
+    ),
+    "fn-c50-r40-fedfs-v1-16": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedfs-v1",
+            rounds=FN_ROUNDS,
+            min_num_clients=FN_MIN_NUM_CLIENTS,
+            sample_fraction=FN_SAMPLE_FRACTION_50,
+            min_sample_size=FN_MIN_SAMPLE_SIZE_50,
+            training_round_timeout=16,
+            lr_initial=FN_LR_INITIAL,
+            partial_updates=True,
+            importance_sampling=False,
+            dynamic_timeout=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=FN_IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=FN_MAX_DELAY_FACTOR,
+            real_delays=True,
+        ),
+    ),
+    "fn-c10-r40-fedavg-16": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedavg",
+            rounds=FN_ROUNDS,
+            min_num_clients=FN_MIN_NUM_CLIENTS,
+            sample_fraction=FN_SAMPLE_FRACTION_10,
+            min_sample_size=FN_MIN_SAMPLE_SIZE_10,
+            training_round_timeout=16,
+            lr_initial=FN_LR_INITIAL,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=FN_IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=FN_MAX_DELAY_FACTOR,
+            real_delays=True,
+        ),
+    ),
+    "fn-c10-r40-fedfs-v0-16-08": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedfs-v0",
+            rounds=FN_ROUNDS,
+            min_num_clients=FN_MIN_NUM_CLIENTS,
+            sample_fraction=FN_SAMPLE_FRACTION_10,
+            min_sample_size=FN_MIN_SAMPLE_SIZE_10,
+            training_round_timeout=16,
+            lr_initial=FN_LR_INITIAL,
+            partial_updates=True,
+            importance_sampling=False,
+            dynamic_timeout=False,
+            training_round_timeout_short=8,
+        ),
+        clients=configure_clients(
+            iid_fraction=FN_IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=FN_MAX_DELAY_FACTOR,
+            real_delays=True,
+        ),
+    ),
+    "fn-c10-r40-fedfs-v0-16-16": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedfs-v0",
+            rounds=FN_ROUNDS,
+            min_num_clients=FN_MIN_NUM_CLIENTS,
+            sample_fraction=FN_SAMPLE_FRACTION_10,
+            min_sample_size=FN_MIN_SAMPLE_SIZE_10,
+            training_round_timeout=16,
+            lr_initial=FN_LR_INITIAL,
+            partial_updates=True,
+            importance_sampling=False,
+            dynamic_timeout=False,
+            training_round_timeout_short=16,
+        ),
+        clients=configure_clients(
+            iid_fraction=FN_IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=FN_MAX_DELAY_FACTOR,
+            real_delays=True,
+        ),
+    ),
+    "fn-c10-r40-fedfs-v1-16": Setting(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedfs-v1",
+            rounds=FN_ROUNDS,
+            min_num_clients=FN_MIN_NUM_CLIENTS,
+            sample_fraction=FN_SAMPLE_FRACTION_10,
+            min_sample_size=FN_MIN_SAMPLE_SIZE_10,
+            training_round_timeout=16,
+            lr_initial=FN_LR_INITIAL,
+            partial_updates=True,
+            importance_sampling=False,
+            dynamic_timeout=False,
+        ),
+        clients=configure_clients(
+            iid_fraction=FN_IID_FRACTION,
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+            delay_factor_fast=0.0,
+            delay_factor_slow=FN_MAX_DELAY_FACTOR,
+            real_delays=True,
+        ),
+    ),
     ###
     ### FedFS
     ###
