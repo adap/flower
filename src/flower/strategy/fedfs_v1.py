@@ -80,6 +80,11 @@ class FedFSv1(FedAvg):
         self.contributions: Dict[str, List[Tuple[int, int, int]]] = {}
         self.durations: List[Tuple[str, float, int, int]] = []
 
+    def __repr__(self) -> str:
+        # pylint: disable-msg=line-too-long
+        rep = f"FedFSv1(dynamic_timeout_percentile={self.dynamic_timeout_percentile}, r_fast={self.r_fast}, r_slow={self.r_slow}, t_max={self.t_max})"
+        return rep
+
     # pylint: disable-msg=too-many-locals
     def on_configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager

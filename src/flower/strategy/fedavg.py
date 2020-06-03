@@ -56,6 +56,10 @@ class FedAvg(Strategy):
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
 
+    def __repr__(self) -> str:
+        rep = f"FedAvg(accept_failures={self.accept_failures})"
+        return rep
+
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Return the sample size and the required number of available clients."""
         num_clients = int(num_available_clients * self.fraction_fit)

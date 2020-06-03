@@ -84,6 +84,11 @@ class FastAndSlow(FedAvg):
         self.contributions: Dict[str, List[Tuple[int, int, int]]] = {}
         self.durations: List[Tuple[str, float, int, int]] = []
 
+    def __repr__(self) -> str:
+        # pylint: disable-msg=line-too-long
+        rep = f"FastAndSlow(importance_sampling={self.importance_sampling}, dynamic_timeout={self.dynamic_timeout}, dynamic_timeout_percentile={self.dynamic_timeout_percentile}, alternating_timeout={self.alternating_timeout}, r_fast={self.r_fast}, r_slow={self.r_slow}, t_fast={self.t_fast}, t_slow={self.t_slow})"
+        return rep
+
     # pylint: disable-msg=too-many-locals
     def on_configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager

@@ -44,6 +44,7 @@ class ServerSetting(BaseSetting):
     dynamic_timeout: bool
     alternating_timeout: bool = False
     dry_run: bool = False
+    training_round_timeout_short: Optional[int] = None
 
 
 @dataclass
