@@ -74,6 +74,11 @@ class FedFSv0(FedAvg):
         self.t_slow = t_slow
         self.contributions: Dict[str, List[Tuple[int, int, int]]] = {}
 
+    def __repr__(self) -> str:
+        # pylint: disable-msg=line-too-long
+        rep = f"FedFSv0(r_fast={self.r_fast}, r_slow={self.r_slow}, t_fast={self.t_fast}, t_slow={self.t_slow})"
+        return rep
+
     # pylint: disable-msg=too-many-locals
     def on_configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager
