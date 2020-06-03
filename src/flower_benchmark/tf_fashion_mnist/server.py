@@ -107,9 +107,7 @@ def main() -> None:
 
     if server_setting.strategy == "fedfs-v0":
         if server_setting.training_round_timeout is None:
-            raise ValueError(
-                "No `training_round_timeout` set for `fedfs-v0` strategy"
-            )
+            raise ValueError("No `training_round_timeout` set for `fedfs-v0` strategy")
         strategy = flwr.strategy.FedFSv0(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
@@ -124,9 +122,7 @@ def main() -> None:
 
     if server_setting.strategy == "fedfs-v1":
         if server_setting.training_round_timeout is None:
-            raise ValueError(
-                "No `training_round_timeout` set for `fedfs-v1` strategy"
-            )
+            raise ValueError("No `training_round_timeout` set for `fedfs-v1` strategy")
         strategy = flwr.strategy.FedFSv1(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
