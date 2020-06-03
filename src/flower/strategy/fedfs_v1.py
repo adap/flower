@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federating: Fast and Slow."""
+"""Federating: Fast and Slow (v1)."""
 
 
 from logging import DEBUG, INFO

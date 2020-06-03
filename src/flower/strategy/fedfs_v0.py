@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federating: Fast and Slow."""
+"""Federating: Fast and Slow (v0)."""
 
 
 import statistics
@@ -55,7 +55,7 @@ class FedFSv0(FedAvg):
         r_slow: int = 1,
         t_fast: int = 10,
         t_slow: int = 10,
-    ):
+    ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_eval=fraction_eval,
