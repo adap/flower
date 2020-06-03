@@ -60,6 +60,7 @@ class FedFSv1(FedAvg):
         r_fast: int = 1,
         r_slow: int = 1,
         t_max: int = 10,
+        use_past_contributions: bool = False,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -77,6 +78,7 @@ class FedFSv1(FedAvg):
         self.r_fast = r_fast
         self.r_slow = r_slow
         self.t_max = t_max
+        self.use_past_contributions = use_past_contributions
         self.contributions: Dict[str, List[Tuple[int, int, int]]] = {}
         self.durations: List[Tuple[str, float, int, int]] = []
 
@@ -188,8 +190,13 @@ class FedFSv1(FedAvg):
                 contribs: List[Tuple[int, int, int]] = self.contributions[cid]
 
                 # pylint: disable-msg=invalid-name
-                _, c, m = contribs[-1]
-                c_over_m = c / m
+                if self.use_past_contributions:
+                    cs = [c for _, c, _ in contribs]
+                    ms = [m for _, _, m in contribs]
+                    c_over_m = sum(cs) / sum(ms)
+                else:
+                    _, c, m = contribs[-1]
+                    c_over_m = c / m
                 # pylint: enable-msg=invalid-name
 
                 if fast_round:
