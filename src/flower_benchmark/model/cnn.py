@@ -27,46 +27,33 @@ def orig_cnn(
     input_shape: Tuple[int, int, int] = (28, 28, 1), seed: Optional[int] = None
 ) -> tf.keras.Model:
     """Create a CNN instance."""
-    # Kernel initializer
-    kernel_initializer = tf.keras.initializers.glorot_uniform(seed=seed)
-
     # Architecture
     inputs = tf.keras.layers.Input(shape=input_shape)
     layers = tf.keras.layers.Conv2D(
         32,
         kernel_size=(5, 5),
         strides=(1, 1),
-        kernel_initializer=kernel_initializer,
         padding="same",
         activation="relu",
-        kernel_regularizer=tf.keras.regularizers.l2(CNN_REG),
     )(inputs)
     layers = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(layers)
     layers = tf.keras.layers.Conv2D(
         64,
         kernel_size=(5, 5),
         strides=(1, 1),
-        kernel_initializer=kernel_initializer,
         padding="same",
         activation="relu",
-        kernel_regularizer=tf.keras.regularizers.l2(CNN_REG),
     )(layers)
     layers = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(layers)
     layers = tf.keras.layers.Flatten()(layers)
     layers = tf.keras.layers.Dense(
         512,
-        kernel_initializer=kernel_initializer,
         activation="relu",
-        kernel_regularizer=tf.keras.regularizers.l2(DENSE_REG),
-        bias_regularizer=tf.keras.regularizers.l2(DENSE_REG),
     )(layers)
 
     outputs = tf.keras.layers.Dense(
         10,
-        kernel_initializer=kernel_initializer,
         activation="softmax",
-        kernel_regularizer=tf.keras.regularizers.l2(DENSE_REG),
-        bias_regularizer=tf.keras.regularizers.l2(DENSE_REG),
     )(layers)
 
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
