@@ -23,6 +23,7 @@ CNN_REG = 1e-5
 DENSE_REG = 1e-3
 
 
+# pylint: disable-msg=unused-argument
 def orig_cnn(
     input_shape: Tuple[int, int, int] = (28, 28, 1), seed: Optional[int] = None
 ) -> tf.keras.Model:
