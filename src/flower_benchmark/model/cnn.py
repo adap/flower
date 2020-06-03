@@ -30,31 +30,17 @@ def orig_cnn(
     # Architecture
     inputs = tf.keras.layers.Input(shape=input_shape)
     layers = tf.keras.layers.Conv2D(
-        32,
-        kernel_size=(5, 5),
-        strides=(1, 1),
-        padding="same",
-        activation="relu",
+        32, kernel_size=(5, 5), strides=(1, 1), padding="same", activation="relu",
     )(inputs)
     layers = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(layers)
     layers = tf.keras.layers.Conv2D(
-        64,
-        kernel_size=(5, 5),
-        strides=(1, 1),
-        padding="same",
-        activation="relu",
+        64, kernel_size=(5, 5), strides=(1, 1), padding="same", activation="relu",
     )(layers)
     layers = tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=(2, 2))(layers)
     layers = tf.keras.layers.Flatten()(layers)
-    layers = tf.keras.layers.Dense(
-        512,
-        activation="relu",
-    )(layers)
+    layers = tf.keras.layers.Dense(512, activation="relu",)(layers)
 
-    outputs = tf.keras.layers.Dense(
-        10,
-        activation="softmax",
-    )(layers)
+    outputs = tf.keras.layers.Dense(10, activation="softmax",)(layers)
 
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
