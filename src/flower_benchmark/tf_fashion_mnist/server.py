@@ -143,6 +143,7 @@ def main() -> None:
             r_fast=1,
             r_slow=1,
             t_max=server_setting.training_round_timeout,
+            use_past_contributions=True,
         )
 
     if server_setting.strategy == "qffedavg":
