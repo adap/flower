@@ -105,6 +105,26 @@ def main() -> None:
             t_slow=server_setting.training_round_timeout,
         )
 
+    if server_setting.strategy == "fedfs-v0":
+        if server_setting.training_round_timeout is None:
+            raise ValueError("No `training_round_timeout` set for `fedfs-v0` strategy")
+        t_fast = (
+            math.ceil(0.5 * server_setting.training_round_timeout)
+            if server_setting.training_round_timeout_short is None
+            else server_setting.training_round_timeout_short
+        )
+        strategy = flwr.strategy.FedFSv0(
+            fraction_fit=server_setting.sample_fraction,
+            min_fit_clients=server_setting.min_sample_size,
+            min_available_clients=server_setting.min_num_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+            r_fast=1,
+            r_slow=1,
+            t_fast=t_fast,
+            t_slow=server_setting.training_round_timeout,
+        )
+
     if server_setting.strategy == "qffedavg":
         strategy = flwr.strategy.QffedAvg(
             q_param=0.2,
