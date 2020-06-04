@@ -48,7 +48,11 @@ def start_server(server_address: str, server: Server, config: Dict[str, int]) ->
     if res is not None:
         loss, (results, failures) = res
         log(INFO, "app_evaluate: federated loss: %s", str(loss))
-        log(INFO, "app_evaluate: results %s", str(results))
+        log(
+            INFO,
+            "app_evaluate: results %s",
+            str([(res[0].cid, res[1]) for res in results]),
+        )
         log(INFO, "app_evaluate: failures %s", str(failures))
     else:
         log(INFO, "app_evaluate: no evaluation result")

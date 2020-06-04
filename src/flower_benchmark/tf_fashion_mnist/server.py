@@ -89,6 +89,11 @@ def main() -> None:
             raise ValueError(
                 "No `training_round_timeout` set for `fast-and-slow` strategy"
             )
+        t_fast = (
+            math.ceil(0.5 * server_setting.training_round_timeout)
+            if server_setting.training_round_timeout_short is None
+            else server_setting.training_round_timeout_short
+        )
         strategy = flwr.strategy.FastAndSlow(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
@@ -101,8 +106,44 @@ def main() -> None:
             alternating_timeout=server_setting.alternating_timeout,
             r_fast=1,
             r_slow=1,
-            t_fast=math.ceil(0.5 * server_setting.training_round_timeout),
+            t_fast=t_fast,
             t_slow=server_setting.training_round_timeout,
+        )
+
+    if server_setting.strategy == "fedfs-v0":
+        if server_setting.training_round_timeout is None:
+            raise ValueError("No `training_round_timeout` set for `fedfs-v0` strategy")
+        t_fast = (
+            math.ceil(0.5 * server_setting.training_round_timeout)
+            if server_setting.training_round_timeout_short is None
+            else server_setting.training_round_timeout_short
+        )
+        strategy = flwr.strategy.FedFSv0(
+            fraction_fit=server_setting.sample_fraction,
+            min_fit_clients=server_setting.min_sample_size,
+            min_available_clients=server_setting.min_num_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+            r_fast=1,
+            r_slow=1,
+            t_fast=t_fast,
+            t_slow=server_setting.training_round_timeout,
+        )
+
+    if server_setting.strategy == "fedfs-v1":
+        if server_setting.training_round_timeout is None:
+            raise ValueError("No `training_round_timeout` set for `fedfs-v1` strategy")
+        strategy = flwr.strategy.FedFSv1(
+            fraction_fit=server_setting.sample_fraction,
+            min_fit_clients=server_setting.min_sample_size,
+            min_available_clients=server_setting.min_num_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+            dynamic_timeout_percentile=0.8,
+            r_fast=1,
+            r_slow=1,
+            t_max=server_setting.training_round_timeout,
+            use_past_contributions=True,
         )
 
     if server_setting.strategy == "qffedavg":
@@ -117,6 +158,7 @@ def main() -> None:
         )
 
     # Run server
+    log(INFO, "Instantiating server, strategy: %s", str(strategy))
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
     flwr.app.start_server(
         DEFAULT_SERVER_ADDRESS, server, config={"num_rounds": server_setting.rounds},
