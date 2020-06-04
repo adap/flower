@@ -158,14 +158,14 @@ def main() -> None:
         )
 
     if server_setting.strategy == "fedprox":
-        strategy = flwr.strategy.FedProx(
+        strategy = flwr.strategy.FedProxMu0(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
             eval_fn=eval_fn,
             on_fit_config_fn=on_fit_config_fn,
-            e_min = 1,
-            e_max = 5,
+            e_min=1,
+            e_max=5,
         )
 
     # Run server
