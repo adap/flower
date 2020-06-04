@@ -60,7 +60,7 @@ class QffedAvg(FedAvg):
         self.accept_failures = accept_failures
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
-        self.pre_weights: Weights
+        self.pre_weights: Weights = None
 
     def __repr__(self) -> str:
         # pylint: disable-msg=line-too-long
