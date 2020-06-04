@@ -49,7 +49,7 @@ FN_MIN_SAMPLE_SIZE_25 = 25
 FN_SAMPLE_FRACTION_10 = 0.2
 FN_MIN_SAMPLE_SIZE_10 = 10
 
-FN_TRAINING_ROUND_TIMEOUT = 40
+FN_TRAINING_ROUND_TIMEOUT = 230
 
 
 def get_setting(name: str) -> Setting:
@@ -165,7 +165,7 @@ SETTINGS = {
     ###
     ### FedFS vs FedAvg
     ###
-    "fn-c25-r50-fedavg-40": Setting(
+    "fn-c25-r50-fedavg-230": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_50,
         server=ServerSetting(
@@ -191,7 +191,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "fn-c25-r50-fedfs-v0-40-40": Setting(
+    "fn-c25-r50-fedfs-v0-230-230": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_50,
         server=ServerSetting(
@@ -218,7 +218,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "fn-c10-r50-fedavg-40": Setting(
+    "fn-c10-r50-fedavg-230": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_50,
         server=ServerSetting(
@@ -244,7 +244,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "fn-c10-r50-fedfs-v0-40-40": Setting(
+    "fn-c10-r50-fedfs-v0-230-230": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_50,
         server=ServerSetting(

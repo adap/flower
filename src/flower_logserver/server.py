@@ -33,7 +33,7 @@ from flower_benchmark.plot import plot
 LOGDIR = "flower_logs"
 LOGFILE = "{logdir}/flower.log".format(logdir=LOGDIR)
 LOGFILE_UPLOAD_INTERVAL = 60
-SERVER_TIMEOUT = 3600
+SERVER_TIMEOUT = 1200
 
 CONFIG: Dict[str, Optional[str]] = {"s3_bucket": None, "s3_key": None}
 
