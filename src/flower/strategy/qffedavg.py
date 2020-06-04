@@ -60,7 +60,7 @@ class QffedAvg(FedAvg):
         self.accept_failures = accept_failures
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
-        self.pre_weights: Weights
+        self.pre_weights: Optional[Weights] = None
 
     def __repr__(self) -> str:
         # pylint: disable-msg=line-too-long
@@ -161,6 +161,9 @@ class QffedAvg(FedAvg):
 
         deltas = []
         hs_ffl = []
+
+        if self.pre_weights is None:
+            raise Exception("QffedAvg pre_weights are None in on_aggregate_fit")
 
         weights_before = self.pre_weights
         eval_result = self.evaluate(weights_before)
