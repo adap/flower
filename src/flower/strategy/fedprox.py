@@ -59,6 +59,7 @@ class FedProxMu0(FedAvg):
         self.accept_failures = accept_failures
         self.e_min = e_min
         self.e_max = e_max
+        self.epochs: Dict[str, int] = {}
 
     def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
         """Evaluate model weights using an evaluation function (if provided)."""
@@ -92,11 +93,17 @@ class FedProxMu0(FedAvg):
                 config.pop("timeout")
 
             # Sample E
-            config["epochs"] = str(random.randint(self.e_min, self.e_max))
+            config["epochs"] = str(self._get_epochs(client.cid))
 
             # Create fit instructions
             fit_ins = (parameters, config)
             client_fit_configs.append((client, fit_ins))
 
         # Return client/config pairs
-        return [(client, fit_ins) for client in clients]
+        return client_fit_configs
+
+
+    def _get_epochs(self, cid: str) -> int:
+        if cid not in self.epochs.keys():
+            self.epochs[cid] = random.randint(self.e_min, self.e_max)
+        return self.epochs[cid]
