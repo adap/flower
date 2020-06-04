@@ -80,11 +80,11 @@ def watch_and_shutdown(keyword: str, adapter: str) -> str:
     )
 
     if adapter == "docker":
-        cmd += "sleep 120 && kill 1'"
+        cmd += "sleep 180 && kill 1'"
     elif adapter == "ec2":
         # Shutdown after 2 minutes to allow a logged in user
         # to chancel the shutdown manually just in case
-        cmd += "sudo shutdown -P 2'"
+        cmd += "sudo shutdown -P 3'"
     else:
         raise Exception("Unknown Adapter")
 
