@@ -11,6 +11,12 @@ python -m pip install -U setuptools==46.3.1
 python -m pip install -U poetry==1.0.5
 
 # Use `poetry` to install project dependencies
-python -m poetry install --extras "benchmark examples-tensorflow ops http-logger"
+python -m poetry install \
+  --extras "benchmark" \
+  --extras "examples-pytorch" \
+  --extras "examples-tensorflow" \
+  --extras "http-logger" \
+  --extras "ops"
+
 # Temporary workaround (Poetry 1.0.5 cannot install TensorFlow 2.1.0)
 python -m pip install -U tensorflow-cpu==2.1.0
