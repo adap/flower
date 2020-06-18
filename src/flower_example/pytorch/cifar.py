@@ -28,7 +28,7 @@ import torch.nn.functional as F
 from torch import Tensor
 
 
-# pylint: disable-msg=unsubscriptable-object
+# pylint: disable-msg=unsubscriptable-object,invalid-name
 class Net(nn.Module[Tensor]):
     """Simple CNN adapted from 'PyTorch: A 60 Minute Blitz'."""
 
@@ -41,7 +41,6 @@ class Net(nn.Module[Tensor]):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
-    # pytorch: disable-msg=invalid-name
     def forward(self, x: Tensor) -> torch.Tensor:
         """Compute forward pass."""
         x = cast(Tensor, self.pool(F.relu(self.conv1(x))))
