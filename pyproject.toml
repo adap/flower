@@ -76,7 +76,7 @@ ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
 [tool.poetry.dev-dependencies]
 isort = "==4.3.21"
 black = "==19.10b0"
-mypy = "==0.761"
+mypy = "==0.780"
 pylint = "==2.5.2"
 pytest = "==5.3.4"
 pytest-watch = "^4.2.0"
