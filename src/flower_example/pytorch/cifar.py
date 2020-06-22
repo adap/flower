@@ -26,7 +26,6 @@ https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 
 from typing import cast
 
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
@@ -46,7 +45,7 @@ class Net(nn.Module):
         self.fc3 = nn.Linear(84, 10)
 
     # pylint: disable-msg=arguments-differ,invalid-name
-    def forward(self, x: Tensor) -> torch.Tensor:
+    def forward(self, x: Tensor) -> Tensor:
         """Compute forward pass."""
         x = cast(Tensor, self.pool(F.relu(self.conv1(x))))
         x = cast(Tensor, self.pool(F.relu(self.conv2(x))))
