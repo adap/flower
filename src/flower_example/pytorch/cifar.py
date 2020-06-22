@@ -34,7 +34,7 @@ from torch import Tensor
 
 import flower as fl
 
-DATA_ROOT = "./data"
+DATA_ROOT = "./data/cifar-10"
 PATH = "./cifar_net.pth"
 
 
