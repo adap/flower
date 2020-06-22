@@ -107,6 +107,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    # Configure logger
     fl.logger.configure(f"client_{args.cid}", host=args.log_host)
 
     # Load model and data

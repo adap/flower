@@ -61,9 +61,9 @@ def main() -> None:
     parser.add_argument(
         "--log_host", type=str, help="Logserver address (no default)",
     )
-    parser.add_argument("--cid", type=str, help="Client CID (no default)")
     args = parser.parse_args()
 
+    # Configure logger
     fl.logger.configure("server", host=args.log_host)
 
     # Load evaluation data
