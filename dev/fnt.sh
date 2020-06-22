@@ -7,7 +7,8 @@ echo "Format code and run all test scripts"
 ./format.sh
 ./test.sh
 ./test-benchmark.sh
-./test-example.sh
+./test-example-pytorch.sh
+./test-example-tensorflow.sh
 ./test-logserver.sh
 ./test-ops.sh
 ./test-tool.sh

@@ -51,7 +51,27 @@ jobs:
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-benchmark.sh
 
-  test_example:
+  test_example_pytorch:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7.7
+      - name: Install build tools
+        run: |
+          python -m pip install -U pip==20.1.1
+          python -m pip install -U setuptools==46.3.1
+          python -m pip install -U poetry==1.0.5
+          poetry config virtualenvs.create false
+      - name: Install dependencies (mandatory + optional)
+        run: |
+          python -m poetry install --extras "examples-pytorch"
+      - name: Lint + Test (isort/black/mypy/pylint/pytest)
+        run: ./dev/test-example-pytorch.sh
+
+  test_example_tensorflow:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -70,4 +90,4 @@ jobs:
           python -m poetry install --extras "examples-tensorflow"
           python -m pip install -U tensorflow-cpu==2.1.0
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
-        run: ./dev/test-example.sh
+        run: ./dev/test-example-tensorflow.sh
