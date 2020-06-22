@@ -20,6 +20,10 @@ explanations are given in the official PyTorch tutorial:
 https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 """
 
+
+# mypy: ignore-errors
+
+
 from typing import cast
 
 import torch
@@ -28,8 +32,8 @@ import torch.nn.functional as F
 from torch import Tensor
 
 
-# pylint: disable-msg=unsubscriptable-object,invalid-name
-class Net(nn.Module[Tensor]):
+# pylint: disable-msg=unsubscriptable-object
+class Net(nn.Module):
     """Simple CNN adapted from 'PyTorch: A 60 Minute Blitz'."""
 
     def __init__(self) -> None:
@@ -41,6 +45,7 @@ class Net(nn.Module[Tensor]):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
+    # pylint: disable-msg=arguments-differ,invalid-name
     def forward(self, x: Tensor) -> torch.Tensor:
         """Compute forward pass."""
         x = cast(Tensor, self.pool(F.relu(self.conv1(x))))
@@ -52,6 +57,6 @@ class Net(nn.Module[Tensor]):
         return x
 
 
-def load_model() -> nn.Module[Tensor]:
+def load_model() -> nn.Module:
     """Load a simple CNN."""
     return Net()
