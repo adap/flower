@@ -16,6 +16,10 @@
 
 import unittest
 
+import numpy as np
+
+import flower as fl
+
 from . import cifar
 
 
@@ -30,11 +34,41 @@ class CifarTestCase(unittest.TestCase):
         expected = 62006
 
         # Execute
-        model = cifar.load_model()
+        model: cifar.Net = cifar.load_model()
         actual = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
         # Assert
         assert actual == expected
+
+    def test_get_weights(self):
+        """Test get_weights."""
+        # pylint: disable-msg=no-self-use
+
+        # Prepare
+        model: cifar.Net = cifar.load_model()
+        expected = 10
+
+        # Execute
+        weights: fl.Weights = model.get_weights()
+
+        # Assert
+        assert len(weights) == expected
+
+    def test_set_weights(self):
+        """Test set_weights."""
+        # pylint: disable-msg=no-self-use
+
+        # Prepare
+        weights_expected: fl.Weights = cifar.load_model().get_weights()
+        model: cifar.Net = cifar.load_model()
+
+        # Execute
+        model.set_weights(weights_expected)
+        weights_actual: fl.Weights = model.get_weights()
+
+        # Assert
+        for nda_expected, nda_actual in zip(weights_expected, weights_actual):
+            np.testing.assert_array_equal(nda_expected, nda_actual)
 
 
 if __name__ == "__main__":

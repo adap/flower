@@ -1,7 +1,7 @@
 # Flower files
 .flower_ops
 plot/
-hotkey_data/
+data/
 
 # Editor
 .vscode

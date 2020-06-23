@@ -51,7 +51,7 @@ class FashionMnistClient(fl.Client):
         config = ins[1]
         fit_begin = timeit.default_timer()
 
-        # Get training
+        # Get training config
         epochs = int(config["epochs"])
         batch_size = int(config["batch_size"])
 
@@ -107,6 +107,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    # Configure logger
     fl.logger.configure(f"client_{args.cid}", host=args.log_host)
 
     # Load model and data

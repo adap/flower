@@ -24,11 +24,18 @@ https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 # mypy: ignore-errors
 
 
+from collections import OrderedDict
 from typing import cast
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
+
+import flower as fl
+
+DATA_ROOT = "./data/cifar-10"
+PATH = "./cifar_net.pth"
 
 
 # pylint: disable-msg=unsubscriptable-object
@@ -55,7 +62,18 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
+    def get_weights(self) -> fl.Weights:
+        """Get model weights as a list of NumPy ndarrays."""
+        return [val.cpu().numpy() for _, val in self.state_dict().items()]
 
-def load_model() -> nn.Module:
+    def set_weights(self, weights: fl.Weights) -> None:
+        """Set model weights from a list of NumPy ndarrays."""
+        state_dict = OrderedDict(
+            {k: torch.Tensor(v) for k, v in zip(self.state_dict().keys(), weights)}
+        )
+        self.load_state_dict(state_dict, strict=True)
+
+
+def load_model() -> Net:
     """Load a simple CNN."""
     return Net()
