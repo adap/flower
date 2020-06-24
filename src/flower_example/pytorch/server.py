@@ -65,7 +65,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure logger
-    fl.logger.configure(f"server", host=args.log_host)
+    fl.logger.configure("server", host=args.log_host)
 
     # Load evaluation data
     _, testset = cifar.load_data()

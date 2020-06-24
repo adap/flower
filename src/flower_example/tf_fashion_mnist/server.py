@@ -64,7 +64,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure logger
-    fl.logger.configure(f"server", host=args.log_host)
+    fl.logger.configure("server", host=args.log_host)
 
     # Load evaluation data
     _, xy_test = fashion_mnist.load_data(partition=0, num_partitions=1)
