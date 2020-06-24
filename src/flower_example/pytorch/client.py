@@ -109,22 +109,16 @@ def main() -> None:
     parser.add_argument(
         "--clients", type=int, required=True, help="Number of clients (no default)",
     )
-    parser.add_argument(
-        "--log_host", type=str, help="Logserver address (no default)",
-    )
     args = parser.parse_args()
-
-    # Configure logger
-    fl.logger.configure(f"client_{args.cid}", host=args.log_host)
 
     # Load model and data
     model = cifar.load_model()
-    trainloader, testloader = cifar.load_data(
+    trainset, testset = cifar.load_data(
         partition=args.partition, num_partitions=args.clients
     )
 
     # Start client
-    client = CifarClient(args.cid, model, trainloader, testloader)
+    client = CifarClient(args.cid, model, trainset, testset)
     fl.app.start_client(args.server_address, client)
 
 
