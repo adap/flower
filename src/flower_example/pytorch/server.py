@@ -106,9 +106,7 @@ def get_eval_fn(
         """Use the entire CIFAR-10 test set for evaluation."""
         model = cifar.load_model()
         model.set_weights(weights)
-        testloader = torch.utils.data.DataLoader(  # type: ignore
-            testset, batch_size=32, shuffle=False
-        )
+        testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
         return cifar.test(model, testloader)
 
     return evaluate

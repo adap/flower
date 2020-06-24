@@ -43,7 +43,7 @@ class CifarClient(fl.Client):
 
     def get_parameters(self) -> fl.ParametersRes:
         print(f"Client {self.cid}: get_parameters")
-        
+
         weights: fl.Weights = self.model.get_weights()
         parameters = fl.weights_to_parameters(weights)
         return fl.ParametersRes(parameters=parameters)
@@ -63,7 +63,7 @@ class CifarClient(fl.Client):
         self.model.set_weights(weights)
 
         # Train model
-        trainloader = torch.utils.data.DataLoader(  # type: ignore
+        trainloader = torch.utils.data.DataLoader(
             self.trainset, batch_size=batch_size, shuffle=True
         )
         cifar.train(self.model, trainloader, epochs=epochs)
@@ -77,14 +77,14 @@ class CifarClient(fl.Client):
 
     def evaluate(self, ins: fl.EvaluateIns) -> fl.EvaluateRes:
         print(f"Client {self.cid}: evaluate")
-        
+
         weights = fl.parameters_to_weights(ins[0])
- 
+
         # Use provided weights to update the local model
         self.model.set_weights(weights)
 
         # Evaluate the updated model on the local dataset
-        testloader = torch.utils.data.DataLoader(  # type: ignore
+        testloader = torch.utils.data.DataLoader(
             self.testset, batch_size=32, shuffle=False
         )
         loss, accuracy = cifar.test(self.model, testloader)

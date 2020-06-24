@@ -103,7 +103,7 @@ def train(net: Net, trainloader: torch.utils.data.DataLoader, epochs: int) -> No
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
     print(f"Training {epochs} epoch(s) w/ {len(trainloader)} batches each")
-    
+
     # Train the network
     for epoch in range(epochs):  # loop over the dataset multiple times
         running_loss = 0.0
