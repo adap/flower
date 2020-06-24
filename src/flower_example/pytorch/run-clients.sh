@@ -29,8 +29,6 @@ do
     echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
     python -m flower_example.pytorch.client \
       --cid=$i \
-      --partition=$i \
-      --clients=$NUM_CLIENTS \
       --server_address=$SERVER_ADDRESS &
 done
 echo "Started $NUM_CLIENTS clients."

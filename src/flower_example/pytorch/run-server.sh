@@ -21,7 +21,7 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
 # Start a Flower server
 python -m flower_example.pytorch.server \
-  --rounds=2 \
+  --rounds=3 \
   --sample_fraction=1.0 \
   --min_sample_size=2 \
   --min_num_clients=2

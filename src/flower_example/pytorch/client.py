@@ -42,11 +42,15 @@ class CifarClient(fl.Client):
         self.testset = testset
 
     def get_parameters(self) -> fl.ParametersRes:
+        print(f"Client {self.cid}: get_parameters")
+        
         weights: fl.Weights = self.model.get_weights()
         parameters = fl.weights_to_parameters(weights)
         return fl.ParametersRes(parameters=parameters)
 
     def fit(self, ins: fl.FitIns) -> fl.FitRes:
+        print(f"Client {self.cid}: fit")
+
         weights: fl.Weights = fl.parameters_to_weights(ins[0])
         config = ins[1]
         fit_begin = timeit.default_timer()
@@ -72,18 +76,16 @@ class CifarClient(fl.Client):
         return params_prime, num_examples_train, num_examples_train, fit_duration
 
     def evaluate(self, ins: fl.EvaluateIns) -> fl.EvaluateRes:
+        print(f"Client {self.cid}: evaluate")
+        
         weights = fl.parameters_to_weights(ins[0])
-        config = ins[1]
-
-        # Get evaluation config
-        batch_size = int(config["batch_size"])
-
+ 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
 
         # Evaluate the updated model on the local dataset
         testloader = torch.utils.data.DataLoader(  # type: ignore
-            self.testset, batch_size=batch_size, shuffle=False
+            self.testset, batch_size=32, shuffle=False
         )
         loss, accuracy = cifar.test(self.model, testloader)
 
@@ -104,18 +106,16 @@ def main() -> None:
         "--cid", type=str, required=True, help="Client CID (no default)"
     )
     parser.add_argument(
-        "--partition", type=int, required=True, help="Partition index (no default)"
-    )
-    parser.add_argument(
-        "--clients", type=int, required=True, help="Number of clients (no default)",
+        "--log_host", type=str, help="Logserver address (no default)",
     )
     args = parser.parse_args()
 
+    # Configure logger
+    fl.logger.configure(f"client_{args.cid}", host=args.log_host)
+
     # Load model and data
     model = cifar.load_model()
-    trainset, testset = cifar.load_data(
-        partition=args.partition, num_partitions=args.clients
-    )
+    trainset, testset = cifar.load_data()
 
     # Start client
     client = CifarClient(args.cid, model, trainset, testset)

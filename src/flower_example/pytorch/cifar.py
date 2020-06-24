@@ -82,9 +82,7 @@ def load_model() -> Net:
 
 
 # pylint: disable-msg=unused-argument
-def load_data(
-    partition: int, num_partitions: int
-) -> Tuple[torchvision.datasets.CIFAR10, torchvision.datasets.CIFAR10]:
+def load_data() -> Tuple[torchvision.datasets.CIFAR10, torchvision.datasets.CIFAR10]:
     """Load CIFAR-10 (training and test set)."""
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -104,6 +102,8 @@ def train(net: Net, trainloader: torch.utils.data.DataLoader, epochs: int) -> No
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
+    print(f"Training {epochs} epoch(s) w/ {len(trainloader)} batches each")
+    
     # Train the network
     for epoch in range(epochs):  # loop over the dataset multiple times
         running_loss = 0.0
@@ -130,16 +130,18 @@ def train(net: Net, trainloader: torch.utils.data.DataLoader, epochs: int) -> No
 
 def test(net: Net, testloader: torch.utils.data.DataLoader) -> Tuple[float, float]:
     """Validate the network on the entire test set."""
+    criterion = nn.CrossEntropyLoss()
     correct = 0
     total = 0
+    loss = 0.0
     with torch.no_grad():
         for data in testloader:
             images, labels = data
             # images, labels = data[0].to(device), data[1].to(device)
             outputs = net(images)
+            loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)  # pylint: disable-msg=no-member
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    loss = 0.0
     accuracy = correct / total
     return loss, accuracy
