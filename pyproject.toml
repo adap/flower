@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "poetry==1.0.5",
+    "poetry==1.0.9",
 ]
 build-backend = "poetry.masonry.api"
 

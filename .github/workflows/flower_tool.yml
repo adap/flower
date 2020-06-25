@@ -24,8 +24,8 @@ jobs:
       - name: Install build tools
         run: |
           python -m pip install -U pip==20.1.1
-          python -m pip install -U setuptools==46.3.1
-          python -m pip install -U poetry==1.0.5
+          python -m pip install -U setuptools==47.3.1
+          python -m pip install -U poetry==1.0.9
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory + optional)
         run: |
