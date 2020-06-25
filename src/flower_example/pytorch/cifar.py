@@ -96,7 +96,12 @@ def load_data() -> Tuple[torchvision.datasets.CIFAR10, torchvision.datasets.CIFA
     return trainset, testset
 
 
-def train(net: Net, trainloader: torch.utils.data.DataLoader, epochs: int) -> None:
+def train(
+    net: Net,
+    trainloader: torch.utils.data.DataLoader,
+    epochs: int,
+    device: torch.device,  # pylint: disable=no-member
+) -> None:
     """Train the network."""
     # Define loss and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -108,15 +113,13 @@ def train(net: Net, trainloader: torch.utils.data.DataLoader, epochs: int) -> No
     for epoch in range(epochs):  # loop over the dataset multiple times
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
-            # get the inputs; data is a list of [inputs, labels]
-            inputs, labels = data
-            # inputs, labels = data[0].to(device), data[1].to(device)
+            images, labels = data[0].to(device), data[1].to(device)
 
             # zero the parameter gradients
             optimizer.zero_grad()
 
             # forward + backward + optimize
-            outputs = net(inputs)
+            outputs = net(images)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -128,7 +131,11 @@ def train(net: Net, trainloader: torch.utils.data.DataLoader, epochs: int) -> No
                 running_loss = 0.0
 
 
-def test(net: Net, testloader: torch.utils.data.DataLoader) -> Tuple[float, float]:
+def test(
+    net: Net,
+    testloader: torch.utils.data.DataLoader,
+    device: torch.device,  # pylint: disable=no-member
+) -> Tuple[float, float]:
     """Validate the network on the entire test set."""
     criterion = nn.CrossEntropyLoss()
     correct = 0
@@ -136,8 +143,7 @@ def test(net: Net, testloader: torch.utils.data.DataLoader) -> Tuple[float, floa
     loss = 0.0
     with torch.no_grad():
         for data in testloader:
-            images, labels = data
-            # images, labels = data[0].to(device), data[1].to(device)
+            images, labels = data[0].to(device), data[1].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)  # pylint: disable-msg=no-member

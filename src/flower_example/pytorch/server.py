@@ -25,6 +25,10 @@ import flower as fl
 
 from . import DEFAULT_SERVER_ADDRESS, cifar
 
+# pylint: disable=no-member
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# pylint: enable=no-member
+
 
 def main() -> None:
     """Start server and train five rounds."""
@@ -106,8 +110,9 @@ def get_eval_fn(
         """Use the entire CIFAR-10 test set for evaluation."""
         model = cifar.load_model()
         model.set_weights(weights)
+        model.to(DEVICE)
         testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
-        return cifar.test(model, testloader)
+        return cifar.test(model, testloader, device=DEVICE)
 
     return evaluate
 
