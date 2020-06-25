@@ -25,6 +25,10 @@ import flower as fl
 
 from . import DEFAULT_SERVER_ADDRESS, cifar
 
+# pylint: disable=no-member
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# pylint: enable=no-member
+
 
 class CifarClient(fl.Client):
     """Flower client implementing CIFAR-10 image classification using PyTorch."""
@@ -66,7 +70,7 @@ class CifarClient(fl.Client):
         trainloader = torch.utils.data.DataLoader(
             self.trainset, batch_size=batch_size, shuffle=True
         )
-        cifar.train(self.model, trainloader, epochs=epochs)
+        cifar.train(self.model, trainloader, epochs=epochs, device=DEVICE)
 
         # Return the refined weights and the number of examples used for training
         weights_prime: fl.Weights = self.model.get_weights()
@@ -87,7 +91,7 @@ class CifarClient(fl.Client):
         testloader = torch.utils.data.DataLoader(
             self.testset, batch_size=32, shuffle=False
         )
-        loss, accuracy = cifar.test(self.model, testloader)
+        loss, accuracy = cifar.test(self.model, testloader, device=DEVICE)
 
         # Return the number of evaluation examples and the evaluation result (loss)
         return len(self.testset), float(loss), float(accuracy)
@@ -115,6 +119,7 @@ def main() -> None:
 
     # Load model and data
     model = cifar.load_model()
+    model.to(DEVICE)
     trainset, testset = cifar.load_data()
 
     # Start client
