@@ -5,14 +5,11 @@ requires = [
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "flower"
+name = "flower-lib"
 version = "0.0.1"
 description = "See `README.md`"
 license = "Apache-2.0"
-authors = [
-    "Daniel J. Beutel <daniel@adap.com>",
-    "Taner Topal <taner@adap.com>",
-]
+authors = ["The Flower Authors <flower@adap.com>"]
 readme = "README.md"
 homepage = "https://github.com/adap/flower"
 repository = "https://github.com/adap/flower"
