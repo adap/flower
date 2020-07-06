@@ -19,7 +19,10 @@ repository = "https://github.com/adap/flower"
 documentation = "https://github.com/adap/flower"
 classifiers = [
     "Development Status :: 3 - Alpha",
+    "Environment :: GPU",
+    "Environment :: GPU :: NVIDIA CUDA",
     "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: MacOS :: MacOS X",
