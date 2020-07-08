@@ -22,6 +22,7 @@ from os import path
 from time import strftime
 from typing import List, Optional
 
+import flower_benchmark.cifar.settings as cifar_settings
 import flower_benchmark.tf_cifar.settings as tf_cifar_settings
 import flower_benchmark.tf_fashion_mnist.settings as tf_fashion_mnist_settings
 import flower_benchmark.tf_hotkey.settings as tf_hotkey_settings
@@ -98,7 +99,9 @@ def run(benchmark: str, setting: str, adapter: str) -> None:
         else f"/home/ubuntu/{WHEEL_FILENAME}"
     )
 
-    if benchmark == "tf_cifar":
+    if benchmark == "cifar":
+        settings = cifar_settings.get_setting(setting)
+    elif benchmark == "tf_cifar":
         settings = tf_cifar_settings.get_setting(setting)
     elif benchmark == "tf_fashion_mnist":
         settings = tf_fashion_mnist_settings.get_setting(setting)
@@ -206,7 +209,7 @@ def main() -> None:
         "--benchmark",
         type=str,
         required=True,
-        choices=["tf_cifar", "tf_fashion_mnist", "tf_hotkey"],
+        choices=["cifar", "tf_cifar", "tf_fashion_mnist", "tf_hotkey"],
         help="Name of benchmark name to run.",
     )
     parser.add_argument(
@@ -215,7 +218,8 @@ def main() -> None:
         required=True,
         choices=list(
             set(
-                list(tf_cifar_settings.SETTINGS.keys())
+                list(cifar_settings.SETTINGS.keys())
+                + list(tf_cifar_settings.SETTINGS.keys())
                 + list(tf_fashion_mnist_settings.SETTINGS.keys())
                 + list(tf_hotkey_settings.SETTINGS.keys())
             )

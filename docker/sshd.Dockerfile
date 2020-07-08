@@ -19,7 +19,7 @@ RUN apt-get clean && \
 
 WORKDIR /root
 
-RUN pip install tensorflow-cpu==2.1.0 numpy==1.18.3
+RUN pip install tensorflow-cpu==2.1.0 numpy==1.18.3 torch==1.5.1 torchvision==0.6.1
 COPY dist/flower-0.0.1-py3-none-any.whl flower-0.0.1-py3-none-any.whl
 RUN python -m pip install --no-cache-dir 'flower-0.0.1-py3-none-any.whl[examples-tensorflow,http-logger,benchmark,ops]' && \
     rm flower-0.0.1-py3-none-any.whl
