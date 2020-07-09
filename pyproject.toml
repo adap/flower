@@ -50,12 +50,13 @@ exclude = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6.9"
 # Mandatory dependencies
 numpy = "^1.18.1"
 grpcio = "^1.27.2"
 google = "^2.0.3"
 protobuf = "==3.12.1"
+dataclasses = { version = "==0.6", markers = "python_version < '3.7'"  }
 # Optional dependencies
 tensorflow-cpu = { version = "==2.1.0", optional = true }
 torch = { version = "==1.5.1", optional = true }
