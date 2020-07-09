@@ -50,7 +50,7 @@ exclude = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6.9"
 # Mandatory dependencies
 numpy = "^1.18.1"
 grpcio = "^1.27.2"
@@ -65,6 +65,7 @@ boto3_type_annotations = { version = "^0.3.1", optional = true }
 paramiko = { version = "^2.7.1", optional = true }
 docker = { version = "^4.2.0", optional = true }
 matplotlib = { version = "^3.2.1", optional = true }
+dataclasses = { version = "==0.6", optional = true }
 
 [tool.poetry.extras]
 benchmark = ["tensorflow-cpu", "boto3", "boto3_type_annotations", "paramiko", "docker", "matplotlib"]
@@ -72,6 +73,7 @@ examples-pytorch = ["torch", "torchvision"]
 examples-tensorflow = ["tensorflow-cpu"]
 http-logger = ["boto3", "boto3_type_annotations", "tensorflow-cpu", "boto3", "boto3_type_annotations", "paramiko", "docker", "matplotlib"]
 ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
+python-369 = ["dataclasses"]
 
 [tool.poetry.dev-dependencies]
 isort = "==4.3.21"
