@@ -139,11 +139,11 @@ client_instances_4, client_names_4 = configure_client_instances(
 )
 
 client_instances_2, client_names_2 = configure_client_instances(
-    num_clients=2, num_cpu=2, num_ram=8
+    num_clients=2, num_cpu=8, num_ram=32
 )
 
 SETTINGS = {
-    "fedavg-min": Setting(
+    "fedavg-sync-min": Setting(
         instances=[Instance(name="server", group="server", num_cpu=2, num_ram=8)]
         + client_instances_2,
         server=ServerSetting(
@@ -153,7 +153,7 @@ SETTINGS = {
             min_num_clients=2,
             sample_fraction=1.0,
             min_sample_size=2,
-            training_round_timeout=900,
+            training_round_timeout=None,
             lr_initial=0.001,
             partial_updates=False,
             importance_sampling=False,
@@ -167,7 +167,7 @@ SETTINGS = {
             dry_run=False,
         ),
     ),
-    "fedavg-10-10": Setting(
+    "fedavg-sync-10-10": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_10,
         server=ServerSetting(
@@ -177,7 +177,7 @@ SETTINGS = {
             min_num_clients=10,
             sample_fraction=1.0,
             min_sample_size=10,
-            training_round_timeout=900,
+            training_round_timeout=None,
             lr_initial=0.001,
             partial_updates=False,
             importance_sampling=False,
@@ -191,7 +191,7 @@ SETTINGS = {
             dry_run=False,
         ),
     ),
-    "fedavg-100-10": Setting(
+    "fedavg-sync-100-10": Setting(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -201,7 +201,7 @@ SETTINGS = {
             min_num_clients=100,
             sample_fraction=0.1,
             min_sample_size=10,
-            training_round_timeout=900,
+            training_round_timeout=None,
             lr_initial=0.001,
             partial_updates=False,
             importance_sampling=False,
