@@ -12,20 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower main package."""
+"""Flower client app."""
 
 
-from .client import Client
-from .client_manager import SimpleClientManager
-from .history import History
-from .server import Server
-from .strategy.parameter import parameters_to_weights, weights_to_parameters
-from .typing import (
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    Parameters,
-    ParametersRes,
-    Weights,
-)
+from logging import INFO
+
+from flower.client import Client
+from flower.grpc_client.connection import insecure_grpc_connection
+from flower.grpc_client.message_handler import handle
+from flower.logger import log
+
+
+def start_client(server_address: str, client: Client) -> None:
+    """Start a Flower client which connects to a gRPC server."""
+    with insecure_grpc_connection(server_address) as conn:
+        receive, send = conn
+        log(INFO, "Opened (insecure) gRPC connection")
+
+        while True:
+            server_message = receive()
+            client_message = handle(client, server_message)
+            send(client_message)

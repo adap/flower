@@ -12,20 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower main package."""
+"""Flower client app."""
 
 
-from .client import Client
-from .client_manager import SimpleClientManager
-from .history import History
-from .server import Server
-from .strategy.parameter import parameters_to_weights, weights_to_parameters
-from .typing import (
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    Parameters,
-    ParametersRes,
-    Weights,
-)
+from .app import start_client
