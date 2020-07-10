@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server app."""
+"""Flower app."""
 
 
-from .app import start_server
+import client
+import server
