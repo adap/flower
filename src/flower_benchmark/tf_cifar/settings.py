@@ -139,7 +139,7 @@ client_instances_4, client_names_4 = configure_client_instances(
 )
 
 client_instances_2, client_names_2 = configure_client_instances(
-    num_clients=2, num_cpu=8, num_ram=32
+    num_clients=2, num_cpu=16, num_ram=64
 )
 
 SETTINGS = {
