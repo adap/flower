@@ -15,6 +15,7 @@
 """Flower main package."""
 
 
+from . import app
 from .client import Client
 from .client_manager import SimpleClientManager
 from .history import History
