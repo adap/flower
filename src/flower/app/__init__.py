@@ -15,5 +15,5 @@
 """Flower app."""
 
 
-import client
-import server
+from . import client
+from . import server
