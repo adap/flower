@@ -20,7 +20,7 @@ import math
 from logging import ERROR, INFO
 from typing import Callable, Dict, Optional
 
-import flower as flwr
+import flower as fl
 from flower.logger import configure, log
 from flower_benchmark.common import get_eval_fn
 from flower_benchmark.dataset import tf_hotkey_partitioned
@@ -65,7 +65,7 @@ def main() -> None:
     model = keyword_cnn(input_shape=(80, 40, 1), seed=SEED)
 
     # Create client_manager
-    client_manager = flwr.SimpleClientManager()
+    client_manager = fl.SimpleClientManager()
 
     # Strategy
     eval_fn = get_eval_fn(model=model, num_classes=10, xy_test=(x_test, y_test))
@@ -76,7 +76,7 @@ def main() -> None:
     )
 
     if server_setting.strategy == "fedavg":
-        strategy = flwr.strategy.FedAvg(
+        strategy = fl.strategy.FedAvg(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
@@ -89,7 +89,7 @@ def main() -> None:
             raise ValueError(
                 "No `training_round_timeout` set for `fast-and-slow` strategy"
             )
-        strategy = flwr.strategy.FastAndSlow(
+        strategy = fl.strategy.FastAndSlow(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
@@ -113,7 +113,7 @@ def main() -> None:
             if server_setting.training_round_timeout_short is None
             else server_setting.training_round_timeout_short
         )
-        strategy = flwr.strategy.FedFSv0(
+        strategy = fl.strategy.FedFSv0(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
@@ -126,7 +126,7 @@ def main() -> None:
         )
 
     if server_setting.strategy == "qffedavg":
-        strategy = flwr.strategy.QffedAvg(
+        strategy = fl.strategy.QffedAvg(
             q_param=0.2,
             qffl_learning_rate=0.1,
             fraction_fit=server_setting.sample_fraction,
@@ -137,8 +137,8 @@ def main() -> None:
         )
 
     # Run server
-    server = flwr.Server(client_manager=client_manager, strategy=strategy)
-    flwr.app.server.start_server(
+    server = fl.Server(client_manager=client_manager, strategy=strategy)
+    fl.app.server.start_server(
         DEFAULT_SERVER_ADDRESS, server, config={"num_rounds": server_setting.rounds},
     )
 
