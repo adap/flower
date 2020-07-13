@@ -40,8 +40,8 @@ classifiers = [
 ]
 packages = [
     { include = "flwr", from = "src" },
-    { include = "flwr_experimental", from = "src" },
     { include = "flwr_example", from = "src" },
+    { include = "flwr_experimental", from = "src" },
 ]
 exclude = [
     "src/**/*_test.py",
