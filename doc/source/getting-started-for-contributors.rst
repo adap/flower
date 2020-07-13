@@ -56,7 +56,7 @@ Compile ProtoBuf Definitions
 
 ::
 
-  $ python -m flower_tool.protoc
+  $ python -m flwr_tool.protoc
 
 Auto-Format Code
 ~~~~~~~~~~~~~~~~
