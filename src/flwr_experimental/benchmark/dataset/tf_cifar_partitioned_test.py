@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,23 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""Tests for partitioned CIFAR-10/100 dataset generation."""
+# pylint: disable=no-self-use
 
-set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+import unittest
 
-# Purpose of this script is to evaluate if the user changed the proto definitions
-# but did not recompile or commit the new proto python files
+from flwr_experimental.benchmark.dataset.tf_cifar_partitioned import load_data
 
-# Recompile protos
-python -m flwr_tool.protoc
 
-# Fail if user forgot to recompile
-CHANGED=$(git diff --name-only HEAD src/flwr/proto)
+class CifarPartitionedTestCase(unittest.TestCase):
+    """Tests for partitioned CIFAR-10/100 dataset generation."""
 
-if [ -n "$CHANGED" ]; then
-    echo "Changes detected"
-    exit 1
-fi
+    def test_load_data_integration(self):
+        """Test partition function."""
+        # Execute
+        for num_partitions in [10, 100]:
+            for fraction in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
+                (_, _), _ = load_data(fraction, num_partitions)
 
-echo "No changes detected"
-exit 0
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

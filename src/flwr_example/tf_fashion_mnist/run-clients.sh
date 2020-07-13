@@ -16,21 +16,21 @@
 # ==============================================================================
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
-# Purpose of this script is to evaluate if the user changed the proto definitions
-# but did not recompile or commit the new proto python files
+SERVER_ADDRESS="[::]:8080"
+NUM_CLIENTS=10
+I_START=0
+I_END=9
 
-# Recompile protos
-python -m flwr_tool.protoc
-
-# Fail if user forgot to recompile
-CHANGED=$(git diff --name-only HEAD src/flwr/proto)
-
-if [ -n "$CHANGED" ]; then
-    echo "Changes detected"
-    exit 1
-fi
-
-echo "No changes detected"
-exit 0
+echo "Starting $NUM_CLIENTS clients."
+for ((i = $I_START; i <= $I_END; i++))
+do
+    echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
+    python -m flwr_example.tf_fashion_mnist.client \
+      --cid=$i \
+      --partition=$i \
+      --clients=$NUM_CLIENTS \
+      --server_address=$SERVER_ADDRESS &
+done
+echo "Started $NUM_CLIENTS clients."
