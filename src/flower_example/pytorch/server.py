@@ -21,7 +21,7 @@ from typing import Callable, Dict, Optional, Tuple
 import torch
 import torchvision
 
-import flower as fl
+import flwr as fl
 
 from . import DEFAULT_SERVER_ADDRESS, cifar
 
@@ -86,7 +86,7 @@ def main() -> None:
     server = fl.Server(client_manager=client_manager, strategy=strategy)
 
     # Run server
-    fl.app.start_server(
+    fl.app.server.start_server(
         args.server_address, server, config={"num_rounds": args.rounds},
     )
 

@@ -22,7 +22,7 @@ from typing import Tuple
 import numpy as np
 import tensorflow as tf
 
-import flower as fl
+import flwr as fl
 
 from . import DEFAULT_SERVER_ADDRESS, fashion_mnist
 
@@ -118,7 +118,7 @@ def main() -> None:
 
     # Start client
     client = FashionMnistClient(args.cid, model, xy_train, xy_test)
-    fl.app.start_client(args.server_address, client)
+    fl.app.client.start_client(args.server_address, client)
 
 
 if __name__ == "__main__":

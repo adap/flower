@@ -20,13 +20,13 @@ from logging import ERROR
 
 import tensorflow as tf
 
-import flower as flwr
-from flower.logger import configure, log
+import flwr as fl
 from flower_benchmark.common import VisionClassificationClient
 from flower_benchmark.dataset import tf_hotkey_partitioned
 from flower_benchmark.model import keyword_cnn
 from flower_benchmark.setting import ClientSetting
 from flower_benchmark.tf_hotkey.settings import SETTINGS, get_setting
+from flwr.logger import configure, log
 
 from . import DEFAULT_SERVER_ADDRESS, SEED
 
@@ -100,7 +100,7 @@ def main() -> None:
         10,
         normalization_factor=100.0,
     )
-    flwr.app.start_client(args.server_address, client)
+    fl.app.client.start_client(args.server_address, client)
 
 
 if __name__ == "__main__":
