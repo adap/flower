@@ -30,7 +30,7 @@ DEFAULT_SERVER_ADDRESS = "[::]:8080"
 def start_server(
     server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,
-    config: Dict[str, int] = {},
+    config: Optional[Dict[str, int]] = None,
     strategy: Optional[Strategy] = None,
 ) -> None:
     """Start a Flower server using the gRPC transport layer."""
@@ -42,7 +42,9 @@ def start_server(
             strategy = FedAvg()
         server = Server(client_manager=client_manager, strategy=strategy)
 
-    # Set default values
+    # Set default config values
+    if config is None:
+        config = {}
     if "num_rounds" not in config:
         config["num_rounds"] = 1
 
