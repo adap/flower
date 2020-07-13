@@ -24,7 +24,10 @@ from flwr.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes,
 
 
 class KerasClient(ABC):
-    """Abstract client interface for Keras."""
+    """Abstract base class for Flower clients which use Keras."""
+
+    def __init__(self, cid: str):
+        self.cid = cid
 
     @abstractmethod
     def get_weights(self) -> Weights:
