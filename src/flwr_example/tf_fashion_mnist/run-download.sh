@@ -16,21 +16,7 @@
 # ==============================================================================
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
-# Purpose of this script is to evaluate if the user changed the proto definitions
-# but did not recompile or commit the new proto python files
-
-# Recompile protos
-python -m flwr_tool.protoc
-
-# Fail if user forgot to recompile
-CHANGED=$(git diff --name-only HEAD src/flwr/proto)
-
-if [ -n "$CHANGED" ]; then
-    echo "Changes detected"
-    exit 1
-fi
-
-echo "No changes detected"
-exit 0
+# Trigger Fashion-MNIST download
+python -m flwr_example.tf_fashion_mnist.download
