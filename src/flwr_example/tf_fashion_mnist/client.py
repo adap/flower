@@ -36,7 +36,7 @@ class FashionMnistClient(fl.KerasClient):
         xy_train: Tuple[np.ndarray, np.ndarray],
         xy_test: Tuple[np.ndarray, np.ndarray],
     ):
-        self.cid = cid
+        super().__init__(cid)
         self.model = model
         self.x_train, self.y_train = xy_train
         self.x_test, self.y_test = xy_test
