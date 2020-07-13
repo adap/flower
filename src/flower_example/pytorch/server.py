@@ -21,7 +21,7 @@ from typing import Callable, Dict, Optional, Tuple
 import torch
 import torchvision
 
-import flower as fl
+import flwr as fl
 
 from . import DEFAULT_SERVER_ADDRESS, cifar
 
