@@ -16,15 +16,13 @@
 
 
 from logging import INFO
-from typing import Dict
+from typing import Dict, Optional
 
-from flower.client_manager import SimpleCLientManager
+from flower.client_manager import SimpleClientManager
 from flower.grpc_server.grpc_server import start_insecure_grpc_server
 from flower.logger import log
 from flower.server import Server
 from flower.strategy import FedAvg, Strategy
-
-
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
