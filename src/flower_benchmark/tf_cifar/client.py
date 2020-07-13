@@ -20,7 +20,7 @@ from logging import ERROR, INFO
 
 import tensorflow as tf
 
-import flower as flwr
+import flower as fl
 from flower.logger import configure, log
 from flower_benchmark.common import VisionClassificationClient
 from flower_benchmark.dataset import tf_cifar_partitioned
@@ -104,7 +104,7 @@ def main() -> None:
         augment_horizontal_flip=True,
         augment_offset=2,
     )
-    flwr.app.client.start_client(args.server_address, client)
+    fl.app.client.start_client(args.server_address, client)
 
 
 if __name__ == "__main__":
