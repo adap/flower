@@ -18,11 +18,16 @@
 import argparse
 from typing import Callable, Dict, Optional, Tuple
 
-import numpy as np
+import torch
+import torchvision
 
 import flower as fl
 
-from . import DEFAULT_SERVER_ADDRESS, fashion_mnist
+from . import DEFAULT_SERVER_ADDRESS, cifar
+
+# pylint: disable=no-member
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# pylint: enable=no-member
 
 
 def main() -> None:
@@ -43,20 +48,20 @@ def main() -> None:
     parser.add_argument(
         "--sample_fraction",
         type=float,
-        default=0.1,
-        help="Fraction of available clients used for fit/evaluate (default: 0.1)",
+        default=1.0,
+        help="Fraction of available clients used for fit/evaluate (default: 1.0)",
     )
     parser.add_argument(
         "--min_sample_size",
         type=int,
-        default=1,
-        help="Minimum number of clients used for fit/evaluate (default: 1)",
+        default=2,
+        help="Minimum number of clients used for fit/evaluate (default: 2)",
     )
     parser.add_argument(
         "--min_num_clients",
         type=int,
-        default=1,
-        help="Minimum number of available clients required for sampling (default: 1)",
+        default=2,
+        help="Minimum number of available clients required for sampling (default: 2)",
     )
     parser.add_argument(
         "--log_host", type=str, help="Logserver address (no default)",
@@ -67,7 +72,7 @@ def main() -> None:
     fl.logger.configure("server", host=args.log_host)
 
     # Load evaluation data
-    _, xy_test = fashion_mnist.load_data(partition=0, num_partitions=1)
+    _, testset = cifar.load_data()
 
     # Create client_manager, strategy, and server
     client_manager = fl.SimpleClientManager()
@@ -75,7 +80,7 @@ def main() -> None:
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
-        eval_fn=get_eval_fn(xy_test=xy_test),
+        eval_fn=get_eval_fn(testset),
         on_fit_config_fn=fit_config,
     )
     server = fl.Server(client_manager=client_manager, strategy=strategy)
@@ -91,22 +96,23 @@ def fit_config(rnd: int) -> Dict[str, str]:
     config = {
         "epoch_global": str(rnd),
         "epochs": str(1),
-        "batch_size": str(64),
+        "batch_size": str(32),
     }
     return config
 
 
 def get_eval_fn(
-    xy_test: Tuple[np.ndarray, np.ndarray]
+    testset: torchvision.datasets.CIFAR10,
 ) -> Callable[[fl.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
     def evaluate(weights: fl.Weights) -> Optional[Tuple[float, float]]:
-        """Use the entire Fashion-MNIST test set for evaluation."""
-        model = fashion_mnist.load_model()
+        """Use the entire CIFAR-10 test set for evaluation."""
+        model = cifar.load_model()
         model.set_weights(weights)
-        loss, acc = model.evaluate(xy_test[0], xy_test[1], batch_size=len(xy_test))
-        return float(loss), float(acc)
+        model.to(DEVICE)
+        testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
+        return cifar.test(model, testloader, device=DEVICE)
 
     return evaluate
 

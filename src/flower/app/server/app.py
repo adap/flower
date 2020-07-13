@@ -12,15 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower App."""
+"""Flower server app."""
 
 
-from logging import DEBUG, INFO
+from logging import INFO
 from typing import Dict
 
-from flower.client import Client
-from flower.grpc_client.connection import insecure_grpc_connection
-from flower.grpc_client.message_handler import handle
 from flower.grpc_server.grpc_server import start_insecure_grpc_server
 from flower.logger import log
 from flower.server import Server
@@ -31,7 +28,7 @@ def start_server(server_address: str, server: Server, config: Dict[str, int]) ->
     grpc_server = start_insecure_grpc_server(
         client_manager=server.client_manager(), server_address=server_address
     )
-    log(DEBUG, "Flower server running (insecure, %s rounds)", config["num_rounds"])
+    log(INFO, "Flower server running (insecure, %s rounds)", config["num_rounds"])
 
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
@@ -59,15 +56,3 @@ def start_server(server_address: str, server: Server, config: Dict[str, int]) ->
 
     # Stop the gRPC server
     grpc_server.stop(1)
-
-
-def start_client(server_address: str, client: Client) -> None:
-    """Start a Flower client which connects to a gRPC server."""
-    with insecure_grpc_connection(server_address) as conn:
-        receive, send = conn
-        log(DEBUG, "Opened (insecure) gRPC connection")
-
-        while True:
-            server_message = receive()
-            client_message = handle(client, server_message)
-            send(client_message)

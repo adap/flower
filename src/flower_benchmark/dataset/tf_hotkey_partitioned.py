@@ -41,7 +41,7 @@ def download(filename: str, path: str) -> None:
     print("Downloaded ", url)
 
 
-def hotkey_load(dirname: str = "./hotkey_data/") -> Tuple[XY, XY]:
+def hotkey_load(dirname: str = "./data/hotkey/") -> Tuple[XY, XY]:
     """Load Hotkey dataset from disk."""
     files = [
         "hotkey_train_x.pkl",
