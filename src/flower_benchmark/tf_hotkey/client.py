@@ -100,7 +100,7 @@ def main() -> None:
         10,
         normalization_factor=100.0,
     )
-    flwr.app.start_client(args.server_address, client)
+    flwr.app.client.start_client(args.server_address, client)
 
 
 if __name__ == "__main__":
