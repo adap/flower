@@ -1,4 +1,4 @@
-# Flower - A Friendly Federated Learning Research Framework
+# Flower (flwr) - A Friendly Federated Learning Research Framework
 
 [![GitHub license](https://img.shields.io/github/license/adap/flower)](https://github.com/adap/flower/blob/master/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/master/CONTRIBUTING.md)
@@ -27,24 +27,28 @@ design of Flower is based on a few guiding principles:
 > Note: Even though Flower is used in production, it is published as
 > pre-release software. Incompatible API changes are possible.
 
+## Documentation
+
+* [Documentation](https://flower.dev)
+
 ## Installation
 
-Flower can be installed directly from the GitHub repository using `pip`:
+Flower can be installed directly from the [PyPI](https://pypi.org/project/flwr/) using `pip`:
 
 ```bash
-$ pip install git+https://github.com/adap/flower.git
+$ pip install flwr
 ```
-
-Official [PyPI](https://pypi.org/) releases will follow once the API matures.
 
 ## Run Examples
 
-We built a number of examples showcasing different usage scenarios in
-`src/flower_example`. To run an example, first install the necessary extras
-(available extras: `examples-tensorflow`):
+A number of examples show different usage scenarios in `src/flwr_example`. To
+run an example, first install the necessary extras. Available extras:
+
+- `examples-tensorflow`
+- `examples-pytorch`
 
 ```bash
-pip install git+https://github.com/adap/flower.git#egg=flower[examples-tensorflow]
+pip install flwr[examples-tensorflow]
 ```
 
 Once the necessary extras (e.g., TensorFlow) are installed, you might want to
@@ -54,13 +58,13 @@ in two terminals using the following commands.
 Start server in the first terminal:
 
 ```bash
-$ ./src/flower_example/tf_fashion_mnist/run-server.sh
+$ ./src/flwr_example/tf_fashion_mnist/run-server.sh
 ```
 
 Start the clients in a second terminal:
 
 ```bash
-$ ./src/flower_example/tf_fashion_mnist/run-clients.sh
+$ ./src/flwr_example/tf_fashion_mnist/run-clients.sh
 ```
 
 ### Docker
@@ -75,14 +79,10 @@ $ docker network create flower
 $ ./dev/docker_build.sh
 
 # Run the docker containers (will tail a logfile created by a central logserver)
-$ ./src/flower_example/tf_fashion_mnist/run-docker.sh
+$ ./src/flwr_example/tf_fashion_mnist/run-docker.sh
 ```
 
 This will start a slightly reduced setup with only four clients.
-
-## Documentation
-
-* [Documentation](https://flower.adap.com/docs/)
 
 ## Contributing to Flower
 
