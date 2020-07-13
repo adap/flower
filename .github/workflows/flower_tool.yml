@@ -5,12 +5,12 @@ on:
     branches:
       - master
     paths:
-      - "src/flower_tool/**"
+      - "src/flwr_tool/**"
   pull_request:
     branches:
       - master
     paths:
-      - "src/flower_tool/**"
+      - "src/flwr_tool/**"
 
 jobs:
   test_tool:
