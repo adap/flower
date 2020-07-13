@@ -139,7 +139,8 @@ def main() -> None:
     # Run server
     server = fl.Server(client_manager=client_manager, strategy=strategy)
     fl.app.server.start_server(
-
+        DEFAULT_SERVER_ADDRESS, server, config={"num_rounds": server_setting.rounds},	
+    )
 
 def get_on_fit_config_fn(
     lr_initial: float, timeout: Optional[int], partial_updates: bool
