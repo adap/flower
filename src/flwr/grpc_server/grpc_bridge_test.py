@@ -19,8 +19,8 @@ import time
 from threading import Thread
 from typing import List, Union
 
-from flower.grpc_server.grpc_bridge import GRPCBridge, GRPCBridgeClosed
-from flower.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.grpc_server.grpc_bridge import GRPCBridge, GRPCBridgeClosed
+from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
 def start_worker(

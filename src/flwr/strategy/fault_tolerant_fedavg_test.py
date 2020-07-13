@@ -18,8 +18,8 @@
 from typing import List, Optional, Tuple
 from unittest.mock import MagicMock
 
-from flower import EvaluateRes, FitRes, Parameters, Weights
-from flower.client_proxy import ClientProxy
+from flwr import EvaluateRes, FitRes, Parameters, Weights
+from flwr.client_proxy import ClientProxy
 
 from .fault_tolerant_fedavg import FaultTolerantFedAvg
 

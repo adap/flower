@@ -17,7 +17,7 @@
 
 from abc import ABC, abstractmethod
 
-from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
+from flwr.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
 
 
 class ClientProxy(ABC):

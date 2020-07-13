@@ -18,9 +18,9 @@
 from logging import INFO
 from typing import Dict
 
-from flower.grpc_server.grpc_server import start_insecure_grpc_server
-from flower.logger import log
-from flower.server import Server
+from flwr.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.logger import log
+from flwr.server import Server
 
 
 def start_server(server_address: str, server: Server, config: Dict[str, int]) -> None:

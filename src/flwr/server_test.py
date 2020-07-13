@@ -19,7 +19,7 @@ from typing import List
 
 import numpy as np
 
-from flower.strategy.parameter import ndarray_to_bytes
+from flwr.strategy.parameter import ndarray_to_bytes
 
 from .client_proxy import ClientProxy
 from .server import evaluate_clients, fit_clients

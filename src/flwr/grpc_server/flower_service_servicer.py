@@ -21,11 +21,11 @@ from typing import Callable, Iterator
 
 import grpc
 
-from flower.client_manager import ClientManager
-from flower.grpc_server.grpc_bridge import GRPCBridge
-from flower.grpc_server.grpc_client_proxy import GrpcClientProxy
-from flower.proto import transport_pb2_grpc
-from flower.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.client_manager import ClientManager
+from flwr.grpc_server.grpc_bridge import GRPCBridge
+from flwr.grpc_server.grpc_client_proxy import GrpcClientProxy
+from flwr.proto import transport_pb2_grpc
+from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
 def default_bridge_factory() -> GRPCBridge:

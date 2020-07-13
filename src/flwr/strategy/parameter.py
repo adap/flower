@@ -20,7 +20,7 @@ from typing import cast
 
 import numpy as np
 
-from flower.typing import Parameters, Weights
+from flwr.typing import Parameters, Weights
 
 
 def weights_to_parameters(weights: Weights) -> Parameters:

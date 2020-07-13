@@ -21,9 +21,9 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from flower.client_manager import ClientManager
-from flower.client_proxy import ClientProxy
-from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from flwr.client_manager import ClientManager
+from flwr.client_proxy import ClientProxy
+from flwr.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 from .aggregate import aggregate_qffl, weighted_loss_avg
 from .fedavg import FedAvg

@@ -20,13 +20,13 @@ import timeit
 from logging import DEBUG, INFO
 from typing import List, Optional, Tuple, cast
 
-from flower.client_manager import ClientManager
-from flower.client_proxy import ClientProxy
-from flower.history import History
-from flower.logger import log
-from flower.strategy import DefaultStrategy, Strategy
-from flower.strategy.parameter import parameters_to_weights
-from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from flwr.client_manager import ClientManager
+from flwr.client_proxy import ClientProxy
+from flwr.history import History
+from flwr.logger import log
+from flwr.strategy import DefaultStrategy, Strategy
+from flwr.strategy.parameter import parameters_to_weights
+from flwr.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
 EvaluateResultsAndFailures = Tuple[

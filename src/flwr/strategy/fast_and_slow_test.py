@@ -16,7 +16,7 @@
 
 import unittest
 
-from flower.strategy import fast_and_slow
+from flwr.strategy import fast_and_slow
 
 
 # pylint: disable-msg=no-self-use,missing-class-docstring,missing-function-docstring

@@ -15,9 +15,9 @@
 """Handle server messages by calling appropriate client methods."""
 
 
-from flower.client import Client
-from flower.grpc_server import serde
-from flower.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.client import Client
+from flwr.grpc_server import serde
+from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 # pylint: disable=missing-function-docstring
 

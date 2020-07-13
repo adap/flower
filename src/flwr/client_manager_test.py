@@ -16,8 +16,8 @@
 
 from unittest.mock import MagicMock
 
-from flower.client_manager import SimpleClientManager
-from flower.grpc_server.grpc_client_proxy import GrpcClientProxy
+from flwr.client_manager import SimpleClientManager
+from flwr.grpc_server.grpc_client_proxy import GrpcClientProxy
 
 
 def test_simple_client_manager_register():

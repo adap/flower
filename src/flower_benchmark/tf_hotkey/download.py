@@ -17,8 +17,8 @@
 
 from logging import INFO
 
-from flower.logger import log
 from flower_benchmark.dataset import tf_hotkey_partitioned
+from flwr.logger import log
 
 
 def main() -> None:

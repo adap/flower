@@ -21,10 +21,10 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from flower.client_manager import ClientManager
-from flower.client_proxy import ClientProxy
-from flower.logger import log
-from flower.typing import EvaluateRes, FitIns, FitRes, Weights
+from flwr.client_manager import ClientManager
+from flwr.client_proxy import ClientProxy
+from flwr.logger import log
+from flwr.typing import EvaluateRes, FitIns, FitRes, Weights
 
 from .aggregate import aggregate, weighted_loss_avg
 from .fast_and_slow import is_fast_round, normalize_and_sample

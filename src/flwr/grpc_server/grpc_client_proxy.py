@@ -15,11 +15,11 @@
 """Networked Flower client implementation."""
 
 
-from flower import typing
-from flower.client_proxy import ClientProxy
-from flower.grpc_server import serde
-from flower.grpc_server.grpc_bridge import GRPCBridge
-from flower.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr import typing
+from flwr.client_proxy import ClientProxy
+from flwr.grpc_server import serde
+from flwr.grpc_server.grpc_bridge import GRPCBridge
+from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
 class GrpcClientProxy(ClientProxy):

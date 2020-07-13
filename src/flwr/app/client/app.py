@@ -17,10 +17,10 @@
 
 from logging import INFO
 
-from flower.client import Client
-from flower.grpc_client.connection import insecure_grpc_connection
-from flower.grpc_client.message_handler import handle
-from flower.logger import log
+from flwr.client import Client
+from flwr.grpc_client.connection import insecure_grpc_connection
+from flwr.grpc_client.message_handler import handle
+from flwr.logger import log
 
 
 def start_client(server_address: str, client: Client) -> None:

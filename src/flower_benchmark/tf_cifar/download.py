@@ -19,7 +19,7 @@ from logging import INFO
 
 import tensorflow as tf
 
-from flower.logger import log
+from flwr.logger import log
 
 tf.get_logger().setLevel("ERROR")
 

@@ -17,8 +17,8 @@
 
 from typing import List
 
-from flower import typing
-from flower.proto.transport_pb2 import ClientMessage, Parameters, Reason, ServerMessage
+from flwr import typing
+from flwr.proto.transport_pb2 import ClientMessage, Parameters, Reason, ServerMessage
 
 # pylint: disable=missing-function-docstring
 

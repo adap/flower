@@ -22,10 +22,10 @@ from unittest.mock import patch
 
 import grpc
 
-from flower.client_manager import SimpleClientManager
-from flower.grpc_client.connection import insecure_grpc_connection
-from flower.grpc_server.grpc_server import start_insecure_grpc_server
-from flower.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.client_manager import SimpleClientManager
+from flwr.grpc_client.connection import insecure_grpc_connection
+from flwr.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 EXPECTED_NUM_SERVER_MESSAGE = 10
 
@@ -66,9 +66,7 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
             break
 
 
-@patch(
-    "flower.grpc_server.flower_service_servicer.FlowerServiceServicer.Join", mock_join
-)
+@patch("flwr.grpc_server.flower_service_servicer.FlowerServiceServicer.Join", mock_join)
 def test_integration_connection():
     """Create a server and establish a connection to it.
 

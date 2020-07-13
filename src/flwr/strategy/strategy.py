@@ -18,9 +18,9 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
 
-from flower.client_manager import ClientManager
-from flower.client_proxy import ClientProxy
-from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from flwr.client_manager import ClientManager
+from flwr.client_proxy import ClientProxy
+from flwr.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 
 class Strategy(ABC):

@@ -20,9 +20,9 @@ from typing import Callable, Iterator, Tuple
 
 import grpc
 
-from flower.logger import log
-from flower.proto.transport_pb2 import ClientMessage, ServerMessage
-from flower.proto.transport_pb2_grpc import FlowerServiceStub
+from flwr.logger import log
+from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.transport_pb2_grpc import FlowerServiceStub
 
 # Uncomment these flags in case you are debugging
 # os.environ["GRPC_VERBOSITY"] = "debug"

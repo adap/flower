@@ -20,9 +20,9 @@ Paper: https://arxiv.org/abs/1602.05629
 
 from typing import Callable, Dict, List, Optional, Tuple
 
-from flower.client_manager import ClientManager
-from flower.client_proxy import ClientProxy
-from flower.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from flwr.client_manager import ClientManager
+from flwr.client_proxy import ClientProxy
+from flwr.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 from .aggregate import aggregate, weighted_loss_avg
 from .parameter import parameters_to_weights, weights_to_parameters

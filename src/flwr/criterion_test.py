@@ -16,10 +16,10 @@
 
 from unittest.mock import MagicMock
 
-from flower.client_manager import SimpleClientManager
-from flower.client_proxy import ClientProxy
-from flower.criterion import Criterion
-from flower.grpc_server.grpc_client_proxy import GrpcClientProxy
+from flwr.client_manager import SimpleClientManager
+from flwr.client_proxy import ClientProxy
+from flwr.criterion import Criterion
+from flwr.grpc_server.grpc_client_proxy import GrpcClientProxy
 
 
 def test_criterion_applied():

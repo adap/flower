@@ -21,12 +21,12 @@ from logging import ERROR
 import tensorflow as tf
 
 import flwr as fl
-from flower.logger import configure, log
 from flower_benchmark.common import VisionClassificationClient
 from flower_benchmark.dataset import tf_hotkey_partitioned
 from flower_benchmark.model import keyword_cnn
 from flower_benchmark.setting import ClientSetting
 from flower_benchmark.tf_hotkey.settings import SETTINGS, get_setting
+from flwr.logger import configure, log
 
 from . import DEFAULT_SERVER_ADDRESS, SEED
 

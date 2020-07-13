@@ -24,7 +24,7 @@ import numpy as np
 import tensorflow as tf
 
 import flwr as fl
-from flower.logger import log
+from flwr.logger import log
 
 from .data import build_dataset
 

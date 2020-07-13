@@ -20,9 +20,9 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
-import flower
-from flower.grpc_server.grpc_client_proxy import GrpcClientProxy
-from flower.proto.transport_pb2 import ClientMessage, Parameters
+import flwr
+from flwr.grpc_server.grpc_client_proxy import GrpcClientProxy
+from flwr.proto.transport_pb2 import ClientMessage, Parameters
 
 MESSAGE_PARAMETERS = Parameters(tensors=[], tensor_type="np")
 MESSAGE_FIT_RES = ClientMessage(
@@ -50,7 +50,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
 
         # Execute
-        value: flower.ParametersRes = client.get_parameters()
+        value: flwr.ParametersRes = client.get_parameters()
 
         # Assert
         assert value.parameters.tensors == []
@@ -59,23 +59,23 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         """This test is currently quite simple and should be improved"""
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
-        parameters = flower.weights_to_parameters([np.ones((2, 2))])
-        ins: flower.FitIns = (parameters, {})
+        parameters = flwr.weights_to_parameters([np.ones((2, 2))])
+        ins: flwr.FitIns = (parameters, {})
 
         # Execute
         parameters_prime, num_examples, _, _ = client.fit(ins=ins)
 
         # Assert
         assert parameters_prime.tensor_type == "np"
-        assert flower.parameters_to_weights(parameters_prime) == []
+        assert flwr.parameters_to_weights(parameters_prime) == []
         assert num_examples == 10
 
     def test_evaluate(self):
         """This test is currently quite simple and should be improved"""
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
-        parameters = flower.Parameters(tensors=[], tensor_type="np")
-        evaluate_ins: flower.EvaluateIns = (parameters, {})
+        parameters = flwr.Parameters(tensors=[], tensor_type="np")
+        evaluate_ins: flwr.EvaluateIns = (parameters, {})
 
         # Execute
         value = client.evaluate(evaluate_ins)
