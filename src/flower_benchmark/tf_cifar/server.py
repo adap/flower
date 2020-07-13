@@ -20,7 +20,7 @@ import math
 from logging import ERROR, INFO
 from typing import Callable, Dict, Optional
 
-import flower as flwr
+import flower as fl
 from flower.logger import configure, log
 from flower_benchmark.common import get_eval_fn
 from flower_benchmark.dataset import tf_cifar_partitioned
@@ -65,7 +65,7 @@ def main() -> None:
     model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
 
     # Create client_manager
-    client_manager = flwr.SimpleClientManager()
+    client_manager = fl.SimpleClientManager()
 
     # Strategy
     eval_fn = get_eval_fn(
@@ -78,7 +78,7 @@ def main() -> None:
     )
 
     if server_setting.strategy == "fedavg":
-        strategy = flwr.strategy.FedAvg(
+        strategy = fl.strategy.FedAvg(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
@@ -91,7 +91,7 @@ def main() -> None:
             raise ValueError(
                 "No `training_round_timeout` set for `fast-and-slow` strategy"
             )
-        strategy = flwr.strategy.FastAndSlow(
+        strategy = fl.strategy.FastAndSlow(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
@@ -108,8 +108,8 @@ def main() -> None:
         )
 
     # Run server
-    server = flwr.Server(client_manager=client_manager, strategy=strategy)
-    flwr.app.server.start_server(
+    server = fl.Server(client_manager=client_manager, strategy=strategy)
+    fl.app.server.start_server(
         DEFAULT_SERVER_ADDRESS, server, config={"num_rounds": server_setting.rounds},
     )
 
