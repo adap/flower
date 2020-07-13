@@ -15,4 +15,4 @@
 """Flower client app."""
 
 
-from .app import start_client
+from .app import start_client, start_keras_client

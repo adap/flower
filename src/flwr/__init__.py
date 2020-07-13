@@ -19,6 +19,7 @@ from . import app
 from .client import Client
 from .client_manager import SimpleClientManager
 from .history import History
+from .keras_client import KerasClient
 from .server import Server
 from .strategy.parameter import parameters_to_weights, weights_to_parameters
 from .typing import (
