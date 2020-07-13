@@ -22,6 +22,6 @@ jobs:
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
-          sed -i '' -E "s/^version = \"(.+)\"/version = \"\1-nightly-$(date '+%Y%m%d')\"/" pyproject.toml
+          sed -i -E "s/^version = \"(.+)\"/version = \"\1-nightly-$(date '+%Y%m%d')\"/" pyproject.toml
           python -m poetry build
           python -m poetry publish -u=__token__ --p=$PYPI_TOKEN
