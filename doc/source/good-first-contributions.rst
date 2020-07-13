@@ -27,7 +27,6 @@ ideas where we'd be happy to accept a PR:
 
 - First scikit-learn example (MNIST)
 - First MXNet 1.6 example (MNIST)
-- CIFAR-10/100 (PyTorch/TensorFlow)
 - ImageNet (PyTorch/TensorFlow)
 - LSTM (PyTorch/TensorFlow)
 - Transformer (PyTorch/TensorFlow)

@@ -81,7 +81,7 @@ def main() -> None:
     server = fl.Server(client_manager=client_manager, strategy=strategy)
 
     # Run server
-    fl.app.start_server(
+    fl.app.server.start_server(
         args.server_address, server, config={"num_rounds": args.rounds},
     )
 

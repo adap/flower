@@ -23,7 +23,7 @@ from typing import Callable, List, Optional, Tuple
 import numpy as np
 import tensorflow as tf
 
-import flower as flwr
+import flower as fl
 from flower.logger import log
 
 from .data import build_dataset
@@ -150,7 +150,7 @@ def get_lr_schedule(
 
 def get_eval_fn(
     model: tf.keras.Model, num_classes: int, xy_test: Tuple[np.ndarray, np.ndarray]
-) -> Callable[[flwr.Weights], Optional[Tuple[float, float]]]:
+) -> Callable[[fl.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
     ds_test = build_dataset(
@@ -161,7 +161,7 @@ def get_eval_fn(
         augment=False,
     )
 
-    def evaluate(weights: flwr.Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(weights: fl.Weights) -> Optional[Tuple[float, float]]:
         """Use entire test set for evaluation."""
         model.set_weights(weights)
         lss, acc = keras_evaluate(model, ds_test, batch_size=len(xy_test[0]))
