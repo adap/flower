@@ -20,7 +20,7 @@ from typing import Callable, Dict, Optional, Tuple
 
 import numpy as np
 
-import flower as fl
+import flwr as fl
 
 from . import DEFAULT_SERVER_ADDRESS, fashion_mnist
 

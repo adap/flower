@@ -26,7 +26,7 @@ def install_wheel(wheel_remote_path: str) -> str:
     Remove previous versions if existing.
     """
     return (
-        "python3.7 -m pip uninstall -y flower && "
+        "python3.7 -m pip uninstall -y flwr && "
         + f"python3.7 -m pip install '{wheel_remote_path}[examples-tensorflow,http-logger]'"
     )
 

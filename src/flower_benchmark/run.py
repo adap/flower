@@ -25,12 +25,12 @@ from typing import List, Optional
 import flower_benchmark.tf_cifar.settings as tf_cifar_settings
 import flower_benchmark.tf_fashion_mnist.settings as tf_fashion_mnist_settings
 import flower_benchmark.tf_hotkey.settings as tf_hotkey_settings
-from flower.logger import configure, log
 from flower_benchmark import command
 from flower_ops.cluster import Cluster, Instance
 from flower_ops.compute.adapter import Adapter
 from flower_ops.compute.docker_adapter import DockerAdapter
 from flower_ops.compute.ec2_adapter import EC2Adapter
+from flwr.logger import configure, log
 
 OPS_INI_PATH = path.normpath(
     f"{path.dirname(path.realpath(__file__))}/../../.flower_ops"
