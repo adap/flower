@@ -9,7 +9,9 @@ from google.protobuf.internal.containers import (
     RepeatedScalarFieldContainer as google___protobuf___internal___containers___RepeatedScalarFieldContainer,
 )
 
-from google.protobuf.message import Message as google___protobuf___message___Message
+from google.protobuf.message import (
+    Message as google___protobuf___message___Message,
+)
 
 from typing import (
     Iterable as typing___Iterable,
@@ -23,7 +25,10 @@ from typing import (
     cast as typing___cast,
 )
 
-from typing_extensions import Literal as typing_extensions___Literal
+from typing_extensions import (
+    Literal as typing_extensions___Literal,
+)
+
 
 builtin___bool = bool
 builtin___bytes = bytes
@@ -34,604 +39,364 @@ if sys.version_info < (3,):
     builtin___buffer = buffer
     builtin___unicode = unicode
 
+
 class Reason(builtin___int):
     DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
     @classmethod
     def Name(cls, number: builtin___int) -> builtin___str: ...
     @classmethod
-    def Value(cls, name: builtin___str) -> "Reason": ...
+    def Value(cls, name: builtin___str) -> 'Reason': ...
     @classmethod
     def keys(cls) -> typing___List[builtin___str]: ...
     @classmethod
-    def values(cls) -> typing___List["Reason"]: ...
+    def values(cls) -> typing___List['Reason']: ...
     @classmethod
-    def items(cls) -> typing___List[typing___Tuple[builtin___str, "Reason"]]: ...
-    UNKNOWN = typing___cast("Reason", 0)
-    RECONNECT = typing___cast("Reason", 1)
-    POWER_DISCONNECTED = typing___cast("Reason", 2)
-    WIFI_UNAVAILABLE = typing___cast("Reason", 3)
-
-UNKNOWN = typing___cast("Reason", 0)
-RECONNECT = typing___cast("Reason", 1)
-POWER_DISCONNECTED = typing___cast("Reason", 2)
-WIFI_UNAVAILABLE = typing___cast("Reason", 3)
+    def items(cls) -> typing___List[typing___Tuple[builtin___str, 'Reason']]: ...
+    UNKNOWN = typing___cast('Reason', 0)
+    RECONNECT = typing___cast('Reason', 1)
+    POWER_DISCONNECTED = typing___cast('Reason', 2)
+    WIFI_UNAVAILABLE = typing___cast('Reason', 3)
+UNKNOWN = typing___cast('Reason', 0)
+RECONNECT = typing___cast('Reason', 1)
+POWER_DISCONNECTED = typing___cast('Reason', 2)
+WIFI_UNAVAILABLE = typing___cast('Reason', 3)
 
 class Parameters(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    tensors = (
-        ...
-    )  # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___bytes]
-    tensor_type = ...  # type: typing___Text
-    def __init__(
-        self,
+    tensors = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___bytes]
+    tensor_type = ... # type: typing___Text
+
+    def __init__(self,
         *,
-        tensors: typing___Optional[typing___Iterable[builtin___bytes]] = None,
-        tensor_type: typing___Optional[typing___Text] = None,
-    ) -> None: ...
+        tensors : typing___Optional[typing___Iterable[builtin___bytes]] = None,
+        tensor_type : typing___Optional[typing___Text] = None,
+        ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> Parameters: ...
     else:
         @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> Parameters: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Parameters: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def ClearField(
-            self, field_name: typing_extensions___Literal["tensor_type", "tensors"]
-        ) -> None: ...
+        def ClearField(self, field_name: typing_extensions___Literal[u"tensor_type",u"tensors"]) -> None: ...
     else:
-        def ClearField(
-            self,
-            field_name: typing_extensions___Literal[
-                "tensor_type", b"tensor_type", "tensors", b"tensors"
-            ],
-        ) -> None: ...
+        def ClearField(self, field_name: typing_extensions___Literal[u"tensor_type",b"tensor_type",u"tensors",b"tensors"]) -> None: ...
 
 class ServerMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     class Reconnect(google___protobuf___message___Message):
         DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-        seconds = ...  # type: builtin___int
-        def __init__(
-            self, *, seconds: typing___Optional[builtin___int] = None,
-        ) -> None: ...
+        seconds = ... # type: builtin___int
+
+        def __init__(self,
+            *,
+            seconds : typing___Optional[builtin___int] = None,
+            ) -> None: ...
         if sys.version_info >= (3,):
             @classmethod
             def FromString(cls, s: builtin___bytes) -> ServerMessage.Reconnect: ...
         else:
             @classmethod
-            def FromString(
-                cls,
-                s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode],
-            ) -> ServerMessage.Reconnect: ...
-        def MergeFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
-        def CopyFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
+            def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ServerMessage.Reconnect: ...
+        def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
         if sys.version_info >= (3,):
-            def ClearField(
-                self, field_name: typing_extensions___Literal["seconds"]
-            ) -> None: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"seconds"]) -> None: ...
         else:
-            def ClearField(
-                self, field_name: typing_extensions___Literal["seconds", b"seconds"]
-            ) -> None: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"seconds",b"seconds"]) -> None: ...
+
     class GetParameters(google___protobuf___message___Message):
         DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-        def __init__(self,) -> None: ...
+
+        def __init__(self,
+            ) -> None: ...
         if sys.version_info >= (3,):
             @classmethod
             def FromString(cls, s: builtin___bytes) -> ServerMessage.GetParameters: ...
         else:
             @classmethod
-            def FromString(
-                cls,
-                s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode],
-            ) -> ServerMessage.GetParameters: ...
-        def MergeFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
-        def CopyFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
+            def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ServerMessage.GetParameters: ...
+        def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+
     class FitIns(google___protobuf___message___Message):
         DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
         class ConfigEntry(google___protobuf___message___Message):
             DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-            key = ...  # type: typing___Text
-            value = ...  # type: typing___Text
-            def __init__(
-                self,
+            key = ... # type: typing___Text
+            value = ... # type: typing___Text
+
+            def __init__(self,
                 *,
-                key: typing___Optional[typing___Text] = None,
-                value: typing___Optional[typing___Text] = None,
-            ) -> None: ...
+                key : typing___Optional[typing___Text] = None,
+                value : typing___Optional[typing___Text] = None,
+                ) -> None: ...
             if sys.version_info >= (3,):
                 @classmethod
-                def FromString(
-                    cls, s: builtin___bytes
-                ) -> ServerMessage.FitIns.ConfigEntry: ...
+                def FromString(cls, s: builtin___bytes) -> ServerMessage.FitIns.ConfigEntry: ...
             else:
                 @classmethod
-                def FromString(
-                    cls,
-                    s: typing___Union[
-                        builtin___bytes, builtin___buffer, builtin___unicode
-                    ],
-                ) -> ServerMessage.FitIns.ConfigEntry: ...
-            def MergeFrom(
-                self, other_msg: google___protobuf___message___Message
-            ) -> None: ...
-            def CopyFrom(
-                self, other_msg: google___protobuf___message___Message
-            ) -> None: ...
+                def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ServerMessage.FitIns.ConfigEntry: ...
+            def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+            def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
             if sys.version_info >= (3,):
-                def ClearField(
-                    self, field_name: typing_extensions___Literal["key", "value"]
-                ) -> None: ...
+                def ClearField(self, field_name: typing_extensions___Literal[u"key",u"value"]) -> None: ...
             else:
-                def ClearField(
-                    self,
-                    field_name: typing_extensions___Literal[
-                        "key", b"key", "value", b"value"
-                    ],
-                ) -> None: ...
+                def ClearField(self, field_name: typing_extensions___Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+
+
         @property
         def parameters(self) -> Parameters: ...
+
         @property
         def config(self) -> typing___MutableMapping[typing___Text, typing___Text]: ...
-        def __init__(
-            self,
+
+        def __init__(self,
             *,
-            parameters: typing___Optional[Parameters] = None,
-            config: typing___Optional[
-                typing___Mapping[typing___Text, typing___Text]
-            ] = None,
-        ) -> None: ...
+            parameters : typing___Optional[Parameters] = None,
+            config : typing___Optional[typing___Mapping[typing___Text, typing___Text]] = None,
+            ) -> None: ...
         if sys.version_info >= (3,):
             @classmethod
             def FromString(cls, s: builtin___bytes) -> ServerMessage.FitIns: ...
         else:
             @classmethod
-            def FromString(
-                cls,
-                s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode],
-            ) -> ServerMessage.FitIns: ...
-        def MergeFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
-        def CopyFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
+            def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ServerMessage.FitIns: ...
+        def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
         if sys.version_info >= (3,):
-            def HasField(
-                self, field_name: typing_extensions___Literal["parameters"]
-            ) -> builtin___bool: ...
-            def ClearField(
-                self, field_name: typing_extensions___Literal["config", "parameters"]
-            ) -> None: ...
+            def HasField(self, field_name: typing_extensions___Literal[u"parameters"]) -> builtin___bool: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"config",u"parameters"]) -> None: ...
         else:
-            def HasField(
-                self,
-                field_name: typing_extensions___Literal["parameters", b"parameters"],
-            ) -> builtin___bool: ...
-            def ClearField(
-                self,
-                field_name: typing_extensions___Literal[
-                    "config", b"config", "parameters", b"parameters"
-                ],
-            ) -> None: ...
+            def HasField(self, field_name: typing_extensions___Literal[u"parameters",b"parameters"]) -> builtin___bool: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"config",b"config",u"parameters",b"parameters"]) -> None: ...
+
     class EvaluateIns(google___protobuf___message___Message):
         DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
         class ConfigEntry(google___protobuf___message___Message):
             DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-            key = ...  # type: typing___Text
-            value = ...  # type: typing___Text
-            def __init__(
-                self,
+            key = ... # type: typing___Text
+            value = ... # type: typing___Text
+
+            def __init__(self,
                 *,
-                key: typing___Optional[typing___Text] = None,
-                value: typing___Optional[typing___Text] = None,
-            ) -> None: ...
+                key : typing___Optional[typing___Text] = None,
+                value : typing___Optional[typing___Text] = None,
+                ) -> None: ...
             if sys.version_info >= (3,):
                 @classmethod
-                def FromString(
-                    cls, s: builtin___bytes
-                ) -> ServerMessage.EvaluateIns.ConfigEntry: ...
+                def FromString(cls, s: builtin___bytes) -> ServerMessage.EvaluateIns.ConfigEntry: ...
             else:
                 @classmethod
-                def FromString(
-                    cls,
-                    s: typing___Union[
-                        builtin___bytes, builtin___buffer, builtin___unicode
-                    ],
-                ) -> ServerMessage.EvaluateIns.ConfigEntry: ...
-            def MergeFrom(
-                self, other_msg: google___protobuf___message___Message
-            ) -> None: ...
-            def CopyFrom(
-                self, other_msg: google___protobuf___message___Message
-            ) -> None: ...
+                def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ServerMessage.EvaluateIns.ConfigEntry: ...
+            def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+            def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
             if sys.version_info >= (3,):
-                def ClearField(
-                    self, field_name: typing_extensions___Literal["key", "value"]
-                ) -> None: ...
+                def ClearField(self, field_name: typing_extensions___Literal[u"key",u"value"]) -> None: ...
             else:
-                def ClearField(
-                    self,
-                    field_name: typing_extensions___Literal[
-                        "key", b"key", "value", b"value"
-                    ],
-                ) -> None: ...
+                def ClearField(self, field_name: typing_extensions___Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+
+
         @property
         def parameters(self) -> Parameters: ...
+
         @property
         def config(self) -> typing___MutableMapping[typing___Text, typing___Text]: ...
-        def __init__(
-            self,
+
+        def __init__(self,
             *,
-            parameters: typing___Optional[Parameters] = None,
-            config: typing___Optional[
-                typing___Mapping[typing___Text, typing___Text]
-            ] = None,
-        ) -> None: ...
+            parameters : typing___Optional[Parameters] = None,
+            config : typing___Optional[typing___Mapping[typing___Text, typing___Text]] = None,
+            ) -> None: ...
         if sys.version_info >= (3,):
             @classmethod
             def FromString(cls, s: builtin___bytes) -> ServerMessage.EvaluateIns: ...
         else:
             @classmethod
-            def FromString(
-                cls,
-                s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode],
-            ) -> ServerMessage.EvaluateIns: ...
-        def MergeFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
-        def CopyFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
+            def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ServerMessage.EvaluateIns: ...
+        def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
         if sys.version_info >= (3,):
-            def HasField(
-                self, field_name: typing_extensions___Literal["parameters"]
-            ) -> builtin___bool: ...
-            def ClearField(
-                self, field_name: typing_extensions___Literal["config", "parameters"]
-            ) -> None: ...
+            def HasField(self, field_name: typing_extensions___Literal[u"parameters"]) -> builtin___bool: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"config",u"parameters"]) -> None: ...
         else:
-            def HasField(
-                self,
-                field_name: typing_extensions___Literal["parameters", b"parameters"],
-            ) -> builtin___bool: ...
-            def ClearField(
-                self,
-                field_name: typing_extensions___Literal[
-                    "config", b"config", "parameters", b"parameters"
-                ],
-            ) -> None: ...
+            def HasField(self, field_name: typing_extensions___Literal[u"parameters",b"parameters"]) -> builtin___bool: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"config",b"config",u"parameters",b"parameters"]) -> None: ...
+
+
     @property
     def reconnect(self) -> ServerMessage.Reconnect: ...
+
     @property
     def get_parameters(self) -> ServerMessage.GetParameters: ...
+
     @property
     def fit_ins(self) -> ServerMessage.FitIns: ...
+
     @property
     def evaluate_ins(self) -> ServerMessage.EvaluateIns: ...
-    def __init__(
-        self,
+
+    def __init__(self,
         *,
-        reconnect: typing___Optional[ServerMessage.Reconnect] = None,
-        get_parameters: typing___Optional[ServerMessage.GetParameters] = None,
-        fit_ins: typing___Optional[ServerMessage.FitIns] = None,
-        evaluate_ins: typing___Optional[ServerMessage.EvaluateIns] = None,
-    ) -> None: ...
+        reconnect : typing___Optional[ServerMessage.Reconnect] = None,
+        get_parameters : typing___Optional[ServerMessage.GetParameters] = None,
+        fit_ins : typing___Optional[ServerMessage.FitIns] = None,
+        evaluate_ins : typing___Optional[ServerMessage.EvaluateIns] = None,
+        ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> ServerMessage: ...
     else:
         @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> ServerMessage: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ServerMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(
-            self,
-            field_name: typing_extensions___Literal[
-                "evaluate_ins", "fit_ins", "get_parameters", "msg", "reconnect"
-            ],
-        ) -> builtin___bool: ...
-        def ClearField(
-            self,
-            field_name: typing_extensions___Literal[
-                "evaluate_ins", "fit_ins", "get_parameters", "msg", "reconnect"
-            ],
-        ) -> None: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"evaluate_ins",u"fit_ins",u"get_parameters",u"msg",u"reconnect"]) -> builtin___bool: ...
+        def ClearField(self, field_name: typing_extensions___Literal[u"evaluate_ins",u"fit_ins",u"get_parameters",u"msg",u"reconnect"]) -> None: ...
     else:
-        def HasField(
-            self,
-            field_name: typing_extensions___Literal[
-                "evaluate_ins",
-                b"evaluate_ins",
-                "fit_ins",
-                b"fit_ins",
-                "get_parameters",
-                b"get_parameters",
-                "msg",
-                b"msg",
-                "reconnect",
-                b"reconnect",
-            ],
-        ) -> builtin___bool: ...
-        def ClearField(
-            self,
-            field_name: typing_extensions___Literal[
-                "evaluate_ins",
-                b"evaluate_ins",
-                "fit_ins",
-                b"fit_ins",
-                "get_parameters",
-                b"get_parameters",
-                "msg",
-                b"msg",
-                "reconnect",
-                b"reconnect",
-            ],
-        ) -> None: ...
-    def WhichOneof(
-        self, oneof_group: typing_extensions___Literal["msg", b"msg"]
-    ) -> typing_extensions___Literal[
-        "reconnect", "get_parameters", "fit_ins", "evaluate_ins"
-    ]: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"evaluate_ins",b"evaluate_ins",u"fit_ins",b"fit_ins",u"get_parameters",b"get_parameters",u"msg",b"msg",u"reconnect",b"reconnect"]) -> builtin___bool: ...
+        def ClearField(self, field_name: typing_extensions___Literal[u"evaluate_ins",b"evaluate_ins",u"fit_ins",b"fit_ins",u"get_parameters",b"get_parameters",u"msg",b"msg",u"reconnect",b"reconnect"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions___Literal[u"msg",b"msg"]) -> typing_extensions___Literal["reconnect","get_parameters","fit_ins","evaluate_ins"]: ...
 
 class ClientMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     class Disconnect(google___protobuf___message___Message):
         DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-        reason = ...  # type: Reason
-        def __init__(self, *, reason: typing___Optional[Reason] = None,) -> None: ...
+        reason = ... # type: Reason
+
+        def __init__(self,
+            *,
+            reason : typing___Optional[Reason] = None,
+            ) -> None: ...
         if sys.version_info >= (3,):
             @classmethod
             def FromString(cls, s: builtin___bytes) -> ClientMessage.Disconnect: ...
         else:
             @classmethod
-            def FromString(
-                cls,
-                s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode],
-            ) -> ClientMessage.Disconnect: ...
-        def MergeFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
-        def CopyFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
+            def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ClientMessage.Disconnect: ...
+        def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
         if sys.version_info >= (3,):
-            def ClearField(
-                self, field_name: typing_extensions___Literal["reason"]
-            ) -> None: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"reason"]) -> None: ...
         else:
-            def ClearField(
-                self, field_name: typing_extensions___Literal["reason", b"reason"]
-            ) -> None: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"reason",b"reason"]) -> None: ...
+
     class ParametersRes(google___protobuf___message___Message):
         DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+
         @property
         def parameters(self) -> Parameters: ...
-        def __init__(
-            self, *, parameters: typing___Optional[Parameters] = None,
-        ) -> None: ...
+
+        def __init__(self,
+            *,
+            parameters : typing___Optional[Parameters] = None,
+            ) -> None: ...
         if sys.version_info >= (3,):
             @classmethod
             def FromString(cls, s: builtin___bytes) -> ClientMessage.ParametersRes: ...
         else:
             @classmethod
-            def FromString(
-                cls,
-                s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode],
-            ) -> ClientMessage.ParametersRes: ...
-        def MergeFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
-        def CopyFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
+            def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ClientMessage.ParametersRes: ...
+        def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
         if sys.version_info >= (3,):
-            def HasField(
-                self, field_name: typing_extensions___Literal["parameters"]
-            ) -> builtin___bool: ...
-            def ClearField(
-                self, field_name: typing_extensions___Literal["parameters"]
-            ) -> None: ...
+            def HasField(self, field_name: typing_extensions___Literal[u"parameters"]) -> builtin___bool: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"parameters"]) -> None: ...
         else:
-            def HasField(
-                self,
-                field_name: typing_extensions___Literal["parameters", b"parameters"],
-            ) -> builtin___bool: ...
-            def ClearField(
-                self,
-                field_name: typing_extensions___Literal["parameters", b"parameters"],
-            ) -> None: ...
+            def HasField(self, field_name: typing_extensions___Literal[u"parameters",b"parameters"]) -> builtin___bool: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"parameters",b"parameters"]) -> None: ...
+
     class FitRes(google___protobuf___message___Message):
         DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-        num_examples = ...  # type: builtin___int
-        num_examples_ceil = ...  # type: builtin___int
-        fit_duration = ...  # type: builtin___float
+        num_examples = ... # type: builtin___int
+        num_examples_ceil = ... # type: builtin___int
+        fit_duration = ... # type: builtin___float
+
         @property
         def parameters(self) -> Parameters: ...
-        def __init__(
-            self,
+
+        def __init__(self,
             *,
-            parameters: typing___Optional[Parameters] = None,
-            num_examples: typing___Optional[builtin___int] = None,
-            num_examples_ceil: typing___Optional[builtin___int] = None,
-            fit_duration: typing___Optional[builtin___float] = None,
-        ) -> None: ...
+            parameters : typing___Optional[Parameters] = None,
+            num_examples : typing___Optional[builtin___int] = None,
+            num_examples_ceil : typing___Optional[builtin___int] = None,
+            fit_duration : typing___Optional[builtin___float] = None,
+            ) -> None: ...
         if sys.version_info >= (3,):
             @classmethod
             def FromString(cls, s: builtin___bytes) -> ClientMessage.FitRes: ...
         else:
             @classmethod
-            def FromString(
-                cls,
-                s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode],
-            ) -> ClientMessage.FitRes: ...
-        def MergeFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
-        def CopyFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
+            def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ClientMessage.FitRes: ...
+        def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
         if sys.version_info >= (3,):
-            def HasField(
-                self, field_name: typing_extensions___Literal["parameters"]
-            ) -> builtin___bool: ...
-            def ClearField(
-                self,
-                field_name: typing_extensions___Literal[
-                    "fit_duration", "num_examples", "num_examples_ceil", "parameters"
-                ],
-            ) -> None: ...
+            def HasField(self, field_name: typing_extensions___Literal[u"parameters"]) -> builtin___bool: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"fit_duration",u"num_examples",u"num_examples_ceil",u"parameters"]) -> None: ...
         else:
-            def HasField(
-                self,
-                field_name: typing_extensions___Literal["parameters", b"parameters"],
-            ) -> builtin___bool: ...
-            def ClearField(
-                self,
-                field_name: typing_extensions___Literal[
-                    "fit_duration",
-                    b"fit_duration",
-                    "num_examples",
-                    b"num_examples",
-                    "num_examples_ceil",
-                    b"num_examples_ceil",
-                    "parameters",
-                    b"parameters",
-                ],
-            ) -> None: ...
+            def HasField(self, field_name: typing_extensions___Literal[u"parameters",b"parameters"]) -> builtin___bool: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"fit_duration",b"fit_duration",u"num_examples",b"num_examples",u"num_examples_ceil",b"num_examples_ceil",u"parameters",b"parameters"]) -> None: ...
+
     class EvaluateRes(google___protobuf___message___Message):
         DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-        num_examples = ...  # type: builtin___int
-        loss = ...  # type: builtin___float
-        accuracy = ...  # type: builtin___float
-        def __init__(
-            self,
+        num_examples = ... # type: builtin___int
+        loss = ... # type: builtin___float
+        accuracy = ... # type: builtin___float
+
+        def __init__(self,
             *,
-            num_examples: typing___Optional[builtin___int] = None,
-            loss: typing___Optional[builtin___float] = None,
-            accuracy: typing___Optional[builtin___float] = None,
-        ) -> None: ...
+            num_examples : typing___Optional[builtin___int] = None,
+            loss : typing___Optional[builtin___float] = None,
+            accuracy : typing___Optional[builtin___float] = None,
+            ) -> None: ...
         if sys.version_info >= (3,):
             @classmethod
             def FromString(cls, s: builtin___bytes) -> ClientMessage.EvaluateRes: ...
         else:
             @classmethod
-            def FromString(
-                cls,
-                s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode],
-            ) -> ClientMessage.EvaluateRes: ...
-        def MergeFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
-        def CopyFrom(
-            self, other_msg: google___protobuf___message___Message
-        ) -> None: ...
+            def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ClientMessage.EvaluateRes: ...
+        def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+        def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
         if sys.version_info >= (3,):
-            def ClearField(
-                self,
-                field_name: typing_extensions___Literal[
-                    "accuracy", "loss", "num_examples"
-                ],
-            ) -> None: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"accuracy",u"loss",u"num_examples"]) -> None: ...
         else:
-            def ClearField(
-                self,
-                field_name: typing_extensions___Literal[
-                    "accuracy",
-                    b"accuracy",
-                    "loss",
-                    b"loss",
-                    "num_examples",
-                    b"num_examples",
-                ],
-            ) -> None: ...
+            def ClearField(self, field_name: typing_extensions___Literal[u"accuracy",b"accuracy",u"loss",b"loss",u"num_examples",b"num_examples"]) -> None: ...
+
+
     @property
     def disconnect(self) -> ClientMessage.Disconnect: ...
+
     @property
     def parameters_res(self) -> ClientMessage.ParametersRes: ...
+
     @property
     def fit_res(self) -> ClientMessage.FitRes: ...
+
     @property
     def evaluate_res(self) -> ClientMessage.EvaluateRes: ...
-    def __init__(
-        self,
+
+    def __init__(self,
         *,
-        disconnect: typing___Optional[ClientMessage.Disconnect] = None,
-        parameters_res: typing___Optional[ClientMessage.ParametersRes] = None,
-        fit_res: typing___Optional[ClientMessage.FitRes] = None,
-        evaluate_res: typing___Optional[ClientMessage.EvaluateRes] = None,
-    ) -> None: ...
+        disconnect : typing___Optional[ClientMessage.Disconnect] = None,
+        parameters_res : typing___Optional[ClientMessage.ParametersRes] = None,
+        fit_res : typing___Optional[ClientMessage.FitRes] = None,
+        evaluate_res : typing___Optional[ClientMessage.EvaluateRes] = None,
+        ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
         def FromString(cls, s: builtin___bytes) -> ClientMessage: ...
     else:
         @classmethod
-        def FromString(
-            cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]
-        ) -> ClientMessage: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ClientMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(
-            self,
-            field_name: typing_extensions___Literal[
-                "disconnect", "evaluate_res", "fit_res", "msg", "parameters_res"
-            ],
-        ) -> builtin___bool: ...
-        def ClearField(
-            self,
-            field_name: typing_extensions___Literal[
-                "disconnect", "evaluate_res", "fit_res", "msg", "parameters_res"
-            ],
-        ) -> None: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"disconnect",u"evaluate_res",u"fit_res",u"msg",u"parameters_res"]) -> builtin___bool: ...
+        def ClearField(self, field_name: typing_extensions___Literal[u"disconnect",u"evaluate_res",u"fit_res",u"msg",u"parameters_res"]) -> None: ...
     else:
-        def HasField(
-            self,
-            field_name: typing_extensions___Literal[
-                "disconnect",
-                b"disconnect",
-                "evaluate_res",
-                b"evaluate_res",
-                "fit_res",
-                b"fit_res",
-                "msg",
-                b"msg",
-                "parameters_res",
-                b"parameters_res",
-            ],
-        ) -> builtin___bool: ...
-        def ClearField(
-            self,
-            field_name: typing_extensions___Literal[
-                "disconnect",
-                b"disconnect",
-                "evaluate_res",
-                b"evaluate_res",
-                "fit_res",
-                b"fit_res",
-                "msg",
-                b"msg",
-                "parameters_res",
-                b"parameters_res",
-            ],
-        ) -> None: ...
-    def WhichOneof(
-        self, oneof_group: typing_extensions___Literal["msg", b"msg"]
-    ) -> typing_extensions___Literal[
-        "disconnect", "parameters_res", "fit_res", "evaluate_res"
-    ]: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"disconnect",b"disconnect",u"evaluate_res",b"evaluate_res",u"fit_res",b"fit_res",u"msg",b"msg",u"parameters_res",b"parameters_res"]) -> builtin___bool: ...
+        def ClearField(self, field_name: typing_extensions___Literal[u"disconnect",b"disconnect",u"evaluate_res",b"evaluate_res",u"fit_res",b"fit_res",u"msg",b"msg",u"parameters_res",b"parameters_res"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions___Literal[u"msg",b"msg"]) -> typing_extensions___Literal["disconnect","parameters_res","fit_res","evaluate_res"]: ...
