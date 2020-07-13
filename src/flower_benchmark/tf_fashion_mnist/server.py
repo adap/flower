@@ -158,7 +158,7 @@ def main() -> None:
         )
 
     if server_setting.strategy == "fedprox":
-        strategy = flwr.strategy.FedProxMu0(
+        strategy = fl.strategy.FedProxMu0(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,

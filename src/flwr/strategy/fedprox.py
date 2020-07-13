@@ -21,9 +21,9 @@ Paper: https://proceedings.mlsys.org/static/paper_files/mlsys/2020/176-Paper.pdf
 import random
 from typing import Callable, Dict, List, Optional, Tuple
 
-from flower.client_manager import ClientManager
-from flower.client_proxy import ClientProxy
-from flower.typing import FitIns, Weights
+from flwr.client_manager import ClientManager
+from flwr.client_proxy import ClientProxy
+from flwr.typing import FitIns, Weights
 
 from .fedavg import FedAvg
 from .parameter import weights_to_parameters
