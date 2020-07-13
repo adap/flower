@@ -20,7 +20,7 @@ import math
 from logging import ERROR, INFO
 from typing import Callable, Dict, Optional
 
-import flower as fl
+import flwr as fl
 from flower.logger import configure, log
 from flower_benchmark.common import get_eval_fn
 from flower_benchmark.dataset import tf_hotkey_partitioned

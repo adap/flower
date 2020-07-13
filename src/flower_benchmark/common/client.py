@@ -21,7 +21,7 @@ from typing import Tuple
 import numpy as np
 import tensorflow as tf
 
-import flower as fl
+import flwr as fl
 from flower.logger import log
 
 from .common import custom_fit, keras_evaluate

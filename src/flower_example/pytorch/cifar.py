@@ -34,7 +34,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch import Tensor
 
-import flower as fl
+import flwr as fl
 
 DATA_ROOT = "./data/cifar-10"
 PATH = "./cifar_net.pth"

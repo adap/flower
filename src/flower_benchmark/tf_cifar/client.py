@@ -20,7 +20,7 @@ from logging import ERROR, INFO
 
 import tensorflow as tf
 
-import flower as fl
+import flwr as fl
 from flower.logger import configure, log
 from flower_benchmark.common import VisionClassificationClient
 from flower_benchmark.dataset import tf_cifar_partitioned
