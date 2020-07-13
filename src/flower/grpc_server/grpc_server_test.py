@@ -14,15 +14,26 @@
 # ==============================================================================
 """Tests for module server."""
 
-import flower_testing
+import socket
+from contextlib import closing
+from typing import cast
+
 from flower.client_manager import SimpleClientManager
 from flower.grpc_server.grpc_server import start_insecure_grpc_server
+
+
+def unused_tcp_port() -> int:
+    """Return an unused port."""
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+        sock.bind(("", 0))
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return cast(int, sock.getsockname()[1])
 
 
 def test_integration_start_and_shutdown_server():
     """Create server and check if FlowerServiceServicer is returned."""
     # Prepare
-    port = flower_testing.network.unused_tcp_port()
+    port = unused_tcp_port()
     client_manager = SimpleClientManager()
 
     # Execute

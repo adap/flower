@@ -15,12 +15,13 @@
 """Tests for module connection."""
 
 import concurrent.futures
-from typing import Iterator
+import socket
+from contextlib import closing
+from typing import Iterator, cast
 from unittest.mock import patch
 
 import grpc
 
-import flower_testing
 from flower.client_manager import SimpleClientManager
 from flower.grpc_client.connection import insecure_grpc_connection
 from flower.grpc_server.grpc_server import start_insecure_grpc_server
@@ -33,6 +34,14 @@ SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect=ServerMessage.Reconnect())
 
 CLIENT_MESSAGE = ClientMessage()
 CLIENT_MESSAGE_DISCONNECT = ClientMessage(disconnect=ClientMessage.Disconnect())
+
+
+def unused_tcp_port() -> int:
+    """Return an unused port."""
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+        sock.bind(("", 0))
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return cast(int, sock.getsockname()[1])
 
 
 def mock_join(  # type: ignore # pylint: disable=invalid-name
@@ -67,7 +76,7 @@ def test_integration_connection():
     with multiple roundtrips between server and client.
     """
     # Prepare
-    port = flower_testing.network.unused_tcp_port()
+    port = unused_tcp_port()
 
     server = start_insecure_grpc_server(
         client_manager=SimpleClientManager(), server_address=f"[::]:{port}"
