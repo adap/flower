@@ -26,7 +26,25 @@ consult :code:`pyproject.toml` for a full list of possible extras (section
 PyTorch Examples
 ----------------
 
-PyTorch examples will follow shortly. Stay tuned!
+Our PyTorch examples are based on PyTorch 1.5.1. They should work with other
+releases as well. So far, we provide the follow examples.
+
+CIFAR-10 Image Classification
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`CIFAR-10 and CIFAR-100 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ are
+popular RGB image datasets. The Flower CIFAR-10 example uses PyTorch to train a
+simple CNN classifier in a federated learning setup with two clients.
+
+First, start a Flower server:
+
+  $ ./src/flower_example/pytorch/run-server.sh
+
+Then, start the two clients in a new terminal window:
+
+  $ ./src/flower_example/pytorch/run-clients.sh
+
+For more details, see :code:`src/flower_example/pytorch`.
 
 
 TensorFlow Examples
@@ -45,21 +63,11 @@ classification model over those partitions.
 
 First, start a Flower server:
 
-  $ python -m flower_example.tf_mnist_grpc_server
+  $ ./src/flower_example/tf_fashion_mnist/run-server.sh
 
-For each Flower client that should participate in the trainig, open a new
-terminal window and type:
+Then, start the two clients in a new terminal window:
 
-  $ python -m flower_example.tf_mnist_grpc_client
+  $ ./src/flower_example/tf_fashion_mnist/run-clients.sh
 
-For more details, see :code:`src/flower_example/tf_mnist_grpc_server.py` and
-:code:`src/flower_example/tf_mnist_grpc_client.py`. 
 
-MNIST Image Classification (single-machine)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-There is also a single-machine version of the previous MNIST image
-classification example. It executes both client and server in a single process,
-which might be handy for some types of experimentation. To run it, type::
-
-  $ python src/flower_example/mnist.py
+For more details, see :code:`src/flower_example/tf_fashion_mnist`.
