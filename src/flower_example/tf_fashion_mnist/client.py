@@ -22,7 +22,7 @@ from typing import Tuple
 import numpy as np
 import tensorflow as tf
 
-import flower as fl
+import flwr as fl
 
 from . import DEFAULT_SERVER_ADDRESS, fashion_mnist
 

@@ -18,7 +18,7 @@ import unittest
 
 import numpy as np
 
-import flower as fl
+import flwr as fl
 
 from . import cifar
 
