@@ -106,7 +106,7 @@ def main() -> None:
         augment_horizontal_flip=False,
         augment_offset=1,
     )
-    flwr.app.start_client(args.server_address, client)
+    flwr.app.client.start_client(args.server_address, client)
 
 
 if __name__ == "__main__":

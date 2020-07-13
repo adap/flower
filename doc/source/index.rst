@@ -1,11 +1,11 @@
 .. image:: _static/flower-logo.png
-    :alt: Flower: A friendly federated learning research framework
+    :alt: Flower: A Friendly Federated Learning Research Framework
     :align: center
     :width: 200
     :target: https://flower.adap.com/
 
 
-Welcome to Flower's documentation!
+Welcome to Flower!
 ==================================
 
 Flower is a friendly federated learning research framework. The design of
@@ -17,9 +17,9 @@ Flower is based on a few guiding principles which aim to make it
 User Guide
 ----------
 
-The user guide is targeted at developers who want to use Flower to bring
-existing machine learning workloads into a federated setting. One of Flower's
-design goals was to make this simple. Read on to learn more.
+The user guide is targeted at researchers and developers who want to use Flower
+to bring existing machine learning workloads into a federated setting. One of
+Flower's design goals was to make this simple. Read on to learn more.
 
 .. warning:: Flower's user-facing API is still in development and not
    considered stable. We welcome curious users to give it a try and share their
@@ -48,9 +48,9 @@ intended to help along the way.
    good-first-contributions
 
 
-Indices and tables
-------------------
+.. Indices and tables
+.. ------------------
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`

@@ -160,7 +160,7 @@ def main() -> None:
     # Run server
     log(INFO, "Instantiating server, strategy: %s", str(strategy))
     server = flwr.Server(client_manager=client_manager, strategy=strategy)
-    flwr.app.start_server(
+    flwr.app.server.start_server(
         DEFAULT_SERVER_ADDRESS, server, config={"num_rounds": server_setting.rounds},
     )
 
