@@ -59,7 +59,10 @@ def custom_fit(
 
         # Single loop over the dataset
         batch_begin = timeit.default_timer()
-        for x, y in ds_train:
+        num_examples_batch = 0
+        for batch, (x, y) in enumerate(ds_train):
+            num_examples_batch += len(x)
+
             # Optimize the model
             loss_value, grads = grad(model, x, y)
             optimizer.apply_gradients(zip(grads, model.trainable_variables))
@@ -75,6 +78,19 @@ def custom_fit(
             batch_duration = timeit.default_timer() - batch_begin
             if delay_factor > 0.0:
                 time.sleep(batch_duration * delay_factor)
+
+            # Progress log
+            if batch % 100 == 0:
+                log(
+                    INFO,
+                    "Batch %s: loss %s (%s examples processed, batch duration: %s)",
+                    batch,
+                    loss_value,
+                    num_examples_batch,
+                    batch_duration,
+                )
+
+            # Timeout
             if timeout is not None:
                 fit_duration = timeit.default_timer() - fit_begin
                 if fit_duration > timeout:
