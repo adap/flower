@@ -16,15 +16,39 @@
 
 
 from logging import INFO
-from typing import Dict
+from typing import Dict, Optional
 
+from flwr.client_manager import SimpleClientManager
 from flwr.grpc_server.grpc_server import start_insecure_grpc_server
 from flwr.logger import log
 from flwr.server import Server
+from flwr.strategy import FedAvg, Strategy
+
+DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 
-def start_server(server_address: str, server: Server, config: Dict[str, int]) -> None:
+def start_server(
+    server_address: str = DEFAULT_SERVER_ADDRESS,
+    server: Optional[Server] = None,
+    config: Optional[Dict[str, int]] = None,
+    strategy: Optional[Strategy] = None,
+) -> None:
     """Start a Flower server using the gRPC transport layer."""
+
+    # Create server instance if none was given
+    if server is None:
+        client_manager = SimpleClientManager()
+        if strategy is None:
+            strategy = FedAvg()
+        server = Server(client_manager=client_manager, strategy=strategy)
+
+    # Set default config values
+    if config is None:
+        config = {}
+    if "num_rounds" not in config:
+        config["num_rounds"] = 1
+
+    # Start gRPC server
     grpc_server = start_insecure_grpc_server(
         client_manager=server.client_manager(), server_address=server_address
     )

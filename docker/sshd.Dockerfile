@@ -24,8 +24,8 @@ COPY dist/flwr-0.0.1-py3-none-any.whl flwr-0.0.1-py3-none-any.whl
 RUN python -m pip install --no-cache-dir 'flwr-0.0.1-py3-none-any.whl[examples-tensorflow,http-logger,benchmark,ops]' && \
     rm flwr-0.0.1-py3-none-any.whl
 
-RUN python3.7 -m flower_benchmark.tf_fashion_mnist.download
-RUN python3.7 -m flower_benchmark.tf_cifar.download
+RUN python3.7 -m flwr_experimental.benchmark.tf_fashion_mnist.download
+RUN python3.7 -m flwr_experimental.benchmark.tf_cifar.download
 
 EXPOSE 22
 
