@@ -5,7 +5,7 @@ requires = [
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "flower"
+name = "flwr"
 version = "0.0.1"
 description = "See `README.md`"
 license = "Apache-2.0"
@@ -39,7 +39,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 packages = [
-    { include = "flower", from = "src" },
+    { include = "flwr", from = "src" },
     { include = "flower_benchmark", from = "src" },
     { include = "flower_example", from = "src" },
     { include = "flower_logserver", from = "src" },

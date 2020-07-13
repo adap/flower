@@ -21,8 +21,8 @@ from typing import Tuple
 import numpy as np
 import tensorflow as tf
 
-import flower as fl
-from flower.logger import log
+import flwr as fl
+from flwr.logger import log
 
 from .common import custom_fit, keras_evaluate
 from .data import build_dataset
