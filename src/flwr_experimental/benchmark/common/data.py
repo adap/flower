@@ -104,7 +104,9 @@ def build_dataset(
     dataset = dataset.map(
         lambda x, y: (
             tf.cast(x, tf.float32) / normalization_factor,
-            tf.one_hot(indices=tf.cast(y, tf.int32), depth=num_classes),
+            tf.one_hot(
+                indices=tf.cast(y, tf.int32), depth=num_classes, on_value=1, off_value=0
+            ),
         ),
         num_parallel_calls=tf.data.experimental.AUTOTUNE,
     )
