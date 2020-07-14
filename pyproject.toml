@@ -91,7 +91,8 @@ force_grid_wrap = 0
 use_parentheses = true
 
 [tool.black]
-target-version = ['py37']
+line-length = 88
+target-version = ["py36", "py37", "py38"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods"
