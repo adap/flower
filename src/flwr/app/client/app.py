@@ -20,11 +20,12 @@ from logging import INFO
 from flwr.client import Client
 from flwr.grpc_client.connection import insecure_grpc_connection
 from flwr.grpc_client.message_handler import handle
+from flwr.keras_client import KerasClient, KerasClientWrapper
 from flwr.logger import log
 
 
 def start_client(server_address: str, client: Client) -> None:
-    """Start a Flower client which connects to a gRPC server."""
+    """Start a Flower Client which connects to a gRPC server."""
     with insecure_grpc_connection(server_address) as conn:
         receive, send = conn
         log(INFO, "Opened (insecure) gRPC connection")
@@ -33,3 +34,13 @@ def start_client(server_address: str, client: Client) -> None:
             server_message = receive()
             client_message = handle(client, server_message)
             send(client_message)
+
+
+def start_keras_client(server_address: str, client: KerasClient) -> None:
+    """Start a Flower KerasClient which connects to a gRPC server."""
+
+    # Wrap the Keras client
+    flower_client = KerasClientWrapper(client)
+
+    # Start
+    start_client(server_address, flower_client)
