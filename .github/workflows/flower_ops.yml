@@ -3,12 +3,12 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - "src/flwr_experimental/ops/**"
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - "src/flwr_experimental/ops/**"
 
