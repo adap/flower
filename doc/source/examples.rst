@@ -11,10 +11,9 @@ pipelines, usually leveraging popular machine learning frameworks such as
 Extra Dependencies
 ------------------
 
-The core Flower framework keeps a minimal set of dependencies. Because
-the examples demonstrate Flower in the context of differnt machine learning
-frameworks, one needs to install those additional dependencies before running
-an example
+The core Flower framework keeps a minimal set of dependencies. The examples
+demonstrate Flower in the context of differnt machine learning frameworks, so 
+additional dependencies need to be installed before an example can be run.
 
 For PyTorch examples::
 
