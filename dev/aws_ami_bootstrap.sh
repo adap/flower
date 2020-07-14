@@ -16,7 +16,7 @@
 # ==============================================================================
 
 # This script can be used to create an AWS EC2 AMI which contains the dependencies required
-# to execute Flower benchmarks. The AWS EC2 AMI might not always reflect all dependencies listed
+# to execute Flower baselines. The AWS EC2 AMI might not always reflect all dependencies listed
 # in `pyproject.toml`, but it should at least have most of them.
 
 # This script was last used on 2020-05-26 to create an AMI with ID `ami-0370b0294d7241341`.

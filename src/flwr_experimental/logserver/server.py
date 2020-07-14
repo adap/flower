@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Provides a logserver."""
+
+
 import argparse
 import ast
 import json
@@ -28,7 +30,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import boto3
 import numpy as np
 
-from flwr_experimental.benchmark.plot import plot
+from flwr_experimental.baseline.plot import plot
 
 LOGDIR = "flower_logs"
 LOGFILE = "{logdir}/flower.log".format(logdir=LOGDIR)

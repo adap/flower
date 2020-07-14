@@ -33,7 +33,7 @@ jobs:
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test.sh
 
-  test_benchmark:
+  test_baseline:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -49,10 +49,10 @@ jobs:
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory + optional)
         run: |
-          python -m poetry install --extras "benchmark"
+          python -m poetry install --extras "baseline"
           python -m pip install -U tensorflow-cpu==2.2.0
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
-        run: ./dev/test-benchmark.sh
+        run: ./dev/test-baseline.sh
 
   test_example_pytorch:
     runs-on: ubuntu-18.04

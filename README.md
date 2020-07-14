@@ -47,7 +47,7 @@ Available [examples](src/flwr_example):
 
 ## Flower Baselines
 
-*Coming soon* - curious minds can take a peek at [src/flwr_experimental/benchmark](src/flwr_experimental/benchmark).
+*Coming soon* - curious minds can take a peek at [src/flwr_experimental/baseline](src/flwr_experimental/baseline).
 
 ## Contributing to Flower
 
