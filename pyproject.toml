@@ -6,14 +6,14 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "0.0.1"
+version = "0.1.1"
 description = "Flower - A Friendly Federated Learning Research Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
 readme = "README.md"
-homepage = "https://github.com/adap/flower"
+homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"
-documentation = "https://github.com/adap/flower"
+documentation = "https://flower.dev"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
