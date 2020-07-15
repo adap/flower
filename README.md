@@ -1,10 +1,10 @@
-# Flower (flwr) - A Friendly Federated Learning Research Framework
+# Flower (`flwr`) - A Friendly Federated Learning Research Framework
 
 [![GitHub license](https://img.shields.io/github/license/adap/flower)](https://github.com/adap/flower/blob/master/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/master/CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/workflows/Build/badge.svg)
 
-Flower is a research framework for building federated learning systems. The
+Flower (`flwr`) is a research framework for building federated learning systems. The
 design of Flower is based on a few guiding principles:
 
 * **Customizable**: Federated learning systems vary wildly from one use case to
@@ -13,7 +13,7 @@ design of Flower is based on a few guiding principles:
 
 * **Extendable**: Flower originated from a research project at the Univerity of
   Oxford, so it was build with AI research in mind. Many components can be
-  extended and overridden to build new state-of-the-art systems. 
+  extended and overridden to build new state-of-the-art systems.
 
 * **Framework-agnostic**: Different machine learning frameworks have different
   strengths. Flower can be used with any machine learning framework, for
@@ -30,59 +30,24 @@ design of Flower is based on a few guiding principles:
 ## Documentation
 
 * [Documentation](https://flower.dev)
+  * [Installation](https://flower.dev/installation.html)
 
-## Installation
+## Flower Usage Examples
 
-Flower can be installed directly from the [PyPI](https://pypi.org/project/flwr/) using `pip`:
+A number of examples show different usage scenarios of Flower (in combination
+with popular machine learning frameworks such as PyTorch or TensorFlow). To run
+an example, first install the necessary extras:
 
-```bash
-$ pip install flwr
-```
+[Usage Examples Documentation](https://flower.dev/examples.html)
 
-## Run Examples
+Available [examples](src/flwr_example):
 
-A number of examples show different usage scenarios in `src/flwr_example`. To
-run an example, first install the necessary extras. Available extras:
+* [PyTorch & CIFAR-10](src/flwr_example/pytorch)
+* [TensorFlow & Fashion-MNIST](src/flwr_example/tensorflow)
 
-- `examples-tensorflow`
-- `examples-pytorch`
+## Flower Baselines
 
-```bash
-pip install flwr[examples-tensorflow]
-```
-
-Once the necessary extras (e.g., TensorFlow) are installed, you might want to
-run the Fashion-MNIST example by starting a single server and multiple clients
-in two terminals using the following commands.
-
-Start server in the first terminal:
-
-```bash
-$ ./src/flwr_example/tf_fashion_mnist/run-server.sh
-```
-
-Start the clients in a second terminal:
-
-```bash
-$ ./src/flwr_example/tf_fashion_mnist/run-clients.sh
-```
-
-### Docker
-
-If you have Docker on your machine you might want to skip most of the setup and
-try out the example using the following commands:
-
-```bash
-# Create docker network `flower` so that containers can reach each other by name
-$ docker network create flower
-# Build the Flower docker containers
-$ ./dev/docker_build.sh
-
-# Run the docker containers (will tail a logfile created by a central logserver)
-$ ./src/flwr_example/tf_fashion_mnist/run-docker.sh
-```
-
-This will start a slightly reduced setup with only four clients.
+*Coming soon* - curious minds can take a peek at [src/flwr_experimental/benchmark](src/flwr_experimental/benchmark).
 
 ## Contributing to Flower
 
