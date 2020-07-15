@@ -1,4 +1,4 @@
-FROM python:3.7.7-slim-stretch
+FROM python:3.7.8-slim-stretch
 
 # Install the biggest dependencies before copying the wheel
 RUN pip install tensorflow-cpu==2.2.0 numpy==1.18.3
