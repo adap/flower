@@ -24,13 +24,19 @@ jobs:
         id: pip-cache
         run: |
           echo "::set-output name=dir::$(pip cache dir)"
-      - name: Restore Cache
+      - name: Get Poetry cache dir
+        id: poetry-cache
+        run: |
+          echo "::set-output name=dir::$(poetry config cache-dir)"          
+      - name: Restore Pip Cache
         uses: actions/cache@v2
         with:
-          path: ${{ steps.pip-cache.outputs.dir }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          path: |
+            ${{ steps.pip-cache.outputs.dir }}
+            ${{ steps.poetry-cache.outputs.dir }}
+          key: pip-poetry-cache-${{ hashFiles('**/pyproject.toml') }}-${{ runner.os }}-${{ matrix.python-version }}
           restore-keys: |
-            ${{ runner.os }}-pip-
+            pip-poetry-cache-
       - name: Install build tools
         run: |
           python -m pip install -U pip==20.1.1
