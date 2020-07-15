@@ -16,8 +16,7 @@
 
 
 import argparse
-import timeit
-from typing import Tuple
+from typing import Dict, Tuple, cast
 
 import numpy as np
 import tensorflow as tf
@@ -27,8 +26,8 @@ import flwr as fl
 from . import DEFAULT_SERVER_ADDRESS, fashion_mnist
 
 
-class FashionMnistClient(fl.Client):
-    """Flower client implementing Fashion-MNIST image classification using TensorFlow/Keras."""
+class FashionMnistClient(fl.KerasClient):
+    """Flower KerasClient implementing Fashion-MNIST image classification."""
 
     def __init__(
         self,
@@ -42,45 +41,36 @@ class FashionMnistClient(fl.Client):
         self.x_train, self.y_train = xy_train
         self.x_test, self.y_test = xy_test
 
-    def get_parameters(self) -> fl.ParametersRes:
-        parameters = fl.weights_to_parameters(self.model.get_weights())
-        return fl.ParametersRes(parameters=parameters)
+    def get_weights(self) -> fl.Weights:
+        return cast(fl.Weights, self.model.get_weights())
 
-    def fit(self, ins: fl.FitIns) -> fl.FitRes:
-        weights: fl.Weights = fl.parameters_to_weights(ins[0])
-        config = ins[1]
-        fit_begin = timeit.default_timer()
-
-        # Get training config
-        epochs = int(config["epochs"])
-        batch_size = int(config["batch_size"])
-
-        # Use provided weights to update the local model
+    def fit(
+        self, weights: fl.Weights, config: Dict[str, str]
+    ) -> Tuple[fl.Weights, int, int]:
+        # Use provided weights to update local model
         self.model.set_weights(weights)
 
-        # Train the local model using the local dataset
+        # Train the local model using local dataset
         self.model.fit(
-            self.x_train, self.y_train, epochs=epochs, batch_size=batch_size, verbose=2
+            self.x_train,
+            self.y_train,
+            batch_size=int(config["batch_size"]),
+            epochs=int(config["epochs"]),
         )
 
         # Return the refined weights and the number of examples used for training
-        params_prime = fl.weights_to_parameters(self.model.get_weights())
-        num_examples = len(self.x_train)
-        fit_duration = timeit.default_timer() - fit_begin
-        return params_prime, num_examples, num_examples, fit_duration
+        return self.model.get_weights(), len(self.x_train), len(self.x_train)
 
-    def evaluate(self, ins: fl.EvaluateIns) -> fl.EvaluateRes:
-        weights = fl.parameters_to_weights(ins[0])
-
-        # Use provided weights to update the local model
+    def evaluate(
+        self, weights: fl.Weights, config: Dict[str, str]
+    ) -> Tuple[int, float, float]:
+        # Update local model and evaluate on local dataset
         self.model.set_weights(weights)
-
-        # Evaluate the updated model on the local dataset
         loss, accuracy = self.model.evaluate(
             self.x_test, self.y_test, batch_size=len(self.x_test), verbose=2
         )
 
-        # Return the number of evaluation examples and the evaluation result (loss)
+        # Return number of evaluation examples and evaluation result (loss/accuracy)
         return len(self.x_test), float(loss), float(accuracy)
 
 
@@ -118,7 +108,7 @@ def main() -> None:
 
     # Start client
     client = FashionMnistClient(args.cid, model, xy_train, xy_test)
-    fl.app.client.start_client(args.server_address, client)
+    fl.app.client.start_keras_client(args.server_address, client)
 
 
 if __name__ == "__main__":

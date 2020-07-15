@@ -10,8 +10,7 @@ Welcome to Flower!
 
 Flower is a friendly federated learning research framework. The design of
 Flower is based on a few guiding principles which aim to make it
-*customizable*, *extendable*, *framework-agnostic*, and hopefully also
-*understandable*.
+*customizable*, *extendable*, *framework-agnostic*, and *understandable*.
 
 
 User Guide
