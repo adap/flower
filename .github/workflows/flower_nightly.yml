@@ -3,6 +3,9 @@ name: Nightly Release
 on:
   schedule:
     - cron:  '0 23 * * *'
+  pull_request:
+    branches:
+      - fix_nightly_release
 
 jobs:
   deploy_docs:
@@ -18,7 +21,7 @@ jobs:
           python -m pip install -U pip==20.1.1
           python -m pip install -U setuptools==47.3.1
           python -m pip install -U poetry==1.0.9
-      - name: Build and deploy docs
+      - name: Release nightly
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
