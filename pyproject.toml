@@ -63,7 +63,7 @@ docker = { version = "^4.2.0", optional = true }
 matplotlib = { version = "^3.2.1", optional = true }
 
 [tool.poetry.extras]
-benchmark = ["tensorflow-cpu", "boto3", "boto3_type_annotations", "paramiko", "docker", "matplotlib"]
+baseline = ["tensorflow-cpu", "boto3", "boto3_type_annotations", "paramiko", "docker", "matplotlib"]
 examples-pytorch = ["torch", "torchvision"]
 examples-tensorflow = ["tensorflow-cpu"]
 http-logger = ["boto3", "boto3_type_annotations", "tensorflow-cpu", "boto3", "boto3_type_annotations", "paramiko", "docker", "matplotlib"]
@@ -91,7 +91,8 @@ force_grid_wrap = 0
 use_parentheses = true
 
 [tool.black]
-target-version = ['py37']
+line-length = 88
+target-version = ["py36", "py37", "py38"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods"
