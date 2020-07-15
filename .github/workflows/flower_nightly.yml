@@ -1,11 +1,14 @@
 name: Nightly Release
 
 on:
-  schedule:
-    - cron:  '0 23 * * *'
   pull_request:
     branches:
-      - fix_nightly_release
+      - 'fix_nightly_release'
+      - 'main'
+  push:
+    branches:
+      - 'fix_nightly_release'
+      - 'main'
 
 jobs:
   deploy_docs:

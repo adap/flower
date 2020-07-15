@@ -7,7 +7,7 @@ git root of this project. The file needs to contain the following fields
 ```
 [paths]
 wheel_dir = ~/development/adap/flower/dist/
-wheel_filename = flwr-0.0.1-py3-none-any.whl
+wheel_filename = WHEEL_FILENAME
 
 [aws]
 image_id = ami-0370b0294d7241341
