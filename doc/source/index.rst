@@ -1,8 +1,4 @@
-.. image:: _static/flower-logo.png
-    :alt: Flower: A Friendly Federated Learning Research Framework
-    :align: center
-    :width: 200
-    :target: https://flower.adap.com/
+
 
 
 Welcome to Flower!
