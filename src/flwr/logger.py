@@ -18,7 +18,20 @@ from logging import LogRecord
 from logging.handlers import HTTPHandler
 from typing import Any, Dict, Optional, Tuple
 
+# Create logger
 LOGGER_NAME = "flower"
+FLOWER_LOGGER = logging.getLogger(LOGGER_NAME)
+FLOWER_LOGGER.setLevel(logging.DEBUG)
+
+DEFAULT_FORMATTER = logging.Formatter(
+    "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
+)
+
+# Configure console logger
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+console_handler.setFormatter(DEFAULT_FORMATTER)
+FLOWER_LOGGER.addHandler(console_handler)
 
 
 class CustomHTTPHandler(HTTPHandler):
@@ -54,35 +67,26 @@ class CustomHTTPHandler(HTTPHandler):
 def configure(
     identifier: str, filename: Optional[str] = None, host: Optional[str] = None
 ) -> None:
-    """Configure logger."""
-    # create logger
-    _logger = logging.getLogger(LOGGER_NAME)
-    _logger.setLevel(logging.DEBUG)
+    """Configure logging to file and/or remote log server."""
 
-    # create formatter
+    # Create formatter
     formatter = logging.Formatter(
         f"{identifier} | %(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
     )
-
-    # Console logger
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
-    console_handler.setFormatter(formatter)
-    _logger.addHandler(console_handler)
 
     if filename:
         # Create file handler and log to disk
         file_handler = logging.FileHandler(filename)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
-        _logger.addHandler(file_handler)
+        FLOWER_LOGGER.addHandler(file_handler)
 
     if host:
         # Create http handler which logs even debug messages
         http_handler = CustomHTTPHandler(identifier, host, "/log", method="POST",)
         http_handler.setLevel(logging.DEBUG)
         # Override mapLogRecords as setFormatter has no effect on what is send via http
-        _logger.addHandler(http_handler)
+        FLOWER_LOGGER.addHandler(http_handler)
 
 
 logger = logging.getLogger(LOGGER_NAME)  # pylint: disable=invalid-name
