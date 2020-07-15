@@ -12,7 +12,7 @@ python -m pip install -U poetry==1.0.9
 
 # Use `poetry` to install project dependencies
 python -m poetry install \
-  --extras "benchmark" \
+  --extras "baseline" \
   --extras "examples-pytorch" \
   --extras "examples-tensorflow" \
   --extras "http-logger" \
