@@ -1,14 +1,6 @@
 name: Nightly Release
 
-on:
-  pull_request:
-    branches:
-      - 'fix_nightly_release'
-      - 'main'
-  push:
-    branches:
-      - 'fix_nightly_release'
-      - 'main'
+on: push
 
 jobs:
   deploy_docs:
