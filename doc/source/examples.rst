@@ -11,16 +11,42 @@ pipelines, usually leveraging popular machine learning frameworks such as
 Extra Dependencies
 ------------------
 
-The core Flower framework tries to keep a minimal set of dependencies. Because
-the examples demonstrate Flower in the context of differnt machine learning
-frameworks, one needs to install those additional dependencies before running
-an example::
+The core Flower framework keeps a minimal set of dependencies. The examples
+demonstrate Flower in the context of differnt machine learning frameworks, so 
+additional dependencies need to be installed before an example can be run.
 
-  $ pip install git+https://github.com/adap/flower.git#egg=flower[examples-tensorflow]
+For PyTorch examples::
 
-The previous command installs the extra :code:`examples-tensorflow`. Please
-consult :code:`pyproject.toml` for a full list of possible extras (section
-:code:`[tool.poetry.extras]`).
+  $ pip install flwr[examples-pytorch]
+
+For TensorFlow examples::
+
+  $ pip install flwr[examples-tensorflow]
+
+For both PyTorch and TensorFlow examples::
+
+  $ pip install flwr[examples-pytorch,examples-tensorflow]
+
+Please consult :code:`pyproject.toml` for a full list of possible extras
+(section :code:`[tool.poetry.extras]`).
+
+
+Run Examples Using Docker
+-------------------------
+
+Flower examples can also be run through Docker without the need for most of the
+setup steps that are otherwise necessary::
+
+  # Create docker network `flower` so that containers can reach each other by name
+  $ docker network create flower
+  
+  # Build the Flower docker containers
+  $ ./dev/docker_build.sh
+
+  # Run the docker containers (will tail a logfile created by a central logserver)
+  $ ./src/flwr_example/tensorflow/run-docker.sh
+
+This will start a slightly smaller workload with only four clients.
 
 
 PyTorch Examples
@@ -63,11 +89,10 @@ classification model over those partitions.
 
 First, start a Flower server:
 
-  $ ./src/flower_example/tf_fashion_mnist/run-server.sh
+  $ ./src/flower_example/tensorflow/run-server.sh
 
 Then, start the two clients in a new terminal window:
 
-  $ ./src/flower_example/tf_fashion_mnist/run-clients.sh
+  $ ./src/flower_example/tensorflow/run-clients.sh
 
-
-For more details, see :code:`src/flower_example/tf_fashion_mnist`.
+For more details, see :code:`src/flower_example/tensorflow`.
