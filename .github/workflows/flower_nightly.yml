@@ -1,6 +1,8 @@
 name: Nightly Release
 
-on: push
+on:
+  schedule:
+    - cron:  '0 23 * * *'
 
 jobs:
   release:
@@ -20,7 +22,4 @@ jobs:
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
-          sed -i -E "s/^name = \"(.+)\"/name = \"\1-nightly\"/" pyproject.toml
-          sed -i -E "s/^version = \"(.+)\"/version = \"\1-dev.$(date '+%Y%m%d')\"/" pyproject.toml
-          python -m poetry build
-          python -m poetry publish -u __token__ -p $PYPI_TOKEN
+          ./dev/publish-nightly.sh

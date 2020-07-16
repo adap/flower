@@ -15,10 +15,13 @@
 # limitations under the License.
 # ==============================================================================
 
-set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+if [[ $(git log --since="24 hours ago" --pretty=oneline) ]]; then
+    TODAY=$(date '+%Y%m%d')
 
-cd doc
-make html
-cd build/html
-aws s3 sync --delete --exclude ".*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev
+    sed -i -E "s/^name = \"(.+)\"/name = \"\1-nightly\"/" pyproject.toml
+    sed -i -E "s/^version = \"(.+)\"/version = \"\1-dev.$TODAY\"/" pyproject.toml
+    python -m poetry build
+    python -m poetry publish -u __token__ -p $PYPI_TOKEN
+else
+    echo "There are no commits in last 24 hours"
+fi
