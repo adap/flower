@@ -22,7 +22,7 @@ from grpc_tools import protoc
 
 DIR_PATH = path.dirname(path.realpath(__file__))
 GRPC_PATH = grpc_tools.__path__[0]
-IN_PATH = path.normpath(f"{DIR_PATH}/../../proto")
+IN_PATH = path.normpath(f"{DIR_PATH}/../proto")
 OUT_PATH = path.normpath(f"{DIR_PATH}/..")
 PROTO_FILES = glob.glob(f"{IN_PATH}/flwr/**/*.proto")
 
