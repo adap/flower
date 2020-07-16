@@ -33,7 +33,7 @@ instances in the same subnet over their private IP does not incure any cost).
 
 #### AMI
 The provided AMI is a bare Ubuntu 18.04 image which was modified with the
-`dev/aws_ami_bootstrap.sh` script.
+`dev/aws-ami-bootstrap.sh` script.
 
 ### Execution
 To execute the script simply do:
