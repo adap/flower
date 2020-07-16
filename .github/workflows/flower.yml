@@ -20,20 +20,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python }}
-      - name: Get pip cache dir
-        id: pip-cache
-        run: |
-          echo "::set-output name=dir::$(pip cache dir)"
-      - name: Get Poetry cache dir
-        id: poetry-cache
-        run: |
-          echo "::set-output name=dir::$(poetry config cache-dir)"          
       - name: Restore Pip Cache
         uses: actions/cache@v2
         with:
           path: |
-            ${{ steps.pip-cache.outputs.dir }}
-            ${{ steps.poetry-cache.outputs.dir }}
+            ~/.cache/pip
+            ~/.cache/pypoetry
           key: pip-poetry-cache-${{ hashFiles('**/pyproject.toml') }}-${{ runner.os }}-${{ matrix.python-version }}
           restore-keys: |
             pip-poetry-cache-
