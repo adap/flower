@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies (mandatory only)
         run: python -m poetry install
       - name: Check if protos need recompilation
-        run: ./dev/check_protos.sh
+        run: ./dev/check-protos.sh
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test.sh
 
