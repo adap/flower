@@ -30,6 +30,15 @@ Flower's design goals was to make this simple. Read on to learn more.
    howto-aws
 
 
+API Documentation
+-----------------
+
+.. toctree::
+   :maxdepth: 2
+
+   api_documentation/modules
+
+
 Contributor Guide
 -----------------
 

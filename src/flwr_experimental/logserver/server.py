@@ -39,10 +39,6 @@ SERVER_TIMEOUT = 1200
 
 CONFIG: Dict[str, Optional[str]] = {"s3_bucket": None, "s3_key": None}
 
-# Create a flower_logs directory to store the logfiles.
-Path(LOGDIR).mkdir(exist_ok=True)
-Path(LOGFILE).touch()
-
 Accuracies = List[Tuple[int, float]]
 
 
@@ -182,6 +178,10 @@ class LogServer(HTTPServer):
 
 def main() -> None:
     """Start log server."""
+    # Create a flower_logs directory to store the logfiles.
+    Path(LOGDIR).mkdir(exist_ok=True)
+    Path(LOGFILE).touch()
+
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser(description="Flower LogServer")
