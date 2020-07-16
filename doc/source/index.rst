@@ -24,6 +24,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    :maxdepth: 2
    :caption: User Guide Contents:
 
+   quickstart
    installation
    examples
    howto-aws

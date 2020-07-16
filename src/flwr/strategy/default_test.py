@@ -37,7 +37,7 @@ def test_default_strategy_num_fit_clients_19_available() -> None:
 
     # Prepare
     strategy = DefaultStrategy()
-    expected = 1
+    expected = 2
 
     # Execute
     actual, _ = strategy.num_fit_clients(num_available_clients=19)
@@ -51,7 +51,7 @@ def test_default_strategy_num_fit_clients_10_available() -> None:
 
     # Prepare
     strategy = DefaultStrategy()
-    expected = 1
+    expected = 2
 
     # Execute
     actual, _ = strategy.num_fit_clients(num_available_clients=10)
@@ -65,7 +65,7 @@ def test_default_strategy_num_fit_clients_minimum() -> None:
 
     # Prepare
     strategy = DefaultStrategy()
-    expected = 1
+    expected = 2
 
     # Execute
     actual, _ = strategy.num_fit_clients(num_available_clients=9)
@@ -93,7 +93,7 @@ def test_default_strategy_num_evaluation_clients_39_available() -> None:
 
     # Prepare
     strategy = DefaultStrategy(fraction_eval=0.05)
-    expected = 1
+    expected = 2
 
     # Execute
     actual, _ = strategy.num_evaluation_clients(num_available_clients=39)
@@ -107,7 +107,7 @@ def test_default_strategy_num_evaluation_clients_20_available() -> None:
 
     # Prepare
     strategy = DefaultStrategy(fraction_eval=0.05)
-    expected = 1
+    expected = 2
 
     # Execute
     actual, _ = strategy.num_evaluation_clients(num_available_clients=20)
@@ -121,7 +121,7 @@ def test_default_strategy_num_evaluation_clients_minimum() -> None:
 
     # Prepare
     strategy = DefaultStrategy(fraction_eval=0.05)
-    expected = 1
+    expected = 2
 
     # Execute
     actual, _ = strategy.num_evaluation_clients(num_available_clients=19)

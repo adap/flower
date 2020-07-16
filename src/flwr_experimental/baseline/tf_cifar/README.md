@@ -7,7 +7,7 @@ git root of this project. The file needs to contain the following fields
 ```
 [paths]
 wheel_dir = ~/development/adap/flower/dist/
-wheel_filename = flwr-0.0.1-py3-none-any.whl
+wheel_filename = WHEEL_FILENAME
 
 [aws]
 image_id = ami-0370b0294d7241341
@@ -33,7 +33,7 @@ instances in the same subnet over their private IP does not incure any cost).
 
 #### AMI
 The provided AMI is a bare Ubuntu 18.04 image which was modified with the
-`dev/aws_ami_bootstrap.sh` script.
+`dev/aws-ami-bootstrap.sh` script.
 
 ### Execution
 To execute the script simply do:
