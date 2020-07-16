@@ -15,11 +15,18 @@
 # limitations under the License.
 # ==============================================================================
 
+# This script will build and publish a nightly release of Flower under the condition
+# that at least one commit was made in the last 24 hours.
+# It will rename the the package name in the pyproject.toml to from "flwr" to "flwr-nightly".
+# The version name in the pyproject.toml will be appended with "-dev" and the current date.
+# A final release will be e.g. "flwr-nightly 0.1.1.dev20200716" as seen at:
+# https://pypi.org/project/flwr-nightly/
+
 if [[ $(git log --since="24 hours ago" --pretty=oneline) ]]; then
     sed -i -E "s/^name = \"(.+)\"/name = \"\1-nightly\"/" pyproject.toml
     sed -i -E "s/^version = \"(.+)\"/version = \"\1-dev$(date '+%Y%m%d')\"/" pyproject.toml
     python -m poetry build
     python -m poetry publish -u __token__ -p $PYPI_TOKEN
 else
-    echo "There are no commits in last 24 hours"
+    echo "There were no commits in the last 24 hours."
 fi
