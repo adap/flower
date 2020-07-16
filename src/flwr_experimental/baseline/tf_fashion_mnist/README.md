@@ -42,7 +42,7 @@ not incure any cost).
 #### AMI
 
 The provided AMI is a bare Ubuntu 18.04 image which was modified using the
-`dev/aws_ami_bootstrap.sh` script.
+`dev/aws-ami-bootstrap.sh` script.
 
 ## Build Docker Container
 
