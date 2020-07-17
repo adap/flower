@@ -1,6 +1,7 @@
 # Flower files
 .flower_ops
 data/
+doc/source/api_documentation
 
 # Editor
 .vscode
