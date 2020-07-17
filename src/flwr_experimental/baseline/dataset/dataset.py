@@ -44,21 +44,24 @@ def sort_by_label_repeating(x: np.ndarray, y: np.ndarray) -> XY:
     """Sort by label repeating.
 
     Create sorting index which is applied to by label sorted x, y
-    Example:
+
+    .. code-block:: python
+
         # given:
         y = [
             0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9
         ]
 
-        use:
+        # use:
         idx = [
             0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19
         ]
 
-        so that y[idx] becomes:
+        # so that y[idx] becomes:
         y = [
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
         ]
+
     """
     x, y = sort_by_label(x, y)
 
