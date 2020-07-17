@@ -1,9 +1,6 @@
 name: Docs
 
-on:
-  push:
-    branches:
-      - main
+on: push
 
 jobs:
   deploy_docs:
