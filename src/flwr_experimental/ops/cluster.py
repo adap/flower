@@ -104,7 +104,8 @@ def ssh_connection(
 def create_instances(adapter: Adapter, instances: List[Instance], timeout: int) -> None:
     """Start instances and set props of each instance.
 
-    Fails if CPU and RAM of instances are not all the same."""
+    Fails if CPU and RAM of instances are not all the same.
+    """
     if not all(
         [
             ins.num_cpu == instances[0].num_cpu and ins.num_ram == instances[0].num_ram

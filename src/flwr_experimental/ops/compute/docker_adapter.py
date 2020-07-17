@@ -81,6 +81,7 @@ class DockerAdapter(Adapter):
                 num_ram (int): RAM in GB (currently ignored)
                 timeout (int): Timeout in minutes
                 num_instance (int): Number of instances to start
+
         """
         instances: List[AdapterInstance] = []
 
