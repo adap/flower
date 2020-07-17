@@ -43,7 +43,8 @@ class Adapter(ABC):
             num_ram (int): RAM in GB
             num_instance (int): Number of instances to start if currently available
             timeout (int): Timeout in minutes
-            commands (:obj:`str`, optional): List of bash commands which will be joined into a single string with newline as a seperator
+            commands (:obj:`str`, optional): List of bash commands which will be joined into a single
+                string with newline as a seperator
             gpu (bool): If true will only consider instances with GPU
 
         """
