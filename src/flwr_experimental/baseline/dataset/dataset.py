@@ -61,7 +61,7 @@ def sort_by_label_repeating(x: np.ndarray, y: np.ndarray) -> XY:
         y = [
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
         ]
-    
+
     """
     x, y = sort_by_label(x, y)
 
