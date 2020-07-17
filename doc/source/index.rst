@@ -1,8 +1,4 @@
-.. image:: _static/flower-logo.png
-    :alt: Flower: A Friendly Federated Learning Research Framework
-    :align: center
-    :width: 200
-    :target: https://flower.adap.com/
+
 
 
 Welcome to Flower!
@@ -32,6 +28,15 @@ Flower's design goals was to make this simple. Read on to learn more.
    installation
    examples
    howto-aws
+
+
+API Documentation
+-----------------
+
+.. toctree::
+   :maxdepth: 2
+
+   api_documentation/modules
 
 
 Contributor Guide
