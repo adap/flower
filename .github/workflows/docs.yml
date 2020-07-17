@@ -18,7 +18,7 @@ jobs:
           python -m pip install -U poetry==1.0.9
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory only)
-        run: python -m poetry install
+        run: python -m poetry install --extras "baseline examples-tensorflow examples-pytorch http-logger ops"
       - name: Build and deploy docs
         env:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
