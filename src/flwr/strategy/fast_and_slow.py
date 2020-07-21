@@ -37,7 +37,11 @@ WAIT_TIMEOUT = 600
 
 
 class FastAndSlow(FedAvg):
-    """Strategy implementation which alternates between fast and slow rounds."""
+    """Strategy implementation which alternates between fast and slow rounds.
+
+    :meta private:
+
+    """
 
     # pylint: disable-msg=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
@@ -340,13 +344,21 @@ class FastAndSlow(FedAvg):
 
 
 def is_fast_round(rnd: int, r_fast: int, r_slow: int) -> bool:
-    """Determine if the round is fast or slow."""
+    """Determine if the round is fast or slow.
+
+    :meta private:
+
+    """
     remainder = rnd % (r_fast + r_slow)
     return remainder - r_fast < 0
 
 
 def softmax(logits: np.ndarray) -> np.ndarray:
-    """Compute softmax."""
+    """Compute softmax.
+
+    :meta private:
+
+    """
     e_x = np.exp(logits - np.max(logits))
     return cast(np.ndarray, e_x / e_x.sum(axis=0))
 
@@ -358,7 +370,11 @@ def normalize_and_sample(
     sample_size: int,
     use_softmax: bool = False,
 ) -> List[ClientProxy]:
-    """Normalize the relative importance and sample clients accordingly."""
+    """Normalize the relative importance and sample clients accordingly.
+
+    :meta private:
+
+    """
     indices = np.arange(len(all_clients.keys()))
     if use_softmax:
         probs = softmax(np.array(raw))
@@ -382,7 +398,11 @@ def normalize_and_sample(
 def timeout_candidates(
     durations: List[Tuple[str, float, int, int]], max_timeout: int
 ) -> List[float]:
-    """Calculate timeout candidates based on previous round training durations."""
+    """Calculate timeout candidates based on previous round training durations.
+
+    :meta private:
+
+    """
     scaled_timeout_candidates = [
         fit_duration * float(num_ex_ceil) / (float(num_ex) + E_TIMEOUT)
         for _, fit_duration, num_ex, num_ex_ceil in durations
@@ -391,7 +411,11 @@ def timeout_candidates(
 
 
 def next_timeout(candidates: List[float], percentile: float) -> int:
-    """Cacluate timeout for the next round."""
+    """Cacluate timeout for the next round.
+
+    :meta private:
+
+    """
     candidates.sort()
     num_included = math.ceil(len(candidates) * percentile)
     timeout_raw = candidates[num_included - 1]
