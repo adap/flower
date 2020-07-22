@@ -67,25 +67,25 @@ implemented in the following way:
 
 .. code-block:: python
 
-class MnistClient(fl.KerasClient):
-    def __init__(self, cid, model, x_train, y_train, x_test, y_test):
-        super().__init__(cid)
-        self.model = model
-        self.x_train, self.y_train = x_train, y_train
-        self.x_test, self.y_test = x_test, y_test
+    class MnistClient(fl.KerasClient):
+        def __init__(self, cid, model, x_train, y_train, x_test, y_test):
+            super().__init__(cid)
+            self.model = model
+            self.x_train, self.y_train = x_train, y_train
+            self.x_test, self.y_test = x_test, y_test
 
-    def get_weights(self):
-        return model.get_weights()
+        def get_weights(self):
+            return model.get_weights()
 
-    def fit(self, weights, config):
-        self.model.set_weights(weights)
-        self.model.fit(x_train, y_train, epochs=5)
-        return self.model.get_weights(), len(self.x_train), len(self.x_train)
+        def fit(self, weights, config):
+            self.model.set_weights(weights)
+            self.model.fit(x_train, y_train, epochs=5)
+            return self.model.get_weights(), len(self.x_train), len(self.x_train)
 
-    def evaluate(self, weights, config):
-        self.model.set_weights(weights)
-        loss, accuracy = self.model.evaluate(x_test, y_test)
-        return len(self.x_test), loss, accuracy
+        def evaluate(self, weights, config):
+            self.model.set_weights(weights)
+            loss, accuracy = self.model.evaluate(x_test, y_test)
+            return len(self.x_test), loss, accuracy
 
 We can now create an instance of our class :code:`MnistClient` and add one line
 to actually run this client:
