@@ -1,6 +1,3 @@
-
-
-
 Welcome to Flower!
 ==================================
 
@@ -22,7 +19,7 @@ Flower's design goals was to make this simple. Read on to learn more.
 
 .. toctree::
    :maxdepth: 2
-   :caption: User Guide Contents:
+   :caption: User Guide
 
    quickstart
    installation
@@ -47,10 +44,21 @@ intended to help along the way.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contributor Guide Contents:
+   :caption: Contributor Guide
 
    getting-started-for-contributors
    good-first-contributions
+
+
+About Flower
+------------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: About Flower
+
+   people
+   organizations
 
 
 .. Indices and tables
