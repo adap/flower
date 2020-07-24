@@ -37,8 +37,8 @@ Run Examples Using Docker
 Flower examples can also be run through Docker without the need for most of the
 setup steps that are otherwise necessary::
 
-  # Create docker network `flower` so that containers can reach each other by name
-  $ docker network create flower
+  # Create docker network `flwr` so that containers can reach each other by name
+  $ docker network create flwr
   
   # Build the Flower docker containers
   $ ./dev/docker_build.sh
@@ -64,13 +64,13 @@ simple CNN classifier in a federated learning setup with two clients.
 
 First, start a Flower server:
 
-  $ ./src/flower_example/pytorch/run-server.sh
+  $ ./src/flwr_example/pytorch/run-server.sh
 
 Then, start the two clients in a new terminal window:
 
-  $ ./src/flower_example/pytorch/run-clients.sh
+  $ ./src/flwr_example/pytorch/run-clients.sh
 
-For more details, see :code:`src/flower_example/pytorch`.
+For more details, see :code:`src/flwr_example/pytorch`.
 
 
 TensorFlow Examples
@@ -89,10 +89,10 @@ classification model over those partitions.
 
 First, start a Flower server:
 
-  $ ./src/flower_example/tensorflow/run-server.sh
+  $ ./src/flwr_example/tensorflow/run-server.sh
 
 Then, start the two clients in a new terminal window:
 
-  $ ./src/flower_example/tensorflow/run-clients.sh
+  $ ./src/flwr_example/tensorflow/run-clients.sh
 
-For more details, see :code:`src/flower_example/tensorflow`.
+For more details, see :code:`src/flwr_example/tensorflow`.
