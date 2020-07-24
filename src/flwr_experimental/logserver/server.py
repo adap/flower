@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Provides a logserver."""
+
+
 import argparse
 import ast
 import json
@@ -23,12 +25,12 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from threading import Event, Thread
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 import boto3
 import numpy as np
 
-from flwr_experimental.benchmark.plot import plot
+from flwr_experimental.baseline.plot import plot
 
 LOGDIR = "flower_logs"
 LOGFILE = "{logdir}/flower.log".format(logdir=LOGDIR)
@@ -36,10 +38,6 @@ LOGFILE_UPLOAD_INTERVAL = 60
 SERVER_TIMEOUT = 1200
 
 CONFIG: Dict[str, Optional[str]] = {"s3_bucket": None, "s3_key": None}
-
-# Create a flower_logs directory to store the logfiles.
-Path(LOGDIR).mkdir(exist_ok=True)
-Path(LOGFILE).touch()
 
 Accuracies = List[Tuple[int, float]]
 
@@ -137,10 +135,8 @@ def plot_accuracies(values: Accuracies) -> str:
         y_label="Accuracy",
         filename=filename,
     )
-
     upload_file(local_path, filename + ".pdf")
-
-    return local_path
+    return cast(str, local_path)
 
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -182,6 +178,10 @@ class LogServer(HTTPServer):
 
 def main() -> None:
     """Start log server."""
+    # Create a flower_logs directory to store the logfiles.
+    Path(LOGDIR).mkdir(exist_ok=True)
+    Path(LOGFILE).touch()
+
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser(description="Flower LogServer")

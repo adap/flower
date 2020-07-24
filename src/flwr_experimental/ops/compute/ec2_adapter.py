@@ -154,6 +154,7 @@ class EC2Adapter(Adapter):
 
         Returns:
             bool: True if all are reachable otherwise False.
+
         """
 
         for _ in range(30):
@@ -188,13 +189,14 @@ class EC2Adapter(Adapter):
     ) -> List[AdapterInstance]:
         """Create one or more EC2 instance(s) of the same type.
 
-            Args:
-                num_cpu (int): Number of instance vCPU (values in
-                               ec2_adapter.INSTANCE_TYPES_CPU or INSTANCE_TYPES_GPU)
-                num_ram (int): RAM in GB (values in ec2_adapter.INSTANCE_TYPES_CPU
-                               or INSTANCE_TYPES_GPU)
-                timeout (int): Timeout in minutes
-                num_instance (int): Number of instances to start if currently available in EC2
+        Args:
+            num_cpu (int): Number of instance vCPU (values in
+                            ec2_adapter.INSTANCE_TYPES_CPU or INSTANCE_TYPES_GPU)
+            num_ram (int): RAM in GB (values in ec2_adapter.INSTANCE_TYPES_CPU
+                            or INSTANCE_TYPES_GPU)
+            timeout (int): Timeout in minutes
+            num_instance (int): Number of instances to start if currently available in EC2
+
         """
         # The instance will be set to terminate after stutdown
         # This is a fail safe in case something happens and the instances
@@ -251,6 +253,7 @@ class EC2Adapter(Adapter):
 
         Args:
             instance_ids ([str[]]): If provided, filter by instance_ids
+
         """
         if instance_ids is None:
             instance_ids = []
@@ -278,6 +281,7 @@ class EC2Adapter(Adapter):
         """Terminate instances.
 
         Will raise an error if something goes wrong.
+
         """
         res = self.ec2.terminate_instances(InstanceIds=instance_ids)
 
@@ -289,6 +293,7 @@ class EC2Adapter(Adapter):
         """Terminate all instances.
 
         Will raise an error if something goes wrong.
+
         """
         result: EC2DescribeInstancesResult = self.ec2.describe_instances(
             Filters=tags_to_filter(self.tags),

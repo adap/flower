@@ -30,6 +30,7 @@ design of Flower is based on a few guiding principles:
 ## Documentation
 
 * [Documentation](https://flower.dev)
+  * [Quickstart](https://flower.dev/quickstart.html)
   * [Installation](https://flower.dev/installation.html)
 
 ## Flower Usage Examples
@@ -42,12 +43,13 @@ an example, first install the necessary extras:
 
 Available [examples](src/flwr_example):
 
+* [Quickstart: Keras & MNIST](src/flwr_example/quickstart)
 * [PyTorch & CIFAR-10](src/flwr_example/pytorch)
 * [TensorFlow & Fashion-MNIST](src/flwr_example/tensorflow)
 
 ## Flower Baselines
 
-*Coming soon* - curious minds can take a peek at [src/flwr_experimental/benchmark](src/flwr_experimental/benchmark).
+*Coming soon* - curious minds can take a peek at [src/flwr_experimental/baseline](src/flwr_experimental/baseline).
 
 ## Contributing to Flower
 

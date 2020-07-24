@@ -38,14 +38,15 @@ class Adapter(ABC):
     ) -> List[AdapterInstance]:
         """Create one or more instance(s) of the same type.
 
-            Args:
-                num_cpu (int): Number of instance CPU
-                num_ram (int): RAM in GB
-                num_instance (int): Number of instances to start if currently available
-                timeout (int): Timeout in minutes
-                commands ([str]): List of bash commands which will be joined into a single string
-                    with "\n" as a seperator
-                gpu (bool): If true will only consider instances with GPU
+        Args:
+            num_cpu (int): Number of instance CPU
+            num_ram (int): RAM in GB
+            num_instance (int): Number of instances to start if currently available
+            timeout (int): Timeout in minutes
+            commands (:obj:`str`, optional): List of bash commands which will be joined into a
+                single string with newline as a seperator
+            gpu (bool): If true will only consider instances with GPU
+
         """
 
     @abstractmethod
@@ -55,7 +56,8 @@ class Adapter(ABC):
         """List all instances with tags belonging to this adapter.
 
         Args:
-            instance_ids ([str[]]): If provided, filter by instance_ids
+            instance_ids (:obj:`list` of :obj:`str`, optional): If provided, filter by instance_ids
+
         """
 
     @abstractmethod
@@ -63,6 +65,7 @@ class Adapter(ABC):
         """Terminate instances.
 
         Should raise an error if something goes wrong.
+
         """
 
     @abstractmethod
@@ -70,4 +73,5 @@ class Adapter(ABC):
         """Terminate all instances.
 
         Will raise an error if something goes wrong.
+
         """
