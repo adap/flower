@@ -20,7 +20,7 @@
 
 
 # Start a Flower server
-python server.py \
+python -m flwr_example.pytorch_imagenet.server \
   --rounds=5 \
   --sample_fraction=1.0 \
   --min_sample_size=1 \
