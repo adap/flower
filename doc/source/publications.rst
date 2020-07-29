@@ -8,5 +8,4 @@ to list all publications which used Flower in some form.
 Papers
 --------------
 
-- `Paper 1 <https://arxiv.org/...>`_
-- `Paper 2 <https://arxiv.org/...>`_
+- `Flower: A Friendly Federated Learning Research Framework <https://arxiv.org/abs/2007.14390>`_
