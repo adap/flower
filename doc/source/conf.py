@@ -40,6 +40,9 @@ release = "0.4.0"
 extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.graphviz",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -60,9 +63,12 @@ html_theme = "alabaster"
 
 # https://alabaster.readthedocs.io/en/latest/customization.html
 html_theme_options = {
+    # Look and feel
+    "page_width": "1024px", # max-width (default: 940px) 
     "logo": "flower-logo.png",
     "logo_name": False,
     "sidebar_collapse": False,
+    "description": "A Friendly Federated Learning Research Framework",
     # GitHub
     "github_user": "adap",
     "github_repo": "flower",
@@ -70,6 +76,7 @@ html_theme_options = {
     "github_banner": True,
     "github_button": True,
 }
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
