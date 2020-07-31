@@ -24,12 +24,12 @@ from sphinx.application import ConfigError
 
 # -- Project information -----------------------------------------------------
 
-project = "Flower"
-copyright = "2020, Adap GmbH"
-author = "The Flower Authors"
+project = u"Flower"
+copyright = u"2020 Adap GmbH"
+author = u"The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.4.0"
+release = u"0.4.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -69,6 +69,8 @@ html_theme_options = {
     "github_type": "star",
     "github_banner": True,
     "github_button": True,
+    # Google Analytics
+    "analytics_id": "UA-173987939-1",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -76,38 +78,5 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
-
-# -- Analytics ---------------------------------------------------------------
-
-googleanalytics_id = "UA-173987939-1"
-
-
-def html_page_context(app, pagename, templatename, context, doctree):
-    metatags = context.get("metatags", "")
-    metatags += (
-        """<script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', '%s']);
-      _gaq.push(['_trackPageview']);
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-    </script>"""
-        % app.config.googleanalytics_id
-    )
-    context["metatags"] = metatags
-
-
-def check_config(app):
-    if not app.config.googleanalytics_id:
-        raise ConfigError(
-            "'googleanalytics_id' config value must be set for ga statistics to function properly."
-        )
-
-
-def setup(app):
-    app.add_config_value("googleanalytics_id", "", "html")
-    app.connect("builder-inited", check_config)
-    app.connect("html-page-context", html_page_context)
+# Favicon
+html_favicon = "_static/favicon.ico"
