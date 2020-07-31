@@ -35,6 +35,9 @@ def start_client(server_address: str, client: Client) -> None:
             client_message = handle(client, server_message)
             send(client_message)
 
+            if client_message.is_final:
+                break
+
 
 def start_keras_client(server_address: str, client: KerasClient) -> None:
     """Start a Flower KerasClient which connects to a gRPC server."""

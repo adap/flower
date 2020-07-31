@@ -66,11 +66,13 @@ message ClientMessage {
     float loss = 2;
     float accuracy = 3;
   }
+  
+  bool is_final=1;
 
   oneof msg {
-    Disconnect disconnect = 1;
-    ParametersRes parameters_res = 2;
-    FitRes fit_res = 3;
-    EvaluateRes evaluate_res = 4;
+    Disconnect disconnect = 10;
+    ParametersRes parameters_res = 20;
+    FitRes fit_res = 30;
+    EvaluateRes evaluate_res = 40;
   }
 }
