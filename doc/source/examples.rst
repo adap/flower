@@ -44,7 +44,7 @@ setup steps that are otherwise necessary::
   $ ./dev/docker_build.sh
 
   # Run the docker containers (will tail a logfile created by a central logserver)
-  $ ./src/flwr_example/tensorflow/run-docker.sh
+  $ ./src/py/flwr_example/tensorflow/run-docker.sh
 
 This will start a slightly smaller workload with only four clients.
 
@@ -64,13 +64,13 @@ simple CNN classifier in a federated learning setup with two clients.
 
 First, start a Flower server:
 
-  $ ./src/flwr_example/pytorch/run-server.sh
+  $ ./src/py/flwr_example/pytorch/run-server.sh
 
 Then, start the two clients in a new terminal window:
 
-  $ ./src/flwr_example/pytorch/run-clients.sh
+  $ ./src/py/flwr_example/pytorch/run-clients.sh
 
-For more details, see :code:`src/flwr_example/pytorch`.
+For more details, see :code:`src/py/flwr_example/pytorch`.
 
 
 TensorFlow Examples
@@ -89,10 +89,10 @@ classification model over those partitions.
 
 First, start a Flower server:
 
-  $ ./src/flwr_example/tensorflow/run-server.sh
+  $ ./src/py/flwr_example/tensorflow/run-server.sh
 
 Then, start the two clients in a new terminal window:
 
-  $ ./src/flwr_example/tensorflow/run-clients.sh
+  $ ./src/py/flwr_example/tensorflow/run-clients.sh
 
-For more details, see :code:`src/flwr_example/tensorflow`.
+For more details, see :code:`src/py/flwr_example/tensorflow`.

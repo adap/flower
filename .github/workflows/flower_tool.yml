@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - "src/flwr_tool/**"
+      - "src/py/flwr_tool/**"
   pull_request:
     branches:
       - main
     paths:
-      - "src/flwr_tool/**"
+      - "src/py/flwr_tool/**"
 
 jobs:
   test_tool:
