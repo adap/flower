@@ -17,7 +17,7 @@ People
 
       - .. figure:: _static/profile-akhil.png
 
-           Akhil Marthur
+           Akhil Mathur
 
     * - .. figure:: _static/profile-titouan.png
 

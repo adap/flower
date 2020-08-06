@@ -59,6 +59,7 @@ About Flower
 
    people
    organizations
+   publications
 
 
 .. Indices and tables
