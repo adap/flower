@@ -20,9 +20,10 @@ from os import path
 import grpc_tools
 from grpc_tools import protoc
 
-DIR_PATH = path.dirname(path.realpath(__file__))
 GRPC_PATH = grpc_tools.__path__[0]
-IN_PATH = path.normpath(f"{DIR_PATH}/../proto")
+
+DIR_PATH = path.dirname(path.realpath(__file__))
+IN_PATH = path.normpath(f"{DIR_PATH}/../../proto")
 OUT_PATH = path.normpath(f"{DIR_PATH}/..")
 PROTO_FILES = glob.glob(f"{IN_PATH}/flwr/**/*.proto")
 
@@ -30,8 +31,8 @@ PROTO_FILES = glob.glob(f"{IN_PATH}/flwr/**/*.proto")
 def compile_all() -> None:
     """Compile all protos in the proto directory into the respective directories.
 
-    The directory structure of the proto directory will be mirrored in src.
-    This is needed as otherwise grpc_tools.protoc will have broken imports.
+    The directory structure of the proto directory will be mirrored in `src/py`.
+    This is needed as otherwise `grpc_tools.protoc` will have broken imports.
     """
     command = [
         "grpc_tools.protoc",

@@ -41,15 +41,15 @@ an example, first install the necessary extras:
 
 [Usage Examples Documentation](https://flower.dev/examples.html)
 
-Available [examples](src/flwr_example):
+Available [examples](src/py/flwr_example):
 
-* [Quickstart: Keras & MNIST](src/flwr_example/quickstart)
-* [PyTorch & CIFAR-10](src/flwr_example/pytorch)
-* [TensorFlow & Fashion-MNIST](src/flwr_example/tensorflow)
+* [Quickstart: Keras & MNIST](src/py/flwr_example/quickstart)
+* [PyTorch & CIFAR-10](src/py/flwr_example/pytorch)
+* [TensorFlow & Fashion-MNIST](src/py/flwr_example/tensorflow)
 
 ## Flower Baselines
 
-*Coming soon* - curious minds can take a peek at [src/flwr_experimental/baseline](src/flwr_experimental/baseline).
+*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline](src/py/flwr_experimental/baseline).
 
 ## Contributing to Flower
 
