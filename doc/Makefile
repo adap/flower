@@ -20,9 +20,9 @@ clean-sphinx-apidoc:
 
 docs:
 	make clean-sphinx-apidoc
-	sphinx-apidoc --doc-project "API Reference" -f -d 2 -M -o $(SOURCEDIR)/api_documentation ../src/flwr \
-		../src/*_test.py \
-		../src/flwr/proto
+	sphinx-apidoc --doc-project "API Reference" -f -d 2 -M -o $(SOURCEDIR)/api_documentation ../src/py/flwr \
+		../src/py/*_test.py \
+		../src/py/flwr/proto
 	make html
 
 serve:

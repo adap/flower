@@ -77,7 +77,7 @@ python -m flwr_experimental.baseline.tf_fashion_mnist.run --adapter="ec2" --sett
 Or alternatively, customize the wrapper script `run.sh` and run it using your AWS profile:
 
 ```bash
-AWS_PROFILE=your-aws-profile src/flwr_experimental/baseline/run.sh
+AWS_PROFILE=your-aws-profile src/py/flwr_experimental/baseline/run.sh
 ```
 
 ## Get Results
