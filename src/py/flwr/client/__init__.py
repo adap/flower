@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower client app."""
+"""Flower Client."""
 
 
 from .app import start_client, start_keras_client
+from .client import Client
+from .keras_client import KerasClient

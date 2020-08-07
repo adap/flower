@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower app."""
+"""Flower Server App."""
 
 
-from . import client, server
+from . import server
