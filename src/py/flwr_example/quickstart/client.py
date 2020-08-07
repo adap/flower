@@ -43,7 +43,7 @@ if __name__ == "__main__":
     x_train, x_test = x_train / 255.0, x_test / 255.0
 
     # Instanstiate client
-    client = MnistClient("0", model, x_train, y_train, x_test, y_test)
+    client = MnistClient("0", model, x_train, y_train, x_test, y_test)  # type: ignore
 
     # Start client
     fl.app.client.start_keras_client(server_address="[::]:8080", client=client)
