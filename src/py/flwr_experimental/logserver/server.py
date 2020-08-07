@@ -25,7 +25,7 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from threading import Event, Thread
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, List, Optional, Tuple, Union
 
 import boto3
 import numpy as np
@@ -136,7 +136,7 @@ def plot_accuracies(values: Accuracies) -> str:
         filename=filename,
     )
     upload_file(local_path, filename + ".pdf")
-    return cast(str, local_path)
+    return local_path
 
 
 class RequestHandler(BaseHTTPRequestHandler):
