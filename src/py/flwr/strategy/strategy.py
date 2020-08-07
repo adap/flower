@@ -20,7 +20,7 @@ from typing import List, Optional, Tuple
 
 from flwr.client_manager import ClientManager
 from flwr.client_proxy import ClientProxy
-from flwr.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 
 class Strategy(ABC):

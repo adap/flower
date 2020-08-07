@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import boto3
 from boto3_type_annotations import ec2
 
-from flwr.logger import log
+from flwr.common.logger import log
 
 from .adapter import Adapter, AdapterInstance
 

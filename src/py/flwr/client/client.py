@@ -17,7 +17,7 @@
 
 from abc import ABC, abstractmethod
 
-from flwr.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
 
 
 class Client(ABC):

@@ -64,7 +64,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure logger
-    fl.logger.configure("server", host=args.log_host)
+    fl.common.logger.configure("server", host=args.log_host)
 
     # Load evaluation data
     _, xy_test = fashion_mnist.load_data(partition=0, num_partitions=1)
@@ -98,10 +98,10 @@ def fit_config(rnd: int) -> Dict[str, str]:
 
 def get_eval_fn(
     xy_test: Tuple[np.ndarray, np.ndarray]
-) -> Callable[[fl.Weights], Optional[Tuple[float, float]]]:
+) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
-    def evaluate(weights: fl.Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
         """Use the entire Fashion-MNIST test set for evaluation."""
         model = fashion_mnist.load_model()
         model.set_weights(weights)

@@ -24,7 +24,7 @@ import numpy as np
 import tensorflow as tf
 
 import flwr as fl
-from flwr.logger import log
+from flwr.common.logger import log
 
 from .data import build_dataset
 
@@ -166,7 +166,7 @@ def get_lr_schedule(
 
 def get_eval_fn(
     model: tf.keras.Model, num_classes: int, xy_test: Tuple[np.ndarray, np.ndarray]
-) -> Callable[[fl.Weights], Optional[Tuple[float, float]]]:
+) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
     ds_test = build_dataset(
@@ -177,7 +177,7 @@ def get_eval_fn(
         augment=False,
     )
 
-    def evaluate(weights: fl.Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
         """Use entire test set for evaluation."""
         model.set_weights(weights)
         lss, acc = keras_evaluate(model, ds_test, batch_size=len(xy_test[0]))

@@ -22,11 +22,12 @@ import numpy as np
 import tensorflow as tf
 
 import flwr as fl
+from flwr.common import Weights
 
 from . import DEFAULT_SERVER_ADDRESS, fashion_mnist
 
 
-class FashionMnistClient(fl.KerasClient):
+class FashionMnistClient(fl.client.KerasClient):
     """Flower KerasClient implementing Fashion-MNIST image classification."""
 
     def __init__(
@@ -41,12 +42,10 @@ class FashionMnistClient(fl.KerasClient):
         self.x_train, self.y_train = xy_train
         self.x_test, self.y_test = xy_test
 
-    def get_weights(self) -> fl.Weights:
-        return cast(fl.Weights, self.model.get_weights())
+    def get_weights(self) -> Weights:
+        return cast(Weights, self.model.get_weights())
 
-    def fit(
-        self, weights: fl.Weights, config: Dict[str, str]
-    ) -> Tuple[fl.Weights, int, int]:
+    def fit(self, weights: Weights, config: Dict[str, str]) -> Tuple[Weights, int, int]:
         # Use provided weights to update local model
         self.model.set_weights(weights)
 
@@ -62,7 +61,7 @@ class FashionMnistClient(fl.KerasClient):
         return self.model.get_weights(), len(self.x_train), len(self.x_train)
 
     def evaluate(
-        self, weights: fl.Weights, config: Dict[str, str]
+        self, weights: Weights, config: Dict[str, str]
     ) -> Tuple[int, float, float]:
         # Update local model and evaluate on local dataset
         self.model.set_weights(weights)
@@ -98,7 +97,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure logger
-    fl.logger.configure(f"client_{args.cid}", host=args.log_host)
+    fl.common.logger.configure(f"client_{args.cid}", host=args.log_host)
 
     # Load model and data
     model = fashion_mnist.load_model()
@@ -108,7 +107,7 @@ def main() -> None:
 
     # Start client
     client = FashionMnistClient(args.cid, model, xy_train, xy_test)
-    fl.app.client.start_keras_client(args.server_address, client)
+    fl.client.start_keras_client(args.server_address, client)
 
 
 if __name__ == "__main__":

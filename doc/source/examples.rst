@@ -52,7 +52,7 @@ This will start a slightly smaller workload with only four clients.
 PyTorch Examples
 ----------------
 
-Our PyTorch examples are based on PyTorch 1.5.1. They should work with other
+Our PyTorch examples are based on PyTorch 1.6. They should work with other
 releases as well. So far, we provide the follow examples.
 
 CIFAR-10 Image Classification

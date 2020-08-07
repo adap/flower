@@ -12,23 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Helper script to download CIFAR-10/100."""
+"""Flower utilities shared between server and client."""
 
 
-from logging import INFO
-
-import tensorflow as tf
-
-from flwr.common.logger import log
-
-tf.get_logger().setLevel("ERROR")
-
-
-def main() -> None:
-    """Download data."""
-    log(INFO, "Download Fashion-MNIST")
-    tf.keras.datasets.fashion_mnist.load_data()
-
-
-if __name__ == "__main__":
-    main()
+from .parameter import (
+    bytes_to_ndarray,
+    ndarray_to_bytes,
+    parameters_to_weights,
+    weights_to_parameters,
+)
+from .typing import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    Parameters,
+    ParametersRes,
+    Weights,
+)

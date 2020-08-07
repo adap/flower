@@ -20,7 +20,7 @@ from typing import Callable, Iterator, Tuple
 
 import grpc
 
-from flwr.logger import log
+from flwr.common.logger import log
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub
 

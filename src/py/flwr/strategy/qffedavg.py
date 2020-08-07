@@ -23,11 +23,18 @@ import numpy as np
 
 from flwr.client_manager import ClientManager
 from flwr.client_proxy import ClientProxy
-from flwr.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    Weights,
+    parameters_to_weights,
+    weights_to_parameters,
+)
 
 from .aggregate import aggregate_qffl, weighted_loss_avg
 from .fedavg import FedAvg
-from .parameter import parameters_to_weights, weights_to_parameters
 
 
 class QffedAvg(FedAvg):

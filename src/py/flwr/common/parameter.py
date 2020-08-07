@@ -20,7 +20,7 @@ from typing import cast
 
 import numpy as np
 
-from flwr.typing import Parameters, Weights
+from .typing import Parameters, Weights
 
 
 def weights_to_parameters(weights: Weights) -> Parameters:

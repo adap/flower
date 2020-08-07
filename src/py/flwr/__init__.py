@@ -15,17 +15,7 @@
 """Flower main package."""
 
 
-from . import app
+from . import app, client
 from .client_manager import SimpleClientManager
 from .history import History
 from .server import Server
-from .strategy.parameter import parameters_to_weights, weights_to_parameters
-from .typing import (
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    Parameters,
-    ParametersRes,
-    Weights,
-)

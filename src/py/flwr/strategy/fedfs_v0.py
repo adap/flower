@@ -23,13 +23,19 @@ import numpy as np
 
 from flwr.client_manager import ClientManager
 from flwr.client_proxy import ClientProxy
-from flwr.logger import log
-from flwr.typing import EvaluateRes, FitIns, FitRes, Weights
+from flwr.common import (
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    Weights,
+    parameters_to_weights,
+    weights_to_parameters,
+)
+from flwr.common.logger import log
 
 from .aggregate import aggregate, weighted_loss_avg
 from .fast_and_slow import is_fast_round, normalize_and_sample
 from .fedavg import FedAvg
-from .parameter import parameters_to_weights, weights_to_parameters
 
 E = 0.001
 WAIT_TIMEOUT = 600

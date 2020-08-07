@@ -23,9 +23,10 @@ from unittest.mock import patch
 import grpc
 
 from flwr.client_manager import SimpleClientManager
-from flwr.grpc_client.connection import insecure_grpc_connection
 from flwr.grpc_server.grpc_server import start_insecure_grpc_server
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+
+from .connection import insecure_grpc_connection
 
 EXPECTED_NUM_SERVER_MESSAGE = 10
 

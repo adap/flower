@@ -17,11 +17,12 @@
 
 from logging import INFO
 
-from flwr.client import Client
-from flwr.grpc_client.connection import insecure_grpc_connection
-from flwr.grpc_client.message_handler import handle
-from flwr.keras_client import KerasClient, KerasClientWrapper
-from flwr.logger import log
+from flwr.common.logger import log
+
+from .client import Client
+from .grpc_client.connection import insecure_grpc_connection
+from .grpc_client.message_handler import handle
+from .keras_client import KerasClient, KerasClientWrapper
 
 
 def start_client(server_address: str, client: Client) -> None:

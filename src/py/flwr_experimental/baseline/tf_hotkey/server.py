@@ -21,7 +21,7 @@ from logging import ERROR, INFO
 from typing import Callable, Dict, Optional
 
 import flwr as fl
-from flwr.logger import configure, log
+from flwr.common.logger import configure, log
 from flwr_experimental.baseline.common import get_eval_fn
 from flwr_experimental.baseline.dataset import tf_hotkey_partitioned
 from flwr_experimental.baseline.model import keyword_cnn

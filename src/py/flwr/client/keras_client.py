@@ -18,9 +18,18 @@ import timeit
 from abc import ABC, abstractmethod
 from typing import Dict, Tuple
 
-from flwr.client import Client
-from flwr.strategy.parameter import parameters_to_weights, weights_to_parameters
-from flwr.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
+from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    ParametersRes,
+    Weights,
+    parameters_to_weights,
+    weights_to_parameters,
+)
+
+from .client import Client
 
 
 class KerasClient(ABC):

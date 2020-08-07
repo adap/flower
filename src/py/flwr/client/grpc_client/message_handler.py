@@ -15,8 +15,8 @@
 """Handle server messages by calling appropriate client methods."""
 
 
-from flwr.client import Client
-from flwr.grpc_server import serde
+from flwr.client.client import Client
+from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 # pylint: disable=missing-function-docstring

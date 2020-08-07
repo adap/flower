@@ -15,9 +15,9 @@
 """Networked Flower client implementation."""
 
 
-from flwr import typing
+from flwr import common
 from flwr.client_proxy import ClientProxy
-from flwr.grpc_server import serde
+from flwr.common import serde
 from flwr.grpc_server.grpc_bridge import GRPCBridge
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
@@ -31,7 +31,7 @@ class GrpcClientProxy(ClientProxy):
         super().__init__(cid)
         self.bridge = bridge
 
-    def get_parameters(self) -> typing.ParametersRes:
+    def get_parameters(self) -> common.ParametersRes:
         """Return the current local model parameters."""
         get_parameters_msg = serde.get_parameters_to_proto()
         client_msg: ClientMessage = self.bridge.request(
@@ -40,7 +40,7 @@ class GrpcClientProxy(ClientProxy):
         parameters_res = serde.parameters_res_from_proto(client_msg.parameters_res)
         return parameters_res
 
-    def fit(self, ins: typing.FitIns) -> typing.FitRes:
+    def fit(self, ins: common.FitIns) -> common.FitRes:
         """Refine the provided weights using the locally held dataset."""
         fit_ins_msg = serde.fit_ins_to_proto(ins)
         client_msg: ClientMessage = self.bridge.request(
@@ -49,7 +49,7 @@ class GrpcClientProxy(ClientProxy):
         fit_res = serde.fit_res_from_proto(client_msg.fit_res)
         return fit_res
 
-    def evaluate(self, ins: typing.EvaluateIns) -> typing.EvaluateRes:
+    def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
         evaluate_msg = serde.evaluate_ins_to_proto(ins)
         client_msg: ClientMessage = self.bridge.request(
