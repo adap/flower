@@ -18,9 +18,9 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
 
-from flwr.client_manager import ClientManager
-from flwr.client_proxy import ClientProxy
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
 
 
 class Strategy(ABC):

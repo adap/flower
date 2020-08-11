@@ -16,10 +16,10 @@
 
 
 from flwr import common
-from flwr.client_proxy import ClientProxy
 from flwr.common import serde
-from flwr.grpc_server.grpc_bridge import GRPCBridge
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.grpc_server.grpc_bridge import GRPCBridge
 
 
 class GrpcClientProxy(ClientProxy):

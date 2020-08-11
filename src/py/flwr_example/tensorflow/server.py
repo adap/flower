@@ -70,18 +70,18 @@ def main() -> None:
     _, xy_test = fashion_mnist.load_data(partition=0, num_partitions=1)
 
     # Create client_manager, strategy, and server
-    client_manager = fl.SimpleClientManager()
-    strategy = fl.strategy.DefaultStrategy(
+    client_manager = fl.server.SimpleClientManager()
+    strategy = fl.server.strategy.DefaultStrategy(
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
         eval_fn=get_eval_fn(xy_test=xy_test),
         on_fit_config_fn=fit_config,
     )
-    server = fl.Server(client_manager=client_manager, strategy=strategy)
+    server = fl.server.Server(client_manager=client_manager, strategy=strategy)
 
     # Run server
-    fl.app.server.start_server(
+    fl.server.start_server(
         args.server_address, server, config={"num_rounds": args.rounds},
     )
 

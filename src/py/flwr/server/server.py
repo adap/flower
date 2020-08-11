@@ -20,8 +20,6 @@ import timeit
 from logging import DEBUG, INFO
 from typing import List, Optional, Tuple, cast
 
-from flwr.client_manager import ClientManager
-from flwr.client_proxy import ClientProxy
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -31,8 +29,10 @@ from flwr.common import (
     parameters_to_weights,
 )
 from flwr.common.logger import log
-from flwr.history import History
-from flwr.strategy import DefaultStrategy, Strategy
+from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.history import History
+from flwr.server.strategy import DefaultStrategy, Strategy
 
 FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
 EvaluateResultsAndFailures = Tuple[

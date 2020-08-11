@@ -17,8 +17,8 @@
 
 from typing import Callable, List, Optional, Tuple
 
-from flwr.client_proxy import ClientProxy
 from flwr.common import EvaluateRes, FitRes, Weights, parameters_to_weights
+from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg

@@ -12,17 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federating: Fast and Slow (v0)."""
+"""Federating: Fast and Slow (v1)."""
 
 
-import statistics
-from logging import INFO
+from logging import DEBUG, INFO
 from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from flwr.client_manager import ClientManager
-from flwr.client_proxy import ClientProxy
 from flwr.common import (
     EvaluateRes,
     FitIns,
@@ -32,17 +29,25 @@ from flwr.common import (
     weights_to_parameters,
 )
 from flwr.common.logger import log
+from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
-from .fast_and_slow import is_fast_round, normalize_and_sample
+from .fast_and_slow import (
+    is_fast_round,
+    next_timeout,
+    normalize_and_sample,
+    timeout_candidates,
+)
 from .fedavg import FedAvg
 
 E = 0.001
+E_TIMEOUT = 0.0001
 WAIT_TIMEOUT = 600
 
 
-class FedFSv0(FedAvg):
-    """Strategy implementation which alternates between fast and slow rounds."""
+class FedFSv1(FedAvg):
+    """Strategy implementation which alternates between sampling fast and slow cients."""
 
     # pylint: disable-msg=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
@@ -57,10 +62,11 @@ class FedFSv0(FedAvg):
         min_completion_rate_evaluate: float = 0.5,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
+        dynamic_timeout_percentile: float = 0.8,
         r_fast: int = 1,
         r_slow: int = 1,
-        t_fast: int = 10,
-        t_slow: int = 10,
+        t_max: int = 10,
+        use_past_contributions: bool = False,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -74,15 +80,17 @@ class FedFSv0(FedAvg):
         )
         self.min_completion_rate_fit = min_completion_rate_fit
         self.min_completion_rate_evaluate = min_completion_rate_evaluate
+        self.dynamic_timeout_percentile = dynamic_timeout_percentile
         self.r_fast = r_fast
         self.r_slow = r_slow
-        self.t_fast = t_fast
-        self.t_slow = t_slow
+        self.t_max = t_max
+        self.use_past_contributions = use_past_contributions
         self.contributions: Dict[str, List[Tuple[int, int, int]]] = {}
+        self.durations: List[Tuple[str, float, int, int]] = []
 
     def __repr__(self) -> str:
         # pylint: disable-msg=line-too-long
-        rep = f"FedFSv0(r_fast={self.r_fast}, r_slow={self.r_slow}, t_fast={self.t_fast}, t_slow={self.t_slow})"
+        rep = f"FedFSv1(dynamic_timeout_percentile={self.dynamic_timeout_percentile}, r_fast={self.r_fast}, r_slow={self.r_slow}, t_max={self.t_max})"
         return rep
 
     # pylint: disable-msg=too-many-locals
@@ -108,9 +116,31 @@ class FedFSv0(FedAvg):
             return []
 
         # Sample clients
-        clients = self._contribution_based_sampling(
-            sample_size=sample_size, client_manager=client_manager
-        )
+        if rnd == 1:
+            # Sample with 1/k in the first round
+            log(
+                DEBUG,
+                "FedFS round %s, sample %s clients with 1/k",
+                str(rnd),
+                str(sample_size),
+            )
+            clients = self._one_over_k_sampling(
+                sample_size=sample_size, client_manager=client_manager
+            )
+        else:
+            fast_round = is_fast_round(rnd - 1, r_fast=self.r_fast, r_slow=self.r_slow)
+            log(
+                DEBUG,
+                "FedFS round %s, sample %s clients, fast_round %s",
+                str(rnd),
+                str(sample_size),
+                str(fast_round),
+            )
+            clients = self._fs_based_sampling(
+                sample_size=sample_size,
+                client_manager=client_manager,
+                fast_round=fast_round,
+            )
 
         # Prepare parameters and config
         parameters = weights_to_parameters(weights)
@@ -120,8 +150,17 @@ class FedFSv0(FedAvg):
             config = self.on_fit_config_fn(rnd)
 
         # Set timeout for this round
-        use_fast_timeout = is_fast_round(rnd - 1, self.r_fast, self.r_slow)
-        config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
+        if self.durations:
+            candidates = timeout_candidates(
+                durations=self.durations, max_timeout=self.t_max,
+            )
+            timeout = next_timeout(
+                candidates=candidates, percentile=self.dynamic_timeout_percentile,
+            )
+            config["timeout"] = str(timeout)
+        else:
+            # Initial round has not past durations, use max_timeout
+            config["timeout"] = str(self.t_max)
 
         # Fit instructions
         fit_ins = (parameters, config)
@@ -129,27 +168,62 @@ class FedFSv0(FedAvg):
         # Return client/config pairs
         return [(client, fit_ins) for client in clients]
 
-    def _contribution_based_sampling(
+    def _one_over_k_sampling(
         self, sample_size: int, client_manager: ClientManager
     ) -> List[ClientProxy]:
-        """Sample clients depending on their past contributions."""
-        # Get all clients and gather their contributions
+        """Sample clients with probability 1/k."""
+        sample_size, min_num_clients = self.num_fit_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
+        return clients
+
+    def _fs_based_sampling(
+        self, sample_size: int, client_manager: ClientManager, fast_round: bool
+    ) -> List[ClientProxy]:
+        """Sample clients with 1/k * c/m in fast rounds and 1 - c/m in slow rounds."""
         all_clients: Dict[str, ClientProxy] = client_manager.all()
+        k = len(all_clients)
         cid_idx: Dict[int, str] = {}
         raw: List[float] = []
         for idx, (cid, _) in enumerate(all_clients.items()):
             cid_idx[idx] = cid
-            penalty = 0.0
-            if cid in self.contributions.keys():
-                contribs: List[Tuple[int, int, int]] = self.contributions[cid]
-                penalty = statistics.mean([c / m for _, c, m in contribs])
-            # `p` should be:
-            #   - High for clients which have never been picked before
-            #   - Medium for clients which have contributed, but not used their entire budget
-            #   - Low (but not 0) for clients which have been picked and used their budget
-            raw.append(1.1 - penalty)
 
-        # Sample clients
+            if cid in self.contributions.keys():
+                # Previously selected clients
+                contribs: List[Tuple[int, int, int]] = self.contributions[cid]
+
+                # pylint: disable-msg=invalid-name
+                if self.use_past_contributions:
+                    cs = [c for _, c, _ in contribs]
+                    ms = [m for _, _, m in contribs]
+                    c_over_m = sum(cs) / sum(ms)
+                else:
+                    _, c, m = contribs[-1]
+                    c_over_m = c / m
+                # pylint: enable-msg=invalid-name
+
+                if fast_round:
+                    importance = (1 / k) * c_over_m + E
+                else:
+                    importance = 1 - c_over_m + E
+            else:
+                # Previously unselected clients
+                if fast_round:
+                    importance = 1 / k
+                else:
+                    importance = 1
+            raw.append(importance)
+
+        log(
+            DEBUG,
+            "FedFS _fs_based_sampling, sample %s clients, raw %s",
+            str(sample_size),
+            str(raw),
+        )
+
         return normalize_and_sample(
             all_clients=all_clients,
             cid_idx=cid_idx,
@@ -188,6 +262,16 @@ class FedFSv0(FedAvg):
             if cid not in self.contributions.keys():
                 self.contributions[cid] = []
             self.contributions[cid].append(contribution)
+
+        self.durations = []
+        for client, (_, num_examples, num_examples_ceil, fit_duration) in results:
+            cid_duration = (
+                client.cid,
+                fit_duration,
+                num_examples,
+                num_examples_ceil,
+            )
+            self.durations.append(cid_duration)
 
         return weights_prime
 

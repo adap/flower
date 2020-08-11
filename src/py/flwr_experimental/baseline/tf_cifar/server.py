@@ -65,7 +65,7 @@ def main() -> None:
     model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
 
     # Create client_manager
-    client_manager = fl.SimpleClientManager()
+    client_manager = fl.server.SimpleClientManager()
 
     # Strategy
     eval_fn = get_eval_fn(
@@ -78,7 +78,7 @@ def main() -> None:
     )
 
     if server_setting.strategy == "fedavg":
-        strategy = fl.strategy.FedAvg(
+        strategy = fl.server.strategy.FedAvg(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
@@ -91,7 +91,7 @@ def main() -> None:
             raise ValueError(
                 "No `training_round_timeout` set for `fast-and-slow` strategy"
             )
-        strategy = fl.strategy.FastAndSlow(
+        strategy = fl.server.strategy.FastAndSlow(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
@@ -108,8 +108,8 @@ def main() -> None:
         )
 
     # Run server
-    server = fl.Server(client_manager=client_manager, strategy=strategy)
-    fl.app.server.start_server(
+    server = fl.server.Server(client_manager=client_manager, strategy=strategy)
+    fl.server.start_server(
         DEFAULT_SERVER_ADDRESS, server, config={"num_rounds": server_setting.rounds},
     )
 
