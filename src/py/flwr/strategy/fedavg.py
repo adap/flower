@@ -22,10 +22,17 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.client_manager import ClientManager
 from flwr.client_proxy import ClientProxy
-from flwr.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    Weights,
+    parameters_to_weights,
+    weights_to_parameters,
+)
 
 from .aggregate import aggregate, weighted_loss_avg
-from .parameter import parameters_to_weights, weights_to_parameters
 from .strategy import Strategy
 
 

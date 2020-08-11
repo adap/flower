@@ -20,7 +20,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 
-from flwr.typing import Weights
+from flwr.common import Weights
 
 
 def aggregate(results: List[Tuple[Weights, int]]) -> Weights:

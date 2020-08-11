@@ -19,8 +19,8 @@ from logging import INFO
 from typing import Dict, Optional
 
 from flwr.client_manager import SimpleClientManager
+from flwr.common.logger import log
 from flwr.grpc_server.grpc_server import start_insecure_grpc_server
-from flwr.logger import log
 from flwr.server import Server
 from flwr.strategy import FedAvg, Strategy
 

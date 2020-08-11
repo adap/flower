@@ -22,7 +22,7 @@ import numpy as np
 import tensorflow as tf
 
 import flwr as fl
-from flwr.logger import log
+from flwr.common.logger import log
 
 from .common import custom_fit, keras_evaluate
 from .data import build_dataset
@@ -30,7 +30,7 @@ from .data import build_dataset
 tf.get_logger().setLevel("ERROR")
 
 
-class VisionClassificationClient(fl.Client):
+class VisionClassificationClient(fl.client.Client):
     """Flower client implementing image classification using TensorFlow/Keras."""
 
     # pylint: disable-msg=too-many-arguments
@@ -71,12 +71,12 @@ class VisionClassificationClient(fl.Client):
         self.num_examples_test = len(xy_test[0])
         self.delay_factor = delay_factor
 
-    def get_parameters(self) -> fl.ParametersRes:
-        parameters = fl.weights_to_parameters(self.model.get_weights())
-        return fl.ParametersRes(parameters=parameters)
+    def get_parameters(self) -> fl.common.ParametersRes:
+        parameters = fl.common.weights_to_parameters(self.model.get_weights())
+        return fl.common.ParametersRes(parameters=parameters)
 
-    def fit(self, ins: fl.FitIns) -> fl.FitRes:
-        weights: fl.Weights = fl.parameters_to_weights(ins[0])
+    def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
+        weights: fl.common.Weights = fl.common.parameters_to_weights(ins[0])
         config = ins[1]
         log(
             DEBUG,
@@ -115,14 +115,14 @@ class VisionClassificationClient(fl.Client):
 
         if not completed and not partial_updates:
             # Return empty update if local update could not be completed in time
-            parameters = fl.weights_to_parameters([])
+            parameters = fl.common.weights_to_parameters([])
         else:
             # Return the refined weights and the number of examples used for training
-            parameters = fl.weights_to_parameters(self.model.get_weights())
+            parameters = fl.common.weights_to_parameters(self.model.get_weights())
         return parameters, num_examples, num_examples_ceil, fit_duration
 
-    def evaluate(self, ins: fl.EvaluateIns) -> fl.EvaluateRes:
-        weights = fl.parameters_to_weights(ins[0])
+    def evaluate(self, ins: fl.common.EvaluateIns) -> fl.common.EvaluateRes:
+        weights = fl.common.parameters_to_weights(ins[0])
         config = ins[1]
         log(
             DEBUG,

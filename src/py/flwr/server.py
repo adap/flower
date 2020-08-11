@@ -22,11 +22,17 @@ from typing import List, Optional, Tuple, cast
 
 from flwr.client_manager import ClientManager
 from flwr.client_proxy import ClientProxy
+from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    Weights,
+    parameters_to_weights,
+)
+from flwr.common.logger import log
 from flwr.history import History
-from flwr.logger import log
 from flwr.strategy import DefaultStrategy, Strategy
-from flwr.strategy.parameter import parameters_to_weights
-from flwr.typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
 
 FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
 EvaluateResultsAndFailures = Tuple[

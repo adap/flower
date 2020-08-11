@@ -17,7 +17,7 @@
 
 from logging import INFO
 
-from flwr.logger import log
+from flwr.common.logger import log
 from flwr_experimental.baseline.dataset import tf_hotkey_partitioned
 
 

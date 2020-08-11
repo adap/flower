@@ -21,7 +21,7 @@ from logging import ERROR, INFO
 import tensorflow as tf
 
 import flwr as fl
-from flwr.logger import configure, log
+from flwr.common.logger import configure, log
 from flwr_experimental.baseline.common import VisionClassificationClient
 from flwr_experimental.baseline.dataset import tf_cifar_partitioned
 from flwr_experimental.baseline.model import resnet50v2
@@ -104,7 +104,7 @@ def main() -> None:
         augment_horizontal_flip=True,
         augment_offset=2,
     )
-    fl.app.client.start_client(args.server_address, client)
+    fl.client.start_client(args.server_address, client)
 
 
 if __name__ == "__main__":

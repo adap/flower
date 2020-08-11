@@ -18,7 +18,7 @@ import unittest
 
 import numpy as np
 
-import flwr as fl
+from flwr.common import Weights
 
 from . import cifar
 
@@ -49,7 +49,7 @@ class CifarTestCase(unittest.TestCase):
         expected = 10
 
         # Execute
-        weights: fl.Weights = model.get_weights()
+        weights: Weights = model.get_weights()
 
         # Assert
         assert len(weights) == expected
@@ -59,12 +59,12 @@ class CifarTestCase(unittest.TestCase):
         # pylint: disable-msg=no-self-use
 
         # Prepare
-        weights_expected: fl.Weights = cifar.load_model().get_weights()
+        weights_expected: Weights = cifar.load_model().get_weights()
         model: cifar.Net = cifar.load_model()
 
         # Execute
         model.set_weights(weights_expected)
-        weights_actual: fl.Weights = model.get_weights()
+        weights_actual: Weights = model.get_weights()
 
         # Assert
         for nda_expected, nda_actual in zip(weights_expected, weights_actual):

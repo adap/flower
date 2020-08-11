@@ -18,11 +18,10 @@
 from typing import Callable, List, Optional, Tuple
 
 from flwr.client_proxy import ClientProxy
-from flwr.typing import EvaluateRes, FitRes, Weights
+from flwr.common import EvaluateRes, FitRes, Weights, parameters_to_weights
 
 from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg
-from .parameter import parameters_to_weights
 
 
 class FaultTolerantFedAvg(FedAvg):

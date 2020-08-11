@@ -19,11 +19,18 @@ from typing import List
 
 import numpy as np
 
-from flwr.strategy.parameter import ndarray_to_bytes
+from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    Parameters,
+    ParametersRes,
+    ndarray_to_bytes,
+)
 
 from .client_proxy import ClientProxy
 from .server import evaluate_clients, fit_clients
-from .typing import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, ParametersRes
 
 
 class SuccessClient(ClientProxy):

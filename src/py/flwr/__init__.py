@@ -15,19 +15,7 @@
 """Flower main package."""
 
 
-from . import app
-from .client import Client
+from . import app, client
 from .client_manager import SimpleClientManager
 from .history import History
-from .keras_client import KerasClient
 from .server import Server
-from .strategy.parameter import parameters_to_weights, weights_to_parameters
-from .typing import (
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    Parameters,
-    ParametersRes,
-    Weights,
-)

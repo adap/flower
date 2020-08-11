@@ -23,7 +23,7 @@ from typing import Dict, Iterator, List, Optional, Tuple
 from paramiko.client import SSHClient
 from paramiko.sftp_attr import SFTPAttributes
 
-from flwr.logger import log
+from flwr.common.logger import log
 
 from .compute.adapter import Adapter
 
