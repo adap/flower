@@ -12,23 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Helper script to download CIFAR-10/100."""
+"""Flower Server."""
 
 
-from logging import INFO
-
-import tensorflow as tf
-
-from flwr.common.logger import log
-
-tf.get_logger().setLevel("ERROR")
-
-
-def main() -> None:
-    """Download data."""
-    log(INFO, "Download Fashion-MNIST")
-    tf.keras.datasets.fashion_mnist.load_data()
-
-
-if __name__ == "__main__":
-    main()
+from .app import start_server
+from .client_manager import SimpleClientManager
+from .history import History
+from .server import Server

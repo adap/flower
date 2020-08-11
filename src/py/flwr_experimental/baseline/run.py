@@ -26,7 +26,7 @@ from typing import List, Optional
 import flwr_experimental.baseline.tf_cifar.settings as tf_cifar_settings
 import flwr_experimental.baseline.tf_fashion_mnist.settings as tf_fashion_mnist_settings
 import flwr_experimental.baseline.tf_hotkey.settings as tf_hotkey_settings
-from flwr.logger import configure, log
+from flwr.common.logger import configure, log
 from flwr_experimental.baseline import command
 from flwr_experimental.ops.cluster import Cluster, Instance
 from flwr_experimental.ops.compute.adapter import Adapter
