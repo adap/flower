@@ -67,7 +67,7 @@ implemented in the following way:
 
 .. code-block:: python
 
-    class MnistClient(fl.KerasClient):
+    class MnistClient(fl.client.KerasClient):
         def __init__(self, cid, model, x_train, y_train, x_test, y_test):
             super().__init__(cid)
             self.model = model
@@ -93,10 +93,10 @@ to actually run this client:
 .. code-block:: python
 
     client = MnistClient("0", model, x_train, y_train, x_test, y_test)
-    fl.app.client.start_keras_client(server_address="[::]:8080", client=client)
+    fl.client.start_keras_client(server_address="[::]:8080", client=client)
 
 That's it for the client. We only have to implement :code:`Client` or
-:code:`KerasClient` and call :code:`fl.app.client.start_client()`. The string
+:code:`KerasClient` and call :code:`fl.client.start_client()`. The string
 :code:`"[::]:8080"` tells the client which server to connect to. In our case we
 can run the server and the client on the same machine, therefore we use
 :code:`"[::]:8080"`. If we run a truly federated workload with the server and
@@ -115,7 +115,7 @@ configuration possibilities at their default values. In a file named
 
     import flwr as fl
 
-    fl.app.server.start_server(config={"num_rounds": 3})
+    fl.server.start_server(config={"num_rounds": 3})
 
 
 Train the model, federated!

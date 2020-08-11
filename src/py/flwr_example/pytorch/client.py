@@ -22,6 +22,7 @@ import torch
 import torchvision
 
 import flwr as fl
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
 
 from . import DEFAULT_SERVER_ADDRESS, cifar
 
@@ -30,7 +31,7 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
 
 
-class CifarClient(fl.Client):
+class CifarClient(fl.client.Client):
     """Flower client implementing CIFAR-10 image classification using PyTorch."""
 
     def __init__(
@@ -45,17 +46,17 @@ class CifarClient(fl.Client):
         self.trainset = trainset
         self.testset = testset
 
-    def get_parameters(self) -> fl.ParametersRes:
+    def get_parameters(self) -> ParametersRes:
         print(f"Client {self.cid}: get_parameters")
 
-        weights: fl.Weights = self.model.get_weights()
-        parameters = fl.weights_to_parameters(weights)
-        return fl.ParametersRes(parameters=parameters)
+        weights: Weights = self.model.get_weights()
+        parameters = fl.common.weights_to_parameters(weights)
+        return ParametersRes(parameters=parameters)
 
-    def fit(self, ins: fl.FitIns) -> fl.FitRes:
+    def fit(self, ins: FitIns) -> FitRes:
         print(f"Client {self.cid}: fit")
 
-        weights: fl.Weights = fl.parameters_to_weights(ins[0])
+        weights: Weights = fl.common.parameters_to_weights(ins[0])
         config = ins[1]
         fit_begin = timeit.default_timer()
 
@@ -73,16 +74,16 @@ class CifarClient(fl.Client):
         cifar.train(self.model, trainloader, epochs=epochs, device=DEVICE)
 
         # Return the refined weights and the number of examples used for training
-        weights_prime: fl.Weights = self.model.get_weights()
-        params_prime = fl.weights_to_parameters(weights_prime)
+        weights_prime: Weights = self.model.get_weights()
+        params_prime = fl.common.weights_to_parameters(weights_prime)
         num_examples_train = len(self.trainset)
         fit_duration = timeit.default_timer() - fit_begin
         return params_prime, num_examples_train, num_examples_train, fit_duration
 
-    def evaluate(self, ins: fl.EvaluateIns) -> fl.EvaluateRes:
+    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         print(f"Client {self.cid}: evaluate")
 
-        weights = fl.parameters_to_weights(ins[0])
+        weights = fl.common.parameters_to_weights(ins[0])
 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
@@ -115,7 +116,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure logger
-    fl.logger.configure(f"client_{args.cid}", host=args.log_host)
+    fl.common.logger.configure(f"client_{args.cid}", host=args.log_host)
 
     # Load model and data
     model = cifar.load_model()
@@ -124,7 +125,7 @@ def main() -> None:
 
     # Start client
     client = CifarClient(args.cid, model, trainset, testset)
-    fl.app.client.start_client(args.server_address, client)
+    fl.client.start_client(args.server_address, client)
 
 
 if __name__ == "__main__":
