@@ -17,9 +17,9 @@ import concurrent.futures
 
 import grpc
 
-from flwr.client_manager import ClientManager
-from flwr.grpc_server import flower_service_servicer as fss
 from flwr.proto import transport_pb2_grpc
+from flwr.server.client_manager import ClientManager
+from flwr.server.grpc_server import flower_service_servicer as fss
 
 
 def start_insecure_grpc_server(

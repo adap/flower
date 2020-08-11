@@ -18,8 +18,8 @@ import socket
 from contextlib import closing
 from typing import cast
 
-from flwr.client_manager import SimpleClientManager
-from flwr.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.server.client_manager import SimpleClientManager
+from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
 
 
 def unused_tcp_port() -> int:

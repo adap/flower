@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server app."""
+"""Flower Server."""
 
 
 from .app import start_server
+from .client_manager import SimpleClientManager
+from .history import History
+from .server import Server

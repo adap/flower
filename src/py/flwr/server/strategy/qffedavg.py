@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Averaging (FedAvg) [McMahan et al., 2016] strategy.
-
-Paper: https://arxiv.org/abs/1602.05629
+"""FAIR RESOURCE ALLOCATION IN FEDERATED LEARNING [Li et al., 2020] strategy.
+Paper: https://openreview.net/pdf?id=ByexElSYDr
 """
 
 
 from typing import Callable, Dict, List, Optional, Tuple
 
-from flwr.client_manager import ClientManager
-from flwr.client_proxy import ClientProxy
+import numpy as np
+
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -31,22 +30,26 @@ from flwr.common import (
     parameters_to_weights,
     weights_to_parameters,
 )
+from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate, weighted_loss_avg
-from .strategy import Strategy
+from .aggregate import aggregate_qffl, weighted_loss_avg
+from .fedavg import FedAvg
 
 
-class FedAvg(Strategy):
-    """Configurable FedAvg strategy implementation."""
+class QffedAvg(FedAvg):
+    """Configurable QffedAvg strategy implementation."""
 
     # pylint: disable-msg=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
+        q_param: float = 0.2,
+        qffl_learning_rate: float = 0.1,
         fraction_fit: float = 0.1,
         fraction_eval: float = 0.1,
-        min_fit_clients: int = 2,
-        min_eval_clients: int = 2,
-        min_available_clients: int = 2,
+        min_fit_clients: int = 1,
+        min_eval_clients: int = 1,
+        min_available_clients: int = 1,
         eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
@@ -62,9 +65,13 @@ class FedAvg(Strategy):
         self.on_fit_config_fn = on_fit_config_fn
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
+        self.learning_rate = qffl_learning_rate
+        self.q_param = q_param
+        self.pre_weights: Optional[Weights] = None
 
     def __repr__(self) -> str:
-        rep = f"FedAvg(accept_failures={self.accept_failures})"
+        # pylint: disable-msg=line-too-long
+        rep = f"QffedAvg(learning_rate={self.learning_rate}, q_param={self.q_param}, pre_weights={self.pre_weights})"
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
@@ -88,6 +95,7 @@ class FedAvg(Strategy):
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
+        self.pre_weights = weights
         parameters = weights_to_parameters(weights)
         config = {}
         if self.on_fit_config_fn is not None:
@@ -124,15 +132,12 @@ class FedAvg(Strategy):
         evaluate_ins = (parameters, config)
 
         # Sample clients
-        if rnd >= 0:
-            sample_size, min_num_clients = self.num_evaluation_clients(
-                client_manager.num_available()
-            )
-            clients = client_manager.sample(
-                num_clients=sample_size, min_num_clients=min_num_clients
-            )
-        else:
-            clients = list(client_manager.all().values())
+        sample_size, min_num_clients = self.num_evaluation_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
 
         # Return client/config pairs
         return [(client, evaluate_ins) for client in clients]
@@ -150,11 +155,48 @@ class FedAvg(Strategy):
         if not self.accept_failures and failures:
             return None
         # Convert results
-        weights_results = [
-            (parameters_to_weights(parameters), num_examples)
-            for client, (parameters, num_examples, _, _) in results
-        ]
-        return aggregate(weights_results)
+
+        def norm_grad(grad_list: List[Weights]) -> float:
+            # input: nested gradients
+            # output: square of the L-2 norm
+            client_grads = grad_list[0]
+            for i in range(1, len(grad_list)):
+                client_grads = np.append(
+                    client_grads, grad_list[i]
+                )  # output a flattened array
+            return float(np.sum(np.square(client_grads)))
+
+        deltas = []
+        hs_ffl = []
+
+        if self.pre_weights is None:
+            raise Exception("QffedAvg pre_weights are None in on_aggregate_fit")
+
+        weights_before = self.pre_weights
+        eval_result = self.evaluate(weights_before)
+        if eval_result is not None:
+            loss, _ = eval_result
+
+        for _, (parameters, _, _, _) in results:
+            new_weights = parameters_to_weights(parameters)
+            # plug in the weight updates into the gradient
+            grads = [
+                (u - v) * 1.0 / self.learning_rate
+                for u, v in zip(weights_before, new_weights)
+            ]
+            deltas.append(
+                [np.float_power(loss + 1e-10, self.q_param) * grad for grad in grads]
+            )
+            # estimation of the local Lipschitz constant
+            hs_ffl.append(
+                self.q_param
+                * np.float_power(loss + 1e-10, (self.q_param - 1))
+                * norm_grad(grads)
+                + (1.0 / self.learning_rate)
+                * np.float_power(loss + 1e-10, self.q_param)
+            )
+
+        return aggregate_qffl(weights_before, deltas, hs_ffl)
 
     def on_aggregate_evaluate(
         self,
@@ -168,7 +210,7 @@ class FedAvg(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None
-        return weighted_loss_avg([evaluate_res for _, evaluate_res in results])
+        return weighted_loss_avg([evaluate_res for client, evaluate_res in results])
 
     def on_conclude_round(
         self, rnd: int, loss: Optional[float], acc: Optional[float]

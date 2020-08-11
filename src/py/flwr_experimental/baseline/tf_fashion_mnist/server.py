@@ -65,7 +65,7 @@ def main() -> None:
     model = orig_cnn(input_shape=(28, 28, 1), seed=SEED)
 
     # Create client_manager
-    client_manager = fl.SimpleClientManager()
+    client_manager = fl.server.SimpleClientManager()
 
     # Strategy
     eval_fn = get_eval_fn(model=model, num_classes=10, xy_test=(x_test, y_test))
@@ -76,7 +76,7 @@ def main() -> None:
     )
 
     if server_setting.strategy == "fedavg":
-        strategy = fl.strategy.FedAvg(
+        strategy = fl.server.strategy.FedAvg(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
@@ -94,7 +94,7 @@ def main() -> None:
             if server_setting.training_round_timeout_short is None
             else server_setting.training_round_timeout_short
         )
-        strategy = fl.strategy.FastAndSlow(
+        strategy = fl.server.strategy.FastAndSlow(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
@@ -118,7 +118,7 @@ def main() -> None:
             if server_setting.training_round_timeout_short is None
             else server_setting.training_round_timeout_short
         )
-        strategy = fl.strategy.FedFSv0(
+        strategy = fl.server.strategy.FedFSv0(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
@@ -133,7 +133,7 @@ def main() -> None:
     if server_setting.strategy == "fedfs-v1":
         if server_setting.training_round_timeout is None:
             raise ValueError("No `training_round_timeout` set for `fedfs-v1` strategy")
-        strategy = fl.strategy.FedFSv1(
+        strategy = fl.server.strategy.FedFSv1(
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
@@ -147,7 +147,7 @@ def main() -> None:
         )
 
     if server_setting.strategy == "qffedavg":
-        strategy = fl.strategy.QffedAvg(
+        strategy = fl.server.strategy.QffedAvg(
             q_param=0.2,
             qffl_learning_rate=0.1,
             fraction_fit=server_setting.sample_fraction,
@@ -159,8 +159,8 @@ def main() -> None:
 
     # Run server
     log(INFO, "Instantiating server, strategy: %s", str(strategy))
-    server = fl.Server(client_manager=client_manager, strategy=strategy)
-    fl.app.server.start_server(
+    server = fl.server.Server(client_manager=client_manager, strategy=strategy)
+    fl.server.start_server(
         DEFAULT_SERVER_ADDRESS, server, config={"num_rounds": server_setting.rounds},
     )
 
