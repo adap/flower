@@ -1,12 +1,12 @@
 [build-system]
 requires = [
-    "poetry==1.0.9",
+    "poetry==1.0.10",
 ]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "0.1.1"
+version = "0.5.0"
 description = "Flower - A Friendly Federated Learning Research Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
@@ -36,12 +36,12 @@ classifiers = [
     "Typing :: Typed",
 ]
 packages = [
-    { include = "flwr", from = "src" },
-    { include = "flwr_example", from = "src" },
-    { include = "flwr_experimental", from = "src" },
+    { include = "flwr", from = "src/py" },
+    { include = "flwr_example", from = "src/py" },
+    { include = "flwr_experimental", from = "src/py" },
 ]
 exclude = [
-    "src/**/*_test.py",
+    "src/py/**/*_test.py",
 ]
 
 [tool.poetry.dependencies]
@@ -54,8 +54,8 @@ protobuf = "==3.12.1"
 dataclasses = { version = "==0.6", markers = "python_version < '3.7'"  }
 # Optional dependencies
 tensorflow-cpu = { version = "==2.2.0", optional = true }
-torch = { version = "==1.5.1", optional = true }
-torchvision = { version = "==0.6.1", optional = true }
+torch = { version = "==1.6.0", optional = true }
+torchvision = { version = "==0.7.0", optional = true }
 boto3 = { version = "^1.12.36", optional = true }
 boto3_type_annotations = { version = "^0.3.1", optional = true }
 paramiko = { version = "^2.7.1", optional = true }
@@ -72,16 +72,16 @@ ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
 [tool.poetry.dev-dependencies]
 isort = "==4.3.21"
 black = "==19.10b0"
-mypy = "==0.780"
+docformatter = "==1.3.1"
+mypy = "==0.782"
 pylint = "==2.5.2"
 pytest = "==5.3.4"
 pytest-watch = "^4.2.0"
 grpcio-tools = "==1.27.2"
-mypy-protobuf = "==1.18"
+mypy-protobuf = "==1.23"
 rope = "==0.16.0"
 numpy-stubs = { git = "https://github.com/numpy/numpy-stubs.git", rev = "f3c6315738489983f5f37e1477ac68373d71b470" }
-sphinx = "==2.4.4"
-docformatter = "==1.3.1"
+sphinx = "==3.1.2"
 
 [tool.isort]
 line_length = 88
