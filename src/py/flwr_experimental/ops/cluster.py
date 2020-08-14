@@ -67,7 +67,7 @@ class IgnoreHostKeyPolicy:
     """Policy for accepting any unknown host key. This is used by `paramiko.client.SSHClient`."""
 
     # pylint: disable=no-self-use, unused-argument
-    def missing_host_key(self, client, hostname, key):
+    def missing_host_key(self, client, hostname, key) -> None:
         """Simply return to ignore the host key.
 
         As we create and destroy machines quite regularly and don't reuse them

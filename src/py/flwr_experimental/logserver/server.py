@@ -147,7 +147,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-type", "text/html")
         self.end_headers()
 
-    def do_POST(self):  # pylint: disable=invalid-name
+    def do_POST(self) -> None:  # pylint: disable=invalid-name
         """Handle POST request."""
         content_length = int(self.headers["Content-Length"])
         post_qs = self.rfile.read(content_length).decode("utf-8")
@@ -170,7 +170,7 @@ class LogServer(HTTPServer):
 
     timeout = SERVER_TIMEOUT
 
-    def handle_timeout(self):
+    def handle_timeout(self) -> None:
         """Cleanup and upload logfile to S3."""
         self.server_close()
         raise TimeoutError()

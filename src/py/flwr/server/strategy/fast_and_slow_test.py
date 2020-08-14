@@ -21,7 +21,7 @@ from flwr.server.strategy import fast_and_slow
 
 # pylint: disable-msg=no-self-use,missing-class-docstring,missing-function-docstring
 class FastAndSlowTestCase(unittest.TestCase):
-    def test_fast_round(self):
+    def test_fast_round(self) -> None:
         # Prepare
         values = [
             # 1 fast, 1 slow
@@ -56,7 +56,7 @@ class FastAndSlowTestCase(unittest.TestCase):
             actual = fast_and_slow.is_fast_round(rnd, r_fast, r_slow)
             assert actual == expected
 
-    def test_next_timeout_below_max(self):
+    def test_next_timeout_below_max(self) -> None:
         # Prepare
         durations = [15.6, 13.1, 18.7]
         percentile = 0.5

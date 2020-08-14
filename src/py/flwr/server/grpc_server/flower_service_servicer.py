@@ -48,7 +48,7 @@ def register_client(
 
     if is_success:
 
-        def rpc_termination_callback():
+        def rpc_termination_callback() -> None:
             client.bridge.close()
             client_manager.unregister(client)
 
