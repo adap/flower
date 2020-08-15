@@ -64,24 +64,24 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure logger
-    fl.logger.configure("server", host=args.log_host)
+    fl.common.logger.configure("server", host=args.log_host)
 
     # Load evaluation data
     _, xy_test = fashion_mnist.load_data(partition=0, num_partitions=1)
 
     # Create client_manager, strategy, and server
-    client_manager = fl.SimpleClientManager()
-    strategy = fl.strategy.DefaultStrategy(
+    client_manager = fl.server.SimpleClientManager()
+    strategy = fl.server.strategy.DefaultStrategy(
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
         eval_fn=get_eval_fn(xy_test=xy_test),
         on_fit_config_fn=fit_config,
     )
-    server = fl.Server(client_manager=client_manager, strategy=strategy)
+    server = fl.server.Server(client_manager=client_manager, strategy=strategy)
 
     # Run server
-    fl.app.server.start_server(
+    fl.server.start_server(
         args.server_address, server, config={"num_rounds": args.rounds},
     )
 
@@ -98,10 +98,10 @@ def fit_config(rnd: int) -> Dict[str, str]:
 
 def get_eval_fn(
     xy_test: Tuple[np.ndarray, np.ndarray]
-) -> Callable[[fl.Weights], Optional[Tuple[float, float]]]:
+) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
-    def evaluate(weights: fl.Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
         """Use the entire Fashion-MNIST test set for evaluation."""
         model = fashion_mnist.load_model()
         model.set_weights(weights)
