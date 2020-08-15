@@ -23,10 +23,11 @@ http://image-net.org
 # mypy: ignore-errors
 
 
+import os
 from collections import OrderedDict
 from typing import Tuple
 
-import os
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -34,44 +35,50 @@ import torchvision
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch import Tensor
-from tqdm import tqdm
-
-import numpy as np
 
 import flwr as fl
+from tqdm import tqdm
+
 
 def load_model() -> Net:
     """Load a simple CNN."""
     return Net()
 
+
 def load_data(data_path):
     """Load ImageNet (training and val set)."""
 
     # Load ImageNet and normalize
-    traindir = os.path.join(data_path, 'train')
-    valdir = os.path.join(data_path, 'val')
+    traindir = os.path.join(data_path, "train")
+    valdir = os.path.join(data_path, "val")
 
-
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+    )
 
     trainset = datasets.ImageFolder(
         traindir,
-        transforms.Compose([
-            transforms.RandomResizedCrop(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            normalize,
-        ]))
+        transforms.Compose(
+            [
+                transforms.RandomResizedCrop(224),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ]
+        ),
+    )
 
     valset = datasets.ImageFolder(
         valdir,
-        transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            normalize,
-        ]))
+        transforms.Compose(
+            [
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                normalize,
+            ]
+        ),
+    )
 
     return trainset, valset
 
@@ -112,12 +119,21 @@ def train(
             tmp1, tmp2 = accuracy(outputs, labels, topk=(1, 5))
             acc1, acc5 = acc1 + tmp1, acc5 + tmp2
             if i % 5 == 4:  # print every 5 mini-batches
-                 print("[%d, %5d] loss: %.3f acc1: %.3f acc5: %.3f" % (epoch + 1, i + 1, running_loss / (i+1), acc1 / (i+1), acc5 / (i+1)),flush=True)
+                print(
+                    "[%d, %5d] loss: %.3f acc1: %.3f acc5: %.3f"
+                    % (
+                        epoch + 1,
+                        i + 1,
+                        running_loss / (i + 1),
+                        acc1 / (i + 1),
+                        acc5 / (i + 1),
+                    ),
+                    flush=True,
+                )
+
 
 def test(
-    net: Net,
-    testloader: torch.utils.data.DataLoader,
-    device: torch.device,
+    net: Net, testloader: torch.utils.data.DataLoader, device: torch.device,
 ) -> Tuple[float, float]:
     """Validate the network on the entire test set."""
     criterion = nn.CrossEntropyLoss()
@@ -137,6 +153,7 @@ def test(
             acc1, acc5 = acc1 + tmp1, acc5 + tmp2
             i += 1
     return loss / i, acc1 / i
+
 
 def accuracy(output, target, topk=(1,)):
     """Computes the accuracy over the k top predictions for the specified values of k"""

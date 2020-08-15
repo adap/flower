@@ -14,20 +14,17 @@
 # ==============================================================================
 """Flower client example using PyTorch for Imagenet image classification."""
 
-from collections import OrderedDict
-
 import argparse
 import timeit
-
-import torch
-import torchvision
-
-import flwr as fl
+from collections import OrderedDict
 
 import numpy as np
-
-import imagenet
+import torch
+import torchvision
 import torchvision.models as models
+
+import flwr as fl
+import imagenet
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
@@ -35,18 +32,24 @@ DEFAULT_SERVER_ADDRESS = "[::]:8080"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
 
-def get_weights(model) -> fl.Weights:
+
+def get_weights(model) -> fl.common.Weights:
     """Get model weights as a list of NumPy ndarrays."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
-def set_weights(model, weights: fl.Weights) -> None:
+
+def set_weights(model, weights: fl.common.Weights) -> None:
     """Set model weights from a list of NumPy ndarrays."""
     state_dict = OrderedDict(
-        {k: torch.Tensor(np.atleast_1d(v)) for k, v in zip(model.state_dict().keys(), weights)}
+        {
+            k: torch.Tensor(np.atleast_1d(v))
+            for k, v in zip(model.state_dict().keys(), weights)
+        }
     )
     model.load_state_dict(state_dict, strict=True)
 
-class ImageNetClient(fl.Client):
+
+class ImageNetClient(fl.client.Client):
     """Flower client implementing ImageNet image classification using PyTorch."""
 
     def __init__(
@@ -54,7 +57,7 @@ class ImageNetClient(fl.Client):
         cid: str,
         trainset: torchvision.datasets,
         testset: torchvision.datasets,
-        nb_clients: int
+        nb_clients: int,
     ) -> None:
         super().__init__(cid)
         self.model = models.resnet18().to(DEVICE)
@@ -62,13 +65,13 @@ class ImageNetClient(fl.Client):
         self.testset = testset
         self.nb_clients = nb_clients
 
-    def get_parameters(self) -> fl.ParametersRes:
+    def get_parameters(self) -> fl.common.ParametersRes:
         print(f"Client {self.cid}: get_parameters")
-        weights: fl.Weights = get_weights(self.model)
-        parameters = fl.weights_to_parameters(weights)
-        return fl.ParametersRes(parameters=parameters)
+        weights: fl.common.Weights = get_weights(self.model)
+        parameters = fl.common.weights_to_parameters(weights)
+        return fl.common.ParametersRes(parameters=parameters)
 
-    def fit(self, ins: fl.FitIns) -> fl.FitRes:
+    def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
 
         # Set the seed so we are sure to generate the same global batches
         # indices across all clients
@@ -76,7 +79,7 @@ class ImageNetClient(fl.Client):
 
         print(f"Client {self.cid}: fit")
 
-        weights: fl.Weights = fl.parameters_to_weights(ins[0])
+        weights: fl.common.Weights = fl.common.parameters_to_weights(ins[0])
         config = ins[1]
         fit_begin = timeit.default_timer()
 
@@ -96,7 +99,9 @@ class ImageNetClient(fl.Client):
         # Get starting and ending indices w.r.t cid
         start_ind = int(self.cid) * nb_samples_per_clients
         end_ind = (int(self.cid) * nb_samples_per_clients) + nb_samples_per_clients
-        train_sampler = torch.utils.data.SubsetRandomSampler(dataset_indices[start_ind:end_ind])
+        train_sampler = torch.utils.data.SubsetRandomSampler(
+            dataset_indices[start_ind:end_ind]
+        )
 
         # Train model
         trainloader = torch.utils.data.DataLoader(
@@ -106,13 +111,13 @@ class ImageNetClient(fl.Client):
         imagenet.train(self.model, trainloader, epochs=epochs, device=DEVICE)
 
         # Return the refined weights and the number of examples used for training
-        weights_prime: fl.Weights = get_weights(self.model)
-        params_prime = fl.weights_to_parameters(weights_prime)
+        weights_prime: fl.common.Weights = get_weights(self.model)
+        params_prime = fl.common.weights_to_parameters(weights_prime)
         num_examples_train = len(self.trainset)
         fit_duration = timeit.default_timer() - fit_begin
         return params_prime, num_examples_train, num_examples_train, fit_duration
 
-    def evaluate(self, ins: fl.EvaluateIns) -> fl.EvaluateRes:
+    def evaluate(self, ins: fl.common.EvaluateIns) -> fl.common.EvaluateRes:
 
         # Set the set so we are sure to generate the same batches
         # accross all clients.
@@ -123,13 +128,13 @@ class ImageNetClient(fl.Client):
         config = ins[1]
         batch_size = int(config["batch_size"])
 
-        weights = fl.parameters_to_weights(ins[0])
+        weights = fl.common.parameters_to_weights(ins[0])
 
         # Use provided weights to update the local model
         set_weights(self.model, weights)
 
         # Get the data corresponding to this client
-        dataset_size = len(self.test_set)
+        dataset_size = len(self.testset)
         nb_samples_per_clients = dataset_size // self.nb_clients
         dataset_indices = list(range(dataset_size))
         np.random.shuffle(dataset_indices)
@@ -137,7 +142,9 @@ class ImageNetClient(fl.Client):
         # Get starting and ending indices w.r.t cid
         start_ind = int(self.cid) * nb_samples_per_clients
         end_ind = (int(self.cid) * nb_samples_per_clients) + nb_samples_per_clients
-        test_sampler = torch.utils.data.SubsetRandomSampler(dataset_indices[start_ind:end_ind])
+        test_sampler = torch.utils.data.SubsetRandomSampler(
+            dataset_indices[start_ind:end_ind]
+        )
 
         # Evaluate the updated model on the local dataset
         testloader = torch.utils.data.DataLoader(
@@ -174,14 +181,13 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure logger
-    fl.logger.configure(f"client_{args.cid}", host=args.log_host)
-
+    fl.common.logger.configure(f"client_{args.cid}", host=args.log_host)
 
     trainset, testset = imagenet.load_data(args.data_path)
 
     # Start client
     client = ImageNetClient(args.cid, trainset, testset, args.nb_clients)
-    fl.app.client.start_client(args.server_address, client)
+    fl.client.start_client(args.server_address, client)
 
 
 if __name__ == "__main__":

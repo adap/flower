@@ -20,14 +20,11 @@ from typing import Callable, Dict, Optional, Tuple
 
 import torch
 import torchvision
-
-import flwr as fl
-
-import imagenet
-
 import torchvision.models as models
 
-from client import set_weights, get_weights
+import flwr as fl
+import imagenet
+from client import get_weights, set_weights
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
@@ -78,24 +75,24 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure logger
-    fl.logger.configure("server", host=args.log_host)
+    fl.common.logger.configure("server", host=args.log_host)
 
     # Load evaluation data
     trainset, testset = imagenet.load_data(args.data_path)
 
     # Create client_manager, strategy, and server
-    client_manager = fl.SimpleClientManager()
-    strategy = fl.strategy.DefaultStrategy(
+    client_manager = fl.server.SimpleClientManager()
+    strategy = fl.server.strategy.DefaultStrategy(
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
         eval_fn=get_eval_fn(testset),
         on_fit_config_fn=fit_config,
     )
-    server = fl.Server(client_manager=client_manager, strategy=strategy)
+    server = fl.server.Server(client_manager=client_manager, strategy=strategy)
 
     # Run server
-    fl.app.server.start_server(
+    fl.server.start_server(
         args.server_address, server, config={"num_rounds": args.rounds},
     )
 
@@ -112,10 +109,10 @@ def fit_config(rnd: int) -> Dict[str, str]:
 
 def get_eval_fn(
     testset: torchvision.datasets,
-) -> Callable[[fl.Weights], Optional[Tuple[float, float]]]:
+) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
-    def evaluate(weights: fl.Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
         """Use the entire ImageNet test set for evaluation."""
 
         model = models.resnet18()
@@ -124,7 +121,9 @@ def get_eval_fn(
         model.to(DEVICE)
         model.eval()
 
-        testloader = torch.utils.data.DataLoader(testset, num_workers=6, batch_size=128, shuffle=False)
+        testloader = torch.utils.data.DataLoader(
+            testset, num_workers=6, batch_size=128, shuffle=False
+        )
         return imagenet.test(model, testloader, device=DEVICE)
 
     return evaluate
