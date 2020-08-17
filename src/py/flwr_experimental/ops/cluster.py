@@ -18,7 +18,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from itertools import groupby
 from logging import DEBUG, ERROR
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import Dict, Iterator, List, Optional, Tuple
 
 from paramiko.client import SSHClient
 from paramiko.sftp_attr import SFTPAttributes
@@ -67,7 +67,7 @@ class IgnoreHostKeyPolicy:
     """Policy for accepting any unknown host key. This is used by `paramiko.client.SSHClient`."""
 
     # pylint: disable=no-self-use, unused-argument
-    def missing_host_key(self, client: SSHClient, hostname: str, key: Any) -> None:
+    def missing_host_key(self, client: SSHClient, hostname: str, key: str) -> None:
         """Simply return to ignore the host key.
 
         As we create and destroy machines quite regularly and don't reuse them
