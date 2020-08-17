@@ -74,7 +74,7 @@ class IgnoreHostKeyPolicy:
         we will not store the host key in the local system to avoid pollution the
         local known_hosts file.
         """
-        return
+        return None
 
 
 SSHCredentials = Tuple[str, str]  # username, key_filename
