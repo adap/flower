@@ -38,14 +38,14 @@ MESSAGE_FIT_RES = ClientMessage(
 class GrpcClientProxyTestCase(unittest.TestCase):
     """Tests for GrpcClientProxy."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Setup mocks for tests."""
         self.bridge_mock = MagicMock()
         # Set return_value for usually blocking get_client_message method
         self.bridge_mock.request.return_value = MESSAGE_FIT_RES
 
-    def test_get_parameters(self):
-        """This test is currently quite simple and should be improved"""
+    def test_get_parameters(self) -> None:
+        """This test is currently quite simple and should be improved."""
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
 
@@ -55,8 +55,8 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         # Assert
         assert value.parameters.tensors == []
 
-    def test_fit(self):
-        """This test is currently quite simple and should be improved"""
+    def test_fit(self) -> None:
+        """This test is currently quite simple and should be improved."""
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
         parameters = flwr.common.weights_to_parameters([np.ones((2, 2))])
@@ -70,8 +70,8 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         assert flwr.common.parameters_to_weights(parameters_prime) == []
         assert num_examples == 10
 
-    def test_evaluate(self):
-        """This test is currently quite simple and should be improved"""
+    def test_evaluate(self) -> None:
+        """This test is currently quite simple and should be improved."""
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
         parameters = flwr.common.Parameters(tensors=[], tensor_type="np")

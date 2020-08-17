@@ -65,7 +65,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
 
         self.client_manager_mock = MagicMock()
 
-    def test_register_client(self):
+    def test_register_client(self) -> None:
         """Test register_client function."""
         # Prepare
         self.client_manager_mock.register.return_value = True
@@ -92,7 +92,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
             self.grpc_client_proxy_mock
         )
 
-    def test_join(self):
+    def test_join(self) -> None:
         """Test Join method of FlowerServiceServicer."""
         # Prepare
 

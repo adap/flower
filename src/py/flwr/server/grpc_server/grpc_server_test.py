@@ -30,7 +30,7 @@ def unused_tcp_port() -> int:
         return cast(int, sock.getsockname()[1])
 
 
-def test_integration_start_and_shutdown_server():
+def test_integration_start_and_shutdown_server() -> None:
     """Create server and check if FlowerServiceServicer is returned."""
     # Prepare
     port = unused_tcp_port()

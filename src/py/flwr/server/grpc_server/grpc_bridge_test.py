@@ -28,7 +28,7 @@ def start_worker(
 ) -> Thread:
     """Simulate processing loop with five calls."""
 
-    def _worker():
+    def _worker() -> None:
         # Wait until the ServerMessage is available and extract
         # although here we do nothing with the return value
         for _ in range(rounds):
@@ -45,7 +45,7 @@ def start_worker(
     return thread
 
 
-def test_workflow_successful():
+def test_workflow_successful() -> None:
     """Test full workflow."""
     # Prepare
     rounds = 5
@@ -72,7 +72,7 @@ def test_workflow_successful():
     assert len(client_messages_received) == rounds
 
 
-def test_workflow_close():
+def test_workflow_close() -> None:
     """Test interrupted workflow.
 
     Close bridge after setting three client messages.
@@ -117,7 +117,7 @@ def test_workflow_close():
     assert isinstance(raised_error, StopIteration)
 
 
-def test_server_message_iterator_close_while_blocking():
+def test_server_message_iterator_close_while_blocking() -> None:
     """Test interrupted workflow.
 
     Close bridge while blocking for next server_message.
