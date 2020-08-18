@@ -23,7 +23,7 @@ from flwr_experimental.baseline.dataset.tf_fashion_mnist_partitioned import load
 class FashionMnistPartitionedTestCase(unittest.TestCase):
     """Tests for partitioned FashionMNIST dataset generation."""
 
-    def test_load_data_integration(self):
+    def test_load_data_integration(self) -> None:
         """Test partition function."""
         # Execute
         for num_partitions in [10, 100]:

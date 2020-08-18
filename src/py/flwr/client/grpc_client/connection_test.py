@@ -71,7 +71,7 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
     "flwr.server.grpc_server.flower_service_servicer.FlowerServiceServicer.Join",
     mock_join,
 )
-def test_integration_connection():
+def test_integration_connection() -> None:
     """Create a server and establish a connection to it.
 
     Purpose of this integration test is to simulate multiple clients

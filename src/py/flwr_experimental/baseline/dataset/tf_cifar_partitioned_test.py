@@ -23,7 +23,7 @@ from flwr_experimental.baseline.dataset.tf_cifar_partitioned import load_data
 class CifarPartitionedTestCase(unittest.TestCase):
     """Tests for partitioned CIFAR-10/100 dataset generation."""
 
-    def test_load_data_integration(self):
+    def test_load_data_integration(self) -> None:
         """Test partition function."""
         # Execute
         for num_partitions in [10, 100]:

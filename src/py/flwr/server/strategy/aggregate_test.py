@@ -23,7 +23,7 @@ from .aggregate import aggregate, weighted_loss_avg
 
 
 def test_aggregate() -> None:
-    """Test aggregate function"""
+    """Test aggregate function."""
 
     # Prepare
     weights0_0 = np.array([[1, 2, 3], [4, 5, 6]])
@@ -42,7 +42,7 @@ def test_aggregate() -> None:
 
 
 def test_weighted_loss_avg_single_value() -> None:
-    """Test weighted loss averaging"""
+    """Test weighted loss averaging."""
     # Prepare
     results: List[Tuple[int, float, Optional[float]]] = [(5, 0.5, 0.1)]
     expected = 0.5
@@ -55,7 +55,7 @@ def test_weighted_loss_avg_single_value() -> None:
 
 
 def test_weighted_loss_avg_multiple_values() -> None:
-    """Test weighted loss averaging"""
+    """Test weighted loss averaging."""
     # Prepare
     results: List[Tuple[int, float, Optional[float]]] = [
         (1, 2.0, 0.1),

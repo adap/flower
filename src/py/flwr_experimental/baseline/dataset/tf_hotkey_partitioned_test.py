@@ -23,7 +23,7 @@ from flwr_experimental.baseline.dataset.tf_hotkey_partitioned import load_data
 class HotkeyPartitionedTestCase(unittest.TestCase):
     """Tests for partitioned Hotkey dataset generation."""
 
-    def test_load_data_integration(self):
+    def test_load_data_integration(self) -> None:
         """Test partition function."""
         # Execute
         for num_partitions in [10, 100]:

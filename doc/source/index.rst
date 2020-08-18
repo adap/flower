@@ -13,10 +13,6 @@ The user guide is targeted at researchers and developers who want to use Flower
 to bring existing machine learning workloads into a federated setting. One of
 Flower's design goals was to make this simple. Read on to learn more.
 
-.. warning:: Flower's user-facing API is still in development and not
-   considered stable. We welcome curious users to give it a try and share their
-   experience with us.
-
 .. toctree::
    :maxdepth: 2
    :caption: User Guide
