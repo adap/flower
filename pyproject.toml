@@ -96,4 +96,4 @@ line-length = 88
 target-version = ["py36", "py37", "py38"]
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = "bad-continuation,duplicate-code,too-few-public-methods"
+disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"

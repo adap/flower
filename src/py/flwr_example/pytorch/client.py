@@ -27,7 +27,7 @@ from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes,
 from . import DEFAULT_SERVER_ADDRESS, cifar
 
 # pylint: disable=no-member
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # type: ignore
 # pylint: enable=no-member
 
 

@@ -68,7 +68,7 @@ class SimpleClientManager(ClientManager):
         self.clients: Dict[str, ClientProxy] = {}
         self._cv = threading.Condition()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.clients)
 
     def wait_for(self, num_clients: int, timeout: int = 86400) -> bool:
