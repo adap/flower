@@ -22,7 +22,7 @@ from flwr.server.criterion import Criterion
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
 
 
-def test_criterion_applied():
+def test_criterion_applied() -> None:
     """Test sampling w/ criterion."""
     # Prepare
     bridge = MagicMock()
@@ -51,7 +51,7 @@ def test_criterion_applied():
     assert client4 in sampled_clients
 
 
-def test_criterion_not_applied():
+def test_criterion_not_applied() -> None:
     """Test sampling w/o criterion."""
     # Prepare
     bridge = MagicMock()

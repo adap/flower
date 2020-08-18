@@ -18,7 +18,7 @@
 from .cnn import orig_cnn
 
 
-def test_cnn_size_mnist():
+def test_cnn_size_mnist() -> None:
     """Test number of parameters with MNIST-sized inputs."""
     # Prepare
     model = orig_cnn(input_shape=(28, 28, 1))
@@ -31,7 +31,7 @@ def test_cnn_size_mnist():
     assert actual == expected
 
 
-def test_cnn_size_cifar():
+def test_cnn_size_cifar() -> None:
     """Test number of parameters with CIFAR-sized inputs."""
     # Prepare
     model = orig_cnn(input_shape=(32, 32, 3))

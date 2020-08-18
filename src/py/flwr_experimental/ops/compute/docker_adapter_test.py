@@ -44,7 +44,7 @@ if os.getenv("FLOWER_INTEGRATION"):
                 container.remove(force=True)
             self.client.close()
 
-        def test_create_instances(self):
+        def test_create_instances(self) -> None:
             """Create and start an instance."""
             # Execute
             instances = self.adapter.create_instances(
@@ -59,7 +59,7 @@ if os.getenv("FLOWER_INTEGRATION"):
             )
             assert len(containers) == 2
 
-        def test_list_instances(self):
+        def test_list_instances(self) -> None:
             """List all instances."""
             # Prepare
             for _ in range(2):
@@ -80,7 +80,7 @@ if os.getenv("FLOWER_INTEGRATION"):
             ports = {i[3] for i in instances}
             assert len(ports) == 2, "Each instance should have a distinct port."
 
-        def test_terminate_instance(self):
+        def test_terminate_instance(self) -> None:
             """Destroy all instances."""
             # Prepare
             port = get_free_port()
@@ -102,7 +102,7 @@ if os.getenv("FLOWER_INTEGRATION"):
             )
             assert len(containers) == 0
 
-        def test_terminate_all_instances(self):
+        def test_terminate_all_instances(self) -> None:
             """Destroy all instances."""
             # Prepare
             for _ in range(2):

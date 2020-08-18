@@ -15,6 +15,7 @@
 """Flower Client."""
 
 
-from .app import start_client, start_keras_client
-from .client import Client
-from .keras_client import KerasClient
+from .app import start_client as start_client
+from .app import start_keras_client as start_keras_client
+from .client import Client as Client
+from .keras_client import KerasClient as KerasClient
