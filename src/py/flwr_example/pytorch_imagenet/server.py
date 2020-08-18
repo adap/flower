@@ -23,8 +23,9 @@ import torchvision
 import torchvision.models as models
 
 import flwr as fl
-import imagenet
 from client import get_weights, set_weights
+
+from . import imagenet
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 

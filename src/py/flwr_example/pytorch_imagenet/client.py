@@ -24,7 +24,8 @@ import torchvision
 import torchvision.models as models
 
 import flwr as fl
-import imagenet
+
+from . import imagenet
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
