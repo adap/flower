@@ -27,7 +27,7 @@ echo "Starting $NUM_CLIENTS clients."
 for ((i = $I_START; i <= $I_END; i++))
 do
     echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
-    python client.py \
+    python -m flwr_example.pytorch_imagenet.client \
       --cid=$i \
       --server_address=$SERVER_ADDRESS \
       --data_path=$PLACEHOLDER &

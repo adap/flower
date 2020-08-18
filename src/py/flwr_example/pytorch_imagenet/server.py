@@ -23,7 +23,7 @@ import torchvision
 import torchvision.models as models
 
 import flwr as fl
-from client import get_weights, set_weights
+from .client import get_weights, set_weights
 
 from . import imagenet
 
