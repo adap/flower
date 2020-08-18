@@ -77,4 +77,5 @@ class Strategy(ABC):
     def on_conclude_round(
         self, rnd: int, loss: Optional[float], acc: Optional[float]
     ) -> bool:
-        """Conclude federated learning round and decide whether to continue or not."""
+        """Conclude federated learning round and decide whether to continue or
+        not."""

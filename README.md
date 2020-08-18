@@ -24,9 +24,6 @@ design of Flower is based on a few guiding principles:
 * **Understandable**: Flower is written with maintainability in mind. The
   community is encouraged to both read and contribute to the codebase.
 
-> Note: Even though Flower is used in production, it is published as
-> pre-release software. Incompatible API changes are possible.
-
 ## Documentation
 
 * [Documentation](https://flower.dev)

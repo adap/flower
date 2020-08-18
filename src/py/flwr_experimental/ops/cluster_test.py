@@ -47,7 +47,7 @@ class CreateInstancesTestCase(unittest.TestCase):
         ]
         self.timeout = 10
 
-    def test_create_instances(self):
+    def test_create_instances(self) -> None:
         """Test if create_instances works correctly."""
         # Prepare
         instances = [
@@ -75,7 +75,7 @@ class CreateInstancesTestCase(unittest.TestCase):
             assert ins.ssh_port is not None
             assert ins.state is not None
 
-    def test_create_instances_fail(self):
+    def test_create_instances_fail(self) -> None:
         """Test if create_instances fails when instances list is invalid."""
         # Prepare
         instances = [
@@ -90,7 +90,7 @@ class CreateInstancesTestCase(unittest.TestCase):
             )
 
 
-def test_group_instances_by_specs():
+def test_group_instances_by_specs() -> None:
     """Test that function works correctly."""
     # Prepare
     instances = [
@@ -154,7 +154,7 @@ if os.getenv("FLOWER_INTEGRATION"):
         def tearDown(self) -> None:
             self.cluster.terminate()
 
-        def test_exec(self):
+        def test_exec(self) -> None:
             """Execute on all clients."""
             # Prepare
             command = "nproc"

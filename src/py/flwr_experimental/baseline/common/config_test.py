@@ -17,7 +17,7 @@
 from .config import sample_real_delay_factors
 
 
-def test_sample_real_delay_factors_100():
+def test_sample_real_delay_factors_100() -> None:
     """Test delay factors."""
     # Prepare
     num_clients = 100
@@ -29,7 +29,7 @@ def test_sample_real_delay_factors_100():
     assert len(factors) == num_clients
 
 
-def test_sample_real_delay_factors_10():
+def test_sample_real_delay_factors_10() -> None:
     """Test delay factors."""
     # Prepare
     num_clients = 10
@@ -41,7 +41,7 @@ def test_sample_real_delay_factors_10():
     assert len(factors) == num_clients
 
 
-def test_sample_real_delay_factors_seed():
+def test_sample_real_delay_factors_seed() -> None:
     """Test delay factors."""
     # Prepare
     num_clients = 100

@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides contextmanager which manages a gRPC channel to connect to the server."""
+"""Provides contextmanager which manages a gRPC channel to connect to the
+server."""
 from contextlib import contextmanager
 from logging import DEBUG
 from queue import Queue

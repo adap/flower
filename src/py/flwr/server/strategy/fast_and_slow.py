@@ -46,7 +46,6 @@ class FastAndSlow(FedAvg):
     """Strategy implementation which alternates between fast and slow rounds.
 
     :meta private:
-
     """
 
     # pylint: disable-msg=too-many-arguments,too-many-instance-attributes,too-many-locals
@@ -353,7 +352,6 @@ def is_fast_round(rnd: int, r_fast: int, r_slow: int) -> bool:
     """Determine if the round is fast or slow.
 
     :meta private:
-
     """
     remainder = rnd % (r_fast + r_slow)
     return remainder - r_fast < 0
@@ -363,7 +361,6 @@ def softmax(logits: np.ndarray) -> np.ndarray:
     """Compute softmax.
 
     :meta private:
-
     """
     e_x = np.exp(logits - np.max(logits))
     return cast(np.ndarray, e_x / e_x.sum(axis=0))
@@ -379,7 +376,6 @@ def normalize_and_sample(
     """Normalize the relative importance and sample clients accordingly.
 
     :meta private:
-
     """
     indices = np.arange(len(all_clients.keys()))
     if use_softmax:
@@ -407,7 +403,6 @@ def timeout_candidates(
     """Calculate timeout candidates based on previous round training durations.
 
     :meta private:
-
     """
     scaled_timeout_candidates = [
         fit_duration * float(num_ex_ceil) / (float(num_ex) + E_TIMEOUT)
@@ -420,7 +415,6 @@ def next_timeout(candidates: List[float], percentile: float) -> int:
     """Cacluate timeout for the next round.
 
     :meta private:
-
     """
     candidates.sort()
     num_included = math.ceil(len(candidates) * percentile)

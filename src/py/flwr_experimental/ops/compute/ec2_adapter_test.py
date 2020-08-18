@@ -68,7 +68,7 @@ class EC2AdapterTestCase(unittest.TestCase):
             boto_ec2_client=self.ec2_mock,
         )
 
-    def test_create_instances(self):
+    def test_create_instances(self) -> None:
         """Create and start an instance."""
         # Prepare
         reservations = self.ec2_mock.describe_instances.return_value["Reservations"]
@@ -90,7 +90,7 @@ class EC2AdapterTestCase(unittest.TestCase):
         assert isinstance(instances[0], tuple)
         assert instances[0] == expected_return_value
 
-    def test_list_instances(self):
+    def test_list_instances(self) -> None:
         """List all instances."""
         # Prepare
         reservations = self.ec2_mock.describe_instances.return_value["Reservations"]
@@ -111,7 +111,7 @@ class EC2AdapterTestCase(unittest.TestCase):
         assert len(instances) == 1
         assert instances[0] == expected_return_value
 
-    def test_terminate_instances(self):
+    def test_terminate_instances(self) -> None:
         """Destroy all instances."""
         # Prepare
         instance_id = "1"
@@ -143,7 +143,7 @@ if os.getenv("FLOWER_INTEGRATION"):
                 security_group_ids=["sg-0dd0f0080bcf86400"],
             )
 
-        def test_workflow(self):
+        def test_workflow(self) -> None:
             """Create, list and terminate an instance."""
             # Execute & Assert
             instances = self.adapter.create_instances(
