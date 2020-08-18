@@ -49,7 +49,7 @@ def assert_identity(xy_0: XY, xy_1: XY) -> None:
 class CifarPartitionedTestCase(unittest.TestCase):
     """Tests for partitioned CIFAR-10/100 dataset generation."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         (x, y), (_, _) = tf.keras.datasets.cifar10.load_data()
 
         np.random.seed(2000)
@@ -62,11 +62,11 @@ class CifarPartitionedTestCase(unittest.TestCase):
         # produce other permuations
         np.random.seed(3000)
 
-    def test_assert_identity(self):
+    def test_assert_identity(self) -> None:
         """Test assert_identity function."""
         assert_identity(self.ds, self.ds)
 
-    def test_sort_by_label(self):
+    def test_sort_by_label(self) -> None:
         """Test sort_by_label function."""
         # Prepare
         x_org, y_org = self.ds
@@ -80,7 +80,7 @@ class CifarPartitionedTestCase(unittest.TestCase):
             if i > 0:
                 assert y[i] >= y[i - 1]
 
-    def test_sort_by_label_repeating(self):
+    def test_sort_by_label_repeating(self) -> None:
         """Test sort_by_label function."""
         # Prepare
         x, y = self.ds
@@ -94,7 +94,7 @@ class CifarPartitionedTestCase(unittest.TestCase):
         assert_identity(self.ds, (x, y))
         assert {y[0] for y in y[:10]} == set(range(10))
 
-    def test_split_at_fraction(self):
+    def test_split_at_fraction(self) -> None:
         """Test split_at_fraction function."""
         # Prepare
         fraction = 0.5
@@ -110,7 +110,7 @@ class CifarPartitionedTestCase(unittest.TestCase):
         np.testing.assert_equal(x_1, x[barrier:])
         np.testing.assert_equal(y_1, y[barrier:])
 
-    def test_shuffle(self):
+    def test_shuffle(self) -> None:
         """Test sort_by_label function."""
         # Prepare
         x, y = self.ds
@@ -121,7 +121,7 @@ class CifarPartitionedTestCase(unittest.TestCase):
         # Assert
         assert_identity(self.ds, (x, y))
 
-    def test_partition(self):
+    def test_partition(self) -> None:
         """Test partition function."""
         # Prepare
         x, y = self.ds
@@ -134,7 +134,7 @@ class CifarPartitionedTestCase(unittest.TestCase):
         assert partitions[0][0].shape == partitions[1][0].shape
         assert partitions[0][1].shape == partitions[1][1].shape
 
-    def test_combine_partitions(self):
+    def test_combine_partitions(self) -> None:
         """Test combine function."""
         # Prepare
         r_0_5 = list(range(0, 5))

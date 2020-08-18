@@ -68,7 +68,8 @@ class FedAvg(Strategy):
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available clients."""
+        """Return the sample size and the required number of available
+        clients."""
         num_clients = int(num_available_clients * self.fraction_fit)
         return max(num_clients, self.min_fit_clients), self.min_available_clients
 
@@ -78,7 +79,8 @@ class FedAvg(Strategy):
         return max(num_clients, self.min_eval_clients), self.min_available_clients
 
     def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
-        """Evaluate model weights using an evaluation function (if provided)."""
+        """Evaluate model weights using an evaluation function (if
+        provided)."""
         if self.eval_fn is None:
             # No evaluation function provided
             return None

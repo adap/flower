@@ -29,16 +29,16 @@ from flwr_experimental.logserver.server import (
 class LogserverTest(unittest.TestCase):
     """Tests for functions in the server module."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         # Create a temporary directory
         self.test_dir = tempfile.TemporaryDirectory()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         # Cleanup the directory after the test
         # self.test_dir.cleanup()
         pass
 
-    def test_parse_plot_message(self):
+    def test_parse_plot_message(self) -> None:
         """Test parse_plot_message function."""
         # Prepare
         message = "app_fit: accuracies_centralized [(0, 0.019), (1, 0.460)]"
@@ -52,7 +52,7 @@ class LogserverTest(unittest.TestCase):
         assert plot_type == expected_plot_type
         assert values == expected_values
 
-    def test_plot_accuracies(self):
+    def test_plot_accuracies(self) -> None:
         """Test plot accuracies function."""
         # Prepare
         values = [(0, 0.019), (1, 0.460), (2, 0.665), (3, 0.845)]

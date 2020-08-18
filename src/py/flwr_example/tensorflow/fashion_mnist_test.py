@@ -20,7 +20,7 @@ import numpy as np
 from .fashion_mnist import shuffle
 
 
-def test_shuffle():
+def test_shuffle() -> None:
     """Test if shuffle is deterministic depending on the the provided seed."""
     # Prepare
     x_tt = np.arange(8)

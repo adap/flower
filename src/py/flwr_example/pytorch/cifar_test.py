@@ -26,7 +26,7 @@ from . import cifar
 class CifarTestCase(unittest.TestCase):
     """Tests for cifar module."""
 
-    def test_load_model(self):
+    def test_load_model(self) -> None:
         """Test the number of (trainable) model parameters."""
         # pylint: disable-msg=no-self-use
 
@@ -40,7 +40,7 @@ class CifarTestCase(unittest.TestCase):
         # Assert
         assert actual == expected
 
-    def test_get_weights(self):
+    def test_get_weights(self) -> None:
         """Test get_weights."""
         # pylint: disable-msg=no-self-use
 
@@ -54,7 +54,7 @@ class CifarTestCase(unittest.TestCase):
         # Assert
         assert len(weights) == expected
 
-    def test_set_weights(self):
+    def test_set_weights(self) -> None:
         """Test set_weights."""
         # pylint: disable-msg=no-self-use
 

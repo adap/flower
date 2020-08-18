@@ -15,7 +15,7 @@
 """Flower Server."""
 
 
-from .app import start_server
-from .client_manager import SimpleClientManager
-from .history import History
-from .server import Server
+from .app import start_server as start_server
+from .client_manager import SimpleClientManager as SimpleClientManager
+from .history import History as History
+from .server import Server as Server
