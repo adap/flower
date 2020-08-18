@@ -15,11 +15,11 @@
 """Contains the strategy abstraction and different implementations."""
 
 
-from .default import DefaultStrategy
-from .fast_and_slow import FastAndSlow
-from .fault_tolerant_fedavg import FaultTolerantFedAvg
-from .fedavg import FedAvg
-from .fedfs_v0 import FedFSv0
-from .fedfs_v1 import FedFSv1
-from .qffedavg import QffedAvg
-from .strategy import Strategy
+from .default import DefaultStrategy as DefaultStrategy
+from .fast_and_slow import FastAndSlow as FastAndSlow
+from .fault_tolerant_fedavg import FaultTolerantFedAvg as FaultTolerantFedAvg
+from .fedavg import FedAvg as FedAvg
+from .fedfs_v0 import FedFSv0 as FedFSv0
+from .fedfs_v1 import FedFSv1 as FedFSv1
+from .qffedavg import QffedAvg as QffedAvg
+from .strategy import Strategy as Strategy

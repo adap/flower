@@ -15,5 +15,6 @@
 """Baseline models."""
 
 
-from .cnn import keyword_cnn, orig_cnn
-from .resnet import resnet50v2
+from .cnn import keyword_cnn as keyword_cnn
+from .cnn import orig_cnn as orig_cnn
+from .resnet import resnet50v2 as resnet50v2

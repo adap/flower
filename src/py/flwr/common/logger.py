@@ -50,7 +50,7 @@ class CustomHTTPHandler(HTTPHandler):
         super(CustomHTTPHandler, self).__init__(host, url, method, secure, credentials)
         self.identifier = identifier
 
-    def mapLogRecord(self, record: LogRecord) -> Dict[str, Any]:  # type: ignore
+    def mapLogRecord(self, record: LogRecord) -> Dict[str, Any]:
         """Filter for the properties to be send to the logserver."""
         record_dict = record.__dict__
         return {

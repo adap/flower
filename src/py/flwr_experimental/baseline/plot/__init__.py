@@ -15,4 +15,6 @@
 """Provides plotting functionality."""
 
 
-from .plot import bar_chart, line_chart, single_bar_chart
+from .plot import bar_chart as bar_chart
+from .plot import line_chart as line_chart
+from .plot import single_bar_chart as single_bar_chart
