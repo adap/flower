@@ -34,12 +34,12 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
 
 
-def get_weights(model) -> fl.common.Weights:
+def get_weights(model: torch.nn.ModuleList) -> fl.common.Weights:
     """Get model weights as a list of NumPy ndarrays."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
 
-def set_weights(model, weights: fl.common.Weights) -> None:
+def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
     """Set model weights from a list of NumPy ndarrays."""
     state_dict = OrderedDict(
         {

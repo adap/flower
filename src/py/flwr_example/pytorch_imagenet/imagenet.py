@@ -79,7 +79,10 @@ def load_data(data_path) -> Tuple[datasets.ImageFolder, datasets.ImageFolder]:
 
 
 def train(
-    net, trainloader: torch.utils.data.DataLoader, epochs: int, device: torch.device,
+    net: torch.nn.ModuleList,
+    trainloader: torch.utils.data.DataLoader,
+    epochs: int,
+    device: torch.device,
 ) -> None:
     """Train the network."""
 
@@ -125,7 +128,9 @@ def train(
 
 
 def test(
-    net, testloader: torch.utils.data.DataLoader, device: torch.device,
+    net: torch.nn.ModuleList,
+    testloader: torch.utils.data.DataLoader,
+    device: torch.device,
 ) -> Tuple[float, float]:
     """Validate the network on the entire test set."""
     criterion = nn.CrossEntropyLoss()
