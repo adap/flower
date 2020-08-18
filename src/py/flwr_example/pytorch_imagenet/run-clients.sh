@@ -22,6 +22,7 @@ SERVER_ADDRESS="[::]:8080"
 NUM_CLIENTS=40
 I_START=0
 I_END=39
+IMAGENET_PATH="~/Downloads/imagenet-object-localization-challenge/"
 
 echo "Starting $NUM_CLIENTS clients."
 for ((i = $I_START; i <= $I_END; i++))
@@ -30,6 +31,6 @@ do
     python -m flwr_example.pytorch_imagenet.client \
       --cid=$i \
       --server_address=$SERVER_ADDRESS \
-      --data_path=$PLACEHOLDER &
+      --data_path=$IMAGENET_PATH &
 done
 echo "Started $NUM_CLIENTS clients."

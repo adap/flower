@@ -18,6 +18,7 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
+IMAGENET_PATH="~/Downloads/imagenet-object-localization-challenge/"
 
 # Start a Flower server
 python -m flwr_example.pytorch_imagenet.server \
@@ -25,4 +26,4 @@ python -m flwr_example.pytorch_imagenet.server \
   --sample_fraction=0.25 \
   --min_sample_size=10 \
   --min_num_clients=30 \
-  --data_path=$PLACEHOLDER
+  --data_path=$IMAGENET_PATH
