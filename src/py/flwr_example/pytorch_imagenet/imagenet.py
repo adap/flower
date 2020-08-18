@@ -35,17 +35,12 @@ import torchvision
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch import Tensor
-
-import flwr as fl
 from tqdm import tqdm
 
-
-def load_model() -> Net:
-    """Load a simple CNN."""
-    return Net()
+import flwr as fl
 
 
-def load_data(data_path):
+def load_data(data_path) -> Tuple[datasets.ImageFolder, datasets.ImageFolder]:
     """Load ImageNet (training and val set)."""
 
     # Load ImageNet and normalize
@@ -84,10 +79,7 @@ def load_data(data_path):
 
 
 def train(
-    net: Net,
-    trainloader: torch.utils.data.DataLoader,
-    epochs: int,
-    device: torch.device,
+    net, trainloader: torch.utils.data.DataLoader, epochs: int, device: torch.device,
 ) -> None:
     """Train the network."""
 
@@ -133,7 +125,7 @@ def train(
 
 
 def test(
-    net: Net, testloader: torch.utils.data.DataLoader, device: torch.device,
+    net, testloader: torch.utils.data.DataLoader, device: torch.device,
 ) -> Tuple[float, float]:
     """Validate the network on the entire test set."""
     criterion = nn.CrossEntropyLoss()
