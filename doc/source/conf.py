@@ -29,7 +29,7 @@ copyright = u"2020 Adap GmbH"
 author = u"The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = u"0.5.0"
+release = u"0.6.0"
 
 
 # -- General configuration ---------------------------------------------------
