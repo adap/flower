@@ -72,6 +72,23 @@ Then, start the two clients in a new terminal window:
 
 For more details, see :code:`src/py/flwr_example/pytorch`.
 
+ImageNet-2012 Image Classification
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`ImageNet-2012 <http://www.image-net.org/>`_ is one of the major computer
+vision datasets. The Flower ImageNet example uses PyTorch to train a ResNet-18
+classifier in a federated learning setup with ten clients.
+
+First, start a Flower server:
+
+  $ ./src/py/flwr_example/pytorch_imagenet/run-server.sh
+
+Then, start the two clients in a new terminal window:
+
+  $ ./src/py/flwr_example/pytorch_imagenet/run-clients.sh
+
+For more details, see :code:`src/py/flwr_example/pytorch_imagenet`.
+
 
 TensorFlow Examples
 -------------------
