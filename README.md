@@ -48,6 +48,10 @@ Available [examples](src/py/flwr_example):
 
 *Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline](src/py/flwr_experimental/baseline).
 
+## Flower Datasets
+
+*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline/dataset](src/py/flwr_experimental/baseline/dataset).
+
 ## Contributing to Flower
 
 We welcome contributions. Please see [CONTRIBUTING.md](CONTRIBUTING.md) to get
