@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
+import os
+import sys
 from sphinx.application import ConfigError
 
 # Configuration file for the Sphinx documentation builder.
@@ -20,6 +21,10 @@ from sphinx.application import ConfigError
 # This file only contains a selection of the most common options. For a full
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
+
+
+# Fixing path issue for autodoc
+sys.path.insert(0, os.path.abspath('../../src/py'))
 
 
 # -- Project information -----------------------------------------------------
