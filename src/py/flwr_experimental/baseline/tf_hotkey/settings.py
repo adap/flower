@@ -22,7 +22,7 @@ from flwr_experimental.baseline.common import (
     sample_delay_factors,
     sample_real_delay_factors,
 )
-from flwr_experimental.baseline.setting import ClientSetting, ServerSetting, Setting
+from flwr_experimental.baseline.setting import Baseline, ClientSetting, ServerSetting
 from flwr_experimental.ops.cluster import Instance
 
 ROUNDS = 50
@@ -52,11 +52,11 @@ FN_MIN_SAMPLE_SIZE_10 = 10
 FN_TRAINING_ROUND_TIMEOUT = 230
 
 
-def get_setting(name: str) -> Setting:
+def get_setting(name: str) -> Baseline:
     """Return appropriate setting."""
     if name not in SETTINGS:
         raise Exception(
-            f"Setting {name} does not exist. Valid settings are: {list(SETTINGS.keys())}"
+            f"Baseline {name} does not exist. Valid settings are: {list(SETTINGS.keys())}"
         )
     return SETTINGS[name]
 
@@ -165,7 +165,7 @@ SETTINGS = {
     ###
     ### FedFS vs FedAvg
     ###
-    "fn-c25-r50-fedavg-230": Setting(
+    "fn-c25-r50-fedavg-230": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_50,
         server=ServerSetting(
@@ -191,7 +191,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "fn-c25-r50-fedfs-v0-230-230": Setting(
+    "fn-c25-r50-fedfs-v0-230-230": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_50,
         server=ServerSetting(
@@ -218,7 +218,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "fn-c10-r50-fedavg-230": Setting(
+    "fn-c10-r50-fedavg-230": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_50,
         server=ServerSetting(
@@ -244,7 +244,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "fn-c10-r50-fedfs-v0-230-230": Setting(
+    "fn-c10-r50-fedfs-v0-230-230": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_50,
         server=ServerSetting(
@@ -274,7 +274,7 @@ SETTINGS = {
     ###
     ###
     ###
-    "n2020-fedfs": Setting(
+    "n2020-fedfs": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_50,
         server=ServerSetting(
@@ -301,7 +301,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "n2020-fedavg": Setting(
+    "n2020-fedavg": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_50,
         server=ServerSetting(
@@ -328,7 +328,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "dry-run": Setting(
+    "dry-run": Baseline(
         instances=[
             Instance(name="server", group="server", num_cpu=4, num_ram=16),
             Instance(name="client", group="clients", num_cpu=4, num_ram=16),
@@ -354,7 +354,7 @@ SETTINGS = {
             dry_run=True,
         ),
     ),
-    "minimal": Setting(
+    "minimal": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_10,
         server=ServerSetting(
@@ -381,7 +381,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "fedavg-sync": Setting(
+    "fedavg-sync": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_50,
         server=ServerSetting(
@@ -408,7 +408,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "fedavg-async": Setting(
+    "fedavg-async": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_50,
         server=ServerSetting(
@@ -435,7 +435,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "fast-and-slow-only-partial-updates": Setting(
+    "fast-and-slow-only-partial-updates": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_50,
         server=ServerSetting(
@@ -462,7 +462,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "fast-and-slow-only-dynamic-timeouts": Setting(
+    "fast-and-slow-only-dynamic-timeouts": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_50,
         server=ServerSetting(
@@ -489,7 +489,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "fast-and-slow-only-importance-sampling": Setting(
+    "fast-and-slow-only-importance-sampling": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_50,
         server=ServerSetting(
@@ -516,7 +516,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "fast-and-slow": Setting(
+    "fast-and-slow": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_50,
         server=ServerSetting(
@@ -543,7 +543,7 @@ SETTINGS = {
             real_delays=True,
         ),
     ),
-    "qffedavg": Setting(
+    "qffedavg": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=8, num_ram=32)]
         + client_instances_50,
         server=ServerSetting(
