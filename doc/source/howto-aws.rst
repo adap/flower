@@ -26,7 +26,7 @@ Setup
 
     git clone https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv
 
-    pyenv install 3.7.8
+    pyenv install 3.7.9
 
     # Install
     git clone https://github.com/adap/flower.git
