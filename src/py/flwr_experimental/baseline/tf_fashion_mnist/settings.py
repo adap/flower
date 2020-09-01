@@ -22,7 +22,7 @@ from flwr_experimental.baseline.common import (
     sample_delay_factors,
     sample_real_delay_factors,
 )
-from flwr_experimental.baseline.setting import ClientSetting, ServerSetting, Baseline
+from flwr_experimental.baseline.setting import Baseline, ClientSetting, ServerSetting
 from flwr_experimental.ops.cluster import Instance
 
 N20_ROUNDS = 50
