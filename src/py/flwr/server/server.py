@@ -192,7 +192,7 @@ def fit_clients(
         else:
             # Potential success case
             result = future.result()
-            if len(result[1][0].tensors) > 0:
+            if len(result[1].parameters.tensors) > 0:
                 results.append(result)
             else:
                 failures.append(Exception("Empty client update"))
@@ -206,7 +206,7 @@ def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
 
 
 def evaluate_clients(
-    client_instructions: List[Tuple[ClientProxy, FitIns]]
+    client_instructions: List[Tuple[ClientProxy, EvaluateIns]]
 ) -> EvaluateResultsAndFailures:
     """Evaluate weights concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:

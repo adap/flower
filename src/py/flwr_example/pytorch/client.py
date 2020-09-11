@@ -56,8 +56,8 @@ class CifarClient(fl.client.Client):
     def fit(self, ins: FitIns) -> FitRes:
         print(f"Client {self.cid}: fit")
 
-        weights: Weights = fl.common.parameters_to_weights(ins[0])
-        config = ins[1]
+        weights: Weights = fl.common.parameters_to_weights(ins.parameters)
+        config = ins.config
         fit_begin = timeit.default_timer()
 
         # Get training config
@@ -78,12 +78,17 @@ class CifarClient(fl.client.Client):
         params_prime = fl.common.weights_to_parameters(weights_prime)
         num_examples_train = len(self.trainset)
         fit_duration = timeit.default_timer() - fit_begin
-        return params_prime, num_examples_train, num_examples_train, fit_duration
+        return FitRes(
+            parameters=params_prime,
+            num_examples=num_examples_train,
+            num_examples_ceil=num_examples_train,
+            fit_duration=fit_duration,
+        )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         print(f"Client {self.cid}: evaluate")
 
-        weights = fl.common.parameters_to_weights(ins[0])
+        weights = fl.common.parameters_to_weights(ins.parameters)
 
         # Use provided weights to update the local model
         self.model.set_weights(weights)
@@ -95,7 +100,9 @@ class CifarClient(fl.client.Client):
         loss, accuracy = cifar.test(self.model, testloader, device=DEVICE)
 
         # Return the number of evaluation examples and the evaluation result (loss)
-        return len(self.testset), float(loss), float(accuracy)
+        return EvaluateRes(
+            num_examples=len(self.testset), loss=float(loss), accuracy=float(accuracy)
+        )
 
 
 def main() -> None:

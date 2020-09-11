@@ -80,8 +80,8 @@ class ImageNetClient(fl.client.Client):
 
         print(f"Client {self.cid}: fit")
 
-        weights: fl.common.Weights = fl.common.parameters_to_weights(ins[0])
-        config = ins[1]
+        weights: fl.common.Weights = fl.common.parameters_to_weights(ins.parameters)
+        config = ins.config
         fit_begin = timeit.default_timer()
 
         # Get training config
@@ -116,7 +116,12 @@ class ImageNetClient(fl.client.Client):
         params_prime = fl.common.weights_to_parameters(weights_prime)
         num_examples_train = len(self.trainset)
         fit_duration = timeit.default_timer() - fit_begin
-        return params_prime, num_examples_train, num_examples_train, fit_duration
+        return fl.common.FitRes(
+            parameters=params_prime,
+            num_examples=num_examples_train,
+            num_examples_ceil=num_examples_train,
+            fit_duration=fit_duration,
+        )
 
     def evaluate(self, ins: fl.common.EvaluateIns) -> fl.common.EvaluateRes:
 
@@ -126,10 +131,10 @@ class ImageNetClient(fl.client.Client):
 
         print(f"Client {self.cid}: evaluate")
 
-        config = ins[1]
+        config = ins.config
         batch_size = int(config["batch_size"])
 
-        weights = fl.common.parameters_to_weights(ins[0])
+        weights = fl.common.parameters_to_weights(ins.parameters)
 
         # Use provided weights to update the local model
         set_weights(self.model, weights)
@@ -155,7 +160,9 @@ class ImageNetClient(fl.client.Client):
         loss, accuracy = imagenet.test(self.model, testloader, device=DEVICE)
 
         # Return the number of evaluation examples and the evaluation result (loss)
-        return len(self.testset), float(loss), float(accuracy)
+        return fl.common.EvaluateRes(
+            num_examples=len(self.testset), loss=float(loss), accuracy=float(accuracy)
+        )
 
 
 def main() -> None:
