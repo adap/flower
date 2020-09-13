@@ -104,7 +104,7 @@ class QffedAvg(FedAvg):
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(rnd)
-        fit_ins = (parameters, config)
+        fit_ins = FitIns(parameters, config)
 
         # Sample clients
         sample_size, min_num_clients = self.num_fit_clients(
@@ -132,7 +132,7 @@ class QffedAvg(FedAvg):
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
             config = self.on_evaluate_config_fn(rnd)
-        evaluate_ins = (parameters, config)
+        evaluate_ins = EvaluateIns(parameters, config)
 
         # Sample clients
         sample_size, min_num_clients = self.num_evaluation_clients(
@@ -180,8 +180,8 @@ class QffedAvg(FedAvg):
         if eval_result is not None:
             loss, _ = eval_result
 
-        for _, (parameters, _, _, _) in results:
-            new_weights = parameters_to_weights(parameters)
+        for _, fit_res in results:
+            new_weights = parameters_to_weights(fit_res.parameters)
             # plug in the weight updates into the gradient
             grads = [
                 (u - v) * 1.0 / self.learning_rate
@@ -213,7 +213,12 @@ class QffedAvg(FedAvg):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None
-        return weighted_loss_avg([evaluate_res for client, evaluate_res in results])
+        return weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss, evaluate_res.accuracy)
+                for client, evaluate_res in results
+            ]
+        )
 
     def on_conclude_round(
         self, rnd: int, loss: Optional[float], acc: Optional[float]

@@ -60,25 +60,29 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
         parameters = flwr.common.weights_to_parameters([np.ones((2, 2))])
-        ins: flwr.common.FitIns = (parameters, {})
+        ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
 
         # Execute
-        parameters_prime, num_examples, _, _ = client.fit(ins=ins)
+        fit_res = client.fit(ins=ins)
 
         # Assert
-        assert parameters_prime.tensor_type == "np"
-        assert flwr.common.parameters_to_weights(parameters_prime) == []
-        assert num_examples == 10
+        assert fit_res.parameters.tensor_type == "np"
+        assert flwr.common.parameters_to_weights(fit_res.parameters) == []
+        assert fit_res.num_examples == 10
 
     def test_evaluate(self) -> None:
         """This test is currently quite simple and should be improved."""
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
         parameters = flwr.common.Parameters(tensors=[], tensor_type="np")
-        evaluate_ins: flwr.common.EvaluateIns = (parameters, {})
+        evaluate_ins: flwr.common.EvaluateIns = flwr.common.EvaluateIns(parameters, {})
 
         # Execute
-        value = client.evaluate(evaluate_ins)
+        evaluate_res = client.evaluate(evaluate_ins)
 
         # Assert
-        assert (0, 0.0, 0.0) == value
+        assert (0, 0.0, 0.0) == (
+            evaluate_res.num_examples,
+            evaluate_res.loss,
+            evaluate_res.accuracy,
+        )

@@ -76,8 +76,8 @@ class VisionClassificationClient(fl.client.Client):
         return fl.common.ParametersRes(parameters=parameters)
 
     def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
-        weights: fl.common.Weights = fl.common.parameters_to_weights(ins[0])
-        config = ins[1]
+        weights: fl.common.Weights = fl.common.parameters_to_weights(ins.parameters)
+        config = ins.config
         log(
             DEBUG,
             "fit on %s (examples: %s), config %s",
@@ -119,11 +119,16 @@ class VisionClassificationClient(fl.client.Client):
         else:
             # Return the refined weights and the number of examples used for training
             parameters = fl.common.weights_to_parameters(self.model.get_weights())
-        return parameters, num_examples, num_examples_ceil, fit_duration
+        return fl.common.FitRes(
+            parameters=parameters,
+            num_examples=num_examples,
+            num_examples_ceil=num_examples_ceil,
+            fit_duration=fit_duration,
+        )
 
     def evaluate(self, ins: fl.common.EvaluateIns) -> fl.common.EvaluateRes:
-        weights = fl.common.parameters_to_weights(ins[0])
-        config = ins[1]
+        weights = fl.common.parameters_to_weights(ins.parameters)
+        config = ins.config
         log(
             DEBUG,
             "evaluate on %s (examples: %s), config %s",
@@ -141,4 +146,6 @@ class VisionClassificationClient(fl.client.Client):
         )
 
         # Return the number of evaluation examples and the evaluation result (loss)
-        return self.num_examples_test, loss, acc
+        return fl.common.EvaluateRes(
+            num_examples=self.num_examples_test, loss=loss, accuracy=acc
+        )

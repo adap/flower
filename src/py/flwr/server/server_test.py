@@ -43,10 +43,10 @@ class SuccessClient(ClientProxy):
     def fit(self, ins: FitIns) -> FitRes:
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
-        return Parameters(tensors=[arr_serialized], tensor_type=""), 1, 1, 12.3
+        return FitRes(Parameters(tensors=[arr_serialized], tensor_type=""), 1, 1, 12.3)
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        return 1, 1.0, 0.1
+        return EvaluateRes(1, 1.0, 0.1)
 
 
 class FailingCLient(ClientProxy):
@@ -71,7 +71,7 @@ def test_fit_clients() -> None:
     ]
     arr = np.array([[1, 2], [3, 4], [5, 6]])
     arr_serialized = ndarray_to_bytes(arr)
-    ins: FitIns = (Parameters(tensors=[arr_serialized], tensor_type=""), {})
+    ins: FitIns = FitIns(Parameters(tensors=[arr_serialized], tensor_type=""), {})
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
@@ -80,7 +80,7 @@ def test_fit_clients() -> None:
     # Assert
     assert len(results) == 1
     assert len(failures) == 1
-    assert results[0][1][1] == 1
+    assert results[0][1].num_examples == 1
 
 
 def test_eval_clients() -> None:
@@ -92,7 +92,9 @@ def test_eval_clients() -> None:
     ]
     arr = np.array([[1, 2], [3, 4], [5, 6]])
     arr_serialized = ndarray_to_bytes(arr)
-    ins: EvaluateIns = (Parameters(tensors=[arr_serialized], tensor_type=""), {})
+    ins: EvaluateIns = EvaluateIns(
+        Parameters(tensors=[arr_serialized], tensor_type=""), {},
+    )
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
@@ -101,5 +103,5 @@ def test_eval_clients() -> None:
     # Assert
     assert len(results) == 1
     assert len(failures) == 1
-    assert results[0][1][0] == 1
-    assert results[0][1][1] == 1.0
+    assert results[0][1].num_examples == 1
+    assert results[0][1].loss == 1.0
