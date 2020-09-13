@@ -23,9 +23,6 @@ from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
 class Client(ABC):
     """Abstract base class for Flower clients."""
 
-    def __init__(self, cid: str):
-        self.cid = cid
-
     @abstractmethod
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""

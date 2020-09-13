@@ -24,14 +24,12 @@ def main() -> None:
     class MnistClient(fl.client.keras_client.KerasClient):
         def __init__(
             self,
-            cid: str,
             model: tf.keras.Model,
             x_train: np.ndarray,
             y_train: np.ndarray,
             x_test: np.ndarray,
             y_test: np.ndarray,
         ) -> None:
-            super().__init__(cid)
             self.model = model
             self.x_train, self.y_train = x_train, y_train
             self.x_test, self.y_test = x_test, y_test
@@ -58,7 +56,7 @@ def main() -> None:
     x_train, x_test = x_train / 255.0, x_test / 255.0
 
     # Instanstiate client
-    client = MnistClient("0", model, x_train, y_train, x_test, y_test)
+    client = MnistClient(model, x_train, y_train, x_test, y_test)
 
     # Start client
     fl.client.start_keras_client(server_address="[::]:8080", client=client)

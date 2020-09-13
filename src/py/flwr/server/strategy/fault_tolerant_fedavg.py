@@ -66,8 +66,8 @@ class FaultTolerantFedAvg(FedAvg):
             return None
         # Convert results
         weights_results = [
-            (parameters_to_weights(parameters), num_examples)
-            for client, (parameters, num_examples, _, _) in results
+            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            for client, fit_res in results
         ]
         return aggregate(weights_results)
 
@@ -85,4 +85,9 @@ class FaultTolerantFedAvg(FedAvg):
         if completion_rate < self.completion_rate_evaluate:
             # Not enough results for aggregation
             return None
-        return weighted_loss_avg([evaluate_res for _, evaluate_res in results])
+        return weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss, evaluate_res.accuracy)
+                for client, evaluate_res in results
+            ]
+        )

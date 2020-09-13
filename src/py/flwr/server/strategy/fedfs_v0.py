@@ -125,7 +125,7 @@ class FedFSv0(FedAvg):
         config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
 
         # Fit instructions
-        fit_ins = (parameters, config)
+        fit_ins = FitIns(parameters, config)
 
         # Return client/config pairs
         return [(client, fit_ins) for client in clients]
@@ -177,15 +177,19 @@ class FedFSv0(FedAvg):
 
         # Convert results
         weights_results = [
-            (parameters_to_weights(parameters), num_examples)
-            for client, (parameters, num_examples, _, _) in results
+            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            for client, fit_res in results
         ]
         weights_prime = aggregate(weights_results)
 
         # Track contributions to the global model
         for client, fit_res in results:
             cid = client.cid
-            contribution: Tuple[int, int, int] = (rnd, fit_res[1], fit_res[2])
+            contribution: Tuple[int, int, int] = (
+                rnd,
+                fit_res.num_examples,
+                fit_res.num_examples_ceil,
+            )
             if cid not in self.contributions.keys():
                 self.contributions[cid] = []
             self.contributions[cid].append(contribution)
@@ -208,4 +212,9 @@ class FedFSv0(FedAvg):
             # Not enough results for aggregation
             return None
 
-        return weighted_loss_avg([evaluate_res for _, evaluate_res in results])
+        return weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss, evaluate_res.accuracy)
+                for client, evaluate_res in results
+            ]
+        )

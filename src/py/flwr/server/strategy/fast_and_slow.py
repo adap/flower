@@ -191,7 +191,7 @@ class FastAndSlow(FedAvg):
             config["timeout"] = str(self.t_slow)
 
         # Fit instructions
-        fit_ins = (parameters, config)
+        fit_ins = FitIns(parameters, config)
 
         # Return client/config pairs
         return [(client, fit_ins) for client in clients]
@@ -302,8 +302,8 @@ class FastAndSlow(FedAvg):
 
         # Convert results
         weights_results = [
-            (parameters_to_weights(parameters), num_examples)
-            for client, (parameters, num_examples, _, _) in results
+            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            for client, fit_res in results
         ]
         weights_prime = aggregate(weights_results)
 
@@ -311,19 +311,23 @@ class FastAndSlow(FedAvg):
             # Track contributions to the global model
             for client, fit_res in results:
                 cid = client.cid
-                contribution: Tuple[int, int, int] = (rnd, fit_res[1], fit_res[2])
+                contribution: Tuple[int, int, int] = (
+                    rnd,
+                    fit_res.num_examples,
+                    fit_res.num_examples_ceil,
+                )
                 if cid not in self.contributions.keys():
                     self.contributions[cid] = []
                 self.contributions[cid].append(contribution)
 
         if self.dynamic_timeout:
             self.durations = []
-            for client, (_, num_examples, num_examples_ceil, fit_duration) in results:
+            for client, fit_res in results:
                 cid_duration = (
                     client.cid,
-                    fit_duration,
-                    num_examples,
-                    num_examples_ceil,
+                    fit_res.fit_duration,
+                    fit_res.num_examples,
+                    fit_res.num_examples_ceil,
                 )
                 self.durations.append(cid_duration)
 
@@ -345,7 +349,12 @@ class FastAndSlow(FedAvg):
             # Not enough results for aggregation
             return None
 
-        return weighted_loss_avg([evaluate_res for _, evaluate_res in results])
+        return weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss, evaluate_res.accuracy)
+                for client, evaluate_res in results
+            ]
+        )
 
 
 def is_fast_round(rnd: int, r_fast: int, r_slow: int) -> bool:
