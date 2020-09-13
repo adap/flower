@@ -24,14 +24,12 @@ def main() -> None:
     class MnistClient(fl.client.keras_client.KerasClient):
         def __init__(
             self,
-            cid: str,
             model: tf.keras.Model,
             x_train: np.ndarray,
             y_train: np.ndarray,
             x_test: np.ndarray,
             y_test: np.ndarray,
         ) -> None:
-            super().__init__(cid)
             self.model = model
             self.x_train, self.y_train = x_train, y_train
             self.x_test, self.y_test = x_test, y_test
