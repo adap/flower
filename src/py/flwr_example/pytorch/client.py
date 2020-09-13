@@ -41,7 +41,7 @@ class CifarClient(fl.client.Client):
         trainset: torchvision.datasets.CIFAR10,
         testset: torchvision.datasets.CIFAR10,
     ) -> None:
-        super().__init__(cid)
+        self.cid = cid
         self.model = model
         self.trainset = trainset
         self.testset = testset

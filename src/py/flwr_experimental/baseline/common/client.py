@@ -47,7 +47,7 @@ class VisionClassificationClient(fl.client.Client):
         augment_offset: int = 0,
         normalization_factor: float = 255.0,
     ):
-        super().__init__(cid)
+        self.cid = cid
         self.model = model
         self.ds_train = build_dataset(
             xy_train[0],

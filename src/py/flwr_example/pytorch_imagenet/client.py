@@ -60,7 +60,7 @@ class ImageNetClient(fl.client.Client):
         testset: torchvision.datasets,
         nb_clients: int,
     ) -> None:
-        super().__init__(cid)
+        self.cid = cid
         self.model = models.resnet18().to(DEVICE)
         self.trainset = trainset
         self.testset = testset

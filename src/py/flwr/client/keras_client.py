@@ -35,9 +35,6 @@ from .client import Client
 class KerasClient(ABC):
     """Abstract base class for Flower clients which use Keras."""
 
-    def __init__(self, cid: str):
-        self.cid = cid
-
     @abstractmethod
     def get_weights(self) -> Weights:
         """Return the current local model weights."""
@@ -57,8 +54,6 @@ class KerasClientWrapper(Client):
     """Wrapper which translates between Client and KerasClient."""
 
     def __init__(self, keras_client: KerasClient) -> None:
-        super().__init__(cid=keras_client.cid)
-        self.cid = keras_client.cid
         self.keras_client = keras_client
 
     def get_parameters(self) -> ParametersRes:
