@@ -16,7 +16,7 @@
 
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 
 import numpy as np
 
@@ -38,9 +38,37 @@ class ParametersRes:
     parameters: Parameters
 
 
-FitIns = Tuple[Parameters, Dict[str, str]]  # model parameters, config
-FitRes = Tuple[
-    Parameters, int, int, float
-]  # model parameters, num_examples_processed, num_examples_ceil, fit_duration
-EvaluateIns = Tuple[Parameters, Dict[str, str]]  # model parameters, config
-EvaluateRes = Tuple[int, float, Optional[float]]  # num_examples, loss, accuracy
+@dataclass
+class FitIns:
+    """Fit instructions for a client."""
+
+    parameters: Parameters
+    config: Dict[str, str]
+
+
+@dataclass
+class FitRes:
+    """Fit response from a client."""
+
+    parameters: Parameters
+    # config: Dict[str, str]
+    num_examples: int
+    num_examples_ceil: int
+    fit_duration: float
+
+
+@dataclass
+class EvaluateIns:
+    """Evaluate instructions for a client."""
+
+    parameters: Parameters
+    config: Dict[str, str]
+
+
+@dataclass
+class EvaluateRes:
+    """Evaluate response from a client."""
+
+    num_examples: int
+    loss: float
+    accuracy: float

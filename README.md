@@ -42,11 +42,16 @@ Available [examples](src/py/flwr_example):
 
 * [Quickstart: Keras & MNIST](src/py/flwr_example/quickstart)
 * [PyTorch & CIFAR-10](src/py/flwr_example/pytorch)
+* [PyTorch & ImageNet](src/py/flwr_example/pytorch_imagenet)
 * [TensorFlow & Fashion-MNIST](src/py/flwr_example/tensorflow)
 
 ## Flower Baselines
 
 *Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline](src/py/flwr_experimental/baseline).
+
+## Flower Datasets
+
+*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline/dataset](src/py/flwr_experimental/baseline/dataset).
 
 ## Contributing to Flower
 

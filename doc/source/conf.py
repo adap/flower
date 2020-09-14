@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
+import os
+import sys
 from sphinx.application import ConfigError
 
 # Configuration file for the Sphinx documentation builder.
@@ -22,6 +23,10 @@ from sphinx.application import ConfigError
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 
+# Fixing path issue for autodoc
+sys.path.insert(0, os.path.abspath('../../src/py'))
+
+
 # -- Project information -----------------------------------------------------
 
 project = u"Flower"
@@ -29,7 +34,7 @@ copyright = u"2020 Adap GmbH"
 author = u"The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = u"0.5.0"
+release = u"0.6.0"
 
 
 # -- General configuration ---------------------------------------------------

@@ -35,9 +35,6 @@ from .client import Client
 class KerasClient(ABC):
     """Abstract base class for Flower clients which use Keras."""
 
-    def __init__(self, cid: str):
-        self.cid = cid
-
     @abstractmethod
     def get_weights(self) -> Weights:
         """Return the current local model weights."""
@@ -57,8 +54,6 @@ class KerasClientWrapper(Client):
     """Wrapper which translates between Client and KerasClient."""
 
     def __init__(self, keras_client: KerasClient) -> None:
-        super().__init__(cid=keras_client.cid)
-        self.cid = keras_client.cid
         self.keras_client = keras_client
 
     def get_parameters(self) -> ParametersRes:
@@ -70,26 +65,26 @@ class KerasClientWrapper(Client):
     def fit(self, ins: FitIns) -> FitRes:
         """Refine the provided weights using the locally held dataset."""
         # Deconstruct FitIns
-        weights: Weights = parameters_to_weights(ins[0])
-        config = ins[1]
+        weights: Weights = parameters_to_weights(ins.parameters)
 
         # Train
         fit_begin = timeit.default_timer()
         weights_prime, num_examples, num_examples_ceil = self.keras_client.fit(
-            weights, config
+            weights, ins.config
         )
         fit_duration = timeit.default_timer() - fit_begin
 
         # Return FitRes
         parameters = weights_to_parameters(weights_prime)
-        return parameters, num_examples, num_examples_ceil, fit_duration
+        return FitRes(
+            parameters=parameters,
+            num_examples=num_examples,
+            num_examples_ceil=num_examples_ceil,
+            fit_duration=fit_duration,
+        )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
-        # Deconstruct EvaluateIns
-        weights: Weights = parameters_to_weights(ins[0])
-        config = ins[1]
-
-        # Evaluate and return
-        num_examples, loss, accuracy = self.keras_client.evaluate(weights, config)
-        return num_examples, loss, accuracy
+        weights: Weights = parameters_to_weights(ins.parameters)
+        num_examples, loss, accuracy = self.keras_client.evaluate(weights, ins.config)
+        return EvaluateRes(num_examples=num_examples, loss=loss, accuracy=accuracy)

@@ -20,7 +20,7 @@ from flwr_experimental.baseline.common import (
     configure_client_instances,
     sample_delay_factors,
 )
-from flwr_experimental.baseline.setting import ClientSetting, ServerSetting, Setting
+from flwr_experimental.baseline.setting import Baseline, ClientSetting, ServerSetting
 from flwr_experimental.ops.cluster import Instance
 
 ROUNDS = 20
@@ -34,11 +34,11 @@ IID_FRACTION = 0.1
 MAX_DELAY_FACTOR = 4.0  # Equals a 5x slowdown
 
 
-def get_setting(name: str) -> Setting:
+def get_setting(name: str) -> Baseline:
     """Return appropriate setting."""
     if name not in SETTINGS:
         raise Exception(
-            f"Setting {name} does not exist. Valid settings are: {list(SETTINGS.keys())}"
+            f"Baseline {name} does not exist. Valid settings are: {list(SETTINGS.keys())}"
         )
     return SETTINGS[name]
 
@@ -146,7 +146,7 @@ client_instances_2, client_names_2 = configure_client_instances(
 )
 
 SETTINGS = {
-    "fedavg-sync-min": Setting(
+    "fedavg-sync-min": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=2, num_ram=8)]
         + client_instances_2,
         server=ServerSetting(
@@ -170,7 +170,7 @@ SETTINGS = {
             dry_run=False,
         ),
     ),
-    "fedavg-sync-10-10": Setting(
+    "fedavg-sync-10-10": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_10,
         server=ServerSetting(
@@ -194,7 +194,7 @@ SETTINGS = {
             dry_run=False,
         ),
     ),
-    "fedavg-sync-100-10": Setting(
+    "fedavg-sync-100-10": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -221,7 +221,7 @@ SETTINGS = {
     ########################################
     ### PREVIOUS ###
     ########################################
-    "dry-run": Setting(
+    "dry-run": Baseline(
         instances=[
             Instance(name="server", group="server", num_cpu=2, num_ram=8),
             Instance(name="client", group="clients", num_cpu=2, num_ram=8),
@@ -244,7 +244,7 @@ SETTINGS = {
             iid_fraction=0.1, instance_names=["client"], num_clients=4, dry_run=True
         ),
     ),
-    "minimal": Setting(
+    "minimal": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=2, num_ram=8)]
         + client_instances_4,
         server=ServerSetting(
@@ -270,7 +270,7 @@ SETTINGS = {
             delay_factor_slow=MAX_DELAY_FACTOR,
         ),
     ),
-    "fedavg-sync": Setting(
+    "fedavg-sync": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -296,7 +296,7 @@ SETTINGS = {
             delay_factor_slow=MAX_DELAY_FACTOR,
         ),
     ),
-    "fedavg-async": Setting(
+    "fedavg-async": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(
@@ -322,7 +322,7 @@ SETTINGS = {
             delay_factor_slow=MAX_DELAY_FACTOR,
         ),
     ),
-    "fedfs": Setting(
+    "fedfs": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_100,
         server=ServerSetting(

@@ -32,12 +32,10 @@ class FashionMnistClient(fl.client.KerasClient):
 
     def __init__(
         self,
-        cid: str,
         model: tf.keras.Model,
         xy_train: Tuple[np.ndarray, np.ndarray],
         xy_test: Tuple[np.ndarray, np.ndarray],
     ):
-        super().__init__(cid)
         self.model = model
         self.x_train, self.y_train = xy_train
         self.x_test, self.y_test = xy_test
@@ -83,9 +81,6 @@ def main() -> None:
         help=f"gRPC server address (default: {DEFAULT_SERVER_ADDRESS})",
     )
     parser.add_argument(
-        "--cid", type=str, required=True, help="Client CID (no default)"
-    )
-    parser.add_argument(
         "--partition", type=int, required=True, help="Partition index (no default)"
     )
     parser.add_argument(
@@ -97,7 +92,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Configure logger
-    fl.common.logger.configure(f"client_{args.cid}", host=args.log_host)
+    fl.common.logger.configure(f"client_{args.partition}", host=args.log_host)
 
     # Load model and data
     model = fashion_mnist.load_model()
@@ -106,7 +101,7 @@ def main() -> None:
     )
 
     # Start client
-    client = FashionMnistClient(args.cid, model, xy_train, xy_test)
+    client = FashionMnistClient(model, xy_train, xy_test)
     fl.client.start_keras_client(args.server_address, client)
 
 

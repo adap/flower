@@ -12,25 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower client (abstract base class)."""
+"""Flower example using PyTorch for ImageNet image classification."""
 
 
-from abc import ABC, abstractmethod
-
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
-
-
-class Client(ABC):
-    """Abstract base class for Flower clients."""
-
-    @abstractmethod
-    def get_parameters(self) -> ParametersRes:
-        """Return the current local model parameters."""
-
-    @abstractmethod
-    def fit(self, ins: FitIns) -> FitRes:
-        """Refine the provided weights using the locally held dataset."""
-
-    @abstractmethod
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        """Evaluate the provided weights using the locally held dataset."""
+DEFAULT_SERVER_ADDRESS = "[::]:8080"

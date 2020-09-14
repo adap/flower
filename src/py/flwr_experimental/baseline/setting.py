@@ -63,7 +63,7 @@ class ClientSetting(BaseSetting):
 
 
 @dataclass
-class Setting:
+class Baseline:
     """One specific training setting."""
 
     instances: List[Instance]

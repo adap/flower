@@ -59,7 +59,7 @@ def test_on_aggregate_fit_not_enough_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.5)
     results: List[Tuple[ClientProxy, FitRes]] = [
-        (MagicMock(), (Parameters(tensors=[], tensor_type=""), 1, 1, 0.1))
+        (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, 1, 0.1))
     ]
     failures: List[BaseException] = [Exception(), Exception()]
     expected: Optional[Weights] = None
@@ -76,7 +76,7 @@ def test_on_aggregate_fit_just_enough_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.5)
     results: List[Tuple[ClientProxy, FitRes]] = [
-        (MagicMock(), (Parameters(tensors=[], tensor_type=""), 1, 1, 0.1))
+        (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, 1, 0.1))
     ]
     failures: List[BaseException] = [Exception()]
     expected: Optional[Weights] = []
@@ -93,7 +93,7 @@ def test_on_aggregate_fit_no_failures() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.99)
     results: List[Tuple[ClientProxy, FitRes]] = [
-        (MagicMock(), (Parameters(tensors=[], tensor_type=""), 1, 1, 0.1))
+        (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, 1, 0.1))
     ]
     failures: List[BaseException] = []
     expected: Optional[Weights] = []
@@ -139,7 +139,9 @@ def test_on_aggregate_evaluate_not_enough_results() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.5)
-    results: List[Tuple[ClientProxy, EvaluateRes]] = [(MagicMock(), (1, 2.3, 0.12))]
+    results: List[Tuple[ClientProxy, EvaluateRes]] = [
+        (MagicMock(), EvaluateRes(1, 2.3, 0.12))
+    ]
     failures: List[BaseException] = [Exception(), Exception()]
     expected: Optional[float] = None
 
@@ -154,7 +156,9 @@ def test_on_aggregate_evaluate_just_enough_results() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.5)
-    results: List[Tuple[ClientProxy, EvaluateRes]] = [(MagicMock(), (1, 2.3, 0.12))]
+    results: List[Tuple[ClientProxy, EvaluateRes]] = [
+        (MagicMock(), EvaluateRes(1, 2.3, 0.12))
+    ]
     failures: List[BaseException] = [Exception()]
     expected: Optional[float] = 2.3
 
@@ -169,7 +173,9 @@ def test_on_aggregate_evaluate_no_failures() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.99)
-    results: List[Tuple[ClientProxy, EvaluateRes]] = [(MagicMock(), (1, 2.3, 0.12))]
+    results: List[Tuple[ClientProxy, EvaluateRes]] = [
+        (MagicMock(), EvaluateRes(1, 2.3, 0.12))
+    ]
     failures: List[BaseException] = []
     expected: Optional[float] = 2.3
 

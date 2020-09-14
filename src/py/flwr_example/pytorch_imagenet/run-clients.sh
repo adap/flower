@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,25 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower client (abstract base class)."""
 
+set -e
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
-from abc import ABC, abstractmethod
+SERVER_ADDRESS="[::]:8080"
+NUM_CLIENTS=40
+I_START=0
+I_END=39
+IMAGENET_PATH="~/Downloads/imagenet-object-localization-challenge/"
 
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
-
-
-class Client(ABC):
-    """Abstract base class for Flower clients."""
-
-    @abstractmethod
-    def get_parameters(self) -> ParametersRes:
-        """Return the current local model parameters."""
-
-    @abstractmethod
-    def fit(self, ins: FitIns) -> FitRes:
-        """Refine the provided weights using the locally held dataset."""
-
-    @abstractmethod
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        """Evaluate the provided weights using the locally held dataset."""
+echo "Starting $NUM_CLIENTS clients."
+for ((i = $I_START; i <= $I_END; i++))
+do
+    echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
+    python -m flwr_example.pytorch_imagenet.client \
+      --cid=$i \
+      --server_address=$SERVER_ADDRESS \
+      --data_path=$IMAGENET_PATH &
+done
+echo "Started $NUM_CLIENTS clients."

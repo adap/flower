@@ -95,7 +95,7 @@ class FedAvg(Strategy):
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(rnd)
-        fit_ins = (parameters, config)
+        fit_ins = FitIns(parameters, config)
 
         # Sample clients
         sample_size, min_num_clients = self.num_fit_clients(
@@ -123,7 +123,7 @@ class FedAvg(Strategy):
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
             config = self.on_evaluate_config_fn(rnd)
-        evaluate_ins = (parameters, config)
+        evaluate_ins = EvaluateIns(parameters, config)
 
         # Sample clients
         if rnd >= 0:
@@ -153,8 +153,8 @@ class FedAvg(Strategy):
             return None
         # Convert results
         weights_results = [
-            (parameters_to_weights(parameters), num_examples)
-            for client, (parameters, num_examples, _, _) in results
+            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            for client, fit_res in results
         ]
         return aggregate(weights_results)
 
@@ -170,7 +170,12 @@ class FedAvg(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None
-        return weighted_loss_avg([evaluate_res for _, evaluate_res in results])
+        return weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss, evaluate_res.accuracy)
+                for _, evaluate_res in results
+            ]
+        )
 
     def on_conclude_round(
         self, rnd: int, loss: Optional[float], acc: Optional[float]

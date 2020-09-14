@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,25 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower client (abstract base class)."""
 
+set -e
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
-from abc import ABC, abstractmethod
+IMAGENET_PATH="~/Downloads/imagenet-object-localization-challenge/"
 
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
-
-
-class Client(ABC):
-    """Abstract base class for Flower clients."""
-
-    @abstractmethod
-    def get_parameters(self) -> ParametersRes:
-        """Return the current local model parameters."""
-
-    @abstractmethod
-    def fit(self, ins: FitIns) -> FitRes:
-        """Refine the provided weights using the locally held dataset."""
-
-    @abstractmethod
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        """Evaluate the provided weights using the locally held dataset."""
+# Start a Flower server
+python -m flwr_example.pytorch_imagenet.server \
+  --rounds=100 \
+  --sample_fraction=0.25 \
+  --min_sample_size=10 \
+  --min_num_clients=30 \
+  --data_path=$IMAGENET_PATH
