@@ -15,7 +15,7 @@
 """Fault-tolerant variant of FedAvg strategy."""
 
 
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.common import EvaluateRes, FitRes, Weights, parameters_to_weights
 from flwr.server.client_proxy import ClientProxy
@@ -56,8 +56,7 @@ class FaultTolerantFedAvg(FedAvg):
         self.completion_rate_evaluate = min_completion_rate_evaluate
 
     def __repr__(self) -> str:
-        rep = f"FaultTolerantFedAvg()"
-        return rep
+        return "FaultTolerantFedAvg()"
 
     def on_aggregate_fit(
         self,
