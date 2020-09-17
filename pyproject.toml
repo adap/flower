@@ -50,7 +50,7 @@ python = "^3.6.9"
 numpy = "^1.18.1"
 grpcio = "^1.27.2"
 google = "^2.0.3"
-protobuf = "==3.12.1"
+protobuf = "^3.12.1"
 dataclasses = { version = "==0.6", markers = "python_version < '3.7'"  }
 # Optional dependencies
 tensorflow-cpu = { version = "==2.2.0", optional = true }
