@@ -42,7 +42,10 @@ import flwr as fl
 
 
 def dataset_partitioner(
-    dataset: torch.utils.data.Dataset, batch_size: int, client_id: int, number_of_clients: int
+    dataset: torch.utils.data.Dataset,
+    batch_size: int,
+    client_id: int,
+    number_of_clients: int,
 ) -> torch.utils.data.DataLoader:
     """Helper function to partition datasets
 
@@ -419,10 +422,13 @@ class PytorchMNISTClient(fl.client.Client):
         num_examples_test, test_loss, accuracy, = test(
             self.model, self.test_loader, device=self.device
         )
-        print(f"Client {self.cid} - Evaluate on {num_examples_test} samples: Average loss: {test_loss:.4f}, Accuracy: {100*accuracy:.2f}%\n")
-
+        print(
+            f"Client {self.cid} - Evaluate on {num_examples_test} samples: Average loss: {test_loss:.4f}, Accuracy: {100*accuracy:.2f}%\n"
+        )
 
         # Return the number of evaluation examples and the evaluation result (loss)
         return fl.common.EvaluateRes(
-            num_examples=num_examples_test, loss=float(test_loss), accuracy=float(accuracy),
+            num_examples=num_examples_test,
+            loss=float(test_loss),
+            accuracy=float(accuracy),
         )

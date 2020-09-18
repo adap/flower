@@ -15,7 +15,7 @@
 """Fault-tolerant variant of FedAvg strategy."""
 
 
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.common import EvaluateRes, FitRes, Weights, parameters_to_weights
 from flwr.server.client_proxy import ClientProxy
@@ -25,7 +25,7 @@ from .fedavg import FedAvg
 
 
 class FaultTolerantFedAvg(FedAvg):
-    """Configurable FedAvg strategy implementation."""
+    """Configurable fault-tolerant FedAvg strategy implementation."""
 
     # pylint: disable-msg=too-many-arguments,too-many-instance-attributes
     def __init__(
@@ -36,19 +36,27 @@ class FaultTolerantFedAvg(FedAvg):
         min_eval_clients: int = 1,
         min_available_clients: int = 1,
         eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
+        on_fit_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
+        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         min_completion_rate_fit: float = 0.5,
         min_completion_rate_evaluate: float = 0.5,
     ) -> None:
         super().__init__(
-            min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
             fraction_fit=fraction_fit,
             fraction_eval=fraction_eval,
+            min_fit_clients=min_fit_clients,
+            min_eval_clients=min_eval_clients,
             min_available_clients=min_available_clients,
             eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+            on_evaluate_config_fn=on_evaluate_config_fn,
+            accept_failures=True,
         )
         self.completion_rate_fit = min_completion_rate_fit
         self.completion_rate_evaluate = min_completion_rate_evaluate
+
+    def __repr__(self) -> str:
+        return "FaultTolerantFedAvg()"
 
     def on_aggregate_fit(
         self,
