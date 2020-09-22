@@ -40,11 +40,9 @@ EvaluateResultsAndFailures = Tuple[
 ]
 
 
-def return_strategy(strategy: Optional[Strategy]) -> Optional[Strategy]:
+def set_strategy(strategy: Optional[Strategy]) -> Strategy:
     """Return Strategy."""
-    if strategy is not None:
-        return strategy
-    return DefaultStrategy()
+    return strategy if strategy is not None else DefaultStrategy()
 
 
 class Server:
@@ -55,7 +53,7 @@ class Server:
     ) -> None:
         self._client_manager: ClientManager = client_manager
         self.weights: Weights = []
-        self.strategy: Strategy = return_strategy(strategy)
+        self.strategy: Strategy = set_strategy(strategy)
 
     def client_manager(self) -> ClientManager:
         """Return ClientManager."""

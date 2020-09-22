@@ -95,7 +95,24 @@ class FastAndSlow(FedAvg):
 
     def __repr__(self) -> str:
         # pylint: disable=line-too-long
-        rep = f"FastAndSlow(importance_sampling={self.importance_sampling}, dynamic_timeout={self.dynamic_timeout}, dynamic_timeout_percentile={self.dynamic_timeout_percentile}, alternating_timeout={self.alternating_timeout}, r_fast={self.r_fast}, r_slow={self.r_slow}, t_fast={self.t_fast}, t_slow={self.t_slow})"
+        importance_sampling = (
+            f"FastAndSlow(importance_sampling={self.importance_sampling}, "
+        )
+        dynamic_timeout = f"dynamic_timeout={self.dynamic_timeout}, "
+        dynamic_timeout_percentile = (
+            f"dynamic_timeout_percentile={self.dynamic_timeout_percentile}, "
+        )
+        alternating_timeout = f"alternating_timeout={self.alternating_timeout}, "
+        r_part = f"r_fast={self.r_fast}, r_slow={self.r_slow}, "
+        t_part = f"t_fast={self.t_fast}, t_slow={self.t_slow})"
+        rep = (
+            importance_sampling
+            + dynamic_timeout
+            + dynamic_timeout_percentile
+            + alternating_timeout
+            + r_part
+            + t_part
+        )
         return rep
 
     # pylint: disable=too-many-locals
