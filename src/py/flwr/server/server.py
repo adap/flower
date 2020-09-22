@@ -54,7 +54,7 @@ class Server:
         """Return ClientManager."""
         return self._client_manager
 
-    # pylint: disable-msg=too-many-locals
+    # pylint: disable=too-many-locals
     def fit(self, num_rounds: int) -> History:
         """Run federated averaging for a number of rounds."""
         history = History()
