@@ -40,9 +40,9 @@ class Strategy(ABC):
 
         Returns:
             A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
-            `FitIns` for this particular `ClientProxy`. If a particular `ClientProxy` is not
-            included in this list, it means that this `ClientProxy` will not participate
-            in the next round of federated learning.
+            `FitIns` for this particular `ClientProxy`. If a particular `ClientProxy`
+            is not included in this list, it means that this `ClientProxy`
+            will not participate in the next round of federated learning.
         """
 
     @abstractmethod
