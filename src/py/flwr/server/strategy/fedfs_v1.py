@@ -50,7 +50,7 @@ class FedFSv1(FedAvg):
     """Strategy implementation which alternates between sampling fast and slow
     cients."""
 
-    # pylint: disable-msg=too-many-arguments,too-many-instance-attributes,too-many-locals
+    # pylint:disable-msg=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         fraction_fit: float = 0.1,

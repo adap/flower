@@ -48,7 +48,7 @@ class FastAndSlow(FedAvg):
     :meta private:
     """
 
-    # pylint: disable-msg=too-many-arguments,too-many-instance-attributes,too-many-locals
+    # pylint:disable-msg=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         fraction_fit: float = 0.1,
@@ -223,9 +223,9 @@ class FastAndSlow(FedAvg):
                 contribs: List[Tuple[int, int, int]] = self.contributions[cid]
                 penalty = statistics.mean([c / m for _, c, m in contribs])
             # `p` should be:
-            #   - High for clients which have never been picked before
-            #   - Medium for clients which have contributed, but not used their entire budget
-            #   - Low (but not 0) for clients which have been picked and used their budget
+            # - High for clients which have never been picked before
+            # - Medium for clients which have contributed, but not used their entire budget
+            # - Low (but not 0) for clients which have been picked and used their budget
             raw.append(1.1 - penalty)
 
         # Sample clients
