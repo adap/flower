@@ -94,7 +94,6 @@ class FastAndSlow(FedAvg):
         self.durations: List[Tuple[str, float, int, int]] = []
 
     def __repr__(self) -> str:
-        # pylint: disable=line-too-long
         rep = f"FastAndSlow(importance_sampling={self.importance_sampling}, "
         rep += f"dynamic_timeout={self.dynamic_timeout}, "
         rep += f"dynamic_timeout_percentile={self.dynamic_timeout_percentile}, "
@@ -126,10 +125,10 @@ class FastAndSlow(FedAvg):
             return []
 
         # Sample clients
-        nam = "FedFS round %s, sample %s clients (based on all previous contributions)"
+        msg = "FedFS round %s, sample %s clients (based on all previous contributions)"
         if self.alternating_timeout:
             log(
-                DEBUG, nam, str(rnd), str(sample_size),
+                DEBUG, msg, str(rnd), str(sample_size),
             )
             clients = self._contribution_based_sampling(
                 sample_size=sample_size, client_manager=client_manager

@@ -90,7 +90,6 @@ class FedFSv1(FedAvg):
         self.durations: List[Tuple[str, float, int, int]] = []
 
     def __repr__(self) -> str:
-        # pylint: disable=line-too-long
         rep = f"FedFSv1(dynamic_timeout_percentile={self.dynamic_timeout_percentile}, "
         rep += f"r_fast={self.r_fast}, r_slow={self.r_slow}, t_max={self.t_max})"
         return rep
