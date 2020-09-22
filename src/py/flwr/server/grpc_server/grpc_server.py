@@ -43,9 +43,7 @@ def start_insecure_grpc_server(
     )
 
     servicer = fss.FlowerServiceServicer(client_manager)
-    transport_pb2_grpc.add_FlowerServiceServicer_to_server(
-        servicer, server
-    )  # type:ignore
+    transport_pb2_grpc.add_FlowerServiceServicer_to_server(servicer, server)  # type:ignore
 
     server.add_insecure_port(server_address)
     server.start()
