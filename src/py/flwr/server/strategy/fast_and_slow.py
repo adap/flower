@@ -95,24 +95,12 @@ class FastAndSlow(FedAvg):
 
     def __repr__(self) -> str:
         # pylint: disable=line-too-long
-        importance_sampling = (
-            f"FastAndSlow(importance_sampling={self.importance_sampling}, "
-        )
-        dynamic_timeout = f"dynamic_timeout={self.dynamic_timeout}, "
-        dynamic_timeout_percentile = (
-            f"dynamic_timeout_percentile={self.dynamic_timeout_percentile}, "
-        )
-        alternating_timeout = f"alternating_timeout={self.alternating_timeout}, "
-        r_part = f"r_fast={self.r_fast}, r_slow={self.r_slow}, "
-        t_part = f"t_fast={self.t_fast}, t_slow={self.t_slow})"
-        rep = (
-            importance_sampling
-            + dynamic_timeout
-            + dynamic_timeout_percentile
-            + alternating_timeout
-            + r_part
-            + t_part
-        )
+        rep = f"FastAndSlow(importance_sampling={self.importance_sampling}, "
+        rep += f"dynamic_timeout={self.dynamic_timeout}, "
+        rep += f"dynamic_timeout_percentile={self.dynamic_timeout_percentile}, "
+        rep += f"alternating_timeout={self.alternating_timeout}, "
+        rep += f"r_fast={self.r_fast}, r_slow={self.r_slow}, "
+        rep += f"t_fast={self.t_fast}, t_slow={self.t_slow})"
         return rep
 
     # pylint: disable=too-many-locals
@@ -138,12 +126,10 @@ class FastAndSlow(FedAvg):
             return []
 
         # Sample clients
+        nam = "FedFS round %s, sample %s clients (based on all previous contributions)"
         if self.alternating_timeout:
             log(
-                DEBUG,
-                "FedFS round %s, sample %s clients (based on all previous contributions)",
-                str(rnd),
-                str(sample_size),
+                DEBUG, nam, str(rnd), str(sample_size),
             )
             clients = self._contribution_based_sampling(
                 sample_size=sample_size, client_manager=client_manager
@@ -241,7 +227,8 @@ class FastAndSlow(FedAvg):
                 penalty = statistics.mean([c / m for _, c, m in contribs])
             # `p` should be:
             # - High for clients which have never been picked before
-            # - Medium for clients which have contributed, but not used their entire budget
+            # - Medium for clients which have contributed,
+            #   but not used their entire budget
             # - Low (but not 0) for clients which have been picked and used their budget
             raw.append(1.1 - penalty)
 

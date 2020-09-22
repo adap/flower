@@ -70,9 +70,9 @@ def configure(
     """Configure logging to file and/or remote log server."""
 
     # Create formatter
-    formatter = logging.Formatter(
-        f"{identifier} | %(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
-    )
+    string_to_input = f"{identifier} | %(levelname)s %(name)s %(asctime)s "
+    string_to_input += "| %(filename)s:%(lineno)d | %(message)s"
+    formatter = logging.Formatter(string_to_input)
 
     if filename:
         # Create file handler and log to disk
