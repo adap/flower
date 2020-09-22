@@ -48,7 +48,7 @@ class FastAndSlow(FedAvg):
     :meta private:
     """
 
-    # pylint: disable-msg=too-many-arguments,too-many-instance-attributes,too-many-locals
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         fraction_fit: float = 0.1,
@@ -94,11 +94,15 @@ class FastAndSlow(FedAvg):
         self.durations: List[Tuple[str, float, int, int]] = []
 
     def __repr__(self) -> str:
-        # pylint: disable-msg=line-too-long
-        rep = f"FastAndSlow(importance_sampling={self.importance_sampling}, dynamic_timeout={self.dynamic_timeout}, dynamic_timeout_percentile={self.dynamic_timeout_percentile}, alternating_timeout={self.alternating_timeout}, r_fast={self.r_fast}, r_slow={self.r_slow}, t_fast={self.t_fast}, t_slow={self.t_slow})"
+        rep = f"FastAndSlow(importance_sampling={self.importance_sampling}, "
+        rep += f"dynamic_timeout={self.dynamic_timeout}, "
+        rep += f"dynamic_timeout_percentile={self.dynamic_timeout_percentile}, "
+        rep += f"alternating_timeout={self.alternating_timeout}, "
+        rep += f"r_fast={self.r_fast}, r_slow={self.r_slow}, "
+        rep += f"t_fast={self.t_fast}, t_slow={self.t_slow})"
         return rep
 
-    # pylint: disable-msg=too-many-locals
+    # pylint: disable=too-many-locals
     def on_configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
@@ -121,12 +125,10 @@ class FastAndSlow(FedAvg):
             return []
 
         # Sample clients
+        msg = "FedFS round %s, sample %s clients (based on all previous contributions)"
         if self.alternating_timeout:
             log(
-                DEBUG,
-                "FedFS round %s, sample %s clients (based on all previous contributions)",
-                str(rnd),
-                str(sample_size),
+                DEBUG, msg, str(rnd), str(sample_size),
             )
             clients = self._contribution_based_sampling(
                 sample_size=sample_size, client_manager=client_manager
@@ -223,9 +225,10 @@ class FastAndSlow(FedAvg):
                 contribs: List[Tuple[int, int, int]] = self.contributions[cid]
                 penalty = statistics.mean([c / m for _, c, m in contribs])
             # `p` should be:
-            #   - High for clients which have never been picked before
-            #   - Medium for clients which have contributed, but not used their entire budget
-            #   - Low (but not 0) for clients which have been picked and used their budget
+            # - High for clients which have never been picked before
+            # - Medium for clients which have contributed,
+            #   but not used their entire budget
+            # - Low (but not 0) for clients which have been picked and used their budget
             raw.append(1.1 - penalty)
 
         # Sample clients
@@ -252,7 +255,7 @@ class FastAndSlow(FedAvg):
                 # Previously selected clients
                 contribs: List[Tuple[int, int, int]] = self.contributions[cid]
 
-                # pylint: disable-msg=invalid-name
+                # pylint: disable=invalid-name
                 _, c, m = contribs[-1]
                 c_over_m = c / m
                 # pylint: enable-msg=invalid-name

@@ -72,7 +72,8 @@ class QffedAvg(FedAvg):
 
     def __repr__(self) -> str:
         # pylint: disable-msg=line-too-long
-        rep = f"QffedAvg(learning_rate={self.learning_rate}, q_param={self.q_param}, pre_weights={self.pre_weights})"
+        rep = f"QffedAvg(learning_rate={self.learning_rate}, "
+        rep += f"q_param={self.q_param}, pre_weights={self.pre_weights})"
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:

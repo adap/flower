@@ -50,7 +50,7 @@ class FedFSv1(FedAvg):
     """Strategy implementation which alternates between sampling fast and slow
     cients."""
 
-    # pylint: disable-msg=too-many-arguments,too-many-instance-attributes,too-many-locals
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         fraction_fit: float = 0.1,
@@ -90,11 +90,11 @@ class FedFSv1(FedAvg):
         self.durations: List[Tuple[str, float, int, int]] = []
 
     def __repr__(self) -> str:
-        # pylint: disable-msg=line-too-long
-        rep = f"FedFSv1(dynamic_timeout_percentile={self.dynamic_timeout_percentile}, r_fast={self.r_fast}, r_slow={self.r_slow}, t_max={self.t_max})"
+        rep = f"FedFSv1(dynamic_timeout_percentile={self.dynamic_timeout_percentile}, "
+        rep += f"r_fast={self.r_fast}, r_slow={self.r_slow}, t_max={self.t_max})"
         return rep
 
-    # pylint: disable-msg=too-many-locals
+    # pylint: disable=too-many-locals
     def on_configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
@@ -196,7 +196,7 @@ class FedFSv1(FedAvg):
                 # Previously selected clients
                 contribs: List[Tuple[int, int, int]] = self.contributions[cid]
 
-                # pylint: disable-msg=invalid-name
+                # pylint: disable=invalid-name
                 if self.use_past_contributions:
                     cs = [c for _, c, _ in contribs]
                     ms = [m for _, _, m in contribs]

@@ -10,5 +10,6 @@ black -q --exclude "src\/py\/flwr\/proto" --check src/py/flwr  && echo "- black:
 # docformatter -c -r src/py/flwr  && echo "- docformatter:  done" &&
 mypy src/py                                                    && echo "- mypy:   done" &&
 pylint --ignore=src/py/flwr/proto src/py/flwr                  && echo "- pylint: done" &&
+flake8 src/py/flwr                                             && echo "- flake8: done" &&
 pytest -q src/py/flwr                                          && echo "- pytest: done" &&
 echo "- All Python checks passed"
