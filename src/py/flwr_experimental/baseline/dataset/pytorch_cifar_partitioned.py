@@ -44,7 +44,7 @@ class Rot90Transform:
     def __init__(self, angles: List[int]):
         self.angles = angles
 
-    def __call__(self, x: torch.Tensor):
+    def __call__(self, x: torch.Tensor) -> torch.Tensor:
         angle = random.choice(self.angles)
         return TF.rotate(x, angle)
 
@@ -145,7 +145,7 @@ def generate_partitioned_dataset_files(
 class CIFAR10PartitionedDataset(torch.utils.data.Dataset):
     """Augmented and partitioned dataset based on CIFAR10."""
 
-    def __init__(self, partition_id: int, root_dir: str,) -> None:
+    def __init__(self, partition_id: int, root_dir: str):
         """ Dataset from partitioned files  
 
         Parameters
