@@ -20,8 +20,10 @@ from glob import glob
 from os.path import exists, join
 from shutil import rmtree
 from tempfile import TemporaryDirectory
+from tqdm import tqdm
 
 import numpy as np
+import torch
 import torchvision
 
 from flwr_experimental.baseline.dataset.pytorch_cifar_partitioned import (
@@ -37,109 +39,89 @@ class CIFAR10PartitionedTestCase(unittest.TestCase):
     def test_augment_dataset(self) -> None:
         """Test dataset augmentation function."""
         # Load CIFAR10
-        tempdir = TemporaryDirectory()
-        data_dir = tempdir.name
-        testset = torchvision.datasets.CIFAR10(
-            root=data_dir, train=True, download=True, transform=None
-        )
+        with TemporaryDirectory() as temp_dir:
+            testset = torchvision.datasets.CIFAR10(
+                root=temp_dir, train=False, download=True, transform=None
+            )
 
-        # Define data augmentation transforms
-        augment_transform = torchvision.transforms.Compose(
-            [torchvision.transforms.RandomVerticalFlip(),]
-        )
+            len_dataset = len(testset)
+            shape_imgs = testset[0][0].size
+            shape_labels = 1 #It's an int
 
-        # Augment existing dataset
-        aug_imgs, aug_labels = augment_dataset(
-            original_dataset=testset,
-            augment_factor=10,
-            augment_transform=augment_transform,
-        )
+            # Define data augmentation transforms
+            augment_transform = torchvision.transforms.Compose(
+                [torchvision.transforms.RandomVerticalFlip(),
+                torchvision.transforms.RandomHorizontalFlip()]
+            )
 
-        len_dataset = len(testset)
-        shape_imgs = testset[0][0].shape
-        shape_labels = testset[0][1].shape
+            # Augment existing dataset
+            augment_factor = 10
+            aug_imgs, aug_labels = augment_dataset(
+                original_dataset=testset,
+                augment_factor=augment_factor,
+                augment_transform=augment_transform,
+            )
 
-        original_data_shapes = (len_dataset, shape_imgs, shape_labels)
-        augmented_data_shapes = (*aug_imgs.shape, *aug_labels.shape)
+            self.assertEqual(len(aug_imgs), augment_factor*len(testset))
+            self.assertEqual(len(aug_labels), augment_factor*len(testset))
+            self.assertSequenceEqual(testset[0][0].size, aug_imgs[0].shape[1:])
 
-        self.assertSequenceEqual(original_data_shapes, augmented_data_shapes)
+    def test_generate_partitioned_dataset(self) -> None:
+        """Tests if partitions are being created properly"""
+        with TemporaryDirectory() as temp_dir:
+            X = np.zeros((5 * 13, 3, 32, 32), dtype=np.uint8)
+            Y = np.zeros((5 * 13,), dtype=np.int32)
 
-    def test_generate_partitioned_dataset_files_nb_partitions(self) -> None:
-        """Test if number of partitioned files are being created
-        """
-        temp_dir = TemporaryDirectory()
+            fake_dataset = (X, Y)
+            len_partitions=13
+            nb_partitions = 5
+            generate_partitioned_dataset_files(
+                dataset=fake_dataset,
+                len_partitions=len_partitions,
+                nb_partitions=nb_partitions,
+                data_dir=temp_dir
+            )
 
-        X = np.zeros((5 * 13, 3, 32, 32), dtype=np.uint8)
-        Y = np.zeros((5 * 13,), dtype=np.int32)
+            partitionfiles = [f for f in glob(join(temp_dir, "cifar10*.pt"))]
+            self.assertEqual(len(partitionfiles), nb_partitions, "Number of files must be equal to the number of generated partitions")
 
-        fake_dataset = (X, Y)
+            X, Y = torch.load(join(temp_dir, "cifar10_0.pt"))
+            self.assertEqual(Y.shape[0], (len_partitions), "length of partition must be equal to len_partition")
+            self.assertSequenceEqual(X.shape, (13, 3, 32, 32))
 
-        generate_partitioned_dataset_files(
-            dataset=fake_dataset,
-            len_partitions=13,
-            nb_partitions=3,
-            data_dir=temp_dir.name,
-        )
-
-        partitionfiles = [f for f in glob("cifar10*.pt")]
-        self.assertEqual(len(partitionfiles), 3)
-
-    def test_generate_partitioned_dataset_files_len_partitions(self) -> None:
-        """Test partition function."""
-        temp_dir = TemporaryDirectory()
-
-        X = np.zeros((5 * 13, 3, 32, 32), dtype=np.uint8)
-        Y = np.zeros((5 * 13,), dtype=np.int32)
-
-        fake_dataset = (X, Y)
-
-        generate_partitioned_dataset_files(
-            dataset=fake_dataset,
-            len_partitions=13,
-            nb_partitions=5,
-            data_dir=temp_dir.name,
-        )
-
-        XY = torch.load(join(temp_dir.name, "cifar10_0.pt"))
-
-        self.assertSequenceEqual(XY.shape, (13, 5, 3, 32, 32))
-
-    def test_correct_number_of_samples_per_partition(self) -> None:
+    def test_uniform_distribution_within_partition(self) -> None:
         """Test if each partition contains the same number of samples for each class"""
-        temp_dir = TemporaryDirectory()
+        with TemporaryDirectory() as temp_dir:
+            # Load CIFAR10
+            trainset = torchvision.datasets.CIFAR10(
+                root=temp_dir, train=True, download=True, transform=None
+            )
 
-        # Load CIFAR10
-        trainset = torchvision.datasets.CIFAR10(
-            root=temp_dir.name, train=True, download=True, transform=None
-        )
+            # Define data augmentation transforms
+            augment_transform = torchvision.transforms.Compose(
+                [torchvision.transforms.RandomHorizontalFlip(),]
+            )
 
-        # Define data augmentation transforms
-        augment_transform = torchvision.transforms.Compose(
-            [torchvision.transforms.RandomHorizontalFlip(),]
-        )
+            # Augment existing dataset and save thumbnails
+            augmented_CIFAR10 = augment_dataset(
+                original_dataset=trainset,
+                augment_factor=10,
+                augment_transform=augment_transform,
+            )
 
-        # Augment existing dataset and save thumbnails
-        augmented_CIFAR10 = augment_dataset(
-            original_dataset=trainset,
-            augment_factor=10,
-            augment_transform=augment_transform,
-        )
+            # Generate the partionioned files
+            generate_partitioned_dataset_files(
+                dataset=augmented_CIFAR10,
+                len_partitions=500,
+                nb_partitions=1000,
+                data_dir=temp_dir,
+            )
 
-        # Generate the partionioned files
-        generate_partitioned_dataset_files(
-            dataset=augmented_CIFAR10,
-            len_partitions=500,
-            nb_partitions=1000,
-            data_dir=temp_dir.name,
-        )
+            for idx in tqdm(range(1000)):
+                X, Y = torch.load(join(temp_dir, f"cifar10_{idx}.pt"))
+                is_label_hist_uniform = (np.bincount(Y) == 50 * np.ones(10)).all()
 
-        failures = []
-        bins = [*range(11)]
-        for idx in range(1000):
-            X, Y = torch.load(join(temp_dir.name, f"cifar10_{idx}.pt"))
-            if (np.bincount(Y) == 50 * np.ones(10)).all():
-                failures.append(False)
-        self.assertEqual([], failures)
+                self.assertTrue(is_label_hist_uniform)
 
 
 if __name__ == "__main__":
