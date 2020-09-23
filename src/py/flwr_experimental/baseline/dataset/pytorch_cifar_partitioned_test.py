@@ -20,11 +20,11 @@ from glob import glob
 from os.path import exists, join
 from shutil import rmtree
 from tempfile import TemporaryDirectory
-from tqdm import tqdm
 
 import numpy as np
 import torch
 import torchvision
+from tqdm import tqdm
 
 from flwr_experimental.baseline.dataset.pytorch_cifar_partitioned import (
     CIFAR10PartitionedDataset,
@@ -46,12 +46,14 @@ class CIFAR10PartitionedTestCase(unittest.TestCase):
 
             len_dataset = len(testset)
             shape_imgs = testset[0][0].size
-            shape_labels = 1 #It's an int
+            shape_labels = 1  # It's an int
 
             # Define data augmentation transforms
             augment_transform = torchvision.transforms.Compose(
-                [torchvision.transforms.RandomVerticalFlip(),
-                torchvision.transforms.RandomHorizontalFlip()]
+                [
+                    torchvision.transforms.RandomVerticalFlip(),
+                    torchvision.transforms.RandomHorizontalFlip(),
+                ]
             )
 
             # Augment existing dataset
@@ -62,8 +64,8 @@ class CIFAR10PartitionedTestCase(unittest.TestCase):
                 augment_transform=augment_transform,
             )
 
-            self.assertEqual(len(aug_imgs), augment_factor*len(testset))
-            self.assertEqual(len(aug_labels), augment_factor*len(testset))
+            self.assertEqual(len(aug_imgs), augment_factor * len(testset))
+            self.assertEqual(len(aug_labels), augment_factor * len(testset))
             self.assertSequenceEqual(testset[0][0].size, aug_imgs[0].shape[1:])
 
     def test_generate_partitioned_dataset(self) -> None:
@@ -73,20 +75,28 @@ class CIFAR10PartitionedTestCase(unittest.TestCase):
             Y = np.zeros((5 * 13,), dtype=np.int32)
 
             fake_dataset = (X, Y)
-            len_partitions=13
+            len_partitions = 13
             nb_partitions = 5
             generate_partitioned_dataset_files(
                 dataset=fake_dataset,
                 len_partitions=len_partitions,
                 nb_partitions=nb_partitions,
-                data_dir=temp_dir
+                data_dir=temp_dir,
             )
 
             partitionfiles = [f for f in glob(join(temp_dir, "cifar10*.pt"))]
-            self.assertEqual(len(partitionfiles), nb_partitions, "Number of files must be equal to the number of generated partitions")
+            self.assertEqual(
+                len(partitionfiles),
+                nb_partitions,
+                "Number of files must be equal to the number of generated partitions",
+            )
 
             X, Y = torch.load(join(temp_dir, "cifar10_0.pt"))
-            self.assertEqual(Y.shape[0], (len_partitions), "length of partition must be equal to len_partition")
+            self.assertEqual(
+                Y.shape[0],
+                (len_partitions),
+                "length of partition must be equal to len_partition",
+            )
             self.assertSequenceEqual(X.shape, (13, 3, 32, 32))
 
     def test_uniform_distribution_within_partition(self) -> None:
