@@ -93,7 +93,8 @@ def test_eval_clients() -> None:
     arr = np.array([[1, 2], [3, 4], [5, 6]])
     arr_serialized = ndarray_to_bytes(arr)
     ins: EvaluateIns = EvaluateIns(
-        Parameters(tensors=[arr_serialized], tensor_type=""), {},
+        Parameters(tensors=[arr_serialized], tensor_type=""),
+        {},
     )
     client_instructions = [(c, ins) for c in clients]
 

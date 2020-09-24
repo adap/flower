@@ -310,7 +310,13 @@ def plot(lines: List[Tuple[str, List[Tuple[int, float]]]], filename: str) -> Non
     values = [np.array([x * 100 for _, x in val]) for _, val in lines]
     labels = [label for label, _ in lines]
     line_chart(
-        values, labels, "Round", "Accuracy", filename=filename, y_floor=0, y_ceil=100,
+        values,
+        labels,
+        "Round",
+        "Accuracy",
+        filename=filename,
+        y_floor=0,
+        y_ceil=100,
     )
 
 

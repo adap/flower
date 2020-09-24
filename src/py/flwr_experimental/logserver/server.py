@@ -191,7 +191,9 @@ def main() -> None:
         help="S3 bucket where the logfile should be uploaded to.",
     )
     parser.add_argument(
-        "--s3_key", type=str, help="S3 key under which the logfile should be uploaded.",
+        "--s3_key",
+        type=str,
+        help="S3 key under which the logfile should be uploaded.",
     )
     args = parser.parse_args()
 

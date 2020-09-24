@@ -259,7 +259,8 @@ class EC2Adapter(Adapter):
             instance_ids = []
 
         result: EC2DescribeInstancesResult = self.ec2.describe_instances(
-            InstanceIds=instance_ids, Filters=tags_to_filter(self.tags),
+            InstanceIds=instance_ids,
+            Filters=tags_to_filter(self.tags),
         )
 
         instances = flatten_reservations(result)

@@ -34,10 +34,15 @@ def parse_args() -> argparse.Namespace:
     """Parse and return commandline arguments."""
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--log_host", type=str, help="HTTP log handler host (no default)",
+        "--log_host",
+        type=str,
+        help="HTTP log handler host (no default)",
     )
     parser.add_argument(
-        "--setting", type=str, choices=SETTINGS.keys(), help="Setting to run.",
+        "--setting",
+        type=str,
+        choices=SETTINGS.keys(),
+        help="Setting to run.",
     )
 
     return parser.parse_args()
@@ -161,7 +166,9 @@ def main() -> None:
     log(INFO, "Instantiating server, strategy: %s", str(strategy))
     server = fl.server.Server(client_manager=client_manager, strategy=strategy)
     fl.server.start_server(
-        DEFAULT_SERVER_ADDRESS, server, config={"num_rounds": server_setting.rounds},
+        DEFAULT_SERVER_ADDRESS,
+        server,
+        config={"num_rounds": server_setting.rounds},
     )
 
 
