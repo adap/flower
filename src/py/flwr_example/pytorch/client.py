@@ -118,7 +118,9 @@ def main() -> None:
         "--cid", type=str, required=True, help="Client CID (no default)"
     )
     parser.add_argument(
-        "--log_host", type=str, help="Logserver address (no default)",
+        "--log_host",
+        type=str,
+        help="Logserver address (no default)",
     )
     args = parser.parse_args()
 

@@ -69,7 +69,10 @@ def get_instance_name(
 
 
 def configure_uniform_clients(
-    iid_fraction: float, instance_names: List[str], num_clients: int, dry_run: bool,
+    iid_fraction: float,
+    instance_names: List[str],
+    num_clients: int,
+    dry_run: bool,
 ) -> List[ClientSetting]:
     """Configure `num_clients`, all using the same delay factor."""
     clients = []

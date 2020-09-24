@@ -118,7 +118,9 @@ def shift(x: np.ndarray, y: np.ndarray) -> XY:
 
 
 def create_partitions(
-    unpartitioned_dataset: XY, iid_fraction: float, num_partitions: int,
+    unpartitioned_dataset: XY,
+    iid_fraction: float,
+    num_partitions: int,
 ) -> XYList:
     """Create partitioned version of a training or test set.
 
@@ -144,7 +146,9 @@ def create_partitions(
 
 
 def create_partitioned_dataset(
-    keras_dataset: Tuple[XY, XY], iid_fraction: float, num_partitions: int,
+    keras_dataset: Tuple[XY, XY],
+    iid_fraction: float,
+    num_partitions: int,
 ) -> Tuple[PartitionedDataset, XY]:
     """Create partitioned version of keras dataset.
 

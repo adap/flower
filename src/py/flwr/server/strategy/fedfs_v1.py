@@ -153,10 +153,12 @@ class FedFSv1(FedAvg):
         # Set timeout for this round
         if self.durations:
             candidates = timeout_candidates(
-                durations=self.durations, max_timeout=self.t_max,
+                durations=self.durations,
+                max_timeout=self.t_max,
             )
             timeout = next_timeout(
-                candidates=candidates, percentile=self.dynamic_timeout_percentile,
+                candidates=candidates,
+                percentile=self.dynamic_timeout_percentile,
             )
             config["timeout"] = str(timeout)
         else:

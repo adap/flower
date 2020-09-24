@@ -154,7 +154,9 @@ def run(baseline: str, setting: str, adapter: str) -> None:
     cluster.exec(
         "server",
         command.start_server(
-            log_host=f"{logserver.private_ip}:8081", baseline=baseline, setting=setting,
+            log_host=f"{logserver.private_ip}:8081",
+            baseline=baseline,
+            setting=setting,
         ),
     )
 
