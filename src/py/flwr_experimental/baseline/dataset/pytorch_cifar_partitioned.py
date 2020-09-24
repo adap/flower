@@ -38,8 +38,7 @@ from flwr_experimental.baseline.dataset.dataset import (
 
 
 class Rot90Transform:
-    """Rotates image by a multiple of 90 degrees
-    """
+    """Rotates image by a multiple of 90 degrees"""
 
     def __init__(self, angles: List[int]):
         self.angles = angles
@@ -58,18 +57,18 @@ def augment_dataset(
     """Augments the dataset augment_transform
 
     Dataset is augmented to len(original_dataset)*augment_factor
-    using augment_transform. The original dataset will be a subset 
+    using augment_transform. The original dataset will be a subset
     of the new one.
 
     Parameters
     ----------
     original_dataset : torch.utils.data.Dataset
-        Original PyTorch Dataset to be augmented 
+        Original PyTorch Dataset to be augmented
     augment_factor : int
         Number of aumented copies generated from each original sample.
         This will multiply the final length of the dataset by augment_factor.
     augment_transform : torchvision.transforms
-        Composition of transforms used to augment the images. 
+        Composition of transforms used to augment the images.
         Last transform in this composition does not need to be a ToTensor.
     save_thumbnails_dir
         Directory where to save thumbnails. One jpg image will be created for each original image
@@ -112,18 +111,21 @@ def augment_dataset(
 
 
 def generate_partitioned_dataset_files(
-    dataset: XY, len_partitions: int, nb_partitions: int, data_dir: str,
+    dataset: XY,
+    len_partitions: int,
+    nb_partitions: int,
+    data_dir: str,
 ) -> None:
-    """ Generates a set of tensor files contaning partitions of dataset. 
+    """Generates a set of tensor files contaning partitions of dataset.
 
     Parameters
     ----------
     dataset:
-        Dataset in the form XY to be partitioned. 
+        Dataset in the form XY to be partitioned.
     len_partitions : int
-       Number of samples inside a partition. 
+       Number of samples inside a partition.
     nb_partitions : int
-        Total number of partitions to be generated. 
+        Total number of partitions to be generated.
     data_dir: str
         Path to directory where the partition dataset files will be stored.
     """
@@ -146,7 +148,7 @@ class CIFAR10PartitionedDataset(torch.utils.data.Dataset):
     """Augmented and partitioned dataset based on CIFAR10."""
 
     def __init__(self, partition_id: int, root_dir: str):
-        """ Dataset from partitioned files  
+        """Dataset from partitioned files
 
         Parameters
         ----------

@@ -109,7 +109,9 @@ class CIFAR10PartitionedTestCase(unittest.TestCase):
 
             # Define data augmentation transforms
             augment_transform = torchvision.transforms.Compose(
-                [torchvision.transforms.RandomHorizontalFlip(),]
+                [
+                    torchvision.transforms.RandomHorizontalFlip(),
+                ]
             )
 
             # Augment existing dataset and save thumbnails
