@@ -68,7 +68,10 @@ class Server:
         res = self.strategy.evaluate(weights=self.weights)
         if res is not None:
             log(
-                INFO, "initial weights (loss/accuracy): %s, %s", res[0], res[1],
+                INFO,
+                "initial weights (loss/accuracy): %s, %s",
+                res[0],
+                res[1],
             )
             history.add_loss_centralized(rnd=0, loss=res[0])
             history.add_accuracy_centralized(rnd=0, acc=res[1])
@@ -130,7 +133,9 @@ class Server:
             log(INFO, "evaluate: no clients sampled, cancel federated evaluation")
             return None
         log(
-            DEBUG, "evaluate: strategy sampled %s clients", len(client_instructions),
+            DEBUG,
+            "evaluate: strategy sampled %s clients",
+            len(client_instructions),
         )
 
         # Evaluate current global weights on those clients
@@ -153,7 +158,9 @@ class Server:
             rnd=rnd, weights=self.weights, client_manager=self._client_manager
         )
         log(
-            DEBUG, "fit_round: strategy sampled %s clients", len(client_instructions),
+            DEBUG,
+            "fit_round: strategy sampled %s clients",
+            len(client_instructions),
         )
         if not client_instructions:
             log(INFO, "fit_round: no clients sampled, cancel fit")

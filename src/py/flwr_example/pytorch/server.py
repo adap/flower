@@ -64,7 +64,9 @@ def main() -> None:
         help="Minimum number of available clients required for sampling (default: 2)",
     )
     parser.add_argument(
-        "--log_host", type=str, help="Logserver address (no default)",
+        "--log_host",
+        type=str,
+        help="Logserver address (no default)",
     )
     args = parser.parse_args()
 
@@ -87,7 +89,9 @@ def main() -> None:
 
     # Run server
     fl.server.start_server(
-        args.server_address, server, config={"num_rounds": args.rounds},
+        args.server_address,
+        server,
+        config={"num_rounds": args.rounds},
     )
 
 

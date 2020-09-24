@@ -46,7 +46,9 @@ def unused_tcp_port() -> int:
 
 
 def mock_join(  # type: ignore # pylint: disable=invalid-name
-    _self, request_iterator: Iterator[ClientMessage], _context: grpc.ServicerContext,
+    _self,
+    request_iterator: Iterator[ClientMessage],
+    _context: grpc.ServicerContext,
 ) -> Iterator[ServerMessage]:
     """Serve as mock for the Join method of class FlowerServiceServicer."""
     counter = 0

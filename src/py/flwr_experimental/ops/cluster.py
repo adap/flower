@@ -216,7 +216,8 @@ class Cluster:
             # pylint: disable=broad-except
             except Exception as exc:
                 log(
-                    ERROR, "Failed to start the cluster completely. Shutting down...",
+                    ERROR,
+                    "Failed to start the cluster completely. Shutting down...",
                 )
                 log(ERROR, exc)
 

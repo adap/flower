@@ -26,7 +26,9 @@ class GrpcClientProxy(ClientProxy):
     """Flower client proxy which delegates over the network using gRPC."""
 
     def __init__(
-        self, cid: str, bridge: GRPCBridge,
+        self,
+        cid: str,
+        bridge: GRPCBridge,
     ):
         super().__init__(cid)
         self.bridge = bridge

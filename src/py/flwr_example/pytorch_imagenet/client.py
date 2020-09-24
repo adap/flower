@@ -181,10 +181,15 @@ def main() -> None:
         "--data_path", type=str, required=True, help="ImageNet datapath"
     )
     parser.add_argument(
-        "--log_host", type=str, help="Logserver address (no default)",
+        "--log_host",
+        type=str,
+        help="Logserver address (no default)",
     )
     parser.add_argument(
-        "--nb_clients", type=int, default=40, help="Total number of clients",
+        "--nb_clients",
+        type=int,
+        default=40,
+        help="Total number of clients",
     )
     args = parser.parse_args()
 

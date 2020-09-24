@@ -83,7 +83,12 @@ def configure(
 
     if host:
         # Create http handler which logs even debug messages
-        http_handler = CustomHTTPHandler(identifier, host, "/log", method="POST",)
+        http_handler = CustomHTTPHandler(
+            identifier,
+            host,
+            "/log",
+            method="POST",
+        )
         http_handler.setLevel(logging.DEBUG)
         # Override mapLogRecords as setFormatter has no effect on what is send via http
         FLOWER_LOGGER.addHandler(http_handler)
