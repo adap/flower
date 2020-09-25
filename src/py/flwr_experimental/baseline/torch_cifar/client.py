@@ -21,6 +21,7 @@ from logging import ERROR, INFO
 
 import torch
 import torchvision
+from torchvision import transforms
 
 import flwr as fl
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
@@ -42,8 +43,8 @@ class CifarClient(fl.client.Client):
         self,
         cid: str,
         model: torch.nn.ModuleList,
-        trainset: torchvision.datasets.CIFAR10,
-        testset: torchvision.datasets.CIFAR10,
+        trainset: torch.utils.data.Dataset,
+        testset: torch.utils.data.Dataset,
     ) -> None:
         self.cid = cid
         self.model = model
@@ -164,7 +165,16 @@ def main() -> None:
     model = torchvision.models.resnet18().to(DEVICE)
 
     # Load local data partition
-    trainset, testset = cifar.load_data()  # TODO
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ]
+    )
+
+    trainset, testset = cifar.load_data(
+        cid=int(client_setting.cid), root_dir=cifar.DATA_ROOT
+    )
 
     # Start client
     client = CifarClient(

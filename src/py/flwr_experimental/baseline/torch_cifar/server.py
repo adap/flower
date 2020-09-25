@@ -21,6 +21,7 @@ from typing import Callable, Dict, Optional, Tuple
 
 import torch
 import torchvision
+from torchvision import transforms
 
 import flwr as fl
 from flwr.common.logger import configure, log
@@ -68,16 +69,26 @@ def main() -> None:
     model = torchvision.models.resnet18().to(DEVICE)
 
     # Load evaluation data
-    _, testset = cifar.load_data()  # TODO
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ]
+    )
+    testset = torchvision.datasets.CIFAR10(
+        root=cifar.DATA_ROOT,
+        train=False,
+        transform=transform,
+        target_transform=None,
+        download=True,
+    )
 
     # Create client_manager
     client_manager = fl.server.SimpleClientManager()
 
     # Strategy
     eval_fn = get_eval_fn(model=model, testset=testset)
-    fit_config_fn = get_on_fit_config_fn(
-        lr_initial=server_setting.lr_initial
-    )
+    fit_config_fn = get_on_fit_config_fn(lr_initial=server_setting.lr_initial)
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=server_setting.sample_fraction,
         min_fit_clients=server_setting.min_sample_size,
@@ -115,9 +126,7 @@ def get_eval_fn(
     return evaluate
 
 
-def get_on_fit_config_fn(
-    lr_initial: float
-) -> Callable[[int], Dict[str, str]]:
+def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
     """Return a function which returns training configurations."""
 
     def fit_config(rnd: int) -> Dict[str, str]:
