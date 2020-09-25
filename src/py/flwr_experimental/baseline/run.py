@@ -15,6 +15,7 @@
 """Execute Fashion-MNIST baseline locally in Docker."""
 
 
+import sys
 import argparse
 import concurrent.futures
 import configparser
@@ -23,9 +24,11 @@ from os import path
 from time import strftime
 from typing import List, Optional
 
+from flwr_experimental.baseline.setting import Baseline
 import flwr_experimental.baseline.tf_cifar.settings as tf_cifar_settings
 import flwr_experimental.baseline.tf_fashion_mnist.settings as tf_fashion_mnist_settings
 import flwr_experimental.baseline.tf_hotkey.settings as tf_hotkey_settings
+import flwr_experimental.baseline.torch_cifar.settings as torch_cifar_settings
 from flwr.common.logger import configure, log
 from flwr_experimental.baseline import command
 from flwr_experimental.ops.cluster import Cluster, Instance
@@ -33,8 +36,9 @@ from flwr_experimental.ops.compute.adapter import Adapter
 from flwr_experimental.ops.compute.docker_adapter import DockerAdapter
 from flwr_experimental.ops.compute.ec2_adapter import EC2Adapter
 
+
 OPS_INI_PATH = path.normpath(
-    f"{path.dirname(path.realpath(__file__))}/../../../.flower_ops"
+    f"{path.dirname(path.realpath(__file__))}/../../../../.flower_ops"
 )
 
 # Read config file and extract all values which are needed further down.
@@ -44,7 +48,7 @@ CONFIG.read(OPS_INI_PATH)
 WHEEL_FILENAME = CONFIG.get("paths", "wheel_filename")
 WHEEL_LOCAL_PATH = path.expanduser(CONFIG.get("paths", "wheel_dir")) + WHEEL_FILENAME
 
-DOCKER_PRIVATE_KEY = path.realpath(path.dirname(__file__) + "/../../../docker/ssh_key")
+DOCKER_PRIVATE_KEY = path.realpath(path.dirname(__file__) + "/../../../../docker/ssh_key")
 
 
 def now() -> str:
@@ -90,6 +94,19 @@ def configure_cluster(
     return cluster
 
 
+def load_settings(baseline: str, setting: str) -> Baseline:
+    if baseline == "tf_cifar":
+        return tf_cifar_settings.get_setting(setting)
+    elif baseline == "tf_fashion_mnist":
+        return tf_fashion_mnist_settings.get_setting(setting)
+    elif baseline == "tf_hotkey":
+        return tf_hotkey_settings.get_setting(setting)
+    elif baseline == "torch_cifar":
+        return torch_cifar_settings.get_setting(setting)
+
+    raise Exception("Setting not found.")
+
+
 # pylint: disable=too-many-arguments, too-many-locals
 def run(baseline: str, setting: str, adapter: str) -> None:
     """Run baseline."""
@@ -101,14 +118,7 @@ def run(baseline: str, setting: str, adapter: str) -> None:
         else f"/home/ubuntu/{WHEEL_FILENAME}"
     )
 
-    if baseline == "tf_cifar":
-        settings = tf_cifar_settings.get_setting(setting)
-    elif baseline == "tf_fashion_mnist":
-        settings = tf_fashion_mnist_settings.get_setting(setting)
-    elif baseline == "tf_hotkey":
-        settings = tf_hotkey_settings.get_setting(setting)
-    else:
-        raise Exception("Setting not found.")
+    settings = load_settings(baseline, setting)
 
     # Get instances and add a logserver to the list
     instances = settings.instances
@@ -205,24 +215,36 @@ def run(baseline: str, setting: str, adapter: str) -> None:
 def main() -> None:
     """Start Flower baseline."""
     parser = argparse.ArgumentParser(description="Flower")
+
+    # When adding a new setting make sure to modify the load_settings function
+    possible_baselines = ["tf_cifar", "tf_fashion_mnist", "tf_hotkey", "torch_cifar"]
+    possible_settings = []
+    all_settings = [
+        list(tf_cifar_settings.SETTINGS.keys()),
+        list(tf_fashion_mnist_settings.SETTINGS.keys()),
+        list(tf_hotkey_settings.SETTINGS.keys()),
+        list(torch_cifar_settings.SETTINGS.keys()),
+    ]
+
+    # Show only relevant settings based on baseline as choices
+    # for --setting parameter
+    baseline_arg = [arg for arg in sys.argv if "--baseline" in arg]
+    if len(baseline_arg) > 0:
+        baseline_arg = baseline_arg[0].split("=")[1]
+        possible_settings = all_settings[possible_baselines.index(baseline_arg)]
+
     parser.add_argument(
         "--baseline",
         type=str,
         required=True,
-        choices=["tf_cifar", "tf_fashion_mnist", "tf_hotkey"],
+        choices=possible_baselines,
         help="Name of baseline name to run.",
     )
     parser.add_argument(
         "--setting",
         type=str,
         required=True,
-        choices=list(
-            set(
-                list(tf_cifar_settings.SETTINGS.keys())
-                + list(tf_fashion_mnist_settings.SETTINGS.keys())
-                + list(tf_hotkey_settings.SETTINGS.keys())
-            )
-        ),
+        choices=possible_settings,
         help="Name of setting to run.",
     )
     parser.add_argument(
