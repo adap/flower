@@ -107,7 +107,7 @@ def augment_dataset(
             )
 
     # Rearrange dataset. Every multiple of augment_factor is an original image.
-    X = augmented_imgs.reshape(-1, 3, 32, 32)
+    X = augmented_imgs.reshape((-1, 3, 32, 32))
     Y = augmented_labels.reshape(-1)
     return (X, Y)
 
@@ -135,7 +135,6 @@ def generate_partitioned_dataset_files(
     X, Y = dataset
 
     X, Y = shuffle(X, Y)
-    X, Y = sort_by_label(X, Y)
     X, Y = sort_by_label_repeating(X, Y)
 
     # Create one file per partition
