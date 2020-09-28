@@ -104,13 +104,12 @@ def augment_dataset(
             augmented_imgs[idx, j, :, :, :] = combined_transform(img)
 
         # Save augmented set disk as thumbnails?
-        if save_thumbnails_dir is not None:
-            if path.isdir(save_thumbnails_dir):
-                tmp = [*augmented_imgs[idx, :, :, :, :]]
-                tmp2 = np.concatenate(tmp, axis=-1)
-                save_image(
-                    from_numpy(tmp2), path.join(save_thumbnails_dir, f"cifar10_{idx}.jpg")
-                )
+        if save_thumbnails_dir and path.isdir(save_thumbnails_dir):
+            tmp = [*augmented_imgs[idx, :, :, :, :]]
+            tmp2 = np.concatenate(tmp, axis=-1)
+            save_image(
+                from_numpy(tmp2), path.join(save_thumbnails_dir, f"cifar10_{idx}.jpg")
+            )
 
     # Rearrange dataset. Every multiple of augment_factor is an original image.
     X = augmented_imgs.reshape((-1, 3, 32, 32))
