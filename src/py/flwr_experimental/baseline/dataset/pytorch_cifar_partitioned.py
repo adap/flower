@@ -26,6 +26,7 @@ import torch
 import torchvision
 import torchvision.transforms.functional as TF
 from torch import from_numpy
+from torchvision import transforms
 from torchvision.utils import save_image
 from tqdm import tqdm
 
@@ -89,7 +90,7 @@ def augment_dataset(
     augmented_imgs = np.empty(
         (len(original_dataset), augment_factor, 3, 32, 32), dtype=np.float32
     )
-    augmented_labels = np.empty((len(original_dataset), augment_factor), dtype=np.int32)
+    augmented_labels = np.empty((len(original_dataset), augment_factor), dtype=np.long)
 
     print("Generating augmented images...")
     for idx, (img, label) in enumerate(tqdm(original_dataset)):
@@ -97,6 +98,7 @@ def augment_dataset(
         augmented_labels[idx, :] = label
         for j in range(1, augment_factor):
             augmented_imgs[idx, j, :, :, :] = combined_transform(img)
+        # Save augmented set disk as thubmnails?
         if isdir(save_thumbnails_dir):
             tmp = [*augmented_imgs[idx, :, :, :, :]]
             tmp2 = np.concatenate(tmp, axis=-1)
@@ -105,7 +107,7 @@ def augment_dataset(
             )
 
     # Rearrange dataset. Every multiple of augment_factor is an original image.
-    X = augmented_imgs.reshape(-1, 3, 32, 32)
+    X = augmented_imgs.reshape((-1, 3, 32, 32))
     Y = augmented_labels.reshape(-1)
     return (X, Y)
 
@@ -133,7 +135,6 @@ def generate_partitioned_dataset_files(
     X, Y = dataset
 
     X, Y = shuffle(X, Y)
-    X, Y = sort_by_label(X, Y)
     X, Y = sort_by_label_repeating(X, Y)
 
     # Create one file per partition
@@ -147,7 +148,9 @@ def generate_partitioned_dataset_files(
 class CIFAR10PartitionedDataset(torch.utils.data.Dataset):
     """Augmented and partitioned dataset based on CIFAR10."""
 
-    def __init__(self, partition_id: int, root_dir: str):
+    def __init__(
+        self, partition_id: int, root_dir: str, transform: torchvision.transforms = None
+    ):
         """Dataset from partitioned files
 
         Parameters
@@ -156,26 +159,40 @@ class CIFAR10PartitionedDataset(torch.utils.data.Dataset):
             Partition file ID. Usually the same as the client ID.
         root_dir : str
             Directory containing partioned files.
+        transform : torchvision.transform
+            Transforms to be applied (usually normalization) to tensors before creating dataset.
         """
         self.partition_id = partition_id
         self.root_dir = root_dir
         self.partition_path = join(self.root_dir, f"cifar10_{self.partition_id}.pt")
+        self.transform = (
+            transforms.Compose([transforms.ToPILImage(), transform])
+            if transform
+            else None
+        )
 
         if not exists(self.partition_path):
-            print("Partition file not found.")
+            raise RuntimeError(f"Partition file {self.partition_path} not found.")
         else:
             self.X, self.Y = torch.load(self.partition_path)
+            self.X = torch.from_numpy(self.X)
+            self.Y = torch.from_numpy(self.Y)
 
     def __len__(self) -> int:
         return len(self.X)
 
     def __getitem__(self, idx: int) -> XY:
-        return (self.X[idx], self.Y[idx])
+        x = self.X[idx]
+        y = self.Y[idx]
+        if self.transform:
+            x = self.transform(x)
+
+        return (x, y)
 
 
 if __name__ == "__main__":
     # Where to save partitions
-    data_dir = "./cifar10"
+    data_dir = "./data/cifar-10"
     # Load CIFAR10
     trainset = torchvision.datasets.CIFAR10(
         root=data_dir, train=True, download=True, transform=None
@@ -184,8 +201,6 @@ if __name__ == "__main__":
     # Define data augmentation transforms
     augment_transform = torchvision.transforms.Compose(
         [
-            # torchvision.transforms.RandomResizedCrop(size=(32, 32)),
-            # torchvision.transforms.RandomCrop(32, padding=4),
             Rot90Transform(angles=[-30, -15, 0, 15, 30]),
             torchvision.transforms.RandomHorizontalFlip(),
             torchvision.transforms.RandomVerticalFlip(),
@@ -196,7 +211,7 @@ if __name__ == "__main__":
     )
 
     # Augment existing dataset and save thumbnails
-    save_thumbnails_dir = "./cifar10/thumbnails/"
+    save_thumbnails_dir = join(data_dir, "thumbnails")
     augmented_CIFAR10 = augment_dataset(
         original_dataset=trainset,
         augment_factor=10,
@@ -212,7 +227,13 @@ if __name__ == "__main__":
         data_dir=data_dir,
     )
 
-    # Generate the
+    # Generate the dataset from saved files
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ]
+    )
     specific_augmented_dataset = CIFAR10PartitionedDataset(
-        partition_id=0, root_dir=data_dir
+        partition_id=0, root_dir=data_dir, transform=transform
     )

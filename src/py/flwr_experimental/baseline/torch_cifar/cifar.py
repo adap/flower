@@ -31,6 +31,9 @@ import torchvision
 import torchvision.transforms as transforms
 
 import flwr as fl
+from flwr_experimental.baseline.dataset.pytorch_cifar_partitioned import (
+    CIFAR10PartitionedDataset,
+)
 
 DATA_ROOT = "./data/cifar-10"
 PATH = "./cifar_net.pth"
@@ -53,13 +56,18 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
 
 
 # pylint: disable=unused-argument
-def load_data() -> Tuple[torchvision.datasets.CIFAR10, torchvision.datasets.CIFAR10]:
+def load_data(
+    cid: int, root_dir: str = DATA_ROOT
+) -> Tuple[torch.utils.data.Dataset, torch.utils.data.Dataset]:
     """Load CIFAR-10 (training and test set)."""
     transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ]
     )
-    trainset = torchvision.datasets.CIFAR10(
-        root=DATA_ROOT, train=True, download=True, transform=transform
+    trainset = CIFAR10PartitionedDataset(
+        partition_id=cid, root_dir=root_dir, transform=transform
     )
     testset = torchvision.datasets.CIFAR10(
         root=DATA_ROOT, train=False, download=True, transform=transform
@@ -79,7 +87,7 @@ def train(
     optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
     print(f"Training {epochs} epoch(s) w/ {len(trainloader)} batches each")
-
+    model.train()
     # Train the network
     for epoch in range(epochs):  # loop over the dataset multiple times
         running_loss = 0.0
@@ -108,6 +116,7 @@ def test(
     device: torch.device,  # pylint: disable=no-member
 ) -> Tuple[float, float]:
     """Validate the network on the entire test set."""
+    model.eval()
     criterion = nn.CrossEntropyLoss()
     correct = 0
     total = 0

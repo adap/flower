@@ -35,13 +35,18 @@ def float_to_int(i: float) -> int:
 
 
 def sort_by_label(x: np.ndarray, y: np.ndarray) -> XY:
-    """Sort by label."""
+    """Sort by label.
+    Assuming two labels and four examples the resulting label
+    order would be 1,1,2,2
+    """
     idx = np.argsort(y, axis=0).reshape((y.shape[0]))
     return (x[idx], y[idx])
 
 
 def sort_by_label_repeating(x: np.ndarray, y: np.ndarray) -> XY:
-    """Sort by label repeating.
+    """Sort by label in repeating groups.
+    Assuming two labels and four examples the resulting label
+    order would be 1,2,1,2
 
     Create sorting index which is applied to by label sorted x, y
 
