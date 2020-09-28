@@ -147,7 +147,9 @@ def generate_partitioned_dataset_files(
         run_idx = [*range(part_idx * len_partitions, (part_idx + 1) * len_partitions)]
         this_part_X = X[run_idx]
         this_part_Y = Y[run_idx]
-        torch.save((this_part_X, this_part_Y), path.join(data_dir, f"cifar10_{part_idx}.pt"))
+        torch.save(
+            (this_part_X, this_part_Y), path.join(data_dir, f"cifar10_{part_idx}.pt")
+        )
 
 
 class CIFAR10PartitionedDataset(torch.utils.data.Dataset):
@@ -169,7 +171,9 @@ class CIFAR10PartitionedDataset(torch.utils.data.Dataset):
         """
         self.partition_id = partition_id
         self.root_dir = root_dir
-        self.partition_path = path.join(self.root_dir, f"cifar10_{self.partition_id}.pt")
+        self.partition_path = path.expanduser(
+            path.join(self.root_dir, f"cifar10_{self.partition_id}.pt")
+        )
         self.transform = (
             transforms.Compose([transforms.ToPILImage(), transform])
             if transform
