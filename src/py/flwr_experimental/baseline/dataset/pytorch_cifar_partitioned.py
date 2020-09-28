@@ -96,9 +96,11 @@ def augment_dataset(
     for idx, (img, label) in enumerate(tqdm(original_dataset)):
         augmented_imgs[idx, 0, :, :, :] = torchvision.transforms.ToTensor()(img)
         augmented_labels[idx, :] = label
+
         for j in range(1, augment_factor):
             augmented_imgs[idx, j, :, :, :] = combined_transform(img)
-        # Save augmented set disk as thubmnails?
+
+        # Save augmented set disk as thumbnails?
         if isdir(save_thumbnails_dir):
             tmp = [*augmented_imgs[idx, :, :, :, :]]
             tmp2 = np.concatenate(tmp, axis=-1)
@@ -192,7 +194,7 @@ class CIFAR10PartitionedDataset(torch.utils.data.Dataset):
 
 if __name__ == "__main__":
     # Where to save partitions
-    data_dir = "./data/cifar-10"
+    data_dir = "~/data/cifar-10"
     # Load CIFAR10
     trainset = torchvision.datasets.CIFAR10(
         root=data_dir, train=True, download=True, transform=None
