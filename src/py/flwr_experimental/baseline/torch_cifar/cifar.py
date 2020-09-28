@@ -35,9 +35,7 @@ from flwr_experimental.baseline.dataset.pytorch_cifar_partitioned import (
     CIFAR10PartitionedDataset,
 )
 
-DATA_ROOT = "./data/cifar-10"
-PATH = "./cifar_net.pth"
-
+DATA_ROOT = "~/data/cifar-10"
 
 def get_weights(model: torch.nn.ModuleList) -> fl.common.Weights:
     """Get model weights as a list of NumPy ndarrays."""
