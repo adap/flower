@@ -19,6 +19,7 @@ from typing import Optional
 
 from flwr_experimental.ops.cluster import Instance
 
+PYTHON="python3.8"
 
 def install_wheel(wheel_remote_path: str) -> str:
     """Return install command for wheel.
@@ -26,8 +27,8 @@ def install_wheel(wheel_remote_path: str) -> str:
     Remove previous versions if existing.
     """
     return (
-        "python3.7 -m pip uninstall -y flwr && "
-        + f"python3.7 -m pip install '{wheel_remote_path}[examples-tensorflow,http-logger]'"
+        f"{PYTHON} -m pip uninstall -y flwr && "
+        + f"{PYTHON} -m pip install '{wheel_remote_path}[examples-tensorflow,http-logger]'"
     )
 
 
@@ -35,7 +36,7 @@ def start_logserver(
     logserver_s3_bucket: Optional[str] = None, logserver_s3_key: Optional[str] = None
 ) -> str:
     """Return command to run logserver."""
-    cmd = "screen -d -m python3.7 -m flwr_experimental.logserver"
+    cmd = f"screen -d -m {PYTHON} -m flwr_experimental.logserver"
 
     if logserver_s3_bucket is not None and logserver_s3_key is not None:
         cmd += f" --s3_bucket={logserver_s3_bucket}" + f" --s3_key={logserver_s3_key}"
@@ -48,7 +49,7 @@ def start_server(log_host: str, baseline: str, setting: str) -> str:
     """Build command to run server."""
     return (
         "screen -d -m"
-        + f" python3.7 -m flwr_experimental.baseline.{baseline}.server"
+        + f" {PYTHON} -m flwr_experimental.baseline.{baseline}.server"
         + f" --log_host={log_host}"
         + f" --setting={setting}"
     )
@@ -60,7 +61,7 @@ def start_client(
     """Build command to run client."""
     return (
         "screen -d -m"
-        + f" python3.7 -m flwr_experimental.baseline.{baseline}.client"
+        + f" {PYTHON} -m flwr_experimental.baseline.{baseline}.client"
         + f" --server_address={server_address}"
         + f" --log_host={log_host}"
         + f" --setting={setting}"
@@ -70,7 +71,7 @@ def start_client(
 
 def download_dataset(baseline: str) -> str:
     "Return command which makes dataset locally available."
-    return f"python3.7 -m flwr_experimental.baseline.{baseline}.download"
+    return f"{PYTHON} -m flwr_experimental.baseline.{baseline}.download"
 
 
 def watch_and_shutdown(keyword: str, adapter: str) -> str:
