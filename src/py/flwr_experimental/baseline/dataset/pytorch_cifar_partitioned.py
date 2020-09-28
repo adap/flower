@@ -16,9 +16,10 @@
 # pylint: disable=invalid-name
 
 import random
-from os.path import exists, isdir, join
+from os import path
 from pathlib import Path
 from typing import List
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -53,7 +54,7 @@ def augment_dataset(
     original_dataset: torch.utils.data.Dataset,
     augment_factor: int,
     augment_transform: torchvision.transforms,
-    save_thumbnails_dir: str = "",
+    save_thumbnails_dir: Optional[str] = None,
 ) -> XY:
     """Augments the dataset augment_transform
 
@@ -66,7 +67,7 @@ def augment_dataset(
     original_dataset : torch.utils.data.Dataset
         Original PyTorch Dataset to be augmented
     augment_factor : int
-        Number of aumented copies generated from each original sample.
+        Number of augmented copies generated from each original sample.
         This will multiply the final length of the dataset by augment_factor.
     augment_transform : torchvision.transforms
         Composition of transforms used to augment the images.
@@ -80,7 +81,9 @@ def augment_dataset(
     XY
         A tuple containing the new augmented dataset
     """
+    # Create directory if it does not exist
     if save_thumbnails_dir:
+        save_thumbnails_dir = path.expanduser(save_thumbnails_dir)
         Path(save_thumbnails_dir).mkdir(parents=True, exist_ok=True)
 
     combined_transform = torchvision.transforms.Compose(
@@ -101,11 +104,11 @@ def augment_dataset(
             augmented_imgs[idx, j, :, :, :] = combined_transform(img)
 
         # Save augmented set disk as thumbnails?
-        if isdir(save_thumbnails_dir):
+        if path.isdir(save_thumbnails_dir):
             tmp = [*augmented_imgs[idx, :, :, :, :]]
             tmp2 = np.concatenate(tmp, axis=-1)
             save_image(
-                from_numpy(tmp2), join(save_thumbnails_dir, f"cifar10_{idx}.jpg")
+                from_numpy(tmp2), path.join(save_thumbnails_dir, f"cifar10_{idx}.jpg")
             )
 
     # Rearrange dataset. Every multiple of augment_factor is an original image.
@@ -144,7 +147,7 @@ def generate_partitioned_dataset_files(
         run_idx = [*range(part_idx * len_partitions, (part_idx + 1) * len_partitions)]
         this_part_X = X[run_idx]
         this_part_Y = Y[run_idx]
-        torch.save((this_part_X, this_part_Y), join(data_dir, f"cifar10_{part_idx}.pt"))
+        torch.save((this_part_X, this_part_Y), path.join(data_dir, f"cifar10_{part_idx}.pt"))
 
 
 class CIFAR10PartitionedDataset(torch.utils.data.Dataset):
@@ -166,14 +169,14 @@ class CIFAR10PartitionedDataset(torch.utils.data.Dataset):
         """
         self.partition_id = partition_id
         self.root_dir = root_dir
-        self.partition_path = join(self.root_dir, f"cifar10_{self.partition_id}.pt")
+        self.partition_path = path.join(self.root_dir, f"cifar10_{self.partition_id}.pt")
         self.transform = (
             transforms.Compose([transforms.ToPILImage(), transform])
             if transform
             else None
         )
 
-        if not exists(self.partition_path):
+        if not path.exists(self.partition_path):
             raise RuntimeError(f"Partition file {self.partition_path} not found.")
         else:
             self.X, self.Y = torch.load(self.partition_path)
@@ -194,7 +197,7 @@ class CIFAR10PartitionedDataset(torch.utils.data.Dataset):
 
 if __name__ == "__main__":
     # Where to save partitions
-    data_dir = "~/data/cifar-10"
+    data_dir = path.expanduser("~/.flower/data/cifar-10")
     # Load CIFAR10
     trainset = torchvision.datasets.CIFAR10(
         root=data_dir, train=True, download=True, transform=None
@@ -213,7 +216,7 @@ if __name__ == "__main__":
     )
 
     # Augment existing dataset and save thumbnails
-    save_thumbnails_dir = join(data_dir, "thumbnails")
+    save_thumbnails_dir = path.join(data_dir, "thumbnails")
     augmented_CIFAR10 = augment_dataset(
         original_dataset=trainset,
         augment_factor=10,

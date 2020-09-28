@@ -40,4 +40,4 @@ python3.8 -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
 python3.8 -c "import tensorflow as tf; tf.keras.datasets.fashion_mnist.load_data()"
 python3.8 -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
 python3.8 -c "import tensorflow as tf; tf.keras.datasets.cifar100.load_data()"
-python3.8 -c "import torchvision; torchvision.datasets.CIFAR10(root='~/data/cifar-10', train=True, download=True)"
+python3.8 -m flwr_experimental.baseline.dataset.pytorch_cifar_partitioned

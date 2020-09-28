@@ -23,6 +23,7 @@ https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 
 from collections import OrderedDict
 from typing import Tuple
+from os import path
 
 import numpy as np
 import torch
@@ -35,7 +36,7 @@ from flwr_experimental.baseline.dataset.pytorch_cifar_partitioned import (
     CIFAR10PartitionedDataset,
 )
 
-DATA_ROOT = "~/data/cifar-10"
+DATA_ROOT = "~/.flower/data/cifar-10"
 
 def get_weights(model: torch.nn.ModuleList) -> fl.common.Weights:
     """Get model weights as a list of NumPy ndarrays."""
@@ -68,7 +69,7 @@ def load_data(
         partition_id=cid, root_dir=root_dir, transform=transform
     )
     testset = torchvision.datasets.CIFAR10(
-        root=DATA_ROOT, train=False, download=True, transform=transform
+        root=path.expanduser(DATA_ROOT), train=False, download=True, transform=transform
     )
     return trainset, testset
 
