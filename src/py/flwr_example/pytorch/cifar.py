@@ -37,7 +37,7 @@ from torch import Tensor
 
 import flwr as fl
 
-DATA_ROOT = "./data/cifar-10"
+DATA_ROOT = "~/data/cifar-10"
 PATH = "./cifar_net.pth"
 
 
