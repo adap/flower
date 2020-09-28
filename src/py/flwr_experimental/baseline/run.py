@@ -230,8 +230,9 @@ def main() -> None:
     # for --setting parameter
     baseline_arg = [arg for arg in sys.argv if "--baseline" in arg]
     if len(baseline_arg) > 0:
-        baseline_arg = baseline_arg[0].split("=")[1]
-        possible_settings = all_settings[possible_baselines.index(baseline_arg)]
+        selected_baseline = baseline_arg[0].split("=")[1]
+        idx = possible_baselines.index(selected_baseline)
+        possible_settings = all_settings[idx]
 
     parser.add_argument(
         "--baseline",
