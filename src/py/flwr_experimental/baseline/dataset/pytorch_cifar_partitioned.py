@@ -217,12 +217,10 @@ if __name__ == "__main__":
     )
 
     # Augment existing dataset and save thumbnails
-    save_thumbnails_dir = path.join(data_dir, "thumbnails")
     augmented_CIFAR10 = augment_dataset(
         original_dataset=trainset,
         augment_factor=10,
         augment_transform=augment_transform,
-        save_thumbnails_dir=save_thumbnails_dir,
     )
 
     # Generate the partionioned files
