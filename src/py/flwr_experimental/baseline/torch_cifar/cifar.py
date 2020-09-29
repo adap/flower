@@ -38,6 +38,12 @@ from flwr_experimental.baseline.dataset.pytorch_cifar_partitioned import (
 
 DATA_ROOT = "~/.flower/data/cifar-10"
 
+
+def load_model(device) -> torch.nn.ModuleList:
+    """Load model (ResNet-18)."""
+    return torchvision.models.resnet18().to(device)  # Alternative: mobilenet_v2
+
+
 def get_weights(model: torch.nn.ModuleList) -> fl.common.Weights:
     """Get model weights as a list of NumPy ndarrays."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]

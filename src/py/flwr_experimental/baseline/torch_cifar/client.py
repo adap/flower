@@ -162,7 +162,7 @@ def main() -> None:
     log(INFO, "Starting client, settings: %s", client_setting)
 
     # Load model
-    model = torchvision.models.resnet18().to(DEVICE)
+    model = cifar.load_model(DEVICE)
 
     # Load local data partition
     transform = transforms.Compose(

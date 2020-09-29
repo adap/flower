@@ -66,7 +66,7 @@ def main() -> None:
         raise Exception(msg)
 
     # Load model (for centralized evaluation)
-    model = torchvision.models.resnet18().to(DEVICE)
+    model = cifar.load_model(DEVICE)
 
     # Load evaluation data
     transform = transforms.Compose(
