@@ -138,6 +138,75 @@ SETTINGS = {
             dry_run=False,
         ),
     ),
+    "scale-50": Baseline(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_50,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedavg",
+            rounds=ROUNDS,
+            min_num_clients=50,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=10,
+            training_round_timeout=None,
+            lr_initial=LR_INITIAL,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=False,
+            dry_run=False,
+        ),
+        clients=configure_uniform_clients(
+            instance_names=client_names_50,
+            num_clients=50,
+            dry_run=False,
+        ),
+    ),
+    "scale-100": Baseline(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_100,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedavg",
+            rounds=ROUNDS,
+            min_num_clients=100,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=20,
+            training_round_timeout=None,
+            lr_initial=LR_INITIAL,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=False,
+            dry_run=False,
+        ),
+        clients=configure_uniform_clients(
+            instance_names=client_names_100,
+            num_clients=100,
+            dry_run=False,
+        ),
+    ),
+    "scale-500": Baseline(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_500,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedavg",
+            rounds=ROUNDS,
+            min_num_clients=500,
+            sample_fraction=SAMPLE_FRACTION,
+            min_sample_size=100,
+            training_round_timeout=None,
+            lr_initial=LR_INITIAL,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=False,
+            dry_run=False,
+        ),
+        clients=configure_uniform_clients(
+            instance_names=client_names_500,
+            num_clients=500,
+            dry_run=False,
+        ),
+    ),
     "scale-1000": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
         + client_instances_1000,
