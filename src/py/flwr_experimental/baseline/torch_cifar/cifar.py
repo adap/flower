@@ -59,6 +59,7 @@ def load_data(
     cid: int, root_dir: str = DATA_ROOT
 ) -> Tuple[torch.utils.data.Dataset, torch.utils.data.Dataset]:
     """Load CIFAR-10 (training and test set)."""
+    root_dir = path.expanduser(root_dir)
     transform = transforms.Compose(
         [
             transforms.ToTensor(),
@@ -69,7 +70,7 @@ def load_data(
         partition_id=cid, root_dir=root_dir, transform=transform
     )
     testset = torchvision.datasets.CIFAR10(
-        root=path.expanduser(DATA_ROOT), train=False, download=True, transform=transform
+        root=root_dir, train=False, download=True, transform=transform
     )
     return trainset, testset
 
