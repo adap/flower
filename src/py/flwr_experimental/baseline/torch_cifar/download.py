@@ -21,10 +21,11 @@ from flwr.common.logger import log
 from flwr_experimental.baseline.torch_cifar.cifar import load_data
 
 def main() -> None:
-    """Download data."""
-    log(INFO, "Download CIFAR-10 for torch")
-    load_data()
-
+    """No download is needed.
+    
+    To be consistent with the other benchmarks we need this download
+    module for the run module in the baseline package.
+    """
 
 if __name__ == "__main__":
     main()
