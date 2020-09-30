@@ -35,13 +35,15 @@ import flwr as fl
 from flwr_experimental.baseline.dataset.pytorch_cifar_partitioned import (
     CIFAR10PartitionedDataset,
 )
+# from flwr_experimental.baseline.model.mobilenetv2_cifar import MobileNetV2 # TODO: fixme
 
 DATA_ROOT = "~/.flower/data/cifar-10"
 
 
 def load_model(device) -> torch.nn.ModuleList:
     """Load model (ResNet-18)."""
-    return torchvision.models.resnet18().to(device)  # Alternative: mobilenet_v2
+    # return MobileNetV2().to(device) # TODO: fixme
+    return torchvision.models.resnet18(num_classes=10).to(device)
 
 
 def get_weights(model: torch.nn.ModuleList) -> fl.common.Weights:

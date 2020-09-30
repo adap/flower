@@ -52,6 +52,7 @@ class EC2StatusTimeout(Exception):
 # List of AWS instance types with
 # (instance_type, vCPU, Mem)
 INSTANCE_TYPES_CPU = [
+    ("t3.micro", 2, 1, 0.012),
     ("t3.small", 2, 2, 0.0209),  # Beware CPU credit limited
     ("c5.large", 2, 4, 0.097),
     ("m5a.large", 2, 8, 0.104),

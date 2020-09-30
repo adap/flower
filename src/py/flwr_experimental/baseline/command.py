@@ -28,7 +28,7 @@ def install_wheel(wheel_remote_path: str) -> str:
     """
     return (
         f"{PYTHON} -m pip uninstall -y flwr && "
-        + f"{PYTHON} -m pip install '{wheel_remote_path}[examples-tensorflow,http-logger]'"
+        + f"{PYTHON} -m pip install '{wheel_remote_path}[examples-tensorflow,examples-pytorch,http-logger]'"
     )
 
 
