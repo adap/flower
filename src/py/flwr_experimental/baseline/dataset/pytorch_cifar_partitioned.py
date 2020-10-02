@@ -226,7 +226,7 @@ if __name__ == "__main__":
         augment_transform=augment_transform,
     )
 
-    # Generate the partionioned files
+    # Generate the partitioned files
     generate_partitioned_dataset_files(
         dataset=augmented_CIFAR10,
         len_partitions=500,
