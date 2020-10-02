@@ -43,7 +43,7 @@ DATA_ROOT = "~/.flower/data/cifar-10"
 def load_model(device) -> torch.nn.ModuleList:
     """Load model (ResNet-18)."""
     # return MobileNetV2().to(device) # TODO: fixme
-    return torchvision.models.resnet18(num_classes=10).to(device)
+    return torchvision.models.resnet18(num_classes=10).to(device)  # Or: mobilenet_v2
 
 
 def get_weights(model: torch.nn.ModuleList) -> fl.common.Weights:
@@ -74,12 +74,22 @@ def load_data(
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
         ]
     )
+    
+    # Load EC-10 partition
     trainset = CIFAR10PartitionedDataset(
         partition_id=cid, root_dir=root_dir, transform=transform
     )
+
+    # Load entire CIFAR-10 training set
+    # trainset = torchvision.datasets.CIFAR10(
+    #     root=root_dir, train=True, download=True, transform=transform
+    # )
+
+    # Load entire CIFAR-10 test set
     testset = torchvision.datasets.CIFAR10(
         root=root_dir, train=False, download=True, transform=transform
     )
+
     return trainset, testset
 
 
