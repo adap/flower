@@ -1,4 +1,4 @@
-FROM python:3.8.6-slim
+FROM python:3.7.9-slim-stretch
 
 RUN apt-get update
 RUN apt-get install -y openssh-server screen
