@@ -24,9 +24,9 @@ COPY dist/flwr-0.8.0-py3-none-any.whl flwr-0.8.0-py3-none-any.whl
 RUN python -m pip install --no-cache-dir 'flwr-0.8.0-py3-none-any.whl[examples-pytorch,examples-tensorflow,http-logger,baseline,ops]' && \
     rm flwr-0.8.0-py3-none-any.whl
 
-RUN python3.8 -m flwr_experimental.baseline.tf_fashion_mnist.download
-RUN python3.8 -m flwr_experimental.baseline.tf_cifar.download
-RUN python3.8 -m flwr_experimental.baseline.torch_cifar.download
+RUN python3.7 -m flwr_experimental.baseline.tf_fashion_mnist.download
+RUN python3.7 -m flwr_experimental.baseline.tf_cifar.download
+RUN python3.7 -m flwr_experimental.baseline.torch_cifar.download
 
 EXPOSE 22
 
