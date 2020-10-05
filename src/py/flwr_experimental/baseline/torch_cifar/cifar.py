@@ -64,7 +64,7 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
 
 # pylint: disable=unused-argument
 def load_data(
-    cid: int, root_dir: str = DATA_ROOT
+        cid: int, root_dir: str = DATA_ROOT, load_testset: bool = False
 ) -> Tuple[torch.utils.data.Dataset, torch.utils.data.Dataset]:
     """Load CIFAR-10 (training and test set)."""
     root_dir = path.expanduser(root_dir)
@@ -79,6 +79,12 @@ def load_data(
     trainset = CIFAR10PartitionedDataset(
         partition_id=cid, root_dir=root_dir, transform=transform
     )
+<<<<<<< HEAD
+    testset = None
+    if load_testset:
+        testset = torchvision.datasets.CIFAR10(
+        root=DATA_ROOT, train=False, download=True, transform=transform
+=======
 
     # Load entire CIFAR-10 training set
     # trainset = torchvision.datasets.CIFAR10(
@@ -88,6 +94,7 @@ def load_data(
     # Load entire CIFAR-10 test set
     testset = torchvision.datasets.CIFAR10(
         root=root_dir, train=False, download=True, transform=transform
+>>>>>>> 036414bfc5d24fc7dc2a775f6004dfce1feb12de
     )
 
     return trainset, testset
