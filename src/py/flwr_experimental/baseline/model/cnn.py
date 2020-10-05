@@ -73,7 +73,9 @@ def orig_cnn(
 
     # Compile model w/ learning rate schedule
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-        initial_learning_rate=1e-3, decay_steps=10000, decay_rate=0.9,
+        initial_learning_rate=1e-3,
+        decay_steps=10000,
+        decay_rate=0.9,
     )
     model.compile(
         optimizer=tf.keras.optimizers.SGD(learning_rate=lr_schedule, momentum=0.9),
@@ -134,7 +136,9 @@ def keyword_cnn(
 
     # Compile model w/ learning rate schedule
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-        initial_learning_rate=1e-3, decay_steps=10000, decay_rate=0.9,
+        initial_learning_rate=1e-3,
+        decay_steps=10000,
+        decay_rate=0.9,
     )
     model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),

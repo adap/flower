@@ -128,7 +128,10 @@ class FastAndSlow(FedAvg):
         msg = "FedFS round %s, sample %s clients (based on all previous contributions)"
         if self.alternating_timeout:
             log(
-                DEBUG, msg, str(rnd), str(sample_size),
+                DEBUG,
+                msg,
+                str(rnd),
+                str(sample_size),
             )
             clients = self._contribution_based_sampling(
                 sample_size=sample_size, client_manager=client_manager
@@ -177,10 +180,12 @@ class FastAndSlow(FedAvg):
         if self.dynamic_timeout:
             if self.durations:
                 candidates = timeout_candidates(
-                    durations=self.durations, max_timeout=self.t_slow,
+                    durations=self.durations,
+                    max_timeout=self.t_slow,
                 )
                 timeout = next_timeout(
-                    candidates=candidates, percentile=self.dynamic_timeout_percentile,
+                    candidates=candidates,
+                    percentile=self.dynamic_timeout_percentile,
                 )
                 config["timeout"] = str(timeout)
             else:

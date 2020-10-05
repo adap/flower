@@ -76,11 +76,11 @@ class DockerAdapter(Adapter):
     ) -> List[AdapterInstance]:
         """Create one or more docker container instance(s) of the same type.
 
-            Args:
-                num_cpu (int): Number of instance CPU cores (currently ignored)
-                num_ram (int): RAM in GB (currently ignored)
-                timeout (int): Timeout in minutes
-                num_instance (int): Number of instances to start
+        Args:
+            num_cpu (int): Number of instance CPU cores (currently ignored)
+            num_ram (int): RAM in GB (currently ignored)
+            timeout (int): Timeout in minutes
+            num_instance (int): Number of instances to start
 
         """
         instances: List[AdapterInstance] = []

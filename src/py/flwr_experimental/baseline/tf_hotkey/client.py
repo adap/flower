@@ -47,10 +47,15 @@ def parse_args() -> argparse.Namespace:
         help=f"Server address (IPv6, default: {DEFAULT_SERVER_ADDRESS})",
     )
     parser.add_argument(
-        "--log_host", type=str, help="HTTP log handler host (no default)",
+        "--log_host",
+        type=str,
+        help="HTTP log handler host (no default)",
     )
     parser.add_argument(
-        "--setting", type=str, choices=SETTINGS.keys(), help="Setting to run.",
+        "--setting",
+        type=str,
+        choices=SETTINGS.keys(),
+        help="Setting to run.",
     )
     parser.add_argument("--cid", type=str, required=True, help="Client cid.")
     return parser.parse_args()

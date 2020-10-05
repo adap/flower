@@ -84,10 +84,15 @@ def main() -> None:
         "--partition", type=int, required=True, help="Partition index (no default)"
     )
     parser.add_argument(
-        "--clients", type=int, required=True, help="Number of clients (no default)",
+        "--clients",
+        type=int,
+        required=True,
+        help="Number of clients (no default)",
     )
     parser.add_argument(
-        "--log_host", type=str, help="Logserver address (no default)",
+        "--log_host",
+        type=str,
+        help="Logserver address (no default)",
     )
     args = parser.parse_args()
 
