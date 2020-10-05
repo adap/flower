@@ -115,7 +115,7 @@ def load_data(
         Client ID used to select a specific partition.
         
     nb_clients: int 
-        Total number of clients launched during traning. This value dictates the number of unique to be created.
+        Total number of clients launched during training. This value dictates the number of unique to be created.
         
 
     Returns
