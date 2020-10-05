@@ -52,7 +52,7 @@ class CifarClient(fl.client.Client):
 
     def get_parameters(self) -> ParametersRes:
         log(INFO, "Client %s: get_parameters", self.cid)
-        model = torchvision.models.resnet18().to(DEVICE)
+        model = cifar.load_model(DEVICE)
         weights: Weights = cifar.get_weights(model)
         del model
         parameters = fl.common.weights_to_parameters(weights)
@@ -63,7 +63,7 @@ class CifarClient(fl.client.Client):
         weights: Weights = fl.common.parameters_to_weights(ins.parameters)
         config = ins.config
 
-        model = torchvision.models.resnet18().to(DEVICE)
+        model = cifar.load_model(DEVICE)
 
         fit_begin = timeit.default_timer()
 
@@ -112,7 +112,7 @@ class CifarClient(fl.client.Client):
             num_examples=len(self.testset), loss=float(loss), accuracy=float(accuracy)
         )
         """
-        return EvaluateRes(num_examples=0, loss=1.0, accuracy=0.5)
+        return EvaluateRes(num_examples=1, loss=1.0, accuracy=0.5)
 
 
 def parse_args() -> argparse.Namespace:
