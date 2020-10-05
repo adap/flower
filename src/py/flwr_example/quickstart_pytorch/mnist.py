@@ -58,10 +58,10 @@ def dataset_partitioner(
         Size of mini-batches used by the returned DataLoader.
         
     client_id: int 
-        Unique integer used for selecting a specif partition. 
+        Unique integer used for selecting a specific partition. 
         
     number_of_clients: int 
-        Total number of clients launched during traning. This value dictates the number of partitions to be created.
+        Total number of clients launched during training. This value dictates the number of partitions to be created.
         
 
     Returns
@@ -196,7 +196,7 @@ class MNISTNet(nn.Module):
 
 
 def train(
-    model: torch.nn.ModuleList,
+    model: torch.nn.Module,
     train_loader: torch.utils.data.DataLoader,
     epochs: int,
     device: torch.device = torch.device("cpu"),
@@ -205,11 +205,11 @@ def train(
 
     Parameters
     ----------
-    model: torch.nn.ModuleList
+    model: torch.nn.Module
         Neural network model used in this example.
         
     train_loader: torch.utils.data.DataLoader
-        DataLoader used in traning.
+        DataLoader used in training.
         
     epochs: int 
         Number of epochs to run in each round. 
@@ -221,14 +221,14 @@ def train(
     Returns
     -------
     num_examples_train: int
-        Number of total samples used during traning.
+        Number of total samples used during training.
 
     """
     model.train()
     optimizer = optim.Adadelta(model.parameters(), lr=1.0)
     scheduler = StepLR(optimizer, step_size=1, gamma=0.7)
     print(f"Training {epochs} epoch(s) w/ {len(train_loader)} mini-batches each")
-    for epoch in range(epochs):  # loop over the dataset multiple time
+    for epoch in range(epochs):  # loop over the dataset multiple times
         print()
         loss_epoch: float = 0.0
         num_examples_train: int = 0
@@ -266,7 +266,7 @@ def train(
 
 
 def test(
-    model: torch.nn.ModuleList,
+    model: torch.nn.Module,
     test_loader: torch.utils.data.DataLoader,
     device: torch.device = torch.device("cpu"),
 ) -> Tuple[int, float, float]:
@@ -274,7 +274,7 @@ def test(
 
     Parameters
     ----------
-    model: torch.nn.ModuleList :
+    model: torch.nn.Module :
         Neural network model used in this example.
         
     test_loader: torch.utils.data.DataLoader :
@@ -355,7 +355,7 @@ class PytorchMNISTClient(fl.client.Client):
         self.model.load_state_dict(state_dict, strict=True)
 
     def get_parameters(self) -> fl.common.ParametersRes:
-        """Encapsulates the weight into Flower Parameters """
+        """Encapsulates the weights into Flower Parameters """
         weights: fl.common.Weights = self.get_weights()
         parameters = fl.common.weights_to_parameters(weights)
         return fl.common.ParametersRes(parameters=parameters)
