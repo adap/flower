@@ -25,9 +25,9 @@ from flwr_experimental.baseline.common import (
 from flwr_experimental.baseline.setting import Baseline, ClientSetting, ServerSetting
 from flwr_experimental.ops.cluster import Instance
 
-N20_ROUNDS = 50
-ROUNDS = 20
-MIN_NUM_CLIENTS = 90
+N20_ROUNDS = 10
+ROUNDS = 10
+MIN_NUM_CLIENTS = 10
 SAMPLE_FRACTION = 0.1
 MIN_SAMPLE_SIZE = 10
 
@@ -37,14 +37,14 @@ IID_FRACTION = 0.1
 MAX_DELAY_FACTOR = 4.0  # Equals a 5x slowdown
 
 
-FN_ROUNDS = 40
-FN_MIN_NUM_CLIENTS = 90
+FN_ROUNDS = 10
+FN_MIN_NUM_CLIENTS = 10
 FN_LR_INITIAL = 0.001
 FN_IID_FRACTION = 0.1
 FN_MAX_DELAY_FACTOR = 4.0
 
 FN_SAMPLE_FRACTION_50 = 0.5
-FN_MIN_SAMPLE_SIZE_50 = 50
+FN_MIN_SAMPLE_SIZE_50 = 10
 
 FN_SAMPLE_FRACTION_10 = 0.1
 FN_MIN_SAMPLE_SIZE_10 = 10
@@ -168,14 +168,14 @@ SETTINGS = {
     ###
     "fn-c50-r40-fedavg-16": Baseline(
         instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
-        + client_instances_100,
+        + client_instances_10,
         server=ServerSetting(
             instance_name="server",
             strategy="fedavg",
             rounds=FN_ROUNDS,
             min_num_clients=FN_MIN_NUM_CLIENTS,
-            sample_fraction=FN_SAMPLE_FRACTION_50,
-            min_sample_size=FN_MIN_SAMPLE_SIZE_50,
+            sample_fraction=FN_SAMPLE_FRACTION_10,
+            min_sample_size=FN_MIN_SAMPLE_SIZE_10,
             training_round_timeout=16,
             lr_initial=FN_LR_INITIAL,
             partial_updates=False,
@@ -184,8 +184,8 @@ SETTINGS = {
         ),
         clients=configure_clients(
             iid_fraction=FN_IID_FRACTION,
-            instance_names=client_names_100,
-            num_clients=100,
+            instance_names=client_names_10,
+            num_clients=10,
             dry_run=False,
             delay_factor_fast=0.0,
             delay_factor_slow=FN_MAX_DELAY_FACTOR,

@@ -21,7 +21,7 @@ import concurrent.futures
 import configparser
 from logging import INFO
 from os import path
-from time import strftime
+from time import strftime, sleep
 from typing import List, Optional
 
 from flwr_experimental.baseline.setting import Baseline
@@ -169,6 +169,8 @@ def run(baseline: str, setting: str, adapter: str) -> None:
             setting=setting,
         ),
     )
+
+    sleep(120)
 
     # Start Flower clients
     log(INFO, "(8/9) Start clients.")

@@ -18,7 +18,7 @@ from contextlib import contextmanager
 from logging import DEBUG
 from queue import Queue
 from typing import Callable, Iterator, Tuple
-
+import os
 import grpc
 
 from flwr.common.logger import log
@@ -26,8 +26,8 @@ from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub
 
 # Uncomment these flags in case you are debugging
-# os.environ["GRPC_VERBOSITY"] = "debug"
-# os.environ["GRPC_TRACE"] = "connectivity_state"
+os.environ["GRPC_VERBOSITY"] = "info"
+os.environ["GRPC_TRACE"] = "all"
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -47,7 +47,7 @@ def insecure_grpc_connection(
             ("grpc.max_receive_message_length", 256 * 1024 * 1024),
         ],
     )
-    channel.subscribe(on_channel_state_change)
+    # channel.subscribe(on_channel_state_change)
 
     queue: Queue[ClientMessage] = Queue(  # pylint: disable=unsubscriptable-object
         maxsize=1
@@ -57,7 +57,9 @@ def insecure_grpc_connection(
     server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
 
     receive: Callable[[], ServerMessage] = lambda: next(server_message_iterator)
-    send: Callable[[ClientMessage], None] = lambda msg: queue.put(msg, block=False)
+    # This call blocks if the queue already contains an item. Set timeout=1 if it is
+    # desired to throw an error instead of waiting.
+    send: Callable[[ClientMessage], None] = lambda msg: queue.put(msg)
 
     try:
         yield (receive, send)

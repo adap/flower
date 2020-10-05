@@ -23,6 +23,6 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
 # Execute `run.py`
 python -m flwr_experimental.baseline.run \
-  --adapter="docker" \
-  --baseline="tf_fashion_mnist" \
-  --setting="minimal"
+  --adapter="ec2" \
+  --baseline="torch_cifar" \
+  --setting="scale-10"

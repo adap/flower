@@ -21,7 +21,7 @@ from flwr_experimental.baseline.common import configure_client_instances
 from flwr_experimental.baseline.setting import Baseline, ClientSetting, ServerSetting
 from flwr_experimental.ops.cluster import Instance
 
-ROUNDS = 2
+ROUNDS = 50
 SAMPLE_FRACTION = 0.2
 LR_INITIAL = 0.01
 
@@ -68,27 +68,27 @@ def configure_uniform_clients(
     return clients
 
 client_instances_2, client_names_2 = configure_client_instances(
-    num_clients=2, num_cpu=2, num_ram=8
+    num_clients=2, num_cpu=2, num_ram=2
 )
 
 client_instances_10, client_names_10 = configure_client_instances(
-    num_clients=10, num_cpu=2, num_ram=8
+    num_clients=10, num_cpu=2, num_ram=2
 )
 
 client_instances_50, client_names_50 = configure_client_instances(
-    num_clients=50, num_cpu=2, num_ram=8
+    num_clients=50, num_cpu=2, num_ram=2
 )
 
 client_instances_100, client_names_100 = configure_client_instances(
-    num_clients=100, num_cpu=2, num_ram=8
+    num_clients=100, num_cpu=2, num_ram=2
 )
 
 client_instances_500, client_names_500 = configure_client_instances(
-    num_clients=500, num_cpu=2, num_ram=8
+    num_clients=500, num_cpu=2, num_ram=2
 )
 
 client_instances_1000, client_names_1000 = configure_client_instances(
-    num_clients=1000, num_cpu=2, num_ram=8
+    num_clients=1000, num_cpu=2, num_ram=2
 )
 
 SETTINGS = {
