@@ -22,8 +22,8 @@ https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 
 
 from collections import OrderedDict
-from typing import Tuple
 from os import path
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -35,6 +35,7 @@ import flwr as fl
 from flwr_experimental.baseline.dataset.pytorch_cifar_partitioned import (
     CIFAR10PartitionedDataset,
 )
+
 # from flwr_experimental.baseline.model.mobilenetv2_cifar import MobileNetV2 # TODO: fixme
 
 DATA_ROOT = "~/.flower/data/cifar-10"
@@ -64,7 +65,7 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
 
 # pylint: disable=unused-argument
 def load_data(
-        cid: int, root_dir: str = DATA_ROOT, load_testset: bool = False
+    cid: int, root_dir: str = DATA_ROOT, load_testset: bool = False
 ) -> Tuple[torch.utils.data.Dataset, torch.utils.data.Dataset]:
     """Load CIFAR-10 (training and test set)."""
     root_dir = path.expanduser(root_dir)
@@ -74,28 +75,17 @@ def load_data(
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
         ]
     )
-    
+
     # Load EC-10 partition
     trainset = CIFAR10PartitionedDataset(
         partition_id=cid, root_dir=root_dir, transform=transform
     )
-<<<<<<< HEAD
+
     testset = None
     if load_testset:
         testset = torchvision.datasets.CIFAR10(
-        root=DATA_ROOT, train=False, download=True, transform=transform
-=======
-
-    # Load entire CIFAR-10 training set
-    # trainset = torchvision.datasets.CIFAR10(
-    #     root=root_dir, train=True, download=True, transform=transform
-    # )
-
-    # Load entire CIFAR-10 test set
-    testset = torchvision.datasets.CIFAR10(
-        root=root_dir, train=False, download=True, transform=transform
->>>>>>> 036414bfc5d24fc7dc2a775f6004dfce1feb12de
-    )
+            root=root_dir, train=False, download=True, transform=transform
+        )
 
     return trainset, testset
 

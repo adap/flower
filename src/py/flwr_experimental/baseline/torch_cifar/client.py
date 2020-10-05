@@ -165,13 +165,6 @@ def main() -> None:
     model = cifar.load_model(DEVICE)
 
     # Load local data partition
-    transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        ]
-    )
-
     trainset, testset = cifar.load_data(
         cid=int(client_setting.cid), root_dir=cifar.DATA_ROOT
     )

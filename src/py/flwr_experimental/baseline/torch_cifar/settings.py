@@ -67,6 +67,7 @@ def configure_uniform_clients(
         clients.append(client)
     return clients
 
+
 client_instances_2, client_names_2 = configure_client_instances(
     num_clients=2, num_cpu=2, num_ram=8
 )
