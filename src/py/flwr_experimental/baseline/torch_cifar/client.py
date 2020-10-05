@@ -75,7 +75,13 @@ class CifarClient(fl.client.Client):
         trainloader = torch.utils.data.DataLoader(
             self.trainset, batch_size=batch_size, shuffle=True
         )
-        cifar.train(self.model, trainloader, epochs=epochs, device=DEVICE)
+        cifar.train(
+            model=self.model,
+            trainloader=trainloader,
+            epochs=epochs,
+            device=DEVICE,
+            # batches_per_episode=2,
+        )
 
         # Return the refined weights and the number of examples used for training
         weights_prime: Weights = cifar.get_weights(self.model)
@@ -166,7 +172,7 @@ def main() -> None:
 
     # Load local data partition
     trainset, testset = cifar.load_data(
-        cid=int(client_setting.cid), root_dir=cifar.DATA_ROOT
+        cid=int(client_setting.cid), root_dir=cifar.DATA_ROOT, load_testset=True
     )
 
     # Start client

@@ -23,7 +23,7 @@ https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 
 from collections import OrderedDict
 from os import path
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 import torch
@@ -95,6 +95,7 @@ def train(
     trainloader: torch.utils.data.DataLoader,
     epochs: int,
     device: torch.device,  # pylint: disable=no-member
+    batches_per_episode: Optional[int] = None,
 ) -> None:
     """Train the network."""
     # Define loss and optimizer
@@ -123,6 +124,9 @@ def train(
             if i % 100 == 0:  # print every 100 mini-batches
                 print("[%d, %5d] loss: %.3f" % (epoch + 1, i + 1, running_loss / 2000))
                 running_loss = 0.0
+
+            if batches_per_episode is not None and i % batches_per_episode == 0:
+                break
 
 
 def test(
