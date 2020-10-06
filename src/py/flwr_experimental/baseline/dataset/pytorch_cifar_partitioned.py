@@ -18,7 +18,8 @@
 import random
 from os import path
 from pathlib import Path
-from typing import List, Optional
+from typing import List
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
