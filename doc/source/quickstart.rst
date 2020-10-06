@@ -1,5 +1,5 @@
-Flower Quickstart
-=================
+Flower Quickstart (with Keras)
+==============================
 
 Let's build a federated learning system in less than 50 lines of code!
 
