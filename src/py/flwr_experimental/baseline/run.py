@@ -15,27 +15,26 @@
 """Execute Fashion-MNIST baseline locally in Docker."""
 
 
-import sys
 import argparse
 import concurrent.futures
 import configparser
+import sys
 from logging import INFO
 from os import path
 from time import strftime
 from typing import List, Optional
 
-from flwr_experimental.baseline.setting import Baseline
 import flwr_experimental.baseline.tf_cifar.settings as tf_cifar_settings
 import flwr_experimental.baseline.tf_fashion_mnist.settings as tf_fashion_mnist_settings
 import flwr_experimental.baseline.tf_hotkey.settings as tf_hotkey_settings
 import flwr_experimental.baseline.torch_cifar.settings as torch_cifar_settings
 from flwr.common.logger import configure, log
 from flwr_experimental.baseline import command
+from flwr_experimental.baseline.setting import Baseline
 from flwr_experimental.ops.cluster import Cluster, Instance
 from flwr_experimental.ops.compute.adapter import Adapter
 from flwr_experimental.ops.compute.docker_adapter import DockerAdapter
 from flwr_experimental.ops.compute.ec2_adapter import EC2Adapter
-
 
 OPS_INI_PATH = path.normpath(
     f"{path.dirname(path.realpath(__file__))}/../../../../.flower_ops"
@@ -48,7 +47,9 @@ CONFIG.read(OPS_INI_PATH)
 WHEEL_FILENAME = CONFIG.get("paths", "wheel_filename")
 WHEEL_LOCAL_PATH = path.expanduser(CONFIG.get("paths", "wheel_dir")) + WHEEL_FILENAME
 
-DOCKER_PRIVATE_KEY = path.realpath(path.dirname(__file__) + "/../../../../docker/ssh_key")
+DOCKER_PRIVATE_KEY = path.realpath(
+    path.dirname(__file__) + "/../../../../docker/ssh_key"
+)
 
 
 def now() -> str:

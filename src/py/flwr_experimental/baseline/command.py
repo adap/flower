@@ -19,7 +19,8 @@ from typing import Optional
 
 from flwr_experimental.ops.cluster import Instance
 
-PYTHON="python3.7"
+PYTHON = "python3.7"
+
 
 def install_wheel(wheel_remote_path: str) -> str:
     """Return install command for wheel.

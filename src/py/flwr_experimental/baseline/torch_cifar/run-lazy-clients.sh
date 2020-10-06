@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Helper script to download CIFAR-10/100."""
 
+set -e
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
-from logging import INFO
+SERVER_ADDRESS="[::]:8080"
+NUM_CLIENTS=2
+I_START=0
+I_END=1
 
-from flwr.common.logger import log
-from flwr_experimental.baseline.torch_cifar.cifar import load_data
-
-
-def main() -> None:
-    """No download is needed.
-
-    To be consistent with the other benchmarks we need this download
-    module for the run module in the baseline package.
-    """
-
-
-if __name__ == "__main__":
-    main()
+echo "Starting $NUM_CLIENTS clients."
+for ((i = $I_START; i <= $I_END; i++))
+do
+    echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
+    python -m flwr_experimental.baseline.torch_cifar.lazy_client \
+      --server_address=$SERVER_ADDRESS \
+      --setting="scale-min" \
+      --cid=$i &
+done
+echo "Started $NUM_CLIENTS clients."

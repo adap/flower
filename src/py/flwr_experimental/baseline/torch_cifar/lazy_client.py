@@ -18,6 +18,7 @@
 import argparse
 import timeit
 from logging import ERROR, INFO
+from typing import Optional
 
 import torch
 import torchvision
@@ -42,18 +43,18 @@ class CifarClient(fl.client.Client):
     def __init__(
         self,
         cid: str,
-        model: torch.nn.ModuleList,
         trainset: torch.utils.data.Dataset,
-        testset: torch.utils.data.Dataset,
+        testset: Optional[torch.utils.data.Dataset] = None,
     ) -> None:
         self.cid = cid
-        self.model = model
         self.trainset = trainset
         self.testset = testset
 
     def get_parameters(self) -> ParametersRes:
         log(INFO, "Client %s: get_parameters", self.cid)
-        weights: Weights = cifar.get_weights(self.model)
+        model = cifar.load_model(DEVICE)
+        weights: Weights = cifar.get_weights(model)
+        del model
         parameters = fl.common.weights_to_parameters(weights)
         return ParametersRes(parameters=parameters)
 
@@ -62,6 +63,8 @@ class CifarClient(fl.client.Client):
         weights: Weights = fl.common.parameters_to_weights(ins.parameters)
         config = ins.config
 
+        model = cifar.load_model(DEVICE)
+
         fit_begin = timeit.default_timer()
 
         # Get training config
@@ -69,14 +72,14 @@ class CifarClient(fl.client.Client):
         batch_size = int(config["batch_size"])
 
         # Set model parameters
-        cifar.set_weights(self.model, weights)
+        cifar.set_weights(model, weights)
 
         # Train model
         trainloader = torch.utils.data.DataLoader(
             self.trainset, batch_size=batch_size, shuffle=True
         )
         cifar.train(
-            model=self.model,
+            model=model,
             trainloader=trainloader,
             epochs=epochs,
             device=DEVICE,
@@ -84,7 +87,8 @@ class CifarClient(fl.client.Client):
         )
 
         # Return the refined weights and the number of examples used for training
-        weights_prime: Weights = cifar.get_weights(self.model)
+        weights_prime: Weights = cifar.get_weights(model)
+        del model
         params_prime = fl.common.weights_to_parameters(weights_prime)
         num_examples_train = len(self.trainset)
         fit_duration = timeit.default_timer() - fit_begin
@@ -96,7 +100,7 @@ class CifarClient(fl.client.Client):
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        log(INFO, "Client %s: evaluate", self.cid)
+        """log(INFO, "Client %s: evaluate", self.cid)
         weights = fl.common.parameters_to_weights(ins.parameters)
         _ = ins.config
 
@@ -113,6 +117,8 @@ class CifarClient(fl.client.Client):
         return EvaluateRes(
             num_examples=len(self.testset), loss=float(loss), accuracy=float(accuracy)
         )
+        """
+        return EvaluateRes(num_examples=1, loss=1.0, accuracy=0.5)
 
 
 def parse_args() -> argparse.Namespace:
@@ -167,21 +173,13 @@ def main() -> None:
     configure(identifier=f"client:{client_setting.cid}", host=args.log_host)
     log(INFO, "Starting client, settings: %s", client_setting)
 
-    # Load model
-    model = cifar.load_model(DEVICE)
-
     # Load local data partition
-    trainset, testset = cifar.load_data(
-        cid=int(client_setting.cid), root_dir=cifar.DATA_ROOT, load_testset=True
+    trainset, _ = cifar.load_data(
+        cid=int(client_setting.cid), root_dir=cifar.DATA_ROOT, load_testset=False
     )
 
     # Start client
-    client = CifarClient(
-        cid=client_setting.cid,
-        model=model,
-        trainset=trainset,
-        testset=testset,
-    )
+    client = CifarClient(cid=client_setting.cid, trainset=trainset)
     fl.client.start_client(args.server_address, client)
 
 
