@@ -61,6 +61,7 @@ INSTANCE_TYPES_CPU = [
     ("m5a.4xlarge", 16, 64, 0.832),
     ("m5ad.12xlarge", 48, 192, 2.496),
     ("m5ad.24xlarge", 96, 384, 4.992),
+    ("r5.24xlarge", 96, 768, 7.296),
 ]
 
 INSTANCE_TYPES_GPU = [
@@ -158,7 +159,7 @@ class EC2Adapter(Adapter):
 
         """
 
-        for _ in range(30):
+        for _ in range(60):
             result = self.ec2.describe_instance_status(
                 InstanceIds=instance_ids,
                 # Also include instances which don't have state "running" yet
