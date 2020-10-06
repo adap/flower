@@ -134,7 +134,7 @@ def get_on_fit_config_fn(lr_initial: float) -> Callable[[int], Dict[str, str]]:
         config = {
             "epoch_global": str(rnd),
             "epochs": str(1),
-            "batch_size": str(32),
+            "batch_size": str(16),
             "lr_initial": str(lr_initial),
             "lr_decay": str(0.99),
         }
