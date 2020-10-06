@@ -23,7 +23,9 @@ https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 
 from collections import OrderedDict
 from os import path
+from logging import DEBUG
 from typing import Optional, Tuple
+
 
 import numpy as np
 import torch
@@ -35,6 +37,7 @@ import flwr as fl
 from flwr_experimental.baseline.dataset.pytorch_cifar_partitioned import (
     CIFAR10PartitionedDataset,
 )
+from flwr.common.logger import log
 
 # from flwr_experimental.baseline.model.mobilenetv2_cifar import MobileNetV2 # TODO: fixme
 
@@ -103,10 +106,11 @@ def train(
     # optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
     optimizer = torch.optim.Adam(model.parameters())
 
-    print(f"Training {epochs} epoch(s) w/ {len(trainloader)} batches each")
+    log(DEBUG, f"Training {epochs} epoch(s) w/ {len(trainloader)} batches each")
     model.train()
     # Train the network
     for epoch in range(epochs):  # loop over the dataset multiple times
+        log(DEBUG, f"Training epoch: {epoch}/{epochs}")
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
             images, labels = data[0].to(device), data[1].to(device)
@@ -122,8 +126,8 @@ def train(
 
             # print statistics
             running_loss += loss.item()
-            if i % 100 == 0:  # print every 100 mini-batches
-                print("[%d, %5d] loss: %.3f" % (epoch + 1, i + 1, running_loss / 2000))
+            if i % 2 == 0:  # print every 100 mini-batches
+                log(DEBUG, "[%d, %5d] loss: %.3f" % (epoch + 1, i + 1, running_loss / 2000))
                 running_loss = 0.0
 
             if batches_per_episode is not None and i >= batches_per_episode:
