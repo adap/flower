@@ -80,7 +80,7 @@ class CifarClient(fl.client.Client):
             trainloader=trainloader,
             epochs=epochs,
             device=DEVICE,
-            # batches_per_episode=2,
+            # batches_per_episode=5,
         )
 
         # Return the refined weights and the number of examples used for training

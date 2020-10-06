@@ -125,7 +125,7 @@ def train(
                 print("[%d, %5d] loss: %.3f" % (epoch + 1, i + 1, running_loss / 2000))
                 running_loss = 0.0
 
-            if batches_per_episode is not None and i % batches_per_episode == 0:
+            if batches_per_episode is not None and i >= batches_per_episode:
                 break
 
 
