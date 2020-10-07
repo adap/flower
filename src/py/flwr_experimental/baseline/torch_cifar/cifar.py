@@ -94,6 +94,7 @@ def load_data(
 
 
 def train(
+    cid: str,
     model: torch.nn.ModuleList,
     trainloader: torch.utils.data.DataLoader,
     epochs: int,
@@ -103,8 +104,8 @@ def train(
     """Train the network."""
     # Define loss and optimizer
     criterion = nn.CrossEntropyLoss()
-    # optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-    optimizer = torch.optim.Adam(model.parameters())
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    # optimizer = torch.optim.Adam(model.parameters())
 
     log(DEBUG, f"Training {epochs} epoch(s) w/ {len(trainloader)} batches each")
     model.train()
@@ -126,8 +127,8 @@ def train(
 
             # print statistics
             running_loss += loss.item()
-            if i % 2 == 0:  # print every 100 mini-batches
-                log(DEBUG, "[%d, %5d] loss: %.3f" % (epoch + 1, i + 1, running_loss / 2000))
+            if i % 2 == 0:  # log every other mini-batch
+                log(DEBUG, "[%3d/%3d] loss: %.3f" % (epoch + 1, i + 1, running_loss / 2000))
                 running_loss = 0.0
 
             if batches_per_episode is not None and i >= batches_per_episode:

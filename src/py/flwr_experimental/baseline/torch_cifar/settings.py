@@ -22,7 +22,7 @@ from flwr_experimental.baseline.setting import Baseline, ClientSetting, ServerSe
 from flwr_experimental.ops.cluster import Instance
 
 ROUNDS = 2
-LR_INITIAL = 0.01
+LR_INITIAL = 0.001
 
 
 def get_setting(name: str) -> Baseline:
@@ -123,8 +123,8 @@ SETTINGS = {
             strategy="fedavg",
             rounds=ROUNDS,
             min_num_clients=8,
-            sample_fraction=0.2,
-            min_sample_size=2,
+            sample_fraction=0.1,
+            min_sample_size=1,
             training_round_timeout=None,
             lr_initial=LR_INITIAL,
             partial_updates=False,
@@ -146,8 +146,8 @@ SETTINGS = {
             strategy="fedavg",
             rounds=ROUNDS,
             min_num_clients=40,
-            sample_fraction=0.2,
-            min_sample_size=10,
+            sample_fraction=0.1,
+            min_sample_size=5,
             training_round_timeout=None,
             lr_initial=LR_INITIAL,
             partial_updates=False,
@@ -169,8 +169,8 @@ SETTINGS = {
             strategy="fedavg",
             rounds=ROUNDS,
             min_num_clients=80,
-            sample_fraction=0.2,
-            min_sample_size=20,
+            sample_fraction=0.1,
+            min_sample_size=10,
             training_round_timeout=None,
             lr_initial=LR_INITIAL,
             partial_updates=False,
@@ -192,8 +192,8 @@ SETTINGS = {
             strategy="fedavg",
             rounds=ROUNDS,
             min_num_clients=400,
-            sample_fraction=0.2,
-            min_sample_size=100,
+            sample_fraction=0.1,
+            min_sample_size=50,
             training_round_timeout=None,
             lr_initial=LR_INITIAL,
             partial_updates=False,
@@ -215,8 +215,8 @@ SETTINGS = {
             strategy="fedavg",
             rounds=ROUNDS,
             min_num_clients=800,
-            sample_fraction=0.2,
-            min_sample_size=200,
+            sample_fraction=0.1,
+            min_sample_size=100,
             training_round_timeout=None,
             lr_initial=LR_INITIAL,
             partial_updates=False,

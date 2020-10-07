@@ -76,6 +76,7 @@ class CifarClient(fl.client.Client):
             self.trainset, batch_size=batch_size, shuffle=True
         )
         cifar.train(
+            cid=self.cid,
             model=self.model,
             trainloader=trainloader,
             epochs=epochs,
