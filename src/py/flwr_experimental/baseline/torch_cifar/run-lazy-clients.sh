@@ -19,9 +19,9 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
 SERVER_ADDRESS="[::]:8080"
-NUM_CLIENTS=2
+NUM_CLIENTS=10
 I_START=0
-I_END=1
+I_END=9
 
 echo "Starting $NUM_CLIENTS clients."
 for ((i = $I_START; i <= $I_END; i++))
@@ -29,7 +29,7 @@ do
     echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
     python -m flwr_experimental.baseline.torch_cifar.lazy_client \
       --server_address=$SERVER_ADDRESS \
-      --setting="scale-min" \
+      --setting="scale-10" \
       --cid=$i &
 done
 echo "Started $NUM_CLIENTS clients."
