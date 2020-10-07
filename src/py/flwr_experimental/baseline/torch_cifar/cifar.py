@@ -97,6 +97,7 @@ def train(
     cid: str,
     model: torch.nn.ModuleList,
     trainloader: torch.utils.data.DataLoader,
+    epoch_global: int,
     epochs: int,
     device: torch.device,  # pylint: disable=no-member
     batches_per_episode: Optional[int] = None,
@@ -104,17 +105,23 @@ def train(
     """Train the network."""
     # Define loss and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
     # optimizer = torch.optim.Adam(model.parameters())
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma = 0.95)
+
+    # Fast-forward scheduler to the right epoch 
+    for _ in range(epoch_global):
+        scheduler.step()
 
     log(DEBUG, f"Training {epochs} epoch(s) w/ {len(trainloader)} batches each")
     model.train()
     # Train the network
     for epoch in range(epochs):  # loop over the dataset multiple times
         log(DEBUG, f"Training epoch: {epoch}/{epochs}")
+        scheduler.step()
         running_loss = 0.0
-        for i, data in enumerate(trainloader, 0):
-            images, labels = data[0].to(device), data[1].to(device)
+        for i, (data, target) in enumerate(trainloader, 0):
+            images, labels = data.to(device), target.to(device)
 
             # zero the parameter gradients
             optimizer.zero_grad()

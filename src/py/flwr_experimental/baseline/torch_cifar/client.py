@@ -65,6 +65,7 @@ class CifarClient(fl.client.Client):
         fit_begin = timeit.default_timer()
 
         # Get training config
+        epoch_global = int(config["epoch_global"])
         epochs = int(config["epochs"])
         batch_size = int(config["batch_size"])
 
@@ -79,6 +80,7 @@ class CifarClient(fl.client.Client):
             cid=self.cid,
             model=self.model,
             trainloader=trainloader,
+            epoch_global=epoch_global,
             epochs=epochs,
             device=DEVICE,
             # batches_per_episode=5,
