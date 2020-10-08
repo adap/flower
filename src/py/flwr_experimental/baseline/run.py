@@ -35,7 +35,7 @@ from flwr_experimental.ops.compute.ec2_adapter import EC2Adapter
 from flwr_experimental.ops.instance import Instance
 
 OPS_INI_PATH = path.normpath(
-    f"{path.dirname(path.realpath(__file__))}/../../../.flower_ops"
+    f"{path.dirname(path.realpath(__file__))}/../../../../.flower_ops"
 )
 
 # Read config file and extract all values which are needed further down.
@@ -45,7 +45,9 @@ CONFIG.read(OPS_INI_PATH)
 WHEEL_FILENAME = CONFIG.get("paths", "wheel_filename")
 WHEEL_LOCAL_PATH = path.expanduser(CONFIG.get("paths", "wheel_dir")) + WHEEL_FILENAME
 
-DOCKER_PRIVATE_KEY = path.realpath(path.dirname(__file__) + "/../../../docker/ssh_key")
+DOCKER_PRIVATE_KEY = path.realpath(
+    path.dirname(__file__) + "/../../../../docker/ssh_key"
+)
 
 
 def now() -> str:
