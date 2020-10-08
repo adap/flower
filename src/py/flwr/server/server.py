@@ -159,9 +159,8 @@ class Server:
         )
         log(
             DEBUG,
-            "fit_round: strategy sampled %s clients (out of %s)",
+            "fit_round: strategy sampled %s clients",
             len(client_instructions),
-            self._client_manager.num_available(),
         )
         if not client_instructions:
             log(INFO, "fit_round: no clients sampled, cancel fit")
