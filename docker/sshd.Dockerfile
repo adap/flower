@@ -26,7 +26,6 @@ RUN python -m pip install --no-cache-dir 'flwr-0.8.0-py3-none-any.whl[examples-p
 
 RUN python3.7 -m flwr_experimental.baseline.tf_fashion_mnist.download
 RUN python3.7 -m flwr_experimental.baseline.tf_cifar.download
-RUN python3.7 -m flwr_experimental.baseline.torch_cifar.download
 
 EXPOSE 22
 
