@@ -20,7 +20,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 
-from flwr_experimental.ops.cluster import Instance
+from flwr_experimental.ops.instance import Instance
 
 # We assume that devices which are older will have at most
 # ~80% of the the Samsung Galaxy Note 5 compute performance.
