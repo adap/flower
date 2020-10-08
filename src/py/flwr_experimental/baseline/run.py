@@ -142,10 +142,7 @@ def run(baseline: str, setting: str, adapter: str) -> None:
 
     # Install the wheel on all instances
     log(INFO, "(4/9) Install wheel on all instances.")
-    extras = ["examples-tensorflow"] if "tf_" in baseline else ["examples-pytorch"]
-    cluster.exec_all(
-        command.install_wheel(wheel_remote_path=wheel_remote_path, wheel_extras=extras)
-    )
+    cluster.exec_all(command.install_wheel(wheel_remote_path=wheel_remote_path))
 
     # Download datasets in server and clients
     log(INFO, "(5/9) Download dataset on server and clients.")

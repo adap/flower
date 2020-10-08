@@ -20,23 +20,14 @@ from typing import Optional, List
 from flwr_experimental.ops.instance import Instance
 
 
-def install_wheel(
-    wheel_remote_path: str, wheel_extras: Optional[List[str]] = None
-) -> str:
+def install_wheel(wheel_remote_path: str) -> str:
     """Return install command for wheel.
 
     Remove previous versions if existing.
     """
-    extras = ["http-logger"]
-
-    if wheel_extras:
-        extras += wheel_extras
-
-    extras_str = ",".join(extras)
-
     return (
         "python3.7 -m pip uninstall -y flwr && "
-        + f"python3.7 -m pip install '{wheel_remote_path}[{extras_str}]'"
+        + f"python3.7 -m pip install '{wheel_remote_path}[examples-tensorflow,http-logger]'"
     )
 
 
