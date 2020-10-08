@@ -31,7 +31,7 @@ import flwr_experimental.baseline.torch_cifar.settings as torch_cifar_settings
 from flwr.common.logger import configure, log
 from flwr_experimental.baseline import command
 from flwr_experimental.baseline.setting import Baseline
-from flwr_experimental.ops.cluster import Instance
+from flwr_experimental.ops.cluster import Cluster
 from flwr_experimental.ops.compute.adapter import Adapter
 from flwr_experimental.ops.compute.docker_adapter import DockerAdapter
 from flwr_experimental.ops.compute.ec2_adapter import EC2Adapter
@@ -142,7 +142,10 @@ def run(baseline: str, setting: str, adapter: str) -> None:
 
     # Install the wheel on all instances
     log(INFO, "(4/9) Install wheel on all instances.")
-    cluster.exec_all(command.install_wheel(wheel_remote_path))
+    extras = ["examples-tensorflow"] if "tf_" in baseline else ["examples-pytorch"]
+    cluster.exec_all(
+        command.install_wheel(wheel_remote_path=wheel_remote_path, wheel_extras=extras)
+    )
 
     # Download datasets in server and clients
     log(INFO, "(5/9) Download dataset on server and clients.")

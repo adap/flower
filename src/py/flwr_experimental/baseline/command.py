@@ -15,18 +15,28 @@
 """Provides functions to construct various Flower CLI commands."""
 
 
-from typing import Optional
+from typing import Optional, List
 
 from flwr_experimental.ops.instance import Instance
 
-def install_wheel(wheel_remote_path: str) -> str:
+
+def install_wheel(
+    wheel_remote_path: str, wheel_extras: Optional[List[str]] = None
+) -> str:
     """Return install command for wheel.
 
     Remove previous versions if existing.
     """
+    extras = ["http-logger"]
+
+    if wheel_extras:
+        extras += wheel_extras
+
+    extras_str = ",".join(extras)
+
     return (
-        f"python3.7 -m pip uninstall -y flwr && "
-        + f"python3.7 -m pip install '{wheel_remote_path}[examples-tensorflow,examples-pytorch,http-logger]'"
+        "python3.7 -m pip uninstall -y flwr && "
+        + f"python3.7 -m pip install '{wheel_remote_path}[{extras_str}]'"
     )
 
 
@@ -34,7 +44,7 @@ def start_logserver(
     logserver_s3_bucket: Optional[str] = None, logserver_s3_key: Optional[str] = None
 ) -> str:
     """Return command to run logserver."""
-    cmd = f"screen -d -m python3.7 -m flwr_experimental.logserver"
+    cmd = "screen -d -m python3.7 -m flwr_experimental.logserver"
 
     if logserver_s3_bucket is not None and logserver_s3_key is not None:
         cmd += f" --s3_bucket={logserver_s3_bucket}" + f" --s3_key={logserver_s3_key}"
