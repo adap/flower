@@ -134,6 +134,10 @@ def run(baseline: str, setting: str, adapter: str) -> None:
     # Install the wheel on all instances
     log(INFO, "(4/9) Install wheel on all instances.")
     cluster.exec_all(command.install_wheel(wheel_remote_path))
+    extras = ["examples-tensorflow"] if "tf_" in baseline else ["examples-pytorch"]
+    cluster.exec_all(
+        command.install_wheel(wheel_remote_path=wheel_remote_path, wheel_extras=extras)
+    )
 
     # Download datasets in server and clients
     log(INFO, "(5/9) Download dataset on server and clients.")
@@ -189,7 +193,7 @@ def run(baseline: str, setting: str, adapter: str) -> None:
     # Shutdown server and client instance after 10min if not at least one Flower
     # process is running it
     log(INFO, "(9/9) Start shutdown watcher script.")
-    cluster.exec_all(command.watch_and_shutdown("flower", adapter))
+    cluster.exec_all(command.watch_and_shutdown("flwr", adapter))
 
     # Give user info how to tail logfile
     private_key = (
