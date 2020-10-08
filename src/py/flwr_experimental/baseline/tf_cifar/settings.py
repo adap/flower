@@ -16,7 +16,7 @@
 
 from typing import List
 
-from flwr_experimental.baseline.common import (
+from flwr_experimental.baseline.config import (
     configure_client_instances,
     sample_delay_factors,
 )
