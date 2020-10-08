@@ -58,8 +58,9 @@ INSTANCE_TYPES_CPU = [
     ("m5a.xlarge", 4, 16, 0.208),
     ("m5a.2xlarge", 8, 32, 0.416),
     ("m5a.4xlarge", 16, 64, 0.832),
-    ("m5ad.12xlarge", 48, 192, 2.496),
-    ("m5ad.24xlarge", 96, 384, 4.992),
+    ("m5a.12xlarge", 48, 192, 2.496),
+    ("m5a.24xlarge", 96, 384, 4.992),
+    ("r5.24xlarge", 96, 768, 7.296),
 ]
 
 INSTANCE_TYPES_GPU = [
