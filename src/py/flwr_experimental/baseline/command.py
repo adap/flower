@@ -15,7 +15,7 @@
 """Provides functions to construct various Flower CLI commands."""
 
 
-from typing import Optional, List
+from typing import Optional
 
 from flwr_experimental.ops.instance import Instance
 
