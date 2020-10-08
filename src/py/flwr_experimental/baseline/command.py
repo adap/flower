@@ -17,7 +17,7 @@
 
 from typing import Optional
 
-from flwr_experimental.ops.cluster import Instance
+from flwr_experimental.ops.instance import Instance
 
 PYTHON = "python3.7"
 

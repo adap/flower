@@ -31,10 +31,11 @@ import flwr_experimental.baseline.torch_cifar.settings as torch_cifar_settings
 from flwr.common.logger import configure, log
 from flwr_experimental.baseline import command
 from flwr_experimental.baseline.setting import Baseline
-from flwr_experimental.ops.cluster import Cluster, Instance
+from flwr_experimental.ops.cluster import Instance
 from flwr_experimental.ops.compute.adapter import Adapter
 from flwr_experimental.ops.compute.docker_adapter import DockerAdapter
 from flwr_experimental.ops.compute.ec2_adapter import EC2Adapter
+from flwr_experimental.ops.instance import Instance
 
 OPS_INI_PATH = path.normpath(
     f"{path.dirname(path.realpath(__file__))}/../../../../.flower_ops"

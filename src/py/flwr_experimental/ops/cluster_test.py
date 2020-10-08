@@ -21,12 +21,12 @@ from unittest.mock import MagicMock
 
 from .cluster import (
     Cluster,
-    Instance,
     InstanceMismatch,
     create_instances,
     group_instances_by_specs,
 )
 from .compute.ec2_adapter import EC2Adapter
+from .instance import Instance
 
 IMAGE_ID = "ami-0370b0294d7241341"
 KEY_NAME = "flower"

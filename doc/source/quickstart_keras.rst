@@ -1,5 +1,5 @@
-Flower Quickstart
-=================
+Flower Quickstart (with Keras)
+==============================
 
 Let's build a federated learning system in less than 50 lines of code!
 
@@ -69,7 +69,7 @@ implemented in the following way:
 
     class MnistClient(fl.client.KerasClient):
         def __init__(self, cid, model, x_train, y_train, x_test, y_test):
-            super().__init__(cid)
+            super().__init__()
             self.model = model
             self.x_train, self.y_train = x_train, y_train
             self.x_test, self.y_test = x_test, y_test

@@ -20,7 +20,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 
-from flwr_experimental.ops.cluster import Instance
+from flwr_experimental.ops.instance import Instance
 
 # We assume that devices which are older will have at most
 # ~80% of the the Samsung Galaxy Note 5 compute performance.
@@ -95,13 +95,19 @@ def get_delay_factor() -> float:
 
 
 def configure_client_instances(
-    num_clients: int, num_cpu: int, num_ram: float
+    num_clients: int, num_cpu: int, num_ram: float, gpu: bool = False
 ) -> Tuple[List[Instance], List[str]]:
     """Return list of client instances and a list of instance names."""
     instance_names = [f"client_{i}" for i in range(num_clients)]
 
     instances = [
-        Instance(name=instance_name, group="clients", num_cpu=num_cpu, num_ram=num_ram)
+        Instance(
+            name=instance_name,
+            group="clients",
+            num_cpu=num_cpu,
+            num_ram=num_ram,
+            gpu=gpu,
+        )
         for instance_name in instance_names
     ]
 
