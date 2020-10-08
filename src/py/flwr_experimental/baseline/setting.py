@@ -17,7 +17,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from flwr_experimental.ops.cluster import Instance
+from flwr_experimental.ops.instance import Instance
 
 
 @dataclass

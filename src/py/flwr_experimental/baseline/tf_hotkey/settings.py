@@ -23,7 +23,7 @@ from flwr_experimental.baseline.common import (
     sample_real_delay_factors,
 )
 from flwr_experimental.baseline.setting import Baseline, ClientSetting, ServerSetting
-from flwr_experimental.ops.cluster import Instance
+from flwr_experimental.ops.instance import Instance
 
 ROUNDS = 50
 MIN_NUM_CLIENTS = 45

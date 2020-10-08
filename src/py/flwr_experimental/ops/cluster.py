@@ -15,7 +15,6 @@
 """Implments compute classes for EC2."""
 import concurrent.futures
 from contextlib import contextmanager
-from dataclasses import dataclass
 from itertools import groupby
 from logging import DEBUG, ERROR
 from typing import Dict, Iterator, List, Optional, Tuple
@@ -26,28 +25,9 @@ from paramiko.sftp_attr import SFTPAttributes
 from flwr.common.logger import log
 
 from .compute.adapter import Adapter
+from .instance import Instance
 
 ExecInfo = Tuple[str, str]
-
-
-# pylint: disable=too-many-instance-attributes
-@dataclass
-class Instance:
-    """Represents an instance."""
-
-    # Specs
-    name: str
-    group: str
-    num_cpu: int
-    num_ram: float
-    gpu: bool = False
-
-    # Runtime information
-    instance_id: Optional[str] = None
-    private_ip: Optional[str] = None
-    public_ip: Optional[str] = None
-    ssh_port: Optional[int] = None
-    state: Optional[str] = None
 
 
 class StartFailed(Exception):
@@ -281,6 +261,8 @@ class Cluster:
             _, stdout, stderr = client.exec_command(command)
             stdout = stdout.readlines()
             stderr = stderr.readlines()
+
+        print(stdout, stderr)
 
         return stdout, stderr
 
