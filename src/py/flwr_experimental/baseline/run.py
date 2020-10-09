@@ -18,6 +18,7 @@
 import argparse
 import concurrent.futures
 import configparser
+import sys
 from logging import INFO
 from os import path
 from time import strftime
@@ -28,6 +29,7 @@ import flwr_experimental.baseline.tf_fashion_mnist.settings as tf_fashion_mnist_
 import flwr_experimental.baseline.tf_hotkey.settings as tf_hotkey_settings
 from flwr.common.logger import configure, log
 from flwr_experimental.baseline import command
+from flwr_experimental.baseline.setting import Baseline
 from flwr_experimental.ops.cluster import Cluster
 from flwr_experimental.ops.compute.adapter import Adapter
 from flwr_experimental.ops.compute.docker_adapter import DockerAdapter
@@ -93,6 +95,18 @@ def configure_cluster(
     return cluster
 
 
+def load_baseline_setting(baseline: str, setting: str) -> Baseline:
+    """Return appropriate baseline setting."""
+    if baseline == "tf_cifar":
+        return tf_cifar_settings.get_setting(setting)
+    if baseline == "tf_fashion_mnist":
+        return tf_fashion_mnist_settings.get_setting(setting)
+    if baseline == "tf_hotkey":
+        return tf_hotkey_settings.get_setting(setting)
+
+    raise Exception("Setting not found.")
+
+
 # pylint: disable=too-many-arguments, too-many-locals
 def run(baseline: str, setting: str, adapter: str) -> None:
     """Run baseline."""
@@ -104,14 +118,7 @@ def run(baseline: str, setting: str, adapter: str) -> None:
         else f"/home/ubuntu/{WHEEL_FILENAME}"
     )
 
-    if baseline == "tf_cifar":
-        settings = tf_cifar_settings.get_setting(setting)
-    elif baseline == "tf_fashion_mnist":
-        settings = tf_fashion_mnist_settings.get_setting(setting)
-    elif baseline == "tf_hotkey":
-        settings = tf_hotkey_settings.get_setting(setting)
-    else:
-        raise Exception("Setting not found.")
+    settings = load_baseline_setting(baseline, setting)
 
     # Get instances and add a logserver to the list
     instances = settings.instances
@@ -212,24 +219,36 @@ def run(baseline: str, setting: str, adapter: str) -> None:
 def main() -> None:
     """Start Flower baseline."""
     parser = argparse.ArgumentParser(description="Flower")
+
+    # When adding a new setting make sure to modify the load_baseline_setting function
+    possible_baselines = ["tf_cifar", "tf_fashion_mnist", "tf_hotkey"]
+    possible_settings = []
+    all_settings = [
+        list(tf_cifar_settings.SETTINGS.keys()),
+        list(tf_fashion_mnist_settings.SETTINGS.keys()),
+        list(tf_hotkey_settings.SETTINGS.keys()),
+    ]
+
+    # Show only relevant settings based on baseline as choices
+    # for --setting parameter
+    baseline_arg = [arg for arg in sys.argv if "--baseline" in arg]
+    if len(baseline_arg) > 0:
+        selected_baseline = baseline_arg[0].split("=")[1]
+        idx = possible_baselines.index(selected_baseline)
+        possible_settings = all_settings[idx]
+
     parser.add_argument(
         "--baseline",
         type=str,
         required=True,
-        choices=["tf_cifar", "tf_fashion_mnist", "tf_hotkey"],
+        choices=possible_baselines,
         help="Name of baseline name to run.",
     )
     parser.add_argument(
         "--setting",
         type=str,
         required=True,
-        choices=list(
-            set(
-                list(tf_cifar_settings.SETTINGS.keys())
-                + list(tf_fashion_mnist_settings.SETTINGS.keys())
-                + list(tf_hotkey_settings.SETTINGS.keys())
-            )
-        ),
+        choices=possible_settings,
         help="Name of setting to run.",
     )
     parser.add_argument(
