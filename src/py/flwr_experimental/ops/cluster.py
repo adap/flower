@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Implements compute classes for EC2."""
+"""Implments compute classes for EC2."""
 import concurrent.futures
 from contextlib import contextmanager
 from itertools import groupby
