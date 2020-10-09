@@ -19,7 +19,7 @@ from typing import List
 
 from flwr_experimental.baseline.config import configure_client_instances
 from flwr_experimental.baseline.setting import Baseline, ClientSetting, ServerSetting
-from flwr_experimental.ops.cluster import Instance
+from flwr_experimental.ops.instance import Instance
 
 ROUNDS = 2
 LR_INITIAL = 0.001
