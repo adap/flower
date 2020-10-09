@@ -52,7 +52,6 @@ class EC2StatusTimeout(Exception):
 # List of AWS instance types with
 # (instance_type, vCPU, Mem)
 INSTANCE_TYPES_CPU = [
-    ("t3.micro", 2, 1, 0.012),
     ("t3.small", 2, 2, 0.0209),  # Beware CPU credit limited
     ("c5.large", 2, 4, 0.097),
     ("m5a.large", 2, 8, 0.104),
@@ -159,7 +158,7 @@ class EC2Adapter(Adapter):
 
         """
 
-        for _ in range(60):
+        for _ in range(30):
             result = self.ec2.describe_instance_status(
                 InstanceIds=instance_ids,
                 # Also include instances which don't have state "running" yet
@@ -221,9 +220,6 @@ class EC2Adapter(Adapter):
         )
 
         result: EC2RunInstancesResult = self.ec2.run_instances(
-            BlockDeviceMappings=[
-                {"DeviceName": "/dev/sda1", "Ebs": {"DeleteOnTermination": True}}
-            ],
             ImageId=self.image_id,
             # We always want an exact number of instances
             MinCount=num_instance,
