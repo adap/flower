@@ -96,14 +96,15 @@ def configure_cluster(
     return cluster
 
 
-def load_settings(baseline: str, setting: str) -> Baseline:
+def load_baseline_setting(baseline: str, setting: str) -> Baseline:
+    """Return appropriate baseline setting."""
     if baseline == "tf_cifar":
         return tf_cifar_settings.get_setting(setting)
-    elif baseline == "tf_fashion_mnist":
+    if baseline == "tf_fashion_mnist":
         return tf_fashion_mnist_settings.get_setting(setting)
-    elif baseline == "tf_hotkey":
+    if baseline == "tf_hotkey":
         return tf_hotkey_settings.get_setting(setting)
-    elif baseline == "torch_cifar":
+    if baseline == "torch_cifar":
         return torch_cifar_settings.get_setting(setting)
 
     raise Exception("Setting not found.")
@@ -120,7 +121,7 @@ def run(baseline: str, setting: str, adapter: str) -> None:
         else f"/home/ubuntu/{WHEEL_FILENAME}"
     )
 
-    settings = load_settings(baseline, setting)
+    settings = load_baseline_setting(baseline, setting)
 
     # Get instances and add a logserver to the list
     instances = settings.instances
