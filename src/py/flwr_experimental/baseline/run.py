@@ -223,7 +223,7 @@ def main() -> None:
     """Start Flower baseline."""
     parser = argparse.ArgumentParser(description="Flower")
 
-    # When adding a new setting make sure to modify the load_settings function
+    # When adding a new setting make sure to modify the load_baseline_setting function
     possible_baselines = ["tf_cifar", "tf_fashion_mnist", "tf_hotkey", "torch_cifar"]
     possible_settings = []
     all_settings = [
