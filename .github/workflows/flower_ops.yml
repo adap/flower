@@ -30,6 +30,6 @@ jobs:
       - name: Install dependencies (mandatory + optional)
         run: |
           python -m poetry install --extras "ops"
-          python -m pip install -U tensorflow-cpu==2.2.0
+          python -m pip install -U tensorflow-cpu==2.3.0
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-ops.sh
