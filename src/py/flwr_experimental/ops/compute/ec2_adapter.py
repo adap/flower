@@ -220,6 +220,9 @@ class EC2Adapter(Adapter):
         )
 
         result: EC2RunInstancesResult = self.ec2.run_instances(
+            BlockDeviceMappings=[
+                {"DeviceName": "/dev/sda1", "Ebs": {"DeleteOnTermination": True}}
+            ],
             ImageId=self.image_id,
             # We always want an exact number of instances
             MinCount=num_instance,
