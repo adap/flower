@@ -53,21 +53,21 @@ def dataset_partitioner(
     ----------
     dataset: torch.utils.data.Dataset
         Dataset to be partitioned into *number_of_clients* subsets.
-        
-    batch_size: int 
+
+    batch_size: int
         Size of mini-batches used by the returned DataLoader.
-        
-    client_id: int 
-        Unique integer used for selecting a specific partition. 
-        
-    number_of_clients: int 
+
+    client_id: int
+        Unique integer used for selecting a specific partition.
+
+    number_of_clients: int
         Total number of clients launched during training. This value dictates the number of partitions to be created.
-        
+
 
     Returns
     -------
     data_loader: torch.utils.data.Dataset
-        DataLoader for specific client_id considering number_of_clients partitions.  
+        DataLoader for specific client_id considering number_of_clients partitions.
 
     """
 
@@ -102,21 +102,21 @@ def load_data(
 
     Parameters
     ----------
-    data_root: str 
+    data_root: str
         Directory where MNIST dataset will be stored.
-        
-    train_batch_size: int 
+
+    train_batch_size: int
         Mini-batch size for training set.
-        
-    test_batch_size: int 
+
+    test_batch_size: int
         Mini-batch size for test set.
-        
-    cid: int 
+
+    cid: int
         Client ID used to select a specific partition.
-        
-    nb_clients: int 
+
+    nb_clients: int
         Total number of clients launched during training. This value dictates the number of unique to be created.
-        
+
 
     Returns
     -------
@@ -170,9 +170,9 @@ class MNISTNet(nn.Module):
 
         Parameters
         ----------
-        x: Tensor 
+        x: Tensor
             Mini-batch of shape (N,28,28) containing images from MNIST dataset.
-            
+
 
         Returns
         -------
@@ -207,14 +207,14 @@ def train(
     ----------
     model: torch.nn.Module
         Neural network model used in this example.
-        
+
     train_loader: torch.utils.data.DataLoader
         DataLoader used in training.
-        
-    epochs: int 
-        Number of epochs to run in each round. 
-        
-    device: torch.device 
+
+    epochs: int
+        Number of epochs to run in each round.
+
+    device: torch.device
          (Default value = torch.device("cpu"))
          Device where the network will be trained within a client.
 
@@ -276,10 +276,10 @@ def test(
     ----------
     model: torch.nn.Module :
         Neural network model used in this example.
-        
+
     test_loader: torch.utils.data.DataLoader :
         DataLoader used in test.
-        
+
     device: torch.device :
          (Default value = torch.device("cpu"))
          Device where the network will be tested within a client.
@@ -338,7 +338,7 @@ class PytorchMNISTClient(fl.client.Client):
 
         Parameters
         ----------
-        weights: fl.common.Weights 
+        weights: fl.common.Weights
             Weights received by the server and set to local model
 
 
@@ -365,8 +365,8 @@ class PytorchMNISTClient(fl.client.Client):
 
         Parameters
         ----------
-        ins: fl.common.FitIns 
-           Parameters sent by the server to be used during training. 
+        ins: fl.common.FitIns
+           Parameters sent by the server to be used during training.
 
         Returns
         -------
@@ -405,9 +405,9 @@ class PytorchMNISTClient(fl.client.Client):
 
         Parameters
         ----------
-        ins: fl.common.EvaluateIns 
-           Parameters sent by the server to be used during testing. 
-            
+        ins: fl.common.EvaluateIns
+           Parameters sent by the server to be used during testing.
+
 
         Returns
         -------
@@ -419,9 +419,11 @@ class PytorchMNISTClient(fl.client.Client):
         # Use provided weights to update the local model
         self.set_weights(weights)
 
-        num_examples_test, test_loss, accuracy, = test(
-            self.model, self.test_loader, device=self.device
-        )
+        (
+            num_examples_test,
+            test_loss,
+            accuracy,
+        ) = test(self.model, self.test_loader, device=self.device)
         print(
             f"Client {self.cid} - Evaluate on {num_examples_test} samples: Average loss: {test_loss:.4f}, Accuracy: {100*accuracy:.2f}%\n"
         )
