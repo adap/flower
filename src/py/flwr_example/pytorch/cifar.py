@@ -37,9 +37,7 @@ from torch import Tensor
 
 import flwr as fl
 
-DATA_ROOT = "./data/cifar-10"
-PATH = "./cifar_net.pth"
-
+DATA_ROOT = "~/.flower/data/cifar-10"
 
 # pylint: disable-msg=unsubscriptable-object
 class Net(nn.Module):
