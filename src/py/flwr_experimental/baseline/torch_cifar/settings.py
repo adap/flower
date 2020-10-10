@@ -230,4 +230,27 @@ SETTINGS = {
             dry_run=False,
         ),
     ),
+    "scale-10000": Baseline(
+        instances=[Instance(name="server", group="server", num_cpu=4, num_ram=16)]
+        + client_instances_1000,
+        server=ServerSetting(
+            instance_name="server",
+            strategy="fedavg",
+            rounds=ROUNDS,
+            min_num_clients=8000,
+            sample_fraction=0.1,
+            min_sample_size=1000,
+            training_round_timeout=None,
+            lr_initial=LR_INITIAL,
+            partial_updates=False,
+            importance_sampling=False,
+            dynamic_timeout=False,
+            dry_run=False,
+        ),
+        clients=configure_uniform_clients(
+            instance_names=client_names_1000,
+            num_clients=10000,
+            dry_run=False,
+        ),
+    ),
 }
