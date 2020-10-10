@@ -30,7 +30,7 @@ sudo apt install -y python3.7 python3-pip
 python3.7 -m pip install -U pip==20.2.3 setuptools==49.3.1
 python3.7 -m pip install -U numpy==1.18.1 grpcio==1.27.2 google==2.0.3 protobuf==3.12.1 \
     boto3==1.12.36 boto3_type_annotations==0.3.1 paramiko==2.7.1 docker==4.2.0 matplotlib==3.2.1 \
-    tensorflow-cpu==2.2.0
+    tensorflow-cpu==2.3.0
 
 # Preload datasets
 python3.7 -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
