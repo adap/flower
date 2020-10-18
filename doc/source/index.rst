@@ -1,9 +1,7 @@
-Welcome to Flower!
-==================================
+Flower Docs
+===========
 
-Flower is a friendly federated learning research framework. The design of
-Flower is based on a few guiding principles which aim to make it
-*customizable*, *extendable*, *framework-agnostic*, and *understandable*.
+Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
 
 
 User Guide

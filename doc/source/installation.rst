@@ -34,4 +34,4 @@ command to install the latest version of Flower directly from GitHub::
 
 One can also install a specific commit::
 
-  $ pip install git+https://github.com/adap/flower.git@155c61bdae5ff3e4be0d5bbfd54fb1d885ca117e
+  $ pip install git+https://github.com/adap/flower.git@39f1ba78d0f2175ef1193634be56b2a6f68dc864
