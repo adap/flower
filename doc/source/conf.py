@@ -81,7 +81,7 @@ html_theme_options = {
     "github_banner": True,
     "github_button": True,
     # Google Analytics
-    "analytics_id": "UA-173987939-1",
+    "analytics_id": "G-25B84QL84Y",
 }
 
 
