@@ -117,35 +117,28 @@
       </div>
     </div>
 
-    <script src="/_static/cookies-eu-banner.min.js"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ theme_analytics_id }}"></script>
     <script>
-      (async () => {
-        async function isCookieRequired() {
-          try {
-            req = await fetch("https://ipapi.co/json/");
-            res = await req.json();
-            return res.in_eu || (res.region_code === "CA" && res.country === "US");
-          } catch (e) {
-            return true;
-          }
-        }
+      function onFingerprintJSLoad(fpAgent) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        
+        fpAgent.get().then(result => {
+          gtag('js', new Date());
+          gtag('config', '{{ theme_analytics_id }}', {
+            send_page_view: true,
+            client_storage: 'none',
+            client_id: result.visitorId,
+          });
+        });
+      }
 
-        if (await isCookieRequired()) {
-          new CookiesEuBanner(function () {
-            // Code to launch when user accepts cookies
-            var _gaq = _gaq || [];
-            _gaq.push(['_setAccount', '{{ theme_analytics_id }}']);
-            _gaq.push(['_trackPageview']);
-            (function () {
-              var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-              ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-              var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-            })();
-          }, true);
-        }
-      })().catch(e => {
-          console.error(e);
-      });
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js';
+      script.id = 'fingerprintjs';
+      document.body.appendChild(script);
+  
+      script.onload = () => FingerprintJS.load().then(onFingerprintJSLoad);
     </script>
     {% endif %}
 {%- endblock %}
