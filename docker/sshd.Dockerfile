@@ -20,9 +20,9 @@ RUN apt-get clean && \
 WORKDIR /root
 
 RUN python3.7 -m pip install tensorflow-cpu==2.3.0 torch==1.6.0 torchvision==0.7.0 numpy==1.18.3
-COPY dist/flwr-0.8.0-py3-none-any.whl flwr-0.8.0-py3-none-any.whl
-RUN python3.7 -m pip install --no-cache-dir 'flwr-0.8.0-py3-none-any.whl[examples-pytorch,examples-tensorflow,http-logger,baseline,ops]' && \
-    rm flwr-0.8.0-py3-none-any.whl
+COPY dist/flwr-0.9.0-py3-none-any.whl flwr-0.9.0-py3-none-any.whl
+RUN python3.7 -m pip install --no-cache-dir 'flwr-0.9.0-py3-none-any.whl[examples-pytorch,examples-tensorflow,http-logger,baseline,ops]' && \
+    rm flwr-0.9.0-py3-none-any.whl
 
 RUN python3.7 -m flwr_experimental.baseline.tf_fashion_mnist.download
 RUN python3.7 -m flwr_experimental.baseline.tf_cifar.download
