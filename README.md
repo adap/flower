@@ -27,8 +27,8 @@ design of Flower is based on a few guiding principles:
 ## Documentation
 
 * [Documentation](https://flower.dev)
-  * [Quickstart](https://flower.dev/quickstart.html)
-  * [Installation](https://flower.dev/installation.html)
+  * [Quickstart](https://flower.dev/docs/quickstart_keras.html)
+  * [Installation](https://flower.dev/docs/installation.html)
 
 ## Flower Usage Examples
 
@@ -36,7 +36,7 @@ A number of examples show different usage scenarios of Flower (in combination
 with popular machine learning frameworks such as PyTorch or TensorFlow). To run
 an example, first install the necessary extras:
 
-[Usage Examples Documentation](https://flower.dev/examples.html)
+[Usage Examples Documentation](https://flower.dev/docs/examples.html)
 
 Available [examples](src/py/flwr_example):
 
