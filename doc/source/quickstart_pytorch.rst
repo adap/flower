@@ -23,7 +23,7 @@ Since we want to use PyTorch to solve a computer vision task, let's go ahead an 
 
 
 Ready... Set... Train!
-------------
+----------------------
 
 Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on PyTorch's `Basic MNIST Example <https://github.com/pytorch/examples/tree/master/mnist>`_. This will allow you see how easy it is to wrap your code with Flower and begin training in a federated way.
 We provide you with two helper scripts namely *run-server.sh* and *run-clients.sh*. Don't be afraid to look inside, they are simple enough =).
