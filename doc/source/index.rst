@@ -43,6 +43,7 @@ intended to help along the way.
 
    getting-started-for-contributors
    good-first-contributions
+   architecture
 
 
 About Flower
