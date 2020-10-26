@@ -16,9 +16,8 @@
 # ==============================================================================
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
 
-cd doc
-make docs
-cd build/html
-aws s3 sync --delete --exclude ".*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs
+
+# Start a Flower server
+python -m flwr_example.tensorflow_minimal.server

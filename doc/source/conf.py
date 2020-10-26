@@ -34,7 +34,7 @@ copyright = u"2020 Adap GmbH"
 author = u"The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = u"0.8.0"
+release = u"0.10.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -73,7 +73,7 @@ html_theme_options = {
     "logo": "flower-logo.png",
     "logo_name": False,
     "sidebar_collapse": False,
-    "description": "A Friendly Federated Learning Research Framework",
+    "description": "A Friendly Federated Learning Framework",
     # GitHub
     "github_user": "adap",
     "github_repo": "flower",
@@ -81,7 +81,7 @@ html_theme_options = {
     "github_banner": True,
     "github_button": True,
     # Google Analytics
-    "analytics_id": "UA-173987939-1",
+    "analytics_id": "UA-173987939-2",
 }
 
 
