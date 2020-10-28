@@ -38,7 +38,7 @@ class KerasClient(ABC):
     @abstractmethod
     def get_weights(self) -> Weights:
         """Return the current local model weights.
-        
+
         Returns:
             The local model weights as a list of NumPy ndarrays. In many cases,
             it will be sufficient to just return the return value of Keras'
@@ -48,7 +48,7 @@ class KerasClient(ABC):
     @abstractmethod
     def fit(self, weights: Weights, config: Dict[str, str]) -> Tuple[Weights, int, int]:
         """Refine/train the provided weights using the locally held dataset.
-        
+
         Arguments:
             weights: List[numpy.ndarray]. The current (global) model weights.
                 This argument has the structure expected by Keras'
