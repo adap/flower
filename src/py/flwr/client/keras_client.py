@@ -37,17 +37,62 @@ class KerasClient(ABC):
 
     @abstractmethod
     def get_weights(self) -> Weights:
-        """Return the current local model weights."""
+        """Return the current local model weights.
+
+        Returns:
+            The local model weights as a list of NumPy ndarrays. In many cases,
+            it will be sufficient to just return the return value of Keras'
+            `model.get_weights()`.
+        """
 
     @abstractmethod
     def fit(self, weights: Weights, config: Dict[str, str]) -> Tuple[Weights, int, int]:
-        """Refine the provided weights using the locally held dataset."""
+        """Refine/train the provided weights using the locally held dataset.
+
+        Arguments:
+            weights: List[numpy.ndarray]. The current (global) model weights.
+                This argument has the structure expected by Keras'
+                `model.set_weights(weights)` and returned by Keras'
+                `model.get_weights()`.
+            config: Dict[str, str]. Configuration parameters which allow the
+                server to influence training on the client. It can be used to
+                communicate arbitrary values from the server to the client, for
+                example, to set the number of (local) training epochs.
+
+        Returns:
+            A tuple containing three elements: Updated weights (usually
+            obtained by calling Keras' `model.get_weights()`), an `int`
+            representing the number of examples used for training
+            (`num_examples`), and a second `int` representing the maximum
+            number of examples that might have been used during training
+            (`num_examples_ceil`). If the client does not terminate training
+            early (e.g., due to a timeout or other stopping condition), then
+            `num_examples == num_examples_ceil`.
+        """
 
     @abstractmethod
     def evaluate(
         self, weights: Weights, config: Dict[str, str]
     ) -> Tuple[int, float, float]:
-        """Evaluate the provided weights using the locally held dataset."""
+        """Evaluate the provided weights using the locally held dataset.
+
+        Arguments:
+            weights: List[numpy.ndarray]. The current (global) model weights.
+                This argument has the structure expected by Keras'
+                `model.set_weights(weights)` and returned by Keras'
+                `model.get_weights()`.
+            config: Dict[str, str]. Configuration parameters which allow the
+                server to influence evaluation on the client. It can be used to
+                communicate arbitrary values from the server to the client, for
+                example, to influence the number of examples used for
+                evaluation.
+
+        Returns:
+            A tuple containing three elements: An `int` representing the number
+            of examples used for evaluation, a `float` representing the loss,
+            and a `float` representing the accuracy of the (global) model
+            weights on the local dataset.
+        """
 
 
 class KerasClientWrapper(Client):
