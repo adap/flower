@@ -30,6 +30,7 @@ enum Reason {
   RECONNECT = 1;
   POWER_DISCONNECTED = 2;
   WIFI_UNAVAILABLE = 3;
+  ACK = 4;
 }
 
 message ServerMessage {

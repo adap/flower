@@ -20,12 +20,14 @@ from typing import List
 import numpy as np
 
 from flwr.common import (
+    Disconnect,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
     Parameters,
     ParametersRes,
+    Reconnect,
     ndarray_to_bytes,
 )
 
@@ -48,6 +50,9 @@ class SuccessClient(ClientProxy):
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         return EvaluateRes(1, 1.0, 0.1)
 
+    def reconnect(self, reconnect: Reconnect) -> Disconnect:
+        return Disconnect(reason="UNKNOWN")
+
 
 class FailingCLient(ClientProxy):
     """Test class."""
@@ -59,6 +64,9 @@ class FailingCLient(ClientProxy):
         raise Exception()
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
+        raise Exception()
+
+    def reconnect(self, reconnect: Reconnect) -> Disconnect:
         raise Exception()
 
 

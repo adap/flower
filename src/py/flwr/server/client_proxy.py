@@ -17,7 +17,15 @@
 
 from abc import ABC, abstractmethod
 
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
+from flwr.common import (
+    Disconnect,
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    ParametersRes,
+    Reconnect,
+)
 
 
 class ClientProxy(ABC):
@@ -37,3 +45,7 @@ class ClientProxy(ABC):
     @abstractmethod
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
+
+    @abstractmethod
+    def reconnect(self, reconnect: Reconnect) -> Disconnect:
+        """Disconnect and (optionally) reconnect later."""
