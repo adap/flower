@@ -50,10 +50,12 @@ class _Reason(google___protobuf___internal___enum_type_wrapper____EnumTypeWrappe
     RECONNECT = typing___cast(ReasonValue, 1)
     POWER_DISCONNECTED = typing___cast(ReasonValue, 2)
     WIFI_UNAVAILABLE = typing___cast(ReasonValue, 3)
+    ACK = typing___cast(ReasonValue, 4)
 UNKNOWN = typing___cast(ReasonValue, 0)
 RECONNECT = typing___cast(ReasonValue, 1)
 POWER_DISCONNECTED = typing___cast(ReasonValue, 2)
 WIFI_UNAVAILABLE = typing___cast(ReasonValue, 3)
+ACK = typing___cast(ReasonValue, 4)
 type___Reason = Reason
 
 class Parameters(google___protobuf___message___Message):
