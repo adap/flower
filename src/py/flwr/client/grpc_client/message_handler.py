@@ -15,7 +15,7 @@
 """Handle server messages by calling appropriate client methods."""
 
 
-from typing import Optional, Tuple
+from typing import Tuple
 
 from flwr.client.client import Client
 from flwr.common import serde
