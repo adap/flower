@@ -1,10 +1,10 @@
-# Flower (`flwr`) - A Friendly Federated Learning Research Framework
+# Flower (`flwr`) - A Friendly Federated Learning Framework
 
 [![GitHub license](https://img.shields.io/github/license/adap/flower)](https://github.com/adap/flower/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/main/CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/workflows/Build/badge.svg)
 
-Flower (`flwr`) is a research framework for building federated learning systems. The
+Flower (`flwr`) is a framework for building federated learning systems. The
 design of Flower is based on a few guiding principles:
 
 * **Customizable**: Federated learning systems vary wildly from one use case to
