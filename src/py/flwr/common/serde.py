@@ -36,37 +36,43 @@ def parameters_from_proto(msg: Parameters) -> typing.Parameters:
     return typing.Parameters(tensors=tensors, tensor_type=msg.tensor_type)
 
 
-#  === Reconnect / Disconnect messages ===
+#  === Reconnect message ===
 
 
-def server_reconnect_to_proto(seconds: int) -> ServerMessage.Reconnect:
-    return ServerMessage.Reconnect(seconds=seconds)
+def reconnect_to_proto(reconnect: typing.Reconnect) -> ServerMessage.Reconnect:
+    """Serialize flower.Reconnect to ProtoBuf message."""
+    return ServerMessage.Reconnect(seconds=reconnect.seconds)
 
 
-def server_reconnect_from_proto(msg: ServerMessage.Reconnect) -> int:
-    return msg.seconds
+def reconnect_from_proto(msg: ServerMessage.Reconnect) -> typing.Reconnect:
+    """Deserialize flower.Reconnect from ProtoBuf message."""
+    return typing.Reconnect(seconds=msg.seconds)
 
 
-def client_disconnect_to_proto(reason: str) -> ClientMessage.Disconnect:
+# === Disconnect message ===
+
+
+def disconnect_to_proto(disconnect: typing.Disconnect) -> ClientMessage.Disconnect:
+    """Serialize flower.Disconnect to ProtoBuf message."""
     reason_proto = Reason.UNKNOWN
-    if reason == "RECONNECT":
+    if disconnect.reason == "RECONNECT":
         reason_proto = Reason.RECONNECT
-    elif reason == "POWER_DISCONNECTED":
+    elif disconnect.reason == "POWER_DISCONNECTED":
         reason_proto = Reason.POWER_DISCONNECTED
-    elif reason == "WIFI_UNAVAILABLE":
+    elif disconnect.reason == "WIFI_UNAVAILABLE":
         reason_proto = Reason.WIFI_UNAVAILABLE
-
     return ClientMessage.Disconnect(reason=reason_proto)
 
 
-def client_disconnect_from_proto(msg: ClientMessage.Disconnect) -> str:
+def disconnect_from_proto(msg: ClientMessage.Disconnect) -> typing.Disconnect:
+    """Deserialize flower.Disconnect from ProtoBuf message."""
     if msg.reason == Reason.RECONNECT:
-        return "RECONNECT"
+        return typing.Disconnect(reason="RECONNECT")
     if msg.reason == Reason.POWER_DISCONNECTED:
-        return "POWER_DISCONNECTED"
+        return typing.Disconnect(reason="POWER_DISCONNECTED")
     if msg.reason == Reason.WIFI_UNAVAILABLE:
-        return "WIFI_UNAVAILABLE"
-    return "UNKNOWN"
+        return typing.Disconnect(reason="WIFI_UNAVAILABLE")
+    return typing.Disconnect(reason="UNKNOWN")
 
 
 # === GetWeights messages ===

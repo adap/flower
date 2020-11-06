@@ -15,6 +15,7 @@
 """Flower client app."""
 
 
+import time
 from logging import INFO
 
 from flwr.common.logger import log
@@ -27,14 +28,30 @@ from .keras_client import KerasClient, KerasClientWrapper
 
 def start_client(server_address: str, client: Client) -> None:
     """Start a Flower Client which connects to a gRPC server."""
-    with insecure_grpc_connection(server_address) as conn:
-        receive, send = conn
-        log(INFO, "Opened (insecure) gRPC connection")
+    while True:
+        sleep_duration: int = 0
+        with insecure_grpc_connection(server_address) as conn:
+            receive, send = conn
+            log(INFO, "Opened (insecure) gRPC connection")
 
-        while True:
-            server_message = receive()
-            client_message = handle(client, server_message)
-            send(client_message)
+            while True:
+                server_message = receive()
+                client_message, sleep_duration, keep_going = handle(
+                    client, server_message
+                )
+                send(client_message)
+                if not keep_going:
+                    break
+        if sleep_duration == 0:
+            log(INFO, "Disconnect and shut down")
+            break
+        # Sleep and reconnect afterwards
+        log(
+            INFO,
+            "Disconnect, then re-establish connection after %s second(s)",
+            sleep_duration,
+        )
+        time.sleep(sleep_duration)
 
 
 def start_keras_client(server_address: str, client: KerasClient) -> None:

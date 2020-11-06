@@ -15,10 +15,6 @@
 # limitations under the License.
 # ==============================================================================
 
-set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
-
-
 # Start a Flower server
 python -m flwr_example.pytorch.server \
   --rounds=5 \
