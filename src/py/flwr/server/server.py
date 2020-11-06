@@ -21,10 +21,12 @@ from logging import DEBUG, INFO
 from typing import List, Optional, Tuple, cast
 
 from flwr.common import (
+    Disconnect,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
+    Reconnect,
     Weights,
     parameters_to_weights,
 )
@@ -37,6 +39,9 @@ from flwr.server.strategy import DefaultStrategy, Strategy
 FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
 EvaluateResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, EvaluateRes]], List[BaseException]
+]
+ReconnectResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, Disconnect]], List[BaseException]
 ]
 
 
@@ -116,6 +121,11 @@ class Server:
             if not should_continue:
                 break
 
+        # Send shutdown signal to all clients
+        all_clients = self._client_manager.all()
+        _ = shutdown(clients=[all_clients[k] for k in all_clients.keys()])
+
+        # Bookkeeping
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
         log(INFO, "[TIME] FL finished in %s", elapsed)
@@ -184,6 +194,33 @@ class Server:
         random_client = self._client_manager.sample(1)[0]
         parameters_res = random_client.get_parameters()
         return parameters_to_weights(parameters_res.parameters)
+
+
+def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:
+    """Instruct clients to disconnect and never reconnect."""
+    reconnect = Reconnect(seconds=None)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(reconnect_client, c, reconnect) for c in clients]
+        concurrent.futures.wait(futures)
+    # Gather results
+    results: List[Tuple[ClientProxy, Disconnect]] = []
+    failures: List[BaseException] = []
+    for future in futures:
+        failure = future.exception()
+        if failure is not None:
+            failures.append(failure)
+        else:
+            result = future.result()
+            results.append(result)
+    return results, failures
+
+
+def reconnect_client(
+    client: ClientProxy, reconnect: Reconnect
+) -> Tuple[ClientProxy, Disconnect]:
+    """Instruct a single client to disconnect and (optionally) reconnect later."""
+    disconnect = client.reconnect(reconnect)
+    return client, disconnect
 
 
 def fit_clients(
