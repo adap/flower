@@ -15,9 +15,11 @@
 """Handle server messages by calling appropriate client methods."""
 
 
+from typing import Tuple
+
 from flwr.client.client import Client
 from flwr.common import serde
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 # pylint: disable=missing-function-docstring
 
@@ -26,15 +28,18 @@ class UnkownServerMessage(Exception):
     """Signifies that the received message is unknown."""
 
 
-def handle(client: Client, server_msg: ServerMessage) -> ClientMessage:
+def handle(
+    client: Client, server_msg: ServerMessage
+) -> Tuple[ClientMessage, int, bool]:
     if server_msg.HasField("reconnect"):
-        raise UnkownServerMessage()
+        disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect)
+        return disconnect_msg, sleep_duration, False
     if server_msg.HasField("get_parameters"):
-        return _get_parameters(client)
+        return _get_parameters(client), 0, True
     if server_msg.HasField("fit_ins"):
-        return _fit(client, server_msg.fit_ins)
+        return _fit(client, server_msg.fit_ins), 0, True
     if server_msg.HasField("evaluate_ins"):
-        return _evaluate(client, server_msg.evaluate_ins)
+        return _evaluate(client, server_msg.evaluate_ins), 0, True
     raise UnkownServerMessage()
 
 
@@ -63,3 +68,18 @@ def _evaluate(client: Client, evaluate_msg: ServerMessage.EvaluateIns) -> Client
     # Serialize evaluate result
     evaluate_res_proto = serde.evaluate_res_to_proto(evaluate_res)
     return ClientMessage(evaluate_res=evaluate_res_proto)
+
+
+# pylint: disable=unused-argument
+def _reconnect(
+    reconnect_msg: ServerMessage.Reconnect,
+) -> Tuple[ClientMessage, int]:
+    # Determine the reason for sending Disconnect message
+    reason = Reason.ACK
+    sleep_duration = None
+    if reconnect_msg.seconds is not None:
+        reason = Reason.RECONNECT
+        sleep_duration = reconnect_msg.seconds
+    # Build Disconnect message
+    disconnect = ClientMessage.Disconnect(reason=reason)
+    return ClientMessage(disconnect=disconnect), sleep_duration

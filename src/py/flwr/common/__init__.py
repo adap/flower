@@ -19,24 +19,28 @@ from .parameter import bytes_to_ndarray as bytes_to_ndarray
 from .parameter import ndarray_to_bytes as ndarray_to_bytes
 from .parameter import parameters_to_weights as parameters_to_weights
 from .parameter import weights_to_parameters as weights_to_parameters
+from .typing import Disconnect as Disconnect
 from .typing import EvaluateIns as EvaluateIns
 from .typing import EvaluateRes as EvaluateRes
 from .typing import FitIns as FitIns
 from .typing import FitRes as FitRes
 from .typing import Parameters as Parameters
 from .typing import ParametersRes as ParametersRes
+from .typing import Reconnect as Reconnect
 from .typing import Weights as Weights
 
 __all__ = [
     "bytes_to_ndarray",
-    "ndarray_to_bytes",
-    "parameters_to_weights",
-    "weights_to_parameters",
+    "Disconnect",
     "EvaluateIns",
     "EvaluateRes",
     "FitIns",
     "FitRes",
+    "ndarray_to_bytes",
     "Parameters",
+    "parameters_to_weights",
     "ParametersRes",
+    "Reconnect",
     "Weights",
+    "weights_to_parameters",
 ]

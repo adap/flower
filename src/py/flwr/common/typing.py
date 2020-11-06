@@ -16,7 +16,7 @@
 
 
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 
@@ -72,3 +72,17 @@ class EvaluateRes:
     num_examples: int
     loss: float
     accuracy: float
+
+
+@dataclass
+class Reconnect:
+    """Reconnect message from server to client."""
+
+    seconds: Optional[int]
+
+
+@dataclass
+class Disconnect:
+    """Disconnect message from client to server."""
+
+    reason: str

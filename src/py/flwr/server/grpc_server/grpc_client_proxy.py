@@ -59,3 +59,12 @@ class GrpcClientProxy(ClientProxy):
         )
         evaluate_res = serde.evaluate_res_from_proto(client_msg.evaluate_res)
         return evaluate_res
+
+    def reconnect(self, reconnect: common.Reconnect) -> common.Disconnect:
+        """Disconnect and (optionally) reconnect later."""
+        reconnect_msg = serde.reconnect_to_proto(reconnect)
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(reconnect=reconnect_msg)
+        )
+        disconnect = serde.disconnect_from_proto(client_msg.disconnect)
+        return disconnect
