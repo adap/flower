@@ -218,7 +218,7 @@ def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:
 def reconnect_client(
     client: ClientProxy, reconnect: Reconnect
 ) -> Tuple[ClientProxy, Disconnect]:
-    """."""
+    """Instruct a single client to disconnect and (optionally) reconnect later."""
     disconnect = client.reconnect(reconnect)
     return client, disconnect
 

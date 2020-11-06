@@ -76,13 +76,13 @@ class EvaluateRes:
 
 @dataclass
 class Reconnect:
-    """."""
+    """Reconnect message from server to client."""
 
     seconds: Optional[int]
 
 
 @dataclass
 class Disconnect:
-    """."""
+    """Disconnect message from client to server."""
 
     reason: str

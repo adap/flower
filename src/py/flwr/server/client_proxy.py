@@ -48,4 +48,4 @@ class ClientProxy(ABC):
 
     @abstractmethod
     def reconnect(self, reconnect: Reconnect) -> Disconnect:
-        """."""
+        """Disconnect and (optionally) reconnect later."""
