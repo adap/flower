@@ -15,12 +15,8 @@
 # limitations under the License.
 # ==============================================================================
 
-set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../../
-
-
 # Start a Flower server
-python -m flwr_example.tf_fashion_mnist.server \
+python -m flwr_example.tensorflow.server \
   --rounds=5 \
   --sample_fraction=0.5 \
   --min_sample_size=5 \
