@@ -24,9 +24,6 @@ echo "Starting $NUM_CLIENTS clients."
 for ((i = 0; i < $NUM_CLIENTS; i++))
 do
     echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
-    python -m flwr_example.quickstart.client \
-      --cid=$i \
-      --server_address=$SERVER_ADDRESS \
-      --nb_clients=$NUM_CLIENTS &
+    python -m flwr_example.quickstart.client &
 done
 echo "Started $NUM_CLIENTS clients."
