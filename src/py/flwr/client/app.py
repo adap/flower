@@ -48,7 +48,7 @@ def start_client(server_address: str, client: Client) -> None:
         # Sleep and reconnect afterwards
         log(
             INFO,
-            "Disconnect, then re-establish connections after %s seconds",
+            "Disconnect, then re-establish connection after %s second(s)",
             sleep_duration,
         )
         time.sleep(sleep_duration)
