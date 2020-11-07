@@ -21,6 +21,7 @@ from typing import Callable, Iterator, Tuple
 
 import grpc
 
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub
@@ -37,14 +38,14 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 @contextmanager
 def insecure_grpc_connection(
-    server_address: str,
+    server_address: str, max_message_length: int = GRPC_MAX_MESSAGE_LENGTH
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish an insecure gRPC connection to a gRPC server."""
     channel = grpc.insecure_channel(
         server_address,
         options=[
-            ("grpc.max_send_message_length", 256 * 1024 * 1024),
-            ("grpc.max_receive_message_length", 256 * 1024 * 1024),
+            ("grpc.max_send_message_length", max_message_length),
+            ("grpc.max_receive_message_length", max_message_length),
         ],
     )
     channel.subscribe(on_channel_state_change)
