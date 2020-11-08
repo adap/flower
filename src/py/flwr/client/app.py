@@ -32,7 +32,7 @@ def start_client(
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
 ) -> None:
-    f"""Start a Flower Client which connects to a gRPC server.
+    """Start a Flower Client which connects to a gRPC server.
 
     Arguments:
         server_address: str. The IPv6 address of the server. If the Flower
@@ -40,7 +40,7 @@ def start_client(
             would be `"[::]:8080"`.
         client: flwr.client.Client. An implementation of the abstract base
             class `flwr.client.Client`.
-        grpc_max_message_length: int (default: {GRPC_MAX_MESSAGE_LENGTH}).
+        grpc_max_message_length: int (default: 536_870_912, this equals 512MB).
             The maximum length of gRPC messages that can be exchanged with the
             Flower server. The default should be sufficient for most models.
             Users who train very large models might need to increase this
@@ -84,7 +84,7 @@ def start_keras_client(
     client: KerasClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
 ) -> None:
-    f"""Start a Flower KerasClient which connects to a gRPC server.
+    """Start a Flower KerasClient which connects to a gRPC server.
 
     Arguments:
         server_address: str. The IPv6 address of the server. If the Flower
@@ -92,7 +92,7 @@ def start_keras_client(
             would be `"[::]:8080"`.
         client: flwr.client.KerasClient. An implementation of the abstract base
             class `flwr.client.KerasClient`.
-        grpc_max_message_length: int (default: {GRPC_MAX_MESSAGE_LENGTH}).
+        grpc_max_message_length: int (default: 536_870_912, this equals 512MB).
             The maximum length of gRPC messages that can be exchanged with the
             Flower server. The default should be sufficient for most models.
             Users who train very large models might need to increase this
