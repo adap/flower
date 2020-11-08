@@ -35,7 +35,33 @@ def start_server(
     strategy: Optional[Strategy] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
 ) -> None:
-    """Start a Flower server using the gRPC transport layer."""
+    """Start a Flower server using the gRPC transport layer.
+
+    Arguments:
+        server_address: Optional[str] (default: `"[::]:8080"`). The IPv6
+            address of the server.
+        server: Optional[flwr.server.Server] (default: None). An implementation
+            of the abstract base class `flwr.server.Server`. If no instance is
+            provided, then `start_server` will create one.
+        config: Optional[Dict[str, int]] (default: None). The only currently
+            supported values is `num_rounds`, so a full configuration object
+            instructing the server to perform three rounds of federated
+            learning looks like the following: `{"num_rounds": 3}`.
+        strategy: Optional[flwr.server.Strategy] (default: None). An
+            implementation of the abstract base class `flwr.server.Strategy`.
+            If no strategy is provided, then `start_server` will use
+            `flwr.server.strategy.FedAvg`.
+        grpc_max_message_length: int (default: 536_870_912, this equals 512MB).
+            The maximum length of gRPC messages that can be exchanged with the
+            Flower clients. The default should be sufficient for most models.
+            Users who train very large models might need to increase this
+            value. Note that the Flower clients needs to started with the same
+            value (see `flwr.client.start_client`), otherwise clients will not
+            know about the increased limit and block larger messages.
+
+    Returns:
+        None.
+    """
 
     # Create server instance if none was given
     if server is None:
