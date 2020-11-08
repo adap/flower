@@ -36,17 +36,17 @@ def start_server(
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
 ) -> None:
     """Start a Flower server using the gRPC transport layer.
-    
+
     Arguments:
         server_address: Optional[str] (default: `"[::]:8080"`). The IPv6
             address of the server.
         server: Optional[flwr.server.Server] (default: None). An implementation
             of the abstract base class `flwr.server.Server`. If no instance is
             provided, then `start_server` will create one.
-        config: Optional[Dict[str, int]] (default: None). The only currently supported values
-            is `num_rounds`, so a full configuration object instructing the
-            server to perform three rounds of federated learning looks like the
-            following: `{"num_rounds": 3}`.
+        config: Optional[Dict[str, int]] (default: None). The only currently
+            supported values is `num_rounds`, so a full configuration object
+            instructing the server to perform three rounds of federated
+            learning looks like the following: `{"num_rounds": 3}`.
         strategy: Optional[flwr.server.Strategy] (default: None). An
             implementation of the abstract base class `flwr.server.Strategy`.
             If no strategy is provided, then `start_server` will use
