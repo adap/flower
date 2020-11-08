@@ -29,6 +29,8 @@ from .typing import ParametersRes as ParametersRes
 from .typing import Reconnect as Reconnect
 from .typing import Weights as Weights
 
+GRPC_MAX_MESSAGE_LENGTH: int = 268435456  # == 256 * 1024 * 1024
+
 __all__ = [
     "bytes_to_ndarray",
     "Disconnect",
@@ -36,6 +38,7 @@ __all__ = [
     "EvaluateRes",
     "FitIns",
     "FitRes",
+    "GRPC_MAX_MESSAGE_LENGTH",
     "ndarray_to_bytes",
     "Parameters",
     "parameters_to_weights",

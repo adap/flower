@@ -18,6 +18,7 @@
 from logging import INFO
 from typing import Dict, Optional
 
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
@@ -32,6 +33,7 @@ def start_server(
     server: Optional[Server] = None,
     config: Optional[Dict[str, int]] = None,
     strategy: Optional[Strategy] = None,
+    grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
 ) -> None:
     """Start a Flower server using the gRPC transport layer."""
 
@@ -50,7 +52,9 @@ def start_server(
 
     # Start gRPC server
     grpc_server = start_insecure_grpc_server(
-        client_manager=server.client_manager(), server_address=server_address
+        client_manager=server.client_manager(),
+        server_address=server_address,
+        max_message_length=grpc_max_message_length,
     )
     log(INFO, "Flower server running (insecure, %s rounds)", config["num_rounds"])
 

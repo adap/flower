@@ -18,6 +18,7 @@
 import time
 from logging import INFO
 
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 
 from .client import Client
@@ -26,11 +27,17 @@ from .grpc_client.message_handler import handle
 from .keras_client import KerasClient, KerasClientWrapper
 
 
-def start_client(server_address: str, client: Client) -> None:
+def start_client(
+    server_address: str,
+    client: Client,
+    grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+) -> None:
     """Start a Flower Client which connects to a gRPC server."""
     while True:
         sleep_duration: int = 0
-        with insecure_grpc_connection(server_address) as conn:
+        with insecure_grpc_connection(
+            server_address, max_message_length=grpc_max_message_length
+        ) as conn:
             receive, send = conn
             log(INFO, "Opened (insecure) gRPC connection")
 
