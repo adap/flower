@@ -50,7 +50,7 @@ class Strategy(ABC):
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation.
-        
+
         Arguments:
             rnd: Integer. The current round of federated learning.
             weights: Weights. The current (global) model weights.
@@ -73,7 +73,7 @@ class Strategy(ABC):
         failures: List[BaseException],
     ) -> Optional[Weights]:
         """Aggregate training results.
-        
+
         Arguments:
             rnd: int. The current round of federated learning.
             results: List[Tuple[ClientProxy, FitRes]]. Successful updates from the
@@ -104,7 +104,7 @@ class Strategy(ABC):
         failures: List[BaseException],
     ) -> Optional[float]:
         """Aggregate evaluation results.
-             
+
         Arguments:
             rnd: int. The current round of federated learning.
             results: List[Tuple[ClientProxy, FitRes]]. Successful updates from the
@@ -125,7 +125,7 @@ class Strategy(ABC):
     @abstractmethod
     def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
         """Evaluate the current model weights.
-        
+
         This function can be used to perform centralized (i.e., server-side) evaluation
         of model weights.
 
@@ -142,7 +142,7 @@ class Strategy(ABC):
     ) -> bool:
         """Conclude federated learning round and decide whether to continue or
         not.
-        
+
         Arguments:
             rnd: int. The current round of federated learning.
             loss: Optional[float]. The loss of the global model weights.
