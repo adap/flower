@@ -80,7 +80,7 @@ class Strategy(ABC):
                 previously selected and configured clients. Each pair of
                 `(ClientProxy, FitRes` constitutes a successful update from one of the
                 previously selected clients. Not that not all previously selected
-                clients are necessarily inclded in this list: a client might drop out
+                clients are necessarily included in this list: a client might drop out
                 and not submit a result. For each client that did not submit an update,
                 there should be an `Exception` in `failures`.
             failures: List[BaseException]. Exceptions that occurred while the server
@@ -111,7 +111,7 @@ class Strategy(ABC):
                 previously selected and configured clients. Each pair of
                 `(ClientProxy, FitRes` constitutes a successful update from one of the
                 previously selected clients. Not that not all previously selected
-                clients are necessarily inclded in this list: a client might drop out
+                clients are necessarily included in this list: a client might drop out
                 and not submit a result. For each client that did not submit an update,
                 there should be an `Exception` in `failures`.
             failures: List[BaseException]. Exceptions that occurred while the server
