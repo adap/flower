@@ -45,7 +45,7 @@ exclude = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6.9"
+python = "^3.6.1"
 # Mandatory dependencies
 numpy = "^1.18.1"
 grpcio = "^1.27.2"
