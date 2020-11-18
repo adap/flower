@@ -20,7 +20,6 @@ from flwr.server.client_manager import SimpleClientManager
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
 
 
-
 def test_simple_client_manager_register() -> None:
     """Tests if the register method works correctly."""
     # Prepare
@@ -37,7 +36,6 @@ def test_simple_client_manager_register() -> None:
     assert first
     assert not second
     assert len(client_manager) == 1
-
 
 
 def test_simple_client_manager_unregister() -> None:
