@@ -47,6 +47,7 @@ class FastAndSlow(FedAvg):
     rounds.
     :meta private:
     """
+
     # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
