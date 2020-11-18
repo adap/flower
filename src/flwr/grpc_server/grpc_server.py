@@ -29,8 +29,8 @@ def start_insecure_grpc_server(
 ) -> grpc.Server:
     """Create grpc server and return registered FlowerServiceServicer instance.
 
-    If used in a main function server.wait_for_termination(timeout=None) should
-    be called as otherwise the server will immediately stop.
+    If used in a main function server.wait_for_termination(timeout=None)
+    should be called as otherwise the server will immediately stop.
     """
     server = grpc.server(
         concurrent.futures.ThreadPoolExecutor(max_workers=max_concurrent_workers),

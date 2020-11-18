@@ -36,7 +36,8 @@ WAIT_TIMEOUT = 600
 
 
 class FedFSv0(FedAvg):
-    """Strategy implementation which alternates between fast and slow rounds."""
+    """Strategy implementation which alternates between fast and slow
+    rounds."""
 
     # pylint: disable-msg=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(

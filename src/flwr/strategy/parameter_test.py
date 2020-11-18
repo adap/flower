@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""... tests."""
+"""...
+
+tests.
+"""
 
 
 import numpy as np
@@ -22,7 +25,8 @@ from .parameter import bytes_to_ndarray, ndarray_to_bytes
 
 
 def test_serialisation_deserialisation() -> None:
-    """Test if after serialization/deserialisation the np.ndarray is identical."""
+    """Test if after serialization/deserialisation the np.ndarray is
+    identical."""
     arr = np.array([[1, 2], [3, 4], [5, 6]])
 
     arr_serialized = ndarray_to_bytes(arr)

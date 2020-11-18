@@ -37,7 +37,8 @@ WAIT_TIMEOUT = 600
 
 
 class FastAndSlow(FedAvg):
-    """Strategy implementation which alternates between fast and slow rounds."""
+    """Strategy implementation which alternates between fast and slow
+    rounds."""
 
     # pylint: disable-msg=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
@@ -382,7 +383,8 @@ def normalize_and_sample(
 def timeout_candidates(
     durations: List[Tuple[str, float, int, int]], max_timeout: int
 ) -> List[float]:
-    """Calculate timeout candidates based on previous round training durations."""
+    """Calculate timeout candidates based on previous round training
+    durations."""
     scaled_timeout_candidates = [
         fit_duration * float(num_ex_ceil) / (float(num_ex) + E_TIMEOUT)
         for _, fit_duration, num_ex, num_ex_ceil in durations

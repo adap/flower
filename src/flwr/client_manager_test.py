@@ -21,7 +21,7 @@ from flwr.grpc_server.grpc_client_proxy import GrpcClientProxy
 
 
 def test_simple_client_manager_register():
-    """Tests if the register method works correctly"""
+    """Tests if the register method works correctly."""
     # Prepare
     cid = "1"
     bridge = MagicMock()
@@ -39,7 +39,7 @@ def test_simple_client_manager_register():
 
 
 def test_simple_client_manager_unregister():
-    """Tests if the unregister method works correctly"""
+    """Tests if the unregister method works correctly."""
     # Prepare
     cid = "1"
     bridge = MagicMock()

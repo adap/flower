@@ -75,7 +75,8 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
     def Join(  # pylint: disable=invalid-name
         self, request_iterator: Iterator[ClientMessage], context: grpc.ServicerContext,
     ) -> Iterator[ServerMessage]:
-        """Method will be invoked by each GrpcClientProxy which participates in the network.
+        """Method will be invoked by each GrpcClientProxy which participates in
+        the network.
 
         Protocol:
             - The first message is sent from the server to the client

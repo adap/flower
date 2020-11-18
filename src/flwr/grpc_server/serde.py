@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""This module contains functions for protobuf serialization and deserialization."""
+"""This module contains functions for protobuf serialization and
+deserialization."""
 
 
 from typing import List
