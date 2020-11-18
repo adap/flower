@@ -44,11 +44,9 @@ WAIT_TIMEOUT = 600
 
 class FastAndSlow(FedAvg):
     """Strategy implementation which alternates between fast and slow
-    rounds."""
-
+    rounds.
     :meta private:
     """
-
     # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
