@@ -19,23 +19,148 @@ Since we want to use PyTorch to solve a computer vision task, let's go ahead an 
 
 .. code-block:: shell
 
-  $ pip install pytorch torchvision
+  $ pip install torch torchvision
 
 
 Ready... Set... Train!
 ----------------------
 
 Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on PyTorch's `Basic MNIST Example <https://github.com/pytorch/examples/tree/master/mnist>`_. This will allow you see how easy it is to wrap your code with Flower and begin training in a federated way.
-We provide you with two helper scripts namely *run-server.sh* and *run-clients.sh*. Don't be afraid to look inside, they are simple enough =).
+You can use two helper scripts namely *run-server.sh* and *run-clients.sh*. 
+First, create the run-server.sh:
 
-Go ahead and launch on a terminal the *run-server.sh* script first as follows:
+.. code-block:: sh
+
+    python -m server
+
+and execute the script: 
+
+.. code-block:: shell
+
+    $ bash chmod +x ./run-server.sh
+
+
+Second, create run-client.sh:
+
+.. code-block:: sh
+
+    set -e
+    SERVER_ADDRESS="[::]:8080"
+    NUM_CLIENTS=2
+    echo "Starting $NUM_CLIENTS clients."
+    for ((i = 0; i < $NUM_CLIENTS; i++))
+    do
+        echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
+        python -m client \
+            --cid=$i \
+            --server_address=$SERVER_ADDRESS \
+            --nb_clients=$NUM_CLIENTS &
+    done
+    echo "Started $NUM_CLIENTS clients."
+
+Before you can run both scripts you neeed to create server.py and client.py. 
+Let's start with server.py since it only requires the flwr package and starts the flower server by using only one command. 
+
+.. code-block:: python
+
+    import flwr as fl
+
+    fl.server.start_server(config={"num_rounds": 3})
+
+The client script is longer but consists mostly of settings that you may want to adjust later to change your federated learning setup. 
+The client.py needs a few packages as numpy, pytorch, flower  and of course the data sample of MNIST. 
+
+.. code-block:: python
+
+    from argparse import ArgumentParser
+
+    import numpy as np
+    import torch
+
+    import flwr as fl
+
+    from flwr_example.quickstart_pytorch import mnist
+
+    DATA_ROOT = "./data/mnist"
+
+    if __name__ == "__main__":
+        # Training settings
+        parser = ArgumentParser(description="PyTorch MNIST Example")
+        parser.add_argument(
+            "--server_address",
+            type=str,
+            default="[::]:8080",
+            help=f"gRPC server address (default: '[::]:8080')",
+        )
+        parser.add_argument(
+            "--cid",
+            type=int,
+            metavar="N",
+            help="ID of current client (default: 0)",
+        )
+        parser.add_argument(
+            "--nb_clients",
+            type=int,
+            default=2,
+            metavar="N",
+            help="Total number of clients being launched (default: 2)",
+        )
+        parser.add_argument(
+            "--train-batch-size",
+            type=int,
+            default=64,
+            metavar="N",
+            help="input batch size for training (default: 64)",
+        )
+        parser.add_argument(
+            "--test-batch-size",
+            type=int,
+            default=1000,
+            metavar="N",
+            help="input batch size for testing (default: 1000)",
+        )
+        parser.add_argument(
+            "--epochs",
+            type=int,
+            default=14,
+            metavar="N",
+            help="number of epochs to train (default: 14)",
+        )
+
+        args = parser.parse_args()
+
+        # Load MNIST data
+        train_loader, test_loader = mnist.load_data(
+            data_root=DATA_ROOT,
+            train_batch_size=args.train_batch_size,
+            test_batch_size=args.test_batch_size,
+            cid=args.cid,
+            nb_clients=args.nb_clients,
+        )
+
+        # pylint: disable=no-member
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # pylint: enable=no-member
+
+        # Instantiate client
+        client = mnist.PytorchMNISTClient(
+            cid=args.cid,
+            train_loader=train_loader,
+            test_loader=test_loader,
+            epochs=args.epochs,
+            device=device,
+        )
+
+        # Start client
+        fl.client.start_client(args.server_address, client)
+
+With only 4 scripts you are ready to run your first federated mnist workload. You just need to start the server:
 
 .. code-block:: shell
 
   $ bash ./run-server.sh 
 
-
-Now that the server is up and running, go ahead and launch the clients.  
+and in a second terminal you need to start the client:
 
 .. code-block:: shell
 
