@@ -37,14 +37,14 @@ Run Examples Using Docker
 Flower examples can also be run through Docker without the need for most of the
 setup steps that are otherwise necessary::
 
-  # Create docker network `flower` so that containers can reach each other by name
-  $ docker network create flower
+  # Create docker network `flwr` so that containers can reach each other by name
+  $ docker network create flwr
   
   # Build the Flower docker containers
   $ ./dev/docker_build.sh
 
   # Run the docker containers (will tail a logfile created by a central logserver)
-  $ ./src/flwr_example/tensorflow/run-docker.sh
+  $ ./src/py/flwr_example/tensorflow/run-docker.sh
 
 This will start a slightly smaller workload with only four clients.
 
@@ -52,7 +52,7 @@ This will start a slightly smaller workload with only four clients.
 PyTorch Examples
 ----------------
 
-Our PyTorch examples are based on PyTorch 1.5.1. They should work with other
+Our PyTorch examples are based on PyTorch 1.6. They should work with other
 releases as well. So far, we provide the follow examples.
 
 CIFAR-10 Image Classification
@@ -64,13 +64,30 @@ simple CNN classifier in a federated learning setup with two clients.
 
 First, start a Flower server:
 
-  $ ./src/flower_example/pytorch/run-server.sh
+  $ ./src/py/flwr_example/pytorch/run-server.sh
 
 Then, start the two clients in a new terminal window:
 
-  $ ./src/flower_example/pytorch/run-clients.sh
+  $ ./src/py/flwr_example/pytorch/run-clients.sh
 
-For more details, see :code:`src/flower_example/pytorch`.
+For more details, see :code:`src/py/flwr_example/pytorch`.
+
+ImageNet-2012 Image Classification
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`ImageNet-2012 <http://www.image-net.org/>`_ is one of the major computer
+vision datasets. The Flower ImageNet example uses PyTorch to train a ResNet-18
+classifier in a federated learning setup with ten clients.
+
+First, start a Flower server:
+
+  $ ./src/py/flwr_example/pytorch_imagenet/run-server.sh
+
+Then, start the two clients in a new terminal window:
+
+  $ ./src/py/flwr_example/pytorch_imagenet/run-clients.sh
+
+For more details, see :code:`src/py/flwr_example/pytorch_imagenet`.
 
 
 TensorFlow Examples
@@ -89,10 +106,10 @@ classification model over those partitions.
 
 First, start a Flower server:
 
-  $ ./src/flower_example/tensorflow/run-server.sh
+  $ ./src/py/flwr_example/tensorflow/run-server.sh
 
 Then, start the two clients in a new terminal window:
 
-  $ ./src/flower_example/tensorflow/run-clients.sh
+  $ ./src/py/flwr_example/tensorflow/run-clients.sh
 
-For more details, see :code:`src/flower_example/tensorflow`.
+For more details, see :code:`src/py/flwr_example/tensorflow`.

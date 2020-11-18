@@ -1,4 +1,4 @@
-FROM python:3.7.8-slim-stretch
+FROM python:3.7.9-slim-stretch
 
 RUN apt-get update
 RUN apt-get install -y openssh-server screen
@@ -19,10 +19,10 @@ RUN apt-get clean && \
 
 WORKDIR /root
 
-RUN pip install tensorflow-cpu==2.2.0 numpy==1.18.3
-COPY dist/flwr-0.0.1-py3-none-any.whl flwr-0.0.1-py3-none-any.whl
-RUN python -m pip install --no-cache-dir 'flwr-0.0.1-py3-none-any.whl[examples-pytorch,examples-tensorflow,http-logger,baseline,ops]' && \
-    rm flwr-0.0.1-py3-none-any.whl
+RUN python3.7 -m pip install tensorflow-cpu==2.3.0 torch==1.7.0 torchvision==0.8.1 numpy==1.18.3
+COPY dist/flwr-0.11.0-py3-none-any.whl flwr-0.11.0-py3-none-any.whl
+RUN python3.7 -m pip install --no-cache-dir 'flwr-0.11.0-py3-none-any.whl[examples-pytorch,examples-tensorflow,http-logger,baseline,ops]' && \
+    rm flwr-0.11.0-py3-none-any.whl
 
 RUN python3.7 -m flwr_experimental.baseline.tf_fashion_mnist.download
 RUN python3.7 -m flwr_experimental.baseline.tf_cifar.download

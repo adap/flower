@@ -1,16 +1,16 @@
-name: Build
+name: Build Ops
 
 on:
   push:
     branches:
       - main
     paths:
-      - "src/flwr_experimental/ops/**"
+      - "src/py/flwr_experimental/ops/**"
   pull_request:
     branches:
       - main
     paths:
-      - "src/flwr_experimental/ops/**"
+      - "src/py/flwr_experimental/ops/**"
 
 jobs:
   test_ops:
@@ -20,16 +20,16 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.8
+          python-version: 3.7.9
       - name: Install build tools
         run: |
-          python -m pip install -U pip==20.1.1
-          python -m pip install -U setuptools==47.3.1
-          python -m pip install -U poetry==1.0.9
+          python -m pip install -U pip==20.2.4
+          python -m pip install -U setuptools==49.3.1
+          python -m pip install -U poetry==1.1.4
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory + optional)
         run: |
           python -m poetry install --extras "ops"
-          python -m pip install -U tensorflow-cpu==2.2.0
+          python -m pip install -U tensorflow-cpu==2.3.0
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-ops.sh

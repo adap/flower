@@ -1,16 +1,7 @@
-.. image:: _static/flower-logo.png
-    :alt: Flower: A Friendly Federated Learning Research Framework
-    :align: center
-    :width: 200
-    :target: https://flower.adap.com/
+Flower Docs
+===========
 
-
-Welcome to Flower!
-==================================
-
-Flower is a friendly federated learning research framework. The design of
-Flower is based on a few guiding principles which aim to make it
-*customizable*, *extendable*, *framework-agnostic*, and *understandable*.
+Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
 
 
 User Guide
@@ -20,17 +11,24 @@ The user guide is targeted at researchers and developers who want to use Flower
 to bring existing machine learning workloads into a federated setting. One of
 Flower's design goals was to make this simple. Read on to learn more.
 
-.. warning:: Flower's user-facing API is still in development and not
-   considered stable. We welcome curious users to give it a try and share their
-   experience with us.
-
 .. toctree::
    :maxdepth: 2
-   :caption: User Guide Contents:
+   :caption: User Guide
 
+   quickstart_keras
+   quickstart_pytorch
    installation
    examples
    howto-aws
+
+
+API Reference
+-----------------
+
+.. toctree::
+   :maxdepth: 3
+
+   api_documentation/modules
 
 
 Contributor Guide
@@ -41,10 +39,23 @@ intended to help along the way.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contributor Guide Contents:
+   :caption: Contributor Guide
 
    getting-started-for-contributors
    good-first-contributions
+   architecture
+
+
+About Flower
+------------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: About Flower
+
+   people
+   organizations
+   publications
 
 
 .. Indices and tables

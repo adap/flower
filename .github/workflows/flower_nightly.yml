@@ -5,24 +5,21 @@ on:
     - cron:  '0 23 * * *'
 
 jobs:
-  deploy_docs:
+  release:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.8
+          python-version: 3.7.9
       - name: Install build tools
         run: |
-          python -m pip install -U pip==20.1.1
-          python -m pip install -U setuptools==47.3.1
-          python -m pip install -U poetry==1.0.9
-      - name: Build and deploy docs
+          python -m pip install -U pip==20.2.4
+          python -m pip install -U setuptools==49.3.1
+          python -m pip install -U poetry==1.1.4
+      - name: Release nightly
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
-          sed -i -E "s/^name = \"(.+)\"/name = \"\1-nightly\"/" pyproject.toml
-          sed -i -E "s/^version = \"(.+)\"/version = \"\1-dev.$(date '+%Y%m%d')\"/" pyproject.toml
-          python -m poetry build
-          python -m poetry publish -u=__token__ --p=$PYPI_TOKEN
+          ./dev/publish-nightly.sh
