@@ -19,7 +19,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    quickstart_pytorch
    installation
    examples
-   pytorch_complete
+   example_walkthrough_pytorch_mnist
    howto-aws
 
 
