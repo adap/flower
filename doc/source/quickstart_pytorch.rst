@@ -84,7 +84,7 @@ Create some clients
 -------------------
 
 The client script is longer but consists mostly of settings that you may want to adjust later to change your federated learning setup. 
-The client.py needs a few packages as numpy, pytorch, flower  and of course the data sample of MNIST. 
+The :code:`client.py` needs a few packages as numpy, pytorch, flower  and of course the data sample of MNIST. 
 
 .. code-block:: python
 
@@ -209,7 +209,7 @@ Now, let's see what is really happening inside.
 Closer look at the server
 -------------------------
 
-The server.py simply launches a server that will coordinate three rounds of training.
+The :code:`server.py` simply launches a server that will coordinate three rounds of training.
 Flower Servers are very customizable, but for simple workloads we can start a server and leave all the configuration possibilities at their default values.
 
 Closer look at the client
@@ -365,7 +365,7 @@ The code contains 5 main functions similar to the Keras example.
 #. :code:`evaluate`
     * test the local model 
 
-The fitting function trains the MNIST dataset with a typical CNN that can be found in the `Go-Through Example: PyTorch <https://flower.dev/docs/pytorch_complete.html>`_ .
+The fitting function trains the MNIST dataset with a typical CNN that can be found in the `Example Walk-Through: PyTorch & MNIST <https://flower.dev/docs/example_walkthrough_pytorch_mnist.html>`_ .
 Observe that these functions basically encapsulate regular training and test loops and provide :code:`fit` and :code:`evaluate` with final statistics for each round.
 You could substitute them with your own train and test loops, and also change the network architecture and the entire example would still work flawlessly. 
 As a matter of fact, why not try and modify the code to an example of your liking? 
