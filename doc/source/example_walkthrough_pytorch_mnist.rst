@@ -19,7 +19,7 @@ Since we want to use PyTorch to solve a computer vision task, let's go ahead an 
 
 .. code-block:: shell
 
-  $ pip install pytorch torchvision
+  $ pip install torch torchvision
 
 
 Ready... Set... Train!
