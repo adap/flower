@@ -15,9 +15,11 @@ Flower's design goals was to make this simple. Read on to learn more.
    :maxdepth: 1
    :caption: User Guide
 
+   installation
    quickstart_keras
    quickstart_pytorch
-   installation
+   strategies
+   implementing-strategies
    examples
    example_walkthrough_pytorch_mnist
    howto-aws
