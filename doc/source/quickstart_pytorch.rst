@@ -31,11 +31,11 @@ Now that we have all our dependencies installed, let's run a simple distributed 
 You can use two helper scripts namely :code:`run-server.sh` and :code:`run-clients.sh`. 
 First, create the :code:`run-server.sh`:
 
-.. code-block:: sh
+.. code-block:: shell
 
     python -m server
 
-and execute the script: 
+and make the script executable: 
 
 .. code-block:: shell
 
@@ -44,7 +44,7 @@ and execute the script:
 
 Second, create :code:`run-client.sh`:
 
-.. code-block:: sh
+.. code-block:: shell
 
     set -e
     SERVER_ADDRESS="[::]:8080"
@@ -59,6 +59,12 @@ Second, create :code:`run-client.sh`:
             --nb_clients=$NUM_CLIENTS &
     done
     echo "Started $NUM_CLIENTS clients."
+
+and make it as well executable:
+
+.. code-block:: shell
+
+    $ bash chmod +x ./run-client.sh
 
 The script contains a main loop to start a set of :code:`NUM_CLIENTS` clients. Here  you can set how many clients participating on the federated learning workload. The clients are labeled by a counter :code:`--cid` for identification. In order to connect each client to the server the :code:`SERVER_ADDRESS` can be set or a default value of :code:`[::]:8080` can be used. 
 
@@ -164,13 +170,13 @@ The client.py needs a few packages as numpy, pytorch, flower  and of course the 
         # Start client
         fl.client.start_client(args.server_address, client)
 
-With only 4 scripts you are ready to run your first federated mnist workload. You just need to start the server:
+With only 4 scripts you are ready to run your first federated MNIST workload. You just need to start the server:
 
 .. code-block:: shell
 
   $ bash ./run-server.sh 
 
-and in a second terminal you need to start the client:
+and in a second terminal you need to start the clients:
 
 .. code-block:: shell
 
@@ -200,13 +206,13 @@ Et voilà! You should be seeing the training procedure and, after a few iteratio
 
 Now, let's see what is really happening inside. 
 
-Closer look to the server
+Closer look at the server
 -------------------------
 
 The server.py simply launches a server that will coordinate three rounds of training.
 Flower Servers are very customizable, but for simple workloads we can start a server and leave all the configuration possibilities at their default values.
 
-Closer look to the client
+Closer look at the client
 -------------------------
 
 Next, let's take a look at the client part that is more complex since the training of the MNIST data happens here.
