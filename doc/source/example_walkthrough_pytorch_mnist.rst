@@ -1,5 +1,3 @@
-.. _link-target:
-
 Example Walk-Through: PyTorch & MNIST
 =====================================
 
