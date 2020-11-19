@@ -1,7 +1,7 @@
 .. _link-target:
 
-Go-Through Example: PyTorch
-===========================
+Example Walk-Through: PyTorch & MNIST
+=====================================
 
 In this tutorial we will learn, how to train a Convolutional Neural Network on MNIST using Flower and PyTorch. 
 
