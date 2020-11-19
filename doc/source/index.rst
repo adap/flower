@@ -12,7 +12,7 @@ to bring existing machine learning workloads into a federated setting. One of
 Flower's design goals was to make this simple. Read on to learn more.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: User Guide
 
    quickstart_keras
@@ -38,7 +38,7 @@ The Flower authors welcome external contributions. The following guides are
 intended to help along the way.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contributor Guide
 
    getting-started-for-contributors
@@ -50,7 +50,7 @@ About Flower
 ------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: About Flower
 
    people
