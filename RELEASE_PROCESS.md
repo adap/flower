@@ -9,7 +9,7 @@ Each week on Monday if there was a commit since the last release create a new re
 When the release is built the following things need to happen:
 
 - [ ] Tag the release commit with the version number
-- [ ] Upload the release to PyPi
+- [ ] Upload the release to PyPI
 
 ### After the release
 
