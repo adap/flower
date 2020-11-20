@@ -12,7 +12,7 @@ Extra Dependencies
 ------------------
 
 The core Flower framework keeps a minimal set of dependencies. The examples
-demonstrate Flower in the context of differnt machine learning frameworks, so 
+demonstrate Flower in the context of different machine learning frameworks, so
 additional dependencies need to be installed before an example can be run.
 
 For PyTorch examples::
