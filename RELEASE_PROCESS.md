@@ -6,14 +6,14 @@ This document describes the current release process. It may or may not change in
 
 Each week on Monday if there was a commit since the last release create a new release. The version number of this release is in `pyproject.toml`.
 
-When the release is build the following things need to happen
+When the release is built the following things need to happen:
 
 - [ ] Tag the released commit with the version number
 - [ ] Upload the release to PyPi
 
 ### After the release
 
-Create a pull request which contains the following changes
+Create a pull request which contains the following changes:
 
 - [ ] Increases the minor version in `pyproject.toml`by one.
 - [ ] Adjust all files which contain the current version number if necessary.
