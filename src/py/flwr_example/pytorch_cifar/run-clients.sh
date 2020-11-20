@@ -15,5 +15,17 @@
 # limitations under the License.
 # ==============================================================================
 
-# Start a Flower server
-python -m flwr_example.quickstart.server
+set -e
+
+SERVER_ADDRESS="[::]:8080"
+NUM_CLIENTS=2
+
+echo "Starting $NUM_CLIENTS clients."
+for ((i = 0; i < $NUM_CLIENTS; i++))
+do
+    echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
+    python -m flwr_example.pytorch_cifar.client \
+      --cid=$i \
+      --server_address=$SERVER_ADDRESS &
+done
+echo "Started $NUM_CLIENTS clients."

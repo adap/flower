@@ -15,19 +15,5 @@
 # limitations under the License.
 # ==============================================================================
 
-set -e
-
-SERVER_ADDRESS="[::]:8080"
-NUM_CLIENTS=10
-
-echo "Starting $NUM_CLIENTS clients."
-for ((i = 0; i < $NUM_CLIENTS; i++))
-do
-    echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
-    python -m flwr_example.tensorflow.client \
-      --cid=$i \
-      --partition=$i \
-      --clients=$NUM_CLIENTS \
-      --server_address=$SERVER_ADDRESS &
-done
-echo "Started $NUM_CLIENTS clients."
+# Start a Flower server
+python -m flwr_example.quickstart_tensorflow.server

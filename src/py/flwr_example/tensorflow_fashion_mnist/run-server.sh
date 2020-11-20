@@ -16,7 +16,7 @@
 # ==============================================================================
 
 # Start a Flower server
-python -m flwr_example.tensorflow.server \
+python -m flwr_example.tensorflow_fashion_mnist.server \
   --rounds=5 \
   --sample_fraction=0.5 \
   --min_sample_size=5 \

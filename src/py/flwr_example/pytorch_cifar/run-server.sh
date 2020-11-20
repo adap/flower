@@ -16,7 +16,7 @@
 # ==============================================================================
 
 # Start a Flower server
-python -m flwr_example.pytorch.server \
+python -m flwr_example.pytorch_cifar.server \
   --rounds=5 \
   --sample_fraction=1.0 \
   --min_sample_size=2 \

@@ -16,7 +16,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    :caption: User Guide
 
    installation
-   quickstart_keras
+   quickstart_tensorflow
    quickstart_pytorch
    strategies
    implementing-strategies

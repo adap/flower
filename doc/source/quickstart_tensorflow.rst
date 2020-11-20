@@ -1,5 +1,5 @@
-Flower Quickstart (with Keras)
-==============================
+Quickstart (TensorFlow)
+=======================
 
 Let's build a federated learning system in less than 50 lines of code!
 
@@ -176,4 +176,4 @@ that started the server):
 
 Congratulations! You've successfully built and run your first federated
 learning system. The full source code for this can be found in
-:code:`src/py/flwr_example/quickstart`.
+:code:`src/py/flwr_example/quickstart_tensorflow`.

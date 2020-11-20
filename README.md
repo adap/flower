@@ -26,9 +26,11 @@ design of Flower is based on a few guiding principles:
 
 ## Documentation
 
-* [Documentation](https://flower.dev)
-  * [Quickstart](https://flower.dev/docs/quickstart_keras.html)
-  * [Installation](https://flower.dev/docs/installation.html)
+[Flower Documentation](https://flower.dev):
+
+* [Installation](https://flower.dev/docs/installation.html)
+* [Quickstart (TensorFlow)](https://flower.dev/docs/quickstart_tensorflow.html)
+* [Quickstart (PyTorch)](https://flower.dev/docs/quickstart_pytorch.html)
 
 ## Flower Usage Examples
 
@@ -38,12 +40,16 @@ an example, first install the necessary extras:
 
 [Usage Examples Documentation](https://flower.dev/docs/examples.html)
 
-Available [examples](src/py/flwr_example):
+Quickstart examples:
 
-* [Quickstart: Keras & MNIST](src/py/flwr_example/quickstart)
-* [PyTorch & CIFAR-10](src/py/flwr_example/pytorch)
+* [Quickstart (TensorFlow)](src/py/flwr_example/quickstart_tensorflow)
+* [Quickstart (PyTorch)](src/py/flwr_example/quickstart_pytorch)
+
+Other [examples](src/py/flwr_example):
+
+* [PyTorch & CIFAR-10](src/py/flwr_example/pytorch_cifar)
 * [PyTorch & ImageNet](src/py/flwr_example/pytorch_imagenet)
-* [TensorFlow & Fashion-MNIST](src/py/flwr_example/tensorflow)
+* [TensorFlow & Fashion-MNIST](src/py/flwr_example/tensorflow_fashion_mnist)
 
 ## Flower Baselines
 
