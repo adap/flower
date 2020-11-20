@@ -23,6 +23,6 @@ from .fedavg import FedAvg
 
 class DefaultStrategy(FedAvg):
     """DEPRECATED Configurable default strategy.
-    
+
     DEPRECATION WARNING: use FedAvg instead.
     """
