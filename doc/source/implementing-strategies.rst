@@ -6,7 +6,7 @@ The strategy abstraction enables implementation of fully custom strategies. A st
 The :code:`Strategy` abstraction
 --------------------------------
 
-All strategy implementation are derived from the abstract base class `flwr.server.strategy.Strategy`, both built-in implementations and third party implementations. This means that custom strategy implementations have the exact same capabilities at their disposal as built-in ones.
+All strategy implementation are derived from the abstract base class :code:`flwr.server.strategy.Strategy`, both built-in implementations and third party implementations. This means that custom strategy implementations have the exact same capabilities at their disposal as built-in ones.
 
 The strategy abstraction defines a few abstract methods that need to be implemented:
 
