@@ -31,29 +31,11 @@ Please consult :code:`pyproject.toml` for a full list of possible extras
 (section :code:`[tool.poetry.extras]`).
 
 
-Run Examples Using Docker
--------------------------
-
-Flower examples can also be run through Docker without the need for most of the
-setup steps that are otherwise necessary::
-
-  # Create docker network `flwr` so that containers can reach each other by name
-  $ docker network create flwr
-  
-  # Build the Flower docker containers
-  $ ./dev/docker_build.sh
-
-  # Run the docker containers (will tail a logfile created by a central logserver)
-  $ ./src/py/flwr_example/tensorflow/run-docker.sh
-
-This will start a slightly smaller workload with only four clients.
-
-
 PyTorch Examples
 ----------------
 
 Our PyTorch examples are based on PyTorch 1.7. They should work with other
-releases as well. So far, we provide the follow examples.
+releases as well. So far, we provide the following examples.
 
 CIFAR-10 Image Classification
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
