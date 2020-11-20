@@ -3,6 +3,8 @@ Flower Quickstart (with PyTorch)
 
 In this tutorial we will learn how to train a Convolutional Neural Network on MNIST using Flower and PyTorch. 
 
+First of all, it is recommended to create a virtual environment and run everything within a `virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_. 
+
 Our example consists of one *server* and two *clients* all having the same model. 
 
 *Clients* are responsible for generating individual weight-updates for the model based on their local datasets. 
@@ -15,27 +17,166 @@ Now that we have a rough idea of what is going on, let's get started. We first n
 
   $ pip install flwr
 
-Since we want to use PyTorch to solve a computer vision task, let's go ahead an install PyTorch and the **torchvision** library: 
+Since we want to use PyTorch to solve a computer vision task, let's go ahead and install PyTorch and the **torchvision** library: 
 
 .. code-block:: shell
 
-  $ pip install pytorch torchvision
+  $ pip install torch torchvision
 
 
-Ready... Set... Train!
-----------------------
+Run it with a shell script
+--------------------------
 
 Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on PyTorch's `Basic MNIST Example <https://github.com/pytorch/examples/tree/master/mnist>`_. This will allow you see how easy it is to wrap your code with Flower and begin training in a federated way.
-We provide you with two helper scripts namely *run-server.sh* and *run-clients.sh*. Don't be afraid to look inside, they are simple enough =).
+You can use two helper scripts namely :code:`run-server.sh` and :code:`run-clients.sh`. 
+First, create the :code:`run-server.sh`:
 
-Go ahead and launch on a terminal the *run-server.sh* script first as follows:
+.. code-block:: shell
+
+    python -m server
+
+and make the script executable: 
+
+.. code-block:: shell
+
+    $ bash chmod +x ./run-server.sh
+
+
+Second, create :code:`run-client.sh`:
+
+.. code-block:: shell
+
+    set -e
+    SERVER_ADDRESS="[::]:8080"
+    NUM_CLIENTS=2
+    echo "Starting $NUM_CLIENTS clients."
+    for ((i = 0; i < $NUM_CLIENTS; i++))
+    do
+        echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
+        python -m client \
+            --cid=$i \
+            --server_address=$SERVER_ADDRESS \
+            --nb_clients=$NUM_CLIENTS &
+    done
+    echo "Started $NUM_CLIENTS clients."
+
+and make it as well executable:
+
+.. code-block:: shell
+
+    $ bash chmod +x ./run-client.sh
+
+The script contains a main loop to start a set of :code:`NUM_CLIENTS` clients. Here  you can set how many clients participating on the federated learning workload. The clients are labeled by a counter :code:`--cid` for identification. In order to connect each client to the server the :code:`SERVER_ADDRESS` can be set or a default value of :code:`[::]:8080` can be used. 
+
+Create a server
+---------------
+
+Before you can run both scripts you need to create :code:`server.py` and :code:`client.py`. 
+Let's start with :code:`server.py` since it only requires the flwr package and starts the flower server by using only one command. 
+
+.. code-block:: python
+
+    import flwr as fl
+
+    fl.server.start_server(config={"num_rounds": 3})
+
+Create some clients
+-------------------
+
+The client script is longer but consists mostly of settings that you may want to adjust later to change your federated learning setup. 
+The :code:`client.py` needs a few packages as numpy, pytorch, flower  and of course the data sample of MNIST. 
+
+.. code-block:: python
+
+    from argparse import ArgumentParser
+
+    import numpy as np
+    import torch
+
+    import flwr as fl
+
+    from flwr_example.quickstart_pytorch import mnist
+
+    DATA_ROOT = "./data/mnist"
+
+    if __name__ == "__main__":
+        # Training settings
+        parser = ArgumentParser(description="PyTorch MNIST Example")
+        parser.add_argument(
+            "--server_address",
+            type=str,
+            default="[::]:8080",
+            help=f"gRPC server address (default: '[::]:8080')",
+        )
+        parser.add_argument(
+            "--cid",
+            type=int,
+            metavar="N",
+            help="ID of current client (default: 0)",
+        )
+        parser.add_argument(
+            "--nb_clients",
+            type=int,
+            default=2,
+            metavar="N",
+            help="Total number of clients being launched (default: 2)",
+        )
+        parser.add_argument(
+            "--train-batch-size",
+            type=int,
+            default=64,
+            metavar="N",
+            help="input batch size for training (default: 64)",
+        )
+        parser.add_argument(
+            "--test-batch-size",
+            type=int,
+            default=1000,
+            metavar="N",
+            help="input batch size for testing (default: 1000)",
+        )
+        parser.add_argument(
+            "--epochs",
+            type=int,
+            default=14,
+            metavar="N",
+            help="number of epochs to train (default: 14)",
+        )
+
+        args = parser.parse_args()
+
+        # Load MNIST data
+        train_loader, test_loader = mnist.load_data(
+            data_root=DATA_ROOT,
+            train_batch_size=args.train_batch_size,
+            test_batch_size=args.test_batch_size,
+            cid=args.cid,
+            nb_clients=args.nb_clients,
+        )
+
+        # pylint: disable=no-member
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # pylint: enable=no-member
+
+        # Instantiate client
+        client = mnist.PytorchMNISTClient(
+            cid=args.cid,
+            train_loader=train_loader,
+            test_loader=test_loader,
+            epochs=args.epochs,
+            device=device,
+        )
+
+        # Start client
+        fl.client.start_client(args.server_address, client)
+
+With only 4 scripts you are ready to run your first federated MNIST workload. You just need to start the server:
 
 .. code-block:: shell
 
   $ bash ./run-server.sh 
 
-
-Now that the server is up and running, go ahead and launch the clients.  
+and in a second terminal you need to start the clients:
 
 .. code-block:: shell
 
@@ -65,44 +206,47 @@ Et voilà! You should be seeing the training procedure and, after a few iteratio
 
 Now, let's see what is really happening inside. 
 
-Flower Server
--------------
+Closer look at the server
+-------------------------
 
-Inside the server helper script *run-server.sh* you will find the following code that basically runs the :code:`server.py`
+The :code:`server.py` simply launches a server that will coordinate three rounds of training.
+Flower Servers are very customizable, but for simple workloads we can start a server and leave all the configuration possibilities at their default values.
 
-.. code-block:: bash 
+Closer look at the client
+-------------------------
 
-    python -m flwr_example.quickstart_pytorch.server
+Next, let's take a look at the client part that is more complex since the training of the MNIST data happens here.
+Again, we can go deeper and look inside :code:`client.py`. You find many parameters to setup your own federated learning workload:
 
+#. :code:`--server_address` 
+    * setup your server address to connect the clients to server.
+#. :code:`--cid`     
+    * counter to identify all clients
+#. :code:`--nb_clients`  
+    * set the number of clients connected to one server
+#. :code:`--train-batch-size`    
+    * set up the size of the training batch for each client
+#. :code:`--test-batch-size`     
+    * set up the size of the test batch
+#. :code:`--epochs`  
+    * set up the number of epochs to run for each client
 
-We can go a bit deeper and see that :code:`server.py` simply launches a server that will coordinate three rounds of training.
-Flower Servers are very customizable, but for simple workloads we can start a server and leave all the configuration possibilities at their default values as seen below.
+Play a bit around with the settings to get a feeling of a federated learning setup. 
+
+After going through the argument parsing code at the beginning of our function, you will find a call to :code:`mnist.load_data`.
 
 .. code-block:: python
 
-    import flwr as fl
+    # Load MNIST data
+    train_loader, test_loader = mnist.load_data(
+        data_root=DATA_ROOT,
+        train_batch_size=args.train_batch_size,
+        test_batch_size=args.test_batch_size,
+        cid=args.cid,
+        nb_clients=args.nb_clients,
+    )
 
-    fl.server.start_server(config={"num_rounds": 3})
-
-
-Flower Client
--------------
-
-Next, let's take a look at the *run-clients.sh* file. You will see that it contains a main loop that starts a set of *clients*.
-
-.. code-block:: bash 
-
-    python -m flwr_example.quickstart_pytorch.client \
-      --cid=$i \
-      --server_address=$SERVER_ADDRESS \
-      --nb_clients=$NUM_CLIENTS 
-
-* **cid**: is the client ID. It is an integer that uniquely identifies client identifier.
-* **sever_address**: String that identifies IP and port of the server. 
-* **nb_clients**: This defines the number of clients being created. This piece of information is not required by the client, but it helps us partition the original MNIST dataset to make sure that every client is working on unique subsets of both *training* and *test* sets.
-
-Again, we can go deeper and look inside :code:`flwr_example/quickstart_pytorch/client.py`. 
-After going through the argument parsing code at the beginning of our :code:`main` function, you will find a call to :code:`mnist.load_data`. This function is responsible for partitioning the original MNIST datasets (*training* and *test*) and returning a :code:`torch.utils.data.DataLoader` s for each of them.
+This function is responsible for partitioning the original MNIST datasets (*training* and *test*) and returning a :code:`torch.utils.data.DataLoader` s for each of them.
 We then instantiate a :code:`PytorchMNISTClient` object with our client ID, our DataLoaders, the number of epochs in each round, and which device we want to use for training (cpu or gpu).
 
 
@@ -118,11 +262,7 @@ We then instantiate a :code:`PytorchMNISTClient` object with our client ID, our 
 
 The :code:`PytorchMNISTClient` object if finally passed to :code:`fl.client.start_client` along with the server's address as the training process begins.
 
-
-A Closer Look
--------------
-
-Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_example.quickstart_pytorch.mnist` and see what it is doing:
+Now, let's look closely into the :code:`PytorchMNISTClient`. As soon as you install the *flwr* package you also install *flwr_example* where you can find :code:`flwr_example.quickstart_pytorch.mnist`. If you run already the Keras example then the code will be familiar to you:
 
 .. code-block:: python
 
@@ -148,18 +288,7 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
         def set_weights(self, weights: fl.common.Weights) -> None:
-            """Set model weights from a list of NumPy ndarrays.
 
-            Parameters
-            ----------
-            weights: fl.common.Weights 
-                Weights received by the server and set to local model
-
-
-            Returns
-            -------
-
-            """
             state_dict = OrderedDict(
                 {
                     k: torch.Tensor(v)
@@ -175,18 +304,8 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
             return fl.common.ParametersRes(parameters=parameters)
 
         def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
-            """Trains the model on local dataset
+            """Trains the model on local dataset"""
 
-            Parameters
-            ----------
-            ins: fl.common.FitIns 
-            Parameters sent by the server to be used during training. 
-
-            Returns
-            -------
-                Set of variables containing the new set of weights and information the client.
-
-            """
             weights: fl.common.Weights = fl.common.parameters_to_weights(ins.parameters)
             fit_begin = timeit.default_timer()
 
@@ -210,244 +329,43 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
             )
 
         def evaluate(self, ins: fl.common.EvaluateIns) -> fl.common.EvaluateRes:
-            """
+            weights = fl.common.parameters_to_weights(ins.parameters)
 
-            Parameters
-            ----------
-            ins: fl.common.EvaluateIns 
-            Parameters sent by the server to be used during testing. 
-                
+            # Use provided weights to update the local model
+            self.set_weights(weights)
 
-            Returns
-            -------
-                Information the clients testing results.
+            (
+                num_examples_test,
+                test_loss,
+                accuracy,
+            ) = test(self.model, self.test_loader, device=self.device)
+            print(
+                f"Client {self.cid} - Evaluate on {num_examples_test} samples: Average loss: {test_loss:.4f}, Accuracy: {100*accuracy:.2f}%\n"
+            )
 
+            # Return the number of evaluation examples and the evaluation result (loss)
+            return fl.common.EvaluateRes(
+                num_examples=num_examples_test,
+                loss=float(test_loss),
+                accuracy=float(accuracy),
+            )
 
-The first thing to notice is that :code:`PytorchMNISTClient` instantiates a CNN model inside its constructor
+The code contains 5 main functions similar to the Keras example. 
 
-.. code-block:: python
+#. :code:`get_weights`
+    * receive the model weights calculated by the local model
+#. :code:`set_weights`
+    * set the model weights on the local model that are received from the server
+#. :code:`get_parameters`
+    * encapsulates the weight into Flower parameters
+#. :code:`fit`
+    * set the local model weights
+    * train the local model
+    * receive the updated local model weights
+#. :code:`evaluate`
+    * test the local model 
 
-    class PytorchMNISTClient(fl.client.Client):
-    """Flower client implementing MNIST handwritten classification using PyTorch."""
-
-    def __init__(
-        self,
-        cid: int,
-        train_loader: datasets,
-        test_loader: datasets,
-        epochs: int,
-        device: torch.device = torch.device("cpu"),
-    ) -> None:
-        self.model = MNISTNet().to(device)
-    ...
-
-The code for the CNN is available under :code:`quickstart_pytorch.mnist` and it is reproduced below. It is the same network found in `Basic MNIST Example <https://github.com/pytorch/examples/tree/master/mnist>`_.
-
-.. code-block:: python
-
-    class MNISTNet(nn.Module):
-        """Simple CNN adapted from Pytorch's 'Basic MNIST Example'."""
-
-        def __init__(self) -> None:
-            super(MNISTNet, self).__init__()
-            self.conv1 = nn.Conv2d(1, 32, 3, 1)
-            self.conv2 = nn.Conv2d(32, 64, 3, 1)
-            self.dropout1 = nn.Dropout2d(0.25)
-            self.dropout2 = nn.Dropout2d(0.5)
-            self.fc1 = nn.Linear(9216, 128)
-            self.fc2 = nn.Linear(128, 10)
-
-        def forward(self, x: Tensor) -> Tensor:
-            """Compute forward pass.
-
-            Parameters
-            ----------
-            x: Tensor 
-                Mini-batch of shape (N,28,28) containing images from MNIST dataset.
-                
-
-            Returns
-            -------
-            output: Tensor
-                The probability density of the output being from a specific class given the input.
-
-            """
-            x = self.conv1(x)
-            x = F.relu(x)
-            x = self.conv2(x)
-            x = F.relu(x)
-            x = F.max_pool2d(x, 2)
-            x = self.dropout1(x)
-            x = torch.flatten(x, 1)
-            x = self.fc1(x)
-            x = F.relu(x)
-            x = self.dropout2(x)
-            x = self.fc2(x)
-            output = F.log_softmax(x, dim=1)
-            return output
-
-
-The second thing to notice is that :code:`PytorchMNISTClient` class inherits from the :code:`fl.client.Client` and hence it must implement the following methods:  
-
-.. code-block:: python
-
-    from abc import ABC, abstractmethod
-
-    from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
-
-
-    class Client(ABC):
-        """Abstract base class for Flower clients."""
-
-        @abstractmethod
-        def get_parameters(self) -> ParametersRes:
-            """Return the current local model parameters."""
-
-        @abstractmethod
-        def fit(self, ins: FitIns) -> FitRes:
-            """Refine the provided weights using the locally held dataset."""
-
-        @abstractmethod
-        def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-            """Evaluate the provided weights using the locally held dataset."""
-
-
-When comparing the abstract class to its derived class :code:`PytorchMNISTClient` you will notice that :code:`fit` calls a :code:`train` function and that :code:`evaluate` calls a :code:`test`: function. 
-
-These functions can both be found inside the same :code:`quickstart_pytorch.mnist` module:
-
-.. code-block:: python
-
-    def train(
-        model: torch.nn.ModuleList,
-        train_loader: torch.utils.data.DataLoader,
-        epochs: int,
-        device: torch.device = torch.device("cpu"),
-    ) -> int:
-        """Train routine based on 'Basic MNIST Example'
-
-        Parameters
-        ----------
-        model: torch.nn.ModuleList
-            Neural network model used in this example.
-            
-        train_loader: torch.utils.data.DataLoader
-            DataLoader used in traning.
-            
-        epochs: int 
-            Number of epochs to run in each round. 
-            
-        device: torch.device 
-            (Default value = torch.device("cpu"))
-            Device where the network will be trained within a client.
-
-        Returns
-        -------
-        num_examples_train: int
-            Number of total samples used during traning.
-
-        """
-        model.train()
-        optimizer = optim.Adadelta(model.parameters(), lr=1.0)
-        scheduler = StepLR(optimizer, step_size=1, gamma=0.7)
-        print(f"Training {epochs} epoch(s) w/ {len(train_loader)} mini-batches each")
-        for epoch in range(epochs):  # loop over the dataset multiple time
-            print()
-            loss_epoch: float = 0.0
-            num_examples_train: int = 0
-            for batch_idx, (data, target) in enumerate(train_loader):
-                # Grab mini-batch and transfer to device
-                data, target = data.to(device), target.to(device)
-                num_examples_train += len(data)
-
-                # Zero gradients
-                optimizer.zero_grad()
-
-                output = model(data)
-                loss = F.nll_loss(output, target)
-                loss.backward()
-                optimizer.step()
-
-                loss_epoch += loss.item()
-                if batch_idx % 10 == 8:
-                    print(
-                        "Train Epoch: {} [{}/{} ({:.0f}%)] Loss: {:.6f}\t\t\t\t".format(
-                            epoch,
-                            num_examples_train,
-                            len(train_loader) * train_loader.batch_size,
-                            100.0
-                            * num_examples_train
-                            / len(train_loader)
-                            / train_loader.batch_size,
-                            loss.item(),
-                        ),
-                        end="\r",
-                        flush=True,
-                    )
-            scheduler.step()
-        return num_examples_train
-
-
-    def test(
-        model: torch.nn.ModuleList,
-        test_loader: torch.utils.data.DataLoader,
-        device: torch.device = torch.device("cpu"),
-    ) -> Tuple[int, float, float]:
-        """Test routine 'Basic MNIST Example'
-
-        Parameters
-        ----------
-        model: torch.nn.ModuleList :
-            Neural network model used in this example.
-            
-        test_loader: torch.utils.data.DataLoader :
-            DataLoader used in test.
-            
-        device: torch.device :
-            (Default value = torch.device("cpu"))
-            Device where the network will be tested within a client.
-
-        Returns
-        -------
-            Tuple containing the total number of test samples, the test_loss, and the accuracy evaluated on the test set.
-
-        """
-        model.eval()
-        test_loss: float = 0
-        correct: int = 0
-        num_test_samples: int = 0
-        with torch.no_grad():
-            for data, target in test_loader:
-                data, target = data.to(device), target.to(device)
-                num_test_samples += len(data)
-                output = model(data)
-                test_loss += F.nll_loss(
-                    output, target, reduction="sum"
-                ).item()  # sum up batch loss
-                pred = output.argmax(
-                    dim=1, keepdim=True
-                )  # get the index of the max log-probability
-                correct += pred.eq(target.view_as(pred)).sum().item()
-
-        test_loss /= num_test_samples
-
-        return (num_test_samples, test_loss, correct / num_test_samples)
-
-
+The fitting function trains the MNIST dataset with a typical CNN that can be found in the `Example Walk-Through: PyTorch & MNIST <https://flower.dev/docs/example_walkthrough_pytorch_mnist.html>`_ .
 Observe that these functions basically encapsulate regular training and test loops and provide :code:`fit` and :code:`evaluate` with final statistics for each round.
 You could substitute them with your own train and test loops, and also change the network architecture and the entire example would still work flawlessly. 
 As a matter of fact, why not try and modify the code to an example of your liking? 
-
-
-
-Give It a Try
--------------
-Looking through the quickstart code description above will have given a good understanding on how *clients* and *servers* work in Flower, how to run a simple experiment and the internals of a client wrapper. 
-Here are a few things you could try on your own and want get more experience with Flower:
-
-- Try and change :code:`PytorchMNISTClient` so it can accept different architectures.
-- Modify the :code:`train` function so that it accepts different optimizers
-- Modify the :code:`test` function so that it proves not only the top-1 (regular accuracy), but also the top-5 accuracy?
-- Go larger! Try to adapt the code to larger images and datasets. Why not try training on ImageNet with a ResNet-50? 
-
-You are ready now. Enjoy learning in a federated way!
