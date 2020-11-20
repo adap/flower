@@ -4,7 +4,7 @@ This document describes the current release process. It may or may not change in
 
 ## Process
 
-Each week on Friday if there was a commit since the last release create a new release. The version number of this release is in the `pyproject.toml`.
+Each week on Monday if there was a commit since the last release create a new release. The version number of this release is in the `pyproject.toml`.
 
 When the release is build the following things need to happen
 
