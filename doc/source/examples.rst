@@ -52,7 +52,7 @@ This will start a slightly smaller workload with only four clients.
 PyTorch Examples
 ----------------
 
-Our PyTorch examples are based on PyTorch 1.6. They should work with other
+Our PyTorch examples are based on PyTorch 1.7. They should work with other
 releases as well. So far, we provide the follow examples.
 
 CIFAR-10 Image Classification
@@ -64,13 +64,13 @@ simple CNN classifier in a federated learning setup with two clients.
 
 First, start a Flower server:
 
-  $ ./src/py/flwr_example/pytorch/run-server.sh
+  $ ./src/py/flwr_example/pytorch_cifar/run-server.sh
 
 Then, start the two clients in a new terminal window:
 
-  $ ./src/py/flwr_example/pytorch/run-clients.sh
+  $ ./src/py/flwr_example/pytorch_cifar/run-clients.sh
 
-For more details, see :code:`src/py/flwr_example/pytorch`.
+For more details, see :code:`src/py/flwr_example/pytorch_cifar`.
 
 ImageNet-2012 Image Classification
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -96,20 +96,20 @@ TensorFlow Examples
 Our TensorFlow examples are based on TensorFlow 2.0 or newer. So far, we
 provide the following examples.
 
-MNIST Image Classification
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Fashion-MNIST Image Classification
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`MNIST <http://yann.lecun.com/exdb/mnist/>`_ is often used as the "Hello,
-world!" of machine learning. We follow this tradition and provide an example
-which samples random local datasets from MNIST and trains a simple image
-classification model over those partitions.
+`Fashion-MNIST <https://github.com/zalandoresearch/fashion-mnist>`_ is often
+used as the "Hello, world!" of machine learning. We follow this tradition and
+provide an example which samples random local datasets from Fashion-MNIST and
+trains a simple image classification model over those partitions.
 
 First, start a Flower server:
 
-  $ ./src/py/flwr_example/tensorflow/run-server.sh
+  $ ./src/py/flwr_example/tensorflow_fashion_mnist/run-server.sh
 
 Then, start the two clients in a new terminal window:
 
-  $ ./src/py/flwr_example/tensorflow/run-clients.sh
+  $ ./src/py/flwr_example/tensorflow_fashion_mnist/run-clients.sh
 
-For more details, see :code:`src/py/flwr_example/tensorflow`.
+For more details, see :code:`src/py/flwr_example/tensorflow_fashion_mnist`.
