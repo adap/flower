@@ -30,7 +30,7 @@ jobs:
         run: python -m poetry install
       - name: Check if protos need recompilation
         run: ./dev/check-protos.sh
-      - name: Lint + Test (isort/black/mypy/pylint/pytest)
+      - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
         run: ./dev/test.sh
 
   test_baseline:
