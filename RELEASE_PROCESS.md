@@ -15,6 +15,6 @@ When the release is built the following things need to happen:
 
 Create a pull request which contains the following changes:
 
-- [ ] Increases the minor version in `pyproject.toml`by one.
-- [ ] Adjust all files which contain the current version number if necessary.
+- [ ] Increase the minor version in `pyproject.toml` by one.
+- [ ] Update all files which contain the current version number if necessary.
 - [ ] Create an entry in the CHANGELOG.md for the new release which documents the changes.
