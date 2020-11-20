@@ -21,7 +21,7 @@ Flower comes with a number of popular federated learning strategies built-in. A 
     strategy = fl.server.strategy.FedAvg()
     fl.server.start_server(config={"num_rounds": 3}, strategy=strategy)
 
-This creates a strategy with all parameters left a default and passes it to the :code:`start_server` function. It is usually recommended to adjust a few parameters during instantiation:
+This creates a strategy with all parameters left at their default values and passes it to the :code:`start_server` function. It is usually recommended to adjust a few parameters during instantiation:
 
 .. code-block:: python
 
