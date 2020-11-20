@@ -11,7 +11,7 @@ When the release is built the following things need to happen:
 - [ ] Tag the release commit with the version number
 - [ ] Upload the release to PyPI
 
-### After the release
+## After the release
 
 Create a pull request which contains the following changes:
 
