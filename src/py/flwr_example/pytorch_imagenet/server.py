@@ -85,7 +85,7 @@ def main() -> None:
 
     # Create client_manager, strategy, and server
     client_manager = fl.server.SimpleClientManager()
-    strategy = fl.server.strategy.DefaultStrategy(
+    strategy = fl.server.strategy.FedAvg(
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,

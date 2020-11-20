@@ -34,7 +34,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
-from flwr.server.strategy import DefaultStrategy, Strategy
+from flwr.server.strategy import FedAvg, Strategy
 
 FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
 EvaluateResultsAndFailures = Tuple[
@@ -47,7 +47,7 @@ ReconnectResultsAndFailures = Tuple[
 
 def set_strategy(strategy: Optional[Strategy]) -> Strategy:
     """Return Strategy."""
-    return strategy if strategy is not None else DefaultStrategy()
+    return strategy if strategy is not None else FedAvg()
 
 
 class Server:
