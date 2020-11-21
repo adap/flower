@@ -69,9 +69,6 @@ def main() -> None:
     # Load model (for centralized evaluation)
     model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
 
-    # Create client_manager
-    client_manager = fl.server.SimpleClientManager()
-
     # Strategy
     eval_fn = get_eval_fn(
         model=model, num_classes=NUM_CLASSES, xy_test=(x_test, y_test)
@@ -113,11 +110,10 @@ def main() -> None:
         )
 
     # Run server
-    server = fl.server.Server(client_manager=client_manager, strategy=strategy)
     fl.server.start_server(
         DEFAULT_SERVER_ADDRESS,
-        server,
         config={"num_rounds": server_setting.rounds},
+        strategy=strategy,
     )
 
 
