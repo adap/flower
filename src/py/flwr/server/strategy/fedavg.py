@@ -176,9 +176,3 @@ class FedAvg(Strategy):
                 for _, evaluate_res in results
             ]
         )
-
-    def on_conclude_round(
-        self, rnd: int, loss: Optional[float], acc: Optional[float]
-    ) -> bool:
-        """Always continue training."""
-        return True

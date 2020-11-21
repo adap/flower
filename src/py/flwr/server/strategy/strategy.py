@@ -135,19 +135,3 @@ class Strategy(ABC):
         Returns:
             The evaluation result, usually a Tuple containing loss and accuracy.
         """
-
-    @abstractmethod
-    def on_conclude_round(
-        self, rnd: int, loss: Optional[float], acc: Optional[float]
-    ) -> bool:
-        """Conclude federated learning round and decide whether to continue or
-        not.
-
-        Arguments:
-            rnd: int. The current round of federated learning.
-            loss: Optional[float]. The loss of the global model weights.
-            acc: Optional[float]. The accuracy of the global model weights.
-
-        Returns:
-            A boolean indicating whether the server should continue or not.
-        """
