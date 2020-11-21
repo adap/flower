@@ -20,7 +20,8 @@
 
 echo "ARGS: ${@}"
 
-./build_image.sh --quiet -f Dockerfile.cpu
+./build_image.sh --quiet -f Dockerfile.gpu
 
 # TODO: here we assume all datasets live in /datasets (for all devices), is this the best way ?
-docker run --expose 80 -v /datasets:/app/data --rm flower_client ${@}
+# TODO: changing the power mode here?, requires sudo :(
+docker run --expose 80 --runtime nvidia -v /datasets:/app/data --rm flower_client ${@}

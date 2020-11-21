@@ -1,5 +1,4 @@
-FROM jafermarq/jetsonfederated_cpu:test
-
+FROM jafermarq/jetsonfederated_gpu:latest
 
 WORKDIR /app
 

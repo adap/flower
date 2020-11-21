@@ -176,7 +176,7 @@ def main() -> None:
 
     # model
     model = utils.load_model(args.model)
-
+    model.to(DEVICE)
     # load (local, on-device) dataset
     trainset, testset = utils.load_cifar()
 
