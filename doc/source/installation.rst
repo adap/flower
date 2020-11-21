@@ -1,14 +1,14 @@
-Installing Flower
+Install
 =================
 
 
-Python Version
---------------
+Requirements
+---------------
 
 Flower requires `Python 3.6 <https://docs.python.org/3.6/>`_ or above.
 
 
-Install Stable Release
+Stable Release
 ----------------------
 
 Stable releases are available on `PyPI <https://pypi.org/>`_::
@@ -16,7 +16,7 @@ Stable releases are available on `PyPI <https://pypi.org/>`_::
   $ pip install flwr
 
 
-Install Nightly Release
+Nightly Release
 -----------------------
 
 The latest (potentially unstable) changes in Flower are available as nightly releases::

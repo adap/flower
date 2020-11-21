@@ -16,10 +16,8 @@ Flower's design goals was to make this simple. Read on to learn more.
    :caption: User Guide
 
    installation
-   quickstart_tensorflow
-   quickstart_pytorch
-   strategies
-   implementing-strategies
+   quickstart
+   strategies/index
    examples
    example_walkthrough_pytorch_mnist
    howto-aws
@@ -41,23 +39,21 @@ The Flower authors welcome external contributions. The following guides are
 intended to help along the way.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contributor Guide
 
-   getting-started-for-contributors
-   good-first-contributions
+   contributing/index
    architecture
 
 
-About Flower
+About 
 ------------
 
 .. toctree::
    :maxdepth: 1
-   :caption: About Flower
+   :caption: About 
 
-   people
-   organizations
+   about/index
    publications
 
 

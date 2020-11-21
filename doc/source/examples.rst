@@ -44,11 +44,11 @@ CIFAR-10 Image Classification
 popular RGB image datasets. The Flower CIFAR-10 example uses PyTorch to train a
 simple CNN classifier in a federated learning setup with two clients.
 
-First, start a Flower server:
+First, start a Flower server::
 
   $ ./src/py/flwr_example/pytorch_cifar/run-server.sh
 
-Then, start the two clients in a new terminal window:
+Then, start the two clients in a new terminal window::
 
   $ ./src/py/flwr_example/pytorch_cifar/run-clients.sh
 
@@ -61,11 +61,11 @@ ImageNet-2012 Image Classification
 vision datasets. The Flower ImageNet example uses PyTorch to train a ResNet-18
 classifier in a federated learning setup with ten clients.
 
-First, start a Flower server:
+First, start a Flower server::
 
   $ ./src/py/flwr_example/pytorch_imagenet/run-server.sh
 
-Then, start the two clients in a new terminal window:
+Then, start the two clients in a new terminal window::
 
   $ ./src/py/flwr_example/pytorch_imagenet/run-clients.sh
 
@@ -86,11 +86,11 @@ used as the "Hello, world!" of machine learning. We follow this tradition and
 provide an example which samples random local datasets from Fashion-MNIST and
 trains a simple image classification model over those partitions.
 
-First, start a Flower server:
+First, start a Flower server::
 
   $ ./src/py/flwr_example/tensorflow_fashion_mnist/run-server.sh
 
-Then, start the two clients in a new terminal window:
+Then, start the two clients in a new terminal window::
 
   $ ./src/py/flwr_example/tensorflow_fashion_mnist/run-clients.sh
 

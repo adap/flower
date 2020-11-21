@@ -7,19 +7,19 @@ Academia
 
 .. list-table:: 
 
-    * - .. figure:: _static/logo-camlsys.png
+    * - .. figure:: ../_static/logo-camlsys.png
 
            `CaMLSys Lab <https://mlsys.cst.cam.ac.uk/>`_
 
-      - .. figure:: _static/logo-ox.png
+      - .. figure:: ../_static/logo-ox.png
 
            `University of Oxford, Department of Computer Science <http://www.cs.ox.ac.uk/>`_
 
-    * - .. figure:: _static/logo-ca.png
+    * - .. figure:: ../_static/logo-ca.png
 
            `University of Cambridge, Department of Computer Science and Technology <https://www.cst.cam.ac.uk/>`_
 
-      - .. figure:: _static/logo-ucl.gif
+      - .. figure:: ../_static/logo-ucl.gif
 
            University College London
 
@@ -27,7 +27,7 @@ Academia
 Industry
 ~~~~~~~~
 
-.. figure:: _static/logo-adap.png
+.. figure:: ../_static/logo-adap.png
      :width: 50 %
      
 `Adap <https://adap.com>`_

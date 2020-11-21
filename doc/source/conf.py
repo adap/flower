@@ -24,7 +24,7 @@ from sphinx.application import ConfigError
 
 
 # Fixing path issue for autodoc
-sys.path.insert(0, os.path.abspath('../../src/py'))
+#sys.path.insert(0, os.path.abspath('../../src/py'))
 
 
 # -- Project information -----------------------------------------------------
@@ -51,7 +51,7 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+#templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -64,31 +64,51 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
-
-# https://alabaster.readthedocs.io/en/latest/customization.html
-html_theme_options = {
-    # Look and feel
-    "page_width": "1024px", # max-width (default: 940px) 
-    "logo": "flower-logo.png",
-    "logo_name": False,
-    "sidebar_collapse": False,
-    "description": "A Friendly Federated Learning Framework",
-    # GitHub
+#html_theme = "alabaster"
+html_theme = "pydata_sphinx_theme"
+#html_sidebars = {}
+#https://pydata-sphinx-theme.readthedocs.io/en/latest/user_guide/configuring.html
+html_logo = "_static/flower-logo.png"
+html_context = {
     "github_user": "adap",
     "github_repo": "flower",
-    "github_type": "star",
-    "github_banner": True,
-    "github_button": True,
-    # Google Analytics
-    "analytics_id": "UA-173987939-2",
+    "github_version": "main",
+    "doc_path": "doc/source"
+    }
+html_theme_options = {
+    # Look and feel
+    "search_bar_text": "Search...",
+    "show_toc_level": 1,
+    # Gihub
+    "github_url": "https://github.com/adap/flower",
+    "use_edit_page_button": True,
+    # Google Analyticsy
+    "google_analytics_id": "UA-173987939-2",
 }
+
+# https://alabaster.readthedocs.io/en/latest/customization.html
+#html_theme_options = {
+#    # Look and feel
+#    "page_width": "1024px", # max-width (default: 940px) 
+#    "logo": "flower-logo.png",
+#    "logo_name": False,
+#    "sidebar_collapse": False,
+#    "description": "A Friendly Federated Learning Framework",
+#    # GitHub
+#    "github_user": "adap",
+#    "github_repo": "flower",
+#    "github_type": "star",
+#    "github_banner": True,
+#    "github_button": True,
+#    # Google Analyticsy
+#    "analytics_id": "UA-173987939-2",
+#}
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+#html_static_path = ["_static"]
 
 # Favicon
-html_favicon = "_static/favicon.ico"
+#html_favicon = "_static/favicon.ico"
