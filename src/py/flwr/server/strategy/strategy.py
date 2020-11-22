@@ -49,7 +49,7 @@ class Strategy(ABC):
 
     def on_configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+    ) -> List[Tuple[ClientProxy, FitIns]]:
         """DEPRECATED: Use `configure_fit` instead."""
         warning = """
         Detected usage of the deprecated Strategy method
