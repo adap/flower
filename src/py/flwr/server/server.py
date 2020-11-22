@@ -114,13 +114,6 @@ class Server:
                     rnd=current_round, loss=cast(float, loss_fed)
                 )
 
-            # Conclude round
-            loss = res_cen[0] if res_cen is not None else None
-            acc = res_cen[1] if res_cen is not None else None
-            should_continue = self.strategy.on_conclude_round(current_round, loss, acc)
-            if not should_continue:
-                break
-
         # Send shutdown signal to all clients
         all_clients = self._client_manager.all()
         _ = shutdown(clients=[all_clients[k] for k in all_clients.keys()])
