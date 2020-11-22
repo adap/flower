@@ -16,11 +16,9 @@
 
 
 from abc import ABC, abstractmethod
-from logging import WARNING
 from typing import List, Optional, Tuple
 
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
-from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
