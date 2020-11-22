@@ -65,14 +65,10 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # Configure logger
-    fl.common.logger.configure("server", host=args.log_host)
-
     # Load evaluation data
     _, xy_test = fashion_mnist.load_data(partition=0, num_partitions=1)
 
-    # Create client_manager, strategy, and server
-    client_manager = fl.server.SimpleClientManager()
+    # Create strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
@@ -80,13 +76,13 @@ def main() -> None:
         eval_fn=get_eval_fn(xy_test=xy_test),
         on_fit_config_fn=fit_config,
     )
-    server = fl.server.Server(client_manager=client_manager, strategy=strategy)
 
-    # Run server
+    # Configure logger and start server
+    fl.common.logger.configure("server", host=args.log_host)
     fl.server.start_server(
         args.server_address,
-        server,
         config={"num_rounds": args.rounds},
+        strategy=strategy,
     )
 
 
