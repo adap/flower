@@ -43,11 +43,6 @@ The strategy abstraction defines a few abstract methods that need to be implemen
         @abstractmethod
         def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
 
-        @abstractmethod
-        def on_conclude_round(
-            self, rnd: int, loss: Optional[float], acc: Optional[float]
-        ) -> bool:
-
 Creating a new strategy means implmenting a new :code:`class` derived from the abstract base class :code:`Strategy` which provides implementations for the previously shown abstract methods:
 
 .. code-block:: python
@@ -67,9 +62,6 @@ Creating a new strategy means implmenting a new :code:`class` derived from the a
             # Your implementation here
 
         def evaluate(self, weights):
-            # Your implementation here
-
-        def on_conclude_round(self, rnd, loss, acc):
             # Your implementation here
 
 The following sections describe each of those methods in detail.
@@ -96,10 +88,5 @@ The :code:`on_aggregate_evaluate` method
 
 The :code:`evaluate` method
 ---------------------------
-
-*coming soon*
-
-The :code:`on_conclude_round` method
-------------------------------------
 
 *coming soon*
