@@ -69,9 +69,6 @@ def main() -> None:
     # Load model (for centralized evaluation)
     model = keyword_cnn(input_shape=(80, 40, 1), seed=SEED)
 
-    # Create client_manager
-    client_manager = fl.server.SimpleClientManager()
-
     # Strategy
     eval_fn = get_eval_fn(model=model, num_classes=10, xy_test=(x_test, y_test))
     on_fit_config_fn = get_on_fit_config_fn(
@@ -142,11 +139,10 @@ def main() -> None:
         )
 
     # Run server
-    server = fl.server.Server(client_manager=client_manager, strategy=strategy)
     fl.server.start_server(
         DEFAULT_SERVER_ADDRESS,
-        server,
         config={"num_rounds": server_setting.rounds},
+        strategy=strategy,
     )
 
 
