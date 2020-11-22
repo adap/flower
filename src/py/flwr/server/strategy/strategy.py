@@ -24,10 +24,10 @@ from flwr.server.client_proxy import ClientProxy
 
 
 class Strategy(ABC):
-    """Abstract class to implement custom server strategies."""
+    """Abstract base class for server strategy implementations."""
 
     @abstractmethod
-    def on_configure_fit(
+    def configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training.
@@ -46,27 +46,7 @@ class Strategy(ABC):
         """
 
     @abstractmethod
-    def on_configure_evaluate(
-        self, rnd: int, weights: Weights, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        """Configure the next round of evaluation.
-
-        Arguments:
-            rnd: Integer. The current round of federated learning.
-            weights: Weights. The current (global) model weights.
-            client_manager: ClientManager. The client manger which knows about all
-                currently connected clients.
-
-        Returns:
-            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
-            `EvaluateIns` for this particular `ClientProxy`. If a particular
-            `ClientProxy` is not included in this list, it means that this
-            `ClientProxy` will not participate in the next round of federated
-            evaluation.
-        """
-
-    @abstractmethod
-    def on_aggregate_fit(
+    def aggregate_fit(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
@@ -97,7 +77,27 @@ class Strategy(ABC):
         """
 
     @abstractmethod
-    def on_aggregate_evaluate(
+    def configure_evaluate(
+        self, rnd: int, weights: Weights, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation.
+
+        Arguments:
+            rnd: Integer. The current round of federated learning.
+            weights: Weights. The current (global) model weights.
+            client_manager: ClientManager. The client manger which knows about all
+                currently connected clients.
+
+        Returns:
+            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
+            `EvaluateIns` for this particular `ClientProxy`. If a particular
+            `ClientProxy` is not included in this list, it means that this
+            `ClientProxy` will not participate in the next round of federated
+            evaluation.
+        """
+
+    @abstractmethod
+    def aggregate_evaluate(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],

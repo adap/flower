@@ -24,7 +24,7 @@ from flwr.server.client_proxy import ClientProxy
 from .fault_tolerant_fedavg import FaultTolerantFedAvg
 
 
-def test_on_aggregate_fit_no_results_no_failures() -> None:
+def test_aggregate_fit_no_results_no_failures() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.1)
@@ -33,13 +33,13 @@ def test_on_aggregate_fit_no_results_no_failures() -> None:
     expected: Optional[Weights] = None
 
     # Execute
-    actual = strategy.on_aggregate_fit(1, results, failures)
+    actual = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
 
 
-def test_on_aggregate_fit_no_results() -> None:
+def test_aggregate_fit_no_results() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.1)
@@ -48,13 +48,13 @@ def test_on_aggregate_fit_no_results() -> None:
     expected: Optional[Weights] = None
 
     # Execute
-    actual = strategy.on_aggregate_fit(1, results, failures)
+    actual = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
 
 
-def test_on_aggregate_fit_not_enough_results() -> None:
+def test_aggregate_fit_not_enough_results() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.5)
@@ -65,13 +65,13 @@ def test_on_aggregate_fit_not_enough_results() -> None:
     expected: Optional[Weights] = None
 
     # Execute
-    actual = strategy.on_aggregate_fit(1, results, failures)
+    actual = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
 
 
-def test_on_aggregate_fit_just_enough_results() -> None:
+def test_aggregate_fit_just_enough_results() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.5)
@@ -82,13 +82,13 @@ def test_on_aggregate_fit_just_enough_results() -> None:
     expected: Optional[Weights] = []
 
     # Execute
-    actual = strategy.on_aggregate_fit(1, results, failures)
+    actual = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
 
 
-def test_on_aggregate_fit_no_failures() -> None:
+def test_aggregate_fit_no_failures() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.99)
@@ -99,13 +99,13 @@ def test_on_aggregate_fit_no_failures() -> None:
     expected: Optional[Weights] = []
 
     # Execute
-    actual = strategy.on_aggregate_fit(1, results, failures)
+    actual = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
 
 
-def test_on_aggregate_evaluate_no_results_no_failures() -> None:
+def test_aggregate_evaluate_no_results_no_failures() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.1)
@@ -114,13 +114,13 @@ def test_on_aggregate_evaluate_no_results_no_failures() -> None:
     expected: Optional[float] = None
 
     # Execute
-    actual = strategy.on_aggregate_evaluate(1, results, failures)
+    actual = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
 
 
-def test_on_aggregate_evaluate_no_results() -> None:
+def test_aggregate_evaluate_no_results() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.1)
@@ -129,13 +129,13 @@ def test_on_aggregate_evaluate_no_results() -> None:
     expected: Optional[float] = None
 
     # Execute
-    actual = strategy.on_aggregate_evaluate(1, results, failures)
+    actual = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
 
 
-def test_on_aggregate_evaluate_not_enough_results() -> None:
+def test_aggregate_evaluate_not_enough_results() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.5)
@@ -146,13 +146,13 @@ def test_on_aggregate_evaluate_not_enough_results() -> None:
     expected: Optional[float] = None
 
     # Execute
-    actual = strategy.on_aggregate_evaluate(1, results, failures)
+    actual = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
 
 
-def test_on_aggregate_evaluate_just_enough_results() -> None:
+def test_aggregate_evaluate_just_enough_results() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.5)
@@ -163,13 +163,13 @@ def test_on_aggregate_evaluate_just_enough_results() -> None:
     expected: Optional[float] = 2.3
 
     # Execute
-    actual = strategy.on_aggregate_evaluate(1, results, failures)
+    actual = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
 
 
-def test_on_aggregate_evaluate_no_failures() -> None:
+def test_aggregate_evaluate_no_failures() -> None:
     """Test evaluate function."""
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.99)
@@ -180,7 +180,7 @@ def test_on_aggregate_evaluate_no_failures() -> None:
     expected: Optional[float] = 2.3
 
     # Execute
-    actual = strategy.on_aggregate_evaluate(1, results, failures)
+    actual = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected

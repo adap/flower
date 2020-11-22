@@ -95,7 +95,7 @@ class QffedAvg(FedAvg):
             return None
         return self.eval_fn(weights)
 
-    def on_configure_fit(
+    def configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
@@ -118,7 +118,7 @@ class QffedAvg(FedAvg):
         # Return client/config pairs
         return [(client, fit_ins) for client in clients]
 
-    def on_configure_evaluate(
+    def configure_evaluate(
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
@@ -146,7 +146,7 @@ class QffedAvg(FedAvg):
         # Return client/config pairs
         return [(client, evaluate_ins) for client in clients]
 
-    def on_aggregate_fit(
+    def aggregate_fit(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
@@ -174,7 +174,7 @@ class QffedAvg(FedAvg):
         hs_ffl = []
 
         if self.pre_weights is None:
-            raise Exception("QffedAvg pre_weights are None in on_aggregate_fit")
+            raise Exception("QffedAvg pre_weights are None in aggregate_fit")
 
         weights_before = self.pre_weights
         eval_result = self.evaluate(weights_before)
@@ -202,7 +202,7 @@ class QffedAvg(FedAvg):
 
         return aggregate_qffl(weights_before, deltas, hs_ffl)
 
-    def on_aggregate_evaluate(
+    def aggregate_evaluate(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
