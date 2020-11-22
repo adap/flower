@@ -1,4 +1,5 @@
-FROM jafermarq/jetsonfederated_gpu:latest
+ARG BASE_IMAGE_TYPE=cpu
+FROM jafermarq/jetsonfederated_$BASE_IMAGE_TYPE:latest
 
 WORKDIR /app
 

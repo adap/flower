@@ -16,11 +16,11 @@
 # ==============================================================================
 
 
-# run as: ./run_pi.sh --server_address=<YOUR_SERVER_ADDRESS> --cid=0 --model=Net
+# run as: ./run_jetson.sh --server_address=<YOUR_SERVER_ADDRESS> --cid=0 --model=ResNet18
 
 echo "ARGS: ${@}"
 
-./build_image.sh --quiet -f Dockerfile.gpu
+./build_image.sh --quiet --build-arg BASE_IMAGE_TYPE=gpu
 
 # TODO: here we assume all datasets live in /datasets (for all devices), is this the best way ?
 # TODO: changing the power mode here?, requires sudo :(
