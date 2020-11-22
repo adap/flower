@@ -1,0 +1,107 @@
+
+
+
+This demo will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use NVIDIA Jetson devices and Raspberri Pi as Flower clients. This demo uses Flower with PyTorch. The source code used is mostly borrowed from the the [example that Flower provides for CIFAR-10](https://github.com/adap/flower/tree/main/src/py/flwr_example/pytorch_cifar).
+
+# Getting things ready
+
+This is a list of components that you'll need: 
+
+* For server: A machine running Linux/macOS.
+* For clients: either a Rapsberry Pi 3 (RPi 4 would work too) or a Jetson Xavier-NX (or any other recent NVIDIA-Jetson device).
+* A 32GB uSD card and ideally UHS-1 or better. (not needed if you plan to use a Jetson-TX2 instead)
+* Software to flash the images to a uSD card (e.g. [Etcher](https://www.balena.io/etcher/))
+
+What follows is a step-by-step guide on how to setup your client/s and the server. In order to minimize the amount of setup and potential issues that might arise due to the hardware/software heterogenity between clients we'll be running the clients inside a Docker. We provide two docker images: one built for Jetson devices and make use of their GPU; and for CPU-only training suitable for RaspberryPi (but would also work on Jetson devices). The following diagram illustrates the setup for this demo:
+
+![alt text](diagram.png)
+
+
+## Setting up a Jetson Xavier-NX
+
+> These steps have been validated for Jetson Xavier-NX Dev Kit. An identical setup is needed for a Jetson Nano and Jetson-TX2 once you get ssh access to them (i.e. jumpy straight to point `5` below). For instructions on how to setup these devices please refer to the "getting started guides" for [Jetson-Nano](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#intro) and [Jetson-TX2](https://developer.nvidia.com/embedded/dlc/l4t-28-2-jetson-developer-kit-user-guide-ga). 
+
+1. Download the ubuntu image from [NVIDIA-embedded](https://developer.nvidia.com/embedded/downloads), note that you'll need a NVIDIA developer account. 
+2. Extract the imgae (~14GB) and flash it onto the uSD card using Etcher (or equivalent).
+3. Follow [the instructions](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit) to setup the device.
+4. Installing Docker: it comes pre-installed with the image provided by NVIDIA. But for convinience we will create a new user group and add our user to it (with the idea of not having to use `sudo` for every command involving docker (e.g. `docker run`, `docker ps`, etc)). More details about what this entails can be found in the [Docker documentation](https://docs.docker.com/engine/install/linux-postinstall/). You can achieve this by doing:
+    ``` bash
+    $ sudo usermod -aG docker $USER
+      # apply changes to current shell (or logout/reboot)
+    $ newgrp docker
+    ```
+5. The minimal installation to run this example only requires an additional package, `git`, in order to clone this repo. Install `git` by:
+
+    ```bash
+    $ sudo apt-get update && sudo apt-get install git -y
+    ```
+
+6. (optional) additional packages:
+     * [jtop](https://github.com/rbonghi/jetson_stats), a tool to monitor various metrics on the Jetson devices including CPU and GPU utilization, power consumption and, many more.
+        ```bash
+        # First we need to install pip3
+        $ sudo apt-get install python3-pip -y 
+        # updated pip3
+        $ sudo pip3 install -U pip
+        # finally, install jtop
+        $ sudo -H pip3 install -U jetson-stats
+        ```
+     * [TMUX](https://github.com/tmux/tmux/wiki), a terminal multiplexer.
+        ```bash
+        # install tmux
+        $ sudo apt-get install tmux -y
+        # add mouse support
+        $ echo set -g mouse on > ~/.tmux.conf
+        ```
+
+## Settting up a Raspberry Pi (3 or 4)
+
+1. Install ubuntu server 64-bit for Rapsberry Pi using one of the images provided [here](https://ubuntu.com/download/raspberry-pi). A step-by-step installation guide can be found [here](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi#1-overview).
+
+2. Install docker (+ post-installation steps as in [Docker Docs](https://docs.docker.com/engine/install/linux-postinstall/)):
+    ```bash
+    # make sure your OS is up-to-date
+    $ sudo apt-get update && apt-get upgrade
+
+    # get the installation script
+    $ curl -fsSL https://get.docker.com -o get-docker.sh
+
+    # install docker
+    $ sudo sh get-docker.sh
+
+    # create a new group for docker and add your user to it
+    $ sudo groupadd docker && sudo usermod -aG docker $USER
+    ```
+3. Minimal additional requirements: install `git` as described in stage `5` for the Jetson Xavier-NX setup.
+4. (optional) additional packages: you could install `TMUX` (see point `6` above) and `htop` as a replacement for `jtop` (which is only available for Jetson devices). Htop can be installed via: `sudo apt-get install htop -y`.
+
+
+## Settting up the server
+
+The only requirement for the server is to have flower installed. You can do so by running `pip install flwr` inside your virtualenv or conda environment. In this example we don't use docker for the server.
+
+
+# Running FL training with Flower
+
+### Server:
+
+Launch the server and define the model you'd like to train. The current code (see `utils.py`) provides two models for CIFAR-10: a small CNN (more suitable for RaspberryPi) and, a ResNet18, which will run well on the gpu. Each model can be specified using the `--model` flag with options `Net` or `ResNet18`. Launch a FL training setup with one client and doing 3 epochs as:
+```bash
+# launch your server. It will be waiting until one client connects
+python server.py --min_num_clients 1 --min_sample_size 1 --model ResNet18 --batch_size 32 --server_address <YOUR_SERVER_IP:PORT> --rounds 3
+```
+
+Asuming you have cloned this repo onto the device/s, then execute the appropiate script to run the docker image, connect with the server and proceed with the training. Note that you can use both a Jetson and a RPi simultaneously, just make sure you modify the script above when launching the server so it waits until 2 clients are online. 
+
+### For Jetson:
+
+```bash
+./run_jetson.sh --server_address=<SERVER_ADDRESS> --cid=0 --model=ResNet18
+```
+
+### For RaspberryPi:
+
+```bash
+# depending on the model of RapsberryPi you have, running the smaller `Net` model might be the only option due to the higher RAM budget needed for ResNet18. For a RaspberryPi 4 with 4GB of RAM or more should be fine to run a RestNet18 (with an appropiate batch size)
+./run_pi.sh --server_address=<SERVER_ADDRESS> --cid=0 --model=Net
+```
