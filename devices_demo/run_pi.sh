@@ -23,4 +23,4 @@ echo "ARGS: ${@}"
 ./build_image.sh --quiet --build-arg BASE_IMAGE_TYPE=cpu
 
 # TODO: here we assume all datasets live in /datasets (for all devices), is this the best way ?
-docker run --expose 80 -v /datasets:/app/data --rm flower_client ${@}
+docker run -v /datasets:/app/data --rm flower_client ${@}

@@ -24,4 +24,4 @@ echo "ARGS: ${@}"
 
 # TODO: here we assume all datasets live in /datasets (for all devices), is this the best way ?
 # TODO: changing the power mode here?, requires sudo :(
-docker run --expose 80 --runtime nvidia -v /datasets:/app/data --rm flower_client ${@}
+docker run --runtime nvidia -v /datasets:/app/data --rm flower_client ${@}
