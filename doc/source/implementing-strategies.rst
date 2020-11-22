@@ -104,9 +104,9 @@ The :code:`evaluate` method
 Deprecated methods
 ------------------
 
-The following methods are deprecated and will be removed in a future release.
-Migrate to the new versions by renaming them (i.e., removing the :code:`on_`
-prefix):
+The following methods were replaced by updated versions with the same type
+signature. Migrate to the new versions by renaming them (i.e., remove the
+:code:`on_` prefix):
 
 * :code:`on_configure_fit` (replaced by :code:`configure_fit`)
 * :code:`on_aggregate_fit` (replaced by :code:`aggregate_fit`)

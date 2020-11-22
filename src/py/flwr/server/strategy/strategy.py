@@ -47,52 +47,6 @@ class Strategy(ABC):
             will not participate in the next round of federated learning.
         """
 
-    def on_configure_fit(
-        self, rnd: int, weights: Weights, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, FitIns]]:
-        """DEPRECATED: Use `configure_fit` instead."""
-        warning = """
-        Detected usage of the deprecated Strategy method
-        `on_configure_fit`, please migrate by renaming to `configure_fit`.
-        """
-        log(WARNING, warning)
-        return self.configure_fit(
-            rnd=rnd, weights=weights, client_manager=client_manager
-        )
-
-    @abstractmethod
-    def configure_evaluate(
-        self, rnd: int, weights: Weights, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        """Configure the next round of evaluation.
-
-        Arguments:
-            rnd: Integer. The current round of federated learning.
-            weights: Weights. The current (global) model weights.
-            client_manager: ClientManager. The client manger which knows about all
-                currently connected clients.
-
-        Returns:
-            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
-            `EvaluateIns` for this particular `ClientProxy`. If a particular
-            `ClientProxy` is not included in this list, it means that this
-            `ClientProxy` will not participate in the next round of federated
-            evaluation.
-        """
-
-    def on_configure_evaluate(
-        self, rnd: int, weights: Weights, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        """DEPRECATED: Use `configure_evaluate` instead."""
-        warning = """
-        Detected usage of the deprecated Strategy method
-        `on_configure_evaluate`, please migrate by renaming to `configure_evaluate`.
-        """
-        log(WARNING, warning)
-        return self.configure_evaluate(
-            rnd=rnd, weights=weights, client_manager=client_manager
-        )
-
     @abstractmethod
     def aggregate_fit(
         self,
@@ -124,19 +78,25 @@ class Strategy(ABC):
             the same.
         """
 
-    def on_aggregate_fit(
-        self,
-        rnd: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
-    ) -> Optional[Weights]:
-        """DEPRECATED: Use `aggregate_fit` instead."""
-        warning = """
-        Detected usage of the deprecated Strategy method
-        `on_aggregate_fit`, please migrate by renaming to `aggregate_fit`.
+    @abstractmethod
+    def configure_evaluate(
+        self, rnd: int, weights: Weights, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation.
+
+        Arguments:
+            rnd: Integer. The current round of federated learning.
+            weights: Weights. The current (global) model weights.
+            client_manager: ClientManager. The client manger which knows about all
+                currently connected clients.
+
+        Returns:
+            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
+            `EvaluateIns` for this particular `ClientProxy`. If a particular
+            `ClientProxy` is not included in this list, it means that this
+            `ClientProxy` will not participate in the next round of federated
+            evaluation.
         """
-        log(WARNING, warning)
-        return self.aggregate_fit(rnd=rnd, results=results, failures=failures)
 
     @abstractmethod
     def aggregate_evaluate(
@@ -163,20 +123,6 @@ class Strategy(ABC):
             Optional `float` representing the aggregated evaluation result. Aggregation
             typically uses some variant of a weighted average.
         """
-
-    def on_aggregate_evaluate(
-        self,
-        rnd: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
-    ) -> Optional[float]:
-        """DEPRECATED: Use `aggregate_evaluate` instead."""
-        warning = """
-        Detected usage of the deprecated Strategy method
-        `on_aggregate_evaluate`, please migrate by renaming to `aggregate_evaluate`.
-        """
-        log(WARNING, warning)
-        return self.aggregate_evaluate(rnd=rnd, results=results, failures=failures)
 
     @abstractmethod
     def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
