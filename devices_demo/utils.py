@@ -110,10 +110,10 @@ def load_cifar() -> Tuple[datasets.CIFAR10, datasets.CIFAR10]:
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
     trainset = datasets.CIFAR10(
-        root=DATA_ROOT/"cifar-10", train=True, download=True, transform=transform
+        root=DATA_ROOT/"cifar-10", train=True, download=False, transform=transform
     )
     testset = datasets.CIFAR10(
-        root=DATA_ROOT/"cifar-10", train=False, download=True, transform=transform
+        root=DATA_ROOT/"cifar-10", train=False, download=False, transform=transform
     )
     return trainset, testset
 

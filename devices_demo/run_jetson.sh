@@ -20,8 +20,6 @@
 
 echo "ARGS: ${@}"
 
-./build_image.sh --quiet --build-arg BASE_IMAGE_TYPE=gpu
+./build_image.sh --build-arg BASE_IMAGE_TYPE=gpu
 
-# TODO: here we assume all datasets live in /datasets (for all devices), is this the best way ?
-# TODO: changing the power mode here?, requires sudo :(
-docker run --runtime nvidia -v /datasets:/app/data --rm flower_client ${@}
+docker run --runtime nvidia --rm flower_client ${@}
