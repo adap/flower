@@ -104,7 +104,7 @@ def main() -> None:
     fl.common.logger.configure("server", host=args.log_host)
 
     # Load evaluation data
-    _, testset = utils.load_cifar()
+    _, testset = utils.load_cifar(download=True)
 
     # Create client_manager, strategy, and server
     client_manager = fl.server.SimpleClientManager()

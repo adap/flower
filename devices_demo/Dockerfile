@@ -13,9 +13,13 @@ ADD utils.py /app
 # Having the dataset as part of the Docker image would make things easier in scenarios
 # where we want multilple instances of the same image runnig simultaneously.
 # If the dataset is already in your system you can `COPY ...` it instead.
-ENV DATA_DIR=/app/data
-RUN mkdir $DATA_DIR
-RUN python3 -c "from torchvision import datasets; datasets.CIFAR10(root='${DATA_DIR}/cifar-10', download=True)"
+ENV DATA_DIR=/app/data/cifar-10
+RUN mkdir -p $DATA_DIR
+WORKDIR $DATA_DIR
+RUN apt-get install wget -y
+RUN wget https://www.cs.toronto.edu/\~kriz/cifar-10-python.tar.gz 
+RUN tar -zxvf cifar-10-python.tar.gz
 
 RUN echo "Ready!"
+WORKDIR /app
 ENTRYPOINT ["python3","./client.py"]
