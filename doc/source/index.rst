@@ -23,6 +23,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    examples
    example_walkthrough_pytorch_mnist
    howto-aws
+   changelog
 
 
 API Reference
@@ -47,6 +48,7 @@ intended to help along the way.
    getting-started-for-contributors
    good-first-contributions
    architecture
+   release_process
 
 
 About Flower
