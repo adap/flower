@@ -5,6 +5,7 @@ description = "Run your ML workload federated"
 authors = ["y"]
 
 [tool.poetry.dependencies]
+python = "^3.7.9"
 tensorflow-cpu = "2.3.0"
 numpy = "1.18.1"
 typing = "^3.7.4"
