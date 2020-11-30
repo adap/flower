@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Unreleased
-----------
+v0.11.0 (2020-11-30)
+--------------------
 
 Incompatible changes:
 
