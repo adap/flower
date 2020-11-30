@@ -57,7 +57,7 @@ After installing all required libaries you can start the Flower server
 ./run-server.sh
 ```
 
-and start 2 Flower clients with
+Open a new terminal and start 2 Flower clients with
 
 ```shell
 ./run-client.sh
