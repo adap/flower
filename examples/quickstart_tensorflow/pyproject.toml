@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "flower_example"
-version = "0.0.1"
-description = "Run your ML workload federated"
-authors = ["y"]
+name = "Keras Quickstarter"
+version = "0.1.0"
+description = "Run Keras federated"
+authors = ["mariaboerner1987 <maria@adap.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7.9"
+python = "^3.6.12"
 tensorflow-cpu = "2.3.0"
 numpy = "1.18.1"
 typing = "^3.7.4"
