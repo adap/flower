@@ -4,6 +4,9 @@ Changelog
 Unreleased
 ----------
 
+v0.11.0 (2020-11-30)
+--------------------
+
 Incompatible changes:
 
 * Renamed strategy methods (`#486 <https://github.com/adap/flower/pull/486>`_) to unify the naming of Flower's public APIs. Other public methods/functions (e.g., every method in :code:`Client`, but also :code:`Strategy.evaluate`) do not use the :code:`on_` prefix, which is why we're removing it from the four methods in Strategy. To migrate rename the following :code:`Strategy` methods accordingly:
