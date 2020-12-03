@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower client app."""
 
+
 import timeit
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
@@ -109,9 +110,9 @@ class NumPyClientWrapper(Client):
         fit_duration = timeit.default_timer() - fit_begin
 
         # Return FitRes
-        parameters = weights_to_parameters(parameters_prime)
+        parameters_prime_proto = weights_to_parameters(parameters_prime)
         return FitRes(
-            parameters=parameters,
+            parameters=parameters_prime_proto,
             num_examples=num_examples,
             num_examples_ceil=num_examples,  # num_examples == num_examples_ceil
             fit_duration=fit_duration,

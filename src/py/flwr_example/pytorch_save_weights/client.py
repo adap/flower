@@ -51,7 +51,7 @@ class CifarClient(fl.client.NumPyClient):
 
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str]
-    ) -> Tuple[List[np.ndarray], int, int]:
+    ) -> Tuple[List[np.ndarray], int]:
         # Set model parameters
         self.model.set_weights(parameters)
 
