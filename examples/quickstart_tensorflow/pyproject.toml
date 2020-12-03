@@ -1,5 +1,11 @@
+[build-system]
+requires = [
+    "poetry==1.1.4",
+]
+build-backend = "poetry.masonry.api"
+
 [tool.poetry]
-name = "Keras Quickstarter"
+name = "quickstart_tensorflow"
 version = "0.1.0"
 description = "Run Keras federated"
 authors = ["mariaboerner1987 <maria@adap.com>"]
