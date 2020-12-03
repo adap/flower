@@ -56,7 +56,7 @@ After installing all required libaries you can start the Flower server
 ./run-server.sh
 ```
 
-Open a new terminal and start 2 Flower clients with
+Now you are ready to start the Flower Clients which will participate in the learning. Todo so simply run the `run-clients.sh` shell script as follows:
 
 ```shell
 ./run-client.sh
