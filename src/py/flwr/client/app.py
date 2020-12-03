@@ -45,9 +45,9 @@ def start_client(
             The maximum length of gRPC messages that can be exchanged with the
             Flower server. The default should be sufficient for most models.
             Users who train very large models might need to increase this
-            value. Note that the Flower server needs to started with the same
-            value (see `flwr.server.start_server`), otherwise it will not know
-            about the increased limit and block larger messages.
+            value. Note that the Flower server needs to be started with the
+            same value (see `flwr.server.start_server`), otherwise it will not
+            know about the increased limit and block larger messages.
 
     Returns:
         None.
@@ -97,9 +97,9 @@ def start_numpy_client(
             The maximum length of gRPC messages that can be exchanged with the
             Flower server. The default should be sufficient for most models.
             Users who train very large models might need to increase this
-            value. Note that the Flower server needs to started with the same
-            value (see `flwr.server.start_server`), otherwise it will not know
-            about the increased limit and block larger messages.
+            value. Note that the Flower server needs to be started with the
+            same value (see `flwr.server.start_server`), otherwise it will not
+            know about the increased limit and block larger messages.
 
     Returns:
         None.
@@ -133,9 +133,9 @@ def start_keras_client(
             The maximum length of gRPC messages that can be exchanged with the
             Flower server. The default should be sufficient for most models.
             Users who train very large models might need to increase this
-            value. Note that the Flower server needs to started with the same
-            value (see `flwr.server.start_server`), otherwise it will not know
-            about the increased limit and block larger messages.
+            value. Note that the Flower server needs to be started with the
+            same value (see `flwr.server.start_server`), otherwise it will not
+            know about the increased limit and block larger messages.
 
     Returns:
         None.
