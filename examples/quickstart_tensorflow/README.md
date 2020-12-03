@@ -24,7 +24,7 @@ pyenv virtualenv 3.7.9 keras-federated-3.7.9
 Activate the virtualenv by running the following command:
 
 ```shell
-keras-federated-3.7.9
+echo keras-federated-3.7.9 > .python-version
 ```
 
 ## Run Keras Federated
