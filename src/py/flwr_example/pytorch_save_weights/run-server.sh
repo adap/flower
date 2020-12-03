@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server example."""
 
-
-import flwr as fl
-
-if __name__ == "__main__":
-    fl.server.start_server(config={"num_rounds": 3})
+# Start a Flower server
+python -m flwr_example.pytorch_save_weights.server

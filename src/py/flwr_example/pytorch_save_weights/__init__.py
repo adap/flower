@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server example."""
+"""Flower example using PyTorch for CIFAR-10 image classification."""
 
 
-import flwr as fl
-
-if __name__ == "__main__":
-    fl.server.start_server(config={"num_rounds": 3})
+DEFAULT_SERVER_ADDRESS = "[::]:8080"
