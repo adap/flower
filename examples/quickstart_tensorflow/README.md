@@ -2,6 +2,9 @@
 
 Flower is easy to use by only starting the Flower server and the Flower clients.
 
+This introductory example to Flower uses Keras but deep knowledge of Keras is not necessarily required to run the example. However, it will help you understanding how to adapt Flower to your use-cases.
+Running this example in itself is quite easy.
+
 It is recommended to use [pyenv](https://github.com/pyenv/pyenv)/[pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) and [poetry](https://python-poetry.org/docs/) to ensure the right version of libraries.
 
 After installing both tools you can start to set up everything.  
