@@ -9,7 +9,7 @@ After installing both tools you can start to set up everything.
 
 ## Setup your virtual environment
 
-First, you should setup your virtualenv and  install [Python Version 3.6](https://docs.python.org/3.6/) or above:
+First, you should setup your virtualenv and install [Python Version 3.6](https://docs.python.org/3.6/) or above:
 
 ```shell
 pyenv install 3.7.9
