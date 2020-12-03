@@ -21,7 +21,7 @@ Create a virtualenv with:
 pyenv virtualenv 3.7.9 keras-federated-3.7.9
 ```
 
-Activate the virtualenv by creating a `.python-version` with the content:
+Activate the virtualenv by running the following command:
 
 ```shell
 keras-federated-3.7.9
