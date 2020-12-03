@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies (mandatory + optional)
         run: |
           python -m poetry install --extras "baseline"
-          python -m pip install -U tensorflow-cpu==2.3.0
+          python -m pip install -U tensorflow-cpu==2.3.1
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-baseline.sh
 
@@ -91,6 +91,6 @@ jobs:
       - name: Install dependencies (mandatory + optional)
         run: |
           python -m poetry install --extras "examples-tensorflow"
-          python -m pip install -U tensorflow-cpu==2.3.0
+          python -m pip install -U tensorflow-cpu==2.3.1
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-example-tensorflow.sh
