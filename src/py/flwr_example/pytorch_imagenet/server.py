@@ -88,7 +88,7 @@ def main() -> None:
         eval_fn=get_eval_fn(testset),
         on_fit_config_fn=fit_config,
     )
-    
+
     # Configure logger and start server
     fl.common.logger.configure("server", host=args.log_host)
     fl.server.start_server(
