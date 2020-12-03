@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""Flower example using PyTorch for CIFAR-10 image classification."""
 
-# Start a Flower server
-python -m flwr_example.quickstart.server
+
+DEFAULT_SERVER_ADDRESS = "[::]:8080"

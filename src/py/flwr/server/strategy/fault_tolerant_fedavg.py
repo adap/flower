@@ -58,7 +58,7 @@ class FaultTolerantFedAvg(FedAvg):
     def __repr__(self) -> str:
         return "FaultTolerantFedAvg()"
 
-    def on_aggregate_fit(
+    def aggregate_fit(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
@@ -79,7 +79,7 @@ class FaultTolerantFedAvg(FedAvg):
         ]
         return aggregate(weights_results)
 
-    def on_aggregate_evaluate(
+    def aggregate_evaluate(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],

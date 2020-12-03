@@ -15,9 +15,14 @@
 # limitations under the License.
 # ==============================================================================
 
-# Start a Flower server
-python -m flwr_example.tensorflow.server \
-  --rounds=5 \
-  --sample_fraction=0.5 \
-  --min_sample_size=5 \
-  --min_num_clients=5
+set -e
+
+NUM_CLIENTS=2
+
+echo "Starting $NUM_CLIENTS clients."
+for ((i = 0; i < $NUM_CLIENTS; i++))
+do
+    echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
+    python -m flwr_example.pytorch_save_weights.client &
+done
+echo "Started $NUM_CLIENTS clients."

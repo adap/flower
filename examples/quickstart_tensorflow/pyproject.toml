@@ -1,0 +1,24 @@
+[build-system]
+requires = [
+    "poetry==1.1.4",
+]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "quickstart_tensorflow"
+version = "0.1.0"
+description = "Run Keras federated"
+authors = ["mariaboerner1987 <maria@adap.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.12"
+tensorflow-cpu = "2.3.0"
+numpy = "1.18.1"
+typing = "^3.7.4"
+flwr = "^0.11.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

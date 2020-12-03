@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,18 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""Flower server example."""
 
-set -e
 
-SERVER_ADDRESS="[::]:8080"
-NUM_CLIENTS=2
+import flwr as fl
 
-echo "Starting $NUM_CLIENTS clients."
-for ((i = 0; i < $NUM_CLIENTS; i++))
-do
-    echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
-    python -m flwr_example.pytorch.client \
-      --cid=$i \
-      --server_address=$SERVER_ADDRESS &
-done
-echo "Started $NUM_CLIENTS clients."
+if __name__ == "__main__":
+    fl.server.start_server(config={"num_rounds": 3})
