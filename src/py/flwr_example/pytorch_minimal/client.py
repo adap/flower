@@ -17,7 +17,7 @@
 
 import argparse
 import timeit
-from typing import Tuple
+from typing import Dict, Tuple
 
 import torch
 import torchvision
@@ -28,7 +28,7 @@ from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes,
 from . import DEFAULT_SERVER_ADDRESS, cifar
 
 # pylint: disable=no-member
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
 
 # Flower Client
@@ -48,7 +48,7 @@ class CifarClient(fl.client.KerasClient):
     def get_weights(self) -> Weights:
         return self.model.get_weights()
 
-    def fit(self, weights: Weights, config) -> Tuple[Weights, int, int]:
+    def fit(self, weights: Weights, config: Dict[str, str]) -> Tuple[Weights, int, int]:
         # Set model parameters
         self.model.set_weights(weights)
 
@@ -58,7 +58,9 @@ class CifarClient(fl.client.KerasClient):
         # Return the updated model parameters
         return self.model.get_weights(), len(self.trainloader), len(self.testloader)
 
-    def evaluate(self, weights: Weights, config) -> Tuple[int, float, float]:
+    def evaluate(
+        self, weights: Weights, config: Dict[str, str]
+    ) -> Tuple[int, float, float]:
         # Use provided weights to update the local model
         self.model.set_weights(weights)
 
