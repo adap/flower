@@ -43,7 +43,7 @@ The only requirement for the server is to have flower installed. You can do so b
 
 6. (optional) additional packages:
         <img align="right" style="padding-top: 40px; padding-left: 15px" width="575" height="380" src="media/tmux_jtop_view.gif">
-     * [jtop](https://github.com/rbonghi/jetson_stats), a tool to monitor various metrics on the Jetson devices including CPU/GPU utilization, power consumption and, many more.
+     * [jtop](https://github.com/rbonghi/jetson_stats),  to monitor CPU/GPU utilization, power consumption and, many more.
         ```bash
         # First we need to install pip3
         $ sudo apt-get install python3-pip -y 
