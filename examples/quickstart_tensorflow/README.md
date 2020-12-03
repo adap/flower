@@ -44,7 +44,7 @@ You have different files available:
 -- run-server.sh
 ```
 
-The `pyproject.toml` and `poetry.lock` orchestrate the project dependencies. Simply run poetry to install all required dependencies with:
+The `pyproject.toml` defines the project dependencies. Simply run poetry to install all required dependencies with:
 
 ```shell
 poetry install
