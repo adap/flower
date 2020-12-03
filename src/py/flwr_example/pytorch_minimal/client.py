@@ -45,7 +45,7 @@ class CifarClient(fl.client.KerasClient):
         self.trainloader = trainloader
         self.testloader = testloader
 
-    def get_weights(self) -> ParametersRes:
+    def get_weights(self) -> Weights:
         return self.model.get_weights()
 
     def fit(self, weights: Weights, config) -> Tuple[Weights, int, int]:
