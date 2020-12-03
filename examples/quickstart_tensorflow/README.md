@@ -1,7 +1,5 @@
 # Flower Example using Keras
 
-Flower is easy to use by only starting the Flower server and the Flower clients.
-
 This introductory example to Flower uses Keras but deep knowledge of Keras is not necessarily required to run the example. However, it will help you understanding how to adapt Flower to your use-cases.
 Running this example in itself is quite easy.
 
