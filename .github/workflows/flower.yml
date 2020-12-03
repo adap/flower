@@ -30,7 +30,7 @@ jobs:
         run: python -m poetry install
       - name: Check if protos need recompilation
         run: ./dev/check-protos.sh
-      - name: Lint + Test (isort/black/mypy/pylint/pytest)
+      - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
         run: ./dev/test.sh
 
   test_baseline:
@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies (mandatory + optional)
         run: |
           python -m poetry install --extras "baseline"
-          python -m pip install -U tensorflow-cpu==2.3.0
+          python -m pip install -U tensorflow-cpu==2.3.1
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-baseline.sh
 
@@ -91,6 +91,6 @@ jobs:
       - name: Install dependencies (mandatory + optional)
         run: |
           python -m poetry install --extras "examples-tensorflow"
-          python -m pip install -U tensorflow-cpu==2.3.0
+          python -m pip install -U tensorflow-cpu==2.3.1
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-example-tensorflow.sh

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""DEPRECATED Configurable strategy implementation.
 
-DEPRECATION WARNING: use FedAvg instead.
-"""
-
-
-from .fedavg import FedAvg
-
-
-class DefaultStrategy(FedAvg):
-    """DEPRECATED Configurable default strategy.
-
-    DEPRECATION WARNING: use FedAvg instead.
-    """
+# Start a Flower server
+python -m flwr_example.pytorch_minimal.server

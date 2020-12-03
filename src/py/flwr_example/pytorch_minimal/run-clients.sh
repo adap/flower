@@ -15,9 +15,14 @@
 # limitations under the License.
 # ==============================================================================
 
-# Start a Flower server
-python -m flwr_example.pytorch.server \
-  --rounds=5 \
-  --sample_fraction=1.0 \
-  --min_sample_size=2 \
-  --min_num_clients=2
+set -e
+
+NUM_CLIENTS=2
+
+echo "Starting $NUM_CLIENTS clients."
+for ((i = 0; i < $NUM_CLIENTS; i++))
+do
+    echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
+    python -m flwr_example.pytorch_minimal.client &
+done
+echo "Started $NUM_CLIENTS clients."
