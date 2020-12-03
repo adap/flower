@@ -37,7 +37,6 @@ git clone https://github.com/adap/.....
 You have different files available:
 
 ```shell
--- poetry.lock
 -- pyproject.toml
 -- client.py
 -- server.py
