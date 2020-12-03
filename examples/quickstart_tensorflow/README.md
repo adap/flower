@@ -28,7 +28,7 @@ keras-federated-3.7.9
 
 ## Run Keras Federated
 
-Clone the flower examples to your virtualenv:
+Start with cloning the Flower repo and checking out the example. We have prepared a single line which you can copy into your shell which will checkout the example for you.
 
 ```shell
 git clone https://github.com/adap/.....
