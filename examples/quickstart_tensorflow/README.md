@@ -50,7 +50,7 @@ The `pyproject.toml` defines the project dependencies. Simply run poetry to inst
 poetry install
 ```
 
-After installing all required libaries you can start the Flower server
+Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal running the `run-server.sh` script as follows:
 
 ```shell
 ./run-server.sh
