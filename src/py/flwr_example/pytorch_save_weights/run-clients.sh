@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server example."""
 
+set -e
 
-import flwr as fl
+NUM_CLIENTS=2
 
-if __name__ == "__main__":
-    fl.server.start_server(config={"num_rounds": 3})
+echo "Starting $NUM_CLIENTS clients."
+for ((i = 0; i < $NUM_CLIENTS; i++))
+do
+    echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
+    python -m flwr_example.pytorch_save_weights.client &
+done
+echo "Started $NUM_CLIENTS clients."
