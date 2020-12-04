@@ -32,7 +32,7 @@ The only requirement for the server is to have flower installed. You can do so b
 
 ## Setting up a Jetson Xavier-NX
 
-> These steps have been validated for a Jetson Xavier-NX Dev Kit. An identical setup is needed for a Jetson Nano and Jetson TX2 once you get ssh access to them (i.e. jumping straight to point `5` below). For instructions on how to setup these devices please refer to the "getting started guides" for [Jetson Nano](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#intro) and [Jetson TX2](https://developer.nvidia.com/embedded/dlc/l4t-28-2-jetson-developer-kit-user-guide-ga). 
+> These steps have been validated for a Jetson Xavier-NX Dev Kit. An identical setup is needed for a Jetson Nano and Jetson TX2 once you get ssh access to them (i.e. jumping straight to point `4` below). For instructions on how to setup these devices please refer to the "getting started guides" for [Jetson Nano](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#intro) and [Jetson TX2](https://developer.nvidia.com/embedded/dlc/l4t-28-2-jetson-developer-kit-user-guide-ga). 
 
 1. Download the Ubuntu image from [NVIDIA-embedded](https://developer.nvidia.com/embedded/downloads), note that you'll need a NVIDIA developer account. 
 2. Extract the imgae (~14GB) and flash it onto the uSD card using Etcher (or equivalent).
@@ -48,7 +48,6 @@ The only requirement for the server is to have flower installed. You can do so b
     ```bash
     $ sudo apt-get update && sudo apt-get install git -y
     ```
-    &nbsp;
 
 6. (optional) additional packages:
         <img align="right" style="padding-top: 40px; padding-left: 15px" width="575" height="380" src="media/tmux_jtop_view.gif">
@@ -68,7 +67,6 @@ The only requirement for the server is to have flower installed. You can do so b
         # add mouse support
         $ echo set -g mouse on > ~/.tmux.conf
         ``` 
-        &nbsp;
 
 7. Power modes: The Jetson devices can operate at different power modes, each making use of more or less CPU cores clocked at different freqencies. The right power mode might very much depend on the application and scenario. When power consumption is not a limiting factor, we could use the highest 15W mode using all 6 CPU cores. On the other hand, if the devices are battery-powered we might want to make use of a low power mode using 10W and 2 CPU cores. All the details regarding the different power modes of a Jetson Xavier-NX can be found [here](https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%2520Linux%2520Driver%2520Package%2520Development%2520Guide%2Fpower_management_jetson_xavier.html%23wwpID0E0NO0HA). For this demo we'll be setting the device to the high performance mode:
     ```bash
