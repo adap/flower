@@ -22,4 +22,4 @@ RUN tar -zxvf cifar-10-python.tar.gz
 
 RUN echo "Ready!"
 WORKDIR /app
-ENTRYPOINT ["python3","./client.py"]
+ENTRYPOINT ["python3","-u","./client.py"]
