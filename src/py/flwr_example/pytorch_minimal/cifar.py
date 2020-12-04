@@ -35,8 +35,6 @@ import torchvision
 import torchvision.transforms as transforms
 from torch import Tensor
 
-import flwr as fl
-
 DATA_ROOT = "~/.flower/data/cifar-10"
 
 # pylint: disable-msg=unsubscriptable-object
@@ -62,18 +60,6 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
-
-    def get_weights(self) -> fl.common.Weights:
-        """Get model weights as a list of NumPy ndarrays."""
-        return [val.cpu().numpy() for _, val in self.state_dict().items()]
-
-    def set_weights(self, weights: fl.common.Weights) -> None:
-        """Set model weights from a list of NumPy ndarrays."""
-        state_dict = OrderedDict(
-            {k: torch.Tensor(v) for k, v in zip(self.state_dict().keys(), weights)}
-        )
-        self.load_state_dict(state_dict, strict=True)
-
 
 # pylint: disable-msg=unused-argument
 def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
@@ -127,7 +113,7 @@ def train(
 
             # print statistics
             running_loss += loss.item()
-            if i % 2000 == 1999:  # print every 2000 mini-batches
+            if i % 500 == 99:  # print every 2000 mini-batches
                 print("[%d, %5d] loss: %.3f" % (epoch + 1, i + 1, running_loss / 2000))
                 running_loss = 0.0
 
@@ -152,3 +138,16 @@ def test(
             correct += (predicted == labels).sum().item()
     accuracy = correct / total
     return loss, accuracy
+
+def main():
+    DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print('Central PyTorch Training')
+    print('Load data')
+    trainloader, testloader = load_data()
+    print('Start training')
+    train(net= Net(), trainloader=trainloader, epochs=2, device= DEVICE)
+    print('Start Testing')
+    print('Loss and accuracy', test(net= Net(), testloader=testloader, device= DEVICE))
+
+if __name__ == "__main__":
+    main()
