@@ -112,7 +112,7 @@ def train(
 
             # print statistics
             running_loss += loss.item()
-            if i % 500 == 99:  # print every 500 mini-batches
+            if i % 100 == 99:  # print every 100 mini-batches
                 print("[%d, %5d] loss: %.3f" % (epoch + 1, i + 1, running_loss / 2000))
                 running_loss = 0.0
 
@@ -140,13 +140,15 @@ def test(
 
 def main():
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    print('Central PyTorch Training')
-    print('Load data')
+    print("Central PyTorch Training")
+    print("Load data")
     trainloader, testloader = load_data()
-    print('Start training')
+    print("Start training")
     train(net= Net(), trainloader=trainloader, epochs=2, device= DEVICE)
-    print('Start Testing')
-    print('Loss and accuracy', test(net= Net(), testloader=testloader, device= DEVICE))
+    print("Start Testing")
+    loss, accuracy = test(net= Net(), testloader=testloader, device= DEVICE)
+    print("Loss: ", loss) 
+    print("Accuracy: ", accuracy)
 
 if __name__ == "__main__":
     main()
