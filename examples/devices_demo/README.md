@@ -14,6 +14,7 @@ This is a list of components that you'll need:
 
 What follows is a step-by-step guide on how to setup your client/s and the server. In order to minimize the amount of setup and potential issues that might arise due to the hardware/software heterogenity between clients we'll be running the clients inside a Docker. We provide two docker images: one built for Jetson devices and make use of their GPU; and the other for CPU-only training suitable for Raspberry Pi (but would also work on Jetson devices). The following diagram illustrates the setup for this demo:
 
+<!-- jetson xavier-nx image borrowed from: https://developer.nvidia.com/embedded/jetson-xavier-nx-devkit -->
 ![alt text](media/diagram.png)
 
 ## Clone this repo
@@ -97,6 +98,10 @@ The only requirement for the server is to have flower installed. You can do so b
 
 
 # Running FL training with Flower
+
+For this demo we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. To keep the client side simple, the datasets will be downloaded when building the docker image. This will happen as the first stage in both `run_pi.sh` and `run_jetson.sh`. 
+
+>If you'd like to make use of your own dataset you could [mount it](https://docs.docker.com/storage/volumes/) to the client docker container when calling `docker run`. We leave this an other more advanced topics for a future example.
 
 ## Server
 
