@@ -15,9 +15,9 @@
 """Flower client example using PyTorch for CIFAR-10 image classification."""
 
 
-from collections import OrderedDict
 import argparse
 import timeit
+from collections import OrderedDict
 from typing import Dict, Tuple
 
 import torch
@@ -50,7 +50,7 @@ class CifarClient(fl.client.KerasClient):
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_weights(self, weights: fl.common.Weights) -> None:
-        #Set model weights from a list of NumPy ndarrays.
+        # Set model weights from a list of NumPy ndarrays.
         state_dict = OrderedDict(
             {
                 k: torch.Tensor(v)

@@ -60,6 +60,7 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
+
 # pylint: disable-msg=unused-argument
 def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     """Load CIFAR-10 (training and test set)."""
@@ -138,17 +139,19 @@ def test(
     accuracy = correct / total
     return loss, accuracy
 
+
 def main():
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Central PyTorch Training")
     print("Load data")
     trainloader, testloader = load_data()
     print("Start training")
-    train(net= Net(), trainloader=trainloader, epochs=2, device= DEVICE)
+    train(net=Net(), trainloader=trainloader, epochs=2, device=DEVICE)
     print("Start Testing")
-    loss, accuracy = test(net= Net(), testloader=testloader, device= DEVICE)
-    print("Loss: ", loss) 
+    loss, accuracy = test(net=Net(), testloader=testloader, device=DEVICE)
+    print("Loss: ", loss)
     print("Accuracy: ", accuracy)
+
 
 if __name__ == "__main__":
     main()
