@@ -131,6 +131,6 @@ $ ./run_jetson.sh --server_address=<SERVER_ADDRESS> --cid=0 --model=ResNet18
 Depending on the model of RapsberryPi you have, running the smaller `Net` model might be the only option due to the higher RAM budget needed for ResNet18. It should be fine for a RaspberryPi 4 with 4GB of RAM to run a RestNet18 (with an appropiate batch size) but bear in mind that each batch might take several second to complete. The following would run the smaller `Net` model:
 
 ```bash
-# note that pulling pulling the base image, extracting the content might take a while (specially on a RPi 3) the first time you run this.
+# note that pulling the base image, extracting the content might take a while (specially on a RPi 3) the first time you run this.
 $ ./run_pi.sh --server_address=<SERVER_ADDRESS> --cid=0 --model=Net
 ```
