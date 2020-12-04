@@ -11,7 +11,7 @@ WORKDIR /app
 RUN python3 -m pip install --upgrade pip
 
 # installing flower
-RUN pip3 install flwr
+RUN pip3 install flwr==0.11.0
 
 ## deps for an exciting future project
 RUN apt-get update
