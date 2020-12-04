@@ -32,7 +32,7 @@ echo keras-federated-3.7.9 > .python-version
 Start with cloning the Flower repo and checking out the example. We have prepared a single line which you can copy into your shell which will checkout the example for you.
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git -b flower_example && mv flower/examples/quickstart_tensorflow . && rm -rf flower && cd quickstart_tensorflow
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_tensorflow . && rm -rf flower && cd quickstart_tensorflow
 ```
 
 You have different files available:
