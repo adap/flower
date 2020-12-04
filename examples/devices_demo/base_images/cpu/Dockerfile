@@ -1,4 +1,4 @@
-# from an ubuntu18 image bult for arm, we build from source Pytorch and Torchvision
+# From an ubuntu18 image bult for Arm, we build from source Pytorch and Torchvision
 # Then we install Flower
 # We also install dependencies for a very exciting future project
 
@@ -42,7 +42,7 @@ RUN python3 setup.py install
 # Installing flower
 RUN pip3 install flwr==0.11.0
 
-## deps for an exciting future project
+# Deps for an exciting future project
 RUN apt-get install libffi-dev python-dev python3-h5py libhdf5-dev libssl-dev -y
 RUN pip3 install scikit-build
 RUN pip3 install cmake joblib numpy pre-commit psutil==5.6.6 \

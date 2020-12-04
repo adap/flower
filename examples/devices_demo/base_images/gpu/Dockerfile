@@ -10,10 +10,10 @@ WORKDIR /app
 # update pip
 RUN python3 -m pip install --upgrade pip
 
-# installing flower
+# Installing flower
 RUN pip3 install flwr==0.11.0
 
-## deps for an exciting future project
+# Deps for an exciting future project
 RUN apt-get update
 RUN apt-get install libffi-dev python-dev python3-h5py libhdf5-dev libssl-dev \
     gcc gfortran libopenblas-dev liblapack-dev cython -y
