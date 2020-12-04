@@ -13,6 +13,3 @@
 # limitations under the License.
 # ==============================================================================
 """Flower example using PyTorch for CIFAR-10 image classification."""
-
-
-DEFAULT_SERVER_ADDRESS = "[::]:8080"

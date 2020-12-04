@@ -17,22 +17,23 @@
 
 import argparse
 import timeit
-from typing import Dict, Tuple
 
+# pylint: enable=no-member
+from typing import Dict, List, Tuple
+
+import numpy as np
 import torch
 import torchvision
 
 import flwr as fl
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
 
-from . import DEFAULT_SERVER_ADDRESS, cifar
+from . import  cifar
 
 # pylint: disable=no-member
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# pylint: enable=no-member
-
 # Flower Client
-class CifarClient(fl.client.KerasClient):
+class CifarClient(fl.client.NumPyClient):
     """Flower client implementing CIFAR-10 image classification using PyTorch."""
 
     def __init__(
@@ -45,24 +46,26 @@ class CifarClient(fl.client.KerasClient):
         self.trainloader = trainloader
         self.testloader = testloader
 
-    def get_weights(self) -> Weights:
+    def get_parameters(self) -> List[np.ndarray]:
         return self.model.get_weights()
 
-    def fit(self, weights: Weights, config: Dict[str, str]) -> Tuple[Weights, int, int]:
+    def fit(
+        self, parameters: List[np.ndarray], config: Dict[str, str]
+    ) -> Tuple[List[np.ndarray], int]:
         # Set model parameters
-        self.model.set_weights(weights)
+        self.model.set_weights(parameters)
 
         # Train model
         cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
 
         # Return the updated model parameters
-        return self.model.get_weights(), len(self.trainloader), len(self.testloader)
+        return self.model.get_weights(), len(self.trainloader)
 
     def evaluate(
-        self, weights: Weights, config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[int, float, float]:
         # Use provided weights to update the local model
-        self.model.set_weights(weights)
+        self.model.set_weights(parameters)
 
         # Evaluate the updated model on the local dataset
         loss, accuracy = cifar.test(self.model, self.testloader, device=DEVICE)
@@ -81,7 +84,7 @@ def main() -> None:
 
     # Start client
     client = CifarClient(model, trainloader, testloader)
-    fl.client.start_keras_client(DEFAULT_SERVER_ADDRESS, client)
+    fl.client.start_numpy_client("[::]:8080", client=client)
 
 
 if __name__ == "__main__":

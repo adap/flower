@@ -24,7 +24,7 @@ import torchvision
 
 import flwr as fl
 
-from . import DEFAULT_SERVER_ADDRESS, cifar
+from . import cifar
 
 
 class SaveModelStrategy(fl.server.strategy.FedAvg):
@@ -58,7 +58,6 @@ def main() -> None:
 
     # Run server
     fl.server.start_server(
-        server_address=DEFAULT_SERVER_ADDRESS,
         config={"num_rounds": 3},
         strategy=strategy,
     )
