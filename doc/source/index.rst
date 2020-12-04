@@ -15,6 +15,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    :maxdepth: 1
    :caption: User Guide
 
+   recommended-env-setup
    installation
    quickstart_tensorflow
    quickstart_pytorch
