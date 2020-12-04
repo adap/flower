@@ -17,6 +17,7 @@
 
 import argparse
 import timeit
+from collections import OrderedDict
 from typing import Dict, Tuple
 
 import torch
@@ -46,23 +47,33 @@ class CifarClient(fl.client.KerasClient):
         self.testloader = testloader
 
     def get_weights(self) -> Weights:
-        return self.model.get_weights()
+        return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
+
+    def set_weights(self, weights: fl.common.Weights) -> None:
+        # Set model weights from a list of NumPy ndarrays.
+        state_dict = OrderedDict(
+            {
+                k: torch.Tensor(v)
+                for k, v in zip(self.model.state_dict().keys(), weights)
+            }
+        )
+        self.model.load_state_dict(state_dict, strict=True)
 
     def fit(self, weights: Weights, config: Dict[str, str]) -> Tuple[Weights, int, int]:
         # Set model parameters
-        self.model.set_weights(weights)
+        self.set_weights(weights)
 
         # Train model
         cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
 
         # Return the updated model parameters
-        return self.model.get_weights(), len(self.trainloader), len(self.testloader)
+        return self.get_weights(), len(self.trainloader), len(self.testloader)
 
     def evaluate(
         self, weights: Weights, config: Dict[str, str]
     ) -> Tuple[int, float, float]:
         # Use provided weights to update the local model
-        self.model.set_weights(weights)
+        self.set_weights(weights)
 
         # Evaluate the updated model on the local dataset
         loss, accuracy = cifar.test(self.model, self.testloader, device=DEVICE)
