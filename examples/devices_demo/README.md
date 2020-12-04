@@ -77,12 +77,12 @@ The only requirement for the server is to have flower installed. You can do so b
 
 ## Setting up a Raspberry Pi (3B+ or 4B)
 
-1. Install ubuntu server 64-bit for Rapsberry Pi. You can do this by using one of the images provided [by Ubuntu](https://ubuntu.com/download/raspberry-pi) and then use Etcher. Alternativelly, astep-by-step installation guide, showing how to download and flash the image onto a uSD card and, go throught the first boot process, can be found [here](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi#1-overview).
+1. Install Ubuntu server 20.04 LTS 64-bit for Rapsberry Pi. You can do this by using one of the images provided [by Ubuntu](https://ubuntu.com/download/raspberry-pi) and then use Etcher. Alternativelly, astep-by-step installation guide, showing how to download and flash the image onto a uSD card and, go throught the first boot process, can be found [here](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi#1-overview). Please note that the first time you boot your RPi it will automatically update the system (which will lock `sudo` and prevent running the commands below for a few minutes)
 
 2. Install docker (+ post-installation steps as in [Docker Docs](https://docs.docker.com/engine/install/linux-postinstall/)):
     ```bash
     # make sure your OS is up-to-date
-    $ sudo apt-get update && apt-get upgrade
+    $ sudo apt-get update
 
     # get the installation script
     $ curl -fsSL https://get.docker.com -o get-docker.sh
@@ -90,10 +90,17 @@ The only requirement for the server is to have flower installed. You can do so b
     # install docker
     $ sudo sh get-docker.sh
 
-    # create a new group for docker and add your user to it
-    $ sudo groupadd docker && sudo usermod -aG docker $USER
+    # add your user to the docker group
+    $ sudo usermod -aG docker $USER
+
+    # apply changes to current shell (or logout/reboot)
+    $ newgrp docker
     ```
-3. Minimal additional requirements: install `git` as described in stage `5` for the Jetson Xavier-NX setup.
+
+3. Install `git` as:
+    ```bash
+    $ sudo apt-get install git
+    ```
 4. (optional) additional packages: you could install `TMUX` (see point `6` above) and `htop` as a replacement for `jtop` (which is only available for Jetson devices). Htop can be installed via: `sudo apt-get install htop -y`.
 
 
