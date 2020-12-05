@@ -28,7 +28,7 @@ import torchvision
 import flwr as fl
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
 
-from . import  cifar
+from . import cifar
 
 # pylint: disable=no-member
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
