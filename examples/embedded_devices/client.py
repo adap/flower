@@ -51,7 +51,8 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
 
 
 class CifarClient(fl.client.Client):
-    """Flower client implementing CIFAR-10 image classification using PyTorch."""
+    """Flower client implementing CIFAR-10 image classification using
+    PyTorch."""
 
     def __init__(
         self,
@@ -96,11 +97,13 @@ class CifarClient(fl.client.Client):
         set_weights(self.model, weights)
 
         if torch.cuda.is_available():
-            kwargs = {'num_workers': num_workers,
-                      'pin_memory': pin_memory,
-                      'drop_last': True}
+            kwargs = {
+                "num_workers": num_workers,
+                "pin_memory": pin_memory,
+                "drop_last": True,
+            }
         else:
-            kwargs = {'drop_last': True}
+            kwargs = {"drop_last": True}
 
         # Train model
         trainloader = torch.utils.data.DataLoader(
