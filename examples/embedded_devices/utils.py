@@ -80,13 +80,13 @@ class Net(nn.Module):
 
 
 def ResNet18():
-    """ Returns a ResNet18 model from TorchVision adapted for CIFAR-10"""
+    """Returns a ResNet18 model from TorchVision adapted for CIFAR-10."""
 
     model = resnet18(num_classes=10)
 
     # replace w/ smaller input layer
     model.conv1 = torch.nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-    nn.init.kaiming_normal_(model.conv1.weight, mode='fan_out', nonlinearity='relu')
+    nn.init.kaiming_normal_(model.conv1.weight, mode="fan_out", nonlinearity="relu")
     # no need for pooling if training for CIFAR-10
     model.maxpool = torch.nn.Identity()
 
@@ -95,9 +95,9 @@ def ResNet18():
 
 def load_model(model_name: str) -> nn.Module:
 
-    if model_name == 'Net':
+    if model_name == "Net":
         return Net()
-    elif model_name == 'ResNet18':
+    elif model_name == "ResNet18":
         return ResNet18()
     else:
         raise NotImplementedError(f"model {model_name} is not implemented")
@@ -110,10 +110,10 @@ def load_cifar(download=False) -> Tuple[datasets.CIFAR10, datasets.CIFAR10]:
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
     trainset = datasets.CIFAR10(
-        root=DATA_ROOT/"cifar-10", train=True, download=download, transform=transform
+        root=DATA_ROOT / "cifar-10", train=True, download=download, transform=transform
     )
     testset = datasets.CIFAR10(
-        root=DATA_ROOT/"cifar-10", train=False, download=download, transform=transform
+        root=DATA_ROOT / "cifar-10", train=False, download=download, transform=transform
     )
     return trainset, testset
 

@@ -87,9 +87,7 @@ parser.add_argument(
     default=4,
     help="number of workers for dataset reading",
 )
-parser.add_argument(
-    '--pin_memory',
-    action='store_true')
+parser.add_argument("--pin_memory", action="store_true")
 args = parser.parse_args()
 
 
@@ -98,7 +96,9 @@ def main() -> None:
 
     print(args)
 
-    assert (args.min_sample_size <= args.min_num_clients), f"Num_clients shouldn't be lower than min_sample_size"
+    assert (
+        args.min_sample_size <= args.min_num_clients
+    ), f"Num_clients shouldn't be lower than min_sample_size"
 
     # Configure logger
     fl.common.logger.configure("server", host=args.log_host)
@@ -132,7 +132,7 @@ def fit_config(rnd: int) -> Dict[str, str]:
         "epochs": str(1),
         "batch_size": str(args.batch_size),
         "num_workers": str(args.num_workers),
-        "pin_memory": str(args.pin_memory)
+        "pin_memory": str(args.pin_memory),
     }
     return config
 
