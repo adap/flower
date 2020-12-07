@@ -44,12 +44,6 @@ jobs:
       - name: Install poetry
         run: |
           python -m pip install -U poetry==1.0.10
-      - name: Configure poetry
-        run: |
-          poetry config virtualenvs.create true
-          poetry config virtualenvs.in-project false
-          poetry config cache-dir ~/.poetry
-          poetry config virtualenvs.path ~/.poetry/venv
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
@@ -59,15 +53,19 @@ jobs:
         id: cache-dependencies
         uses: actions/cache@v2
         with:
-          path: '~/.poetry'
+          path: |
+            '~/.poetry'
+            '~/.pip'
           key: ${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
-      - run: |
-          ls -la ~/.
+      - run: ls -la ~/.
       - name: Install dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: |
           python -m poetry install --extras "baseline"
           python -m pip install -U tensorflow-cpu==2.3.1
+      - run: |
+          ls -la .
+          ls -la ~/.
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-baseline.sh
 
