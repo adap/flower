@@ -1,8 +1,14 @@
 Changelog
 =========
 
-Unreleased
-----------
+v0.12.0 (2020-12-07)
+--------------------
+
+Important changes:
+
+* Added an example for embedded devices (#507)
+* Added a new NumPyClient (in addition to the existing KerasClient) (#504, #508)
+* Deprecated `flwr_examples` package and started to migrate examples into the top-level `examples` directory (#494, #508, #512)
 
 v0.11.0 (2020-11-30)
 --------------------
