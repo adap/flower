@@ -12,5 +12,5 @@ authors = ["The Flower Authors <enquiries@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
-flwr = "^0.11.0"
+flwr = "^0.12.0"
 tensorflow-cpu = "2.3.1"
