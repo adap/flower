@@ -12,4 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower example using PyTorch for CIFAR-10 image classification."""
+"""DEPRECATED Flower example (PyTorch for CIFAR-10 image classification).
+"""
+
+warning = """
+DEPRECATION WARNING: Example moved to `examples/quickstart_pytorch`.
+
+All examples will be migrated to the `examples` directory. `flwr_example` will
+be removed in a future release.
+"""
+print(warning)
