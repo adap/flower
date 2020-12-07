@@ -9,7 +9,7 @@ After installing both tools you can start to set up everything.
 
 ## Setup your virtual environment
 
-First, you should setup your virtualenv and install [Python Version 3.6](https://docs.python.org/3.6/) or above:
+First, you should setup your virtualenv and install [Python (version 3.6 or above, we recommend 3.7)](https://docs.python.org/3.7/):
 
 ```shell
 pyenv install 3.7.9
@@ -60,7 +60,7 @@ Afterwards you are ready to start the Flower server as well as the clients. You 
 Now you are ready to start the Flower Clients which will participate in the learning. Todo so simply run the `run-clients.sh` shell script as follows:
 
 ```shell
-./run-client.sh
+./run-clients.sh
 ```
 
 You will see that Keras is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart_tensorflow.html) for a detailed explanation.
