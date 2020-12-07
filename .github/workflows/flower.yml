@@ -56,6 +56,7 @@ jobs:
           path: |
             '~/.poetry'
             '~/.pip'
+             ~/.cache/pip
           key: ${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
       - run: ls -la ~/.
       - name: Install dependencies
