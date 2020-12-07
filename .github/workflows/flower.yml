@@ -47,6 +47,7 @@ jobs:
           path: '~/.keras'
           key: keras-datasets
       - name: Cache Dependencies
+        id: cache-dependencies
         uses: actions/cache@v2
         with:
           path: '~/.poetry'
@@ -54,10 +55,12 @@ jobs:
       - run: |
           ls -la ~/.
       - name: Install build tools
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: |
           python -m pip install -U pip==20.2.4
           python -m pip install -U poetry==1.0.10
       - name: Install dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: |
           python -m poetry install --extras "baseline"
           python -m pip install -U tensorflow-cpu==2.3.1
