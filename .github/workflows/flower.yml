@@ -41,6 +41,15 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.7.9
+      - name: Install poetry
+        run: |
+          python -m pip install -U poetry==1.0.10
+      - name: Configure poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project false
+          poetry config cache-dir ~/.poetry
+          poetry config virtualenvs.path ~/.poetry/venv
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
@@ -54,11 +63,6 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
       - run: |
           ls -la ~/.
-      - name: Install build tools
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        run: |
-          python -m pip install -U pip==20.2.4
-          python -m pip install -U poetry==1.0.10
       - name: Install dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: |
