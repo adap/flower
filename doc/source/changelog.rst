@@ -1,14 +1,19 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+
 v0.12.0 (2020-12-07)
 --------------------
 
 Important changes:
 
-* Added an example for embedded devices (#507)
-* Added a new NumPyClient (in addition to the existing KerasClient) (#504, #508)
-* Deprecated `flwr_examples` package and started to migrate examples into the top-level `examples` directory (#494, #508, #512)
+* Added an example for embedded devices (`#507 <https://github.com/adap/flower/pull/507>`_)
+* Added a new NumPyClient (in addition to the existing KerasClient) (`#504 <https://github.com/adap/flower/pull/504>`_, `#508 <https://github.com/adap/flower/pull/508>`_)
+* Deprecated `flwr_examples` package and started to migrate examples into the top-level `examples` directory (`#494 <https://github.com/adap/flower/pull/494>`_, `#512 <https://github.com/adap/flower/pull/512>`_)
+
 
 v0.11.0 (2020-11-30)
 --------------------
