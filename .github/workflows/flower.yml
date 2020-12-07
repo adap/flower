@@ -52,8 +52,7 @@ jobs:
           path: '~/.poetry'
           key: ${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
       - run: |
-          ls ~/.keras
-          ls ~/.poetry
+          ls -la ~/.
       - name: Install build tools
         run: |
           python -m pip install -U pip==20.2.4
