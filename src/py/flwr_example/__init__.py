@@ -12,4 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower usage examples."""
+"""DEPRECATED Flower usage examples.
+
+Please note that the entire `flwr_examples` packages will be removed in a
+future release. Examples will be migrated to the `/examples` directory.
+"""
+
+warning = """
+DEPRECATION WARNING: Flower usage examples will be removed.
+
+All examples will be migrated to the `examples` directory. The `flwr_example`
+package will be removed in a future release.
+"""
+print(warning)
