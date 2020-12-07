@@ -59,15 +59,11 @@ jobs:
             '~/.pip'
              ~/.cache/pip
           key: ${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
-      - run: ls -la ~/.
       - name: Install dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: |
           python -m poetry install --extras "baseline"
           python -m pip install -U tensorflow-cpu==2.3.1
-      - run: |
-          ls -la .
-          ls -la ~/.
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-baseline.sh
 
