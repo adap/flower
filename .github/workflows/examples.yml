@@ -1,0 +1,30 @@
+name: Build Core
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test_quickstart_tensorflow:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7.9
+      - name: Install
+        run: |
+          python -m pip install -U poetry==1.1.4
+      - name: Install dependencies
+        run: |
+          cd examples/quickstart_tensorflow
+          python -m poetry install
+      - name: Test
+        run: |
+          
+
