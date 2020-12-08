@@ -48,7 +48,7 @@ WHEEL_FILENAME = CONFIG.get("paths", "wheel_filename")
 WHEEL_LOCAL_PATH = path.expanduser(CONFIG.get("paths", "wheel_dir")) + WHEEL_FILENAME
 
 DOCKER_PRIVATE_KEY = path.realpath(
-    path.dirname(__file__) + "/../../../../docker/ssh_key"
+    path.dirname(__file__) + "/../../../docker/ssh_key"
 )
 
 
