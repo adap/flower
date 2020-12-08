@@ -8,7 +8,7 @@ After setting up the virtual environment it is recommended to use [poetry](https
 
 ## Run PyTorch Federated
 
-Start bz cloning the Flower example. We have prepared a single line that you can copy into your shell:
+Start by cloning the Flower example. We have prepared a single line that you can copy into your shell:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_tensorflow . && rm -rf flower && cd quickstart_tensorflow
@@ -31,7 +31,7 @@ poetry install
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
 ```shell
-pzthon3 server.py
+python3 server.py
 ```
 
 Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the following commands.
