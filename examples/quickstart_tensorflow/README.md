@@ -54,21 +54,21 @@ poetry install
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
 ```shell
-python server.py
+python3 server.py
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. Todo so simply open two more terminals and run the following command in each:
+Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminals and run the following command in each:
 
 ```shell
-python client.py
+python3 client.py
 ```
 
-Alternatively you can run everythin in one shell as follows:
+Alternatively you can run all of it in one shell as follows:
 
 ```shell
-python server.py &
-python client.py &
-python client.py &
+python3 server.py &
+python3 client.py &
+python3 client.py &
 ```
 
 You will see that Keras is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart_tensorflow.html) for a detailed explanation.

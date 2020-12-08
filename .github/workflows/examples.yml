@@ -40,17 +40,25 @@ jobs:
           python server.py &
           sleep 3
 
-          if [[ $(ps aux | grep "[p]ython server.py" | awk '{ print $2 }') ]];
-            then echo "Server process started correctly";
-            else echo "Server process did not start or crashed" && exit 1;
-          fi
-
-          python client.py &
+          python client.py 1 &
           sleep 3
 
-          if [[ $(ps aux | grep "[p]ython client.py" | awk '{ print $2 }') ]];
-            then echo "Client process started correctly";
-            else echo "Client process did not start or crashed" && exit 1;
+          if [[ $(ps aux | grep "[p]ython client.py 1" | awk '{ print $2 }') ]];
+            then echo "Client process 1 started correctly";
+            else echo "Client process 1 crashed" && exit 1;
+          fi
+          
+          python client.py 2 &
+          sleep 3
+          
+          if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
+            then echo "Client process 2 started correctly";
+            else echo "Client process 2 crashed" && exit 1;
+          fi
+
+          if [[ $(ps aux | grep "[p]ython server.py" | awk '{ print $2 }') ]];
+            then echo "Server process started correctly";
+            else echo "Server process crashed" && exit 1;
           fi
 
           killall python
