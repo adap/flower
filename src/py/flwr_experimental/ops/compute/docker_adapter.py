@@ -27,7 +27,8 @@ from .adapter import Adapter, AdapterInstance
 
 
 class NoPublicFacingPortFound(Exception):
-    """Raise if public-facing port of container was not bound to private port of host."""
+    """Raise if public-facing port of container was not bound to private port
+    of host."""
 
 
 def get_free_port() -> int:
@@ -81,7 +82,6 @@ class DockerAdapter(Adapter):
             num_ram (int): RAM in GB (currently ignored)
             timeout (int): Timeout in minutes
             num_instance (int): Number of instances to start
-
         """
         instances: List[AdapterInstance] = []
 

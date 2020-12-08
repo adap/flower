@@ -80,7 +80,8 @@ def upload_file(local_filepath: str, s3_key: Optional[str]) -> None:
 
 
 def continous_logfile_upload(stop_condition: Event, interval: int) -> None:
-    """Call upload_logfile function regularly until stop_condition Event is set."""
+    """Call upload_logfile function regularly until stop_condition Event is
+    set."""
     while True:
         upload_file(LOGFILE, CONFIG["s3_key"])
 
