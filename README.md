@@ -53,11 +53,11 @@ Other [examples](https://github.com/adap/flower/tree/main/src/py/flwr_example):
 
 ## Flower Baselines
 
-*Coming soon* - curious minds can take a peek at [https://github.com/adap/flower/tree/main/src/py/flwr_experimental/baseline](https://github.com/adap/flower/tree/main/src/py/flwr_experimental/baseline).
+*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline](https://github.com/adap/flower/tree/main/src/py/flwr_experimental/baseline).
 
 ## Flower Datasets
 
-*Coming soon* - curious minds can take a peek at [https://github.com/adap/flower/tree/main/src/py/flwr_experimental/baseline/dataset](https://github.com/adap/flower/tree/main/src/py/flwr_experimental/baseline/dataset).
+*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline/dataset](https://github.com/adap/flower/tree/main/src/py/flwr_experimental/baseline/dataset).
 
 ## Citation
 
