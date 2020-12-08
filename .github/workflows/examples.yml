@@ -46,6 +46,7 @@ jobs:
           fi
 
           python client.py &
+          python client.py &
           sleep 3
 
           if [[ $(ps aux | grep "[p]ython client.py" | awk '{ print $2 }') ]];
