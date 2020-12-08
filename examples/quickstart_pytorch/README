@@ -6,7 +6,7 @@ Running this example in itself is quite easy.
 It is recommended to use a virtual environment as described [here](https://flower.dev/docs/recommended-env-setup).
 After setting up the virtual environment it is recommended to install [poetry](https://python-poetry.org/docs/) to ensure the right version of libraries.
 
-## Run Keras Federated
+## Run PyTorch Federated
 
 Start with cloning the Flower repo and checking out the example. We have prepared a single line which you can copy into your shell which will checkout the example for you.
 
