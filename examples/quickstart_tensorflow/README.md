@@ -57,7 +57,7 @@ Afterwards you are ready to start the Flower server as well as the clients. You 
 python server.py
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. Todo so simply open two more terminals and run the following command in each:
+Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminals and run the following command in each:
 
 ```shell
 python client.py
