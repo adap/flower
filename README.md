@@ -42,22 +42,22 @@ an example, first install the necessary extras:
 
 Quickstart examples:
 
-* [Quickstart (TensorFlow)](src/py/flwr_example/quickstart_tensorflow)
-* [Quickstart (PyTorch)](src/py/flwr_example/quickstart_pytorch)
+* [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/src/py/flwr_example/quickstart_tensorflow)
+* [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/src/py/flwr_example/quickstart_pytorch)
 
-Other [examples](src/py/flwr_example):
+Other [examples](https://github.com/adap/flower/tree/main/src/py/flwr_example):
 
-* [PyTorch & CIFAR-10](src/py/flwr_example/pytorch_cifar)
-* [PyTorch & ImageNet](src/py/flwr_example/pytorch_imagenet)
-* [TensorFlow & Fashion-MNIST](src/py/flwr_example/tensorflow_fashion_mnist)
+* [PyTorch & CIFAR-10](https://github.com/adap/flower/tree/main/src/py/flwr_example/pytorch_cifar)
+* [PyTorch & ImageNet](https://github.com/adap/flower/tree/main/src/py/flwr_example/pytorch_imagenet)
+* [TensorFlow & Fashion-MNIST](https://github.com/adap/flower/tree/main/src/py/flwr_example/tensorflow_fashion_mnist)
 
 ## Flower Baselines
 
-*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline](src/py/flwr_experimental/baseline).
+*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline](https://github.com/adap/flower/tree/main/src/py/flwr_experimental/baseline).
 
 ## Flower Datasets
 
-*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline/dataset](src/py/flwr_experimental/baseline/dataset).
+*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline/dataset](https://github.com/adap/flower/tree/main/src/py/flwr_experimental/baseline/dataset).
 
 ## Citation
 
