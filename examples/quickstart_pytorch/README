@@ -1,0 +1,45 @@
+# Flower Example using PyTorch
+
+This introductory example to Flower uses PyTorch but deep knowledge of PyToch is not necessarily required to run the example. However, it will help you understanding how to adapt Flower to your use-cases.
+Running this example in itself is quite easy.
+
+It is recommended to use a virtual environment as described [here](https://flower.dev/docs/recommended-env-setup).
+After setting up the virtual environment it is recommended to install [poetry](https://python-poetry.org/docs/) to ensure the right version of libraries.
+
+## Run Keras Federated
+
+Start with cloning the Flower repo and checking out the example. We have prepared a single line which you can copy into your shell which will checkout the example for you.
+
+```shell
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_tensorflow . && rm -rf flower && cd quickstart_tensorflow
+```
+
+You have different files available:
+
+```shell
+-- pyproject.toml
+-- client.py
+-- server.py
+-- run-clients.sh
+-- run-server.sh
+```
+
+The `pyproject.toml` defines the project dependencies. Simply run poetry to install all required dependencies with:
+
+```shell
+poetry install
+```
+
+Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
+
+```shell
+./run-server.py
+```
+
+Now you are ready to start the Flower clients which will participate in the learning. To do so simply open one more terminal and run the following command:
+
+```shell
+./run-client.py
+```
+
+You will see that PyTorch is starting a federated training. Have a look to the [Flower Quickstarter documentation](file://wsl%24/Ubuntu-18.04/home/maria/adap/flower/doc/build/html/quickstart_pytorch.html) for a detailed explanation.
