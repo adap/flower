@@ -17,17 +17,16 @@
 
 import argparse
 import timeit
-
 from collections import OrderedDict
 from importlib import import_module
-import numpy as np
 
+import numpy as np
 import torch
 import torchvision
-import flwr as fl
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
 
+import flwr as fl
 import utils
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
 
 # pylint: disable=no-member
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
