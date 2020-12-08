@@ -16,17 +16,15 @@
 
 
 import argparse
+from collections import OrderedDict
 from typing import Callable, Dict, Optional, Tuple
 
-from collections import OrderedDict
 import numpy as np
-
 import torch
 import torchvision
+
 import flwr as fl
-
 import utils
-
 
 # pylint: disable=no-member
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
