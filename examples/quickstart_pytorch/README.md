@@ -11,7 +11,7 @@ After setting up the virtual environment it is recommended to use [poetry](https
 Start by cloning the Flower example. We have prepared a single line that you can copy into your shell:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_tensorflow . && rm -rf flower && cd quickstart_tensorflow
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_pytorch . && rm -rf flower && cd quickstart_pytorch
 ```
 
 You have different files available:
