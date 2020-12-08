@@ -63,7 +63,7 @@ Now you are ready to start the Flower clients which will participate in the lear
 python client.py
 ```
 
-Alternatively you can run everythin in one shell as follows:
+Alternatively you can run all of it in one shell as follows:
 
 ```shell
 python server.py &
