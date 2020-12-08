@@ -47,7 +47,7 @@ The provided AMI is a bare Ubuntu 18.04 image which was modified using the
 ## Build Docker Container
 
 ```bash
-./docker/build.sh
+./src/docker/build.sh
 ```
 
 ## Build Python Wheel
