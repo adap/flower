@@ -54,7 +54,7 @@ If you open a new terminal you can activate the previously created virtual envir
 Virtualenv with Anaconda
 ------------------------
 
-If you prefer to use anaconda for your virtual environment then install and setup the `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`_  package. After setting it up you can create a virtual environment with:
+If you prefer to use Anaconda for your virtual environment then install and setup the `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`_  package. After setting it up you can create a virtual environment with:
 
 .. code-block:: shell
 
