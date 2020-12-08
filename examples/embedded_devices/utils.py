@@ -26,19 +26,19 @@ https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 
 
 from collections import OrderedDict
+from pathlib import Path
+from time import time
 from typing import Tuple
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchvision import datasets
-from torchvision.models import resnet18
 import torchvision.transforms as transforms
 from torch import Tensor
+from torchvision import datasets
+from torchvision.models import resnet18
 
-from time import time
 import flwr as fl
-from pathlib import Path
 
 DATA_ROOT = Path("./data")
 
