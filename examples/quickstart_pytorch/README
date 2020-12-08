@@ -1,14 +1,14 @@
 # Flower Example using PyTorch
 
-This introductory example to Flower uses PyTorch but deep knowledge of PyToch is not necessarily required to run the example. However, it will help you understanding how to adapt Flower to your use-cases.
+This introductory example to Flower uses PyTorch, but deep knowledge of PyToch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
 Running this example in itself is quite easy.
 
 It is recommended to use a virtual environment as described [here](https://flower.dev/docs/recommended-env-setup).
-After setting up the virtual environment it is recommended to install [poetry](https://python-poetry.org/docs/) to ensure the right version of libraries.
+After setting up the virtual environment it is recommended to use [poetry](https://python-poetry.org/docs/) to install the project.
 
 ## Run PyTorch Federated
 
-Start with cloning the Flower repo and checking out the example. We have prepared a single line which you can copy into your shell which will checkout the example for you.
+Start bz cloning the Flower example. We have prepared a single line that you can copy into your shell:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_tensorflow . && rm -rf flower && cd quickstart_tensorflow
@@ -20,11 +20,9 @@ You have different files available:
 -- pyproject.toml
 -- client.py
 -- server.py
--- run-clients.sh
--- run-server.sh
 ```
 
-The `pyproject.toml` defines the project dependencies. Simply run poetry to install all required dependencies with:
+The `pyproject.toml` defines the project dependencies. Simply run poetry to install all required dependencies:
 
 ```shell
 poetry install
@@ -33,13 +31,21 @@ poetry install
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
 ```shell
-./run-server.py
+pzthon3 server.py
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open one more terminal and run the following command:
+Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the following commands.
+
+Start client 1 in the first terminal:
 
 ```shell
-./run-client.py
+python3 client.py
 ```
 
-You will see that PyTorch is starting a federated training. Have a look to the [Flower Quickstarter documentation](file://wsl%24/Ubuntu-18.04/home/maria/adap/flower/doc/build/html/quickstart_pytorch.html) for a detailed explanation.
+Start client 2 in the second terminal:
+
+```shell
+python3 client.py
+```
+
+You will see that PyTorch is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart_pytorch.html) for a detailed explanation.
