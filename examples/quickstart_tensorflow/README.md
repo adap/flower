@@ -51,16 +51,24 @@ The `pyproject.toml` defines the project dependencies. Simply run poetry to inst
 poetry install
 ```
 
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal running the `run-server.sh` script as follows:
+Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
 ```shell
-./run-server.sh
+python server.py
 ```
 
-Now you are ready to start the Flower Clients which will participate in the learning. Todo so simply run the `run-clients.sh` shell script as follows:
+Now you are ready to start the Flower clients which will participate in the learning. Todo so simply open two more terminals and run the following command in each:
 
 ```shell
-./run-clients.sh
+python client.py
+```
+
+Alternatively you can run everythin in one shell as follows:
+
+```shell
+python server.py &
+python client.py &
+python client.py &
 ```
 
 You will see that Keras is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart_tensorflow.html) for a detailed explanation.
