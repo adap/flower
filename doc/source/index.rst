@@ -22,6 +22,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    implementing-strategies
    examples
    example_walkthrough_pytorch_mnist
+   recommended-env-setup
    howto-aws
    changelog
 
