@@ -35,7 +35,7 @@ and then returns the entire training and test set as NumPy ndarrays.
 
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
-Next, we need a model. For the purpose of this tutorial, a MobilNetV2 network that is predefined in Keras with 10 output classes:
+Next, we need a model. For the purpose of this tutorial, we use MobilNetV2 with 10 output classes:
 
 .. code-block:: python
 
@@ -56,15 +56,15 @@ implemented in the following way:
 .. code-block:: python
 
     class CifarClient(fl.client.NumPyClient):
-        def get_parameters(self):  # type: ignore
+        def get_parameters(self):
             return model.get_weights()
 
-        def fit(self, parameters, config):  # type: ignore
+        def fit(self, parameters, config):
             model.set_weights(parameters)
             model.fit(x_train, y_train, epochs=1, batch_size=32, steps_per_epoch=3)
             return model.get_weights(), len(x_train)
 
-        def evaluate(self, parameters, config):  # type: ignore
+        def evaluate(self, parameters, config):
             model.set_weights(parameters)
             loss, accuracy = model.evaluate(x_test, y_test)
             return len(x_test), loss, accuracy
