@@ -1,22 +1,21 @@
 Virtual Env Installation
 ========================
 
-It is recommended to run your federated setup within a virtual environment.
-We give you three different examples how to create the virtual environment with pyenv virtualenv, poetry, or anaconda. 
-You can follow the instructions or choose your prefered setup. 
+It is recommended to run your Python setup within a virtual environment.
+This guide shows three different examples how to create a virtual environment with pyenv virtualenv, poetry, or anaconda.
+You can follow the instructions or choose your preferred setup. 
 
 Python Version
 --------------
 
-Flower requires `Python 3.6 <https://docs.python.org/3.6/>`_ or above.
-
+Flower requires `Python 3.6 <https://docs.python.org/3.6/>`_ or above, we recommend `Python 3.7 <https://docs.python.org/3.7/>`_.
 
 Virutualenv with Pyenv/Virtualenv
 ---------------------------------
 
-One of the recommended virtual environment is `pyenv <https://github.com/pyenv/pyenv>`_/`virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_. Please clone the repositories to download the required libraries.
+One of the recommended virtual environment is `pyenv <https://github.com/pyenv/pyenv>`_/`virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_. Please see `Flower examples <https://github.com/adap/flower/tree/main/examples/>`_ for details.
 
-After your virtualenv installation you can install `Python Version 3.6 <https://docs.python.org/3.6/>`_ or above:
+Once Pyenv is set up, you can use it to install `Python Version 3.6 <https://docs.python.org/3.6/>`_ or above:
 
 .. code-block:: shell
 
@@ -39,7 +38,7 @@ Activate the virtualenv by running the following command:
 Virtualenv with Poetry
 ----------------------
 
-The flower examples are based on `poetry <https://python-poetry.org/docs/>`_ to manage all dependency and ensure the right version of them. After installing poetry you simply create a virtual environment with:
+The Flower examples are based on `Poetry <https://python-poetry.org/docs/>`_ to manage dependencies. After installing Poetry you simply create a virtual environment with:
 
 .. code-block:: shell
 
@@ -71,4 +70,4 @@ and activate the virtual environment with:
 And then?
 ---------
 
-As soon as you created your virtual environment you can clone the repository and use poetry to install all required packages as shown in the `Flower examples <https://github.com/adap/flower/tree/main/examples/>`_. 
+As soon as you created your virtual environment you clone one of the `Flower examples <https://github.com/adap/flower/tree/main/examples/>`_. 
