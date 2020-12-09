@@ -24,7 +24,8 @@ AdapterInstance = Tuple[
 
 
 class Adapter(ABC):
-    """Base class for different Adapter implementations, for example, AWS EC2."""
+    """Base class for different Adapter implementations, for example, AWS
+    EC2."""
 
     # pylint: disable=too-many-arguments
     @abstractmethod
@@ -46,7 +47,6 @@ class Adapter(ABC):
             commands (:obj:`str`, optional): List of bash commands which will be joined into a
                 single string with newline as a seperator
             gpu (bool): If true will only consider instances with GPU
-
         """
 
     @abstractmethod
@@ -57,7 +57,6 @@ class Adapter(ABC):
 
         Args:
             instance_ids (:obj:`list` of :obj:`str`, optional): If provided, filter by instance_ids
-
         """
 
     @abstractmethod
@@ -65,7 +64,6 @@ class Adapter(ABC):
         """Terminate instances.
 
         Should raise an error if something goes wrong.
-
         """
 
     @abstractmethod
@@ -73,5 +71,4 @@ class Adapter(ABC):
         """Terminate all instances.
 
         Will raise an error if something goes wrong.
-
         """

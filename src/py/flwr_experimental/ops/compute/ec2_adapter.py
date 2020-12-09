@@ -36,8 +36,8 @@ class NoMatchingInstanceType(Exception):
 class EC2TerminationFailure(Exception):
     """Something went wrong while terminating EC2 instances.
 
-    EC2 should be manually checked to check what went wrong and
-    the instances might need manual shutdown and terminatation.
+    EC2 should be manually checked to check what went wrong and the
+    instances might need manual shutdown and terminatation.
     """
 
 
@@ -72,7 +72,8 @@ INSTANCE_TYPES_GPU = [
 def find_instance_type(
     num_cpu: int, num_ram: float, instance_types: List[Tuple[str, int, int, float]]
 ) -> Tuple[str, float]:
-    """Return the first matching instance type if one exists, raise otherwise."""
+    """Return the first matching instance type if one exists, raise
+    otherwise."""
     for instance_type in instance_types:
         if instance_type[1] == num_cpu and instance_type[2] == num_ram:
             return instance_type[0], instance_type[3]
@@ -83,7 +84,8 @@ def find_instance_type(
 def flatten_reservations(
     reservations: EC2DescribeInstancesResult,
 ) -> List[ec2.Instance]:
-    """Extract instances from reservations returned by a call to describe_instances."""
+    """Extract instances from reservations returned by a call to
+    describe_instances."""
     instances: List[ec2.Instance] = []
 
     # Flatten list of lists
@@ -150,12 +152,11 @@ class EC2Adapter(Adapter):
         self.ec2 = boto3.client("ec2") if boto_ec2_client is None else boto_ec2_client
 
     def _wait_until_instances_are_reachable(self, instance_ids: List[str]) -> None:
-        """Block until all instances are reachable.
-        Raises TimeoutException after 300s.
+        """Block until all instances are reachable. Raises TimeoutException
+        after 300s.
 
         Returns:
             bool: True if all are reachable otherwise False.
-
         """
 
         for _ in range(30):
@@ -197,7 +198,6 @@ class EC2Adapter(Adapter):
                             or INSTANCE_TYPES_GPU)
             timeout (int): Timeout in minutes
             num_instance (int): Number of instances to start if currently available in EC2
-
         """
         # The instance will be set to terminate after stutdown
         # This is a fail safe in case something happens and the instances
@@ -257,7 +257,6 @@ class EC2Adapter(Adapter):
 
         Args:
             instance_ids ([str[]]): If provided, filter by instance_ids
-
         """
         if instance_ids is None:
             instance_ids = []
@@ -286,7 +285,6 @@ class EC2Adapter(Adapter):
         """Terminate instances.
 
         Will raise an error if something goes wrong.
-
         """
         res = self.ec2.terminate_instances(InstanceIds=instance_ids)
 
@@ -298,7 +296,6 @@ class EC2Adapter(Adapter):
         """Terminate all instances.
 
         Will raise an error if something goes wrong.
-
         """
         result: EC2DescribeInstancesResult = self.ec2.describe_instances(
             Filters=tags_to_filter(self.tags),
