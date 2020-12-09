@@ -78,12 +78,13 @@ def start_client(
 
 
 def download_dataset(baseline: str) -> str:
-    "Return command which makes dataset locally available."
+    """Return command which makes dataset locally available."""
     return f"python3.7 -m flwr_experimental.baseline.{baseline}.download"
 
 
 def watch_and_shutdown(keyword: str, adapter: str) -> str:
-    """Return command which shuts down the instance after no baseline is running anymore."""
+    """Return command which shuts down the instance after no baseline is
+    running anymore."""
     cmd = (
         f"screen -d -m bash -c 'while [[ $(ps a | grep -v grep | grep {keyword}) ]]; "
         + "do sleep 1; done; "
@@ -102,7 +103,8 @@ def watch_and_shutdown(keyword: str, adapter: str) -> str:
 
 
 def tail_logfile(adapter: str, private_key: str, logserver: Instance) -> str:
-    "Return command which can be used to tail the logfile on the logserver."
+    """Return command which can be used to tail the logfile on the
+    logserver."""
     ssh_key = f"-i {private_key}"
     username = "root" if adapter == "docker" else "ubuntu"
 

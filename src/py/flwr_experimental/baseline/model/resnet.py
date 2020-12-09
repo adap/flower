@@ -24,7 +24,7 @@ import tensorflow as tf
 def resnet50v2(
     input_shape: Tuple[int, int, int], num_classes: int, seed: Optional[int] = None
 ) -> tf.keras.Model:
-    """Create a ResNet-50 (v2) instance"""
+    """Create a ResNet-50 (v2) instance."""
 
     model = tf.keras.applications.ResNet50V2(
         weights=None, include_top=True, input_shape=input_shape, classes=num_classes
