@@ -3,12 +3,12 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 # Python
-isort -s src/py/flwr/proto -rc src/py
-black -q --exclude src/py/flwr/proto src/py
-docformatter -i -r src/py/flwr -e src/py/flwr/proto
-docformatter -i -r src/py/flwr_experimental
+python -m isort -s src/py/flwr/proto -rc src/py
+python -m black -q --exclude src/py/flwr/proto src/py
+python -m docformatter -i -r src/py/flwr -e src/py/flwr/proto
+python -m docformatter -i -r src/py/flwr_experimental
 
 # Examples
-isort -rc examples
-black -q examples
-docformatter -i -r examples
+python -m isort -rc examples
+python -m black -q examples
+python -m docformatter -i -r examples

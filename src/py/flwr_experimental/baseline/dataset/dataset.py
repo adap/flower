@@ -36,17 +36,17 @@ def float_to_int(i: float) -> int:
 
 def sort_by_label(x: np.ndarray, y: np.ndarray) -> XY:
     """Sort by label.
-    Assuming two labels and four examples the resulting label
-    order would be 1,1,2,2
+
+    Assuming two labels and four examples the resulting label order
+    would be 1,1,2,2
     """
     idx = np.argsort(y, axis=0).reshape((y.shape[0]))
     return (x[idx], y[idx])
 
 
 def sort_by_label_repeating(x: np.ndarray, y: np.ndarray) -> XY:
-    """Sort by label in repeating groups.
-    Assuming two labels and four examples the resulting label
-    order would be 1,2,1,2
+    """Sort by label in repeating groups. Assuming two labels and four examples
+    the resulting label order would be 1,2,1,2.
 
     Create sorting index which is applied to by label sorted x, y
 
@@ -66,7 +66,6 @@ def sort_by_label_repeating(x: np.ndarray, y: np.ndarray) -> XY:
         y = [
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
         ]
-
     """
     x, y = sort_by_label(x, y)
 
@@ -112,8 +111,8 @@ def combine_partitions(xy_list_0: XYList, xy_list_1: XYList) -> XYList:
 
 
 def shift(x: np.ndarray, y: np.ndarray) -> XY:
-    """Shift x_1, y_1 so that the first half contains only
-    labels 0 to 4 and the second half 5 to 9."""
+    """Shift x_1, y_1 so that the first half contains only labels 0 to 4 and
+    the second half 5 to 9."""
     x, y = sort_by_label(x, y)
 
     (x_0, y_0), (x_1, y_1) = split_at_fraction(x, y, fraction=0.5)
@@ -129,7 +128,8 @@ def create_partitions(
 ) -> XYList:
     """Create partitioned version of a training or test set.
 
-    Currently tested and supported are MNIST, FashionMNIST and CIFAR-10/100
+    Currently tested and supported are MNIST, FashionMNIST and
+    CIFAR-10/100
     """
     x, y = unpartitioned_dataset
 
@@ -157,7 +157,8 @@ def create_partitioned_dataset(
 ) -> Tuple[PartitionedDataset, XY]:
     """Create partitioned version of keras dataset.
 
-    Currently tested and supported are MNIST, FashionMNIST and CIFAR-10/100
+    Currently tested and supported are MNIST, FashionMNIST and
+    CIFAR-10/100
     """
     xy_train, xy_test = keras_dataset
 
