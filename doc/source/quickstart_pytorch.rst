@@ -29,7 +29,7 @@ Flower Client
 
 Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on PyTorch's `Deep Learning with PyTorch <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_. 
 
-Next, in a file called :code:`client.py`, import Flower and PyTorch related packages:
+In a file called :code:`client.py`, import Flower and PyTorch related packages:
 
 .. code-block:: python
       
@@ -49,20 +49,20 @@ In addition, we define the device allocation in PyTorch with:
 
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-We use PyTorch to load CIFAR10, a popular colored image classification dataset for machine learning. The PyTorch :code:`DataLoader()` downloads the training and testing data that is then normalized. 
+We use PyTorch to load CIFAR10, a popular colored image classification dataset for machine learning. The PyTorch :code:`DataLoader()` downloads the training and test data that are then normalized. 
 
 .. code-block:: python
 
     def load_data():
     """Load CIFAR-10 (training and test set)."""
-    transform = transforms.Compose(
+        transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-    )
-    trainset = CIFAR10(".", train=True, download=True, transform=transform)
-    testset = CIFAR10(".", train=False, download=True, transform=transform)
-    trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
-    testloader = DataLoader(testset, batch_size=32)
-    return trainloader, testloader
+        )
+        trainset = CIFAR10(".", train=True, download=True, transform=transform)
+        testset = CIFAR10(".", train=False, download=True, transform=transform)
+        trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
+        testloader = DataLoader(testset, batch_size=32)
+        return trainloader, testloader
 
 Define the loss and optimizer with PyTorch. The training of the dataset is done by looping over the dataset, measure the corresponding loss and optimize it. 
 
@@ -99,7 +99,8 @@ Define then the validation of the  machine learning network. We loop over the te
         accuracy = correct / total
         return loss, accuracy
 
-After defining the training and testing of a PyTorch machine learning model, we can use the functions for the Flower clients. 
+After defining the training and testing of a PyTorch machine learning model, we can use the functions for the Flower clients.
+
 The Flower clients and server will use the MobileNetV2 of PyTorch, :code:`torchvision.models.mobilenet_v2()`, that needs to be defined. 
 
 .. code-block:: python
@@ -167,7 +168,7 @@ to actually run this client:
      fl.client.start_numpy_client("[::]:8080", client=CifarClient())
 
 That's it for the client. We only have to implement :code:`Client` or
-:code:`NumPyClient` and call :code:`fl.client.start_client()` or :code:` fl.client.start_numpy_client()`. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
+:code:`NumPyClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
 :code:`"[::]:8080"`. If we run a truly federated workload with the server and
 clients running on different machines, all that needs to change is the
 :code:`server_address` we point the client at.
