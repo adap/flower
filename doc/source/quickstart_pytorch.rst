@@ -1,9 +1,9 @@
 Quickstart (PyTorch)
 ====================
 
-In this tutorial we will learn how to train a Convolutional Neural Network on MNIST using Flower and PyTorch. 
+In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using Flower and PyTorch. 
 
-First of all, it is recommended to create a virtual environment and run everything within a `virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_. 
+First of all, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_. 
 
 Our example consists of one *server* and two *clients* all having the same model. 
 
@@ -24,333 +24,101 @@ Since we want to use PyTorch to solve a computer vision task, let's go ahead and
   $ pip install torch torchvision
 
 
-Run it with a shell script
---------------------------
+Flower Client
+-------------
 
-Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on PyTorch's `Basic MNIST Example <https://github.com/pytorch/examples/tree/master/mnist>`_. This will allow you see how easy it is to wrap your code with Flower and begin training in a federated way.
-You can use two helper scripts namely :code:`run-server.sh` and :code:`run-clients.sh`. 
-First, create the :code:`run-server.sh`:
+Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on PyTorch's `Deep Learning with PyTorch <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_. 
 
-.. code-block:: shell
-
-    python -m server
-
-and make the script executable: 
-
-.. code-block:: shell
-
-    $ bash chmod +x ./run-server.sh
-
-
-Second, create :code:`run-client.sh`:
-
-.. code-block:: shell
-
-    set -e
-    SERVER_ADDRESS="[::]:8080"
-    NUM_CLIENTS=2
-    echo "Starting $NUM_CLIENTS clients."
-    for ((i = 0; i < $NUM_CLIENTS; i++))
-    do
-        echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
-        python -m client \
-            --cid=$i \
-            --server_address=$SERVER_ADDRESS \
-            --nb_clients=$NUM_CLIENTS &
-    done
-    echo "Started $NUM_CLIENTS clients."
-
-and make it as well executable:
-
-.. code-block:: shell
-
-    $ bash chmod +x ./run-client.sh
-
-The script contains a main loop to start a set of :code:`NUM_CLIENTS` clients. Here  you can set how many clients participating on the federated learning workload. The clients are labeled by a counter :code:`--cid` for identification. In order to connect each client to the server the :code:`SERVER_ADDRESS` can be set or a default value of :code:`[::]:8080` can be used. 
-
-Create a server
----------------
-
-Before you can run both scripts you need to create :code:`server.py` and :code:`client.py`. 
-Let's start with :code:`server.py` since it only requires the flwr package and starts the flower server by using only one command. 
+In a file called :code:`client.py`, import Flower and PyTorch related packages:
 
 .. code-block:: python
+      
+    from collections import OrderedDict
 
-    import flwr as fl
-
-    fl.server.start_server(config={"num_rounds": 3})
-
-Create some clients
--------------------
-
-The client script is longer but consists mostly of settings that you may want to adjust later to change your federated learning setup. 
-The :code:`client.py` needs a few packages as numpy, pytorch, flower  and of course the data sample of MNIST. 
-
-.. code-block:: python
-
-    from argparse import ArgumentParser
-
-    import numpy as np
     import torch
+    import torchvision
+    import torchvision.transforms as transforms
+    from torch.utils.data import DataLoader
+    from torchvision.datasets import CIFAR10
 
     import flwr as fl
 
-    from flwr_example.quickstart_pytorch import mnist
-
-    DATA_ROOT = "./data/mnist"
-
-    if __name__ == "__main__":
-        # Training settings
-        parser = ArgumentParser(description="PyTorch MNIST Example")
-        parser.add_argument(
-            "--server_address",
-            type=str,
-            default="[::]:8080",
-            help=f"gRPC server address (default: '[::]:8080')",
-        )
-        parser.add_argument(
-            "--cid",
-            type=int,
-            metavar="N",
-            help="ID of current client (default: 0)",
-        )
-        parser.add_argument(
-            "--nb_clients",
-            type=int,
-            default=2,
-            metavar="N",
-            help="Total number of clients being launched (default: 2)",
-        )
-        parser.add_argument(
-            "--train-batch-size",
-            type=int,
-            default=64,
-            metavar="N",
-            help="input batch size for training (default: 64)",
-        )
-        parser.add_argument(
-            "--test-batch-size",
-            type=int,
-            default=1000,
-            metavar="N",
-            help="input batch size for testing (default: 1000)",
-        )
-        parser.add_argument(
-            "--epochs",
-            type=int,
-            default=14,
-            metavar="N",
-            help="number of epochs to train (default: 14)",
-        )
-
-        args = parser.parse_args()
-
-        # Load MNIST data
-        train_loader, test_loader = mnist.load_data(
-            data_root=DATA_ROOT,
-            train_batch_size=args.train_batch_size,
-            test_batch_size=args.test_batch_size,
-            cid=args.cid,
-            nb_clients=args.nb_clients,
-        )
-
-        # pylint: disable=no-member
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # pylint: enable=no-member
-
-        # Instantiate client
-        client = mnist.PytorchMNISTClient(
-            cid=args.cid,
-            train_loader=train_loader,
-            test_loader=test_loader,
-            epochs=args.epochs,
-            device=device,
-        )
-
-        # Start client
-        fl.client.start_client(args.server_address, client)
-
-With only 4 scripts you are ready to run your first federated MNIST workload. You just need to start the server:
-
-.. code-block:: shell
-
-  $ bash ./run-server.sh 
-
-and in a second terminal you need to start the clients:
-
-.. code-block:: shell
-
-  $ bash ./run-clients.sh 
-
-
-Et voilà! You should be seeing the training procedure and, after a few iterations, the test accuracy for each client.
-
-.. code-block:: shell
-
-    Train Epoch: 10 [30000/30016 (100%)] Loss: 0.007014				
-    
-    Train Epoch: 10 [30000/30016 (100%)] Loss: 0.000403				
-    
-    Train Epoch: 11 [30000/30016 (100%)] Loss: 0.001280				
-    
-    Train Epoch: 11 [30000/30016 (100%)] Loss: 0.000641				
-    
-    Train Epoch: 12 [30000/30016 (100%)] Loss: 0.006784				
-    
-    Train Epoch: 12 [30000/30016 (100%)] Loss: 0.007134				
-    
-    Client 1 - Evaluate on 5000 samples: Average loss: 0.0290, Accuracy: 99.16%	
-    
-    Client 0 - Evaluate on 5000 samples: Average loss: 0.0328, Accuracy: 99.14%
-
-
-Now, let's see what is really happening inside. 
-
-Closer look at the server
--------------------------
-
-The :code:`server.py` simply launches a server that will coordinate three rounds of training.
-Flower Servers are very customizable, but for simple workloads we can start a server and leave all the configuration possibilities at their default values.
-
-Closer look at the client
--------------------------
-
-Next, let's take a look at the client part that is more complex since the training of the MNIST data happens here.
-Again, we can go deeper and look inside :code:`client.py`. You find many parameters to setup your own federated learning workload:
-
-#. :code:`--server_address` 
-    * setup your server address to connect the clients to server.
-#. :code:`--cid`     
-    * counter to identify all clients
-#. :code:`--nb_clients`  
-    * set the number of clients connected to one server
-#. :code:`--train-batch-size`    
-    * set up the size of the training batch for each client
-#. :code:`--test-batch-size`     
-    * set up the size of the test batch
-#. :code:`--epochs`  
-    * set up the number of epochs to run for each client
-
-Play a bit around with the settings to get a feeling of a federated learning setup. 
-
-After going through the argument parsing code at the beginning of our function, you will find a call to :code:`mnist.load_data`.
+In addition, we define the device allocation in PyTorch with:
 
 .. code-block:: python
 
-    # Load MNIST data
-    train_loader, test_loader = mnist.load_data(
-        data_root=DATA_ROOT,
-        train_batch_size=args.train_batch_size,
-        test_batch_size=args.test_batch_size,
-        cid=args.cid,
-        nb_clients=args.nb_clients,
-    )
+    DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-This function is responsible for partitioning the original MNIST datasets (*training* and *test*) and returning a :code:`torch.utils.data.DataLoader` s for each of them.
-We then instantiate a :code:`PytorchMNISTClient` object with our client ID, our DataLoaders, the number of epochs in each round, and which device we want to use for training (cpu or gpu).
-
+We use PyTorch to load CIFAR10, a popular colored image classification dataset for machine learning. The PyTorch :code:`DataLoader()` downloads the training and test data that are then normalized. 
 
 .. code-block:: python
 
-    client = mnist.PytorchMNISTClient(
-        cid=args.cid,
-        train_loader=train_loader,
-        test_loader=test_loader,
-        epochs=args.epochs,
-        device=device,
+    def load_data():
+    """Load CIFAR-10 (training and test set)."""
+        transform = transforms.Compose(
+        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
         )
+        trainset = CIFAR10(".", train=True, download=True, transform=transform)
+        testset = CIFAR10(".", train=False, download=True, transform=transform)
+        trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
+        testloader = DataLoader(testset, batch_size=32)
+        return trainloader, testloader
 
-The :code:`PytorchMNISTClient` object if finally passed to :code:`fl.client.start_client` along with the server's address as the training process begins.
-
-Now, let's look closely into the :code:`PytorchMNISTClient`. As soon as you install the *flwr* package you also install *flwr_example* where you can find :code:`flwr_example.quickstart_pytorch.mnist`. If you run already the Keras example then the code will be familiar to you:
+Define the loss and optimizer with PyTorch. The training of the dataset is done by looping over the dataset, measure the corresponding loss and optimize it. 
 
 .. code-block:: python
 
-    class PytorchMNISTClient(fl.client.Client):
-        """Flower client implementing MNIST handwritten classification using PyTorch."""
-        def __init__(
-            self,
-            cid: int,
-            train_loader: datasets,
-            test_loader: datasets,
-            epochs: int,
-            device: torch.device = torch.device("cpu"),
-        ) -> None:
-            self.model = MNISTNet().to(device)
-            self.cid = cid
-            self.train_loader = train_loader
-            self.test_loader = test_loader
-            self.device = device
-            self.epochs = epochs
+    def train(net, trainloader, epochs):
+    """Train the network on the training set."""
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+        for _ in range(epochs):
+            for images, labels in trainloader:
+                images, labels = images.to(DEVICE), labels.to(DEVICE)
+                optimizer.zero_grad()
+                loss = criterion(net(images), labels)
+                loss.backward()
+                optimizer.step()
 
-        def get_weights(self) -> fl.common.Weights:
-            """Get model weights as a list of NumPy ndarrays."""
-            return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
+Define then the validation of the  machine learning network. We loop over the test set and measure the loss and accuracy of the test set. 
 
-        def set_weights(self, weights: fl.common.Weights) -> None:
+.. code-block:: python
 
-            state_dict = OrderedDict(
-                {
-                    k: torch.Tensor(v)
-                    for k, v in zip(self.model.state_dict().keys(), weights)
-                }
-            )
-            self.model.load_state_dict(state_dict, strict=True)
+    def test(net, testloader):
+        """Validate the network on the entire test set."""
+        criterion = torch.nn.CrossEntropyLoss()
+        correct, total, loss = 0, 0, 0.0
+        with torch.no_grad():
+            for data in testloader:
+                images, labels = data[0].to(DEVICE), data[1].to(DEVICE)
+                outputs = net(images)
+                loss += criterion(outputs, labels).item()
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+        accuracy = correct / total
+        return loss, accuracy
 
-        def get_parameters(self) -> fl.common.ParametersRes:
-            """Encapsulates the weight into Flower Parameters """
-            weights: fl.common.Weights = self.get_weights()
-            parameters = fl.common.weights_to_parameters(weights)
-            return fl.common.ParametersRes(parameters=parameters)
+After defining the training and testing of a PyTorch machine learning model, we use the functions for the Flower clients.
 
-        def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
-            """Trains the model on local dataset"""
+The Flower clients and server will use the MobileNetV2 of PyTorch, :code:`torchvision.models.mobilenet_v2()`. 
 
-            weights: fl.common.Weights = fl.common.parameters_to_weights(ins.parameters)
-            fit_begin = timeit.default_timer()
+.. code-block:: python
 
-            # Set model parameters/weights
-            self.set_weights(weights)
+    net = torchvision.models.mobilenet_v2().to(DEVICE)
+    trainloader, testloader = load_data()
 
-            # Train model
-            num_examples_train: int = train(
-                self.model, self.train_loader, epochs=self.epochs, device=self.device
-            )
+After loading the data set with :code:`load_data()` we define the Flower interface. 
 
-            # Return the refined weights and the number of examples used for training
-            weights_prime: fl.common.Weights = self.get_weights()
-            params_prime = fl.common.weights_to_parameters(weights_prime)
-            fit_duration = timeit.default_timer() - fit_begin
-            return fl.common.FitRes(
-                parameters=params_prime,
-                num_examples=num_examples_train,
-                num_examples_ceil=num_examples_train,
-                fit_duration=fit_duration,
-            )
+The Flower server interacts with clients through an interface called
+:code:`Client`. When the server selects a particular client for training, it
+sends training instructions over the network. The client receives those
+instructions and calls one of the :code:`Client` methods to run your code
+(i.e., to train the neural network we defined earlier).
 
-        def evaluate(self, ins: fl.common.EvaluateIns) -> fl.common.EvaluateRes:
-            weights = fl.common.parameters_to_weights(ins.parameters)
-
-            # Use provided weights to update the local model
-            self.set_weights(weights)
-
-            (
-                num_examples_test,
-                test_loss,
-                accuracy,
-            ) = test(self.model, self.test_loader, device=self.device)
-            print(
-                f"Client {self.cid} - Evaluate on {num_examples_test} samples: Average loss: {test_loss:.4f}, Accuracy: {100*accuracy:.2f}%\n"
-            )
-
-            # Return the number of evaluation examples and the evaluation result (loss)
-            return fl.common.EvaluateRes(
-                num_examples=num_examples_test,
-                loss=float(test_loss),
-                accuracy=float(accuracy),
-            )
-
-The code contains 5 main functions similar to the Keras example. 
+Flower provides a convenience class called :code:`NumPyClient` which makes it
+easier to implement the :code:`Client` interface when your workload uses PyTorch.
+The :code:`NumPyClient` interface defines four methods
 
 #. :code:`get_weights`
     * receive the model weights calculated by the local model
@@ -363,9 +131,112 @@ The code contains 5 main functions similar to the Keras example.
     * train the local model
     * receive the updated local model weights
 #. :code:`evaluate`
-    * test the local model 
+    * test the local model
 
-The fitting function trains the MNIST dataset with a typical CNN that can be found in the `Example Walk-Through: PyTorch & MNIST <https://flower.dev/docs/example_walkthrough_pytorch_mnist.html>`_ .
-Observe that these functions basically encapsulate regular training and test loops and provide :code:`fit` and :code:`evaluate` with final statistics for each round.
-You could substitute them with your own train and test loops, and also change the network architecture and the entire example would still work flawlessly. 
-As a matter of fact, why not try and modify the code to an example of your liking? 
+which can be implemented in the following way:
+
+.. code-block:: python
+
+    class CifarClient(fl.client.NumPyClient):
+        def get_parameters(self):
+            return [val.cpu().numpy() for _, val in net.state_dict().items()]
+
+        def set_parameters(self, parameters):
+            params_dict = zip(net.state_dict().keys(), parameters)
+            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            net.load_state_dict(state_dict, strict=True)
+
+        def fit(self, parameters, config):
+            self.set_parameters(parameters)
+            train(net, trainloader, epochs=1)
+            return self.get_parameters(), len(trainloader)
+
+        def evaluate(self, parameters, config):
+            self.set_parameters(parameters)
+            loss, accuracy = test(net, testloader)
+            return len(testloader), float(loss), float(accuracy)
+
+We can now create an instance of our class :code:`CifarClient` and add one line
+to actually run this client:
+
+.. code-block:: python
+
+     fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+
+That's it for the client. We only have to implement :code:`Client` or
+:code:`NumPyClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
+:code:`"[::]:8080"`. If we run a truly federated workload with the server and
+clients running on different machines, all that needs to change is the
+:code:`server_address` we point the client at.
+
+Flower Server
+-------------
+
+For simple workloads we can start a Flower server and leave all the
+configuration possibilities at their default values. In a file named
+:code:`server.py`, import Flower and start the server:
+
+.. code-block:: python
+
+    import flwr as fl
+
+    fl.server.start_server(config={"num_rounds": 3})
+
+Train the model, federated!
+---------------------------
+
+With both client and server ready, we can now run everything and see federated
+learning in action. FL systems usually have a server and multiple clients. We
+therefore have to start the server first:
+
+.. code-block:: shell
+
+    $ python server.py
+
+Once the server is running we can start the clients in different terminals.
+Open a new terminal and start the first client:
+
+.. code-block:: shell
+
+    $ python client.py
+
+Open another terminal and start the second client:
+
+.. code-block:: shell
+
+    $ python client.py
+
+Each client will have its own dataset.
+You should now see how the training does in the very first terminal (the one
+that started the server):
+
+.. code-block:: shell
+
+    INFO flower 2020-07-15 10:06:54,903 | app.py:55 | Flower server running (insecure, 3 rounds)
+    INFO flower 2020-07-15 10:07:00,962 | server.py:66 | [TIME] FL starting
+    DEBUG flower 2020-07-15 10:07:03,206 | server.py:145 | fit_round: strategy sampled 2 clients
+    DEBUG flower 2020-07-15 10:07:19,909 | server.py:157 | fit_round received 2 results and 0 failures
+    DEBUG flower 2020-07-15 10:07:19,913 | server.py:122 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2020-07-15 10:07:20,455 | server.py:132 | evaluate received 2 results and 0 failures
+    DEBUG flower 2020-07-15 10:07:20,456 | server.py:145 | fit_round: strategy sampled 2 clients
+    DEBUG flower 2020-07-15 10:07:37,437 | server.py:157 | fit_round received 2 results and 0 failures
+    DEBUG flower 2020-07-15 10:07:37,441 | server.py:122 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2020-07-15 10:07:37,863 | server.py:132 | evaluate received 2 results and 0 failures
+    DEBUG flower 2020-07-15 10:07:37,864 | server.py:145 | fit_round: strategy sampled 2 clients
+    DEBUG flower 2020-07-15 10:07:55,531 | server.py:157 | fit_round received 2 results and 0 failures
+    DEBUG flower 2020-07-15 10:07:55,535 | server.py:122 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2020-07-15 10:07:55,937 | server.py:132 | evaluate received 2 results and 0 failures
+    INFO flower 2020-07-15 10:07:55,937 | server.py:107 | [TIME] FL finished in 54.974524599994766
+    INFO flower 2020-07-15 10:07:55,937 | app.py:59 | app_fit: losses_distributed [(1, 0.07337841391563416), (2, 0.06347471475601196), (3, 0.07028044760227203)]
+    INFO flower 2020-07-15 10:07:55,937 | app.py:60 | app_fit: accuracies_distributed []
+    INFO flower 2020-07-15 10:07:55,937 | app.py:61 | app_fit: losses_centralized []
+    INFO flower 2020-07-15 10:07:55,937 | app.py:62 | app_fit: accuracies_centralized []
+    DEBUG flower 2020-07-15 10:07:55,939 | server.py:122 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2020-07-15 10:07:56,396 | server.py:132 | evaluate received 2 results and 0 failures
+    INFO flower 2020-07-15 10:07:56,396 | app.py:71 | app_evaluate: federated loss: 0.07028044760227203
+    INFO flower 2020-07-15 10:07:56,396 | app.py:75 | app_evaluate: results [('ipv6:[::1]:33318', (10000, 0.07028044760227203, 0.982200026512146)), ('ipv6:[::1]:33320', (10000, 0.07028044760227203, 0.982200026512146))]
+    INFO flower 2020-07-15 10:07:56,396 | app.py:77 | app_evaluate: failures []
+
+Congratulations! You've successfully built and run your first federated
+learning system. The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart_pytorch/client.py>`_ for this can be found in
+:code:`examples/quickstart_pytorch/client.py`.
