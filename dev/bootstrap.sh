@@ -18,3 +18,5 @@ python -m poetry install \
   --extras "http-logger" \
   --extras "ops"
 
+# Temporary workaround (Poetry 1.0.10 cannot install TensorFlow 2.3.1)
+python -m pip install -U tensorflow-cpu==2.3.1
