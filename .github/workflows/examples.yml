@@ -33,7 +33,7 @@ jobs:
       - name: Download Datasets
         run: |
           cd examples/quickstart_pytorch
-          python -c "from torchvision.datasets import CIFAR10; CIFAR10("./dataset", download=True)"
+          python -c "from torchvision.datasets import CIFAR10; CIFAR10(\"./dataset\", download=True)"
       - name: Test
         run: |
           cd examples/quickstart_pytorch
