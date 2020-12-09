@@ -99,20 +99,16 @@ Define then the validation of the  machine learning network. We loop over the te
         accuracy = correct / total
         return loss, accuracy
 
-After defining the training and testing of a PyTorch machine learning model, we can use the functions for the Flower clients.
+After defining the training and testing of a PyTorch machine learning model, we use the functions for the Flower clients.
 
-The Flower clients and server will use the MobileNetV2 of PyTorch, :code:`torchvision.models.mobilenet_v2()`, that needs to be defined. 
+The Flower clients and server will use the MobileNetV2 of PyTorch, :code:`torchvision.models.mobilenet_v2()`. 
 
 .. code-block:: python
 
     net = torchvision.models.mobilenet_v2().to(DEVICE)
+    trainloader, testloader = load_data()
 
 After loading the data set with :code:`load_data()` we define the Flower interface. 
-
-.. code-block:: python
-
-    # Load data (CIFAR-10)
-    trainloader, testloader = load_data()
 
 The Flower server interacts with clients through an interface called
 :code:`Client`. When the server selects a particular client for training, it
