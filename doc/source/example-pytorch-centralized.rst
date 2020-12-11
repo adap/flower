@@ -2,14 +2,14 @@ Example: PyTorch Centralized and Federated
 ==========================================
 
 Before you start with this tutorial we recommend to setup a virtual environment as described `here <https://flower.dev/docs/recommended-env-setup.html>`_. 
-This tutorial will show you how to build Flower on top of an existing machine learning workload. We are using PyTorch to train a Convolutional Neural Network on a CIFAR10 dataset. First, we setup this machine learning task with a centralized training approach based on `Deep Learning with PyTorch <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_ tutorial. Secondly, we use the centralized training and run it federated.
+This tutorial will show you how to build Flower on top of an existing machine learning workload. We are using PyTorch to train a Convolutional Neural Network on the CIFAR-10 dataset. First, we introduce this machine learning task with a centralized training approach based on the `Deep Learning with PyTorch <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_ tutorial. Then, we build on the centralized training to run it in a federated fashion.
 
 Centralized Training
--------------------- 
+--------------------
 
 We will post the complete centralized training here and explain it shortly. If you have question about the centralized training have a look to the `PyTorch tutorial <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_. 
 
-Let's now create a :code:`cifar.py` to train your CIFAR10 dataset centralized. 
+Let's now create a :code:`cifar.py` to train your CIFAR-10 dataset centralized. 
 
 First, all required packages as :code:`torch` and :code:`torchvision` need to be implemented. You can see that we do not implement any package for federated learning. You can keep all these import as they are even for the federated learning process at a later point.
 
@@ -24,7 +24,7 @@ First, all required packages as :code:`torch` and :code:`torchvision` need to be
     import torchvision.transforms as transforms
     from torch import Tensor
 
-As already mentioned we will use the CIFAR10 dataset for the machine learning workload. The model setup is defined in the :code:`class Net()` and will be a Convolutional Neural Network.
+As already mentioned we will use the CIFAR-10 dataset for the machine learning workload. The model setup is defined in the :code:`class Net()` and will be a Convolutional Neural Network.
 
 .. code-block:: python
 
