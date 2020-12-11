@@ -206,7 +206,7 @@ Finally, we will setup the *clients* with :code:`client.py` and use the previous
 
     DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-The implemenation of the Flower *client* is done with the :code:`CifarClient()`. This *Client* has two paramter definition and two running  functions:
+The implemenation of the Flower *client* is done with the :code:`CifarClient()`. This *client* has two paramter definition and two running  functions:
 
 #. :code:`set_parameters`
     * set the model weights on the local model that are received from the server
@@ -279,7 +279,7 @@ After you setup the Flower *Client* you can start your federated training and co
 
 You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient()` with Flower :code:`fl.client.start_numpy_client()` by setting the IP adress as done in the :code:`server.py`. 
 
-..code-block:: python
+.. code-block:: python
 
     def main() -> None:
         """Load data, start CifarClient."""
