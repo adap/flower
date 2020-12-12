@@ -99,7 +99,8 @@ def build_dataset(
     seed: Optional[int] = None,
     normalization_factor: float = 255.0,
 ) -> tf.data.Dataset:
-    """Normalize images, one-hot encode labels, optionally shuffle and augment."""
+    """Normalize images, one-hot encode labels, optionally shuffle and
+    augment."""
     dataset = tf.data.Dataset.from_tensor_slices((x, y))
     dataset = dataset.map(
         lambda x, y: (

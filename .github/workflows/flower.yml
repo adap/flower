@@ -51,6 +51,14 @@ jobs:
         run: |
           python -m poetry install --extras "baseline"
           python -m pip install -U tensorflow-cpu==2.3.1
+      - name: Cache Datasets
+        uses: actions/cache@v2
+        with:
+          path: '~/.keras'
+          key: keras-datasets
+      - name: Download Datasets
+        run: |
+          python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-baseline.sh
 

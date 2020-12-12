@@ -17,6 +17,7 @@
 
 import argparse
 import timeit
+<<<<<<< HEAD
 
 from collections import OrderedDict
 from importlib import import_module
@@ -28,6 +29,18 @@ import flwr as fl
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
 
 import utils
+=======
+from collections import OrderedDict
+from importlib import import_module
+
+import numpy as np
+import torch
+import torchvision
+
+import flwr as fl
+import utils
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
+>>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
 
 # pylint: disable=no-member
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -51,7 +64,12 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
 
 
 class CifarClient(fl.client.Client):
+<<<<<<< HEAD
     """Flower client implementing CIFAR-10 image classification using PyTorch."""
+=======
+    """Flower client implementing CIFAR-10 image classification using
+    PyTorch."""
+>>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
 
     def __init__(
         self,
@@ -96,11 +114,21 @@ class CifarClient(fl.client.Client):
         set_weights(self.model, weights)
 
         if torch.cuda.is_available():
+<<<<<<< HEAD
             kwargs = {'num_workers': num_workers,
                       'pin_memory': pin_memory,
                       'drop_last': True}
         else:
             kwargs = {'drop_last': True}
+=======
+            kwargs = {
+                "num_workers": num_workers,
+                "pin_memory": pin_memory,
+                "drop_last": True,
+            }
+        else:
+            kwargs = {"drop_last": True}
+>>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
 
         # Train model
         trainloader = torch.utils.data.DataLoader(

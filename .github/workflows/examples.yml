@@ -1,0 +1,64 @@
+name: Test Examples
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test_quickstart_tensorflow:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7.9
+      - name: Install
+        run: |
+          python -m pip install poetry==1.1.4
+          poetry config virtualenvs.create false
+      - name: Install dependencies
+        run: |
+          cd examples/quickstart_tensorflow
+          python -m poetry install
+      - name: Cache Datasets
+        uses: actions/cache@v2
+        with:
+          path: '~/.keras'
+          key: keras-datasets
+      - name: Download Datasets
+        run: |
+          python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
+      - name: Test
+        run: |
+          cd examples/quickstart_tensorflow
+
+          python server.py &
+          sleep 3
+
+          python client.py 1 &
+          sleep 3
+
+          if [[ $(ps aux | grep "[p]ython client.py 1" | awk '{ print $2 }') ]];
+            then echo "Client process 1 started correctly";
+            else echo "Client process 1 crashed" && exit 1;
+          fi
+          
+          python client.py 2 &
+          sleep 3
+          
+          if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
+            then echo "Client process 2 started correctly";
+            else echo "Client process 2 crashed" && exit 1;
+          fi
+
+          if [[ $(ps aux | grep "[p]ython server.py" | awk '{ print $2 }') ]];
+            then echo "Server process started correctly";
+            else echo "Server process crashed" && exit 1;
+          fi
+
+          killall python

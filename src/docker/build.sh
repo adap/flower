@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,24 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for partitioned hotkey dataset generation."""
-# pylint: disable=no-self-use
 
-import unittest
+set -e
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
 
-from flwr_experimental.baseline.dataset.tf_hotkey_partitioned import load_data
+HASH=$(printf "$(git rev-parse HEAD)\n$(git diff | sha1sum)" | sha1sum | cut -c1-7)
 
-
-class HotkeyPartitionedTestCase(unittest.TestCase):
-    """Tests for partitioned Hotkey dataset generation."""
-
-    def test_load_data_integration(self) -> None:
-        """Test partition function."""
-        # Execute
-        for num_partitions in [10, 100]:
-            for fraction in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
-                (_, _), _ = load_data(fraction, num_partitions)
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+rm -rf dist
+python -m poetry build
+docker build -f src/docker/default.Dockerfile -t flower:latest -t flower:$HASH .
+docker build -f src/docker/sshd.Dockerfile --build-arg SSH_PUBLIC_KEY="$(cat docker/ssh_key.pub)" -t flower-sshd:latest -t flower-sshd:$HASH .

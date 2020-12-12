@@ -115,8 +115,8 @@ if os.getenv("FLOWER_INTEGRATION"):
         """Integration tests class Cluster.
 
         This TestCase will not mock anythin and use a live EC2Adapter
-        which will be used to provision a single machine and execute a single
-        command on it. Afterwards the machines will be shut down.
+        which will be used to provision a single machine and execute a
+        single command on it. Afterwards the machines will be shut down.
         """
 
         # pylint: disable=too-many-instance-attributes
