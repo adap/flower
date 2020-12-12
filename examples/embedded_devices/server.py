@@ -16,20 +16,6 @@
 
 
 import argparse
-<<<<<<< HEAD
-from typing import Callable, Dict, Optional, Tuple
-
-from collections import OrderedDict
-import numpy as np
-
-import torch
-import torchvision
-import flwr as fl
-
-import utils
-
-
-=======
 from collections import OrderedDict
 from typing import Callable, Dict, Optional, Tuple
 
@@ -40,7 +26,6 @@ import torchvision
 import flwr as fl
 import utils
 
->>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
 # pylint: disable=no-member
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
@@ -100,13 +85,7 @@ parser.add_argument(
     default=4,
     help="number of workers for dataset reading",
 )
-<<<<<<< HEAD
-parser.add_argument(
-    '--pin_memory',
-    action='store_true')
-=======
 parser.add_argument("--pin_memory", action="store_true")
->>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
 args = parser.parse_args()
 
 
@@ -115,13 +94,9 @@ def main() -> None:
 
     print(args)
 
-<<<<<<< HEAD
-    assert (args.min_sample_size <= args.min_num_clients), f"Num_clients shouldn't be lower than min_sample_size"
-=======
     assert (
         args.min_sample_size <= args.min_num_clients
     ), f"Num_clients shouldn't be lower than min_sample_size"
->>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
 
     # Configure logger
     fl.common.logger.configure("server", host=args.log_host)
@@ -155,11 +130,7 @@ def fit_config(rnd: int) -> Dict[str, str]:
         "epochs": str(1),
         "batch_size": str(args.batch_size),
         "num_workers": str(args.num_workers),
-<<<<<<< HEAD
-        "pin_memory": str(args.pin_memory)
-=======
         "pin_memory": str(args.pin_memory),
->>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
     }
     return config
 

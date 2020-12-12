@@ -26,33 +26,19 @@ https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 
 
 from collections import OrderedDict
-<<<<<<< HEAD
-=======
 from pathlib import Path
 from time import time
->>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
 from typing import Tuple
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-<<<<<<< HEAD
-from torchvision import datasets
-from torchvision.models import resnet18
-import torchvision.transforms as transforms
-from torch import Tensor
-
-from time import time
-import flwr as fl
-from pathlib import Path
-=======
 import torchvision.transforms as transforms
 from torch import Tensor
 from torchvision import datasets
 from torchvision.models import resnet18
 
 import flwr as fl
->>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
 
 DATA_ROOT = Path("./data")
 
@@ -94,21 +80,13 @@ class Net(nn.Module):
 
 
 def ResNet18():
-<<<<<<< HEAD
-    """ Returns a ResNet18 model from TorchVision adapted for CIFAR-10"""
-=======
     """Returns a ResNet18 model from TorchVision adapted for CIFAR-10."""
->>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
 
     model = resnet18(num_classes=10)
 
     # replace w/ smaller input layer
     model.conv1 = torch.nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-<<<<<<< HEAD
-    nn.init.kaiming_normal_(model.conv1.weight, mode='fan_out', nonlinearity='relu')
-=======
     nn.init.kaiming_normal_(model.conv1.weight, mode="fan_out", nonlinearity="relu")
->>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
     # no need for pooling if training for CIFAR-10
     model.maxpool = torch.nn.Identity()
 
@@ -117,15 +95,9 @@ def ResNet18():
 
 def load_model(model_name: str) -> nn.Module:
 
-<<<<<<< HEAD
-    if model_name == 'Net':
-        return Net()
-    elif model_name == 'ResNet18':
-=======
     if model_name == "Net":
         return Net()
     elif model_name == "ResNet18":
->>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
         return ResNet18()
     else:
         raise NotImplementedError(f"model {model_name} is not implemented")
@@ -138,17 +110,10 @@ def load_cifar(download=False) -> Tuple[datasets.CIFAR10, datasets.CIFAR10]:
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
     trainset = datasets.CIFAR10(
-<<<<<<< HEAD
-        root=DATA_ROOT/"cifar-10", train=True, download=download, transform=transform
-    )
-    testset = datasets.CIFAR10(
-        root=DATA_ROOT/"cifar-10", train=False, download=download, transform=transform
-=======
         root=DATA_ROOT / "cifar-10", train=True, download=download, transform=transform
     )
     testset = datasets.CIFAR10(
         root=DATA_ROOT / "cifar-10", train=False, download=download, transform=transform
->>>>>>> f78cf837157d3ea38f3a55c25581bebef7f8c84d
     )
     return trainset, testset
 
