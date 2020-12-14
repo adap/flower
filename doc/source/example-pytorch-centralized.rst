@@ -11,7 +11,7 @@ We will post the complete centralized training here and explain it shortly. If y
 
 Let's now create a :code:`cifar.py` to train your CIFAR-10 dataset centralized. 
 
-First, all required packages as :code:`torch` and :code:`torchvision` need to be implemented. You can see that we do not implement any package for federated learning. You can keep all these import as they are even for the federated learning process at a later point.
+First, all required packages as :code:`torch` and :code:`torchvision` need to be implemented. You can see that we do not implement any package for federated learning. You can keep all these imports as they are even for the federated learning process at a later point.
 
 .. code-block:: python
 
@@ -50,7 +50,7 @@ As already mentioned we will use the CIFAR-10 dataset for the machine learning w
             x = self.fc3(x)
             return x
 
-The :code:`load_data()` loads the CIFAR10 training and test data. As soon as the data is loaded it is also normalized. 
+The :code:`load_data()` loads the CIFAR-10 training and test data. As soon as the data is loaded it is also normalized. 
 
 .. code-block:: python
 
@@ -136,7 +136,7 @@ The evalution of the model is done by :code:`test()`. The function loops over al
         accuracy = correct / total
         return loss, accuracy
 
-After defining the data loader, training and evaluation we can start to centrally train the CIFAR10 dataset as you may have done it before.
+After defining the data loader, training and evaluation we can start to centrally train the CIFAR-10 dataset as you may have done it before.
 
 .. code-block:: python
 
