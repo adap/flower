@@ -42,14 +42,12 @@ an example, first install the necessary extras:
 
 Quickstart examples:
 
-* [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/src/py/flwr_example/quickstart_tensorflow)
-* [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/src/py/flwr_example/quickstart_pytorch)
+* [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/examples/quickstart_tensorflow)
+* [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/examples/quickstart_pytorch)
 
-Other [examples](https://github.com/adap/flower/tree/main/src/py/flwr_example):
+Other [examples](https://github.com/adap/flower/tree/main/examples):
 
-* [PyTorch & CIFAR-10](https://github.com/adap/flower/tree/main/src/py/flwr_example/pytorch_cifar)
-* [PyTorch & ImageNet](https://github.com/adap/flower/tree/main/src/py/flwr_example/pytorch_imagenet)
-* [TensorFlow & Fashion-MNIST](https://github.com/adap/flower/tree/main/src/py/flwr_example/tensorflow_fashion_mnist)
+* [Raspberry Pi & Nvidia Jetson Tutorial](https://github.com/adap/flower/tree/main/examples/embedded_devices)
 
 ## Flower Baselines
 
