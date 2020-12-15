@@ -114,13 +114,6 @@ class Server:
                     rnd=current_round, loss=cast(float, loss_fed)
                 )
 
-            # Conclude round
-            loss = res_cen[0] if res_cen is not None else None
-            acc = res_cen[1] if res_cen is not None else None
-            should_continue = self.strategy.on_conclude_round(current_round, loss, acc)
-            if not should_continue:
-                break
-
         # Send shutdown signal to all clients
         all_clients = self._client_manager.all()
         _ = shutdown(clients=[all_clients[k] for k in all_clients.keys()])
@@ -136,7 +129,7 @@ class Server:
     ) -> Optional[Tuple[Optional[float], EvaluateResultsAndFailures]]:
         """Validate current global model on a number of clients."""
         # Get clients and their respective instructions from strategy
-        client_instructions = self.strategy.on_configure_evaluate(
+        client_instructions = self.strategy.configure_evaluate(
             rnd=rnd, weights=self.weights, client_manager=self._client_manager
         )
         if not client_instructions:
@@ -158,13 +151,13 @@ class Server:
             len(failures),
         )
         # Aggregate the evaluation results
-        loss_aggregated = self.strategy.on_aggregate_evaluate(rnd, results, failures)
+        loss_aggregated = self.strategy.aggregate_evaluate(rnd, results, failures)
         return loss_aggregated, results_and_failures
 
     def fit_round(self, rnd: int) -> Optional[Weights]:
         """Perform a single round of federated averaging."""
         # Get clients and their respective instructions from strategy
-        client_instructions = self.strategy.on_configure_fit(
+        client_instructions = self.strategy.configure_fit(
             rnd=rnd, weights=self.weights, client_manager=self._client_manager
         )
         log(
@@ -187,7 +180,7 @@ class Server:
         )
 
         # Aggregate training results
-        return self.strategy.on_aggregate_fit(rnd, results, failures)
+        return self.strategy.aggregate_fit(rnd, results, failures)
 
     def _get_initial_weights(self) -> Weights:
         """Get initial weights from one of the available clients."""

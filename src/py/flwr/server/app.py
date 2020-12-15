@@ -55,9 +55,9 @@ def start_server(
             The maximum length of gRPC messages that can be exchanged with the
             Flower clients. The default should be sufficient for most models.
             Users who train very large models might need to increase this
-            value. Note that the Flower clients needs to started with the same
-            value (see `flwr.client.start_client`), otherwise clients will not
-            know about the increased limit and block larger messages.
+            value. Note that the Flower clients need to be started with the
+            same value (see `flwr.client.start_client`), otherwise clients will
+            not know about the increased limit and block larger messages.
 
     Returns:
         None.

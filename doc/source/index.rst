@@ -20,7 +20,9 @@ Flower's design goals was to make this simple. Read on to learn more.
    strategies/index
    examples
    example_walkthrough_pytorch_mnist
+   recommended-env-setup
    howto-aws
+   changelog
 
 
 API Reference
@@ -44,6 +46,7 @@ intended to help along the way.
 
    contributing/index
    architecture
+   release_process
 
 
 About 
