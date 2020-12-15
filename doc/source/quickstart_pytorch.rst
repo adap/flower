@@ -36,7 +36,8 @@ In a file called :code:`client.py`, import Flower and PyTorch related packages:
     from collections import OrderedDict
 
     import torch
-    import torchvision
+    import torch.nn as nn
+    import torch.nn.functional as F
     import torchvision.transforms as transforms
     from torch.utils.data import DataLoader
     from torchvision.datasets import CIFAR10
@@ -101,11 +102,31 @@ Define then the validation of the  machine learning network. We loop over the te
 
 After defining the training and testing of a PyTorch machine learning model, we use the functions for the Flower clients.
 
-The Flower clients and server will use the MobileNetV2 of PyTorch, :code:`torchvision.models.mobilenet_v2()`. 
+The Flower clients will use a simle CNN adapted from 'PyTorch: A 60 Minute Blitz':
 
 .. code-block:: python
 
-    net = torchvision.models.mobilenet_v2().to(DEVICE)
+    class Net(nn.Module):
+        def __init__(self) -> None:
+            super(Net, self).__init__()
+            self.conv1 = nn.Conv2d(3, 6, 5)
+            self.pool = nn.MaxPool2d(2, 2)
+            self.conv2 = nn.Conv2d(6, 16, 5)
+            self.fc1 = nn.Linear(16 * 5 * 5, 120)
+            self.fc2 = nn.Linear(120, 84)
+            self.fc3 = nn.Linear(84, 10)
+
+        def forward(self, x: torch.Tensor) -> torch.Tensor:
+            x = self.pool(F.relu(self.conv1(x)))
+            x = self.pool(F.relu(self.conv2(x)))
+            x = x.view(-1, 16 * 5 * 5)
+            x = F.relu(self.fc1(x))
+            x = F.relu(self.fc2(x))
+            x = self.fc3(x)
+            return x
+
+    # Load model and data
+    net = Net()
     trainloader, testloader = load_data()
 
 After loading the data set with :code:`load_data()` we define the Flower interface. 
@@ -207,36 +228,32 @@ Open another terminal and start the second client:
     $ python client.py
 
 Each client will have its own dataset.
-You should now see how the training does in the very first terminal (the one
-that started the server):
+You should now see how the training does in the very first terminal (the one that started the server):
 
 .. code-block:: shell
 
-    INFO flower 2020-07-15 10:06:54,903 | app.py:55 | Flower server running (insecure, 3 rounds)
-    INFO flower 2020-07-15 10:07:00,962 | server.py:66 | [TIME] FL starting
-    DEBUG flower 2020-07-15 10:07:03,206 | server.py:145 | fit_round: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:19,909 | server.py:157 | fit_round received 2 results and 0 failures
-    DEBUG flower 2020-07-15 10:07:19,913 | server.py:122 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:20,455 | server.py:132 | evaluate received 2 results and 0 failures
-    DEBUG flower 2020-07-15 10:07:20,456 | server.py:145 | fit_round: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:37,437 | server.py:157 | fit_round received 2 results and 0 failures
-    DEBUG flower 2020-07-15 10:07:37,441 | server.py:122 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:37,863 | server.py:132 | evaluate received 2 results and 0 failures
-    DEBUG flower 2020-07-15 10:07:37,864 | server.py:145 | fit_round: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:55,531 | server.py:157 | fit_round received 2 results and 0 failures
-    DEBUG flower 2020-07-15 10:07:55,535 | server.py:122 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:55,937 | server.py:132 | evaluate received 2 results and 0 failures
-    INFO flower 2020-07-15 10:07:55,937 | server.py:107 | [TIME] FL finished in 54.974524599994766
-    INFO flower 2020-07-15 10:07:55,937 | app.py:59 | app_fit: losses_distributed [(1, 0.07337841391563416), (2, 0.06347471475601196), (3, 0.07028044760227203)]
-    INFO flower 2020-07-15 10:07:55,937 | app.py:60 | app_fit: accuracies_distributed []
-    INFO flower 2020-07-15 10:07:55,937 | app.py:61 | app_fit: losses_centralized []
-    INFO flower 2020-07-15 10:07:55,937 | app.py:62 | app_fit: accuracies_centralized []
-    DEBUG flower 2020-07-15 10:07:55,939 | server.py:122 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:56,396 | server.py:132 | evaluate received 2 results and 0 failures
-    INFO flower 2020-07-15 10:07:56,396 | app.py:71 | app_evaluate: federated loss: 0.07028044760227203
-    INFO flower 2020-07-15 10:07:56,396 | app.py:75 | app_evaluate: results [('ipv6:[::1]:33318', (10000, 0.07028044760227203, 0.982200026512146)), ('ipv6:[::1]:33320', (10000, 0.07028044760227203, 0.982200026512146))]
-    INFO flower 2020-07-15 10:07:56,396 | app.py:77 | app_evaluate: failures []
+INFO flower 2020-12-14 21:01:06,817 | app.py:85 | Flower server running (insecure, 3 rounds)
+INFO flower 2020-12-14 21:01:12,130 | server.py:85 | [TIME] FL starting
+DEBUG flower 2020-12-14 21:01:14,836 | server.py:163 | fit_round: strategy sampled 2 clients (out of 2)
+DEBUG flower 2020-12-14 21:01:33,083 | server.py:175 | fit_round received 2 results and 0 failures
+DEBUG flower 2020-12-14 21:01:33,090 | server.py:138 | evaluate: strategy sampled 2 clients
+DEBUG flower 2020-12-14 21:01:37,357 | server.py:147 | evaluate received 2 results and 0 failures
+DEBUG flower 2020-12-14 21:01:37,360 | server.py:163 | fit_round: strategy sampled 2 clients (out of 2)
+DEBUG flower 2020-12-14 21:01:55,586 | server.py:175 | fit_round received 2 results and 0 failures
+DEBUG flower 2020-12-14 21:01:55,592 | server.py:138 | evaluate: strategy sampled 2 clients
+DEBUG flower 2020-12-14 21:01:58,341 | server.py:147 | evaluate received 2 results and 0 failures
+DEBUG flower 2020-12-14 21:01:58,343 | server.py:163 | fit_round: strategy sampled 2 clients (out of 2)
+DEBUG flower 2020-12-14 21:02:21,917 | server.py:175 | fit_round received 2 results and 0 failures
+DEBUG flower 2020-12-14 21:02:21,924 | server.py:138 | evaluate: strategy sampled 2 clients
+DEBUG flower 2020-12-14 21:02:24,842 | server.py:147 | evaluate received 2 results and 0 failures
+INFO flower 2020-12-14 21:02:24,844 | server.py:124 | [TIME] FL finished in 72.71333799999957
+INFO flower 2020-12-14 21:02:24,844 | app.py:89 | app_fit: losses_distributed [(1, 654.751953125), (2, 514.7012329101562), (3, 478.53936767578125)]
+INFO flower 2020-12-14 21:02:24,844 | app.py:90 | app_fit: accuracies_distributed []
+INFO flower 2020-12-14 21:02:24,845 | app.py:91 | app_fit: losses_centralized []
+INFO flower 2020-12-14 21:02:24,845 | app.py:92 | app_fit: accuracies_centralized []
+INFO flower 2020-12-14 21:02:24,847 | server.py:136 | evaluate: no clients sampled, cancel federated evaluation
+INFO flower 2020-12-14 21:02:24,847 | app.py:109 | app_evaluate: no evaluation result
 
-Congratulations! You've successfully built and run your first federated
-learning system. The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart_pytorch/client.py>`_ for this can be found in
-:code:`examples/quickstart_pytorch/client.py`.
+Congratulations!
+You've successfully built and run your first federated learning system.
+The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart_pytorch/client.py>`_ for this example can be found in :code:`examples/quickstart_pytorch`.
