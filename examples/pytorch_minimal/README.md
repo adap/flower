@@ -23,8 +23,6 @@ You have different files available:
 -- cifar.py
 -- client.py
 -- server.py
--- run-client.sh
--- run-server.sh
 ```
 
 The `pyproject.toml` defines the project dependencies. Simply run poetry to install all required dependencies with:
