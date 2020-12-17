@@ -95,11 +95,7 @@ The only requirement for the server is to have flower installed. You can do so b
     $ newgrp docker
     ```
 
-3. Install `git` as:
-    ```bash
-    $ sudo apt-get install git
-    ```
-4. (optional) additional packages: you could install `TMUX` (see point `6` above) and `htop` as a replacement for `jtop` (which is only available for Jetson devices). Htop can be installed via: `sudo apt-get install htop -y`.
+3. (optional) additional packages: you could install `TMUX` (see point `6` above) and `htop` as a replacement for `jtop` (which is only available for Jetson devices). Htop can be installed via: `sudo apt-get install htop -y`.
 
 
 # Running FL training with Flower

@@ -1,7 +1,8 @@
 from collections import OrderedDict
 
 import torch
-import torchvision
+import torch.nn as nn
+import torch.nn.functional as F
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
@@ -12,10 +13,29 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def main():
-    """Load model, load data, define Flower client, start Flower client."""
+    """Create model, load data, define Flower client, start Flower client."""
 
-    # Load model (MobileNetV2)
-    net = torchvision.models.mobilenet_v2().to(DEVICE)
+    # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
+    class Net(nn.Module):
+        def __init__(self) -> None:
+            super(Net, self).__init__()
+            self.conv1 = nn.Conv2d(3, 6, 5)
+            self.pool = nn.MaxPool2d(2, 2)
+            self.conv2 = nn.Conv2d(6, 16, 5)
+            self.fc1 = nn.Linear(16 * 5 * 5, 120)
+            self.fc2 = nn.Linear(120, 84)
+            self.fc3 = nn.Linear(84, 10)
+
+        def forward(self, x: torch.Tensor) -> torch.Tensor:
+            x = self.pool(F.relu(self.conv1(x)))
+            x = self.pool(F.relu(self.conv2(x)))
+            x = x.view(-1, 16 * 5 * 5)
+            x = F.relu(self.fc1(x))
+            x = F.relu(self.fc2(x))
+            x = self.fc3(x)
+            return x
+
+    net = Net()
 
     # Load data (CIFAR-10)
     trainloader, testloader = load_data()
