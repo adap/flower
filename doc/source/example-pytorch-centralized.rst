@@ -170,11 +170,11 @@ The concept of centralized learning as shown in the previous section is known fo
 
 However, if you use Flower you can keep your code and put Flower on top. You can play around with federated learning setups without destroying your actual pre-existing code.
 
-The concept is easy to understand. We have to set up a *server* and take the :code:`cifar.py` for the *clients* that are connected to the *server*. The *server* sends model parameter to the clients. The *clients* running the training and updating the paramters. The updated parameters are evaluated and send back to the *server* that averages all received paramters. This is one round of a federated learning process. 
+The concept is easy to understand. We have to set up a *server* and take the :code:`cifar.py` for the *clients* that are connected to the *server*. The *server* sends model parameters to the clients. The *clients* running the training and updating the paramters. The updated parameters are evaluated and send back to the *server* that averages all received paramters. This is one round of a federated learning process. 
 
 Our example consists of one *server* and two *clients* all having the same model. 
 
-Let us set up the :code:`server.py` first. The *server* needs first the flower package. Then, you define the IP adress and how many federated learning rounds you need. 
+Let us set up the :code:`server.py` first. The *server* needs first the flower package. Then, you define the IP address and how many federated learning rounds you need. 
 
 .. code-block:: python
 
@@ -303,4 +303,4 @@ That's it. You can now run
 
     python client.py
 
-in two different terminals and your centralized PyTorch example is running federated without touching your central training. The full `source code <https://github.com/adap/flower/blob/main/src/py/flwr_example/pytorch_minimal/client.py>`_ for this can be found in :code:`src/py/flwr_example/pytorch_minimal/client.py`.
+in two different terminals and your centralized PyTorch example is running federated without touching your central training. The full `source code <https://github.com/adap/flower/blob/main/examples/pytorch_minimal/client.py>`_ for this can be found in :code:`examples/pytorch_minimal/client.py`.
