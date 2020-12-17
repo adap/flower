@@ -13,7 +13,7 @@ After setting up the virtual environment it is recommended to use [poetry](https
 Start with cloning the Flower repo and checking out the example. We have prepared a single line which you can copy into your shell which will checkout the example for you.
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/src/py/flwr_example/pytorch_minimal . && rm -rf flower && cd quickstart_pytorch
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/src/py/flwr_example/pytorch_minimal . && rm -rf flower && cd pytorch_federated
 ```
 
 You have different files available:
