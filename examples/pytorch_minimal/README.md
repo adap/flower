@@ -50,13 +50,21 @@ If you want to run this pre-existing setup federated you only need `client.py` a
 You can simply start first the server in a terminal as follows:
 
 ```shell
-./run-server.sh
+python3 server.py
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open one more terminals and run the following command:
+Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the following commands.
+
+Start client 1 in the first terminal:
 
 ```shell
-./run-client.sh
+python3 client.py
+```
+
+Start client 2 in the second terminal:
+
+```shell
+python3 client.py
 ```
 
 The PyTorch example using the CIFAR10 trains now federated.
