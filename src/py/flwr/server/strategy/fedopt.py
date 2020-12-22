@@ -19,23 +19,10 @@ Paper: https://arxiv.org/abs/2003.00295
 """
 
 
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
-import numpy as np
+from flwr.common import Weights
 
-from flwr.common import (
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
-)
-from flwr.server.client_manager import ClientManager
-from flwr.server.client_proxy import ClientProxy
-
-from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg
 
 
