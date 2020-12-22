@@ -19,23 +19,13 @@ Paper: https://arxiv.org/abs/2003.00295
 """
 
 
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from flwr.common import (
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
-)
-from flwr.server.client_manager import ClientManager
+from flwr.common import FitRes, Weights
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate, weighted_loss_avg
 from .fedopt import FedOpt
 
 
@@ -72,6 +62,7 @@ class FedAdagrad(FedOpt):
             eta_l=eta_l,
             tau=tau,
         )
+        self.v_t: Optional[np.ndarray] = None
 
     def __repr__(self) -> str:
         rep = f"FedAdagrad(accept_failures={self.accept_failures})"
@@ -94,8 +85,8 @@ class FedAdagrad(FedOpt):
 
         # Adagrad
         delta_t = aggregated_updates
-        if not hasattr(self, "v_t"):
-            self.v_t: np.ndarray = np.zeros_like(delta_t)
+        if not self.v_t:
+            self.v_t = np.zeros_like(delta_t)
         self.v_t = self.v_t + np.multiply(delta_t, delta_t)
 
         weights = [
