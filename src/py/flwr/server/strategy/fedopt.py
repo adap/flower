@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et al.,
-2020] strategy.
+"""Adaptive Federated Optimization (FedOpt) [Reddi et al., 2020] abstract
+strategy.
 
 Paper: https://arxiv.org/abs/2003.00295
 """
@@ -36,10 +36,10 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
-from .fedopt import FedOpt
+from .fedavg import FedAvg
 
 
-class FedAdagrad(FedOpt):
+class FedOpt(FedAvg):
     """Configurable FedAdagrad strategy implementation."""
 
     # pylint: disable-msg=too-many-arguments,too-many-instance-attributes
@@ -59,47 +59,20 @@ class FedAdagrad(FedOpt):
         tau: float = 1e-9,
     ) -> None:
         super().__init__(
-            fraction_fit=fraction_fit,
-            fraction_eval=fraction_eval,
-            min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
-            min_available_clients=min_available_clients,
-            eval_fn=eval_fn,
-            on_fit_config_fn=on_fit_config_fn,
-            on_evaluate_config_fn=on_evaluate_config_fn,
-            accept_failures=accept_failures,
-            eta=eta,
-            eta_l=eta_l,
-            tau=tau,
+            fraction_fit,
+            fraction_eval,
+            min_fit_clients,
+            min_eval_clients,
+            min_available_clients,
+            eval_fn,
+            on_fit_config_fn,
+            on_evaluate_config_fn,
+            accept_failures,
         )
+        self.eta = eta
+        self.eta_l = eta_l
+        self.tau = tau
 
     def __repr__(self) -> str:
-        rep = f"FedAdagrad(accept_failures={self.accept_failures})"
+        rep = f"FedOpt(accept_failures={self.accept_failures})"
         return rep
-
-    def aggregate_fit(
-        self,
-        rnd: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
-        previous_weights: Weights = [],
-    ) -> Optional[Weights]:
-        """Aggregate fit results using weighted average."""
-        fedavg_aggregate = super().aggregate_fit(
-            rnd=rnd, results=results, failures=failures
-        )
-        if fedavg_aggregate is None:
-            return None
-        aggregated_updates = fedavg_aggregate[0] - previous_weights[0]
-
-        # Adagrad
-        delta_t = aggregated_updates
-        if not hasattr(self, "v_t"):
-            self.v_t: np.ndarray = np.zeros_like(delta_t)
-        self.v_t = self.v_t + np.multiply(delta_t, delta_t)
-
-        weights = [
-            previous_weights[0] + self.eta * delta_t / (np.sqrt(self.v_t) + self.tau)
-        ]
-
-        return weights
