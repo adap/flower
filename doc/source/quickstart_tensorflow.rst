@@ -1,7 +1,7 @@
 Quickstart (TensorFlow)
 =======================
 
-Let's build a federated learning system in less than 50 lines of code!
+Let's build a federated learning system in less than 20 lines of code!
 
 Before Flower can be imported we have to install it:
 
@@ -123,7 +123,7 @@ Open another terminal and start the second client:
 
     $ python client.py
 
-Each client will have its own dataset, which 
+Each client will have its own dataset. 
 
 You should now see how the training does in the very first terminal (the one
 that started the server):

@@ -1,8 +1,9 @@
-# Flower (`flwr`) - A Friendly Federated Learning Framework
+# Flower - A Friendly Federated Learning Framework
 
 [![GitHub license](https://img.shields.io/github/license/adap/flower)](https://github.com/adap/flower/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/main/CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/workflows/Build/badge.svg)
+![Downloads](https://pepy.tech/badge/flwr)
 
 Flower (`flwr`) is a framework for building federated learning systems. The
 design of Flower is based on a few guiding principles:
@@ -42,14 +43,12 @@ an example, first install the necessary extras:
 
 Quickstart examples:
 
-* [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/src/py/flwr_example/quickstart_tensorflow)
-* [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/src/py/flwr_example/quickstart_pytorch)
+* [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/examples/quickstart_tensorflow)
+* [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/examples/quickstart_pytorch)
 
-Other [examples](https://github.com/adap/flower/tree/main/src/py/flwr_example):
+Other [examples](https://github.com/adap/flower/tree/main/examples):
 
-* [PyTorch & CIFAR-10](https://github.com/adap/flower/tree/main/src/py/flwr_example/pytorch_cifar)
-* [PyTorch & ImageNet](https://github.com/adap/flower/tree/main/src/py/flwr_example/pytorch_imagenet)
-* [TensorFlow & Fashion-MNIST](https://github.com/adap/flower/tree/main/src/py/flwr_example/tensorflow_fashion_mnist)
+* [Raspberry Pi & Nvidia Jetson Tutorial](https://github.com/adap/flower/tree/main/examples/embedded_devices)
 
 ## Flower Baselines
 
