@@ -73,7 +73,7 @@ class FedAdagrad(FedOpt):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-        previous_weights: Weights = [],
+        current_weights: Optional[Weights],
     ) -> Optional[Weights]:
         """Aggregate fit results using weighted average."""
         fedavg_aggregate = super().aggregate_fit(
