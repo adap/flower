@@ -98,8 +98,8 @@ def load_data():
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
-    trainset = CIFAR10(".", train=True, download=True, transform=transform)
-    testset = CIFAR10(".", train=False, download=True, transform=transform)
+    trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
+    testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
     trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
     testloader = DataLoader(testset, batch_size=32)
     return trainloader, testloader
