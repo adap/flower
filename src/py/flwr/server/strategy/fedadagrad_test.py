@@ -30,7 +30,10 @@ from .fedadagrad import FedAdagrad
 def test_aggregate_fit() -> None:
     """Tests if adagrad fucntion is aggregating correclty."""
     # Prepare
-    strategy = FedAdagrad(eta=0.1, eta_l=0.316, tau=0.5)
+    previous_weights: Weights = [array([0.1, 0.1, 0.1, 0.1], dtype=float32)]
+    strategy = FedAdagrad(
+        eta=0.1, eta_l=0.316, tau=0.5, current_weights=previous_weights
+    )
     param_0: Parameters = weights_to_parameters(
         [array([0.2, 0.2, 0.2, 0.2], dtype=float32)]
     )
@@ -50,13 +53,10 @@ def test_aggregate_fit() -> None:
             FitRes(param_1, num_examples=5, num_examples_ceil=5, fit_duration=0.1),
         ),
     ]
-    previous_weights: Weights = [array([0.1, 0.1, 0.1, 0.1], dtype=float32)]
     expected: Weights = [array([0.15, 0.15, 0.15, 0.15], dtype=float32)]
 
     # Execute
-    actual_list = strategy.aggregate_fit(
-        rnd=1, results=results, failures=[], previous_weights=previous_weights
-    )
+    actual_list = strategy.aggregate_fit(rnd=1, results=results, failures=[])
     if actual_list:
         actual = actual_list[0]
     assert (actual == expected[0]).all()

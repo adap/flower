@@ -35,6 +35,7 @@ class FedAdagrad(FedOpt):
     # pylint: disable-msg=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
+        *,
         fraction_fit: float = 0.1,
         fraction_eval: float = 0.1,
         min_fit_clients: int = 2,
@@ -44,6 +45,7 @@ class FedAdagrad(FedOpt):
         on_fit_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         accept_failures: bool = True,
+        current_weights: Weights,
         eta: float = 1e-1,
         eta_l: float = 1e-1,
         tau: float = 1e-9,
@@ -58,6 +60,7 @@ class FedAdagrad(FedOpt):
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
+            current_weights=current_weights,
             eta=eta,
             eta_l=eta_l,
             tau=tau,
@@ -73,7 +76,6 @@ class FedAdagrad(FedOpt):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-        current_weights: Optional[Weights],
     ) -> Optional[Weights]:
         """Aggregate fit results using weighted average."""
         fedavg_aggregate = super().aggregate_fit(
@@ -81,7 +83,7 @@ class FedAdagrad(FedOpt):
         )
         if fedavg_aggregate is None:
             return None
-        aggregated_updates = fedavg_aggregate[0] - previous_weights[0]
+        aggregated_updates = fedavg_aggregate[0] - self.current_weights[0]
 
         # Adagrad
         delta_t = aggregated_updates
@@ -89,8 +91,9 @@ class FedAdagrad(FedOpt):
             self.v_t = np.zeros_like(delta_t)
         self.v_t = self.v_t + np.multiply(delta_t, delta_t)
 
-        weights = [
-            previous_weights[0] + self.eta * delta_t / (np.sqrt(self.v_t) + self.tau)
+        new_weights = [
+            self.current_weights[0]
+            + self.eta * delta_t / (np.sqrt(self.v_t) + self.tau)
         ]
 
-        return weights
+        return new_weights

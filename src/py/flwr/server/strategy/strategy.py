@@ -51,7 +51,6 @@ class Strategy(ABC):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-        current_weights: Optional[Weights],
     ) -> Optional[Weights]:
         """Aggregate training results.
 

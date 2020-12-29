@@ -32,6 +32,7 @@ class FedOpt(FedAvg):
     # pylint: disable-msg=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
+        *,
         fraction_fit: float = 0.1,
         fraction_eval: float = 0.1,
         min_fit_clients: int = 2,
@@ -41,6 +42,7 @@ class FedOpt(FedAvg):
         on_fit_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         accept_failures: bool = True,
+        current_weights: Weights,
         eta: float = 1e-1,
         eta_l: float = 1e-1,
         tau: float = 1e-9,
@@ -56,6 +58,7 @@ class FedOpt(FedAvg):
             on_evaluate_config_fn,
             accept_failures,
         )
+        self.current_weights = current_weights
         self.eta = eta
         self.eta_l = eta_l
         self.tau = tau
