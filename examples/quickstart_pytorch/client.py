@@ -35,7 +35,7 @@ def main():
             x = self.fc3(x)
             return x
 
-    net = Net()
+    net = Net().to(DEVICE)
 
     # Load data (CIFAR-10)
     trainloader, testloader = load_data()
