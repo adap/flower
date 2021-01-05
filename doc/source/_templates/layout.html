@@ -1,136 +1,85 @@
-{%- extends "basic/layout.html" %}
+{% extends "pydata_sphinx_theme/layout.html" %}
 
-{%- block extrahead %}
-  {{ super() }}
-  <link rel="stylesheet" href="{{ pathto('_static/custom.css', 1) }}" type="text/css" />
-  {% if theme_touch_icon %}
-    <link rel="apple-touch-icon" href="{{ pathto('_static/' ~ theme_touch_icon, 1) }}" />
-  {% endif %}
-  {% if theme_canonical_url %}
-    <link rel="canonical" href="{{ theme_canonical_url }}{{ pagename }}.html"/>
-  {% endif %}
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+{% set is_single_page = (theme_single_page == True) or (theme_single_page == "True") %}
+{% if is_single_page %}
+    {%- set sidebar_width_class = "col-md-2" %}
+{% else %}
+    {%- set sidebar_width_class = "col-md-3" %}
+{% endif %}
+
+{% block extrahead %}
+{{ super() }}
+
+{% if pageurl %}
+<!-- Opengraph tags -->
+<meta property="og:url"         content="{{ pageurl }}" />
+<meta property="og:type"        content="article" />
+<meta property="og:title"       content="{% if pagetitle %}{{ pagetitle | e }}{% else %}{{ docstitle | e }}{% endif %}" />
+<meta property="og:description" content="{{ page_description | e }}" />
+{% if logourl %}<meta property="og:image"       content="{{ logourl }}" />{% endif %}
+
+<meta name="twitter:card" content="summary" />
+{% endif %}
 {% endblock %}
 
-{# top+bottom related navs; we also have our own in sidebar #}
-{%- macro rellink_markup() %}
-  <nav id="rellinks">
-    <ul>
-      {%- if prev %}
-        <li>
-          &larr;
-          <a href="{{ prev.link|e }}" title="Previous document">{{ prev.title }}</a>
-        </li>
-      {%- endif %}
-      {%- if next %}
-        <li>
-          <a href="{{ next.link|e }}" title="Next document">{{ next.title }}</a>
-          &rarr;
-        </li>
-      {%- endif %}
-    </ul>
-  </nav>
-{%- endmacro %}
+<!-- Docs TOC is "d-none d-xl-block col-xl-2" -->
 
-{%- set theme_show_relbar_top = theme_show_relbar_top or theme_show_relbars %}
-{%- set theme_show_relbar_bottom = theme_show_relbar_bottom or theme_show_relbars %}
+{% block docs_sidebar %}
+<div class="col-12 {{ sidebar_width_class }} bd-sidebar site-navigation show{% if is_single_page %} single-page{% endif %}" id="site-navigation">
+    {% if not is_single_page %}
+        {% include "sidebar.html" %}
+    {%- endif %}
+</div>
+{% endblock %}
 
-{# removed existing top+bottom related nav, and embed in main content #}
-{%- block relbar1 %}{% endblock %}
-{%- block relbar2 %}{% endblock %}
-
-{# Nav should appear before content, not after #}
-{%- block content %}
-{%- if theme_fixed_sidebar|lower == 'true' %}
-  <div class="document">
-    {{ sidebar() }}
-    {%- block document %}
-      <div class="documentwrapper">
-      {%- if render_sidebar %}
-        <div class="bodywrapper">
-      {%- endif %}
-
-          {%- block relbar_top %}
-            {%- if theme_show_relbar_top|tobool %}
-              <div class="related top">
-                &nbsp;
-                {{- rellink_markup () }}
-              </div>
-            {%- endif %}
-          {% endblock %}
-
-          <div class="body" role="main">
-            {% block body %} {% endblock %}
-          </div>
-
-          {%- block relbar_bottom %}
-            {%- if theme_show_relbar_bottom|tobool %}
-              <div class="related bottom">
-                &nbsp;
-                {{- rellink_markup () }}
-              </div>
-            {%- endif %}
-          {% endblock %}
-
-      {%- if render_sidebar %}
+{% block docs_main %}
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    {% block docs_body %}
+    {% include "topbar.html" %}
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        {{ super() }}
+        {% if theme_show_prev_next %}
+        <div class='prev-next-bottom'>
+            {{ prev_next(prev, next) }}
         </div>
-      {%- endif %}
-      </div>
-    {%- endblock %}
-    <div class="clearer"></div>
-  </div>
-{%- else %}
-{{ super() }}
-{%- endif %}
+        {% endif %}
+        </div>
+    </div>
+    {% endblock %}
+    {%- include "footer.html" %}
+</main>
+{% endblock %}
+
+{% block docs_toc %}
+{% endblock %}
+
+{% block docs_navbar %}
 {%- endblock %}
 
 {%- block footer %}
-    <div class="footer">
-      {% if show_copyright %}&copy;{{ copyright }}.{% endif %}
-      {% if theme_show_powered_by|lower == 'true' %}
-      {% if show_copyright %}|{% endif %}
-      Powered by <a href="http://sphinx-doc.org/">Sphinx {{ sphinx_version }}</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster {{ alabaster_version }}</a>
-      {% endif %}
-      {%- if show_source and has_source and sourcename %}
-      {% if show_copyright or theme_show_powered_by %}|{% endif %}
-      <a href="{{ pathto('_sources/' + sourcename, true)|e }}"
-          rel="nofollow">{{ _('Page source') }}</a>
-      {%- endif %}
-      | <a href="https://adap.com/en/imprint">Imprint</a>
-      | <a href="https://adap.com/en/privacy">Privacy Policy</a>
-    </div>
-
-    {% if theme_github_banner|lower != 'false' %}
-    <a href="https://github.com/{{ theme_github_user }}/{{ theme_github_repo }}" class="github">
-        <img style="position: absolute; top: 0; right: 0; border: 0;" src="{{ pathto('_static/' ~ theme_github_banner, 1) if theme_github_banner|lower != 'true' else 'https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png' }}" alt="Fork me on GitHub"  class="github"/>
-    </a>
-    {% endif %}
-
-    {% if theme_analytics_id %}
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ theme_analytics_id }}"></script>
-    <script>
-      function onFingerprintJSLoad(fpAgent) {
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        
-        fpAgent.get().then(result => {
-          gtag('js', new Date());
-          gtag('config', '{{ theme_analytics_id }}', {
-            send_page_view: true,
-            client_storage: 'none',
-            client_id: result.visitorId,
-          });
-        });
-      }
-
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js';
-      script.id = 'fingerprintjs';
-      document.body.appendChild(script);
-  
-      script.onload = () => FingerprintJS.load().then(onFingerprintJSLoad);
-    </script>
-    {% endif %}
 {%- endblock %}
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-173987939-2"></script>
+<script>
+function onFingerprintJSLoad(fpAgent) {
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    
+    fpAgent.get().then(result => {
+    gtag('js', new Date());
+    gtag('config', 'UA-173987939-2', {
+        send_page_view: true,
+        client_storage: 'none',
+        client_id: result.visitorId,
+    });
+    });
+}
+
+const script = document.createElement('script');
+script.src = 'https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js';
+script.id = 'fingerprintjs';
+document.body.appendChild(script);
+
+script.onload = () => FingerprintJS.load().then(onFingerprintJSLoad);
+</script>
