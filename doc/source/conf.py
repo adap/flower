@@ -65,7 +65,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # a list of builtin themes.
 #
 html_theme = "sphinx_book_theme"
-html_title = f"Flower v{release}"
+html_title = f"Flower {release}"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.dev/docs/"
