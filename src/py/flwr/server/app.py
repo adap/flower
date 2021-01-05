@@ -62,7 +62,7 @@ def start_server(
     Returns:
         None.
     """
-
+    
     # Create server instance if none was given
     if server is None:
         client_manager = SimpleClientManager()
@@ -107,6 +107,9 @@ def start_server(
         log(INFO, "app_evaluate: failures %s", str(failures))
     else:
         log(INFO, "app_evaluate: no evaluation result")
+
+    # Graceful shutdown
+    server.disconnect_all_clients()
 
     # Stop the gRPC server
     grpc_server.stop(1)
