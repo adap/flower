@@ -62,7 +62,7 @@ def start_server(
     Returns:
         None.
     """
-    
+
     # Create server instance if none was given
     if server is None:
         client_manager = SimpleClientManager()
