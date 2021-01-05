@@ -232,27 +232,27 @@ You should now see how the training does in the very first terminal (the one tha
 
 .. code-block:: shell
 
-INFO flower 2020-12-14 21:01:06,817 | app.py:85 | Flower server running (insecure, 3 rounds)
-INFO flower 2020-12-14 21:01:12,130 | server.py:85 | [TIME] FL starting
-DEBUG flower 2020-12-14 21:01:14,836 | server.py:163 | fit_round: strategy sampled 2 clients (out of 2)
-DEBUG flower 2020-12-14 21:01:33,083 | server.py:175 | fit_round received 2 results and 0 failures
-DEBUG flower 2020-12-14 21:01:33,090 | server.py:138 | evaluate: strategy sampled 2 clients
-DEBUG flower 2020-12-14 21:01:37,357 | server.py:147 | evaluate received 2 results and 0 failures
-DEBUG flower 2020-12-14 21:01:37,360 | server.py:163 | fit_round: strategy sampled 2 clients (out of 2)
-DEBUG flower 2020-12-14 21:01:55,586 | server.py:175 | fit_round received 2 results and 0 failures
-DEBUG flower 2020-12-14 21:01:55,592 | server.py:138 | evaluate: strategy sampled 2 clients
-DEBUG flower 2020-12-14 21:01:58,341 | server.py:147 | evaluate received 2 results and 0 failures
-DEBUG flower 2020-12-14 21:01:58,343 | server.py:163 | fit_round: strategy sampled 2 clients (out of 2)
-DEBUG flower 2020-12-14 21:02:21,917 | server.py:175 | fit_round received 2 results and 0 failures
-DEBUG flower 2020-12-14 21:02:21,924 | server.py:138 | evaluate: strategy sampled 2 clients
-DEBUG flower 2020-12-14 21:02:24,842 | server.py:147 | evaluate received 2 results and 0 failures
-INFO flower 2020-12-14 21:02:24,844 | server.py:124 | [TIME] FL finished in 72.71333799999957
-INFO flower 2020-12-14 21:02:24,844 | app.py:89 | app_fit: losses_distributed [(1, 654.751953125), (2, 514.7012329101562), (3, 478.53936767578125)]
-INFO flower 2020-12-14 21:02:24,844 | app.py:90 | app_fit: accuracies_distributed []
-INFO flower 2020-12-14 21:02:24,845 | app.py:91 | app_fit: losses_centralized []
-INFO flower 2020-12-14 21:02:24,845 | app.py:92 | app_fit: accuracies_centralized []
-INFO flower 2020-12-14 21:02:24,847 | server.py:136 | evaluate: no clients sampled, cancel federated evaluation
-INFO flower 2020-12-14 21:02:24,847 | app.py:109 | app_evaluate: no evaluation result
+    INFO flower 2020-12-14 21:01:06,817 | app.py:85 | Flower server running (insecure, 3 rounds)
+    INFO flower 2020-12-14 21:01:12,130 | server.py:85 | [TIME] FL starting
+    DEBUG flower 2020-12-14 21:01:14,836 | server.py:163 | fit_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2020-12-14 21:01:33,083 | server.py:175 | fit_round received 2 results and 0 failures
+    DEBUG flower 2020-12-14 21:01:33,090 | server.py:138 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2020-12-14 21:01:37,357 | server.py:147 | evaluate received 2 results and 0 failures
+    DEBUG flower 2020-12-14 21:01:37,360 | server.py:163 | fit_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2020-12-14 21:01:55,586 | server.py:175 | fit_round received 2 results and 0 failures
+    DEBUG flower 2020-12-14 21:01:55,592 | server.py:138 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2020-12-14 21:01:58,341 | server.py:147 | evaluate received 2 results and 0 failures
+    DEBUG flower 2020-12-14 21:01:58,343 | server.py:163 | fit_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2020-12-14 21:02:21,917 | server.py:175 | fit_round received 2 results and 0 failures
+    DEBUG flower 2020-12-14 21:02:21,924 | server.py:138 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2020-12-14 21:02:24,842 | server.py:147 | evaluate received 2 results and 0 failures
+    INFO flower 2020-12-14 21:02:24,844 | server.py:124 | [TIME] FL finished in 72.71333799999957
+    INFO flower 2020-12-14 21:02:24,844 | app.py:89 | app_fit: losses_distributed [(1, 654.751953125), (2, 514.7012329101562), (3, 478.53936767578125)]
+    INFO flower 2020-12-14 21:02:24,844 | app.py:90 | app_fit: accuracies_distributed []
+    INFO flower 2020-12-14 21:02:24,845 | app.py:91 | app_fit: losses_centralized []
+    INFO flower 2020-12-14 21:02:24,845 | app.py:92 | app_fit: accuracies_centralized []
+    INFO flower 2020-12-14 21:02:24,847 | server.py:136 | evaluate: no clients sampled, cancel federated evaluation
+    INFO flower 2020-12-14 21:02:24,847 | app.py:109 | app_evaluate: no evaluation result
 
 Congratulations!
 You've successfully built and run your first federated learning system.
