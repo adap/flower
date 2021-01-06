@@ -59,7 +59,6 @@ class FedAdagrad(FedOpt):
         Implementation based on https://arxiv.org/abs/2003.00295
 
         Args:
-            current_weights (Weights): Current set of weights from the server.
             fraction_fit (float, optional): Fraction of clients used during
                 training. Defaults to 0.1.
             fraction_eval (float, optional): Fraction of clients used during
@@ -78,6 +77,7 @@ class FedAdagrad(FedOpt):
                 Function used to configure validation. Defaults to None.
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
+            current_weights (Weights): Current set of weights from the server.
             eta (float, optional): Server-side learning rate. Defaults to 1e-1.
             eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.
             tau (float, optional): Controls the algorithm's degree of adaptability.
@@ -137,5 +137,6 @@ class FedAdagrad(FedOpt):
             + self.eta * delta_t[idx] / (np.sqrt(self.v_t[idx]) + self.tau)
             for idx in range(len(delta_t))
         ]
+        self.current_weights = new_weights
 
-        return new_weights
+        return self.current_weights
