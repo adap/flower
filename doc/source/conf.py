@@ -64,24 +64,23 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+html_theme = "sphinx_book_theme"
+html_title = f"Flower {release}"
+html_logo = "_static/flower-logo.png"
+html_favicon = "_static/favicon.ico"
+html_baseurl = "https://flower.dev/docs/"
 
-# https://alabaster.readthedocs.io/en/latest/customization.html
+# https://sphinx-book-theme.readthedocs.io/en/latest/configure.html
 html_theme_options = {
-    # Look and feel
-    "page_width": "1024px", # max-width (default: 940px) 
-    "logo": "flower-logo.png",
-    "logo_name": False,
-    "sidebar_collapse": False,
-    "description": "A Friendly Federated Learning Framework",
     # GitHub
-    "github_user": "adap",
-    "github_repo": "flower",
-    "github_type": "star",
-    "github_banner": True,
-    "github_button": True,
-    # Google Analytics
-    "analytics_id": "UA-173987939-2",
+    "repository_url": "https://github.com/adap/flower",
+    "repository_branch": "main",
+    "path_to_docs": "doc",
+
+    "home_page_in_toc": True,
+    "use_repository_button": True,
+    "use_issues_button": True,
+    "use_edit_page_button": True,
 }
 
 
@@ -91,4 +90,3 @@ html_theme_options = {
 html_static_path = ["_static"]
 
 # Favicon
-html_favicon = "_static/favicon.ico"

@@ -114,10 +114,6 @@ class Server:
                     rnd=current_round, loss=cast(float, loss_fed)
                 )
 
-        # Send shutdown signal to all clients
-        all_clients = self._client_manager.all()
-        _ = shutdown(clients=[all_clients[k] for k in all_clients.keys()])
-
         # Bookkeeping
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
@@ -181,6 +177,11 @@ class Server:
 
         # Aggregate training results
         return self.strategy.aggregate_fit(rnd, results, failures)
+
+    def disconnect_all_clients(self) -> None:
+        """Send shutdown signal to all clients."""
+        all_clients = self._client_manager.all()
+        _ = shutdown(clients=[all_clients[k] for k in all_clients.keys()])
 
     def _get_initial_weights(self) -> Weights:
         """Get initial weights from one of the available clients."""
