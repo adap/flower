@@ -14,11 +14,8 @@
 # ==============================================================================
 """Flower client example using PyTorch for CIFAR-10 image classification."""
 
-import os, sys
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-sys.path.append(parentdir)
-from pathlib import Path
+
+import argparse
 import timeit
 from collections import OrderedDict
 from typing import Dict, List, Tuple
@@ -29,7 +26,7 @@ import torchvision
 
 import flwr as fl
 
-import cifar
+from . import cifar
 
 # pylint: disable=no-member
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
