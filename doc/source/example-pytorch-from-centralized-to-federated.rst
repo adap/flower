@@ -1,5 +1,5 @@
-Example: PyTorch Centralized and Federated
-==========================================
+Example: PyTorch - From Centralized To Federated
+================================================
 
 Before you start with this tutorial we recommend to setup a virtual environment as described `here <https://flower.dev/docs/recommended-env-setup.html>`_. 
 This tutorial will show you how to build Flower on top of an existing machine learning workload. We are using PyTorch to train a Convolutional Neural Network on the CIFAR-10 dataset. First, we introduce this machine learning task with a centralized training approach based on the `Deep Learning with PyTorch <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_ tutorial. Then, we build on the centralized training to run it in a federated fashion.
