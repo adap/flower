@@ -2,47 +2,72 @@ API Reference - flwr
 =========================
 
 
-.. _flwr-server-api-ref:
-
-server
-------
-
-
-.. _flwr-server-start_server-ref:
-
-server.start_server
-~~~~~~~~~~~~~~~~~~~
-.. autofunction:: flwr.server.start_server
-
-
-.. _flwr-client-api-ref:
+.. _flwr-client-apiref:
 
 client
 ------
+.. automodule:: flwr.client
 
-.. _flwr-client-Client-ref:
+.. _flwr-client-Client-apiref:
 
 Client
 ~~~~~~
-.. autofunction:: flwr.client.Client
+.. autoclass:: flwr.client.Client
 
 
-.. _flwr-client-start_client-ref:
+.. _flwr-client-start_client-apiref:
 
 start_client
 ~~~~~~~~~~~~
 .. autofunction:: flwr.client.start_client
 
 
-.. _flwr-client-NumPyClient-ref:
+.. _flwr-client-NumPyClient-apiref:
 
 NumPyClient
 ~~~~~~~~~~~
-.. autofunction:: flwr.client.NumPyClient
+.. autoclass:: flwr.client.NumPyClient
 
 
-.. _flwr-client-start_numpy_client-ref:
+.. _flwr-client-start_numpy_client-apiref:
 
 start_numpy_client
 ~~~~~~~~~~~~~~~~~~
 .. autofunction:: flwr.client.start_numpy_client
+
+
+.. _flwr-server-apiref:
+
+server
+------
+.. automodule:: flwr.server
+
+
+.. _flwr-server-start_server-apiref:
+
+server.start_server
+~~~~~~~~~~~~~~~~~~~
+.. autofunction:: flwr.server.start_server
+
+
+.. _flwr-server-strategy-apiref:
+
+server.strategy
+---------------
+.. automodule:: flwr.server.strategy
+
+
+.. _flwr-server-strategy-Strategy-apiref:
+
+server.strategy.Strategy
+~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: flwr.server.strategy.Strategy
+
+
+.. _flwr-server-strategy-FedAvg-apiref:
+
+server.strategy.FedAvg
+~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: flwr.server.strategy.FedAvg
+
+
