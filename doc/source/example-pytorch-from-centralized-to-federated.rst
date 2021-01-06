@@ -168,7 +168,7 @@ Federated Training
 
 The concept of centralized learning as shown in the previous section is known for most of you and many of you have set it up already. Normally, if you want to run machine learning workloads federated you have to change your complete code and set up everything from scratch. This is quite a big effort. 
 
-However, if you use Flower you can keep your code and put Flower on top. You can play around with federated learning setups without destroying your actual pre-existing code.
+However, with Flower you can evolve your pre-existing code into a federated learning setup without the need for a major rewrite.
 
 The concept is easy to understand. We have to set up a *server* and take the :code:`cifar.py` for the *clients* that are connected to the *server*. The *server* sends model parameters to the clients. The *clients* running the training and updating the paramters. The updated parameters are evaluated and send back to the *server* that averages all received paramters. This is one round of a federated learning process. 
 
