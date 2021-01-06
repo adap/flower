@@ -67,11 +67,11 @@ class FedAvg(Strategy):
                 during validation. Defaults to 2.
             min_available_clients (int, optional): Minimum number of total
                 clients in the system. Defaults to 2.
-            eval_fn (Optional[Callable[[Weights], Optional[Tuple[float, float]]]], optional):
+            eval_fn (Callable[[Weights], Optional[Tuple[float, float]]], optional):
                 Function used for validation. Defaults to None.
-            on_fit_config_fn (Optional[Callable[[int], Dict[str, str]]], optional):
+            on_fit_config_fn (Callable[[int], Dict[str, str]], optional):
                 Function used to configure training. Defaults to None.
-            on_evaluate_config_fn (Optional[Callable[[int], Dict[str, str]]], optional):
+            on_evaluate_config_fn (Callable[[int], Dict[str, str]], optional):
                 Function used to configure validation. Defaults to None.
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
