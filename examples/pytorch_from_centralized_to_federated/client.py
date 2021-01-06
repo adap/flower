@@ -1,10 +1,7 @@
 """Flower client example using PyTorch for CIFAR-10 image classification."""
 
-import os, sys
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-sys.path.append(parentdir)
-from pathlib import Path
+import os
+import sys
 import timeit
 from collections import OrderedDict
 from typing import Dict, List, Tuple
@@ -13,9 +10,8 @@ import numpy as np
 import torch
 import torchvision
 
-import flwr as fl
-
 import cifar
+import flwr as fl
 
 # pylint: disable=no-member
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -23,7 +19,8 @@ DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Flower Client
 class CifarClient(fl.client.NumPyClient):
-    """Flower client implementing CIFAR-10 image classification using PyTorch."""
+    """Flower client implementing CIFAR-10 image classification using
+    PyTorch."""
 
     def __init__(
         self,
