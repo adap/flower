@@ -49,7 +49,7 @@ class FedOpt(FedAvg):
     ) -> None:
         """Federated Optim strategy interface.
 
-        Implementaiton based on https://arxiv.org/abs/2003.00295
+        Implementation based on https://arxiv.org/abs/2003.00295
 
         Args:
             current_weights (Weights): Current set of weights from the server.

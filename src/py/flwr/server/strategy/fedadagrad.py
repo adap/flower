@@ -56,7 +56,7 @@ class FedAdagrad(FedOpt):
     ) -> None:
         """Federated learning strategy using Adagrad on server-side.
 
-        Implementaiton based on https://arxiv.org/abs/2003.00295
+        Implementation based on https://arxiv.org/abs/2003.00295
 
         Args:
             current_weights (Weights): Current set of weights from the server.
