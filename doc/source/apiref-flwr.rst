@@ -1,10 +1,12 @@
-API Reference - Core
+API Reference - flwr
 =========================
+
 
 .. _flwr-server-api-ref:
 
-Server
-----------
+server
+------
+
 
 .. _flwr-server-start_server-ref:
 
@@ -13,25 +15,34 @@ server.start_server
 .. autofunction:: flwr.server.start_server
 
 
+.. _flwr-client-api-ref:
+
+client
+------
+
+.. _flwr-client-Client-ref:
+
 Client
-----------
+~~~~~~
+.. autofunction:: flwr.client.Client
+
 
 .. _flwr-client-start_client-ref:
 
-server.start_client
-~~~~~~~~~~~~~~~~~~~
+start_client
+~~~~~~~~~~~~
 .. autofunction:: flwr.client.start_client
 
 
-.. _flwr-client-start_keras_client-ref:
+.. _flwr-client-NumPyClient-ref:
 
-server.start_keras_client
-~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autofunction:: flwr.client.start_keras_client
+NumPyClient
+~~~~~~~~~~~
+.. autofunction:: flwr.client.NumPyClient
 
 
 .. _flwr-client-start_numpy_client-ref:
 
-server.start_numpy_client
-~~~~~~~~~~~~~~~~~~~~~~~~~
+start_numpy_client
+~~~~~~~~~~~~~~~~~~
 .. autofunction:: flwr.client.start_numpy_client

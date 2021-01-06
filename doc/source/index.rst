@@ -33,7 +33,7 @@ API Reference
    :maxdepth: 3
    :caption: API Reference
 
-   Core <apiref-core>
+   flwr <apiref-flwr>
 
 
 Contributor Guide

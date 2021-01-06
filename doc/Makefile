@@ -15,7 +15,7 @@ help:
 .PHONY: help Makefile
 
 docs:
-	rm -r build
+	rm -rf build
 	make html
 
 serve:
