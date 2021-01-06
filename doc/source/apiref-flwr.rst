@@ -13,6 +13,7 @@ client
 Client
 ~~~~~~
 .. autoclass:: flwr.client.Client
+    :members:
 
 
 .. _flwr-client-start_client-apiref:
@@ -27,6 +28,7 @@ start_client
 NumPyClient
 ~~~~~~~~~~~
 .. autoclass:: flwr.client.NumPyClient
+    :members:
 
 
 .. _flwr-client-start_numpy_client-apiref:
@@ -62,6 +64,7 @@ server.strategy
 server.strategy.Strategy
 ~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: flwr.server.strategy.Strategy
+    :members:
 
 
 .. _flwr-server-strategy-FedAvg-apiref:
@@ -69,5 +72,4 @@ server.strategy.Strategy
 server.strategy.FedAvg
 ~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: flwr.server.strategy.FedAvg
-
-
+    :members:
