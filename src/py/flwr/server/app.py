@@ -108,5 +108,8 @@ def start_server(
     else:
         log(INFO, "app_evaluate: no evaluation result")
 
+    # Graceful shutdown
+    server.disconnect_all_clients()
+
     # Stop the gRPC server
     grpc_server.stop(1)
