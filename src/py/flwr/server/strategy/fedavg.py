@@ -75,7 +75,6 @@ class FedAvg(Strategy):
                 Function used to configure validation. Defaults to None.
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
-
         """
         super().__init__()
         self.min_fit_clients = min_fit_clients
