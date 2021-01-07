@@ -209,8 +209,9 @@ Our *client* needs to import :code:`flwr`, but also :code:`torch` to update the 
     DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 Implementing a Flower *client* basically means implementing a subclass of either :code:`flwr.client.Client` or :code:`flwr.client.NumPyClient`.
-Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll call it :code:`CifarClient`. As a side note the NumPyClient helps avoiding some boilerplate code which is required in many cases.
-:code:`CifarClient` needs to implement the following four methods, two methods for getting/setting model parameters, one method for training, and one method for evaluation:
+Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll call it :code:`CifarClient`.
+:code:`NumPyClient` is slighly easier to implement than :code:`Client` if you use a framework with good NumPy interoperability (like PyTorch or TensorFlow/Keras) because it avoids some of the boilerplate that would otherwise be necessary.
+:code:`CifarClient` needs to implement four methods, two methods for getting/setting model parameters, one method for training the model, and one method for testing the model:
 
 #. :code:`set_parameters`
     * set the model parameters on the local model that are received from the server
