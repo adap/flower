@@ -52,7 +52,7 @@ class FedAvg(Strategy):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
         accept_failures: bool = True,
     ) -> None:
-        """Federated Average strategy.
+        """Federated Averaging strategy.
 
         Implementation based on https://arxiv.org/abs/1602.05629
 
