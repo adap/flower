@@ -1,4 +1,3 @@
-
 # Federated Learning on Embedded Devices with Flower
 
 This demo will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use NVIDIA Jetson devices and Raspberry Pi as Flower clients. This demo uses Flower with PyTorch. The source code used is mostly borrowed from the [example that Flower provides for CIFAR-10](https://github.com/adap/flower/tree/main/src/py/flwr_example/pytorch_cifar).
@@ -18,17 +17,16 @@ What follows is a step-by-step guide on how to setup your client/s and the serve
 ![alt text](media/diagram.png)
 
 ## Clone this repo
+
 Start with cloning the Flower repo and checking out the example. We have prepared a single line which you can copy into your shell:
 
 ```bash
 $ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/embedded_devices . && rm -rf flower && cd embedded_devices
 ```
 
-
 ## Setting up the server
 
 The only requirement for the server is to have flower installed. You can do so by running `pip install flwr` inside your virtualenv or conda environment.
-
 
 ## Setting up a Jetson Xavier-NX
 
@@ -96,7 +94,6 @@ The only requirement for the server is to have flower installed. You can do so b
     ```
 
 3. (optional) additional packages: you could install `TMUX` (see point `6` above) and `htop` as a replacement for `jtop` (which is only available for Jetson devices). Htop can be installed via: `sudo apt-get install htop -y`.
-
 
 # Running FL training with Flower
 

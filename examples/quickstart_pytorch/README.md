@@ -3,30 +3,39 @@
 This introductory example to Flower uses PyTorch, but deep knowledge of PyToch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
 Running this example in itself is quite easy.
 
-It is recommended to use a virtual environment as described [here](https://flower.dev/docs/recommended-env-setup).
-After setting up the virtual environment it is recommended to use [poetry](https://python-poetry.org/docs/) to install the project.
+## Project Setup
 
-## Run PyTorch Federated
-
-Start by cloning the Flower example. We have prepared a single line that you can copy into your shell:
+Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_pytorch . && rm -rf flower && cd quickstart_pytorch
 ```
 
-You have different files available:
+This will create a new directory called `quickstart_pytorch` containing the following files:
 
 ```shell
 -- pyproject.toml
 -- client.py
 -- server.py
+-- README.md
 ```
 
-The `pyproject.toml` defines the project dependencies. Simply run poetry to install all required dependencies:
+Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
 ```shell
 poetry install
+poetry shell
 ```
+
+Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+
+```shell
+python3 -c "import flwr"
+```
+
+If you don't see any errors you're good to go!
+
+# Run Federated Learning with PyTorch and Flower
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
