@@ -4,6 +4,22 @@ Changelog
 Unreleased
 ----------
 
+What's new?
+
+* New built-in strategies (`#549 <https://github.com/adap/flower/pull/549>`_)
+    * (abstract) FedOpt
+    * FedAdagrad
+* New example: PyTorch From Centralized To Federated (`#549 <https://github.com/adap/flower/pull/549>`_)
+* Improved documetation
+    * New documetation theme (`#551 <https://github.com/adap/flower/pull/551>`_)
+    * New API reference (`#554 <https://github.com/adap/flower/pull/554>`_)
+    * Updated examples documentation (`#549 <https://github.com/adap/flower/pull/549>`_)
+    * Removed obsolete documentation (`#548 <https://github.com/adap/flower/pull/548>`_)
+
+Bugfix:
+
+* :code:`Server.fit` does not disconnect clients when finished, disconnecting the clients is now handled in :code:`flwr.server.start_server` (`#553 <https://github.com/adap/flower/pull/553>`_, `#540 <https://github.com/adap/flower/issues/540>`_).
+
 
 v0.12.0 (2020-12-07)
 --------------------
