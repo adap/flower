@@ -61,7 +61,7 @@ def main():
             return len(testloader), float(loss), float(accuracy)
 
     # Start client
-    fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+    fl.client.start_numpy_client("0.0.0.0:8080", client=CifarClient())
 
 
 def train(net, trainloader, epochs):
