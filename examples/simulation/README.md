@@ -1,6 +1,6 @@
 # Single Machine Simulation Of Federated Learning
 
-This example is part of a series of blog posts. It is recommended to read the [blog post](https://flower.dev/blog/2021-01-07-simulation-of-federated-learning) before reading further.
+This example is part of a series of blog posts. It is recommended to read the [blog post](https://flower.dev/blog/2021-01-08-simulate-federated-learning) before reading further.
 
 ## Quick Start
 
@@ -42,7 +42,7 @@ poetry install
 poetry shell
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything worked correctly you can run the following command:
+Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
 
 ```shell
 python3 -c "import flwr"

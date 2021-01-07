@@ -18,7 +18,7 @@ DATASET = Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]
 
 def start_server(num_clients: int, num_rounds: int):
     """Start the server with a slightly adjusted FedAvg strategy."""
-    strategy = FedAvg(min_available_clients=num_clients, fraction_fit=0.5)
+    strategy = FedAvg(min_available_clients=num_clients, fraction_fit=0.3)
     fl.server.start_server(strategy=strategy, config={"num_rounds": num_rounds})
 
 

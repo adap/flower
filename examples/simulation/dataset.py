@@ -23,8 +23,6 @@ XY = Tuple[np.ndarray, np.ndarray]
 XYList = List[XY]
 PartitionedDataset = List[Tuple[XY, XY]]
 
-np.random.seed(2020)
-
 
 def shuffle(x: np.ndarray, y: np.ndarray) -> XY:
     """Shuffle x and y."""
@@ -38,20 +36,15 @@ def partition(x: np.ndarray, y: np.ndarray, num_partitions: int) -> XYList:
 
 
 def create_partitions(
-    unpartitioned_dataset: XY,
+    dataset: XY,
     num_partitions: int,
 ) -> XYList:
-    """Create partitioned version of a training or test set.
-
-    Currently tested and supported are MNIST, FashionMNIST and
-    CIFAR-10/100
-    """
-    x, y = unpartitioned_dataset
+    """Create partitioned version of a training or test set."""
+    x, y = dataset
     x, y = shuffle(x, y)
     xy_partitions = partition(x, y, num_partitions)
 
-    # Adjust x and y shape
-    return [adjust_xy_shape(xy) for xy in xy_partitions]
+    return xy_partitions
 
 
 def load(
@@ -60,36 +53,7 @@ def load(
     """Create partitioned version of CIFAR-10."""
     xy_train, xy_test = tf.keras.datasets.cifar10.load_data()
 
-    xy_train_partitions = create_partitions(
-        unpartitioned_dataset=xy_train,
-        num_partitions=num_partitions,
-    )
-
-    xy_test_partitions = create_partitions(
-        unpartitioned_dataset=xy_test,
-        num_partitions=num_partitions,
-    )
+    xy_train_partitions = create_partitions(xy_train, num_partitions)
+    xy_test_partitions = create_partitions(xy_test, num_partitions)
 
     return list(zip(xy_train_partitions, xy_test_partitions))
-
-
-def adjust_xy_shape(xy: XY) -> XY:
-    """Adjust shape of both x and y."""
-    x, y = xy
-    if x.ndim == 3:
-        x = adjust_x_shape(x)
-    if y.ndim == 2:
-        y = adjust_y_shape(y)
-    return (x, y)
-
-
-def adjust_x_shape(nda: np.ndarray) -> np.ndarray:
-    """Turn shape (x, y, z) into (x, y, z, 1)."""
-    nda_adjusted = np.reshape(nda, (nda.shape[0], nda.shape[1], nda.shape[2], 1))
-    return cast(np.ndarray, nda_adjusted)
-
-
-def adjust_y_shape(nda: np.ndarray) -> np.ndarray:
-    """Turn shape (x, 1) into (x)."""
-    nda_adjusted = np.reshape(nda, (nda.shape[0]))
-    return cast(np.ndarray, nda_adjusted)
