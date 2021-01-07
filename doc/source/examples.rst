@@ -7,6 +7,63 @@ pipelines, usually leveraging popular machine learning frameworks such as
 `PyTorch <https://pytorch.org/>`_ or
 `TensorFlow <https://www.tensorflow.org/>`_.
 
+.. note::
+   Flower usage examples used to be bundled with Flower in a package called
+   `flwr_example`. We are migrating those examples to standalone projects to
+   make them easier to use. All new examples are based in the directory
+   `examples <https://github.com/adap/flower/tree/main/examples>`_.
+
+The following examples are available as standalone projects.
+
+
+Quickstart TensorFlow/Keras
+---------------------------
+
+The TensorFlow/Keras quickstart example shows CIFAR-10 image classification
+with MobileNetV2:
+
+- `Code <https://github.com/adap/flower/tree/main/examples/quickstart_tensorflow>`_
+- `Tutorial <https://flower.dev/docs/quickstart_tensorflow.html>`_
+- `Blog post <https://flower.dev/blog/2020-12-11-federated-learning-in-less-than-20-lines-of-code>`_
+
+
+Quickstart PyTorch
+------------------
+
+The PyTorch quickstart example shows CIFAR-10 image classification
+with a simple Convolutional Neural Network:
+
+- `Code <https://github.com/adap/flower/tree/main/examples/quickstart_pytorch>`_
+- `Tutorial <https://flower.dev/docs/quickstart_pytorch.html>`_
+
+
+PyTorch: From Centralized To Federated
+--------------------------------------
+
+This example shows how a regular PyTorch project can be federated using Flower:
+
+- `Code <https://github.com/adap/flower/tree/main/examples/pytorch_from_centralized_to_federated>`_
+- `Tutorial <https://flower.dev/docs/example-pytorch-from-centralized-to-federated.html>`_
+
+
+Federated Learning on Raspberry Pi and Nvidia Jetson
+----------------------------------------------------
+
+This example shows how Flower can be used to build a federated learning system that run across Raspberry Pi and Nvidia Jetson:
+
+- `Code <https://github.com/adap/flower/tree/main/examples/embedded_devices>`_
+- `Blog post <https://flower.dev/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_
+
+
+
+Legacy Examples (`flwr_example`)
+================================
+
+.. warning::
+   The useage examples in `flwr_example` are deprecated and will be removed in
+   the future. New examples are provided as standalone projects in
+   `examples <https://github.com/adap/flower/tree/main/examples>`_.
+
 
 Extra Dependencies
 ------------------
