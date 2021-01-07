@@ -29,7 +29,7 @@ poetry install
 poetry shell
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything worked correctly you can run the following command:
+Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
 
 ```shell
 python3 -c "import flwr"
