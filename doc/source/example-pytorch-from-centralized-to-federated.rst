@@ -193,7 +193,6 @@ We can already start the *server*:
     python3 server.py
 
 Finally, we will define our *client* logic in :code:`client.py` and build upon the previously defined centralized training in :code:`cifar.py`.
-In order to update the model parameters of our PyTorch model on the *server* and *client* we also need to implement :code:`flwr`, :code:`torch` and :code:`torchvision`.
 Our *client* needs to import :code:`flwr`, but also :code:`torch` to update the paramters on our PyTorch model:
 
 .. code-block:: python
