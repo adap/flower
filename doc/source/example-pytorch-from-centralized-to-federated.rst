@@ -288,7 +288,7 @@ You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient
 
         # Start client
         client = CifarClient(model, trainloader, testloader)
-        fl.client.start_numpy_client("[::]:8080", client)
+        fl.client.start_numpy_client("0.0.0.0:8080", client)
 
 
     if __name__ == "__main__":
