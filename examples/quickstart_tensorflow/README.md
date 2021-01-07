@@ -8,7 +8,7 @@ Running this example in itself is quite easy.
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/example/quickstart_tensorflow . && rm -rf flower && cd quickstart_tensorflow
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_tensorflow . && rm -rf flower && cd quickstart_tensorflow
 ```
 
 This will create a new directory called `quickstart_tensorflow` containing the following files:
