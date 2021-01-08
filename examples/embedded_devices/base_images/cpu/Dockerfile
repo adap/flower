@@ -40,7 +40,7 @@ RUN apt-get install libavcodec-dev libavformat-dev libswscale-dev libjpeg8-dev z
 RUN python3 setup.py install
 
 # Installing flower
-RUN pip3 install flwr==0.11.0
+RUN pip3 install flwr==0.13.0
 
 # Deps for an exciting future project
 RUN apt-get install libffi-dev python-dev python3-h5py libhdf5-dev libssl-dev -y
