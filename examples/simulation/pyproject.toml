@@ -12,6 +12,6 @@ authors = ["The Flower Authors <enquiries@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
-flwr = "==0.12.0"  # For development: { path = "../../", develop = true }
+flwr = "==0.13.0"  # For development: { path = "../../", develop = true }
 numpy = "==1.18.5"
 tensorflow-cpu = "==2.3.1"
