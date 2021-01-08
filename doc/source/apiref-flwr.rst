@@ -73,3 +73,5 @@ server.strategy.FedAvg
 ~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: flwr.server.strategy.FedAvg
     :members:
+
+    .. automethod:: __init__
