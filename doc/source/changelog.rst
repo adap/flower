@@ -9,9 +9,16 @@ What's new?
 * New built-in strategies (`#549 <https://github.com/adap/flower/pull/549>`_)
     * (abstract) FedOpt
     * FedAdagrad
+
+
+v0.13.0 (2021-01-08)
+--------------------
+
+What's new?
+
 * New example: PyTorch From Centralized To Federated (`#549 <https://github.com/adap/flower/pull/549>`_)
-* Improved documetation
-    * New documetation theme (`#551 <https://github.com/adap/flower/pull/551>`_)
+* Improved documentation
+    * New documentation theme (`#551 <https://github.com/adap/flower/pull/551>`_)
     * New API reference (`#554 <https://github.com/adap/flower/pull/554>`_)
     * Updated examples documentation (`#549 <https://github.com/adap/flower/pull/549>`_)
     * Removed obsolete documentation (`#548 <https://github.com/adap/flower/pull/548>`_)
