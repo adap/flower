@@ -10,7 +10,7 @@ Each week on Monday if there was a commit since the last release create a new re
 
 To make a release the following things need to happen:
 
-1. Update the `changelog.md` unreleased section to contain the version number and date the release you are building. Create a pull request with the change.
+1. Update the `changelog.md` unreleased section to contain the version number and date for the release you are building. Create a pull request with the change.
 2. Tag the release commit with the version number as soon as the PR is merged.
 3. Build the release with `poetry build` and publish it with `poetry publish`
 4. Create an entry in GitHub releases with the release notes for the previously tagged commit.
