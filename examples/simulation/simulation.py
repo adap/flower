@@ -16,9 +16,10 @@ import dataset
 DATASET = Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]
 
 
-def start_server(num_clients: int, num_rounds: int):
+def start_server(num_rounds: int, num_clients: int, fraction_fit: float):
     """Start the server with a slightly adjusted FedAvg strategy."""
-    strategy = FedAvg(min_available_clients=num_clients, fraction_fit=0.3)
+    strategy = FedAvg(min_available_clients=num_clients, fraction_fit=fraction_fit)
+    # Exposes the server by default on port 8080
     fl.server.start_server(strategy=strategy, config={"num_rounds": num_rounds})
 
 
@@ -35,14 +36,17 @@ def start_client(dataset: DATASET) -> None:
     # Define a Flower client
     class CifarClient(fl.client.NumPyClient):
         def get_parameters(self):
+            """Return current weights."""
             return model.get_weights()
 
         def fit(self, parameters, config):
+            """Fit model and return new weights as well as number of training examples."""
             model.set_weights(parameters)
             model.fit(x_train, y_train, epochs=1, batch_size=32, steps_per_epoch=3)
             return model.get_weights(), len(x_train)
 
         def evaluate(self, parameters, config):
+            """Evaluate using provided parameters."""
             model.set_weights(parameters)
             loss, accuracy = model.evaluate(x_test, y_test)
             return len(x_test), loss, accuracy
@@ -51,12 +55,14 @@ def start_client(dataset: DATASET) -> None:
     fl.client.start_numpy_client("0.0.0.0:8080", client=CifarClient())
 
 
-def run_simulation(num_clients: int, num_rounds: int):
+def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
+    """Start a FL simulation."""
+
     # This will hold all the processes which we are going to create
     processes = []
 
     # Start the server
-    server_process = Process(target=start_server, args=(num_clients, num_rounds))
+    server_process = Process(target=start_server, args=(num_rounds, num_clients, fraction_fit))
     server_process.start()
     processes.append(server_process)
 
@@ -75,4 +81,4 @@ def run_simulation(num_clients: int, num_rounds: int):
 
 
 if __name__ == "__main__":
-    run_simulation(num_clients=10, num_rounds=200)
+    run_simulation(num_rounds=100, num_clients=10, fraction_fit=0.5)
