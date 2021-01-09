@@ -17,7 +17,7 @@
 
 import timeit
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 
@@ -26,6 +26,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    Metrics,
     ParametersRes,
     parameters_to_weights,
     weights_to_parameters,
@@ -67,7 +68,7 @@ class NumPyClient(ABC):
     @abstractmethod
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, str]
-    ) -> Tuple[int, float, float]:
+    ) -> Union[Tuple[int, float, float], Tuple[int, float, float, Metrics]]:
         """Evaluate the provided weights using the locally held dataset.
 
         Arguments:
@@ -121,7 +122,15 @@ class NumPyClientWrapper(Client):
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset."""
         parameters: List[np.ndarray] = parameters_to_weights(ins.parameters)
-        num_examples, loss, accuracy = self.numpy_client.evaluate(
-            parameters, ins.config
+
+        results = self.numpy_client.evaluate(parameters, ins.config)
+        if len(results) == 3:
+            results = cast(Tuple[int, float, float], results)
+            num_examples, loss, accuracy = results
+            metrics: Optional[Metrics] = None
+        elif len(results) == 4:
+            results = cast(Tuple[int, float, float, Metrics], results)
+            num_examples, loss, accuracy, metrics = results
+        return EvaluateRes(
+            num_examples=num_examples, loss=loss, accuracy=accuracy, metrics=metrics
         )
-        return EvaluateRes(num_examples=num_examples, loss=loss, accuracy=accuracy)
