@@ -16,7 +16,7 @@
 deserialization."""
 
 
-from typing import Any, Dict, List, Union, cast
+from typing import Any, List, cast
 
 from flwr.proto.transport_pb2 import (
     ClientMessage,
@@ -202,6 +202,7 @@ def metrics_from_proto(proto: Any) -> typing.Metrics:
 
 def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
     """Serialize... ."""
+
     if isinstance(scalar, bool):
         return Scalar(bool=scalar)
 
@@ -216,6 +217,10 @@ def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
 
     if isinstance(scalar, str):
         return Scalar(string=scalar)
+
+    raise Exception(
+        f"Accepted types: {bool, bytes, float, int, str} (but not {type(scalar)})"
+    )
 
 
 def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:

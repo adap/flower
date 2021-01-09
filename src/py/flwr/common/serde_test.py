@@ -17,9 +17,6 @@
 
 from typing import Union, cast
 
-import numpy as np
-import pytest
-
 from .serde import scalar_from_proto, scalar_to_proto
 
 
