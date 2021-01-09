@@ -27,7 +27,7 @@ from .fedavg import FedAvg
 class FaultTolerantFedAvg(FedAvg):
     """Configurable fault-tolerant FedAvg strategy implementation."""
 
-    # pylint: disable-msg=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         fraction_fit: float = 0.1,

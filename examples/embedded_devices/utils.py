@@ -43,7 +43,7 @@ import flwr as fl
 DATA_ROOT = Path("./data")
 
 
-# pylint: disable-msg=unsubscriptable-object
+# pylint: disable=unsubscriptable-object
 class Net(nn.Module):
     """Simple CNN adapted from 'PyTorch: A 60 Minute Blitz'."""
 
@@ -56,7 +56,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
-    # pylint: disable-msg=arguments-differ,invalid-name
+    # pylint: disable=arguments-differ,invalid-name
     def forward(self, x: Tensor) -> Tensor:
         """Compute forward pass."""
         x = self.pool(F.relu(self.conv1(x)))
@@ -103,7 +103,7 @@ def load_model(model_name: str) -> nn.Module:
         raise NotImplementedError(f"model {model_name} is not implemented")
 
 
-# pylint: disable-msg=unused-argument
+# pylint: disable=unused-argument
 def load_cifar(download=False) -> Tuple[datasets.CIFAR10, datasets.CIFAR10]:
     """Load CIFAR-10 (training and test set)."""
     transform = transforms.Compose(
@@ -170,7 +170,7 @@ def test(
             images, labels = data[0].to(device), data[1].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
-            _, predicted = torch.max(outputs.data, 1)  # pylint: disable-msg=no-member
+            _, predicted = torch.max(outputs.data, 1)  # pylint: disable=no-member
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
     accuracy = correct / total

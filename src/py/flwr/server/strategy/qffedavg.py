@@ -41,7 +41,7 @@ from .fedavg import FedAvg
 class QffedAvg(FedAvg):
     """Configurable QffedAvg strategy implementation."""
 
-    # pylint: disable-msg=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         q_param: float = 0.2,
@@ -71,7 +71,7 @@ class QffedAvg(FedAvg):
         self.pre_weights: Optional[Weights] = None
 
     def __repr__(self) -> str:
-        # pylint: disable-msg=line-too-long
+        # pylint: disable=line-too-long
         rep = f"QffedAvg(learning_rate={self.learning_rate}, "
         rep += f"q_param={self.q_param}, pre_weights={self.pre_weights})"
         return rep
