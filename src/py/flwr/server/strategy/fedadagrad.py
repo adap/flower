@@ -36,7 +36,7 @@ class FedAdagrad(FedOpt):
     Paper: https://arxiv.org/abs/2003.00295
     """
 
-    # pylint: disable-msg=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         *,
