@@ -28,7 +28,7 @@ class CifarTestCase(unittest.TestCase):
 
     def test_load_model(self) -> None:
         """Test the number of (trainable) model parameters."""
-        # pylint: disable-msg=no-self-use
+        # pylint: disable=no-self-use
 
         # Prepare
         expected = 62006
@@ -42,7 +42,7 @@ class CifarTestCase(unittest.TestCase):
 
     def test_get_weights(self) -> None:
         """Test get_weights."""
-        # pylint: disable-msg=no-self-use
+        # pylint: disable=no-self-use
 
         # Prepare
         model: cifar.Net = cifar.load_model()
@@ -56,7 +56,7 @@ class CifarTestCase(unittest.TestCase):
 
     def test_set_weights(self) -> None:
         """Test set_weights."""
-        # pylint: disable-msg=no-self-use
+        # pylint: disable=no-self-use
 
         # Prepare
         weights_expected: Weights = cifar.load_model().get_weights()
