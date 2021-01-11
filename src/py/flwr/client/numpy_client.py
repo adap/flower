@@ -89,7 +89,7 @@ class NumPyClient(ABC):
             metrics (Metrics, optional): A dictionary mapping arbitrary string
                 keys to values of type bool, bytes, float, int, or str. Metrics
                 can be used to communicate arbitrary values back to the server.
-        """        
+        """
 
 
 class NumPyClientWrapper(Client):
