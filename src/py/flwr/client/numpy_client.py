@@ -71,21 +71,25 @@ class NumPyClient(ABC):
     ) -> Union[Tuple[int, float, float], Tuple[int, float, float, Metrics]]:
         """Evaluate the provided weights using the locally held dataset.
 
-        Arguments:
-            parameters: List[numpy.ndarray]. The current (global) model
+        Args:
+            parameters (List[np.ndarray]): The current (global) model
                 parameters.
-            config: Dict[str, str]. Configuration parameters which allow the
+            config (Dict[str, str]): Configuration parameters which allow the
                 server to influence evaluation on the client. It can be used to
                 communicate arbitrary values from the server to the client, for
                 example, to influence the number of examples used for
                 evaluation.
 
         Returns:
-            A tuple containing three elements: An `int` representing the number
-            of examples used for evaluation, a `float` representing the loss,
-            and a `float` representing the accuracy of the (global) model
-            weights on the local dataset.
-        """
+            num_examples (int): The number of examples used for evaluation.
+            loss (float): The evaluation loss of the model on the local
+                dataset.
+            accuracy (float, deprecated): The accuracy of the model on the
+                local test dataset.
+            metrics (Metrics, optional): A dictionary mapping arbitrary string
+                keys to values of type bool, bytes, float, int, or str. Metrics
+                can be used to communicate arbitrary values back to the server.
+        """        
 
 
 class NumPyClientWrapper(Client):
