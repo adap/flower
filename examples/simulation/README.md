@@ -1,6 +1,6 @@
 # Single Machine Simulation Of Federated Learning
 
-This example is part of a series of blog posts. It is recommended to read the [blog post](https://flower.dev/blog/2021-01-08-simulate-federated-learning) before reading further.
+This example is part of a series of blog posts. It's recommended to read the [blog post](https://flower.dev/blog/2021-01-11-single-machine-simulation-of-federated-learning-systems) before reading further.
 
 ## Quick Start
 
