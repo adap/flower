@@ -3,7 +3,7 @@
 """Check provided directory and sub-directories for missing __init__.py files.
 
 Example:
-    python -m adap.to..
+    python -m flwr_tool.init_py_check src/py 
 """
 
 import os
@@ -30,7 +30,7 @@ def check_missing_init_files(absolute_path: str) -> None:
             warning_list.append(warning_message)
 
     if len(warning_list) > 0:
-        print("Could not find '__init__.py' in the   following directories:")
+        print("Could not find '__init__.py' in the following directories:")
         for warning in warning_list:
             print(warning)
         sys.exit(1)
