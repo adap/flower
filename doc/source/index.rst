@@ -1,5 +1,5 @@
-Flower Docs
-===========
+Flower Documentation
+====================
 
 Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
 
@@ -12,23 +12,29 @@ to bring existing machine learning workloads into a federated setting. One of
 Flower's design goals was to make this simple. Read on to learn more.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: User Guide
 
-   quickstart_keras
-   quickstart_pytorch
    installation
+   quickstart_tensorflow
+   quickstart_pytorch
+   strategies
+   implementing-strategies
    examples
-   howto-aws
+   example_walkthrough_pytorch_mnist
+   example-pytorch-from-centralized-to-federated
+   recommended-env-setup
+   changelog
 
 
 API Reference
------------------
+-------------
 
 .. toctree::
    :maxdepth: 3
+   :caption: API Reference
 
-   api_documentation/modules
+   flwr <apiref-flwr>
 
 
 Contributor Guide
@@ -38,20 +44,21 @@ The Flower authors welcome external contributions. The following guides are
 intended to help along the way.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contributor Guide
 
    getting-started-for-contributors
    good-first-contributions
    architecture
+   release_process
 
 
-About Flower
-------------
+About
+-----
 
 .. toctree::
-   :maxdepth: 2
-   :caption: About Flower
+   :maxdepth: 1
+   :caption: About
 
    people
    organizations

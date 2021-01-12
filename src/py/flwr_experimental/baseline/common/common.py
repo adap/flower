@@ -29,7 +29,7 @@ from flwr.common.logger import log
 from .data import build_dataset
 
 
-# pylint: disable-msg=unused-argument,invalid-name,too-many-arguments,too-many-locals
+# pylint: disable=unused-argument,invalid-name,too-many-arguments,too-many-locals
 def custom_fit(
     model: tf.keras.Model,
     dataset: tf.data.Dataset,

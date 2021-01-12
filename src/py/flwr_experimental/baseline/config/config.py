@@ -43,7 +43,7 @@ def sample_delay_factors(
 ) -> List[float]:
     """Sample delay factors."""
     np.random.seed(seed)
-    # pylint: disable-msg=invalid-name
+    # pylint: disable=invalid-name
     ps = [float(p) for p in np.random.rand(num_clients)]
     step_size = max_delay / num_clients
     ds = [(i + 1) * step_size for i in range(num_clients)]
@@ -86,7 +86,7 @@ def sample_real_delay_factors(num_clients: int, seed: int = 2021) -> List[float]
 
 
 def get_delay_factor() -> float:
-    """Return a delay factor"""
+    """Return a delay factor."""
     values_prob = [val[2] for val in DEVICE_DISTRIBUTION]
     values_perf = [val[3] for val in DEVICE_DISTRIBUTION]
     max_perf = max(values_perf)

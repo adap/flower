@@ -39,20 +39,23 @@ class InstanceIdNotFound(Exception):
 
 
 class InstanceMismatch(Exception):
-    """Raised when instances passed to create_instances do not
-    have the same values for RAM or CPU."""
+    """Raised when instances passed to create_instances do not have the same
+    values for RAM or CPU."""
 
 
 class IgnoreHostKeyPolicy:
-    """Policy for accepting any unknown host key. This is used by `paramiko.client.SSHClient`."""
+    """Policy for accepting any unknown host key.
+
+    This is used by `paramiko.client.SSHClient`.
+    """
 
     # pylint: disable=no-self-use, unused-argument
     def missing_host_key(self, client: SSHClient, hostname: str, key: str) -> None:
         """Simply return to ignore the host key.
 
-        As we create and destroy machines quite regularly and don't reuse them
-        we will not store the host key in the local system to avoid pollution the
-        local known_hosts file.
+        As we create and destroy machines quite regularly and don't
+        reuse them we will not store the host key in the local system to
+        avoid pollution the local known_hosts file.
         """
         return None
 
@@ -269,7 +272,10 @@ class Cluster:
     def exec_all(
         self, command: str, groups: Optional[List[str]] = None
     ) -> Dict[str, ExecInfo]:
-        """Run command on all instances. If provided filter by group."""
+        """Run command on all instances.
+
+        If provided filter by group.
+        """
         instance_names = self.get_instance_names(groups)
 
         results: Dict[str, ExecInfo] = {}

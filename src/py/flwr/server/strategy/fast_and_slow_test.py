@@ -19,7 +19,7 @@ import unittest
 from flwr.server.strategy import fast_and_slow
 
 
-# pylint: disable-msg=no-self-use,missing-class-docstring,missing-function-docstring
+# pylint: disable=no-self-use,missing-class-docstring,missing-function-docstring
 class FastAndSlowTestCase(unittest.TestCase):
     def test_fast_round(self) -> None:
         # Prepare

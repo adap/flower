@@ -95,7 +95,7 @@ class FedFSv1(FedAvg):
         return rep
 
     # pylint: disable=too-many-locals
-    def on_configure_fit(
+    def configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
@@ -235,7 +235,7 @@ class FedFSv1(FedAvg):
             use_softmax=False,
         )
 
-    def on_aggregate_fit(
+    def aggregate_fit(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
@@ -282,7 +282,7 @@ class FedFSv1(FedAvg):
 
         return weights_prime
 
-    def on_aggregate_evaluate(
+    def aggregate_evaluate(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],

@@ -7,12 +7,69 @@ pipelines, usually leveraging popular machine learning frameworks such as
 `PyTorch <https://pytorch.org/>`_ or
 `TensorFlow <https://www.tensorflow.org/>`_.
 
+.. note::
+   Flower usage examples used to be bundled with Flower in a package called
+   `flwr_example`. We are migrating those examples to standalone projects to
+   make them easier to use. All new examples are based in the directory
+   `examples <https://github.com/adap/flower/tree/main/examples>`_.
+
+The following examples are available as standalone projects.
+
+
+Quickstart TensorFlow/Keras
+---------------------------
+
+The TensorFlow/Keras quickstart example shows CIFAR-10 image classification
+with MobileNetV2:
+
+- `Code <https://github.com/adap/flower/tree/main/examples/quickstart_tensorflow>`_
+- `Tutorial <https://flower.dev/docs/quickstart_tensorflow.html>`_
+- `Blog post <https://flower.dev/blog/2020-12-11-federated-learning-in-less-than-20-lines-of-code>`_
+
+
+Quickstart PyTorch
+------------------
+
+The PyTorch quickstart example shows CIFAR-10 image classification
+with a simple Convolutional Neural Network:
+
+- `Code <https://github.com/adap/flower/tree/main/examples/quickstart_pytorch>`_
+- `Tutorial <https://flower.dev/docs/quickstart_pytorch.html>`_
+
+
+PyTorch: From Centralized To Federated
+--------------------------------------
+
+This example shows how a regular PyTorch project can be federated using Flower:
+
+- `Code <https://github.com/adap/flower/tree/main/examples/pytorch_from_centralized_to_federated>`_
+- `Tutorial <https://flower.dev/docs/example-pytorch-from-centralized-to-federated.html>`_
+
+
+Federated Learning on Raspberry Pi and Nvidia Jetson
+----------------------------------------------------
+
+This example shows how Flower can be used to build a federated learning system that run across Raspberry Pi and Nvidia Jetson:
+
+- `Code <https://github.com/adap/flower/tree/main/examples/embedded_devices>`_
+- `Blog post <https://flower.dev/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_
+
+
+
+Legacy Examples (`flwr_example`)
+================================
+
+.. warning::
+   The useage examples in `flwr_example` are deprecated and will be removed in
+   the future. New examples are provided as standalone projects in
+   `examples <https://github.com/adap/flower/tree/main/examples>`_.
+
 
 Extra Dependencies
 ------------------
 
 The core Flower framework keeps a minimal set of dependencies. The examples
-demonstrate Flower in the context of differnt machine learning frameworks, so 
+demonstrate Flower in the context of different machine learning frameworks, so
 additional dependencies need to be installed before an example can be run.
 
 For PyTorch examples::
@@ -31,29 +88,11 @@ Please consult :code:`pyproject.toml` for a full list of possible extras
 (section :code:`[tool.poetry.extras]`).
 
 
-Run Examples Using Docker
--------------------------
-
-Flower examples can also be run through Docker without the need for most of the
-setup steps that are otherwise necessary::
-
-  # Create docker network `flwr` so that containers can reach each other by name
-  $ docker network create flwr
-  
-  # Build the Flower docker containers
-  $ ./dev/docker_build.sh
-
-  # Run the docker containers (will tail a logfile created by a central logserver)
-  $ ./src/py/flwr_example/tensorflow/run-docker.sh
-
-This will start a slightly smaller workload with only four clients.
-
-
 PyTorch Examples
 ----------------
 
-Our PyTorch examples are based on PyTorch 1.6. They should work with other
-releases as well. So far, we provide the follow examples.
+Our PyTorch examples are based on PyTorch 1.7. They should work with other
+releases as well. So far, we provide the following examples.
 
 CIFAR-10 Image Classification
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,13 +103,13 @@ simple CNN classifier in a federated learning setup with two clients.
 
 First, start a Flower server:
 
-  $ ./src/py/flwr_example/pytorch/run-server.sh
+  $ ./src/py/flwr_example/pytorch_cifar/run-server.sh
 
 Then, start the two clients in a new terminal window:
 
-  $ ./src/py/flwr_example/pytorch/run-clients.sh
+  $ ./src/py/flwr_example/pytorch_cifar/run-clients.sh
 
-For more details, see :code:`src/py/flwr_example/pytorch`.
+For more details, see :code:`src/py/flwr_example/pytorch_cifar`.
 
 ImageNet-2012 Image Classification
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -96,20 +135,20 @@ TensorFlow Examples
 Our TensorFlow examples are based on TensorFlow 2.0 or newer. So far, we
 provide the following examples.
 
-MNIST Image Classification
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Fashion-MNIST Image Classification
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`MNIST <http://yann.lecun.com/exdb/mnist/>`_ is often used as the "Hello,
-world!" of machine learning. We follow this tradition and provide an example
-which samples random local datasets from MNIST and trains a simple image
-classification model over those partitions.
+`Fashion-MNIST <https://github.com/zalandoresearch/fashion-mnist>`_ is often
+used as the "Hello, world!" of machine learning. We follow this tradition and
+provide an example which samples random local datasets from Fashion-MNIST and
+trains a simple image classification model over those partitions.
 
 First, start a Flower server:
 
-  $ ./src/py/flwr_example/tensorflow/run-server.sh
+  $ ./src/py/flwr_example/tensorflow_fashion_mnist/run-server.sh
 
 Then, start the two clients in a new terminal window:
 
-  $ ./src/py/flwr_example/tensorflow/run-clients.sh
+  $ ./src/py/flwr_example/tensorflow_fashion_mnist/run-clients.sh
 
-For more details, see :code:`src/py/flwr_example/tensorflow`.
+For more details, see :code:`src/py/flwr_example/tensorflow_fashion_mnist`.
