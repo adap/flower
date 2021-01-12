@@ -41,7 +41,7 @@ message ServerMessage {
     map<string, string> config = 2;
   }
   message EvaluateIns {
-    Parameters parameters = 1; 
+    Parameters parameters = 1;
     map<string, string> config = 2;
   }
 
@@ -59,13 +59,14 @@ message ClientMessage {
   message FitRes {
     Parameters parameters = 1;
     int64 num_examples = 2;
-    int64 num_examples_ceil = 3;
-    float fit_duration = 4;
+    int64 num_examples_ceil = 3 [deprecated = true];
+    float fit_duration = 4 [deprecated = true];
   }
   message EvaluateRes {
     int64 num_examples = 1;
     float loss = 2;
-    float accuracy = 3;
+    float accuracy = 3 [deprecated = true];
+    map<string, Scalar> metrics = 4;
   }
 
   oneof msg {
@@ -73,5 +74,15 @@ message ClientMessage {
     ParametersRes parameters_res = 2;
     FitRes fit_res = 3;
     EvaluateRes evaluate_res = 4;
+  }
+}
+
+message Scalar {
+  oneof scalar {
+    double double = 1;
+    sint64 sint64 = 8;
+    bool bool = 13;
+    string string = 14;
+    bytes bytes = 15;
   }
 }
