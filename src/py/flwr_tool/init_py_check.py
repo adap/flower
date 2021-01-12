@@ -1,8 +1,10 @@
-#!/usr/bin/env python3
 # Copyright 2020 Adap GmbH. All Rights Reserved.
 
-"""This File will check the specified directory for any missing __init__.py
-files."""
+"""Check provided directory and sub-directories for missing __init__.py files.
+
+Example:
+    python -m adap.to..
+"""
 
 import os
 import re
@@ -35,7 +37,7 @@ def check_missing_init_files(absolute_path: str) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    if len(sys.argv) != 2:
         raise Exception(
             "Please provide path to directory as in `init_py_check.py src/py/adap`"
         )

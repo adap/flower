@@ -7,9 +7,9 @@ echo "=== test.sh ==="
 isort --skip src/py/flwr/proto --check-only -rc src/py/flwr    && echo "- isort:  done" &&
 black -q --exclude "src\/py\/flwr\/proto" --check src/py/flwr  && echo "- black:  done" &&
 docformatter -c -r src/py/flwr -e src/py/flwr/proto            && echo "- docformatter:  done" &&
+python -m flwr_tool.init_py_check src/py src/py                && echo "- init-check: done" &&
 mypy src/py                                                    && echo "- mypy:   done" &&
 pylint --ignore=src/py/flwr/proto src/py/flwr                  && echo "- pylint: done" &&
 flake8 src/py/flwr                                             && echo "- flake8: done" &&
 pytest -q src/py/flwr                                          && echo "- pytest: done" &&
-./src/py/flwr_tool/init_py_check.py src/py                     && echo "- init-check: done" &&
 echo "- All Python checks passed"
