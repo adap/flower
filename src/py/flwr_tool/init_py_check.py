@@ -19,8 +19,7 @@ def check_missing_init_files(absolute_path: str) -> None:
     ignore_list = ["__pycache__$", ".pytest_cache.*$", "dist", "flwr.egg-info$"]
 
     for dir_path, _, files_in_dir in path:
-        # As some directories are automatically
-        # generated we are going to ignore them
+        # As some directories are automatically generated we are going to ignore them
         if any([re.search(iw, dir_path) is not None for iw in ignore_list]):
             continue
 
