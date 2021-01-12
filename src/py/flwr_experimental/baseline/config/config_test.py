@@ -56,7 +56,7 @@ def test_sample_real_delay_factors_seed() -> None:
     assert len(factors_b) == num_clients
     assert len(factors_c) == num_clients
 
-    # pylint: disable-msg=invalid-name
+    # pylint: disable=invalid-name
     all_same_in_a_and_b = True
     all_same_in_a_and_c = True
 
