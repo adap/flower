@@ -16,11 +16,13 @@
 
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 
 Weights = List[np.ndarray]
+Scalar = Union[bool, bytes, float, int, str]
+Metrics = Dict[str, Scalar]
 
 
 @dataclass
@@ -44,6 +46,7 @@ class FitIns:
 
     parameters: Parameters
     config: Dict[str, str]
+    # metrics: Metrics
 
 
 @dataclass
@@ -51,10 +54,10 @@ class FitRes:
     """Fit response from a client."""
 
     parameters: Parameters
-    # config: Dict[str, str]
     num_examples: int
-    num_examples_ceil: int
-    fit_duration: float
+    num_examples_ceil: int  # Deprecated
+    fit_duration: float  # Deprecated
+    # metrics: Metrics
 
 
 @dataclass
@@ -63,6 +66,7 @@ class EvaluateIns:
 
     parameters: Parameters
     config: Dict[str, str]
+    # metrics: Metrics
 
 
 @dataclass
@@ -71,7 +75,8 @@ class EvaluateRes:
 
     num_examples: int
     loss: float
-    accuracy: float
+    accuracy: float  # Deprecated
+    metrics: Optional[Metrics] = None
 
 
 @dataclass

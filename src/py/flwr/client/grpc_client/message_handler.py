@@ -70,7 +70,6 @@ def _evaluate(client: Client, evaluate_msg: ServerMessage.EvaluateIns) -> Client
     return ClientMessage(evaluate_res=evaluate_res_proto)
 
 
-# pylint: disable=unused-argument
 def _reconnect(
     reconnect_msg: ServerMessage.Reconnect,
 ) -> Tuple[ClientMessage, int]:
