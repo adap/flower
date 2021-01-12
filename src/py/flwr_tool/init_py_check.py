@@ -36,9 +36,8 @@ def check_missing_init_files(absolute_path: str) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        raise Exception(
-            "Please provide path to directory as in `init_py_check.py src/py/adap`"
-        )
-    abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[1]))
-    check_missing_init_files(abs_path)
+    for i in range(len(sys.argv)):
+        if i == 0:
+            continue
+        abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
+        check_missing_init_files(abs_path)
