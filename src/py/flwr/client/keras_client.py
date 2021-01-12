@@ -134,6 +134,7 @@ class KerasClientWrapper(Client):
         weights: Weights = parameters_to_weights(ins.parameters)
 
         results = self.keras_client.evaluate(weights, ins.config)
+        # Note that accuracy is deprecated and will be removed in a future release
         if len(results) == 3:
             results = cast(Tuple[int, float, float], results)
             num_examples, loss, accuracy = results

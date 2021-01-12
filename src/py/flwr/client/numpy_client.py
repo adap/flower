@@ -128,6 +128,7 @@ class NumPyClientWrapper(Client):
         parameters: List[np.ndarray] = parameters_to_weights(ins.parameters)
 
         results = self.numpy_client.evaluate(parameters, ins.config)
+        # Note that accuracy is deprecated and will be removed in a future release
         if len(results) == 3:
             results = cast(Tuple[int, float, float], results)
             num_examples, loss, accuracy = results
