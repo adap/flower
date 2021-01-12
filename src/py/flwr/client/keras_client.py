@@ -16,13 +16,14 @@
 
 import timeit
 from abc import ABC, abstractmethod
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple, Union, cast
 
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
+    Metrics,
     ParametersRes,
     Weights,
     parameters_to_weights,
@@ -73,7 +74,7 @@ class KerasClient(ABC):
     @abstractmethod
     def evaluate(
         self, weights: Weights, config: Dict[str, str]
-    ) -> Tuple[int, float, float]:
+    ) -> Union[Tuple[int, float, float], Tuple[int, float, float, Metrics]]:
         """Evaluate the provided weights using the locally held dataset.
 
         Arguments:
@@ -131,5 +132,16 @@ class KerasClientWrapper(Client):
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
         weights: Weights = parameters_to_weights(ins.parameters)
-        num_examples, loss, accuracy = self.keras_client.evaluate(weights, ins.config)
-        return EvaluateRes(num_examples=num_examples, loss=loss, accuracy=accuracy)
+
+        results = self.keras_client.evaluate(weights, ins.config)
+        # Note that accuracy is deprecated and will be removed in a future release
+        if len(results) == 3:
+            results = cast(Tuple[int, float, float], results)
+            num_examples, loss, accuracy = results
+            metrics: Optional[Metrics] = None
+        elif len(results) == 4:
+            results = cast(Tuple[int, float, float, Metrics], results)
+            num_examples, loss, accuracy, metrics = results
+        return EvaluateRes(
+            num_examples=num_examples, loss=loss, accuracy=accuracy, metrics=metrics
+        )

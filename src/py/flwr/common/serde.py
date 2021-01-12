@@ -16,9 +16,15 @@
 deserialization."""
 
 
-from typing import List
+from typing import Any, List, cast
 
-from flwr.proto.transport_pb2 import ClientMessage, Parameters, Reason, ServerMessage
+from flwr.proto.transport_pb2 import (
+    ClientMessage,
+    Parameters,
+    Reason,
+    Scalar,
+    ServerMessage,
+)
 
 from . import typing
 
@@ -155,13 +161,69 @@ def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIn
 
 def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
     """Serialize flower.EvaluateIns to ProtoBuf message."""
+    metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     return ClientMessage.EvaluateRes(
-        num_examples=res.num_examples, loss=res.loss, accuracy=res.accuracy
+        num_examples=res.num_examples,
+        loss=res.loss,
+        accuracy=res.accuracy,
+        metrics=metrics_msg,
     )
 
 
 def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRes:
     """Deserialize flower.EvaluateRes from ProtoBuf message."""
+    metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
     return typing.EvaluateRes(
-        num_examples=msg.num_examples, loss=msg.loss, accuracy=msg.accuracy
+        num_examples=msg.num_examples,
+        loss=msg.loss,
+        accuracy=msg.accuracy,
+        metrics=metrics,
     )
+
+
+# === Metrics messages ===
+
+
+def metrics_to_proto(metrics: typing.Metrics) -> Any:
+    """Serialize... ."""
+    proto = {}
+    for key in metrics:
+        proto[key] = scalar_to_proto(metrics[key])
+    return proto
+
+
+def metrics_from_proto(proto: Any) -> typing.Metrics:
+    """Deserialize... ."""
+    metrics = {}
+    for k in proto:
+        metrics[k] = scalar_from_proto(proto[k])
+    return metrics
+
+
+def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
+    """Serialize... ."""
+
+    if isinstance(scalar, bool):
+        return Scalar(bool=scalar)
+
+    if isinstance(scalar, bytes):
+        return Scalar(bytes=scalar)
+
+    if isinstance(scalar, float):
+        return Scalar(double=scalar)
+
+    if isinstance(scalar, int):
+        return Scalar(sint64=scalar)
+
+    if isinstance(scalar, str):
+        return Scalar(string=scalar)
+
+    raise Exception(
+        f"Accepted types: {bool, bytes, float, int, str} (but not {type(scalar)})"
+    )
+
+
+def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
+    """Deserialize... ."""
+    scalar = getattr(scalar_msg, scalar_msg.WhichOneof("scalar"))
+    return cast(typing.Scalar, scalar)
