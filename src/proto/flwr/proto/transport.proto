@@ -81,7 +81,7 @@ message Scalar {
   oneof scalar {
     double double = 1;
     sint64 sint64 = 8;
-    bool bool =13;
+    bool bool = 13;
     string string = 14;
     bytes bytes = 15;
   }
