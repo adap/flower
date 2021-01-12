@@ -11,4 +11,5 @@ mypy src/py                                                    && echo "- mypy: 
 pylint --ignore=src/py/flwr/proto src/py/flwr                  && echo "- pylint: done" &&
 flake8 src/py/flwr                                             && echo "- flake8: done" &&
 pytest -q src/py/flwr                                          && echo "- pytest: done" &&
+./src/py/flwr_tool/init_py_check.py src/py                     && echo "- init-check: done" &&
 echo "- All Python checks passed"
