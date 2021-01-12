@@ -14,15 +14,18 @@ def check_missing_init_files(absolute_path: str) -> None:
     files."""
     path = os.walk(absolute_path)
     warning_list = []
+    ignore_list = ["__pycache__$", ".pytest_cache.*$", "dist"]
+    should_skip: bool = False
 
     for dir_path, _, files_in_dir in path:
         # As some directories are automatically
         # generated we are going to ignore them
-        if re.search("__pycache__$", dir_path) is not None:
-            continue
-        if re.search(".pytest_cache.*$", dir_path) is not None:
-            continue
-        if re.search("dist", dir_path) is not None:
+        for ignore_word in ignore_list:
+            if re.search(ignore_word, dir_path) is not None:
+                should_skip = True
+                break
+        if should_skip:
+            should_skip = False
             continue
 
         # If no init is found in current directory add a warning_message to warning_list
