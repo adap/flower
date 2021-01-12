@@ -16,7 +16,7 @@ def check_missing_init_files(absolute_path: str) -> None:
     files."""
     path = os.walk(absolute_path)
     warning_list = []
-    ignore_list = ["__pycache__$", ".pytest_cache.*$", "dist", "flwr.egg-info$"]
+    ignore_list = ["__pycache__$", ".pytest_cache.*$", "dist", "flwr.egg-info$", "py$"]
 
     for dir_path, _, files_in_dir in path:
         # As some directories are automatically generated we are going to ignore them
