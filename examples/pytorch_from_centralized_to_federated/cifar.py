@@ -23,7 +23,7 @@ from torchvision.datasets import CIFAR10
 
 DATA_ROOT = "~/.flower/data/cifar-10"
 
-# pylint: disable-msg=unsubscriptable-object
+# pylint: disable=unsubscriptable-object
 class Net(nn.Module):
     """Simple CNN adapted from 'PyTorch: A 60 Minute Blitz'."""
 
@@ -36,7 +36,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
-    # pylint: disable-msg=arguments-differ,invalid-name
+    # pylint: disable=arguments-differ,invalid-name
     def forward(self, x: Tensor) -> Tensor:
         """Compute forward pass."""
         x = self.pool(F.relu(self.conv1(x)))
@@ -110,7 +110,7 @@ def test(
             images, labels = data[0].to(device), data[1].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
-            _, predicted = torch.max(outputs.data, 1)  # pylint: disable-msg=no-member
+            _, predicted = torch.max(outputs.data, 1)  # pylint: disable=no-member
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
     accuracy = correct / total
