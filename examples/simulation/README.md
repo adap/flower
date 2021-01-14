@@ -1,6 +1,6 @@
 # Single Machine Simulation Of Federated Learning
 
-This example is part of a series of blog posts. It's recommended to read the [blog post](https://flower.dev/blog/2021-01-11-single-machine-simulation-of-federated-learning-systems) before reading further.
+This example is part of a series of blog posts. It's recommended to read the [blog post](https://flower.dev/blog/2021-01-14-single-machine-simulation-of-federated-learning-systems) before reading further.
 
 ## Quick Start
 
@@ -62,7 +62,7 @@ It contains in the last line the following code which you might like to adjust.
 
 ```python
 if __name__ == "__main__":
-    run_simulation(num_clients=100, num_rounds=3)
+    run_simulation(num_rounds=100, num_clients=10, fraction_fit=0.5)
 ```
 
-If your machine is powerful enough you can try running a single machine simulation with e.g. 100 clients.
+If your machine is powerful enough you can try running a single machine simulation with e.g. 100 or even 1000 clients.

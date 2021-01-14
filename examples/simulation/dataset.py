@@ -31,16 +31,16 @@ def shuffle(x: np.ndarray, y: np.ndarray) -> XY:
 
 
 def partition(x: np.ndarray, y: np.ndarray, num_partitions: int) -> XYList:
-    """Return x, y as list of partitions."""
+    """Split x and y into a number of partitions."""
     return list(zip(np.split(x, num_partitions), np.split(y, num_partitions)))
 
 
 def create_partitions(
-    dataset: XY,
+    source_dataset : XY,
     num_partitions: int,
 ) -> XYList:
-    """Create partitioned version of a training or test set."""
-    x, y = dataset
+    """Create partitioned version of a source dataset."""
+    x, y = source_dataset 
     x, y = shuffle(x, y)
     xy_partitions = partition(x, y, num_partitions)
 

@@ -42,7 +42,9 @@ def start_client(dataset: DATASET) -> None:
         def fit(self, parameters, config):
             """Fit model and return new weights as well as number of training examples."""
             model.set_weights(parameters)
-            model.fit(x_train, y_train, epochs=1, batch_size=32, steps_per_epoch=3)
+            # Remove steps_per_epoch if you want to train over the full dataset
+            # https://keras.io/api/models/model_training_apis/#fit-method
+            model.fit(x_train, y_train, epochs=1, batch_size=32)
             return model.get_weights(), len(x_train)
 
         def evaluate(self, parameters, config):
@@ -66,6 +68,9 @@ def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
     server_process.start()
     processes.append(server_process)
 
+    # Optionally block the script here for a second or two so the server has time to start
+    time.sleep(2)
+
     # Load the dataset partitions
     partitions = dataset.load(num_partitions=num_clients)
 
@@ -81,4 +86,4 @@ def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
 
 
 if __name__ == "__main__":
-    run_simulation(num_rounds=100, num_clients=10, fraction_fit=0.5)
+    run_simulation(num_rounds=100, num_clients=10, fraction_fit=0.1)
