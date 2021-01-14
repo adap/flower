@@ -7,7 +7,7 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "simulation"
 version = "0.1.0"
-description = "Single Machine Federated Learning Simulation with Flower"
+description = "Single-Machine Federated Learning Simulation with Flower"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
 
 [tool.poetry.dependencies]

@@ -164,7 +164,7 @@ class MNISTNet(nn.Module):
         self.fc1 = nn.Linear(9216, 128)
         self.fc2 = nn.Linear(128, 10)
 
-    # pylint: disable-msg=arguments-differ,invalid-name
+    # pylint: disable=arguments-differ,invalid-name
     def forward(self, x: Tensor) -> Tensor:
         """Compute forward pass.
 

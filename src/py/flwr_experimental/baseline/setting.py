@@ -27,7 +27,7 @@ class BaseSetting:
     instance_name: str
 
 
-# pylint: disable-msg=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class ServerSetting(BaseSetting):
     """Settings for the server."""
