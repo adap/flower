@@ -44,7 +44,7 @@ def start_client(dataset: DATASET) -> None:
             model.set_weights(parameters)
             # Remove steps_per_epoch if you want to train over the full dataset
             # https://keras.io/api/models/model_training_apis/#fit-method
-            model.fit(x_train, y_train, epochs=1, batch_size=32)
+            model.fit(x_train, y_train, epochs=1, batch_size=32, steps_per_epoch=3)
             return model.get_weights(), len(x_train)
 
         def evaluate(self, parameters, config):
@@ -86,4 +86,4 @@ def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
 
 
 if __name__ == "__main__":
-    run_simulation(num_rounds=100, num_clients=10, fraction_fit=0.1)
+    run_simulation(num_rounds=100, num_clients=10, fraction_fit=0.5)
