@@ -41,3 +41,4 @@ if __name__ == "__main__":
             continue
         abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
         check_missing_init_files(abs_path)
+        
