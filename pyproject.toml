@@ -78,7 +78,7 @@ mypy = "==0.790"
 pylint = "==2.6.0"
 pytest = "==6.2.1"
 pytest-watch = "^4.2.0"
-grpcio-tools = "==1.27.2"
+grpcio-tools = "==1.34.0"
 mypy-protobuf = "==1.23"
 rope = "==0.16.0"
 numpy-stubs = { git = "https://github.com/numpy/numpy-stubs.git", rev = "f3c6315738489983f5f37e1477ac68373d71b470" }
