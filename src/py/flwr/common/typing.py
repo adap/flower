@@ -45,7 +45,7 @@ class FitIns:
     """Fit instructions for a client."""
 
     parameters: Parameters
-    config: Dict[str, str]
+    config: Dict[str, Scalar]
     # metrics: Metrics
 
 
@@ -65,7 +65,7 @@ class EvaluateIns:
     """Evaluate instructions for a client."""
 
     parameters: Parameters
-    config: Dict[str, str]
+    config: Dict[str, Scalar]
     # metrics: Metrics
 
 

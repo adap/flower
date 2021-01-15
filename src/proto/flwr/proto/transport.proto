@@ -38,11 +38,11 @@ message ServerMessage {
   message GetParameters {}
   message FitIns {
     Parameters parameters = 1;
-    map<string, string> config = 2;
+    map<string, Scalar> config = 2;
   }
   message EvaluateIns {
     Parameters parameters = 1;
-    map<string, string> config = 2;
+    map<string, Scalar> config = 2;
   }
 
   oneof msg {

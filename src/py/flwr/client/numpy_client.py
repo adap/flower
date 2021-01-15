@@ -28,6 +28,7 @@ from flwr.common import (
     FitRes,
     Metrics,
     ParametersRes,
+    Scalar,
     parameters_to_weights,
     weights_to_parameters,
 )
@@ -48,14 +49,14 @@ class NumPyClient(ABC):
 
     @abstractmethod
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, Scalar]
     ) -> Tuple[List[np.ndarray], int]:
         """Train the provided parameters using the locally held dataset.
 
         Arguments:
             parameters: List[numpy.ndarray]. The current (global) model
                 parameters.
-            config: Dict[str, str]. Configuration parameters which allow the
+            config: Dict[str, Scalar]. Configuration parameters which allow the
                 server to influence training on the client. It can be used to
                 communicate arbitrary values from the server to the client, for
                 example, to set the number of (local) training epochs.
@@ -67,14 +68,14 @@ class NumPyClient(ABC):
 
     @abstractmethod
     def evaluate(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, Scalar]
     ) -> Union[Tuple[int, float, float], Tuple[int, float, float, Metrics]]:
         """Evaluate the provided weights using the locally held dataset.
 
         Args:
             parameters (List[np.ndarray]): The current (global) model
                 parameters.
-            config (Dict[str, str]): Configuration parameters which allow the
+            config (Dict[str, Scalar]): Configuration parameters which allow the
                 server to influence evaluation on the client. It can be used to
                 communicate arbitrary values from the server to the client, for
                 example, to influence the number of examples used for
