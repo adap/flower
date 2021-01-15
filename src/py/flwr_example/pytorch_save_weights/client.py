@@ -21,11 +21,10 @@ import timeit
 # pylint: enable=no-member
 from typing import Dict, List, Tuple
 
+import flwr as fl
 import numpy as np
 import torch
 import torchvision
-
-import flwr as fl
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
 
 from . import cifar

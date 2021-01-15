@@ -28,14 +28,13 @@ https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 from collections import OrderedDict
 from typing import Tuple
 
+import flwr as fl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 from torch import Tensor
-
-import flwr as fl
 
 DATA_ROOT = "~/.flower/data/cifar-10"
 

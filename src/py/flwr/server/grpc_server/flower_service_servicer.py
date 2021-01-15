@@ -20,7 +20,6 @@ Relevant knowledge for reading this modules code:
 from typing import Callable, Iterator
 
 import grpc
-
 from flwr.proto import transport_pb2_grpc
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import ClientManager

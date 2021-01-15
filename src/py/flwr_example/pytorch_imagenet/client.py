@@ -18,12 +18,11 @@ import argparse
 import timeit
 from collections import OrderedDict
 
+import flwr as fl
 import numpy as np
 import torch
 import torchvision
 import torchvision.models as models
-
-import flwr as fl
 
 from . import imagenet
 

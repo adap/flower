@@ -20,10 +20,9 @@ import timeit
 from logging import INFO
 from typing import Callable, List, Optional, Tuple
 
+import flwr as fl
 import numpy as np
 import tensorflow as tf
-
-import flwr as fl
 from flwr.common.logger import log
 
 from .data import build_dataset

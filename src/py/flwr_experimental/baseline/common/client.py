@@ -18,10 +18,9 @@
 from logging import DEBUG
 from typing import Tuple
 
+import flwr as fl
 import numpy as np
 import tensorflow as tf
-
-import flwr as fl
 from flwr.common.logger import log
 
 from .common import custom_fit, keras_evaluate

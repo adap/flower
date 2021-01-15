@@ -30,6 +30,7 @@ from pathlib import Path
 from time import time
 from typing import Tuple
 
+import flwr as fl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -37,8 +38,6 @@ import torchvision.transforms as transforms
 from torch import Tensor
 from torchvision import datasets
 from torchvision.models import resnet18
-
-import flwr as fl
 
 DATA_ROOT = Path("./data")
 

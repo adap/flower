@@ -18,10 +18,9 @@
 import argparse
 from typing import Dict, Tuple, cast
 
+import flwr as fl
 import numpy as np
 import tensorflow as tf
-
-import flwr as fl
 from flwr.common import Weights
 
 from . import DEFAULT_SERVER_ADDRESS, fashion_mnist

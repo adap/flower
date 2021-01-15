@@ -18,11 +18,10 @@
 import argparse
 from typing import Callable, Dict, Optional, Tuple
 
+import flwr as fl
 import torch
 import torchvision
 import torchvision.models as models
-
-import flwr as fl
 
 from . import imagenet
 from .client import get_weights, set_weights
