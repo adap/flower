@@ -19,6 +19,7 @@ import random
 from typing import List, Optional, Tuple
 
 import numpy as np
+
 from flwr_experimental.ops.instance import Instance
 
 # We assume that devices which are older will have at most

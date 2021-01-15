@@ -20,6 +20,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
+
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,

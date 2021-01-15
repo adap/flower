@@ -18,10 +18,11 @@
 import argparse
 from typing import Callable, Dict, List, Optional, Tuple
 
-import flwr as fl
 import numpy as np
 import torch
 import torchvision
+
+import flwr as fl
 
 from . import cifar
 

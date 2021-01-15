@@ -18,9 +18,10 @@
 import argparse
 import timeit
 
-import flwr as fl
 import torch
 import torchvision
+
+import flwr as fl
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
 
 from . import DEFAULT_SERVER_ADDRESS, cifar

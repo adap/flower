@@ -18,8 +18,9 @@
 import argparse
 from typing import Callable, Dict, Optional, Tuple
 
-import flwr as fl
 import numpy as np
+
+import flwr as fl
 
 from . import DEFAULT_SERVER_ADDRESS, fashion_mnist
 

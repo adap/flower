@@ -19,6 +19,7 @@ from functools import reduce
 from typing import List, Optional, Tuple
 
 import numpy as np
+
 from flwr.common import Weights
 
 

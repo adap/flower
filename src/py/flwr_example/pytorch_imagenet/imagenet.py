@@ -27,7 +27,6 @@ import os
 from collections import OrderedDict
 from typing import Tuple
 
-import flwr as fl
 import numpy as np
 import torch
 import torch.nn as nn
@@ -37,6 +36,8 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch import Tensor
 from tqdm import tqdm
+
+import flwr as fl
 
 
 def load_data(data_path) -> Tuple[datasets.ImageFolder, datasets.ImageFolder]:

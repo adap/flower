@@ -19,6 +19,7 @@ from logging import DEBUG, INFO
 from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
+
 from flwr.common import (
     EvaluateRes,
     FitIns,

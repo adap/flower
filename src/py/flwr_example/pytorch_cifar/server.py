@@ -18,9 +18,10 @@
 import argparse
 from typing import Callable, Dict, Optional, Tuple
 
-import flwr as fl
 import torch
 import torchvision
+
+import flwr as fl
 
 from . import DEFAULT_SERVER_ADDRESS, cifar
 

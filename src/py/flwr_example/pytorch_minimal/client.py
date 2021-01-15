@@ -20,10 +20,11 @@ import timeit
 from collections import OrderedDict
 from typing import Dict, List, Tuple
 
-import flwr as fl
 import numpy as np
 import torch
 import torchvision
+
+import flwr as fl
 
 from . import cifar
 

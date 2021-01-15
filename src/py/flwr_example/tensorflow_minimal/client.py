@@ -1,5 +1,6 @@
-import flwr as fl
 import tensorflow as tf
+
+import flwr as fl
 
 if __name__ == "__main__":
     # Load and compile Keras model
