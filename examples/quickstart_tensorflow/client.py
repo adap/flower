@@ -1,11 +1,12 @@
 import os
 
-# Make TensorFlow log less verbose
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-
 import tensorflow as tf
 
 import flwr as fl
+
+# Make TensorFlow log less verbose
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
 
 if __name__ == "__main__":
     # Load and compile Keras model

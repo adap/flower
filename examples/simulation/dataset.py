@@ -16,8 +16,8 @@
 
 from typing import List, Tuple, cast
 
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 XY = Tuple[np.ndarray, np.ndarray]
 XYList = List[XY]
@@ -36,11 +36,11 @@ def partition(x: np.ndarray, y: np.ndarray, num_partitions: int) -> XYList:
 
 
 def create_partitions(
-    source_dataset : XY,
+    source_dataset: XY,
     num_partitions: int,
 ) -> XYList:
     """Create partitioned version of a source dataset."""
-    x, y = source_dataset 
+    x, y = source_dataset
     x, y = shuffle(x, y)
     xy_partitions = partition(x, y, num_partitions)
 
