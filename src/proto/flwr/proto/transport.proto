@@ -59,13 +59,13 @@ message ClientMessage {
   message FitRes {
     Parameters parameters = 1;
     int64 num_examples = 2;
-    int64 num_examples_ceil = 3 [deprecated = true];
-    float fit_duration = 4 [deprecated = true];
+    int64 num_examples_ceil = 3 [ deprecated = true ];
+    float fit_duration = 4 [ deprecated = true ];
   }
   message EvaluateRes {
     int64 num_examples = 1;
     float loss = 2;
-    float accuracy = 3 [deprecated = true];
+    float accuracy = 3 [ deprecated = true ];
     map<string, Scalar> metrics = 4;
   }
 
