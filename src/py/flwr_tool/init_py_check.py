@@ -37,7 +37,9 @@ def check_missing_init_files(absolute_path: str) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) == 0:
-        raise Exception("Please provide at least one directory path relative to your current working directory.")    
+        raise Exception(
+    "Please provide at least one directory path relative to your current working directory."
+    )
     for i in range(len(sys.argv)):
         abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
         check_missing_init_files(abs_path)
