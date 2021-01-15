@@ -243,9 +243,9 @@ class EC2Adapter(Adapter):
         # impaired reachability
         try:
             self._wait_until_instances_are_reachable(instance_ids=instance_ids)
-        except EC2StatusTimeout:
+        except EC2StatusTimeout as ec2statustimeout:
             self.terminate_instances(instance_ids)
-            raise EC2CreateInstanceFailure()
+            raise EC2CreateInstanceFailure() from ec2statustimeout
 
         return self.list_instances(instance_ids=instance_ids)
 

@@ -207,7 +207,7 @@ class Cluster:
                     future.cancel()
 
                 self.terminate()
-                raise StartFailed()
+                raise StartFailed() from exc
 
         for ins in self.instances:
             log(DEBUG, ins)
