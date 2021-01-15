@@ -1,17 +1,18 @@
-from multiprocessing import Process
 import os
+import time
+from multiprocessing import Process
 from typing import Tuple
+
+import numpy as np
+import tensorflow as tf
+
+import dataset
+import flwr as fl
+from flwr.server.strategy import FedAvg
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
-import time
-import tensorflow as tf
-import numpy as np
-import flwr as fl
-from flwr.server.strategy import FedAvg
-
-import dataset
 
 DATASET = Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]
 
@@ -40,7 +41,8 @@ def start_client(dataset: DATASET) -> None:
             return model.get_weights()
 
         def fit(self, parameters, config):
-            """Fit model and return new weights as well as number of training examples."""
+            """Fit model and return new weights as well as number of training
+            examples."""
             model.set_weights(parameters)
             # Remove steps_per_epoch if you want to train over the full dataset
             # https://keras.io/api/models/model_training_apis/#fit-method
@@ -64,7 +66,9 @@ def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
     processes = []
 
     # Start the server
-    server_process = Process(target=start_server, args=(num_rounds, num_clients, fraction_fit))
+    server_process = Process(
+        target=start_server, args=(num_rounds, num_clients, fraction_fit)
+    )
     server_process.start()
     processes.append(server_process)
 
