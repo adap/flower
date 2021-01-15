@@ -49,8 +49,8 @@ class CifarPartitionedTestCase(unittest.TestCase):
     """Tests for partitioned CIFAR-10/100 dataset generation."""
 
     def setUp(self) -> None:
-        x = np.random.random((5, 3, 32, 32), dtype=np.float32)
-        y = np.random.random_integer(low=0, high=9, size=(5,))
+        x = np.random.random(size=(500, 3, 32, 32))
+        y = np.random.random_integer(low=0, high=9, size=(500,))
 
         np.random.seed(2000)
         idx = np.random.permutation(x.shape[0])
