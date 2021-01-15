@@ -14,7 +14,6 @@
 # ==============================================================================
 import os
 import sys
-
 from sphinx.application import ConfigError
 
 # Configuration file for the Sphinx documentation builder.
