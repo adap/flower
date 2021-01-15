@@ -51,7 +51,7 @@ jobs:
       - name: Install dependencies (mandatory + optional)
         run: |
           python -m poetry install --extras "baseline"
-          python -m pip install -U tensorflow-cpu==2.3.1
+          python -m pip install -U tensorflow-cpu==2.4.0
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
@@ -100,6 +100,6 @@ jobs:
       - name: Install dependencies (mandatory + optional)
         run: |
           python -m poetry install --extras "examples-tensorflow"
-          python -m pip install -U tensorflow-cpu==2.3.1
+          python -m pip install -U tensorflow-cpu==2.4.0
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-example-tensorflow.sh
