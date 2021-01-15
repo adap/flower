@@ -15,7 +15,7 @@
 
 # pylint: disable=invalid-name
 
-from typing import List, Optional, Tuple, cast
+from typing import List, Tuple, cast
 
 import numpy as np
 
