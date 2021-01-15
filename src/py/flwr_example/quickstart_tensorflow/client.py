@@ -1,9 +1,8 @@
 from typing import Dict, Tuple, cast
 
+import flwr as fl
 import numpy as np
 import tensorflow as tf
-
-import flwr as fl
 
 
 def main() -> None:

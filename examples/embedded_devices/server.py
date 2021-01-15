@@ -19,11 +19,10 @@ import argparse
 from collections import OrderedDict
 from typing import Callable, Dict, Optional, Tuple
 
+import flwr as fl
 import numpy as np
 import torch
 import torchvision
-
-import flwr as fl
 import utils
 
 # pylint: disable=no-member

@@ -18,7 +18,6 @@
 from typing import List, Tuple
 
 import numpy as np
-
 from flwr_experimental.baseline.plot import line_chart
 
 RESULTS = {

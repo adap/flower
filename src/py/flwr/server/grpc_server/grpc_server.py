@@ -16,7 +16,6 @@
 import concurrent.futures
 
 import grpc
-
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.proto import transport_pb2_grpc
 from flwr.server.client_manager import ClientManager

@@ -17,7 +17,6 @@
 import unittest
 
 import numpy as np
-
 from flwr.common import Weights
 
 from . import cifar
