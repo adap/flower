@@ -23,9 +23,9 @@ from importlib import import_module
 import numpy as np
 import torch
 import torchvision
+import utils
 
 import flwr as fl
-import utils
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
 
 # pylint: disable=no-member

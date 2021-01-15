@@ -3,10 +3,10 @@ import time
 from multiprocessing import Process
 from typing import Tuple
 
+import dataset
 import numpy as np
 import tensorflow as tf
 
-import dataset
 import flwr as fl
 from flwr.server.strategy import FedAvg
 

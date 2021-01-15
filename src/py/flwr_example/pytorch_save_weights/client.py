@@ -17,6 +17,7 @@
 
 import argparse
 import timeit
+
 # pylint: enable=no-member
 from typing import Dict, List, Tuple
 

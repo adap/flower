@@ -22,9 +22,9 @@ from typing import Callable, Dict, Optional, Tuple
 import numpy as np
 import torch
 import torchvision
+import utils
 
 import flwr as fl
-import utils
 
 # pylint: disable=no-member
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
