@@ -80,7 +80,17 @@ message ClientMessage {
 message Scalar {
   oneof scalar {
     double double = 1;
+    // float float = 2;
+    // int32 int32 = 3;
+    // int64 int64 = 4;
+    // uint32 uint32 = 5;
+    // uint64 uint64 = 6;
+    // sint32 sint32 = 7;
     sint64 sint64 = 8;
+    // fixed32 fixed32 = 9;
+    // fixed64 fixed64 = 10;
+    // sfixed32 sfixed32 = 11;
+    // sfixed64 sfixed64 = 12;
     bool bool = 13;
     string string = 14;
     bytes bytes = 15;
