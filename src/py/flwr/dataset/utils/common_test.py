@@ -50,7 +50,7 @@ class CifarPartitionedTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         x = np.random.random(size=(500, 3, 32, 32))
-        y = np.random.random_integer(low=0, high=9, size=(500,))
+        y = np.random.randint(low=0, high=9, size=(500,))
 
         np.random.seed(2000)
         idx = np.random.permutation(x.shape[0])
