@@ -7,6 +7,10 @@ echo "=== test.sh ==="
 clang-format-10 --Werror --dry-run src/proto/flwr/proto/*                 && echo "- clang-format: done" &&
 python -m isort --check-only --skip src/py/flwr/proto src/py/flwr         && echo "- isort:  done" &&
 python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr      && echo "- black:  done" &&
+python -m flwr_tool.init_py_check \
+  src/py/flwr src/py/flwr_tool \
+  src/py/flwr_example \
+  src/py/flwr_experimental
 python -m docformatter -c -r src/py/flwr -e src/py/flwr/proto             && echo "- docformatter:  done" &&
 python -m mypy src/py                                                     && echo "- mypy:   done" &&
 python -m pylint --ignore=src/py/flwr/proto src/py/flwr                   && echo "- pylint: done" &&
