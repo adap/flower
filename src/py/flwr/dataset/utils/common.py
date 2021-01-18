@@ -218,15 +218,19 @@ def create_dla_partitions(
     Args:
         dataset (XY): Datasets containing samples X
             and labels Y.
-        dirichlet_dist (numpy.ndarray, optional): previously generated distribution to be used.
-            This s useful when applying the same distribution for train and validation sets.
-        num_partitions (int, optional): Number of partitions to be created. Defaults to 100.
-        concentration (float, optional): Dirichlet Concentration (:math:`\\alpha`) parameter.
+        dirichlet_dist (numpy.ndarray, optional): previously generated distribution to
+            be used. This s useful when applying the same distribution for train and
+            validation sets.
+        num_partitions (int, optional): Number of partitions to be created.
+            Defaults to 100.
+        concentration (float, optional): Dirichlet Concentration (:math:`\\alpha`)
+            parameter.
             An :math:`\\alpha \\to \\Inf` generates uniform distributions over classes.
             An :math:`\\alpha \\to 0.0` generates on class per client. Defaults to 0.5.
 
     Returns:
-        Tuple[numpy.ndarray, XYList]: List of XYList containing partitions for each the dataset.
+        Tuple[numpy.ndarray, XYList]: List of XYList containing partitions
+            for each dataset.
     """
 
     x, y = dataset
@@ -244,12 +248,12 @@ def create_dla_partitions(
         if dist_num_classes != num_classes:
             raise ValueError(
                 f"""Number of classes in dataset ({num_classes}) 
-                  differs from the one in the provided partitions {dist_num_classes}."""
+              differs from the one in the provided partitions {dist_num_classes}."""
             )
         if dist_num_partitions != num_partitions:
             raise ValueError(
                 f"""The value in `num_partitions` ({num_partitions}) 
-                  differs from the one from `dirichlet_dist` {dist_num_partitions}."""
+                differs from the one from `dirichlet_dist` {dist_num_partitions}."""
             )
 
     # Assuming balanced distribution
@@ -278,12 +282,12 @@ def create_dla_partitions(
                 np.random.multinomial(1, dirichlet_dist[partition_id]) == 1
             )[0][0]
             sample: np.ndarray = list_samples_per_class[sample_class].pop()
-            # print(f'Sampled class {sample_class} with {len(list_samples_per_class[sample_class])} remaining')
 
             data[partition_id].append(sample)
             target[partition_id].append(sample_class)
 
-            # If last sample of the class was drawn, then set pdf to zero for that class.
+            # If last sample of the class was drawn,
+            # then set pdf to zero for that class.
             num_samples_per_class[sample_class] -= 1
             if num_samples_per_class[sample_class] == 0:
                 remaining_indices.remove(np.where(classes == sample_class)[0][0])
