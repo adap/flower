@@ -12,6 +12,7 @@ python -m docformatter -i -r src/py/flwr_experimental
 find src/proto/flwr/proto -name *.proto | grep "\.proto" | xargs clang-format-10 -i
 
 # Examples
+# --project '' : used to overwrite the known_first_party settings inside the pyproject.toml
 python -m isort examples --project '' --thirdparty flwr
 python -m black -q examples
 python -m docformatter -i -r examples
