@@ -1,7 +1,8 @@
 import os
 
-import flwr as fl
 import tensorflow as tf
+
+import flwr as fl
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"

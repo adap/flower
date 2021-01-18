@@ -21,6 +21,7 @@ Paper: https://openreview.net/pdf?id=ByexElSYDr
 from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
+
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,

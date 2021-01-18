@@ -21,6 +21,7 @@ from typing import Iterator, cast
 from unittest.mock import patch
 
 import grpc
+
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server

@@ -18,8 +18,9 @@
 import argparse
 from logging import ERROR, INFO
 
-import flwr as fl
 import tensorflow as tf
+
+import flwr as fl
 from flwr.common.logger import configure, log
 from flwr_experimental.baseline.common import VisionClassificationClient
 from flwr_experimental.baseline.dataset import tf_cifar_partitioned

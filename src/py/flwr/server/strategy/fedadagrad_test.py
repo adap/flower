@@ -18,10 +18,11 @@
 from typing import List, Tuple
 from unittest.mock import MagicMock
 
+from numpy import array, float32
+
 from flwr.common import FitRes, Parameters, Weights, weights_to_parameters
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
-from numpy import array, float32
 
 from .fedadagrad import FedAdagrad
 

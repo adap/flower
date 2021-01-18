@@ -18,8 +18,9 @@
 import unittest
 from unittest.mock import MagicMock
 
-import flwr
 import numpy as np
+
+import flwr
 from flwr.proto.transport_pb2 import ClientMessage, Parameters
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
 

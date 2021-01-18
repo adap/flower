@@ -15,9 +15,10 @@
 
 from argparse import ArgumentParser
 
-import flwr as fl
 import numpy as np
 import torch
+
+import flwr as fl
 
 from . import mnist
 

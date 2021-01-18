@@ -18,6 +18,7 @@ import argparse
 from logging import INFO
 
 import tensorflow as tf
+
 from flwr.common.logger import log
 
 tf.get_logger().setLevel("ERROR")

@@ -29,6 +29,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import boto3
 import numpy as np
+
 from flwr_experimental.baseline.plot import plot
 
 LOGDIR = "flower_logs"

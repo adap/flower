@@ -29,7 +29,6 @@ import timeit
 from collections import OrderedDict
 from typing import Tuple
 
-import flwr as fl
 import numpy as np
 import torch
 import torch.nn as nn
@@ -38,6 +37,8 @@ from torch import Tensor, optim
 from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader, Dataset, SubsetRandomSampler
 from torchvision import datasets, transforms
+
+import flwr as fl
 
 
 def dataset_partitioner(

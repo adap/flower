@@ -19,6 +19,7 @@ import unittest
 
 import numpy as np
 import tensorflow as tf
+
 from flwr_experimental.baseline.dataset.dataset import (
     XY,
     combine_partitions,
