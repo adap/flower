@@ -78,6 +78,10 @@ message ClientMessage {
 }
 
 message Scalar {
+  // The following oneof contains all types that ProtoBuf considers to be
+  // "Scalar Value Types". Commented-out types are listed for reference and
+  // might be enabled in future releases. Source:
+  // https://developers.google.com/protocol-buffers/docs/proto3#scalar
   oneof scalar {
     double double = 1;
     // float float = 2;
