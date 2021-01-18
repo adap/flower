@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
+"""Provides commonely used functions when generating a dataset for Federated
+Learning."""
 # pylint: disable=invalid-name
 
 from typing import List, Tuple, cast
