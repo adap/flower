@@ -37,7 +37,7 @@ FLOWER_LOGGER.addHandler(console_handler)
 class CustomHTTPHandler(HTTPHandler):
     """Custom HTTPHandler which overrides the mapLogRecords method."""
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,bad-option-value,R1725
     def __init__(
         self,
         identifier: str,

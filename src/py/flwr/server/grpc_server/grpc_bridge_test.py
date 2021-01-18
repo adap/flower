@@ -62,8 +62,8 @@ def test_workflow_successful() -> None:
         try:
             _ = next(server_message_iterator)
             bridge.set_client_message(ClientMessage())
-        except Exception:
-            raise Exception
+        except Exception as exception:
+            raise Exception from exception
 
     # Wait until worker_thread is finished
     worker_thread.join(timeout=1)
