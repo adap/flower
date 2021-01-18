@@ -264,7 +264,8 @@ def create_dla_partitions(
         [0], np.cumsum(num_samples_per_class, dtype=np.int)
     )
     list_samples_per_class: List[List[np.ndarray]] = [  # noqa: E203
-        x_l[boundaries[idx] : boundaries[idx + 1]] for idx in range(num_classes)
+        x_l[boundaries[idx] : boundaries[idx + 1]]  # noqa: E203
+        for idx in range(num_classes)  # noqa: E203
     ]
 
     if dirichlet_dist.size == 0:
