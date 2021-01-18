@@ -204,3 +204,102 @@ def adjust_y_shape(nda: np.ndarray) -> np.ndarray:
     """Turn shape (x, 1) into (x)."""
     nda_adjusted = np.reshape(nda, (nda.shape[0]))
     return cast(np.ndarray, nda_adjusted)
+
+
+def create_dla_partitions(
+    dataset: XY,
+    dirichlet_dist: np.ndarray = np.empty(0),
+    num_partitions: int = 100,
+    concentration: float = 0.5,
+) -> Tuple[np.ndarray, XYList]:
+    """Create ibalanced non-iid partitions using Dirichlet Latent
+    Allocation(LDA) without resampling.
+
+    Args:
+        dataset (XY): Datasets containing samples X
+            and labels Y.
+        dirichlet_dist (numpy.ndarray, optional): previously generated distribution to be used.
+            This s useful when applying the same distribution for train and validation sets.
+        num_partitions (int, optional): Number of partitions to be created. Defaults to 100.
+        concentration (float, optional): Dirichlet Concentration (:math:`\\alpha`) parameter.
+            An :math:`\\alpha \\to \\Inf` generates uniform distributions over classes.
+            An :math:`\\alpha \\to 0.0` generates on class per client. Defaults to 0.5.
+
+    Returns:
+        Tuple[numpy.ndarray, XYList]: List of XYList containing partitions for each the dataset.
+    """
+
+    x, y = dataset
+    x, y = shuffle(x, y)
+    x, y = sort_by_label(x, y)
+    x_l: List[np.ndarray] = list(x)
+
+    # Get number of classes and verify if they matching with
+    classes, num_samples_per_class = np.unique(y, return_counts=True)
+    num_classes: int = classes.size
+    remaining_indices = [j for j in range(num_classes)]
+
+    if dirichlet_dist.size != 0:
+        dist_num_partitions, dist_num_classes = dirichlet_dist.shape
+        if dist_num_classes != num_classes:
+            raise ValueError(
+                f"""Number of classes in dataset ({num_classes}) 
+                  differs from the one in the provided partitions {dist_num_classes}."""
+            )
+        if dist_num_partitions != num_partitions:
+            raise ValueError(
+                f"""The value in `num_partitions` ({num_partitions}) 
+                  differs from the one from `dirichlet_dist` {dist_num_partitions}."""
+            )
+
+    # Assuming balanced distribution
+    num_samples = x.shape[0]
+    num_samples_per_partition = num_samples // num_partitions
+
+    boundaries: List[int] = np.append(
+        [0], np.cumsum(num_samples_per_class, dtype=np.int)
+    )
+    list_samples_per_class: List[List[np.ndarray]] = [
+        x_l[boundaries[idx] : boundaries[idx + 1]] for idx in range(num_classes)
+    ]
+
+    if dirichlet_dist.size == 0:
+        dirichlet_dist = np.random.dirichlet(
+            alpha=[concentration] * num_classes, size=num_partitions
+        )
+    original_dirichlet_dist = dirichlet_dist.copy()
+
+    data: List[List[Optional[np.ndarray]]] = [[] for _ in range(num_partitions)]
+    target: List[List[Optional[np.ndarray]]] = [[] for _ in range(num_partitions)]
+
+    for partition_id in range(num_partitions):
+        for _ in range(num_samples_per_partition):
+            sample_class: int = np.where(
+                np.random.multinomial(1, dirichlet_dist[partition_id]) == 1
+            )[0][0]
+            sample: np.ndarray = list_samples_per_class[sample_class].pop()
+            # print(f'Sampled class {sample_class} with {len(list_samples_per_class[sample_class])} remaining')
+
+            data[partition_id].append(sample)
+            target[partition_id].append(sample_class)
+
+            # If last sample of the class was drawn, then set pdf to zero for that class.
+            num_samples_per_class[sample_class] -= 1
+            if num_samples_per_class[sample_class] == 0:
+                remaining_indices.remove(np.where(classes == sample_class)[0][0])
+                # Be careful to distinguish between original zero-valued
+                # classes and classes that are empty
+                dirichlet_dist[:, sample_class] = 0.0
+                dirichlet_dist[:, remaining_indices] += 1e-5
+
+                sum_rows = np.sum(dirichlet_dist, axis=1)
+                dirichlet_dist = dirichlet_dist / (
+                    sum_rows[:, np.newaxis] + np.finfo(float).eps
+                )
+
+    partitions = [
+        (np.concatenate([data[idx]]), np.concatenate([target[idx]])[..., np.newaxis])
+        for idx in range(num_partitions)
+    ]
+
+    return partitions, original_dirichlet_dist

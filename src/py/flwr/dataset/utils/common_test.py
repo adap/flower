@@ -22,6 +22,7 @@ import numpy as np
 from flwr.dataset.utils.common import (
     XY,
     combine_partitions,
+    create_dla_partitions,
     partition,
     shuffle,
     sort_by_label,
@@ -42,15 +43,26 @@ def assert_identity(xy_0: XY, xy_1: XY) -> None:
     """Assert that both datasets contain the same examples."""
     assert xy_0[0].shape == xy_1[0].shape
     assert xy_0[1].shape == xy_1[1].shape
+    assert xy_0[0].dtype == xy_1[0].dtype
+    assert xy_0[1].dtype == xy_1[1].dtype
     assert hash_xy(xy_0) == hash_xy(xy_1)
 
 
-class CifarPartitionedTestCase(unittest.TestCase):
-    """Tests for partitioned CIFAR-10/100 dataset generation."""
+class ImageClassificationPartitionedTestCase(unittest.TestCase):
+    """Tests for Partitioned Dataset Ggeneration in Image Classification such
+    as CIFAR-10/100."""
 
     def setUp(self) -> None:
-        x = np.random.random(size=(500, 3, 32, 32))
-        y = np.concatenate(np.array([50 * [j] for j in range(10)]), axis=0)
+        self.num_classes: int = 10
+        self.num_samples_per_class: int = 1000
+        self.num_samples: int = self.num_classes * self.num_samples_per_class
+        x = np.random.random(size=(self.num_samples, 3, 32, 32))
+        y = np.concatenate(
+            np.array(
+                [self.num_samples_per_class * [j] for j in range(self.num_classes)]
+            ),
+            axis=0,
+        )
         y = np.expand_dims(y, axis=1)
 
         np.random.seed(2000)
@@ -153,6 +165,64 @@ class CifarPartitionedTestCase(unittest.TestCase):
         x_01, y_01 = xy_combined[0]
         np.testing.assert_equal(x_01, r_0_10)
         np.testing.assert_equal(y_01, r_0_10)
+
+    def test_create_dla_partitions_alpha_near_zero(self) -> None:
+        """Test if Dirichlet Latent Allocation partitions will give single
+        class distribution when concentration is near zero (~1e-3)."""
+        # Prepare
+        num_partitions = 5
+        concentration = 1e-3
+
+        # Execute
+        _, distributions = create_dla_partitions(
+            dataset=self.ds, num_partitions=num_partitions, concentration=concentration
+        )
+        test_num_partitions, test_num_classes = distributions.shape
+
+        # Assert
+        for part in range(test_num_partitions):
+            this_distribution = distributions[part]
+            max_prob = np.max(this_distribution)
+            assert max_prob > 0.5
+
+    def test_create_dla_partitions_large_alpha(self) -> None:
+        """Test if Dirichlet Latent Allocation partitions will give near
+        uniform distribution when concentration is large(~1e5)."""
+        # Prepare
+        num_partitions = 5
+        concentration = 1e5
+        uniform = (
+            1.0 / (self.num_classes) * np.ones((self.num_classes,), dtype=np.float)
+        )
+
+        # Execute
+        _, distributions = create_dla_partitions(
+            dataset=self.ds, num_partitions=num_partitions, concentration=concentration
+        )
+        test_num_partitions, test_num_classes = distributions.shape
+
+        # Assert
+        for part in range(test_num_partitions):
+            this_distribution = distributions[part]
+            np.testing.assert_array_almost_equal(this_distribution, uniform, decimal=3)
+
+    def test_create_dla_partitions_elements(self) -> None:
+        """Test if partitions from Dirichlet Latent Allocation contain the same
+        elements."""
+        # Prepare
+        x, y = self.ds
+        num_partitions = 5
+        concentration = 0.5
+
+        # Execute
+        partitions, distribution = create_dla_partitions(
+            dataset=self.ds, num_partitions=num_partitions, concentration=concentration
+        )
+        x_dla = np.concatenate([item[0] for item in partitions])
+        y_dla = np.concatenate([item[1] for item in partitions])
+
+        # Assert
+        assert_identity(xy_0=self.ds, xy_1=(x_dla, y_dla))
 
 
 if __name__ == "__main__":
