@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""Commonly used functions for generating partitioned datasets."""
 
 # pylint: disable=invalid-name
 

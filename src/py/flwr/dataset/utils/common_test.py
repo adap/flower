@@ -49,7 +49,7 @@ class CifarPartitionedTestCase(unittest.TestCase):
     """Tests for partitioned CIFAR-10/100 dataset generation."""
 
     def setUp(self) -> None:
-        x = np.random.random(size=(500, 3, 32, 32))
+        x = np.random.random(size=(500, 3, 32, 32))  # pylint: disable=no-member
         y = np.concatenate(np.array([50 * [j] for j in range(10)]), axis=0)
         y = np.expand_dims(y, axis=1)
 
