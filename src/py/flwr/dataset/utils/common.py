@@ -265,7 +265,7 @@ def create_dla_partitions(
     )
     list_samples_per_class: List[List[np.ndarray]] = [
         x_l[boundaries[idx] : boundaries[idx + 1]]
-        for idx in range(num_classes)  # noqa: E207
+        for idx in range(num_classes)  # noqa: E203
     ]
 
     if dirichlet_dist.size == 0:
