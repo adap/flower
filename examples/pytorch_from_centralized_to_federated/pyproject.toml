@@ -15,3 +15,12 @@ python = "^3.6.1"
 flwr = "^0.13.0"
 torch = "1.7.0"
 torchvision = "0.8.1"
+
+[tool.isort]
+line_length = 88
+indent = "    "
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+known_third_party = ["flwr"]
