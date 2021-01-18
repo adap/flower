@@ -39,7 +39,7 @@ import flwr as fl
 
 DATA_ROOT = "~/.flower/data/cifar-10"
 
-# pylint: disable=unsubscriptable-object
+# pylint: disable=unsubscriptable-object,bad-option-value,R1725
 class Net(nn.Module):
     """Simple CNN adapted from 'PyTorch: A 60 Minute Blitz'."""
 

@@ -6,12 +6,12 @@ import timeit
 from collections import OrderedDict
 from typing import Dict, List, Tuple
 
+import flwr as fl
 import numpy as np
 import torch
 import torchvision
 
-import cifar
-import flwr as fl
+from . import cifar
 
 # pylint: disable=no-member
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
