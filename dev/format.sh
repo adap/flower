@@ -12,6 +12,5 @@ python -m docformatter -i -r src/py/flwr_experimental
 find src/proto/flwr/proto -name *.proto | grep "\.proto" | xargs clang-format-10 -i
 
 # Examples
-python -m isort -rc examples
 python -m black -q examples
 python -m docformatter -i -r examples
