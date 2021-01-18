@@ -20,11 +20,10 @@ import timeit
 from collections import OrderedDict
 from importlib import import_module
 
+import flwr as fl
 import numpy as np
 import torch
 import torchvision
-
-import flwr as fl
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
 
 from . import utils

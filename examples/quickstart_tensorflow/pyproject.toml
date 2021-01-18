@@ -14,12 +14,3 @@ authors = ["The Flower Authors <enquiries@flower.dev>"]
 python = "^3.6.1"
 flwr = "^0.13.0"  # For development: { path = "../../", develop = true }
 tensorflow-cpu = "2.4.0"
-
-[tool.isort]
-line_length = 88
-indent = "    "
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-known_third_party = ["flwr"]
