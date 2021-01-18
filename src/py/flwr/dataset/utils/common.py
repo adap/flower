@@ -15,7 +15,7 @@
 
 # pylint: disable=invalid-name
 
-from typing import List, Tuple, cast
+from typing import List, Optional, Tuple, cast
 
 import numpy as np
 
@@ -247,12 +247,12 @@ def create_dla_partitions(
         dist_num_partitions, dist_num_classes = dirichlet_dist.shape
         if dist_num_classes != num_classes:
             raise ValueError(
-                f"""Number of classes in dataset ({num_classes}) 
+                f"""Number of classes in dataset ({num_classes})
               differs from the one in the provided partitions {dist_num_classes}."""
             )
         if dist_num_partitions != num_partitions:
             raise ValueError(
-                f"""The value in `num_partitions` ({num_partitions}) 
+                f"""The value in `num_partitions` ({num_partitions})
                 differs from the one from `dirichlet_dist` {dist_num_partitions}."""
             )
 
@@ -264,7 +264,7 @@ def create_dla_partitions(
         [0], np.cumsum(num_samples_per_class, dtype=np.int)
     )
     list_samples_per_class: List[List[np.ndarray]] = [
-        x_l[boundaries[idx] : boundaries[idx + 1]] for idx in range(num_classes)
+        x_l[boundaries[idx]:boundaries[idx + 1]] for idx in range(num_classes)
     ]
 
     if dirichlet_dist.size == 0:
