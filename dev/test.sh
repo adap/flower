@@ -5,7 +5,7 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 echo "=== test.sh ==="
 
 clang-format-10 --Werror --dry-run src/proto/flwr/proto/*                 && echo "- clang-format: done" &&
-python -m isort --check-only -s src/py/flwr/proto src/py/flwr             && echo "- isort:  done" &&
+python -m isort --check-only --skip src/py/flwr/proto src/py/flwr             && echo "- isort:  done" &&
 python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr      && echo "- black:  done" &&
 python -m docformatter -c -r src/py/flwr -e src/py/flwr/proto             && echo "- docformatter:  done" &&
 python -m mypy src/py                                                     && echo "- mypy:   done" &&
