@@ -213,8 +213,8 @@ def create_dla_partitions(
     num_partitions: int = 100,
     concentration: float = 0.5,
 ) -> Tuple[XYList, np.ndarray]:
-    """Create ibalanced non-iid partitions using Dirichlet Latent
-    Allocation(LDA) without resampling.
+    """Create imbalanced non-iid partitions using Latent Dirichlet
+    Allocation (LDA) without resampling.
 
     Args:
         dataset (XY): Datasets containing samples X
