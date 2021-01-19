@@ -141,16 +141,38 @@ jobs:
         run: |
           cd examples/pytorch_from_centralized_to_federated
 
-          python3 cifar.py
+          python3 cifar.py &
           sleep 3
+
+          if [[ $(ps aux | grep "[p]ython cifar.py" | awk '{ print $2 }') ]];
+            then echo "Cifar process 1 started correctly";
+            else echo "Cifar process 1 crashed" && exit 1;
+          fi
+
+          killall python
 
           python3 server.py
           sleep 3
 
-          python3 client.py
+          python3 client.py 1 &
           sleep 3
 
-          python3 client.py
+          if [[ $(ps aux | grep "[p]ython client.py 1" | awk '{ print $2 }') ]];
+            then echo "Client process 1 started correctly";
+            else echo "Client process 1 crashed" && exit 1;
+          fi
+
+          python3 client.py 2 &
           sleep 3
+
+          if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
+            then echo "Client process 2 started correctly";
+            else echo "Client process 2 crashed" && exit 1;
+          fi
+
+          if [[ $(ps aux | grep "[p]ython server.py" | awk '{ print $2 }') ]];
+            then echo "Server process started correctly";
+            else echo "Server process crashed" && exit 1;
+          fi
 
           killall python
