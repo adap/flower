@@ -281,8 +281,8 @@ def create_dla_partitions(
             data[partition_id].append(sample)
             target[partition_id].append(sample_class)
 
-            # If last sample of the class was drawn,
-            # then set pdf to zero for that class.
+            # If last sample of the class was drawn, then set the 
+            #  probability density function (PDF) to zero for that class.
             if len(list_samples_per_class[sample_class]) == 0:
                 remaining_indices.remove(np.where(classes == sample_class)[0][0])
                 # Be careful to distinguish between classes that had zero probability
