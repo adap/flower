@@ -219,7 +219,7 @@ def create_dla_partitions(
     Args:
         dataset (XY): Dataset containing samples X and labels Y.
         dirichlet_dist (numpy.ndarray, optional): previously generated distribution to
-            be used. This s useful when applying the same distribution for train and
+            be used. This is useful when applying the same distribution for train and
             validation sets.
         num_partitions (int, optional): Number of partitions to be created.
             Defaults to 100.
