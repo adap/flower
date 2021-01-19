@@ -8,7 +8,7 @@ import numpy as np
 import tensorflow as tf
 from flwr.server.strategy import FedAvg
 
-from . import dataset
+import dataset
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
