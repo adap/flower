@@ -226,7 +226,7 @@ def create_dla_partitions(
         concentration (float, optional): Dirichlet Concentration (:math:`\\alpha`)
             parameter.
             An :math:`\\alpha \\to \\Inf` generates uniform distributions over classes.
-            An :math:`\\alpha \\to 0.0` generates on class per client. Defaults to 0.5.
+            An :math:`\\alpha \\to 0.0` generates one class per client. Defaults to 0.5.
 
     Returns:
         Tuple[numpy.ndarray, XYList]: List of XYList containing partitions
