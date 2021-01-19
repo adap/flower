@@ -217,8 +217,7 @@ def create_dla_partitions(
     Allocation (LDA) without resampling.
 
     Args:
-        dataset (XY): Datasets containing samples X
-            and labels Y.
+        dataset (XY): Dataset containing samples X and labels Y.
         dirichlet_dist (numpy.ndarray, optional): previously generated distribution to
             be used. This s useful when applying the same distribution for train and
             validation sets.
