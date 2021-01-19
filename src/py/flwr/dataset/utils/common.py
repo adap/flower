@@ -212,7 +212,7 @@ def create_dla_partitions(
     dirichlet_dist: np.ndarray = np.empty(0),
     num_partitions: int = 100,
     concentration: float = 0.5,
-) -> Tuple[np.ndarray, XYList]:
+) -> Tuple[XYList, np.ndarray]:
     """Create ibalanced non-iid partitions using Dirichlet Latent
     Allocation(LDA) without resampling.
 
@@ -242,24 +242,18 @@ def create_dla_partitions(
     # Get number of classes and verify if they matching with
     classes, num_samples_per_class = np.unique(y, return_counts=True)
     num_classes: int = classes.size
-    remaining_indices = [j for j in range(num_classes)]
+    remaining_indices = list(range(num_classes))
 
     if dirichlet_dist.size != 0:
-        dist_num_partitions, dist_num_classes = dirichlet_dist.shape
-        if dist_num_classes != num_classes:
+        if dirichlet_dist.shape != (num_partitions, num_classes):
             raise ValueError(
-                f"""Number of classes in dataset ({num_classes})
-              differs from the one in the provided partitions {dist_num_classes}."""
-            )
-        if dist_num_partitions != num_partitions:
-            raise ValueError(
-                f"""The value in `num_partitions` ({num_partitions})
-                differs from the one from `dirichlet_dist` {dist_num_partitions}."""
+                f"""The shape of the provided dirichlet distribution
+                 ({dirichlet_dist.shape}) must match the provided number
+                  of partitions and classes ({num_partitions},{num_classes})"""
             )
 
     # Assuming balanced distribution
-    num_samples = x.shape[0]
-    num_samples_per_partition = num_samples // num_partitions
+    num_samples_per_partition = x.shape[0] // num_partitions
 
     boundaries: List[int] = np.append(
         [0], np.cumsum(num_samples_per_class, dtype=np.int)
@@ -290,11 +284,10 @@ def create_dla_partitions(
 
             # If last sample of the class was drawn,
             # then set pdf to zero for that class.
-            num_samples_per_class[sample_class] -= 1
-            if num_samples_per_class[sample_class] == 0:
+            if len(list_samples_per_class[sample_class]) == 0:
                 remaining_indices.remove(np.where(classes == sample_class)[0][0])
-                # Be careful to distinguish between original zero-valued
-                # classes and classes that are empty
+                # Be careful to distinguish between classes that had zero probability
+                # and classes that are now empty
                 dirichlet_dist[:, sample_class] = 0.0
                 dirichlet_dist[:, remaining_indices] += 1e-5
 

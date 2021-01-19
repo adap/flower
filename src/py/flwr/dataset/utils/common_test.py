@@ -177,7 +177,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         _, distributions = create_dla_partitions(
             dataset=self.ds, num_partitions=num_partitions, concentration=concentration
         )
-        test_num_partitions, test_num_classes = distributions.shape
+        test_num_partitions, _ = distributions.shape
 
         # Assert
         for part in range(test_num_partitions):
@@ -199,7 +199,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         _, distributions = create_dla_partitions(
             dataset=self.ds, num_partitions=num_partitions, concentration=concentration
         )
-        test_num_partitions, test_num_classes = distributions.shape
+        test_num_partitions, _ = distributions.shape
 
         # Assert
         for part in range(test_num_partitions):
@@ -210,12 +210,11 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         """Test if partitions from Dirichlet Latent Allocation contain the same
         elements."""
         # Prepare
-        x, y = self.ds
         num_partitions = 5
         concentration = 0.5
 
         # Execute
-        partitions, distribution = create_dla_partitions(
+        partitions, _ = create_dla_partitions(
             dataset=self.ds, num_partitions=num_partitions, concentration=concentration
         )
         x_dla = np.concatenate([item[0] for item in partitions])
