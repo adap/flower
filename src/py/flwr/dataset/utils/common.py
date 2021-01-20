@@ -264,8 +264,6 @@ def sample_without_replacement(
     for _ in range(num_samples):
         sample_class: int = np.where(np.random.multinomial(1, distribution) == 1)[0][0]
         if not list_samples[sample_class]:
-            print(sample_class)
-            print(distribution)
         sample: np.ndarray = list_samples[sample_class].pop()
 
         data.append(sample)
@@ -347,7 +345,6 @@ def create_lda_partitions(
     # Assuming balanced distribution
     empty_classes = num_classes * [False]
     for partition_id in range(num_partitions):
-        print(empty_classes)
         partitions[partition_id], empty_classes = sample_without_replacement(
             distribution=dirichlet_dist[partition_id].copy(),
             list_samples=list_samples_per_class,
