@@ -263,7 +263,6 @@ def sample_without_replacement(
     target: List[np.ndarray] = []
     for _ in range(num_samples):
         sample_class: int = np.where(np.random.multinomial(1, distribution) == 1)[0][0]
-        if not list_samples[sample_class]:
         sample: np.ndarray = list_samples[sample_class].pop()
 
         data.append(sample)
