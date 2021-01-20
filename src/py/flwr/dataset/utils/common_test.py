@@ -18,11 +18,12 @@
 import unittest
 
 import numpy as np
+from numpy.random import default_rng
 
 from flwr.dataset.utils.common import (
     XY,
     combine_partitions,
-    create_dla_partitions,
+    create_lda_partitions,
     partition,
     shuffle,
     sort_by_label,
@@ -56,7 +57,8 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         self.num_classes: int = 10
         self.num_samples_per_class: int = 1000
         self.num_samples: int = self.num_classes * self.num_samples_per_class
-        x = np.random.random(size=(self.num_samples, 3, 32, 32))
+        rng = default_rng()
+        x = rng.random(size=(self.num_samples, 3, 32, 32))
         y = np.concatenate(
             np.array(
                 [self.num_samples_per_class * [j] for j in range(self.num_classes)]
@@ -166,7 +168,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         np.testing.assert_equal(x_01, r_0_10)
         np.testing.assert_equal(y_01, r_0_10)
 
-    def test_create_dla_partitions_alpha_near_zero(self) -> None:
+    def test_create_lda_partitions_alpha_near_zero(self) -> None:
         """Test if Dirichlet Latent Allocation partitions will give single
         class distribution when concentration is near zero (~1e-3)."""
         # Prepare
@@ -174,7 +176,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         concentration = 1e-3
 
         # Execute
-        _, distributions = create_dla_partitions(
+        _, distributions = create_lda_partitions(
             dataset=self.ds, num_partitions=num_partitions, concentration=concentration
         )
         test_num_partitions, _ = distributions.shape
@@ -185,7 +187,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
             max_prob = np.max(this_distribution)
             assert max_prob > 0.5
 
-    def test_create_dla_partitions_large_alpha(self) -> None:
+    def test_create_lda_partitions_large_alpha(self) -> None:
         """Test if Dirichlet Latent Allocation partitions will give near
         uniform distribution when concentration is large(~1e5)."""
         # Prepare
@@ -196,7 +198,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         )
 
         # Execute
-        _, distributions = create_dla_partitions(
+        _, distributions = create_lda_partitions(
             dataset=self.ds, num_partitions=num_partitions, concentration=concentration
         )
         test_num_partitions, _ = distributions.shape
@@ -206,7 +208,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
             this_distribution = distributions[part]
             np.testing.assert_array_almost_equal(this_distribution, uniform, decimal=3)
 
-    def test_create_dla_partitions_elements(self) -> None:
+    def test_create_lda_partitions_elements(self) -> None:
         """Test if partitions from Dirichlet Latent Allocation contain the same
         elements."""
         # Prepare
@@ -214,14 +216,14 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         concentration = 0.5
 
         # Execute
-        partitions, _ = create_dla_partitions(
+        partitions, _ = create_lda_partitions(
             dataset=self.ds, num_partitions=num_partitions, concentration=concentration
         )
-        x_dla = np.concatenate([item[0] for item in partitions])
-        y_dla = np.concatenate([item[1] for item in partitions])
+        x_lda = np.concatenate([item[0] for item in partitions])
+        y_lda = np.concatenate([item[1] for item in partitions])
 
         # Assert
-        assert_identity(xy_0=self.ds, xy_1=(x_dla, y_dla))
+        assert_identity(xy_0=self.ds, xy_1=(x_lda, y_lda))
 
 
 if __name__ == "__main__":

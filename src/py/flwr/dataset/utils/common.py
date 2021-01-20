@@ -16,7 +16,7 @@
 
 # pylint: disable=invalid-name
 
-from typing import List, Optional, Tuple, cast
+from typing import List, Tuple, cast
 
 import numpy as np
 
@@ -207,14 +207,92 @@ def adjust_y_shape(nda: np.ndarray) -> np.ndarray:
     return cast(np.ndarray, nda_adjusted)
 
 
-def create_dla_partitions(
+def exclude_classes_and_normalize(
+    distribution: np.array, exclude_dims: List[bool], eps: float = 1e-5
+) -> np.ndarray:
+    """Excludes classes from a distribution. Useful when sampling without
+    replacement.
+
+    Args:
+        distribution (np.array): Distribution being used.
+        exclude_dims (List[bool]): Dimensions to be excluded.
+        eps (float, optional): Small value to be addad to non-excluded dimensions.
+            Defaults to 1e-5.
+
+    Returns:
+        np.ndarray: Normalized distributions.
+    """
+
+    distribution[[not x for x in exclude_dims]] += eps
+    distribution[exclude_dims] = 0.0
+    sum_rows = np.sum(distribution) + np.finfo(float).eps
+    distribution = distribution / sum_rows
+
+    return distribution
+
+
+def sample_without_replacement(
+    distribution: np.ndarray,
+    list_samples: List[List[np.ndarray]],
+    num_samples: int,
+    empty_classes: List[bool],
+) -> Tuple[XY, List[bool]]:
+    """Samples from a list without replacement using a given distribution.
+
+    Args:
+        distribution (np.ndarray): Distribution used for sampling.
+        list_samples(List[List[np.ndarray]]): List of samples.
+        num_samples (int): Total number of item sto be sampled.
+        empty_classes (List[bool]): List of booleans indicating which classes are empty.
+            This is useful to differentiate which classes should still be sampled.
+
+    Returns:
+        XY: Dataset contaning samples
+        List[bool]: empty_classes.
+    """
+    # Make sure empty classes are not sampled
+    # and solves for rare cases where
+    if not empty_classes:
+        empty_classes = distribution.shape * [False]
+
+    distribution = exclude_classes_and_normalize(
+        distribution=distribution, exclude_dims=empty_classes
+    )
+
+    data: List[np.ndarray] = []
+    target: List[np.ndarray] = []
+    for _ in range(num_samples):
+        sample_class: int = np.where(np.random.multinomial(1, distribution) == 1)[0][0]
+        if not list_samples[sample_class]:
+            print(sample_class)
+            print(distribution)
+        sample: np.ndarray = list_samples[sample_class].pop()
+
+        data.append(sample)
+        target.append(sample_class)
+
+        # If last sample of the class was drawn, then set the
+        #  probability density function (PDF) to zero for that class.
+        if len(list_samples[sample_class]) == 0:
+            empty_classes[sample_class] = True
+            # Be careful to distinguish between classes that had zero probability
+            # and classes that are now empty
+            distribution = exclude_classes_and_normalize(
+                distribution=distribution, exclude_dims=empty_classes
+            )
+    data_array: np.ndarray = np.concatenate([data], axis=0)
+    target_array: np.ndarray = np.array(target, dtype=np.int64)[..., np.newaxis]
+    return (data_array, target_array), empty_classes
+
+
+def create_lda_partitions(
     dataset: XY,
     dirichlet_dist: np.ndarray = np.empty(0),
     num_partitions: int = 100,
     concentration: float = 0.5,
 ) -> Tuple[XYList, np.ndarray]:
-    """Create imbalanced non-iid partitions using Latent Dirichlet
-    Allocation (LDA) without resampling.
+    """Create imbalanced non-iid partitions using Latent Dirichlet Allocation
+    (LDA) without resampling.
 
     Args:
         dataset (XY): Dataset containing samples X and labels Y.
@@ -229,8 +307,8 @@ def create_dla_partitions(
             An :math:`\\alpha \\to 0.0` generates one class per client. Defaults to 0.5.
 
     Returns:
-        Tuple[numpy.ndarray, XYList]: List of XYList containing partitions
-            for each dataset.
+        Tuple[XYList, numpy.ndarray]: List of XYList containing partitions
+            for each dataset and the dirichlet probability density functions.
     """
 
     x, y = dataset
@@ -239,9 +317,10 @@ def create_dla_partitions(
     x_l: List[np.ndarray] = list(x)
 
     # Get number of classes and verify if they matching with
-    classes, num_samples_per_class = np.unique(y, return_counts=True)
+    classes, start_indices, samples_per_class = np.unique(
+        y, return_index=True, return_counts=True
+    )
     num_classes: int = classes.size
-    remaining_indices = list(range(num_classes))
 
     if dirichlet_dist.size != 0:
         if dirichlet_dist.shape != (num_partitions, num_classes):
@@ -251,53 +330,29 @@ def create_dla_partitions(
                   of partitions and classes ({num_partitions},{num_classes})"""
             )
 
-    # Assuming balanced distribution
-    num_samples_per_partition = x.shape[0] // num_partitions
-
-    boundaries: List[int] = np.append(
-        [0], np.cumsum(num_samples_per_class, dtype=np.int)
-    )
-    list_samples_per_class: List[List[np.ndarray]] = [  # noqa: E203
-        x_l[boundaries[idx] : boundaries[idx + 1]]  # noqa: E203
-        for idx in range(num_classes)  # noqa: E203
+    list_samples_per_class: List[List[np.ndarray]] = [
+        x_l[start_indices[j] : start_indices[j] + samples_per_class[j]]  # noqa: E203
+        for j in range(num_classes)
     ]
 
     if dirichlet_dist.size == 0:
-        dirichlet_dist = np.random.dirichlet(
+        dirichlet_dist = np.random.default_rng().dirichlet(
             alpha=[concentration] * num_classes, size=num_partitions
         )
-    original_dirichlet_dist = dirichlet_dist.copy()
 
-    data: List[List[Optional[np.ndarray]]] = [[] for _ in range(num_partitions)]
-    target: List[List[Optional[np.ndarray]]] = [[] for _ in range(num_partitions)]
-
-    for partition_id in range(num_partitions):
-        for _ in range(num_samples_per_partition):
-            sample_class: int = np.where(
-                np.random.multinomial(1, dirichlet_dist[partition_id]) == 1
-            )[0][0]
-            sample: np.ndarray = list_samples_per_class[sample_class].pop()
-
-            data[partition_id].append(sample)
-            target[partition_id].append(sample_class)
-
-            # If last sample of the class was drawn, then set the 
-            #  probability density function (PDF) to zero for that class.
-            if len(list_samples_per_class[sample_class]) == 0:
-                remaining_indices.remove(np.where(classes == sample_class)[0][0])
-                # Be careful to distinguish between classes that had zero probability
-                # and classes that are now empty
-                dirichlet_dist[:, sample_class] = 0.0
-                dirichlet_dist[:, remaining_indices] += 1e-5
-
-                sum_rows = np.sum(dirichlet_dist, axis=1)
-                dirichlet_dist = dirichlet_dist / (
-                    sum_rows[:, np.newaxis] + np.finfo(float).eps
-                )
-
-    partitions = [
-        (np.concatenate([data[idx]]), np.concatenate([target[idx]])[..., np.newaxis])
-        for idx in range(num_partitions)
+    partitions: List[XY] = [
+        (np.empty((1,)), np.empty((1,))) for _ in range(num_partitions)
     ]
 
-    return partitions, original_dirichlet_dist
+    # Assuming balanced distribution
+    empty_classes = num_classes * [False]
+    for partition_id in range(num_partitions):
+        print(empty_classes)
+        partitions[partition_id], empty_classes = sample_without_replacement(
+            distribution=dirichlet_dist[partition_id].copy(),
+            list_samples=list_samples_per_class,
+            num_samples=x.shape[0] // num_partitions,
+            empty_classes=empty_classes,
+        )
+
+    return partitions, dirichlet_dist
