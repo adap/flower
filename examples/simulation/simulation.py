@@ -3,12 +3,12 @@ import time
 from multiprocessing import Process
 from typing import Tuple
 
+import flwr as fl
 import numpy as np
 import tensorflow as tf
+from flwr.server.strategy import FedAvg
 
 import dataset
-import flwr as fl
-from flwr.server.strategy import FedAvg
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
