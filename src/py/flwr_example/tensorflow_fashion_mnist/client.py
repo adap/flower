@@ -43,7 +43,9 @@ class FashionMnistClient(fl.client.KerasClient):
     def get_weights(self) -> Weights:
         return cast(Weights, self.model.get_weights())
 
-    def fit(self, weights: Weights, config: Dict[str, str]) -> Tuple[Weights, int, int]:
+    def fit(
+        self, weights: Weights, config: Dict[str, fl.common.Scalar]
+    ) -> Tuple[Weights, int, int]:
         # Use provided weights to update local model
         self.model.set_weights(weights)
 
@@ -59,7 +61,7 @@ class FashionMnistClient(fl.client.KerasClient):
         return self.model.get_weights(), len(self.x_train), len(self.x_train)
 
     def evaluate(
-        self, weights: Weights, config: Dict[str, str]
+        self, weights: Weights, config: Dict[str, fl.common.Scalar]
     ) -> Tuple[int, float, float]:
         # Update local model and evaluate on local dataset
         self.model.set_weights(weights)
