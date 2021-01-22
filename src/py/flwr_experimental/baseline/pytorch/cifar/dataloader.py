@@ -23,49 +23,44 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
-import torch
 import torch.nn as nn
-from torch import Tensor, from_numpy
-from torch.distributions.dirichlet import Dirichlet
-from torchvision import transforms
+from torch import Tensor, from_numpy, load, save
+from torch.utils.data import Dataset
 from torchvision.datasets import CIFAR10, CIFAR100
+from torchvision.transforms import Compose, Normalize, ToTensor
 
 import flwr as fl
-from flwr.dataset.utils.common import (
-    XY,
-    XYList,
-    create_lda_partitions,
-)
+from flwr.dataset.utils.common import XY, XYList, create_lda_partitions
 from flwr_experimental.baseline.pytorch.utils import convert_pytorch_dataset_to_xy
 
 DATA_ROOT: str = "~/.flower/data/cifar"
 
 
-
-def get_normalization_transform() -> transforms.transforms.Compose:
-    """ Generates a compose transformation with mean and average normalization
-        for CIFAR10
+def get_normalization_transform() -> Compose:
+    """Generates a compose transformation with mean and average normalization
+    for CIFAR10.
 
     Returns:
         transforms.transforms.Compose: A Compose transformation for CIFAR10
     """
-    transform = transforms.Compose(
+    transform = Compose(
         [
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+            ToTensor(),
+            Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
         ]
     )
     return transform
 
 
-class CIFAR_PartitionedDataset(torch.utils.data.Dataset):
+class CIFAR_PartitionedDataset(Dataset):
     def __init__(
         self,
         *,
         num_classes: int = 10,
         root_dir: Union[str, bytes, PathLike] = DATA_ROOT,
         partition_id: int,
-        transform: Optional[callable]):
+        transform: Optional[callable],
+    ):
         """Dataset from partitioned files
         Parameters
         ----------
@@ -91,9 +86,9 @@ class CIFAR_PartitionedDataset(torch.utils.data.Dataset):
         if not self.partition_path.exists():
             raise RuntimeError(f"Partition file {self.partition_path} not found.")
         else:
-            self.X, self.Y = torch.load(self.partition_path)
-            self.X = torch.from_numpy(self.X)
-            self.Y = torch.from_numpy(self.Y)
+            self.X, self.Y = load(self.partition_path)
+            self.X = from_numpy(self.X)
+            self.Y = from_numpy(self.Y)
 
     def __len__(self) -> int:
         return len(self.X)
@@ -101,6 +96,9 @@ class CIFAR_PartitionedDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx: int) -> XY:
         x = self.X[idx]
         y = self.Y[idx]
+
+        if self.transform:
+            x = self.trasform(x)
 
         return (x, y)
 
@@ -179,9 +177,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    save_root = (
-        Path(f"{args.save_root}") / "partitions" / "lda" / f"{args.alpha:.2f}"
-    )
+    save_root = Path(f"{args.save_root}") / "partitions" / "lda" / f"{args.alpha:.2f}"
 
     # Use standard mean and standard variation
     basic_transform = get_normalization_transform()
@@ -191,13 +187,11 @@ if __name__ == "__main__":
         train=True,
         download=True,
     )
-
     test_dataset = CIFAR10(
         root=f"{DATA_ROOT}-{args.num_classes}",
         train=True,
         download=True,
     )
-
     dist = np.empty(0)
     for dataset, data_str in [(train_dataset, "train"), (test_dataset, "test")]:
         save_dir = save_root / data_str
@@ -205,11 +199,12 @@ if __name__ == "__main__":
 
         np_dataset = convert_pytorch_dataset_to_xy(dataset)
 
-        partitions, dist  = create_lda_partitions(dataset=np_dataset, 
-                                                  dirichlet_dist=dist,
-                                                  num_partitions=args.num_partitions, 
-                                                  concentration=args.alpha
+        partitions, dist = create_lda_partitions(
+            dataset=np_dataset,
+            dirichlet_dist=dist,
+            num_partitions=args.num_partitions,
+            concentration=args.alpha,
         )
 
         for idx, part in enumerate(partitions):
-            torch.save(part, save_dir / f"{idx:03}.pt")
+            save(part, save_dir / f"{idx:03}.pt")
