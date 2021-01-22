@@ -25,6 +25,7 @@ from flwr.common import (
     FitRes,
     Metrics,
     ParametersRes,
+    Scalar,
     Weights,
     parameters_to_weights,
     weights_to_parameters,
@@ -47,7 +48,9 @@ class KerasClient(ABC):
         """
 
     @abstractmethod
-    def fit(self, weights: Weights, config: Dict[str, str]) -> Tuple[Weights, int, int]:
+    def fit(
+        self, weights: Weights, config: Dict[str, Scalar]
+    ) -> Tuple[Weights, int, int]:
         """Refine/train the provided weights using the locally held dataset.
 
         Arguments:
@@ -55,7 +58,7 @@ class KerasClient(ABC):
                 This argument has the structure expected by Keras'
                 `model.set_weights(weights)` and returned by Keras'
                 `model.get_weights()`.
-            config: Dict[str, str]. Configuration parameters which allow the
+            config: Dict[str, Scalar]. Configuration parameters which allow the
                 server to influence training on the client. It can be used to
                 communicate arbitrary values from the server to the client, for
                 example, to set the number of (local) training epochs.
@@ -73,7 +76,7 @@ class KerasClient(ABC):
 
     @abstractmethod
     def evaluate(
-        self, weights: Weights, config: Dict[str, str]
+        self, weights: Weights, config: Dict[str, Scalar]
     ) -> Union[Tuple[int, float, float], Tuple[int, float, float, Metrics]]:
         """Evaluate the provided weights using the locally held dataset.
 
@@ -82,7 +85,7 @@ class KerasClient(ABC):
                 This argument has the structure expected by Keras'
                 `model.set_weights(weights)` and returned by Keras'
                 `model.get_weights()`.
-            config: Dict[str, str]. Configuration parameters which allow the
+            config: Dict[str, Scalar]. Configuration parameters which allow the
                 server to influence evaluation on the client. It can be used to
                 communicate arbitrary values from the server to the client, for
                 example, to influence the number of examples used for

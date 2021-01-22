@@ -21,7 +21,13 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 
 Weights = List[np.ndarray]
+
+# The following union type contains Python types corresponding to ProtoBuf types that
+# ProtoBuf considers to be "Scalar Value Types", even though some of them arguably do
+# not conform to other definitions of what a scalar is. Source:
+# https://developers.google.com/protocol-buffers/docs/overview#scalar
 Scalar = Union[bool, bytes, float, int, str]
+
 Metrics = Dict[str, Scalar]
 
 
@@ -45,8 +51,7 @@ class FitIns:
     """Fit instructions for a client."""
 
     parameters: Parameters
-    config: Dict[str, str]
-    # metrics: Metrics
+    config: Dict[str, Scalar]
 
 
 @dataclass
@@ -65,8 +70,7 @@ class EvaluateIns:
     """Evaluate instructions for a client."""
 
     parameters: Parameters
-    config: Dict[str, str]
-    # metrics: Metrics
+    config: Dict[str, Scalar]
 
 
 @dataclass
