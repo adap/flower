@@ -111,13 +111,14 @@ def parameters_res_from_proto(msg: ClientMessage.ParametersRes) -> typing.Parame
 def fit_ins_to_proto(ins: typing.FitIns) -> ServerMessage.FitIns:
     """Serialize flower.FitIns to ProtoBuf message."""
     parameters_proto = parameters_to_proto(ins.parameters)
-    return ServerMessage.FitIns(parameters=parameters_proto, config=ins.config)
+    config_msg = metrics_to_proto(ins.config)
+    return ServerMessage.FitIns(parameters=parameters_proto, config=config_msg)
 
 
 def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
     """Deserialize flower.FitIns from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
-    config = dict(msg.config)
+    config = metrics_from_proto(msg.config)
     return typing.FitIns(parameters=parameters, config=config)
 
 
@@ -149,13 +150,14 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
 def evaluate_ins_to_proto(ins: typing.EvaluateIns) -> ServerMessage.EvaluateIns:
     """Serialize flower.EvaluateIns to ProtoBuf message."""
     parameters_proto = parameters_to_proto(ins.parameters)
-    return ServerMessage.EvaluateIns(parameters=parameters_proto, config=ins.config)
+    config_msg = metrics_to_proto(ins.config)
+    return ServerMessage.EvaluateIns(parameters=parameters_proto, config=config_msg)
 
 
 def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIns:
     """Deserialize flower.EvaluateIns from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
-    config = dict(msg.config)
+    config = metrics_from_proto(msg.config)
     return typing.EvaluateIns(parameters=parameters, config=config)
 
 
