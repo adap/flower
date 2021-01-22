@@ -15,8 +15,9 @@
 
 # pylint: disable=invalid-name
 
-from torch.utils.data import DataLoader, Dataset
 from numpy import array, asarray, concatenate, int64
+from torch.utils.data import DataLoader, Dataset
+
 from flwr_experimental.baseline.dataset.dataset import XY
 
 
