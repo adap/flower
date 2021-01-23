@@ -68,10 +68,10 @@ class Server:
         self.strategy: Strategy = set_strategy(strategy)
 
         # make these actual class methods (if defined)
-        self.on_init_fn = func_to_method(on_init_fn, self)
-        self.on_round_end_fn = func_to_method(on_round_end_fn, self)
+        self.on_init = func_to_method(on_init_fn, self)
+        self.on_round_end = func_to_method(on_round_end_fn, self)
 
-        self.on_init_fn()
+        self.on_init()
 
     def client_manager(self) -> ClientManager:
         """Return ClientManager."""
@@ -129,7 +129,7 @@ class Server:
 
             # Round ended, run post round stages
             args = {'current_round': current_round}
-            self.on_round_end_fn(args)
+            self.on_round_end(args)
 
         # Bookkeeping
         end_time = timeit.default_timer()
