@@ -18,7 +18,7 @@
 import concurrent.futures
 import timeit
 from logging import DEBUG, INFO
-from typing import List, Optional, Tuple, cast
+from typing import List, Optional, Tuple, cast, Callable, Dict
 
 from flwr.common import (
     Disconnect,
@@ -50,15 +50,28 @@ def set_strategy(strategy: Optional[Strategy]) -> Strategy:
     return strategy if strategy is not None else FedAvg()
 
 
+def func_to_method(f, obj):
+    """Converst a function into a obj's method."""
+    return f.__get__(obj, type(obj)) if f else lambda: None
+
+
 class Server:
     """Flower server."""
 
     def __init__(
-        self, client_manager: ClientManager, strategy: Optional[Strategy] = None
+        self, client_manager: ClientManager, strategy: Optional[Strategy] = None,
+        on_init_fn: Optional[Callable[[None], None]] = None,
+        on_round_end_fn: Optional[Callable[[Dict], None]] = None,
     ) -> None:
         self._client_manager: ClientManager = client_manager
         self.weights: Weights = []
         self.strategy: Strategy = set_strategy(strategy)
+
+        # make these actual class methods (if defined)
+        self.on_init_fn = func_to_method(on_init_fn, self)
+        self.on_round_end_fn = func_to_method(on_round_end_fn, self)
+
+        self.on_init_fn()
 
     def client_manager(self) -> ClientManager:
         """Return ClientManager."""
@@ -113,6 +126,10 @@ class Server:
                 history.add_loss_distributed(
                     rnd=current_round, loss=cast(float, loss_fed)
                 )
+
+            # Round ended, run post round stages
+            args = {'current_round': current_round}
+            self.on_round_end_fn(args)
 
         # Bookkeeping
         end_time = timeit.default_timer()
