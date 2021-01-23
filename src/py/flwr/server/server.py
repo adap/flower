@@ -294,4 +294,4 @@ def evaluate_client(
 
 def func_to_method(f: Callable, srv: Server):
     """Converst a function into a obj's method."""
-    return f.__get__(srv, Server)) if f else lambda: None
+    return f.__get__(srv, Server) if f else lambda: None
