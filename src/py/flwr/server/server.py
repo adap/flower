@@ -18,7 +18,7 @@
 import concurrent.futures
 import timeit
 from logging import DEBUG, INFO
-from typing import List, Optional, Tuple, cast, Callable, Dict
+from typing import Callable, Dict, List, Optional, Tuple, cast
 
 from flwr.common import (
     Disconnect,
@@ -48,11 +48,6 @@ ReconnectResultsAndFailures = Tuple[
 def set_strategy(strategy: Optional[Strategy]) -> Strategy:
     """Return Strategy."""
     return strategy if strategy is not None else FedAvg()
-
-
-def func_to_method(f, obj):
-    """Converst a function into a obj's method."""
-    return f.__get__(obj, type(obj)) if f else lambda: None
 
 
 class Server:
@@ -295,3 +290,8 @@ def evaluate_client(
     """Evaluate weights on a single client."""
     evaluate_res = client.evaluate(ins)
     return client, evaluate_res
+
+
+def func_to_method(f: Callable, srv: Server):
+    """Converst a function into a obj's method."""
+    return f.__get__(srv, Server)) if f else lambda: None
