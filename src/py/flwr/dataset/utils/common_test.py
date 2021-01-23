@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Tests for partitioned CIFAR-10/100 dataset generation."""
-# pylint: disable=no-self-use, invalid-name
+# pylint: disable=no-self-use, invalid-name, disable=R0904
 
 import unittest
 
@@ -24,10 +24,13 @@ from flwr.dataset.utils.common import (
     XY,
     combine_partitions,
     create_lda_partitions,
+    exclude_classes_and_normalize,
     partition,
+    sample_without_replacement,
     shuffle,
     sort_by_label,
     sort_by_label_repeating,
+    split_array_at_indices,
     split_at_fraction,
 )
 
@@ -167,6 +170,273 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         x_01, y_01 = xy_combined[0]
         np.testing.assert_equal(x_01, r_0_10)
         np.testing.assert_equal(y_01, r_0_10)
+
+    def test_split_array_at_indices_wrong_num_dims(self) -> None:
+        """Tests if exception is thrown for wrong number of dimensions."""
+        # Prepare
+        x = np.ones((100, 3, 32, 32), dtype=np.float32)
+        split_idx = np.arange(start=0, stop=90, step=10, dtype=np.int64)
+        split_idx = np.expand_dims(split_idx, axis=0)
+
+        # Execute
+        with self.assertRaises(ValueError):
+            split_array_at_indices(x, split_idx)
+
+    def test_split_array_at_indices_wrong_dtype(self) -> None:
+        """Tests if exception is thrown for wrong dtype."""
+        # Prepare
+        x = np.ones((100, 3, 32, 32), dtype=np.float32)
+        split_idx = np.arange(start=0, stop=90, step=10, dtype=np.int32)
+
+        # Execute
+        with self.assertRaises(ValueError):
+            split_array_at_indices(x, split_idx)
+
+    def test_split_array_at_indices_wrong_split_max_index(self) -> None:
+        """Tests if exception is thrown for wrong max split index."""
+        # Prepare
+        x = np.ones((100, 3, 32, 32), dtype=np.float32)
+        split_idx = np.arange(start=0, stop=90, step=10, dtype=np.int64)
+        split_idx[-1] = 1000000
+
+        # Execute
+        with self.assertRaises(ValueError):
+            split_array_at_indices(x, split_idx)
+
+    def test_split_array_at_indices_wrong_initial_split(self) -> None:
+        """Tests if exception is thrown for wrong split values."""
+        # Prepae
+        x = np.ones((100, 3, 32, 32), dtype=np.float32)
+        split_idx = np.arange(start=0, stop=90, step=10, dtype=np.int64)
+        split_idx[0] = 10
+
+        # Execute
+        with self.assertRaises(ValueError):
+            split_array_at_indices(x, split_idx)
+
+    def test_split_array_at_indices_not_increasing(self) -> None:
+        """Tests if exception is thrown for split not having increasing
+        values."""
+        # Prepae
+        x = np.ones((100, 3, 32, 32), dtype=np.float32)
+        split_idx = np.arange(start=0, stop=90, step=10, dtype=np.int64)
+        split_idx[1] = 70
+
+        # Execute
+        with self.assertRaises(ValueError):
+            split_array_at_indices(x, split_idx)
+
+    def test_split_array(self) -> None:
+        """Tests if split is correct."""
+        # Prepare
+        split_expected = [
+            [
+                np.zeros((3, 32, 32), dtype=np.float32),
+                np.zeros((3, 32, 32), dtype=np.float32),
+                np.zeros((3, 32, 32), dtype=np.float32),
+                np.zeros((3, 32, 32), dtype=np.float32),
+            ],
+            [
+                np.ones((3, 32, 32), dtype=np.float32),
+                np.ones((3, 32, 32), dtype=np.float32),
+                np.ones((3, 32, 32), dtype=np.float32),
+                np.ones((3, 32, 32), dtype=np.float32),
+            ],
+            [
+                2 * np.ones((3, 32, 32), dtype=np.float32),
+                2 * np.ones((3, 32, 32), dtype=np.float32),
+                2 * np.ones((3, 32, 32), dtype=np.float32),
+                2 * np.ones((3, 32, 32), dtype=np.float32),
+            ],
+        ]
+
+        x = np.concatenate(split_expected)
+        split_idx = np.arange(start=0, stop=12, step=4, dtype=np.int64)
+
+        # Execute
+        list_splits = split_array_at_indices(x, split_idx)
+
+        # Assert
+        for idx, split in enumerate(list_splits):
+            for idx_el, element in enumerate(split):
+                np.testing.assert_equal(split_expected[idx][idx_el], element)
+
+    def test_exclude_classes_and_normalize_verify_dist_sum_one(self) -> None:
+        """Tests if non-distributions raise exceptions."""
+        # Prepare
+        distribution = np.array([0.1, 0.1, 0.3], dtype=np.float32)
+        exclude_dims = 3 * [False]
+
+        # Execute
+        with self.assertRaises(ValueError):
+            exclude_classes_and_normalize(distribution, exclude_dims=exclude_dims)
+
+    def test_exclude_classes_and_normalize_verify_dist_positive(self) -> None:
+        """Tests if non-distributions raise exceptions."""
+        # Prepare
+        distribution = np.array([0.1, -0.1, 1.0], dtype=np.float32)
+        exclude_dims = 3 * [False]
+
+        # Execute
+        with self.assertRaises(ValueError):
+            exclude_classes_and_normalize(distribution, exclude_dims=exclude_dims)
+
+    def test_exclude_classes_and_normalize_verify_distribution_and_exclude_dims(
+        self,
+    ) -> None:
+        """Tests if non-distributions raise exceptions."""
+        # Prepare
+        distribution = np.ones((5,), dtype=np.float32)
+        exclude_dims = 4 * [False]
+
+        # Execute
+        with self.assertRaises(ValueError):
+            exclude_classes_and_normalize(distribution, exclude_dims)
+
+    def test_exclude_classes_and_normalize_positive_eps(self) -> None:
+        """Tests if eps<0 raises exceptions."""
+        # Prepare
+        distribution = np.array([0.1, 0.1, 0.8], dtype=np.float32)
+        exclude_dims = 3 * [False]
+
+        # Execute
+        with self.assertRaises(ValueError):
+            exclude_classes_and_normalize(
+                distribution, exclude_dims=exclude_dims, eps=-3
+            )
+
+    def test_exclude_classes_and_normalize(self) -> None:
+        """Tests if non-distributions raise exceptions."""
+        # Prepare
+        distribution = np.array([0.1, 0.7, 0.1, 0.05, 0.05], dtype=np.float32)
+        exclude_dims = [False, True, False, False, False]
+        expected = np.array([1.0 / 3, 0, 1.0 / 3, 1.0 / 6, 1.0 / 6], dtype=np.float32)
+
+        # Execute
+        new_dist = exclude_classes_and_normalize(distribution, exclude_dims)
+
+        # Assert
+        np.testing.assert_array_almost_equal(expected, new_dist, decimal=4)
+
+    def test_sample_without_replacement_large_sample(self) -> None:
+        """Tests is requesting too many samples will raise an exception."""
+        # Prepare
+        distribution = np.array([1.0 / 3, 1.0 / 3, 1.0 / 3], dtype=np.float32)
+        list_samples = [
+            [
+                np.zeros((3, 32, 32), dtype=np.float32),
+                np.zeros((3, 32, 32), dtype=np.float32),
+            ],
+            [
+                np.ones((3, 32, 32), dtype=np.float32),
+                np.ones((3, 32, 32), dtype=np.float32),
+            ],
+            [
+                2 * np.ones((3, 32, 32), dtype=np.float32),
+                2 * np.ones((3, 32, 32), dtype=np.float32),
+            ],
+        ]
+        num_samples = 100000
+        empty_classes = 3 * [False]
+        # Execute
+        with self.assertRaises(ValueError):
+            sample_without_replacement(
+                distribution, list_samples, num_samples, empty_classes
+            )
+
+    def test_sample_without_replacement_updating_empty_list(self) -> None:
+        """Tests is empty list is being updated."""
+        # Prepare
+        distribution = np.array([1.0 / 3, 1.0 / 3, 1.0 / 3], dtype=np.float32)
+        empty_classes = [False, False, True]
+        list_samples = [
+            [
+                np.zeros((3, 32, 32), dtype=np.float32),
+                np.zeros((3, 32, 32), dtype=np.float32),
+            ],
+            [
+                np.ones((3, 32, 32), dtype=np.float32),
+                np.ones((3, 32, 32), dtype=np.float32),
+            ],
+            [],
+        ]
+        num_samples = 3
+        # Execute
+        _, list_empty = sample_without_replacement(
+            distribution, list_samples, num_samples, empty_classes
+        )
+
+        # Assert
+        assert sum(list_empty) == 2
+
+    def test_sample_without_replacement(self) -> None:
+        """Tests is sampling is done correctly."""
+        # Prepare
+        distribution = np.array([0.0, 1.0, 0.0], dtype=np.float32)
+        empty_classes = [False, False, True]
+        list_samples = [
+            [
+                np.zeros((3, 1, 1), dtype=np.float32),
+                np.zeros((3, 1, 1), dtype=np.float32),
+                np.zeros((3, 1, 1), dtype=np.float32),
+                np.zeros((3, 1, 1), dtype=np.float32),
+                np.zeros((3, 1, 1), dtype=np.float32),
+            ],
+            [
+                7 * np.ones((3, 1, 1), dtype=np.float32),
+                7 * np.ones((3, 1, 1), dtype=np.float32),
+                7 * np.ones((3, 1, 1), dtype=np.float32),
+                7 * np.ones((3, 1, 1), dtype=np.float32),
+                7 * np.ones((3, 1, 1), dtype=np.float32),
+            ],
+            [],
+        ]
+        num_samples = 4
+        expected_x = 7 * np.ones((4, 3, 1, 1), dtype=np.float32)
+        expected_y = np.expand_dims(np.array(4 * [1], dtype=np.int64), axis=1)
+
+        # Execute
+        this_partition, _ = sample_without_replacement(
+            distribution, list_samples, num_samples, empty_classes
+        )
+
+        # Assert
+        assert_identity(this_partition, (expected_x, expected_y))
+
+    def test_create_lda_partitions_imbalanced_not_set(self) -> None:
+        """Test if Dirichlet Latent Allocation rejects imbalanced
+        partitions."""
+        # Prepare
+        num_partitions = 3
+        concentration = 1e-3
+
+        # Execute
+        with self.assertRaises(ValueError):
+            create_lda_partitions(
+                dataset=self.ds,
+                num_partitions=num_partitions,
+                concentration=concentration,
+            )
+
+    def test_create_lda_partitions_imbalanced(self) -> None:
+        """Test if Dirichlet Latent Allocation accepts imbalanced partitions if
+        accept_imbalanced is set."""
+        # Prepare
+        num_partitions = 3
+        concentration = 1e-3
+
+        # Execute
+        partitions, _ = create_lda_partitions(
+            dataset=self.ds,
+            num_partitions=num_partitions,
+            concentration=concentration,
+            accept_imbalanced=True,
+        )
+        numel_list = [x.shape[0] for (x, y) in partitions]
+        total_samples = np.sum(numel_list)
+
+        # Assert
+        assert total_samples == self.num_samples
 
     def test_create_lda_partitions_alpha_near_zero(self) -> None:
         """Test if Dirichlet Latent Allocation partitions will give single

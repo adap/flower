@@ -269,6 +269,9 @@ def exclude_classes_and_normalize(
     Returns:
         np.ndarray: Normalized distributions.
     """
+    if np.any(distribution < 0) or (not np.isclose(np.sum(distribution), 1.0)):
+        raise ValueError("distribution must sum to 1 and have only positive values.")
+
     if distribution.size != len(exclude_dims):
         raise ValueError(
             """Length of distribution must be equal
