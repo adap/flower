@@ -25,6 +25,7 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 import torch.nn as nn
 from PIL import Image
+from PIL.Image import Image as ImageType
 from torch import Tensor, from_numpy, load, save
 from torch.utils.data import Dataset
 from torchvision.datasets import CIFAR10, CIFAR100
@@ -68,7 +69,7 @@ class CIFAR_PartitionedDataset(Dataset):
         num_classes: int = 10,
         root_dir: Union[str, bytes, PathLike],
         partition_id: int,
-        transform: Optional[callable],
+        transform: Optional[callable]=None,
     ):
         """Dataset from partitioned files
         Parameters
@@ -86,28 +87,28 @@ class CIFAR_PartitionedDataset(Dataset):
                 """Number of classes can only be either 
                 10 or 100 for CIFAR10 and CIFAR100 datasets respectively."""
             )
-        self.root_dir: Path = Path(root_dir)
+        self.root_dir: Path = Path(root_dir).expanduser()
         self.partition_id: int = partition_id
         self.partition_path = (
-            self.root_dir / f"cifar{num_classes}_{self.partition_id}.pt"
+            self.root_dir / f"{self.partition_id}.pt"
         )
 
         if not self.partition_path.exists():
             raise RuntimeError(f"Partition file {self.partition_path} not found.")
         else:
             self.X, self.Y = load(self.partition_path)
-            self.X = from_numpy(self.X)
-            self.Y = from_numpy(self.Y)
+        
+        self.transform = transform
 
     def __len__(self) -> int:
         return len(self.X)
 
-    def __getitem__(self, idx: int) -> Union[XY, Tuple[Image, ndarray]]:
+    def __getitem__(self, idx: int) -> Union[XY, Tuple[ImageType, np.ndarray]]:
         x = Image.fromarray(self.X[idx])
-        y = self.Y[idx]
+        y = self.Y.item(idx)
 
         if self.transform:
-            x = self.trasform(x)
+            x = self.transform(x)
 
         return (x, y)
 
