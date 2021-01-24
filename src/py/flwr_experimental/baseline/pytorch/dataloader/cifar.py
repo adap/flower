@@ -121,6 +121,7 @@ class CIFAR10PartitionedDataset(CIFAR_PartitionedDataset):
         *,
         root_dir: Union[str, bytes, PathLike],
         partition_id: int,
+        transform: Optional[callable]=None,
     ):
         """Dataset from partitioned files
         Parameters
@@ -130,7 +131,7 @@ class CIFAR10PartitionedDataset(CIFAR_PartitionedDataset):
         root_dir : Union[str, bytes, os.PathLike]
             Directory containing partioned files.
         """
-        super().__init__(num_classes=10, root_dir=root_dir, partition_id=partition_id)
+        super().__init__(num_classes=10, root_dir=root_dir, partition_id=partition_id, transform=transform)
 
 
 class CIFAR100PartitionedDataset(CIFAR_PartitionedDataset):
@@ -141,6 +142,7 @@ class CIFAR100PartitionedDataset(CIFAR_PartitionedDataset):
         *,
         root_dir: Union[str, bytes, PathLike],
         partition_id: int,
+        transform: Optional[callable]=None,
     ):
         """Dataset from partitioned files
         Parameters
@@ -150,4 +152,4 @@ class CIFAR100PartitionedDataset(CIFAR_PartitionedDataset):
         root_dir : Union[str, bytes, os.PathLike]
             Directory containing partioned files.
         """
-        super().__init__(num_classes=100, root_dir=root_dir, partition_id=partition_id)
+        super().__init__(num_classes=100, root_dir=root_dir, partition_id=partition_id, transform=transform)
