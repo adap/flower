@@ -24,6 +24,7 @@ from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import torch.nn as nn
+from PIL import Image
 from torch import Tensor, from_numpy, load, save
 from torch.utils.data import Dataset
 from torchvision.datasets import CIFAR10, CIFAR100
@@ -31,22 +32,30 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 
 import flwr as fl
 from flwr.dataset.utils.common import XY, XYList, create_lda_partitions
-from flwr_experimental.baseline.pytorch.utils import convert_pytorch_dataset_to_xy
-
-DATA_ROOT: str = "~/.flower/data/cifar"
+from flwr.dataset.utils.pytorch import convert_torchvision_dataset_to_xy
 
 
-def get_normalization_transform() -> Compose:
+def get_normalization_transform(num_classes: int = 10) -> Compose:
     """Generates a compose transformation with mean and average normalization
     for CIFAR10.
 
     Returns:
         transforms.transforms.Compose: A Compose transformation for CIFAR10
     """
+    if num_classes not in [10, 100]:
+        raise ValueError(
+            """Number of classes can only be either 
+                10 or 100 for CIFAR10 and CIFAR100 datasets respectively."""
+        )
+    if num_classes == 10:
+        mean_std = ((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    else:
+        mean_std = ((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))
+
     transform = Compose(
         [
             ToTensor(),
-            Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+            Normalize(*mean_std),
         ]
     )
     return transform
@@ -57,7 +66,7 @@ class CIFAR_PartitionedDataset(Dataset):
         self,
         *,
         num_classes: int = 10,
-        root_dir: Union[str, bytes, PathLike] = DATA_ROOT,
+        root_dir: Union[str, bytes, PathLike],
         partition_id: int,
         transform: Optional[callable],
     ):
@@ -93,8 +102,8 @@ class CIFAR_PartitionedDataset(Dataset):
     def __len__(self) -> int:
         return len(self.X)
 
-    def __getitem__(self, idx: int) -> XY:
-        x = self.X[idx]
+    def __getitem__(self, idx: int) -> Union[XY, Tuple[Image, ndarray]]:
+        x = Image.fromarray(self.X[idx])
         y = self.Y[idx]
 
         if self.transform:
@@ -109,7 +118,7 @@ class CIFAR10PartitionedDataset(CIFAR_PartitionedDataset):
     def __init__(
         self,
         *,
-        root_dir: Union[str, bytes, PathLike] = DATA_ROOT,
+        root_dir: Union[str, bytes, PathLike],
         partition_id: int,
     ):
         """Dataset from partitioned files
@@ -129,7 +138,7 @@ class CIFAR100PartitionedDataset(CIFAR_PartitionedDataset):
     def __init__(
         self,
         *,
-        root_dir: Union[str, bytes, PathLike] = DATA_ROOT,
+        root_dir: Union[str, bytes, PathLike],
         partition_id: int,
     ):
         """Dataset from partitioned files
@@ -141,70 +150,3 @@ class CIFAR100PartitionedDataset(CIFAR_PartitionedDataset):
             Directory containing partioned files.
         """
         super().__init__(num_classes=100, root_dir=root_dir, partition_id=partition_id)
-
-
-if __name__ == "__main__":
-    """Generates Latent Dirichlet Allocated Partitions for CIFAR10/100
-    datasets."""
-    parser = argparse.ArgumentParser(
-        description="Generate Latent Dirichlet Allocated Partitions for CIFAR10/100 datasets."
-    )
-
-    parser.add_argument(
-        "--num_classes",
-        type=int,
-        required=True,
-        choices=[10, 100],
-        help="Choose 10 for CIFAR10 and 100 for CIFAR100.",
-    )
-    parser.add_argument(
-        "--num_partitions",
-        type=int,
-        default=500,
-        help="Number of partitions in which to split the dataset.",
-    )
-    parser.add_argument(
-        "--alpha",
-        type=float,
-        default=0.1,
-        help="Choose Dirichlet concentration.",
-    )
-    parser.add_argument(
-        "--save_root",
-        type=str,
-        default=DATA_ROOT,
-        help="Choose where to save partition.",
-    )
-
-    args = parser.parse_args()
-    save_root = Path(f"{args.save_root}") / "partitions" / "lda" / f"{args.alpha:.2f}"
-
-    # Use standard mean and standard variation
-    basic_transform = get_normalization_transform()
-
-    train_dataset = CIFAR10(
-        root=f"{DATA_ROOT}-{args.num_classes}",
-        train=True,
-        download=True,
-    )
-    test_dataset = CIFAR10(
-        root=f"{DATA_ROOT}-{args.num_classes}",
-        train=True,
-        download=True,
-    )
-    dist = np.empty(0)
-    for dataset, data_str in [(train_dataset, "train"), (test_dataset, "test")]:
-        save_dir = save_root / data_str
-        save_dir.mkdir(parents=True, exist_ok=True)
-
-        np_dataset = convert_pytorch_dataset_to_xy(dataset)
-
-        partitions, dist = create_lda_partitions(
-            dataset=np_dataset,
-            dirichlet_dist=dist,
-            num_partitions=args.num_partitions,
-            concentration=args.alpha,
-        )
-
-        for idx, part in enumerate(partitions):
-            save(part, save_dir / f"{idx:03}.pt")
