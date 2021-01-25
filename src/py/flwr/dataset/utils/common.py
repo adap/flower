@@ -245,7 +245,7 @@ def split_array_at_indices(
 
     list_samples_split: List[List[np.ndarray]] = [[] for _ in range(num_splits)]
     for j in range(num_splits):
-        tmp_x = x[split_idx[j] : split_idx[j + 1]] # noqa: E203
+        tmp_x = x[split_idx[j] : split_idx[j + 1]]  # noqa: E203
         for sample in tmp_x:
             list_samples_split[j].append(sample)
 
