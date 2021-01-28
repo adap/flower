@@ -61,6 +61,7 @@ message ClientMessage {
     int64 num_examples = 2;
     int64 num_examples_ceil = 3 [ deprecated = true ];
     float fit_duration = 4 [ deprecated = true ];
+    map<string, Scalar> metrics = 5;
   }
   message EvaluateRes {
     int64 num_examples = 1;
