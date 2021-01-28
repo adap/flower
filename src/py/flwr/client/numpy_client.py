@@ -50,7 +50,7 @@ class NumPyClient(ABC):
     @abstractmethod
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
-    ) -> Tuple[List[np.ndarray], int]:
+    ) -> Union[Tuple[List[np.ndarray], int], Tuple[List[np.ndarray], int, Metrics]]:
         """Train the provided parameters using the locally held dataset.
 
         Arguments:
@@ -64,6 +64,7 @@ class NumPyClient(ABC):
         Returns:
             A tuple containing two elements: Updated parameters and an `int`
             representing the number of examples used for training.
+            TODO
         """
 
     @abstractmethod
@@ -112,16 +113,24 @@ class NumPyClientWrapper(Client):
 
         # Train
         fit_begin = timeit.default_timer()
-        parameters_prime, num_examples = self.numpy_client.fit(parameters, ins.config)
-        fit_duration = timeit.default_timer() - fit_begin
+        results = self.numpy_client.fit(parameters, ins.config)
+        if len(results) == 2:
+            results = cast(Tuple[List[np.ndarray], int], results)
+            parameters_prime, num_examples = results
+            metrics: Optional[Metrics] = None
+        elif len(results) == 3:
+            results = cast(Tuple[List[np.ndarray], int, Metrics], results)
+            parameters_prime, num_examples, metrics = results
 
         # Return FitRes
+        fit_duration = timeit.default_timer() - fit_begin
         parameters_prime_proto = weights_to_parameters(parameters_prime)
         return FitRes(
             parameters=parameters_prime_proto,
             num_examples=num_examples,
             num_examples_ceil=num_examples,  # num_examples == num_examples_ceil
             fit_duration=fit_duration,
+            metrics=metrics,
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
