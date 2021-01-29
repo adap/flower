@@ -8,11 +8,11 @@ What's new?
 
 * **Generalized** :code:`Client.fit` **and** :code:`Client.evaluate` **return values** (`#xxx <https://github.com/adap/flower/pull/xxx>`_, `#572 <https://github.com/adap/flower/pull/572>`_)
 
-  Clients (both :code:`Client` and :code:`NumPyClient`) can now return an additional dictionary mapping :code:`str` keys to values of the following types: :code:`bool`, :code:`bytes`, :code:`float`, :code:`int`, :code:`str`. This means one can return almost arbitrary values from :code:`fit`/:code:`evaluate` and make use of them on the server side!
+  Clients can now return an additional dictionary mapping :code:`str` keys to values of the following types: :code:`bool`, :code:`bytes`, :code:`float`, :code:`int`, :code:`str`. This means one can return almost arbitrary values from :code:`fit`/:code:`evaluate` and make use of them on the server side!
   
-  In case you wondered: this feature is compatible with existing projects. The additional dictionary return value is optional, which means that :code:`Client` and :code:`NumPyClient` can handle either three or four return values. See the example below for details.
+  In case you wondered: this feature is compatible with existing projects. The additional dictionary return value is optional, which means that :code:`NumPyClient` can handle either three or four return values. See the example below for details.
 
-  *Code example:* note the additional dictionary return values in both :code:`Client.fit` and :code:`Client.evaluate`: 
+  *Code example:* note the additional dictionary return values in both :code:`FlwrClient.fit` and :code:`FlwrClient.evaluate`: 
 
   .. code-block:: python
 
