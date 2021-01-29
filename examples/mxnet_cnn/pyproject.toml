@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "mxnet_example"
+version = "0.1.0"
+description = "MXNet example with MNIST and CNN"
+authors = ["mariaboerner1987 <maria@adap.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+mxnet = "^1.7.0"
+flwr = "^0.13.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
