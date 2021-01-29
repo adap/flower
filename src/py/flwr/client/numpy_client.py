@@ -62,9 +62,12 @@ class NumPyClient(ABC):
                 example, to set the number of (local) training epochs.
 
         Returns:
-            A tuple containing two elements: Updated parameters and an `int`
-            representing the number of examples used for training.
-            TODO
+            parameters: List[numpy.ndarray]. The locally updated model
+                parameters.
+            num_examples (int): The number of examples used for training.
+            metrics (Metrics, optional): A dictionary mapping arbitrary string
+                keys to values of type bool, bytes, float, int, or str. Metrics
+                can be used to communicate arbitrary values back to the server.
         """
 
     @abstractmethod

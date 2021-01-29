@@ -66,15 +66,16 @@ class KerasClient(ABC):
                 example, to set the number of (local) training epochs.
 
         Returns:
-            A tuple containing three elements: Updated weights (usually
-            obtained by calling Keras' `model.get_weights()`), an `int`
-            representing the number of examples used for training
-            (`num_examples`), and a second `int` representing the maximum
-            number of examples that might have been used during training
-            (`num_examples_ceil`). If the client does not terminate training
-            early (e.g., due to a timeout or other stopping condition), then
-            `num_examples == num_examples_ceil`.
-            TODO
+            weights: Weights. The locally updated model weights, usually
+                obtained by calling Keras' `model.get_weights()`.
+            num_examples (int): The number of examples used for training.
+            num_examples_ceil (int): The maximum number of examples that might
+                have been used during training.  If the client does not
+                terminate training early (e.g., due to a timeout or other
+                stopping condition), then `num_examples == num_examples_ceil`.
+            metrics (Metrics, optional): A dictionary mapping arbitrary string
+                keys to values of type bool, bytes, float, int, or str. Metrics
+                can be used to communicate arbitrary values back to the server.
         """
 
     @abstractmethod
