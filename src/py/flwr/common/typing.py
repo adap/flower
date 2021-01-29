@@ -62,7 +62,7 @@ class FitRes:
     num_examples: int
     num_examples_ceil: int  # Deprecated
     fit_duration: float  # Deprecated
-    # metrics: Metrics
+    metrics: Optional[Metrics] = None
 
 
 @dataclass
