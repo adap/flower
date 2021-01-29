@@ -6,7 +6,7 @@ Unreleased
 
 What's new?
 
-* **Generalized** :code:`Client.fit` **and** :code:`Client.evaluate` **return values** (`#xxx <https://github.com/adap/flower/pull/xxx>`_, `#572 <https://github.com/adap/flower/pull/572>`_)
+* **Generalized** :code:`Client.fit` **and** :code:`Client.evaluate` **return values** (`#610 <https://github.com/adap/flower/pull/610>`_, `#572 <https://github.com/adap/flower/pull/572>`_)
 
   Clients can now return an additional dictionary mapping :code:`str` keys to values of the following types: :code:`bool`, :code:`bytes`, :code:`float`, :code:`int`, :code:`str`. This means one can return almost arbitrary values from :code:`fit`/:code:`evaluate` and make use of them on the server side!
   
