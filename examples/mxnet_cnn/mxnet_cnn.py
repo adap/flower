@@ -6,6 +6,7 @@ https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.ht
 """
 
 from __future__ import print_function
+from typing import Tuple
 import mxnet as mx
 from mxnet import gluon
 from mxnet.gluon import nn
@@ -15,7 +16,7 @@ import mxnet.ndarray as F
 # Fixing the random seed
 mx.random.seed(42)
 
-def load_data():
+def load_data() -> Tuple[mx.io.NDArrayIter, mx.io.NDArrayIter]:
     print("Download Dataset")
     # Download MNIST data
     mnist = mx.test_utils.get_mnist()
@@ -58,11 +59,11 @@ def train(
     net: Net,
     train_data: mx.io.NDArrayIter,
     epoch: int,
+    device: mx.context
 )->None:
-    print("Setup context to GPU and if not available to CPU")
-    # set the context on GPU is available otherwise CPU
-    ctx = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
-    net.initialize(mx.init.Xavier(magnitude=2.24), ctx=ctx)
+
+    
+    net.initialize(mx.init.Xavier(magnitude=2.24), ctx=device)
     trainer = gluon.Trainer(net.collect_params(), 'sgd', {'learning_rate': 0.03})
 
     # Use Accuracy as the evaluation metric.
@@ -78,10 +79,10 @@ def train(
         for batch in train_data:
             # Splits train data into multiple slices along batch_axis
             # and copy each slice into a context.
-            data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
+            data = gluon.utils.split_and_load(batch.data[0], ctx_list=device, batch_axis=0)
             # Splits train labels into multiple slices along batch_axis
             # and copy each slice into a context.
-            label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
+            label = gluon.utils.split_and_load(batch.label[0], ctx_list=device, batch_axis=0)
             outputs = []
             # Inside training scope
             with ag.record():
@@ -110,106 +111,45 @@ def train(
 
 def test(
     net: Net,
-    train_data: mx.io.NDArrayIter,
-):
+    val_data: mx.io.NDArrayIter,
+    device: mx.context
+) -> Tuple[float]:
     # Use Accuracy as the evaluation metric.
+    # net.initialize(mx.init.Xavier(magnitude=2.24), ctx=device, force_reinit= True)
     metric = mx.metric.Accuracy()
     loss_metric = mx.metric.Loss()
+    loss = 0.0
+    print("start batch processing")
     # Reset the validation data iterator.
     val_data.reset()
     # Loop over the validation data iterator.
     for batch in val_data:
         # Splits validation data into multiple slices along batch_axis
         # and copy each slice into a context.
-        data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
+        data = gluon.utils.split_and_load(batch.data[0], ctx_list=device, batch_axis=0)
         # Splits validation label into multiple slices along batch_axis
         # and copy each slice into a context.
-        label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
+        label = gluon.utils.split_and_load(batch.label[0], ctx_list=device, batch_axis=0)
         outputs = []
         for x in data:
             outputs.append(net(x))
         # Updates internal evaluation
         metric.update(label, outputs)
+        #loss_metric.update(label, outputs)
+        #loss_metric += loss_metric.get()
     print('validation acc: %s=%f'%metric.get())
     eval_acc = metric.get()
-    #assert metric.get()[1] > 0.98
-
+    # assert metric.get()[1] > 0.98
     return eval_acc
 
 def main():
+    print("Setup context to GPU and if not available to CPU")
+    DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
     train_data, val_data = load_data()
-    train(net=Net(), train_data = train_data, epoch=2)
-    print("Loss and Accuracy: ", test(net=Net(), train_data = train_data))
+    NET = Net()
+    train(net=NET, train_data = train_data, epoch=10, device=DEVICE)
+    acc = test(net=NET, val_data = val_data, device=DEVICE)
+    print("Loss and Accuracy: ", acc)
 
 if __name__ == "__main__":
     main()
-
-"""
-
-# define network
-net = nn.Sequential()
-net.add(nn.Dense(128, activation='relu'))
-net.add(nn.Dense(64, activation='relu'))
-net.add(nn.Dense(10))
-
-gpus = mx.test_utils.list_gpus()
-ctx =  [mx.gpu()] if gpus else [mx.cpu(0), mx.cpu(1)]
-net.initialize(mx.init.Xavier(magnitude=2.24), ctx=ctx)
-trainer = gluon.Trainer(net.collect_params(), 'sgd', {'learning_rate': 0.02})
-
-epoch = 10
-# Use Accuracy as the evaluation metric.
-metric = mx.metric.Accuracy()
-softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
-for i in range(epoch):
-    # Reset the train data iterator.
-    train_data.reset()
-    # Loop over the train data iterator.
-    for batch in train_data:
-        # Splits train data into multiple slices along batch_axis
-        # and copy each slice into a context.
-        data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
-        # Splits train labels into multiple slices along batch_axis
-        # and copy each slice into a context.
-        label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
-        outputs = []
-        # Inside training scope
-        with ag.record():
-            for x, y in zip(data, label):
-                z = net(x)
-                # Computes softmax cross entropy loss.
-                loss = softmax_cross_entropy_loss(z, y)
-                # Backpropagate the error for one iteration.
-                loss.backward()
-                outputs.append(z)
-        # Updates internal evaluation
-        metric.update(label, outputs)
-        # Make one step of parameter update. Trainer needs to know the
-        # batch size of data to normalize the gradient by 1/batch_size.
-        trainer.step(batch.data[0].shape[0])
-    # Gets the evaluation result.
-    name, acc = metric.get()
-    # Reset evaluation result to initial state.
-    metric.reset()
-    print('training acc at epoch %d: %s=%f'%(i, name, acc))
-
-    # Use Accuracy as the evaluation metric.
-metric = mx.metric.Accuracy()
-# Reset the validation data iterator.
-val_data.reset()
-# Loop over the validation data iterator.
-for batch in val_data:
-    # Splits validation data into multiple slices along batch_axis
-    # and copy each slice into a context.
-    data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
-    # Splits validation label into multiple slices along batch_axis
-    # and copy each slice into a context.
-    label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
-    outputs = []
-    for x in data:
-        outputs.append(net(x))
-    # Updates internal evaluation
-    metric.update(label, outputs)
-print('validation acc: %s=%f'%metric.get())
-assert metric.get()[1] > 0.94
-"""
