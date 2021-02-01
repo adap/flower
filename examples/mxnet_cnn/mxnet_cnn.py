@@ -101,24 +101,25 @@ def train(
             trainer.step(batch.data[0].shape[0])
         # Gets the evaluation result.
         name, acc = metric.get()
-        name, running_loss = loss_metric.get()
+        name_loss, running_loss = loss_metric.get()
         # Reset evaluation result to initial state.
         metric.reset()
         print('training acc at epoch %d: %s=%f'%(i, name, acc))
         
-        print('training loss at epoch %d: %s=%f'%(i, name, running_loss))
+        print('training loss at epoch %d: %s=%f'%(i, name_loss, running_loss))
 
 
 def test(
     net: Net,
     val_data: mx.io.NDArrayIter,
     device: mx.context
-) -> Tuple[float]:
+) -> Tuple[float, float]:
     # Use Accuracy as the evaluation metric.
     # net.initialize(mx.init.Xavier(magnitude=2.24), ctx=device, force_reinit= True)
     metric = mx.metric.Accuracy()
     loss_metric = mx.metric.Loss()
     loss = 0.0
+    eval_loss = 0.0
     print("start batch processing")
     # Reset the validation data iterator.
     val_data.reset()
@@ -135,21 +136,23 @@ def test(
             outputs.append(net(x))
         # Updates internal evaluation
         metric.update(label, outputs)
-        #loss_metric.update(label, outputs)
-        #loss_metric += loss_metric.get()
+        loss_metric.update(label, outputs)
+        loss += loss_metric.get()
     print('validation acc: %s=%f'%metric.get())
     eval_acc = metric.get()
+    eval_loss = loss.item()
     # assert metric.get()[1] > 0.98
-    return eval_acc
+    print("loss Loop", loss)
+    return eval_loss, eval_acc
 
 def main():
     print("Setup context to GPU and if not available to CPU")
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
     train_data, val_data = load_data()
     NET = Net()
-    train(net=NET, train_data = train_data, epoch=10, device=DEVICE)
-    acc = test(net=NET, val_data = val_data, device=DEVICE)
-    print("Loss and Accuracy: ", acc)
+    train(net=NET, train_data = train_data, epoch=2, device=DEVICE)
+    loss, acc = test(net=NET, val_data = val_data, device=DEVICE)
+    print("Loss and Accuracy: ", loss, acc)
 
 if __name__ == "__main__":
     main()
