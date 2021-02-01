@@ -404,7 +404,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         assert_identity(this_partition, (expected_x, expected_y))
 
     def test_create_lda_partitions_imbalanced_not_set(self) -> None:
-        """Test if Dirichlet Latent Allocation rejects imbalanced
+        """Test if Latent Dirichlet Allocation rejects imbalanced
         partitions."""
         # Prepare
         num_partitions = 3
@@ -419,7 +419,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
             )
 
     def test_create_lda_partitions_imbalanced(self) -> None:
-        """Test if Dirichlet Latent Allocation accepts imbalanced partitions if
+        """Test if Latent Dirichlet Allocation accepts imbalanced partitions if
         accept_imbalanced is set."""
         # Prepare
         num_partitions = 3
@@ -439,7 +439,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         assert total_samples == self.num_samples
 
     def test_create_lda_partitions_alpha_near_zero(self) -> None:
-        """Test if Dirichlet Latent Allocation partitions will give single
+        """Test if Latent Dirichlet Allocation partitions will give single
         class distribution when concentration is near zero (~1e-3)."""
         # Prepare
         num_partitions = 5
@@ -458,7 +458,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
             assert max_prob > 0.5
 
     def test_create_lda_partitions_large_alpha(self) -> None:
-        """Test if Dirichlet Latent Allocation partitions will give near
+        """Test if Latent Dirichlet Allocation partitions will give near
         uniform distribution when concentration is large(~1e5)."""
         # Prepare
         num_partitions = 5
@@ -479,7 +479,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
             np.testing.assert_array_almost_equal(this_distribution, uniform, decimal=3)
 
     def test_create_lda_partitions_elements(self) -> None:
-        """Test if partitions from Dirichlet Latent Allocation contain the same
+        """Test if partitions from Latent Dirichlet Allocation contain the same
         elements."""
         # Prepare
         num_partitions = 5
@@ -494,6 +494,38 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
 
         # Assert
         assert_identity(xy_0=self.ds, xy_1=(x_lda, y_lda))
+
+    def test_create_lda_partitions_elements_list_concentration(self) -> None:
+        """Test if partitions from Latent Dirichlet Allocation contain the same
+        elements."""
+        # Prepare
+        num_partitions = 5
+        concentration = self.num_classes * [0.5]
+
+        # Execute
+        partitions, _ = create_lda_partitions(
+            dataset=self.ds, num_partitions=num_partitions, concentration=concentration
+        )
+        x_lda = np.concatenate([item[0] for item in partitions])
+        y_lda = np.concatenate([item[1] for item in partitions])
+
+        # Assert
+        assert_identity(xy_0=self.ds, xy_1=(x_lda, y_lda))
+
+    def test_create_lda_partitions_elements_wrong_list_concentration(self) -> None:
+        """Test if partitions from Latent Dirichlet Allocation contain the same
+        elements."""
+        # Prepare
+        num_partitions = 5
+        concentration = (self.num_classes + 1) * [0.5]
+
+        # Execute
+        with self.assertRaises(ValueError):
+            create_lda_partitions(
+                dataset=self.ds,
+                num_partitions=num_partitions,
+                concentration=concentration,
+            )
 
 
 if __name__ == "__main__":
