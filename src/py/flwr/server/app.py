@@ -62,7 +62,23 @@ def start_server(
     Returns:
         None.
     """
+    server, config = _init_defaults(server, config, strategy)
 
+    # Start gRPC server
+    grpc_server = start_insecure_grpc_server(
+        client_manager=server.client_manager(),
+        server_address=server_address,
+        max_message_length=grpc_max_message_length,
+    )
+    log(INFO, "Flower server running (insecure, %s rounds)", config["num_rounds"])
+
+    _fl(server=server, config=config)
+
+    # Stop the gRPC server
+    grpc_server.stop(1)
+
+
+def _init_defaults(server, config, strategy):
     # Create server instance if none was given
     if server is None:
         client_manager = SimpleClientManager()
@@ -76,14 +92,10 @@ def start_server(
     if "num_rounds" not in config:
         config["num_rounds"] = 1
 
-    # Start gRPC server
-    grpc_server = start_insecure_grpc_server(
-        client_manager=server.client_manager(),
-        server_address=server_address,
-        max_message_length=grpc_max_message_length,
-    )
-    log(INFO, "Flower server running (insecure, %s rounds)", config["num_rounds"])
+    return server, config
 
+
+def _fl(server: Server, config) -> None:
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
@@ -110,6 +122,3 @@ def start_server(
 
     # Graceful shutdown
     server.disconnect_all_clients()
-
-    # Stop the gRPC server
-    grpc_server.stop(1)
