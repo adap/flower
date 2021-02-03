@@ -28,6 +28,62 @@ from flwr.server.strategy import FedAvg, Strategy
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 
+from typing import List
+
+from flwr.client import Client, NumPyClient, numpy_client
+from flwr.server.in_memory_server.in_memory_client_proxy import InMemoryClientProxy
+
+
+def start_numpy_simulation(
+    numpy_clients: List[NumPyClient],
+    server: Optional[Server] = None,
+    config: Optional[Dict[str, int]] = None,
+    strategy: Optional[Strategy] = None,
+) -> None:
+    clients = [numpy_client.NumPyClientWrapper(npc) for npc in numpy_clients]
+    return start_simulation(
+        clients=clients, server=server, config=config, strategy=strategy
+    )
+
+
+def start_simulation(
+    clients: List[Client],
+    server: Optional[Server] = None,
+    config: Optional[Dict[str, int]] = None,
+    strategy: Optional[Strategy] = None,
+) -> None:
+    """[summary]
+
+    Args:
+        clients (List[Client]): [description]
+        server: Optional[flwr.server.Server] (default: None). An implementation
+            of the abstract base class `flwr.server.Server`. If no instance is
+            provided, then `start_server` will create one.
+        config: Optional[Dict[str, int]] (default: None). The only currently
+            supported values is `num_rounds`, so a full configuration object
+            instructing the server to perform three rounds of federated
+            learning looks like the following: `{"num_rounds": 3}`.
+        strategy: Optional[flwr.server.Strategy] (default: None). An
+            implementation of the abstract base class `flwr.server.Strategy`.
+            If no strategy is provided, then `start_server` will use
+            `flwr.server.strategy.FedAvg`.
+    """
+    server, config = _init_defaults(server, config, strategy)
+
+    # Wrap each Client in a ClientProxy instance
+    client_proxies = [
+        InMemoryClientProxy(str(cid), client) for cid, client in enumerate(clients)
+    ]
+
+    # Register each ClientProxy with the ClientManager
+    client_manager = server.client_manager()
+    for cp in client_proxies:
+        client_manager.register(cp)
+
+    # Run federated learning
+    _fl(server=server, config=config)
+
+
 def start_server(
     server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,

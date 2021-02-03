@@ -138,7 +138,8 @@ class Server:
         )
 
         # Evaluate current global weights on those clients
-        results_and_failures = evaluate_clients(client_instructions)
+        results_and_failures = evaluate_clients_round_robin(client_instructions)
+        # results_and_failures = evaluate_clients(client_instructions)
         results, failures = results_and_failures
         log(
             DEBUG,
@@ -167,7 +168,8 @@ class Server:
             return None
 
         # Collect training results from all clients participating in this round
-        results, failures = fit_clients(client_instructions)
+        results, failures = fit_clients_round_robin(client_instructions)
+        # results, failures = fit_clients(client_instructions)
         log(
             DEBUG,
             "fit_round received %s results and %s failures",
@@ -244,6 +246,18 @@ def fit_clients(
     return results, failures
 
 
+def fit_clients_round_robin(
+    client_instructions: List[Tuple[ClientProxy, FitIns]]
+) -> FitResultsAndFailures:
+    """Refine weights concurrently on all selected clients."""
+    results = []
+    for client_proxy, fitins in client_instructions:
+        res = fit_client(client_proxy, fitins)
+        results.append(res)
+    failures = []
+    return results, failures
+
+
 def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
     """Refine weights on a single client."""
     fit_res = client.fit(ins)
@@ -269,6 +283,18 @@ def evaluate_clients(
         else:
             # Success case
             results.append(future.result())
+    return results, failures
+
+
+def evaluate_clients_round_robin(
+    client_instructions: List[Tuple[ClientProxy, EvaluateIns]]
+) -> EvaluateResultsAndFailures:
+    """Evaluate weights concurrently on all selected clients."""
+    results = []
+    for client_proxy, evaluate_ins in client_instructions:
+        res = evaluate_client(client_proxy, evaluate_ins)
+        results.append(res)
+    failures = []
     return results, failures
 
 
