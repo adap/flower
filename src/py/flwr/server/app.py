@@ -16,7 +16,7 @@
 
 
 from logging import INFO
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
@@ -62,23 +62,31 @@ def start_server(
     Returns:
         None.
     """
-    server, config = _init_defaults(server, config, strategy)
+    initialized_server, initialized_config = _init_defaults(server, config, strategy)
 
     # Start gRPC server
     grpc_server = start_insecure_grpc_server(
-        client_manager=server.client_manager(),
+        client_manager=initialized_server.client_manager(),
         server_address=server_address,
         max_message_length=grpc_max_message_length,
     )
-    log(INFO, "Flower server running (insecure, %s rounds)", config["num_rounds"])
+    log(
+        INFO,
+        "Flower server running (insecure, %s rounds)",
+        initialized_config["num_rounds"],
+    )
 
-    _fl(server=server, config=config)
+    _fl(server=initialized_server, config=initialized_config)
 
     # Stop the gRPC server
     grpc_server.stop(1)
 
 
-def _init_defaults(server, config, strategy):
+def _init_defaults(
+    server: Optional[Server],
+    config: Optional[Dict[str, int]],
+    strategy: Optional[Strategy],
+) -> Tuple[Server, Dict[str, int]]:
     # Create server instance if none was given
     if server is None:
         client_manager = SimpleClientManager()
@@ -95,7 +103,7 @@ def _init_defaults(server, config, strategy):
     return server, config
 
 
-def _fl(server: Server, config) -> None:
+def _fl(server: Server, config: Dict[str, int]) -> None:
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
