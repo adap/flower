@@ -8,9 +8,9 @@ def main() -> None:
 
     # Load model
     def load_model() -> tf.keras.Model:
-        return tf.keras.applications.MobileNetV2(
-            (32, 32, 3), classes=10, weights=None
-        ).compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+        model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+        model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+        return model
 
     # Define Flower client
     class CifarClient(fl.client.NumPyClient):
@@ -30,8 +30,7 @@ def main() -> None:
                 x_train[self.train_start : self.train_end],
                 y_train[self.train_start : self.train_end],
                 epochs=1,
-                batch_size=32,
-                steps_per_epoch=3,
+                batch_size=20,
             )
             return model.get_weights(), len(x_train[self.train_start : self.train_end])
 
@@ -68,7 +67,9 @@ def main() -> None:
         min_eval_clients=3,
         min_available_clients=500,
     )
-    fl.server.start_numpy_simulation(numpy_clients=clients, strategy=strategy)
+    fl.server.start_numpy_simulation(
+        numpy_clients=clients, strategy=strategy, config={"num_rounds": 3}
+    )
 
 
 if __name__ == "__main__":
