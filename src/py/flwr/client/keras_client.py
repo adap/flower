@@ -16,7 +16,9 @@
 
 import timeit
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Tuple, Union, cast
+from typing import Dict, List, Optional, Tuple, Union, cast
+
+import numpy as np
 
 from flwr.common import (
     EvaluateIns,
@@ -50,7 +52,7 @@ class KerasClient(ABC):
     @abstractmethod
     def fit(
         self, weights: Weights, config: Dict[str, Scalar]
-    ) -> Tuple[Weights, int, int]:
+    ) -> Union[Tuple[Weights, int, int], Tuple[Weights, int, int, Metrics]]:
         """Refine/train the provided weights using the locally held dataset.
 
         Arguments:
@@ -64,14 +66,16 @@ class KerasClient(ABC):
                 example, to set the number of (local) training epochs.
 
         Returns:
-            A tuple containing three elements: Updated weights (usually
-            obtained by calling Keras' `model.get_weights()`), an `int`
-            representing the number of examples used for training
-            (`num_examples`), and a second `int` representing the maximum
-            number of examples that might have been used during training
-            (`num_examples_ceil`). If the client does not terminate training
-            early (e.g., due to a timeout or other stopping condition), then
-            `num_examples == num_examples_ceil`.
+            weights: Weights. The locally updated model weights, usually
+                obtained by calling Keras' `model.get_weights()`.
+            num_examples (int): The number of examples used for training.
+            num_examples_ceil (int): The maximum number of examples that might
+                have been used during training.  If the client does not
+                terminate training early (e.g., due to a timeout or other
+                stopping condition), then `num_examples == num_examples_ceil`.
+            metrics (Metrics, optional): A dictionary mapping arbitrary string
+                keys to values of type bool, bytes, float, int, or str. Metrics
+                can be used to communicate arbitrary values back to the server.
         """
 
     @abstractmethod
@@ -118,18 +122,24 @@ class KerasClientWrapper(Client):
 
         # Train
         fit_begin = timeit.default_timer()
-        weights_prime, num_examples, num_examples_ceil = self.keras_client.fit(
-            weights, ins.config
-        )
-        fit_duration = timeit.default_timer() - fit_begin
+        results = self.keras_client.fit(weights, ins.config)
+        if len(results) == 3:
+            results = cast(Tuple[List[np.ndarray], int, int], results)
+            weights_prime, num_examples, num_examples_ceil = results
+            metrics: Optional[Metrics] = None
+        elif len(results) == 4:
+            results = cast(Tuple[List[np.ndarray], int, int, Metrics], results)
+            weights_prime, num_examples, num_examples_ceil, metrics = results
 
         # Return FitRes
-        parameters = weights_to_parameters(weights_prime)
+        fit_duration = timeit.default_timer() - fit_begin
+        weights_prime_proto = weights_to_parameters(weights_prime)
         return FitRes(
-            parameters=parameters,
+            parameters=weights_prime_proto,
             num_examples=num_examples,
             num_examples_ceil=num_examples_ceil,
             fit_duration=fit_duration,
+            metrics=metrics,
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:

@@ -6,6 +6,50 @@ Unreleased
 
 What's new?
 
+* **Generalized** :code:`Client.fit` **and** :code:`Client.evaluate` **return values** (`#610 <https://github.com/adap/flower/pull/610>`_, `#572 <https://github.com/adap/flower/pull/572>`_)
+
+  Clients can now return an additional dictionary mapping :code:`str` keys to values of the following types: :code:`bool`, :code:`bytes`, :code:`float`, :code:`int`, :code:`str`. This means one can return almost arbitrary values from :code:`fit`/:code:`evaluate` and make use of them on the server side!
+  
+  In case you wondered: this feature is compatible with existing projects. The additional dictionary return value is optional, which means that :code:`NumPyClient` can handle either three or four return values. See the example below for details.
+
+  *Code example:* note the additional dictionary return values in both :code:`FlwrClient.fit` and :code:`FlwrClient.evaluate`: 
+
+  .. code-block:: python
+
+    class FlwrClient(fl.client.NumPyClient):
+        def fit(self, parameters, config):
+            net.set_parameters(parameters)
+            train_loss = train(net, trainloader)
+            return net.get_weights(), len(trainloader), {"train_loss": train_loss}
+
+        def evaluate(self, parameters, config):
+            net.set_parameters(parameters)
+            loss, accuracy, custom_metric = test(net, testloader)
+            return len(testloader), loss, accuracy, {"custom_metric": custom_metric}
+
+* **Generalized** :code:`config` **argument in** :code:`Client.fit` **and** :code:`Client.evaluate` (`#595 <https://github.com/adap/flower/pull/595>`_)
+
+  The :code:`config` argument used to be of type :code:`Dict[str, str]`, which means that dictionary values were expected to be strings. The new release generalizes this to enable values of the following types: :code:`bool`, :code:`bytes`, :code:`float`, :code:`int`, :code:`str`.
+  
+  This means one can now pass almost arbitrary values to :code:`fit`/:code:`evaluate` using the :code:`config` dictionary. Yay, no more :code:`str(epochs)` on the server-side and :code:`int(config["epochs"])` on the client side!
+
+  *Code example:* note that the :code:`config` dictionary now contains non-:code:`str` values in both :code:`Client.fit` and :code:`Client.evaluate`: 
+
+  .. code-block:: python
+  
+    class FlwrClient(fl.client.NumPyClient):
+        def fit(self, parameters, config):
+            net.set_parameters(parameters)
+            epochs: int = config["epochs"]
+            train_loss = train(net, trainloader, epochs)
+            return net.get_weights(), len(trainloader), {"train_loss": train_loss}
+
+        def evaluate(self, parameters, config):
+            net.set_parameters(parameters)
+            batch_size: int = config["batch_size"]
+            loss, accuracy, custom_metric = test(net, testloader, batch_size)
+            return len(testloader), loss, accuracy, {"custom_metric": custom_metric}
+
 * New built-in strategies (`#549 <https://github.com/adap/flower/pull/549>`_)
     * (abstract) FedOpt
     * FedAdagrad
