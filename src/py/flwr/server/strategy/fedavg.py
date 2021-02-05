@@ -25,6 +25,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    Scalar,
     Weights,
     parameters_to_weights,
     weights_to_parameters,
@@ -48,8 +49,8 @@ class FedAvg(Strategy):
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
         eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
+        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
     ) -> None:
         """Federated Averaging strategy.
@@ -69,9 +70,9 @@ class FedAvg(Strategy):
                 clients in the system. Defaults to 2.
             eval_fn (Callable[[Weights], Optional[Tuple[float, float]]], optional):
                 Function used for validation. Defaults to None.
-            on_fit_config_fn (Callable[[int], Dict[str, str]], optional):
+            on_fit_config_fn (Callable[[int], Dict[str, Scalar]], optional):
                 Function used to configure training. Defaults to None.
-            on_evaluate_config_fn (Callable[[int], Dict[str, str]], optional):
+            on_evaluate_config_fn (Callable[[int], Dict[str, Scalar]], optional):
                 Function used to configure validation. Defaults to None.
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.

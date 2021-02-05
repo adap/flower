@@ -122,10 +122,11 @@ def main():
     print("Centralized PyTorch training")
     print("Load data")
     trainloader, testloader = load_data()
+    net = Net()
     print("Start training")
-    train(net=Net(), trainloader=trainloader, epochs=2, device=DEVICE)
+    train(net=net, trainloader=trainloader, epochs=2, device=DEVICE)
     print("Evaluate model")
-    loss, accuracy = test(net=Net(), testloader=testloader, device=DEVICE)
+    loss, accuracy = test(net=net, testloader=testloader, device=DEVICE)
     print("Loss: ", loss)
     print("Accuracy: ", accuracy)
 

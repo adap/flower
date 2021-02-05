@@ -23,7 +23,7 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from flwr.common import FitRes, Weights
+from flwr.common import FitRes, Scalar, Weights
 from flwr.server.client_proxy import ClientProxy
 
 from .fedopt import FedOpt
@@ -46,8 +46,8 @@ class FedAdagrad(FedOpt):
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
         eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
+        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         current_weights: Weights,
         eta: float = 1e-1,
