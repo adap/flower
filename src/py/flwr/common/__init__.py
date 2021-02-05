@@ -28,6 +28,7 @@ from .typing import Metrics as Metrics
 from .typing import Parameters as Parameters
 from .typing import ParametersRes as ParametersRes
 from .typing import Reconnect as Reconnect
+from .typing import Scalar as Scalar
 from .typing import Weights as Weights
 
 GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912  # == 512 * 1024 * 1024
@@ -46,6 +47,7 @@ __all__ = [
     "parameters_to_weights",
     "ParametersRes",
     "Reconnect",
+    "Scalar",
     "Weights",
     "weights_to_parameters",
 ]
