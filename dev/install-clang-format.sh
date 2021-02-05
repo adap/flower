@@ -9,5 +9,5 @@ then
     sudo apt install clang-format-10
     exit
 else
-    echo "Clang-Format is already installed on your Environment"
+    echo "clang-format is already installed in your environment"
 fi
