@@ -52,7 +52,8 @@ def train(
     epoch: int,
     device: mx.context
 ) -> None:
-    net.initialize(mx.init.Xavier(magnitude=2.24), ctx=device)
+    #print('Xavier Init', mx.init.Xavier(magnitude=2.24))
+    
     trainer = gluon.Trainer(net.collect_params(), 'sgd', {'learning_rate': 0.03})
     # Use Accuracy as the evaluation metric.
     metric = mx.metric.Accuracy()
@@ -132,11 +133,19 @@ def main():
     print("Setup context to GPU and if not available to CPU")
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
     train_data, val_data = load_data()
+    print("train_data", train_data, len(list(train_data)))
     net = Net()
+    net.initialize(mx.init.Xavier(magnitude=2.24), ctx=DEVICE)
     train(net=net, train_data = train_data, epoch=2, device=DEVICE)
     loss, acc = test(net=net, val_data = val_data, device=DEVICE)
     print("Loss: ", loss)
     print("Accuracy: ", acc)
+    print("print key", net.collect_params().keys())
+    print("Collect Parameters", net.collect_params().values())
+    #for val in  net.collect_params():
+    #    print('Parameter value',val)
+    #parameters=[val.data() for val in net.collect_params().values()]
+
 
 if __name__ == "__main__":
     main()
