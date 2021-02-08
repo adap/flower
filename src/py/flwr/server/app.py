@@ -16,14 +16,19 @@
 
 
 from logging import INFO
-from typing import Dict, Optional
+from typing import Dict, Optional, Callable, List
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
-from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.server.client_manager import ClientManager, SimpleClientManager
+from flwr.server.network_manager import (
+    GRPCNetworkManager,
+    NetworkManager,
+)
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
+from grpc import ClientCallDetails
+import grpc
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
@@ -33,6 +38,7 @@ def start_server(
     server: Optional[Server] = None,
     config: Optional[Dict[str, int]] = None,
     strategy: Optional[Strategy] = None,
+    network_managers: Optional[List[NetworkManager]] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
 ) -> None:
     """Start a Flower server using the gRPC transport layer.
@@ -77,11 +83,18 @@ def start_server(
         config["num_rounds"] = 1
 
     # Start gRPC server
-    grpc_server = start_insecure_grpc_server(
-        client_manager=server.client_manager(),
-        server_address=server_address,
-        max_message_length=grpc_max_message_length,
-    )
+    if network_managers is None:
+        network_managers = [
+            GRPCNetworkManager(
+                client_manager=server.client_manager(),
+                server_address=server_address,
+                grpc_max_message_length=grpc_max_message_length,
+            )
+        ]
+
+    for net in network_managers:
+        net.start()
+
     log(INFO, "Flower server running (insecure, %s rounds)", config["num_rounds"])
 
     # Fit model
@@ -111,5 +124,6 @@ def start_server(
     # Graceful shutdown
     server.disconnect_all_clients()
 
-    # Stop the gRPC server
-    grpc_server.stop(1)
+    # Shutdown networks
+    for net in network_managers:
+        net.stop()
