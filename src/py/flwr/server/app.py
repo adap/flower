@@ -16,7 +16,7 @@
 
 
 from logging import INFO
-from typing import Dict, Optional, Callable, List
+from typing import Dict, Optional, Tuple
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
@@ -68,7 +68,39 @@ def start_server(
     Returns:
         None.
     """
+    initialized_server, initialized_config = _init_defaults(server, config, strategy)
 
+    # Start gRPC server
+    if network_managers is None:
+        network_managers = [
+            GRPCNetworkManager(
+                client_manager=initialized_server.client_manager(),
+                server_address=server_address,
+                grpc_max_message_length=grpc_max_message_length,
+            )
+        ]
+
+    for net in network_managers:
+        net.start()
+
+    log(
+        INFO,
+        "Flower server running (insecure, %s rounds)",
+        initialized_config["num_rounds"],
+    )
+
+    _fl(server=initialized_server, config=initialized_config)
+
+    # Shutdown networks
+    for net in network_managers:
+        net.stop()
+
+
+def _init_defaults(
+    server: Optional[Server],
+    config: Optional[Dict[str, int]],
+    strategy: Optional[Strategy],
+) -> Tuple[Server, Dict[str, int]]:
     # Create server instance if none was given
     if server is None:
         client_manager = SimpleClientManager()
@@ -82,20 +114,10 @@ def start_server(
     if "num_rounds" not in config:
         config["num_rounds"] = 1
 
-    # Start gRPC server
-    if network_managers is None:
-        network_managers = [
-            GRPCNetworkManager(
-                client_manager=server.client_manager(),
-                server_address=server_address,
-                grpc_max_message_length=grpc_max_message_length,
-            )
-        ]
+    return server, config
 
-    for net in network_managers:
-        net.start()
 
-    log(INFO, "Flower server running (insecure, %s rounds)", config["num_rounds"])
+def _fl(server: Server, config: Dict[str, int]) -> None:
 
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
@@ -123,7 +145,3 @@ def start_server(
 
     # Graceful shutdown
     server.disconnect_all_clients()
-
-    # Shutdown networks
-    for net in network_managers:
-        net.stop()
