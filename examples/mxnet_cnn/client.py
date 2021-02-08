@@ -28,7 +28,7 @@ class MNISTClient(fl.client.NumPyClient):
         model: mxnet_cnn.Net,
         train_data: mx.io.NDArrayIter,
         val_data: mx.io.NDArrayIter,
-        device: mx.context
+        device: mx.context,
     ) -> None:
         self.model = model
         self.train_data = train_data
@@ -37,18 +37,17 @@ class MNISTClient(fl.client.NumPyClient):
 
     def get_parameters(self) -> List[np.ndarray]:
         # Return model parameters as a list of NumPy ndarrays
-        #return [val.data() for val in self.model.collect_params().values()]
-        #model_params = [val.data() for val in self.model.collect_params().values()]
+        # return [val.data() for val in self.model.collect_params().values()]
+        # model_params = [val.data() for val in self.model.collect_params().values()]
         return self.model.collect_params()
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         # arg_params: name of parameter
         # aux_params: value of parameters NDArray
-        #self.model.initialize(parameters, force_reinit=True)
+        # self.model.initialize(parameters, force_reinit=True)
         params = zip(self.model.collect_params().keys(), parameters)
         for key, value in params:
-            self.model.collect_params().setattr(key,value)
-
+            self.model.collect_params().setattr(key, value)
 
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str]
