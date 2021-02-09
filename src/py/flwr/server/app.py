@@ -113,7 +113,6 @@ def _init_defaults(
 
 
 def _fl(server: Server, config: Dict[str, int]) -> None:
-
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
