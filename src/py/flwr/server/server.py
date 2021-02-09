@@ -17,7 +17,7 @@
 
 import concurrent.futures
 import timeit
-from logging import DEBUG, ERROR, INFO
+from logging import DEBUG, INFO
 from typing import List, Optional, Tuple, cast
 
 from flwr.common import (
@@ -69,9 +69,7 @@ class Server:
         """Run federated averaging for a number of rounds."""
         history = History()
         # Initialize weights by asking one client to return theirs
-        log(INFO, "Getting initial parameters")
         self.weights = self._get_initial_weights()
-        log(INFO, "Evaluating initial parameters")
         res = self.strategy.evaluate(weights=self.weights)
         if res is not None:
             log(
@@ -148,10 +146,6 @@ class Server:
             len(results),
             len(failures),
         )
-
-        if len(failures) > 0:
-            log(ERROR, failures)
-
         # Aggregate the evaluation results
         loss_aggregated = self.strategy.aggregate_evaluate(rnd, results, failures)
         return loss_aggregated, results_and_failures
@@ -180,9 +174,6 @@ class Server:
             len(results),
             len(failures),
         )
-
-        if len(failures) > 0:
-            log(ERROR, failures)
 
         # Aggregate training results
         return self.strategy.aggregate_fit(rnd, results, failures)
