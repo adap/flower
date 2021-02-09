@@ -69,7 +69,9 @@ class Server:
         """Run federated averaging for a number of rounds."""
         history = History()
         # Initialize weights by asking one client to return theirs
+        log(INFO, "Getting initial parameters")
         self.weights = self._get_initial_weights()
+        log(INFO, "Evaluating initial parameters")
         res = self.strategy.evaluate(weights=self.weights)
         if res is not None:
             log(
