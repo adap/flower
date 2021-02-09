@@ -30,16 +30,12 @@ from flwr.server.strategy import FedAvg, Strategy
 from grpc import ClientCallDetails
 import grpc
 
-DEFAULT_SERVER_ADDRESS = "[::]:8080"
-
 
 def start_server(
-    server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,
     config: Optional[Dict[str, int]] = None,
     strategy: Optional[Strategy] = None,
     network_managers: Optional[List[NetworkManager]] = None,
-    grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
 ) -> None:
     """Start a Flower server using the gRPC transport layer.
 
@@ -73,11 +69,7 @@ def start_server(
     # Start gRPC server
     if network_managers is None:
         network_managers = [
-            GRPCNetworkManager(
-                client_manager=initialized_server.client_manager(),
-                server_address=server_address,
-                grpc_max_message_length=grpc_max_message_length,
-            )
+            GRPCNetworkManager(client_manager=initialized_server.client_manager())
         ]
 
     for net in network_managers:

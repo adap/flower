@@ -15,6 +15,8 @@
 """Flower ClientManager."""
 
 import threading
+
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.client.keras_client import KerasClient, KerasClientWrapper
 
 import grpc
@@ -26,6 +28,8 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
 from flwr.server.in_memory_server.in_memory_client_proxy import InMemoryClientProxy
 from flwr.client import Client
+
+DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 
 class NetworkManager(ABC):
@@ -50,8 +54,8 @@ class GRPCNetworkManager(NetworkManager):
     def __init__(
         self,
         client_manager: ClientManager,
-        server_address: str,
-        grpc_max_message_length: int,
+        server_address: str = DEFAULT_SERVER_ADDRESS,
+        grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     ) -> None:
         super().__init__(client_manager)
 
@@ -79,7 +83,7 @@ class SimpleInMemoryNetworkManager(NetworkManager):
 
         # Use a Semaphore for parallelism. Warning this can create issues with
         # TensorFlow if the global state TF influences the results each client produces.
-        # Take care of that or don't increase parallism
+        # Take care of that or don't increase parallisme
         self._cv = threading.Semaphore(value=parallel)
 
         Wrapper = None
