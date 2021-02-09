@@ -20,7 +20,7 @@ from typing import Dict, List, Optional, Tuple
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
-from flwr.server.client_manager import ClientManager, SimpleClientManager
+from flwr.server.client_manager import SimpleClientManager
 from flwr.server.network_manager import GRPCNetworkManager, NetworkManager
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
@@ -28,7 +28,7 @@ from flwr.server.strategy import FedAvg, Strategy
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 
-def start_server(
+def start_server(  # pylint: disable=too-many-arguments
     server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,
     config: Optional[Dict[str, int]] = None,

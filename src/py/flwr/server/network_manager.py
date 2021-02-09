@@ -16,7 +16,7 @@
 
 import threading
 from abc import ABC, abstractmethod
-from typing import List, Optional, cast
+from typing import List, Optional
 
 import grpc
 
@@ -85,6 +85,9 @@ class GRPCNetworkManager(NetworkManager):
 
 
 class SimpleInMemoryNetworkManager(NetworkManager):
+    """NetworkManager which will hold in memory clients and register them with
+    a ClientManager."""
+
     def __init__(
         self,
         clients: List[Client],
@@ -98,21 +101,21 @@ class SimpleInMemoryNetworkManager(NetworkManager):
         # Take care of that or don't increase parallisme
         self._cv = threading.Semaphore(value=parallel)
 
-        Wrapper = None
+        wrapper = None
         self.client_proxies: List[ClientProxy] = []
 
         if len(clients) > 0:
             if isinstance(clients[0], NumPyClient):
-                Wrapper = NumPyClientWrapper
+                wrapper = NumPyClientWrapper
             elif isinstance(clients[0], KerasClient):
-                Wrapper = KerasClientWrapper
+                wrapper = KerasClientWrapper
             else:
                 raise Exception("Client Class is not yet supported.")
 
-        if Wrapper is not None:
+        if wrapper is not None:
             self.client_proxies = [
                 InMemoryClientProxy(
-                    cid=str(index), client=Wrapper(client), lock=self._cv
+                    cid=str(index), client=wrapper(client), lock=self._cv
                 )
                 for index, client in enumerate(clients)
             ]
