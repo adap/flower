@@ -14,6 +14,7 @@
 # ==============================================================================
 """Networked Flower client implementation."""
 
+import threading
 
 from flwr import common
 from flwr.client import Client
@@ -23,26 +24,43 @@ from flwr.server.client_proxy import ClientProxy
 class InMemoryClientProxy(ClientProxy):
     """Flower client proxy which delegates over the network using gRPC."""
 
-    def __init__(
-        self,
-        cid: str,
-        client: Client,
-    ):
+    def __init__(self, cid: str, client: Client, lock: threading.Condition = None):
         super().__init__(cid)
         self.client = client
+        self._cv = lock
 
     def get_parameters(self) -> common.ParametersRes:
         """Return the current local model parameters."""
+        if self._cv:
+            with self._cv:
+                print(f"CID: {self.cid} acquired lock")
+                return self.client.get_parameters()
+
         return self.client.get_parameters()
 
     def fit(self, ins: common.FitIns) -> common.FitRes:
         """Refine the provided weights using the locally held dataset."""
+        if self._cv:
+            with self._cv:
+                print(f"CID: {self.cid} acquired lock")
+                return self.client.fit(ins=ins)
+
         return self.client.fit(ins=ins)
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
+        if self._cv:
+            with self._cv:
+                print(f"CID: {self.cid} acquired lock")
+                return self.client.evaluate(ins=ins)
+
         return self.client.evaluate(ins=ins)
 
     def reconnect(self, reconnect: common.Reconnect) -> common.Disconnect:
         """Disconnect and (optionally) reconnect later."""
+        if self._cv:
+            with self._cv:
+                print(f"CID: {self.cid} acquired lock")
+                return common.Disconnect(reason="unknown")
+
         return common.Disconnect(reason="unknown")

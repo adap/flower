@@ -14,12 +14,14 @@
 # ==============================================================================
 """Flower ClientManager."""
 
+import threading
+from flwr.client.keras_client import KerasClient, KerasClientWrapper
 
-from flwr import client
 import grpc
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
+from flwr.client.numpy_client import NumPyClient, NumPyClientWrapper
 from flwr.server.client_manager import ClientManager
 from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
 from flwr.server.in_memory_server.in_memory_client_proxy import InMemoryClientProxy
@@ -70,10 +72,28 @@ class GRPCNetworkManager(NetworkManager):
 
 
 class SimpleInMemoryNetworkManager(NetworkManager):
-    def __init__(self, client_manager: ClientManager, clients: List[Client]) -> None:
+    def __init__(
+        self, client_manager: ClientManager, clients: List[Client], parallel: int = 1
+    ) -> None:
         super().__init__(client_manager)
+
+        # Use a Semaphore for parallelism. Warning this can create issues with
+        # TensorFlow if the global state TF influences the results each client produces.
+        # Take care of that or don't increase parallism
+        self._cv = threading.Semaphore(value=parallel)
+
+        Wrapper = None
+
+        if len(clients) > 0:
+            if isinstance(clients[0], NumPyClient):
+                Wrapper = NumPyClientWrapper
+            elif isinstance(clients[0], KerasClient):
+                Wrapper = KerasClientWrapper
+            else:
+                raise Exception("Client Class is not yet supported.")
+
         self.client_proxies = [
-            InMemoryClientProxy(cid=index, client=client)
+            InMemoryClientProxy(cid=index, client=Wrapper(client), lock=self._cv)
             for index, client in enumerate(clients)
         ]
 

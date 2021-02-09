@@ -16,7 +16,7 @@
 
 
 from logging import INFO
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, List
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log

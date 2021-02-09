@@ -4,10 +4,9 @@ from multiprocessing import Process
 from typing import Tuple
 
 import flwr as fl
-from flwr.client.numpy_client import NumPyClientWrapper
 import numpy as np
-from numpy.core.fromnumeric import partition
 import tensorflow as tf
+
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg
 from flwr.server.client_manager import SimpleClientManager
@@ -23,38 +22,43 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 DATASET = Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]
 
 
-def generate_client(dataset: DATASET) -> None:
-    """Start a single client with the provided dataset."""
+class CifarClient(fl.client.NumPyClient):
+    def __init__(self, dataset: DATASET) -> None:
+        super().__init__()
+        self.dataset = dataset
 
-    # Load and compile a Keras model for CIFAR-10
-    model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
-    model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+    def get_parameters(self):
+        """Return current weights."""
+        model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+        model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+        return model.get_weights()
 
-    # Unpack the CIFAR-10 dataset partition
-    (x_train, y_train), (x_test, y_test) = dataset
+    def fit(self, parameters, config):
+        """Fit model and return new weights as well as number of training
+        examples."""
+        model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+        model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+        model.set_weights(parameters)
 
-    # Define a Flower client
-    class CifarClient(fl.client.NumPyClient):
-        def get_parameters(self):
-            """Return current weights."""
-            return model.get_weights()
+        (x_train, y_train), _ = self.dataset
 
-        def fit(self, parameters, config):
-            """Fit model and return new weights as well as number of training
-            examples."""
-            model.set_weights(parameters)
-            # Remove steps_per_epoch if you want to train over the full dataset
-            # https://keras.io/api/models/model_training_apis/#fit-method
-            model.fit(x_train, y_train, epochs=1, batch_size=32, steps_per_epoch=3)
-            return model.get_weights(), len(x_train)
+        model.fit(x_train, y_train, epochs=1, batch_size=32)
 
-        def evaluate(self, parameters, config):
-            """Evaluate using provided parameters."""
-            model.set_weights(parameters)
-            loss, accuracy = model.evaluate(x_test, y_test)
-            return len(x_test), loss, accuracy
+        weights = model.get_weights()
 
-    return CifarClient()
+        return weights, len(x_train)
+
+    def evaluate(self, parameters, config):
+        """Evaluate using provided parameters."""
+        model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+        model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+        model.set_weights(parameters)
+
+        _, (x_test, y_test) = self.dataset
+
+        loss, accuracy = model.evaluate(x_test, y_test)
+
+        return len(x_test), loss, accuracy
 
 
 def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
@@ -62,7 +66,7 @@ def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
 
     # Load the dataset partitions
     partitions = dataset.load(num_partitions=num_clients)
-    clients = [generate_client(partition) for partition in partitions]
+    clients = [CifarClient(dataset=partition) for partition in partitions]
 
     strategy = FedAvg(min_available_clients=num_clients, fraction_fit=fraction_fit)
     client_manager = SimpleClientManager()
@@ -81,4 +85,4 @@ def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
 
 
 if __name__ == "__main__":
-    run_simulation(num_rounds=2, num_clients=5, fraction_fit=0.4)
+    run_simulation(num_rounds=10, num_clients=100, fraction_fit=0.1)

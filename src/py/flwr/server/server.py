@@ -17,7 +17,7 @@
 
 import concurrent.futures
 import timeit
-from logging import DEBUG, INFO
+from logging import DEBUG, INFO, ERROR
 from typing import List, Optional, Tuple, cast
 
 from flwr.common import (
@@ -146,6 +146,10 @@ class Server:
             len(results),
             len(failures),
         )
+
+        if len(failures) > 0:
+            log(ERROR, failures)
+
         # Aggregate the evaluation results
         loss_aggregated = self.strategy.aggregate_evaluate(rnd, results, failures)
         return loss_aggregated, results_and_failures
@@ -174,6 +178,9 @@ class Server:
             len(results),
             len(failures),
         )
+
+        if len(failures) > 0:
+            log(ERROR, failures)
 
         # Aggregate training results
         return self.strategy.aggregate_fit(rnd, results, failures)
