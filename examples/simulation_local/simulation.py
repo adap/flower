@@ -61,28 +61,21 @@ class CifarClient(fl.client.NumPyClient):
         return len(x_test), loss, accuracy
 
 
-def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
+def run_simulation(num_rounds: int, num_clients: int):
     """Start a FL simulation."""
 
     # Load the dataset partitions
     partitions = dataset.load(num_partitions=num_clients)
     clients = [CifarClient(dataset=partition) for partition in partitions]
 
-    strategy = FedAvg(min_available_clients=num_clients, fraction_fit=fraction_fit)
-    client_manager = SimpleClientManager()
-    server = Server(client_manager=client_manager, strategy=strategy)
-
     # Use custom in memory network manager instead of default gRPC one
-    network_manager = SimpleInMemoryNetworkManager(
-        client_manager=server.client_manager(), clients=clients
-    )
+    network_manager = SimpleInMemoryNetworkManager(clients=clients)
 
     fl.server.start_server(
-        server=server,
         network_managers=[network_manager],
         config={"num_rounds": num_rounds},
     )
 
 
 if __name__ == "__main__":
-    run_simulation(num_rounds=10, num_clients=100, fraction_fit=0.1)
+    run_simulation(num_rounds=10, num_clients=10)

@@ -15,28 +15,29 @@
 """Flower ClientManager."""
 
 import threading
-
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.client.keras_client import KerasClient, KerasClientWrapper
+from abc import ABC, abstractmethod
+from typing import List, Optional, cast
 
 import grpc
-from abc import ABC, abstractmethod
-from typing import Optional, List
 
+from flwr.client import Client
+from flwr.client.keras_client import KerasClient, KerasClientWrapper
 from flwr.client.numpy_client import NumPyClient, NumPyClientWrapper
 from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
 from flwr.server.in_memory_server.in_memory_client_proxy import InMemoryClientProxy
-from flwr.client import Client
-
-DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 
 class NetworkManager(ABC):
     """Abstract base class for managing networks."""
 
-    def __init__(self, client_manager: ClientManager) -> None:
-        """Init method"""
+    def __init__(self, client_manager: Optional[ClientManager] = None) -> None:
+        """Init method."""
+        self.client_manager = client_manager
+
+    def set_client_manager(self, client_manager: ClientManager) -> None:
+        """Set client_manager."""
         self.client_manager = client_manager
 
     @abstractmethod
@@ -53,9 +54,9 @@ class GRPCNetworkManager(NetworkManager):
 
     def __init__(
         self,
-        client_manager: ClientManager,
-        server_address: str = DEFAULT_SERVER_ADDRESS,
-        grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+        server_address: str,
+        grpc_max_message_length: int,
+        client_manager: Optional[ClientManager] = None,
     ) -> None:
         super().__init__(client_manager)
 
@@ -64,20 +65,31 @@ class GRPCNetworkManager(NetworkManager):
 
         self.server: Optional[grpc.Server] = None
 
-    def start(self):
+    def start(self) -> None:
+        """Start the gRPC server."""
+        if self.client_manager is None:
+            raise Exception(
+                "GRPCNetworkManager can not start when client_manager is not set."
+            )
+
         self.server = start_insecure_grpc_server(
             client_manager=self.client_manager,
             server_address=self.server_address,
             max_message_length=self.grpc_max_message_length,
         )
 
-    def stop(self):
-        self.server.stop(1)
+    def stop(self) -> None:
+        """Stop the gRPC server."""
+        if self.server is not None:
+            self.server.stop(1)
 
 
 class SimpleInMemoryNetworkManager(NetworkManager):
     def __init__(
-        self, client_manager: ClientManager, clients: List[Client], parallel: int = 1
+        self,
+        clients: List[Client],
+        client_manager: Optional[ClientManager] = None,
+        parallel: int = 1,
     ) -> None:
         super().__init__(client_manager)
 
@@ -87,6 +99,7 @@ class SimpleInMemoryNetworkManager(NetworkManager):
         self._cv = threading.Semaphore(value=parallel)
 
         Wrapper = None
+        self.client_proxies: List[ClientProxy] = []
 
         if len(clients) > 0:
             if isinstance(clients[0], NumPyClient):
@@ -96,15 +109,24 @@ class SimpleInMemoryNetworkManager(NetworkManager):
             else:
                 raise Exception("Client Class is not yet supported.")
 
-        self.client_proxies = [
-            InMemoryClientProxy(cid=index, client=Wrapper(client), lock=self._cv)
-            for index, client in enumerate(clients)
-        ]
+        if Wrapper is not None:
+            self.client_proxies = [
+                InMemoryClientProxy(
+                    cid=str(index), client=Wrapper(client), lock=self._cv
+                )
+                for index, client in enumerate(clients)
+            ]
 
     def start(self) -> None:
+        if self.client_manager is None:
+            raise Exception("Can not start when client_manager is not set.")
+
         for client_proxy in self.client_proxies:
             self.client_manager.register(client_proxy)
 
     def stop(self) -> None:
+        if self.client_manager is None:
+            raise Exception("Can not stop when client_manager is not set.")
+
         for client_proxy in self.client_proxies:
             self.client_manager.unregister(client_proxy)

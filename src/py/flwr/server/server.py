@@ -17,7 +17,7 @@
 
 import concurrent.futures
 import timeit
-from logging import DEBUG, INFO, ERROR
+from logging import DEBUG, ERROR, INFO
 from typing import List, Optional, Tuple, cast
 
 from flwr.common import (

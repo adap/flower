@@ -15,6 +15,7 @@
 """Networked Flower client implementation."""
 
 import threading
+from typing import Optional
 
 from flwr import common
 from flwr.client import Client
@@ -24,7 +25,7 @@ from flwr.server.client_proxy import ClientProxy
 class InMemoryClientProxy(ClientProxy):
     """Flower client proxy which delegates over the network using gRPC."""
 
-    def __init__(self, cid: str, client: Client, lock: threading.Condition = None):
+    def __init__(self, cid: str, client: Client, lock: Optional[threading.Lock] = None):
         super().__init__(cid)
         self.client = client
         self._cv = lock
