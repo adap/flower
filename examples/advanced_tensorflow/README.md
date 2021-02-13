@@ -1,9 +1,10 @@
-# Advanced Flower TensorFlow/Keras Example
+# Advanced Flower Example (TensorFlow/Keras)
 
-This example demonstrates an advanced federated learning setup using Flower and TensorFlow/Keras. It differs from the quickstart example in the following ways:
+This example demonstrates an advanced federated learning setup using Flower with TensorFlow/Keras. It differs from the quickstart example in the following ways:
 
-- 10 clients with a local dataset of 5000 training examples and 1000 test examples each
-- Server-side model evaluation after aggregation
+- 10 clients (instead of just 2)
+- Each client holds a local dataset of 5000 training examples and 1000 test examples
+- Server-side model evaluation after parameter aggregation
 - Hyperparameter schedule using config functions
 - Custom return values
 
@@ -45,5 +46,5 @@ If you don't see any errors you're good to go!
 The included `run.sh` will start the Flower server (using `server.py`), sleep for 2 seconds to ensure the the server is up, and then start 10 Flower clients (using `client.py`). You can simply start everything in a terminal as follows:
 
 ```shell
-poetry run run.sh
+poetry run ./run.sh
 ```
