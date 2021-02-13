@@ -6,7 +6,7 @@ import tensorflow as tf
 
 import flwr as fl
 
-# Make TensorFlow log less verbose
+# Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
@@ -17,10 +17,13 @@ class CifarClient(fl.client.NumPyClient):
         self.x_train, self.y_train = x_train, y_train
         self.x_test, self.y_test = x_test, y_test
 
-    def get_parameters(self):  # type: ignore
+    def get_parameters(self):
+        """Get parameters of the local model."""
         return self.model.get_weights()
 
-    def fit(self, parameters, config):  # type: ignore
+    def fit(self, parameters, config):
+        """Train parameters on the locally held training set."""
+
         # Update local model parameters
         self.model.set_weights(parameters)
 
@@ -44,18 +47,20 @@ class CifarClient(fl.client.NumPyClient):
         }
         return parameters_prime, num_train_examples, results
 
-    def evaluate(self, parameters, config):  # type: ignore
+    def evaluate(self, parameters, config):
+        """Evaluate parameters on the locally held test set."""
+
         # Update local model with global parameters
         self.model.set_weights(parameters)
 
         # Get config values
         steps: int = config["val_steps"]
 
-        # Evaluate global model parameter on the local test data
+        # Evaluate global model parameters on the local test data
         loss, accuracy = self.model.evaluate(self.x_test, self.y_test, 32, steps=steps)
 
         # Populate the 3rd return value with a 0.0 float, it'll be removed in the future
-        return len(self.x_test), loss, 0.0, {"loss": loss, "accuracy": accuracy}
+        return len(self.x_test), loss, 0.0, {"accuracy": accuracy}
 
 
 def main() -> None:
@@ -77,6 +82,8 @@ def main() -> None:
 
 
 def load_partition(idx: int):
+    """Load 1/10th of the training and test data to simulate a local data partition."""
+    assert idx in range(10)
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
     return (
         x_train[idx * 5000 : (idx + 1) * 5000],
