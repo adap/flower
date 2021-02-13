@@ -70,7 +70,9 @@ def main() -> None:
     args = parser.parse_args()
 
     # Load and compile Keras model
-    model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+    model = tf.keras.applications.EfficientNetB0(
+        input_shape=(32, 32, 3), weights=None, classes=10
+    )
     model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
     # Load a subset of CIFAR-10 to simulate the local data partition
@@ -82,7 +84,7 @@ def main() -> None:
 
 
 def load_partition(idx: int):
-    """Load 1/10th of the training and test data to simulate a local data partition."""
+    """Load 1/10th of the training and test data to simulate a partition."""
     assert idx in range(10)
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
     return (
