@@ -73,7 +73,11 @@ class NumPyClient(ABC):
     @abstractmethod
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
-    ) -> Union[Tuple[int, float, float], Tuple[int, float, float, Metrics]]:
+    ) -> Union[
+        Tuple[float, int, Metrics],
+        Tuple[int, float, float],  # Deprecated
+        Tuple[int, float, float, Metrics],  # Deprecated
+    ]:
         """Evaluate the provided weights using the locally held dataset.
 
         Args:
@@ -86,14 +90,12 @@ class NumPyClient(ABC):
                 evaluation.
 
         Returns:
-            num_examples (int): The number of examples used for evaluation.
             loss (float): The evaluation loss of the model on the local
                 dataset.
-            accuracy (float, deprecated): The accuracy of the model on the
-                local test dataset.
-            metrics (Metrics, optional): A dictionary mapping arbitrary string
-                keys to values of type bool, bytes, float, int, or str. Metrics
-                can be used to communicate arbitrary values back to the server.
+            num_examples (int): The number of examples used for evaluation.
+            metrics (Metrics): A dictionary mapping arbitrary string keys to
+                values of type bool, bytes, float, int, or str. Metrics can be
+                used to communicate arbitrary values back to the server.
         """
 
 
@@ -131,8 +133,8 @@ class NumPyClientWrapper(Client):
         return FitRes(
             parameters=parameters_prime_proto,
             num_examples=num_examples,
-            num_examples_ceil=num_examples,  # num_examples == num_examples_ceil
-            fit_duration=fit_duration,
+            num_examples_ceil=num_examples,  # Deprecated
+            fit_duration=fit_duration,  # Deprecated
             metrics=metrics,
         )
 
@@ -141,14 +143,49 @@ class NumPyClientWrapper(Client):
         parameters: List[np.ndarray] = parameters_to_weights(ins.parameters)
 
         results = self.numpy_client.evaluate(parameters, ins.config)
-        # Note that accuracy is deprecated and will be removed in a future release
         if len(results) == 3:
-            results = cast(Tuple[int, float, float], results)
-            num_examples, loss, accuracy = results
-            metrics: Optional[Metrics] = None
+            if (
+                isinstance(results[0], float)
+                and isinstance(results[1], int)
+                and isinstance(results[2], dict)
+            ):
+                # Forward-compatible case: loss, num_examples, metrics
+                results = cast(Tuple[float, int, Metrics], results)
+                loss, num_examples, metrics = results
+                evaluate_res = EvaluateRes(
+                    loss=loss,
+                    num_examples=num_examples,
+                    metrics=metrics,
+                )
+            elif (
+                isinstance(results[0], int)
+                and isinstance(results[1], float)
+                and isinstance(results[2], float)
+            ):
+                # Legacy case: num_examples, loss, accuracy
+                # This will be removed in a future release
+                results = cast(Tuple[int, float, float], results)
+                num_examples, loss, accuracy = results
+                evaluate_res = EvaluateRes(
+                    loss=loss,
+                    num_examples=num_examples,
+                    accuracy=accuracy,  # Deprecated
+                )
+            else:
+                raise Exception("")
         elif len(results) == 4:
+            # Legacy case: num_examples, loss, accuracy, metrics
+            # This will be removed in a future release
             results = cast(Tuple[int, float, float, Metrics], results)
+            assert isinstance(results[0], int)
+            assert isinstance(results[1], float)
+            assert isinstance(results[2], float)
+            assert isinstance(results[3], dict)
             num_examples, loss, accuracy, metrics = results
-        return EvaluateRes(
-            num_examples=num_examples, loss=loss, accuracy=accuracy, metrics=metrics
-        )
+            evaluate_res = EvaluateRes(
+                loss=loss,
+                num_examples=num_examples,
+                accuracy=accuracy,  # Deprecated
+                metrics=metrics,
+            )
+        return evaluate_res

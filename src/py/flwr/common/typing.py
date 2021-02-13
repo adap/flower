@@ -60,8 +60,8 @@ class FitRes:
 
     parameters: Parameters
     num_examples: int
-    num_examples_ceil: int  # Deprecated
-    fit_duration: float  # Deprecated
+    num_examples_ceil: Optional[int] = None  # Deprecated
+    fit_duration: Optional[float] = None  # Deprecated
     metrics: Optional[Metrics] = None
 
 
@@ -77,9 +77,9 @@ class EvaluateIns:
 class EvaluateRes:
     """Evaluate response from a client."""
 
-    num_examples: int
     loss: float
-    accuracy: float  # Deprecated
+    num_examples: int
+    accuracy: Optional[float] = None  # Deprecated
     metrics: Optional[Metrics] = None
 
 

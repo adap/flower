@@ -48,7 +48,7 @@ class SuccessClient(ClientProxy):
         return FitRes(Parameters(tensors=[arr_serialized], tensor_type=""), 1, 1, 12.3)
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        return EvaluateRes(1, 1.0, 0.1)
+        return EvaluateRes(loss=1.0, num_examples=1)
 
     def reconnect(self, reconnect: Reconnect) -> Disconnect:
         return Disconnect(reason="UNKNOWN")
@@ -112,5 +112,5 @@ def test_eval_clients() -> None:
     # Assert
     assert len(results) == 1
     assert len(failures) == 1
-    assert results[0][1].num_examples == 1
     assert results[0][1].loss == 1.0
+    assert results[0][1].num_examples == 1
