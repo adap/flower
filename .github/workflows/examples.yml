@@ -104,7 +104,7 @@ jobs:
           fi
           
           python client.py 2 &
-          sleep 3
+          sleep 3 
           
           if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
             then echo "Client process 2 started correctly";
