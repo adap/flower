@@ -141,7 +141,7 @@ jobs:
         run: |
           cd examples/pytorch_from_centralized_to_federated
 
-          python3 server.py
+          python3 server.py &
           sleep 3
 
           python3 client.py 1 &
