@@ -104,7 +104,7 @@ jobs:
           fi
           
           python client.py 2 &
-          sleep 3 
+          sleep 3
           
           if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
             then echo "Client process 2 started correctly";
@@ -173,6 +173,7 @@ jobs:
             then echo "Client process 2 started correctly";
             else echo "Client process 2 crashed" && exit 1;
           fi
+
   test_simulation:
     runs-on: ubuntu-18.04
     steps:
@@ -197,7 +198,7 @@ jobs:
           cd examples/simulation
 
           python3 simulation.py &
-          sleep 3
+          sleep 10
 
           if [[ $(ps aux | grep "python simulation.py" | awk '{ print $2 }') ]];
             then echo "Simulation process started correctly";
