@@ -200,6 +200,6 @@ jobs:
           sleep 3
 
           if [[ $(ps aux | grep "python simulation.py" | awk '{ print $2 }') ]];
-            then echo "Server process started correctly";
-            else echo "Server process crashed" && exit 1;
+            then echo "Simulation process started correctly";
+            else echo "Simulation process crashed" && exit 1;
           fi
