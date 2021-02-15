@@ -60,7 +60,7 @@ class CifarClient(fl.client.NumPyClient):
         self.model.load_state_dict(state_dict, strict=True)
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, fl.common.Scalar]
     ) -> Tuple[List[np.ndarray], int]:
         # Set model parameters
         self.set_parameters(parameters)
@@ -72,7 +72,7 @@ class CifarClient(fl.client.NumPyClient):
         return self.get_parameters(), len(self.trainloader)
 
     def evaluate(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, fl.common.Scalar]
     ) -> Tuple[int, float, float]:
         # Use provided parameters to update the local model
         self.set_parameters(parameters)

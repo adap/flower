@@ -38,14 +38,14 @@ def main() -> None:
             return cast(fl.common.Weights, self.model.get_weights())
 
         def fit(
-            self, weights: fl.common.Weights, config: Dict[str, str]
+            self, weights: fl.common.Weights, config: Dict[str, fl.common.Scalar]
         ) -> Tuple[fl.common.Weights, int, int]:
             self.model.set_weights(weights)
             self.model.fit(self.x_train, self.y_train, epochs=5)
             return self.model.get_weights(), len(self.x_train), len(self.x_train)
 
         def evaluate(
-            self, weights: fl.common.Weights, config: Dict[str, str]
+            self, weights: fl.common.Weights, config: Dict[str, fl.common.Scalar]
         ) -> Tuple[int, float, float]:
             self.model.set_weights(weights)
             loss, accuracy = self.model.evaluate(self.x_test, self.y_test)
