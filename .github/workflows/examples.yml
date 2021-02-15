@@ -134,6 +134,15 @@ jobs:
         run: |
           cd examples/pytorch_from_centralized_to_federated
           python -m poetry install
+      - name: Cache Datasets
+        uses: actions/cache@v2
+        with:
+          path: './examples/pytorch_from_centralized_to_federated/dataset'
+          key: pytorch-datasets
+      - name: Download Datasets
+        run: |
+          cd examples/pytorch_from_centralized_to_federated
+          python -c "from torchvision.datasets import CIFAR10; CIFAR10(\"./dataset\", download=True)"
       - name: Import flwr
         run: |
           python3 -c "import flwr"
