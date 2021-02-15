@@ -144,6 +144,11 @@ jobs:
           python3 server.py &
           sleep 3
 
+          if [[ $(ps aux | grep "python server.py" | awk '{ print $2 }') ]];
+            then echo "Server process started correctly";
+            else echo "Server process crashed" && exit 1;
+          fi
+
           python3 client.py 1 &
           sleep 3
 
@@ -158,11 +163,6 @@ jobs:
           if [[ $(ps aux | grep "python client.py 2" | awk '{ print $2 }') ]];
             then echo "Client process 2 started correctly";
             else echo "Client process 2 crashed" && exit 1;
-          fi
-
-          if [[ $(ps aux | grep "python server.py" | awk '{ print $2 }') ]];
-            then echo "Server process started correctly";
-            else echo "Server process crashed" && exit 1;
           fi
 
           killall python
