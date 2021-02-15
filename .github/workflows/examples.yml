@@ -147,13 +147,13 @@ jobs:
           python3 client.py 1 &
           sleep 3
 
-          python3 client.py 2 &
-          sleep 3
-
           if [[ $(ps aux | grep "[p]ython client.py 1" | awk '{ print $2 }') ]];
             then echo "Client process 1 started correctly";
             else echo "Client process 1 crashed" && exit 1;
           fi
+
+          python3 client.py 2 &
+          sleep 3
 
           if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
             then echo "Client process 2 started correctly";
