@@ -174,4 +174,3 @@ jobs:
             else echo "Client process 2 crashed" && exit 1;
           fi
 
-          killall python
