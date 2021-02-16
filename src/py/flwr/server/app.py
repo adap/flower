@@ -33,8 +33,8 @@ def start_server(  # pylint: disable=too-many-arguments
     server: Optional[Server] = None,
     config: Optional[Dict[str, int]] = None,
     strategy: Optional[Strategy] = None,
-    network_managers: Optional[List[NetworkManager]] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    network_managers: Optional[List[NetworkManager]] = None,
 ) -> None:
     """Start a Flower server using the gRPC transport layer.
 
