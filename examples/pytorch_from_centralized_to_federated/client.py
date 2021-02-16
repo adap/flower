@@ -11,7 +11,7 @@ import numpy as np
 import torch
 import torchvision
 
-from . import cifar
+import cifar
 
 # pylint: disable=no-member
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
