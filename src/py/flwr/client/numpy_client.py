@@ -50,7 +50,9 @@ class NumPyClient(ABC):
     @abstractmethod
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
-    ) -> Union[Tuple[List[np.ndarray], int], Tuple[List[np.ndarray], int, Metrics]]:
+    ) -> Union[
+        Tuple[List[np.ndarray], int], Tuple[List[np.ndarray], int, Dict[str, Scalar]]
+    ]:
         """Train the provided parameters using the locally held dataset.
 
         Arguments:
@@ -65,18 +67,19 @@ class NumPyClient(ABC):
             parameters: List[numpy.ndarray]. The locally updated model
                 parameters.
             num_examples (int): The number of examples used for training.
-            metrics (Metrics, optional): A dictionary mapping arbitrary string
-                keys to values of type bool, bytes, float, int, or str. Metrics
-                can be used to communicate arbitrary values back to the server.
+            metrics (Dict[str, Scalar], optional): A dictionary mapping
+                arbitrary string keys to values of type bool, bytes, float,
+                int, or str. It can be used to communicate arbitrary values
+                back to the server.
         """
 
     @abstractmethod
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
     ) -> Union[
-        Tuple[float, int, Metrics],
+        Tuple[float, int, Dict[str, Scalar]],
         Tuple[int, float, float],  # Deprecated
-        Tuple[int, float, float, Metrics],  # Deprecated
+        Tuple[int, float, float, Dict[str, Scalar]],  # Deprecated
     ]:
         """Evaluate the provided weights using the locally held dataset.
 
@@ -93,9 +96,15 @@ class NumPyClient(ABC):
             loss (float): The evaluation loss of the model on the local
                 dataset.
             num_examples (int): The number of examples used for evaluation.
-            metrics (Metrics): A dictionary mapping arbitrary string keys to
-                values of type bool, bytes, float, int, or str. Metrics can be
-                used to communicate arbitrary values back to the server.
+            metrics (Dict[str, Scalar]): A dictionary mapping arbitrary string
+                keys to values of type bool, bytes, float, int, or str. It can
+                be used to communicate arbitrary values back to the server.
+
+        Notes:
+            The previous return value format (int, float, float) and the
+            extended format (int, float, float, Dict[str, Scalar]) are still
+            supported for compatibility reasons. They will however be remove in
+            a future release, please migrate to (float, int, Dict[str, Scalar]).
         """
 
 
@@ -172,7 +181,9 @@ class NumPyClientWrapper(Client):
                     accuracy=accuracy,  # Deprecated
                 )
             else:
-                raise Exception("")
+                raise Exception(
+                    "Return value expected to be of type (float, int, dict)."
+                )
         elif len(results) == 4:
             # Legacy case: num_examples, loss, accuracy, metrics
             # This will be removed in a future release
