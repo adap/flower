@@ -51,7 +51,8 @@ class NumPyClient(ABC):
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
     ) -> Union[
-        Tuple[List[np.ndarray], int], Tuple[List[np.ndarray], int, Dict[str, Scalar]]
+        Tuple[List[np.ndarray], int, Dict[str, Scalar]],
+        Tuple[List[np.ndarray], int],  # Deprecated
     ]:
         """Train the provided parameters using the locally held dataset.
 
