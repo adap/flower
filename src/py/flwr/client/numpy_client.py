@@ -102,10 +102,11 @@ class NumPyClient(ABC):
                 be used to communicate arbitrary values back to the server.
 
         Notes:
-            The previous return value format (int, float, float) and the
+            The previous return type format (int, float, float) and the
             extended format (int, float, float, Dict[str, Scalar]) are still
-            supported for compatibility reasons. They will however be remove in
-            a future release, please migrate to (float, int, Dict[str, Scalar]).
+            supported for compatibility reasons. They will however be removed
+            in a future release, please migrate to
+            (float, int, Dict[str, Scalar]).
         """
 
 
