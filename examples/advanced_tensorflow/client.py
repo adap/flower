@@ -64,9 +64,6 @@ class CifarClient(fl.client.NumPyClient):
 
 
 def main() -> None:
-    # Sleep for 2s to give the server enough time to start
-    time.sleep(2)
-
     # Parse command line argument `partition`
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument("--partition", type=int, choices=range(0, 10), required=True)
