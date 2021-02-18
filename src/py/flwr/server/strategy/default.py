@@ -31,6 +31,7 @@ class DefaultStrategy(FedAvg):
     DEPRECATION WARNING: use FedAvg instead.
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         fraction_fit: float = 0.1,
