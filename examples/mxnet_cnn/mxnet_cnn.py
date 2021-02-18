@@ -29,56 +29,22 @@ def load_data() -> Tuple[mx.io.NDArrayIter, mx.io.NDArrayIter]:
     val_data = mx.io.NDArrayIter(mnist["test_data"], mnist["test_label"], batch_size)
     return train_data, val_data
 
-
-print("Define Sequential")
-
 def model():
     net = nn.Sequential()
     net.add(nn.Dense(256, activation='relu'))
     net.add(nn.Dense(10))
-    #construct a MLP
-    #net = nn.HybridSequential()
-    #with net.name_scope():
-    #    net.add(nn.Dense(128, activation="relu"))
-    #    net.add(nn.Dense(64, activation="relu"))
-    #    net.add(nn.Dense(10))
-    # initialize the parameters
     net.collect_params().initialize()
     return net
-
-"""
-class Net(gluon.Block):
-    def __init__(self, **kwargs):
-        super(Net, self).__init__(**kwargs)
-        self.conv1 = nn.Conv2D(20, kernel_size=(5, 5))
-        self.pool1 = nn.MaxPool2D(pool_size=(2, 2), strides=(2, 2))
-        self.conv2 = nn.Conv2D(50, kernel_size=(5, 5))
-        self.pool2 = nn.MaxPool2D(pool_size=(2, 2), strides=(2, 2))
-        self.fc1 = nn.Dense(500)
-        self.fc2 = nn.Dense(10)
-
-    def forward(self, x):
-        x = self.pool1(F.tanh(self.conv1(x)))
-        x = self.pool2(F.tanh(self.conv2(x)))
-        # 0 means copy over size from corresponding dimension.
-        # -1 means infer size from the rest of dimensions.
-        x = x.reshape((0, -1))
-        x = F.tanh(self.fc1(x))
-        x = F.tanh(self.fc2(x))
-        return x
-"""
 
 def train(
     net: mx.gluon.nn, train_data: mx.io.NDArrayIter, epoch: int, device: mx.context
 ) -> None:
-    print("Training")
     # print('Xavier Init', mx.init.Xavier(magnitude=2.24))
     trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.03})
     # Use Accuracy as the evaluation metric.
     metric = mx.metric.Accuracy()
     loss_metric = mx.metric.Loss()
     softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
-    print("Start MXNet training")
     for i in range(epoch):
         # Reset the train data iterator.
         train_data.reset()
@@ -115,7 +81,6 @@ def train(
         # Reset evaluation result to initial state.
         metric.reset()
         print("training acc at epoch %d: %s=%f" % (i, name, acc))
-        # print('training loss at epoch %d: %s=%f'%(i, name_loss, running_loss))
 
 
 def test(
@@ -126,7 +91,6 @@ def test(
     loss_metric = mx.metric.Loss()
     loss = 0.0
     eval_loss = 0.0
-    print("start batch processing")
     # Reset the validation data iterator.
     val_data.reset()
     # Loop over the validation data iterator.
@@ -157,11 +121,8 @@ def main():
     print("Setup context to GPU and if not available to CPU")
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
     train_data, val_data = load_data()
-    print("train_data", train_data, len(list(train_data)))
     net = model()
     init = nd.random.uniform(shape=(2, 784))
-    #init = mx.init.Xavier(magnitude=2.24)
-    #net.initialize(init, ctx=DEVICE)
     net(init)
     print("parameter", net.collect_params().values())
     train(net=net, train_data=train_data, epoch=5, device=DEVICE)
