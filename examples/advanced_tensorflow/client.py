@@ -36,16 +36,16 @@ class CifarClient(fl.client.NumPyClient):
             self.x_train, self.y_train, batch_size, epochs, validation_split=0.1
         )
 
-        # Return updated model weights and results
+        # Return updated model parameters and results
         parameters_prime = self.model.get_weights()
-        num_train_examples = len(self.x_train)
+        num_examples_train = len(self.x_train)
         results = {
             "loss": history.history["loss"][0],
             "accuracy": history.history["accuracy"][0],
             "val_loss": history.history["val_loss"][0],
             "val_accuracy": history.history["val_accuracy"][0],
         }
-        return parameters_prime, num_train_examples, results
+        return parameters_prime, num_examples_train, results
 
     def evaluate(self, parameters, config):
         """Evaluate parameters on the locally held test set."""
@@ -56,11 +56,10 @@ class CifarClient(fl.client.NumPyClient):
         # Get config values
         steps: int = config["val_steps"]
 
-        # Evaluate global model parameters on the local test data
+        # Evaluate global model parameters on the local test data and return results
         loss, accuracy = self.model.evaluate(self.x_test, self.y_test, 32, steps=steps)
-
-        # Populate the 3rd return value with a 0.0 float, it'll be removed in the future
-        return len(self.x_test), loss, 0.0, {"accuracy": accuracy}
+        num_examples_test = len(self.x_test)
+        return loss, num_examples_test, {"accuracy": accuracy}
 
 
 def main() -> None:

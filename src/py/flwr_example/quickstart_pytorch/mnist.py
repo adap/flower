@@ -430,7 +430,7 @@ class PytorchMNISTClient(fl.client.Client):
 
         # Return the number of evaluation examples and the evaluation result (loss)
         return fl.common.EvaluateRes(
-            num_examples=num_examples_test,
             loss=float(test_loss),
+            num_examples=num_examples_test,
             accuracy=float(accuracy),
         )

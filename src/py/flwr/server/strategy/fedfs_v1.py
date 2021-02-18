@@ -262,6 +262,7 @@ class FedFSv1(FedAvg):
         # Track contributions to the global model
         for client, fit_res in results:
             cid = client.cid
+            assert fit_res.num_examples_ceil is not None
             contribution: Tuple[int, int, int] = (
                 rnd,
                 fit_res.num_examples,
@@ -273,6 +274,8 @@ class FedFSv1(FedAvg):
 
         self.durations = []
         for client, fit_res in results:
+            assert fit_res.fit_duration is not None
+            assert fit_res.num_examples_ceil is not None
             cid_duration = (
                 client.cid,
                 fit_res.fit_duration,
