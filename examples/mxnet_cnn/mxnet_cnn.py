@@ -12,6 +12,7 @@ from mxnet import gluon
 from mxnet.gluon import nn
 from mxnet import autograd as ag
 import mxnet.ndarray as F
+from mxnet import nd
 
 # Fixing the random seed
 mx.random.seed(42)
@@ -29,9 +30,23 @@ def load_data() -> Tuple[mx.io.NDArrayIter, mx.io.NDArrayIter]:
     return train_data, val_data
 
 
-print("Define CNN")
+print("Define Sequential")
 
+def model():
+    net = nn.Sequential()
+    net.add(nn.Dense(256, activation='relu'))
+    net.add(nn.Dense(10))
+    #construct a MLP
+    #net = nn.HybridSequential()
+    #with net.name_scope():
+    #    net.add(nn.Dense(128, activation="relu"))
+    #    net.add(nn.Dense(64, activation="relu"))
+    #    net.add(nn.Dense(10))
+    # initialize the parameters
+    net.collect_params().initialize()
+    return net
 
+"""
 class Net(gluon.Block):
     def __init__(self, **kwargs):
         super(Net, self).__init__(**kwargs)
@@ -51,13 +66,13 @@ class Net(gluon.Block):
         x = F.tanh(self.fc1(x))
         x = F.tanh(self.fc2(x))
         return x
-
+"""
 
 def train(
-    net: Net, train_data: mx.io.NDArrayIter, epoch: int, device: mx.context
+    net: mx.gluon.nn, train_data: mx.io.NDArrayIter, epoch: int, device: mx.context
 ) -> None:
+    print("Training")
     # print('Xavier Init', mx.init.Xavier(magnitude=2.24))
-
     trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.03})
     # Use Accuracy as the evaluation metric.
     metric = mx.metric.Accuracy()
@@ -91,7 +106,6 @@ def train(
                     outputs.append(z)
             # Updates internal evaluation
             metric.update(label, outputs)
-            # loss_metric.update(label, loss)
             # Make one step of parameter update. Trainer needs to know the
             # batch size of data to normalize the gradient by 1/batch_size.
             trainer.step(batch.data[0].shape[0])
@@ -105,7 +119,7 @@ def train(
 
 
 def test(
-    net: Net, val_data: mx.io.NDArrayIter, device: mx.context
+    net: mx.gluon.nn, val_data: mx.io.NDArrayIter, device: mx.context
 ) -> Tuple[float, float]:
     # Use Accuracy as the evaluation metric.
     metric = mx.metric.Accuracy()
@@ -133,6 +147,7 @@ def test(
         # Updates internal evaluation
         metric.update(label, outputs)
     print("validation acc: %s=%f" % metric.get())
+    print("validation loss:", loss)
     accuracy = metric.get()[1]
     # assert metric.get()[1] > 0.98
     return loss, accuracy
@@ -143,17 +158,17 @@ def main():
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
     train_data, val_data = load_data()
     print("train_data", train_data, len(list(train_data)))
-    net = Net()
-    net.initialize(mx.init.Xavier(magnitude=2.24), ctx=DEVICE)
-    train(net=net, train_data=train_data, epoch=2, device=DEVICE)
+    net = model()
+    init = nd.random.uniform(shape=(2, 784))
+    #init = mx.init.Xavier(magnitude=2.24)
+    #net.initialize(init, ctx=DEVICE)
+    net(init)
+    print("parameter", net.collect_params().values())
+    train(net=net, train_data=train_data, epoch=5, device=DEVICE)
+    print("parameter", net.collect_params().values())
     loss, acc = test(net=net, val_data=val_data, device=DEVICE)
     print("Loss: ", loss)
     print("Accuracy: ", acc)
-    print("print key", net.collect_params().keys())
-    print("Collect Parameters", net.collect_params().values())
-    # for val in  net.collect_params():
-    #    print('Parameter value',val)
-    # parameters=[val.data() for val in net.collect_params().values()]
 
 
 if __name__ == "__main__":
