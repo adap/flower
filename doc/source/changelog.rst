@@ -6,11 +6,13 @@ Unreleased
 
 What's new?
 
-* **Generalized** :code:`Client.fit` **and** :code:`Client.evaluate` **return values** (`#610 <https://github.com/adap/flower/pull/610>`_, `#572 <https://github.com/adap/flower/pull/572>`_)
+* **Generalized** :code:`Client.fit` **and** :code:`Client.evaluate` **return values** (`#610 <https://github.com/adap/flower/pull/610>`_, `#572 <https://github.com/adap/flower/pull/572>`_, `#633 <https://github.com/adap/flower/pull/633>`_)
 
   Clients can now return an additional dictionary mapping :code:`str` keys to values of the following types: :code:`bool`, :code:`bytes`, :code:`float`, :code:`int`, :code:`str`. This means one can return almost arbitrary values from :code:`fit`/:code:`evaluate` and make use of them on the server side!
   
-  In case you wondered: this feature is compatible with existing projects. The additional dictionary return value is optional, which means that :code:`NumPyClient` can handle either three or four return values. See the example below for details.
+  This improvement also allowed for more consistent return types between :code:`fit` and :code:`evaluate`: :code:`evaluate` should now return a tuple :code:`(float, int, dict)` representing the loss, number of examples, and a dictionary holding arbitrary problem-specific values like accuracy. 
+  
+  In case you wondered: this feature is compatible with existing projects, the additional dictionary return value is optional. New code should however migrate to the new return types to be compatible with upcoming Flower releases (:code:`fit`: :code:`List[np.ndarray], int, Dict[str, Scalar]`, :code:`evaluate`: :code:`float, int, Dict[str, Scalar]`). See the example below for details.
 
   *Code example:* note the additional dictionary return values in both :code:`FlwrClient.fit` and :code:`FlwrClient.evaluate`: 
 
@@ -25,7 +27,7 @@ What's new?
         def evaluate(self, parameters, config):
             net.set_parameters(parameters)
             loss, accuracy, custom_metric = test(net, testloader)
-            return len(testloader), loss, accuracy, {"custom_metric": custom_metric}
+            return loss, len(testloader), {"accuracy": accuracy, "custom_metric": custom_metric}
 
 * **Generalized** :code:`config` **argument in** :code:`Client.fit` **and** :code:`Client.evaluate` (`#595 <https://github.com/adap/flower/pull/595>`_)
 
@@ -47,8 +49,8 @@ What's new?
         def evaluate(self, parameters, config):
             net.set_parameters(parameters)
             batch_size: int = config["batch_size"]
-            loss, accuracy, custom_metric = test(net, testloader, batch_size)
-            return len(testloader), loss, accuracy, {"custom_metric": custom_metric}
+            loss, accuracy = test(net, testloader, batch_size)
+            return loss, len(testloader), {"accuracy": accuracy}
 
 * New built-in strategies (`#549 <https://github.com/adap/flower/pull/549>`_)
     * (abstract) FedOpt
