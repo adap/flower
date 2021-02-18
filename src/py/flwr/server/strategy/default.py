@@ -12,11 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Configurable strategy implementation."""
+"""DEPRECATED Configurable strategy implementation.
+
+DEPRECATION WARNING: use FedAvg instead.
+"""
 
 
 from .fedavg import FedAvg
 
 
 class DefaultStrategy(FedAvg):
-    """Configurable default strategy."""
+    """DEPRECATED Configurable default strategy.
+
+    DEPRECATION WARNING: use FedAvg instead.
+    """

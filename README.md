@@ -1,8 +1,9 @@
-# Flower (`flwr`) - A Friendly Federated Learning Framework
+# Flower - A Friendly Federated Learning Framework
 
 [![GitHub license](https://img.shields.io/github/license/adap/flower)](https://github.com/adap/flower/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/main/CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/workflows/Build/badge.svg)
+![Downloads](https://pepy.tech/badge/flwr)
 
 Flower (`flwr`) is a framework for building federated learning systems. The
 design of Flower is based on a few guiding principles:
@@ -26,9 +27,11 @@ design of Flower is based on a few guiding principles:
 
 ## Documentation
 
-* [Documentation](https://flower.dev)
-  * [Quickstart](https://flower.dev/docs/quickstart_keras.html)
-  * [Installation](https://flower.dev/docs/installation.html)
+[Flower Documentation](https://flower.dev):
+
+* [Installation](https://flower.dev/docs/installation.html)
+* [Quickstart (TensorFlow)](https://flower.dev/docs/quickstart_tensorflow.html)
+* [Quickstart (PyTorch)](https://flower.dev/docs/quickstart_pytorch.html)
 
 ## Flower Usage Examples
 
@@ -38,20 +41,22 @@ an example, first install the necessary extras:
 
 [Usage Examples Documentation](https://flower.dev/docs/examples.html)
 
-Available [examples](src/py/flwr_example):
+Quickstart examples:
 
-* [Quickstart: Keras & MNIST](src/py/flwr_example/quickstart)
-* [PyTorch & CIFAR-10](src/py/flwr_example/pytorch)
-* [PyTorch & ImageNet](src/py/flwr_example/pytorch_imagenet)
-* [TensorFlow & Fashion-MNIST](src/py/flwr_example/tensorflow)
+* [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/examples/quickstart_tensorflow)
+* [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/examples/quickstart_pytorch)
+
+Other [examples](https://github.com/adap/flower/tree/main/examples):
+
+* [Raspberry Pi & Nvidia Jetson Tutorial](https://github.com/adap/flower/tree/main/examples/embedded_devices)
 
 ## Flower Baselines
 
-*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline](src/py/flwr_experimental/baseline).
+*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline](https://github.com/adap/flower/tree/main/src/py/flwr_experimental/baseline).
 
 ## Flower Datasets
 
-*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline/dataset](src/py/flwr_experimental/baseline/dataset).
+*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline/dataset](https://github.com/adap/flower/tree/main/src/py/flwr_experimental/baseline/dataset).
 
 ## Citation
 

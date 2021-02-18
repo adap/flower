@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Test for server"""
+"""Test for server."""
 
 import os.path
 import tempfile

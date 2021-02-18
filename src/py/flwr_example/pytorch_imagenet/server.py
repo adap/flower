@@ -77,34 +77,30 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # Configure logger
-    fl.common.logger.configure("server", host=args.log_host)
-
     # Load evaluation data
-    trainset, testset = imagenet.load_data(args.data_path)
+    _, testset = imagenet.load_data(args.data_path)
 
-    # Create client_manager, strategy, and server
-    client_manager = fl.server.SimpleClientManager()
-    strategy = fl.server.strategy.DefaultStrategy(
+    # Create strategy
+    strategy = fl.server.strategy.FedAvg(
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
         eval_fn=get_eval_fn(testset),
         on_fit_config_fn=fit_config,
     )
-    server = fl.server.Server(client_manager=client_manager, strategy=strategy)
 
-    # Run server
+    # Configure logger and start server
+    fl.common.logger.configure("server", host=args.log_host)
     fl.server.start_server(
         args.server_address,
-        server,
         config={"num_rounds": args.rounds},
+        strategy=strategy,
     )
 
 
-def fit_config(rnd: int) -> Dict[str, str]:
+def fit_config(rnd: int) -> Dict[str, fl.common.Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
-    config = {
+    config: Dict[str, fl.common.Scalar] = {
         "epoch_global": str(rnd),
         "epochs": str(5),
         "batch_size": str(128),

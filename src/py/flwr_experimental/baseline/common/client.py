@@ -31,9 +31,10 @@ tf.get_logger().setLevel("ERROR")
 
 
 class VisionClassificationClient(fl.client.Client):
-    """Flower client implementing image classification using TensorFlow/Keras."""
+    """Flower client implementing image classification using
+    TensorFlow/Keras."""
 
-    # pylint: disable-msg=too-many-arguments
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         cid: str,

@@ -36,7 +36,7 @@ if os.getenv("FLOWER_INTEGRATION"):
             self.adapter = DockerAdapter(name=self.name)
 
         def tearDown(self) -> None:
-            """Cleanup tests"""
+            """Cleanup tests."""
             containers = self.client.containers.list(
                 filters={"label": f"adapter_name={self.name}"}
             )

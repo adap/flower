@@ -21,7 +21,7 @@ import numpy as np
 import tensorflow as tf
 
 
-# pylint: disable-msg=too-many-arguments
+# pylint: disable=too-many-arguments
 def load_partition(
     xy_partitions: List[Tuple[np.ndarray, np.ndarray]],
     xy_test: Tuple[np.ndarray, np.ndarray],
@@ -86,7 +86,7 @@ def adjust_y_shape(nda: np.ndarray) -> np.ndarray:
     return cast(np.ndarray, nda_adjusted)
 
 
-# pylint: disable-msg=too-many-arguments,invalid-name
+# pylint: disable=too-many-arguments,invalid-name
 def build_dataset(
     x: np.ndarray,
     y: np.ndarray,
@@ -99,7 +99,8 @@ def build_dataset(
     seed: Optional[int] = None,
     normalization_factor: float = 255.0,
 ) -> tf.data.Dataset:
-    """Normalize images, one-hot encode labels, optionally shuffle and augment."""
+    """Normalize images, one-hot encode labels, optionally shuffle and
+    augment."""
     dataset = tf.data.Dataset.from_tensor_slices((x, y))
     dataset = dataset.map(
         lambda x, y: (

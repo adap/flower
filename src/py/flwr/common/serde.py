@@ -16,9 +16,15 @@
 deserialization."""
 
 
-from typing import List
+from typing import Any, List, cast
 
-from flwr.proto.transport_pb2 import ClientMessage, Parameters, Reason, ServerMessage
+from flwr.proto.transport_pb2 import (
+    ClientMessage,
+    Parameters,
+    Reason,
+    Scalar,
+    ServerMessage,
+)
 
 from . import typing
 
@@ -105,35 +111,40 @@ def parameters_res_from_proto(msg: ClientMessage.ParametersRes) -> typing.Parame
 def fit_ins_to_proto(ins: typing.FitIns) -> ServerMessage.FitIns:
     """Serialize flower.FitIns to ProtoBuf message."""
     parameters_proto = parameters_to_proto(ins.parameters)
-    return ServerMessage.FitIns(parameters=parameters_proto, config=ins.config)
+    config_msg = metrics_to_proto(ins.config)
+    return ServerMessage.FitIns(parameters=parameters_proto, config=config_msg)
 
 
 def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
     """Deserialize flower.FitIns from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
-    config = dict(msg.config)
+    config = metrics_from_proto(msg.config)
     return typing.FitIns(parameters=parameters, config=config)
 
 
 def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
     """Serialize flower.FitIns to ProtoBuf message."""
     parameters_proto = parameters_to_proto(res.parameters)
+    metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     return ClientMessage.FitRes(
         parameters=parameters_proto,
         num_examples=res.num_examples,
         num_examples_ceil=res.num_examples_ceil,
         fit_duration=res.fit_duration,
+        metrics=metrics_msg,
     )
 
 
 def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     """Deserialize flower.FitRes from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
+    metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
     return typing.FitRes(
         parameters=parameters,
         num_examples=msg.num_examples,
         num_examples_ceil=msg.num_examples_ceil,
         fit_duration=msg.fit_duration,
+        metrics=metrics,
     )
 
 
@@ -143,25 +154,82 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
 def evaluate_ins_to_proto(ins: typing.EvaluateIns) -> ServerMessage.EvaluateIns:
     """Serialize flower.EvaluateIns to ProtoBuf message."""
     parameters_proto = parameters_to_proto(ins.parameters)
-    return ServerMessage.EvaluateIns(parameters=parameters_proto, config=ins.config)
+    config_msg = metrics_to_proto(ins.config)
+    return ServerMessage.EvaluateIns(parameters=parameters_proto, config=config_msg)
 
 
 def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIns:
     """Deserialize flower.EvaluateIns from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
-    config = dict(msg.config)
+    config = metrics_from_proto(msg.config)
     return typing.EvaluateIns(parameters=parameters, config=config)
 
 
 def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
     """Serialize flower.EvaluateIns to ProtoBuf message."""
+    metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     return ClientMessage.EvaluateRes(
-        num_examples=res.num_examples, loss=res.loss, accuracy=res.accuracy
+        num_examples=res.num_examples,
+        loss=res.loss,
+        accuracy=res.accuracy,
+        metrics=metrics_msg,
     )
 
 
 def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRes:
     """Deserialize flower.EvaluateRes from ProtoBuf message."""
+    metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
     return typing.EvaluateRes(
-        num_examples=msg.num_examples, loss=msg.loss, accuracy=msg.accuracy
+        num_examples=msg.num_examples,
+        loss=msg.loss,
+        accuracy=msg.accuracy,
+        metrics=metrics,
     )
+
+
+# === Metrics messages ===
+
+
+def metrics_to_proto(metrics: typing.Metrics) -> Any:
+    """Serialize... ."""
+    proto = {}
+    for key in metrics:
+        proto[key] = scalar_to_proto(metrics[key])
+    return proto
+
+
+def metrics_from_proto(proto: Any) -> typing.Metrics:
+    """Deserialize... ."""
+    metrics = {}
+    for k in proto:
+        metrics[k] = scalar_from_proto(proto[k])
+    return metrics
+
+
+def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
+    """Serialize... ."""
+
+    if isinstance(scalar, bool):
+        return Scalar(bool=scalar)
+
+    if isinstance(scalar, bytes):
+        return Scalar(bytes=scalar)
+
+    if isinstance(scalar, float):
+        return Scalar(double=scalar)
+
+    if isinstance(scalar, int):
+        return Scalar(sint64=scalar)
+
+    if isinstance(scalar, str):
+        return Scalar(string=scalar)
+
+    raise Exception(
+        f"Accepted types: {bool, bytes, float, int, str} (but not {type(scalar)})"
+    )
+
+
+def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
+    """Deserialize... ."""
+    scalar = getattr(scalar_msg, scalar_msg.WhichOneof("scalar"))
+    return cast(typing.Scalar, scalar)

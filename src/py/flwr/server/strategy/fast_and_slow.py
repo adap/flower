@@ -26,6 +26,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    Scalar,
     Weights,
     parameters_to_weights,
     weights_to_parameters,
@@ -59,8 +60,8 @@ class FastAndSlow(FedAvg):
         eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
         min_completion_rate_fit: float = 0.5,
         min_completion_rate_evaluate: float = 0.5,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
+        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         importance_sampling: bool = True,
         dynamic_timeout: bool = True,
         dynamic_timeout_percentile: float = 0.8,
@@ -103,7 +104,7 @@ class FastAndSlow(FedAvg):
         return rep
 
     # pylint: disable=too-many-locals
-    def on_configure_fit(
+    def configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
@@ -292,7 +293,7 @@ class FastAndSlow(FedAvg):
             use_softmax=False,
         )
 
-    def on_aggregate_fit(
+    def aggregate_fit(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
@@ -341,7 +342,7 @@ class FastAndSlow(FedAvg):
 
         return weights_prime
 
-    def on_aggregate_evaluate(
+    def aggregate_evaluate(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],

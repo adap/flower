@@ -69,9 +69,6 @@ def main() -> None:
     # Load model (for centralized evaluation)
     model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
 
-    # Create client_manager
-    client_manager = fl.server.SimpleClientManager()
-
     # Strategy
     eval_fn = get_eval_fn(
         model=model, num_classes=NUM_CLASSES, xy_test=(x_test, y_test)
@@ -113,22 +110,21 @@ def main() -> None:
         )
 
     # Run server
-    server = fl.server.Server(client_manager=client_manager, strategy=strategy)
     fl.server.start_server(
         DEFAULT_SERVER_ADDRESS,
-        server,
         config={"num_rounds": server_setting.rounds},
+        strategy=strategy,
     )
 
 
 def get_on_fit_config_fn(
     lr_initial: float, timeout: Optional[int], partial_updates: bool
-) -> Callable[[int], Dict[str, str]]:
+) -> Callable[[int], Dict[str, fl.common.Scalar]]:
     """Return a function which returns training configurations."""
 
-    def fit_config(rnd: int) -> Dict[str, str]:
+    def fit_config(rnd: int) -> Dict[str, fl.common.Scalar]:
         """Return a configuration with static batch size and (local) epochs."""
-        config = {
+        config: Dict[str, fl.common.Scalar] = {
             "epoch_global": str(rnd),
             "epochs": str(1),
             "batch_size": str(32),
