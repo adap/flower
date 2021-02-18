@@ -4,9 +4,15 @@ Changelog
 Unreleased
 ----------
 
+What's new?
+
 * New built-in strategies (`#549 <https://github.com/adap/flower/pull/549>`_)
     * (abstract) FedOpt
     * FedAdagrad
+
+Deprecations
+
+* Deprecate :code:`flwr.server.strategy.DefaultStrategy` (migrate to :code:`flwr.server.strategy.FedAvg`, which is equivalent)
 
 
 v0.14.0 (2021-02-18)
