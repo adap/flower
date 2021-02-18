@@ -13,3 +13,6 @@ python client.py --partition=7 &
 python client.py --partition=8 &
 python client.py --partition=9 &
 
+# This will allow you to use CTRL+C to stop all background processes
+trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+sleep 86400
