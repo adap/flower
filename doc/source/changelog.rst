@@ -4,6 +4,14 @@ Changelog
 Unreleased
 ----------
 
+* New built-in strategies (`#549 <https://github.com/adap/flower/pull/549>`_)
+    * (abstract) FedOpt
+    * FedAdagrad
+
+
+v0.14.0 (2021-02-18)
+--------------------
+
 What's new?
 
 * **Generalized** :code:`Client.fit` **and** :code:`Client.evaluate` **return values** (`#610 <https://github.com/adap/flower/pull/610>`_, `#572 <https://github.com/adap/flower/pull/572>`_, `#633 <https://github.com/adap/flower/pull/633>`_)
@@ -51,10 +59,6 @@ What's new?
             batch_size: int = config["batch_size"]
             loss, accuracy = test(net, testloader, batch_size)
             return loss, len(testloader), {"accuracy": accuracy}
-
-* New built-in strategies (`#549 <https://github.com/adap/flower/pull/549>`_)
-    * (abstract) FedOpt
-    * FedAdagrad
 
 
 v0.13.0 (2021-01-08)
