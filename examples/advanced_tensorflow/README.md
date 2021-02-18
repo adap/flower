@@ -48,3 +48,5 @@ The included `run.sh` will start the Flower server (using `server.py`), sleep fo
 ```shell
 poetry run ./run.sh
 ```
+
+The `run.sh` script starts processes in the background so that you don't have to open eleven terminal windows. If you experiment with the code example and something goes wrong, simply using `CTRL + C` on Linux (or `CMD + C` on macOS) won't kill all the processes. You'll have to use `killall python` (or `killall python3`) to kill all background processes (or a more specific command if you have other Python processes running that you don't want to kill).
