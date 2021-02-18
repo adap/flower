@@ -47,13 +47,13 @@ def start_client(dataset: DATASET) -> None:
             # Remove steps_per_epoch if you want to train over the full dataset
             # https://keras.io/api/models/model_training_apis/#fit-method
             model.fit(x_train, y_train, epochs=1, batch_size=32, steps_per_epoch=3)
-            return model.get_weights(), len(x_train)
+            return model.get_weights(), len(x_train), {}
 
         def evaluate(self, parameters, config):
             """Evaluate using provided parameters."""
             model.set_weights(parameters)
             loss, accuracy = model.evaluate(x_test, y_test)
-            return len(x_test), loss, accuracy
+            return loss, len(x_test), {"accuracy": accuracy}
 
     # Start Flower client
     fl.client.start_numpy_client("0.0.0.0:8080", client=CifarClient())
