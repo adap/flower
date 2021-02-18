@@ -41,6 +41,7 @@ class DefaultStrategy(FedAvg):
         eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        accept_failures: bool = True,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -51,7 +52,7 @@ class DefaultStrategy(FedAvg):
             eval_fn=eval_fn,
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
-            accept_failures=True,
+            accept_failures=accept_failures,
         )
         warning = """
         DEPRECATION WARNING: DefaultStrategy is deprecated, migrate to FedAvg.
