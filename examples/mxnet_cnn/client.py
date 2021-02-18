@@ -39,7 +39,11 @@ class MNISTClient(fl.client.NumPyClient):
     def get_parameters(self) -> List[np.ndarray]:
         # Return model parameters as a list of NumPy ndarrays
         print("Get Parameters")
-        return [val.data() for val in self.model.collect_params('.*weight').values()]
+        param = []
+        for val in self.model.collect_params('.*weight').values():
+            p = val.data()
+            param.append(p.asnumpy())
+        return param
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         # arg_params: name of parameter
@@ -57,7 +61,7 @@ class MNISTClient(fl.client.NumPyClient):
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
         mxnet_cnn.train(self.model, self.train_data, epoch=3, device=self.device)
-        return self.get_parameters(), len(list(self.train_data))
+        return self.get_parameters(), self.train_data.batch_size
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, str]
@@ -67,7 +71,8 @@ class MNISTClient(fl.client.NumPyClient):
         loss, accuracy = mxnet_cnn.test(self.model, self.val_data, device=self.device)
         print('Evaluation loss:', loss)
         print('Evaluation accuracy:', accuracy)
-        return len(list(self.val_data)), float(loss), float(accuracy)
+        print('NUmber of examples',self.val_data.batch_size)
+        return self.val_data.batch_size, float(loss), float(accuracy)
 
 
 def main() -> None:
@@ -76,6 +81,7 @@ def main() -> None:
     # Load model and data
     print("Define Device")
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
+    #DEVICE = [mx.cpu()]
     print("Load data")
     train_data, val_data = mxnet_cnn.load_data()
     print("define model")
