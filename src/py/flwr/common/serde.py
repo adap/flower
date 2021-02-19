@@ -47,7 +47,8 @@ def parameters_from_proto(msg: Parameters) -> typing.Parameters:
 
 def reconnect_to_proto(reconnect: typing.Reconnect) -> ServerMessage.Reconnect:
     """Serialize flower.Reconnect to ProtoBuf message."""
-    return ServerMessage.Reconnect(seconds=reconnect.seconds)
+    reconnect_seconds: int = cast(int, reconnect.seconds)
+    return ServerMessage.Reconnect(seconds=reconnect_seconds)
 
 
 def reconnect_from_proto(msg: ServerMessage.Reconnect) -> typing.Reconnect:
@@ -126,11 +127,13 @@ def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
     """Serialize flower.FitIns to ProtoBuf message."""
     parameters_proto = parameters_to_proto(res.parameters)
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
+    res_num_examples_ceil: int = cast(int, res.num_examples_ceil)
+    res_fit_duration: float = cast(float, res.fit_duration)
     return ClientMessage.FitRes(
         parameters=parameters_proto,
         num_examples=res.num_examples,
-        num_examples_ceil=res.num_examples_ceil,  # Deprecated
-        fit_duration=res.fit_duration,  # Deprecated
+        num_examples_ceil=res_num_examples_ceil,  # Deprecated
+        fit_duration=res_fit_duration,  # Deprecated
         metrics=metrics_msg,
     )
 
@@ -168,10 +171,11 @@ def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIn
 def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
     """Serialize flower.EvaluateIns to ProtoBuf message."""
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
+    res_accuracy: float = cast(float, res.accuracy)
     return ClientMessage.EvaluateRes(
         loss=res.loss,
         num_examples=res.num_examples,
-        accuracy=res.accuracy,  # Deprecated
+        accuracy=res_accuracy,  # Deprecated
         metrics=metrics_msg,
     )
 

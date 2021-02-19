@@ -44,6 +44,7 @@ def compile_all() -> None:
         f"--python_out={OUT_PATH}",
         f"--grpc_python_out={OUT_PATH}",
         f"--mypy_out={OUT_PATH}",
+        f"--mypy_grpc_out={OUT_PATH}",
     ] + PROTO_FILES
 
     exit_code = protoc.main(command)

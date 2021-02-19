@@ -21,7 +21,7 @@ docker run -it --rm flower_federated_learning_simulation
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/example/simulation . && rm -rf flower && cd simulation
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/simulation . && rm -rf flower && cd simulation
 ```
 
 This will create a new directory called `simulation` containing the following files:
