@@ -70,16 +70,10 @@ def ssh_connection(
     """Connect to server and yield SSH client."""
     username, key_filename = ssh_credentials
 
-    ignore_host_key_policy: Union[
-        Type[MissingHostKeyPolicy], MissingHostKeyPolicy
-    ] = cast(
-        Union[Type[MissingHostKeyPolicy], MissingHostKeyPolicy], IgnoreHostKeyPolicy
-    )
-
     instance_ssh_port: int = cast(int, instance.ssh_port)
 
     client = SSHClient()
-    client.set_missing_host_key_policy(ignore_host_key_policy)
+    client.set_missing_host_key_policy(IgnoreHostKeyPolicy)
     client.connect(
         hostname=str(instance.public_ip),
         port=instance_ssh_port,
