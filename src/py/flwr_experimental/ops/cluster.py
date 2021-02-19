@@ -17,9 +17,9 @@ import concurrent.futures
 from contextlib import contextmanager
 from itertools import groupby
 from logging import DEBUG, ERROR
-from typing import Dict, Iterator, List, Optional, Tuple, cast
+from typing import Dict, Iterator, List, Optional, Tuple, Type, Union, cast
 
-from paramiko.client import SSHClient
+from paramiko.client import MissingHostKeyPolicy, SSHClient
 from paramiko.sftp_attr import SFTPAttributes
 
 from flwr.common.logger import log
@@ -71,9 +71,14 @@ def ssh_connection(
     username, key_filename = ssh_credentials
 
     instance_ssh_port: int = cast(int, instance.ssh_port)
+    ignore_host_key_policy: Union[
+        Type[MissingHostKeyPolicy], MissingHostKeyPolicy
+    ] = cast(
+        Union[Type[MissingHostKeyPolicy], MissingHostKeyPolicy], IgnoreHostKeyPolicy
+    )
 
     client = SSHClient()
-    client.set_missing_host_key_policy(IgnoreHostKeyPolicy)
+    client.set_missing_host_key_policy(ignore_host_key_policy)
     client.connect(
         hostname=str(instance.public_ip),
         port=instance_ssh_port,
