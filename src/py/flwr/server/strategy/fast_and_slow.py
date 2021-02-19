@@ -26,6 +26,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    Scalar,
     Weights,
     parameters_to_weights,
     weights_to_parameters,
@@ -59,8 +60,8 @@ class FastAndSlow(FedAvg):
         eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
         min_completion_rate_fit: float = 0.5,
         min_completion_rate_evaluate: float = 0.5,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, str]]] = None,
+        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         importance_sampling: bool = True,
         dynamic_timeout: bool = True,
         dynamic_timeout_percentile: float = 0.8,
@@ -319,6 +320,7 @@ class FastAndSlow(FedAvg):
             # Track contributions to the global model
             for client, fit_res in results:
                 cid = client.cid
+                assert fit_res.num_examples_ceil is not None
                 contribution: Tuple[int, int, int] = (
                     rnd,
                     fit_res.num_examples,
@@ -331,6 +333,8 @@ class FastAndSlow(FedAvg):
         if self.dynamic_timeout:
             self.durations = []
             for client, fit_res in results:
+                assert fit_res.fit_duration is not None
+                assert fit_res.num_examples_ceil is not None
                 cid_duration = (
                     client.cid,
                     fit_res.fit_duration,

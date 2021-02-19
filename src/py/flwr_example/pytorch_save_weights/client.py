@@ -48,7 +48,7 @@ class CifarClient(fl.client.NumPyClient):
         return self.model.get_weights()
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, fl.common.Scalar]
     ) -> Tuple[List[np.ndarray], int]:
         # Set model parameters
         self.model.set_weights(parameters)
@@ -60,7 +60,7 @@ class CifarClient(fl.client.NumPyClient):
         return self.model.get_weights(), len(self.trainloader)
 
     def evaluate(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, fl.common.Scalar]
     ) -> Tuple[int, float, float]:
         # Use provided weights to update the local model
         self.model.set_weights(parameters)
