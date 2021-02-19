@@ -17,7 +17,7 @@ import concurrent.futures
 from contextlib import contextmanager
 from itertools import groupby
 from logging import DEBUG, ERROR
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, Union, cast
+from typing import Dict, Iterator, List, Optional, Tuple, Type, Union, cast
 
 from paramiko.client import MissingHostKeyPolicy, SSHClient
 from paramiko.sftp_attr import SFTPAttributes
@@ -27,7 +27,7 @@ from flwr.common.logger import log
 from .compute.adapter import Adapter
 from .instance import Instance
 
-ExecInfo = Tuple[List[Any], List[Any]]
+ExecInfo = Tuple[List[str], List[str]]
 
 
 class StartFailed(Exception):
