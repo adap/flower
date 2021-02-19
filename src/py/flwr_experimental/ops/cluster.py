@@ -17,9 +17,9 @@ import concurrent.futures
 from contextlib import contextmanager
 from itertools import groupby
 from logging import DEBUG, ERROR
-from typing import Dict, Iterator, List, Optional, Tuple
+from typing import Dict, Iterator, List, Optional, Tuple, Type, Union, cast
 
-from paramiko.client import SSHClient
+from paramiko.client import MissingHostKeyPolicy, SSHClient
 from paramiko.sftp_attr import SFTPAttributes
 
 from flwr.common.logger import log
@@ -27,7 +27,7 @@ from flwr.common.logger import log
 from .compute.adapter import Adapter
 from .instance import Instance
 
-ExecInfo = Tuple[str, str]
+ExecInfo = Tuple[List[str], List[str]]
 
 
 class StartFailed(Exception):
@@ -70,11 +70,18 @@ def ssh_connection(
     """Connect to server and yield SSH client."""
     username, key_filename = ssh_credentials
 
+    instance_ssh_port: int = cast(int, instance.ssh_port)
+    ignore_host_key_policy: Union[
+        Type[MissingHostKeyPolicy], MissingHostKeyPolicy
+    ] = cast(
+        Union[Type[MissingHostKeyPolicy], MissingHostKeyPolicy], IgnoreHostKeyPolicy
+    )
+
     client = SSHClient()
-    client.set_missing_host_key_policy(IgnoreHostKeyPolicy)
+    client.set_missing_host_key_policy(ignore_host_key_policy)
     client.connect(
-        hostname=instance.public_ip,
-        port=instance.ssh_port,
+        hostname=str(instance.public_ip),
+        port=instance_ssh_port,
         username=username,
         key_filename=key_filename,
     )
@@ -225,7 +232,9 @@ class Cluster:
 
         with ssh_connection(instance, self.ssh_credentials) as client:
             sftp = client.open_sftp()
-            sftp_file_attributes = sftp.put(local_path, remote_path)
+
+            if sftp is not None:
+                sftp_file_attributes = sftp.put(local_path, remote_path)
 
         return sftp_file_attributes
 
@@ -262,12 +271,12 @@ class Cluster:
 
         with ssh_connection(instance, self.ssh_credentials) as client:
             _, stdout, stderr = client.exec_command(command)
-            stdout = stdout.readlines()
-            stderr = stderr.readlines()
+            lines_stdout = stdout.readlines()
+            lines_stderr = stderr.readlines()
 
-        print(stdout, stderr)
+        print(lines_stdout, lines_stderr)
 
-        return stdout, stderr
+        return lines_stdout, lines_stderr
 
     def exec_all(
         self, command: str, groups: Optional[List[str]] = None

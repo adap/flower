@@ -17,6 +17,7 @@
 import os
 import unittest
 import warnings
+from typing import Sized, cast
 from unittest.mock import MagicMock
 
 from .cluster import (
@@ -163,9 +164,12 @@ if os.getenv("FLOWER_INTEGRATION"):
             # Execute
             stdout, stderr = self.cluster.exec("server", command)
 
+            casted_stderr: Sized = cast(Sized, stderr)
+            casted_stdout: Sized = cast(Sized, stdout)
+
             # Assert
-            assert len(stderr) == 0
-            assert len(stdout) == 1
+            assert len(casted_stderr) == 0
+            assert len(casted_stdout) == 1
             assert "".join(stdout) == expected_result
 
 

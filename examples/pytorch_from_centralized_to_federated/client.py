@@ -48,7 +48,7 @@ class CifarClient(fl.client.NumPyClient):
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
         cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
-        return self.get_parameters(), len(self.trainloader)
+        return self.get_parameters(), len(self.trainloader), {}
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, str]
@@ -56,7 +56,7 @@ class CifarClient(fl.client.NumPyClient):
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
         loss, accuracy = cifar.test(self.model, self.testloader, device=DEVICE)
-        return len(self.testloader), float(loss), float(accuracy)
+        return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
 
 
 def main() -> None:
@@ -68,7 +68,7 @@ def main() -> None:
 
     # Start client
     client = CifarClient(model, trainloader, testloader)
-    fl.client.start_numpy_client("0.0.0.0:8080", client)
+    fl.client.start_numpy_client("[::]:8080", client)
 
 
 if __name__ == "__main__":
