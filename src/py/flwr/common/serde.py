@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""This module contains functions for protobuf serialization and
-deserialization."""
+"""ProtoBuf serialization and deserialization."""
 
 
 from typing import Any, List, cast
@@ -47,7 +46,9 @@ def parameters_from_proto(msg: Parameters) -> typing.Parameters:
 
 def reconnect_to_proto(reconnect: typing.Reconnect) -> ServerMessage.Reconnect:
     """Serialize flower.Reconnect to ProtoBuf message."""
-    return ServerMessage.Reconnect(seconds=reconnect.seconds)
+    if reconnect.seconds is not None:
+        return ServerMessage.Reconnect(seconds=reconnect.seconds)
+    return ServerMessage.Reconnect()
 
 
 def reconnect_from_proto(msg: ServerMessage.Reconnect) -> typing.Reconnect:
@@ -126,11 +127,35 @@ def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
     """Serialize flower.FitIns to ProtoBuf message."""
     parameters_proto = parameters_to_proto(res.parameters)
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
+    # Legacy case, will be removed in a future release
+    if res.num_examples_ceil is not None and res.fit_duration is not None:
+        return ClientMessage.FitRes(
+            parameters=parameters_proto,
+            num_examples=res.num_examples,
+            num_examples_ceil=res.num_examples_ceil,  # Deprecated
+            fit_duration=res.fit_duration,  # Deprecated
+            metrics=metrics_msg,
+        )
+    # Legacy case, will be removed in a future release
+    if res.num_examples_ceil is not None:
+        return ClientMessage.FitRes(
+            parameters=parameters_proto,
+            num_examples=res.num_examples,
+            num_examples_ceil=res.num_examples_ceil,  # Deprecated
+            metrics=metrics_msg,
+        )
+    # Legacy case, will be removed in a future release
+    if res.fit_duration is not None:
+        return ClientMessage.FitRes(
+            parameters=parameters_proto,
+            num_examples=res.num_examples,
+            fit_duration=res.fit_duration,  # Deprecated
+            metrics=metrics_msg,
+        )
+    # Forward-compatible case
     return ClientMessage.FitRes(
         parameters=parameters_proto,
         num_examples=res.num_examples,
-        num_examples_ceil=res.num_examples_ceil,  # Deprecated
-        fit_duration=res.fit_duration,  # Deprecated
         metrics=metrics_msg,
     )
 
@@ -168,10 +193,18 @@ def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIn
 def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
     """Serialize flower.EvaluateIns to ProtoBuf message."""
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
+    # Legacy case, will be removed in a future release
+    if res.accuracy is not None:
+        return ClientMessage.EvaluateRes(
+            loss=res.loss,
+            num_examples=res.num_examples,
+            accuracy=res.accuracy,  # Deprecated
+            metrics=metrics_msg,
+        )
+    # Forward-compatible case
     return ClientMessage.EvaluateRes(
         loss=res.loss,
         num_examples=res.num_examples,
-        accuracy=res.accuracy,  # Deprecated
         metrics=metrics_msg,
     )
 
