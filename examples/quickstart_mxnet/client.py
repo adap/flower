@@ -10,15 +10,14 @@ import flwr as fl
 import numpy as np
 import mxnet as mx
 from mxnet import nd
-from mxnet.gluon import ParameterDict
 
 import mxnet_cnn
 
 
 # Flower Client
 class MNISTClient(fl.client.NumPyClient):
-    """Flower client implementing CIFAR-10 image classification using
-    PyTorch."""
+    """Flower client implementing MNIST classification using
+    MXNet."""
 
     def __init__(
         self,
@@ -33,14 +32,16 @@ class MNISTClient(fl.client.NumPyClient):
         self.device = device
 
     def get_parameters(self) -> List[np.ndarray]:
-        # Return model parameters as a list of NumPy ndarrays
+        # Return model parameters as a list of NumPy Arrays
         param = []
         for val in self.model.collect_params('.*weight').values():
             p = val.data()
+            # convert parameters from NDArray to Numpy Array required by Flower Numpy Client
             param.append(p.asnumpy())
         return param
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
+        # Collect model parameters and set new weight values
         params = zip(self.model.collect_params('.*weight').keys(), parameters)
         for key, value in params:
             self.model.collect_params().setattr(key, value)
@@ -65,19 +66,17 @@ class MNISTClient(fl.client.NumPyClient):
 def main() -> None:
     """Load data, start CifarClient."""
 
-    # Load model and data
-    print("Define Device")
+    # Setup context to GPU and if not available to CPU
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
-    #DEVICE = [mx.cpu()]
-    print("Load data")
+    # Load data
     train_data, val_data = mxnet_cnn.load_data()
-    print("define model")
+    # Define model from centralized training
     model = mxnet_cnn.model()
-    print("Make one forward")
+    # Make one forward propagation to initialize parameters
     init = nd.random.uniform(shape=(2, 784))
     model(init)
 
-    # Start client
+    # Start Flower client
     client = MNISTClient(model, train_data, val_data, DEVICE)
     fl.client.start_numpy_client("0.0.0.0:8080", client)
 

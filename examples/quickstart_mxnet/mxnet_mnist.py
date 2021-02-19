@@ -30,6 +30,7 @@ def load_data() -> Tuple[mx.io.NDArrayIter, mx.io.NDArrayIter]:
     return train_data, val_data
 
 def model():
+    # Define simple Sequential model
     net = nn.Sequential()
     net.add(nn.Dense(256, activation='relu'))
     net.add(nn.Dense(10))
@@ -90,7 +91,6 @@ def test(
     metric = mx.metric.Accuracy()
     loss_metric = mx.metric.Loss()
     loss = 0.0
-    eval_loss = 0.0
     # Reset the validation data iterator.
     val_data.reset()
     # Loop over the validation data iterator.
@@ -118,15 +118,13 @@ def test(
 
 
 def main():
-    print("Setup context to GPU and if not available to CPU")
+    # Setup context to GPU and if not available to CPU
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
     train_data, val_data = load_data()
     net = model()
     init = nd.random.uniform(shape=(2, 784))
     net(init)
-    print("parameter", net.collect_params().values())
     train(net=net, train_data=train_data, epoch=5, device=DEVICE)
-    print("parameter", net.collect_params().values())
     loss, acc = test(net=net, val_data=val_data, device=DEVICE)
     print("Loss: ", loss)
     print("Accuracy: ", acc)
