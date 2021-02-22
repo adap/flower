@@ -16,8 +16,7 @@ import mxnet_cnn
 
 # Flower Client
 class MNISTClient(fl.client.NumPyClient):
-    """Flower client implementing MNIST classification using
-    MXNet."""
+    """Flower client implementing MNIST classification using MXNet."""
 
     def __init__(
         self,
@@ -34,7 +33,7 @@ class MNISTClient(fl.client.NumPyClient):
     def get_parameters(self) -> List[np.ndarray]:
         # Return model parameters as a list of NumPy Arrays
         param = []
-        for val in self.model.collect_params('.*weight').values():
+        for val in self.model.collect_params(".*weight").values():
             p = val.data()
             # convert parameters from NDArray to Numpy Array required by Flower Numpy Client
             param.append(p.asnumpy())
@@ -42,7 +41,7 @@ class MNISTClient(fl.client.NumPyClient):
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         # Collect model parameters and set new weight values
-        params = zip(self.model.collect_params('.*weight').keys(), parameters)
+        params = zip(self.model.collect_params(".*weight").keys(), parameters)
         for key, value in params:
             self.model.collect_params().setattr(key, value)
 

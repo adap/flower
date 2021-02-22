@@ -29,13 +29,15 @@ def load_data() -> Tuple[mx.io.NDArrayIter, mx.io.NDArrayIter]:
     val_data = mx.io.NDArrayIter(mnist["test_data"], mnist["test_label"], batch_size)
     return train_data, val_data
 
+
 def model():
     # Define simple Sequential model
     net = nn.Sequential()
-    net.add(nn.Dense(256, activation='relu'))
+    net.add(nn.Dense(256, activation="relu"))
     net.add(nn.Dense(10))
     net.collect_params().initialize()
     return net
+
 
 def train(
     net: mx.gluon.nn, train_data: mx.io.NDArrayIter, epoch: int, device: mx.context
