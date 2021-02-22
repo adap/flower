@@ -45,7 +45,6 @@ def train(
     trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.03})
     # Use Accuracy as the evaluation metric.
     metric = mx.metric.Accuracy()
-    loss_metric = mx.metric.Loss()
     softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
     for i in range(epoch):
         # Reset the train data iterator.

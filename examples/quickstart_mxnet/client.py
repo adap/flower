@@ -1,9 +1,5 @@
 """Flower client example using MXNet for MNIST classification."""
 
-import os
-import sys
-import timeit
-from collections import OrderedDict
 from typing import Dict, List, Tuple
 
 import flwr as fl
@@ -11,7 +7,7 @@ import numpy as np
 import mxnet as mx
 from mxnet import nd
 
-import mxnet_cnn
+import mxnet_mnist
 
 
 # Flower Client
@@ -20,7 +16,7 @@ class MNISTClient(fl.client.NumPyClient):
 
     def __init__(
         self,
-        model: mxnet_cnn.model(),
+        model: mxnet_mnist.model(),
         train_data: mx.io.NDArrayIter,
         val_data: mx.io.NDArrayIter,
         device: mx.context,
@@ -50,7 +46,7 @@ class MNISTClient(fl.client.NumPyClient):
     ) -> Tuple[List[np.ndarray], int]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
-        mxnet_cnn.train(self.model, self.train_data, epoch=1, device=self.device)
+        mxnet_mnist.train(self.model, self.train_data, epoch=1, device=self.device)
         return self.get_parameters(), self.train_data.batch_size
 
     def evaluate(
@@ -58,7 +54,7 @@ class MNISTClient(fl.client.NumPyClient):
     ) -> Tuple[int, float, float]:
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
-        loss, accuracy = mxnet_cnn.test(self.model, self.val_data, device=self.device)
+        loss, accuracy = mxnet_mnist.test(self.model, self.val_data, device=self.device)
         return self.val_data.batch_size, float(loss), float(accuracy)
 
 
@@ -68,9 +64,9 @@ def main() -> None:
     # Setup context to GPU and if not available to CPU
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
     # Load data
-    train_data, val_data = mxnet_cnn.load_data()
+    train_data, val_data = mxnet_mnist.load_data()
     # Define model from centralized training
-    model = mxnet_cnn.model()
+    model = mxnet_mnist.model()
     # Make one forward propagation to initialize parameters
     init = nd.random.uniform(shape=(2, 784))
     model(init)
