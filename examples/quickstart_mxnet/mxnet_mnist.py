@@ -42,7 +42,6 @@ def model():
 def train(
     net: mx.gluon.nn, train_data: mx.io.NDArrayIter, epoch: int, device: mx.context
 ) -> None:
-    # print('Xavier Init', mx.init.Xavier(magnitude=2.24))
     trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.03})
     # Use Accuracy as the evaluation metric.
     metric = mx.metric.Accuracy()
@@ -115,18 +114,21 @@ def test(
     print("validation acc: %s=%f" % metric.get())
     print("validation loss:", loss)
     accuracy = metric.get()[1]
-    # assert metric.get()[1] > 0.98
     return loss, accuracy
 
 
 def main():
     # Setup context to GPU and if not available to CPU
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
+    # Load train and validation data
     train_data, val_data = load_data()
+    # Define sequential model
     net = model()
     init = nd.random.uniform(shape=(2, 784))
     net(init)
+    # Start model training based on training set
     train(net=net, train_data=train_data, epoch=5, device=DEVICE)
+    # Evaluate model using loss and accuracy
     loss, acc = test(net=net, val_data=val_data, device=DEVICE)
     print("Loss: ", loss)
     print("Accuracy: ", acc)
