@@ -15,8 +15,8 @@ mx.random.seed(42)
 # Setup context to GPU or CPU
 DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
 
-def main():
 
+def main():
     def model():
         net = nn.Sequential()
         net.add(nn.Dense(256, activation="relu"))
@@ -53,7 +53,7 @@ def main():
             self.set_parameters(parameters)
             loss, accuracy = test(model, val_data)
             return val_data.batch_size, float(loss), float(accuracy)
-    
+
     # Start Flower client
     fl.client.start_numpy_client("0.0.0.0:8080", client=MNISTClient())
 
