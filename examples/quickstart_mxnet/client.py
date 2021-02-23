@@ -1,4 +1,10 @@
-"""Flower client example using MXNet for MNIST classification."""
+"""
+Flower client example using MXNet for MNIST classification.
+
+The code is generally adapted from:
+
+https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html#Loading-Data
+"""
 
 import flwr as fl
 import numpy as np
