@@ -53,12 +53,12 @@ def main():
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             train(model, train_data, epoch=1)
-            return self.get_parameters(), train_data.batch_size
+            return self.get_parameters(), train_data.batch_size, {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss, accuracy = test(model, val_data)
-            return val_data.batch_size, float(loss), float(accuracy)
+            return float(loss),  val_data.batch_size, {"accuracy":float(accuracy)}
 
     # Start Flower client
     fl.client.start_numpy_client("0.0.0.0:8080", client=MNISTClient())
