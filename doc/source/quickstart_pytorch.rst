@@ -139,14 +139,13 @@ instructions and calls one of the :code:`Client` methods to run your code
 
 Flower provides a convenience class called :code:`NumPyClient` which makes it
 easier to implement the :code:`Client` interface when your workload uses PyTorch.
-The :code:`NumPyClient` interface defines four methods
+Implementing :code:`NumPyClient` usually means defining the following methods
+(:code:`set_parameters` is optional though):
 
-#. :code:`get_weights`
-    * receive the model weights calculated by the local model
-#. :code:`set_weights`
-    * set the model weights on the local model that are received from the server
 #. :code:`get_parameters`
-    * encapsulates the weight into Flower parameters
+    * return the model weight as a list of NumPy ndarrays
+#. :code:`set_parameters` (optional)
+    * update the local model weights with the parameters received from the server
 #. :code:`fit`
     * set the local model weights
     * train the local model
