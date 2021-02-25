@@ -62,12 +62,12 @@ implemented in the following way:
         def fit(self, parameters, config):
             model.set_weights(parameters)
             model.fit(x_train, y_train, epochs=1, batch_size=32, steps_per_epoch=3)
-            return model.get_weights(), len(x_train)
+            return model.get_weights(), len(x_train), {}
 
         def evaluate(self, parameters, config):
             model.set_weights(parameters)
             loss, accuracy = model.evaluate(x_test, y_test)
-            return len(x_test), loss, accuracy
+            return loss, len(x_test), {"accuracy": accuracy}
 
 
 We can now create an instance of our class :code:`CifarClient` and add one line
@@ -130,30 +130,32 @@ that started the server):
 
 .. code-block:: shell
 
-    INFO flower 2020-07-15 10:06:54,903 | app.py:55 | Flower server running (insecure, 3 rounds)
-    INFO flower 2020-07-15 10:07:00,962 | server.py:66 | [TIME] FL starting
-    DEBUG flower 2020-07-15 10:07:03,206 | server.py:145 | fit_round: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:19,909 | server.py:157 | fit_round received 2 results and 0 failures
-    DEBUG flower 2020-07-15 10:07:19,913 | server.py:122 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:20,455 | server.py:132 | evaluate received 2 results and 0 failures
-    DEBUG flower 2020-07-15 10:07:20,456 | server.py:145 | fit_round: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:37,437 | server.py:157 | fit_round received 2 results and 0 failures
-    DEBUG flower 2020-07-15 10:07:37,441 | server.py:122 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:37,863 | server.py:132 | evaluate received 2 results and 0 failures
-    DEBUG flower 2020-07-15 10:07:37,864 | server.py:145 | fit_round: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:55,531 | server.py:157 | fit_round received 2 results and 0 failures
-    DEBUG flower 2020-07-15 10:07:55,535 | server.py:122 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:55,937 | server.py:132 | evaluate received 2 results and 0 failures
-    INFO flower 2020-07-15 10:07:55,937 | server.py:107 | [TIME] FL finished in 54.974524599994766
-    INFO flower 2020-07-15 10:07:55,937 | app.py:59 | app_fit: losses_distributed [(1, 0.07337841391563416), (2, 0.06347471475601196), (3, 0.07028044760227203)]
-    INFO flower 2020-07-15 10:07:55,937 | app.py:60 | app_fit: accuracies_distributed []
-    INFO flower 2020-07-15 10:07:55,937 | app.py:61 | app_fit: losses_centralized []
-    INFO flower 2020-07-15 10:07:55,937 | app.py:62 | app_fit: accuracies_centralized []
-    DEBUG flower 2020-07-15 10:07:55,939 | server.py:122 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2020-07-15 10:07:56,396 | server.py:132 | evaluate received 2 results and 0 failures
-    INFO flower 2020-07-15 10:07:56,396 | app.py:71 | app_evaluate: federated loss: 0.07028044760227203
-    INFO flower 2020-07-15 10:07:56,396 | app.py:75 | app_evaluate: results [('ipv6:[::1]:33318', (10000, 0.07028044760227203, 0.982200026512146)), ('ipv6:[::1]:33320', (10000, 0.07028044760227203, 0.982200026512146))]
-    INFO flower 2020-07-15 10:07:56,396 | app.py:77 | app_evaluate: failures []
+    INFO flower 2021-02-25 14:15:46,741 | app.py:76 | Flower server running (insecure, 3 rounds)
+    INFO flower 2021-02-25 14:15:46,742 | server.py:72 | Getting initial parameters
+    INFO flower 2021-02-25 14:16:01,770 | server.py:74 | Evaluating initial parameters
+    INFO flower 2021-02-25 14:16:01,770 | server.py:87 | [TIME] FL starting
+    DEBUG flower 2021-02-25 14:16:12,341 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2021-02-25 14:21:17,235 | server.py:177 | fit_round received 2 results and 0 failures
+    DEBUG flower 2021-02-25 14:21:17,512 | server.py:139 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2021-02-25 14:21:29,628 | server.py:149 | evaluate received 2 results and 0 failures
+    DEBUG flower 2021-02-25 14:21:29,696 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2021-02-25 14:25:59,917 | server.py:177 | fit_round received 2 results and 0 failures
+    DEBUG flower 2021-02-25 14:26:00,227 | server.py:139 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2021-02-25 14:26:11,457 | server.py:149 | evaluate received 2 results and 0 failures
+    DEBUG flower 2021-02-25 14:26:11,530 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2021-02-25 14:30:43,389 | server.py:177 | fit_round received 2 results and 0 failures
+    DEBUG flower 2021-02-25 14:30:43,630 | server.py:139 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2021-02-25 14:30:53,384 | server.py:149 | evaluate received 2 results and 0 failures
+    INFO flower 2021-02-25 14:30:53,384 | server.py:122 | [TIME] FL finished in 891.6143046000007
+    INFO flower 2021-02-25 14:30:53,385 | app.py:109 | app_fit: losses_distributed [(1, 2.3196680545806885), (2, 2.3202896118164062), (3, 2.1818180084228516)]
+    INFO flower 2021-02-25 14:30:53,385 | app.py:110 | app_fit: accuracies_distributed []
+    INFO flower 2021-02-25 14:30:53,385 | app.py:111 | app_fit: losses_centralized []
+    INFO flower 2021-02-25 14:30:53,385 | app.py:112 | app_fit: accuracies_centralized []
+    DEBUG flower 2021-02-25 14:30:53,442 | server.py:139 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2021-02-25 14:31:02,848 | server.py:149 | evaluate received 2 results and 0 failures
+    INFO flower 2021-02-25 14:31:02,848 | app.py:121 | app_evaluate: federated loss: 2.1818180084228516
+    INFO flower 2021-02-25 14:31:02,848 | app.py:125 | app_evaluate: results [('ipv4:127.0.0.1:57158', EvaluateRes(loss=2.1818180084228516, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.21610000729560852})), ('ipv4:127.0.0.1:57160', EvaluateRes(loss=2.1818180084228516, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.21610000729560852}))]
+    INFO flower 2021-02-25 14:31:02,848 | app.py:127 | app_evaluate: failures [] flower 2020-07-15 10:07:56,396 | app.py:77 | app_evaluate: failures []
 
 Congratulations! You've successfully built and run your first federated
 learning system. The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart_tensorflow/client.py>`_ for this can be found in
