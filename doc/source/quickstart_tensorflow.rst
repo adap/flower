@@ -62,12 +62,12 @@ implemented in the following way:
         def fit(self, parameters, config):
             model.set_weights(parameters)
             model.fit(x_train, y_train, epochs=1, batch_size=32, steps_per_epoch=3)
-            return model.get_weights(), len(x_train)
+            return model.get_weights(), len(x_train), {}
 
         def evaluate(self, parameters, config):
             model.set_weights(parameters)
             loss, accuracy = model.evaluate(x_test, y_test)
-            return len(x_test), loss, accuracy
+            return loss, len(x_test), {"accuracy": accuracy}
 
 
 We can now create an instance of our class :code:`CifarClient` and add one line
