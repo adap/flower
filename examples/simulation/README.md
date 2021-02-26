@@ -1,4 +1,4 @@
-# Single Machine Simulation Of Federated Learning
+# Single-Machine Simulation of Federated Learning Systems
 
 This example is part of a series of blog posts. It's recommended to read the [blog post](https://flower.dev/blog/2021-01-14-single-machine-simulation-of-federated-learning-systems) before reading further.
 
