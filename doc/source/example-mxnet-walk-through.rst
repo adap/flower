@@ -2,7 +2,7 @@ Example: MXNet - Run MXNet Federated
 ====================================
 
 This tutorial will show you how to use Flower to build a federated version of a MXNet workload.
-We are using MXNet to train a Sequential model on a MNIST dataset. We will setup the example similar to our `PyTorch - From Centralized To Federated <https://github.com/adap/flower/blob/main/examples/pytorch_from_centralized_to_federated>`_ walk through. 
+We are using MXNet to train a Sequential model on a MNIST dataset. We will setup the example similar to our `PyTorch - From Centralized To Federated <https://github.com/adap/flower/blob/main/examples/pytorch_from_centralized_to_federated>`_ walk through. MXNet and PyTorch are very similar and a very good comparison between MXNet and PyTorch is given `here <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/getting-started/to-mxnet/pytorch.html>`_.
 First, we build a centralized training approach based on the `Handwritten Digit Recognition <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_ tutorial.
 Then, we build upon the centralized training code to run the training in a federated fashion.
 
@@ -146,3 +146,35 @@ The evalution of the model is defined in function :code:`test()`. The function l
         print("validation loss:", loss)
         accuracy = metric.get()[1]
         return loss, accuracy
+
+Having defined defining the data loading, model architecture, training, and evaluation we can put everything together and train our model on MNIST. Note that the GPU/CPU device for the training and testing is defined within the :code:`ctx` (context).  
+
+.. code-block:: python
+
+    def main():
+        # Setup context to GPU and if not available to CPU
+        DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
+        # Load train and validation data
+        train_data, val_data = load_data()
+        # Define sequential model
+        net = model()
+        init = nd.random.uniform(shape=(2, 784))
+        net(init)
+        # Start model training based on training set
+        train(net=net, train_data=train_data, epoch=5, device=DEVICE)
+        # Evaluate model using loss and accuracy
+        loss, acc = test(net=net, val_data=val_data, device=DEVICE)
+        print("Loss: ", loss)
+        print("Accuracy: ", acc)
+
+    if __name__ == "__main__":
+            main()
+
+You can now run your MXNet machine learning workload:
+
+.. code-block:: python
+
+    python3 mxnet_mnist.py
+
+So far this should all look fairly familiar if you've used MXNet or even PyTorch before.
+Let's take the next step and use what we've built to create a simple federated learning system consisting of one server and two clients.
