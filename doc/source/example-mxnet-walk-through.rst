@@ -181,3 +181,68 @@ Let's take the next step and use what we've built to create a simple federated l
 
 MXNet meets Flower
 ------------------
+
+So far it was not possible to train a MXNet workload federated since it was not supported yet. However, Flower is fully agnostic to machine learning frameworks and can take any model parameters and aggregate them. This section will show you how Flower can be used to federate MXNet workloads.
+
+The concept is however always the same. 
+We have to start a *server* and then use the code in :code:`mxnet_mnist.py` for the *clients* that are connected to the *server*.
+The *server* sends model parameters to the clients. The *clients* run the training and update the paramters.
+The updated parameters are sent back to the *server* which averages all received parameter updates.
+This describes one round of the federated learning process and we repeat this for multiple rounds.
+The challenging part is to transform the MXNet parameters from :code:`NDArray` to :code:`NumPy Arrays` to make it readable for Flower. 
+ 
+
+Our example consists of one *server* and two *clients*. Let's set up :code:`server.py` first. The *server* needs to import the Flower package :code:`flwr`.
+Next, we use the :code:`start_server` function to start a server and tell it to perform three rounds of federated learning.
+
+.. code-block:: python
+
+    import flwr as fl
+
+    if __name__ == "__main__":
+        fl.server.start_server("0.0.0.0:8080", config={"num_rounds": 3})
+
+We can already start the *server*:
+
+.. code-block:: python
+
+    python3 server.py
+
+Finally, we will define our *client* logic in :code:`client.py` and build upon the previously defined MXNet training in :code:`mxnet_mnist.py`.
+Our *client* needs to import :code:`flwr`, but also :code:`mxnet` to update the paramters on our MXNet model:
+
+.. code-block:: python
+
+    from typing import Dict, List, Tuple
+
+    import flwr as fl
+    import numpy as np
+    import mxnet as mx
+    from mxnet import nd
+
+    import mxnet_mnist
+
+
+Implementing a Flower *client* basically means implementing a subclass of either :code:`flwr.client.Client` or :code:`flwr.client.NumPyClient`.
+Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll call it :code:`MNISTClient`.
+:code:`NumPyClient` is slighly easier to implement than :code:`Client` if you use a framework with good NumPy interoperability (like PyTorch or TensorFlow/Keras) because it avoids some of the boilerplate that would otherwise be necessary.
+:code:`MNISTClient` needs to implement four methods, two methods for getting/setting model parameters, one method for training the model, and one method for testing the model:
+
+#. :code:`set_parameters (optional)`
+    * set the model parameters on the local model that are received from the server
+    * transform MXNet :code:`NDArray`s to NumPy :code:`ndarray`s
+    * loop over the list of model parameters received as NumPy :code:`ndarray`s (think list of neural network layers)
+#. :code:`get_parameters`
+    * get the model parameters and return them as a list of NumPy :code:`ndarray`s (which is what :code:`flwr.client.NumPyClient` expects)
+#. :code:`fit`
+    * update the parameters of the local model with the parameters received from the server
+    * train the model on the local training set
+    * get the updated local model weights and return them to the server
+#. :code:`evaluate`
+    * update the parameters of the local model with the parameters received from the server
+    * evaluate the updated model on the local test set
+    * return the local loss and accuracy to the server
+
+The two :code:`NumPyClient` methods :code:`fit` and :code:`evaluate` make use of the functions :code:`train()` and :code:`test()` previously defined in :code:`mxnet_mnist.py`.
+So what we really do here is we tell Flower through our :code:`NumPyClient` subclass which of our already defined functions to call for training and evaluation.
+We included type annotations to give you a better understanding of the data types that get passed around.
