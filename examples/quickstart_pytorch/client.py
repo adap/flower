@@ -52,15 +52,15 @@ def main():
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             train(net, trainloader, epochs=1)
-            return self.get_parameters(), len(trainloader)
+            return self.get_parameters(), len(trainloader), {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
-            return len(testloader), float(loss), float(accuracy)
+            return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
     # Start client
-    fl.client.start_numpy_client("0.0.0.0:8080", client=CifarClient())
+    fl.client.start_numpy_client("[::]:8080", client=CifarClient())
 
 
 def train(net, trainloader, epochs):

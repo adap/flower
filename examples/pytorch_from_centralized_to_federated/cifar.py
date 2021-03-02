@@ -21,7 +21,7 @@ import torchvision.transforms as transforms
 from torch import Tensor
 from torchvision.datasets import CIFAR10
 
-DATA_ROOT = "~/.flower/data/cifar-10"
+DATA_ROOT = "./dataset"
 
 # pylint: disable=unsubscriptable-object
 class Net(nn.Module):
@@ -122,10 +122,11 @@ def main():
     print("Centralized PyTorch training")
     print("Load data")
     trainloader, testloader = load_data()
+    net = Net()
     print("Start training")
-    train(net=Net(), trainloader=trainloader, epochs=2, device=DEVICE)
+    train(net=net, trainloader=trainloader, epochs=2, device=DEVICE)
     print("Evaluate model")
-    loss, accuracy = test(net=Net(), testloader=testloader, device=DEVICE)
+    loss, accuracy = test(net=net, testloader=testloader, device=DEVICE)
     print("Loss: ", loss)
     print("Accuracy: ", accuracy)
 

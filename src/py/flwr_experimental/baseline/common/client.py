@@ -148,5 +148,5 @@ class VisionClassificationClient(fl.client.Client):
 
         # Return the number of evaluation examples and the evaluation result (loss)
         return fl.common.EvaluateRes(
-            num_examples=self.num_examples_test, loss=loss, accuracy=acc
+            loss=loss, num_examples=self.num_examples_test, accuracy=acc
         )

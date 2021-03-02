@@ -18,6 +18,10 @@ DEPRECATION WARNING: use FedAvg instead.
 """
 
 
+from typing import Callable, Dict, Optional, Tuple
+
+from flwr.common import Scalar, Weights
+
 from .fedavg import FedAvg
 
 
@@ -26,3 +30,35 @@ class DefaultStrategy(FedAvg):
 
     DEPRECATION WARNING: use FedAvg instead.
     """
+
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        fraction_fit: float = 0.1,
+        fraction_eval: float = 0.1,
+        min_fit_clients: int = 1,
+        min_eval_clients: int = 1,
+        min_available_clients: int = 1,
+        eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
+        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        accept_failures: bool = True,
+    ) -> None:
+        super().__init__(
+            fraction_fit=fraction_fit,
+            fraction_eval=fraction_eval,
+            min_fit_clients=min_fit_clients,
+            min_eval_clients=min_eval_clients,
+            min_available_clients=min_available_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+            on_evaluate_config_fn=on_evaluate_config_fn,
+            accept_failures=accept_failures,
+        )
+        warning = """
+        DEPRECATION WARNING: DefaultStrategy is deprecated, migrate to FedAvg.
+
+        DefaultStrategy will be removed in a future release. Migrate to FedAvg
+        (which is functionally equivalent).
+        """
+        print(warning)

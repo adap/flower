@@ -16,7 +16,7 @@
 
 # pylint: disable=invalid-name
 
-from typing import List, Tuple, cast
+from typing import List, Tuple, Union, cast
 
 import numpy as np
 
@@ -239,13 +239,13 @@ def split_array_at_indices(
         )
     if not np.all(split_idx[:-1] <= split_idx[1:]):
         raise ValueError("Items in `split_idx` must be in increasing order.")
-    
-    num_splits:int = len(split_idx)
+
+    num_splits: int = len(split_idx)
     split_idx = np.append(split_idx, x.shape[0])
 
-    list_samples_split: List[List[np.ndarray]]= [[] for _ in range(num_splits)]
+    list_samples_split: List[List[np.ndarray]] = [[] for _ in range(num_splits)]
     for j in range(num_splits):
-        tmp_x = x[split_idx[j] : split_idx[j + 1]]
+        tmp_x = x[split_idx[j] : split_idx[j + 1]]  # noqa: E203
         for sample in tmp_x:
             list_samples_split[j].append(sample)
 
@@ -351,7 +351,7 @@ def create_lda_partitions(
     dataset: XY,
     dirichlet_dist: np.ndarray = None,
     num_partitions: int = 100,
-    concentration: float = 0.5,
+    concentration: Union[float, np.ndarray, List[float]] = 0.5,
     accept_imbalanced: bool = False,
 ) -> Tuple[XYList, np.ndarray]:
     """Create imbalanced non-iid partitions using Latent Dirichlet Allocation
@@ -393,12 +393,24 @@ def create_lda_partitions(
     # Get number of classes and verify if they matching with
     classes, start_indices = np.unique(y, return_index=True)
 
+    # Check if concentration is working.
+    concentration = np.asarray(concentration)
+    if concentration.size == 1:
+        concentration = np.repeat(concentration, classes.size)
+    elif concentration.size != classes.size:  # Sequence
+        raise ValueError(
+            f"The size of the provided concentration ({concentration.size}) ",
+            f"must be either 1 or equal number of classes {classes.size})",
+        )
+
     # Split into list of list of samples per class
-    list_samples_per_class:List[List[np.ndarray]] = split_array_at_indices(x, start_indices)
+    list_samples_per_class: List[List[np.ndarray]] = split_array_at_indices(
+        x, start_indices
+    )
 
     if dirichlet_dist is None:
         dirichlet_dist = np.random.default_rng().dirichlet(
-            alpha=classes.size * [concentration], size=num_partitions
+            alpha=concentration, size=num_partitions
         )
 
     if dirichlet_dist.size != 0:

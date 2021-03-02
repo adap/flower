@@ -187,6 +187,7 @@ class FedFSv0(FedAvg):
         # Track contributions to the global model
         for client, fit_res in results:
             cid = client.cid
+            assert fit_res.num_examples_ceil is not None
             contribution: Tuple[int, int, int] = (
                 rnd,
                 fit_res.num_examples,
