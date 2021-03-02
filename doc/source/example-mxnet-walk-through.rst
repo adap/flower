@@ -38,6 +38,21 @@ You can see that we do not import any :code:`flwr` package for federated learnin
     # Fixing the random seed
     mx.random.seed(42)
 
+The :code:`load_data()` function loads the MNIST training and test sets.
+
+.. code-block:: python
+
+    def load_data() -> Tuple[mx.io.NDArrayIter, mx.io.NDArrayIter]:
+        print("Download Dataset")
+        # Download MNIST data
+        mnist = mx.test_utils.get_mnist()
+        batch_size = 100
+        train_data = mx.io.NDArrayIter(
+            mnist["train_data"], mnist["train_label"], batch_size, shuffle=True
+        )
+        val_data = mx.io.NDArrayIter(mnist["test_data"], mnist["test_label"], batch_size)
+        return train_data, val_data
+
 As already mentioned we will use the MNIST dataset for this machine learning workload. The model architecture (a very simple Sequential model) is defined in :code:`model()`.
 
 .. code-block:: python
@@ -49,3 +64,85 @@ As already mentioned we will use the MNIST dataset for this machine learning wor
         net.add(nn.Dense(10))
         net.collect_params().initialize()
         return net
+
+We now need to define the training (function :code:`train()`) which loops over the training set and measures the the loss for each batch of training examples.
+
+.. code-block:: python
+
+    def train(
+        net: mx.gluon.nn, train_data: mx.io.NDArrayIter, epoch: int, device: mx.context
+    ) -> None:
+        trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.03})
+        # Use Accuracy as the evaluation metric.
+        metric = mx.metric.Accuracy()
+        softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
+        for i in range(epoch):
+            # Reset the train data iterator.
+            train_data.reset()
+            # Loop over the train data iterator.
+            for batch in train_data:
+                # Splits train data into multiple slices along batch_axis
+                # and copy each slice into a context.
+                data = gluon.utils.split_and_load(
+                    batch.data[0], ctx_list=device, batch_axis=0
+                )
+                # Splits train labels into multiple slices along batch_axis
+                # and copy each slice into a context.
+                label = gluon.utils.split_and_load(
+                    batch.label[0], ctx_list=device, batch_axis=0
+                )
+                outputs = []
+                # Inside training scope
+                with ag.record():
+                    for x, y in zip(data, label):
+                        z = net(x)
+                        # Computes softmax cross entropy loss.
+                        loss = softmax_cross_entropy_loss(z, y)
+                        # Backpropogate the error for one iteration.
+                        loss.backward()
+                        outputs.append(z)
+                # Updates internal evaluation
+                metric.update(label, outputs)
+                # Make one step of parameter update. Trainer needs to know the
+                # batch size of data to normalize the gradient by 1/batch_size.
+                trainer.step(batch.data[0].shape[0])
+            # Gets the evaluation result.
+            name, acc = metric.get()
+            # Reset evaluation result to initial state.
+            metric.reset()
+            print("training acc at epoch %d: %s=%f" % (i, name, acc))
+
+The evalution of the model is defined in function :code:`test()`. The function loops over all test samples and measures the loss and accuracy of the model based on the test dataset. 
+
+.. code-block:: python
+
+    def test(
+        net: mx.gluon.nn, val_data: mx.io.NDArrayIter, device: mx.context
+    ) -> Tuple[float, float]:
+        # Use Accuracy as the evaluation metric.
+        metric = mx.metric.Accuracy()
+        loss_metric = mx.metric.Loss()
+        loss = 0.0
+        # Reset the validation data iterator.
+        val_data.reset()
+        # Loop over the validation data iterator.
+        for batch in val_data:
+            # Splits validation data into multiple slices along batch_axis
+            # and copy each slice into a context.
+            data = gluon.utils.split_and_load(batch.data[0], ctx_list=device, batch_axis=0)
+            # Splits validation label into multiple slices along batch_axis
+            # and copy each slice into a context.
+            label = gluon.utils.split_and_load(
+                batch.label[0], ctx_list=device, batch_axis=0
+            )
+            outputs = []
+            for x in data:
+                outputs.append(net(x))
+                loss_metric.update(label, outputs)
+                loss += loss_metric.get()[1]
+            # Updates internal evaluation
+            metric.update(label, outputs)
+        print("validation acc: %s=%f" % metric.get())
+        print("validation loss:", loss)
+        accuracy = metric.get()[1]
+        return loss, accuracy
