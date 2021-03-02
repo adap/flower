@@ -14,8 +14,8 @@ Before we start setting up our MXNet example we install the :code:`mxnet` and :c
   $ pip install flwr
 
 
-Centralized Training
---------------------
+MNIST Training with MXNet
+-------------------------
 
 We begin with a brief description of the centralized training code based on a Sequential model.
 If you want a more in-depth explanation of what's going on then have a look at the official `MXNet tutorial <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/>`_.
@@ -178,3 +178,6 @@ You can now run your MXNet machine learning workload:
 
 So far this should all look fairly familiar if you've used MXNet or even PyTorch before.
 Let's take the next step and use what we've built to create a simple federated learning system consisting of one server and two clients.
+
+MXNet meets Flower
+------------------
