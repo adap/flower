@@ -17,23 +17,18 @@
 # mypy: ignore-errors
 # pylint: disable=W0223
 
-import argparse
 from os import PathLike
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
-import torch.nn as nn
 from PIL import Image
 from PIL.Image import Image as ImageType
-from torch import Tensor, from_numpy, load, save
+from torch import load
 from torch.utils.data import Dataset
-from torchvision.datasets import CIFAR10, CIFAR100
 from torchvision.transforms import Compose, Normalize, ToTensor
 
-import flwr as fl
-from flwr.dataset.utils.common import XY, XYList, create_lda_partitions
-from flwr.dataset.utils.pytorch import convert_torchvision_dataset_to_xy
+from flwr.dataset.utils.common import XY
 
 
 def get_normalization_transform(num_classes: int = 10) -> Compose:
@@ -45,7 +40,7 @@ def get_normalization_transform(num_classes: int = 10) -> Compose:
     """
     if num_classes not in [10, 100]:
         raise ValueError(
-            """Number of classes can only be either 
+            """Number of classes can only be either
                 10 or 100 for CIFAR10 and CIFAR100 datasets respectively."""
         )
     if num_classes == 10:
@@ -62,14 +57,20 @@ def get_normalization_transform(num_classes: int = 10) -> Compose:
     return transform
 
 
-class CIFAR_PartitionedDataset(Dataset):
+class CIFARPartitionedDataset(Dataset):
+    """Defines PyTorch Dataset that reads from a Flower dataset partition.
+
+    Args:
+        Dataset (torch.utils.data.Dataset): PyTorch dataset.
+    """
+
     def __init__(
         self,
         *,
         num_classes: int = 10,
         root_dir: Union[str, bytes, PathLike],
         partition_id: int,
-        transform: Optional[callable]=None,
+        transform: Optional[callable] = None,
     ):
         """Dataset from partitioned files
         Parameters
@@ -84,36 +85,34 @@ class CIFAR_PartitionedDataset(Dataset):
 
         if num_classes not in [10, 100]:
             raise ValueError(
-                """Number of classes can only be either 
+                """Number of classes can only be either
                 10 or 100 for CIFAR10 and CIFAR100 datasets respectively."""
             )
         self.root_dir: Path = Path(root_dir).expanduser()
         self.partition_id: int = partition_id
-        self.partition_path = (
-            self.root_dir / f"{self.partition_id}.pt"
-        )
+        self.partition_path = self.root_dir / f"{self.partition_id}.pt"
 
         if not self.partition_path.exists():
             raise RuntimeError(f"Partition file {self.partition_path} not found.")
-        else:
-            self.X, self.Y = load(self.partition_path)
-        
+
+        self.images, self.labels = load(self.partition_path)
+
         self.transform = transform
 
     def __len__(self) -> int:
-        return len(self.X)
+        return len(self.images)
 
     def __getitem__(self, idx: int) -> Union[XY, Tuple[ImageType, np.ndarray]]:
-        x = Image.fromarray(self.X[idx])
-        y = self.Y.item(idx)
+        image = Image.fromarray(self.images[idx])
+        label = self.labels.item(idx)
 
         if self.transform:
-            x = self.transform(x)
+            image = self.transform(image)
 
-        return (x, y)
+        return (image, label)
 
 
-class CIFAR10PartitionedDataset(CIFAR_PartitionedDataset):
+class CIFAR10PartitionedDataset(CIFARPartitionedDataset):
     """Augmented and partitioned dataset based on CIFAR10."""
 
     def __init__(
@@ -121,7 +120,7 @@ class CIFAR10PartitionedDataset(CIFAR_PartitionedDataset):
         *,
         root_dir: Union[str, bytes, PathLike],
         partition_id: int,
-        transform: Optional[callable]=None,
+        transform: Optional[callable] = None,
     ):
         """Dataset from partitioned files
         Parameters
@@ -131,10 +130,15 @@ class CIFAR10PartitionedDataset(CIFAR_PartitionedDataset):
         root_dir : Union[str, bytes, os.PathLike]
             Directory containing partioned files.
         """
-        super().__init__(num_classes=10, root_dir=root_dir, partition_id=partition_id, transform=transform)
+        super().__init__(
+            num_classes=10,
+            root_dir=root_dir,
+            partition_id=partition_id,
+            transform=transform,
+        )
 
 
-class CIFAR100PartitionedDataset(CIFAR_PartitionedDataset):
+class CIFAR100PartitionedDataset(CIFARPartitionedDataset):
     """Augmented and partitioned dataset based on CIFAR10."""
 
     def __init__(
@@ -142,7 +146,7 @@ class CIFAR100PartitionedDataset(CIFAR_PartitionedDataset):
         *,
         root_dir: Union[str, bytes, PathLike],
         partition_id: int,
-        transform: Optional[callable]=None,
+        transform: Optional[callable] = None,
     ):
         """Dataset from partitioned files
         Parameters
@@ -152,4 +156,9 @@ class CIFAR100PartitionedDataset(CIFAR_PartitionedDataset):
         root_dir : Union[str, bytes, os.PathLike]
             Directory containing partioned files.
         """
-        super().__init__(num_classes=100, root_dir=root_dir, partition_id=partition_id, transform=transform)
+        super().__init__(
+            num_classes=100,
+            root_dir=root_dir,
+            partition_id=partition_id,
+            transform=transform,
+        )

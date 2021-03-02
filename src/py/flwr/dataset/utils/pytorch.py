@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
+"""Helper functions for PyTorch."""
 # pylint: disable=invalid-name
 
 from numpy import array, asarray, concatenate, expand_dims, int64
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import Dataset
 
 from .common import XY
 

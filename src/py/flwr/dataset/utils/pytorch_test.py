@@ -19,40 +19,45 @@ import unittest
 from os import mkdir
 from os.path import join
 from tempfile import TemporaryDirectory
+from typing import List
 
 import numpy as np
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import ImageFolder
 
-from .common import XY
 from .pytorch import convert_torchvision_dataset_to_xy
 
 
 class PytorchUtilFunctions(unittest.TestCase):
-    def test_convert_torchvision_dataset_to_xy(self) -> None:
-        """Test convert_torchvision_dataset_to_xy function."""
-        # Prepare
-        dataset = None
-        list_classes = ["cat", "dog"]
-        list_np_images = []
-        list_pil_images = []
-        for idx, label in enumerate(list_classes):
+    """Test Class for PyTorch related functions.
+
+    Args:
+        unittest (None): No input necessary.
+    """
+
+    def setUp(self) -> None:
+        self.list_classes: List[str] = ["cat", "dog"]
+        self.list_np_images: List[np.ndarray] = []
+        self.list_pil_images: List[Image] = []
+
+        for idx, _ in enumerate(self.list_classes):
             # Create image array
             tmp_np_img = idx * np.ones((32, 32, 3), dtype=np.uint8)
-            list_np_images.append(tmp_np_img)
+            self.list_np_images.append(tmp_np_img)
 
             # Converts to PIL
             tmp_pil_img = Image.fromarray(tmp_np_img)
-            list_pil_images.append(tmp_pil_img)
+            self.list_pil_images.append(tmp_pil_img)
 
-        # Save images and load with DatasetFolder
+    def test_convert_torchvision_dataset_to_xy(self) -> None:
+        """Test convert_torchvision_dataset_to_xy function."""
+        # Prepare
         with TemporaryDirectory() as tmpdirname:
-            for idx, image_class in enumerate(list_classes):
+            for idx, image_class in enumerate(self.list_classes):
                 class_dir: str = join(tmpdirname, image_class)
                 mkdir(class_dir)
                 img_path: str = join(class_dir, "0.png")
-                list_pil_images[idx].save(img_path)
+                self.list_pil_images[idx].save(img_path)
 
             dataset = ImageFolder(tmpdirname)
 
@@ -60,7 +65,7 @@ class PytorchUtilFunctions(unittest.TestCase):
             X, Y = convert_torchvision_dataset_to_xy(dataset)
 
             # Assert
-            for idx, np_img in enumerate(list_np_images):
+            for idx, _ in enumerate(self.list_np_images):
                 dataset_img, dataset_label = dataset[idx]
                 dataset_np = np.array(dataset_img)
 
