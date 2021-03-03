@@ -209,7 +209,7 @@ We can already start the *server*:
     python3 server.py
 
 Finally, we will define our *client* logic in :code:`client.py` and build upon the previously defined MXNet training in :code:`mxnet_mnist.py`.
-Our *client* needs to import :code:`flwr`, but also :code:`mxnet` to update the paramters on our MXNet model:
+Our *client* needs to import :code:`flwr`, but also :code:`mxnet` to update the parameters on our MXNet model:
 
 .. code-block:: python
 
@@ -246,3 +246,91 @@ Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll ca
 The two :code:`NumPyClient` methods :code:`fit` and :code:`evaluate` make use of the functions :code:`train()` and :code:`test()` previously defined in :code:`mxnet_mnist.py`.
 So what we really do here is we tell Flower through our :code:`NumPyClient` subclass which of our already defined functions to call for training and evaluation.
 We included type annotations to give you a better understanding of the data types that get passed around.
+
+.. code-block:: python
+
+    class MNISTClient(fl.client.NumPyClient):
+        """Flower client implementing MNIST classification using MXNet."""
+
+        def __init__(
+            self,
+            model: mxnet_mnist.model(),
+            train_data: mx.io.NDArrayIter,
+            val_data: mx.io.NDArrayIter,
+            device: mx.context,
+        ) -> None:
+            self.model = model
+            self.train_data = train_data
+            self.val_data = val_data
+            self.device = device
+
+        def get_parameters(self) -> List[np.ndarray]:
+            # Return model parameters as a list of NumPy Arrays
+            param = []
+            for val in self.model.collect_params(".*weight").values():
+                p = val.data()
+                # convert parameters from MXNet NDArray to Numpy Array required by Flower Numpy Client
+                param.append(p.asnumpy())
+            return param
+
+        def set_parameters(self, parameters: List[np.ndarray]) -> None:
+            # Collect model parameters and set new weight values
+            params = zip(self.model.collect_params(".*weight").keys(), parameters)
+            for key, value in params:
+                self.model.collect_params().setattr(key, value)
+
+        def fit(
+            self, parameters: List[np.ndarray], config: Dict[str, str]
+        ) -> Tuple[List[np.ndarray], int]:
+            # Set model parameters, train model, return updated model parameters
+            self.set_parameters(parameters)
+            mxnet_mnist.train(self.model, self.train_data, epoch=1, device=self.device)
+            return self.get_parameters(), self.train_data.batch_size, {}
+
+        def evaluate(
+            self, parameters: List[np.ndarray], config: Dict[str, str]
+        ) -> Tuple[int, float, float]:
+            # Set model parameters, evaluate model on local test dataset, return result
+            self.set_parameters(parameters)
+            loss, accuracy = mxnet_mnist.test(self.model, self.val_data, device=self.device)
+            return float(loss), self.val_data.batch_size, {"accuracy":float(accuracy)}
+
+Having defined defining the data loading, model architecture, training, and evaluation we can put everything together and train our Sequential model on MNIST.
+
+.. code-block:: python
+
+    def main() -> None:
+        """Load data, start CifarClient."""
+
+        # Setup context to GPU and if not available to CPU
+        DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
+        # Load data
+        train_data, val_data = mxnet_mnist.load_data()
+        # Define model from centralized training
+        model = mxnet_mnist.model()
+        # Make one forward propagation to initialize parameters
+        init = nd.random.uniform(shape=(2, 784))
+        model(init)
+
+        # Start Flower client
+        client = MNISTClient(model, train_data, val_data, DEVICE)
+        fl.client.start_numpy_client("0.0.0.0:8080", client)
+
+
+    if __name__ == "__main__":
+        main()
+
+And that's it. You can now open two additional terminal windows and run
+
+.. code-block:: python
+
+    python3 client.py
+
+in each window (make sure that the server is still running before you do so) and see your MXNet project run federated learning across two clients. Congratulations!
+
+Next Steps
+----------
+
+The full source code for this example can be found `here <https://github.com/adap/flower/blob/main/examples/mxnet_federated>`_.
+Our example is of course somewhat over-simplified because both clients load the exact same dataset, which isn't realistic.
+You're now prepared to explore this topic further. How about using a CNN or using a different dataset? How about adding more clients?
