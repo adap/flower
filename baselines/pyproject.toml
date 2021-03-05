@@ -37,6 +37,10 @@ classifiers = [
     "Typing :: Typed",
 ]
 
+packages = [
+    { include = "flwr_baselines", from = "flwr_baselines" }
+]
+
 [tool.poetry.dependencies]
 python = "^3.8.6"
 # Mandatory dependencies

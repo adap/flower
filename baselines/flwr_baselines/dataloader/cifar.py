@@ -28,7 +28,7 @@ from torch import load
 from torch.utils.data import Dataset
 from torchvision.transforms import Compose, Normalize, ToTensor
 
-from flwr.dataset.utils.common import XY
+from flwr_baselines.common.utils import XY
 
 
 def get_normalization_transform(num_classes: int = 10) -> Compose:

@@ -69,6 +69,7 @@ examples-pytorch = ["torch", "torchvision", "tqdm"]
 examples-tensorflow = ["tensorflow-cpu"]
 http-logger = ["boto3", "boto3_type_annotations", "tensorflow-cpu", "boto3", "boto3_type_annotations", "paramiko", "docker", "matplotlib"]
 ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
+dataset = ["torch", "torchvision"]
 
 [tool.poetry.dev-dependencies]
 isort = "==5.7.0"

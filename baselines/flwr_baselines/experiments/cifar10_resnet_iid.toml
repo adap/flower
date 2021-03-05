@@ -1,0 +1,13 @@
+# This is a TOML document.
+
+title = "Classification"
+
+[client]
+
+[server]
+
+# Line breaks are OK when inside arrays
+hosts = [
+  "alpha",
+  "omega"
+]
