@@ -52,7 +52,7 @@ class FedAvg(Strategy):
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
-        initialize_parameters_fn: Optional[Callable[[], Weights]]
+        initial_parameters: Optional[Weights] = None,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -90,7 +90,7 @@ class FedAvg(Strategy):
         self.on_fit_config_fn = on_fit_config_fn
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
-        self.initialize_parameters_fn = initialize_parameters_fn
+        self.initial_parameters = initial_parameters
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -109,9 +109,9 @@ class FedAvg(Strategy):
 
     def initialize_parameters(self, client_manager: ClientManager) -> Optional[Weights]:
         """Initialize global model parameters."""
-        if self.initialize_parameters_fn is not None:
-            return self.initialize_parameters_fn(client_manager=client_manager)
-        return None
+        initial_parameters = self.initial_parameters
+        self.initial_parameters = None  # Don't keep initial parameters in memory
+        return initial_parameters
 
     def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
         """Evaluate model weights using an evaluation function (if

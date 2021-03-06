@@ -188,11 +188,20 @@ class Server:
 
     def _get_initial_parameters(self) -> Weights:
         """Get initial parameters from one of the available clients."""
-        parameters = self.strategy.initialize_parameters()
-        if parameters is None:
-            random_client = self._client_manager.sample(1)[0]
-            parameters_res = random_client.get_parameters()
-            parameters = parameters_to_weights(parameters_res.parameters)
+
+        # Server-side parameter initialization
+        parameters: Optional[Weights] = self.strategy.initialize_parameters(
+            client_manager=self._client_manager
+        )
+        if parameters is not None:
+            log(INFO, "Received initial parameters from strategy")
+            return parameters
+
+        # Get initial parameters from one of the clients
+        random_client = self._client_manager.sample(1)[0]
+        parameters_res = random_client.get_parameters()
+        parameters = parameters_to_weights(parameters_res.parameters)
+        log(INFO, "Received initial parameters from one random client")
         return parameters
 
 
