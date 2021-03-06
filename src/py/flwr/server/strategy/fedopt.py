@@ -77,15 +77,16 @@ class FedOpt(FedAvg):
                 Defaults to 1e-9.
         """
         super().__init__(
-            fraction_fit,
-            fraction_eval,
-            min_fit_clients,
-            min_eval_clients,
-            min_available_clients,
-            eval_fn,
-            on_fit_config_fn,
-            on_evaluate_config_fn,
-            accept_failures,
+            fraction_fit=fraction_fit,
+            fraction_eval=fraction_eval,
+            min_fit_clients=min_fit_clients,
+            min_eval_clients=min_eval_clients,
+            min_available_clients=min_available_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+            on_evaluate_config_fn=on_evaluate_config_fn,
+            accept_failures=accept_failures,
+            initial_parameters=current_weights,
         )
         self.current_weights = current_weights
         self.eta = eta
