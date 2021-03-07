@@ -19,7 +19,7 @@ class CifarClient(fl.client.NumPyClient):
 
     def get_parameters(self):
         """Get parameters of the local model."""
-        return self.model.get_weights()
+        raise Exception("Not implemented (server-side parameter initialization)")
 
     def fit(self, parameters, config):
         """Train parameters on the locally held training set."""

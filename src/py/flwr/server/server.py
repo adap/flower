@@ -68,15 +68,16 @@ class Server:
     def fit(self, num_rounds: int) -> History:
         """Run federated averaging for a number of rounds."""
         history = History()
-        # Initialize weights by asking one client to return theirs
+
+        # Initialize parameters
         log(INFO, "Getting initial parameters")
-        self.weights = self._get_initial_weights()
+        self.weights = self._get_initial_parameters()
         log(INFO, "Evaluating initial parameters")
         res = self.strategy.evaluate(weights=self.weights)
         if res is not None:
             log(
                 INFO,
-                "initial weights (loss/accuracy): %s, %s",
+                "initial parameters (loss/accuracy): %s, %s",
                 res[0],
                 res[1],
             )
@@ -185,11 +186,23 @@ class Server:
         all_clients = self._client_manager.all()
         _ = shutdown(clients=[all_clients[k] for k in all_clients.keys()])
 
-    def _get_initial_weights(self) -> Weights:
-        """Get initial weights from one of the available clients."""
+    def _get_initial_parameters(self) -> Weights:
+        """Get initial parameters from one of the available clients."""
+
+        # Server-side parameter initialization
+        parameters: Optional[Weights] = self.strategy.initialize_parameters(
+            client_manager=self._client_manager
+        )
+        if parameters is not None:
+            log(INFO, "Received initial parameters from strategy")
+            return parameters
+
+        # Get initial parameters from one of the clients
         random_client = self._client_manager.sample(1)[0]
         parameters_res = random_client.get_parameters()
-        return parameters_to_weights(parameters_res.parameters)
+        parameters = parameters_to_weights(parameters_res.parameters)
+        log(INFO, "Received initial parameters from one random client")
+        return parameters
 
 
 def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:
