@@ -2,7 +2,7 @@
 
 The code is generally adapted from:
 
-https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html#Loading-Data
+https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html
 """
 
 from __future__ import print_function
