@@ -6,9 +6,33 @@ Unreleased
 
 What's new?
 
-* New built-in strategies (`#549 <https://github.com/adap/flower/pull/549>`_)
+* **New built-in strategies** (`#549 <https://github.com/adap/flower/pull/549>`_)
     * (abstract) FedOpt
     * FedAdagrad
+* **Server-side parameter initialization** (`#658 <https://github.com/adap/flower/pull/658>`_)
+
+  Model parameters can now be initialized on the server-side. Server-side parameter initialization works via a new :code:`Strategy` method called :code:`initialize_parameters`.
+
+  Built-in strategies support a new constructor argument called :code:`initial_parameters` to set the initial parameters. Built-in strategies will provide these initial parameters to the server on startup and then delete them to free the memory afterwards.
+
+  .. code-block:: python
+
+    # Create model
+    model = tf.keras.applications.EfficientNetB0(
+        input_shape=(32, 32, 3), weights=None, classes=10
+    )
+    model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+
+    # Create strategy and initilize parameters on the server-side
+    strategy = fl.server.strategy.FedAvg(
+        # ... (other constructor arguments)
+        initial_parameters=model.get_weights(),
+    )
+
+    # Start Flower server with the strategy
+    fl.server.start_server("[::]:8080", config={"num_rounds": 3}, strategy=strategy)
+
+  If no initial parameters are provided to the strategy, the server will continue to use the current behaviour (namely, it will ask one of the connected clients for its parameters and use these as the initial global parameters).
 
 Deprecations
 

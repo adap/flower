@@ -52,6 +52,7 @@ class FedAvg(Strategy):
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
+        initial_parameters: Optional[Weights] = None,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -76,6 +77,8 @@ class FedAvg(Strategy):
                 Function used to configure validation. Defaults to None.
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
+            initialize_parameters_fn (Callable[[], Optional[Weights]], optional):
+                Function used to initialize global model parameters. Defaults to None.
         """
         super().__init__()
         self.min_fit_clients = min_fit_clients
@@ -87,6 +90,7 @@ class FedAvg(Strategy):
         self.on_fit_config_fn = on_fit_config_fn
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
+        self.initial_parameters = initial_parameters
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -102,6 +106,12 @@ class FedAvg(Strategy):
         """Use a fraction of available clients for evaluation."""
         num_clients = int(num_available_clients * self.fraction_eval)
         return max(num_clients, self.min_eval_clients), self.min_available_clients
+
+    def initialize_parameters(self, client_manager: ClientManager) -> Optional[Weights]:
+        """Initialize global model parameters."""
+        initial_parameters = self.initial_parameters
+        self.initial_parameters = None  # Don't keep initial parameters in memory
+        return initial_parameters
 
     def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
         """Evaluate model weights using an evaluation function (if
