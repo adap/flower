@@ -32,7 +32,7 @@ def test_aggregate_fit() -> None:
     # Prepare
     previous_weights: Weights = [array([0.1, 0.1, 0.1, 0.1], dtype=float32)]
     strategy = FedAdagrad(
-        eta=0.1, eta_l=0.316, tau=0.5, current_weights=previous_weights
+        eta=0.1, eta_l=0.316, tau=0.5, initial_parameters=previous_weights
     )
     param_0: Parameters = weights_to_parameters(
         [array([0.2, 0.2, 0.2, 0.2], dtype=float32)]
