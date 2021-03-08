@@ -77,7 +77,7 @@ class FedAdagrad(FedOpt):
                 Function used to configure validation. Defaults to None.
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
-            initial_parameters (Weights): Current set of weights from the server.
+            initial_parameters (Weights): Initial set of weights from the server.
             eta (float, optional): Server-side learning rate. Defaults to 1e-1.
             eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.
             tau (float, optional): Controls the algorithm's degree of adaptability.
