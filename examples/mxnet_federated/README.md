@@ -1,4 +1,4 @@
-# MXNet: Basic Example
+# MXNet: From Centralized To Federated
 
 This example demonstrates how an already existing centralized MXNEt-based machine learning project can be federated with Flower.
 
