@@ -3,7 +3,7 @@ Flower client example using MXNet for MNIST classification.
 
 The code is generally adapted from:
 
-https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html#Loading-Data
+https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html
 """
 
 import flwr as fl
