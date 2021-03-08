@@ -2,7 +2,7 @@
 
 This example demonstrates how an already existing centralized MXNEt-based machine learning project can be federated with Flower.
 
-This introductory example for Flower uses MXNet, but you're not required to be a MXNet expert to run the example. The example will help you to understand how Flower can be used to build federated learning use cases based on an existing MXNet projects.
+This introductory example for Flower uses MXNet, but you're not required to be a MXNet expert to run the example. The example will help you to understand how Flower can be used to build federated learning use cases based on an existing MXNet project.
 
 ## Project Setup
 
