@@ -1,6 +1,6 @@
 """Placeholder to ensure test setup is working correctly.
 
-Should be removed with first real code
+Should be removed when first real code has tests.
 """
 
 import unittest
