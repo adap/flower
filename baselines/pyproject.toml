@@ -38,7 +38,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = "^3.8.3"
 # Mandatory dependencies
 flwr = "^0.14.0"  # For development: { path = "../../", develop = true }
 torch = "^1.7.1"
