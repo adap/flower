@@ -27,6 +27,19 @@ class Strategy(ABC):
     """Abstract base class for server strategy implementations."""
 
     @abstractmethod
+    def initialize_parameters(self, client_manager: ClientManager) -> Optional[Weights]:
+        """Initialize the (global) model parameters.
+
+        Arguments:
+            client_manager: ClientManager. The client manager which holds all currently
+                connected clients.
+
+        Returns:
+            Optional `flwr.common.Weights`. If parameters are returned, then the server
+            will treat these as the initial global model parameters.
+        """
+
+    @abstractmethod
     def configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
@@ -35,8 +48,8 @@ class Strategy(ABC):
         Arguments:
             rnd: Integer. The current round of federated learning.
             weights: Weights. The current (global) model weights.
-            client_manager: ClientManager. The client manger which knows about all
-                currently connected clients.
+            client_manager: ClientManager. The client manager which holds all currently
+                connected clients.
 
         Returns:
             A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
@@ -85,8 +98,8 @@ class Strategy(ABC):
         Arguments:
             rnd: Integer. The current round of federated learning.
             weights: Weights. The current (global) model weights.
-            client_manager: ClientManager. The client manger which knows about all
-                currently connected clients.
+            client_manager: ClientManager. The client manager which holds all currently
+                connected clients.
 
         Returns:
             A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
