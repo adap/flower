@@ -331,6 +331,6 @@ in each window (make sure that the server is still running before you do so) and
 Next Steps
 ----------
 
-The full source code for this example can be found `here <https://github.com/adap/flower/blob/main/examples/mxnet_federated>`_.
+The full source code for this example can be found `here <https://github.com/adap/flower/blob/main/examples/mxnet_from_centralized_to_federated>`_.
 Our example is of course somewhat over-simplified because both clients load the exact same dataset, which isn't realistic.
 You're now prepared to explore this topic further. How about using a CNN or using a different dataset? How about adding more clients?
