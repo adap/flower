@@ -7,6 +7,7 @@ This example demonstrates an advanced federated learning setup using Flower with
 - Server-side model evaluation after parameter aggregation
 - Hyperparameter schedule using config functions
 - Custom return values
+- Server-side parameter initialization
 
 ## Project Setup
 

@@ -6,6 +6,44 @@ Unreleased
 
 What's new?
 
+* **New built-in strategies** (`#549 <https://github.com/adap/flower/pull/549>`_)
+    * (abstract) FedOpt
+    * FedAdagrad
+* **Server-side parameter initialization** (`#658 <https://github.com/adap/flower/pull/658>`_)
+
+  Model parameters can now be initialized on the server-side. Server-side parameter initialization works via a new :code:`Strategy` method called :code:`initialize_parameters`.
+
+  Built-in strategies support a new constructor argument called :code:`initial_parameters` to set the initial parameters. Built-in strategies will provide these initial parameters to the server on startup and then delete them to free the memory afterwards.
+
+  .. code-block:: python
+
+    # Create model
+    model = tf.keras.applications.EfficientNetB0(
+        input_shape=(32, 32, 3), weights=None, classes=10
+    )
+    model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+
+    # Create strategy and initilize parameters on the server-side
+    strategy = fl.server.strategy.FedAvg(
+        # ... (other constructor arguments)
+        initial_parameters=model.get_weights(),
+    )
+
+    # Start Flower server with the strategy
+    fl.server.start_server("[::]:8080", config={"num_rounds": 3}, strategy=strategy)
+
+  If no initial parameters are provided to the strategy, the server will continue to use the current behaviour (namely, it will ask one of the connected clients for its parameters and use these as the initial global parameters).
+
+Deprecations
+
+* Deprecate :code:`flwr.server.strategy.DefaultStrategy` (migrate to :code:`flwr.server.strategy.FedAvg`, which is equivalent)
+
+
+v0.14.0 (2021-02-18)
+--------------------
+
+What's new?
+
 * **Generalized** :code:`Client.fit` **and** :code:`Client.evaluate` **return values** (`#610 <https://github.com/adap/flower/pull/610>`_, `#572 <https://github.com/adap/flower/pull/572>`_, `#633 <https://github.com/adap/flower/pull/633>`_)
 
   Clients can now return an additional dictionary mapping :code:`str` keys to values of the following types: :code:`bool`, :code:`bytes`, :code:`float`, :code:`int`, :code:`str`. This means one can return almost arbitrary values from :code:`fit`/:code:`evaluate` and make use of them on the server side!
@@ -51,10 +89,6 @@ What's new?
             batch_size: int = config["batch_size"]
             loss, accuracy = test(net, testloader, batch_size)
             return loss, len(testloader), {"accuracy": accuracy}
-
-* New built-in strategies (`#549 <https://github.com/adap/flower/pull/549>`_)
-    * (abstract) FedOpt
-    * FedAdagrad
 
 
 v0.13.0 (2021-01-08)
