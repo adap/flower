@@ -63,6 +63,7 @@ class FedFSv0(FedAvg):
         r_slow: int = 1,
         t_fast: int = 10,
         t_slow: int = 10,
+        initial_parameters: Optional[Weights] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -73,6 +74,7 @@ class FedFSv0(FedAvg):
             eval_fn=eval_fn,
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
+            initial_parameters=initial_parameters,
         )
         self.min_completion_rate_fit = min_completion_rate_fit
         self.min_completion_rate_evaluate = min_completion_rate_evaluate
