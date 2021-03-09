@@ -117,7 +117,7 @@ def test(
 
 
 def main():
-    # Setup context to GPU and if not available to CPU
+    # Set context to GPU or - if not available - to CPU
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
     # Load train and validation data
     train_data, val_data = load_data()

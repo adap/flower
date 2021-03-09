@@ -1,4 +1,4 @@
-# MXNet: Basic Example
+# Flower Example using MXNet
 
 This example demonstrates how to run a MXNet machine learning project federated with Flower.
 
