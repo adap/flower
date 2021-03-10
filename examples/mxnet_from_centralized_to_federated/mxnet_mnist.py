@@ -110,8 +110,6 @@ def test(
             loss += loss_metric.get()[1]
         # Updates internal evaluation
         metric.update(label, outputs)
-    print("validation acc: %s=%f" % metric.get())
-    print("validation loss:", loss)
     accuracy = metric.get()[1]
     return loss, accuracy
 
