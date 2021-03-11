@@ -73,10 +73,13 @@ def main() -> None:
 
     # Set context to GPU or - if not available - to CPU
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
+    
     # Load data
     train_data, val_data = mxnet_mnist.load_data()
+    
     # Load model (from centralized training)
     model = mxnet_mnist.model()
+    
     # Do one forward propagation to initialize parameters
     init = nd.random.uniform(shape=(2, 784))
     model(init)
