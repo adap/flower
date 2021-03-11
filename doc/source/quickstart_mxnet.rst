@@ -1,5 +1,5 @@
 Quickstart (MXNet)
-====================
+==================
 
 In this tutorial we will learn how to train a Sequential Model on MNIST using Flower and MXNet. 
 
@@ -8,7 +8,7 @@ First of all, it is recommended to create a virtual environment and run everythi
 Our example consists of one *server* and two *clients* all having the same model. 
 
 *Clients* are responsible for generating individual model parameter updates for the model based on their local datasets. 
-These updates are then sent to the *server* which will aggregate them to produce a better model. Finally, the *server* sends this improved version of the model back to each *client*.
+These updates are then sent to the *server* which will aggregate them to produce an updated global model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of parameters updates is called a *round*.
 
 Now that we have a rough idea of what is going on, let's get started. We first need to install Flower. You can do this by running:
@@ -17,7 +17,7 @@ Now that we have a rough idea of what is going on, let's get started. We first n
 
   $ pip install flwr
 
-Since we want to use MXNet, let's go ahead and install its library: 
+Since we want to use MXNet, let's go ahead and install it:
 
 .. code-block:: shell
 
@@ -27,7 +27,7 @@ Since we want to use MXNet, let's go ahead and install its library:
 Flower Client
 -------------
 
-Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on MXNet´s `Hand-written Digit Recognition <https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_. 
+Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on MXNet´s `Hand-written Digit Recognition tutorial <https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_. 
 
 In a file called :code:`client.py`, import Flower and MXNet related packages:
 
@@ -44,7 +44,7 @@ In a file called :code:`client.py`, import Flower and MXNet related packages:
     from mxnet import autograd as ag
     import mxnet.ndarray as F
 
-In addition, we define the device allocation in MXNet with:
+In addition, define the device allocation in MXNet with:
 
 .. code-block:: python
 
@@ -64,7 +64,7 @@ We use MXNet to load MNIST, a popular image classification dataset of handrwritt
         val_data = mx.io.NDArrayIter(mnist["test_data"], mnist["test_label"], batch_size)
         return train_data, val_data
 
-Define the training and loss with MXNet. The training of the dataset is done by looping over the dataset, measure the corresponding loss and optimize it. 
+Define the training and loss with MXNet. We train the model by looping over the dataset, measure the corresponding loss and optimize it. 
 
 .. code-block:: python
 
@@ -100,7 +100,7 @@ Define the training and loss with MXNet. The training of the dataset is done by 
         return trainings_metric
 
 
-Define then the validation of the  machine learning network. We loop over the test set and measure the loss and accuracy of the test set. 
+Define then the validation of the  machine learning model. We loop over the test set and measure the loss and accuracy on the test set. 
 
 .. code-block:: python
 
@@ -143,7 +143,7 @@ The Flower clients will use a simple Sequential model:
         init = nd.random.uniform(shape=(2, 784))
         model(init)
 
-After loading the data set with :code:`load_data()` we define the Flower interface. 
+After loading the dataset with :code:`load_data()` we implement a Flower client. 
 
 The Flower server interacts with clients through an interface called
 :code:`Client`. When the server selects a particular client for training, it
