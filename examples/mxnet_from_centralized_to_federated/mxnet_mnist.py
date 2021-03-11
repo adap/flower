@@ -34,7 +34,7 @@ def model():
     # Define simple Sequential model
     net = nn.Sequential()
     net.add(nn.Dense(256, activation="relu"))
-    net.add(nn.Dense(64, activation='relu'))
+    net.add(nn.Dense(64, activation="relu"))
     net.add(nn.Dense(10))
     net.collect_params().initialize()
     return net
