@@ -95,7 +95,7 @@ Define the training and loss with MXNet. We train the model by looping over the 
             print("training acc at epoch %d: %s=%f" % (i, name, acc))
 
 
-Define then the validation of the  machine learning network. We loop over the test set and measure the loss and accuracy of the test set. 
+Define then the validation of the  machine learning model. We loop over the test set and measure the loss and accuracy on the test set. 
 
 .. code-block:: python
 
