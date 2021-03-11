@@ -52,8 +52,9 @@ def main():
 
         def fit(self, parameters, config):
             self.set_parameters(parameters)
-            train(model, train_data, epoch=2)
-            return self.get_parameters(), train_data.batch_size, {}
+            [accuracy, loss] = train(model, train_data, epoch=2)
+            metrics = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
+            return self.get_parameters(), train_data.batch_size, metrics
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
