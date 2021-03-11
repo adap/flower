@@ -8,7 +8,7 @@ First of all, it is recommended to create a virtual environment and run everythi
 Our example consists of one *server* and two *clients* all having the same model. 
 
 *Clients* are responsible for generating individual model parameter updates for the model based on their local datasets. 
-These updates are then sent to the *server* which will aggregate them to produce a better model. Finally, the *server* sends this improved version of the model back to each *client*.
+These updates are then sent to the *server* which will aggregate them to produce an updated global model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of parameters updates is called a *round*.
 
 Now that we have a rough idea of what is going on, let's get started. We first need to install Flower. You can do this by running:
