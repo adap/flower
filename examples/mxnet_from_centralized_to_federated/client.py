@@ -55,7 +55,7 @@ class MNISTClient(fl.client.NumPyClient):
     ) -> Tuple[int, float, Dict]:
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
-        (accuracy, loss) = mxnet_mnist.test(self.model, self.val_data, device=self.device)
+        [accuracy, loss] = mxnet_mnist.test(self.model, self.val_data, device=self.device)
         print("Evaluation accuracy & loss", accuracy, loss)
         return float(loss[1]), self.val_data.batch_size, {"accuracy": float(accuracy[1])}
 

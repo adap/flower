@@ -129,7 +129,6 @@ def main():
     # Start model training based on training set
     train(net=net, train_data=train_data, epoch=5, device=DEVICE)
     # Evaluate model using loss and accuracy
-    eval_metric = {}
     eval_metric = test(net=net, val_data=val_data, device=DEVICE)
     acc = eval_metric[0]
     loss = eval_metric[1]
