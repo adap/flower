@@ -44,7 +44,7 @@ def train(
     net: mx.gluon.nn, train_data: mx.io.NDArrayIter, epoch: int, device: mx.context
 ) -> None:
     trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.01})
-    # Use Accuracy as the evaluation metric.
+    # Use Accuracy and Cross Entropy Loss as the evaluation metric.
     accuracy_metric = mx.metric.Accuracy()
     loss_metric = mx.metric.CrossEntropy()
     metrics = mx.metric.CompositeEvalMetric()
