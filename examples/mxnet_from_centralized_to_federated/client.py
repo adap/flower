@@ -46,18 +46,18 @@ class MNISTClient(fl.client.NumPyClient):
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
-        mxnet_mnist.train(self.model, self.train_data, epoch=2, device=self.device)
-        return self.get_parameters(), self.train_data.batch_size, {}
+        [accuracy, loss] = mxnet_mnist.train(self.model, self.train_data, epoch=2, device=self.device)
+        results = { "accuracy": accuracy[1], "loss": loss[1]}
+        return self.get_parameters(), self.train_data.batch_size, results
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict
     ) -> Tuple[int, float, Dict]:
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
-        loss, accuracy = mxnet_mnist.test(self.model, self.val_data, device=self.device)
-        print("Evaluation Loss", loss)
-        print("Evaluation Accuracy", accuracy)
-        return float(loss), self.val_data.batch_size, {"accuracy": float(accuracy)}
+        (accuracy, loss) = mxnet_mnist.test(self.model, self.val_data, device=self.device)
+        print("Evaluation accuracy & loss", accuracy, loss)
+        return float(loss[1]), self.val_data.batch_size, {"accuracy": float(accuracy[1])}
 
 
 def main() -> None:

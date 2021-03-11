@@ -45,8 +45,11 @@ def train(
 ) -> None:
     trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.01})
     # Use Accuracy as the evaluation metric.
-    metric = mx.metric.Accuracy()
+    accuracy_metric = mx.metric.Accuracy()
     loss_metric = mx.metric.CrossEntropy()
+    metrics = mx.metric.CompositeEvalMetric()
+    for child_metric in [accuracy_metric, loss_metric]:
+        metrics.add(child_metric)
     softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
     for i in range(epoch):
         # Reset the train data iterator.
@@ -75,28 +78,25 @@ def train(
                     loss.backward()
                     outputs.append(z.softmax())
             # Updates internal evaluation
-            metric.update(label, outputs)
-            
+            metrics.update(label, outputs)
             # Make one step of parameter update. Trainer needs to know the
             # batch size of data to normalize the gradient by 1/batch_size.
             trainer.step(batch.data[0].shape[0])
         # Gets the evaluation result.
-        name, acc = metric.get()
-        loss_metric.update(label, outputs)
-        name_loss, running_loss = loss_metric.get()
-        # Reset evaluation result to initial state.
-        metric.reset()
-        print("training acc at epoch %d: %s=%f" % (i, name, acc))
-        # print("training loss", loss_metric )
+        trainings_metric = metrics.get_name_value()
+        print("Accuracy & loss at epoch %d: %s" % (i, trainings_metric))
+    return trainings_metric
 
 
 def test(
     net: mx.gluon.nn, val_data: mx.io.NDArrayIter, device: mx.context
 ) -> Tuple[float, float]:
     # Use Accuracy as the evaluation metric.
-    metric = mx.metric.Accuracy()
+    accuracy_metric = mx.metric.Accuracy()
     loss_metric = mx.metric.CrossEntropy()
-    loss = 0.0
+    metrics = mx.metric.CompositeEvalMetric()
+    for child_metric in [accuracy_metric, loss_metric]:
+        metrics.add(child_metric)
     # Reset the validation data iterator.
     val_data.reset()
     # Loop over the validation data iterator.
@@ -113,11 +113,8 @@ def test(
         for x in data:
             outputs.append(net(x).softmax())
         # Updates internal evaluation
-        metric.update(label, outputs)
-    loss_metric.update(label, outputs)
-    loss += loss_metric.get()[1]
-    accuracy = metric.get()[1]
-    return loss, accuracy
+        metrics.update(label, outputs)
+    return metrics.get_name_value()
 
 
 def main():
@@ -132,9 +129,12 @@ def main():
     # Start model training based on training set
     train(net=net, train_data=train_data, epoch=5, device=DEVICE)
     # Evaluate model using loss and accuracy
-    loss, acc = test(net=net, val_data=val_data, device=DEVICE)
-    print("Loss: ", loss)
-    print("Accuracy: ", acc)
+    eval_metric = {}
+    eval_metric = test(net=net, val_data=val_data, device=DEVICE)
+    acc = eval_metric[0]
+    loss = eval_metric[1]
+    print("Evaluation Loss: ", loss)
+    print("Evaluation Accuracy: ", acc)
 
 
 if __name__ == "__main__":
