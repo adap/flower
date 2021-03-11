@@ -61,6 +61,7 @@ As already mentioned we will use the MNIST dataset for this machine learning wor
         # Define simple Sequential model
         net = nn.Sequential()
         net.add(nn.Dense(256, activation="relu"))
+        net.add(nn.Dense(64, activation="relu"))
         net.add(nn.Dense(10))
         net.collect_params().initialize()
         return net
@@ -73,8 +74,12 @@ We now need to define the training (function :code:`train()`) which loops over t
         net: mx.gluon.nn, train_data: mx.io.NDArrayIter, epoch: int, device: mx.context
     ) -> None:
         trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.03})
-        # Use Accuracy as the evaluation metric.
-        metric = mx.metric.Accuracy()
+        # Use Accuracy and Cross Entropy Loss as the evaluation metric.
+        accuracy_metric = mx.metric.Accuracy()
+        loss_metric = mx.metric.CrossEntropy()
+        metrics = mx.metric.CompositeEvalMetric()
+        for child_metric in [accuracy_metric, loss_metric]:
+            metrics.add(child_metric)
         softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
         for i in range(epoch):
             # Reset the train data iterator.
@@ -100,17 +105,16 @@ We now need to define the training (function :code:`train()`) which loops over t
                         loss = softmax_cross_entropy_loss(z, y)
                         # Backpropogate the error for one iteration.
                         loss.backward()
-                        outputs.append(z)
+                        outputs.append(z.softmax())
                 # Updates internal evaluation
                 metric.update(label, outputs)
                 # Make one step of parameter update. Trainer needs to know the
                 # batch size of data to normalize the gradient by 1/batch_size.
                 trainer.step(batch.data[0].shape[0])
             # Gets the evaluation result.
-            name, acc = metric.get()
-            # Reset evaluation result to initial state.
-            metric.reset()
-            print("training acc at epoch %d: %s=%f" % (i, name, acc))
+            trainings_metric = metrics.get_name_value()
+            print("Accuracy & loss at epoch %d: %s" % (i, trainings_metric))
+        return trainings_metric
 
 The evalution of the model is defined in function :code:`test()`. The function loops over all test samples and measures the loss and accuracy of the model based on the test dataset. 
 
@@ -119,10 +123,12 @@ The evalution of the model is defined in function :code:`test()`. The function l
     def test(
         net: mx.gluon.nn, val_data: mx.io.NDArrayIter, device: mx.context
     ) -> Tuple[float, float]:
-        # Use Accuracy as the evaluation metric.
-        metric = mx.metric.Accuracy()
-        loss_metric = mx.metric.Loss()
-        loss = 0.0
+        # Use Accuracy and Cross Entropy Loss as the evaluation metric.
+        accuracy_metric = mx.metric.Accuracy()
+        loss_metric = mx.metric.CrossEntropy()
+        metrics = mx.metric.CompositeEvalMetric()
+        for child_metric in [accuracy_metric, loss_metric]:
+            metrics.add(child_metric)
         # Reset the validation data iterator.
         val_data.reset()
         # Loop over the validation data iterator.
@@ -137,15 +143,10 @@ The evalution of the model is defined in function :code:`test()`. The function l
             )
             outputs = []
             for x in data:
-                outputs.append(net(x))
-                loss_metric.update(label, outputs)
-                loss += loss_metric.get()[1]
+                outputs.append(net(x).softmax())
             # Updates internal evaluation
-            metric.update(label, outputs)
-        print("validation acc: %s=%f" % metric.get())
-        print("validation loss:", loss)
-        accuracy = metric.get()[1]
-        return loss, accuracy
+            metrics.update(label, outputs)
+        return metrics.get_name_value()
 
 Having defined defining the data loading, model architecture, training, and evaluation we can put everything together and train our model on MNIST. Note that the GPU/CPU device for the training and testing is defined within the :code:`ctx` (context).  
 
@@ -163,9 +164,11 @@ Having defined defining the data loading, model architecture, training, and eval
         # Start model training based on training set
         train(net=net, train_data=train_data, epoch=5, device=DEVICE)
         # Evaluate model using loss and accuracy
-        loss, acc = test(net=net, val_data=val_data, device=DEVICE)
-        print("Loss: ", loss)
-        print("Accuracy: ", acc)
+        eval_metric = test(net=net, val_data=val_data, device=DEVICE)
+        acc = eval_metric[0]
+        loss = eval_metric[1]
+        print("Evaluation Loss: ", loss)
+        print("Evaluation Accuracy: ", acc)
 
     if __name__ == "__main__":
             main()
@@ -284,16 +287,26 @@ We included type annotations to give you a better understanding of the data type
         ) -> Tuple[List[np.ndarray], int]:
             # Set model parameters, train model, return updated model parameters
             self.set_parameters(parameters)
-            mxnet_mnist.train(self.model, self.train_data, epoch=1, device=self.device)
-            return self.get_parameters(), self.train_data.batch_size, {}
+            [accuracy, loss] = mxnet_mnist.train(
+            self.model, self.train_data, epoch=2, device=self.device
+            )
+            results = {"accuracy": accuracy[1], "loss": loss[1]}
+            return self.get_parameters(), self.train_data.batch_size, results
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict[str, str]
         ) -> Tuple[int, float, float]:
             # Set model parameters, evaluate model on local test dataset, return result
             self.set_parameters(parameters)
-            loss, accuracy = mxnet_mnist.test(self.model, self.val_data, device=self.device)
-            return float(loss), self.val_data.batch_size, {"accuracy":float(accuracy)}
+            [accuracy, loss] = mxnet_mnist.test(
+            self.model, self.val_data, device=self.device
+            )
+            print("Evaluation accuracy & loss", accuracy, loss)
+            return (
+                float(loss[1]),
+                self.val_data.batch_size,
+                {"accuracy": float(accuracy[1])},
+            )
 
 Having defined defining the data loading, model architecture, training, and evaluation we can put everything together and train our Sequential model on MNIST.
 
