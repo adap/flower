@@ -27,7 +27,7 @@ Since we want to use MXNet, let's go ahead and install it:
 Flower Client
 -------------
 
-Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on MXNet´s `Hand-written Digit Recognition <https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_. 
+Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on MXNet´s `Hand-written Digit Recognition tutorial <https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_. 
 
 In a file called :code:`client.py`, import Flower and MXNet related packages:
 
