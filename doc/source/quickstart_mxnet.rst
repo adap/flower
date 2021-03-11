@@ -70,7 +70,12 @@ Define the training and loss with MXNet. The training of the dataset is done by 
 
     def train(net, train_data, epoch):
         trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.03})
-        metric = mx.metric.Accuracy()
+        trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.01})
+        accuracy_metric = mx.metric.Accuracy()
+        loss_metric = mx.metric.CrossEntropy()
+        metrics = mx.metric.CompositeEvalMetric()
+        for child_metric in [accuracy_metric, loss_metric]:
+            metrics.add(child_metric)
         softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
         for i in range(epoch):
             train_data.reset()
@@ -87,12 +92,12 @@ Define the training and loss with MXNet. The training of the dataset is done by 
                         z = net(x)
                         loss = softmax_cross_entropy_loss(z, y)
                         loss.backward()
-                        outputs.append(z)
-                metric.update(label, outputs)
+                        outputs.append(z.softmax())
+                metrics.update(label, outputs)
                 trainer.step(batch.data[0].shape[0])
-            name, acc = metric.get()
-            metric.reset()
-            print("training acc at epoch %d: %s=%f" % (i, name, acc))
+            trainings_metric = metrics.get_name_value()
+            print("Accuracy & loss at epoch %d: %s" % (i, trainings_metric))
+        return trainings_metric
 
 
 Define then the validation of the  machine learning network. We loop over the test set and measure the loss and accuracy of the test set. 
@@ -100,9 +105,11 @@ Define then the validation of the  machine learning network. We loop over the te
 .. code-block:: python
 
     def test(net, val_data):
-        metric = mx.metric.Accuracy()
-        loss_metric = mx.metric.Loss()
-        loss = 0.0
+        accuracy_metric = mx.metric.Accuracy()
+        loss_metric = mx.metric.CrossEntropy()
+        metrics = mx.metric.CompositeEvalMetric()
+        for child_metric in [accuracy_metric, loss_metric]:
+            metrics.add(child_metric)
         val_data.reset()
         for batch in val_data:
             data = gluon.utils.split_and_load(batch.data[0], ctx_list=DEVICE, batch_axis=0)
@@ -111,14 +118,9 @@ Define then the validation of the  machine learning network. We loop over the te
             )
             outputs = []
             for x in data:
-                outputs.append(net(x))
-                loss_metric.update(label, outputs)
-                loss += loss_metric.get()[1]
-            metric.update(label, outputs)
-        print("validation acc: %s=%f" % metric.get())
-        print("validation loss:", loss)
-        accuracy = metric.get()[1]
-        return loss, accuracy
+                outputs.append(net(x).softmax())
+            metrics.update(label, outputs)
+        return metrics.get_name_value()
 
 After defining the training and testing of a MXNet machine learning model, we use the functions for the Flower clients.
 
@@ -130,6 +132,7 @@ The Flower clients will use a simple Sequential model:
         def model():
             net = nn.Sequential()
             net.add(nn.Dense(256, activation="relu"))
+            net.add(nn.Dense(64, activation="relu"))
             net.add(nn.Dense(10))
             net.collect_params().initialize()
             return net
@@ -183,13 +186,14 @@ which can be implemented in the following way:
 
         def fit(self, parameters, config):
             self.set_parameters(parameters)
-            train(model, train_data, epoch=1)
+            train(model, train_data, epoch=2)
             return self.get_parameters(), train_data.batch_size, {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
-            loss, accuracy = test(model, val_data)
-            return float(loss),  val_data.batch_size, {"accuracy":float(accuracy)}
+            [accuracy, loss] = test(model, val_data)
+            print("Evaluation accuracy & loss", accuracy, loss)
+            return float(loss[1]), val_data.batch_size, {"accuracy": float(accuracy[1])}
     
 
 We can now create an instance of our class :code:`MNISTClient` and add one line
@@ -247,32 +251,32 @@ You should now see how the training does in the very first terminal (the one tha
 
 .. code-block:: shell
 
-    INFO flower 2021-03-02 11:03:45,534 | app.py:76 | Flower server running (insecure, 3 rounds)
-    INFO flower 2021-03-02 11:03:45,534 | server.py:72 | Getting initial parameters
-    INFO flower 2021-03-02 11:03:53,639 | server.py:74 | Evaluating initial parameters
-    INFO flower 2021-03-02 11:03:53,639 | server.py:87 | [TIME] FL starting
-    DEBUG flower 2021-03-02 11:04:00,162 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-03-02 11:04:04,979 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-03-02 11:04:04,985 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-03-02 11:04:05,242 | server.py:149 | evaluate received 2 results and 0 failures
-    DEBUG flower 2021-03-02 11:04:05,244 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-03-02 11:04:10,510 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-03-02 11:04:10,515 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-03-02 11:04:10,855 | server.py:149 | evaluate received 2 results and 0 failures
-    DEBUG flower 2021-03-02 11:04:10,856 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-03-02 11:04:15,432 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-03-02 11:04:15,436 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-03-02 11:04:15,730 | server.py:149 | evaluate received 2 results and 0 failures
-    INFO flower 2021-03-02 11:04:15,730 | server.py:122 | [TIME] FL finished in 22.09073099998932
-    INFO flower 2021-03-02 11:04:15,731 | app.py:109 | app_fit: losses_distributed [(1, 12.912875175476074), (2, 14.816988945007324), (3, 15.702619552612305)]
-    INFO flower 2021-03-02 11:04:15,731 | app.py:110 | app_fit: accuracies_distributed []
-    INFO flower 2021-03-02 11:04:15,731 | app.py:111 | app_fit: losses_centralized []
-    INFO flower 2021-03-02 11:04:15,731 | app.py:112 | app_fit: accuracies_centralized []
-    DEBUG flower 2021-03-02 11:04:15,733 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-03-02 11:04:16,010 | server.py:149 | evaluate received 2 results and 0 failures
-    INFO flower 2021-03-02 11:04:16,010 | app.py:121 | app_evaluate: federated loss: 15.702619552612305
-    INFO flower 2021-03-02 11:04:16,011 | app.py:125 | app_evaluate: results [('ipv4:127.0.0.1:59960', EvaluateRes(loss=15.706217765808105, num_examples=100, accuracy=0.0, metrics={'accuracy': 0.9222})), ('ipv4:127.0.0.1:59962', EvaluateRes(loss=15.699021339416504, num_examples=100, accuracy=0.0, metrics={'accuracy': 0.9218}))]
-    INFO flower 2021-03-02 11:04:16,011 | app.py:127 | app_evaluate: failures []
+    INFO flower 2021-03-11 11:59:04,512 | app.py:76 | Flower server running (insecure, 3 rounds)
+    INFO flower 2021-03-11 11:59:04,512 | server.py:72 | Getting initial parameters
+    INFO flower 2021-03-11 11:59:09,089 | server.py:74 | Evaluating initial parameters
+    INFO flower 2021-03-11 11:59:09,089 | server.py:87 | [TIME] FL starting
+    DEBUG flower 2021-03-11 11:59:11,997 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2021-03-11 11:59:14,652 | server.py:177 | fit_round received 2 results and 0 failures
+    DEBUG flower 2021-03-11 11:59:14,656 | server.py:139 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2021-03-11 11:59:14,811 | server.py:149 | evaluate received 2 results and 0 failures
+    DEBUG flower 2021-03-11 11:59:14,812 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2021-03-11 11:59:18,499 | server.py:177 | fit_round received 2 results and 0 failures
+    DEBUG flower 2021-03-11 11:59:18,503 | server.py:139 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2021-03-11 11:59:18,784 | server.py:149 | evaluate received 2 results and 0 failures
+    DEBUG flower 2021-03-11 11:59:18,786 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2021-03-11 11:59:22,551 | server.py:177 | fit_round received 2 results and 0 failures
+    DEBUG flower 2021-03-11 11:59:22,555 | server.py:139 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2021-03-11 11:59:22,789 | server.py:149 | evaluate received 2 results and 0 failures
+    INFO flower 2021-03-11 11:59:22,789 | server.py:122 | [TIME] FL finished in 13.700094900001204
+    INFO flower 2021-03-11 11:59:22,790 | app.py:109 | app_fit: losses_distributed [(1, 1.5717803835868835), (2, 0.6093432009220123), (3, 0.4424773305654526)]
+    INFO flower 2021-03-11 11:59:22,790 | app.py:110 | app_fit: accuracies_distributed []
+    INFO flower 2021-03-11 11:59:22,791 | app.py:111 | app_fit: losses_centralized []
+    INFO flower 2021-03-11 11:59:22,791 | app.py:112 | app_fit: accuracies_centralized []
+    DEBUG flower 2021-03-11 11:59:22,793 | server.py:139 | evaluate: strategy sampled 2 clients
+    DEBUG flower 2021-03-11 11:59:23,111 | server.py:149 | evaluate received 2 results and 0 failures
+    INFO flower 2021-03-11 11:59:23,112 | app.py:121 | app_evaluate: federated loss: 0.4424773305654526
+    INFO flower 2021-03-11 11:59:23,112 | app.py:125 | app_evaluate: results [('ipv4:127.0.0.1:44344', EvaluateRes(loss=0.443320095539093, num_examples=100, accuracy=0.0, metrics={'accuracy': 0.8752475247524752})), ('ipv4:127.0.0.1:44346', EvaluateRes(loss=0.44163456559181213, num_examples=100, accuracy=0.0, metrics={'accuracy': 0.8761386138613861}))]
+    INFO flower 2021-03-11 11:59:23,112 | app.py:127 | app_evaluate: failures []
 
 Congratulations!
 You've successfully built and run your first federated learning system.
