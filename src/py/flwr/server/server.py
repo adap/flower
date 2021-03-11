@@ -18,7 +18,7 @@
 import concurrent.futures
 import timeit
 from logging import DEBUG, INFO
-from typing import List, Optional, Tuple, cast
+from typing import List, Optional, Tuple
 
 from flwr.common import (
     Disconnect,
@@ -91,9 +91,10 @@ class Server:
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
             res_fit = self.fit_round(rnd=current_round)
-            if res_fit is not None and res_fit[0] is not None:
+            if res_fit:
                 weights_prime, _ = res_fit
-                self.weights = weights_prime
+                if weights_prime:
+                    self.weights = weights_prime
 
             # Evaluate model using strategy implementation
             res_cen = self.strategy.evaluate(weights=self.weights)
@@ -112,11 +113,10 @@ class Server:
 
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(rnd=current_round)
-            if res_fed is not None and res_fed[0] is not None:
+            if res_fed:
                 loss_fed, _ = res_fed
-                history.add_loss_distributed(
-                    rnd=current_round, loss=cast(float, loss_fed)
-                )
+                if loss_fed:
+                    history.add_loss_distributed(rnd=current_round, loss=loss_fed)
 
         # Bookkeeping
         end_time = timeit.default_timer()
@@ -127,6 +127,7 @@ class Server:
     def evaluate(
         self, rnd: int
     ) -> Optional[Tuple[Optional[float], EvaluateResultsAndFailures]]:
+        """Validate current global model on a number of clients."""
         return self.evaluate_round(rnd)
 
     def evaluate_round(
