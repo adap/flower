@@ -42,4 +42,3 @@ def bytes_to_ndarray(tensor: bytes) -> np.ndarray:
     """Deserialize NumPy array from bytes."""
     ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)
     return cast(np.ndarray, ndarray_deserialized)
-
