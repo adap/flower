@@ -44,7 +44,7 @@ In a file called :code:`client.py`, import Flower and MXNet related packages:
     from mxnet import autograd as ag
     import mxnet.ndarray as F
 
-In addition, we define the device allocation in MXNet with:
+In addition, define the device allocation in MXNet with:
 
 .. code-block:: python
 
