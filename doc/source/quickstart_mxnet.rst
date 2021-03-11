@@ -17,7 +17,7 @@ Now that we have a rough idea of what is going on, let's get started. We first n
 
   $ pip install flwr
 
-Since we want to use MXNet, let's go ahead and install its library: 
+Since we want to use MXNet, let's go ahead and install it:
 
 .. code-block:: shell
 
