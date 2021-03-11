@@ -40,6 +40,7 @@ class FaultTolerantFedAvg(FedAvg):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         min_completion_rate_fit: float = 0.5,
         min_completion_rate_evaluate: float = 0.5,
+        initial_parameters: Optional[Weights] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -51,6 +52,7 @@ class FaultTolerantFedAvg(FedAvg):
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=True,
+            initial_parameters=initial_parameters,
         )
         self.completion_rate_fit = min_completion_rate_fit
         self.completion_rate_evaluate = min_completion_rate_evaluate
