@@ -35,10 +35,11 @@ def parameters_to_weights(parameters: Parameters) -> Weights:
 
 def ndarray_to_bytes(ndarray: np.ndarray) -> bytes:
     """Serialize NumPy array to bytes."""
-    return ndarray.tobytes()
+    return cast(bytes, ndarray.tobytes())
 
 
 def bytes_to_ndarray(tensor: bytes) -> np.ndarray:
     """Deserialize NumPy array from bytes."""
     ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)
     return cast(np.ndarray, ndarray_deserialized)
+
