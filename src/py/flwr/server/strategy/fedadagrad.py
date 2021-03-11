@@ -49,7 +49,7 @@ class FedAdagrad(FedOpt):
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
-        current_weights: Weights,
+        initial_parameters: Weights,
         eta: float = 1e-1,
         eta_l: float = 1e-1,
         tau: float = 1e-9,
@@ -77,7 +77,7 @@ class FedAdagrad(FedOpt):
                 Function used to configure validation. Defaults to None.
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
-            current_weights (Weights): Current set of weights from the server.
+            initial_parameters (Weights): Initial set of weights from the server.
             eta (float, optional): Server-side learning rate. Defaults to 1e-1.
             eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.
             tau (float, optional): Controls the algorithm's degree of adaptability.
@@ -93,7 +93,7 @@ class FedAdagrad(FedOpt):
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
-            current_weights=current_weights,
+            initial_parameters=initial_parameters,
             eta=eta,
             eta_l=eta_l,
             tau=tau,
