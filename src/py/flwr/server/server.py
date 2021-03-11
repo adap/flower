@@ -85,13 +85,14 @@ class Server:
             history.add_accuracy_centralized(rnd=0, acc=res[1])
 
         # Run federated learning for num_rounds
-        log(INFO, "[TIME] FL starting")
+        log(INFO, "FL starting")
         start_time = timeit.default_timer()
 
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
-            weights_prime = self.fit_round(rnd=current_round)
-            if weights_prime is not None:
+            res_fit = self.fit_round(rnd=current_round)
+            if res_fit is not None and res_fit[0] is not None:
+                weights_prime, _ = res_fit
                 self.weights = weights_prime
 
             # Evaluate model using strategy implementation
@@ -110,7 +111,7 @@ class Server:
                 history.add_accuracy_centralized(rnd=current_round, acc=acc_cen)
 
             # Evaluate model on a sample of available clients
-            res_fed = self.evaluate(rnd=current_round)
+            res_fed = self.evaluate_round(rnd=current_round)
             if res_fed is not None and res_fed[0] is not None:
                 loss_fed, _ = res_fed
                 history.add_loss_distributed(
@@ -126,50 +127,60 @@ class Server:
     def evaluate(
         self, rnd: int
     ) -> Optional[Tuple[Optional[float], EvaluateResultsAndFailures]]:
+        return self.evaluate_round(rnd)
+
+    def evaluate_round(
+        self, rnd: int
+    ) -> Optional[Tuple[Optional[float], EvaluateResultsAndFailures]]:
         """Validate current global model on a number of clients."""
+
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_evaluate(
             rnd=rnd, weights=self.weights, client_manager=self._client_manager
         )
         if not client_instructions:
-            log(INFO, "evaluate: no clients sampled, cancel federated evaluation")
+            log(INFO, "evaluate_round: no clients selected, cancel")
             return None
         log(
             DEBUG,
-            "evaluate: strategy sampled %s clients",
+            "evaluate_round: strategy sampled %s clients (out of %s)",
             len(client_instructions),
+            self._client_manager.num_available(),
         )
 
-        # Evaluate current global weights on those clients
-        results_and_failures = evaluate_clients(client_instructions)
-        results, failures = results_and_failures
+        # Collect `evaluate` results from all clients participating in this round
+        results, failures = evaluate_clients(client_instructions)
         log(
             DEBUG,
-            "evaluate received %s results and %s failures",
+            "evaluate_round received %s results and %s failures",
             len(results),
             len(failures),
         )
+
         # Aggregate the evaluation results
         loss_aggregated = self.strategy.aggregate_evaluate(rnd, results, failures)
-        return loss_aggregated, results_and_failures
+        return loss_aggregated, (results, failures)
 
-    def fit_round(self, rnd: int) -> Optional[Weights]:
+    def fit_round(
+        self, rnd: int
+    ) -> Optional[Tuple[Optional[Weights], FitResultsAndFailures]]:
         """Perform a single round of federated averaging."""
+
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
             rnd=rnd, weights=self.weights, client_manager=self._client_manager
         )
+        if not client_instructions:
+            log(INFO, "fit_round: no clients selected, cancel")
+            return None
         log(
             DEBUG,
             "fit_round: strategy sampled %s clients (out of %s)",
             len(client_instructions),
             self._client_manager.num_available(),
         )
-        if not client_instructions:
-            log(INFO, "fit_round: no clients sampled, cancel fit")
-            return None
 
-        # Collect training results from all clients participating in this round
+        # Collect `fit` results from all clients participating in this round
         results, failures = fit_clients(client_instructions)
         log(
             DEBUG,
@@ -179,7 +190,8 @@ class Server:
         )
 
         # Aggregate training results
-        return self.strategy.aggregate_fit(rnd, results, failures)
+        weights_aggregated = self.strategy.aggregate_fit(rnd, results, failures)
+        return weights_aggregated, (results, failures)
 
     def disconnect_all_clients(self) -> None:
         """Send shutdown signal to all clients."""
