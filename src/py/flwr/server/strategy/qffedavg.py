@@ -56,8 +56,20 @@ class QffedAvg(FedAvg):
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
+        initial_parameters: Optional[Weights] = None,
     ) -> None:
-        super().__init__()
+        super().__init__(
+            fraction_fit=fraction_fit,
+            fraction_eval=fraction_eval,
+            min_fit_clients=min_fit_clients,
+            min_eval_clients=min_eval_clients,
+            min_available_clients=min_available_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+            on_evaluate_config_fn=on_evaluate_config_fn,
+            accept_failures=accept_failures,
+            initial_parameters=initial_parameters,
+        )
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
         self.fraction_fit = fraction_fit
