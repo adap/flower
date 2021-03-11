@@ -54,7 +54,6 @@ def train(
     for i in range(epoch):
         # Reset the train data iterator.
         train_data.reset()
-        
         # Loop over the train data iterator.
         for batch in train_data:
             # Splits train data into multiple slices along batch_axis
