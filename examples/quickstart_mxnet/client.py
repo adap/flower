@@ -1,5 +1,4 @@
-"""
-Flower client example using MXNet for MNIST classification.
+"""Flower client example using MXNet for MNIST classification.
 
 The code is generally adapted from:
 
@@ -26,7 +25,7 @@ def main():
     def model():
         net = nn.Sequential()
         net.add(nn.Dense(256, activation="relu"))
-        net.add(nn.Dense(64, activation='relu'))
+        net.add(nn.Dense(64, activation="relu"))
         net.add(nn.Dense(10))
         net.collect_params().initialize()
         return net
