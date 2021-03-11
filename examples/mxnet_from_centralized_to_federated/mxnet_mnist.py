@@ -34,6 +34,7 @@ def model():
     # Define simple Sequential model
     net = nn.Sequential()
     net.add(nn.Dense(256, activation="relu"))
+    net.add(nn.Dense(64, activation='relu'))
     net.add(nn.Dense(10))
     net.collect_params().initialize()
     return net
@@ -42,13 +43,15 @@ def model():
 def train(
     net: mx.gluon.nn, train_data: mx.io.NDArrayIter, epoch: int, device: mx.context
 ) -> None:
-    trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.03})
+    trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.01})
     # Use Accuracy as the evaluation metric.
     metric = mx.metric.Accuracy()
+    loss_metric = mx.metric.CrossEntropy()
     softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
     for i in range(epoch):
         # Reset the train data iterator.
         train_data.reset()
+        
         # Loop over the train data iterator.
         for batch in train_data:
             # Splits train data into multiple slices along batch_axis
@@ -70,18 +73,21 @@ def train(
                     loss = softmax_cross_entropy_loss(z, y)
                     # Backpropogate the error for one iteration.
                     loss.backward()
-                    outputs.append(z)
+                    outputs.append(z.softmax())
             # Updates internal evaluation
             metric.update(label, outputs)
+            
             # Make one step of parameter update. Trainer needs to know the
             # batch size of data to normalize the gradient by 1/batch_size.
             trainer.step(batch.data[0].shape[0])
         # Gets the evaluation result.
         name, acc = metric.get()
-        # name_loss, running_loss = loss_metric.get()
+        loss_metric.update(label, outputs)
+        name_loss, running_loss = loss_metric.get()
         # Reset evaluation result to initial state.
         metric.reset()
         print("training acc at epoch %d: %s=%f" % (i, name, acc))
+        # print("training loss", loss_metric )
 
 
 def test(
@@ -89,7 +95,7 @@ def test(
 ) -> Tuple[float, float]:
     # Use Accuracy as the evaluation metric.
     metric = mx.metric.Accuracy()
-    loss_metric = mx.metric.Loss()
+    loss_metric = mx.metric.CrossEntropy()
     loss = 0.0
     # Reset the validation data iterator.
     val_data.reset()
@@ -105,11 +111,11 @@ def test(
         )
         outputs = []
         for x in data:
-            outputs.append(net(x))
-            loss_metric.update(label, outputs)
-            loss += loss_metric.get()[1]
+            outputs.append(net(x).softmax())
         # Updates internal evaluation
         metric.update(label, outputs)
+    loss_metric.update(label, outputs)
+    loss += loss_metric.get()[1]
     accuracy = metric.get()[1]
     return loss, accuracy
 
