@@ -26,6 +26,7 @@ def main():
     def model():
         net = nn.Sequential()
         net.add(nn.Dense(256, activation="relu"))
+        net.add(nn.Dense(64, activation='relu'))
         net.add(nn.Dense(10))
         net.collect_params().initialize()
         return net
@@ -52,13 +53,14 @@ def main():
 
         def fit(self, parameters, config):
             self.set_parameters(parameters)
-            train(model, train_data, epoch=1)
+            train(model, train_data, epoch=2)
             return self.get_parameters(), train_data.batch_size, {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
-            loss, accuracy = test(model, val_data)
-            return float(loss),  val_data.batch_size, {"accuracy":float(accuracy)}
+            [accuracy, loss] = test(model, val_data)
+            print("Evaluation accuracy & loss", accuracy, loss)
+            return float(loss[1]), val_data.batch_size, {"accuracy": float(accuracy[1])}
 
     # Start Flower client
     fl.client.start_numpy_client("0.0.0.0:8080", client=MNISTClient())
@@ -76,8 +78,12 @@ def load_data():
 
 
 def train(net, train_data, epoch):
-    trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.03})
-    metric = mx.metric.Accuracy()
+    trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.01})
+    accuracy_metric = mx.metric.Accuracy()
+    loss_metric = mx.metric.CrossEntropy()
+    metrics = mx.metric.CompositeEvalMetric()
+    for child_metric in [accuracy_metric, loss_metric]:
+        metrics.add(child_metric)
     softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
     for i in range(epoch):
         train_data.reset()
@@ -94,18 +100,20 @@ def train(net, train_data, epoch):
                     z = net(x)
                     loss = softmax_cross_entropy_loss(z, y)
                     loss.backward()
-                    outputs.append(z)
-            metric.update(label, outputs)
+                    outputs.append(z.softmax())
+            metrics.update(label, outputs)
             trainer.step(batch.data[0].shape[0])
-        name, acc = metric.get()
-        metric.reset()
-        print("training acc at epoch %d: %s=%f" % (i, name, acc))
+        trainings_metric = metrics.get_name_value()
+        print("Accuracy & loss at epoch %d: %s" % (i, trainings_metric))
+    return trainings_metric
 
 
 def test(net, val_data):
-    metric = mx.metric.Accuracy()
-    loss_metric = mx.metric.Loss()
-    loss = 0.0
+    accuracy_metric = mx.metric.Accuracy()
+    loss_metric = mx.metric.CrossEntropy()
+    metrics = mx.metric.CompositeEvalMetric()
+    for child_metric in [accuracy_metric, loss_metric]:
+        metrics.add(child_metric)
     val_data.reset()
     for batch in val_data:
         data = gluon.utils.split_and_load(batch.data[0], ctx_list=DEVICE, batch_axis=0)
@@ -114,14 +122,10 @@ def test(net, val_data):
         )
         outputs = []
         for x in data:
-            outputs.append(net(x))
-            loss_metric.update(label, outputs)
-            loss += loss_metric.get()[1]
-        metric.update(label, outputs)
-    print("validation acc: %s=%f" % metric.get())
-    print("validation loss:", loss)
-    accuracy = metric.get()[1]
-    return loss, accuracy
+            outputs.append(net(x).softmax())
+        metrics.update(label, outputs)
+    metrics.update(label, outputs)
+    return metrics.get_name_value()
 
 
 if __name__ == "__main__":
