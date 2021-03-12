@@ -54,7 +54,7 @@ The :code:`load_data()` function loads the MNIST training and test sets.
         val_data = mx.io.NDArrayIter(mnist["test_data"], mnist["test_label"], batch_size)
         return train_data, val_data
 
-As already mentioned we will use the MNIST dataset for this machine learning workload. The model architecture (a very simple Sequential model) is defined in :code:`model()`.
+As already mentioned, we will use the MNIST dataset for this machine learning workload. The model architecture (a very simple :code:`Sequential` model) is defined in :code:`model()`.
 
 .. code-block:: python
 
