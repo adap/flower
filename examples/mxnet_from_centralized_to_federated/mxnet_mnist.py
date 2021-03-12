@@ -5,8 +5,8 @@ The code is generally adapted from:
 https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html
 """
 
-from __future__ import print_function
-from typing import Tuple
+
+from typing import List, Tuple
 import mxnet as mx
 from mxnet import gluon
 from mxnet.gluon import nn
@@ -34,6 +34,7 @@ def model():
     # Define simple Sequential model
     net = nn.Sequential()
     net.add(nn.Dense(256, activation="relu"))
+    net.add(nn.Dense(64, activation="relu"))
     net.add(nn.Dense(10))
     net.collect_params().initialize()
     return net
@@ -41,14 +42,20 @@ def model():
 
 def train(
     net: mx.gluon.nn, train_data: mx.io.NDArrayIter, epoch: int, device: mx.context
-) -> None:
-    trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.03})
-    # Use Accuracy as the evaluation metric.
-    metric = mx.metric.Accuracy()
+) -> Tuple[List[float], int]:
+    trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.01})
+    # Use Accuracy and Cross Entropy Loss as the evaluation metric.
+    accuracy_metric = mx.metric.Accuracy()
+    loss_metric = mx.metric.CrossEntropy()
+    metrics = mx.metric.CompositeEvalMetric()
+    for child_metric in [accuracy_metric, loss_metric]:
+        metrics.add(child_metric)
     softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
     for i in range(epoch):
         # Reset the train data iterator.
         train_data.reset()
+        # Calculate number of samples
+        num_examples = 0
         # Loop over the train data iterator.
         for batch in train_data:
             # Splits train data into multiple slices along batch_axis
@@ -70,29 +77,32 @@ def train(
                     loss = softmax_cross_entropy_loss(z, y)
                     # Backpropogate the error for one iteration.
                     loss.backward()
-                    outputs.append(z)
+                    outputs.append(z.softmax())
+                    num_examples += len(x)
             # Updates internal evaluation
-            metric.update(label, outputs)
+            metrics.update(label, outputs)
             # Make one step of parameter update. Trainer needs to know the
             # batch size of data to normalize the gradient by 1/batch_size.
             trainer.step(batch.data[0].shape[0])
         # Gets the evaluation result.
-        name, acc = metric.get()
-        # name_loss, running_loss = loss_metric.get()
-        # Reset evaluation result to initial state.
-        metric.reset()
-        print("training acc at epoch %d: %s=%f" % (i, name, acc))
+        trainings_metric = metrics.get_name_value()
+        print("Accuracy & loss at epoch %d: %s" % (i, trainings_metric))
+    return trainings_metric, num_examples
 
 
 def test(
     net: mx.gluon.nn, val_data: mx.io.NDArrayIter, device: mx.context
-) -> Tuple[float, float]:
+) -> Tuple[List[float], int]:
     # Use Accuracy as the evaluation metric.
-    metric = mx.metric.Accuracy()
-    loss_metric = mx.metric.Loss()
-    loss = 0.0
+    accuracy_metric = mx.metric.Accuracy()
+    loss_metric = mx.metric.CrossEntropy()
+    metrics = mx.metric.CompositeEvalMetric()
+    for child_metric in [accuracy_metric, loss_metric]:
+        metrics.add(child_metric)
     # Reset the validation data iterator.
     val_data.reset()
+    # Get number of samples for val_dat
+    num_examples = 0
     # Loop over the validation data iterator.
     for batch in val_data:
         # Splits validation data into multiple slices along batch_axis
@@ -105,13 +115,11 @@ def test(
         )
         outputs = []
         for x in data:
-            outputs.append(net(x))
-            loss_metric.update(label, outputs)
-            loss += loss_metric.get()[1]
+            outputs.append(net(x).softmax())
+            num_examples += len(x)
         # Updates internal evaluation
-        metric.update(label, outputs)
-    accuracy = metric.get()[1]
-    return loss, accuracy
+        metrics.update(label, outputs)
+    return metrics.get_name_value(), num_examples
 
 
 def main():
@@ -124,11 +132,13 @@ def main():
     init = nd.random.uniform(shape=(2, 784))
     net(init)
     # Start model training based on training set
-    train(net=net, train_data=train_data, epoch=5, device=DEVICE)
+    train(net=net, train_data=train_data, epoch=2, device=DEVICE)
     # Evaluate model using loss and accuracy
-    loss, acc = test(net=net, val_data=val_data, device=DEVICE)
-    print("Loss: ", loss)
-    print("Accuracy: ", acc)
+    eval_metric, _ = test(net=net, val_data=val_data, device=DEVICE)
+    acc = eval_metric[0]
+    loss = eval_metric[1]
+    print("Evaluation Loss: ", loss)
+    print("Evaluation Accuracy: ", acc)
 
 
 if __name__ == "__main__":
