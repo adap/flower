@@ -23,7 +23,7 @@ If you want a more in-depth explanation of what's going on then have a look at t
 
 Let's create an new file called :code:`mxnet_mnist.py` with all the components required for a traditional (centralized) MNIST training. 
 First, the MXNet package :code:`mxnet` needs to be imported.
-You can see that we do not import any :code:`flwr` package for federated learning. This will be done later. 
+You can see that we do not yet import the :code:`flwr` package for federated learning. This will be done later. 
 
 .. code-block:: python
 
