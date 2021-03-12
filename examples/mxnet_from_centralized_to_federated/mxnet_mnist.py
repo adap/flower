@@ -13,6 +13,7 @@ from mxnet.gluon import nn
 from mxnet import autograd as ag
 import mxnet.ndarray as F
 from mxnet import nd
+import numpy as np
 
 # Fixing the random seed
 mx.random.seed(42)
@@ -54,6 +55,8 @@ def train(
     for i in range(epoch):
         # Reset the train data iterator.
         train_data.reset()
+        # Calculate number of samples
+        num_samples = 0
         # Loop over the train data iterator.
         for batch in train_data:
             # Splits train data into multiple slices along batch_axis
@@ -76,6 +79,8 @@ def train(
                     # Backpropogate the error for one iteration.
                     loss.backward()
                     outputs.append(z.softmax())
+                    #print("label len",len(data))
+                    num_samples += len(x)
             # Updates internal evaluation
             metrics.update(label, outputs)
             # Make one step of parameter update. Trainer needs to know the
@@ -84,7 +89,7 @@ def train(
         # Gets the evaluation result.
         trainings_metric = metrics.get_name_value()
         print("Accuracy & loss at epoch %d: %s" % (i, trainings_metric))
-    return trainings_metric
+    return trainings_metric, num_samples
 
 
 def test(
@@ -98,6 +103,8 @@ def test(
         metrics.add(child_metric)
     # Reset the validation data iterator.
     val_data.reset()
+    # Get number of samples for val_dat
+    num_samples = 0
     # Loop over the validation data iterator.
     for batch in val_data:
         # Splits validation data into multiple slices along batch_axis
@@ -111,9 +118,10 @@ def test(
         outputs = []
         for x in data:
             outputs.append(net(x).softmax())
+            num_samples += len(x) 
         # Updates internal evaluation
         metrics.update(label, outputs)
-    return metrics.get_name_value()
+    return metrics.get_name_value(), num_samples
 
 
 def main():
@@ -126,9 +134,9 @@ def main():
     init = nd.random.uniform(shape=(2, 784))
     net(init)
     # Start model training based on training set
-    train(net=net, train_data=train_data, epoch=5, device=DEVICE)
+    train(net=net, train_data=train_data, epoch=2, device=DEVICE)
     # Evaluate model using loss and accuracy
-    eval_metric = test(net=net, val_data=val_data, device=DEVICE)
+    eval_metric, _ = test(net=net, val_data=val_data, device=DEVICE)
     acc = eval_metric[0]
     loss = eval_metric[1]
     print("Evaluation Loss: ", loss)
