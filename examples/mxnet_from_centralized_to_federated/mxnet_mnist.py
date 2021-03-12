@@ -13,7 +13,6 @@ from mxnet.gluon import nn
 from mxnet import autograd as ag
 import mxnet.ndarray as F
 from mxnet import nd
-import numpy as np
 
 # Fixing the random seed
 mx.random.seed(42)
