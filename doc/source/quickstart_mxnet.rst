@@ -64,7 +64,7 @@ We use MXNet to load MNIST, a popular image classification dataset of handrwritt
         val_data = mx.io.NDArrayIter(mnist["test_data"], mnist["test_label"], batch_size)
         return train_data, val_data
 
-Define the training and loss with MXNet. We train the model by looping over the dataset, measure the corresponding loss and optimize it. 
+Define the training and loss with MXNet. We train the model by looping over the dataset, measure the corresponding loss, and optimize it. 
 
 .. code-block:: python
 
