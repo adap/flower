@@ -18,7 +18,7 @@ Before we start setting up our MXNet example we install the :code:`mxnet` and :c
 MNIST Training with MXNet
 -------------------------
 
-We begin with a brief description of the centralized training code based on a Sequential model.
+We begin with a brief description of the centralized training code based on a :code:`Sequential` model.
 If you want a more in-depth explanation of what's going on then have a look at the official `MXNet tutorial <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/>`_.
 
 Let's create an new file called :code:`mxnet_mnist.py` with all the components required for a traditional (centralized) MNIST training. 
