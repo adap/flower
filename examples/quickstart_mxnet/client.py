@@ -52,15 +52,15 @@ def main():
 
         def fit(self, parameters, config):
             self.set_parameters(parameters)
-            [accuracy, loss], num_data = train(model, train_data, epoch=2)
+            [accuracy, loss], num_examples = train(model, train_data, epoch=2)
             results = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
-            return self.get_parameters(), num_data, results
+            return self.get_parameters(), num_examples, results
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
-            [accuracy, loss], num_data = test(model, val_data)
+            [accuracy, loss], num_examples = test(model, val_data)
             print("Evaluation accuracy & loss", accuracy, loss)
-            return float(loss[1]), num_data, {"accuracy": float(accuracy[1])}
+            return float(loss[1]), num_examples, {"accuracy": float(accuracy[1])}
 
     # Start Flower client
     fl.client.start_numpy_client("0.0.0.0:8080", client=MNISTClient())
@@ -87,7 +87,7 @@ def train(net, train_data, epoch):
     softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
     for i in range(epoch):
         train_data.reset()
-        num_samples = 0
+        num_examples = 0
         for batch in train_data:
             data = gluon.utils.split_and_load(
                 batch.data[0], ctx_list=DEVICE, batch_axis=0
@@ -102,12 +102,12 @@ def train(net, train_data, epoch):
                     loss = softmax_cross_entropy_loss(z, y)
                     loss.backward()
                     outputs.append(z.softmax())
-                    num_samples += len(x)
+                    num_examples += len(x)
             metrics.update(label, outputs)
             trainer.step(batch.data[0].shape[0])
         trainings_metric = metrics.get_name_value()
         print("Accuracy & loss at epoch %d: %s" % (i, trainings_metric))
-    return trainings_metric, num_samples
+    return trainings_metric, num_examples
 
 
 def test(net, val_data):
@@ -117,7 +117,7 @@ def test(net, val_data):
     for child_metric in [accuracy_metric, loss_metric]:
         metrics.add(child_metric)
     val_data.reset()
-    num_samples = 0
+    num_examples = 0
     for batch in val_data:
         data = gluon.utils.split_and_load(batch.data[0], ctx_list=DEVICE, batch_axis=0)
         label = gluon.utils.split_and_load(
@@ -126,10 +126,10 @@ def test(net, val_data):
         outputs = []
         for x in data:
             outputs.append(net(x).softmax())
-            num_samples += len(x)
+            num_examples += len(x)
         metrics.update(label, outputs)
     metrics.update(label, outputs)
-    return metrics.get_name_value(), num_samples
+    return metrics.get_name_value(), num_examples
 
 
 if __name__ == "__main__":
