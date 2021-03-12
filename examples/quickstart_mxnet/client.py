@@ -53,8 +53,8 @@ def main():
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             [accuracy, loss], num_data = train(model, train_data, epoch=2)
-            metrics = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
-            return self.get_parameters(), num_data, metrics
+            results = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
+            return self.get_parameters(), num_data, results
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
