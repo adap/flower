@@ -324,6 +324,7 @@ Having defined defining the data loading, model architecture, training, and eval
         
         # Define model from centralized training
         model = mxnet_mnist.model()
+        
         # Make one forward propagation to initialize parameters
         init = nd.random.uniform(shape=(2, 784))
         model(init)
