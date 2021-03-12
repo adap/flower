@@ -46,24 +46,24 @@ class MNISTClient(fl.client.NumPyClient):
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
-        [accuracy, loss], num_data = mxnet_mnist.train(
+        [accuracy, loss], num_examples = mxnet_mnist.train(
             self.model, self.train_data, epoch=2, device=self.device
         )
         results = {"accuracy": accuracy[1], "loss": loss[1]}
-        return self.get_parameters(), num_data, results
+        return self.get_parameters(), num_examples, results
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict
     ) -> Tuple[int, float, Dict]:
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
-        [accuracy, loss], num_data = mxnet_mnist.test(
+        [accuracy, loss], num_examples = mxnet_mnist.test(
             self.model, self.val_data, device=self.device
         )
         print("Evaluation accuracy & loss", accuracy, loss)
         return (
             float(loss[1]),
-            num_data,
+            num_examples,
             {"accuracy": float(accuracy[1])},
         )
 
@@ -73,13 +73,13 @@ def main() -> None:
 
     # Set context to GPU or - if not available - to CPU
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
-    
+
     # Load data
     train_data, val_data = mxnet_mnist.load_data()
-    
+
     # Load model (from centralized training)
     model = mxnet_mnist.model()
-    
+
     # Do one forward propagation to initialize parameters
     init = nd.random.uniform(shape=(2, 784))
     model(init)
