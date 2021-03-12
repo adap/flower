@@ -309,7 +309,7 @@ We included type annotations to give you a better understanding of the data type
                 {"accuracy": float(accuracy[1])},
             )
 
-Having defined defining the data loading, model architecture, training, and evaluation we can put everything together and train our Sequential model on MNIST.
+Having defined data loading, model architecture, training, and evaluation we can put everything together and train our :code:`Sequential` model on MNIST.
 
 .. code-block:: python
 
