@@ -318,6 +318,7 @@ Having defined defining the data loading, model architecture, training, and eval
 
         # Setup context to GPU and if not available to CPU
         DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
+        
         # Load data
         train_data, val_data = mxnet_mnist.load_data()
         # Define model from centralized training
