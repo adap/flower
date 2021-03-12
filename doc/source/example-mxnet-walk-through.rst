@@ -1,8 +1,9 @@
 Example: MXNet - Run MXNet Federated
 ====================================
 
-This tutorial will show you how to use Flower to build a federated version of a MXNet workload.
-We are using MXNet to train a Sequential model on a MNIST dataset. We will setup the example similar to our `PyTorch - From Centralized To Federated <https://github.com/adap/flower/blob/main/examples/pytorch_from_centralized_to_federated>`_ walk through. MXNet and PyTorch are very similar and a very good comparison between MXNet and PyTorch is given `here <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/getting-started/to-mxnet/pytorch.html>`_.
+This tutorial will show you how to use Flower to build a federated version of an existing MXNet workload.
+We are using MXNet to train a Sequential model on the MNIST dataset.
+We will structure the example similar to our `PyTorch - From Centralized To Federated <https://github.com/adap/flower/blob/main/examples/pytorch_from_centralized_to_federated>`_ walkthrough. MXNet and PyTorch are very similar and a very good comparison between MXNet and PyTorch is given `here <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/getting-started/to-mxnet/pytorch.html>`_.
 First, we build a centralized training approach based on the `Handwritten Digit Recognition <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_ tutorial.
 Then, we build upon the centralized training code to run the training in a federated fashion.
 
@@ -17,12 +18,12 @@ Before we start setting up our MXNet example we install the :code:`mxnet` and :c
 MNIST Training with MXNet
 -------------------------
 
-We begin with a brief description of the centralized training code based on a Sequential model.
+We begin with a brief description of the centralized training code based on a :code:`Sequential` model.
 If you want a more in-depth explanation of what's going on then have a look at the official `MXNet tutorial <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/>`_.
 
 Let's create an new file called :code:`mxnet_mnist.py` with all the components required for a traditional (centralized) MNIST training. 
 First, the MXNet package :code:`mxnet` needs to be imported.
-You can see that we do not import any :code:`flwr` package for federated learning. This will be done later. 
+You can see that we do not yet import the :code:`flwr` package for federated learning. This will be done later. 
 
 .. code-block:: python
 
@@ -53,7 +54,7 @@ The :code:`load_data()` function loads the MNIST training and test sets.
         val_data = mx.io.NDArrayIter(mnist["test_data"], mnist["test_label"], batch_size)
         return train_data, val_data
 
-As already mentioned we will use the MNIST dataset for this machine learning workload. The model architecture (a very simple Sequential model) is defined in :code:`model()`.
+As already mentioned, we will use the MNIST dataset for this machine learning workload. The model architecture (a very simple :code:`Sequential` model) is defined in :code:`model()`.
 
 .. code-block:: python
 
@@ -228,7 +229,7 @@ Our *client* needs to import :code:`flwr`, but also :code:`mxnet` to update the 
 
 Implementing a Flower *client* basically means implementing a subclass of either :code:`flwr.client.Client` or :code:`flwr.client.NumPyClient`.
 Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll call it :code:`MNISTClient`.
-:code:`NumPyClient` is slighly easier to implement than :code:`Client` if you use a framework with good NumPy interoperability (like PyTorch or TensorFlow/Keras) because it avoids some of the boilerplate that would otherwise be necessary.
+:code:`NumPyClient` is slighly easier to implement than :code:`Client` if you use a framework with good NumPy interoperability (like PyTorch or MXNet) because it avoids some of the boilerplate that would otherwise be necessary.
 :code:`MNISTClient` needs to implement four methods, two methods for getting/setting model parameters, one method for training the model, and one method for testing the model:
 
 #. :code:`set_parameters (optional)`
@@ -308,7 +309,7 @@ We included type annotations to give you a better understanding of the data type
                 {"accuracy": float(accuracy[1])},
             )
 
-Having defined defining the data loading, model architecture, training, and evaluation we can put everything together and train our Sequential model on MNIST.
+Having defined data loading, model architecture, training, and evaluation we can put everything together and train our :code:`Sequential` model on MNIST.
 
 .. code-block:: python
 
@@ -317,10 +318,13 @@ Having defined defining the data loading, model architecture, training, and eval
 
         # Setup context to GPU and if not available to CPU
         DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
+        
         # Load data
         train_data, val_data = mxnet_mnist.load_data()
+        
         # Define model from centralized training
         model = mxnet_mnist.model()
+        
         # Make one forward propagation to initialize parameters
         init = nd.random.uniform(shape=(2, 784))
         model(init)
