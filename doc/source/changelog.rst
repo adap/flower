@@ -9,6 +9,13 @@ What's new?
 * **New built-in strategies** (`#549 <https://github.com/adap/flower/pull/549>`_)
     * (abstract) FedOpt
     * FedAdagrad
+
+
+v0.15.0 (2021-03-12)
+--------------------
+
+What's new?
+
 * **Server-side parameter initialization** (`#658 <https://github.com/adap/flower/pull/658>`_)
 
   Model parameters can now be initialized on the server-side. Server-side parameter initialization works via a new :code:`Strategy` method called :code:`initialize_parameters`.
