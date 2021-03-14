@@ -1,9 +1,9 @@
 Quickstart (MXNet)
 ==================
 
-In this tutorial we will learn how to train a Sequential Model on MNIST using Flower and MXNet. 
+In this tutorial, we will learn how to train a :code:`Sequential` model on MNIST using Flower and MXNet. 
 
-First of all, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_. 
+It is recommended to create a virtual environment and run everything within this `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_. 
 
 Our example consists of one *server* and two *clients* all having the same model. 
 
@@ -50,7 +50,7 @@ In addition, define the device allocation in MXNet with:
 
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
 
-We use MXNet to load MNIST, a popular image classification dataset of handrwritten digits for machine learning. The MXNet :code:`mx.test_utils.get_mnist()` downloads the training and test data. 
+We use MXNet to load MNIST, a popular image classification dataset of handwritten digits for machine learning. The MXNet utility :code:`mx.test_utils.get_mnist()` downloads the training and test data. 
 
 .. code-block:: python
 
@@ -64,7 +64,7 @@ We use MXNet to load MNIST, a popular image classification dataset of handrwritt
         val_data = mx.io.NDArrayIter(mnist["test_data"], mnist["test_label"], batch_size)
         return train_data, val_data
 
-Define the training and loss with MXNet. We train the model by looping over the dataset, measure the corresponding loss and optimize it. 
+Define the training and loss with MXNet. We train the model by looping over the dataset, measure the corresponding loss, and optimize it. 
 
 .. code-block:: python
 
@@ -100,7 +100,7 @@ Define the training and loss with MXNet. We train the model by looping over the 
         return trainings_metric
 
 
-Define then the validation of the  machine learning model. We loop over the test set and measure the loss and accuracy on the test set. 
+Next, we define the validation of our machine learning model. We loop over the test set and measure both loss and accuracy on the test set. 
 
 .. code-block:: python
 
@@ -122,9 +122,9 @@ Define then the validation of the  machine learning model. We loop over the test
             metrics.update(label, outputs)
         return metrics.get_name_value()
 
-After defining the training and testing of a MXNet machine learning model, we use the functions for the Flower clients.
+After defining the training and testing of a MXNet machine learning model, we use these functions to implement a Flower client.
 
-The Flower clients will use a simple Sequential model:
+Our Flower clients will use a simple :code:`Sequential` model:
 
 .. code-block:: python
 
@@ -143,7 +143,7 @@ The Flower clients will use a simple Sequential model:
         init = nd.random.uniform(shape=(2, 784))
         model(init)
 
-After loading the dataset with :code:`load_data()` we perform one forward propagation to initialize the model and model parameter. Afterwards, we implement a Flower client. 
+After loading the dataset with :code:`load_data()` we perform one forward propagation to initialize the model and model parameters. Next, we implement a Flower client. 
 
 The Flower server interacts with clients through an interface called
 :code:`Client`. When the server selects a particular client for training, it
@@ -167,7 +167,7 @@ Implementing :code:`NumPyClient` usually means defining the following methods
 #. :code:`evaluate`
     * test the local model
 
-which can be implemented in the following way:
+They can be implemented in the following way:
 
 .. code-block:: python
 
