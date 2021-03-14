@@ -79,6 +79,7 @@ Define the training and loss with MXNet. We train the model by looping over the 
         softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
         for i in range(epoch):
             train_data.reset()
+            num_examples = 0
             for batch in train_data:
                 data = gluon.utils.split_and_load(
                     batch.data[0], ctx_list=DEVICE, batch_axis=0
@@ -93,11 +94,12 @@ Define the training and loss with MXNet. We train the model by looping over the 
                         loss = softmax_cross_entropy_loss(z, y)
                         loss.backward()
                         outputs.append(z.softmax())
+                        num_examples += len(x)
                 metrics.update(label, outputs)
                 trainer.step(batch.data[0].shape[0])
             trainings_metric = metrics.get_name_value()
             print("Accuracy & loss at epoch %d: %s" % (i, trainings_metric))
-        return trainings_metric
+        return trainings_metric, num_examples
 
 
 Next, we define the validation of our machine learning model. We loop over the test set and measure both loss and accuracy on the test set. 
@@ -111,6 +113,7 @@ Next, we define the validation of our machine learning model. We loop over the t
         for child_metric in [accuracy_metric, loss_metric]:
             metrics.add(child_metric)
         val_data.reset()
+        num_examples = 0
         for batch in val_data:
             data = gluon.utils.split_and_load(batch.data[0], ctx_list=DEVICE, batch_axis=0)
             label = gluon.utils.split_and_load(
@@ -119,8 +122,9 @@ Next, we define the validation of our machine learning model. We loop over the t
             outputs = []
             for x in data:
                 outputs.append(net(x).softmax())
+                num_examples += len(x)
             metrics.update(label, outputs)
-        return metrics.get_name_value()
+        return metrics.get_name_value(), num_examples
 
 After defining the training and testing of a MXNet machine learning model, we use these functions to implement a Flower client.
 
@@ -186,12 +190,13 @@ They can be implemented in the following way:
 
         def fit(self, parameters, config):
             self.set_parameters(parameters)
-            train(model, train_data, epoch=2)
-            return self.get_parameters(), train_data.batch_size, {}
+            [accuracy, loss], num_examples = train(model, train_data, epoch=2)
+            results = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
+            return self.get_parameters(), num_examples, results
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
-            [accuracy, loss] = test(model, val_data)
+            [accuracy, loss], num_examples = test(model, val_data)
             print("Evaluation accuracy & loss", accuracy, loss)
             return float(loss[1]), val_data.batch_size, {"accuracy": float(accuracy[1])}
     
