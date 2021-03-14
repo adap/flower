@@ -50,7 +50,7 @@ In addition, define the device allocation in MXNet with:
 
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
 
-We use MXNet to load MNIST, a popular image classification dataset of handrwritten digits for machine learning. The MXNet :code:`mx.test_utils.get_mnist()` downloads the training and test data. 
+We use MXNet to load MNIST, a popular image classification dataset of handwritten digits for machine learning. The MXNet utility :code:`mx.test_utils.get_mnist()` downloads the training and test data. 
 
 .. code-block:: python
 
