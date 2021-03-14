@@ -122,7 +122,7 @@ Define then the validation of the  machine learning model. We loop over the test
             metrics.update(label, outputs)
         return metrics.get_name_value()
 
-After defining the training and testing of a MXNet machine learning model, we use the functions for the Flower clients.
+After defining the training and testing of a MXNet machine learning model, we use these functions to implement a Flower client.
 
 The Flower clients will use a simple Sequential model:
 
