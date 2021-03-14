@@ -100,7 +100,7 @@ Define the training and loss with MXNet. We train the model by looping over the 
         return trainings_metric
 
 
-Define then the validation of the  machine learning model. We loop over the test set and measure the loss and accuracy on the test set. 
+Next, we define the validation of our machine learning model. We loop over the test set and measure both loss and accuracy on the test set. 
 
 .. code-block:: python
 
