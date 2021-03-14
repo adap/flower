@@ -3,7 +3,7 @@ Quickstart (MXNet)
 
 In this tutorial we will learn how to train a Sequential Model on MNIST using Flower and MXNet. 
 
-First of all, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_. 
+It is recommended to create a virtual environment and run everything within this `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_. 
 
 Our example consists of one *server* and two *clients* all having the same model. 
 
