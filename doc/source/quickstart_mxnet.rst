@@ -124,7 +124,7 @@ Define then the validation of the  machine learning model. We loop over the test
 
 After defining the training and testing of a MXNet machine learning model, we use these functions to implement a Flower client.
 
-The Flower clients will use a simple Sequential model:
+Our Flower clients will use a simple :code:`Sequential` model:
 
 .. code-block:: python
 
