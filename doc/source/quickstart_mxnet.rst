@@ -167,7 +167,7 @@ Implementing :code:`NumPyClient` usually means defining the following methods
 #. :code:`evaluate`
     * test the local model
 
-which can be implemented in the following way:
+They can be implemented in the following way:
 
 .. code-block:: python
 
