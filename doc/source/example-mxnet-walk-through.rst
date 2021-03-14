@@ -86,7 +86,7 @@ We now need to define the training (function :code:`train()`) which loops over t
             # Reset the train data iterator.
             train_data.reset()
             # Calculate number of samples
-            num_samples = 0
+            num_examples = 0
             # Loop over the train data iterator.
             for batch in train_data:
                 # Splits train data into multiple slices along batch_axis
@@ -109,7 +109,7 @@ We now need to define the training (function :code:`train()`) which loops over t
                         # Backpropogate the error for one iteration.
                         loss.backward()
                         outputs.append(z.softmax())
-                        num_samples += len(x)
+                        num_examples += len(x)
                 # Updates internal evaluation
                 metric.update(label, outputs)
                 # Make one step of parameter update. Trainer needs to know the
@@ -118,7 +118,7 @@ We now need to define the training (function :code:`train()`) which loops over t
             # Gets the evaluation result.
             trainings_metric = metrics.get_name_value()
             print("Accuracy & loss at epoch %d: %s" % (i, trainings_metric))
-        return trainings_metric, num_samples
+        return trainings_metric, num_examples
 
 The evalution of the model is defined in function :code:`test()`. The function loops over all test samples and measures the loss and accuracy of the model based on the test dataset. 
 
@@ -136,7 +136,7 @@ The evalution of the model is defined in function :code:`test()`. The function l
         # Reset the validation data iterator.
         val_data.reset()
         # Get number of samples for val_dat
-        num_samples = 0
+        num_examples = 0
         # Loop over the validation data iterator.
         for batch in val_data:
             # Splits validation data into multiple slices along batch_axis
@@ -150,10 +150,10 @@ The evalution of the model is defined in function :code:`test()`. The function l
             outputs = []
             for x in data:
                 outputs.append(net(x).softmax())
-                num_samples += len(x) 
+                num_examples += len(x) 
             # Updates internal evaluation
             metrics.update(label, outputs)
-        return metrics.get_name_value(), num_samples
+        return metrics.get_name_value(), num_examples
 
 Having defined defining the data loading, model architecture, training, and evaluation we can put everything together and train our model on MNIST. Note that the GPU/CPU device for the training and testing is defined within the :code:`ctx` (context).  
 
@@ -294,24 +294,24 @@ We included type annotations to give you a better understanding of the data type
         ) -> Tuple[List[np.ndarray], int]:
             # Set model parameters, train model, return updated model parameters
             self.set_parameters(parameters)
-            [accuracy, loss], num_data = mxnet_mnist.train(
+            [accuracy, loss], num_examples = mxnet_mnist.train(
             self.model, self.train_data, epoch=2, device=self.device
             )
             results = {"accuracy": accuracy[1], "loss": loss[1]}
-            return self.get_parameters(), num_data, results
+            return self.get_parameters(), num_examples, results
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict[str, str]
         ) -> Tuple[int, float, float]:
             # Set model parameters, evaluate model on local test dataset, return result
             self.set_parameters(parameters)
-            [accuracy, loss], num_data = mxnet_mnist.test(
+            [accuracy, loss], num_examples = mxnet_mnist.test(
             self.model, self.val_data, device=self.device
             )
             print("Evaluation accuracy & loss", accuracy, loss)
             return (
                 float(loss[1]),
-                num_data,
+                num_examples,
                 {"accuracy": float(accuracy[1])},
             )
 
