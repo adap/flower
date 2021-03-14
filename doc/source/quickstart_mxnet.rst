@@ -143,7 +143,7 @@ Our Flower clients will use a simple :code:`Sequential` model:
         init = nd.random.uniform(shape=(2, 784))
         model(init)
 
-After loading the dataset with :code:`load_data()` we perform one forward propagation to initialize the model and model parameter. Afterwards, we implement a Flower client. 
+After loading the dataset with :code:`load_data()` we perform one forward propagation to initialize the model and model parameters. Next, we implement a Flower client. 
 
 The Flower server interacts with clients through an interface called
 :code:`Client`. When the server selects a particular client for training, it
