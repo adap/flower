@@ -21,7 +21,7 @@ MNIST Training with MXNet
 We begin with a brief description of the centralized training code based on a :code:`Sequential` model.
 If you want a more in-depth explanation of what's going on then have a look at the official `MXNet tutorial <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/>`_.
 
-Let's create an new file called :code:`mxnet_mnist.py` with all the components required for a traditional (centralized) MNIST training. 
+Let's create a new file called:code:`mxnet_mnist.py` with all the components required for a traditional (centralized) MNIST training. 
 First, the MXNet package :code:`mxnet` needs to be imported.
 You can see that we do not yet import the :code:`flwr` package for federated learning. This will be done later. 
 
@@ -155,7 +155,7 @@ The evalution of the model is defined in function :code:`test()`. The function l
             metrics.update(label, outputs)
         return metrics.get_name_value(), num_examples
 
-Having defined defining the data loading, model architecture, training, and evaluation we can put everything together and train our model on MNIST. Note that the GPU/CPU device for the training and testing is defined within the :code:`ctx` (context).  
+Having defined the data loading, model architecture, training, and evaluation we can put everything together and train our model on MNIST. Note that the GPU/CPU device for the training and testing is defined within the :code:`ctx` (context).  
 
 .. code-block:: python
 
@@ -166,6 +166,7 @@ Having defined defining the data loading, model architecture, training, and eval
         train_data, val_data = load_data()
         # Define sequential model
         net = model()
+        # Start forward propagation to initialize model parameters (optional) 
         init = nd.random.uniform(shape=(2, 784))
         net(init)
         # Start model training based on training set
