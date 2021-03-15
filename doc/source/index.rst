@@ -23,6 +23,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    examples
    example_walkthrough_pytorch_mnist
    example-pytorch-from-centralized-to-federated
+   example-mxnet-walk-through
    recommended-env-setup
    changelog
 
