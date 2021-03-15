@@ -67,7 +67,7 @@ As already mentioned, we will use the MNIST dataset for this machine learning wo
         net.collect_params().initialize()
         return net
 
-We now need to define the training (function :code:`train()`) which loops over the training set and measures the the loss for each batch of training examples.
+We now need to define the training (function :code:`train()`) which loops over the training set and measures the loss for each batch of training examples.
 
 .. code-block:: python
 
