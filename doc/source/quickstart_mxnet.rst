@@ -231,7 +231,7 @@ Train the model, federated!
 ---------------------------
 
 With both client and server ready, we can now run everything and see federated
-learning in action. FL systems usually have a server and multiple clients. We
+learning in action. Federated learning systems usually have a server and multiple clients. We
 therefore have to start the server first:
 
 .. code-block:: shell
