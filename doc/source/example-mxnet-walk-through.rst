@@ -120,7 +120,7 @@ We now need to define the training (function :code:`train()`) which loops over t
             print("Accuracy & loss at epoch %d: %s" % (i, trainings_metric))
         return trainings_metric, num_examples
 
-The evalution of the model is defined in function :code:`test()`. The function loops over all test samples and measures the loss and accuracy of the model based on the test dataset. 
+The evaluation of the model is defined in function :code:`test()`. The function loops over all test samples and measures the loss and accuracy of the model based on the test dataset. 
 
 .. code-block:: python
 
