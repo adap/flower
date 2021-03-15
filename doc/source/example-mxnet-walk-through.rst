@@ -193,7 +193,7 @@ Let's take the next step and use what we've built to create a simple federated l
 MXNet meets Flower
 ------------------
 
-So far it was not possible to train a MXNet workload federated since it was not supported yet. However, Flower is fully agnostic to machine learning frameworks and can take any model parameters and aggregate them. This section will show you how Flower can be used to federate MXNet workloads.
+So far, it was not easily possible to use MXNet workloads for federated learning because federated learning is not supported in MXNet. Since Flower is fully agnostic towards the underlying machine learning framework, it can be used to federated arbitrary machine learning workloads. This section will show you how Flower can be used to federate our centralized MXNet workload.
 
 The concept is however always the same. 
 We have to start a *server* and then use the code in :code:`mxnet_mnist.py` for the *clients* that are connected to the *server*.
