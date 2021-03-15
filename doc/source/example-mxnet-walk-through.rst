@@ -155,7 +155,7 @@ The evaluation of the model is defined in function :code:`test()`. The function 
             metrics.update(label, outputs)
         return metrics.get_name_value(), num_examples
 
-Having defined defining the data loading, model architecture, training, and evaluation we can put everything together and train our model on MNIST. Note that the GPU/CPU device for the training and testing is defined within the :code:`ctx` (context).  
+Having defined the data loading, model architecture, training, and evaluation we can put everything together and train our model on MNIST. Note that the GPU/CPU device for the training and testing is defined within the :code:`ctx` (context).  
 
 .. code-block:: python
 
