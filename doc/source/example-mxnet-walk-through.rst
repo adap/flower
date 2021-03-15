@@ -197,7 +197,7 @@ So far, it was not easily possible to use MXNet workloads for federated learning
 
 The concept to federate an existing workload is always the same and easy to understand.
 We have to start a *server* and then use the code in :code:`mxnet_mnist.py` for the *clients* that are connected to the *server*.
-The *server* sends model parameters to the clients. The *clients* run the training and update the paramters.
+The *server* sends model parameters to the clients. The *clients* run the training and update the parameters.
 The updated parameters are sent back to the *server* which averages all received parameter updates.
 This describes one round of the federated learning process and we repeat this for multiple rounds.
 The challenging part is to transform the MXNet parameters from :code:`NDArray` to :code:`NumPy Arrays` to make it readable for Flower. 
