@@ -20,7 +20,7 @@ design of Flower is based on a few guiding principles:
 * **Framework-agnostic**: Different machine learning frameworks have different
   strengths. Flower can be used with any machine learning framework, for
   example, [PyTorch](https://pytorch.org),
-  [TensorFlow](https://tensorflow.org), or even raw [NumPy](https://numpy.org/)
+  [TensorFlow](https://tensorflow.org), [MXNet](https://mxnet.apache.org/), or even raw [NumPy](https://numpy.org/)
   for users who enjoy computing gradients by hand.
 
 * **Understandable**: Flower is written with maintainability in mind. The
@@ -33,6 +33,7 @@ design of Flower is based on a few guiding principles:
 * [Installation](https://flower.dev/docs/installation.html)
 * [Quickstart (TensorFlow)](https://flower.dev/docs/quickstart_tensorflow.html)
 * [Quickstart (PyTorch)](https://flower.dev/docs/quickstart_pytorch.html)
+* [Quickstart (MXNet)](https://flower.dev/docs/example-mxnet-walk-through.html)
 
 ## Flower Usage Examples
 
@@ -46,11 +47,13 @@ Quickstart examples:
 
 * [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/examples/quickstart_tensorflow)
 * [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/examples/quickstart_pytorch)
+* [Quickstart (MXNet)](https://github.com/adap/flower/tree/main/examples/quickstart_mxnet)
 
 Other [examples](https://github.com/adap/flower/tree/main/examples):
 
 * [Raspberry Pi & Nvidia Jetson Tutorial](https://github.com/adap/flower/tree/main/examples/embedded_devices)
 * [PyTorch: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/pytorch_from_centralized_to_federated)
+* [MXNet: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/mxnet_from_centralized_to_federated)
 * [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced_tensorflow)
 * [Single-Machine Simulation of Federated Learning Systems](https://github.com/adap/flower/tree/main/examples/simulation)
 
