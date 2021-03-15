@@ -186,7 +186,7 @@ You can now run your (centralized) MXNet machine learning workload:
 
     python3 mxnet_mnist.py
 
-So far this should all look fairly familiar if you've used MXNet or even PyTorch before.
+So far this should all look fairly familiar if you've used MXNet (or even PyTorch) before.
 Let's take the next step and use what we've built to create a simple federated learning system consisting of one server and two clients.
 
 MXNet meets Flower
