@@ -200,8 +200,6 @@ We have to start a *server* and then use the code in :code:`mxnet_mnist.py` for 
 The *server* sends model parameters to the clients. The *clients* run the training and update the paramters.
 The updated parameters are sent back to the *server* which averages all received parameter updates.
 This describes one round of the federated learning process and we repeat this for multiple rounds.
-The challenging part is to transform the MXNet parameters from :code:`NDArray` to :code:`NumPy Arrays` to make it readable for Flower. 
- 
 
 Our example consists of one *server* and two *clients*. Let's set up :code:`server.py` first. The *server* needs to import the Flower package :code:`flwr`.
 Next, we use the :code:`start_server` function to start a server and tell it to perform three rounds of federated learning.
@@ -253,6 +251,8 @@ Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll ca
     * update the parameters of the local model with the parameters received from the server
     * evaluate the updated model on the local test set
     * return the local loss and accuracy to the server
+
+The challenging part is to transform the MXNet parameters from :code:`NDArray` to :code:`NumPy Arrays` to make it readable for Flower. 
 
 The two :code:`NumPyClient` methods :code:`fit` and :code:`evaluate` make use of the functions :code:`train()` and :code:`test()` previously defined in :code:`mxnet_mnist.py`.
 So what we really do here is we tell Flower through our :code:`NumPyClient` subclass which of our already defined functions to call for training and evaluation.
@@ -321,7 +321,7 @@ Having defined data loading, model architecture, training, and evaluation we can
 .. code-block:: python
 
     def main() -> None:
-        """Load data, start CifarClient."""
+        """Load data, start MNISTClient."""
 
         # Setup context to GPU and if not available to CPU
         DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
