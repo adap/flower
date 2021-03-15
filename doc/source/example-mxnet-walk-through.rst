@@ -180,7 +180,7 @@ Having defined the data loading, model architecture, training, and evaluation we
     if __name__ == "__main__":
             main()
 
-You can now run your MXNet machine learning workload:
+You can now run your (centralized) MXNet machine learning workload:
 
 .. code-block:: python
 
