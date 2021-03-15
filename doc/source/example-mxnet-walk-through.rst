@@ -67,7 +67,7 @@ As already mentioned, we will use the MNIST dataset for this machine learning wo
         net.collect_params().initialize()
         return net
 
-We now need to define the training (function :code:`train()`) which loops over the training set and measures the the loss for each batch of training examples.
+We now need to define the training (function :code:`train()`) which loops over the training set and measures the loss for each batch of training examples.
 
 .. code-block:: python
 
@@ -120,7 +120,7 @@ We now need to define the training (function :code:`train()`) which loops over t
             print("Accuracy & loss at epoch %d: %s" % (i, trainings_metric))
         return trainings_metric, num_examples
 
-The evalution of the model is defined in function :code:`test()`. The function loops over all test samples and measures the loss and accuracy of the model based on the test dataset. 
+The evaluation of the model is defined in function :code:`test()`. The function loops over all test samples and measures the loss and accuracy of the model based on the test dataset. 
 
 .. code-block:: python
 
@@ -181,13 +181,13 @@ Having defined the data loading, model architecture, training, and evaluation we
     if __name__ == "__main__":
             main()
 
-You can now run your MXNet machine learning workload:
+You can now run your (centralized) MXNet machine learning workload:
 
 .. code-block:: python
 
     python3 mxnet_mnist.py
 
-So far this should all look fairly familiar if you've used MXNet or even PyTorch before.
+So far this should all look fairly familiar if you've used MXNet (or even PyTorch) before.
 Let's take the next step and use what we've built to create a simple federated learning system consisting of one server and two clients.
 
 MXNet meets Flower
