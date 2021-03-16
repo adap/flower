@@ -263,12 +263,9 @@ def fit_clients(
         if failure is not None:
             failures.append(failure)
         else:
-            # Potential success case
+            # Success case
             result = future.result()
-            if len(result[1].parameters.tensors) > 0:
-                results.append(result)
-            else:
-                failures.append(Exception("Empty client update"))
+            results.append(result)
     return results, failures
 
 
@@ -296,7 +293,8 @@ def evaluate_clients(
             failures.append(failure)
         else:
             # Success case
-            results.append(future.result())
+            result = future.result()
+            results.append(result)
     return results, failures
 
 
