@@ -1,16 +1,11 @@
 import os
-import time
-from multiprocessing import Process
 from typing import Tuple
 
 import flwr as fl
 import numpy as np
 import tensorflow as tf
 
-from flwr.server.server import Server
-from flwr.server.strategy import FedAvg
-from flwr.server.client_manager import SimpleClientManager
-from flwr.server.network_manager import SimpleInMemoryNetworkManager
+from flwr.server import SimpleInMemoryNetworkManager
 
 
 import dataset
@@ -38,6 +33,10 @@ class CifarClient(fl.client.NumPyClient):
         examples."""
         model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
         model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+
+        for index, layer in enumerate(parameters):
+            parameters[index] = layer.astype(np.float32)
+
         model.set_weights(parameters)
 
         (x_train, y_train), _ = self.dataset
@@ -45,6 +44,9 @@ class CifarClient(fl.client.NumPyClient):
         model.fit(x_train, y_train, epochs=1, batch_size=32)
 
         weights = model.get_weights()
+
+        for index, layer in enumerate(weights):
+            weights[index] = layer.astype(np.float16)
 
         return weights, len(x_train)
 
@@ -69,7 +71,7 @@ def run_simulation(num_rounds: int, num_clients: int):
     clients = [CifarClient(dataset=partition) for partition in partitions]
 
     # Use custom in memory network manager instead of default gRPC one
-    network_manager = SimpleInMemoryNetworkManager(clients=clients)
+    network_manager = SimpleInMemoryNetworkManager(clients=clients, parallel=1)
 
     fl.server.start_server(
         network_managers=[network_manager],
