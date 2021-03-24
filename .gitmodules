@@ -1,3 +1,0 @@
-[submodule "baselines/datasets/leaf"]
-	path = baselines/datasets/leaf
-	url = https://github.com/TalwalkarLab/leaf
