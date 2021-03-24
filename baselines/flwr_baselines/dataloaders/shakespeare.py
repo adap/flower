@@ -1,7 +1,8 @@
 import json
-import numpy as np
 
+import numpy as np
 from torch.utils.data import Dataset
+
 
 class ShakespeareDataset(Dataset):
     def __init__(self, data_root):

@@ -1,27 +1,37 @@
-
+import argparse
 import json
 import pickle
-import argparse
-from pathlib import Path
-from typing import List, Tuple
 from os import PathLike
+from pathlib import Path
+from typing import List, Optional, Tuple
+
+
 def check_between_zero_and_one(value:str):
     fvalue = float(value)
     if fvalue < 0 or fvalue > 1:
-        raise  argparse.ArgumentTypeError(f'''Invalid partition fraction {fvalue}. This must be between 0 and 1.''')
+        raise  argparse.ArgumentTypeError(
+            f'''Invalid partition fraction {fvalue}. This must be between 0 and 1.''')
     return fvalue
 
-def split_json_and_save(list_datasets: List[Tuple[str, float]], path_to_json: PathLike, save_root: PathLike):
+def split_json_and_save(list_datasets: List[Tuple[str, float]], path_to_json: PathLike,
+                        save_root: PathLike, users_list: Optional[List[str]]=[]):
     """Splits LEAF generated datasets and creates individual client partitions.
 
     Args:
-        list_datasets (List[Tuple[str, float]]): list containting dataset tags and fraction of dataset split.
+        list_datasets (List[Tuple[str, float]]): list containting dataset tags
+            and fraction of dataset split.
         path_to_json (PathLike): Path to LEAF JSON file containing dataset. 
-        save_root (PathLike): Root directory where to save the individual client partition files.
+        save_root (PathLike): Root directory where to save the individual client
+            partition files.
     """
+    new_users = []
     with open(path_to_json) as f:
         js = json.load(f)
-        for user_idx, u in enumerate(js['users']):
+        if not users_list:
+            users_list =  js['users']
+            print('Using previous list of users.')
+        for user_idx, u in enumerate(users_list):
+            new_users.append(u)
             x = js['user_data'][u]['x']
             y = js['user_data'][u]['y']
             num_samples =  len(x)
@@ -42,6 +52,8 @@ def split_json_and_save(list_datasets: List[Tuple[str, float]], path_to_json: Pa
 
                 with open(save_dir / f'{dataset}.pickle', 'wb') as f:
                     pickle.dump(data, f)
+
+    return new_users 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=
@@ -65,14 +77,15 @@ if __name__ == '__main__':
     original_train_dataset = args.leaf_train_json
     train_frac = 1.0 - args.val_frac
     list_datasets = [('train', train_frac),('val', args.val_frac)] 
-    split_json_and_save(list_datasets = list_datasets,
-                        path_to_json = original_train_dataset,
-                        save_root = save_root)
+    users_list = split_json_and_save(list_datasets = list_datasets,
+                                     path_to_json = original_train_dataset,
+                                     save_root = save_root)
 
     # Split and save the test files
     original_test_dataset = args.leaf_test_json
     list_datasets = [('test', 1.0)] 
     split_json_and_save(list_datasets = list_datasets,
                         path_to_json = original_test_dataset,
-                        save_root = save_root)
+                        save_root = save_root,
+                        users_list = users_list)
 
