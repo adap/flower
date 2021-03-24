@@ -37,16 +37,6 @@ classifiers = [
     "Typing :: Typed",
 ]
 
-packages = [
-    { include = "baselines", from = "flwr_baselines" },
-    { include = "models", from = "models" },
-    { include = "datasets", from = "datasets" },
-    { include = "dataloaders", from = "dataloaders" },
-]
-exclude = [
-    "**/*_test.py",
-]
-
 [tool.poetry.dependencies]
 python = "^3.8.3"
 # Mandatory dependencies
