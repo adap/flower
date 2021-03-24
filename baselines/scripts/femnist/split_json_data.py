@@ -45,12 +45,12 @@ def split_json_and_save(list_datasets: List[Tuple[str, float]], path_to_json: Pa
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=
-    '''Splits a LEAF Shakespeare train dataset into train/validation for each client
+    '''Splits a LEAF FEMNIST train dataset into train/validation for each client
         and saves the clients' train/val/test dataset in their respective folder.''')
     parser.add_argument('--save_root', type=str, required=True,
                     help='Root folder where partitions will be save as {save_root}/client_id/{train,val,test}.pickle')
     parser.add_argument('--leaf_train_json', type=str, required=True,
-                    help='Complete path to JSON file containing the generated trainset for LEAF Shakespeare.')
+                    help='Root directory to JSON file containing the generated trainset for LEAF Shakespeare.')
     parser.add_argument('--val_frac', type=check_between_zero_and_one, required=True, default=0.2,
                     help='Fraction of original trainset that will be used for validation.')
     parser.add_argument('--leaf_test_json', type=str, required=True,

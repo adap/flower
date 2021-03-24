@@ -13,7 +13,7 @@ echo 'Creating new LEAF dataset split.'
 cd ${FLOWER_ROOT}/baselines/scripts/shakespeare
 python split_json_data.py \
 --save_root ${HOME}/datasets/partitions/shakespeare \
---leaf_train_json ${LEAF_ROOT}/data/shakespeare/data/train/all_data_niid_0_keep_2_train_9.json \
+--leaf_train_json ${LEAF_ROOT}/data/femnist/data/train/all_data_niid_0_keep_2_train_9.json \
 --val_frac 0.25 \
---leaf_test_json ${LEAF_ROOT}/data/shakespeare/data/test/all_data_niid_0_keep_2_test_9.json
+--leaf_test_json ${LEAF_ROOT}/data/femnist/data/test/all_data_niid_0_keep_2_test_9.json
 echo 'Done'
