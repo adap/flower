@@ -10,7 +10,7 @@ echo 'Creating new LEAF dataset split.'
 ./preprocess.sh -s niid --sf 1.0 -k 2 -t sample -tf 0.8
 
 # Format for Flower experiments. Val/train fraction set to 0.25 so validation/total=0.20
-cd ${FLOWER_ROOT}/baselines/scripts/shakespeare
+cd ${FLOWER_ROOT}/baselines/flwr_baselines/scripts/shakespeare
 python split_json_data.py \
 --save_root ${HOME}/datasets/partitions/shakespeare \
 --leaf_train_json ${LEAF_ROOT}/data/shakespeare/data/train/all_data_niid_0_keep_2_train_9.json \
