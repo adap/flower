@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
+
 from flwr.eaaselines.datasets.leaf.models.utils.language_utils import ALL_LETTERS
+
 
 class ShakespeareLeafNet(nn.Module):
     def __init__(self, chars:str=ALL_CHARACTERS, seq_len:int = 80,
