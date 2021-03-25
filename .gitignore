@@ -148,3 +148,6 @@ poetry.lock
 
 # Examples
 examples/**/dataset/**
+
+# Ignore save numpy array (npy) files
+*.npy

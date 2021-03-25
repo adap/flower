@@ -1,0 +1,19 @@
+[build-system]
+requires = [
+    "poetry==1.1.4",
+]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "multi_machine_simulation"
+version = "0.1.0"
+description = "Multi-Machine Federated Learning Simulation with Flower"
+authors = ["The Flower Authors <enquiries@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.2"
+flwr = "^0.15.0"
+tensorflow-cpu = { version = "2.4.1", optional = true }
+
+[tool.poetry.extras]
+client = ["tensorflow-cpu"]
