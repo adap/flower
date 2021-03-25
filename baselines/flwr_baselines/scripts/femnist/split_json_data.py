@@ -1,6 +1,7 @@
 import argparse
 import json
 import pickle
+import numpy as np
 from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -76,7 +77,7 @@ def split_json_and_save(list_datasets: List[Tuple[str, float]], paths_to_json: L
                     data['tag'] = u
                     if split_id == len(list_datasets)-1: # Make sure we use last indices
                         end_idx = num_samples
-                    data['x'] = x[start_idx:end_idx]
+                    data['x'] = [np.asarray(img, dtype=np.float32).reshape((28,28)) for img in x[start_idx:end_idx]]
                     data['y'] = y[start_idx:end_idx]
                     start_idx = end_idx
 
@@ -87,7 +88,6 @@ def split_json_and_save(list_datasets: List[Tuple[str, float]], paths_to_json: L
                         pickle.dump(data, f)
 
         user_count += num_users
-        print(user_count)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=
