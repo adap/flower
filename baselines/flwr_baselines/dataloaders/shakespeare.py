@@ -1,29 +1,37 @@
 import json
+import pickle
+from os import PathLike
 
 import numpy as np
 from torch.utils.data import Dataset
 
+LEAF_CHARACTERS = (
+    "\n !\"&'(),-.0123456789:;>?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]abcdefghijklmnopqrstuvwxyz}"
+)
+
 
 class ShakespeareDataset(Dataset):
-    def __init__(self, data_root):
-        self.CHARACTERS = '''1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz -,\'!;"[]?().:'''
-        self.NUM_LETTERS = len(self.ALL_LETTERS) # 76
+    def __init__(self, path_to_pickle: PathLike):
 
-        with open(data_root) as file:
-            js=json.load(file)
-            self.x, self.y = [], []
-            for u in js['users']:
-                self.x+=js['user_data'][u]['x']
-                self.y+=js['user_data'][u]['y']
+        self.CHARACTERS = LEAF_CHARACTERS
+        self.NUM_LETTERS = len(self.CHARACTERS)  # 80
+        self.x, self.y = [], []
+
+        with open(path_to_pickle) as f:
+            data = pickle.load(f)
+            self.x = data["x"]
+            self.y = data["y"]
+            self.idx = data["idx"]
+            self.char = data["character"]
 
     def word_to_indices(self, word):
-        indices = [ self.CHARACTERS.find(c) for c in word ]
+        indices = [self.CHARACTERS.find(c) for c in word]
         return indices
-	
+
     def __len__(self):
-	    return len(self.y)
-	
+        return len(self.y)
+
     def __getitem__(self, idx):
-    	x = np.array(self.word_to_indices(self.x[idx]))
+        x = np.array(self.word_to_indices(self.x[idx]))
         y = np.array(self.CHARACTERS.find(self.y[idx]))
-        return x, y 
+        return x, y
