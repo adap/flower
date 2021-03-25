@@ -3,8 +3,8 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 # Clone external datasets.
-git clone https://github.com/TalwalkarLab/leaf.git flwr_baselines/datasets/leaf 2> /dev/null
-rm -rf flwr_baselines/datasets/leaf/.git
+git clone https://github.com/TalwalkarLab/leaf.git datasets/leaf 2> /dev/null
+rm -rf datasets/leaf/.git
 
 # Destroy and recreate the venv
 ./dev/venv-delete.sh
