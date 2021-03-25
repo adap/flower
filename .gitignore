@@ -150,4 +150,4 @@ poetry.lock
 examples/**/dataset/**
 
 # Datasets
-baselines/flwr_baselines/datasets/leaf
+baselines/datasets/leaf
