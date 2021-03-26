@@ -66,3 +66,9 @@ def aggregate_qffl(
         updates.append(tmp)
     new_weights = [(u - v) * 1.0 for u, v in zip(weights, updates)]
     return new_weights
+
+def aggregate_fedbn(
+    weights: Weights, deltas: List[Weights], hs_fll: List[Weights]
+) -> Weights:
+
+    return None

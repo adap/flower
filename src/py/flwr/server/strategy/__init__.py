@@ -23,6 +23,7 @@ from .fedavg import FedAvg as FedAvg
 from .fedfs_v0 import FedFSv0 as FedFSv0
 from .fedfs_v1 import FedFSv1 as FedFSv1
 from .qffedavg import QffedAvg as QffedAvg
+from .fedbn import FedBN as FedBN
 from .strategy import Strategy as Strategy
 
 __all__ = [
@@ -34,5 +35,6 @@ __all__ = [
     "FedFSv0",
     "FedFSv1",
     "QffedAvg",
+    "FedBN",
     "Strategy",
 ]
