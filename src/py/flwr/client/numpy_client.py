@@ -35,7 +35,6 @@ from flwr.common import (
 
 from .client import Client
 
-
 DEPRECATION_WARNING_FIT = """DEPRECATION WARNING: deprecated return format
 
     parameters, num_examples
