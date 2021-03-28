@@ -19,6 +19,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    quickstart_tensorflow
    quickstart_pytorch
    quickstart_mxnet
+   evaluation
    strategies
    implementing-strategies
    examples
