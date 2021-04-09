@@ -67,6 +67,7 @@ About
    people
    organizations
    publications
+   blog-post
 
 
 .. Indices and tables
