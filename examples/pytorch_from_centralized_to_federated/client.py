@@ -71,7 +71,6 @@ def main() -> None:
     # Start client
     client = CifarClient(model, trainloader, testloader)
     fl.client.start_numpy_client("localhost:8080", client)
-    
 
 
 if __name__ == "__main__":
