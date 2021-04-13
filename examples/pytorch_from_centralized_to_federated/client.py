@@ -71,7 +71,7 @@ def main() -> None:
     # Start client
     client = CifarClient(model, trainloader, testloader)
     # fl.client.start_numpy_client("[::]:9080", client)
-    fl.client.start_numpy_client("localhost:9080", client)
+    fl.client.start_numpy_client("localhost:8080", client)
     
 
 
