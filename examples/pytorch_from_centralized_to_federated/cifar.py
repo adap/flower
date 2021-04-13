@@ -122,7 +122,7 @@ def test(
 
 
 def main():
-    # DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     DEVICE = "cpu"
     print("Centralized PyTorch training")
     print("Load data")
