@@ -8,6 +8,6 @@ to list all useful articles which used Flower in some form.
 Posts
 -----
 
-- Flower Blog: `Learn to adapt Flower to your Use Case <https://flower.dev/blog>`_
+- Official Flower Blog: `Learn to adapt Flower for your use-case <https://flower.dev/blog>`_
 - Analytics Vidhya: `Federated Learning for Beginners <https://www.analyticsvidhya.com/blog/2021/04/federated-learning-for-beginners/>`_
 - Analytics India Mag: `Guide To Flower – A Framework To Build Federated Learning Systems <https://analyticsindiamag.com/guide-to-flower-a-framework-to-build-federated-learning-systems/>`_
