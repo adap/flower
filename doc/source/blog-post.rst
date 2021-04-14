@@ -6,7 +6,7 @@ If you happen to know about new articles which are not yet listed feel free to w
 to list all useful articles which used Flower in some form.
 
 Posts
-----------------
+-----
 
 - Flower Blog: `Learn to adapt Flower to your Use Case <https://flower.dev/blog>`_
 - Analytics Vidhya: `Federated Learning for Beginners <https://www.analyticsvidhya.com/blog/2021/04/federated-learning-for-beginners/>`_
