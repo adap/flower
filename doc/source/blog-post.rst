@@ -5,7 +5,7 @@ There are various articles writing about the usage of Flower and/or federated le
 If you happen to know about new articles which are not yet listed feel free to write us. We are happy
 to list all useful articles which used Flower in some form.
 
-Articles
+Posts
 ----------------
 
 - Flower Blog: `Learn to adapt Flower to your Use Case <https://flower.dev/blog>`_
