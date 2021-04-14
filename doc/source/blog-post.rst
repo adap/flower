@@ -1,4 +1,4 @@
-Blog Articles
+Blog Posts
 ================
 
 There are various articles writing about the usage of Flower and/or federated learning. Different useful articles will be listed here.
