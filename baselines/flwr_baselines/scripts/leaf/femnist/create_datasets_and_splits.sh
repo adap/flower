@@ -16,10 +16,7 @@
 # Delete previous partitions if needed then extract the entire dataset
 echo 'Deleting previous dataset split.'
 cd ${LEAF_ROOT}/data/femnist
-if [ -d ${LEAF_ROOT}/data/rem_user_data ]; then rm -rf ${LEAF_ROOT}/data/rem_user_data ; fi && \
-if [ -d ${LEAF_ROOT}/data/sampled_data ]; then rm -rf ${LEAF_ROOT}/data/sampled_data ; fi && \
-if [ -d ${LEAF_ROOT}/data/test ]; then rm -rf ${LEAF_ROOT}/data/test ; fi && \
-if [ -d ${LEAF_ROOT}/data/train ]; then rm -rf ${LEAF_ROOT}/data/train ; fi && \
+if [ -d ${LEAF_ROOT}/data/femnist/data ]; then rm -rf ${LEAF_ROOT}/data/femnist/data ; fi 
 echo 'Creating new LEAF dataset split.'
 ./preprocess.sh -s niid --sf 1.0 -k 5 -t sample --tf 0.8 
 
