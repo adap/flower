@@ -78,6 +78,7 @@ def train(
     print(f"Training {epochs} epoch(s) w/ {len(trainloader)} batches each")
 
     # Train the network
+    net.to(device)
     net.train()
     for epoch in range(epochs):  # loop over the dataset multiple times
         running_loss = 0.0
@@ -106,10 +107,14 @@ def test(
     device: torch.device,  # pylint: disable=no-member
 ) -> Tuple[float, float]:
     """Validate the network on the entire test set."""
+    # Define loss and metrics
     criterion = nn.CrossEntropyLoss()
     correct = 0
     total = 0
     loss = 0.0
+
+    # Evaluate the network
+    net.to(device)
     net.eval()
     with torch.no_grad():
         for data in testloader:

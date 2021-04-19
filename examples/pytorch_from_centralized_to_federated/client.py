@@ -35,6 +35,7 @@ class CifarClient(fl.client.NumPyClient):
         self.testloader = testloader
 
     def get_parameters(self) -> List[np.ndarray]:
+        self.model.train()
         if USE_FEDBN:
             # Return model parameters as a list of NumPy ndarrays, excluding parameters of BN layers when using FedBN
             return [val.cpu().numpy() for name, val in self.model.state_dict().items() if 'bn' not in name]
@@ -44,6 +45,7 @@ class CifarClient(fl.client.NumPyClient):
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         # Set model parameters from a list of NumPy ndarrays
+        self.model.train()
         if USE_FEDBN:
             keys = [k for k in self.model.state_dict().keys() if 'bn' not in k]
             params_dict = zip(keys, parameters)
@@ -74,10 +76,14 @@ class CifarClient(fl.client.NumPyClient):
 def main() -> None:
     """Load data, start CifarClient."""
 
-    # Load model and data
-    model = cifar.Net().to(DEVICE)
-    model.eval()
+    # Load data
     trainloader, testloader = cifar.load_data()
+
+    # Load model
+    model = cifar.Net().to(DEVICE).train()
+    
+    # Perform a single forward pass to properly initialize BatchNorm
+    _ = model(next(iter(trainloader))[0].to(DEVICE))
 
     # Start client
     client = CifarClient(model, trainloader, testloader)
