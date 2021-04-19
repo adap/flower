@@ -78,6 +78,7 @@ def train(
     print(f"Training {epochs} epoch(s) w/ {len(trainloader)} batches each")
 
     # Train the network
+    net.train()
     for epoch in range(epochs):  # loop over the dataset multiple times
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
@@ -109,6 +110,7 @@ def test(
     correct = 0
     total = 0
     loss = 0.0
+    net.eval()
     with torch.no_grad():
         for data in testloader:
             images, labels = data[0].to(device), data[1].to(device)
@@ -126,7 +128,8 @@ def main():
     print("Centralized PyTorch training")
     print("Load data")
     trainloader, testloader = load_data()
-    net = Net()
+    net = Net().to(DEVICE)
+    net.eval()
     print("Start training")
     train(net=net, trainloader=trainloader, epochs=2, device=DEVICE)
     print("Evaluate model")
