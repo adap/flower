@@ -20,3 +20,11 @@ Poetry will install all your dependencies in a newly created virtual environment
 ```shell
 python3 -c "import flwr_baselines"
 ```
+
+### TLDR
+
+There is also a short way which might not be suitable for everyone.
+
+```shell
+./dev/bootstrap.sh
+```

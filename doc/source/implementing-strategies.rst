@@ -3,7 +3,7 @@ Implementing Strategies
 
 The strategy abstraction enables implementation of fully custom strategies. A
 strategy is basically the federated learning algorithm that runs on the server.
-Strategies decide how to sample clients, how to configure clients for traning,
+Strategies decide how to sample clients, how to configure clients for training,
 how to aggregate updates, and how to evaluate models. Flower provides a few
 built-in strategies which are based on the same API described below.
 
