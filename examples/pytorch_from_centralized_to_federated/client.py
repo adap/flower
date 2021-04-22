@@ -33,14 +33,15 @@ class CifarClient(fl.client.NumPyClient):
         self.testloader = testloader
 
     def get_parameters(self) -> List[np.ndarray]:
-        # Return model parameters as a list of NumPy ndarrays
-        return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
+        # Return model parameters as a list of NumPy ndarrays, excluding parameters of BN layers when using FedBN
+        return [val.cpu().numpy() for name, val in self.model.state_dict().items() if 'bn' not in name]
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         # Set model parameters from a list of NumPy ndarrays
-        params_dict = zip(self.model.state_dict().keys(), parameters)
+        keys = [k for k in self.model.state_dict().keys() if 'bn' not in k]
+        params_dict = zip(keys, parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-        self.model.load_state_dict(state_dict, strict=True)
+        self.model.load_state_dict(state_dict, strict=False)
 
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str]
@@ -56,6 +57,7 @@ class CifarClient(fl.client.NumPyClient):
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
         loss, accuracy = cifar.test(self.model, self.testloader, device=DEVICE)
+     
         return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
 
 
