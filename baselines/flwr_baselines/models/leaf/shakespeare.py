@@ -15,7 +15,6 @@
 
 import torch
 import torch.nn as nn
-
 from flwr_baselines.dataloaders.leaf.shakespeare import LEAF_CHARACTERS
 
 
@@ -58,7 +57,7 @@ class ShakespeareLeafNet(nn.Module):
 
 
 def get_model() -> nn.Module:
-    """Returns the LEAF Shakespeare network
+    """Returns the LEAF Shakespeare network.
 
     Returns:
         nn.Module: Implementation of LEAF Shakespeare network
