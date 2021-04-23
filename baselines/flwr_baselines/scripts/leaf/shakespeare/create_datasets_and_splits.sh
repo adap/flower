@@ -16,6 +16,11 @@
 # Process Shakespeare for non-iid, 20% testset, minimum two lines
 # Delete previous partitions if needed then extract the entire dataset
 echo 'Deleting previous dataset split.'
+if [[ -z "${LEAF_ROOT}" ]]; then
+  echo 'The environment variable LEAF_ROOT is not set. Exiting...'
+  exit 1
+fi
+
 cd ${LEAF_ROOT}/data/shakespeare
 if [ -d ${LEAF_ROOT}/data/shakespeare/data ]; then rm -rf ${LEAF_ROOT}/data/shakespeare/data ; fi && \
 echo 'Creating new LEAF dataset split.'
@@ -29,4 +34,3 @@ python split_json_data.py \
 --val_frac 0.25 \
 --leaf_test_json ${LEAF_ROOT}/data/shakespeare/data/test/all_data_niid_0_keep_2_test_8.json
 echo 'Done'
-
