@@ -16,7 +16,7 @@
 import torch
 import torch.nn as nn
 
-from flwr.baselines.dataloaders.leaf.shakespeare import LEAF_CHARACTERS
+from flwr_baselines.dataloaders.leaf.shakespeare import LEAF_CHARACTERS
 
 
 class ShakespeareLeafNet(nn.Module):
@@ -27,10 +27,11 @@ class ShakespeareLeafNet(nn.Module):
         hidden_size: int = 256,
         embedding_dim=8,
     ):
-        """Create Shakespeare model for LEAF baselines
+        """Create Shakespeare model for LEAF baselines.
 
         Args:
-            chars (str, optional): String of possible characters (letters+digits). Defaults to LEAF_CHARACTERS.
+            chars (str, optional): String of possible characters (letters+digits).
+                Defaults to LEAF_CHARACTERS.
             seq_len (int, optional): Length of each sequence. Defaults to 80.
             hidden_size (int, optional): Size of hidden layer. Defaults to 256.
             embedding_dim (int, optional): Dimension of embedding. Defaults to 8.
@@ -42,16 +43,24 @@ class ShakespeareLeafNet(nn.Module):
 
         self.encoder = nn.Embedding(self.dict_size, embedding_dim)
         self.lstm = nn.LSTM(
-            input_size=embedding_dim, hidden_size=hidden_size, num_layers=2
+            input_size=embedding_dim,
+            hidden_size=hidden_size,
+            num_layers=2,
+            batch_first=True,  # Notice batch is first dim now
         )
-        self.decoder = nn.Linear(hidden_size * seq_len, self.dict_size)
+        self.decoder = nn.Linear(self.hidden_size, self.dict_size)
 
     def forward(self, x):
-        encoded_seq = self.encoder(x)
-        outputs, (h_n, c_n) = self.lstm(encoded_seq)  # (seq_len, batch,  hidden_size)
-        pred = self.decoder(outputs[-1, :, :].view(-1, self.hidden_size * seq_len))
+        encoded_seq = self.encoder(x)  # (batch, seq_len, embedding_dim)
+        outputs, (h_n, c_n) = self.lstm(encoded_seq)  # (batch, seq_len, hidden_size)
+        pred = self.decoder(h_n[-1])
         return pred
 
 
-def get_model():
+def get_model() -> nn.Module:
+    """Returns the LEAF Shakespeare network
+
+    Returns:
+        nn.Module: Implementation of LEAF Shakespeare network
+    """
     return ShakespeareLeafNet()

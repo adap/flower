@@ -29,3 +29,4 @@ python split_json_data.py \
 --val_frac 0.25 \
 --leaf_test_json ${LEAF_ROOT}/data/shakespeare/data/test/all_data_niid_0_keep_2_test_8.json
 echo 'Done'
+

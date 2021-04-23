@@ -38,7 +38,7 @@ class ShakespeareDataset(Dataset):
         self.NUM_LETTERS = len(self.CHARACTERS)  # 80
         self.x, self.y = [], []
 
-        with open(path_to_pickle) as f:
+        with open(path_to_pickle, "rb") as f:
             data = pickle.load(f)
             self.x = data["x"]
             self.y = data["y"]
