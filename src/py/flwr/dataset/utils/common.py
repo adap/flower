@@ -259,7 +259,7 @@ def exclude_classes_and_normalize(
 
     This function is particularly useful when sampling without replacement.
     Classes for which no sample is available have their probabilities are set to 0.
-    Classes that had probabailities originally set to 0 are incremented with
+    Classes that had probabilities originally set to 0 are incremented with
      `eps` to allow sampling from remaining items.
 
     Args:
@@ -343,7 +343,8 @@ def sample_without_replacement(
                 distribution=distribution, exclude_dims=empty_classes
             )
     data_array: np.ndarray = np.concatenate([data], axis=0)
-    target_array: np.ndarray = np.array(target, dtype=np.int64)[..., np.newaxis]
+    # target_array: np.ndarray = np.array(target, dtype=np.int64)[..., np.newaxis]
+    target_array: np.ndarray = np.array(target, dtype=np.int64)
     return (data_array, target_array), empty_classes
 
 
@@ -365,7 +366,7 @@ def create_lda_partitions(
         num_partitions (int, optional): Number of partitions to be created.
             Defaults to 100.
         concentration (float, optional): Dirichlet Concentration (:math:`\\alpha`)
-            parameter.
+            parameter. Set to float('inf') to get uniform partitions.
             An :math:`\\alpha \\to \\Inf` generates uniform distributions over classes.
             An :math:`\\alpha \\to 0.0` generates one class per client. Defaults to 0.5.
         accept_imbalanced (bool): Whether or not to accept imbalanced output classes.
@@ -386,6 +387,7 @@ def create_lda_partitions(
                If imbalanced classes are allowed, set
                `accept_imbalanced=True`."""
         )
+
     num_samples = num_partitions * [0]
     for j in range(x.shape[0]):
         num_samples[j % num_partitions] += 1
@@ -393,8 +395,27 @@ def create_lda_partitions(
     # Get number of classes and verify if they matching with
     classes, start_indices = np.unique(y, return_index=True)
 
-    # Check if concentration is working.
+    # Make sure that concentration is np.array and
+    # check if concentration is appropriate
     concentration = np.asarray(concentration)
+
+    # Check if concentration is Inf, if so create uniform partitions
+    partitions: List[XY] = [(_, _) for _ in range(num_partitions)]
+    if float("inf") in concentration:
+
+        # partitions = partition(x=x, y=y, num_partitions=num_partitions)
+        partitions = create_partitions(
+            unpartitioned_dataset=(x, y),
+            iid_fraction=1.0,
+            num_partitions=num_partitions,
+        )
+
+        dirichlet_dist = (1.0 / classes.size) * np.ones(
+            (num_partitions, classes.size), dtype=np.float32
+        )
+
+        return partitions, dirichlet_dist
+
     if concentration.size == 1:
         concentration = np.repeat(concentration, classes.size)
     elif concentration.size != classes.size:  # Sequence
@@ -420,8 +441,6 @@ def create_lda_partitions(
                  ({dirichlet_dist.shape}) must match the provided number
                   of partitions and classes ({num_partitions},{classes.size})"""
             )
-
-    partitions: List[XY] = [(_, _) for _ in range(num_partitions)]
 
     # Assuming balanced distribution
     empty_classes = classes.size * [False]
