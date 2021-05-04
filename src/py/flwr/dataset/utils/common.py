@@ -343,8 +343,8 @@ def sample_without_replacement(
                 distribution=distribution, exclude_dims=empty_classes
             )
     data_array: np.ndarray = np.concatenate([data], axis=0)
-    # target_array: np.ndarray = np.array(target, dtype=np.int64)[..., np.newaxis]
     target_array: np.ndarray = np.array(target, dtype=np.int64)
+        
     return (data_array, target_array), empty_classes
 
 
