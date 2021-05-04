@@ -1,16 +1,14 @@
 import os
 import time
 from multiprocessing import Process
-import threading
 from typing import Optional, Tuple
-import resource
 
 import flwr as fl
 import numpy as np
-import tensorflow as tf
 from flwr.server.strategy import FedAvg
 
 import dataset
+from model import FAKE_MOBILENET_V2
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -21,30 +19,22 @@ partitions: Optional[dataset.PartitionedDataset] = None
 
 # Define a Flower client
 class CifarClient(fl.client.NumPyClient):
-    def __init__(self, model, partition_id) -> None:
-        self.model = model
+    def __init__(self, partition_id) -> None:
         self.partition_id = partition_id
 
     def get_parameters(self):
         """Return current weights."""
-        return self.model.get_weights()
+        return FAKE_MOBILENET_V2
 
     def fit(self, parameters, config):
         """Fit model and return new weights as well as number of training
         examples."""
-        self.model.set_weights(parameters)
-        (x_train, y_train), _ = partitions[self.partition_id]
-        # Remove steps_per_epoch if you want to train over the full dataset
-        # https://keras.io/api/models/model_training_apis/#fit-method
-        self.model.fit(x_train, y_train, epochs=1, batch_size=32, steps_per_epoch=3)
-        return self.model.get_weights(), len(x_train), {}
+        return FAKE_MOBILENET_V2, 1, {}
 
     def evaluate(self, parameters, config):
         """Evaluate using provided parameters."""
-        self.model.set_weights(parameters)
-        _, (x_test, y_test) = partitions[self.partition_id]
-        loss, accuracy = self.model.evaluate(x_test, y_test)
-        return loss, len(x_test), {"accuracy": accuracy}
+        return 0.0, 1, {"accuracy": 1}
+
 
 def start_server(num_rounds: int, num_clients: int, fraction_fit: float):
     """Start the server with a slightly adjusted FedAvg strategy."""
@@ -55,11 +45,8 @@ def start_server(num_rounds: int, num_clients: int, fraction_fit: float):
 
 def start_client(partition_id: int) -> None:
     """Start a single client with the provided dataset."""
-    model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
-    model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
-
     # Start Flower client
-    fl.client.start_numpy_client("0.0.0.0:8080", client=CifarClient(model, partition_id))
+    fl.client.start_numpy_client("0.0.0.0:8080", client=CifarClient(partition_id))
 
 
 def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
@@ -88,7 +75,8 @@ def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
     for p in processes:
         p.join()
 
+
 if __name__ == "__main__":
-    num_clients = 10
+    num_clients = 5
     partitions = dataset.load(num_partitions=num_clients)
-    run_simulation(num_rounds=1000, num_clients=num_clients, fraction_fit=0.5)
+    run_simulation(num_rounds=1000, num_clients=num_clients, fraction_fit=1)
