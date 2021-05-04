@@ -348,6 +348,31 @@ def sample_without_replacement(
     return (data_array, target_array), empty_classes
 
 
+def get_partitions_distributions(partitions: XYList) -> Tuple[np.ndarray, List[int]]:
+    """Evaluates the distribution over classes for a set of partitions.
+
+    Args:
+        partitions (XYList): Input partitions
+
+    Returns:
+        np.ndarray: Distributions of size (num_partitions, num_classes)
+    """
+    # Get largest available label
+    labels = set()
+    for _, y in partitions:
+        labels.update(set(y))
+    list_labels = sorted(list(labels))
+    bin_edges = np.arange(len(list_labels) + 1)
+
+    # Pre-allocate distributions
+    distributions = np.zeros((len(partitions), len(list_labels)), dtype=np.float32)
+    for idx, (_, _y) in enumerate(partitions):
+        hist, _ = np.histogram(_y, bin_edges)
+        distributions[idx] = hist / hist.sum()
+
+    return distributions, list_labels
+
+
 def create_lda_partitions(
     dataset: XY,
     dirichlet_dist: np.ndarray = None,
@@ -403,18 +428,14 @@ def create_lda_partitions(
     partitions: List[XY] = [(_, _) for _ in range(num_partitions)]
     if float("inf") in concentration:
 
-        # partitions = partition(x=x, y=y, num_partitions=num_partitions)
         partitions = create_partitions(
             unpartitioned_dataset=(x, y),
             iid_fraction=1.0,
             num_partitions=num_partitions,
         )
+        dirichlet_dist = get_partitions_distributions(partitions)
 
-        dirichlet_dist = (1.0 / classes.size) * np.ones(
-            (num_partitions, classes.size), dtype=np.float32
-        )
-
-        return partitions, dirichlet_dist
+        return partitions, dirichlet_dist[0]
 
     if concentration.size == 1:
         concentration = np.repeat(concentration, classes.size)

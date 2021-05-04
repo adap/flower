@@ -25,6 +25,7 @@ from flwr.dataset.utils.common import (
     combine_partitions,
     create_lda_partitions,
     exclude_classes_and_normalize,
+    get_partitions_distributions,
     partition,
     sample_without_replacement,
     shuffle,
@@ -477,6 +478,31 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
             this_distribution = distributions[part]
             np.testing.assert_array_almost_equal(this_distribution, uniform, decimal=3)
 
+    def test_get_partitions_distributions(self) -> None:
+        """Tests if function can generate data pdf for each partition."""
+        # Prepare
+        partitions = [
+            (np.zeros((2, 5, 5), dtype=np.float32), np.arange(2)),
+            (np.zeros((5, 5, 5), dtype=np.float32), np.arange(5)),
+            (np.zeros((3, 5, 5), dtype=np.float32), np.arange(3)),
+        ]
+
+        # Execute
+        distributions, labels = get_partitions_distributions(partitions)
+
+        # Assert
+        np.testing.assert_array_equal(
+            distributions[0], np.array([0.5, 0.5, 0.0, 0.0, 0.0], dtype=np.float32)
+        )
+        np.testing.assert_array_equal(
+            distributions[1], np.array([0.2, 0.2, 0.2, 0.2, 0.2], dtype=np.float32)
+        )
+        np.testing.assert_array_equal(
+            distributions[2],
+            np.array([1.0 / 3, 1.0 / 3, 1.0 / 3, 0.0, 0.0], dtype=np.float32),
+        )
+        assert labels == [0, 1, 2, 3, 4]
+
     def test_create_lda_partitions_elements(self) -> None:
         """Test if partitions from Latent Dirichlet Allocation contain the same
         elements."""
@@ -513,7 +539,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
             dirichlet_dist,
             1.0
             / self.num_classes
-            * np.ones((num_partitions, self.num_classes), np.float32),
+            * np.ones((num_partitions, self.num_classes), dtype=np.float32),
         )
         assert_identity(xy_0=self.ds, xy_1=(x_lda, y_lda))
 
