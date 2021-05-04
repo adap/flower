@@ -54,8 +54,8 @@ def assert_identity(xy_0: XY, xy_1: XY) -> None:
 
 
 class ImageClassificationPartitionedTestCase(unittest.TestCase):
-    """Tests for Partitioned Dataset Generation in Image Classification such
-    as CIFAR-10/100."""
+    """Tests for Partitioned Dataset Generation in Image Classification such as
+    CIFAR-10/100."""
 
     def setUp(self) -> None:
         self.num_classes: int = 10
