@@ -79,7 +79,7 @@ def start_server(
     _fl(server=initialized_server, config=initialized_config)
 
     # Stop the gRPC server
-    grpc_server.stop(1)
+    grpc_server.stop(grace=1)
 
 
 def _init_defaults(
