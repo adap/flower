@@ -15,7 +15,6 @@
 """Parameter conversion."""
 
 
-from io import BytesIO
 from typing import cast
 
 import numpy as np
@@ -36,13 +35,11 @@ def parameters_to_weights(parameters: Parameters) -> Weights:
 
 def ndarray_to_bytes(ndarray: np.ndarray) -> bytes:
     """Serialize NumPy array to bytes."""
-    bytes_io = BytesIO()
-    np.save(bytes_io, ndarray, allow_pickle=False)
-    return bytes_io.getvalue()
+    return cast(bytes, ndarray.tobytes())
 
 
 def bytes_to_ndarray(tensor: bytes) -> np.ndarray:
     """Deserialize NumPy array from bytes."""
-    bytes_io = BytesIO(tensor)
-    ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
+    ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)
     return cast(np.ndarray, ndarray_deserialized)
+

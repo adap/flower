@@ -1,0 +1,79 @@
+// Copyright 2020 Adap GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "flwr.android_client";
+option java_outer_classname = "FlowerTransport";
+option objc_class_prefix = "gRPC";
+
+package flower.transport;
+
+service FlowerService {
+    rpc Join(stream ClientMessage) returns (stream ServerMessage) {}
+}
+
+message Parameters {
+    repeated bytes tensors = 1;
+    string tensor_type = 2;
+}
+enum Reason {
+    UNKNOWN = 0;
+    RECONNECT = 1;
+    POWER_DISCONNECTED = 2;
+    WIFI_UNAVAILABLE = 3;
+}
+
+message ServerMessage {
+    message Reconnect { int64 seconds = 1; }
+    message GetParameters {}
+    message FitIns {
+        Parameters parameters = 1;
+        map<string, string> config = 2;
+    }
+    message EvaluateIns {
+        Parameters parameters = 1;
+        map<string, string> config = 2;
+    }
+
+    oneof msg {
+        Reconnect reconnect = 1;
+        GetParameters get_parameters = 2;
+        FitIns fit_ins = 3;
+        EvaluateIns evaluate_ins = 4;
+    }
+}
+
+message ClientMessage {
+    message Disconnect { Reason reason = 1; }
+    message ParametersRes { Parameters parameters = 1; }
+    message FitRes {
+        Parameters parameters = 1;
+        int64 num_examples = 2;
+    }
+    message EvaluateRes {
+        int64 num_examples = 1;
+        float loss = 2;
+    }
+
+    oneof msg {
+        Disconnect disconnect = 1;
+        ParametersRes parameters_res = 2;
+        FitRes fit_res = 3;
+        EvaluateRes evaluate_res = 4;
+    }
+}
+
