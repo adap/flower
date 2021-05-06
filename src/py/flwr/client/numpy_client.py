@@ -90,7 +90,8 @@ class NumPyClient(ABC):
     ]:
         """Train the provided parameters using the locally held dataset.
 
-        Arguments:
+        Parameters
+        ----------
             parameters: List[numpy.ndarray]. The current (global) model
                 parameters.
             config: Dict[str, Scalar]. Configuration parameters which allow the
@@ -98,14 +99,20 @@ class NumPyClient(ABC):
                 communicate arbitrary values from the server to the client, for
                 example, to set the number of (local) training epochs.
 
-        Returns:
-            parameters: List[numpy.ndarray]. The locally updated model
-                parameters.
-            num_examples (int): The number of examples used for training.
-            metrics (Dict[str, Scalar], optional): A dictionary mapping
-                arbitrary string keys to values of type bool, bytes, float,
-                int, or str. It can be used to communicate arbitrary values
-                back to the server.
+        Returns
+        -------
+            Tuple[List[numpy.ndarray], int, Optional[Dict[str, Scalar]]]
+                A tuple containing model parameters, number of examples and
+                a metrics dictionary.
+
+                parameters:
+                    The locally updated model parameters.
+                num_examples:
+                    The number of examples used for training.
+                metrics:
+                    A dictionary mapping arbitrary string keys to values of type
+                    bool, bytes, float, int, or str. It can be used to communicate
+                    arbitrary values back to the server.
         """
 
     @abstractmethod
@@ -118,29 +125,34 @@ class NumPyClient(ABC):
     ]:
         """Evaluate the provided weights using the locally held dataset.
 
-        Args:
-            parameters (List[np.ndarray]): The current (global) model
-                parameters.
-            config (Dict[str, Scalar]): Configuration parameters which allow the
-                server to influence evaluation on the client. It can be used to
-                communicate arbitrary values from the server to the client, for
-                example, to influence the number of examples used for
-                evaluation.
+        Parameters
+        ----------
+            parameters : List[np.ndarray]
+                The current (global) model parameters.
+            config : Dict[str, Scalar]
+                Configuration parameters which allow the server to influence
+                evaluation on the client. It can be used to communicate
+                arbitrary values from the server to the client, for example,
+                to influence the number of examples used for evaluation.
 
-        Returns:
-            loss (float): The evaluation loss of the model on the local
-                dataset.
-            num_examples (int): The number of examples used for evaluation.
-            metrics (Dict[str, Scalar]): A dictionary mapping arbitrary string
-                keys to values of type bool, bytes, float, int, or str. It can
-                be used to communicate arbitrary values back to the server.
+        Returns
+        -------
+            Tuple[float, int, Dict[str, Scalar]]
+                loss:
+                    The evaluation loss of the model on the local dataset.
+                num_examples:
+                    The number of examples used for evaluation.
+                metrics:
+                    A dictionary mapping arbitrary string keys to values of
+                    type bool, bytes, float, int, or str. It can be used to
+                    communicate arbitrary values back to the server.
 
-        Notes:
+        Notes
+        -----
             The previous return type format (int, float, float) and the
             extended format (int, float, float, Dict[str, Scalar]) are still
             supported for compatibility reasons. They will however be removed
-            in a future release, please migrate to
-            (float, int, Dict[str, Scalar]).
+            in a future release, please migrate to (float, int, Dict[str, Scalar]).
         """
 
 
