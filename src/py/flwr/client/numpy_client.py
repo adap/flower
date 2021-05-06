@@ -66,7 +66,7 @@ move to
     loss, num_examples, {"accuracy": accuracy}
 
 instead. Note that the deprecated return format will be removed in a future
-release.                  
+release.
 """
 
 
