@@ -81,7 +81,7 @@ class GRPCNetworkManager(NetworkManager):
     def stop(self) -> None:
         """Stop the gRPC server."""
         if self.server is not None:
-            self.server.stop(1)
+            self.server.stop(grace=1)
 
 
 class SimpleInMemoryNetworkManager(NetworkManager):
