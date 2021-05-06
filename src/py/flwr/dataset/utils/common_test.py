@@ -25,6 +25,7 @@ from flwr.dataset.utils.common import (
     combine_partitions,
     create_lda_partitions,
     exclude_classes_and_normalize,
+    get_partitions_distributions,
     partition,
     sample_without_replacement,
     shuffle,
@@ -53,8 +54,8 @@ def assert_identity(xy_0: XY, xy_1: XY) -> None:
 
 
 class ImageClassificationPartitionedTestCase(unittest.TestCase):
-    """Tests for Partitioned Dataset Ggeneration in Image Classification such
-    as CIFAR-10/100."""
+    """Tests for Partitioned Dataset Generation in Image Classification such as
+    CIFAR-10/100."""
 
     def setUp(self) -> None:
         self.num_classes: int = 10
@@ -68,7 +69,6 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
             ),
             axis=0,
         )
-        y = np.expand_dims(y, axis=1)
 
         np.random.seed(2000)
         idx = np.random.permutation(x.shape[0])
@@ -77,7 +77,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         self.ds = x, y
 
         # Make sure subsequent shuffle in tests
-        # produce other permuations
+        # produce other permutations
         np.random.seed(3000)
 
     def test_assert_identity(self) -> None:
@@ -110,7 +110,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
 
         # Assert
         assert_identity(self.ds, (x, y))
-        assert {y[0] for y in y[:10]} == set(range(10))
+        assert set(y[:10]) == set(range(10))
 
     def test_split_at_fraction(self) -> None:
         """Test split_at_fraction function."""
@@ -205,7 +205,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
 
     def test_split_array_at_indices_wrong_initial_split(self) -> None:
         """Tests if exception is thrown for wrong split values."""
-        # Prepae
+        # Prepare
         x = np.ones((100, 3, 32, 32), dtype=np.float32)
         split_idx = np.arange(start=0, stop=90, step=10, dtype=np.int64)
         split_idx[0] = 10
@@ -393,7 +393,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         ]
         num_samples = 4
         expected_x = 7 * np.ones((4, 3, 1, 1), dtype=np.float32)
-        expected_y = np.expand_dims(np.array(4 * [1], dtype=np.int64), axis=1)
+        expected_y = np.array(4 * [1], dtype=np.int64)
 
         # Execute
         this_partition, _ = sample_without_replacement(
@@ -478,6 +478,31 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
             this_distribution = distributions[part]
             np.testing.assert_array_almost_equal(this_distribution, uniform, decimal=3)
 
+    def test_get_partitions_distributions(self) -> None:
+        """Tests if function can generate data pdf for each partition."""
+        # Prepare
+        partitions = [
+            (np.zeros((2, 5, 5), dtype=np.float32), np.arange(2)),
+            (np.zeros((5, 5, 5), dtype=np.float32), np.arange(5)),
+            (np.zeros((3, 5, 5), dtype=np.float32), np.arange(3)),
+        ]
+
+        # Execute
+        distributions, labels = get_partitions_distributions(partitions)
+
+        # Assert
+        np.testing.assert_array_equal(
+            distributions[0], np.array([0.5, 0.5, 0.0, 0.0, 0.0], dtype=np.float32)
+        )
+        np.testing.assert_array_equal(
+            distributions[1], np.array([0.2, 0.2, 0.2, 0.2, 0.2], dtype=np.float32)
+        )
+        np.testing.assert_array_equal(
+            distributions[2],
+            np.array([1.0 / 3, 1.0 / 3, 1.0 / 3, 0.0, 0.0], dtype=np.float32),
+        )
+        assert labels == [0, 1, 2, 3, 4]
+
     def test_create_lda_partitions_elements(self) -> None:
         """Test if partitions from Latent Dirichlet Allocation contain the same
         elements."""
@@ -493,6 +518,29 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         y_lda = np.concatenate([item[1] for item in partitions])
 
         # Assert
+        assert_identity(xy_0=self.ds, xy_1=(x_lda, y_lda))
+
+    def test_create_lda_partitions_with_inf_alpha(self) -> None:
+        """Test if partitions created with concentration=Inf will produce
+        uniform partitions."""
+        # Prepare
+        num_partitions = 5
+        concentration = float("inf")
+
+        # Execute
+        partitions, dirichlet_dist = create_lda_partitions(
+            dataset=self.ds, num_partitions=num_partitions, concentration=concentration
+        )
+        x_lda = np.concatenate([item[0] for item in partitions])
+        y_lda = np.concatenate([item[1] for item in partitions])
+
+        # Assert
+        np.testing.assert_array_equal(
+            dirichlet_dist,
+            1.0
+            / self.num_classes
+            * np.ones((num_partitions, self.num_classes), dtype=np.float32),
+        )
         assert_identity(xy_0=self.ds, xy_1=(x_lda, y_lda))
 
     def test_create_lda_partitions_elements_list_concentration(self) -> None:
