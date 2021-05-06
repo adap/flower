@@ -41,7 +41,7 @@ DEPRECATION_WARNING_FIT = """DEPRECATION WARNING: deprecated return format
 
 move to
 
-    parameters, num_examples, \{\}
+    parameters, num_examples, {"custom_key": custom_val}
 
 instead. Note that the deprecated return format will be removed in a future
 release.
@@ -59,7 +59,7 @@ release.
 """
 DEPRECATION_WARNING_EVALUATE_1 = """DEPRECATION WARNING: deprecated return format
 
-    num_examples, loss, accuracy, \{\}
+    num_examples, loss, accuracy, {"custom_key": custom_val}
 
 move to
 
