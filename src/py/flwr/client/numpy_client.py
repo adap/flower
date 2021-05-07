@@ -35,6 +35,40 @@ from flwr.common import (
 
 from .client import Client
 
+DEPRECATION_WARNING_FIT = """DEPRECATION WARNING: deprecated return format
+
+    parameters, num_examples
+
+move to
+
+    parameters, num_examples, {"custom_key": custom_val}
+
+instead. Note that the deprecated return format will be removed in a future
+release.
+"""
+DEPRECATION_WARNING_EVALUATE_0 = """DEPRECATION WARNING: deprecated return format
+
+    num_examples, loss, accuracy
+
+move to
+
+    loss, num_examples, {"accuracy": accuracy}
+
+instead. Note that the deprecated return format will be removed in a future
+release.
+"""
+DEPRECATION_WARNING_EVALUATE_1 = """DEPRECATION WARNING: deprecated return format
+
+    num_examples, loss, accuracy, {"custom_key": custom_val}
+
+move to
+
+    loss, num_examples, {"accuracy": accuracy}
+
+instead. Note that the deprecated return format will be removed in a future
+release.
+"""
+
 
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
@@ -131,6 +165,7 @@ class NumPyClientWrapper(Client):
         fit_begin = timeit.default_timer()
         results = self.numpy_client.fit(parameters, ins.config)
         if len(results) == 2:
+            print(DEPRECATION_WARNING_FIT)
             results = cast(Tuple[List[np.ndarray], int], results)
             parameters_prime, num_examples = results
             metrics: Optional[Metrics] = None
@@ -175,6 +210,7 @@ class NumPyClientWrapper(Client):
             ):
                 # Legacy case: num_examples, loss, accuracy
                 # This will be removed in a future release
+                print(DEPRECATION_WARNING_EVALUATE_0)
                 results = cast(Tuple[int, float, float], results)
                 num_examples, loss, accuracy = results
                 evaluate_res = EvaluateRes(
@@ -189,6 +225,7 @@ class NumPyClientWrapper(Client):
         elif len(results) == 4:
             # Legacy case: num_examples, loss, accuracy, metrics
             # This will be removed in a future release
+            print(DEPRECATION_WARNING_EVALUATE_1)
             results = cast(Tuple[int, float, float, Metrics], results)
             assert isinstance(results[0], int)
             assert isinstance(results[1], float)
