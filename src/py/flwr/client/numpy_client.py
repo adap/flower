@@ -77,7 +77,9 @@ class NumPyClient(ABC):
     def get_parameters(self) -> List[np.ndarray]:
         """Return the current local model parameters.
 
-        Returns:
+        Returns
+        -------
+        parameters : List[numpy.ndarray]
             The local model parameters as a list of NumPy ndarrays.
         """
 
@@ -90,22 +92,26 @@ class NumPyClient(ABC):
     ]:
         """Train the provided parameters using the locally held dataset.
 
-        Arguments:
-            parameters: List[numpy.ndarray]. The current (global) model
-                parameters.
-            config: Dict[str, Scalar]. Configuration parameters which allow the
-                server to influence training on the client. It can be used to
-                communicate arbitrary values from the server to the client, for
-                example, to set the number of (local) training epochs.
+        Parameters
+        ----------
+        parameters: List[numpy.ndarray]
+            The current (global) model parameters.
+        config: Dict[str, Scalar]
+            Configuration parameters which allow the
+            server to influence training on the client. It can be used to
+            communicate arbitrary values from the server to the client, for
+            example, to set the number of (local) training epochs.
 
-        Returns:
-            parameters: List[numpy.ndarray]. The locally updated model
-                parameters.
-            num_examples (int): The number of examples used for training.
-            metrics (Dict[str, Scalar], optional): A dictionary mapping
-                arbitrary string keys to values of type bool, bytes, float,
-                int, or str. It can be used to communicate arbitrary values
-                back to the server.
+        Returns
+        -------
+        parameters : List[numpy.ndarray]
+            The locally updated model parameters.
+        num_examples : int
+            The number of examples used for training.
+        metrics : Dict[str, Scalar]
+            A dictionary mapping arbitrary string keys to values of type
+            bool, bytes, float, int, or str. It can be used to communicate
+            arbitrary values back to the server.
         """
 
     @abstractmethod
@@ -118,29 +124,33 @@ class NumPyClient(ABC):
     ]:
         """Evaluate the provided weights using the locally held dataset.
 
-        Args:
-            parameters (List[np.ndarray]): The current (global) model
-                parameters.
-            config (Dict[str, Scalar]): Configuration parameters which allow the
-                server to influence evaluation on the client. It can be used to
-                communicate arbitrary values from the server to the client, for
-                example, to influence the number of examples used for
-                evaluation.
+        Parameters
+        ----------
+        parameters : List[np.ndarray]
+            The current (global) model parameters.
+        config : Dict[str, Scalar]
+            Configuration parameters which allow the server to influence
+            evaluation on the client. It can be used to communicate
+            arbitrary values from the server to the client, for example,
+            to influence the number of examples used for evaluation.
 
-        Returns:
-            loss (float): The evaluation loss of the model on the local
-                dataset.
-            num_examples (int): The number of examples used for evaluation.
-            metrics (Dict[str, Scalar]): A dictionary mapping arbitrary string
-                keys to values of type bool, bytes, float, int, or str. It can
-                be used to communicate arbitrary values back to the server.
+        Returns
+        -------
+        loss : float
+            The evaluation loss of the model on the local dataset.
+        num_examples : int
+            The number of examples used for evaluation.
+        metrics : Dict[str, Scalar]
+            A dictionary mapping arbitrary string keys to values of
+            type bool, bytes, float, int, or str. It can be used to
+            communicate arbitrary values back to the server.
 
-        Notes:
-            The previous return type format (int, float, float) and the
-            extended format (int, float, float, Dict[str, Scalar]) are still
-            supported for compatibility reasons. They will however be removed
-            in a future release, please migrate to
-            (float, int, Dict[str, Scalar]).
+        Warning
+        -------
+        The previous return type format (int, float, float) and the
+        extended format (int, float, float, Dict[str, Scalar]) are still
+        supported for compatibility reasons. They will however be removed
+        in a future release, please migrate to (float, int, Dict[str, Scalar]).
         """
 
 

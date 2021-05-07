@@ -215,9 +215,9 @@ Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll ca
 
 #. :code:`set_parameters`
     * set the model parameters on the local model that are received from the server
-    * loop over the list of model parameters received as NumPy :code:`ndarray`s (think list of neural network layers)
+    * loop over the list of model parameters received as NumPy :code:`ndarray`'s (think list of neural network layers)
 #. :code:`get_parameters`
-    * get the model parameters and return them as a list of NumPy :code:`ndarray`s (which is what :code:`flwr.client.NumPyClient` expects)
+    * get the model parameters and return them as a list of NumPy :code:`ndarray`'s (which is what :code:`flwr.client.NumPyClient` expects)
 #. :code:`fit`
     * update the parameters of the local model with the parameters received from the server
     * train the model on the local training set
@@ -305,6 +305,6 @@ in each window (make sure that the server is still running before you do so) and
 Next Steps
 ----------
 
-The full source code for this example can be found `here <https://github.com/adap/flower/blob/main/examples/pytorch_from_centralized_to_federated>`_.
+The full source code for this example: `PyTorch: From Centralized To Federated (Code) <https://github.com/adap/flower/blob/main/examples/pytorch_from_centralized_to_federated>`_.
 Our example is of course somewhat over-simplified because both clients load the exact same dataset, which isn't realistic.
 You're now prepared to explore this topic further. How about using different subsets of CIFAR-10 on each client? How about adding more clients?
