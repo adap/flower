@@ -34,7 +34,6 @@ class InMemoryClientProxy(ClientProxy):
         """Return the current local model parameters."""
         if self._cv:
             with self._cv:
-                print(f"CID: {self.cid} acquired lock")
                 return self.client.get_parameters()
 
         return self.client.get_parameters()
@@ -43,7 +42,6 @@ class InMemoryClientProxy(ClientProxy):
         """Refine the provided weights using the locally held dataset."""
         if self._cv:
             with self._cv:
-                print(f"CID: {self.cid} acquired lock")
                 return self.client.fit(ins=ins)
 
         return self.client.fit(ins=ins)
@@ -52,7 +50,6 @@ class InMemoryClientProxy(ClientProxy):
         """Evaluate the provided weights using the locally held dataset."""
         if self._cv:
             with self._cv:
-                print(f"CID: {self.cid} acquired lock")
                 return self.client.evaluate(ins=ins)
 
         return self.client.evaluate(ins=ins)
@@ -61,7 +58,6 @@ class InMemoryClientProxy(ClientProxy):
         """Disconnect and (optionally) reconnect later."""
         if self._cv:
             with self._cv:
-                print(f"CID: {self.cid} acquired lock")
                 return common.Disconnect(reason="unknown")
 
         return common.Disconnect(reason="unknown")
