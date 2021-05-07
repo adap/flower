@@ -15,7 +15,9 @@
 """Training history."""
 
 from functools import reduce
-from typing import List, Tuple
+from typing import Dict, List, Tuple
+
+from flwr.common.typing import Scalar
 
 
 class History:
@@ -24,8 +26,8 @@ class History:
     def __init__(self) -> None:
         self.losses_distributed: List[Tuple[int, float]] = []
         self.losses_centralized: List[Tuple[int, float]] = []
-        self.accuracies_distributed: List[Tuple[int, float]] = []
-        self.accuracies_centralized: List[Tuple[int, float]] = []
+        self.metrics_distributed: Dict[str, List[Tuple[int, Scalar]]] = {}
+        self.metrics_centralized: Dict[str, List[Tuple[int, Scalar]]] = {}
 
     def add_loss_distributed(self, rnd: int, loss: float) -> None:
         """Add one loss entry (from distributed evaluation)."""
@@ -35,13 +37,23 @@ class History:
         """Add one loss entry (from centralized evaluation)."""
         self.losses_centralized.append((rnd, loss))
 
-    def add_accuracy_distributed(self, rnd: int, acc: float) -> None:
-        """Add one accuray entry (from distributed evaluation)."""
-        self.accuracies_distributed.append((rnd, acc))
+    def add_metrics_distributed(self, rnd: int, metrics: Dict[str, Scalar]) -> None:
+        """Add metrics entries (from distributed evaluation)."""
+        for key in metrics:
+            # if not (isinstance(metrics[key], float) or isinstance(metrics[key], int)):
+            #     continue  # ignore non-numeric key/value pairs
+            if key not in self.metrics_distributed:
+                self.metrics_distributed[key] = []
+            self.metrics_distributed[key].append((rnd, metrics[key]))
 
-    def add_accuracy_centralized(self, rnd: int, acc: float) -> None:
-        """Add one accuracy entry (from centralized evaluation)."""
-        self.accuracies_centralized.append((rnd, acc))
+    def add_metrics_centralized(self, rnd: int, metrics: Dict[str, Scalar]) -> None:
+        """Add metrics entries (from centralized evaluation)."""
+        for key in metrics:
+            # if not (isinstance(metrics[key], float) or isinstance(metrics[key], int)):
+            #     continue  # ignore non-numeric key/value pairs
+            if key not in self.metrics_centralized:
+                self.metrics_centralized[key] = []
+            self.metrics_centralized[key].append((rnd, metrics[key]))
 
     def __repr__(self) -> str:
         rep = ""
@@ -55,14 +67,8 @@ class History:
                 lambda a, b: a + b,
                 [f"\tround {rnd}: {loss}\n" for rnd, loss in self.losses_centralized],
             )
-        if self.accuracies_distributed:
-            rep += "History (accuracy, distributed):\n" + reduce(
-                lambda a, b: a + b,
-                [f"\tround {rnd}: {acc}\n" for rnd, acc in self.accuracies_distributed],
-            )
-        if self.accuracies_centralized:
-            rep += "History (accuracy, centralized):\n" + reduce(
-                lambda a, b: a + b,
-                [f"\tround {rnd}: {acc}\n" for rnd, acc in self.accuracies_centralized],
-            )
+        if self.metrics_distributed:
+            rep += "History (metrics, distributed):\n" + str(self.metrics_distributed)
+        if self.metrics_centralized:
+            rep += "History (metrics, centralized):\n" + str(self.metrics_centralized)
         return rep
