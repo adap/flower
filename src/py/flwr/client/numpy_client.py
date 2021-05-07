@@ -96,7 +96,8 @@ class NumPyClient(ABC):
         ----------
         parameters: List[numpy.ndarray]
             The current (global) model parameters.
-        config: Dict[str, Scalar]. Configuration parameters which allow the
+        config: Dict[str, Scalar]
+            Configuration parameters which allow the
             server to influence training on the client. It can be used to
             communicate arbitrary values from the server to the client, for
             example, to set the number of (local) training epochs.
@@ -144,8 +145,8 @@ class NumPyClient(ABC):
             type bool, bytes, float, int, or str. It can be used to
             communicate arbitrary values back to the server.
 
-        Notes
-        -----
+        Warning
+        -------
         The previous return type format (int, float, float) and the
         extended format (int, float, float, Dict[str, Scalar]) are still
         supported for compatibility reasons. They will however be removed
