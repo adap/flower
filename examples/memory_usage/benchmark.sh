@@ -1,11 +1,27 @@
 #!/bin/bash
 set -e
 
-rm -f *.dat *.jpg
+NUM_CLIENTS=200
 
-python -m mprof run --include-children -o memory_usage_server.dat server.py &
+# Clean up
+rm -rf results
+mkdir results
+
+
+# Benchmark
+python -m mprof run --include-children -o results/memory_usage_server.dat server.py &
 sleep 2
-python -m mprof run --include-children -o memory_usage_clients.dat clients.py
 
-python -m mprof plot memory_usage_server.dat -o memory_usage_server.jpg
-python -m mprof plot memory_usage_clients.dat -o memory_usage_clients.jpg
+for (( i=0; i < $NUM_CLIENTS; i++ ))
+do
+    python -m mprof run --include-children -o results/memory_usage_client_$i.dat client.py &
+    sleep 0.1
+done
+
+
+# This will allow you to use CTRL+C to stop all background processes
+trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+sleep 259200
+
+
+

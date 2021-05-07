@@ -29,23 +29,5 @@ def start_client() -> None:
     # Start Flower client
     fl.client.start_numpy_client("0.0.0.0:8080", client=CifarClient())
 
-
-def run_clients(num_clients: int):
-    """Start a FL simulation."""
-
-    # This will hold all the processes which we are going to create
-    processes = []
-
-    # Start all the clients
-    for _ in range(num_clients):
-        client_process = Process(target=start_client)
-        client_process.start()
-        processes.append(client_process)
-
-    # Block until all processes are finished
-    for p in processes:
-        p.join()
-
-
 if __name__ == "__main__":
-    run_clients(num_clients=100)
+    start_client()

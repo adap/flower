@@ -12,4 +12,4 @@ def start_server(num_rounds: int, num_clients: int, fraction_fit: float):
     fl.server.start_server(strategy=strategy, config={"num_rounds": num_rounds})
 
 if __name__ == "__main__":
-    start_server(num_rounds=5000, num_clients=100, fraction_fit=0.5)
+    start_server(num_rounds=100000, num_clients=200, fraction_fit=0.5)
