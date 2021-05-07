@@ -39,7 +39,7 @@ class Client(ABC):
 
         Parameters
         ----------
-        instructions : FitIns
+        ins : FitIns
             The training instructions containing (global) model parameters
             received from the server and a dictionary of configuration values
             used to customize the local training process.
@@ -57,7 +57,7 @@ class Client(ABC):
 
         Parameters
         ----------
-        instructions : EvaluateIns
+        ins : EvaluateIns
             The evaluation instructions containing (global) model parameters
             received from the server and a dictionary of configuration values
             used to customize the local evaluation process.
