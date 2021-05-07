@@ -79,7 +79,8 @@ class NumPyClient(ABC):
 
         Returns
         -------
-        The local model parameters as a list of NumPy ndarrays.
+        parameters : List[numpy.ndarray]
+            The local model parameters as a list of NumPy ndarrays.
         """
 
     @abstractmethod
@@ -93,8 +94,8 @@ class NumPyClient(ABC):
 
         Parameters
         ----------
-        parameters: List[numpy.ndarray]. The current (global) model
-            parameters.
+        parameters: List[numpy.ndarray]
+            The current (global) model parameters.
         config: Dict[str, Scalar]. Configuration parameters which allow the
             server to influence training on the client. It can be used to
             communicate arbitrary values from the server to the client, for
@@ -102,18 +103,14 @@ class NumPyClient(ABC):
 
         Returns
         -------
-        Tuple[List[numpy.ndarray], int, Optional[Dict[str, Scalar]]]
-            A tuple containing model parameters, number of examples and
-            a metrics dictionary.
-
-            parameters:
-                The locally updated model parameters.
-            num_examples:
-                The number of examples used for training.
-            metrics:
-                A dictionary mapping arbitrary string keys to values of type
-                bool, bytes, float, int, or str. It can be used to communicate
-                arbitrary values back to the server.
+        parameters : List[numpy.ndarray]
+            The locally updated model parameters.
+        num_examples : int
+            The number of examples used for training.
+        metrics : Dict[str, Scalar]
+            A dictionary mapping arbitrary string keys to values of type
+            bool, bytes, float, int, or str. It can be used to communicate
+            arbitrary values back to the server.
         """
 
     @abstractmethod
@@ -138,15 +135,14 @@ class NumPyClient(ABC):
 
         Returns
         -------
-        Tuple[float, int, Dict[str, Scalar]]
-            loss:
-                The evaluation loss of the model on the local dataset.
-            num_examples:
-                The number of examples used for evaluation.
-            metrics:
-                A dictionary mapping arbitrary string keys to values of
-                type bool, bytes, float, int, or str. It can be used to
-                communicate arbitrary values back to the server.
+        loss : float
+            The evaluation loss of the model on the local dataset.
+        num_examples : int
+            The number of examples used for evaluation.
+        metrics : Dict[str, Scalar]
+            A dictionary mapping arbitrary string keys to values of
+            type bool, bytes, float, int, or str. It can be used to
+            communicate arbitrary values back to the server.
 
         Notes
         -----
