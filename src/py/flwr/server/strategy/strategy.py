@@ -16,9 +16,9 @@
 
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Weights
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Scalar, Weights
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
@@ -64,7 +64,10 @@ class Strategy(ABC):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Optional[Weights]:
+    ) -> Union[
+        Tuple[Optional[Weights], Dict[str, Scalar]],
+        Optional[Weights],  # Deprecated
+    ]:
         """Aggregate training results.
 
         Arguments:
@@ -115,7 +118,10 @@ class Strategy(ABC):
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
-    ) -> Optional[float]:
+    ) -> Union[
+        Tuple[Optional[float], Dict[str, Scalar]],
+        Optional[float],  # Deprecated
+    ]:
         """Aggregate evaluation results.
 
         Arguments:
@@ -136,7 +142,7 @@ class Strategy(ABC):
         """
 
     @abstractmethod
-    def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(self, weights: Weights) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate the current model weights.
 
         This function can be used to perform centralized (i.e., server-side) evaluation
@@ -146,5 +152,6 @@ class Strategy(ABC):
             weights: Weights. The current (global) model weights.
 
         Returns:
-            The evaluation result, usually a Tuple containing loss and accuracy.
+            The evaluation result, usually a Tuple containing loss and a
+            dictionary containing task-specific metrics (e.g., accuracy).
         """

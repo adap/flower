@@ -107,17 +107,17 @@ def _fl(server: Server, config: Dict[str, int]) -> None:
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
-    log(INFO, "app_fit: accuracies_distributed %s", str(hist.accuracies_distributed))
+    log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
     log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
-    log(INFO, "app_fit: accuracies_centralized %s", str(hist.accuracies_centralized))
+    log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
 
     # Temporary workaround to force distributed evaluation
     server.strategy.eval_fn = None  # type: ignore
 
     # Evaluate the final trained model
-    res = server.evaluate(rnd=-1)
+    res = server.evaluate_round(rnd=-1)
     if res is not None:
-        loss, (results, failures) = res
+        loss, _, (results, failures) = res
         log(INFO, "app_evaluate: federated loss: %s", str(loss))
         log(
             INFO,
