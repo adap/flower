@@ -316,7 +316,7 @@ def reconnect_client(
 def fit_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]]
 ) -> FitResultsAndFailures:
-    """Refine weights concurrently on all selected clients."""
+    """Refine parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(fit_client, c, ins) for c, ins in client_instructions
@@ -337,7 +337,7 @@ def fit_clients(
 
 
 def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
-    """Refine weights on a single client."""
+    """Refine parameters on a single client."""
     fit_res = client.fit(ins)
     return client, fit_res
 
@@ -345,7 +345,7 @@ def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
 def evaluate_clients(
     client_instructions: List[Tuple[ClientProxy, EvaluateIns]]
 ) -> EvaluateResultsAndFailures:
-    """Evaluate weights concurrently on all selected clients."""
+    """Evaluate parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(evaluate_client, c, ins) for c, ins in client_instructions
@@ -368,6 +368,6 @@ def evaluate_clients(
 def evaluate_client(
     client: ClientProxy, ins: EvaluateIns
 ) -> Tuple[ClientProxy, EvaluateRes]:
-    """Evaluate weights on a single client."""
+    """Evaluate parameters on a single client."""
     evaluate_res = client.evaluate(ins)
     return client, evaluate_res
