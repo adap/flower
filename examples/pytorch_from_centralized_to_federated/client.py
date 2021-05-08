@@ -38,7 +38,11 @@ class CifarClient(fl.client.NumPyClient):
         self.model.train()
         if USE_FEDBN:
             # Return model parameters as a list of NumPy ndarrays, excluding parameters of BN layers when using FedBN
-            return [val.cpu().numpy() for name, val in self.model.state_dict().items() if 'bn' not in name]
+            return [
+                val.cpu().numpy()
+                for name, val in self.model.state_dict().items()
+                if "bn" not in name
+            ]
         else:
             # Return model parameters as a list of NumPy ndarrays
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
@@ -47,7 +51,7 @@ class CifarClient(fl.client.NumPyClient):
         # Set model parameters from a list of NumPy ndarrays
         self.model.train()
         if USE_FEDBN:
-            keys = [k for k in self.model.state_dict().keys() if 'bn' not in k]
+            keys = [k for k in self.model.state_dict().keys() if "bn" not in k]
             params_dict = zip(keys, parameters)
             state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
             self.model.load_state_dict(state_dict, strict=False)
@@ -81,7 +85,7 @@ def main() -> None:
 
     # Load model
     model = cifar.Net().to(DEVICE).train()
-    
+
     # Perform a single forward pass to properly initialize BatchNorm
     _ = model(next(iter(trainloader))[0].to(DEVICE))
 

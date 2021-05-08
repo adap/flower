@@ -33,7 +33,7 @@ def test_aggregate_fit_no_results_no_failures() -> None:
     expected: Optional[Weights] = None
 
     # Execute
-    actual = strategy.aggregate_fit(1, results, failures)
+    actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -48,7 +48,7 @@ def test_aggregate_fit_no_results() -> None:
     expected: Optional[Weights] = None
 
     # Execute
-    actual = strategy.aggregate_fit(1, results, failures)
+    actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -65,7 +65,7 @@ def test_aggregate_fit_not_enough_results() -> None:
     expected: Optional[Weights] = None
 
     # Execute
-    actual = strategy.aggregate_fit(1, results, failures)
+    actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -82,7 +82,7 @@ def test_aggregate_fit_just_enough_results() -> None:
     expected: Optional[Weights] = []
 
     # Execute
-    actual = strategy.aggregate_fit(1, results, failures)
+    actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -99,7 +99,7 @@ def test_aggregate_fit_no_failures() -> None:
     expected: Optional[Weights] = []
 
     # Execute
-    actual = strategy.aggregate_fit(1, results, failures)
+    actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -114,7 +114,7 @@ def test_aggregate_evaluate_no_results_no_failures() -> None:
     expected: Optional[float] = None
 
     # Execute
-    actual = strategy.aggregate_evaluate(1, results, failures)
+    actual, _ = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -129,7 +129,7 @@ def test_aggregate_evaluate_no_results() -> None:
     expected: Optional[float] = None
 
     # Execute
-    actual = strategy.aggregate_evaluate(1, results, failures)
+    actual, _ = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -146,7 +146,7 @@ def test_aggregate_evaluate_not_enough_results() -> None:
     expected: Optional[float] = None
 
     # Execute
-    actual = strategy.aggregate_evaluate(1, results, failures)
+    actual, _ = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -163,7 +163,7 @@ def test_aggregate_evaluate_just_enough_results() -> None:
     expected: Optional[float] = 2.3
 
     # Execute
-    actual = strategy.aggregate_evaluate(1, results, failures)
+    actual, _ = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -180,7 +180,7 @@ def test_aggregate_evaluate_no_failures() -> None:
     expected: Optional[float] = 2.3
 
     # Execute
-    actual = strategy.aggregate_evaluate(1, results, failures)
+    actual, _ = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
