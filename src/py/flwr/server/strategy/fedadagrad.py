@@ -45,7 +45,9 @@ class FedAdagrad(FedOpt):
         min_fit_clients: int = 2,
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
-        eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
+        eval_fn: Optional[
+            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
@@ -109,13 +111,13 @@ class FedAdagrad(FedOpt):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Optional[Weights]:
+    ) -> Tuple[Optional[Weights], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
-        fedavg_aggregate = super().aggregate_fit(
+        fedavg_aggregate, metrics_aggregated = super().aggregate_fit(
             rnd=rnd, results=results, failures=failures
         )
         if fedavg_aggregate is None:
-            return None
+            return None, {}
 
         aggregated_updates = [
             subset_weights - self.current_weights[idx]
@@ -139,4 +141,4 @@ class FedAdagrad(FedOpt):
         ]
         self.current_weights = new_weights
 
-        return self.current_weights
+        return self.current_weights, metrics_aggregated

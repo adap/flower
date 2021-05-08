@@ -28,7 +28,7 @@ from .fedadagrad import FedAdagrad
 
 
 def test_aggregate_fit() -> None:
-    """Tests if adagrad fucntion is aggregating correclty."""
+    """Tests if adagrad function is aggregating correctly."""
     # Prepare
     previous_weights: Weights = [array([0.1, 0.1, 0.1, 0.1], dtype=float32)]
     strategy = FedAdagrad(
@@ -56,7 +56,7 @@ def test_aggregate_fit() -> None:
     expected: Weights = [array([0.15, 0.15, 0.15, 0.15], dtype=float32)]
 
     # Execute
-    actual_list = strategy.aggregate_fit(rnd=1, results=results, failures=[])
+    actual_list, _ = strategy.aggregate_fit(rnd=1, results=results, failures=[])
     if actual_list:
         actual = actual_list[0]
     assert (actual == expected[0]).all()

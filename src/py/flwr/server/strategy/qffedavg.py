@@ -52,7 +52,9 @@ class QffedAvg(FedAvg):
         min_fit_clients: int = 1,
         min_eval_clients: int = 1,
         min_available_clients: int = 1,
-        eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
+        eval_fn: Optional[
+            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
@@ -100,7 +102,7 @@ class QffedAvg(FedAvg):
         num_clients = int(num_available_clients * self.fraction_eval)
         return max(num_clients, self.min_eval_clients), self.min_available_clients
 
-    def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(self, weights: Weights) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model weights using an evaluation function (if
         provided)."""
         if self.eval_fn is None:
@@ -164,13 +166,13 @@ class QffedAvg(FedAvg):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Optional[Weights]:
+    ) -> Tuple[Optional[Weights], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
-            return None
+            return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
-            return None
+            return None, {}
         # Convert results
 
         def norm_grad(grad_list: List[Weights]) -> float:
@@ -213,23 +215,30 @@ class QffedAvg(FedAvg):
                 * np.float_power(loss + 1e-10, self.q_param)
             )
 
-        return aggregate_qffl(weights_before, deltas, hs_ffl)
+        return aggregate_qffl(weights_before, deltas, hs_ffl), {}
 
     def aggregate_evaluate(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
-    ) -> Optional[float]:
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
-            return None
+            return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
-            return None
-        return weighted_loss_avg(
-            [
-                (evaluate_res.num_examples, evaluate_res.loss, evaluate_res.accuracy)
-                for client, evaluate_res in results
-            ]
+            return None, {}
+        return (
+            weighted_loss_avg(
+                [
+                    (
+                        evaluate_res.num_examples,
+                        evaluate_res.loss,
+                        evaluate_res.accuracy,
+                    )
+                    for client, evaluate_res in results
+                ]
+            ),
+            {},
         )

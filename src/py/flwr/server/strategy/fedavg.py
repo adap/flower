@@ -36,6 +36,18 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
+DEPRECATION_WARNING = """DEPRECATION WARNING: deprecated `eval_fn` return format
+
+    loss, accuracy
+
+move to
+
+    loss, {"accuracy": accuracy}
+
+instead. Note that compatibility with the deprecated return format will be
+removed in a future release.
+"""
+
 
 class FedAvg(Strategy):
     """Configurable FedAvg strategy implementation."""
@@ -48,7 +60,9 @@ class FedAvg(Strategy):
         min_fit_clients: int = 2,
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
-        eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
+        eval_fn: Optional[
+            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
@@ -112,13 +126,22 @@ class FedAvg(Strategy):
         self.initial_parameters = None  # Don't keep initial parameters in memory
         return initial_parameters
 
-    def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(self, weights: Weights) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model weights using an evaluation function (if
         provided)."""
         if self.eval_fn is None:
             # No evaluation function provided
             return None
-        return self.eval_fn(weights)
+        eval_res = self.eval_fn(weights)
+        if eval_res is None:
+            return None
+        loss, other = eval_res
+        if isinstance(other, float):
+            print(DEPRECATION_WARNING)
+            metrics = {"accuracy": other}
+        else:
+            metrics = other
+        return loss, metrics
 
     def configure_fit(
         self, rnd: int, weights: Weights, client_manager: ClientManager
@@ -178,35 +201,42 @@ class FedAvg(Strategy):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Optional[Weights]:
+    ) -> Tuple[Optional[Weights], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
-            return None
+            return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
-            return None
+            return None, {}
         # Convert results
         weights_results = [
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
-        return aggregate(weights_results)
+        return aggregate(weights_results), {}
 
     def aggregate_evaluate(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
-    ) -> Optional[float]:
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
-            return None
+            return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
-            return None
-        return weighted_loss_avg(
-            [
-                (evaluate_res.num_examples, evaluate_res.loss, evaluate_res.accuracy)
-                for _, evaluate_res in results
-            ]
+            return None, {}
+        return (
+            weighted_loss_avg(
+                [
+                    (
+                        evaluate_res.num_examples,
+                        evaluate_res.loss,
+                        evaluate_res.accuracy,
+                    )
+                    for _, evaluate_res in results
+                ]
+            ),
+            {},
         )
