@@ -76,7 +76,7 @@ Inside the server helper script *run-server.sh* you will find the following code
 
 
 We can go a bit deeper and see that :code:`server.py` simply launches a server that will coordinate three rounds of training.
-Flower Servers are very customizable, but for simple workloads we can start a server using the :ref:`start_server <flwr-server-start_server-ref>` function and leave all the configuration possibilities at their default values as seen below.
+Flower Servers are very customizable, but for simple workloads we can start a server using the :ref:`start_server <flwr-server-start_server-apiref>` function and leave all the configuration possibilities at their default values as seen below.
 
 .. code-block:: python
 

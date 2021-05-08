@@ -13,6 +13,8 @@ import torchvision
 
 import cifar
 
+USE_FEDBN: bool = True
+
 # pylint: disable=no-member
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
@@ -33,15 +35,26 @@ class CifarClient(fl.client.NumPyClient):
         self.testloader = testloader
 
     def get_parameters(self) -> List[np.ndarray]:
-        # Return model parameters as a list of NumPy ndarrays, excluding parameters of BN layers when using FedBN
-        return [val.cpu().numpy() for name, val in self.model.state_dict().items() if 'bn' not in name]
+        self.model.train()
+        if USE_FEDBN:
+            # Return model parameters as a list of NumPy ndarrays, excluding parameters of BN layers when using FedBN
+            return [val.cpu().numpy() for name, val in self.model.state_dict().items() if 'bn' not in name]
+        else:
+            # Return model parameters as a list of NumPy ndarrays
+            return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         # Set model parameters from a list of NumPy ndarrays
-        keys = [k for k in self.model.state_dict().keys() if 'bn' not in k]
-        params_dict = zip(keys, parameters)
-        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-        self.model.load_state_dict(state_dict, strict=False)
+        self.model.train()
+        if USE_FEDBN:
+            keys = [k for k in self.model.state_dict().keys() if 'bn' not in k]
+            params_dict = zip(keys, parameters)
+            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            self.model.load_state_dict(state_dict, strict=False)
+        else:
+            params_dict = zip(self.model.state_dict().keys(), parameters)
+            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            self.model.load_state_dict(state_dict, strict=True)
 
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str]
@@ -57,16 +70,20 @@ class CifarClient(fl.client.NumPyClient):
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
         loss, accuracy = cifar.test(self.model, self.testloader, device=DEVICE)
-     
         return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
 
 
 def main() -> None:
     """Load data, start CifarClient."""
 
-    # Load model and data
-    model = cifar.Net().to(DEVICE)
+    # Load data
     trainloader, testloader = cifar.load_data()
+
+    # Load model
+    model = cifar.Net().to(DEVICE).train()
+    
+    # Perform a single forward pass to properly initialize BatchNorm
+    _ = model(next(iter(trainloader))[0].to(DEVICE))
 
     # Start client
     client = CifarClient(model, trainloader, testloader)
