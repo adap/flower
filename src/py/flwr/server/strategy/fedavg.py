@@ -37,9 +37,13 @@ from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
 DEPRECATION_WARNING = """DEPRECATION WARNING: deprecated `eval_fn` return format
+
     loss, accuracy
+
 move to
+
     loss, {"accuracy": accuracy}
+
 instead. Note that compatibility with the deprecated return format will be
 removed in a future release.
 """
