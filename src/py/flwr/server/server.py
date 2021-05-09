@@ -18,7 +18,7 @@
 import concurrent.futures
 import timeit
 from logging import DEBUG, INFO, WARNING
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
     Disconnect,
@@ -26,10 +26,11 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    Parameters,
     Reconnect,
     Scalar,
     Weights,
-    parameters_to_weights,
+    weights_to_parameters,
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
@@ -95,7 +96,9 @@ class Server:
         self, client_manager: ClientManager, strategy: Optional[Strategy] = None
     ) -> None:
         self._client_manager: ClientManager = client_manager
-        self.weights: Weights = []
+        self.parameters: Parameters = Parameters(
+            tensors=[], tensor_type="numpy.ndarray"
+        )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
 
     def set_strategy(self, strategy: Strategy) -> None:
@@ -113,9 +116,9 @@ class Server:
 
         # Initialize parameters
         log(INFO, "Getting initial parameters")
-        self.weights = self._get_initial_parameters()
+        self.parameters = self._get_initial_parameters()
         log(INFO, "Evaluating initial parameters")
-        res = self.strategy.evaluate(weights=self.weights)
+        res = self.strategy.evaluate(parameters=self.parameters)
         if res is not None:
             log(
                 INFO,
@@ -134,12 +137,12 @@ class Server:
             # Train model and replace previous global model
             res_fit = self.fit_round(rnd=current_round)
             if res_fit:
-                weights_prime, _, _ = res_fit  # fit_metrics_aggregated
-                if weights_prime:
-                    self.weights = weights_prime
+                parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
+                if parameters_prime:
+                    self.parameters = parameters_prime
 
             # Evaluate model using strategy implementation
-            res_cen = self.strategy.evaluate(weights=self.weights)
+            res_cen = self.strategy.evaluate(parameters=self.parameters)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
                 log(
@@ -190,7 +193,7 @@ class Server:
 
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_evaluate(
-            rnd=rnd, weights=self.weights, client_manager=self._client_manager
+            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
         )
         if not client_instructions:
             log(INFO, "evaluate_round: no clients selected, cancel")
@@ -212,24 +215,35 @@ class Server:
         )
 
         # Aggregate the evaluation results
-        aggregated_result = self.strategy.aggregate_evaluate(rnd, results, failures)
-        if isinstance(aggregated_result, float) or aggregated_result is None:
+        aggregated_result: Union[
+            Tuple[Optional[float], Dict[str, Scalar]],
+            Optional[float],  # Deprecated
+        ] = self.strategy.aggregate_evaluate(rnd, results, failures)
+
+        metrics_aggregated: Dict[str, Scalar] = {}
+        if aggregated_result is None:
+            # Backward-compatibility, this will be removed in a future update
+            log(WARNING, DEPRECATION_WARNING_EVALUATE_ROUND)
+            loss_aggregated = None
+        elif isinstance(aggregated_result, float):
             # Backward-compatibility, this will be removed in a future update
             log(WARNING, DEPRECATION_WARNING_EVALUATE_ROUND)
             loss_aggregated = aggregated_result
-            metrics_aggregated: Dict[str, Scalar] = {}
         else:
             loss_aggregated, metrics_aggregated = aggregated_result
+
         return loss_aggregated, metrics_aggregated, (results, failures)
 
     def fit_round(
         self, rnd: int
-    ) -> Optional[Tuple[Optional[Weights], Dict[str, Scalar], FitResultsAndFailures]]:
+    ) -> Optional[
+        Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
+    ]:
         """Perform a single round of federated averaging."""
 
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
-            rnd=rnd, weights=self.weights, client_manager=self._client_manager
+            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
         )
         if not client_instructions:
             log(INFO, "fit_round: no clients selected, cancel")
@@ -251,26 +265,35 @@ class Server:
         )
 
         # Aggregate training results
-        aggregated_result = self.strategy.aggregate_fit(rnd, results, failures)
-        if isinstance(aggregated_result, list) or aggregated_result is None:
+        aggregated_result: Union[
+            Tuple[Optional[Parameters], Dict[str, Scalar]],
+            Optional[Weights],  # Deprecated
+        ] = self.strategy.aggregate_fit(rnd, results, failures)
+
+        metrics_aggregated: Dict[str, Scalar] = {}
+        if aggregated_result is None:
             # Backward-compatibility, this will be removed in a future update
             log(WARNING, DEPRECATION_WARNING_FIT_ROUND)
-            weights_aggregated = aggregated_result
-            metrics_aggregated: Dict[str, Scalar] = {}
+            parameters_aggregated = None
+        elif isinstance(aggregated_result, list):
+            # Backward-compatibility, this will be removed in a future update
+            log(WARNING, DEPRECATION_WARNING_FIT_ROUND)
+            parameters_aggregated = weights_to_parameters(aggregated_result)
         else:
-            weights_aggregated, metrics_aggregated = aggregated_result
-        return weights_aggregated, metrics_aggregated, (results, failures)
+            parameters_aggregated, metrics_aggregated = aggregated_result
+
+        return parameters_aggregated, metrics_aggregated, (results, failures)
 
     def disconnect_all_clients(self) -> None:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
         _ = shutdown(clients=[all_clients[k] for k in all_clients.keys()])
 
-    def _get_initial_parameters(self) -> Weights:
+    def _get_initial_parameters(self) -> Parameters:
         """Get initial parameters from one of the available clients."""
 
         # Server-side parameter initialization
-        parameters: Optional[Weights] = self.strategy.initialize_parameters(
+        parameters: Optional[Parameters] = self.strategy.initialize_parameters(
             client_manager=self._client_manager
         )
         if parameters is not None:
@@ -280,9 +303,8 @@ class Server:
         # Get initial parameters from one of the clients
         random_client = self._client_manager.sample(1)[0]
         parameters_res = random_client.get_parameters()
-        parameters = parameters_to_weights(parameters_res.parameters)
         log(INFO, "Received initial parameters from one random client")
-        return parameters
+        return parameters_res.parameters
 
 
 def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:

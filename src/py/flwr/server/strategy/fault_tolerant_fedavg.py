@@ -17,7 +17,15 @@
 
 from typing import Callable, Dict, List, Optional, Tuple
 
-from flwr.common import EvaluateRes, FitRes, Scalar, Weights, parameters_to_weights
+from flwr.common import (
+    EvaluateRes,
+    FitRes,
+    Parameters,
+    Scalar,
+    Weights,
+    parameters_to_weights,
+    weights_to_parameters,
+)
 from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
@@ -42,7 +50,7 @@ class FaultTolerantFedAvg(FedAvg):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         min_completion_rate_fit: float = 0.5,
         min_completion_rate_evaluate: float = 0.5,
-        initial_parameters: Optional[Weights] = None,
+        initial_parameters: Optional[Parameters] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -67,7 +75,7 @@ class FaultTolerantFedAvg(FedAvg):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Tuple[Optional[Weights], Dict[str, Scalar]]:
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
@@ -81,7 +89,7 @@ class FaultTolerantFedAvg(FedAvg):
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
-        return aggregate(weights_results), {}
+        return weights_to_parameters(aggregate(weights_results)), {}
 
     def aggregate_evaluate(
         self,

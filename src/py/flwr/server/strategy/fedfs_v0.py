@@ -25,6 +25,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    Parameters,
     Scalar,
     Weights,
     parameters_to_weights,
@@ -65,7 +66,7 @@ class FedFSv0(FedAvg):
         r_slow: int = 1,
         t_fast: int = 10,
         t_slow: int = 10,
-        initial_parameters: Optional[Weights] = None,
+        initial_parameters: Optional[Parameters] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -93,7 +94,7 @@ class FedFSv0(FedAvg):
 
     # pylint: disable=too-many-locals
     def configure_fit(
-        self, rnd: int, weights: Weights, client_manager: ClientManager
+        self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
 
@@ -119,7 +120,6 @@ class FedFSv0(FedAvg):
         )
 
         # Prepare parameters and config
-        parameters = weights_to_parameters(weights)
         config = {}
         if self.on_fit_config_fn is not None:
             # Use custom fit config function if provided
@@ -170,7 +170,7 @@ class FedFSv0(FedAvg):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Tuple[Optional[Weights], Dict[str, Scalar]]:
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
@@ -201,7 +201,7 @@ class FedFSv0(FedAvg):
                 self.contributions[cid] = []
             self.contributions[cid].append(contribution)
 
-        return weights_prime, {}
+        return weights_to_parameters(weights_prime), {}
 
     def aggregate_evaluate(
         self,
