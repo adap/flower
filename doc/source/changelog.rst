@@ -10,6 +10,12 @@ What's new?
     * (abstract) FedOpt
     * FedAdagrad
 
+* **Serialization-agnostic server** (`#721 <https://github.com/adap/flower/pull/721>`_)
+
+  The Flower server is now fully serialization-agnostic. Prior usage of class :code:`Weights` (which represents parameters as deserialized NumPy ndarrays) was replaced by class :code:`Parameters` (e.g., in :code:`Strategy`). :code:`Parameters` objects are fully serialization-agnostic and represents parameters as byte arrays, the :code:`tensor_type` attributes indicates how these byte arrays should be interpreted (e.g., for serialization/deserialization).
+
+  Built-in strategies implement this approach by handling serialization and deserialization to/from :code:`Weights` internally. Custom/3rd-party Strategy implementations should update to the slighly changed Strategy method definitions. Strategy authors can consult PR `#721 <https://github.com/adap/flower/pull/721>`_ to see how strategies can easily migrate to the new format.
+
 * **Custom metrics for server and strategies** (`#717 <https://github.com/adap/flower/pull/717>`_)
 
   The Flower server is now fully task-agnostic, all remaining instances of task-specific metrics (such as :code:`accuracy`) have been replaced by custom metrics dictionaries. Flower 0.15 introduced the capability to pass a dictionary containing custom metrics from client to server. As of this release, custom metrics replace task-specific metrics on the server.
