@@ -40,13 +40,16 @@ class Strategy(ABC):
     ) -> Optional[Parameters]:
         """Initialize the (global) model parameters.
 
-        Arguments:
+        Parameters
+        ----------
             client_manager: ClientManager. The client manager which holds all currently
                 connected clients.
 
-        Returns:
-            Optional `flwr.common.Parameters`. If parameters are returned, then the server
-            will treat these as the initial global model parameters.
+        Returns
+        -------
+        parameters: Parameters (optional)
+            If parameters are returned, then the server will treat these as the
+            initial global model parameters.
         """
 
     @abstractmethod
@@ -55,17 +58,21 @@ class Strategy(ABC):
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training.
 
-        Arguments:
-            rnd: Integer. The current round of federated learning.
-            parameters: Parameters. The current (global) model parameters.
-            client_manager: ClientManager. The client manager which holds all currently
-                connected clients.
+        Parameters
+        ----------
+        rnd : int
+            The current round of federated learning.
+        parameters : Parameters
+            The current (global) model parameters.
+        client_manager : ClientManager
+            The client manager which holds all currently connected clients.
 
-        Returns:
-            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
-            `FitIns` for this particular `ClientProxy`. If a particular `ClientProxy`
-            is not included in this list, it means that this `ClientProxy`
-            will not participate in the next round of federated learning.
+        Returns
+        -------
+        A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
+        `FitIns` for this particular `ClientProxy`. If a particular `ClientProxy`
+        is not included in this list, it means that this `ClientProxy`
+        will not participate in the next round of federated learning.
         """
 
     @abstractmethod
@@ -98,13 +105,14 @@ class Strategy(ABC):
 
         Returns
         -------
-            Optional `flwr.common.Parameters`. If parameters are returned, then the server
-            will treat these as the new global model parameters (i.e., it will replace the
-            previous parameters with the ones returned from this method). If `None` is
-            returned (e.g., because there were only failures and no viable results)
-            then the server will no update the previous model parameters, the updates
-            received in this round are discarded, and the global model parameters remain
-            the same.
+        parameters: Parameters (optional)
+            If parameters are returned, then the server will treat these as the
+            new global model parameters (i.e., it will replace the previous
+            parameters with the ones returned from this method). If `None` is
+            returned (e.g., because there were only failures and no viable
+            results) then the server will no update the previous model
+            parameters, the updates received in this round are discarded, and
+            the global model parameters remain the same.
         """
 
     @abstractmethod
