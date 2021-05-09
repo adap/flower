@@ -35,7 +35,8 @@ from flwr.common import (
 
 from .client import Client
 
-DEPRECATION_WARNING_FIT = """DEPRECATION WARNING: deprecated return format
+DEPRECATION_WARNING_FIT = """
+DEPRECATION WARNING: deprecated return format
 
     parameters, num_examples
 
@@ -46,7 +47,8 @@ move to
 instead. Note that the deprecated return format will be removed in a future
 release.
 """
-DEPRECATION_WARNING_EVALUATE_0 = """DEPRECATION WARNING: deprecated return format
+DEPRECATION_WARNING_EVALUATE_0 = """
+DEPRECATION WARNING: deprecated return format
 
     num_examples, loss, accuracy
 
@@ -57,7 +59,8 @@ move to
 instead. Note that the deprecated return format will be removed in a future
 release.
 """
-DEPRECATION_WARNING_EVALUATE_1 = """DEPRECATION WARNING: deprecated return format
+DEPRECATION_WARNING_EVALUATE_1 = """
+DEPRECATION WARNING: deprecated return format
 
     num_examples, loss, accuracy, {"custom_key": custom_val}
 
@@ -94,9 +97,9 @@ class NumPyClient(ABC):
 
         Parameters
         ----------
-        parameters: List[numpy.ndarray]
+        parameters : List[numpy.ndarray]
             The current (global) model parameters.
-        config: Dict[str, Scalar]
+        config : Dict[str, Scalar]
             Configuration parameters which allow the
             server to influence training on the client. It can be used to
             communicate arbitrary values from the server to the client, for

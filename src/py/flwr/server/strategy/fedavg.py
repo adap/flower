@@ -18,6 +18,7 @@ Paper: https://arxiv.org/abs/1602.05629
 """
 
 
+from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.common import (
@@ -25,18 +26,21 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    Parameters,
     Scalar,
     Weights,
     parameters_to_weights,
     weights_to_parameters,
 )
+from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
-DEPRECATION_WARNING = """DEPRECATION WARNING: deprecated `eval_fn` return format
+DEPRECATION_WARNING = """
+DEPRECATION WARNING: deprecated `eval_fn` return format
 
     loss, accuracy
 
@@ -46,6 +50,22 @@ move to
 
 instead. Note that compatibility with the deprecated return format will be
 removed in a future release.
+"""
+
+DEPRECATION_WARNING_INITIAL_PARAMETERS = """
+DEPRECATION WARNING: deprecated initial parameter type
+
+    flwr.common.Weights (i.e., List[np.ndarray])
+
+will be removed in a future update, move to
+
+    flwr.common.Parameters
+
+instead. Use
+
+    parameters = flwr.common.weights_to_parameters(weights)
+
+to easily transform `Weights` to `Parameters`.
 """
 
 
@@ -66,7 +86,7 @@ class FedAvg(Strategy):
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
-        initial_parameters: Optional[Weights] = None,
+        initial_parameters: Optional[Parameters] = None,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -91,7 +111,7 @@ class FedAvg(Strategy):
                 Function used to configure validation. Defaults to None.
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
-            initial_parameters (Weights, optional): Initial global model parameters.
+            initial_parameters (Parameters, optional): Initial global model parameters.
         """
         super().__init__()
         self.min_fit_clients = min_fit_clients
@@ -120,18 +140,25 @@ class FedAvg(Strategy):
         num_clients = int(num_available_clients * self.fraction_eval)
         return max(num_clients, self.min_eval_clients), self.min_available_clients
 
-    def initialize_parameters(self, client_manager: ClientManager) -> Optional[Weights]:
+    def initialize_parameters(
+        self, client_manager: ClientManager
+    ) -> Optional[Parameters]:
         """Initialize global model parameters."""
         initial_parameters = self.initial_parameters
         self.initial_parameters = None  # Don't keep initial parameters in memory
+        if isinstance(initial_parameters, list):
+            log(WARNING, DEPRECATION_WARNING_INITIAL_PARAMETERS)
+            initial_parameters = weights_to_parameters(weights=initial_parameters)
         return initial_parameters
 
-    def evaluate(self, weights: Weights) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        """Evaluate model weights using an evaluation function (if
-        provided)."""
+    def evaluate(
+        self, parameters: Parameters
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate model parameters using an evaluation function."""
         if self.eval_fn is None:
             # No evaluation function provided
             return None
+        weights = parameters_to_weights(parameters)
         eval_res = self.eval_fn(weights)
         if eval_res is None:
             return None
@@ -144,10 +171,9 @@ class FedAvg(Strategy):
         return loss, metrics
 
     def configure_fit(
-        self, rnd: int, weights: Weights, client_manager: ClientManager
+        self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        parameters = weights_to_parameters(weights)
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
@@ -166,7 +192,7 @@ class FedAvg(Strategy):
         return [(client, fit_ins) for client in clients]
 
     def configure_evaluate(
-        self, rnd: int, weights: Weights, client_manager: ClientManager
+        self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         # Do not configure federated evaluation if a centralized evaluation
@@ -175,7 +201,6 @@ class FedAvg(Strategy):
             return []
 
         # Parameters and config
-        parameters = weights_to_parameters(weights)
         config = {}
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
@@ -201,7 +226,7 @@ class FedAvg(Strategy):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Tuple[Optional[Weights], Dict[str, Scalar]]:
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
@@ -213,7 +238,7 @@ class FedAvg(Strategy):
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
-        return aggregate(weights_results), {}
+        return weights_to_parameters(aggregate(weights_results)), {}
 
     def aggregate_evaluate(
         self,
@@ -227,16 +252,14 @@ class FedAvg(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-        return (
-            weighted_loss_avg(
-                [
-                    (
-                        evaluate_res.num_examples,
-                        evaluate_res.loss,
-                        evaluate_res.accuracy,
-                    )
-                    for _, evaluate_res in results
-                ]
-            ),
-            {},
+        loss_aggregated = weighted_loss_avg(
+            [
+                (
+                    evaluate_res.num_examples,
+                    evaluate_res.loss,
+                    evaluate_res.accuracy,
+                )
+                for _, evaluate_res in results
+            ]
         )
+        return loss_aggregated, {}

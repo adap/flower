@@ -20,7 +20,13 @@ from unittest.mock import MagicMock
 
 from numpy import array, float32
 
-from flwr.common import FitRes, Parameters, Weights, weights_to_parameters
+from flwr.common import (
+    FitRes,
+    Parameters,
+    Weights,
+    parameters_to_weights,
+    weights_to_parameters,
+)
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
 
@@ -32,7 +38,10 @@ def test_aggregate_fit() -> None:
     # Prepare
     previous_weights: Weights = [array([0.1, 0.1, 0.1, 0.1], dtype=float32)]
     strategy = FedAdagrad(
-        eta=0.1, eta_l=0.316, tau=0.5, initial_parameters=previous_weights
+        eta=0.1,
+        eta_l=0.316,
+        tau=0.5,
+        initial_parameters=weights_to_parameters(previous_weights),
     )
     param_0: Parameters = weights_to_parameters(
         [array([0.2, 0.2, 0.2, 0.2], dtype=float32)]
@@ -56,7 +65,8 @@ def test_aggregate_fit() -> None:
     expected: Weights = [array([0.15, 0.15, 0.15, 0.15], dtype=float32)]
 
     # Execute
-    actual_list, _ = strategy.aggregate_fit(rnd=1, results=results, failures=[])
-    if actual_list:
+    actual_aggregated, _ = strategy.aggregate_fit(rnd=1, results=results, failures=[])
+    if actual_aggregated:
+        actual_list = parameters_to_weights(actual_aggregated)
         actual = actual_list[0]
     assert (actual == expected[0]).all()
