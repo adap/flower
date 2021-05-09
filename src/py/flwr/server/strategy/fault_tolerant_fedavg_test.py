@@ -18,7 +18,7 @@
 from typing import List, Optional, Tuple
 from unittest.mock import MagicMock
 
-from flwr.common import EvaluateRes, FitRes, Parameters, Weights
+from flwr.common import EvaluateRes, FitRes, Parameters, Weights, parameters_to_weights
 from flwr.server.client_proxy import ClientProxy
 
 from .fault_tolerant_fedavg import FaultTolerantFedAvg
@@ -30,7 +30,7 @@ def test_aggregate_fit_no_results_no_failures() -> None:
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.1)
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = []
-    expected: Optional[Weights] = None
+    expected: Optional[Parameters] = None
 
     # Execute
     actual, _ = strategy.aggregate_fit(1, results, failures)
@@ -45,7 +45,7 @@ def test_aggregate_fit_no_results() -> None:
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.1)
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = [Exception()]
-    expected: Optional[Weights] = None
+    expected: Optional[Parameters] = None
 
     # Execute
     actual, _ = strategy.aggregate_fit(1, results, failures)
@@ -62,7 +62,7 @@ def test_aggregate_fit_not_enough_results() -> None:
         (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, 1, 0.1))
     ]
     failures: List[BaseException] = [Exception(), Exception()]
-    expected: Optional[Weights] = None
+    expected: Optional[Parameters] = None
 
     # Execute
     actual, _ = strategy.aggregate_fit(1, results, failures)
@@ -85,7 +85,8 @@ def test_aggregate_fit_just_enough_results() -> None:
     actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
-    assert actual == expected
+    assert actual
+    assert parameters_to_weights(actual) == expected
 
 
 def test_aggregate_fit_no_failures() -> None:
@@ -102,7 +103,8 @@ def test_aggregate_fit_no_failures() -> None:
     actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
-    assert actual == expected
+    assert actual
+    assert parameters_to_weights(actual) == expected
 
 
 def test_aggregate_evaluate_no_results_no_failures() -> None:
