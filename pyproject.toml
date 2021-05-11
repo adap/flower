@@ -6,7 +6,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "0.16.0"
+version = "0.17.0"
 description = "Flower - A Friendly Federated Learning Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
