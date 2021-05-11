@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Unreleased
+v0.16.0 (2021-05-11)
 ----------
 
 What's new?
