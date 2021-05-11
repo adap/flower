@@ -1,8 +1,20 @@
 Changelog
 =========
 
-v0.16.0 (2021-05-11)
+Unreleased
 ----------
+
+What's new?
+
+* Nothing yet.
+
+Incompatible changes:
+
+* Nothing yet.
+
+
+v0.16.0 (2021-05-11)
+--------------------
 
 What's new?
 
