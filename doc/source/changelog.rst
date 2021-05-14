@@ -6,6 +6,18 @@ Unreleased
 
 What's new?
 
+* Nothing yet.
+
+Incompatible changes:
+
+* Nothing yet.
+
+
+v0.16.0 (2021-05-11)
+--------------------
+
+What's new?
+
 * **New built-in strategies** (`#549 <https://github.com/adap/flower/pull/549>`_)
     * (abstract) FedOpt
     * FedAdagrad
