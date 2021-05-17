@@ -76,8 +76,8 @@ black = "==20.8b1"
 docformatter = "==1.4"
 mypy = "==0.800"
 pylint = "==2.6.0"
-pytest = "==6.2.1"
-pytest-watch = "^4.2.0"
+pytest = "==6.2.4"
+pytest-watch = "==4.2.0"
 grpcio-tools = "==1.32.0"
 mypy-protobuf = "==2.4"
 rope = "==0.18.0"
@@ -100,3 +100,11 @@ target-version = ["py36", "py37", "py38"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
+
+[tool.pytest.ini_options]
+minversion = "6.2"
+addopts = "-qq"
+testpaths = [
+    "src/py/flwr",
+    "src/py/flwr_tool",
+]
