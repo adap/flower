@@ -16,16 +16,57 @@
 
 
 from logging import INFO
-from typing import Dict, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.server.ray_server.ray_client_proxy import RayClientProxy
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
+
+
+def start_ray_simulation(
+    config: Optional[Dict[str, int]] = None,
+    strategy: Optional[Strategy] = None,
+    create_client_fn: Optional[Callable[[str], flwr.client.Client]] = None,
+    # TODO Ray-related parameters (how many clients? ...)
+    num_clients: int = 10,
+) -> None:
+    """Start a Ray-based Flower simulation server.
+
+    Parameters
+    ----------
+    config: Optional[Dict[str, int]] (default: None).
+        The only currently supported values is `num_rounds`, so a full
+        configuration object instructing the server to perform three rounds of
+        federated learning looks like the following: `{"num_rounds": 3}`.
+    strategy: Optional[flwr.server.Strategy] (default: None)
+        An implementation of the abstract base class `flwr.server.Strategy`. If
+        no strategy is provided, then `start_server` will use
+        `flwr.server.strategy.FedAvg`.
+    """
+    initialized_server, initialized_config = _init_defaults(None, None, strategy)
+
+    # TODO Start Ray
+    log(
+        INFO,
+        "Flower simulation running (%s rounds)",
+        initialized_config["num_rounds"],
+    )
+
+    # TODO Ask Ray to create and register RayClientProxy objects with the ClientManager
+    for i in range(num_clients):
+        client_proxy = RayClientProxy(cid=str(i))
+        initialized_server.client_manager.register(client=client_proxy)
+
+    # Start training
+    _fl(server=initialized_server, config=initialized_config)
+
+    # TODO Stop Ray
 
 
 def start_server(

@@ -12,59 +12,51 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""gRPC-based Flower ClientProxy implementation."""
+"""Ray-based Flower ClientProxy implementation."""
 
 
 from flwr import common
 from flwr.common import serde
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.grpc_server.grpc_bridge import GRPCBridge
 
 
-class GrpcClientProxy(ClientProxy):
-    """Flower client proxy which delegates over the network using gRPC."""
+class RayClientProxy(ClientProxy):
+    """Flower client proxy which delegates work using Ray."""
 
     def __init__(
         self,
         cid: str,
-        bridge: GRPCBridge,
     ):
         super().__init__(cid)
-        self.bridge = bridge
 
     def get_parameters(self) -> common.ParametersRes:
         """Return the current local model parameters."""
-        get_parameters_msg = serde.get_parameters_to_proto()
-        client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(get_parameters=get_parameters_msg)
-        )
-        parameters_res = serde.parameters_res_from_proto(client_msg.parameters_res)
+
+        # TODO Ray: get parameters of one client
+        parameters_res: common.ParametersRes = None
+
         return parameters_res
 
     def fit(self, ins: common.FitIns) -> common.FitRes:
         """Refine the provided weights using the locally held dataset."""
-        fit_ins_msg = serde.fit_ins_to_proto(ins)
-        client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(fit_ins=fit_ins_msg)
-        )
-        fit_res = serde.fit_res_from_proto(client_msg.fit_res)
+
+        # TODO Ray: create client, perform work, return result
+        fit_res: common.FitRes = None
+
         return fit_res
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
-        evaluate_msg = serde.evaluate_ins_to_proto(ins)
-        client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(evaluate_ins=evaluate_msg)
-        )
-        evaluate_res = serde.evaluate_res_from_proto(client_msg.evaluate_res)
+
+        # TODO Ray: create client, evaluate parameters, return results
+        evaluate_res: common.EvaluateRes = None
+
         return evaluate_res
 
     def reconnect(self, reconnect: common.Reconnect) -> common.Disconnect:
         """Disconnect and (optionally) reconnect later."""
-        reconnect_msg = serde.reconnect_to_proto(reconnect)
-        client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(reconnect=reconnect_msg)
-        )
-        disconnect = serde.disconnect_from_proto(client_msg.disconnect)
+
+        # TODO Ray: unregister ClientProxy from ClientManager, re-register later
+        disconnect: common.Disconnect = None
+
         return disconnect
