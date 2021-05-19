@@ -12,5 +12,5 @@ python -m docformatter -c -r src/py/flwr -e src/py/flwr/proto             && ech
 python -m mypy src/py                                                     && echo "- mypy:          done" &&
 python -m pylint --ignore=src/py/flwr/proto src/py/flwr                   && echo "- pylint:        done" &&
 python -m flake8 src/py/flwr                                              && echo "- flake8:        done" &&
-python -m pytest -q src/py/flwr                                           && echo "- pytest:        done" &&
+python -m pytest                                                          && echo "- pytest:        done" &&
 echo "- All Python checks passed"
