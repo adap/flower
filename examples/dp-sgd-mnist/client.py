@@ -13,16 +13,17 @@ import common
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
+# global for tracking privacy
 PRIVACY_LOSS = 0
+
+
 # Define Flower client
-
-
 class MnistClient(fl.client.NumPyClient):
     def __init__(self, model, x_train, y_train, x_test, y_test, args):
         self.model = model
         self.x_train, self.y_train = x_train, y_train
         self.x_test, self.y_test = x_test, y_test
-        self.batch_size = args.batch_size    
+        self.batch_size = args.batch_size
         self.local_epochs = args.local_epochs
         self.dpsgd = args.dpsgd
 
@@ -62,7 +63,7 @@ class MnistClient(fl.client.NumPyClient):
                 self.noise_multiplier,
             )
             PRIVACY_LOSS += privacy_spent
-        
+
         self.model.set_weights(parameters)
         # Train the model
         self.model.fit(
