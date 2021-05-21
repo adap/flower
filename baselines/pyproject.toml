@@ -58,3 +58,6 @@ mypy-protobuf = "==1.23"
 rope = "==0.19.0"
 sphinx = "==3.4.3"
 sphinx-book-theme = "==0.0.39"
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = "duplicate-code"
