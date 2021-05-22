@@ -16,5 +16,5 @@ authors = [
 [tool.poetry.dependencies]
 python = "^3.8"
 tensorflow = "^2.5.0"
-tensorflow-privacy = {git = "https://github.com/tensorflow/privacy"}
+tensorflow-privacy = {git = "https://github.com/tensorflow/privacy", rev = "aaf4c25"}
 flwr = "^0.16.0"

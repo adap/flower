@@ -54,7 +54,8 @@ poetry run python3 client.py --partition 0
 ```
 ```shell
 # terminal 2
-poetry run python3 client.py --partition 1
+# We will set the second client to use `dpsgd`
+poetry run python3 client.py --partition 1 --dpsgd True
 ```
 
 Alternatively you can run all of it in one shell as follows:
@@ -62,10 +63,10 @@ Alternatively you can run all of it in one shell as follows:
 ```shell
 poetry run python3 server.py &
 poetry run python3 client.py --partition 0 &
-poetry run python3 client.py --partition 1
+poetry run python3 client.py --partition 1 --dpsgd True
 ```
 
-It should be noted that when starting the more than 2 clients, the number of total num of clients you intend to run and the data partition the client is expected to use must be specified. This is because the `num_clients` us used to split the dataset.
+It should be noted that when starting more than 2 clients, the total number of clients you intend to run and the data partition the client is expected to use must be specified. This is because the `num_clients` is used to split the dataset.
 For example, in case of 3 clients
 ```shell
 poetry run python3 server.py --num-clients 3  &
@@ -77,7 +78,7 @@ poetry run python3 client.py --num-clients 3 --partition 2 --dpsgd True
 
 Additional training parameters for the client and server can be referenced by passing `--help` to either script.
 
-Other things to note is that when all clients are running `dpsgd`, either increase the number of rounds or local epochs should be increased to achieve optimal performance.
+Other things to note is that when all clients are running `dpsgd`, either train for more rounds or increase the local epochs to achieve optimal performance. You shall need to carefully tune the hyperparameters to your specific setup.
 ```shell
 poetry run python3 server.py --num-clients 3  --num-rounds 20
 ```
