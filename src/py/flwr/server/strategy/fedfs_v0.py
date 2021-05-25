@@ -25,6 +25,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    Parameters,
     Scalar,
     Weights,
     parameters_to_weights,
@@ -54,7 +55,9 @@ class FedFSv0(FedAvg):
         min_fit_clients: int = 1,
         min_eval_clients: int = 1,
         min_available_clients: int = 1,
-        eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
+        eval_fn: Optional[
+            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        ] = None,
         min_completion_rate_fit: float = 0.5,
         min_completion_rate_evaluate: float = 0.5,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -63,7 +66,7 @@ class FedFSv0(FedAvg):
         r_slow: int = 1,
         t_fast: int = 10,
         t_slow: int = 10,
-        initial_parameters: Optional[Weights] = None,
+        initial_parameters: Optional[Parameters] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -91,7 +94,7 @@ class FedFSv0(FedAvg):
 
     # pylint: disable=too-many-locals
     def configure_fit(
-        self, rnd: int, weights: Weights, client_manager: ClientManager
+        self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
 
@@ -117,7 +120,6 @@ class FedFSv0(FedAvg):
         )
 
         # Prepare parameters and config
-        parameters = weights_to_parameters(weights)
         config = {}
         if self.on_fit_config_fn is not None:
             # Use custom fit config function if provided
@@ -168,16 +170,16 @@ class FedFSv0(FedAvg):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Optional[Weights]:
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
-            return None
+            return None, {}
 
         # Check if enough results are available
         completion_rate = len(results) / (len(results) + len(failures))
         if completion_rate < self.min_completion_rate_fit:
             # Not enough results for aggregation
-            return None
+            return None, {}
 
         # Convert results
         weights_results = [
@@ -199,27 +201,34 @@ class FedFSv0(FedAvg):
                 self.contributions[cid] = []
             self.contributions[cid].append(contribution)
 
-        return weights_prime
+        return weights_to_parameters(weights_prime), {}
 
     def aggregate_evaluate(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
-    ) -> Optional[float]:
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
-            return None
+            return None, {}
 
         # Check if enough results are available
         completion_rate = len(results) / (len(results) + len(failures))
         if completion_rate < self.min_completion_rate_evaluate:
             # Not enough results for aggregation
-            return None
+            return None, {}
 
-        return weighted_loss_avg(
-            [
-                (evaluate_res.num_examples, evaluate_res.loss, evaluate_res.accuracy)
-                for client, evaluate_res in results
-            ]
+        return (
+            weighted_loss_avg(
+                [
+                    (
+                        evaluate_res.num_examples,
+                        evaluate_res.loss,
+                        evaluate_res.accuracy,
+                    )
+                    for client, evaluate_res in results
+                ]
+            ),
+            {},
         )

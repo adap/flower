@@ -35,6 +35,43 @@ from flwr.common import (
 
 from .client import Client
 
+DEPRECATION_WARNING_FIT = """
+DEPRECATION WARNING: deprecated return format
+
+    parameters, num_examples
+
+move to
+
+    parameters, num_examples, {"custom_key": custom_val}
+
+instead. Note that the deprecated return format will be removed in a future
+release.
+"""
+DEPRECATION_WARNING_EVALUATE_0 = """
+DEPRECATION WARNING: deprecated return format
+
+    num_examples, loss, accuracy
+
+move to
+
+    loss, num_examples, {"accuracy": accuracy}
+
+instead. Note that the deprecated return format will be removed in a future
+release.
+"""
+DEPRECATION_WARNING_EVALUATE_1 = """
+DEPRECATION WARNING: deprecated return format
+
+    num_examples, loss, accuracy, {"custom_key": custom_val}
+
+move to
+
+    loss, num_examples, {"accuracy": accuracy}
+
+instead. Note that the deprecated return format will be removed in a future
+release.
+"""
+
 
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
@@ -43,7 +80,9 @@ class NumPyClient(ABC):
     def get_parameters(self) -> List[np.ndarray]:
         """Return the current local model parameters.
 
-        Returns:
+        Returns
+        -------
+        parameters : List[numpy.ndarray]
             The local model parameters as a list of NumPy ndarrays.
         """
 
@@ -56,22 +95,26 @@ class NumPyClient(ABC):
     ]:
         """Train the provided parameters using the locally held dataset.
 
-        Arguments:
-            parameters: List[numpy.ndarray]. The current (global) model
-                parameters.
-            config: Dict[str, Scalar]. Configuration parameters which allow the
-                server to influence training on the client. It can be used to
-                communicate arbitrary values from the server to the client, for
-                example, to set the number of (local) training epochs.
+        Parameters
+        ----------
+        parameters : List[numpy.ndarray]
+            The current (global) model parameters.
+        config : Dict[str, Scalar]
+            Configuration parameters which allow the
+            server to influence training on the client. It can be used to
+            communicate arbitrary values from the server to the client, for
+            example, to set the number of (local) training epochs.
 
-        Returns:
-            parameters: List[numpy.ndarray]. The locally updated model
-                parameters.
-            num_examples (int): The number of examples used for training.
-            metrics (Dict[str, Scalar], optional): A dictionary mapping
-                arbitrary string keys to values of type bool, bytes, float,
-                int, or str. It can be used to communicate arbitrary values
-                back to the server.
+        Returns
+        -------
+        parameters : List[numpy.ndarray]
+            The locally updated model parameters.
+        num_examples : int
+            The number of examples used for training.
+        metrics : Dict[str, Scalar]
+            A dictionary mapping arbitrary string keys to values of type
+            bool, bytes, float, int, or str. It can be used to communicate
+            arbitrary values back to the server.
         """
 
     @abstractmethod
@@ -84,29 +127,33 @@ class NumPyClient(ABC):
     ]:
         """Evaluate the provided weights using the locally held dataset.
 
-        Args:
-            parameters (List[np.ndarray]): The current (global) model
-                parameters.
-            config (Dict[str, Scalar]): Configuration parameters which allow the
-                server to influence evaluation on the client. It can be used to
-                communicate arbitrary values from the server to the client, for
-                example, to influence the number of examples used for
-                evaluation.
+        Parameters
+        ----------
+        parameters : List[np.ndarray]
+            The current (global) model parameters.
+        config : Dict[str, Scalar]
+            Configuration parameters which allow the server to influence
+            evaluation on the client. It can be used to communicate
+            arbitrary values from the server to the client, for example,
+            to influence the number of examples used for evaluation.
 
-        Returns:
-            loss (float): The evaluation loss of the model on the local
-                dataset.
-            num_examples (int): The number of examples used for evaluation.
-            metrics (Dict[str, Scalar]): A dictionary mapping arbitrary string
-                keys to values of type bool, bytes, float, int, or str. It can
-                be used to communicate arbitrary values back to the server.
+        Returns
+        -------
+        loss : float
+            The evaluation loss of the model on the local dataset.
+        num_examples : int
+            The number of examples used for evaluation.
+        metrics : Dict[str, Scalar]
+            A dictionary mapping arbitrary string keys to values of
+            type bool, bytes, float, int, or str. It can be used to
+            communicate arbitrary values back to the server.
 
-        Notes:
-            The previous return type format (int, float, float) and the
-            extended format (int, float, float, Dict[str, Scalar]) are still
-            supported for compatibility reasons. They will however be removed
-            in a future release, please migrate to
-            (float, int, Dict[str, Scalar]).
+        Warning
+        -------
+        The previous return type format (int, float, float) and the
+        extended format (int, float, float, Dict[str, Scalar]) are still
+        supported for compatibility reasons. They will however be removed
+        in a future release, please migrate to (float, int, Dict[str, Scalar]).
         """
 
 
@@ -131,6 +178,7 @@ class NumPyClientWrapper(Client):
         fit_begin = timeit.default_timer()
         results = self.numpy_client.fit(parameters, ins.config)
         if len(results) == 2:
+            print(DEPRECATION_WARNING_FIT)
             results = cast(Tuple[List[np.ndarray], int], results)
             parameters_prime, num_examples = results
             metrics: Optional[Metrics] = None
@@ -175,6 +223,7 @@ class NumPyClientWrapper(Client):
             ):
                 # Legacy case: num_examples, loss, accuracy
                 # This will be removed in a future release
+                print(DEPRECATION_WARNING_EVALUATE_0)
                 results = cast(Tuple[int, float, float], results)
                 num_examples, loss, accuracy = results
                 evaluate_res = EvaluateRes(
@@ -189,6 +238,7 @@ class NumPyClientWrapper(Client):
         elif len(results) == 4:
             # Legacy case: num_examples, loss, accuracy, metrics
             # This will be removed in a future release
+            print(DEPRECATION_WARNING_EVALUATE_1)
             results = cast(Tuple[int, float, float, Metrics], results)
             assert isinstance(results[0], int)
             assert isinstance(results[1], float)

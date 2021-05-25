@@ -27,6 +27,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    Parameters,
     Scalar,
     Weights,
     parameters_to_weights,
@@ -52,11 +53,13 @@ class QffedAvg(FedAvg):
         min_fit_clients: int = 1,
         min_eval_clients: int = 1,
         min_available_clients: int = 1,
-        eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
+        eval_fn: Optional[
+            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
-        initial_parameters: Optional[Weights] = None,
+        initial_parameters: Optional[Parameters] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -100,18 +103,11 @@ class QffedAvg(FedAvg):
         num_clients = int(num_available_clients * self.fraction_eval)
         return max(num_clients, self.min_eval_clients), self.min_available_clients
 
-    def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
-        """Evaluate model weights using an evaluation function (if
-        provided)."""
-        if self.eval_fn is None:
-            # No evaluation function provided
-            return None
-        return self.eval_fn(weights)
-
     def configure_fit(
-        self, rnd: int, weights: Weights, client_manager: ClientManager
+        self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
+        weights = parameters_to_weights(parameters)
         self.pre_weights = weights
         parameters = weights_to_parameters(weights)
         config = {}
@@ -132,7 +128,7 @@ class QffedAvg(FedAvg):
         return [(client, fit_ins) for client in clients]
 
     def configure_evaluate(
-        self, rnd: int, weights: Weights, client_manager: ClientManager
+        self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         # Do not configure federated evaluation if a centralized evaluation
@@ -141,7 +137,6 @@ class QffedAvg(FedAvg):
             return []
 
         # Parameters and config
-        parameters = weights_to_parameters(weights)
         config = {}
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
@@ -164,13 +159,13 @@ class QffedAvg(FedAvg):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Optional[Weights]:
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
-            return None
+            return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
-            return None
+            return None, {}
         # Convert results
 
         def norm_grad(grad_list: List[Weights]) -> float:
@@ -190,7 +185,7 @@ class QffedAvg(FedAvg):
             raise Exception("QffedAvg pre_weights are None in aggregate_fit")
 
         weights_before = self.pre_weights
-        eval_result = self.evaluate(weights_before)
+        eval_result = self.evaluate(weights_to_parameters(weights_before))
         if eval_result is not None:
             loss, _ = eval_result
 
@@ -213,23 +208,31 @@ class QffedAvg(FedAvg):
                 * np.float_power(loss + 1e-10, self.q_param)
             )
 
-        return aggregate_qffl(weights_before, deltas, hs_ffl)
+        weights_aggregated: Weights = aggregate_qffl(weights_before, deltas, hs_ffl)
+        return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
-    ) -> Optional[float]:
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
-            return None
+            return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
-            return None
-        return weighted_loss_avg(
-            [
-                (evaluate_res.num_examples, evaluate_res.loss, evaluate_res.accuracy)
-                for client, evaluate_res in results
-            ]
+            return None, {}
+        return (
+            weighted_loss_avg(
+                [
+                    (
+                        evaluate_res.num_examples,
+                        evaluate_res.loss,
+                        evaluate_res.accuracy,
+                    )
+                    for client, evaluate_res in results
+                ]
+            ),
+            {},
         )

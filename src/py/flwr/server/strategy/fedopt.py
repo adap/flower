@@ -21,7 +21,7 @@ Paper: https://arxiv.org/abs/2003.00295
 
 from typing import Callable, Dict, Optional, Tuple
 
-from flwr.common import Scalar, Weights
+from flwr.common import Parameters, Scalar, Weights, parameters_to_weights
 
 from .fedavg import FedAvg
 
@@ -38,11 +38,13 @@ class FedOpt(FedAvg):
         min_fit_clients: int = 2,
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
-        eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
+        eval_fn: Optional[
+            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
-        initial_parameters: Weights,
+        initial_parameters: Parameters,
         eta: float = 1e-1,
         eta_l: float = 1e-1,
         tau: float = 1e-9,
@@ -70,7 +72,7 @@ class FedOpt(FedAvg):
                 Function used to configure validation. Defaults to None.
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
-            initial_parameters (Weights): Initial set of parameters from the server.
+            initial_parameters (Parameters): Initial set of parameters from the server.
             eta (float, optional): Server-side learning rate. Defaults to 1e-1.
             eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.
             tau (float, optional): Controls the algorithm's degree of adaptability.
@@ -88,7 +90,7 @@ class FedOpt(FedAvg):
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
         )
-        self.current_weights = initial_parameters
+        self.current_weights = parameters_to_weights(initial_parameters)
         self.eta = eta
         self.eta_l = eta_l
         self.tau = tau

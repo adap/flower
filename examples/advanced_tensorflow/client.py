@@ -33,7 +33,11 @@ class CifarClient(fl.client.NumPyClient):
 
         # Train the model using hyperparameters from config
         history = self.model.fit(
-            self.x_train, self.y_train, batch_size, epochs, validation_split=0.1
+            self.x_train,
+            self.y_train,
+            batch_size,
+            epochs,
+            validation_split=0.1,
         )
 
         # Return updated model parameters and results
