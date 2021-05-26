@@ -11,8 +11,7 @@ import torch
 import dataset
 from SimpleNet import SimpleNet
 
-# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-DEVICE = torch.device("cpu")
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 DATASET = Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]
 
@@ -118,5 +117,5 @@ def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
 
 
 if __name__ == "__main__":
-    run_simulation(num_rounds=4, num_clients=2, fraction_fit=1)
+    run_simulation(num_rounds=2, num_clients=2, fraction_fit=0.5)
 

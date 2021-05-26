@@ -14,4 +14,3 @@ COPY . .
 
 # Start the simulation
 CMD python3 simulation.py
-
