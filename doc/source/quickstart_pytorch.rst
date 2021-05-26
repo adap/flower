@@ -174,7 +174,7 @@ which can be implemented in the following way:
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
-            return float(loss), len(self.testloader), {"accuracy":float(accuracy)}
+            return float(loss), len(testloader), {"accuracy":float(accuracy)}
 
 We can now create an instance of our class :code:`CifarClient` and add one line
 to actually run this client:
