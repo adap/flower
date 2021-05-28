@@ -18,7 +18,7 @@
 import concurrent.futures
 import timeit
 from logging import DEBUG, INFO, WARNING
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
     Disconnect,
@@ -256,7 +256,20 @@ class Server:
         )
 
         # Collect `fit` results from all clients participating in this round
-        results, failures = fit_clients(client_instructions)
+        results: List[Tuple[ClientProxy, FitRes]] = []
+        failures: List[BaseException] = []
+
+        def on_resolve(
+            result: Optional[Tuple[ClientProxy, FitRes]],
+            failure: Optional[BaseException],
+        ):
+            if failure is not None:
+                failures.append(failure)
+            if result is not None:
+                results.append(result)
+
+        fit_clients(client_instructions, on_resolve)
+
         log(
             DEBUG,
             "fit_round received %s results and %s failures",
@@ -283,6 +296,37 @@ class Server:
             parameters_aggregated, metrics_aggregated = aggregated_result
 
         return parameters_aggregated, metrics_aggregated, (results, failures)
+
+    def fit_round_continuous(
+        self, rnd: int
+    ) -> Optional[
+        Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
+    ]:
+        """Perform a single round of federated averaging."""
+
+        # Get clients and their respective instructions from strategy
+        client_instructions = self.strategy.configure_fit(
+            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
+        )
+        if not client_instructions:
+            log(INFO, "fit_round: no clients selected, cancel")
+            return None
+        log(
+            DEBUG,
+            "fit_round: strategy sampled %s clients (out of %s)",
+            len(client_instructions),
+            self._client_manager.num_available(),
+        )
+
+        fit_clients(
+            client_instructions,
+            # Use lambda to avoid passing rnd into  fit_clients
+            lambda results, failures: self.strategy.aggregate_fit(
+                rnd, results, failures
+            ),
+        )
+
+        return self.strategy.aggregate_fit(rnd)
 
     def disconnect_all_clients(self) -> None:
         """Send shutdown signal to all clients."""
@@ -336,26 +380,22 @@ def reconnect_client(
 
 
 def fit_clients(
-    client_instructions: List[Tuple[ClientProxy, FitIns]]
+    client_instructions: List[Tuple[ClientProxy, FitIns]],
+    on_resolve: Optional[Callable[[Tuple[ClientProxy, FitRes], BaseException]]] = None,
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(fit_client, c, ins) for c, ins in client_instructions
         ]
-        concurrent.futures.wait(futures)
-    # Gather results
-    results: List[Tuple[ClientProxy, FitRes]] = []
-    failures: List[BaseException] = []
-    for future in futures:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
-    return results, failures
+
+        for future in futures.as_completed(futures):
+            failure = future.exception()
+            if failure is not None:
+                on_resolve(None, failure)
+            else:
+                result = future.result()
+                on_resolve(result, None)
 
 
 def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
