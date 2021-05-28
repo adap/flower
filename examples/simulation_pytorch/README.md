@@ -13,7 +13,7 @@ docker build -t flower_federated_learning_simulation_pytorch .
 and afterwards simply start the simulation in docker using
 
 ```shell
-docker run -it --rm flower_federated_learning_simulation_pytorch
+docker run --ipc=host -it --rm flower_federated_learning_simulation_pytorch
 ```
 
 ## Project Setup

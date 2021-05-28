@@ -88,7 +88,6 @@ def test(net, testloader):
 
 def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
     """Start a FL simulation."""
-    fl.common.logger.configure("simulation", "simulation.log")
     # This will hold all the processes which we are going to create
     processes = []
 
@@ -117,5 +116,6 @@ def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
 
 
 if __name__ == "__main__":
-    run_simulation(num_rounds=2, num_clients=2, fraction_fit=0.5)
+    torch.multiprocessing.set_start_method("spawn") 
+    run_simulation(num_rounds=1, num_clients=10, fraction_fit=1)
 
