@@ -32,6 +32,7 @@ This will create a new directory called `simulation_pytorch` containing the foll
 -- pyproject.toml
 -- README.md
 -- run.sh
+-- SimpleNet.py
 -- simulation.py
 ```
 
