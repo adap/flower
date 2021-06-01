@@ -44,16 +44,17 @@ If you don't see any errors you're good to go!
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
 ```shell
+# terminal 1
 poetry run python3 server.py
 ```
 Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminals and run the following command in each:
 
 ```shell
-# terminal 1
+# terminal 2
 poetry run python3 client.py --partition 0
 ```
 ```shell
-# terminal 2
+# terminal 3
 # We will set the second client to use `dpsgd`
 poetry run python3 client.py --partition 1 --dpsgd True
 ```
@@ -67,10 +68,12 @@ poetry run python3 client.py --partition 1 --dpsgd True
 ```
 
 It should be noted that when starting more than 2 clients, the total number of clients you intend to run and the data partition the client is expected to use must be specified. This is because the `num_clients` is used to split the dataset.
+
 For example, in case of 3 clients
+
 ```shell
-poetry run python3 server.py --num-clients 3  &
-poetry run python3 server.py --num-clients 3 --partition 0 --dpsgd True &
+poetry run python3 server.py --num-clients 3 &
+poetry run python3 client.py --num-clients 3 --partition 0 --dpsgd True &
 poetry run python3 client.py --num-clients 3 --partition 1 &
 poetry run python3 client.py --num-clients 3 --partition 2 --dpsgd True
 ```
@@ -79,10 +82,11 @@ poetry run python3 client.py --num-clients 3 --partition 2 --dpsgd True
 Additional training parameters for the client and server can be referenced by passing `--help` to either script.
 
 Other things to note is that when all clients are running `dpsgd`, either train for more rounds or increase the local epochs to achieve optimal performance. You shall need to carefully tune the hyperparameters to your specific setup.
+
 ```shell
 poetry run python3 server.py --num-clients 3  --num-rounds 20
 ```
 
 ```shell
-poetry run python3 client.py --partition 1 --local-epochs 4 --dpsgd True
+poetry run python3 client.py --num-clients 3 --partition 1 --local-epochs 4 --dpsgd True
 ```
