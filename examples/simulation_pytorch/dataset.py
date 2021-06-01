@@ -7,7 +7,6 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, TensorDataset
-from numpy import ndarray
 
 XY = Tuple[np.ndarray, np.ndarray]
 XYList = List[XY]
