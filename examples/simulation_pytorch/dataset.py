@@ -7,13 +7,14 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, TensorDataset
+from numpy import ndarray
 
 XY = Tuple[np.ndarray, np.ndarray]
 XYList = List[XY]
 PartitionedDataset = List[Tuple[XY, XY]]
 
 
-def cifar_to_numpy():
+def cifar_to_numpy() -> Tuple[Tuple[ndarray, ndarray], Tuple[ndarray, ndarray]]:
     """Download dataset from torchvision and convert it to numpy array."""
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
