@@ -14,7 +14,7 @@ XYList = List[XY]
 PartitionedDataset = List[Tuple[XY, XY]]
 
 
-def cifar_to_numpy() -> Tuple[Tuple[ndarray, ndarray], Tuple[ndarray, ndarray]]:
+def cifar_to_numpy() -> Tuple[XY, XY]:
     """Download dataset from torchvision and convert it to numpy array."""
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -47,7 +47,7 @@ def partition(x: np.ndarray, y: np.ndarray, num_partitions: int) -> XYList:
     )
 
 
-def create_partitions(source_dataset: XY, num_partitions: int,) -> XYList:
+def create_partitions(source_dataset: XY, num_partitions: int) -> XYList:
     """Create partitioned version of a source dataset."""
     x, y = source_dataset
     x, y = shuffle(x, y)
@@ -56,7 +56,7 @@ def create_partitions(source_dataset: XY, num_partitions: int,) -> XYList:
     return xy_partitions
 
 
-def load(num_partitions: int,) -> PartitionedDataset:
+def load(num_partitions: int) -> PartitionedDataset:
     """Create partitioned version of CIFAR-10."""
     xy_train, xy_test = cifar_to_numpy()
     xy_train_partitions = create_partitions(xy_train, num_partitions)
