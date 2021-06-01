@@ -22,32 +22,34 @@ def cifar_to_numpy():
     trainset = torchvision.datasets.CIFAR10(
         root="./data", train=True, download=True, transform=transform
     )
-    trainloader = torch.utils.data.DataLoader(
-        trainset, batch_size=len(trainset), shuffle=True, num_workers=2
-    )
-
     testset = torchvision.datasets.CIFAR10(
         root="./data", train=False, download=True, transform=transform
     )
-    testloader = torch.utils.data.DataLoader(
-        testset, batch_size=len(testset), shuffle=False, num_workers=2
-    )
 
-    train_X = next(iter(trainloader))[0].numpy()
-    test_X = next(iter(testloader))[0].numpy()
-    train_Y = next(iter(trainloader))[1].numpy()
-    test_Y = next(iter(testloader))[1].numpy()
-    return (train_X, train_Y), (test_X, test_Y)
+    # convert data shape from 32x32x3 to 3x32x32 by transpose
+    xy_train = trainset.data.transpose(0, 3, 1, 2), np.array(trainset.targets)
+    xy_test = testset.data.transpose(0, 3, 1, 2), np.array(testset.targets)
+
+    return xy_train, xy_test
+
+
+def shuffle(x: np.ndarray, y: np.ndarray) -> XY:
+    """Shuffle x and y."""
+    idx = np.random.permutation(len(x))
+    return x[idx], y[idx]
 
 
 def partition(x: np.ndarray, y: np.ndarray, num_partitions: int) -> XYList:
     """Split x and y into a number of partitions."""
-    return list(zip(np.split(x, num_partitions), np.split(y, num_partitions)))
+    return list(
+        zip(np.array_split(x, num_partitions), np.array_split(y, num_partitions))
+    )
 
 
 def create_partitions(source_dataset: XY, num_partitions: int,) -> XYList:
     """Create partitioned version of a source dataset."""
     x, y = source_dataset
+    x, y = shuffle(x, y)
     xy_partitions = partition(x, y, num_partitions)
 
     return xy_partitions
