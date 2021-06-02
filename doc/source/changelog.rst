@@ -6,9 +6,51 @@ Unreleased
 
 What's new?
 
+* Nothing yet.
+
+Incompatible changes:
+
+* Nothing yet.
+
+
+v0.16.0 (2021-05-11)
+--------------------
+
+What's new?
+
 * **New built-in strategies** (`#549 <https://github.com/adap/flower/pull/549>`_)
     * (abstract) FedOpt
     * FedAdagrad
+
+* **Custom metrics for server and strategies** (`#717 <https://github.com/adap/flower/pull/717>`_)
+
+  The Flower server is now fully task-agnostic, all remaining instances of task-specific metrics (such as :code:`accuracy`) have been replaced by custom metrics dictionaries. Flower 0.15 introduced the capability to pass a dictionary containing custom metrics from client to server. As of this release, custom metrics replace task-specific metrics on the server.
+
+  Custom metric dictionaries are now used in two user-facing APIs: they are returned from Strategy methods :code:`aggregate_fit`/:code:`aggregate_evaluate` and they enable evaluation functions passed to build-in strategies (via :code:`eval_fn`) to return more than two evaluation metrics. Strategies can even return *aggregated* metrics dictionaries for the server to keep track of.
+
+  Stratey implementations should migrate their :code:`aggregate_fit` and :code:`aggregate_evaluate` methods to the new return type (e.g., by simply returning an empty :code:`{}`), server-side evaluation functions should migrate from :code:`return loss, accuracy` to :code:`return loss, {"accuracy": accuracy}`.
+
+  Flower 0.15-style return types are deprecated (but still supported), compatibility will be removed in a future release.
+
+* **Migration warnings for deprecated functionality** (`#690 <https://github.com/adap/flower/pull/690>`_)
+
+  Earlier versions of Flower were often migrated to new APIs, while maintaining compatibility with legacy APIs. This release introduces detailed warning messages if usage of deprecated APIs is detected. The new warning messages often provide details on how to migrate to more recent APIs, thus easing the transition from one release to another.
+
+* Improved docs and docstrings (`#691 <https://github.com/adap/flower/pull/691>`_ `#692 <https://github.com/adap/flower/pull/692>`_ `#713 <https://github.com/adap/flower/pull/713>`_)
+
+* MXNet example and documentation
+
+* FedBN implementation in example PyTorch: From Centralized To Federated (`#696 <https://github.com/adap/flower/pull/696>`_ `#702 <https://github.com/adap/flower/pull/702>`_ `#705 <https://github.com/adap/flower/pull/705>`_)
+
+Incompatible changes:
+
+* **Serialization-agnostic server** (`#721 <https://github.com/adap/flower/pull/721>`_)
+
+  The Flower server is now fully serialization-agnostic. Prior usage of class :code:`Weights` (which represents parameters as deserialized NumPy ndarrays) was replaced by class :code:`Parameters` (e.g., in :code:`Strategy`). :code:`Parameters` objects are fully serialization-agnostic and represents parameters as byte arrays, the :code:`tensor_type` attributes indicates how these byte arrays should be interpreted (e.g., for serialization/deserialization).
+
+  Built-in strategies implement this approach by handling serialization and deserialization to/from :code:`Weights` internally. Custom/3rd-party Strategy implementations should update to the slighly changed Strategy method definitions. Strategy authors can consult PR `#721 <https://github.com/adap/flower/pull/721>`_ to see how strategies can easily migrate to the new format.
+
+* Deprecated :code:`flwr.server.Server.evaluate`, use :code:`flwr.server.Server.evaluate_round` instead (`#717 <https://github.com/adap/flower/pull/717>`_)
 
 
 v0.15.0 (2021-03-12)
