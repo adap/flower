@@ -15,10 +15,12 @@
 
 import json
 import pickle
-import numpy as np
 from pathlib import Path
 from typing import List
+
+import numpy as np
 from torch.utils.data import Dataset
+
 from flwr.dataset.utils.common import XY
 
 LEAF_CHARACTERS = (
