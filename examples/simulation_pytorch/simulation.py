@@ -116,5 +116,5 @@ def run_simulation(num_rounds: int, num_clients: int, fraction_fit: float):
 
 
 if __name__ == "__main__":
-    torch.multiprocessing.set_start_method("spawn") 
+    torch.multiprocessing.set_start_method("spawn")
     run_simulation(num_rounds=100, num_clients=10, fraction_fit=0.5)
