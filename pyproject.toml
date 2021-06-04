@@ -71,18 +71,18 @@ http-logger = ["boto3", "boto3_type_annotations", "tensorflow-cpu", "boto3", "bo
 ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
 
 [tool.poetry.dev-dependencies]
-isort = "==5.7.0"
-black = "==20.8b1"
+isort = "==5.8.0"
+black = "==21.5b1"
 docformatter = "==1.4"
 mypy = "==0.800"
 pylint = "==2.6.0"
+flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
 grpcio-tools = "==1.32.0"
 mypy-protobuf = "==2.4"
-rope = "==0.18.0"
+rope = "==0.19.0"
 sphinx = "==3.4.3"
-flake8 = "==3.8.4"
 sphinx-book-theme = "==0.0.39"
 
 [tool.isort]
