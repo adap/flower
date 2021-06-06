@@ -16,7 +16,7 @@
 
 
 from logging import INFO
-from typing import Callable, Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
@@ -25,16 +25,18 @@ from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
 from flwr.server.ray_server.ray_client_proxy import RayClientProxy
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
+from flwr.client.client import Client
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 
 def start_ray_simulation(
+    pool_size: int,  # number of total partitions/clients
+    data_partitions_dir: str,  # path where data partitions for each client exist
+    client_resources: Dict[str, int],  # compute/memory resources for each client
+    client_type: Client,
     config: Optional[Dict[str, int]] = None,
     strategy: Optional[Strategy] = None,
-    create_client_fn: Optional[Callable[[str], flwr.client.Client]] = None,
-    # TODO Ray-related parameters (how many clients? ...)
-    num_clients: int = 10,
 ) -> None:
     """Start a Ray-based Flower simulation server.
 
@@ -49,24 +51,22 @@ def start_ray_simulation(
         no strategy is provided, then `start_server` will use
         `flwr.server.strategy.FedAvg`.
     """
-    initialized_server, initialized_config = _init_defaults(None, None, strategy)
+    initialized_server, initialized_config = _init_defaults(None, config, strategy)
 
-    # TODO Start Ray
     log(
         INFO,
-        "Flower simulation running (%s rounds)",
-        initialized_config["num_rounds"],
+        f"Starting Flower Ray simulation running: {initialized_config}",
     )
 
-    # TODO Ask Ray to create and register RayClientProxy objects with the ClientManager
-    for i in range(num_clients):
-        client_proxy = RayClientProxy(cid=str(i))
-        initialized_server.client_manager.register(client=client_proxy)
+    # Ask Ray to create and register RayClientProxy objects with the ClientManager
+    for i in range(pool_size):
+        client_proxy = RayClientProxy(cid=str(i), client_type=client_type,
+                                      resources=client_resources,
+                                      fed_dir=data_partitions_dir)
+        initialized_server.client_manager().register(client=client_proxy)
 
     # Start training
     _fl(server=initialized_server, config=initialized_config)
-
-    # TODO Stop Ray
 
 
 def start_server(

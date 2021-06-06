@@ -16,12 +16,14 @@
 
 
 from .app import start_server as start_server
+from .app import start_ray_simulation as start_ray_simulation
 from .client_manager import SimpleClientManager as SimpleClientManager
 from .history import History as History
 from .server import Server as Server
 
 __all__ = [
     "start_server",
+    "start_ray_simulation",
     "SimpleClientManager",
     "History",
     "Server",
