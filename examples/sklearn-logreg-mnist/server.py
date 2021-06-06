@@ -4,7 +4,8 @@ from sklearn.metrics import log_loss
 from sklearn.linear_model import LogisticRegression
 from typing import Dict
 
-def fit_round(rnd: int)->Dict:
+
+def fit_round(rnd: int) -> Dict:
     """Send round number to client"""
     return {"rnd": rnd}
 
