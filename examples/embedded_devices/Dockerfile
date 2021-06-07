@@ -19,4 +19,10 @@ WORKDIR /app
 ADD client.py /app
 ADD utils.py /app
 
+# update pip
+RUN pip3 install --upgrade pip
+
+# making sure the latest version of flower is installed
+RUN pip3 install flwr==0.16.0
+
 ENTRYPOINT ["python3","-u","./client.py"]
