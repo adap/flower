@@ -39,16 +39,5 @@ RUN git checkout v0.7.0 && git submodule update --recursive
 RUN apt-get install libavcodec-dev libavformat-dev libswscale-dev libjpeg8-dev zlib1g-dev -y
 RUN python3 setup.py install
 
-# Installing flower
-RUN pip3 install flwr==0.13.0
-
-# Deps for an exciting future project
-RUN apt-get install libffi-dev python-dev python3-h5py libhdf5-dev libssl-dev -y
-RUN pip3 install scikit-build
-RUN pip3 install cmake joblib numpy pre-commit psutil==5.6.6 \
-    pyyaml ruamel.yaml scipy sentencepiece SoundFile \
-    sphinx-rtd-theme==0.4.3 Sphinx tqdm
-
-
 WORKDIR /app
 RUN echo "done!"
