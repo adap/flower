@@ -15,6 +15,7 @@
 
 import torch
 import torch.nn as nn
+
 from flwr_baselines.dataloaders.leaf.shakespeare import LEAF_CHARACTERS
 
 

@@ -20,7 +20,7 @@ def check_missing_init_files(absolute_path: str) -> None:
 
     for dir_path, _, files_in_dir in path:
         # As some directories are automatically generated we are going to ignore them
-        if any([re.search(iw, dir_path) is not None for iw in ignore_list]):
+        if any(re.search(iw, dir_path) is not None for iw in ignore_list):
             continue
 
         # If no init is found in current directory add a warning_message to warning_list
