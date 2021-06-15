@@ -25,7 +25,7 @@ class ShakespeareLeafNet(nn.Module):
         chars: str = LEAF_CHARACTERS,
         seq_len: int = 80,
         hidden_size: int = 256,
-        embedding_dim=8,
+        embedding_dim: int = 8,
     ):
         """Create Shakespeare model for LEAF baselines.
 
@@ -50,7 +50,7 @@ class ShakespeareLeafNet(nn.Module):
         )
         self.decoder = nn.Linear(self.hidden_size, self.dict_size)
 
-    def forward(self, x):
+    def forward(self, x: torch.TensorType) -> torch.TensorType:
         encoded_seq = self.encoder(x)  # (batch, seq_len, embedding_dim)
         outputs, (h_n, c_n) = self.lstm(encoded_seq)  # (batch, seq_len, hidden_size)
         pred = self.decoder(h_n[-1])
