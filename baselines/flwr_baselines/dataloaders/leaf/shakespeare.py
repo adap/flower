@@ -15,9 +15,11 @@
 
 import json
 import pickle
-from os import PathLike
+from pathlib import Path
+from typing import List
 
 import numpy as np
+from flwr.dataset.utils.common import XY
 from torch.utils.data import Dataset
 
 LEAF_CHARACTERS = (
@@ -32,7 +34,7 @@ class ShakespeareDataset(Dataset):
         Dataset (torch.utils.data.Dataset): PyTorch Dataset
     """
 
-    def __init__(self, path_to_pickle: PathLike):
+    def __init__(self, path_to_pickle: Path):
 
         self.CHARACTERS = LEAF_CHARACTERS
         self.NUM_LETTERS = len(self.CHARACTERS)  # 80
@@ -45,14 +47,14 @@ class ShakespeareDataset(Dataset):
             self.idx = data["idx"]
             self.char = data["character"]
 
-    def word_to_indices(self, word: str):
+    def word_to_indices(self, word: str) -> List[int]:
         indices = [self.CHARACTERS.find(c) for c in word]
         return indices
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.y)
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> XY:
         x = np.array(self.word_to_indices(self.x[idx]))
         y = np.array(self.CHARACTERS.find(self.y[idx]))
         return x, y
