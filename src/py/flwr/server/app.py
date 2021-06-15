@@ -27,6 +27,10 @@ from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
 from flwr.client.client import Client
 
+# TODO: dynamically imported when user wants to use start_ray_simulation()
+import ray
+
+
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 
@@ -35,6 +39,7 @@ def start_ray_simulation(
     data_partitions_dir: str,  # path where data partitions for each client exist
     client_resources: Dict[str, int],  # compute/memory resources for each client
     client_type: Client,
+    ray_init_config: Dict = {},
     config: Optional[Dict[str, int]] = None,
     strategy: Optional[Strategy] = None,
 ) -> None:
@@ -52,6 +57,14 @@ def start_ray_simulation(
         `flwr.server.strategy.FedAvg`.
     """
     initialized_server, initialized_config = _init_defaults(None, config, strategy)
+
+    # initialize Ray
+    ray.init(**ray_init_config)
+
+    log(
+        INFO,
+        f"Ray initialized with resources: {ray.cluster_resources()}",
+    )
 
     log(
         INFO,

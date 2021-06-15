@@ -37,8 +37,6 @@ class RayClientProxy(ClientProxy):
         self.resources = resources
         self.fed_dir = fed_dir
 
-        assert(ray.is_initialized()), "Ray is not initialized :("
-
     def get_parameters(self) -> common.ParametersRes:
         """Return the current local model parameters."""
 
