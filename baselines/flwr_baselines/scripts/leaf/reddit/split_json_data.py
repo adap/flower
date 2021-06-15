@@ -34,7 +34,7 @@ def split_json_and_save(
     list_datasets: List[Tuple[str, float]],
     path_to_json: PathLike,
     save_root: PathLike,
-    users_list: Optional[List[str]] = [],
+    users_list: Optional[List[str]] = None,
 ):
     """Splits LEAF generated datasets and creates individual client partitions.
 
@@ -45,6 +45,9 @@ def split_json_and_save(
         save_root (PathLike): Root directory where to save the individual client
             partition files.
     """
+    if users_list is None:
+        users_list = []
+
     new_users = []
     with open(path_to_json) as f:
         js = json.load(f)
