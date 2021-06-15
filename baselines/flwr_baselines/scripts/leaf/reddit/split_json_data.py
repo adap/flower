@@ -32,19 +32,22 @@ def check_between_zero_and_one(value: str):
 
 def split_json_and_save(
     list_datasets: List[Tuple[str, float]],
-    path_to_json: Path,
-    save_root: Path,
-    users_list: Optional[List[str]] = [],
+    path_to_json: PathLike,
+    save_root: PathLike,
+    users_list: Optional[List[str]] = None,
 ):
     """Splits LEAF generated datasets and creates individual client partitions.
 
     Args:
         list_datasets (List[Tuple[str, float]]): list containting dataset tags
             and fraction of dataset split.
-        path_to_json (Path): Path to LEAF JSON file containing dataset.
-        save_root (Path): Root directory where to save the individual client
+        path_to_json (PathLike): Path to LEAF JSON file containing dataset.
+        save_root (PathLike): Root directory where to save the individual client
             partition files.
     """
+    if users_list is None:
+        users_list = []
+
     new_users = []
     with open(path_to_json) as f:
         js = json.load(f)
@@ -114,7 +117,7 @@ if __name__ == "__main__":
 
     # Split train dataset into train and validation
     # then save files for each client
-    original_train_dataset = Path(args.leaf_train_json)
+    original_train_dataset = args.leaf_train_json
     train_frac = 1.0 - args.val_frac
     list_datasets = [("train", train_frac), ("val", args.val_frac)]
     users_list = split_json_and_save(
@@ -124,7 +127,7 @@ if __name__ == "__main__":
     )
 
     # Split and save the test files
-    original_test_dataset = Path(args.leaf_test_json)
+    original_test_dataset = args.leaf_test_json
     list_datasets = [("test", 1.0)]
     split_json_and_save(
         list_datasets=list_datasets,
