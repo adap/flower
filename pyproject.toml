@@ -39,7 +39,6 @@ classifiers = [
 ]
 packages = [
     { include = "flwr", from = "src/py" },
-    { include = "flwr_example", from = "src/py" },
     { include = "flwr_experimental", from = "src/py" },
 ]
 exclude = [
@@ -94,7 +93,7 @@ multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
-known_first_party = ["flwr", "flwr_example", "flwr_experimental", "flwr_tool"]
+known_first_party = ["flwr", "flwr_experimental", "flwr_tool"]
 
 [tool.black]
 line-length = 88

@@ -7,11 +7,6 @@ pipelines, usually leveraging popular machine learning frameworks such as
 `PyTorch <https://pytorch.org/>`_ or
 `TensorFlow <https://www.tensorflow.org/>`_.
 
-.. note::
-   Flower usage examples used to be bundled with Flower in a package called
-   `flwr_example`. We are migrating those examples to standalone projects to
-   make them easier to use. All new examples are based in the directory
-   `examples <https://github.com/adap/flower/tree/main/examples>`_.
 
 The following examples are available as standalone projects.
 
