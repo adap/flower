@@ -1,10 +1,10 @@
 from collections import OrderedDict
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
+from models import Net
 
 import flwr as fl
 
@@ -28,12 +28,13 @@ def train(net, trainloader, epochs):
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     for _ in range(epochs):
         for images, _ in trainloader:
-            images = images.to(DEVICE)
             optimizer.zero_grad()
             recon_images, mu, logvar = net(images)
-            recon_loss = F.binary_cross_entropy(recon_images, images)
+            recon_loss = F.binary_cross_entropy(recon_images, images, reduction="mean")
             kld_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
+            print(recon_loss, kld_loss)
             loss = recon_loss + kld_loss
+            # print(loss)
             loss.backward()
             optimizer.step()
 
@@ -52,79 +53,18 @@ def test(net, testloader):
     return loss / total
 
 
-def generate(net):
+def sample(net):
     """ "Generates samples using the decoder of the trained VAE"""
     with torch.no_grad():  # TODO: Accept the desired latent variable values
-        z = [0.1] * 10
-        gen_image = net.decode(torch.tensor(z))
+        z = torch.randn(10)
+        z = z.to(DEVICE)
+        gen_image = net.decode(z)
     return gen_image
 
-
-class Flatten(nn.Module):
-    """Flattens input by reshaping it into a one-dimensional tensor."""
-
-    def forward(self, input):
-        return input.view(input.size(0), -1)
-
-
-class UnFlatten(nn.Module):
-    """Unflattens a tensor converting it to a desired shape."""
-
-    def forward(self, input):  # TODO:
-        return input.view(-1, 16, 5, 5)
-
-
-class Net(nn.Module):
-    def __init__(self, h_dim=400, z_dim=10) -> None:
-        super(Net, self).__init__()
-        self.encoder = nn.Sequential(
-            nn.Conv2d(3, 6, 5),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(6, 16, 5),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            Flatten(),
-        )
-
-        self.fc1 = nn.Linear(h_dim, z_dim)
-        self.fc2 = nn.Linear(h_dim, z_dim)
-        self.fc3 = nn.Linear(z_dim, h_dim)
-
-        self.decoder = nn.Sequential(
-            UnFlatten(),
-            nn.Upsample(scale_factor=2),
-            nn.ConvTranspose2d(16, 6, 5),
-            nn.ReLU(),
-            nn.Upsample(scale_factor=2),
-            nn.ConvTranspose2d(6, 3, 5),
-            nn.Sigmoid(),
-        )
-
-    def reparametrize(self, h):
-        """Reparametrization layer of VAE"""
-        mu, logvar = self.fc1(h), self.fc2(h)
-        std = torch.exp(logvar / 2)
-        eps = torch.randn_like(std)
-        z = mu + std * eps
-        return z, mu, logvar
-
-    def encode(self, x):
-        """Encoder of the VAE"""
-        h = self.encoder(x)
-        z, mu, logvar = self.reparametrize(h)
-        return z, mu, logvar
-
-    def decode(self, z):
-        """Decoder of the VAE"""
-        z = self.fc3(z)
-        z = self.decoder(z)
-        return z
-
-    def forward(self, x):
-        z, mu, logvar = self.encode(x)
-        z = self.decode(z)
-        return z, mu, logvar
+def generate(net, image):
+    """Reproduce the input with trained VAE"""
+    with torch.no_grad():
+        return net.forward(image)
 
 
 # Load model and data
