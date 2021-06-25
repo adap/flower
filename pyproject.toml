@@ -24,8 +24,10 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -75,7 +77,7 @@ isort = "==5.8.0"
 black = "==21.5b1"
 docformatter = "==1.4"
 mypy = "==0.800"
-pylint = "==2.6.0"
+pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
