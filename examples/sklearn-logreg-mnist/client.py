@@ -19,7 +19,7 @@ if __name__ == "__main__":
     model = LogisticRegression(
         penalty="l2",
         max_iter=1,  # local epoch
-        warm_start=True,  # prevent refreshing to weights when fitting
+        warm_start=True,  # prevent refreshing weights when fitting
     )
 
     # Setting initial parameters, akin to model.compile for keras models
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
         def fit(self, parameters, config):  # type: ignore
             utils.set_model_params(model, parameters)
-            # Ignore converegence failure due to low local epochs
+            # Ignore convergence failure due to low local epochs
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 model.fit(X_train, y_train)

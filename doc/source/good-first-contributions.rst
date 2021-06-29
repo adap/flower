@@ -25,7 +25,6 @@ We wish we had more time to write usage examples because we believe they help
 users to get started with building what they want to build. Here are a few
 ideas where we'd be happy to accept a PR:
 
-- First scikit-learn example (MNIST)
 - First MXNet 1.6 example (MNIST)
 - ImageNet (PyTorch/TensorFlow)
 - LSTM (PyTorch/TensorFlow)

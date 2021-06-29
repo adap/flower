@@ -1,6 +1,6 @@
 # Flower Example using scikit-learn
 
-This example of Flower uses `scikit-learn`'s `LogisticRegression` model to train a federated learning system. It will help you understanding how to adapt Flower for use with `scikit-learn`.
+This example of Flower uses `scikit-learn`'s `LogisticRegression` model to train a federated learning system. It will help you understand how to adapt Flower for use with `scikit-learn`.
 Running this example in itself is quite easy.
 
 ## Project Setup
