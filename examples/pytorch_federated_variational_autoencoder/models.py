@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+
 
 class Flatten(nn.Module):
     """Flattens input by reshaping it into a one-dimensional tensor"""
@@ -14,14 +14,19 @@ class UnFlatten(nn.Module):
 
     def forward(self, input):  # TODO:
         return input.view(-1, 16, 6, 6)
-        
+
+
 class Net(nn.Module):
     def __init__(self, h_dim=576, z_dim=10) -> None:
         super(Net, self).__init__()
         self.encoder = nn.Sequential(
-            nn.Conv2d(in_channels=3, out_channels= 6, kernel_size=4, stride=2), # [batch, 6, 15, 15]
+            nn.Conv2d(
+                in_channels=3, out_channels=6, kernel_size=4, stride=2
+            ),  # [batch, 6, 15, 15]
             nn.ReLU(),
-            nn.Conv2d(in_channels=6,out_channels= 16, kernel_size= 5, stride=2), #[batch, 16, 6, 6]
+            nn.Conv2d(
+                in_channels=6, out_channels=16, kernel_size=5, stride=2
+            ),  # [batch, 16, 6, 6]
             nn.ReLU(),
             Flatten(),
         )
@@ -32,10 +37,10 @@ class Net(nn.Module):
 
         self.decoder = nn.Sequential(
             UnFlatten(),
-            nn.ConvTranspose2d(in_channels= 16,out_channels= 6,kernel_size= 5, stride=2),
+            nn.ConvTranspose2d(in_channels=16, out_channels=6, kernel_size=5, stride=2),
             nn.ReLU(),
-            nn.ConvTranspose2d(in_channels= 6,out_channels= 3,kernel_size= 4, stride=2),
-            nn.Softmax(),
+            nn.ConvTranspose2d(in_channels=6, out_channels=3, kernel_size=4, stride=2),
+            nn.Tanh(),
         )
 
     def reparametrize(self, h):
@@ -60,5 +65,5 @@ class Net(nn.Module):
 
     def forward(self, x):
         z, mu, logvar = self.encode(x)
-        z = self.decode(z)
-        return z, mu, logvar
+        z_decode = self.decode(z)
+        return z_decode, mu, logvar
