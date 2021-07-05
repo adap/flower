@@ -1,10 +1,12 @@
 from collections import OrderedDict
+
+import numpy as np
 import torch
 import torch.nn.functional as F
 import torchvision.transforms as transforms
+from models import Net
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
-from models import Net
 
 import flwr as fl
 
@@ -30,11 +32,11 @@ def train(net, trainloader, epochs):
         for images, _ in trainloader:
             optimizer.zero_grad()
             recon_images, mu, logvar = net(images)
-            recon_loss = F.binary_cross_entropy(recon_images, images, reduction="mean")
+            recon_loss = F.mse_loss(recon_images, images)
             kld_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
-            print(recon_loss, kld_loss)
-            loss = recon_loss + kld_loss
-            # print(loss)
+            loss = (
+                recon_loss + 0.05 * kld_loss
+            )  # TODO: Balancing Reconstruction and KL-Divergence loss
             loss.backward()
             optimizer.step()
 
@@ -46,7 +48,7 @@ def test(net, testloader):
         for data in testloader:
             images = data[0].to(DEVICE)
             recon_images, mu, logvar = net(images)
-            recon_loss = F.binary_cross_entropy(recon_images, images)
+            recon_loss = F.mse_loss(recon_images, images)
             kld_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
             loss += recon_loss + kld_loss
             total += len(images)
@@ -54,12 +56,13 @@ def test(net, testloader):
 
 
 def sample(net):
-    """ "Generates samples using the decoder of the trained VAE"""
-    with torch.no_grad():  # TODO: Accept the desired latent variable values
+    """Generates samples using the decoder of the trained VAE"""
+    with torch.no_grad():
         z = torch.randn(10)
         z = z.to(DEVICE)
         gen_image = net.decode(z)
     return gen_image
+
 
 def generate(net, image):
     """Reproduce the input with trained VAE"""
