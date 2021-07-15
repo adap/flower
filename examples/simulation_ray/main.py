@@ -94,7 +94,7 @@ class CifarRayClient(fl.client.NumPyClient):
         self.set_parameters(parameters)
 
         # load data for this client and get trainloader
-        num_workers = len(ray.get_resource_ids()["CPU"])
+        num_workers = len(ray.worker.get_resource_ids()["CPU"])
         trainloader = get_dataloader(self.fed_dir, self.cid, is_train=True,
                                      batch_size=int(config["batch_size"]),
                                      workers=num_workers)
@@ -114,7 +114,7 @@ class CifarRayClient(fl.client.NumPyClient):
         self.set_parameters(parameters)
 
         # load data for this client and get trainloader
-        num_workers = len(ray.get_resource_ids()["CPU"])
+        num_workers = len(ray.worker.get_resource_ids()["CPU"])
         valloader = get_dataloader(self.fed_dir, self.cid, is_train=False,
                                    batch_size=50,
                                    workers=num_workers)
@@ -197,7 +197,6 @@ if __name__ == "__main__":
 
     # (optional) specify ray config
     ray_config = {'include_dashboard': False}
-
     fl.simulation.start_ray_simulation(pool_size, fed_dir, client_resources,
                                        CifarRayClient, config={"num_rounds": 20},
                                        ray_init_config=ray_config,
