@@ -198,7 +198,7 @@ if __name__ == "__main__":
     # (optional) specify ray config
     ray_config = {'include_dashboard': False}
 
-    fl.server.start_ray_simulation(pool_size, fed_dir, client_resources,
-                                   CifarRayClient, config={"num_rounds": 20},
-                                   ray_init_config=ray_config,
-                                   strategy=strategy)
+    fl.simulation.start_ray_simulation(pool_size, fed_dir, client_resources,
+                                       CifarRayClient, config={"num_rounds": 20},
+                                       ray_init_config=ray_config,
+                                       strategy=strategy)

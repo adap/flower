@@ -12,74 +12,69 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server app."""
+"""Flower Simulation app."""
 
 
 from logging import INFO
 from typing import Dict, Optional, Tuple
 
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.simulation.ray_simulation.ray_client_proxy import RayClientProxy
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
+from flwr.client.client import Client
 
-DEFAULT_SERVER_ADDRESS = "[::]:8080"
+# TODO: dynamically imported when user wants to use start_ray_simulation()
+import ray
 
 
-def start_server(
-    server_address: str = DEFAULT_SERVER_ADDRESS,
-    server: Optional[Server] = None,
+def start_ray_simulation(
+    pool_size: int,  # number of total partitions/clients
+    data_partitions_dir: str,  # path where data partitions for each client exist
+    client_resources: Dict[str, int],  # compute/memory resources for each client
+    client_type: Client,
+    ray_init_config: Dict = {},
     config: Optional[Dict[str, int]] = None,
     strategy: Optional[Strategy] = None,
-    grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
 ) -> None:
-    """Start a Flower server using the gRPC transport layer.
+    """Start a Ray-based Flower simulation server.
 
-    Arguments:
-        server_address: Optional[str] (default: `"[::]:8080"`). The IPv6
-            address of the server.
-        server: Optional[flwr.server.Server] (default: None). An implementation
-            of the abstract base class `flwr.server.Server`. If no instance is
-            provided, then `start_server` will create one.
-        config: Optional[Dict[str, int]] (default: None). The only currently
-            supported values is `num_rounds`, so a full configuration object
-            instructing the server to perform three rounds of federated
-            learning looks like the following: `{"num_rounds": 3}`.
-        strategy: Optional[flwr.server.Strategy] (default: None). An
-            implementation of the abstract base class `flwr.server.Strategy`.
-            If no strategy is provided, then `start_server` will use
-            `flwr.server.strategy.FedAvg`.
-        grpc_max_message_length: int (default: 536_870_912, this equals 512MB).
-            The maximum length of gRPC messages that can be exchanged with the
-            Flower clients. The default should be sufficient for most models.
-            Users who train very large models might need to increase this
-            value. Note that the Flower clients need to be started with the
-            same value (see `flwr.client.start_client`), otherwise clients will
-            not know about the increased limit and block larger messages.
-
-    Returns:
-        None.
+    Parameters
+    ----------
+    config: Optional[Dict[str, int]] (default: None).
+        The only currently supported values is `num_rounds`, so a full
+        configuration object instructing the server to perform three rounds of
+        federated learning looks like the following: `{"num_rounds": 3}`.
+    strategy: Optional[flwr.server.Strategy] (default: None)
+        An implementation of the abstract base class `flwr.server.Strategy`. If
+        no strategy is provided, then `start_server` will use
+        `flwr.server.strategy.FedAvg`.
     """
-    initialized_server, initialized_config = _init_defaults(server, config, strategy)
+    initialized_server, initialized_config = _init_defaults(None, config, strategy)
 
-    # Start gRPC server
-    grpc_server = start_insecure_grpc_server(
-        client_manager=initialized_server.client_manager(),
-        server_address=server_address,
-        max_message_length=grpc_max_message_length,
-    )
+    # initialize Ray
+    ray.init(**ray_init_config)
+
     log(
         INFO,
-        "Flower server running (insecure, %s rounds)",
-        initialized_config["num_rounds"],
+        f"Ray initialized with resources: {ray.cluster_resources()}",
     )
 
-    _fl(server=initialized_server, config=initialized_config)
+    log(
+        INFO,
+        f"Starting Flower Ray simulation running: {initialized_config}",
+    )
 
-    # Stop the gRPC server
-    grpc_server.stop(grace=1)
+    # Ask Ray to create and register RayClientProxy objects with the ClientManager
+    for i in range(pool_size):
+        client_proxy = RayClientProxy(cid=str(i), client_type=client_type,
+                                      resources=client_resources,
+                                      fed_dir=data_partitions_dir)
+        initialized_server.client_manager().register(client=client_proxy)
+
+    # Start training
+    _fl(server=initialized_server, config=initialized_config)
 
 
 def _init_defaults(

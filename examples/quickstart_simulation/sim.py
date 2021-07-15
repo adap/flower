@@ -39,7 +39,7 @@ def main() -> None:
             return loss, len(self.x_test), {"accuracy": accuracy}
 
     # Start Flower simulation
-    fl.server.start_ray_simulation(
+    fl.simulation.start_ray_simulation(
         pool_size=1_000_000,
         data_partitions_dir="",  # path where data partitions for each client exist
         client_resources={'num_cpus': 4},  # compute/memory resources for each client
