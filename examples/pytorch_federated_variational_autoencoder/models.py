@@ -12,7 +12,7 @@ class Flatten(nn.Module):
 class UnFlatten(nn.Module):
     """Unflattens a tensor converting it to a desired shape"""
 
-    def forward(self, input):  # TODO:
+    def forward(self, input): 
         return input.view(-1, 16, 6, 6)
 
 

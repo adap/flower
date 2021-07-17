@@ -36,7 +36,7 @@ def train(net, trainloader, epochs):
             kld_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
             loss = (
                 recon_loss + 0.05 * kld_loss
-            )  # TODO: Balancing Reconstruction and KL-Divergence loss
+            ) 
             loss.backward()
             optimizer.step()
 
@@ -73,7 +73,6 @@ def generate(net, image):
 # Load model and data
 net = Net()
 trainloader, testloader = load_data()
-
 
 class CifarClient(fl.client.NumPyClient):
     def get_parameters(self):
