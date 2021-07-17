@@ -9,7 +9,7 @@ Start by cloning the example project. We prepared a single-line command that you
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/pytorch_federated_variational_autoencoder . && rm -rf flower && cd pytorch_federated_variational_autoencoder
 ```
-This will create a new directory called `pytorch_from_centralized_to_federated` containing the following files:
+This will create a new directory called `pytorch_federated_variational_autoencoder` containing the following files:
 
 ```shell
 -- pyproject.toml
