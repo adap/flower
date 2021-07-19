@@ -151,3 +151,6 @@ examples/**/dataset/**
 
 # Datasets
 baselines/datasets/leaf
+
+# Testing secure aggregation
+src/py/flwr/tests/
