@@ -101,7 +101,6 @@ class Server:
             tensors=[], tensor_type="numpy.ndarray"
         )
         self.strategy: Strategy = strategy if strategy is not None else SecAgg()
-        print("SECAGG")
 
     def set_strategy(self, strategy: Strategy) -> None:
         """Replace server strategy."""
