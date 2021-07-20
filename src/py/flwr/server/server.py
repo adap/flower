@@ -19,6 +19,7 @@ import concurrent.futures
 import timeit
 from logging import DEBUG, INFO, WARNING
 from typing import Dict, List, Optional, Tuple, Union
+import ray
 
 from flwr.common import (
     Disconnect,
@@ -213,6 +214,24 @@ class Server:
             len(results),
             len(failures),
         )
+        if (len(failures)>0):
+            if(isinstance(failures[0],ray.exceptions.RayTaskError)):
+                sorted_failures = {} # Entries of the form {cause : (failure, count)
+                for failure in failures:
+                     cause = "%s" % failure.cause
+                     if (not (cause in sorted_failures.keys())):
+                         sorted_failures[cause] = (failure,1)
+                     else:
+                         sorted_failures[cause] = (sorted_failures[cause][0],
+                                                   sorted_failures[cause][1]+1
+                                                  )
+                error_string = "evaluation_round received the following errors: "
+                for (failure,count) in sorted_failures.values():
+                    error_string +="\n%s (error occured in %i clients)" % (failure,count)
+                log(
+                    DEBUG,
+                    error_string
+                )
 
         # Aggregate the evaluation results
         aggregated_result: Union[
@@ -263,7 +282,24 @@ class Server:
             len(results),
             len(failures),
         )
-
+        if (len(failures)>0):
+            if(isinstance(failures[0],ray.exceptions.RayTaskError)):
+                sorted_failures = {} # Entries of the form {cause : (failure, count)
+                for failure in failures:
+                     cause = "%s" % failure.cause
+                     if (not (cause in sorted_failures.keys())):
+                         sorted_failures[cause] = (failure,1)
+                     else:
+                         sorted_failures[cause] = (sorted_failures[cause][0],
+                                                   sorted_failures[cause][1]+1
+                                                  )
+                error_string = "fit_round received the following errors: "
+                for (failure,count) in sorted_failures.values():
+                    error_string +="\n%s (error occured in %i clients)" % (failure,count)
+                log(
+                    DEBUG,
+                    error_string
+                )
         # Aggregate training results
         aggregated_result: Union[
             Tuple[Optional[Parameters], Dict[str, Scalar]],
