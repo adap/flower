@@ -36,7 +36,8 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
-from flwr.server.strategy import FedAvg, Strategy
+from flwr.server.strategy import Strategy
+from flwr.server.strategy.secagg import SecAgg
 
 DEPRECATION_WARNING_EVALUATE = """
 DEPRECATION WARNING: Method
@@ -99,7 +100,8 @@ class Server:
         self.parameters: Parameters = Parameters(
             tensors=[], tensor_type="numpy.ndarray"
         )
-        self.strategy: Strategy = strategy if strategy is not None else FedAvg()
+        self.strategy: Strategy = strategy if strategy is not None else SecAgg()
+        print("SECAGG")
 
     def set_strategy(self, strategy: Strategy) -> None:
         """Replace server strategy."""
