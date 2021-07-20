@@ -36,7 +36,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
-from flwr.server.strategy import Strategy
+from flwr.server.strategy import Strategy, FedAvg
 from flwr.server.strategy.secagg import SecAgg
 
 DEPRECATION_WARNING_EVALUATE = """
@@ -100,7 +100,7 @@ class Server:
         self.parameters: Parameters = Parameters(
             tensors=[], tensor_type="numpy.ndarray"
         )
-        self.strategy: Strategy = strategy if strategy is not None else SecAgg()
+        self.strategy: Strategy = strategy if strategy is not None else FedAvg()
 
     def set_strategy(self, strategy: Strategy) -> None:
         """Replace server strategy."""
@@ -133,10 +133,15 @@ class Server:
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
+        print(isinstance(self.strategy,SecAgg))
 
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
-            res_fit = self.fit_round(rnd=current_round)
+            if isinstance(self.strategy,SecAgg):
+                #hard code methods
+                res_fit = self.fit_round(rnd=current_round)
+            else:
+                res_fit = self.fit_round(rnd=current_round)
             if res_fit:
                 parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
