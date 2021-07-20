@@ -227,7 +227,11 @@ class Server:
                                                   )
                 error_string = "evaluation_round received the following errors: "
                 for (failure,count) in sorted_failures.values():
-                    error_string +="\n%s (error occured in %i clients)" % (failure,count)
+                    error_string += "\n%s (error occured in %i " % (failure,count)
+                    if (count==1):
+                        error_string += "client)"
+                    else:
+                        error_string += "clients)"
                 log(
                     DEBUG,
                     error_string
@@ -295,7 +299,11 @@ class Server:
                                                   )
                 error_string = "fit_round received the following errors: "
                 for (failure,count) in sorted_failures.values():
-                    error_string +="\n%s (error occured in %i clients)" % (failure,count)
+                    error_string += "\n%s (error occured in %i " % (failure,count)
+                    if (count==1):
+                        error_string += "client)"
+                    else:
+                        error_string += "clients)"
                 log(
                     DEBUG,
                     error_string
