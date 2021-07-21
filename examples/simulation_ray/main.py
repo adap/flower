@@ -90,7 +90,7 @@ class CifarRayClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
 
-        print(f"fit() on client cid={self.cid}")
+        # print(f"fit() on client cid={self.cid}")
         self.set_parameters(parameters)
 
         # load data for this client and get trainloader
@@ -110,7 +110,7 @@ class CifarRayClient(fl.client.NumPyClient):
 
     def evaluate(self, parameters, config):
 
-        print(f"evaluate() on client cid={self.cid}")
+        # print(f"evaluate() on client cid={self.cid}")
         self.set_parameters(parameters)
 
         # load data for this client and get trainloader
@@ -175,29 +175,43 @@ def get_eval_fn(
 
 
 # Start Ray simulation (a _default server_ will be created)
+# This example does:
+# 1. Downloads CIFAR-10
+# 2. Partitions the dataset into N splits, where N is the total number of
+#    clients. We refere to this as `pool_size`. The partition can be IID or non-IID
+# 4. Starts a Ray-based simulation where a % of clients are sample each round.
+# 5. After the M rounds end, the global model is evaluated on the entire testset.
+#    Also, the global model is evaluated on the valset partition residing in each
+#    client. This is useful to get a sense on how well the global model can generalise
+#    to each client's data.
 if __name__ == "__main__":
 
-    pool_size = 100  # number of partions (= number of total clients in the experiment)
+    pool_size = 100  # number of dataset partions (= number of total clients)
     client_resources = {'num_cpus': 1}  # each client will get allocated 1 CPUs
 
     # download CIFAR10 dataset
     train_path, testset = getCIFAR10()
 
-    # partition dataset
+    # partition dataset (use a large `alpha` to make it IID;
+    # a small value (e.g. 1) will make it non-IID)
+    # This will create a new directory called "federated: in the directory where
+    # CIFAR-10 lives. Inside it, there will be N=pool_size sub-directories each with
+    # its own train/set split.
     fed_dir = do_fl_partitioning(train_path, pool_size=pool_size, alpha=1000,
                                  num_classes=10, val_ratio=0.1)
 
+    # configure the strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.1,
         min_fit_clients=10,
-        min_available_clients=pool_size,
+        min_available_clients=pool_size,  # All clients should be available
         on_fit_config_fn=fit_config,
-        eval_fn=get_eval_fn(testset),
+        eval_fn=get_eval_fn(testset),  # centralised testset evaluation of global model
     )
 
     # (optional) specify ray config
     ray_config = {'include_dashboard': False}
     fl.simulation.start_ray_simulation(pool_size, fed_dir, client_resources,
-                                       CifarRayClient, config={"num_rounds": 20},
+                                       CifarRayClient, config={"num_rounds": 5},
                                        ray_init_config=ray_config,
                                        strategy=strategy)
