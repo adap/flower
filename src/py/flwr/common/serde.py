@@ -173,14 +173,15 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     )
 
 
-def ask_keys_to_proto()->ServerMessage.AskKeys:
-    return ServerMessage.AskKeys()
+def ask_keys_to_proto()->ServerMessage.SecaggMsg.AskKeys:
+    return ServerMessage.SecaggMsg(ask_keys=ServerMessage.SecaggMsg.AskKeys())
+    
 
-def ask_keys_res_to_proto(res:  typing.ParametersRes)-> ClientMessage.AskKeysRes:
-    return ClientMessage.AskKeysRes(pk1=res.pk1, pk2=res.pk2)
+def ask_keys_res_to_proto(res:  typing.ParametersRes)-> ClientMessage.SecaggRes:
+    return ClientMessage.SecaggRes(ask_keys_res=ClientMessage.SecaggRes.AskKeysRes(pk1=res.pk1, pk2=res.pk2))
 
-def ask_keys_res_from_proto(msg:ClientMessage.AskKeysRes)-> typing.AskKeysRes:
-    return typing.AskKeysRes(pk1=msg.pk1, pk2=msg.pk2)
+def ask_keys_res_from_proto(msg:ClientMessage.SecaggRes)-> typing.AskKeysRes:
+    return typing.AskKeysRes(pk1=msg.ask_keys_res.pk1, pk2=msg.ask_keys_res.pk2)
 
 # === Evaluate messages ===
 
