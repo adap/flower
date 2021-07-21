@@ -50,6 +50,14 @@ class GrpcClientProxy(ClientProxy):
         )
         fit_res = serde.fit_res_from_proto(client_msg.fit_res)
         return fit_res
+    
+    def ask_keys(self)->common.AskKeysRes:
+        ask_keys_msg=serde.ask_keys_to_proto()
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(ask_keys=ask_keys_msg)
+        )
+        ask_keys_res=serde.ask_keys_res_from_proto(client_msg.ask_keys_res)
+        return ask_keys_res
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""

@@ -95,3 +95,9 @@ class Disconnect:
     """Disconnect message from client to server."""
 
     reason: str
+
+@dataclass
+class AskKeysRes:
+    """Ask Keys Stage Response from client to server"""
+    pk1: bytes
+    pk2: bytes

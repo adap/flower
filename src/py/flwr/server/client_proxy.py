@@ -25,6 +25,7 @@ from flwr.common import (
     FitRes,
     ParametersRes,
     Reconnect,
+    AskKeysRes
 )
 
 
@@ -49,3 +50,7 @@ class ClientProxy(ABC):
     @abstractmethod
     def reconnect(self, reconnect: Reconnect) -> Disconnect:
         """Disconnect and (optionally) reconnect later."""
+
+    @abstractmethod
+    def ask_keys(self) -> AskKeysRes:
+        """Ask for public keys"""

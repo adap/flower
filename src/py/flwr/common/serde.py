@@ -173,6 +173,15 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     )
 
 
+def ask_keys_to_proto()->ServerMessage.AskKeys:
+    return ServerMessage.AskKeys()
+
+def ask_keys_res_to_proto(res:  typing.ParametersRes)-> ClientMessage.AskKeysRes:
+    return ClientMessage.AskKeysRes(pk1=res.pk1, pk2=res.pk2)
+
+def ask_keys_res_from_proto(msg:ClientMessage.AskKeysRes)-> typing.AskKeysRes:
+    return typing.AskKeysRes(pk1=msg.pk1, pk2=msg.pk2)
+
 # === Evaluate messages ===
 
 

@@ -38,6 +38,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import Strategy, FedAvg
 from flwr.server.strategy.secagg import SecAgg
+from flwr.common.typing import AskKeysRes
 
 DEPRECATION_WARNING_EVALUATE = """
 DEPRECATION WARNING: Method
@@ -89,6 +90,8 @@ ReconnectResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, Disconnect]], List[BaseException]
 ]
 
+AskKeysResultsAndFailures = Tuple[List[Tuple[ClientProxy, AskKeysRes]], List[BaseException]]
+
 
 class Server:
     """Flower server."""
@@ -133,19 +136,26 @@ class Server:
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
-        print(isinstance(self.strategy,SecAgg))
 
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
             if isinstance(self.strategy,SecAgg):
                 #hard code methods
+                #self.parameters=self.secagg_fit_round(rnd=current_round)
+                print("START SECAGG")
+                self.test=self.secagg_fit_round(rnd=current_round)
+                #TO BE REMOVED
                 res_fit = self.fit_round(rnd=current_round)
+                if res_fit:
+                    parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
+                    if parameters_prime:
+                        self.parameters = parameters_prime
             else:
                 res_fit = self.fit_round(rnd=current_round)
-            if res_fit:
-                parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
-                if parameters_prime:
-                    self.parameters = parameters_prime
+                if res_fit:
+                    parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
+                    if parameters_prime:
+                        self.parameters = parameters_prime
 
             # Evaluate model using strategy implementation
             res_cen = self.strategy.evaluate(parameters=self.parameters)
@@ -290,6 +300,16 @@ class Server:
 
         return parameters_aggregated, metrics_aggregated, (results, failures)
 
+    def secagg_fit_round(self, rnd: int)-> Optional[
+        Optional[Parameters]
+    ]:  
+        #change this to sampling some
+        self.available_users=self._client_manager.all().values()
+        self.ask_keys_results_and_failures = ask_keys(self.available_users)
+        #share_keys()
+        #ask_vectors()
+        #unmask_vectors()
+
     def disconnect_all_clients(self) -> None:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
@@ -400,3 +420,34 @@ def evaluate_client(
     """Evaluate parameters on a single client."""
     evaluate_res = client.evaluate(ins)
     return client, evaluate_res
+
+def ask_keys(available_clients:List[ClientProxy])->AskKeysResultsAndFailures:
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(ask_keys_client, c) for c in available_clients
+        ]
+        concurrent.futures.wait(futures)
+    results: List[Tuple[ClientProxy, AskKeysRes]] = []
+    failures: List[BaseException] = []
+    for future in futures:
+        failure = future.exception()
+        if failure is not None:
+            failures.append(failure)
+        else:
+            # Success case
+            result = future.result()
+            results.append(result)
+    return results, failures
+
+
+def ask_keys_client(client:ClientProxy)->Tuple[ClientProxy, AskKeysRes]:
+    ask_keys_res=client.ask_keys()
+    return client, ask_keys_res
+
+def share_keys():
+    pass
+def ask_vectors():
+    pass
+def unmask_vectors():
+    pass
+
