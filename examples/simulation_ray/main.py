@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Dict, Callable, Optional, Tuple
 from dataset_utils import getCIFAR10, do_fl_partitioning, get_dataloader
 
+from resource_parser import parse_ray_resources
+
 
 # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
 # borrowed from Pytorch quickstart example
@@ -187,8 +189,17 @@ def get_eval_fn(
 if __name__ == "__main__":
 
     pool_size = 100  # number of dataset partions (= number of total clients)
-    client_resources = {'num_cpus': 1}  # each client will get allocated 1 CPUs
 
+    # each client will get allocated 1 CPUs and 1.5GB of VRAM (if available)
+    # if no GPU is detected, then clients will only use CPU.
+    # note that this VRAM is only an educated guess of the expected VRAM
+    # usage for the model. This value is primarily a function of: the model arch,
+    # the size of input and activation (which grows linearly with batch size)
+    resources = {'cpus': 1, 'vram': 1500}
+
+    # parse gpu resources, conver from VRAM to VRAM ratio
+    client_resources = parse_ray_resources(resources['cpus'],
+                                           resources['vram'])
     # download CIFAR10 dataset
     train_path, testset = getCIFAR10()
 
@@ -210,6 +221,9 @@ if __name__ == "__main__":
     )
 
     # (optional) specify ray config
+    # By default Ray will see ALL resources in your system (all CPUs, all GPUs, etc)
+    # You can limit the number of CPUs Ray has access to by specifying `num_cpus`
+    # to the dict{} below, which will be passed to the ray.init() later.
     ray_config = {'include_dashboard': False}
     fl.simulation.start_ray_simulation(pool_size, fed_dir, client_resources,
                                        CifarRayClient, config={"num_rounds": 5},
