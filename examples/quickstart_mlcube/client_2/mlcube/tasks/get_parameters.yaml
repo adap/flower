@@ -1,0 +1,13 @@
+# Schema
+schema_version: 1.0.0
+schema_type: mlcube_task
+
+# Task Inputs
+inputs: []
+
+# Task Outputs
+outputs:
+        - name: log_dir
+          type: directory
+        - name: output_file
+          type: file

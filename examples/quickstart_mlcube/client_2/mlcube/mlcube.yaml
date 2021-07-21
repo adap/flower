@@ -1,0 +1,27 @@
+# This YAML file marks a directory to be an MLCube directory. When running MLCubes with runners, MLCube path is
+# specified using `--mlcube` runner command line argument.
+# The most important parameters that are defined here are (1) name, (2) author and (3) list of MLCube tasks.
+schema_version: 1.0.0
+schema_type: mlcube_root
+
+# MLCube name (string). Replace it with your MLCube name (e.g. "MNIST").
+name: quickstart_mlcube
+# MLCube author (string). Replace it with your MLCube name (e.g. "MLCommons Best Practices Working Group").
+author: Taner Topal
+
+version: 0.1.0
+mlcube_spec_version: 0.1.0
+
+# List of MLCube tasks supported by this MLCube (list of strings). Every task:
+#    - Has a unique name (e.g. "download").
+#    - Is defined in a YAML file in the `tasks` sub-folder (e.g. "tasks/download.yaml").
+#    - Task name is passed to an MLCube implementation file as the first argument (e.g. "python mnist.py download ...").
+# Every task is described by lists of input and output parameters. Every parameter is a file system path (directory or
+# file) characterized by two fields - name and value.
+# By default, if a file system path is a relative path (i.e. does not start with `/`), it is considered to be relative
+# to the `workspace` sub-folder.
+# Once all tasks are listed below, create a YAML file for each task in the 'tasks' sub-folder and change them
+# appropriately.
+# NEXT: study `tasks/example_task.yaml`.
+tasks:
+  - tasks/quickstart_mlcube.yaml

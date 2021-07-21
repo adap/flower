@@ -1,0 +1,10 @@
+schema_type: mlcube_invoke
+schema_version: 1.0.0
+
+task_name: get_parameters
+
+input_binding: {}
+
+output_binding:
+        log_dir: $WORKSPACE/logs/get_parameters
+        output_file: $WORKSPACE/get_parameters/output.p

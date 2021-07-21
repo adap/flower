@@ -1,0 +1,15 @@
+# Platform configuration files define where and how runners run MLCubes. This configuration file defines a Docker
+# runtime for MLCubes. One field needs to be updated here - `container.image`. This platform file defines local docker
+# execution environment.
+# MLCube Docker runner uses image name to either `pull` or `build` a docker image. The rule is the following:
+#   - If the following file exists (`build/Dockerfile`), Docker image will be built.
+#   - Else, docker runner will pull a docker image with the specified name.
+# Users provide platform files using `--platform` command line argument.
+schema_type: mlcube_platform
+schema_version: 0.1.0
+
+platform:
+  name: "docker"
+  version: ">=18.01"
+container:
+  image: "mlcube/quickstart_mlcube:0.0.1"

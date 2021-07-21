@@ -1,0 +1,11 @@
+schema_type: mlcube_invoke
+schema_version: 1.0.0
+
+task_name: evaluate
+
+input_binding:
+        input_file: $WORKSPACE/evaluate/input.p
+
+output_binding:
+        log_dir: $WORKSPACE/logs/evaluate
+        output_file: $WORKSPACE/evaluate/output.p
