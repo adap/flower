@@ -205,8 +205,6 @@ def load_data():
     return train_dl , valid_dl
 
 
-
-
 if __name__ == "__main__":
     main()
 
