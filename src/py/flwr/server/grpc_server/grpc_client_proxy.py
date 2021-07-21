@@ -53,7 +53,6 @@ class GrpcClientProxy(ClientProxy):
     
     def ask_keys(self)->common.AskKeysRes:
         ask_keys_msg=serde.ask_keys_to_proto()
-        print(1)
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(secagg_msg=ask_keys_msg)
         )
