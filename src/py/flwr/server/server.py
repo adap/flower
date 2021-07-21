@@ -300,12 +300,25 @@ class Server:
 
         return parameters_aggregated, metrics_aggregated, (results, failures)
 
-    def secagg_fit_round(self, rnd: int)-> Optional[
+    def secagg_fit_round(self, rnd: int, num:int = None, degree:int =None, threshold:int = None, timeout:int =None)-> Optional[
         Optional[Parameters]
     ]:  
-        #change this to sampling some
-        self.available_users=self._client_manager.all().values()
-        self.ask_keys_results_and_failures = ask_keys(self.available_users)
+        #Setup parameters
+        if num is None:
+            num=max(2,self._client_manager.num_available())
+        if degree is None:
+            #Complete graph
+            degree=num-1
+        elif degree %2==1 and degree!=num-1:
+            #we want degree of each node to be either even or num-1
+            degree+=1
+        if threshold is None:
+            threshold = int(degree *0.9)
+        
+        #Stage 1: Ask Public Keys
+        self.users=self._client_manager.sample(num_clients=num)
+        self.ask_keys_results_and_failures = ask_keys(self.users)
+        print(self.ask_keys_results_and_failures)
         #share_keys()
         #ask_vectors()
         #unmask_vectors()
@@ -421,10 +434,10 @@ def evaluate_client(
     evaluate_res = client.evaluate(ins)
     return client, evaluate_res
 
-def ask_keys(available_clients:List[ClientProxy])->AskKeysResultsAndFailures:
+def ask_keys(clients:List[ClientProxy])->AskKeysResultsAndFailures:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
-            executor.submit(ask_keys_client, c) for c in available_clients
+            executor.submit(ask_keys_client, c) for c in clients
         ]
         concurrent.futures.wait(futures)
     results: List[Tuple[ClientProxy, AskKeysRes]] = []
