@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Server."""
+"""Flower simulation."""
 
 
 from .app import start_ray_simulation as start_ray_simulation
