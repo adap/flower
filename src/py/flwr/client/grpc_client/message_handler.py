@@ -40,8 +40,8 @@ def handle(
         return _fit(client, server_msg.fit_ins), 0, True
     if server_msg.HasField("evaluate_ins"):
         return _evaluate(client, server_msg.evaluate_ins), 0, True
-    if server_msg.HasField("secagg_msg"):
-        if server_msg.secagg_msg.HasField("ask_keys"):
+    if server_msg.HasField("sec_agg_msg"):
+        if server_msg.sec_agg_msg.HasField("ask_keys"):
             return _ask_keys(client), 0, True
     raise UnkownServerMessage()
 
@@ -89,4 +89,4 @@ def _reconnect(
 def _ask_keys(client: Client)-> ClientMessage:
     ask_keys_res=client.ask_keys()
     ask_keys_res_proto = serde.ask_keys_res_to_proto(ask_keys_res)
-    return ClientMessage(secagg_res=ask_keys_res_proto)
+    return ClientMessage(sec_agg_res=ask_keys_res_proto)

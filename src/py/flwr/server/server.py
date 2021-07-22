@@ -141,9 +141,9 @@ class Server:
             # Train model and replace previous global model
             if isinstance(self.strategy,SecAgg):
                 #hard code methods
-                #self.parameters=self.secagg_fit_round(rnd=current_round)
+                #self.parameters=self.sec_agg_fit_round(rnd=current_round)
                 print("START SECAGG")
-                self.test=self.secagg_fit_round(rnd=current_round)
+                self.test=self.sec_agg_fit_round(rnd=current_round)
                 #TO BE REMOVED
                 res_fit = self.fit_round(rnd=current_round)
                 if res_fit:
@@ -300,7 +300,7 @@ class Server:
 
         return parameters_aggregated, metrics_aggregated, (results, failures)
 
-    def secagg_fit_round(self, rnd: int, num:int = None, degree:int =None, threshold:int = None, timeout:int =None)-> Optional[
+    def sec_agg_fit_round(self, rnd: int, num:int = None, degree:int =None, threshold:int = None, timeout:int =None)-> Optional[
         Optional[Parameters]
     ]:  
         #Setup parameters

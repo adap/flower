@@ -44,7 +44,7 @@ message ServerMessage {
     Parameters parameters = 1;
     map<string, Scalar> config = 2;
   }
-  message SecaggMsg{
+  message SecAggMsg{
     message AskKeys{}
     oneof msg{
       AskKeys ask_keys=1;
@@ -56,7 +56,7 @@ message ServerMessage {
     GetParameters get_parameters = 2;
     FitIns fit_ins = 3;
     EvaluateIns evaluate_ins = 4;
-    SecaggMsg secagg_msg=5;
+    SecAggMsg sec_agg_msg=5;
   }
 }
 
@@ -76,7 +76,7 @@ message ClientMessage {
     float accuracy = 3 [ deprecated = true ];
     map<string, Scalar> metrics = 4;
   }
-  message SecaggRes{
+  message SecAggRes{
     message AskKeysRes{
         bytes pk1=1;
         bytes pk2=2;
@@ -92,7 +92,7 @@ message ClientMessage {
     ParametersRes parameters_res = 2;
     FitRes fit_res = 3;
     EvaluateRes evaluate_res = 4;
-    SecaggRes secagg_res =5 ;
+    SecAggRes sec_agg_res =5 ;
   }
 }
 
