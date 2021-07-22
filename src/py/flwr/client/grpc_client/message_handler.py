@@ -87,6 +87,13 @@ def _reconnect(
     return ClientMessage(disconnect=disconnect), sleep_duration
 
 def _ask_keys(client: Client)-> ClientMessage:
-    ask_keys_res=client.ask_keys()
-    ask_keys_res_proto = serde.ask_keys_res_to_proto(ask_keys_res)
-    return ClientMessage(sec_agg_res=ask_keys_res_proto)
+    try:
+        ask_keys_res=client.ask_keys()
+        ask_keys_res_proto = serde.ask_keys_res_to_proto(ask_keys_res)
+        return ClientMessage(sec_agg_res=ask_keys_res_proto)
+    except Exception as e:
+        return _error_res(e)
+
+def _error_res(e: Exception)-> ClientMessage:
+    error_res=ClientMessage.SecAggRes(error_res=ClientMessage.SecAggRes.ErrorRes(error=e.args[0]))
+    return ClientMessage(sec_agg_res=error_res)

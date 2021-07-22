@@ -173,6 +173,14 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     )
 
 
+# === SecAgg Messages ===
+# === Check if error ===
+def check_error(msg: ClientMessage.SecAggRes):
+    if msg.HasField("error_res"):
+        raise Exception(msg.error_res.error)
+
+
+# === Ask Keys ===
 def ask_keys_to_proto()->ServerMessage.SecAggMsg.AskKeys:
     return ServerMessage.SecAggMsg(ask_keys=ServerMessage.SecAggMsg.AskKeys())
     

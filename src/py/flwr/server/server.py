@@ -142,7 +142,6 @@ class Server:
             if isinstance(self.strategy,SecAgg):
                 #hard code methods
                 #self.parameters=self.sec_agg_fit_round(rnd=current_round)
-                print("START SECAGG")
                 self.test=self.sec_agg_fit_round(rnd=current_round)
                 #TO BE REMOVED
                 res_fit = self.fit_round(rnd=current_round)
@@ -303,6 +302,7 @@ class Server:
     def sec_agg_fit_round(self, rnd: int, num:int = None, degree:int =None, threshold:int = None, timeout:int =None)-> Optional[
         Optional[Parameters]
     ]:  
+        log(INFO, "SecAgg setup")
         #Setup parameters
         if num is None:
             num=max(2,self._client_manager.num_available())
@@ -316,6 +316,7 @@ class Server:
             threshold = int(degree *0.9)
         
         #Stage 1: Ask Public Keys
+        log(INFO, "SecAgg ask keys")
         self.users=self._client_manager.sample(num_clients=num)
         self.ask_keys_results_and_failures = ask_keys(self.users)
         print(self.ask_keys_results_and_failures)

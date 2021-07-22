@@ -56,6 +56,7 @@ class GrpcClientProxy(ClientProxy):
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(sec_agg_msg=ask_keys_msg)
         )
+        serde.check_error(client_msg.sec_agg_res)
         ask_keys_res=serde.ask_keys_res_from_proto(client_msg.sec_agg_res)
         return ask_keys_res
 

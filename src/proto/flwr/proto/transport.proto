@@ -81,8 +81,12 @@ message ClientMessage {
         bytes pk1=1;
         bytes pk2=2;
     }
+    message ErrorRes{
+      string error=1;
+    }
     oneof msg{
       AskKeysRes ask_keys_res=1;
+      ErrorRes error_res=2;
     }
   }
   
