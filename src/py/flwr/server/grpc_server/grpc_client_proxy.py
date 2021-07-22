@@ -50,14 +50,14 @@ class GrpcClientProxy(ClientProxy):
         )
         fit_res = serde.fit_res_from_proto(client_msg.fit_res)
         return fit_res
-    
-    def ask_keys(self)->common.AskKeysRes:
-        ask_keys_msg=serde.ask_keys_to_proto()
+
+    def ask_keys(self) -> common.AskKeysRes:
+        ask_keys_msg = serde.ask_keys_to_proto()
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(sec_agg_msg=ask_keys_msg)
         )
         serde.check_error(client_msg.sec_agg_res)
-        ask_keys_res=serde.ask_keys_res_from_proto(client_msg.sec_agg_res)
+        ask_keys_res = serde.ask_keys_res_from_proto(client_msg.sec_agg_res)
         return ask_keys_res
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:

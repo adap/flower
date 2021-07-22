@@ -181,15 +181,19 @@ def check_error(msg: ClientMessage.SecAggRes):
 
 
 # === Ask Keys ===
-def ask_keys_to_proto()->ServerMessage.SecAggMsg.AskKeys:
+def ask_keys_to_proto() -> ServerMessage.SecAggMsg.AskKeys:
     return ServerMessage.SecAggMsg(ask_keys=ServerMessage.SecAggMsg.AskKeys())
-    
 
-def ask_keys_res_to_proto(res:  typing.ParametersRes)-> ClientMessage.SecAggRes:
-    return ClientMessage.SecAggRes(ask_keys_res=ClientMessage.SecAggRes.AskKeysRes(pk1=res.pk1, pk2=res.pk2))
 
-def ask_keys_res_from_proto(msg:ClientMessage.SecAggRes)-> typing.AskKeysRes:
+def ask_keys_res_to_proto(res: typing.ParametersRes) -> ClientMessage.SecAggRes:
+    return ClientMessage.SecAggRes(
+        ask_keys_res=ClientMessage.SecAggRes.AskKeysRes(pk1=res.pk1, pk2=res.pk2)
+    )
+
+
+def ask_keys_res_from_proto(msg: ClientMessage.SecAggRes) -> typing.AskKeysRes:
     return typing.AskKeysRes(pk1=msg.ask_keys_res.pk1, pk2=msg.ask_keys_res.pk2)
+
 
 # === Evaluate messages ===
 

@@ -9,7 +9,18 @@ def generate_key_pairs():
     pk=sk.public_key()
     return sk,pk
 
+def private_key_to_bytes(sk):
+    return sk.private_bytes(encoding=serialization.Encoding.PEM, 
+    format=serialization.PrivateFormat.PKCS8,
+    encryption_algorithm=serialization.NoEncryption)
+
+def bytes_to_private_key(b):
+    return serialization.load_pem_private_key(data= b, password=None)
+
 def public_key_to_bytes(pk):
     return pk.public_bytes(encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
+
+def bytes_to_public_key(b):
+    return serialization.load_pem_public_key(data = b)

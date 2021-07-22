@@ -90,7 +90,9 @@ ReconnectResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, Disconnect]], List[BaseException]
 ]
 
-AskKeysResultsAndFailures = Tuple[List[Tuple[ClientProxy, AskKeysRes]], List[BaseException]]
+AskKeysResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, AskKeysRes]], List[BaseException]
+]
 
 
 class Server:
@@ -139,11 +141,11 @@ class Server:
 
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
-            if isinstance(self.strategy,SecAgg):
-                #hard code methods
-                #self.parameters=self.sec_agg_fit_round(rnd=current_round)
-                self.test=self.sec_agg_fit_round(rnd=current_round)
-                #TO BE REMOVED
+            if isinstance(self.strategy, SecAgg):
+                # hard code methods
+                # self.parameters=self.sec_agg_fit_round(rnd=current_round)
+                self.test = self.sec_agg_fit_round(rnd=current_round)
+                # TO BE REMOVED
                 res_fit = self.fit_round(rnd=current_round)
                 if res_fit:
                     parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
@@ -299,30 +301,35 @@ class Server:
 
         return parameters_aggregated, metrics_aggregated, (results, failures)
 
-    def sec_agg_fit_round(self, rnd: int, num:int = None, degree:int =None, threshold:int = None, timeout:int =None)-> Optional[
-        Optional[Parameters]
-    ]:  
+    def sec_agg_fit_round(
+        self,
+        rnd: int,
+        num: int = None,
+        degree: int = None,
+        threshold: int = None,
+        timeout: int = None,
+    ) -> Optional[Optional[Parameters]]:
         log(INFO, "SecAgg setup")
-        #Setup parameters
+        # Setup parameters
         if num is None:
-            num=max(2,self._client_manager.num_available())
+            num = max(2, self._client_manager.num_available())
         if degree is None:
-            #Complete graph
-            degree=num-1
-        elif degree %2==1 and degree!=num-1:
-            #we want degree of each node to be either even or num-1
-            degree+=1
+            # Complete graph
+            degree = num - 1
+        elif degree % 2 == 1 and degree != num - 1:
+            # we want degree of each node to be either even or num-1
+            degree += 1
         if threshold is None:
-            threshold = int(degree *0.9)
-        
-        #Stage 1: Ask Public Keys
+            threshold = int(degree * 0.9)
+
+        # Stage 1: Ask Public Keys
         log(INFO, "SecAgg ask keys")
-        self.users=self._client_manager.sample(num_clients=num)
+        self.users = self._client_manager.sample(num_clients=num)
         self.ask_keys_results_and_failures = ask_keys(self.users)
         print(self.ask_keys_results_and_failures)
-        #share_keys()
-        #ask_vectors()
-        #unmask_vectors()
+        # share_keys()
+        # ask_vectors()
+        # unmask_vectors()
 
     def disconnect_all_clients(self) -> None:
         """Send shutdown signal to all clients."""
@@ -435,11 +442,10 @@ def evaluate_client(
     evaluate_res = client.evaluate(ins)
     return client, evaluate_res
 
-def ask_keys(clients:List[ClientProxy])->AskKeysResultsAndFailures:
+
+def ask_keys(clients: List[ClientProxy]) -> AskKeysResultsAndFailures:
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(ask_keys_client, c) for c in clients
-        ]
+        futures = [executor.submit(ask_keys_client, c) for c in clients]
         concurrent.futures.wait(futures)
     results: List[Tuple[ClientProxy, AskKeysRes]] = []
     failures: List[BaseException] = []
@@ -454,14 +460,18 @@ def ask_keys(clients:List[ClientProxy])->AskKeysResultsAndFailures:
     return results, failures
 
 
-def ask_keys_client(client:ClientProxy)->Tuple[ClientProxy, AskKeysRes]:
-    ask_keys_res=client.ask_keys()
+def ask_keys_client(client: ClientProxy) -> Tuple[ClientProxy, AskKeysRes]:
+    ask_keys_res = client.ask_keys()
     return client, ask_keys_res
+
 
 def share_keys():
     pass
+
+
 def ask_vectors():
     pass
+
+
 def unmask_vectors():
     pass
-

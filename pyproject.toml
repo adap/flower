@@ -86,6 +86,7 @@ mypy-protobuf = "==2.4"
 rope = "==0.19.0"
 sphinx = "==3.4.3"
 sphinx-book-theme = "==0.0.39"
+autopep8 = "^1.5.7"
 
 [tool.isort]
 line_length = 88
