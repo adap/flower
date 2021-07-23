@@ -304,27 +304,44 @@ class Server:
     def sec_agg_fit_round(
         self,
         rnd: int,
-        num: int = None,
-        degree: int = None,
+        sample_num: int = None,
+        min_num: int = None,
+        share_num: int = None,
         threshold: int = None,
         timeout: int = None,
     ) -> Optional[Optional[Parameters]]:
         log(INFO, "SecAgg setup")
         # Setup parameters
-        if num is None:
-            num = max(2, self._client_manager.num_available())
-        if degree is None:
+        if sample_num is None:
+            sample_num = max(2, self._client_manager.num_available())
+        if min_num is None:
+            min_num = max(2, int(sample_num * 0.9))
+        if share_num is None:
             # Complete graph
-            degree = num - 1
-        elif degree % 2 == 1 and degree != num - 1:
-            # we want degree of each node to be either even or num-1
-            degree += 1
+            share_num = sample_num
+        elif share_num % 2 == 0 and share_num != sample_num:
+            # we want share_num of each node to be either odd or sample_num
+            share_num += 1
         if threshold is None:
-            threshold = int(degree * 0.9)
+            threshold = max(2, int(share_num * 0.9))
+
+        log(
+            INFO,
+            f"SecAgg parameters: rnd = {rnd}, sample_num = {sample_num}, min_num = {min_num}, share_num = {share_num}, threshold = {threshold}, timeout = {timeout}",
+        )
+
+        assert (
+            sample_num >= 2
+            and min_num >= 2
+            and sample_num >= min_num
+            and share_num <= sample_num
+            and threshold <= share_num
+            and threshold >= 2
+        ), "SecAgg parameters not accepted"
 
         # Stage 1: Ask Public Keys
         log(INFO, "SecAgg ask keys")
-        self.users = self._client_manager.sample(num_clients=num)
+        self.users = self._client_manager.sample(num_clients=sample_num)
         self.ask_keys_results_and_failures = ask_keys(self.users)
         print(self.ask_keys_results_and_failures)
         # share_keys()
