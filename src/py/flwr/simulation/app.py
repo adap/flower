@@ -16,7 +16,7 @@
 
 
 from logging import ERROR, INFO
-from typing import Dict, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 import flwr
 from flwr.client.client import Client
@@ -34,28 +34,24 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
 """
 
 
-def start_ray_simulation(
-    pool_size: int,  # number of total partitions/clients
-    data_partitions_dir: str,  # path where data partitions for each client exist
+def start_simulation(
+    client_fn: Callable[[str], Client],
+    nb_clients: int,  # number of total partitions/clients
     client_resources: Dict[str, int],  # compute/memory resources for each client
-    client_type: Client,
-    ray_init_config: Dict = {},
-    config: Optional[Dict[str, int]] = None,
+    ray_init_config: Optional[Dict] = None,
+    nb_rounds: int = 1,
     strategy: Optional[Strategy] = None,
 ) -> None:
     """Start a Ray-based Flower simulation server.
 
     Parameters
     ----------
-    config: Optional[Dict[str, int]] (default: None).
-        The only currently supported values is `num_rounds`, so a full
-        configuration object instructing the server to perform three rounds of
-        federated learning looks like the following: `{"num_rounds": 3}`.
     strategy: Optional[flwr.server.Strategy] (default: None)
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use
         `flwr.server.strategy.FedAvg`.
     """
+
     # Try to import ray
     try:
         import ray
@@ -66,6 +62,8 @@ def start_ray_simulation(
         return None
 
     # Initialize Ray
+    if not ray_init_config:
+        ray_init_config = {}
     ray.init(**ray_init_config)
     log(
         INFO,
@@ -73,6 +71,7 @@ def start_ray_simulation(
     )
 
     # Initialize server and server config
+    config = {"num_rounds": nb_rounds}
     initialized_server, initialized_config = flwr.server.app._init_defaults(
         None, config, strategy
     )
@@ -82,12 +81,11 @@ def start_ray_simulation(
     )
 
     # Ask Ray to create and register RayClientProxy objects with the ClientManager
-    for i in range(pool_size):
+    for i in range(nb_clients):
         client_proxy = RayClientProxy(
+            client_fn=client_fn,
             cid=str(i),
-            client_type=client_type,
             resources=client_resources,
-            fed_dir=data_partitions_dir,
         )
         initialized_server.client_manager().register(client=client_proxy)
 

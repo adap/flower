@@ -15,8 +15,8 @@
 """Flower simulation."""
 
 
-from .app import start_ray_simulation as start_ray_simulation
+from .app import start_simulation as start_simulation
 
 __all__ = [
-    "start_ray_simulation",
+    "start_simulation",
 ]

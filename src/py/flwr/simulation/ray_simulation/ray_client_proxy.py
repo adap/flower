@@ -14,87 +14,73 @@
 # ==============================================================================
 """Ray-based Flower ClientProxy implementation."""
 
-from typing import Dict
+
+from typing import Dict, Union
 
 import ray
 
+import flwr
 from flwr import common
-from flwr.client import Client
+from flwr.client import Client, NumPyClient
 from flwr.server.client_proxy import ClientProxy
 
 
 class RayClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(
-        self, cid: str, client_type: Client, resources: Dict[str, int], fed_dir: str
-    ):
+    def __init__(self, client_fn, cid: str, resources: Dict[str, int]):
         super().__init__(cid)
-        self.client_type = client_type
+        self.client_fn = client_fn
         self.resources = resources
-        self.fed_dir = fed_dir
 
     def get_parameters(self) -> common.ParametersRes:
         """Return the current local model parameters."""
-
-        # spawn client and run get_parameters()
-        params = launch_and_get_params.options(**self.resources).remote(
-            self.client_type, self.cid, self.fed_dir
+        future_paramseters_res = launch_and_get_params.options(**self.resources).remote(
+            self.client_fn, self.cid
         )
-        parameters = ray.get(params)
-        parameters = common.weights_to_parameters(parameters)
-
-        return common.ParametersRes(parameters=parameters)
+        return ray.get(future_paramseters_res)
 
     def fit(self, ins: common.FitIns) -> common.FitRes:
-        """Refine the provided weights using the locally held dataset."""
-
-        weights = common.parameters_to_weights(ins.parameters)
-
-        # spawn client and run fit()
-        remote_fit = launch_and_fit.options(**self.resources).remote(
-            self.client_type, self.cid, self.fed_dir, weights, ins.config
+        """Refine the provided model parameters using the locally held
+        dataset."""
+        future_fit_res = launch_and_fit.options(**self.resources).remote(
+            self.client_fn, self.cid, ins
         )
-        parameters, num_examples, metrics = ray.get(remote_fit)
-
-        parameters = common.weights_to_parameters(parameters)
-        return common.FitRes(parameters, num_examples=num_examples, metrics=metrics)
+        return ray.get(future_fit_res)
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
-        """Evaluate the provided weights using the locally held dataset."""
-
-        weights = common.parameters_to_weights(ins.parameters)
-
-        # spawn client and run evaluate()
-        remote_eval = launch_and_eval.options(**self.resources).remote(
-            self.client_type, self.cid, self.fed_dir, weights, ins.config
+        """Evaluate the provided model parameters using the locally held
+        dataset."""
+        future_evaluate_res = launch_and_evaluate.options(**self.resources).remote(
+            self.client_fn, self.cid, ins
         )
-
-        loss, num_examples, metrics = ray.get(remote_eval)
-        return common.EvaluateRes(loss, num_examples, metrics=metrics)
+        return ray.get(future_evaluate_res)
 
     def reconnect(self, reconnect: common.Reconnect) -> common.Disconnect:
         """Disconnect and (optionally) reconnect later."""
-
-        # Nothing to do here.
-        disconnect: common.Disconnect = None
-
-        return disconnect
+        return common.Disconnect(reason="")  # Nothing to do here (yet)
 
 
 @ray.remote
-def launch_and_get_params(client_type, cid, fed_dir):
-    client = client_type(cid, fed_dir)
+def launch_and_get_params(client_fn, cid) -> common.ParametersRes:
+    client: Client = _create_client(client_fn, cid)
     return client.get_parameters()
 
 
 @ray.remote
-def launch_and_fit(client_type, cid, fed_dir, parameters, config):
-    client = client_type(cid, fed_dir)
-    return client.fit(parameters, config)
+def launch_and_fit(client_fn, cid, fit_ins) -> common.FitRes:
+    client: Client = _create_client(client_fn, cid)
+    return client.fit(fit_ins)
 
 
 @ray.remote
-def launch_and_eval(client_type, cid, fed_dir, parameters, config):
-    client = client_type(cid, fed_dir)
-    return client.evaluate(parameters, config)
+def launch_and_evaluate(client_fn, cid, evaluate_ins) -> common.EvaluateRes:
+    client: Client = _create_client(client_fn, cid)
+    return client.evaluate(evaluate_ins)
+
+
+def _create_client(client_fn, cid: str) -> Client:
+    client: Union[Client, NumPyClient] = client_fn(cid)
+    if isinstance(client, NumPyClient):
+        client = flwr.client.numpy_client.NumPyClientWrapper(numpy_client=client)
+    return client
