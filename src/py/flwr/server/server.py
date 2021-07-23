@@ -342,8 +342,7 @@ class Server:
         self.users = self._client_manager.sample(num_clients=sample_num)
         # promote users to SecAgg clients
         for i in range(len(self.users)):
-            if not isinstance(self.users[i], SecAggClient):
-                self.users[i] = SecAggClient(self.users[i])
+            self.users[i] = SecAggClient(self.users[i])
 
         # Stage 1: Ask Public Keys
         log(INFO, "SecAgg ask keys")
