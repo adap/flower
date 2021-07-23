@@ -19,6 +19,7 @@ import concurrent.futures
 import timeit
 from logging import DEBUG, INFO, WARNING
 from typing import Dict, List, Optional, Tuple, Union
+from flwr.client.secagg_client import SecAggClient
 
 from flwr.common import (
     Disconnect,
@@ -143,7 +144,6 @@ class Server:
             # Train model and replace previous global model
             if isinstance(self.strategy, SecAgg):
                 # hard code methods
-                # self.parameters=self.sec_agg_fit_round(rnd=current_round)
                 self.test = self.sec_agg_fit_round(rnd=current_round)
                 # TO BE REMOVED
                 res_fit = self.fit_round(rnd=current_round)
@@ -339,9 +339,14 @@ class Server:
             and threshold >= 2
         ), "SecAgg parameters not accepted"
 
+        self.users = self._client_manager.sample(num_clients=sample_num)
+        # promote users to SecAgg clients
+        for i in range(len(self.users)):
+            if not isinstance(self.users[i], SecAggClient):
+                self.users[i] = SecAggClient(self.users[i])
+
         # Stage 1: Ask Public Keys
         log(INFO, "SecAgg ask keys")
-        self.users = self._client_manager.sample(num_clients=sample_num)
         self.ask_keys_results_and_failures = ask_keys(self.users)
         print(self.ask_keys_results_and_failures)
         # share_keys()

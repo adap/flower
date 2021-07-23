@@ -33,7 +33,6 @@ from flwr.common import (
     Scalar,
     parameters_to_weights,
     weights_to_parameters,
-    secagg_utils,
 )
 
 from .client import Client
@@ -255,12 +254,3 @@ class NumPyClientWrapper(Client):
                 metrics=metrics,
             )
         return evaluate_res
-
-    # Need to be added to keras client wrapper
-    def ask_keys(self):
-        self.sk1, self.pk1 = secagg_utils.generate_key_pairs()
-        self.sk2, self.pk2 = secagg_utils.generate_key_pairs()
-        return AskKeysRes(
-            pk1=secagg_utils.public_key_to_bytes(self.pk1),
-            pk2=secagg_utils.public_key_to_bytes(self.pk2),
-        )
