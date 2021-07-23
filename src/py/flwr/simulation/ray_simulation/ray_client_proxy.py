@@ -14,23 +14,20 @@
 # ==============================================================================
 """Ray-based Flower ClientProxy implementation."""
 
+from typing import Dict
+
+import ray
+
 from flwr import common
 from flwr.client import Client
 from flwr.server.client_proxy import ClientProxy
-import ray
-
-from typing import Dict
 
 
 class RayClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
     def __init__(
-        self,
-        cid: str,
-        client_type: Client,
-        resources: Dict[str, int],
-        fed_dir: str
+        self, cid: str, client_type: Client, resources: Dict[str, int], fed_dir: str
     ):
         super().__init__(cid)
         self.client_type = client_type
@@ -41,9 +38,9 @@ class RayClientProxy(ClientProxy):
         """Return the current local model parameters."""
 
         # spawn client and run get_parameters()
-        params = launch_and_get_params.options(**self.resources).remote(self.client_type,
-                                                                        self.cid,
-                                                                        self.fed_dir)
+        params = launch_and_get_params.options(**self.resources).remote(
+            self.client_type, self.cid, self.fed_dir
+        )
         parameters = ray.get(params)
         parameters = common.weights_to_parameters(parameters)
 
@@ -55,11 +52,9 @@ class RayClientProxy(ClientProxy):
         weights = common.parameters_to_weights(ins.parameters)
 
         # spawn client and run fit()
-        remote_fit = launch_and_fit.options(**self.resources).remote(self.client_type,
-                                                                     self.cid,
-                                                                     self.fed_dir,
-                                                                     weights,
-                                                                     ins.config)
+        remote_fit = launch_and_fit.options(**self.resources).remote(
+            self.client_type, self.cid, self.fed_dir, weights, ins.config
+        )
         parameters, num_examples, metrics = ray.get(remote_fit)
 
         parameters = common.weights_to_parameters(parameters)
@@ -71,11 +66,9 @@ class RayClientProxy(ClientProxy):
         weights = common.parameters_to_weights(ins.parameters)
 
         # spawn client and run evaluate()
-        remote_eval = launch_and_eval.options(**self.resources).remote(self.client_type,
-                                                                       self.cid,
-                                                                       self.fed_dir,
-                                                                       weights,
-                                                                       ins.config)
+        remote_eval = launch_and_eval.options(**self.resources).remote(
+            self.client_type, self.cid, self.fed_dir, weights, ins.config
+        )
 
         loss, num_examples, metrics = ray.get(remote_eval)
         return common.EvaluateRes(loss, num_examples, metrics=metrics)
@@ -87,6 +80,14 @@ class RayClientProxy(ClientProxy):
         disconnect: common.Disconnect = None
 
         return disconnect
+
+    def get_traceback(self, exception):
+        return "\n".join(
+            ("%s" % exception).split(
+                """
+"""
+            )[1:]
+        )
 
 
 @ray.remote

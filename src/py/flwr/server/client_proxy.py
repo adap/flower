@@ -34,6 +34,9 @@ class ClientProxy(ABC):
     def __init__(self, cid: str):
         self.cid = cid
 
+    def get_traceback(self, exception):
+        return None
+
     @abstractmethod
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""

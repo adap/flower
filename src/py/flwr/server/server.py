@@ -317,13 +317,18 @@ def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:
     # Gather results
     results: List[Tuple[ClientProxy, Disconnect]] = []
     failures: List[BaseException] = []
+    tracebacks = []
+    counter = 0
     for future in futures:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
+            tracebacks.append(client_instructions[counter][0].get_traceback(failure))
         else:
             result = future.result()
             results.append(result)
+        counter += 1
+    log_tracebacks(tracebacks)
     return results, failures
 
 
@@ -348,14 +353,19 @@ def fit_clients(
     # Gather results
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = []
+    tracebacks = []
+    counter = 0
     for future in futures:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
+            tracebacks.append(client_instructions[counter][0].get_traceback(failure))
         else:
             # Success case
             result = future.result()
             results.append(result)
+        counter += 1
+    log_tracebacks(tracebacks)
     return results, failures
 
 
@@ -377,14 +387,19 @@ def evaluate_clients(
     # Gather results
     results: List[Tuple[ClientProxy, EvaluateRes]] = []
     failures: List[BaseException] = []
+    tracebacks = []
+    counter = 0
     for future in futures:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
+            tracebacks.append(client_instructions[counter][0].get_traceback(failure))
         else:
             # Success case
             result = future.result()
             results.append(result)
+        counter += 1
+    log_tracebacks(tracebacks)
     return results, failures
 
 
@@ -394,3 +409,20 @@ def evaluate_client(
     """Evaluate parameters on a single client."""
     evaluate_res = client.evaluate(ins)
     return client, evaluate_res
+
+
+def log_tracebacks(tracebacks):
+    counter = 0
+    ordered_tracebacks = {}  # This is a dict of the form 'traceback : num_clients'
+    while counter < len(tracebacks):
+        traceback = tracebacks[counter]
+        if traceback != None:
+            if traceback in ordered_tracebacks.keys():
+                ordered_tracebacks[traceback] = ordered_tracebacks[traceback] + 1
+            else:
+                ordered_tracebacks[traceback] = 1
+        counter += 1
+    if len(ordered_tracebacks) > 0:
+        log(DEBUG, "The following exceptions occured in clients:")
+        for item in ordered_tracebacks.items():
+            log(DEBUG, "\n%s (error occured in %i clients)", item[0], item[1])
