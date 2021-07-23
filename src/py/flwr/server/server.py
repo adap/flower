@@ -339,15 +339,24 @@ class Server:
             and threshold >= 2
         ), "SecAgg parameters not accepted"
 
-        self.users = self._client_manager.sample(num_clients=sample_num)
+        users = self._client_manager.sample(num_clients=sample_num)
         # promote users to SecAgg clients
-        for i in range(len(self.users)):
-            self.users[i] = SecAggClient(self.users[i])
+        for i in range(len(users)):
+            users[i] = SecAggClient(users[i])
 
         # Stage 1: Ask Public Keys
         log(INFO, "SecAgg ask keys")
-        self.ask_keys_results_and_failures = ask_keys(self.users)
-        print(self.ask_keys_results_and_failures)
+        ask_keys_results_and_failures = ask_keys(users)
+        public_keys_list = []
+        ask_keys_results = ask_keys_results_and_failures[0]
+        for i in users:
+            if i in [result[0] for result in ask_keys_results]:
+                idx = [result[0] for result in ask_keys_results].index(i)
+                public_keys_list.append([result[1] for result in ask_keys_results][idx])
+            else:
+                public_keys_list.append(None)
+
+        print(public_keys_list)
         # share_keys()
         # ask_vectors()
         # unmask_vectors()
