@@ -73,8 +73,8 @@ http-logger = ["boto3", "boto3_type_annotations", "tensorflow-cpu", "boto3", "bo
 ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
 
 [tool.poetry.dev-dependencies]
-isort = "==5.8.0"
-black = "==21.5b1"
+isort = "==5.9.2"
+black = "==21.7b0"
 docformatter = "==1.4"
 mypy = "==0.800"
 pylint = "==2.8.2"
