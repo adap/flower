@@ -34,11 +34,11 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
 """
 
 
-def start_simulation(
+def start_simulation(  # pylint: disable=too-many-arguments
     client_fn: Callable[[str], Client],
     nb_clients: int,  # number of total partitions/clients
     client_resources: Dict[str, int],  # compute/memory resources for each client
-    ray_init_config: Optional[Dict] = None,
+    ray_init_config: Optional[Dict[str, int]] = None,
     nb_rounds: int = 1,
     strategy: Optional[Strategy] = None,
 ) -> None:

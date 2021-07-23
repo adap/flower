@@ -15,7 +15,7 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
-from typing import Dict, Union
+from typing import Callable, Dict, Union, cast
 
 import ray
 
@@ -24,11 +24,13 @@ from flwr import common
 from flwr.client import Client, NumPyClient
 from flwr.server.client_proxy import ClientProxy
 
+ClientFn = Callable[[str], Client]
+
 
 class RayClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(self, client_fn, cid: str, resources: Dict[str, int]):
+    def __init__(self, client_fn: ClientFn, cid: str, resources: Dict[str, int]):
         super().__init__(cid)
         self.client_fn = client_fn
         self.resources = resources
@@ -38,7 +40,11 @@ class RayClientProxy(ClientProxy):
         future_paramseters_res = launch_and_get_params.options(**self.resources).remote(
             self.client_fn, self.cid
         )
-        return ray.get(future_paramseters_res)
+        res = ray.get(future_paramseters_res)
+        return cast(
+            common.ParametersRes,
+            res,
+        )
 
     def fit(self, ins: common.FitIns) -> common.FitRes:
         """Refine the provided model parameters using the locally held
@@ -46,7 +52,11 @@ class RayClientProxy(ClientProxy):
         future_fit_res = launch_and_fit.options(**self.resources).remote(
             self.client_fn, self.cid, ins
         )
-        return ray.get(future_fit_res)
+        res = ray.get(future_fit_res)
+        return cast(
+            common.FitRes,
+            res,
+        )
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
         """Evaluate the provided model parameters using the locally held
@@ -54,32 +64,40 @@ class RayClientProxy(ClientProxy):
         future_evaluate_res = launch_and_evaluate.options(**self.resources).remote(
             self.client_fn, self.cid, ins
         )
-        return ray.get(future_evaluate_res)
+        res = ray.get(future_evaluate_res)
+        return cast(
+            common.EvaluateRes,
+            res,
+        )
 
     def reconnect(self, reconnect: common.Reconnect) -> common.Disconnect:
         """Disconnect and (optionally) reconnect later."""
         return common.Disconnect(reason="")  # Nothing to do here (yet)
 
 
-@ray.remote
-def launch_and_get_params(client_fn, cid) -> common.ParametersRes:
+@ray.remote  # type: ignore
+def launch_and_get_params(client_fn: ClientFn, cid: str) -> common.ParametersRes:
     client: Client = _create_client(client_fn, cid)
     return client.get_parameters()
 
 
-@ray.remote
-def launch_and_fit(client_fn, cid, fit_ins) -> common.FitRes:
+@ray.remote  # type: ignore
+def launch_and_fit(
+    client_fn: ClientFn, cid: str, fit_ins: common.FitIns
+) -> common.FitRes:
     client: Client = _create_client(client_fn, cid)
     return client.fit(fit_ins)
 
 
-@ray.remote
-def launch_and_evaluate(client_fn, cid, evaluate_ins) -> common.EvaluateRes:
+@ray.remote  # type: ignore
+def launch_and_evaluate(
+    client_fn: ClientFn, cid: str, evaluate_ins: common.EvaluateIns
+) -> common.EvaluateRes:
     client: Client = _create_client(client_fn, cid)
     return client.evaluate(evaluate_ins)
 
 
-def _create_client(client_fn, cid: str) -> Client:
+def _create_client(client_fn: ClientFn, cid: str) -> Client:
     client: Union[Client, NumPyClient] = client_fn(cid)
     if isinstance(client, NumPyClient):
         client = flwr.client.numpy_client.NumPyClientWrapper(numpy_client=client)
