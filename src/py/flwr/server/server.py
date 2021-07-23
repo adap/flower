@@ -31,6 +31,7 @@ from flwr.common import (
     Reconnect,
     Scalar,
     Weights,
+    secagg_utils,
     weights_to_parameters,
 )
 from flwr.common.logger import log
@@ -352,7 +353,7 @@ class Server:
         for i in users:
             if i in [result[0] for result in ask_keys_results]:
                 idx = [result[0] for result in ask_keys_results].index(i)
-                public_keys_list.append([ask_keys_results][idx][1])
+                public_keys_list.append(ask_keys_results[idx][1])
             else:
                 public_keys_list.append(None)
 

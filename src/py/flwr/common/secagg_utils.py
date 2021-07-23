@@ -1,26 +1,98 @@
+from typing import List, Tuple
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import serialization
+import base64
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Protocol.SecretSharing import Shamir
+
 
 def generate_key_pairs():
-    sk=ec.generate_private_key(ec.SECP384R1())
-    pk=sk.public_key()
-    return sk,pk
+    sk = ec.generate_private_key(ec.SECP384R1())
+    pk = sk.public_key()
+    return sk, pk
 
-def private_key_to_bytes(sk):
-    return sk.private_bytes(encoding=serialization.Encoding.PEM, 
-    format=serialization.PrivateFormat.PKCS8,
-    encryption_algorithm=serialization.NoEncryption)
 
-def bytes_to_private_key(b):
-    return serialization.load_pem_private_key(data= b, password=None)
-
-def public_key_to_bytes(pk):
-    return pk.public_bytes(encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
+def private_key_to_bytes(sk: ec.EllipticCurvePrivateKey) -> bytes:
+    return sk.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption,
     )
 
-def bytes_to_public_key(b):
-    return serialization.load_pem_public_key(data = b)
+
+def bytes_to_private_key(b: bytes) -> ec.EllipticCurvePrivateKey:
+    return serialization.load_pem_private_key(data=b, password=None)
+
+
+def public_key_to_bytes(pk: ec.EllipticCurvePublicKey) -> bytes:
+    return pk.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+
+
+def bytes_to_public_key(b: bytes) -> ec.EllipticCurvePublicKey:
+    return serialization.load_pem_public_key(data=b)
+
+
+def generate_shared_key(
+    sk: ec.EllipticCurvePrivateKey, pk: ec.EllipticCurvePublicKey
+) -> bytes:
+    # Generate a 32 byte urlsafe(for fernet) shared key from own private key and another public key
+    sharedk = sk.exchange(ec.ECDH(), pk)
+    derivedk = HKDF(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=None,
+        info=None,
+    ).derive(sharedk)
+    return base64.urlsafe_b64encode(derivedk)
+
+
+def encrypt(key: bytes, plaintext: bytes) -> bytes:
+    # key must be url safe
+    f = Fernet(key)
+    return f.encrypt(plaintext)
+
+
+def decrypt(key: bytes, token: bytes):
+    # key must be url safe
+    f = Fernet(key)
+    return f.decrypt(token)
+
+
+def create_shares(
+    secret: bytes, threshold: int, num: int
+) -> List[List[Tuple[int, bytes]]]:
+    # return list of list for each user. Each sublist contains a share for a 16 byte chunk of the secret.
+    # The int part of the tuple represents the index of the share, not the index of the chunk it is representing.
+    secret_padded = pad(secret, 16)
+    secret_padded_chunk = [
+        secret_padded[i : i + 16] for i in range(0, len(secret_padded), 16)
+    ]
+    share_list = []
+    for i in range(num):
+        share_list.append([])
+    # ideally should be done concurrently
+    for i in secret_padded_chunk:
+        chunk_shares = Shamir.split(threshold, num, i)
+        for idx, share in chunk_shares:
+            # idx start with 1
+            share_list[idx - 1].append((idx, share))
+    return share_list
+
+def combine_shares(shares:List[List[Tuple[int, bytes]]]):
+    chunk_num=len(shares[0])
+    secret_padded=bytearray(0)
+    #ideally should be done concurrently
+    for i in range(chunk_num):
+        chunk_shares=[]
+        for j in range(len(shares)):
+            chunk_shares.append(shares[j][i])
+        chunk=Shamir.combine(chunk_shares)
+        secret_padded+=chunk
+    secret=unpad(secret_padded,16)
+    return bytes(secret)
