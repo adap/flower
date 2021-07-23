@@ -14,23 +14,21 @@
 # ==============================================================================
 """Ray-based Flower ClientProxy implementation."""
 
+import traceback
+from typing import Dict
+
+import ray
+
 from flwr import common
 from flwr.client import Client
 from flwr.server.client_proxy import ClientProxy
-import ray
-
-from typing import Dict
 
 
 class RayClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
     def __init__(
-        self,
-        cid: str,
-        client_type: Client,
-        resources: Dict[str, int],
-        fed_dir: str
+        self, cid: str, client_type: Client, resources: Dict[str, int], fed_dir: str
     ):
         super().__init__(cid)
         self.client_type = client_type
@@ -41,9 +39,9 @@ class RayClientProxy(ClientProxy):
         """Return the current local model parameters."""
 
         # spawn client and run get_parameters()
-        params = launch_and_get_params.options(**self.resources).remote(self.client_type,
-                                                                        self.cid,
-                                                                        self.fed_dir)
+        params = launch_and_get_params.options(**self.resources).remote(
+            self.client_type, self.cid, self.fed_dir
+        )
         parameters = ray.get(params)
         parameters = common.weights_to_parameters(parameters)
 
@@ -55,11 +53,13 @@ class RayClientProxy(ClientProxy):
         weights = common.parameters_to_weights(ins.parameters)
 
         # spawn client and run fit()
-        remote_fit = launch_and_fit.options(**self.resources).remote(self.client_type,
-                                                                     self.cid,
-                                                                     self.fed_dir,
-                                                                     weights,
-                                                                     ins.config)
+        try:
+            remote_fit = launch_and_fit.options(**self.resources).remote(
+                self.client_type, self.cid, self.fed_dir, weights, ins.config
+            )
+        except ray.exception.RayTaskError as ex:
+            print("The following error occured:\n" + str(ex.cause()))
+            raise ex
         parameters, num_examples, metrics = ray.get(remote_fit)
 
         parameters = common.weights_to_parameters(parameters)
@@ -71,12 +71,13 @@ class RayClientProxy(ClientProxy):
         weights = common.parameters_to_weights(ins.parameters)
 
         # spawn client and run evaluate()
-        remote_eval = launch_and_eval.options(**self.resources).remote(self.client_type,
-                                                                       self.cid,
-                                                                       self.fed_dir,
-                                                                       weights,
-                                                                       ins.config)
-
+        try:
+            remote_eval = launch_and_eval.options(**self.resources).remote(
+                self.client_type, self.cid, self.fed_dir, weights, ins.config
+            )
+        except Exception as ex:
+            print("The following error occured:\n")
+        #            raise ex
         loss, num_examples, metrics = ray.get(remote_eval)
         return common.EvaluateRes(loss, num_examples, metrics=metrics)
 
@@ -98,10 +99,20 @@ def launch_and_get_params(client_type, cid, fed_dir):
 @ray.remote
 def launch_and_fit(client_type, cid, fed_dir, parameters, config):
     client = client_type(cid, fed_dir)
-    return client.fit(parameters, config)
+    try:
+        return client.fit(parameters, config)
+    except Exception as ex:
+        print("An exception occured in fit_round:")
+        traceback.print_exc()
+        raise ex
 
 
 @ray.remote
 def launch_and_eval(client_type, cid, fed_dir, parameters, config):
     client = client_type(cid, fed_dir)
-    return client.evaluate(parameters, config)
+    try:
+        return client.evaluate(parameters, config)
+    except Exception as ex:
+        print("An exception occured in evaluate_round:")
+        traceback.print_exc()
+        raise ex
