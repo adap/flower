@@ -352,11 +352,10 @@ class Server:
         for i in users:
             if i in [result[0] for result in ask_keys_results]:
                 idx = [result[0] for result in ask_keys_results].index(i)
-                public_keys_list.append([result[1] for result in ask_keys_results][idx])
+                public_keys_list.append([ask_keys_results][idx][1])
             else:
                 public_keys_list.append(None)
 
-        print(public_keys_list)
         # share_keys()
         # ask_vectors()
         # unmask_vectors()
