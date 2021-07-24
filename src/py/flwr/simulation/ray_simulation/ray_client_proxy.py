@@ -40,7 +40,7 @@ class RayClientProxy(ClientProxy):
 
     def get_parameters(self) -> common.ParametersRes:
         """Return the current local model parameters."""
-        future_paramseters_res = launch_and_get_params.options(**self.resources).remote(
+        future_paramseters_res = launch_and_get_parameters.options(**self.resources).remote(
             self.client_fn, self.cid
         )
         res = ray.get(future_paramseters_res)
@@ -79,8 +79,8 @@ class RayClientProxy(ClientProxy):
 
 
 @ray.remote  # type: ignore
-def launch_and_get_params(client_fn: ClientFn, cid: str) -> common.ParametersRes:
-    """."""
+def launch_and_get_parameters(client_fn: ClientFn, cid: str) -> common.ParametersRes:
+    """Exectue get_parameters remotely."""
     client: Client = _create_client(client_fn, cid)
     return client.get_parameters()
 
@@ -89,7 +89,7 @@ def launch_and_get_params(client_fn: ClientFn, cid: str) -> common.ParametersRes
 def launch_and_fit(
     client_fn: ClientFn, cid: str, fit_ins: common.FitIns
 ) -> common.FitRes:
-    """."""
+    """Exectue fit remotely."""
     client: Client = _create_client(client_fn, cid)
     return client.fit(fit_ins)
 
@@ -98,13 +98,13 @@ def launch_and_fit(
 def launch_and_evaluate(
     client_fn: ClientFn, cid: str, evaluate_ins: common.EvaluateIns
 ) -> common.EvaluateRes:
-    """."""
+    """Exectue evaluate remotely."""
     client: Client = _create_client(client_fn, cid)
     return client.evaluate(evaluate_ins)
 
 
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
-    """."""
+    """Create a client instance."""
     client: Union[Client, NumPyClient] = client_fn(cid)
     if isinstance(client, NumPyClient):
         client = NumPyClientWrapper(numpy_client=client)
