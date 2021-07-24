@@ -23,7 +23,7 @@ def main() -> None:
         eval_fn=get_eval_fn(model),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
-        initial_parameters=model.get_weights(),
+        initial_parameters=fl.common.weights_to_parameters(model.get_weights()),
     )
 
     # Start Flower server for four rounds of federated learning
