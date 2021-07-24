@@ -76,7 +76,7 @@ ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
 isort = "==5.8.0"
 black = "==21.5b1"
 docformatter = "==1.4"
-mypy = "==0.812"
+mypy = "==0.910"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
