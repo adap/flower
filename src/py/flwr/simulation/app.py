@@ -16,7 +16,7 @@
 
 
 from logging import INFO
-from typing import Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 try:
     import ray
@@ -39,20 +39,34 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
 
 def start_simulation(  # pylint: disable=too-many-arguments
     client_fn: Callable[[str], Client],
-    nb_clients: int,  # number of total partitions/clients
-    client_resources: Dict[str, int],  # compute/memory resources for each client
-    ray_init_config: Optional[Dict[str, int]] = None,
-    nb_rounds: int = 1,
+    num_clients: int,
+    client_resources: Optional[Dict[str, int]] = None,
+    num_rounds: int = 1,
     strategy: Optional[Strategy] = None,
+    ray_init_args: Optional[Dict[str, Any]] = None,
 ) -> None:
     """Start a Ray-based Flower simulation server.
 
     Parameters
     ----------
-    strategy: Optional[flwr.server.Strategy] (default: None)
+    client_fn : Callable[[str], Client]
+        A function creating client instances. The function must take a single
+        str argument called cid. It should return a single client instance
+        containing the local dataset and model of the client with the matching
+        client id (i.e., cid).
+    num_clients : int
+        The total number of clients in this simulation.
+    client_resources : Optional[Dict[str, int]] (default: None)
+        CPU and GPU resources for a single client. Supported keys are
+        `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`
+    num_rounds : int (default: 1)
+        The number of rounds to train.
+    strategy : Optional[flwr.server.Strategy] (default: None)
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use
         `flwr.server.strategy.FedAvg`.
+    ray_init_args : Optional[Dict[str, Any]] (default: None)
+        Optional dictionary containing `ray.init` arguments.
     """
 
     # Ray cannot be assumed to be installed
@@ -60,9 +74,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
         raise ImportError(RAY_IMPORT_ERROR)
 
     # Initialize Ray
-    if not ray_init_config:
-        ray_init_config = {}
-    ray.init(**ray_init_config)
+    if not ray_init_args:
+        ray_init_args = {}
+    ray.init(**ray_init_args)
     log(
         INFO,
         "Ray initialized with resources: %s",
@@ -70,20 +84,21 @@ def start_simulation(  # pylint: disable=too-many-arguments
     )
 
     # Initialize server and server config
-    config = {"num_rounds": nb_rounds}
+    config = {"num_rounds": num_rounds}
     initialized_server, initialized_config = _init_defaults(None, config, strategy)
     log(
         INFO,
-        "Starting Flower Ray simulation running: %s",
+        "Starting Flower simulation running: %s",
         initialized_config,
     )
 
-    # Ask Ray to create and register RayClientProxy objects with the ClientManager
-    for i in range(nb_clients):
+    # Register one RayClientProxy object for each client with the ClientManager
+    resources = client_resources if client_resources is not None else {}
+    for i in range(num_clients):
         client_proxy = RayClientProxy(
             client_fn=client_fn,
             cid=str(i),
-            resources=client_resources,
+            resources=resources,
         )
         initialized_server.client_manager().register(client=client_proxy)
 

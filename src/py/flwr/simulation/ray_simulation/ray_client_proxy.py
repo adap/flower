@@ -40,9 +40,9 @@ class RayClientProxy(ClientProxy):
 
     def get_parameters(self) -> common.ParametersRes:
         """Return the current local model parameters."""
-        future_paramseters_res = launch_and_get_parameters.options(**self.resources).remote(
-            self.client_fn, self.cid
-        )
+        future_paramseters_res = launch_and_get_parameters.options(
+            **self.resources
+        ).remote(self.client_fn, self.cid)
         res = ray.get(future_paramseters_res)
         return cast(
             common.ParametersRes,
@@ -50,8 +50,7 @@ class RayClientProxy(ClientProxy):
         )
 
     def fit(self, ins: common.FitIns) -> common.FitRes:
-        """Refine the provided model parameters using the locally held
-        dataset."""
+        """Train model parameters on the locally held dataset."""
         future_fit_res = launch_and_fit.options(**self.resources).remote(
             self.client_fn, self.cid, ins
         )
@@ -62,8 +61,7 @@ class RayClientProxy(ClientProxy):
         )
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
-        """Evaluate the provided model parameters using the locally held
-        dataset."""
+        """Evaluate model parameters on the locally held dataset."""
         future_evaluate_res = launch_and_evaluate.options(**self.resources).remote(
             self.client_fn, self.cid, ins
         )
