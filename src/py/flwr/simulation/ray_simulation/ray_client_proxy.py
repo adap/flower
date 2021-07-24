@@ -17,11 +17,14 @@
 
 from typing import Callable, Dict, Union, cast
 
-import ray
+try:
+    import ray
+except ImportError:
+    ray = None
 
-import flwr
 from flwr import common
 from flwr.client import Client, NumPyClient
+from flwr.client.numpy_client import NumPyClientWrapper
 from flwr.server.client_proxy import ClientProxy
 
 ClientFn = Callable[[str], Client]
@@ -77,6 +80,7 @@ class RayClientProxy(ClientProxy):
 
 @ray.remote  # type: ignore
 def launch_and_get_params(client_fn: ClientFn, cid: str) -> common.ParametersRes:
+    """."""
     client: Client = _create_client(client_fn, cid)
     return client.get_parameters()
 
@@ -85,6 +89,7 @@ def launch_and_get_params(client_fn: ClientFn, cid: str) -> common.ParametersRes
 def launch_and_fit(
     client_fn: ClientFn, cid: str, fit_ins: common.FitIns
 ) -> common.FitRes:
+    """."""
     client: Client = _create_client(client_fn, cid)
     return client.fit(fit_ins)
 
@@ -93,12 +98,14 @@ def launch_and_fit(
 def launch_and_evaluate(
     client_fn: ClientFn, cid: str, evaluate_ins: common.EvaluateIns
 ) -> common.EvaluateRes:
+    """."""
     client: Client = _create_client(client_fn, cid)
     return client.evaluate(evaluate_ins)
 
 
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
+    """."""
     client: Union[Client, NumPyClient] = client_fn(cid)
     if isinstance(client, NumPyClient):
-        client = flwr.client.numpy_client.NumPyClientWrapper(numpy_client=client)
+        client = NumPyClientWrapper(numpy_client=client)
     return client
