@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Simulation app."""
+"""Flower simulation app."""
 
 
 from logging import INFO
@@ -27,7 +27,7 @@ from flwr.client.client import Client
 from flwr.common.logger import log
 from flwr.server.app import _fl, _init_defaults
 from flwr.server.strategy import Strategy
-from flwr.simulation.ray_simulation.ray_client_proxy import RayClientProxy
+from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 
 RAY_IMPORT_ERROR: str = """Unable to import module `ray`.
 
@@ -51,14 +51,21 @@ def start_simulation(  # pylint: disable=too-many-arguments
     ----------
     client_fn : Callable[[str], Client]
         A function creating client instances. The function must take a single
-        str argument called cid. It should return a single client instance
-        containing the local dataset and model of the client with the matching
-        client id (i.e., cid).
+        str argument called `cid`. It should return a single client instance.
+        Note that the created client instances are ephemeral and will often be
+        destroyed after a single method invocation. Since client instances are
+        not long-lived, they should not attempt to carry state over method
+        invocations. Any state required by the instance (model, dataset,
+        hyperparameters, ...) should be (re-)created in either the call to
+        `client_fn` or the call to any of the client methods (e.g., load
+        evaluation data in the `evaluate` method itself).
     num_clients : int
         The total number of clients in this simulation.
     client_resources : Optional[Dict[str, int]] (default: None)
         CPU and GPU resources for a single client. Supported keys are
-        `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`
+        `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`.
+        To understand the GPU utilization caused by `num_gpus`, consult the Ray
+        documentation on GPU support.
     num_rounds : int (default: 1)
         The number of rounds to train.
     strategy : Optional[flwr.server.Strategy] (default: None)
