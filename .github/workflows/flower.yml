@@ -28,7 +28,7 @@ jobs:
           python -m pip install -U poetry==1.1.6
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory only)
-        run: python -m poetry install
+        run: python -m poetry install --extras "simulation"
       - name: Check if protos need recompilation
         run: ./dev/check-protos.sh
       - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
