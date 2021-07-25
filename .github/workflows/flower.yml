@@ -10,7 +10,7 @@ on:
 
 jobs:
   test_core:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         python: [3.6.11, 3.7.9, 3.8.3, 3.9.5]
@@ -35,7 +35,7 @@ jobs:
         run: ./dev/test.sh
 
   test_baseline:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -64,7 +64,7 @@ jobs:
         run: ./dev/test-baseline.sh
 
   test_example_pytorch:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -84,7 +84,7 @@ jobs:
         run: ./dev/test-example-pytorch.sh
 
   test_example_tensorflow:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
