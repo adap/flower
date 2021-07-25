@@ -15,15 +15,18 @@
 """Flower Simulation app."""
 
 
-from logging import ERROR, INFO
-from typing import Callable, Dict, Optional, Tuple
+from logging import INFO
+from typing import Callable, Dict, Optional
 
-import flwr
+try:
+    import ray
+except ImportError:
+    ray = None
+
 from flwr.client.client import Client
 from flwr.common.logger import log
-from flwr.server.client_manager import SimpleClientManager
-from flwr.server.server import Server
-from flwr.server.strategy import FedAvg, Strategy
+from flwr.server.app import _fl, _init_defaults
+from flwr.server.strategy import Strategy
 from flwr.simulation.ray_simulation.ray_client_proxy import RayClientProxy
 
 RAY_IMPORT_ERROR: str = """Unable to import module `ray`.
@@ -52,14 +55,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
         `flwr.server.strategy.FedAvg`.
     """
 
-    # Try to import ray
-    try:
-        import ray
-    except:
-        ray = None
-    if not ray:
-        log(ERROR, RAY_IMPORT_ERROR)
-        return None
+    # Ray cannot be assumed to be installed
+    if ray is None:
+        raise ImportError(RAY_IMPORT_ERROR)
 
     # Initialize Ray
     if not ray_init_config:
@@ -67,17 +65,17 @@ def start_simulation(  # pylint: disable=too-many-arguments
     ray.init(**ray_init_config)
     log(
         INFO,
-        f"Ray initialized with resources: {ray.cluster_resources()}",
+        "Ray initialized with resources: %s",
+        ray.cluster_resources(),
     )
 
     # Initialize server and server config
     config = {"num_rounds": nb_rounds}
-    initialized_server, initialized_config = flwr.server.app._init_defaults(
-        None, config, strategy
-    )
+    initialized_server, initialized_config = _init_defaults(None, config, strategy)
     log(
         INFO,
-        f"Starting Flower Ray simulation running: {initialized_config}",
+        "Starting Flower Ray simulation running: %s",
+        initialized_config,
     )
 
     # Ask Ray to create and register RayClientProxy objects with the ClientManager
@@ -90,4 +88,4 @@ def start_simulation(  # pylint: disable=too-many-arguments
         initialized_server.client_manager().register(client=client_proxy)
 
     # Start training
-    flwr.server.app._fl(server=initialized_server, config=initialized_config)
+    _fl(server=initialized_server, config=initialized_config)
