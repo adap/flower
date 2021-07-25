@@ -21,7 +21,7 @@ from typing import Any, Callable, Dict, Optional
 try:
     import ray
 except ImportError:
-    ray = None
+    ray = None  # type: ignore
 
 from flwr.client.client import Client
 from flwr.common.logger import log
