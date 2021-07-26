@@ -69,7 +69,6 @@ def test(net, testloader, device: str):
 # Flower client that will be spawned by Ray
 # Adapted from Pytorch quickstart example
 class CifarRayClient(fl.client.NumPyClient):
-
     def __init__(self, cid: str, fed_dir_data: str):
         self.cid = cid
         self.fed_dir = Path(fed_dir_data)
@@ -85,7 +84,9 @@ class CifarRayClient(fl.client.NumPyClient):
 
     def set_parameters(self, parameters):
         params_dict = zip(self.net.state_dict().keys(), parameters)
-        state_dict = OrderedDict({k: torch.from_numpy(np.copy(v)) for k, v in params_dict})
+        state_dict = OrderedDict(
+            {k: torch.from_numpy(np.copy(v)) for k, v in params_dict}
+        )
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
@@ -95,9 +96,13 @@ class CifarRayClient(fl.client.NumPyClient):
 
         # load data for this client and get trainloader
         num_workers = len(ray.worker.get_resource_ids()["CPU"])
-        trainloader = get_dataloader(self.fed_dir, self.cid, is_train=True,
-                                     batch_size=int(config["batch_size"]),
-                                     workers=num_workers)
+        trainloader = get_dataloader(
+            self.fed_dir,
+            self.cid,
+            is_train=True,
+            batch_size=int(config["batch_size"]),
+            workers=num_workers,
+        )
 
         # send model to device
         self.net.to(self.device)
@@ -115,9 +120,9 @@ class CifarRayClient(fl.client.NumPyClient):
 
         # load data for this client and get trainloader
         num_workers = len(ray.worker.get_resource_ids()["CPU"])
-        valloader = get_dataloader(self.fed_dir, self.cid, is_train=False,
-                                   batch_size=50,
-                                   workers=num_workers)
+        valloader = get_dataloader(
+            self.fed_dir, self.cid, is_train=False, batch_size=50, workers=num_workers
+        )
 
         # send model to device
         self.net.to(self.device)
@@ -187,7 +192,7 @@ def get_eval_fn(
 if __name__ == "__main__":
 
     pool_size = 100  # number of dataset partions (= number of total clients)
-    client_resources = {'num_cpus': 1}  # each client will get allocated 1 CPUs
+    client_resources = {"num_cpus": 1}  # each client will get allocated 1 CPUs
 
     # download CIFAR10 dataset
     train_path, testset = getCIFAR10()
@@ -197,8 +202,9 @@ if __name__ == "__main__":
     # This will create a new directory called "federated: in the directory where
     # CIFAR-10 lives. Inside it, there will be N=pool_size sub-directories each with
     # its own train/set split.
-    fed_dir = do_fl_partitioning(train_path, pool_size=pool_size, alpha=1000,
-                                 num_classes=10, val_ratio=0.1)
+    fed_dir = do_fl_partitioning(
+        train_path, pool_size=pool_size, alpha=1000, num_classes=10, val_ratio=0.1
+    )
 
     # configure the strategy
     strategy = fl.server.strategy.FedAvg(
@@ -209,9 +215,19 @@ if __name__ == "__main__":
         eval_fn=get_eval_fn(testset),  # centralised testset evaluation of global model
     )
 
+    def client_fn(cid: str):
+        # create a single client instance
+        return CifarRayClient(cid, fed_dir)
+
     # (optional) specify ray config
-    ray_config = {'include_dashboard': False}
-    fl.simulation.start_ray_simulation(pool_size, fed_dir, client_resources,
-                                       CifarRayClient, config={"num_rounds": 5},
-                                       ray_init_config=ray_config,
-                                       strategy=strategy)
+    ray_config = {"include_dashboard": False}
+
+    # start simulation
+    fl.simulation.start_simulation(
+        client_fn=client_fn,
+        num_clients=pool_size,
+        client_resources=client_resources,
+        num_rounds=5,
+        strategy=strategy,
+        ray_init_args=ray_config,
+    )
