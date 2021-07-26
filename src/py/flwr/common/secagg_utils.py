@@ -7,6 +7,7 @@ from cryptography.hazmat.primitives import serialization
 import base64
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Protocol.SecretSharing import Shamir
+from concurrent.futures import ThreadPoolExecutor
 
 
 def generate_key_pairs():
@@ -71,28 +72,44 @@ def create_shares(
     # The int part of the tuple represents the index of the share, not the index of the chunk it is representing.
     secret_padded = pad(secret, 16)
     secret_padded_chunk = [
-        secret_padded[i : i + 16] for i in range(0, len(secret_padded), 16)
+        (threshold, num, secret_padded[i : i + 16])
+        for i in range(0, len(secret_padded), 16)
     ]
     share_list = []
     for i in range(num):
         share_list.append([])
-    # ideally should be done concurrently
-    for i in secret_padded_chunk:
-        chunk_shares = Shamir.split(threshold, num, i)
-        for idx, share in chunk_shares:
-            # idx start with 1
-            share_list[idx - 1].append((idx, share))
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        for chunk_shares in executor.map(
+            lambda arg: shamir_split(*arg), secret_padded_chunk
+        ):
+            for idx, share in chunk_shares:
+                # idx start with 1
+                share_list[idx - 1].append((idx, share))
     return share_list
 
-def combine_shares(shares:List[List[Tuple[int, bytes]]]):
-    chunk_num=len(shares[0])
-    secret_padded=bytearray(0)
-    #ideally should be done concurrently
+
+def shamir_split(threshold: int, num: int, chunk: bytes):
+    return Shamir.split(threshold, num, chunk)
+
+
+def combine_shares(shares: List[List[Tuple[int, bytes]]]):
+    chunk_num = len(shares[0])
+    secret_padded = bytearray(0)
+    chunk_shares_list = []
     for i in range(chunk_num):
-        chunk_shares=[]
+        chunk_shares = []
         for j in range(len(shares)):
             chunk_shares.append(shares[j][i])
-        chunk=Shamir.combine(chunk_shares)
-        secret_padded+=chunk
-    secret=unpad(secret_padded,16)
+        chunk_shares_list.append(chunk_shares)
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        for chunk in executor.map(shamir_combine, chunk_shares_list):
+            secret_padded += chunk
+
+    secret = unpad(secret_padded, 16)
     return bytes(secret)
+
+
+def shamir_combine(shares: List[Tuple[int, bytes]]):
+    return Shamir.combine(shares)
