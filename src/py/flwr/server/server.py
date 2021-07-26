@@ -353,14 +353,14 @@ class Server:
         # Stage 1: Ask Public Keys
         log(INFO, "SecAgg ask keys")
         ask_keys_results_and_failures = ask_keys(clients)
-        public_keys_list = []
+        public_keys_dict = {}
         ask_keys_results = ask_keys_results_and_failures[0]
-        for i in clients:
-            if i in [result[0] for result in ask_keys_results]:
-                idx = [result[0] for result in ask_keys_results].index(i)
-                public_keys_list.append(ask_keys_results[idx][1])
+        for idx, client in enumerate(clients):
+            if client in [result[0] for result in ask_keys_results]:
+                pos = [result[0] for result in ask_keys_results].index(client)
+                public_keys_dict[idx] = ask_keys_results[pos][1]
             else:
-                public_keys_list.append(None)
+                public_keys_dict[idx] = None
 
         # share_keys()
         # ask_vectors()

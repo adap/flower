@@ -76,14 +76,14 @@ class RayClientProxy(ClientProxy):
         return common.Disconnect(reason="")  # Nothing to do here (yet)
 
 
-@ray.remote  # type: ignore
+# @ray.remote  # type: ignore
 def launch_and_get_parameters(client_fn: ClientFn, cid: str) -> common.ParametersRes:
     """Exectue get_parameters remotely."""
     client: Client = _create_client(client_fn, cid)
     return client.get_parameters()
 
 
-@ray.remote  # type: ignore
+# @ray.remote  # type: ignore
 def launch_and_fit(
     client_fn: ClientFn, cid: str, fit_ins: common.FitIns
 ) -> common.FitRes:
@@ -92,7 +92,7 @@ def launch_and_fit(
     return client.fit(fit_ins)
 
 
-@ray.remote  # type: ignore
+# @ray.remote  # type: ignore
 def launch_and_evaluate(
     client_fn: ClientFn, cid: str, evaluate_ins: common.EvaluateIns
 ) -> common.EvaluateRes:
