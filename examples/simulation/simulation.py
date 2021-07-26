@@ -7,7 +7,7 @@ import flwr as fl
 import numpy as np
 import tensorflow as tf
 from flwr.server.strategy import FedAvg
-
+from TensorBoardStrategy import TensorBoardStrategy
 import dataset
 
 # Make TensorFlow log less verbose
@@ -19,7 +19,7 @@ DATASET = Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]
 
 def start_server(num_rounds: int, num_clients: int, fraction_fit: float):
     """Start the server with a slightly adjusted FedAvg strategy."""
-    strategy = FedAvg(min_available_clients=num_clients, fraction_fit=fraction_fit)
+    strategy = TensorBoardStrategy(min_available_clients=num_clients, fraction_fit=fraction_fit)
     # Exposes the server by default on port 8080
     fl.server.start_server(strategy=strategy, config={"num_rounds": num_rounds})
 
