@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Networked Flower client implementation."""
+"""gRPC-based Flower ClientProxy implementation."""
 
 
 from flwr import common

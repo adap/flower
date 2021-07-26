@@ -1,0 +1,20 @@
+[build-system]
+requires = [
+    "poetry==1.1.6",
+]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "sklearn-mnist"
+version = "0.1.0"
+description = "Federated training with scikit-learn"
+authors = [
+    "The Flower Authors <enquiries@flower.dev>",
+    "Kaushik Amar Das <kaushik.das@iiitg.ac.in>"
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+flwr = "^0.16.0"
+scikit-learn = "^0.24.2"
+openml = "^0.12.2"
