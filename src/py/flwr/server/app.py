@@ -28,7 +28,7 @@ from flwr.server.strategy import FedAvg, Strategy
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 
-def start_server(
+def start_server(  # pylint: disable=too-many-arguments
     server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,
     config: Optional[Dict[str, int]] = None,
