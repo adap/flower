@@ -24,8 +24,10 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -62,8 +64,10 @@ paramiko = { version = "^2.7.1", optional = true }
 docker = { version = "^4.2.0", optional = true }
 matplotlib = { version = "^3.2.1", optional = true }
 tqdm = { version = "^4.48.2", optional = true }
+ray = { version = "^1.4.0", optional = true}
 
 [tool.poetry.extras]
+simulation = ["ray"]
 baseline = ["tensorflow-cpu", "boto3", "boto3_type_annotations", "paramiko", "docker", "matplotlib"]
 examples-pytorch = ["torch", "torchvision", "tqdm"]
 examples-tensorflow = ["tensorflow-cpu"]
@@ -71,18 +75,18 @@ http-logger = ["boto3", "boto3_type_annotations", "tensorflow-cpu", "boto3", "bo
 ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
 
 [tool.poetry.dev-dependencies]
-isort = "==5.7.0"
-black = "==20.8b1"
+isort = "==5.9.2"
+black = "==21.7b0"
 docformatter = "==1.4"
 mypy = "==0.800"
-pylint = "==2.6.0"
+pylint = "==2.8.2"
+flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
 grpcio-tools = "==1.32.0"
 mypy-protobuf = "==2.4"
-rope = "==0.18.0"
+rope = "==0.19.0"
 sphinx = "==3.4.3"
-flake8 = "==3.8.4"
 sphinx-book-theme = "==0.0.39"
 
 [tool.isort]
