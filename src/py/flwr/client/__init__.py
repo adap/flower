@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Client."""
+"""Flower client."""
 
 
 from .app import start_client as start_client
