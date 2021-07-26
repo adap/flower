@@ -12,11 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower simulation."""
-
-
-from .app import start_simulation as start_simulation
-
-__all__ = [
-    "start_simulation",
-]
+"""Ray-based Flower ClientProxy implementation."""

@@ -12,116 +12,102 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Simulation app."""
+"""Flower simulation app."""
 
 
 from logging import INFO
-from typing import Dict, Optional, Tuple
+from typing import Any, Callable, Dict, Optional
 
-from flwr.common.logger import log
-from flwr.server.client_manager import SimpleClientManager
-from flwr.simulation.ray_simulation.ray_client_proxy import RayClientProxy
-from flwr.server.server import Server
-from flwr.server.strategy import FedAvg, Strategy
+try:
+    import ray
+except ImportError:
+    ray = None  # type: ignore
+
 from flwr.client.client import Client
+from flwr.common.logger import log
+from flwr.server.app import _fl, _init_defaults
+from flwr.server.strategy import Strategy
+from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 
-# TODO: dynamically imported when user wants to use start_ray_simulation()
-import ray
+RAY_IMPORT_ERROR: str = """Unable to import module `ray`.
+
+To install the necessary dependencies, install `flwr` with the `simulation` extra:
+
+    pip install -U flwr["simulation"]
+"""
 
 
-def start_ray_simulation(
-    pool_size: int,  # number of total partitions/clients
-    data_partitions_dir: str,  # path where data partitions for each client exist
-    client_resources: Dict[str, int],  # compute/memory resources for each client
-    client_type: Client,
-    ray_init_config: Dict = {},
-    config: Optional[Dict[str, int]] = None,
+def start_simulation(  # pylint: disable=too-many-arguments
+    client_fn: Callable[[str], Client],
+    num_clients: int,
+    client_resources: Optional[Dict[str, int]] = None,
+    num_rounds: int = 1,
     strategy: Optional[Strategy] = None,
+    ray_init_args: Optional[Dict[str, Any]] = None,
 ) -> None:
     """Start a Ray-based Flower simulation server.
 
     Parameters
     ----------
-    config: Optional[Dict[str, int]] (default: None).
-        The only currently supported values is `num_rounds`, so a full
-        configuration object instructing the server to perform three rounds of
-        federated learning looks like the following: `{"num_rounds": 3}`.
-    strategy: Optional[flwr.server.Strategy] (default: None)
+    client_fn : Callable[[str], Client]
+        A function creating client instances. The function must take a single
+        str argument called `cid`. It should return a single client instance.
+        Note that the created client instances are ephemeral and will often be
+        destroyed after a single method invocation. Since client instances are
+        not long-lived, they should not attempt to carry state over method
+        invocations. Any state required by the instance (model, dataset,
+        hyperparameters, ...) should be (re-)created in either the call to
+        `client_fn` or the call to any of the client methods (e.g., load
+        evaluation data in the `evaluate` method itself).
+    num_clients : int
+        The total number of clients in this simulation.
+    client_resources : Optional[Dict[str, int]] (default: None)
+        CPU and GPU resources for a single client. Supported keys are
+        `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`.
+        To understand the GPU utilization caused by `num_gpus`, consult the Ray
+        documentation on GPU support.
+    num_rounds : int (default: 1)
+        The number of rounds to train.
+    strategy : Optional[flwr.server.Strategy] (default: None)
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use
         `flwr.server.strategy.FedAvg`.
+    ray_init_args : Optional[Dict[str, Any]] (default: None)
+        Optional dictionary containing `ray.init` arguments.
     """
+
+    # Ray cannot be assumed to be installed
+    if ray is None:
+        raise ImportError(RAY_IMPORT_ERROR)
+
+    # Initialize Ray
+    if not ray_init_args:
+        ray_init_args = {}
+    ray.init(**ray_init_args)
+    log(
+        INFO,
+        "Ray initialized with resources: %s",
+        ray.cluster_resources(),
+    )
+
+    # Initialize server and server config
+    config = {"num_rounds": num_rounds}
     initialized_server, initialized_config = _init_defaults(None, config, strategy)
-
-    # initialize Ray
-    ray.init(**ray_init_config)
-
     log(
         INFO,
-        f"Ray initialized with resources: {ray.cluster_resources()}",
+        "Starting Flower simulation running: %s",
+        initialized_config,
     )
 
-    log(
-        INFO,
-        f"Starting Flower Ray simulation running: {initialized_config}",
-    )
-
-    # Ask Ray to create and register RayClientProxy objects with the ClientManager
-    for i in range(pool_size):
-        client_proxy = RayClientProxy(cid=str(i), client_type=client_type,
-                                      resources=client_resources,
-                                      fed_dir=data_partitions_dir)
+    # Register one RayClientProxy object for each client with the ClientManager
+    resources = client_resources if client_resources is not None else {}
+    for i in range(num_clients):
+        client_proxy = RayClientProxy(
+            client_fn=client_fn,
+            cid=str(i),
+            resources=resources,
+        )
         initialized_server.client_manager().register(client=client_proxy)
 
     # Start training
     _fl(server=initialized_server, config=initialized_config)
-
-
-def _init_defaults(
-    server: Optional[Server],
-    config: Optional[Dict[str, int]],
-    strategy: Optional[Strategy],
-) -> Tuple[Server, Dict[str, int]]:
-    # Create server instance if none was given
-    if server is None:
-        client_manager = SimpleClientManager()
-        if strategy is None:
-            strategy = FedAvg()
-        server = Server(client_manager=client_manager, strategy=strategy)
-
-    # Set default config values
-    if config is None:
-        config = {}
-    if "num_rounds" not in config:
-        config["num_rounds"] = 1
-
-    return server, config
-
-
-def _fl(server: Server, config: Dict[str, int]) -> None:
-    # Fit model
-    hist = server.fit(num_rounds=config["num_rounds"])
-    log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
-    log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
-    log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
-    log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
-
-    # Temporary workaround to force distributed evaluation
-    server.strategy.eval_fn = None  # type: ignore
-
-    # Evaluate the final trained model
-    res = server.evaluate_round(rnd=-1)
-    if res is not None:
-        loss, _, (results, failures) = res
-        log(INFO, "app_evaluate: federated loss: %s", str(loss))
-        log(
-            INFO,
-            "app_evaluate: results %s",
-            str([(res[0].cid, res[1]) for res in results]),
-        )
-        log(INFO, "app_evaluate: failures %s", str(failures))
-    else:
-        log(INFO, "app_evaluate: no evaluation result")
-
-    # Graceful shutdown
-    server.disconnect_all_clients()
