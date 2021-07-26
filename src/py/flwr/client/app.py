@@ -18,6 +18,7 @@
 import time
 from logging import INFO
 
+
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 
@@ -26,6 +27,7 @@ from .grpc_client.connection import insecure_grpc_connection
 from .grpc_client.message_handler import handle
 from .keras_client import KerasClient, KerasClientWrapper
 from .numpy_client import NumPyClient, NumPyClientWrapper
+from .secagg_client import SecAggClient
 
 
 def start_client(
@@ -52,6 +54,8 @@ def start_client(
     Returns:
         None.
     """
+
+    client = SecAggClient(client)
     while True:
         sleep_duration: int = 0
         with insecure_grpc_connection(

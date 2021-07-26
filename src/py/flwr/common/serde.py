@@ -180,6 +180,31 @@ def check_error(msg: ClientMessage.SecAggRes):
         raise Exception(msg.error_res.error)
 
 
+# === Setup Param ===
+def setup_param_to_proto(
+    setup_param_in: typing.SetupParamIn,
+) -> ServerMessage.SecAggMsg.SetupParam:
+    return ServerMessage.SecAggMsg(
+        setup_param=ServerMessage.SecAggMsg.SetupParam(
+            secagg_id=setup_param_in.secagg_id,
+            sample_num=setup_param_in.sample_num,
+            share_num=setup_param_in.share_num,
+            threshold=setup_param_in.threshold,
+        )
+    )
+
+
+def setup_param_from_proto(
+    setup_param_msg: ServerMessage.SecAggMsg.SetupParam,
+) -> typing.SetupParamIn:
+    return typing.SetupParamIn(
+        secagg_id=setup_param_msg.secagg_id,
+        sample_num=setup_param_msg.sample_num,
+        share_num=setup_param_msg.share_num,
+        threshold=setup_param_msg.threshold,
+    )
+
+
 # === Ask Keys ===
 def ask_keys_to_proto() -> ServerMessage.SecAggMsg.AskKeys:
     return ServerMessage.SecAggMsg(ask_keys=ServerMessage.SecAggMsg.AskKeys())

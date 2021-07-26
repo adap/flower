@@ -7,6 +7,8 @@ from flwr.common import (
     ParametersRes,
     secagg_utils,
 )
+from flwr.common.typing import SetupParamIn
+from flwr.server.strategy import secagg
 from .client import Client
 
 
@@ -25,6 +27,9 @@ class SecAggClient(Client):
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         return self.client.evaluate(ins)
+
+    def setup_param(self, setup_param_in: SetupParamIn):
+        self.param = setup_param_in
 
     def ask_keys(self):
         self.sk1, self.pk1 = secagg_utils.generate_key_pairs()

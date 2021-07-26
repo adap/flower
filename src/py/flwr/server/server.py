@@ -19,7 +19,6 @@ import concurrent.futures
 import timeit
 from logging import DEBUG, INFO, WARNING
 from typing import Dict, List, Optional, Tuple, Union
-from flwr.client.secagg_client import SecAggClient
 
 from flwr.common import (
     Disconnect,
@@ -40,7 +39,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import Strategy, FedAvg
 from flwr.server.strategy.secagg import SecAgg
-from flwr.common.typing import AskKeysRes
+from flwr.common.typing import AskKeysRes, SetupParamIn
 
 DEPRECATION_WARNING_EVALUATE = """
 DEPRECATION WARNING: Method
@@ -340,17 +339,23 @@ class Server:
             and threshold >= 2
         ), "SecAgg parameters not accepted"
 
-        users = self._client_manager.sample(num_clients=sample_num)
-        # promote users to SecAgg clients
-        for i in range(len(users)):
-            users[i] = SecAggClient(users[i])
+        clients = self._client_manager.sample(num_clients=sample_num)
 
+        # Stage 0: Setup
+        # Give rnd, sample_num, share_num, threshold, client id
+        log(INFO, "SecAgg setup params")
+        setup_param(
+            clients=clients,
+            sample_num=sample_num,
+            share_num=share_num,
+            threshold=threshold,
+        )
         # Stage 1: Ask Public Keys
         log(INFO, "SecAgg ask keys")
-        ask_keys_results_and_failures = ask_keys(users)
+        ask_keys_results_and_failures = ask_keys(clients)
         public_keys_list = []
         ask_keys_results = ask_keys_results_and_failures[0]
-        for i in users:
+        for i in clients:
             if i in [result[0] for result in ask_keys_results]:
                 idx = [result[0] for result in ask_keys_results].index(i)
                 public_keys_list.append(ask_keys_results[idx][1])
@@ -473,6 +478,31 @@ def evaluate_client(
     return client, evaluate_res
 
 
+def setup_param(
+    clients: List[ClientProxy],
+    sample_num: int,
+    share_num: int,
+    threshold: int,
+):
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(
+                lambda p: setup_param_client(*p),
+                (
+                    c,
+                    SetupParamIn(
+                        secagg_id=idx,
+                        sample_num=sample_num,
+                        share_num=share_num,
+                        threshold=threshold,
+                    ),
+                ),
+            )
+            for idx, c in enumerate(clients)
+        ]
+        concurrent.futures.wait(futures)
+
+
 def ask_keys(clients: List[ClientProxy]) -> AskKeysResultsAndFailures:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(ask_keys_client, c) for c in clients]
@@ -488,6 +518,10 @@ def ask_keys(clients: List[ClientProxy]) -> AskKeysResultsAndFailures:
             result = future.result()
             results.append(result)
     return results, failures
+
+
+def setup_param_client(client: ClientProxy, setup_param_msg: SetupParamIn):
+    client.setup_param(setup_param_msg)
 
 
 def ask_keys_client(client: ClientProxy) -> Tuple[ClientProxy, AskKeysRes]:

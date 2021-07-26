@@ -98,6 +98,14 @@ class Disconnect:
 
 
 @dataclass
+class SetupParamIn:
+    secagg_id: int
+    sample_num: int
+    share_num: int
+    threshold: int
+
+
+@dataclass
 class AskKeysRes:
     """Ask Keys Stage Response from client to server"""
 

@@ -45,9 +45,16 @@ message ServerMessage {
     map<string, Scalar> config = 2;
   }
   message SecAggMsg{
+    message SetupParam{
+      int64 secagg_id=1;
+      int64 sample_num=2;
+      int64 share_num=3;
+      int64 threshold=4;
+    }
     message AskKeys{}
     oneof msg{
-      AskKeys ask_keys=1;
+      SetupParam setup_param=1;
+      AskKeys ask_keys=2;
     }
   }
 
@@ -77,6 +84,7 @@ message ClientMessage {
     map<string, Scalar> metrics = 4;
   }
   message SecAggRes{
+
     message AskKeysRes{
         bytes pk1=1;
         bytes pk2=2;

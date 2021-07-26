@@ -41,7 +41,13 @@ def handle(
     if server_msg.HasField("evaluate_ins"):
         return _evaluate(client, server_msg.evaluate_ins), 0, True
     if server_msg.HasField("sec_agg_msg"):
-        if server_msg.sec_agg_msg.HasField("ask_keys"):
+        if server_msg.sec_agg_msg.HasField("setup_param"):
+            # no response
+            _setup_param(client, server_msg.sec_agg_msg.setup_param)
+            # TODO CHANGE THIS TO RETURNING A CLIENT MESSAGE
+            return _error_res(Exception("TEST")), 0, True
+
+        elif server_msg.sec_agg_msg.HasField("ask_keys"):
             return _ask_keys(client), 0, True
     raise UnkownServerMessage()
 
@@ -85,6 +91,14 @@ def _reconnect(
     # Build Disconnect message
     disconnect = ClientMessage.Disconnect(reason=reason)
     return ClientMessage(disconnect=disconnect), sleep_duration
+
+
+def _setup_param(client: Client, setup_param_msg: ServerMessage.SecAggMsg.SetupParam):
+    try:
+        setup_param_in = serde.setup_param_from_proto(setup_param_msg)
+        client.setup_param(setup_param_in)
+    except Exception as e:
+        return _error_res(e)
 
 
 def _ask_keys(client: Client) -> ClientMessage:

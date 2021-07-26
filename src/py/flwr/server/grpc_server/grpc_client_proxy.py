@@ -18,6 +18,7 @@
 from flwr import common
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.common.typing import SetupParamIn
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_bridge import GRPCBridge
 
@@ -50,6 +51,11 @@ class GrpcClientProxy(ClientProxy):
         )
         fit_res = serde.fit_res_from_proto(client_msg.fit_res)
         return fit_res
+
+    def setup_param(self, setup_param_in: SetupParamIn):
+        setup_param_msg = serde.setup_param_to_proto(setup_param_in)
+        self.bridge.request(ServerMessage(sec_agg_msg=setup_param_msg))
+        # doesnt receive response
 
     def ask_keys(self) -> common.AskKeysRes:
         ask_keys_msg = serde.ask_keys_to_proto()
