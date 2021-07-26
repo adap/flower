@@ -54,8 +54,10 @@ class GrpcClientProxy(ClientProxy):
 
     def setup_param(self, setup_param_in: SetupParamIn):
         setup_param_msg = serde.setup_param_to_proto(setup_param_in)
-        self.bridge.request(ServerMessage(sec_agg_msg=setup_param_msg))
-        # doesnt receive response
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(sec_agg_msg=setup_param_msg)
+        )
+        serde.check_error(client_msg.sec_agg_res)
 
     def ask_keys(self) -> common.AskKeysRes:
         ask_keys_msg = serde.ask_keys_to_proto()

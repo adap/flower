@@ -84,7 +84,7 @@ message ClientMessage {
     map<string, Scalar> metrics = 4;
   }
   message SecAggRes{
-
+    message SetupParamRes{}
     message AskKeysRes{
         bytes pk1=1;
         bytes pk2=2;
@@ -93,8 +93,9 @@ message ClientMessage {
       string error=1;
     }
     oneof msg{
-      AskKeysRes ask_keys_res=1;
-      ErrorRes error_res=2;
+      SetupParamRes setup_param_res=1;
+      AskKeysRes ask_keys_res=2;
+      ErrorRes error_res=3;
     }
   }
   
