@@ -9,6 +9,7 @@ from Crypto.Util.Padding import pad, unpad
 from Crypto.Protocol.SecretSharing import Shamir
 from concurrent.futures import ThreadPoolExecutor
 import os
+import random
 
 
 def generate_key_pairs():
@@ -116,5 +117,10 @@ def shamir_combine(shares: List[Tuple[int, bytes]]):
     return Shamir.combine(shares)
 
 
-def random_bytes(num: int = 32):
+def rand_bytes(num: int = 32) -> bytes:
     return os.random(num)
+
+
+def pseudo_rand_gen(seed: bytes, num_range: int, l: int):
+    random.seed(seed)
+    return [random.randrange(0, num_range) for i in range(l)]
