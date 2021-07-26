@@ -8,6 +8,7 @@ import base64
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Protocol.SecretSharing import Shamir
 from concurrent.futures import ThreadPoolExecutor
+import os
 
 
 def generate_key_pairs():
@@ -113,3 +114,7 @@ def combine_shares(shares: List[List[Tuple[int, bytes]]]):
 
 def shamir_combine(shares: List[Tuple[int, bytes]]):
     return Shamir.combine(shares)
+
+
+def random_bytes(num: int):
+    return os.random(num)
