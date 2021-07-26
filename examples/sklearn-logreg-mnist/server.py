@@ -6,7 +6,7 @@ from typing import Dict
 
 
 def fit_round(rnd: int) -> Dict:
-    """Send round number to client"""
+    """Send round number to client."""
     return {"rnd": rnd}
 
 
