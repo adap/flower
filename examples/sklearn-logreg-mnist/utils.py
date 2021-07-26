@@ -10,7 +10,7 @@ XYList = List[XY]
 
 
 def get_model_parameters(model: LogisticRegression) -> LogRegParams:
-    """Returns the paramters of a sklearn LogisticRegression model"""
+    """Returns the paramters of a sklearn LogisticRegression model."""
     if model.fit_intercept:
         params = (model.coef_, model.intercept_)
     else:
@@ -21,7 +21,7 @@ def get_model_parameters(model: LogisticRegression) -> LogRegParams:
 def set_model_params(
     model: LogisticRegression, params: LogRegParams
 ) -> LogisticRegression:
-    """Sets the parameters of a sklean LogisticRegression model"""
+    """Sets the parameters of a sklean LogisticRegression model."""
     model.coef_ = params[0]
     if model.fit_intercept:
         model.intercept_ = params[1]
@@ -29,12 +29,12 @@ def set_model_params(
 
 
 def set_initial_params(model: LogisticRegression):
-    """
-    Sets initial parameters as zeros
-    Required since model params are uninitialized until model.fit is called.
-    But server asks for initial parameters from clients at launch.
-    Refer to sklearn.linear_model.LogisticRegression documentation
-    for more information.
+    """Sets initial parameters as zeros Required since model params are
+    uninitialized until model.fit is called.
+
+    But server asks for initial parameters from clients at launch. Refer
+    to sklearn.linear_model.LogisticRegression documentation for more
+    information.
     """
     n_classes = 10  # MNIST has 10 classes
     n_features = 784  # Number of features in dataset
@@ -46,9 +46,9 @@ def set_initial_params(model: LogisticRegression):
 
 
 def load_mnist() -> Dataset:
-    """
-    Loads the MNIST dataset using OpenML
-    Dataset link: https://www.openml.org/d/554
+    """Loads the MNIST dataset using OpenML.
+
+    OpenML dataset link: https://www.openml.org/d/554
     """
     mnist_openml = openml.datasets.get_dataset(554)
     Xy, _, _, _ = mnist_openml.get_data(dataset_format="array")
