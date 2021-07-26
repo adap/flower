@@ -116,5 +116,5 @@ def shamir_combine(shares: List[Tuple[int, bytes]]):
     return Shamir.combine(shares)
 
 
-def random_bytes(num: int):
+def random_bytes(num: int = 32):
     return os.random(num)
