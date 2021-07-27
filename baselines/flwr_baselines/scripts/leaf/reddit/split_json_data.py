@@ -16,9 +16,9 @@
 import argparse
 import json
 import pickle
-from os import Any, PathLike
+from os import PathLike
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 
 def check_between_zero_and_one(value: str) -> float:
@@ -64,7 +64,7 @@ def split_json_and_save(
             start_idx = 0
             for split_id, (dataset, fraction) in enumerate(list_datasets):
                 end_idx = start_idx + int(fraction * num_samples)
-                data = {}
+                data: Dict[str, Union[str, int]] = {}
                 data["idx"] = user_idx
                 data["character"] = u
                 if split_id == len(list_datasets) - 1:  # Make sure we use last indices
