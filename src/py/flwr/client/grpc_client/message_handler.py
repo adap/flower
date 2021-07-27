@@ -113,6 +113,10 @@ def _ask_keys(client: Client) -> ClientMessage:
         return _error_res(e)
 
 
+def _share_keys(client: Client, share_keys_msg: ServerMessage.SecAggMsg.ShareKeys):
+    pass
+
+
 def _error_res(e: Exception) -> ClientMessage:
     error_res = ClientMessage.SecAggRes(
         error_res=ClientMessage.SecAggRes.ErrorRes(error=e.args[0])

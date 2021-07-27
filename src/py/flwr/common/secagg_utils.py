@@ -74,7 +74,7 @@ def create_shares(
     # The int part of the tuple represents the index of the share, not the index of the chunk it is representing.
     secret_padded = pad(secret, 16)
     secret_padded_chunk = [
-        (threshold, num, secret_padded[i : i + 16])
+        (threshold, num, secret_padded[i: i + 16])
         for i in range(0, len(secret_padded), 16)
     ]
     share_list = []
@@ -124,3 +124,18 @@ def rand_bytes(num: int = 32) -> bytes:
 def pseudo_rand_gen(seed: bytes, num_range: int, l: int):
     random.seed(seed)
     return [random.randrange(0, num_range) for i in range(l)]
+
+
+def share_keys_plaintext_concat(source: int, destination: int, b_share: bytes, sk_share: bytes):
+    concat = b'||'
+    return concat.join([str(source).encode(), str(destination).encode(), b_share, sk_share])
+
+
+def share_keys_plaintext_separate(plaintext: bytes):
+    plaintext_list = plaintext.split(b"||")
+    return (
+        plaintext_list[0].decode("utf-8", "strict"),
+        plaintext_list[1].decode("utf-8", "strict"),
+        plaintext_list[2],
+        plaintext_list[3],
+    )
