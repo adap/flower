@@ -16,12 +16,12 @@
 import argparse
 import json
 import pickle
-from os import PathLike
+from os import Any, PathLike
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 
-def check_between_zero_and_one(value: str):
+def check_between_zero_and_one(value: str) -> float:
     fvalue = float(value)
     if fvalue < 0 or fvalue > 1:
         raise argparse.ArgumentTypeError(
@@ -32,8 +32,8 @@ def check_between_zero_and_one(value: str):
 
 def split_json_and_save(
     list_datasets: List[Tuple[str, float]],
-    path_to_json: PathLike,
-    save_root: PathLike,
+    path_to_json: PathLike[Any],
+    save_root: PathLike[Any],
     users_list: Optional[List[str]] = None,
 ):
     """Splits LEAF generated datasets and creates individual client partitions.
@@ -45,10 +45,12 @@ def split_json_and_save(
         save_root (PathLike): Root directory where to save the individual client
             partition files.
     """
+
     if users_list is None:
         users_list = []
 
     new_users = []
+
     with open(path_to_json) as f:
         js = json.load(f)
         if not users_list:
