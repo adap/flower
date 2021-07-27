@@ -69,7 +69,7 @@ message ClientMessage {
     float accuracy = 3 [ deprecated = true ];
     map<string, Scalar> metrics = 4;
   }
-
+  message GetInfoRes { map<string, Scalar> info_res = 1; }
   oneof msg {
     Disconnect disconnect = 1;
     ParametersRes parameters_res = 2;
@@ -77,7 +77,6 @@ message ClientMessage {
     EvaluateRes evaluate_res = 4;
   }
 
-  message GetInfoRes { map<string, Scalar> info_res = 1; }
 }
 
 message Scalar {
