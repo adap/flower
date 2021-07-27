@@ -34,7 +34,7 @@ def split_json_and_save(
     list_datasets: List[Tuple[str, float]],
     path_to_json: PathLike[Any],
     save_root: PathLike[Any],
-    prev_users_list: Optional[List[str]] = None,
+    users_list: Optional[List[str]] = None,
 ) -> List[str]:
     """Splits LEAF generated datasets and creates individual client partitions.
 
@@ -45,7 +45,6 @@ def split_json_and_save(
         save_root (PathLike): Root directory where to save the individual client
             partition files.
     """
-    users_list: List[str] = [] if prev_users_list is None else prev_users_list
 
     new_users = []
 
@@ -73,9 +72,9 @@ def split_json_and_save(
 
                 save_dir: Path = save_root / str(user_idx)
                 save_dir.mkdir(parents=True, exist_ok=True)
-                f: BinaryIO = open(save_dir / f"{dataset}.pickle", "wb")
-                pickle.dump(data, f)
-                f.close()
+                g: BinaryIO
+                with open(save_dir / f"{dataset}.pickle", "wb") as g:
+                    pickle.dump(data, g)
 
     return new_users
 
@@ -133,5 +132,5 @@ if __name__ == "__main__":
         list_datasets=list_datasets,
         path_to_json=original_test_dataset,
         save_root=save_root,
-        prev_users_list=users_list,
+        users_list=users_list,
     )
