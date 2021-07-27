@@ -10,6 +10,7 @@ from Crypto.Protocol.SecretSharing import Shamir
 from concurrent.futures import ThreadPoolExecutor
 import os
 import random
+import pickle
 
 
 def generate_key_pairs():
@@ -22,7 +23,7 @@ def private_key_to_bytes(sk: ec.EllipticCurvePrivateKey) -> bytes:
     return sk.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption,
+        encryption_algorithm=serialization.NoEncryption(),
     )
 
 
@@ -69,7 +70,7 @@ def decrypt(key: bytes, token: bytes):
 
 def create_shares(
     secret: bytes, threshold: int, num: int
-) -> List[List[Tuple[int, bytes]]]:
+) -> List[bytes]:
     # return list of list for each user. Each sublist contains a share for a 16 byte chunk of the secret.
     # The int part of the tuple represents the index of the share, not the index of the chunk it is representing.
     secret_padded = pad(secret, 16)
@@ -88,6 +89,10 @@ def create_shares(
             for idx, share in chunk_shares:
                 # idx start with 1
                 share_list[idx - 1].append((idx, share))
+
+    for idx, shares in enumerate(share_list):
+        share_list[idx] = pickle.dumps(shares)
+
     return share_list
 
 
@@ -95,14 +100,18 @@ def shamir_split(threshold: int, num: int, chunk: bytes):
     return Shamir.split(threshold, num, chunk)
 
 
-def combine_shares(shares: List[List[Tuple[int, bytes]]]):
-    chunk_num = len(shares[0])
+def combine_shares(share_list: List[bytes]):
+    for idx, share in enumerate(share_list):
+        share_list[idx] = pickle.loads(share)
+
+    print(share_list)
+    chunk_num = len(share_list[0])
     secret_padded = bytearray(0)
     chunk_shares_list = []
     for i in range(chunk_num):
         chunk_shares = []
-        for j in range(len(shares)):
-            chunk_shares.append(shares[j][i])
+        for j in range(len(share_list)):
+            chunk_shares.append(share_list[j][i])
         chunk_shares_list.append(chunk_shares)
 
     with ThreadPoolExecutor(max_workers=10) as executor:
@@ -118,7 +127,7 @@ def shamir_combine(shares: List[Tuple[int, bytes]]):
 
 
 def rand_bytes(num: int = 32) -> bytes:
-    return os.random(num)
+    return os.urandom(num)
 
 
 def pseudo_rand_gen(seed: bytes, num_range: int, l: int):

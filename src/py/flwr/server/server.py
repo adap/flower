@@ -566,7 +566,7 @@ def share_keys_client(client, idx, public_keys_dict, sample_num, share_num):
         return client.share_keys(ShareKeysIn(public_keys_dict=public_keys_dict))
     local_dict = {}
     for i in range(-int(share_num / 2), int(share_num / 2) + 1):
-        if (i + idx) % sample_num in public_keys_dict.keys():
+        if ((i + idx) % sample_num) in public_keys_dict.keys():
             local_dict[(i + idx) % sample_num] = public_keys_dict[
                 (i + idx) % sample_num
             ]

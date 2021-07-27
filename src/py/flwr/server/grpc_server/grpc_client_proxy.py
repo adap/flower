@@ -18,7 +18,7 @@
 from flwr import common
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
-from flwr.common.typing import SetupParamIn, ShareKeysIn
+from flwr.common.typing import SetupParamIn, ShareKeysIn, ShareKeysRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_bridge import GRPCBridge
 
@@ -69,7 +69,7 @@ class GrpcClientProxy(ClientProxy):
         ask_keys_res = serde.ask_keys_res_from_proto(client_msg.sec_agg_res)
         return ask_keys_res
 
-    def share_keys(self, share_keys_in: ShareKeysIn):
+    def share_keys(self, share_keys_in: ShareKeysIn) -> ShareKeysRes:
         share_keys_msg = serde.share_keys_in_to_proto(share_keys_in)
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(sec_agg_msg=share_keys_msg)

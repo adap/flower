@@ -42,11 +42,11 @@ def handle(
         return _evaluate(client, server_msg.evaluate_ins), 0, True
     if server_msg.HasField("sec_agg_msg"):
         if server_msg.sec_agg_msg.HasField("setup_param"):
-            return _setup_param(client, server_msg.sec_agg_msg.setup_param), 0, True
+            return _setup_param(client, server_msg.sec_agg_msg), 0, True
         elif server_msg.sec_agg_msg.HasField("ask_keys"):
             return _ask_keys(client), 0, True
         elif server_msg.sec_agg_msg.HasField("share_keys"):
-            return _error_res(Exception("SHARE_KEYS RECEIVED")), 0, True
+            return _share_keys(client, server_msg.sec_agg_msg), 0, True
     raise UnkownServerMessage()
 
 
@@ -91,7 +91,7 @@ def _reconnect(
     return ClientMessage(disconnect=disconnect), sleep_duration
 
 
-def _setup_param(client: Client, setup_param_msg: ServerMessage.SecAggMsg.SetupParam):
+def _setup_param(client: Client, setup_param_msg: ServerMessage.SecAggMsg):
     try:
         setup_param_in = serde.setup_param_from_proto(setup_param_msg)
         client.setup_param(setup_param_in)
@@ -114,7 +114,13 @@ def _ask_keys(client: Client) -> ClientMessage:
 
 
 def _share_keys(client: Client, share_keys_msg: ServerMessage.SecAggMsg.ShareKeys):
-    pass
+    try:
+        share_keys_in = serde.share_keys_in_from_proto(share_keys_msg)
+        share_keys_res = client.share_keys(share_keys_in)
+        share_keys_res_proto = serde.share_keys_res_to_proto(share_keys_res)
+        return ClientMessage(sec_agg_res=share_keys_res_proto)
+    except Exception as e:
+        return _error_res(e)
 
 
 def _error_res(e: Exception) -> ClientMessage:

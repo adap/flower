@@ -25,6 +25,8 @@ from flwr.proto.transport_pb2 import (
     ServerMessage,
 )
 
+from flwr.server.server import Server
+
 from . import typing
 
 # pylint: disable=missing-function-docstring
@@ -183,7 +185,7 @@ def check_error(msg: ClientMessage.SecAggRes):
 # === Setup Param ===
 def setup_param_to_proto(
     setup_param_in: typing.SetupParamIn,
-) -> ServerMessage.SecAggMsg.SetupParam:
+) -> ServerMessage.SecAggMsg:
     return ServerMessage.SecAggMsg(
         setup_param=ServerMessage.SecAggMsg.SetupParam(
             secagg_id=setup_param_in.secagg_id,
@@ -195,18 +197,18 @@ def setup_param_to_proto(
 
 
 def setup_param_from_proto(
-    setup_param_msg: ServerMessage.SecAggMsg.SetupParam,
+    setup_param_msg: ServerMessage.SecAggMsg,
 ) -> typing.SetupParamIn:
     return typing.SetupParamIn(
-        secagg_id=setup_param_msg.secagg_id,
-        sample_num=setup_param_msg.sample_num,
-        share_num=setup_param_msg.share_num,
-        threshold=setup_param_msg.threshold,
+        secagg_id=setup_param_msg.setup_param.secagg_id,
+        sample_num=setup_param_msg.setup_param.sample_num,
+        share_num=setup_param_msg.setup_param.share_num,
+        threshold=setup_param_msg.setup_param.threshold,
     )
 
 
 # === Ask Keys ===
-def ask_keys_to_proto() -> ServerMessage.SecAggMsg.AskKeys:
+def ask_keys_to_proto() -> ServerMessage.SecAggMsg:
     return ServerMessage.SecAggMsg(ask_keys=ServerMessage.SecAggMsg.AskKeys())
 
 
@@ -221,7 +223,7 @@ def ask_keys_res_from_proto(msg: ClientMessage.SecAggRes) -> typing.AskKeysRes:
 
 
 # === Share Keys ===
-def share_keys_in_to_proto(share_keys_in: typing.ShareKeysIn):
+def share_keys_in_to_proto(share_keys_in: typing.ShareKeysIn) -> ServerMessage.SecAggMsg:
     public_keys_dict = share_keys_in.public_keys_dict
     proto_public_keys_dict = {}
     for i in public_keys_dict.keys():
@@ -234,6 +236,35 @@ def share_keys_in_to_proto(share_keys_in: typing.ShareKeysIn):
         )
     )
 
+
+def share_keys_in_from_proto(share_keys_msg: ServerMessage.SecAggMsg) -> typing.ShareKeysIn:
+    proto_public_keys_dict = share_keys_msg.share_keys.public_keys_dict
+    public_keys_dict = {}
+    for i in proto_public_keys_dict.keys():
+        public_keys_dict[i] = typing.AskKeysRes(
+            pk1=proto_public_keys_dict[i].pk1, pk2=proto_public_keys_dict[i].pk2)
+    return typing.ShareKeysIn(public_keys_dict=public_keys_dict)
+
+
+def share_keys_res_to_proto(share_keys_res: typing.ShareKeysRes) -> ClientMessage.SecAggRes:
+    share_keys_res_msg = ClientMessage.SecAggRes.ShareKeysRes()
+    for packet in share_keys_res.share_keys_res_list:
+        proto_packet = ClientMessage.SecAggRes.ShareKeysRes.Packet(
+            source=packet.source, destination=packet.destination, ciphertext=packet.ciphertext
+        )
+        share_keys_res_msg.packet_list.append(proto_packet)
+    return ClientMessage.SecAggRes(share_keys_res=share_keys_res_msg)
+
+
+def share_keys_res_from_proto(share_keys_res_msg: ClientMessage.SecAggRes) -> typing.ShareKeysRes:
+    proto_packet_list = share_keys_res_msg.share_keys_res.packet_list
+    packet_list = []
+    for proto_packet in proto_packet_list:
+        packet = typing.ShareKeysPacket(
+            source=proto_packet.source, destination=proto_packet.destination, ciphertext=proto_packet.ciphertext
+        )
+        packet_list.append(packet)
+    return typing.ShareKeysRes(share_keys_res_list=packet_list)
 
 # === Evaluate messages ===
 

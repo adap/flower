@@ -98,13 +98,22 @@ message ClientMessage {
         bytes pk1=1;
         bytes pk2=2;
     }
+    message ShareKeysRes{
+      message Packet{
+        int64 source=1;
+        int64 destination=2;
+        bytes ciphertext=3;
+      }
+      repeated Packet packet_list=1;
+    }
     message ErrorRes{
       string error=1;
     }
     oneof msg{
       SetupParamRes setup_param_res=1;
       AskKeysRes ask_keys_res=2;
-      ErrorRes error_res=3;
+      ShareKeysRes share_keys_res=3;
+      ErrorRes error_res=4;
     }
   }
   

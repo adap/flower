@@ -116,3 +116,15 @@ class AskKeysRes:
 @dataclass
 class ShareKeysIn:
     public_keys_dict: Dict[int, AskKeysRes]
+
+
+@dataclass
+class ShareKeysPacket:
+    source: int
+    destination: int
+    ciphertext: bytes
+
+
+@dataclass
+class ShareKeysRes:
+    share_keys_res_list: List[ShareKeysPacket]
