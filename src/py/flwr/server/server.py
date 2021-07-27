@@ -149,6 +149,7 @@ class Server:
                 res_fit = self.fit_round(rnd=current_round)
                 if res_fit:
                     parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
+                    log(INFO, parameters_prime)
                     if parameters_prime:
                         self.parameters = parameters_prime
             else:
@@ -369,7 +370,6 @@ class Server:
         share_keys_results_and_failures = share_keys(
             clients, public_keys_dict, sample_num, share_num
         )
-        print(share_keys_results_and_failures)
         # ask_vectors()
         # unmask_vectors()
 

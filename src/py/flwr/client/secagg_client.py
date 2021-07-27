@@ -94,4 +94,6 @@ class SecAggClient(Client):
                 share_keys_packet = ShareKeysPacket(
                     source=self.secagg_id, destination=client_secagg_id, ciphertext=ciphertext)
                 share_keys_res.share_keys_res_list.append(share_keys_packet)
+
+        log(INFO, "Sent shares")
         return share_keys_res
