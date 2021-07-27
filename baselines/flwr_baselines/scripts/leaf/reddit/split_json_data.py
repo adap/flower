@@ -35,7 +35,7 @@ def split_json_and_save(
     path_to_json: PathLike[Any],
     save_root: PathLike[Any],
     users_list: Optional[List[str]] = None,
-):
+) -> List[str]:
     """Splits LEAF generated datasets and creates individual client partitions.
 
     Args:
