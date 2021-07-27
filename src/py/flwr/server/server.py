@@ -384,6 +384,8 @@ def evaluate_clients(
         ]
         concurrent.futures.wait(futures)
     # Gather results
+    results: List[Tuple[ClientProxy, FitRes]] = []
+    failures: List[BaseException] = []
     tracebacks = []
     counter = 0
     for future in futures:
