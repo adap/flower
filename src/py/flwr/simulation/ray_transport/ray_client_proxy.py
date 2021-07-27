@@ -75,6 +75,14 @@ class RayClientProxy(ClientProxy):
         """Disconnect and (optionally) reconnect later."""
         return common.Disconnect(reason="")  # Nothing to do here (yet)
 
+    def get_traceback(self, exception):
+        return "\n".join(
+            ("%s" % exception).split(
+                """
+"""
+            )[1:]
+        )
+
 
 @ray.remote  # type: ignore
 def launch_and_get_parameters(client_fn: ClientFn, cid: str) -> common.ParametersRes:
