@@ -110,4 +110,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
         initialized_server.client_manager().register(client=client_proxy)
 
     # Start training
-    _fl(server=initialized_server, config=initialized_config)
+    _fl(
+        server=initialized_server,
+        config=initialized_config,
+        force_final_distributed_eval=False,
+    )
