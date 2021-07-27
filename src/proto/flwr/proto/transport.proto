@@ -44,7 +44,7 @@ message ServerMessage {
     Parameters parameters = 1;
     map<string, Scalar> config = 2;
   }
-
+  message GetInfo { map<string, Scalar> get_info = 1; }
   oneof msg {
     Reconnect reconnect = 1;
     GetParameters get_parameters = 2;
@@ -76,6 +76,8 @@ message ClientMessage {
     FitRes fit_res = 3;
     EvaluateRes evaluate_res = 4;
   }
+
+  message GetInfoRes { map<string, Scalar> info_res = 1; }
 }
 
 message Scalar {
