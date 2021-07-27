@@ -18,7 +18,7 @@ import json
 import pickle
 from os import PathLike
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, BinaryIO, Dict, List, Optional, Tuple, Union
 
 
 def check_between_zero_and_one(value: str) -> float:
@@ -73,9 +73,9 @@ def split_json_and_save(
 
                 save_dir: Path = save_root / str(user_idx)
                 save_dir.mkdir(parents=True, exist_ok=True)
-
-                with open(save_dir / f"{dataset}.pickle", "wb") as f:
-                    pickle.dump(data, f)
+                f: BinaryIO = open(save_dir / f"{dataset}.pickle", "wb")
+                pickle.dump(data, f)
+                f.close()
 
     return new_users
 
@@ -133,5 +133,5 @@ if __name__ == "__main__":
         list_datasets=list_datasets,
         path_to_json=original_test_dataset,
         save_root=save_root,
-        users_list=users_list,
+        prev_users_list=users_list,
     )
