@@ -52,10 +52,19 @@ message ServerMessage {
       int64 threshold=4;
     }
     message AskKeys{}
+    message ShareKeys{
+      message KeysPair{
+        bytes pk1=1;
+        bytes pk2=2;
+      }
+      map<int64, KeysPair> public_keys_dict=1;
+    }
     oneof msg{
       SetupParam setup_param=1;
       AskKeys ask_keys=2;
+      ShareKeys share_keys=3;
     }
+    
   }
 
   oneof msg {

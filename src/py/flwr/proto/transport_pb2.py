@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1a\x66lwr/proto/transport.proto\x12\x10\x66lower.transport\"2\n\nParameters\x12\x0f\n\x07tensors\x18\x01 \x03(\x0c\x12\x13\n\x0btensor_type\x18\x02 \x01(\t\"\xbd\x08\n\rServerMessage\x12>\n\treconnect\x18\x01 \x01(\x0b\x32).flower.transport.ServerMessage.ReconnectH\x00\x12G\n\x0eget_parameters\x18\x02 \x01(\x0b\x32-.flower.transport.ServerMessage.GetParametersH\x00\x12\x39\n\x07\x66it_ins\x18\x03 \x01(\x0b\x32&.flower.transport.ServerMessage.FitInsH\x00\x12\x43\n\x0c\x65valuate_ins\x18\x04 \x01(\x0b\x32+.flower.transport.ServerMessage.EvaluateInsH\x00\x12@\n\x0bsec_agg_msg\x18\x05 \x01(\x0b\x32).flower.transport.ServerMessage.SecAggMsgH\x00\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x0f\n\rGetParameters\x1a\xc7\x01\n\x06\x46itIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x42\n\x06\x63onfig\x18\x02 \x03(\x0b\x32\x32.flower.transport.ServerMessage.FitIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xd1\x01\n\x0b\x45valuateIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12G\n\x06\x63onfig\x18\x02 \x03(\x0b\x32\x37.flower.transport.ServerMessage.EvaluateIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\x8c\x02\n\tSecAggMsg\x12K\n\x0bsetup_param\x18\x01 \x01(\x0b\x32\x34.flower.transport.ServerMessage.SecAggMsg.SetupParamH\x00\x12\x45\n\x08\x61sk_keys\x18\x02 \x01(\x0b\x32\x31.flower.transport.ServerMessage.SecAggMsg.AskKeysH\x00\x1aY\n\nSetupParam\x12\x11\n\tsecagg_id\x18\x01 \x01(\x03\x12\x12\n\nsample_num\x18\x02 \x01(\x03\x12\x11\n\tshare_num\x18\x03 \x01(\x03\x12\x11\n\tthreshold\x18\x04 \x01(\x03\x1a\t\n\x07\x41skKeysB\x05\n\x03msgB\x05\n\x03msg\"\xad\n\n\rClientMessage\x12@\n\ndisconnect\x18\x01 \x01(\x0b\x32*.flower.transport.ClientMessage.DisconnectH\x00\x12G\n\x0eparameters_res\x18\x02 \x01(\x0b\x32-.flower.transport.ClientMessage.ParametersResH\x00\x12\x39\n\x07\x66it_res\x18\x03 \x01(\x0b\x32&.flower.transport.ClientMessage.FitResH\x00\x12\x43\n\x0c\x65valuate_res\x18\x04 \x01(\x0b\x32+.flower.transport.ClientMessage.EvaluateResH\x00\x12@\n\x0bsec_agg_res\x18\x05 \x01(\x0b\x32).flower.transport.ClientMessage.SecAggResH\x00\x1a\x36\n\nDisconnect\x12(\n\x06reason\x18\x01 \x01(\x0e\x32\x18.flower.transport.Reason\x1a\x41\n\rParametersRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x1a\x99\x02\n\x06\x46itRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x14\n\x0cnum_examples\x18\x02 \x01(\x03\x12\x1d\n\x11num_examples_ceil\x18\x03 \x01(\x03\x42\x02\x18\x01\x12\x18\n\x0c\x66it_duration\x18\x04 \x01(\x02\x42\x02\x18\x01\x12\x44\n\x07metrics\x18\x05 \x03(\x0b\x32\x33.flower.transport.ClientMessage.FitRes.MetricsEntry\x1aH\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xdc\x01\n\x0b\x45valuateRes\x12\x14\n\x0cnum_examples\x18\x01 \x01(\x03\x12\x0c\n\x04loss\x18\x02 \x01(\x02\x12\x14\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x02\x42\x02\x18\x01\x12I\n\x07metrics\x18\x04 \x03(\x0b\x32\x38.flower.transport.ClientMessage.EvaluateRes.MetricsEntry\x1aH\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xd1\x02\n\tSecAggRes\x12R\n\x0fsetup_param_res\x18\x01 \x01(\x0b\x32\x37.flower.transport.ClientMessage.SecAggRes.SetupParamResH\x00\x12L\n\x0c\x61sk_keys_res\x18\x02 \x01(\x0b\x32\x34.flower.transport.ClientMessage.SecAggRes.AskKeysResH\x00\x12G\n\terror_res\x18\x03 \x01(\x0b\x32\x32.flower.transport.ClientMessage.SecAggRes.ErrorResH\x00\x1a\x0f\n\rSetupParamRes\x1a&\n\nAskKeysRes\x12\x0b\n\x03pk1\x18\x01 \x01(\x0c\x12\x0b\n\x03pk2\x18\x02 \x01(\x0c\x1a\x19\n\x08\x45rrorRes\x12\r\n\x05\x65rror\x18\x01 \x01(\tB\x05\n\x03msgB\x05\n\x03msg\"i\n\x06Scalar\x12\x10\n\x06\x64ouble\x18\x01 \x01(\x01H\x00\x12\x10\n\x06sint64\x18\x08 \x01(\x12H\x00\x12\x0e\n\x04\x62ool\x18\r \x01(\x08H\x00\x12\x10\n\x06string\x18\x0e \x01(\tH\x00\x12\x0f\n\x05\x62ytes\x18\x0f \x01(\x0cH\x00\x42\x08\n\x06scalar*[\n\x06Reason\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tRECONNECT\x10\x01\x12\x16\n\x12POWER_DISCONNECTED\x10\x02\x12\x14\n\x10WIFI_UNAVAILABLE\x10\x03\x12\x07\n\x03\x41\x43K\x10\x04\x32_\n\rFlowerService\x12N\n\x04Join\x12\x1f.flower.transport.ClientMessage\x1a\x1f.flower.transport.ServerMessage\"\x00(\x01\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\x1a\x66lwr/proto/transport.proto\x12\x10\x66lower.transport\"2\n\nParameters\x12\x0f\n\x07tensors\x18\x01 \x03(\x0c\x12\x13\n\x0btensor_type\x18\x02 \x01(\t\"\x94\x0b\n\rServerMessage\x12>\n\treconnect\x18\x01 \x01(\x0b\x32).flower.transport.ServerMessage.ReconnectH\x00\x12G\n\x0eget_parameters\x18\x02 \x01(\x0b\x32-.flower.transport.ServerMessage.GetParametersH\x00\x12\x39\n\x07\x66it_ins\x18\x03 \x01(\x0b\x32&.flower.transport.ServerMessage.FitInsH\x00\x12\x43\n\x0c\x65valuate_ins\x18\x04 \x01(\x0b\x32+.flower.transport.ServerMessage.EvaluateInsH\x00\x12@\n\x0bsec_agg_msg\x18\x05 \x01(\x0b\x32).flower.transport.ServerMessage.SecAggMsgH\x00\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x0f\n\rGetParameters\x1a\xc7\x01\n\x06\x46itIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x42\n\x06\x63onfig\x18\x02 \x03(\x0b\x32\x32.flower.transport.ServerMessage.FitIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xd1\x01\n\x0b\x45valuateIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12G\n\x06\x63onfig\x18\x02 \x03(\x0b\x32\x37.flower.transport.ServerMessage.EvaluateIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xe3\x04\n\tSecAggMsg\x12K\n\x0bsetup_param\x18\x01 \x01(\x0b\x32\x34.flower.transport.ServerMessage.SecAggMsg.SetupParamH\x00\x12\x45\n\x08\x61sk_keys\x18\x02 \x01(\x0b\x32\x31.flower.transport.ServerMessage.SecAggMsg.AskKeysH\x00\x12I\n\nshare_keys\x18\x03 \x01(\x0b\x32\x33.flower.transport.ServerMessage.SecAggMsg.ShareKeysH\x00\x1aY\n\nSetupParam\x12\x11\n\tsecagg_id\x18\x01 \x01(\x03\x12\x12\n\nsample_num\x18\x02 \x01(\x03\x12\x11\n\tshare_num\x18\x03 \x01(\x03\x12\x11\n\tthreshold\x18\x04 \x01(\x03\x1a\t\n\x07\x41skKeys\x1a\x89\x02\n\tShareKeys\x12\x61\n\x10public_keys_dict\x18\x01 \x03(\x0b\x32G.flower.transport.ServerMessage.SecAggMsg.ShareKeys.PublicKeysDictEntry\x1a$\n\x08KeysPair\x12\x0b\n\x03pk1\x18\x01 \x01(\x0c\x12\x0b\n\x03pk2\x18\x02 \x01(\x0c\x1as\n\x13PublicKeysDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12K\n\x05value\x18\x02 \x01(\x0b\x32<.flower.transport.ServerMessage.SecAggMsg.ShareKeys.KeysPair:\x02\x38\x01\x42\x05\n\x03msgB\x05\n\x03msg\"\xad\n\n\rClientMessage\x12@\n\ndisconnect\x18\x01 \x01(\x0b\x32*.flower.transport.ClientMessage.DisconnectH\x00\x12G\n\x0eparameters_res\x18\x02 \x01(\x0b\x32-.flower.transport.ClientMessage.ParametersResH\x00\x12\x39\n\x07\x66it_res\x18\x03 \x01(\x0b\x32&.flower.transport.ClientMessage.FitResH\x00\x12\x43\n\x0c\x65valuate_res\x18\x04 \x01(\x0b\x32+.flower.transport.ClientMessage.EvaluateResH\x00\x12@\n\x0bsec_agg_res\x18\x05 \x01(\x0b\x32).flower.transport.ClientMessage.SecAggResH\x00\x1a\x36\n\nDisconnect\x12(\n\x06reason\x18\x01 \x01(\x0e\x32\x18.flower.transport.Reason\x1a\x41\n\rParametersRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x1a\x99\x02\n\x06\x46itRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x14\n\x0cnum_examples\x18\x02 \x01(\x03\x12\x1d\n\x11num_examples_ceil\x18\x03 \x01(\x03\x42\x02\x18\x01\x12\x18\n\x0c\x66it_duration\x18\x04 \x01(\x02\x42\x02\x18\x01\x12\x44\n\x07metrics\x18\x05 \x03(\x0b\x32\x33.flower.transport.ClientMessage.FitRes.MetricsEntry\x1aH\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xdc\x01\n\x0b\x45valuateRes\x12\x14\n\x0cnum_examples\x18\x01 \x01(\x03\x12\x0c\n\x04loss\x18\x02 \x01(\x02\x12\x14\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x02\x42\x02\x18\x01\x12I\n\x07metrics\x18\x04 \x03(\x0b\x32\x38.flower.transport.ClientMessage.EvaluateRes.MetricsEntry\x1aH\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xd1\x02\n\tSecAggRes\x12R\n\x0fsetup_param_res\x18\x01 \x01(\x0b\x32\x37.flower.transport.ClientMessage.SecAggRes.SetupParamResH\x00\x12L\n\x0c\x61sk_keys_res\x18\x02 \x01(\x0b\x32\x34.flower.transport.ClientMessage.SecAggRes.AskKeysResH\x00\x12G\n\terror_res\x18\x03 \x01(\x0b\x32\x32.flower.transport.ClientMessage.SecAggRes.ErrorResH\x00\x1a\x0f\n\rSetupParamRes\x1a&\n\nAskKeysRes\x12\x0b\n\x03pk1\x18\x01 \x01(\x0c\x12\x0b\n\x03pk2\x18\x02 \x01(\x0c\x1a\x19\n\x08\x45rrorRes\x12\r\n\x05\x65rror\x18\x01 \x01(\tB\x05\n\x03msgB\x05\n\x03msg\"i\n\x06Scalar\x12\x10\n\x06\x64ouble\x18\x01 \x01(\x01H\x00\x12\x10\n\x06sint64\x18\x08 \x01(\x12H\x00\x12\x0e\n\x04\x62ool\x18\r \x01(\x08H\x00\x12\x10\n\x06string\x18\x0e \x01(\tH\x00\x12\x0f\n\x05\x62ytes\x18\x0f \x01(\x0cH\x00\x42\x08\n\x06scalar*[\n\x06Reason\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tRECONNECT\x10\x01\x12\x16\n\x12POWER_DISCONNECTED\x10\x02\x12\x14\n\x10WIFI_UNAVAILABLE\x10\x03\x12\x07\n\x03\x41\x43K\x10\x04\x32_\n\rFlowerService\x12N\n\x04Join\x12\x1f.flower.transport.ClientMessage\x1a\x1f.flower.transport.ServerMessage\"\x00(\x01\x30\x01\x62\x06proto3'
 )
 
 _REASON = _descriptor.EnumDescriptor(
@@ -58,8 +58,8 @@ _REASON = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2623,
-  serialized_end=2714,
+  serialized_start=2966,
+  serialized_end=3057,
 )
 _sym_db.RegisterEnumDescriptor(_REASON)
 
@@ -366,8 +366,8 @@ _SERVERMESSAGE_SECAGGMSG_SETUPPARAM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1072,
-  serialized_end=1161,
+  serialized_start=1147,
+  serialized_end=1236,
 )
 
 _SERVERMESSAGE_SECAGGMSG_ASKKEYS = _descriptor.Descriptor(
@@ -390,8 +390,115 @@ _SERVERMESSAGE_SECAGGMSG_ASKKEYS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1163,
-  serialized_end=1172,
+  serialized_start=1238,
+  serialized_end=1247,
+)
+
+_SERVERMESSAGE_SECAGGMSG_SHAREKEYS_KEYSPAIR = _descriptor.Descriptor(
+  name='KeysPair',
+  full_name='flower.transport.ServerMessage.SecAggMsg.ShareKeys.KeysPair',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='pk1', full_name='flower.transport.ServerMessage.SecAggMsg.ShareKeys.KeysPair.pk1', index=0,
+      number=1, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pk2', full_name='flower.transport.ServerMessage.SecAggMsg.ShareKeys.KeysPair.pk2', index=1,
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1362,
+  serialized_end=1398,
+)
+
+_SERVERMESSAGE_SECAGGMSG_SHAREKEYS_PUBLICKEYSDICTENTRY = _descriptor.Descriptor(
+  name='PublicKeysDictEntry',
+  full_name='flower.transport.ServerMessage.SecAggMsg.ShareKeys.PublicKeysDictEntry',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='flower.transport.ServerMessage.SecAggMsg.ShareKeys.PublicKeysDictEntry.key', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='flower.transport.ServerMessage.SecAggMsg.ShareKeys.PublicKeysDictEntry.value', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=b'8\001',
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1400,
+  serialized_end=1515,
+)
+
+_SERVERMESSAGE_SECAGGMSG_SHAREKEYS = _descriptor.Descriptor(
+  name='ShareKeys',
+  full_name='flower.transport.ServerMessage.SecAggMsg.ShareKeys',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='public_keys_dict', full_name='flower.transport.ServerMessage.SecAggMsg.ShareKeys.public_keys_dict', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[_SERVERMESSAGE_SECAGGMSG_SHAREKEYS_KEYSPAIR, _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_PUBLICKEYSDICTENTRY, ],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1250,
+  serialized_end=1515,
 )
 
 _SERVERMESSAGE_SECAGGMSG = _descriptor.Descriptor(
@@ -416,10 +523,17 @@ _SERVERMESSAGE_SECAGGMSG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='share_keys', full_name='flower.transport.ServerMessage.SecAggMsg.share_keys', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
-  nested_types=[_SERVERMESSAGE_SECAGGMSG_SETUPPARAM, _SERVERMESSAGE_SECAGGMSG_ASKKEYS, ],
+  nested_types=[_SERVERMESSAGE_SECAGGMSG_SETUPPARAM, _SERVERMESSAGE_SECAGGMSG_ASKKEYS, _SERVERMESSAGE_SECAGGMSG_SHAREKEYS, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -434,7 +548,7 @@ _SERVERMESSAGE_SECAGGMSG = _descriptor.Descriptor(
     fields=[]),
   ],
   serialized_start=911,
-  serialized_end=1179,
+  serialized_end=1522,
 )
 
 _SERVERMESSAGE = _descriptor.Descriptor(
@@ -498,7 +612,7 @@ _SERVERMESSAGE = _descriptor.Descriptor(
     fields=[]),
   ],
   serialized_start=101,
-  serialized_end=1186,
+  serialized_end=1529,
 )
 
 
@@ -529,8 +643,8 @@ _CLIENTMESSAGE_DISCONNECT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1539,
-  serialized_end=1593,
+  serialized_start=1882,
+  serialized_end=1936,
 )
 
 _CLIENTMESSAGE_PARAMETERSRES = _descriptor.Descriptor(
@@ -560,8 +674,8 @@ _CLIENTMESSAGE_PARAMETERSRES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1595,
-  serialized_end=1660,
+  serialized_start=1938,
+  serialized_end=2003,
 )
 
 _CLIENTMESSAGE_FITRES_METRICSENTRY = _descriptor.Descriptor(
@@ -598,8 +712,8 @@ _CLIENTMESSAGE_FITRES_METRICSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1872,
-  serialized_end=1944,
+  serialized_start=2215,
+  serialized_end=2287,
 )
 
 _CLIENTMESSAGE_FITRES = _descriptor.Descriptor(
@@ -657,8 +771,8 @@ _CLIENTMESSAGE_FITRES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1663,
-  serialized_end=1944,
+  serialized_start=2006,
+  serialized_end=2287,
 )
 
 _CLIENTMESSAGE_EVALUATERES_METRICSENTRY = _descriptor.Descriptor(
@@ -695,8 +809,8 @@ _CLIENTMESSAGE_EVALUATERES_METRICSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1872,
-  serialized_end=1944,
+  serialized_start=2215,
+  serialized_end=2287,
 )
 
 _CLIENTMESSAGE_EVALUATERES = _descriptor.Descriptor(
@@ -747,8 +861,8 @@ _CLIENTMESSAGE_EVALUATERES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1947,
-  serialized_end=2167,
+  serialized_start=2290,
+  serialized_end=2510,
 )
 
 _CLIENTMESSAGE_SECAGGRES_SETUPPARAMRES = _descriptor.Descriptor(
@@ -771,8 +885,8 @@ _CLIENTMESSAGE_SECAGGRES_SETUPPARAMRES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2418,
-  serialized_end=2433,
+  serialized_start=2761,
+  serialized_end=2776,
 )
 
 _CLIENTMESSAGE_SECAGGRES_ASKKEYSRES = _descriptor.Descriptor(
@@ -809,8 +923,8 @@ _CLIENTMESSAGE_SECAGGRES_ASKKEYSRES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2435,
-  serialized_end=2473,
+  serialized_start=2778,
+  serialized_end=2816,
 )
 
 _CLIENTMESSAGE_SECAGGRES_ERRORRES = _descriptor.Descriptor(
@@ -840,8 +954,8 @@ _CLIENTMESSAGE_SECAGGRES_ERRORRES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2475,
-  serialized_end=2500,
+  serialized_start=2818,
+  serialized_end=2843,
 )
 
 _CLIENTMESSAGE_SECAGGRES = _descriptor.Descriptor(
@@ -890,8 +1004,8 @@ _CLIENTMESSAGE_SECAGGRES = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2170,
-  serialized_end=2507,
+  serialized_start=2513,
+  serialized_end=2850,
 )
 
 _CLIENTMESSAGE = _descriptor.Descriptor(
@@ -954,8 +1068,8 @@ _CLIENTMESSAGE = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=1189,
-  serialized_end=2514,
+  serialized_start=1532,
+  serialized_end=2857,
 )
 
 
@@ -1019,8 +1133,8 @@ _SCALAR = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2516,
-  serialized_end=2621,
+  serialized_start=2859,
+  serialized_end=2964,
 )
 
 _SERVERMESSAGE_RECONNECT.containing_type = _SERVERMESSAGE
@@ -1037,8 +1151,14 @@ _SERVERMESSAGE_EVALUATEINS.fields_by_name['config'].message_type = _SERVERMESSAG
 _SERVERMESSAGE_EVALUATEINS.containing_type = _SERVERMESSAGE
 _SERVERMESSAGE_SECAGGMSG_SETUPPARAM.containing_type = _SERVERMESSAGE_SECAGGMSG
 _SERVERMESSAGE_SECAGGMSG_ASKKEYS.containing_type = _SERVERMESSAGE_SECAGGMSG
+_SERVERMESSAGE_SECAGGMSG_SHAREKEYS_KEYSPAIR.containing_type = _SERVERMESSAGE_SECAGGMSG_SHAREKEYS
+_SERVERMESSAGE_SECAGGMSG_SHAREKEYS_PUBLICKEYSDICTENTRY.fields_by_name['value'].message_type = _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_KEYSPAIR
+_SERVERMESSAGE_SECAGGMSG_SHAREKEYS_PUBLICKEYSDICTENTRY.containing_type = _SERVERMESSAGE_SECAGGMSG_SHAREKEYS
+_SERVERMESSAGE_SECAGGMSG_SHAREKEYS.fields_by_name['public_keys_dict'].message_type = _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_PUBLICKEYSDICTENTRY
+_SERVERMESSAGE_SECAGGMSG_SHAREKEYS.containing_type = _SERVERMESSAGE_SECAGGMSG
 _SERVERMESSAGE_SECAGGMSG.fields_by_name['setup_param'].message_type = _SERVERMESSAGE_SECAGGMSG_SETUPPARAM
 _SERVERMESSAGE_SECAGGMSG.fields_by_name['ask_keys'].message_type = _SERVERMESSAGE_SECAGGMSG_ASKKEYS
+_SERVERMESSAGE_SECAGGMSG.fields_by_name['share_keys'].message_type = _SERVERMESSAGE_SECAGGMSG_SHAREKEYS
 _SERVERMESSAGE_SECAGGMSG.containing_type = _SERVERMESSAGE
 _SERVERMESSAGE_SECAGGMSG.oneofs_by_name['msg'].fields.append(
   _SERVERMESSAGE_SECAGGMSG.fields_by_name['setup_param'])
@@ -1046,6 +1166,9 @@ _SERVERMESSAGE_SECAGGMSG.fields_by_name['setup_param'].containing_oneof = _SERVE
 _SERVERMESSAGE_SECAGGMSG.oneofs_by_name['msg'].fields.append(
   _SERVERMESSAGE_SECAGGMSG.fields_by_name['ask_keys'])
 _SERVERMESSAGE_SECAGGMSG.fields_by_name['ask_keys'].containing_oneof = _SERVERMESSAGE_SECAGGMSG.oneofs_by_name['msg']
+_SERVERMESSAGE_SECAGGMSG.oneofs_by_name['msg'].fields.append(
+  _SERVERMESSAGE_SECAGGMSG.fields_by_name['share_keys'])
+_SERVERMESSAGE_SECAGGMSG.fields_by_name['share_keys'].containing_oneof = _SERVERMESSAGE_SECAGGMSG.oneofs_by_name['msg']
 _SERVERMESSAGE.fields_by_name['reconnect'].message_type = _SERVERMESSAGE_RECONNECT
 _SERVERMESSAGE.fields_by_name['get_parameters'].message_type = _SERVERMESSAGE_GETPARAMETERS
 _SERVERMESSAGE.fields_by_name['fit_ins'].message_type = _SERVERMESSAGE_FITINS
@@ -1203,6 +1326,27 @@ ServerMessage = _reflection.GeneratedProtocolMessageType('ServerMessage', (_mess
       # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.SecAggMsg.AskKeys)
       })
     ,
+
+    'ShareKeys' : _reflection.GeneratedProtocolMessageType('ShareKeys', (_message.Message,), {
+
+      'KeysPair' : _reflection.GeneratedProtocolMessageType('KeysPair', (_message.Message,), {
+        'DESCRIPTOR' : _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_KEYSPAIR,
+        '__module__' : 'flwr.proto.transport_pb2'
+        # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.SecAggMsg.ShareKeys.KeysPair)
+        })
+      ,
+
+      'PublicKeysDictEntry' : _reflection.GeneratedProtocolMessageType('PublicKeysDictEntry', (_message.Message,), {
+        'DESCRIPTOR' : _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_PUBLICKEYSDICTENTRY,
+        '__module__' : 'flwr.proto.transport_pb2'
+        # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.SecAggMsg.ShareKeys.PublicKeysDictEntry)
+        })
+      ,
+      'DESCRIPTOR' : _SERVERMESSAGE_SECAGGMSG_SHAREKEYS,
+      '__module__' : 'flwr.proto.transport_pb2'
+      # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.SecAggMsg.ShareKeys)
+      })
+    ,
     'DESCRIPTOR' : _SERVERMESSAGE_SECAGGMSG,
     '__module__' : 'flwr.proto.transport_pb2'
     # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.SecAggMsg)
@@ -1222,6 +1366,9 @@ _sym_db.RegisterMessage(ServerMessage.EvaluateIns.ConfigEntry)
 _sym_db.RegisterMessage(ServerMessage.SecAggMsg)
 _sym_db.RegisterMessage(ServerMessage.SecAggMsg.SetupParam)
 _sym_db.RegisterMessage(ServerMessage.SecAggMsg.AskKeys)
+_sym_db.RegisterMessage(ServerMessage.SecAggMsg.ShareKeys)
+_sym_db.RegisterMessage(ServerMessage.SecAggMsg.ShareKeys.KeysPair)
+_sym_db.RegisterMessage(ServerMessage.SecAggMsg.ShareKeys.PublicKeysDictEntry)
 
 ClientMessage = _reflection.GeneratedProtocolMessageType('ClientMessage', (_message.Message,), {
 
@@ -1320,6 +1467,7 @@ _sym_db.RegisterMessage(Scalar)
 
 _SERVERMESSAGE_FITINS_CONFIGENTRY._options = None
 _SERVERMESSAGE_EVALUATEINS_CONFIGENTRY._options = None
+_SERVERMESSAGE_SECAGGMSG_SHAREKEYS_PUBLICKEYSDICTENTRY._options = None
 _CLIENTMESSAGE_FITRES_METRICSENTRY._options = None
 _CLIENTMESSAGE_FITRES.fields_by_name['num_examples_ceil']._options = None
 _CLIENTMESSAGE_FITRES.fields_by_name['fit_duration']._options = None
@@ -1333,8 +1481,8 @@ _FLOWERSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=2716,
-  serialized_end=2811,
+  serialized_start=3059,
+  serialized_end=3154,
   methods=[
   _descriptor.MethodDescriptor(
     name='Join',

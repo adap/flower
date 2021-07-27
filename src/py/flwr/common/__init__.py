@@ -53,4 +53,5 @@ __all__ = [
     "weights_to_parameters",
     "SetupParamIn",
     "AskKeysRes",
+    "ShareKeysIn",
 ]

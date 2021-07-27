@@ -220,6 +220,21 @@ def ask_keys_res_from_proto(msg: ClientMessage.SecAggRes) -> typing.AskKeysRes:
     return typing.AskKeysRes(pk1=msg.ask_keys_res.pk1, pk2=msg.ask_keys_res.pk2)
 
 
+# === Share Keys ===
+def share_keys_in_to_proto(share_keys_in: typing.ShareKeysIn):
+    public_keys_dict = share_keys_in.public_keys_dict
+    proto_public_keys_dict = {}
+    for i in public_keys_dict.keys():
+        proto_public_keys_dict[i] = ServerMessage.SecAggMsg.ShareKeys.KeysPair(
+            pk1=public_keys_dict[i].pk1, pk2=public_keys_dict[i].pk2
+        )
+    return ServerMessage.SecAggMsg(
+        share_keys=ServerMessage.SecAggMsg.ShareKeys(
+            public_keys_dict=proto_public_keys_dict
+        )
+    )
+
+
 # === Evaluate messages ===
 
 

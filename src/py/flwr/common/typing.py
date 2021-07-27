@@ -111,3 +111,8 @@ class AskKeysRes:
 
     pk1: bytes
     pk2: bytes
+
+
+@dataclass
+class ShareKeysIn:
+    public_keys_dict: Dict[int, AskKeysRes]

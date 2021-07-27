@@ -18,7 +18,7 @@
 from flwr import common
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
-from flwr.common.typing import SetupParamIn
+from flwr.common.typing import SetupParamIn, ShareKeysIn
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_bridge import GRPCBridge
 
@@ -58,6 +58,7 @@ class GrpcClientProxy(ClientProxy):
             ServerMessage(sec_agg_msg=setup_param_msg)
         )
         serde.check_error(client_msg.sec_agg_res)
+        # No return implemented (To be changed?)
 
     def ask_keys(self) -> common.AskKeysRes:
         ask_keys_msg = serde.ask_keys_to_proto()
@@ -67,6 +68,15 @@ class GrpcClientProxy(ClientProxy):
         serde.check_error(client_msg.sec_agg_res)
         ask_keys_res = serde.ask_keys_res_from_proto(client_msg.sec_agg_res)
         return ask_keys_res
+
+    def share_keys(self, share_keys_in: ShareKeysIn):
+        share_keys_msg = serde.share_keys_in_to_proto(share_keys_in)
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(sec_agg_msg=share_keys_msg)
+        )
+        serde.check_error(client_msg.sec_agg_res)
+        share_keys_res = serde.share_keys_res_from_proto(client_msg.sec_agg_res)
+        return share_keys_res
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""

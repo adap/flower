@@ -42,11 +42,11 @@ def handle(
         return _evaluate(client, server_msg.evaluate_ins), 0, True
     if server_msg.HasField("sec_agg_msg"):
         if server_msg.sec_agg_msg.HasField("setup_param"):
-            # no response
             return _setup_param(client, server_msg.sec_agg_msg.setup_param), 0, True
-
         elif server_msg.sec_agg_msg.HasField("ask_keys"):
             return _ask_keys(client), 0, True
+        elif server_msg.sec_agg_msg.HasField("share_keys"):
+            return _error_res(Exception("SHARE_KEYS RECEIVED")), 0, True
     raise UnkownServerMessage()
 
 

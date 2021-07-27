@@ -39,7 +39,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import Strategy, FedAvg
 from flwr.server.strategy.secagg import SecAgg
-from flwr.common.typing import AskKeysRes, SetupParamIn
+from flwr.common.typing import AskKeysRes, SetupParamIn, ShareKeysIn
 
 DEPRECATION_WARNING_EVALUATE = """
 DEPRECATION WARNING: Method
@@ -355,14 +355,21 @@ class Server:
         ask_keys_results_and_failures = ask_keys(clients)
         public_keys_dict = {}
         ask_keys_results = ask_keys_results_and_failures[0]
+        available_clients_num = 0
         for idx, client in enumerate(clients):
             if client in [result[0] for result in ask_keys_results]:
                 pos = [result[0] for result in ask_keys_results].index(client)
                 public_keys_dict[idx] = ask_keys_results[pos][1]
-            else:
-                public_keys_dict[idx] = None
+                available_clients_num += 1
+        if available_clients_num < min_num:
+            raise Exception("Not enough available clients")
 
-        # share_keys()
+        # Stage 2: Share Keys
+        log(INFO, "SecAgg share keys")
+        share_keys_results_and_failures = share_keys(
+            clients, public_keys_dict, sample_num, share_num
+        )
+        print(share_keys_results_and_failures)
         # ask_vectors()
         # unmask_vectors()
 
@@ -503,6 +510,10 @@ def setup_param(
         concurrent.futures.wait(futures)
 
 
+def setup_param_client(client: ClientProxy, setup_param_msg: SetupParamIn):
+    client.setup_param(setup_param_msg)
+
+
 def ask_keys(clients: List[ClientProxy]) -> AskKeysResultsAndFailures:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(ask_keys_client, c) for c in clients]
@@ -520,17 +531,47 @@ def ask_keys(clients: List[ClientProxy]) -> AskKeysResultsAndFailures:
     return results, failures
 
 
-def setup_param_client(client: ClientProxy, setup_param_msg: SetupParamIn):
-    client.setup_param(setup_param_msg)
-
-
 def ask_keys_client(client: ClientProxy) -> Tuple[ClientProxy, AskKeysRes]:
     ask_keys_res = client.ask_keys()
     return client, ask_keys_res
 
 
-def share_keys():
-    pass
+def share_keys(clients, public_keys_dict, sample_num, share_num):
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(
+                lambda p: share_keys_client(*p),
+                (client, idx, public_keys_dict, sample_num, share_num),
+            )
+            for idx, client in enumerate(clients)
+            if idx in public_keys_dict.keys()
+        ]
+        concurrent.futures.wait(futures)
+    results = []
+    failures = []
+    for future in futures:
+        failure = future.exception()
+        if failure is not None:
+            failures.append(failure)
+        else:
+            # Success case
+            result = future.result()
+            results.append(result)
+    return results, failures
+
+
+def share_keys_client(client, idx, public_keys_dict, sample_num, share_num):
+    if share_num == sample_num:
+        # complete graph
+        return client.share_keys(ShareKeysIn(public_keys_dict=public_keys_dict))
+    local_dict = {}
+    for i in range(-int(share_num / 2), int(share_num / 2) + 1):
+        if (i + idx) % sample_num in public_keys_dict.keys():
+            local_dict[(i + idx) % sample_num] = public_keys_dict[
+                (i + idx) % sample_num
+            ]
+
+    return client.share_keys(ShareKeysIn(public_keys_dict=local_dict))
 
 
 def ask_vectors():
