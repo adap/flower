@@ -33,8 +33,8 @@ def check_between_zero_and_one(value: str) -> float:
 def split_json_and_save(
     list_datasets: List[Tuple[str, float]],
     path_to_json: PathLike[Any],
-    save_root: PathLike[Any],
-    users_list: Optional[List[str]] = None,
+    save_root: Path,
+    prev_users: Optional[List[str]] = None,
 ) -> List[str]:
     """Splits LEAF generated datasets and creates individual client partitions.
 
@@ -44,7 +44,13 @@ def split_json_and_save(
         path_to_json (PathLike): Path to LEAF JSON file containing dataset.
         save_root (PathLike): Root directory where to save the individual client
             partition files.
+        prev_users (Optional[List[str]]): List containing previous users. This is
+            useful when partitioning data into train, val, test datasets.
     """
+    if prev_users is None:
+        prev_users = []
+
+    users_list = [] + prev_users
 
     new_users = []
 
@@ -132,5 +138,5 @@ if __name__ == "__main__":
         list_datasets=list_datasets,
         path_to_json=original_test_dataset,
         save_root=save_root,
-        users_list=users_list,
+        prev_users=users_list,
     )
