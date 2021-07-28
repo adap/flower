@@ -10,7 +10,9 @@ What's new?
 
 Incompatible changes:
 
-* Nothing yet.
+* **Disabled final distributed evaluation** (`#800 <https://github.com/adap/flower/pull/800>`_)
+
+  Prior behaviour was to perform a final round of distributed evaluation on all connected clients, which is often not required (e.g., when using server-side evaluation). The prior behaviour can be enabled by passing :code:`force_final_distributed_eval=True` to :code:`start_server`.
 
 
 v0.16.0 (2021-05-11)
