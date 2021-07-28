@@ -34,7 +34,7 @@ class ClientProxy(ABC):
     def __init__(self, cid: str):
         self.cid = cid
 
-    def get_traceback(self, failure):
+    def get_traceback(self, failure: BaseException):
         return None
 
     @abstractmethod

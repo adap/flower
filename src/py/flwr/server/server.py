@@ -317,13 +317,13 @@ def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:
     # Gather results
     results: List[Tuple[ClientProxy, Disconnect]] = []
     failures: List[BaseException] = []
-    tracebacks = []
-    counter = 0
+    tracebacks: List[BaseException] = []
+    counter: int = 0
     for future in futures:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
-            tracebacks.append(client_instructions[counter][0].get_traceback(failure))
+            tracebacks.append(clients[counter].get_traceback(failure))
         else:
             result = future.result()
             results.append(result)
@@ -353,8 +353,8 @@ def fit_clients(
     # Gather results
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = []
-    tracebacks = []
-    counter = 0
+    tracebacks: List[BaseException] = []
+    counter: int = 0
     for future in futures:
         failure = future.exception()
         if failure is not None:
@@ -384,10 +384,10 @@ def evaluate_clients(
         ]
         concurrent.futures.wait(futures)
     # Gather results
-    results: List[Tuple[ClientProxy, FitRes]] = []
+    results: List[Tuple[ClientProxy, EvaluateRes]] = []
     failures: List[BaseException] = []
-    tracebacks = []
-    counter = 0
+    tracebacks: List[BaseException] = []
+    counter: int = 0
     for future in futures:
         failure = future.exception()
         if failure is not None:
@@ -409,9 +409,11 @@ def evaluate_client(
     return client, evaluate_res
 
 
-def log_tracebacks(tracebacks):
-    counter = 0
-    ordered_tracebacks = {}  # This is a dict of the form 'traceback : num_clients'
+def log_tracebacks(tracebacks: List[BaseException]):
+    counter: int = 0
+    ordered_tracebacks: Dict[
+        BaseException, int
+    ] = {}  # This is a dict of the form 'traceback : num_clients'
     while counter < len(tracebacks):
         traceback = tracebacks[counter]
         if traceback != None:

@@ -75,9 +75,9 @@ class RayClientProxy(ClientProxy):
         """Disconnect and (optionally) reconnect later."""
         return common.Disconnect(reason="")  # Nothing to do here (yet)
 
-    def get_traceback(self, exception):
+    def get_traceback(self, failure: BaseException):
         return "\n".join(
-            ("%s" % exception).split(
+            ("%s" % failure).split(
                 """
 """
             )[1:]
