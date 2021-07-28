@@ -9,8 +9,8 @@ import flwr as fl
 
 from dp_cifar_main import Net, DPCifarClient, PARAMS
 
-
 # Setup for running a single client manually (alternatively use simulation code in 'dp_cifar_simulation').
+
 
 def load_data():
     transform = transforms.Compose(

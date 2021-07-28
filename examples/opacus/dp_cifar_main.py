@@ -19,7 +19,7 @@ PARAMS = {
 PRIVACY_PARAMS = {
     # 'target_epsilon': 5.0,
     'target_delta': 1e-5,
-    'noise_multiplier': 0.2,
+    'noise_multiplier': 0.4,
     'max_grad_norm': 1.2
 }
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -103,7 +103,7 @@ class DPCifarClient(fl.client.NumPyClient):
         self.set_parameters(parameters)
         epsilon = train(self.model, self.trainloader, self.privacy_engine, PARAMS['local_epochs'])
         print(f"epsilon = {epsilon:.2f}")
-        return self.get_parameters(), len(self.trainloader), {}
+        return self.get_parameters(), len(self.trainloader), {"epsilon":epsilon}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
