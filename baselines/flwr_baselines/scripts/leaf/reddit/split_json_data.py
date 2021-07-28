@@ -50,7 +50,7 @@ def split_json_and_save(
     if prev_users is None:
         prev_users = []
 
-    users_list = [] + prev_users
+    users_list: List[str] = [] + prev_users
 
     new_users = []
 
