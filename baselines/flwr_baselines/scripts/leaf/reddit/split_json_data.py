@@ -47,10 +47,11 @@ def split_json_and_save(
         prev_users (Optional[List[str]]): List containing previous users. This is
             useful when partitioning data into train, val, test datasets.
     """
+    # users_list = []
     if prev_users is None:
         prev_users = []
 
-    users_list: List[str] = [] + prev_users
+    users_list: List[str] = prev_users
 
     new_users = []
 
