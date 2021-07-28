@@ -11,6 +11,13 @@ from concurrent.futures import ThreadPoolExecutor
 import os
 import random
 import pickle
+import numpy as np
+
+from numpy.core.fromnumeric import clip
+
+from flwr.common.typing import Weights
+
+# Key Generation
 
 
 def generate_key_pairs():
@@ -55,6 +62,8 @@ def generate_shared_key(
     ).derive(sharedk)
     return base64.urlsafe_b64encode(derivedk)
 
+# Authenticated Encryption
+
 
 def encrypt(key: bytes, plaintext: bytes) -> bytes:
     # key must be url safe
@@ -66,6 +75,8 @@ def decrypt(key: bytes, token: bytes):
     # key must be url safe
     f = Fernet(key)
     return f.decrypt(token)
+
+# Shamir's Secret Sharing Scheme
 
 
 def create_shares(
@@ -126,8 +137,11 @@ def shamir_combine(shares: List[Tuple[int, bytes]]):
     return Shamir.combine(shares)
 
 
+# Random Bytes Generator
 def rand_bytes(num: int = 32) -> bytes:
     return os.urandom(num)
+
+# Pseudo Bytes Generator
 
 
 def pseudo_rand_gen(seed: bytes, num_range: int, l: int):
@@ -135,6 +149,7 @@ def pseudo_rand_gen(seed: bytes, num_range: int, l: int):
     return [random.randrange(0, num_range) for i in range(l)]
 
 
+# String Concatenation
 def share_keys_plaintext_concat(source: int, destination: int, b_share: bytes, sk_share: bytes):
     concat = b'||'
     return concat.join([str(source).encode(), str(destination).encode(), b_share, sk_share])
@@ -148,3 +163,22 @@ def share_keys_plaintext_separate(plaintext: bytes):
         plaintext_list[2],
         plaintext_list[3],
     )
+
+# Weight Quantization
+
+
+def quantize(weight: Weights, clipping_range: float, target_range: int) -> Weights:
+    quantized_list = []
+    f = np.vectorize(lambda x:  min(target_range-1, (sorted((-clipping_range, x, clipping_range))
+                                                     [1]+clipping_range)*target_range/(2*clipping_range)))
+    for arr in weight:
+        quantized_list.append(f(arr).astype(int))
+    return quantized_list
+
+
+def reverse_quantize(weight: Weights, clipping_range: float, target_range: int) -> Weights:
+    reverse_quantized_list = []
+    f = np.vectorize(lambda x:  (x)/target_range*(2*clipping_range)-clipping_range)
+    for arr in weight:
+        reverse_quantized_list.append(f(arr.astype(float)))
+    return reverse_quantized_list

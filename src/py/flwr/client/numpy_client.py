@@ -190,7 +190,6 @@ class NumPyClientWrapper(Client):
 
         # Return FitRes
         fit_duration = timeit.default_timer() - fit_begin
-        print(parameters_prime)
         parameters_prime_proto = weights_to_parameters(parameters_prime)
         return FitRes(
             parameters=parameters_prime_proto,
