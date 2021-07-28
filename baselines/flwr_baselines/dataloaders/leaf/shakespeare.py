@@ -27,7 +27,7 @@ LEAF_CHARACTERS = (
 )
 
 
-class ShakespeareDataset(Dataset):
+class ShakespeareDataset(Dataset[XY]):
     """Creates a PyTorch Dataset for Leaf Shakespeare.
 
     Args:
@@ -36,8 +36,8 @@ class ShakespeareDataset(Dataset):
 
     def __init__(self, path_to_pickle: Path):
 
-        self.CHARACTERS = LEAF_CHARACTERS
-        self.NUM_LETTERS = len(self.CHARACTERS)  # 80
+        self.CHARACTERS: str = LEAF_CHARACTERS
+        self.NUM_LETTERS: int = len(self.CHARACTERS)  # 80
         self.x, self.y = [], []
 
         with open(path_to_pickle, "rb") as f:
@@ -48,7 +48,7 @@ class ShakespeareDataset(Dataset):
             self.char = data["character"]
 
     def word_to_indices(self, word: str) -> List[int]:
-        indices = [self.CHARACTERS.find(c) for c in word]
+        indices: List[int] = [self.CHARACTERS.find(c) for c in word]
         return indices
 
     def __len__(self) -> int:

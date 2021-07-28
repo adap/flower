@@ -19,7 +19,7 @@ import torch.nn as nn
 from flwr_baselines.dataloaders.leaf.shakespeare import LEAF_CHARACTERS
 
 
-class ShakespeareLeafNet(nn.Module):
+class ShakespeareLeafNet(nn.Module[torch.TensorType]):
     def __init__(
         self,
         chars: str = LEAF_CHARACTERS,
