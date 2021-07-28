@@ -340,37 +340,72 @@ class Server:
             and threshold >= 2
         ), "SecAgg parameters not accepted"
 
-        clients = self._client_manager.sample(num_clients=sample_num)
+        client_list = self._client_manager.sample(num_clients=sample_num)
+        setup_param_clients = {}
+        for idx, client in enumerate(client_list):
+            setup_param_clients[idx] = client
 
         # Stage 0: Setup
         # Give rnd, sample_num, share_num, threshold, client id
         log(INFO, "SecAgg setup params")
-        setup_param(
-            clients=clients,
+        setup_param_results_and_failures = setup_param(
+            clients=setup_param_clients,
             sample_num=sample_num,
             share_num=share_num,
             threshold=threshold,
         )
+        setup_param_results = setup_param_results_and_failures[0]
+        ask_keys_clients = {}
+        for idx, client in setup_param_clients.items():
+            if client in [result[0] for result in setup_param_results]:
+                ask_keys_clients[idx] = client
+        if len(ask_keys_clients) < min_num:
+            raise Exception("Not enough available clients after setup param stage")
+
         # Stage 1: Ask Public Keys
         log(INFO, "SecAgg ask keys")
-        ask_keys_results_and_failures = ask_keys(clients)
+        ask_keys_results_and_failures = ask_keys(ask_keys_clients)
         public_keys_dict = {}
         ask_keys_results = ask_keys_results_and_failures[0]
-        available_clients_num = 0
-        for idx, client in enumerate(clients):
+        share_keys_clients = {}
+        for idx, client in ask_keys_clients.items():
             if client in [result[0] for result in ask_keys_results]:
                 pos = [result[0] for result in ask_keys_results].index(client)
                 public_keys_dict[idx] = ask_keys_results[pos][1]
-                available_clients_num += 1
-        if available_clients_num < min_num:
-            raise Exception("Not enough available clients")
+                share_keys_clients[idx] = client
+        if len(share_keys_clients) < min_num:
+            raise Exception("Not enough available clients after ask keys stage")
 
         # Stage 2: Share Keys
         log(INFO, "SecAgg share keys")
         share_keys_results_and_failures = share_keys(
-            clients, public_keys_dict, sample_num, share_num
+            share_keys_clients, public_keys_dict, sample_num, share_num
         )
-        # ask_vectors()
+        share_keys_results = share_keys_results_and_failures[0]
+        total_packet_list = []
+        forward_packet_list_dict = {}
+        ask_vectors_clients = {}
+        for idx, client in share_keys_clients.items():
+            if client in [result[0] for result in share_keys_results]:
+                pos = [result[0] for result in share_keys_results].index(client)
+                ask_vectors_clients[idx] = client
+                packet_list = share_keys_results[pos][1].share_keys_res_list
+                total_packet_list += packet_list
+        if len(ask_vectors_clients) < min_num:
+            raise Exception("Not enough available clients after share keys stage")
+
+        for idx in ask_vectors_clients.keys():
+            forward_packet_list_dict[idx] = []
+
+        for packet in total_packet_list:
+            destination = packet.destination
+            if destination in ask_vectors_clients.keys():
+                forward_packet_list_dict[destination].append(packet)
+
+        # Stage 3: Ask Vectors
+        log(INFO, "SecAgg ask vectors")
+        #ask_vectors_results_and_failures= ask_vectors(ask_vectors_clients, forward_packet_list_dict)
+        raise Exception("Terminate")
         # unmask_vectors()
 
     def disconnect_all_clients(self) -> None:
@@ -505,18 +540,30 @@ def setup_param(
                     ),
                 ),
             )
-            for idx, c in enumerate(clients)
+            for idx, c in clients.items()
         ]
         concurrent.futures.wait(futures)
+        results: List[ClientProxy] = []
+        failures: List[BaseException] = []
+        for future in futures:
+            failure = future.exception()
+            if failure is not None:
+                failures.append(failure)
+            else:
+                # Success case
+                result = future.result()
+                results.append(result)
+        return results, failures
 
 
 def setup_param_client(client: ClientProxy, setup_param_msg: SetupParamIn):
     client.setup_param(setup_param_msg)
+    return client, None
 
 
-def ask_keys(clients: List[ClientProxy]) -> AskKeysResultsAndFailures:
+def ask_keys(clients) -> AskKeysResultsAndFailures:
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(ask_keys_client, c) for c in clients]
+        futures = [executor.submit(ask_keys_client, c) for c in clients.values()]
         concurrent.futures.wait(futures)
     results: List[Tuple[ClientProxy, AskKeysRes]] = []
     failures: List[BaseException] = []
@@ -543,8 +590,7 @@ def share_keys(clients, public_keys_dict, sample_num, share_num):
                 lambda p: share_keys_client(*p),
                 (client, idx, public_keys_dict, sample_num, share_num),
             )
-            for idx, client in enumerate(clients)
-            if idx in public_keys_dict.keys()
+            for idx, client in clients.items()
         ]
         concurrent.futures.wait(futures)
     results = []
@@ -563,7 +609,7 @@ def share_keys(clients, public_keys_dict, sample_num, share_num):
 def share_keys_client(client, idx, public_keys_dict, sample_num, share_num):
     if share_num == sample_num:
         # complete graph
-        return client.share_keys(ShareKeysIn(public_keys_dict=public_keys_dict))
+        return client, client.share_keys(ShareKeysIn(public_keys_dict=public_keys_dict))
     local_dict = {}
     for i in range(-int(share_num / 2), int(share_num / 2) + 1):
         if ((i + idx) % sample_num) in public_keys_dict.keys():
@@ -571,7 +617,7 @@ def share_keys_client(client, idx, public_keys_dict, sample_num, share_num):
                 (i + idx) % sample_num
             ]
 
-    return client.share_keys(ShareKeysIn(public_keys_dict=local_dict))
+    return client, client.share_keys(ShareKeysIn(public_keys_dict=local_dict))
 
 
 def ask_vectors():
