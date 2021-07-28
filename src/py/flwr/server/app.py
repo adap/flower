@@ -34,7 +34,7 @@ def start_server(  # pylint: disable=too-many-arguments
     config: Optional[Dict[str, int]] = None,
     strategy: Optional[Strategy] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    force_final_distributed_eval: bool = True,
+    force_final_distributed_eval: bool = False,
 ) -> None:
     """Start a Flower server using the gRPC transport layer.
 
@@ -59,7 +59,7 @@ def start_server(  # pylint: disable=too-many-arguments
             value. Note that the Flower clients need to be started with the
             same value (see `flwr.client.start_client`), otherwise clients will
             not know about the increased limit and block larger messages.
-        force_final_distributed_eval: bool (default: True).
+        force_final_distributed_eval: bool (default: False).
             Forces a distributed evaulation to occur after the last training
             epoch when enabled.
 
