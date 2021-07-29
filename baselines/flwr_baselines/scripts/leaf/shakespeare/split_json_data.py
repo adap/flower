@@ -12,14 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
+"""Splits LEAF generated datasets and creates individual client partitions."""
 import argparse
 import json
 import pickle
 from pathlib import Path
 from typing import List, Optional, Tuple
-
-"""Splits LEAF generated datasets and creates individual client partitions."""
 
 
 def check_between_zero_and_one(value: str):
@@ -47,16 +45,16 @@ def split_json_and_save(
         save_root (Path): Root directory where to save the individual client
             partition files.
     """
-    if prev_users_list is None:
-        prev_users_list = []
-    new_users = []
+    users_list: List[str] = []
+    new_users: List[str] = []
     with open(path_to_json) as open_file:
         json_file = json.load(open_file)
-        if prev_users_list:
-            users_list = prev_users_list
-            print("Using previous list of users.")
-        else:
+        if prev_users_list is None:
             users_list = json_file["users"]
+        else:
+            print("Using previous list of users.")
+            users_list = prev_users_list
+
         for user_idx, user_str in enumerate(users_list):
             new_users.append(user_str)
             sentence = json_file["user_data"][user_str]["x"]
