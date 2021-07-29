@@ -98,7 +98,7 @@ class Disconnect:
 
 
 @dataclass
-class SetupParamIn:
+class SetupParamIns:
     secagg_id: int
     sample_num: int
     share_num: int
@@ -114,7 +114,7 @@ class AskKeysRes:
 
 
 @dataclass
-class ShareKeysIn:
+class ShareKeysIns:
     public_keys_dict: Dict[int, AskKeysRes]
 
 
@@ -128,3 +128,13 @@ class ShareKeysPacket:
 @dataclass
 class ShareKeysRes:
     share_keys_res_list: List[ShareKeysPacket]
+
+
+@dataclass
+class AskVectorsIns:
+    ask_vectors_in_list: List[ShareKeysPacket]
+
+
+@dataclass
+class AskVectorsRes:
+    parameters: Parameters

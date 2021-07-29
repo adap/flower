@@ -115,7 +115,7 @@ def _ask_keys(client: Client) -> ClientMessage:
 
 def _share_keys(client: Client, share_keys_msg: ServerMessage.SecAggMsg.ShareKeys):
     try:
-        share_keys_in = serde.share_keys_in_from_proto(share_keys_msg)
+        share_keys_in = serde.share_keys_ins_from_proto(share_keys_msg)
         share_keys_res = client.share_keys(share_keys_in)
         share_keys_res_proto = serde.share_keys_res_to_proto(share_keys_res)
         return ClientMessage(sec_agg_res=share_keys_res_proto)

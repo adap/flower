@@ -51,7 +51,9 @@ __all__ = [
     "Scalar",
     "Weights",
     "weights_to_parameters",
-    "SetupParamIn",
+    "SetupParamIns",
     "AskKeysRes",
-    "ShareKeysIn",
+    "ShareKeysIns",
+    "AskVectorsIns",
+    "AskVectorsRes"
 ]

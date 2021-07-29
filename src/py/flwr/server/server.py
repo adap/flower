@@ -39,7 +39,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import Strategy, FedAvg
 from flwr.server.strategy.secagg import SecAgg
-from flwr.common.typing import AskKeysRes, SetupParamIn, ShareKeysIn
+from flwr.common.typing import AskKeysRes, AskVectorsIns, SetupParamIns, ShareKeysIns
 
 DEPRECATION_WARNING_EVALUATE = """
 DEPRECATION WARNING: Method
@@ -365,6 +365,7 @@ class Server:
         # Stage 1: Ask Public Keys
         log(INFO, "SecAgg ask keys")
         ask_keys_results_and_failures = ask_keys(ask_keys_clients)
+
         public_keys_dict = {}
         ask_keys_results = ask_keys_results_and_failures[0]
         share_keys_clients = {}
@@ -404,6 +405,7 @@ class Server:
 
         # Stage 3: Ask Vectors
         log(INFO, "SecAgg ask vectors")
+
         #ask_vectors_results_and_failures= ask_vectors(ask_vectors_clients, forward_packet_list_dict)
         raise Exception("Terminate")
         # unmask_vectors()
@@ -532,7 +534,7 @@ def setup_param(
                 lambda p: setup_param_client(*p),
                 (
                     c,
-                    SetupParamIn(
+                    SetupParamIns(
                         secagg_id=idx,
                         sample_num=sample_num,
                         share_num=share_num,
@@ -556,7 +558,7 @@ def setup_param(
         return results, failures
 
 
-def setup_param_client(client: ClientProxy, setup_param_msg: SetupParamIn):
+def setup_param_client(client: ClientProxy, setup_param_msg: SetupParamIns):
     client.setup_param(setup_param_msg)
     return client, None
 
@@ -609,7 +611,7 @@ def share_keys(clients, public_keys_dict, sample_num, share_num):
 def share_keys_client(client, idx, public_keys_dict, sample_num, share_num):
     if share_num == sample_num:
         # complete graph
-        return client, client.share_keys(ShareKeysIn(public_keys_dict=public_keys_dict))
+        return client, client.share_keys(ShareKeysIns(public_keys_dict=public_keys_dict))
     local_dict = {}
     for i in range(-int(share_num / 2), int(share_num / 2) + 1):
         if ((i + idx) % sample_num) in public_keys_dict.keys():
@@ -617,11 +619,24 @@ def share_keys_client(client, idx, public_keys_dict, sample_num, share_num):
                 (i + idx) % sample_num
             ]
 
-    return client, client.share_keys(ShareKeysIn(public_keys_dict=local_dict))
+    return client, client.share_keys(ShareKeysIns(public_keys_dict=local_dict))
 
 
-def ask_vectors():
-    pass
+def ask_vectors(clients, forward_packet_list_dict):
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(
+                lambda p: ask_vectors_client(*p),
+                (client, idx, forward_packet_list_dict[idx]),
+            )
+            for idx, client in clients.items()
+        ]
+        concurrent.futures.wait(futures)
+
+
+def ask_vectors_client(client, forward_packet_list):
+
+    return client, client.ask_vectors(AskVectorsIns(ask_vectors_in_list=forward_packet_list))
 
 
 def unmask_vectors():

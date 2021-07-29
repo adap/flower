@@ -7,7 +7,7 @@ from flwr.common import (
     ParametersRes,
     secagg_utils,
 )
-from flwr.common.typing import SetupParamIn, ShareKeysIn, ShareKeysPacket, ShareKeysRes
+from flwr.common.typing import SetupParamIns, ShareKeysIns, ShareKeysPacket, ShareKeysRes
 from flwr.server.strategy import secagg
 from .client import Client
 from flwr.common.logger import log
@@ -30,7 +30,7 @@ class SecAggClient(Client):
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         return self.client.evaluate(ins)
 
-    def setup_param(self, setup_param_in: SetupParamIn):
+    def setup_param(self, setup_param_in: SetupParamIns):
         self.sample_num = setup_param_in.sample_num
         self.secagg_id = setup_param_in.secagg_id
         self.share_num = setup_param_in.share_num
@@ -51,7 +51,7 @@ class SecAggClient(Client):
             pk2=secagg_utils.public_key_to_bytes(self.pk2),
         )
 
-    def share_keys(self, share_keys_in: ShareKeysIn) -> ShareKeysRes:
+    def share_keys(self, share_keys_in: ShareKeysIns) -> ShareKeysRes:
         self.public_keys_dict = share_keys_in.public_keys_dict
         # check size is larger than threshold
         if len(self.public_keys_dict) < self.threshold:
