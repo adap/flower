@@ -17,7 +17,7 @@ import argparse
 import json
 import pickle
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 def check_between_zero_and_one(value: str):
@@ -43,6 +43,31 @@ def save_partition(save_root: Path, user_idx: int, dataset: str, data: Dict[str,
     save_dir.mkdir(parents=True, exist_ok=True)
     with open(save_dir / f"{dataset}.pickle", "wb") as save_file:
         pickle.dump(data, save_file)
+
+
+def process_user(
+    json_file: Dict[str, Any],
+    user_idx: str,
+    user_str: str,
+    list_datasets: List[Tuple[str, float]],
+    save_root: Path,
+):
+    sentence = json_file["user_data"][user_str]["x"]
+    next_char = json_file["user_data"][user_str]["y"]
+    start_idx = 0
+
+    for split_id, (dataset, fraction) in enumerate(list_datasets):
+        end_idx = start_idx + int(fraction * len(sentence))
+        if split_id == len(list_datasets) - 1:  # Make sure we use last indices
+            end_idx = len(sentence)
+        data = {}
+        data["idx"] = user_idx
+        data["character"] = user_str
+        data["x"] = sentence[start_idx:end_idx]
+        data["y"] = next_char[start_idx:end_idx]
+        start_idx = end_idx
+
+        save_partition(save_root, user_idx, dataset, data)
 
 
 def split_json_and_save(
@@ -72,23 +97,6 @@ def split_json_and_save(
 
         for user_idx, user_str in enumerate(users_list):
             new_users.append(user_str)
-
-            sentence = json_file["user_data"][user_str]["x"]
-            next_char = json_file["user_data"][user_str]["y"]
-            start_idx = 0
-
-            for split_id, (dataset, fraction) in enumerate(list_datasets):
-                end_idx = start_idx + int(fraction * len(sentence))
-                if split_id == len(list_datasets) - 1:  # Make sure we use last indices
-                    end_idx = len(sentence)
-                data = {}
-                data["idx"] = user_idx
-                data["character"] = user_str
-                data["x"] = sentence[start_idx:end_idx]
-                data["y"] = next_char[start_idx:end_idx]
-                start_idx = end_idx
-
-                save_partition(save_root, user_idx, dataset, data)
 
     return new_users
 
@@ -135,7 +143,7 @@ if __name__ == "__main__":
     original_train_dataset = Path(args.leaf_train_json)
     train_frac = 1.0 - args.val_frac
     train_val_datasets = [("train", train_frac), ("val", args.val_frac)]
-    users_list = split_json_and_save(
+    existing_users = split_json_and_save(
         list_datasets=train_val_datasets,
         path_to_json=original_train_dataset,
         save_root=Path(args.save_root),
@@ -148,5 +156,5 @@ if __name__ == "__main__":
         list_datasets=test_dataset,
         path_to_json=original_test_dataset,
         save_root=Path(args.save_root),
-        prev_users_list=users_list,
+        prev_users_list=existing_users,
     )
