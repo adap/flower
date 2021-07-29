@@ -3,4 +3,4 @@
 set -e
 
 # Start server
-python server.py
+poetry run python server.py

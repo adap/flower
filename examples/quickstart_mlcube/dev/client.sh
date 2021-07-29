@@ -20,4 +20,4 @@ cp -r mlcube_utils.py clients/client_$1/
 
 echo "Start client $1"
 # Start client Python process in background
-PYTHONUNBUFFERED=1 python clients/client_$1/client.py
+poetry run python clients/client_$1/client.py
