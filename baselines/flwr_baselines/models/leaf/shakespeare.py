@@ -20,7 +20,7 @@ import torch.nn as nn
 from flwr_baselines.dataloaders.leaf.shakespeare import LEAF_CHARACTERS
 
 
-class ShakespeareLeafNet(nn.Module[torch.Tensor]):  # type: ignore
+class ShakespeareLeafNet(nn.Module):  # type: ignore
     """Create Shakespeare model for LEAF baselines.
 
     Args:
@@ -52,17 +52,17 @@ class ShakespeareLeafNet(nn.Module[torch.Tensor]):  # type: ignore
         )
         self.decoder = nn.Linear(self.hidden_size, self.dict_size)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, sentence: torch.Tensor) -> torch.Tensor:
         """Forwards sentence to obtain next character
 
         Args:
-            x (torch.Tensor): Tensor containing indices of characters
+            sentence (torch.Tensor): Tensor containing indices of characters
 
         Returns:
             torch.Tensor: Vector encoding position of predicted character
         """
-        encoded_seq = self.encoder(x)  # (batch, seq_len, embedding_dim)
-        outputs, (h_n, _) = self.lstm(encoded_seq)  # (batch, seq_len, hidden_size)
+        encoded_seq = self.encoder(sentence)  # (batch, seq_len, embedding_dim)
+        _, (h_n, _) = self.lstm(encoded_seq)  # (batch, seq_len, hidden_size)
         pred = self.decoder(h_n[-1])
         return pred
 

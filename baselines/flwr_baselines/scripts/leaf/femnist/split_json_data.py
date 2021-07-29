@@ -27,7 +27,7 @@ from PIL import Image
 def read_jsons_and_save(
     list_jsons: List[PathLike],
     save_root: PathLike,
-    users_list: Optional[Dict[str, int]] = [],
+    users_list: Optional[Dict[str, int]] = None,
 ):
     """Reads LEAF JSON files and stores user data as pickle files.
 
@@ -37,18 +37,21 @@ def read_jsons_and_save(
         users_list (Optional[Dict[str, int]], optional): Dictionary of users that have
             already been processed. Defaults to [].
     """
+    if users_list is None:
+        users_list = []
+
     counter: int = 0
     for path_to_json in list_jsons:
         with open(path_to_json, "r") as f:
-            js = json.load(f)
-        for user_idx, u in enumerate(js["users"]):
+            json_file = json.load(f)
+        for user_idx, u in enumerate(json_file["users"]):
             global_id = user_idx + counter
 
             data = {}
             data["tag"] = u
             data["idx"] = str(global_id)
-            data["x"] = js["user_data"][u]["x"]
-            data["y"] = js["user_data"][u]["y"]
+            data["x"] = json_file["user_data"][u]["x"]
+            data["y"] = json_file["user_data"][u]["y"]
 
             save_dir = save_root / str(global_id)
             save_dir.mkdir(parents=True, exist_ok=True)
@@ -72,8 +75,8 @@ def collect_all_users(list_jsons: List[PathLike]):
     all_users = []
     for path_to_json in paths_to_json:
         with open(path_to_json, "r") as f:
-            js = json.load(f)
-            all_users.append(sorted(js["users"]))
+            json_file = json.load(f)
+            all_users.append(sorted(json_file["users"]))
 
     return sorted((list(set(all_users))))
 
@@ -95,12 +98,12 @@ def split_json_and_save(
     user_count = 0
     for path_to_json in paths_to_json:
         with open(path_to_json, "r") as f:
-            js = json.load(f)
+            json_file = json.load(f)
             users_list = sorted(js["users"])
             num_users = len(users_list)
             for user_idx, u in enumerate(users_list):
-                x = js["user_data"][u]["x"]
-                y = js["user_data"][u]["y"]
+                x = json_file["user_data"][u]["x"]
+                y = json_file["user_data"][u]["y"]
                 num_samples = len(x)
                 start_idx = 0
                 for split_id, (dataset, fraction) in enumerate(list_datasets):
@@ -135,7 +138,7 @@ def split_json_and_save(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="""Splits a LEAF FEMNIST train dataset into 
+        description="""Splits a LEAF FEMNIST train dataset into
                        train/validation for each client and saves the clients'
                        train/val/test dataset in their respective folder."""
     )
@@ -143,14 +146,14 @@ if __name__ == "__main__":
         "--save_root",
         type=str,
         required=True,
-        help="""Root folder where partitions will be save as 
+        help="""Root folder where partitions will be save as
                 {save_root}/client_id/{train,val,test}.pickle""",
     )
     parser.add_argument(
         "--leaf_train_jsons_root",
         type=str,
         required=True,
-        help="""Root directory to JSON files containing the 
+        help="""Root directory to JSON files containing the
                 generated trainset for LEAF FEMNIST.""",
     )
     parser.add_argument(
