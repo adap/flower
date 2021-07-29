@@ -22,10 +22,11 @@ from typing import List, Optional, Tuple
 
 
 def check_between_zero_and_one(value: str):
+    """Tests if value is between 0 an 1"""
     fvalue = float(value)
     if fvalue < 0 or fvalue > 1:
         raise argparse.ArgumentTypeError(
-            f"""Invalid partition fraction {fvalue}. This must be between 0 and 1."""
+            f"""Invalid partition fraction {fvalue}. This must be between [0,1]."""
         )
     return fvalue
 
@@ -34,7 +35,7 @@ def split_json_and_save(
     list_datasets: List[Tuple[str, float]],
     path_to_json: Path,
     save_root: Path,
-    users_list: Optional[List[str]] = [],
+    prev_users_list: Optional[List[str]] = None,
 ):
     """Splits LEAF generated datasets and creates individual client partitions.
 
@@ -45,17 +46,21 @@ def split_json_and_save(
         save_root (Path): Root directory where to save the individual client
             partition files.
     """
+    if prev_users_list is None:
+        prev_users_list = []
     new_users = []
     with open(path_to_json) as f:
-        js = json.load(f)
-        if not users_list:
-            users_list = js["users"]
+        json_file = json.load(f)
+        if prev_users_list:
+            users_list = prev_users_list
             print("Using previous list of users.")
+        else:
+            users_list = json_file["users"]
         for user_idx, u in enumerate(users_list):
             new_users.append(u)
-            x = js["user_data"][u]["x"]
-            y = js["user_data"][u]["y"]
-            num_samples = len(x)
+            sentence = json_file["user_data"][u]["x"]
+            next_word = json_file["user_data"][u]["y"]
+            num_samples = len(sentence)
             start_idx = 0
             for split_id, (dataset, fraction) in enumerate(list_datasets):
                 end_idx = start_idx + int(fraction * num_samples)
@@ -64,8 +69,8 @@ def split_json_and_save(
                 data["character"] = u
                 if split_id == len(list_datasets) - 1:  # Make sure we use last indices
                     end_idx = num_samples
-                data["x"] = x[start_idx:end_idx]
-                data["y"] = y[start_idx:end_idx]
+                data["x"] = sentence[start_idx:end_idx]
+                data["y"] = next_word[start_idx:end_idx]
                 start_idx = end_idx
 
                 save_dir = save_root / str(user_idx)
@@ -86,7 +91,8 @@ if __name__ == "__main__":
         "--save_root",
         type=str,
         required=True,
-        help="Root folder where partitions will be save as {save_root}/client_id/{train,val,test}.pickle",
+        help="""Root folder where partitions will be save as
+                {save_root}/client_id/{train,val,test}.pickle""",
     )
     parser.add_argument(
         "--leaf_train_json",
@@ -130,5 +136,5 @@ if __name__ == "__main__":
         list_datasets=list_datasets,
         path_to_json=original_test_dataset,
         save_root=save_root,
-        users_list=users_list,
+        prev_users_list=users_list,
     )
