@@ -16,9 +16,10 @@
 import argparse
 import json
 import pickle
-from os import PathLike
 from pathlib import Path
 from typing import List, Optional, Tuple
+
+"""Splits LEAF generated datasets and creates individual client partitions."""
 
 
 def check_between_zero_and_one(value: str):
@@ -59,7 +60,7 @@ def split_json_and_save(
         for user_idx, u in enumerate(users_list):
             new_users.append(u)
             sentence = json_file["user_data"][u]["x"]
-            next_word = json_file["user_data"][u]["y"]
+            next_char = json_file["user_data"][u]["y"]
             num_samples = len(sentence)
             start_idx = 0
             for split_id, (dataset, fraction) in enumerate(list_datasets):
@@ -70,14 +71,14 @@ def split_json_and_save(
                 if split_id == len(list_datasets) - 1:  # Make sure we use last indices
                     end_idx = num_samples
                 data["x"] = sentence[start_idx:end_idx]
-                data["y"] = next_word[start_idx:end_idx]
+                data["y"] = next_char[start_idx:end_idx]
                 start_idx = end_idx
 
                 save_dir = save_root / str(user_idx)
                 save_dir.mkdir(parents=True, exist_ok=True)
 
-                with open(save_dir / f"{dataset}.pickle", "wb") as f:
-                    pickle.dump(data, f)
+                with open(save_dir / f"{dataset}.pickle", "wb") as open_file:
+                    pickle.dump(data, open_file)
 
     return new_users
 
@@ -122,18 +123,18 @@ if __name__ == "__main__":
     # then save files for each client
     original_train_dataset = Path(args.leaf_train_json)
     train_frac = 1.0 - args.val_frac
-    list_datasets = [("train", train_frac), ("val", args.val_frac)]
+    train_val_datasets = [("train", train_frac), ("val", args.val_frac)]
     users_list = split_json_and_save(
-        list_datasets=list_datasets,
+        list_datasets=train_val_datasets,
         path_to_json=original_train_dataset,
         save_root=save_root,
     )
 
     # Split and save the test files
     original_test_dataset = Path(args.leaf_test_json)
-    list_datasets = [("test", 1.0)]
+    test_dataset = [("test", 1.0)]
     split_json_and_save(
-        list_datasets=list_datasets,
+        list_datasets=test_dataset,
         path_to_json=original_test_dataset,
         save_root=save_root,
         prev_users_list=users_list,
