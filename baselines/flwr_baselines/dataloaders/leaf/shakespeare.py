@@ -13,7 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 
-import json
 import pickle
 from pathlib import Path
 from typing import List
@@ -36,25 +35,33 @@ class ShakespeareDataset(Dataset[XY]):  # type: ignore
 
     def __init__(self, path_to_pickle: Path):
 
-        self.CHARACTERS: str = LEAF_CHARACTERS
-        self.NUM_LETTERS: int = len(self.CHARACTERS)  # 80
-        self.x, self.y = [], []
+        self.characters: str = LEAF_CHARACTERS
+        self.num_letters: int = len(self.characters)  # 80
 
         with open(path_to_pickle, "rb") as f:
             data = pickle.load(f)
-            self.x = data["x"]
-            self.y = data["y"]
-            self.idx = data["idx"]
+            self.sentence = data["x"]
+            self.next_word = data["y"]
+            self.index = data["idx"]
             self.char = data["character"]
 
     def word_to_indices(self, word: str) -> List[int]:
-        indices: List[int] = [self.CHARACTERS.find(c) for c in word]
+        """Converts a sequence of characters into position indices
+        in the reference string `self.characters`.
+
+        Args:
+            word (str): Sequence of characters to be converted.
+
+        Returns:
+            List[int]: List with positions.
+        """
+        indices: List[int] = [self.characters.find(c) for c in word]
         return indices
 
     def __len__(self) -> int:
         return len(self.y)
 
     def __getitem__(self, idx: int) -> XY:
-        x = np.array(self.word_to_indices(self.x[idx]))
-        y = np.array(self.CHARACTERS.find(self.y[idx]))
-        return x, y
+        sentence_indices = np.array(self.word_to_indices(self.sentence[idx]))
+        next_word_index = np.array(self.characters.find(self.next_word[idx]))
+        return sentence_indices, next_word_index
