@@ -115,6 +115,9 @@ message ClientMessage {
       }
       repeated Packet packet_list=1;
     }
+    message AskVectorsRes{
+      Parameters parameters = 1;
+    }
     message ErrorRes{
       string error=1;
     }
@@ -122,7 +125,8 @@ message ClientMessage {
       SetupParamRes setup_param_res=1;
       AskKeysRes ask_keys_res=2;
       ShareKeysRes share_keys_res=3;
-      ErrorRes error_res=4;
+      AskVectorsRes ask_vectors_res=4;
+      ErrorRes error_res=5;
     }
   }
   

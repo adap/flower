@@ -278,6 +278,25 @@ def ask_vectors_ins_to_proto(ask_vectors_ins: typing.AskVectorsIns) -> ServerMes
         proto_packet_list.append(proto_packet)
     return ServerMessage.SecAggMsg(ask_vectors=ServerMessage.SecAggMsg.AskVectors(packet_list=proto_packet_list))
 
+
+def ask_vectors_ins_from_proto(ask_vectors_msg: ServerMessage.SecAggMsg) -> typing.AskVectorsIns:
+    proto_packet_list = ask_vectors_msg.ask_vectors.packet_list
+    packet_list = []
+    for proto_packet in proto_packet_list:
+        packet = typing.ShareKeysPacket(
+            source=proto_packet.source, destination=proto_packet.destination, ciphertext=proto_packet.ciphertext)
+        packet_list.append(packet)
+    return typing.AskVectorsIns(ask_vectors_in_list=packet_list)
+
+
+def ask_vectors_res_to_proto(ask_vectors_res: typing.AskVectorsRes) -> ClientMessage.SecAggRes:
+    parameters_proto = parameters_to_proto(ask_vectors_res.parameters)
+    return ClientMessage.SecAggRes(ask_vectors_res=ClientMessage.SecAggRes.AskVectorsRes(parameters=parameters_proto))
+
+def ask_vectors_res_from_proto(ask_vectors_res_msg:ClientMessage.SecAggRes)->typing.AskVectorsRes:
+    parameters = parameters_from_proto(ask_vectors_res_msg.ask_vectors_res.parameters)
+    return typing.AskVectorsRes(parameters=parameters)
+
 # === Evaluate messages ===
 
 

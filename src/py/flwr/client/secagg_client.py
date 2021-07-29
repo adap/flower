@@ -7,7 +7,7 @@ from flwr.common import (
     ParametersRes,
     secagg_utils,
 )
-from flwr.common.typing import SetupParamIns, ShareKeysIns, ShareKeysPacket, ShareKeysRes
+from flwr.common.typing import AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysPacket, ShareKeysRes
 from flwr.server.strategy import secagg
 from .client import Client
 from flwr.common.logger import log
@@ -97,3 +97,9 @@ class SecAggClient(Client):
 
         log(INFO, "Sent shares")
         return share_keys_res
+
+    def ask_vectors(self, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
+        packet_list = ask_vectors_ins.ask_vectors_in_list
+        print(packet_list)
+        log(INFO, "Sent vectors")
+        return AskVectorsRes
