@@ -27,7 +27,7 @@ LEAF_CHARACTERS = (
 )
 
 
-class ShakespeareDataset(Dataset[XY]):
+class ShakespeareDataset(Dataset[XY]):  # type: ignore
     """Creates a PyTorch Dataset for Leaf Shakespeare.
 
     Args:

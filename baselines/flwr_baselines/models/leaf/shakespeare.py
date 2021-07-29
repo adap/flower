@@ -19,7 +19,7 @@ import torch.nn as nn
 from flwr_baselines.dataloaders.leaf.shakespeare import LEAF_CHARACTERS
 
 
-class ShakespeareLeafNet(nn.Module[torch.TensorType]):
+class ShakespeareLeafNet(nn.Module[torch.nn.Tensor]):  # type: ignore
     def __init__(
         self,
         chars: str = LEAF_CHARACTERS,
@@ -50,7 +50,7 @@ class ShakespeareLeafNet(nn.Module[torch.TensorType]):
         )
         self.decoder = nn.Linear(self.hidden_size, self.dict_size)
 
-    def forward(self, x: torch.TensorType) -> torch.TensorType:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         encoded_seq = self.encoder(x)  # (batch, seq_len, embedding_dim)
         outputs, (h_n, c_n) = self.lstm(encoded_seq)  # (batch, seq_len, hidden_size)
         pred = self.decoder(h_n[-1])
