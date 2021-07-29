@@ -18,7 +18,6 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
-!examples/quickstart_mlcube/*/mlcube/build
 develop-eggs/
 dist/
 downloads/
