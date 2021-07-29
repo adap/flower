@@ -30,6 +30,30 @@ def check_between_zero_and_one(value: str):
     return fvalue
 
 
+def create_partition(
+    split_id: str,
+    start_idx: int,
+    fraction: float,
+    num_samples: int,
+    user_idx: int,
+    user_str: str,
+    list_datasets: List[str, float],
+    sentence: List[str],
+    next_char: List[Any],
+):
+    end_idx = start_idx + int(fraction * num_samples)
+    data = {}
+    data["idx"] = user_idx
+    data["character"] = user_str
+    if split_id == len(list_datasets) - 1:  # Make sure we use last indices
+        end_idx = num_samples
+    data["x"] = sentence[start_idx:end_idx]
+    data["y"] = next_char[start_idx:end_idx]
+    start_idx = end_idx
+
+    return start_idx, data
+
+
 def split_json_and_save(
     list_datasets: List[Tuple[str, float]],
     path_to_json: Path,
@@ -49,7 +73,7 @@ def split_json_and_save(
     new_users: List[str] = []
     with open(path_to_json) as open_file:
         json_file = json.load(open_file)
-        if prev_users_list is None:
+        if not prev_users_list:
             users_list = json_file["users"]
         else:
             print("Using previous list of users.")
@@ -62,16 +86,17 @@ def split_json_and_save(
             num_samples = len(sentence)
             start_idx = 0
             for split_id, (dataset, fraction) in enumerate(list_datasets):
-                end_idx = start_idx + int(fraction * num_samples)
-                data = {}
-                data["idx"] = user_idx
-                data["character"] = user_str
-                if split_id == len(list_datasets) - 1:  # Make sure we use last indices
-                    end_idx = num_samples
-                data["x"] = sentence[start_idx:end_idx]
-                data["y"] = next_char[start_idx:end_idx]
-                start_idx = end_idx
-
+                start_idx, data = create_partition(
+                    split_id,
+                    start_idx,
+                    fraction,
+                    num_samples,
+                    user_idx,
+                    user_str,
+                    list_datasets,
+                    sentence,
+                    next_char,
+                )
                 save_dir = save_root / str(user_idx)
                 save_dir.mkdir(parents=True, exist_ok=True)
 
@@ -115,8 +140,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    save_root = Path(args.save_root)
-
     # Split train dataset into train and validation
     # then save files for each client
     original_train_dataset = Path(args.leaf_train_json)
@@ -125,7 +148,7 @@ if __name__ == "__main__":
     users_list = split_json_and_save(
         list_datasets=train_val_datasets,
         path_to_json=original_train_dataset,
-        save_root=save_root,
+        save_root=Path(args.save_root),
     )
 
     # Split and save the test files
@@ -134,6 +157,6 @@ if __name__ == "__main__":
     split_json_and_save(
         list_datasets=test_dataset,
         path_to_json=original_test_dataset,
-        save_root=save_root,
+        save_root=Path(args.save_root),
         prev_users_list=users_list,
     )
