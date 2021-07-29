@@ -23,7 +23,7 @@ def initial_parameters():
 def main():
     strategy = FedAvg(initial_parameters=initial_parameters())
     fl.server.start_server(
-        "0.0.0.0:8080", strategy=strategy, config={"num_rounds": 100},
+        "0.0.0.0:8080", strategy=strategy, config={"num_rounds": 3},
     )
 
 

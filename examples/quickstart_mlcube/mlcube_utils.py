@@ -22,12 +22,6 @@ def workspace_path(path: str, is_file=True) -> str:
     return full_path
 
 
-model_in_filepath = workspace_path("model_in/mnist_model")
-model_out_filepath = workspace_path("model_out/mnist_model")
-train_metrics_filepath = workspace_path("metrics/train_metrics.json")
-evaluate_metrics_filepath = workspace_path("metrics/evaluate_metrics.json")
-
-
 def run_task(task_name: str):
     """Run mlcube task and return if successful."""
     command = [
@@ -53,6 +47,7 @@ def run_task(task_name: str):
 
 def save_parameteras_as_model(parameters):
     """Write model to $WORKSPACE/model_in/mnist_model from parameters."""
+    filepath = workspace_path("model_in/mnist_model")
     model = tf.keras.models.Sequential(
         [
             tf.keras.layers.Flatten(input_shape=(28, 28)),
@@ -65,19 +60,21 @@ def save_parameteras_as_model(parameters):
         optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
     )
     model.set_weights(parameters)
-    model.save(model_in_filepath)
-
+    model.save(filepath)
 
 
 def load_model_parameters():
     """Load and return model parameters"""
-    model = tf.keras.models.load_model(model_in_filepath)
-    return model.get_weights()
+    filepath = workspace_path("model_out/mnist_model")
+    model = tf.keras.models.load_model(filepath)
+    parameters = model.get_weights()
+    return parameters
 
 
 def load_train_metrics():
     """Load and return metrics."""
-    with open(train_metrics_filepath, "r") as f:
+    filepath = workspace_path("metrics/train_metrics.json")
+    with open(filepath, "r") as f:
         data = json.load(f)
 
     data["loss"] = float(data["loss"])
@@ -89,12 +86,12 @@ def load_train_metrics():
 
 def load_evaluate_metrics():
     """Load and return metrics."""
-    with open(evaluate_metrics_filepath, "r") as f:
+    filepath = workspace_path("metrics/evaluate_metrics.json")
+    with open(filepath, "r") as f:
         data = json.load(f)
 
     data["loss"] = float(data["loss"])
     data["accuracy"] = float(data["accuracy"])
     data["num_examples"] = int(data["num_examples"])
-
 
     return data
