@@ -1,5 +1,7 @@
 # Flower Example using TensorFlow/Keras + MLCube
 
+**Status: experimental**
+
 This introductory example to Flower uses MLCube together with Keras but deep knowledge of Keras is not necessarily required to run the example. However, it will help you understanding how to adapt Flower to your use-cases with MLCube.
 Running this example in itself is quite easy.
 
