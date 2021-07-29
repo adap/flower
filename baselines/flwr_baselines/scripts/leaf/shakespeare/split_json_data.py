@@ -50,24 +50,24 @@ def split_json_and_save(
     if prev_users_list is None:
         prev_users_list = []
     new_users = []
-    with open(path_to_json) as f:
-        json_file = json.load(f)
+    with open(path_to_json) as open_file:
+        json_file = json.load(open_file)
         if prev_users_list:
             users_list = prev_users_list
             print("Using previous list of users.")
         else:
             users_list = json_file["users"]
-        for user_idx, u in enumerate(users_list):
-            new_users.append(u)
-            sentence = json_file["user_data"][u]["x"]
-            next_char = json_file["user_data"][u]["y"]
+        for user_idx, user_str in enumerate(users_list):
+            new_users.append(user_str)
+            sentence = json_file["user_data"][user_str]["x"]
+            next_char = json_file["user_data"][user_str]["y"]
             num_samples = len(sentence)
             start_idx = 0
             for split_id, (dataset, fraction) in enumerate(list_datasets):
                 end_idx = start_idx + int(fraction * num_samples)
                 data = {}
                 data["idx"] = user_idx
-                data["character"] = u
+                data["character"] = user_str
                 if split_id == len(list_datasets) - 1:  # Make sure we use last indices
                     end_idx = num_samples
                 data["x"] = sentence[start_idx:end_idx]
