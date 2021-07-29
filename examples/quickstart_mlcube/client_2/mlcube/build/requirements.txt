@@ -1,3 +1,0 @@
-PyYAML==5.3
-flwr==0.15.0
-tensorflow-cpu==2.4.2

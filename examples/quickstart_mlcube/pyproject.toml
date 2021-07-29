@@ -13,7 +13,8 @@ authors = ["The Flower Authors <enquiries@flower.dev>"]
 [tool.poetry.dependencies]
 python = "^3.6.2"
 flwr = "^0.15.0"  # For development: { path = "../../", develop = true }
-tensorflow-cpu = "2.4.2"
+tensorflow-cpu = "2.1.0"
 mlcube = "^0.0.3"
 mlcube-docker = "^0.0.3"
 cookiecutter = "1.7.2"
+tensorflow-estimator = "2.1.*"
