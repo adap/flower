@@ -406,7 +406,9 @@ class Server:
         # Stage 3: Ask Vectors
         log(INFO, "SecAgg ask vectors")
 
-        #ask_vectors_results_and_failures= ask_vectors(ask_vectors_clients, forward_packet_list_dict)
+        ask_vectors_results_and_failures = ask_vectors(
+            ask_vectors_clients, forward_packet_list_dict)
+        # print(ask_vectors_results_and_failures)
         raise Exception("Terminate")
         # unmask_vectors()
 
@@ -627,11 +629,22 @@ def ask_vectors(clients, forward_packet_list_dict):
         futures = [
             executor.submit(
                 lambda p: ask_vectors_client(*p),
-                (client, idx, forward_packet_list_dict[idx]),
+                (client, forward_packet_list_dict[idx]),
             )
             for idx, client in clients.items()
         ]
         concurrent.futures.wait(futures)
+    results = []
+    failures = []
+    for future in futures:
+        failure = future.exception()
+        if failure is not None:
+            failures.append(failure)
+        else:
+            # Success case
+            result = future.result()
+            results.append(result)
+    return results, failures
 
 
 def ask_vectors_client(client, forward_packet_list):

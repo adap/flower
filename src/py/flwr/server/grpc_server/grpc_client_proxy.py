@@ -81,7 +81,7 @@ class GrpcClientProxy(ClientProxy):
     def ask_vectors(self, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
         ask_vectors_msg = serde.ask_vectors_ins_to_proto(ask_vectors_ins)
         client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(ask_vectors_msg=ask_vectors_msg)
+            ServerMessage(sec_agg_msg=ask_vectors_msg)
         )
         serde.check_error(client_msg.sec_agg_res)
         ask_vectors_res = serde.ask_vectors_res_from_proto(client_msg.sec_agg_res)

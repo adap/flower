@@ -269,6 +269,15 @@ def share_keys_res_from_proto(share_keys_res_msg: ClientMessage.SecAggRes) -> ty
 # === Ask vectors ===
 
 
+def ask_vectors_ins_to_proto(ask_vectors_ins: typing.AskVectorsIns) -> ServerMessage.SecAggMsg:
+    packet_list = ask_vectors_ins.ask_vectors_in_list
+    proto_packet_list = []
+    for packet in packet_list:
+        proto_packet = ServerMessage.SecAggMsg.AskVectors.Packet(
+            source=packet.source, destination=packet.destination, ciphertext=packet.ciphertext)
+        proto_packet_list.append(proto_packet)
+    return ServerMessage.SecAggMsg(ask_vectors=ServerMessage.SecAggMsg.AskVectors(packet_list=proto_packet_list))
+
 # === Evaluate messages ===
 
 

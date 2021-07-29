@@ -47,6 +47,8 @@ def handle(
             return _ask_keys(client), 0, True
         elif server_msg.sec_agg_msg.HasField("share_keys"):
             return _share_keys(client, server_msg.sec_agg_msg), 0, True
+        elif server_msg.sec_agg_msg.HasField("ask_vectors"):
+            return _error_res(Exception("list received")), 0, True
     raise UnkownServerMessage()
 
 

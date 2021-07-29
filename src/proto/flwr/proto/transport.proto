@@ -59,10 +59,19 @@ message ServerMessage {
       }
       map<int64, KeysPair> public_keys_dict=1;
     }
+    message AskVectors{
+      message Packet{
+        int64 source=1;
+        int64 destination=2;
+        bytes ciphertext=3;
+      }
+      repeated Packet packet_list=1;
+    }
     oneof msg{
       SetupParam setup_param=1;
       AskKeys ask_keys=2;
       ShareKeys share_keys=3;
+      AskVectors ask_vectors=4;
     }
     
   }
