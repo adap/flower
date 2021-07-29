@@ -30,28 +30,19 @@ def check_between_zero_and_one(value: str):
     return fvalue
 
 
-def create_partition(
-    split_id: str,
-    start_idx: int,
-    fraction: float,
-    num_samples: int,
-    user_idx: int,
-    user_str: str,
-    list_datasets: List[str, float],
-    sentence: List[str],
-    next_char: List[Any],
-):
-    end_idx = start_idx + int(fraction * num_samples)
-    data = {}
-    data["idx"] = user_idx
-    data["character"] = user_str
-    if split_id == len(list_datasets) - 1:  # Make sure we use last indices
-        end_idx = num_samples
-    data["x"] = sentence[start_idx:end_idx]
-    data["y"] = next_char[start_idx:end_idx]
-    start_idx = end_idx
+def save_partition(save_root: Path, user_idx: int, dataset: str, data: Dict[str, str]):
+    """Saves partition for specific client
 
-    return start_idx, data
+    Args:
+        save_root (Path): Root folder where to save partition
+        user_idx (int): User ID
+        dataset (str): Dataset {train, validation, test}
+        data (Dict[str,str]): Dataset {train, validation, test}
+    """
+    save_dir = save_root / str(user_idx)
+    save_dir.mkdir(parents=True, exist_ok=True)
+    with open(save_dir / f"{dataset}.pickle", "wb") as save_file:
+        pickle.dump(data, save_file)
 
 
 def split_json_and_save(
@@ -81,35 +72,32 @@ def split_json_and_save(
 
         for user_idx, user_str in enumerate(users_list):
             new_users.append(user_str)
+
             sentence = json_file["user_data"][user_str]["x"]
             next_char = json_file["user_data"][user_str]["y"]
-            num_samples = len(sentence)
             start_idx = 0
-            for split_id, (dataset, fraction) in enumerate(list_datasets):
-                start_idx, data = create_partition(
-                    split_id,
-                    start_idx,
-                    fraction,
-                    num_samples,
-                    user_idx,
-                    user_str,
-                    list_datasets,
-                    sentence,
-                    next_char,
-                )
-                save_dir = save_root / str(user_idx)
-                save_dir.mkdir(parents=True, exist_ok=True)
 
-                with open(save_dir / f"{dataset}.pickle", "wb") as open_file:
-                    pickle.dump(data, open_file)
+            for split_id, (dataset, fraction) in enumerate(list_datasets):
+                end_idx = start_idx + int(fraction * len(sentence))
+                if split_id == len(list_datasets) - 1:  # Make sure we use last indices
+                    end_idx = len(sentence)
+                data = {}
+                data["idx"] = user_idx
+                data["character"] = user_str
+                data["x"] = sentence[start_idx:end_idx]
+                data["y"] = next_char[start_idx:end_idx]
+                start_idx = end_idx
+
+                save_partition(save_root, user_idx, dataset, data)
 
     return new_users
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="""Splits a LEAF Shakespeare train dataset into train/validation for each client
-        and saves the clients' train/val/test dataset in their respective folder."""
+        description="""Splits a LEAF Shakespeare train dataset into
+        train/validation for each client and saves the clients'
+        train/val/test dataset in their respective folder."""
     )
     parser.add_argument(
         "--save_root",
@@ -122,7 +110,8 @@ if __name__ == "__main__":
         "--leaf_train_json",
         type=str,
         required=True,
-        help="Complete path to JSON file containing the generated trainset for LEAF Shakespeare.",
+        help="""Complete path to JSON file containing the generated
+                trainset for LEAF Shakespeare.""",
     )
     parser.add_argument(
         "--val_frac",
@@ -135,7 +124,8 @@ if __name__ == "__main__":
         "--leaf_test_json",
         type=str,
         required=True,
-        help="Complete path to JSON file containing the generated *testset* for LEAF Shakespeare.",
+        help="""Complete path to JSON file containing the generated
+            *testset* for LEAF Shakespeare.""",
     )
 
     args = parser.parse_args()
