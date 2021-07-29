@@ -38,8 +38,9 @@ class SecAggClient(Client):
 
         # key is the secagg_id of another client
         # value is the secret share we possess that contributes to the client's secret
-        self.b_share = {}
-        self.sk1_share = {}
+        self.b_share_dict = {}
+        self.sk1_share_dict = {}
+        self.shared_key_dict = {}
         log(INFO, f"SecAgg Params: {setup_param_in}")
 
     def ask_keys(self):
@@ -83,11 +84,12 @@ class SecAggClient(Client):
         for idx, p in enumerate(self.public_keys_dict.items()):
             client_secagg_id, client_public_keys = p
             if client_secagg_id == self.secagg_id:
-                self.b_share[self.secagg_id] = b_shares[idx]
-                self.sk1_share[self.secagg_id] = sk1_shares[idx]
+                self.b_share_dict[self.secagg_id] = b_shares[idx]
+                self.sk1_share_dict[self.secagg_id] = sk1_shares[idx]
             else:
                 shared_key = secagg_utils.generate_shared_key(
                     self.sk2, secagg_utils.bytes_to_public_key(client_public_keys.pk2))
+                self.shared_key_dict[client_secagg_id] = shared_key
                 plaintext = secagg_utils.share_keys_plaintext_concat(
                     self.secagg_id, client_secagg_id, b_shares[idx], sk1_shares[idx])
                 ciphertext = secagg_utils.encrypt(shared_key, plaintext)
@@ -100,6 +102,33 @@ class SecAggClient(Client):
 
     def ask_vectors(self, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
         packet_list = ask_vectors_ins.ask_vectors_in_list
-        print(packet_list)
+
+        if len(packet_list)+1 < self.threshold:
+            raise Exception("Available neighbours number smaller than threshold")
+
+        for packet in packet_list:
+            source = packet.source
+            destination = packet.destination
+            ciphertext = packet.ciphertext
+            if destination != self.secagg_id:
+                raise Exception(
+                    "Received packet meant for another user. Not supposed to happen")
+            shared_key = self.shared_key_dict[source]
+            plaintext = secagg_utils.decrypt(shared_key, ciphertext)
+            try:
+                plaintext_source, plaintext_destination, plaintext_b_share, plaintext_sk1_share = secagg_utils.share_keys_plaintext_separate(
+                    plaintext)
+            except:
+                raise Exception(
+                    "Decryption of ciphertext failed. Not supposed to happen")
+            if plaintext_source != source:
+                raise Exception(
+                    "Received packet source is different from intended source. Not supposed to happen")
+            if plaintext_destination != destination:
+                raise Exception(
+                    "Received packet destination is different from intended destination. Not supposed to happen")
+            self.b_share_dict[source] = plaintext_b_share
+            self.sk1_share_dict[source] = plaintext_sk1_share
+
         log(INFO, "Sent vectors")
-        return AskVectorsRes
+        # return AskVectorsRes(parameters=)
