@@ -28,20 +28,33 @@ For the MLCube setup you will need to install Docker on your system. Please refe
 
 If you don't see any errors you're good to go!
 
+## MLCube setup
+
+For the MLCube setup we have prepared a script which you can execute in your shell using:
+
+```shell
+./dev/setup.sh
+```
+
 # Run Federated Learning with TensorFlow/Keras in MLCube with Flower
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
 ```shell
-poetry run python3 server.py
+./dev/server.sh
 ```
 
-Now you are ready to start everything. We have prepared a simple script in the example root called `run.sh` which you can execute like this:
+Now you are ready to start the clients. We have prepared a simple script called `client.sh` which accepts a CLIENT_ID and can be execute as in:
 
 ```shell
-./run.sh
+# Shell 1
+./client.sh 1
 ```
 
-To understand whats happening in the script please checkout its [content](https://github.com/adap/flower/blob/main/examples/quickstart_mlcube/run.sh).
+
+```shell
+# Shell 2
+./client.sh 2
+```
 
 Congrats! You have just run a Federated Learning experiment using TensorFlow/Keras in MLCube using Flower for federation.
