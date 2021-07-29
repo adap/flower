@@ -16,13 +16,13 @@ class MLCubeClient(fl.client.NumPyClient):
         mlcube.run_task("train")
         parameters = mlcube.load_model_parameters()
         config = mlcube.load_train_metrics()
-        return parameters, 1, config
+        return parameters, config["num_examples"], config
 
     def evaluate(self, parameters, config):  # type: ignore
         mlcube.save_parameteras_as_model(parameters)
         mlcube.run_task("evaluate")
         config = mlcube.load_evaluate_metrics()
-        return config["loss"], 1, config
+        return config["loss"], config["num_examples"], config
 
 
 if __name__ == "__main__":

@@ -82,6 +82,7 @@ def load_train_metrics():
 
     data["loss"] = float(data["loss"])
     data["accuracy"] = float(data["accuracy"])
+    data["num_examples"] = int(data["num_examples"])
 
     return data
 
@@ -93,5 +94,7 @@ def load_evaluate_metrics():
 
     data["loss"] = float(data["loss"])
     data["accuracy"] = float(data["accuracy"])
+    data["num_examples"] = int(data["num_examples"])
+
 
     return data
