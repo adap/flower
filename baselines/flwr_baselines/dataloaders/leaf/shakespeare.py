@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
+"""Creates a PyTorch Dataset for Leaf Shakespeare."""
 import pickle
 from pathlib import Path
 from typing import List
@@ -38,16 +38,16 @@ class ShakespeareDataset(Dataset[XY]):  # type: ignore
         self.characters: str = LEAF_CHARACTERS
         self.num_letters: int = len(self.characters)  # 80
 
-        with open(path_to_pickle, "rb") as f:
-            data = pickle.load(f)
+        with open(path_to_pickle, "rb") as open_file:
+            data = pickle.load(open_file)
             self.sentence = data["x"]
             self.next_word = data["y"]
             self.index = data["idx"]
             self.char = data["character"]
 
     def word_to_indices(self, word: str) -> List[int]:
-        """Converts a sequence of characters into position indices
-        in the reference string `self.characters`.
+        """Converts a sequence of characters into position indices in the
+        reference string `self.characters`.
 
         Args:
             word (str): Sequence of characters to be converted.
@@ -59,7 +59,7 @@ class ShakespeareDataset(Dataset[XY]):  # type: ignore
         return indices
 
     def __len__(self) -> int:
-        return len(self.y)
+        return len(self.next_word)
 
     def __getitem__(self, idx: int) -> XY:
         sentence_indices = np.array(self.word_to_indices(self.sentence[idx]))
