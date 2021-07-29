@@ -52,6 +52,15 @@ def process_user(
     list_datasets: List[Tuple[str, float]],
     save_root: Path,
 ):
+    """Creates and saves partition for user
+
+    Args:
+        json_file (Dict[str, Any]): JSON file containing user data
+        user_idx (str): User ID (counter) in string format
+        user_str (str): Original User ID
+        list_datasets (List[Tuple[str, float]]): List of datasets and relative fractions
+        save_root (Path): Root folder where to save the partition
+    """
     sentence = json_file["user_data"][user_str]["x"]
     next_char = json_file["user_data"][user_str]["y"]
     start_idx = 0
@@ -97,6 +106,7 @@ def split_json_and_save(
 
         for user_idx, user_str in enumerate(users_list):
             new_users.append(user_str)
+            process_user(json_file, user_idx, user_str, list_datasets, save_root)
 
     return new_users
 
