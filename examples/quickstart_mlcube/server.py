@@ -1,22 +1,14 @@
+import os
 import flwr as fl
 from flwr.server.strategy import FedAvg
 import tensorflow as tf
 
 
 def initial_parameters():
-    model = tf.keras.models.Sequential(
-        [
-            tf.keras.layers.Flatten(input_shape=(28, 28)),
-            tf.keras.layers.Dense(128, activation="relu"),
-            tf.keras.layers.Dropout(0.2),
-            tf.keras.layers.Dense(10, activation="softmax"),
-        ]
-    )
-
-    model.compile(
-        optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
-    )
-
+    """Return initial checkpoint parameters"""
+    package_directory = os.path.dirname(os.path.abspath(__file__))
+    filepath = os.path.join(package_directory, "mlcube/workspace/initial_checkpoint")
+    model = tf.keras.models.load_model(filepath)
     return model.get_weights()
 
 
