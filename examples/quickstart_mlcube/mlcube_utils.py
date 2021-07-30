@@ -4,6 +4,7 @@ import subprocess
 import tensorflow as tf
 import json
 
+
 MODULE_PATH = os.path.abspath(__file__)
 MODULE_DIR = os.path.dirname(MODULE_PATH)
 MLCUBE_DIR = os.path.join(MODULE_DIR, "mlcube")
@@ -64,7 +65,7 @@ def save_parameteras_as_model(parameters):
 
 
 def load_model_parameters():
-    """Load and return model parameters"""
+    """Load and return model parameters."""
     filepath = workspace_path("model_out/mnist_model")
     model = tf.keras.models.load_model(filepath)
     parameters = model.get_weights()
@@ -98,7 +99,7 @@ def load_evaluate_metrics():
 
 
 def write_hyperparameters(optimizer, epochs, batch_size):
-    """Write hyperparameters to mlcube"""
+    """Write hyperparameters to mlcube."""
     filepath = workspace_path("parameters/default.parameters.yaml")
     os.remove(filepath)
     with open(filepath, "w") as f:
@@ -109,3 +110,11 @@ def write_hyperparameters(optimizer, epochs, batch_size):
         ]
         for param in params:
             f.write(f"{param}\n")
+
+
+def initial_parameters():
+    """Return initial checkpoint parameters."""
+    package_directory = os.path.dirname(os.path.abspath(__file__))
+    filepath = os.path.join(package_directory, "mlcube/workspace/initial_checkpoint")
+    model = tf.keras.models.load_model(filepath)
+    return model.get_weights()
