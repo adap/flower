@@ -18,7 +18,7 @@ import json
 import pickle
 from os import PathLike
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Any, List, Tuple
 
 import numpy as np
 from PIL import Image
@@ -35,13 +35,40 @@ def check_between_zero_and_one(value: str):
 
 
 def collect_all_users(list_json_files: List[PathLike]):
+    """Creates of a sorted list of all users in a list of JSON files
+
+    Args:
+        list_json_files (List[PathLike]): List of JSON files containing user data
+
+    Returns:
+        [List[str]]: Sorted list of all users.
+    """
     all_users = []
     for path_to_json in list_json_files:
-        with open(path_to_json, "r") as f:
-            json_file = json.load(f)
+        with open(path_to_json, "r") as json_file:
+            json_file = json.load(json_file)
             all_users.append(sorted(json_file["users"]))
 
     return sorted((list(set(all_users))))
+
+
+def save_partitions(
+    user_data: Dict[str, Any], save_root: Path, user_folder: int, dataset: str
+):
+    """Saves user data into appropriate folder
+
+    Args:
+        user_data (Dict[str, Any]): Dictionary containing user dataset.
+        save_root (Path): Root folder where to save partition
+        user_folder (int): User ID (obtained from a counter)
+        dataset (str): Partition's name
+    """
+
+    save_dir = save_root / str(user_folder)
+    save_dir.mkdir(parents=True, exist_ok=True)
+
+    with open(save_dir / f"{dataset}.pickle", "wb") as open_file:
+        pickle.dump(user_data, open_file)
 
 
 def split_json_and_save(
@@ -93,12 +120,7 @@ def split_json_and_save(
                     ]
                     data["y"] = label[start_idx:end_idx]
                     start_idx = end_idx
-
-                    save_dir = save_root / str(user_idx + user_count)
-                    save_dir.mkdir(parents=True, exist_ok=True)
-
-                    with open(save_dir / f"{dataset}.pickle", "wb") as open_file:
-                        pickle.dump(data, open_file)
+                    save_partitions(data, save_root, user_idx + user_count, dataset)
 
         user_count += num_users
 
