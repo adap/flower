@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
+"""Reads LEAF JSON files and stores user data as pickle files."""
 import argparse
 import json
 import pickle
@@ -24,45 +24,8 @@ import numpy as np
 from PIL import Image
 
 
-def read_jsons_and_save(
-    list_jsons: List[PathLike],
-    save_root: PathLike,
-    users_list: Optional[Dict[str, int]] = None,
-):
-    """Reads LEAF JSON files and stores user data as pickle files.
-
-    Args:
-        list_jsons (List[PathLike]): List of paths to LEAF FEMNIST dataset JSON files
-        save_root (PathLike): Root directory where to save the files.
-        users_list (Optional[Dict[str, int]], optional): Dictionary of users that have
-            already been processed. Defaults to [].
-    """
-    if users_list is None:
-        users_list = []
-
-    counter: int = 0
-    for path_to_json in list_jsons:
-        with open(path_to_json, "r") as f:
-            json_file = json.load(f)
-        for user_idx, u in enumerate(json_file["users"]):
-            global_id = user_idx + counter
-
-            data = {}
-            data["tag"] = u
-            data["idx"] = str(global_id)
-            data["x"] = json_file["user_data"][u]["x"]
-            data["y"] = json_file["user_data"][u]["y"]
-
-            save_dir = save_root / str(global_id)
-            save_dir.mkdir(parents=True, exist_ok=True)
-
-            with open(save_dir / f"{dataset}.pickle", "wb") as f:
-                pickle.dump(data, f)
-
-            counter += 1
-
-
 def check_between_zero_and_one(value: str):
+    """Tests if value is between 0 an 1"""
     fvalue = float(value)
     if fvalue < 0 or fvalue > 1:
         raise argparse.ArgumentTypeError(
@@ -71,9 +34,9 @@ def check_between_zero_and_one(value: str):
     return fvalue
 
 
-def collect_all_users(list_jsons: List[PathLike]):
+def collect_all_users(list_json_files: List[PathLike]):
     all_users = []
-    for path_to_json in paths_to_json:
+    for path_to_json in list_json_files:
         with open(path_to_json, "r") as f:
             json_file = json.load(f)
             all_users.append(sorted(json_file["users"]))
@@ -108,6 +71,10 @@ def split_json_and_save(
                 start_idx = 0
                 for split_id, (dataset, fraction) in enumerate(list_datasets):
                     end_idx = start_idx + int(fraction * num_samples)
+                    if (
+                        split_id == len(list_datasets) - 1
+                    ):  # Make sure we use last indices
+                        end_idx = num_samples
                     data = {}
                     data["idx"] = user_idx + user_count
                     data["tag"] = user_str
