@@ -4,7 +4,7 @@ import mlcube_utils as mlcube
 
 # Define Flower client
 class MLCubeClient(fl.client.NumPyClient):
-    def __init__(self, optimizer="adam", epochs=2, batch_size=32) -> None:
+    def __init__(self, optimizer="adam", epochs=1, batch_size=32) -> None:
         super().__init__()
         mlcube.write_hyperparameters(optimizer, epochs, batch_size)
         mlcube.run_task("download")
