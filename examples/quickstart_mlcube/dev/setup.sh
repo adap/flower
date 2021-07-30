@@ -8,7 +8,7 @@ sudo rm -rf mlcube clients
 
 # Clone mlcube
 echo "Clone mlcube from GitHub"
-git clone -b num_examples_weighted_avg https://github.com/msheller/mlcube_examples.git && \
+git clone -b initial_checkpoint https://github.com/msheller/mlcube_examples.git && \
 cp -r mlcube_examples/mnist_openfl mlcube && \
 rm -rf mlcube_examples
 
