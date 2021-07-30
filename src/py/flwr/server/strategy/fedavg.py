@@ -38,6 +38,7 @@ from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
+from flwr.common.utils import tensorboard_writer
 
 DEPRECATION_WARNING = """
 DEPRECATION WARNING: deprecated `eval_fn` return format
@@ -240,6 +241,7 @@ class FedAvg(Strategy):
         ]
         return weights_to_parameters(aggregate(weights_results)), {}
 
+    @tensorboard_writer('my_new_logs')
     def aggregate_evaluate(
         self,
         rnd: int,
