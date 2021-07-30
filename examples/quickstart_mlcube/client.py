@@ -4,8 +4,9 @@ import mlcube_utils as mlcube
 
 # Define Flower client
 class MLCubeClient(fl.client.NumPyClient):
-    def __init__(self) -> None:
+    def __init__(self, optimizer="adam", epochs=2, batch_size=32) -> None:
         super().__init__()
+        mlcube.write_hyperparameters(optimizer, epochs, batch_size)
         mlcube.run_task("download")
 
     def get_parameters(self):  # type: ignore
@@ -26,5 +27,5 @@ class MLCubeClient(fl.client.NumPyClient):
 
 
 if __name__ == "__main__":
-        # Start Flower client
+    # Start Flower client
     fl.client.start_numpy_client("0.0.0.0:8080", client=MLCubeClient())

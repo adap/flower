@@ -95,3 +95,17 @@ def load_evaluate_metrics():
     data["num_examples"] = int(data["num_examples"])
 
     return data
+
+
+def write_hyperparameters(optimizer, epochs, batch_size):
+    """Write hyperparameters to mlcube"""
+    filepath = workspace_path("parameters/default.parameters.yaml")
+    os.remove(filepath)
+    with open(filepath, "w") as f:
+        params = [
+            f'optimizer: "{optimizer}"',
+            f"epochs: {epochs}",
+            f"batch_size: {batch_size}",
+        ]
+        for param in params:
+            f.write(f"{param}\n")
