@@ -18,14 +18,14 @@ import json
 import pickle
 from os import PathLike
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 from PIL import Image
 
 
 def check_between_zero_and_one(value: str):
-    """Tests if value is between 0 an 1"""
+    """Tests if value is between 0 an 1."""
     fvalue = float(value)
     if fvalue < 0 or fvalue > 1:
         raise argparse.ArgumentTypeError(
@@ -35,7 +35,7 @@ def check_between_zero_and_one(value: str):
 
 
 def collect_all_users(list_json_files: List[PathLike]):
-    """Creates of a sorted list of all users in a list of JSON files
+    """Creates of a sorted list of all users in a list of JSON files.
 
     Args:
         list_json_files (List[PathLike]): List of JSON files containing user data
@@ -55,7 +55,7 @@ def collect_all_users(list_json_files: List[PathLike]):
 def save_partitions(
     user_data: Dict[str, Any], save_root: Path, user_folder: int, dataset: str
 ):
-    """Saves user data into appropriate folder
+    """Saves user data into appropriate folder.
 
     Args:
         user_data (Dict[str, Any]): Dictionary containing user dataset.
