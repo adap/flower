@@ -33,7 +33,8 @@ def run_task(task_name: str):
         f"--task=run/{task_name}.yaml",
     ]
 
-    print(" ".join(command))
+    print()
+    print('\n\033[32m' + " ".join(command) + '\033[39m\n')
     process = subprocess.Popen(
         command, cwd=MLCUBE_DIR, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )

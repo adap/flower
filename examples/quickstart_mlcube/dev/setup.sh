@@ -15,4 +15,5 @@ rm -rf mlcube_examples
 # Build mlcube
 pushd mlcube
 poetry run mlcube_docker configure --mlcube=. --platform=platforms/docker.yaml
+mlcube_docker run --mlcube=. --platform=platforms/docker.yaml --task=run/download.yaml
 popd
