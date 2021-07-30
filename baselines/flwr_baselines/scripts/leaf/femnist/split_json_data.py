@@ -97,20 +97,20 @@ def split_json_and_save(
     """
     user_count = 0
     for path_to_json in paths_to_json:
-        with open(path_to_json, "r") as f:
-            json_file = json.load(f)
-            users_list = sorted(js["users"])
+        with open(path_to_json, "r") as json_file:
+            json_file = json.load(json_file)
+            users_list = sorted(json_file["users"])
             num_users = len(users_list)
-            for user_idx, u in enumerate(users_list):
-                x = json_file["user_data"][u]["x"]
-                y = json_file["user_data"][u]["y"]
-                num_samples = len(x)
+            for user_idx, user_str in enumerate(users_list):
+                image = json_file["user_data"][user_str]["x"]
+                label = json_file["user_data"][user_str]["y"]
+                num_samples = len(label)
                 start_idx = 0
                 for split_id, (dataset, fraction) in enumerate(list_datasets):
                     end_idx = start_idx + int(fraction * num_samples)
                     data = {}
                     data["idx"] = user_idx + user_count
-                    data["tag"] = u
+                    data["tag"] = user_str
                     if (
                         split_id == len(list_datasets) - 1
                     ):  # Make sure we use last indices
@@ -122,16 +122,16 @@ def split_json_and_save(
                                 * np.asarray(img, dtype=np.float32).reshape((28, 28))
                             )
                         )
-                        for img in x[start_idx:end_idx]
+                        for img in image[start_idx:end_idx]
                     ]
-                    data["y"] = y[start_idx:end_idx]
+                    data["y"] = label[start_idx:end_idx]
                     start_idx = end_idx
 
                     save_dir = save_root / str(user_idx + user_count)
                     save_dir.mkdir(parents=True, exist_ok=True)
 
-                    with open(save_dir / f"{dataset}.pickle", "wb") as f:
-                        pickle.dump(data, f)
+                    with open(save_dir / f"{dataset}.pickle", "wb") as open_file:
+                        pickle.dump(data, open_file)
 
         user_count += num_users
 
@@ -173,28 +173,26 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    save_root = Path(args.save_root)
-
     # Split train dataset into train and validation
     # then save files for each client
     original_train_datasets = sorted(
         list(Path(args.leaf_train_jsons_root).glob("**/*.json"))
     )
     train_frac = 1.0 - args.val_frac
-    list_datasets = [("train", train_frac), ("val", args.val_frac)]
+    train_val_part_scheme = [("train", train_frac), ("val", args.val_frac)]
     split_json_and_save(
-        list_datasets=list_datasets,
+        list_datasets=train_val_part_scheme,
         paths_to_json=original_train_datasets,
-        save_root=save_root,
+        save_root=Path(args.save_root),
     )
 
     # Split and save the test files
     original_test_datasets = sorted(
         list(Path(args.leaf_test_jsons_root).glob("**/*.json"))
     )
-    list_datasets = [("test", 1.0)]
+    test_part_scheme = [("test", 1.0)]
     split_json_and_save(
-        list_datasets=list_datasets,
+        list_datasets=test_part_scheme,
         paths_to_json=original_test_datasets,
-        save_root=save_root,
+        save_root=Path(args.save_root),
     )
