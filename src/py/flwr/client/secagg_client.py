@@ -7,6 +7,7 @@ from flwr.common import (
     ParametersRes,
     secagg_utils,
 )
+from flwr.common.parameter import parameters_to_weights
 from flwr.common.typing import AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysPacket, ShareKeysRes
 from flwr.server.strategy import secagg
 from .client import Client
@@ -136,6 +137,9 @@ class SecAggClient(Client):
             self.sk1_share_dict[source] = plaintext_sk1_share
 
         # fit client
-
+        # IMPORTANT ASSUMPTION: ASSUME ALL CLIENTS FIT SAME AMOUNT OF DATA
+        fit_res = self.client.fit(fit_ins)
+        parameters = fit_res.parameters
+        weights = parameters_to_weights(parameters)
         log(INFO, "Sent vectors")
         # return AskVectorsRes(parameters=)
