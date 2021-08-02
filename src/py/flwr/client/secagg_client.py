@@ -105,10 +105,12 @@ class SecAggClient(Client):
 
     def ask_vectors(self, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
         packet_list = ask_vectors_ins.ask_vectors_in_list
+        fit_ins = ask_vectors_ins.fit_ins
 
         if len(packet_list)+1 < self.threshold:
             raise Exception("Available neighbours number smaller than threshold")
 
+        # decode all packets
         for packet in packet_list:
             source = packet.source
             destination = packet.destination
@@ -132,6 +134,8 @@ class SecAggClient(Client):
                     "Received packet destination is different from intended destination. Not supposed to happen")
             self.b_share_dict[source] = plaintext_b_share
             self.sk1_share_dict[source] = plaintext_sk1_share
+
+        # fit client
 
         log(INFO, "Sent vectors")
         # return AskVectorsRes(parameters=)

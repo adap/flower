@@ -68,7 +68,12 @@ message ServerMessage {
         int64 destination=2;
         bytes ciphertext=3;
       }
+      message FitIns {
+        Parameters parameters = 1;
+        map<string, Scalar> config = 2;
+      }
       repeated Packet packet_list=1;
+      FitIns fit_ins=2;
     }
     oneof msg{
       SetupParam setup_param=1;

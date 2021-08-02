@@ -136,6 +136,7 @@ class ShareKeysRes:
 @dataclass
 class AskVectorsIns:
     ask_vectors_in_list: List[ShareKeysPacket]
+    fit_ins: FitIns
 
 
 @dataclass

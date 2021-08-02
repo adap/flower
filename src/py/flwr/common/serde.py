@@ -26,6 +26,7 @@ from flwr.proto.transport_pb2 import (
 )
 
 from flwr.server.server import Server
+from flwr_experimental.baseline import config
 
 from . import typing
 
@@ -282,7 +283,9 @@ def ask_vectors_ins_to_proto(ask_vectors_ins: typing.AskVectorsIns) -> ServerMes
         proto_packet = ServerMessage.SecAggMsg.AskVectors.Packet(
             source=packet.source, destination=packet.destination, ciphertext=packet.ciphertext)
         proto_packet_list.append(proto_packet)
-    return ServerMessage.SecAggMsg(ask_vectors=ServerMessage.SecAggMsg.AskVectors(packet_list=proto_packet_list))
+    fit_ins = ServerMessage.SecAggMsg.AskVectors.FitIns(parameters=parameters_to_proto(
+        ask_vectors_ins.fit_ins.parameters), config=metrics_to_proto(ask_vectors_ins.fit_ins.config))
+    return ServerMessage.SecAggMsg(ask_vectors=ServerMessage.SecAggMsg.AskVectors(packet_list=proto_packet_list, fit_ins=fit_ins))
 
 
 def ask_vectors_ins_from_proto(ask_vectors_msg: ServerMessage.SecAggMsg) -> typing.AskVectorsIns:
@@ -292,7 +295,9 @@ def ask_vectors_ins_from_proto(ask_vectors_msg: ServerMessage.SecAggMsg) -> typi
         packet = typing.ShareKeysPacket(
             source=proto_packet.source, destination=proto_packet.destination, ciphertext=proto_packet.ciphertext)
         packet_list.append(packet)
-    return typing.AskVectorsIns(ask_vectors_in_list=packet_list)
+    fit_ins = typing.FitIns(parameters=parameters_from_proto(
+        ask_vectors_msg.ask_vectors.fit_ins.parameters), config=metrics_from_proto(ask_vectors_msg.ask_vectors.fit_ins.config))
+    return typing.AskVectorsIns(ask_vectors_in_list=packet_list, fit_ins=fit_ins)
 
 
 def ask_vectors_res_to_proto(ask_vectors_res: typing.AskVectorsRes) -> ClientMessage.SecAggRes:

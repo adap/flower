@@ -420,9 +420,9 @@ class Server:
 
         # Stage 3: Ask Vectors
         log(INFO, "SecAgg ask vectors")
-
+        fit_ins = FitIns(parameters=self.parameters, config={})
         ask_vectors_results_and_failures = ask_vectors(
-            ask_vectors_clients, forward_packet_list_dict)
+            ask_vectors_clients, forward_packet_list_dict, fit_ins)
         print(ask_vectors_results_and_failures)
         raise Exception("Terminate")
         # unmask_vectors()
@@ -645,12 +645,12 @@ def share_keys_client(client, idx, public_keys_dict, sample_num, share_num):
     return client, client.share_keys(ShareKeysIns(public_keys_dict=local_dict))
 
 
-def ask_vectors(clients, forward_packet_list_dict):
+def ask_vectors(clients, forward_packet_list_dict, fit_ins):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(
                 lambda p: ask_vectors_client(*p),
-                (client, forward_packet_list_dict[idx]),
+                (client, forward_packet_list_dict[idx], fit_ins),
             )
             for idx, client in clients.items()
         ]
@@ -668,9 +668,9 @@ def ask_vectors(clients, forward_packet_list_dict):
     return results, failures
 
 
-def ask_vectors_client(client, forward_packet_list):
+def ask_vectors_client(client, forward_packet_list, fit_ins):
 
-    return client, client.ask_vectors(AskVectorsIns(ask_vectors_in_list=forward_packet_list))
+    return client, client.ask_vectors(AskVectorsIns(ask_vectors_in_list=forward_packet_list, fit_ins=fit_ins))
 
 
 def unmask_vectors():
