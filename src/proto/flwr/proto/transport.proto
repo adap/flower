@@ -50,6 +50,9 @@ message ServerMessage {
       int64 sample_num=2;
       int64 share_num=3;
       int64 threshold=4;
+      float clipping_range=5;
+      int64 target_range=6;
+      int64 mod_range=7;
     }
     message AskKeys{}
     message ShareKeys{

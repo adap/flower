@@ -192,6 +192,9 @@ def setup_param_ins_to_proto(
             sample_num=setup_param_ins.sample_num,
             share_num=setup_param_ins.share_num,
             threshold=setup_param_ins.threshold,
+            clipping_range=setup_param_ins.clipping_range,
+            target_range=setup_param_ins.target_range,
+            mod_range=setup_param_ins.mod_range
         )
     )
 
@@ -204,6 +207,9 @@ def setup_param_from_proto(
         sample_num=setup_param_msg.setup_param.sample_num,
         share_num=setup_param_msg.setup_param.share_num,
         threshold=setup_param_msg.setup_param.threshold,
+        clipping_range=setup_param_msg.setup_param.clipping_range,
+        target_range=setup_param_msg.setup_param.target_range,
+        mod_range=setup_param_msg.setup_param.mod_range,
     )
 
 
@@ -293,7 +299,8 @@ def ask_vectors_res_to_proto(ask_vectors_res: typing.AskVectorsRes) -> ClientMes
     parameters_proto = parameters_to_proto(ask_vectors_res.parameters)
     return ClientMessage.SecAggRes(ask_vectors_res=ClientMessage.SecAggRes.AskVectorsRes(parameters=parameters_proto))
 
-def ask_vectors_res_from_proto(ask_vectors_res_msg:ClientMessage.SecAggRes)->typing.AskVectorsRes:
+
+def ask_vectors_res_from_proto(ask_vectors_res_msg: ClientMessage.SecAggRes) -> typing.AskVectorsRes:
     parameters = parameters_from_proto(ask_vectors_res_msg.ask_vectors_res.parameters)
     return typing.AskVectorsRes(parameters=parameters)
 

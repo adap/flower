@@ -103,6 +103,9 @@ class SetupParamIns:
     sample_num: int
     share_num: int
     threshold: int
+    clipping_range: float
+    target_range: int
+    mod_range: int
 
 
 @dataclass

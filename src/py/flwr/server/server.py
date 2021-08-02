@@ -309,6 +309,9 @@ class Server:
         min_num: int = None,
         share_num: int = None,
         threshold: int = None,
+        clipping_range: float = None,
+        target_range: int = None,
+        mod_range: int = None,
         timeout: int = None,
     ) -> Optional[Optional[Parameters]]:
         log(INFO, "SecAgg setup")
@@ -325,6 +328,15 @@ class Server:
             share_num += 1
         if threshold is None:
             threshold = max(2, int(share_num * 0.9))
+
+        if clipping_range is None:
+            clipping_range = 3
+        if target_range is None:
+            target_range = 10000
+        if mod_range is None:
+            mod_range = sample_num*target_range
+        if timeout is None:
+            timeout = 20
 
         log(
             INFO,
@@ -353,6 +365,9 @@ class Server:
             sample_num=sample_num,
             share_num=share_num,
             threshold=threshold,
+            clipping_range=clipping_range,
+            target_range=target_range,
+            mod_range=mod_range
         )
         setup_param_results = setup_param_results_and_failures[0]
         ask_keys_clients = {}
@@ -529,6 +544,9 @@ def setup_param(
     sample_num: int,
     share_num: int,
     threshold: int,
+    clipping_range: float,
+    target_range: int,
+    mod_range: int
 ):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
@@ -541,6 +559,9 @@ def setup_param(
                         sample_num=sample_num,
                         share_num=share_num,
                         threshold=threshold,
+                        clipping_range=clipping_range,
+                        target_range=target_range,
+                        mod_range=mod_range
                     ),
                 ),
             )

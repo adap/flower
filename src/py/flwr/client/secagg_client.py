@@ -35,6 +35,9 @@ class SecAggClient(Client):
         self.secagg_id = setup_param_in.secagg_id
         self.share_num = setup_param_in.share_num
         self.threshold = setup_param_in.threshold
+        self.clipping_range = setup_param_in.clipping_range
+        self.target_range = setup_param_in.target_range
+        self.mod_range = setup_param_in.mod_range
 
         # key is the secagg_id of another client
         # value is the secret share we possess that contributes to the client's secret
