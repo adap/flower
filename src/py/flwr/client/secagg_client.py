@@ -1,3 +1,4 @@
+import numpy as np
 from flwr.common import (
     AskKeysRes,
     EvaluateIns,
@@ -7,7 +8,7 @@ from flwr.common import (
     ParametersRes,
     secagg_utils,
 )
-from flwr.common.parameter import parameters_to_weights
+from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.typing import AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysPacket, ShareKeysRes
 from flwr.server.strategy import secagg
 from .client import Client
@@ -44,7 +45,7 @@ class SecAggClient(Client):
         # value is the secret share we possess that contributes to the client's secret
         self.b_share_dict = {}
         self.sk1_share_dict = {}
-        self.shared_key_dict = {}
+        self.shared_key_2_dict = {}
         log(INFO, f"SecAgg Params: {setup_param_in}")
 
     def ask_keys(self):
@@ -93,7 +94,7 @@ class SecAggClient(Client):
             else:
                 shared_key = secagg_utils.generate_shared_key(
                     self.sk2, secagg_utils.bytes_to_public_key(client_public_keys.pk2))
-                self.shared_key_dict[client_secagg_id] = shared_key
+                self.shared_key_2_dict[client_secagg_id] = shared_key
                 plaintext = secagg_utils.share_keys_plaintext_concat(
                     self.secagg_id, client_secagg_id, b_shares[idx], sk1_shares[idx])
                 ciphertext = secagg_utils.encrypt(shared_key, plaintext)
@@ -107,6 +108,7 @@ class SecAggClient(Client):
     def ask_vectors(self, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
         packet_list = ask_vectors_ins.ask_vectors_in_list
         fit_ins = ask_vectors_ins.fit_ins
+        available_clients = []
 
         if len(packet_list)+1 < self.threshold:
             raise Exception("Available neighbours number smaller than threshold")
@@ -114,12 +116,13 @@ class SecAggClient(Client):
         # decode all packets
         for packet in packet_list:
             source = packet.source
+            available_clients.append(source)
             destination = packet.destination
             ciphertext = packet.ciphertext
             if destination != self.secagg_id:
                 raise Exception(
                     "Received packet meant for another user. Not supposed to happen")
-            shared_key = self.shared_key_dict[source]
+            shared_key = self.shared_key_2_dict[source]
             plaintext = secagg_utils.decrypt(shared_key, ciphertext)
             try:
                 plaintext_source, plaintext_destination, plaintext_b_share, plaintext_sk1_share = secagg_utils.share_keys_plaintext_separate(
@@ -138,8 +141,24 @@ class SecAggClient(Client):
 
         # fit client
         # IMPORTANT ASSUMPTION: ASSUME ALL CLIENTS FIT SAME AMOUNT OF DATA
+        '''
         fit_res = self.client.fit(fit_ins)
         parameters = fit_res.parameters
         weights = parameters_to_weights(parameters)
+        '''
+        # temporary code
+        weights = [np.array([[-0.2, -0.5, 1.9], [0.0, 2.4, -1.9]]),
+                   np.array([[0.2, 0.5, -1.9], [0.0, -2.4, 1.9]])]
+        quantized_weights = secagg_utils.quantize(
+            weights, self.clipping_range, self.target_range)
+        for client in available_clients:
+            if client == self.secagg_id:
+                # add private mask
+                pass
+
+            else:
+                # add pairwise mask
+                pass
+
         log(INFO, "Sent vectors")
-        # return AskVectorsRes(parameters=)
+        return AskVectorsRes(parameters=weights_to_parameters(quantized_weights))

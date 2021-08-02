@@ -34,6 +34,7 @@ from flwr.common import (
     weights_to_parameters,
 )
 from flwr.common.logger import log
+from flwr.common.parameter import parameters_to_weights
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
@@ -423,7 +424,10 @@ class Server:
         fit_ins = FitIns(parameters=self.parameters, config={})
         ask_vectors_results_and_failures = ask_vectors(
             ask_vectors_clients, forward_packet_list_dict, fit_ins)
-        print(ask_vectors_results_and_failures)
+        ask_vectors_results = ask_vectors_results_and_failures[0]
+        for i in ask_vectors_results:
+            print(secagg_utils.reverse_quantize(parameters_to_weights(
+                i[1].parameters), clipping_range, target_range))
         raise Exception("Terminate")
         # unmask_vectors()
 
