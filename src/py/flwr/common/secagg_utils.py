@@ -144,9 +144,15 @@ def rand_bytes(num: int = 32) -> bytes:
 # Pseudo Bytes Generator
 
 
-def pseudo_rand_gen(seed: bytes, num_range: int, l: int):
+def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]):
     random.seed(seed)
-    return [random.randrange(0, num_range) for i in range(l)]
+    output = []
+    for dimension in dimensions_list:
+        flat_arr = np.array([random.randrange(0, num_range)
+                            for i in range(np.prod(dimension))])
+        modified_arr = np.reshape(flat_arr, dimension)
+        output.append(modified_arr)
+    return output
 
 
 # String Concatenation
