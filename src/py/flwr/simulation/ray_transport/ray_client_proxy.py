@@ -75,30 +75,30 @@ class RayClientProxy(ClientProxy):
         """Disconnect and (optionally) reconnect later."""
         return common.Disconnect(reason="")  # Nothing to do here (yet)
 
-
-@ray.remote  # type: ignore
-def launch_and_get_parameters(client_fn: ClientFn, cid: str) -> common.ParametersRes:
-    """Exectue get_parameters remotely."""
-    client: Client = _create_client(client_fn, cid)
-    return client.get_parameters()
-
-
-@ray.remote  # type: ignore
-def launch_and_fit(
-    client_fn: ClientFn, cid: str, fit_ins: common.FitIns
-) -> common.FitRes:
-    """Exectue fit remotely."""
-    client: Client = _create_client(client_fn, cid)
-    return client.fit(fit_ins)
+if ray is not None:
+    @ray.remote  # type: ignore
+    def launch_and_get_parameters(client_fn: ClientFn, cid: str) -> common.ParametersRes:
+        """Exectue get_parameters remotely."""
+        client: Client = _create_client(client_fn, cid)
+        return client.get_parameters()
 
 
-@ray.remote  # type: ignore
-def launch_and_evaluate(
-    client_fn: ClientFn, cid: str, evaluate_ins: common.EvaluateIns
-) -> common.EvaluateRes:
-    """Exectue evaluate remotely."""
-    client: Client = _create_client(client_fn, cid)
-    return client.evaluate(evaluate_ins)
+    @ray.remote  # type: ignore
+    def launch_and_fit(
+        client_fn: ClientFn, cid: str, fit_ins: common.FitIns
+    ) -> common.FitRes:
+        """Exectue fit remotely."""
+        client: Client = _create_client(client_fn, cid)
+        return client.fit(fit_ins)
+
+
+    @ray.remote  # type: ignore
+    def launch_and_evaluate(
+        client_fn: ClientFn, cid: str, evaluate_ins: common.EvaluateIns
+    ) -> common.EvaluateRes:
+        """Exectue evaluate remotely."""
+        client: Client = _create_client(client_fn, cid)
+        return client.evaluate(evaluate_ins)
 
 
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
