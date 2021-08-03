@@ -105,10 +105,6 @@ def split_json_and_save(
                     data = {}
                     data["idx"] = user_idx + user_count
                     data["tag"] = user_str
-                    if (
-                        split_id == len(list_datasets) - 1
-                    ):  # Make sure we use last indices
-                        end_idx = num_samples
                     data["x"] = [
                         Image.fromarray(
                             np.uint8(
