@@ -427,7 +427,7 @@ class Server:
         ask_vectors_results_and_failures = ask_vectors(
             ask_vectors_clients, forward_packet_list_dict, fit_ins)
         ask_vectors_results = ask_vectors_results_and_failures[0]
-        
+        print(ask_vectors_results)
 
         raise Exception("Terminate")
         # unmask_vectors()

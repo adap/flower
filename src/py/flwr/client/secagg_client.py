@@ -153,13 +153,13 @@ class SecAggClient(Client):
         dimensions_list = [a.shape for a in weights]
         quantized_weights = secagg_utils.quantize(
             weights, self.clipping_range, self.target_range)
-        print(quantized_weights)
         for client in available_clients:
             if client == self.secagg_id:
                 # add private mask
                 private_mask = secagg_utils.pseudo_rand_gen(
                     self.b, self.mod_range, dimensions_list)
-                '''quantized_weights=secagg_utils.weights_addition(quantized_weights,private_mask)'''
+                quantized_weights = secagg_utils.weights_addition(
+                    quantized_weights, private_mask)
                 quantized_weights = secagg_utils.weights_mod(
                     quantized_weights, self.mod_range)
 
@@ -179,5 +179,4 @@ class SecAggClient(Client):
                     quantized_weights, self.mod_range)
 
         log(INFO, "Sent vectors")
-        print(quantized_weights)
         return AskVectorsRes(parameters=weights_to_parameters(quantized_weights))
