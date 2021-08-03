@@ -48,8 +48,9 @@ def handle(
         elif server_msg.sec_agg_msg.HasField("share_keys"):
             return _share_keys(client, server_msg.sec_agg_msg), 0, True
         elif server_msg.sec_agg_msg.HasField("ask_vectors"):
-            # return _error_res(Exception("list received")), 0, True
             return _ask_vectors(client, server_msg.sec_agg_msg), 0, True
+        elif server_msg.sec_agg_msg.HasField("unmask_vectors"):
+            return _unmask_vectors(client, server_msg.sec_agg_msg), 0, True
     raise UnkownServerMessage()
 
 
@@ -132,6 +133,16 @@ def _ask_vectors(client: Client, ask_vectors_msg: ServerMessage.SecAggMsg):
         ask_vectors_res = client.ask_vectors(ask_vectors_ins)
         ask_vectors_res_proto = serde.ask_vectors_res_to_proto(ask_vectors_res)
         return ClientMessage(sec_agg_res=ask_vectors_res_proto)
+    except Exception as e:
+        return _error_res(e)
+
+
+def _unmask_vectors(client: Client, unmask_vectors_msg: ServerMessage.SecAggMsg):
+    try:
+        unmask_vectors_ins = serde.unmask_vectors_ins_from_proto(unmask_vectors_msg)
+        unmask_vectors_res = client.unmask_vectors(unmask_vectors_ins)
+        unmask_vectors_res_proto = serde.unmask_vectors_res_to_proto(unmask_vectors_res)
+        return ClientMessage(sec_agg_res=unmask_vectors_res_proto)
     except Exception as e:
         return _error_res(e)
 

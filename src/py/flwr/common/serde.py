@@ -309,6 +309,20 @@ def ask_vectors_res_from_proto(ask_vectors_res_msg: ClientMessage.SecAggRes) -> 
     parameters = parameters_from_proto(ask_vectors_res_msg.ask_vectors_res.parameters)
     return typing.AskVectorsRes(parameters=parameters)
 
+# === Unmask Vectors ===
+
+
+def unmask_vectors_ins_to_proto(unmask_vectors_ins: typing.UnmaskVectorsIns) -> ServerMessage.SecAggMsg:
+    return ServerMessage.SecAggMsg(unmask_vectors=ServerMessage.SecAggMsg.UnmaskVectors(
+        available_clients=unmask_vectors_ins.available_clients,
+        dropout_clients=unmask_vectors_ins.dropout_clients))
+
+
+def unmask_vectors_ins_from_proto(unmask_vectors_ins: ServerMessage.SecAggMsg) -> typing.UnmaskVectorsIns:
+    return typing.UnmaskVectorsIns(
+        available_clients=unmask_vectors_ins.unmask_vectors.available_clients,
+        dropout_clients=unmask_vectors_ins.unmask_vectors.dropout_clients)
+
 # === Evaluate messages ===
 
 

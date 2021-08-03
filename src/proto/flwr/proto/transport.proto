@@ -75,11 +75,16 @@ message ServerMessage {
       repeated Packet packet_list=1;
       FitIns fit_ins=2;
     }
+    message UnmaskVectors{
+      repeated int64 available_clients=1;
+      repeated int64 dropout_clients=2;
+    }
     oneof msg{
       SetupParam setup_param=1;
       AskKeys ask_keys=2;
       ShareKeys share_keys=3;
       AskVectors ask_vectors=4;
+      UnmaskVectors unmask_vectors=5;
     }
     
   }
@@ -126,6 +131,9 @@ message ClientMessage {
     message AskVectorsRes{
       Parameters parameters = 1;
     }
+    message UnmaskVectorsRes{
+      map<int64,bytes> share_dict=1;
+    }
     message ErrorRes{
       string error=1;
     }
@@ -134,7 +142,8 @@ message ClientMessage {
       AskKeysRes ask_keys_res=2;
       ShareKeysRes share_keys_res=3;
       AskVectorsRes ask_vectors_res=4;
-      ErrorRes error_res=5;
+      UnmaskVectorsRes unmask_vectors_res=5;
+      ErrorRes error_res=6;
     }
   }
   

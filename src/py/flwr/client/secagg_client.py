@@ -9,7 +9,7 @@ from flwr.common import (
     secagg_utils,
 )
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
-from flwr.common.typing import AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysPacket, ShareKeysRes
+from flwr.common.typing import AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
 from flwr.server.strategy import secagg
 from .client import Client
 from flwr.common.logger import log
@@ -179,3 +179,7 @@ class SecAggClient(Client):
 
         log(INFO, "Sent vectors")
         return AskVectorsRes(parameters=weights_to_parameters(quantized_weights))
+
+    def unmask_vectors(self, unmask_vectors_ins: UnmaskVectorsIns) -> UnmaskVectorsRes:
+        print(unmask_vectors_ins)
+        raise Exception("unmask_vectors res serde not implemented")

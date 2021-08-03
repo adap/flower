@@ -142,3 +142,14 @@ class AskVectorsIns:
 @dataclass
 class AskVectorsRes:
     parameters: Parameters
+
+
+@dataclass
+class UnmaskVectorsIns:
+    available_clients: List[int]
+    dropout_clients: List[int]
+
+
+@dataclass
+class UnmaskVectorsRes:
+    share_dict: Dict[int, bytes]

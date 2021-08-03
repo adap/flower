@@ -18,7 +18,7 @@
 from flwr import common
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
-from flwr.common.typing import AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysRes
+from flwr.common.typing import AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_bridge import GRPCBridge
 
@@ -86,6 +86,15 @@ class GrpcClientProxy(ClientProxy):
         serde.check_error(client_msg.sec_agg_res)
         ask_vectors_res = serde.ask_vectors_res_from_proto(client_msg.sec_agg_res)
         return ask_vectors_res
+
+    def unmask_vectors(self, unmask_vectors_ins: UnmaskVectorsIns) -> UnmaskVectorsRes:
+        unmask_vectors_msg = serde.unmask_vectors_ins_to_proto(unmask_vectors_ins)
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(sec_agg_msg=unmask_vectors_msg)
+        )
+        serde.check_error(client_msg.sec_agg_res)
+        unmask_vectors_res = serde.unmask_vectors_res_from_proto(client_msg.sec_agg_res)
+        return unmask_vectors_res
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""

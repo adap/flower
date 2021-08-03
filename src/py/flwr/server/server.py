@@ -42,7 +42,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import Strategy, FedAvg
 from flwr.server.strategy.secagg import SecAgg
-from flwr.common.typing import AskKeysRes, AskVectorsIns, SetupParamIns, ShareKeysIns
+from flwr.common.typing import AskKeysRes, AskVectorsIns, SetupParamIns, ShareKeysIns, UnmaskVectorsIns
 
 DEPRECATION_WARNING_EVALUATE = """
 DEPRECATION WARNING: Method
@@ -430,6 +430,7 @@ class Server:
         #masked_vector = secagg_utils.weights_zero_generate(parameters_to_weights(self.parameters).shape)
         # testing code
         masked_vector = secagg_utils.weights_zero_generate([(2, 3), (2, 3)])
+        # end testing code
         unmask_vectors_clients = {}
         dropout_clients = ask_vectors_clients.copy()
         for idx, client in ask_vectors_clients.items():
@@ -444,8 +445,12 @@ class Server:
         if len(unmask_vectors_clients) < min_num:
             raise Exception("Not enough available clients after ask vectors stage")
 
+        # Stage 3: Ask Vectors
+        log(INFO, "SecAgg unmask vectors")
+        unmask_vectors_results_and_failures = unmask_vectors(
+            unmask_vectors_clients, dropout_clients, sample_num, share_num)
+        print(unmask_vectors_results_and_failures)
         raise Exception("Terminate")
-        # unmask_vectors()
 
     def disconnect_all_clients(self) -> None:
         """Send shutdown signal to all clients."""
@@ -693,5 +698,39 @@ def ask_vectors_client(client, forward_packet_list, fit_ins):
     return client, client.ask_vectors(AskVectorsIns(ask_vectors_in_list=forward_packet_list, fit_ins=fit_ins))
 
 
-def unmask_vectors():
-    pass
+def unmask_vectors(clients, dropout_clients, sample_num, share_num):
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(
+                lambda p: unmask_vectors_client(*p),
+                (client, idx, list(clients.keys()), list(
+                    dropout_clients.keys()), sample_num, share_num),
+            )
+            for idx, client in clients.items()
+        ]
+        concurrent.futures.wait(futures)
+    results = []
+    failures = []
+    for future in futures:
+        failure = future.exception()
+        if failure is not None:
+            failures.append(failure)
+        else:
+            # Success case
+            result = future.result()
+            results.append(result)
+    return results, failures
+
+
+def unmask_vectors_client(client, idx, clients, dropout_clients, sample_num, share_num):
+    if share_num == sample_num:
+        # complete graph
+        return client, client.unmask_vectors(UnmaskVectorsIns(available_clients=clients, dropout_clients=dropout_clients))
+    local_clients = []
+    local_dropout_clients = []
+    for i in range(-int(share_num / 2), int(share_num / 2) + 1):
+        if ((i + idx) % sample_num) in clients:
+            local_clients.append([(i + idx) % sample_num])
+        if ((i + idx) % sample_num) in dropout_clients:
+            local_dropout_clients.append([(i + idx) % sample_num])
+    return client, client.unmask_vectors(UnmaskVectorsIns(available_clients=local_clients, dropout_clients=dropout_clients))
