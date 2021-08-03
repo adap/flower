@@ -102,7 +102,17 @@ def split_json_and_save(
                         split_id == len(list_datasets) - 1
                     ):  # Make sure we use last indices
                         end_idx = num_samples
-                    data = process_data()
+
+                    data = create_dataset(
+                        start_idx,
+                        end_idx,
+                        user_idx,
+                        user_count,
+                        user_str,
+                        label,
+                        image,
+                    )
+
                     start_idx = end_idx
                     save_partitions(data, save_root, user_idx + user_count, dataset)
 
