@@ -71,6 +71,30 @@ def save_partitions(
         pickle.dump(user_data, open_file)
 
 
+def process_user(json_file, user_str, list_datasets, global_idx, save_root):
+    """Precesses individual user"""
+    image = json_file["user_data"][user_str]["x"]
+    label = json_file["user_data"][user_str]["y"]
+    num_samples = len(label)
+    start_idx = 0
+    for split_id, (dataset, fraction) in enumerate(list_datasets):
+        end_idx = start_idx + int(fraction * num_samples)
+        if split_id == len(list_datasets) - 1:  # Make sure we use last indices
+            end_idx = num_samples
+        data = {}
+        data["idx"] = global_idx
+        data["tag"] = user_str
+        data["x"] = [
+            Image.fromarray(
+                np.uint8(255 * np.asarray(img, dtype=np.float32).reshape((28, 28)))
+            )
+            for img in image[start_idx:end_idx]
+        ]
+        data["y"] = label[start_idx:end_idx]
+        start_idx = end_idx
+        save_partitions(data, save_root, data["idx"], dataset)
+
+
 def split_json_and_save(
     list_datasets: List[Tuple[str, float]],
     paths_to_json: List[PathLike],
@@ -92,54 +116,10 @@ def split_json_and_save(
             users_list = sorted(json_file["users"])
             num_users = len(users_list)
             for user_idx, user_str in enumerate(users_list):
-                image = json_file["user_data"][user_str]["x"]
-                label = json_file["user_data"][user_str]["y"]
-                num_samples = len(label)
-                start_idx = 0
-                for split_id, (dataset, fraction) in enumerate(list_datasets):
-                    end_idx = start_idx + int(fraction * num_samples)
-                    if (
-                        split_id == len(list_datasets) - 1
-                    ):  # Make sure we use last indices
-                        end_idx = num_samples
-
-                    data = create_dataset(
-                        start_idx,
-                        end_idx,
-                        user_idx,
-                        user_count,
-                        user_str,
-                        label,
-                        image,
-                    )
-
-                    start_idx = end_idx
-                    save_partitions(data, save_root, user_idx + user_count, dataset)
-
+                process_user(
+                    json_file, user_str, list_datasets, user_count + user_idx, save_root
+                )
         user_count += num_users
-
-
-def create_dataset(
-    start_idx: int,
-    end_idx: int,
-    user_idx: int,
-    user_count: int,
-    user_str: str,
-    label,
-    image,
-):
-    data = {}
-    data["idx"] = user_idx + user_count
-    data["tag"] = user_str
-    data["x"] = [
-        Image.fromarray(
-            np.uint8(255 * np.asarray(img, dtype=np.float32).reshape((28, 28)))
-        )
-        for img in image[start_idx:end_idx]
-    ]
-    data["y"] = label[start_idx:end_idx]
-
-    return data
 
 
 if __name__ == "__main__":
