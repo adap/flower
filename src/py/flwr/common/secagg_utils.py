@@ -188,3 +188,25 @@ def reverse_quantize(weight: Weights, clipping_range: float, target_range: int) 
     for arr in weight:
         reverse_quantized_list.append(f(arr.astype(float)))
     return reverse_quantized_list
+
+# Weight Manipulation
+
+
+def weights_zero_generate(dimensions_list: List[Tuple]):
+    return [np.zeros(dimensions) for dimensions in dimensions_list]
+
+
+def weights_addition(a: Weights, b: Weights) -> Weights:
+    return [a[idx]+b[idx] for idx in range(len(a))]
+
+
+def weights_subtraction(a: Weights, b: Weights) -> Weights:
+    return [a[idx]-b[idx] for idx in range(len(a))]
+
+
+def weights_mod(a: Weights, b: int) -> Weights:
+    return [a[idx] % b for idx in range(len(a))]
+
+
+def weights_divide(a: Weights, b: int) -> Weights:
+    return [a[idx] / b for idx in range(len(a))]

@@ -20,6 +20,8 @@ import timeit
 from logging import DEBUG, INFO, WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
+import numpy as np
+
 from flwr.common import (
     Disconnect,
     EvaluateIns,
@@ -425,10 +427,8 @@ class Server:
         ask_vectors_results_and_failures = ask_vectors(
             ask_vectors_clients, forward_packet_list_dict, fit_ins)
         ask_vectors_results = ask_vectors_results_and_failures[0]
-        '''for i in ask_vectors_results:
-            print(secagg_utils.reverse_quantize(parameters_to_weights(
-                i[1].parameters), clipping_range, target_range))'''
         
+
         raise Exception("Terminate")
         # unmask_vectors()
 
