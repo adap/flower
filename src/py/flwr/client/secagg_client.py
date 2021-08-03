@@ -149,6 +149,7 @@ class SecAggClient(Client):
         # temporary code
         weights = [np.array([[-0.2, -0.5, 1.9], [0.0, 2.4, -1.9]]),
                    np.array([[0.2, 0.5, -1.9], [0.0, -2.4, 1.9]])]
+        print(weights)
         # temporary code end
         dimensions_list = [a.shape for a in weights]
         quantized_weights = secagg_utils.quantize(

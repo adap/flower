@@ -115,7 +115,6 @@ def combine_shares(share_list: List[bytes]):
     for idx, share in enumerate(share_list):
         share_list[idx] = pickle.loads(share)
 
-    print(share_list)
     chunk_num = len(share_list[0])
     secret_padded = bytearray(0)
     chunk_shares_list = []
@@ -190,6 +189,10 @@ def reverse_quantize(weight: Weights, clipping_range: float, target_range: int) 
     return reverse_quantized_list
 
 # Weight Manipulation
+
+
+def weights_shape(weights: Weights):
+    return [arr.shape for arr in weights]
 
 
 def weights_zero_generate(dimensions_list: List[Tuple]):

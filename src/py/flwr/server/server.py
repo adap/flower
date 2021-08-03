@@ -374,11 +374,11 @@ class Server:
         )
         setup_param_results = setup_param_results_and_failures[0]
         ask_keys_clients = {}
+        if len(setup_param_results) < min_num:
+            raise Exception("Not enough available clients after setup param stage")
         for idx, client in setup_param_clients.items():
             if client in [result[0] for result in setup_param_results]:
                 ask_keys_clients[idx] = client
-        if len(ask_keys_clients) < min_num:
-            raise Exception("Not enough available clients after setup param stage")
 
         # Stage 1: Ask Public Keys
         log(INFO, "SecAgg ask keys")
@@ -386,14 +386,14 @@ class Server:
 
         public_keys_dict = {}
         ask_keys_results = ask_keys_results_and_failures[0]
+        if len(ask_keys_results) < min_num:
+            raise Exception("Not enough available clients after ask keys stage")
         share_keys_clients = {}
         for idx, client in ask_keys_clients.items():
             if client in [result[0] for result in ask_keys_results]:
                 pos = [result[0] for result in ask_keys_results].index(client)
                 public_keys_dict[idx] = ask_keys_results[pos][1]
                 share_keys_clients[idx] = client
-        if len(share_keys_clients) < min_num:
-            raise Exception("Not enough available clients after ask keys stage")
 
         # Stage 2: Share Keys
         log(INFO, "SecAgg share keys")
@@ -401,6 +401,8 @@ class Server:
             share_keys_clients, public_keys_dict, sample_num, share_num
         )
         share_keys_results = share_keys_results_and_failures[0]
+        if len(share_keys_results) < min_num:
+            raise Exception("Not enough available clients after share keys stage")
         total_packet_list = []
         forward_packet_list_dict = {}
         ask_vectors_clients = {}
@@ -410,8 +412,6 @@ class Server:
                 ask_vectors_clients[idx] = client
                 packet_list = share_keys_results[pos][1].share_keys_res_list
                 total_packet_list += packet_list
-        if len(ask_vectors_clients) < min_num:
-            raise Exception("Not enough available clients after share keys stage")
 
         for idx in ask_vectors_clients.keys():
             forward_packet_list_dict[idx] = []
@@ -427,6 +427,8 @@ class Server:
         ask_vectors_results_and_failures = ask_vectors(
             ask_vectors_clients, forward_packet_list_dict, fit_ins)
         ask_vectors_results = ask_vectors_results_and_failures[0]
+        if len(ask_vectors_results) < min_num:
+            raise Exception("Not enough available clients after ask vectors stage")
         #masked_vector = secagg_utils.weights_zero_generate(parameters_to_weights(self.parameters).shape)
         # testing code
         masked_vector = secagg_utils.weights_zero_generate([(2, 3), (2, 3)])
@@ -442,14 +444,64 @@ class Server:
                 masked_vector = secagg_utils.weights_addition(
                     masked_vector, parameters_to_weights(client_parameters))
 
-        if len(unmask_vectors_clients) < min_num:
-            raise Exception("Not enough available clients after ask vectors stage")
-
-        # Stage 3: Ask Vectors
+        # Stage 4: Unmask Vectors
         log(INFO, "SecAgg unmask vectors")
         unmask_vectors_results_and_failures = unmask_vectors(
             unmask_vectors_clients, dropout_clients, sample_num, share_num)
-        print(unmask_vectors_results_and_failures)
+        unmask_vectors_results = unmask_vectors_results_and_failures[0]
+
+        collected_shares_dict = {}
+        for idx in ask_vectors_clients.keys():
+            collected_shares_dict[idx] = []
+
+        if len(unmask_vectors_results) < min_num:
+            raise Exception("Not enough available clients after unmask vectors stage")
+        for result in unmask_vectors_results:
+            unmask_vectors_res = result[1]
+            for owner_id, share in unmask_vectors_res.share_dict.items():
+                collected_shares_dict[owner_id].append(share)
+
+        for client_id, share_list in collected_shares_dict.items():
+            if len(share_list) < threshold:
+                raise Exception(
+                    "Not enough shares to recover secret in unmask vectors stage")
+            seed = secagg_utils.combine_shares(share_list=share_list)
+            if client_id in unmask_vectors_clients.keys():
+                # seed is an available client's b
+                private_mask = secagg_utils.pseudo_rand_gen(
+                    seed, mod_range, secagg_utils.weights_shape(masked_vector))
+                masked_vector = secagg_utils.weights_subtraction(
+                    masked_vector, private_mask)
+            else:
+                # seed is a dropout client's sk1
+                neighbor_list = []
+                if share_num == sample_num:
+                    neighbor_list = list(ask_vectors_clients.keys()).remove(client_id)
+                else:
+                    for i in range(-int(share_num / 2), int(share_num / 2) + 1):
+                        if i != 0 and ((i + client_id) % sample_num) in ask_vectors_clients.keys():
+                            neighbor_list.append((i + client_id) % sample_num)
+                for neighbor_id in neighbor_list:
+                    shared_key = secagg_utils.generate_shared_key(
+                        seed, secagg_utils.bytes_to_public_key(public_keys_dict[neighbor_id].pk1))
+                    pairwise_mask = secagg_utils.pseudo_rand_gen(
+                        shared_key, mod_range, secagg_utils.weights_shape(masked_vector))
+                    if client_id > neighbor_id:
+                        masked_vector = secagg_utils.weights_addition(
+                            masked_vector, pairwise_mask)
+                    else:
+                        masked_vector = secagg_utils.weights_subtraction(
+                            masked_vector, pairwise_mask)
+
+        masked_vector = secagg_utils.weights_mod(masked_vector, mod_range)
+        # Divide vector by number of clients who have given us their masked vector
+        # i.e. those participating in final unmask vectors stage
+        masked_vector = secagg_utils.weights_divide(
+            masked_vector, len(unmask_vectors_clients))
+        aggregated_vector = secagg_utils.reverse_quantize(
+            masked_vector, clipping_range, target_range)
+        print(aggregated_vector)
+        aggregated_parameters = weights_to_parameters(aggregated_vector)
         raise Exception("Terminate")
 
     def disconnect_all_clients(self) -> None:
