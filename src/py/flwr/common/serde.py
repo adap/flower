@@ -323,6 +323,14 @@ def unmask_vectors_ins_from_proto(unmask_vectors_ins: ServerMessage.SecAggMsg) -
         available_clients=unmask_vectors_ins.unmask_vectors.available_clients,
         dropout_clients=unmask_vectors_ins.unmask_vectors.dropout_clients)
 
+
+def unmask_vectors_res_to_proto(unmask_vectors_res: typing.UnmaskVectorsRes) -> ClientMessage.SecAggRes:
+    return ClientMessage.SecAggRes(unmask_vectors_res=ClientMessage.SecAggRes.UnmaskVectorsRes(
+        share_dict=unmask_vectors_res.share_dict))
+
+
+def unmask_vectors_res_from_proto(unmask_vectors_res: ClientMessage.SecAggRes) -> typing.UnmaskVectorsRes:
+    return typing.UnmaskVectorsRes(share_dict=unmask_vectors_res.unmask_vectors_res.share_dict)
 # === Evaluate messages ===
 
 

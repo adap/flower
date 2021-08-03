@@ -102,7 +102,7 @@ class SecAggClient(Client):
                     source=self.secagg_id, destination=client_secagg_id, ciphertext=ciphertext)
                 share_keys_res.share_keys_res_list.append(share_keys_packet)
 
-        log(INFO, "Sent shares")
+        log(INFO, "Sent shares for other clients")
         return share_keys_res
 
     def ask_vectors(self, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
@@ -181,5 +181,15 @@ class SecAggClient(Client):
         return AskVectorsRes(parameters=weights_to_parameters(quantized_weights))
 
     def unmask_vectors(self, unmask_vectors_ins: UnmaskVectorsIns) -> UnmaskVectorsRes:
-        print(unmask_vectors_ins)
-        raise Exception("unmask_vectors res serde not implemented")
+        available_clients = unmask_vectors_ins.available_clients
+        if len(available_clients) < self.threshold:
+            raise Exception("Available neighbours number smaller than threshold")
+
+        dropout_clients = unmask_vectors_ins.dropout_clients
+        share_dict = {}
+        for idx in available_clients:
+            share_dict[idx] = self.b_share_dict[idx]
+        for idx in dropout_clients:
+            share_dict[idx] = self.sk1_share_dict[idx]
+        log(INFO, "Sent shares for unmasking")
+        return UnmaskVectorsRes(share_dict=share_dict)
