@@ -102,23 +102,34 @@ def split_json_and_save(
                         split_id == len(list_datasets) - 1
                     ):  # Make sure we use last indices
                         end_idx = num_samples
-                    data = {}
-                    data["idx"] = user_idx + user_count
-                    data["tag"] = user_str
-                    data["x"] = [
-                        Image.fromarray(
-                            np.uint8(
-                                255
-                                * np.asarray(img, dtype=np.float32).reshape((28, 28))
-                            )
-                        )
-                        for img in image[start_idx:end_idx]
-                    ]
-                    data["y"] = label[start_idx:end_idx]
+                    data = process_data()
                     start_idx = end_idx
                     save_partitions(data, save_root, user_idx + user_count, dataset)
 
         user_count += num_users
+
+
+def create_dataset(
+    start_idx: int,
+    end_idx: int,
+    user_idx: int,
+    user_count: int,
+    user_str: str,
+    label,
+    image,
+):
+    data = {}
+    data["idx"] = user_idx + user_count
+    data["tag"] = user_str
+    data["x"] = [
+        Image.fromarray(
+            np.uint8(255 * np.asarray(img, dtype=np.float32).reshape((28, 28)))
+        )
+        for img in image[start_idx:end_idx]
+    ]
+    data["y"] = label[start_idx:end_idx]
+
+    return data
 
 
 if __name__ == "__main__":
