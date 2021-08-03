@@ -29,19 +29,40 @@ class ClientManager(ABC):
 
     @abstractmethod
     def num_available(self) -> int:
-        """Return the number of available clients."""
+        """Return the number of available clients.
+        
+        Returns
+        -------
+        int
+            Number of currently available clients.
+        """
 
     @abstractmethod
     def register(self, client: ClientProxy) -> bool:
-        """Register Flower ClientProxy instance.
+        """Register Flower ClientProxy instance with ClientManager.
 
-        Returns:
-            bool: Indicating if registration was successful
+        Parameters
+        ----------
+        client : ClientProxy
+            Client to be registered with ClientManager
+
+        Returns
+        -------
+        bool
+            Indication that registration was successful. False if ClientProxy
+            is already registered or can not be registered for any reason.
         """
 
     @abstractmethod
     def unregister(self, client: ClientProxy) -> None:
-        """Unregister Flower ClientProxy instance."""
+        """Unregister Flower ClientProxy instance.
+        This method is idempotent.
+
+        Parameters
+        ----------
+        client : ClientProxy
+            Client to be unregistered with ClientManager
+        """
 
     @abstractmethod
     def all(self) -> Dict[str, ClientProxy]:
@@ -58,11 +79,22 @@ class ClientManager(ABC):
         min_num_clients: Optional[int] = None,
         criterion: Optional[Criterion] = None,
     ) -> List[ClientProxy]:
-        """Sample a number of Flower ClientProxy instances."""
+        """Sample a number of Flower ClientProxy instances and return them.
+        
+        Parameters
+        ----------
+        num_clients : int
+            Number of clients to sample
+        min_num_clients : int (default: None)
+            Optional minimum number of clients to be available before sampling.
+            If the minimum number is not yet available block until than.
+        criterion : Criterion (default: None)
+            Criterion object which to allow criterion sampling
+        """
 
 
 class SimpleClientManager(ClientManager):
-    """Provides a pool of available clients."""
+    """Default implementation of the ClientManager interface."""
 
     def __init__(self) -> None:
         self.clients: Dict[str, ClientProxy] = {}
@@ -75,7 +107,18 @@ class SimpleClientManager(ClientManager):
         """Block until at least `num_clients` are available or until a timeout
         is reached.
 
-        Current timeout default: 1 day.
+        Parameters
+        ----------
+        num_clients : int
+            Number of clients to wait for and block until they are available.
+        timeout : int (default: 86400)
+            A timeout in seconds after giving the maximum time to
+            wait and after which `False` is returned.
+
+        Returns
+        -------
+        result : bool
+            Indicates that the required number of clients is present. 
         """
         with self._cv:
             return self._cv.wait_for(
@@ -83,15 +126,28 @@ class SimpleClientManager(ClientManager):
             )
 
     def num_available(self) -> int:
-        """Return the number of available clients."""
+        """Return the number of available clients.
+        
+        Returns
+        -------
+        int
+            Number of currently available clients.
+        """
         return len(self)
 
     def register(self, client: ClientProxy) -> bool:
-        """Register Flower ClientProxy instance.
+        """Register Flower ClientProxy instance with ClientManager.
 
-        Returns:
-            bool: Indicating if registration was successful. False if ClientProxy is
-                already registered or can not be registered for any reason
+        Parameters
+        ----------
+        client : ClientProxy
+            Client to be registered with ClientManager
+
+        Returns
+        -------
+        bool
+            Indication that registration was successful. False if ClientProxy
+            is already registered or can not be registered for any reason.
         """
         if client.cid in self.clients:
             return False
@@ -104,8 +160,13 @@ class SimpleClientManager(ClientManager):
 
     def unregister(self, client: ClientProxy) -> None:
         """Unregister Flower ClientProxy instance.
-
         This method is idempotent.
+
+        Parameters
+        ----------
+        client : ClientProxy
+            Client to be unregistered with ClientManager
+
         """
         if client.cid in self.clients:
             del self.clients[client.cid]

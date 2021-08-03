@@ -77,6 +77,23 @@ server.strategy.FedAvg
     .. automethod:: __init__
 
 
+server.client_manager.ClientManager
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: flwr.server.client_manager.ClientManager
+    :members:
+
+
+server.client_manager.SimpleClientManager
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: flwr.server.client_manager.SimpleClientManager
+    :members:
+
+server.criterion.Criterion
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: flwr.server.criterion.Criterion
+    :members:
+
+
 typing
 ------
 .. automodule:: flwr.common.typing
