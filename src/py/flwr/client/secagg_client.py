@@ -153,30 +153,29 @@ class SecAggClient(Client):
         dimensions_list = [a.shape for a in weights]
         quantized_weights = secagg_utils.quantize(
             weights, self.clipping_range, self.target_range)
-        for client in available_clients:
-            if client == self.secagg_id:
-                # add private mask
-                private_mask = secagg_utils.pseudo_rand_gen(
-                    self.b, self.mod_range, dimensions_list)
-                quantized_weights = secagg_utils.weights_addition(
-                    quantized_weights, private_mask)
-                quantized_weights = secagg_utils.weights_mod(
-                    quantized_weights, self.mod_range)
 
+        # add private mask
+        private_mask = secagg_utils.pseudo_rand_gen(
+            self.b, self.mod_range, dimensions_list)
+        quantized_weights = secagg_utils.weights_addition(
+            quantized_weights, private_mask)
+        quantized_weights = secagg_utils.weights_mod(
+            quantized_weights, self.mod_range)
+
+        for client in available_clients:
+            # add pairwise mask
+            shared_key = secagg_utils.generate_shared_key(
+                self.sk1, secagg_utils.bytes_to_public_key(self.public_keys_dict[client].pk1))
+            pairwise_mask = secagg_utils.pseudo_rand_gen(
+                shared_key, self.mod_range, dimensions_list)
+            if self.secagg_id > client:
+                quantized_weights = secagg_utils.weights_addition(
+                    quantized_weights, pairwise_mask)
             else:
-                # add pairwise mask
-                shared_key = secagg_utils.generate_shared_key(
-                    self.sk1, secagg_utils.bytes_to_public_key(self.public_keys_dict[client].pk1))
-                pairwise_mask = secagg_utils.pseudo_rand_gen(
-                    shared_key, self.mod_range, dimensions_list)
-                if self.secagg_id > client:
-                    quantized_weights = secagg_utils.weights_addition(
-                        quantized_weights, pairwise_mask)
-                else:
-                    quantized_weights = secagg_utils.weights_subtraction(
-                        quantized_weights, pairwise_mask)
-                quantized_weights = secagg_utils.weights_mod(
-                    quantized_weights, self.mod_range)
+                quantized_weights = secagg_utils.weights_subtraction(
+                    quantized_weights, pairwise_mask)
+            quantized_weights = secagg_utils.weights_mod(
+                quantized_weights, self.mod_range)
 
         log(INFO, "Sent vectors")
         return AskVectorsRes(parameters=weights_to_parameters(quantized_weights))

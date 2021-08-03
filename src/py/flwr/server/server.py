@@ -427,7 +427,22 @@ class Server:
         ask_vectors_results_and_failures = ask_vectors(
             ask_vectors_clients, forward_packet_list_dict, fit_ins)
         ask_vectors_results = ask_vectors_results_and_failures[0]
-        print(ask_vectors_results)
+        #masked_vector = secagg_utils.weights_zero_generate(parameters_to_weights(self.parameters).shape)
+        # testing code
+        masked_vector = secagg_utils.weights_zero_generate([(2, 3), (2, 3)])
+        unmask_vectors_clients = {}
+        dropout_clients = ask_vectors_clients.copy()
+        for idx, client in ask_vectors_clients.items():
+            if client in [result[0] for result in ask_vectors_results]:
+                pos = [result[0] for result in ask_vectors_results].index(client)
+                unmask_vectors_clients[idx] = client
+                dropout_clients.pop(idx)
+                client_parameters = ask_vectors_results[pos][1].parameters
+                masked_vector = secagg_utils.weights_addition(
+                    masked_vector, parameters_to_weights(client_parameters))
+
+        if len(unmask_vectors_clients) < min_num:
+            raise Exception("Not enough available clients after ask vectors stage")
 
         raise Exception("Terminate")
         # unmask_vectors()
