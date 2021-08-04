@@ -97,13 +97,10 @@ def _reconnect(
 
 def _setup_param(client: Client, setup_param_msg: ServerMessage.SecAggMsg):
     try:
-        setup_param_in = serde.setup_param_from_proto(setup_param_msg)
-        client.setup_param(setup_param_in)
-        return ClientMessage(
-            sec_agg_res=ClientMessage.SecAggRes(
-                setup_param_res=ClientMessage.SecAggRes.SetupParamRes()
-            )
-        )
+        setup_param_in = serde.setup_param_ins_from_proto(setup_param_msg)
+        setup_param_res = client.setup_param(setup_param_in)
+        setup_param_res_proto = serde.setup_param_res_to_proto(setup_param_res)
+        return ClientMessage(sec_agg_res=setup_param_res_proto)
     except Exception as e:
         return _error_res(e)
 

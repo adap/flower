@@ -200,7 +200,7 @@ def setup_param_ins_to_proto(
     )
 
 
-def setup_param_from_proto(
+def setup_param_ins_from_proto(
     setup_param_msg: ServerMessage.SecAggMsg,
 ) -> typing.SetupParamIns:
     return typing.SetupParamIns(
@@ -214,7 +214,17 @@ def setup_param_from_proto(
     )
 
 
+def setup_param_res_to_proto(setup_param_res: typing.SetupParamRes):
+    return ClientMessage.SecAggRes(
+        setup_param_res=ClientMessage.SecAggRes.SetupParamRes()
+    )
+
+
+def setup_param_res_from_proto(setup_param_res: ServerMessage.SecAggMsg) -> typing.SetupParamRes:
+    return typing.SetupParamRes()
 # === Ask Keys ===
+
+
 def ask_keys_to_proto() -> ServerMessage.SecAggMsg:
     return ServerMessage.SecAggMsg(ask_keys=ServerMessage.SecAggMsg.AskKeys())
 

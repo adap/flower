@@ -94,6 +94,7 @@ ReconnectResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, Disconnect]], List[BaseException]
 ]
 
+
 AskKeysResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, AskKeysRes]], List[BaseException]
 ]
@@ -659,8 +660,8 @@ def setup_param(
 
 
 def setup_param_client(client: ClientProxy, setup_param_msg: SetupParamIns):
-    client.setup_param(setup_param_msg)
-    return client, None
+    setup_param_res = client.setup_param(setup_param_msg)
+    return client, setup_param_res
 
 
 def ask_keys(clients) -> AskKeysResultsAndFailures:

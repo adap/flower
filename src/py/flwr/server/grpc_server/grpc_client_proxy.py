@@ -58,7 +58,8 @@ class GrpcClientProxy(ClientProxy):
             ServerMessage(sec_agg_msg=setup_param_msg)
         )
         serde.check_error(client_msg.sec_agg_res)
-        # No return implemented (To be changed?)
+        setup_param_res=serde.setup_param_res_from_proto(client_msg.sec_agg_res)
+        return setup_param_res
 
     def ask_keys(self) -> common.AskKeysRes:
         ask_keys_msg = serde.ask_keys_to_proto()
