@@ -88,7 +88,6 @@ message ServerMessage {
     }
     
   }
-
   oneof msg {
     Reconnect reconnect = 1;
     GetParameters get_parameters = 2;
@@ -147,6 +146,7 @@ message ClientMessage {
     }
   }
   
+
 
   oneof msg {
     Disconnect disconnect = 1;

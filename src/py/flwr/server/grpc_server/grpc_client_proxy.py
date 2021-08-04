@@ -15,6 +15,7 @@
 """gRPC-based Flower ClientProxy implementation."""
 
 
+from typing import List, Tuple
 from flwr import common
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
@@ -58,7 +59,7 @@ class GrpcClientProxy(ClientProxy):
             ServerMessage(sec_agg_msg=setup_param_msg)
         )
         serde.check_error(client_msg.sec_agg_res)
-        setup_param_res=serde.setup_param_res_from_proto(client_msg.sec_agg_res)
+        setup_param_res = serde.setup_param_res_from_proto(client_msg.sec_agg_res)
         return setup_param_res
 
     def ask_keys(self) -> common.AskKeysRes:

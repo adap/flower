@@ -792,8 +792,8 @@ def unmask_vectors_client(client: ClientProxy, idx: int, clients: List[ClientPro
     if share_num == sample_num:
         # complete graph
         return client, client.unmask_vectors(UnmaskVectorsIns(available_clients=clients, dropout_clients=dropout_clients))
-    local_clients:List[int] = []
-    local_dropout_clients :List[int]= []
+    local_clients: List[int] = []
+    local_dropout_clients: List[int] = []
     for i in range(-int(share_num / 2), int(share_num / 2) + 1):
         if ((i + idx) % sample_num) in clients:
             local_clients.append([(i + idx) % sample_num])
