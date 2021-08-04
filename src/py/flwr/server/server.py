@@ -16,6 +16,7 @@
 
 
 import concurrent.futures
+from pickle import LIST
 import timeit
 from logging import DEBUG, INFO, WARNING
 from typing import Dict, List, Optional, Tuple, Union
@@ -42,7 +43,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import Strategy, FedAvg
 from flwr.server.strategy.secagg import SecAgg
-from flwr.common.typing import AskKeysRes, AskVectorsIns, SetupParamIns, ShareKeysIns, UnmaskVectorsIns
+from flwr.common.typing import AskKeysRes, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
 
 DEPRECATION_WARNING_EVALUATE = """
 DEPRECATION WARNING: Method
@@ -94,9 +95,20 @@ ReconnectResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, Disconnect]], List[BaseException]
 ]
 
-
+SetupParamResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, SetupParamRes]], List[BaseException]
+]
 AskKeysResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, AskKeysRes]], List[BaseException]
+]
+ShareKeysResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, ShareKeysRes]], List[BaseException]
+]
+AskVectorsResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, AskVectorsRes]], List[BaseException]
+]
+UnmaskVectorsResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, UnmaskVectorsRes]], List[BaseException]
 ]
 
 
@@ -356,8 +368,9 @@ class Server:
             and threshold >= 2
         ), "SecAgg parameters not accepted"
 
-        client_list = self._client_manager.sample(num_clients=sample_num)
-        setup_param_clients = {}
+        client_list = self._client_manager.sample(
+            num_clients=sample_num)
+        setup_param_clients: Dict[int, ClientProxy] = {}
         for idx, client in enumerate(client_list):
             setup_param_clients[idx] = client
 
@@ -374,7 +387,7 @@ class Server:
             mod_range=mod_range
         )
         setup_param_results = setup_param_results_and_failures[0]
-        ask_keys_clients = {}
+        ask_keys_clients: Dict[int, ClientProxy] = {}
         if len(setup_param_results) < min_num:
             raise Exception("Not enough available clients after setup param stage")
         for idx, client in setup_param_clients.items():
@@ -385,11 +398,11 @@ class Server:
         log(INFO, "SecAgg ask keys")
         ask_keys_results_and_failures = ask_keys(ask_keys_clients)
 
-        public_keys_dict = {}
+        public_keys_dict: Dict[int, AskKeysRes] = {}
         ask_keys_results = ask_keys_results_and_failures[0]
         if len(ask_keys_results) < min_num:
             raise Exception("Not enough available clients after ask keys stage")
-        share_keys_clients = {}
+        share_keys_clients: Dict[int, ClientProxy] = {}
         for idx, client in ask_keys_clients.items():
             if client in [result[0] for result in ask_keys_results]:
                 pos = [result[0] for result in ask_keys_results].index(client)
@@ -404,9 +417,9 @@ class Server:
         share_keys_results = share_keys_results_and_failures[0]
         if len(share_keys_results) < min_num:
             raise Exception("Not enough available clients after share keys stage")
-        total_packet_list = []
-        forward_packet_list_dict = {}
-        ask_vectors_clients = {}
+        total_packet_list: List[ShareKeysPacket] = []
+        forward_packet_list_dict: Dict[int, List[ShareKeysPacket]] = {}
+        ask_vectors_clients: Dict[int, ClientProxy] = {}
         for idx, client in share_keys_clients.items():
             if client in [result[0] for result in share_keys_results]:
                 pos = [result[0] for result in share_keys_results].index(client)
@@ -434,7 +447,7 @@ class Server:
         # testing code
         masked_vector = secagg_utils.weights_zero_generate([(2, 3), (2, 3)])
         # end testing code
-        unmask_vectors_clients = {}
+        unmask_vectors_clients: Dict[int, ClientProxy] = {}
         dropout_clients = ask_vectors_clients.copy()
         for idx, client in ask_vectors_clients.items():
             if client in [result[0] for result in ask_vectors_results]:
@@ -451,7 +464,7 @@ class Server:
             unmask_vectors_clients, dropout_clients, sample_num, share_num)
         unmask_vectors_results = unmask_vectors_results_and_failures[0]
 
-        collected_shares_dict = {}
+        collected_shares_dict: Dict[int, List[bytes]] = {}
         for idx in ask_vectors_clients.keys():
             collected_shares_dict[idx] = []
 
@@ -475,7 +488,7 @@ class Server:
                     masked_vector, private_mask)
             else:
                 # seed is a dropout client's sk1
-                neighbor_list = []
+                neighbor_list: List[int] = []
                 if share_num == sample_num:
                     neighbor_list = list(ask_vectors_clients.keys()).remove(client_id)
                 else:
@@ -625,7 +638,7 @@ def setup_param(
     clipping_range: float,
     target_range: int,
     mod_range: int
-):
+) -> SetupParamResultsAndFailures:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(
@@ -646,25 +659,25 @@ def setup_param(
             for idx, c in clients.items()
         ]
         concurrent.futures.wait(futures)
-        results: List[ClientProxy] = []
-        failures: List[BaseException] = []
-        for future in futures:
-            failure = future.exception()
-            if failure is not None:
-                failures.append(failure)
-            else:
-                # Success case
-                result = future.result()
-                results.append(result)
-        return results, failures
+    results: List[Tuple[ClientProxy, SetupParamRes]] = []
+    failures: List[BaseException] = []
+    for future in futures:
+        failure = future.exception()
+        if failure is not None:
+            failures.append(failure)
+        else:
+            # Success case
+            result = future.result()
+            results.append(result)
+    return results, failures
 
 
-def setup_param_client(client: ClientProxy, setup_param_msg: SetupParamIns):
+def setup_param_client(client: ClientProxy, setup_param_msg: SetupParamIns) -> Tuple[ClientProxy, SetupParamRes]:
     setup_param_res = client.setup_param(setup_param_msg)
     return client, setup_param_res
 
 
-def ask_keys(clients) -> AskKeysResultsAndFailures:
+def ask_keys(clients: List[ClientProxy]) -> AskKeysResultsAndFailures:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(ask_keys_client, c) for c in clients.values()]
         concurrent.futures.wait(futures)
@@ -686,7 +699,7 @@ def ask_keys_client(client: ClientProxy) -> Tuple[ClientProxy, AskKeysRes]:
     return client, ask_keys_res
 
 
-def share_keys(clients, public_keys_dict, sample_num, share_num):
+def share_keys(clients: List[ClientProxy], public_keys_dict: Dict[int, AskKeysRes], sample_num: int, share_num: int) -> ShareKeysResultsAndFailures:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(
@@ -696,8 +709,8 @@ def share_keys(clients, public_keys_dict, sample_num, share_num):
             for idx, client in clients.items()
         ]
         concurrent.futures.wait(futures)
-    results = []
-    failures = []
+    results: List[Tuple[ClientProxy, ShareKeysRes]] = []
+    failures: List[BaseException] = []
     for future in futures:
         failure = future.exception()
         if failure is not None:
@@ -709,11 +722,11 @@ def share_keys(clients, public_keys_dict, sample_num, share_num):
     return results, failures
 
 
-def share_keys_client(client, idx, public_keys_dict, sample_num, share_num):
+def share_keys_client(client: ClientProxy, idx: int, public_keys_dict: Dict[int, AskKeysRes], sample_num: int, share_num: int) -> Tuple[ClientProxy, ShareKeysRes]:
     if share_num == sample_num:
         # complete graph
         return client, client.share_keys(ShareKeysIns(public_keys_dict=public_keys_dict))
-    local_dict = {}
+    local_dict: Dict[int, AskKeysRes] = {}
     for i in range(-int(share_num / 2), int(share_num / 2) + 1):
         if ((i + idx) % sample_num) in public_keys_dict.keys():
             local_dict[(i + idx) % sample_num] = public_keys_dict[
@@ -723,7 +736,7 @@ def share_keys_client(client, idx, public_keys_dict, sample_num, share_num):
     return client, client.share_keys(ShareKeysIns(public_keys_dict=local_dict))
 
 
-def ask_vectors(clients, forward_packet_list_dict, fit_ins):
+def ask_vectors(clients: List[ClientProxy], forward_packet_list_dict: Dict[int, List[ShareKeysPacket]], fit_ins: FitIns) -> AskVectorsResultsAndFailures:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(
@@ -733,8 +746,8 @@ def ask_vectors(clients, forward_packet_list_dict, fit_ins):
             for idx, client in clients.items()
         ]
         concurrent.futures.wait(futures)
-    results = []
-    failures = []
+    results: List[Tuple[ClientProxy, AskVectorsRes]] = []
+    failures: List[BaseException] = []
     for future in futures:
         failure = future.exception()
         if failure is not None:
@@ -746,12 +759,12 @@ def ask_vectors(clients, forward_packet_list_dict, fit_ins):
     return results, failures
 
 
-def ask_vectors_client(client, forward_packet_list, fit_ins):
+def ask_vectors_client(client: ClientProxy, forward_packet_list: List[ShareKeysPacket], fit_ins: FitIns) -> Tuple[ClientProxy, AskVectorsRes]:
 
     return client, client.ask_vectors(AskVectorsIns(ask_vectors_in_list=forward_packet_list, fit_ins=fit_ins))
 
 
-def unmask_vectors(clients, dropout_clients, sample_num, share_num):
+def unmask_vectors(clients: List[ClientProxy], dropout_clients: List[ClientProxy], sample_num: int, share_num: int) -> UnmaskVectorsResultsAndFailures:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(
@@ -762,8 +775,8 @@ def unmask_vectors(clients, dropout_clients, sample_num, share_num):
             for idx, client in clients.items()
         ]
         concurrent.futures.wait(futures)
-    results = []
-    failures = []
+    results: List[Tuple[ClientProxy, UnmaskVectorsRes]] = []
+    failures: List[BaseException] = []
     for future in futures:
         failure = future.exception()
         if failure is not None:
@@ -775,12 +788,12 @@ def unmask_vectors(clients, dropout_clients, sample_num, share_num):
     return results, failures
 
 
-def unmask_vectors_client(client, idx, clients, dropout_clients, sample_num, share_num):
+def unmask_vectors_client(client: ClientProxy, idx: int, clients: List[ClientProxy], dropout_clients: List[ClientProxy], sample_num: int, share_num: int) -> Tuple[ClientProxy, UnmaskVectorsRes]:
     if share_num == sample_num:
         # complete graph
         return client, client.unmask_vectors(UnmaskVectorsIns(available_clients=clients, dropout_clients=dropout_clients))
-    local_clients = []
-    local_dropout_clients = []
+    local_clients:List[int] = []
+    local_dropout_clients :List[int]= []
     for i in range(-int(share_num / 2), int(share_num / 2) + 1):
         if ((i + idx) % sample_num) in clients:
             local_clients.append([(i + idx) % sample_num])
