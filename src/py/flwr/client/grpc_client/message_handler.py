@@ -95,7 +95,7 @@ def _reconnect(
     return ClientMessage(disconnect=disconnect), sleep_duration
 
 
-def _setup_param(client: Client, setup_param_msg: ServerMessage.SecAggMsg):
+def _setup_param(client: Client, setup_param_msg: ServerMessage.SecAggMsg) -> ClientMessage:
     try:
         setup_param_in = serde.setup_param_ins_from_proto(setup_param_msg)
         setup_param_res = client.setup_param(setup_param_in)
@@ -114,7 +114,7 @@ def _ask_keys(client: Client) -> ClientMessage:
         return _error_res(e)
 
 
-def _share_keys(client: Client, share_keys_msg: ServerMessage.SecAggMsg):
+def _share_keys(client: Client, share_keys_msg: ServerMessage.SecAggMsg) -> ClientMessage:
     try:
         share_keys_in = serde.share_keys_ins_from_proto(share_keys_msg)
         share_keys_res = client.share_keys(share_keys_in)
@@ -124,7 +124,7 @@ def _share_keys(client: Client, share_keys_msg: ServerMessage.SecAggMsg):
         return _error_res(e)
 
 
-def _ask_vectors(client: Client, ask_vectors_msg: ServerMessage.SecAggMsg):
+def _ask_vectors(client: Client, ask_vectors_msg: ServerMessage.SecAggMsg) -> ClientMessage:
     try:
         ask_vectors_ins = serde.ask_vectors_ins_from_proto(ask_vectors_msg)
         ask_vectors_res = client.ask_vectors(ask_vectors_ins)
@@ -134,7 +134,7 @@ def _ask_vectors(client: Client, ask_vectors_msg: ServerMessage.SecAggMsg):
         return _error_res(e)
 
 
-def _unmask_vectors(client: Client, unmask_vectors_msg: ServerMessage.SecAggMsg):
+def _unmask_vectors(client: Client, unmask_vectors_msg: ServerMessage.SecAggMsg) -> ClientMessage:
     try:
         unmask_vectors_ins = serde.unmask_vectors_ins_from_proto(unmask_vectors_msg)
         unmask_vectors_res = client.unmask_vectors(unmask_vectors_ins)

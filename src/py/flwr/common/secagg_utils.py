@@ -20,7 +20,7 @@ from flwr.common.typing import Weights
 # Key Generation
 
 
-def generate_key_pairs():
+def generate_key_pairs() -> Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]:
     sk = ec.generate_private_key(ec.SECP384R1())
     pk = sk.public_key()
     return sk, pk
@@ -107,11 +107,11 @@ def create_shares(
     return share_list
 
 
-def shamir_split(threshold: int, num: int, chunk: bytes):
+def shamir_split(threshold: int, num: int, chunk: bytes) -> List[Tuple[int, bytes]]:
     return Shamir.split(threshold, num, chunk)
 
 
-def combine_shares(share_list: List[bytes]):
+def combine_shares(share_list: List[bytes]) -> bytes:
     for idx, share in enumerate(share_list):
         share_list[idx] = pickle.loads(share)
 
@@ -132,7 +132,7 @@ def combine_shares(share_list: List[bytes]):
     return bytes(secret)
 
 
-def shamir_combine(shares: List[Tuple[int, bytes]]):
+def shamir_combine(shares: List[Tuple[int, bytes]]) -> bytes:
     return Shamir.combine(shares)
 
 
@@ -143,7 +143,7 @@ def rand_bytes(num: int = 32) -> bytes:
 # Pseudo Bytes Generator
 
 
-def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]):
+def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -> Weights:
     random.seed(seed)
     output = []
     for dimension in dimensions_list:
@@ -155,12 +155,12 @@ def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]):
 
 
 # String Concatenation
-def share_keys_plaintext_concat(source: int, destination: int, b_share: bytes, sk_share: bytes):
+def share_keys_plaintext_concat(source: int, destination: int, b_share: bytes, sk_share: bytes) -> bytes:
     concat = b'||'
     return concat.join([str(source).encode(), str(destination).encode(), b_share, sk_share])
 
 
-def share_keys_plaintext_separate(plaintext: bytes):
+def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, bytes]:
     plaintext_list = plaintext.split(b"||")
     return (
         int(plaintext_list[0].decode("utf-8", "strict")),
@@ -191,11 +191,11 @@ def reverse_quantize(weight: Weights, clipping_range: float, target_range: int) 
 # Weight Manipulation
 
 
-def weights_shape(weights: Weights):
+def weights_shape(weights: Weights) -> List[Tuple]:
     return [arr.shape for arr in weights]
 
 
-def weights_zero_generate(dimensions_list: List[Tuple]):
+def weights_zero_generate(dimensions_list: List[Tuple]) -> Weights:
     return [np.zeros(dimensions) for dimensions in dimensions_list]
 
 

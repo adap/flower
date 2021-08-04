@@ -1,3 +1,4 @@
+from typing import Dict, List, Tuple
 import numpy as np
 from flwr.common import (
     AskKeysRes,
@@ -9,7 +10,7 @@ from flwr.common import (
     secagg_utils,
 )
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
-from flwr.common.typing import AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
+from flwr.common.typing import AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
 from flwr.server.strategy import secagg
 from .client import Client
 from flwr.common.logger import log
@@ -43,12 +44,13 @@ class SecAggClient(Client):
 
         # key is the secagg_id of another client
         # value is the secret share we possess that contributes to the client's secret
-        self.b_share_dict = {}
-        self.sk1_share_dict = {}
-        self.shared_key_2_dict = {}
+        self.b_share_dict: Dict[int, bytes] = {}
+        self.sk1_share_dict: Dict[int, bytes] = {}
+        self.shared_key_2_dict: Dict[int, bytes] = {}
         log(INFO, f"SecAgg Params: {setup_param_in}")
+        return SetupParamRes()
 
-    def ask_keys(self):
+    def ask_keys(self) -> AskKeysRes:
         self.sk1, self.pk1 = secagg_utils.generate_key_pairs()
         self.sk2, self.pk2 = secagg_utils.generate_key_pairs()
         log(INFO, "Created SecAgg Key Pairs")
@@ -64,7 +66,7 @@ class SecAggClient(Client):
             raise Exception("Available neighbours number smaller than threshold")
 
         # check if all public keys received are unique
-        pk_list = []
+        pk_list: List[bytes] = []
         for i in self.public_keys_dict.values():
             pk_list.append(i.pk1)
             pk_list.append(i.pk2)
@@ -108,7 +110,7 @@ class SecAggClient(Client):
     def ask_vectors(self, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
         packet_list = ask_vectors_ins.ask_vectors_in_list
         fit_ins = ask_vectors_ins.fit_ins
-        available_clients = []
+        available_clients: List[int] = []
 
         if len(packet_list)+1 < self.threshold:
             raise Exception("Available neighbours number smaller than threshold")
@@ -147,11 +149,11 @@ class SecAggClient(Client):
         weights = parameters_to_weights(parameters)
         '''
         # temporary code
-        weights = [np.array([[-0.2, -0.5, 1.9], [0.0, 2.4, -1.9]]),
-                   np.array([[0.2, 0.5, -1.9], [0.0, -2.4, 1.9]])]
+        weights: Weights = [np.array([[-0.2, -0.5, 1.9], [0.0, 2.4, -1.9]]),
+                            np.array([[0.2, 0.5, -1.9], [0.0, -2.4, 1.9]])]
         print(weights)
         # temporary code end
-        dimensions_list = [a.shape for a in weights]
+        dimensions_list: List[Tuple] = [a.shape for a in weights]
         quantized_weights = secagg_utils.quantize(
             weights, self.clipping_range, self.target_range)
 
@@ -184,7 +186,7 @@ class SecAggClient(Client):
             raise Exception("Available neighbours number smaller than threshold")
 
         dropout_clients = unmask_vectors_ins.dropout_clients
-        share_dict = {}
+        share_dict: Dict[int, bytes] = {}
         for idx in available_clients:
             share_dict[idx] = self.b_share_dict[idx]
         for idx in dropout_clients:
