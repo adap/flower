@@ -67,7 +67,7 @@ If it compiles succesfully, you should see the following message:
 
 Serialization and Deserialization Functions
 --------------------------------------------
-Our next step is to add functions to serialize and deserialize Python datatypes to our defined RPC message types. You should add these functions in :code:`serde.py`: 
+Our next step is to add functions to serialize and deserialize Python datatypes to or from our defined RPC message types. You should add these functions in :code:`serde.py`: 
 
 The four functions:
 .. code-block:: python
@@ -102,7 +102,7 @@ Now write the request function in your Client Proxy class (e.g. :code:`grpc_clie
 Receiving the Message by the Client
 -----------------------------------
 Last step! Modify the code in :code:`message_handler.py` to check the field of your message and call the example_response function. Remember to use the serde functions!
-Within the handle method:
+Within the handle function:
 .. code-block:: python
     if server_msg.HasField("example_ins"):
         return _example_response(client, server_msg.example_ins), 0, True
