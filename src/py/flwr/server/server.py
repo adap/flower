@@ -43,7 +43,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import Strategy, FedAvg
 from flwr.server.strategy.secagg import SecAgg
-from flwr.common.typing import AskKeysRes, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
+from flwr.common.typing import AskKeysIns, AskKeysRes, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
 
 DEPRECATION_WARNING_EVALUATE = """
 DEPRECATION WARNING: Method
@@ -695,7 +695,7 @@ def ask_keys(clients: List[ClientProxy]) -> AskKeysResultsAndFailures:
 
 
 def ask_keys_client(client: ClientProxy) -> Tuple[ClientProxy, AskKeysRes]:
-    ask_keys_res = client.ask_keys()
+    ask_keys_res = client.ask_keys(AskKeysIns())
     return client, ask_keys_res
 
 

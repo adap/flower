@@ -10,7 +10,7 @@ from flwr.common import (
     secagg_utils,
 )
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
-from flwr.common.typing import AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
+from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
 from flwr.server.strategy import secagg
 from .client import Client
 from flwr.common.logger import log
@@ -33,24 +33,24 @@ class SecAggClient(Client):
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         return self.client.evaluate(ins)
 
-    def setup_param(self, setup_param_in: SetupParamIns):
-        self.sample_num = setup_param_in.sample_num
-        self.secagg_id = setup_param_in.secagg_id
-        self.share_num = setup_param_in.share_num
-        self.threshold = setup_param_in.threshold
-        self.clipping_range = setup_param_in.clipping_range
-        self.target_range = setup_param_in.target_range
-        self.mod_range = setup_param_in.mod_range
+    def setup_param(self, setup_param_ins: SetupParamIns):
+        self.sample_num = setup_param_ins.sample_num
+        self.secagg_id = setup_param_ins.secagg_id
+        self.share_num = setup_param_ins.share_num
+        self.threshold = setup_param_ins.threshold
+        self.clipping_range = setup_param_ins.clipping_range
+        self.target_range = setup_param_ins.target_range
+        self.mod_range = setup_param_ins.mod_range
 
         # key is the secagg_id of another client
         # value is the secret share we possess that contributes to the client's secret
         self.b_share_dict: Dict[int, bytes] = {}
         self.sk1_share_dict: Dict[int, bytes] = {}
         self.shared_key_2_dict: Dict[int, bytes] = {}
-        log(INFO, f"SecAgg Params: {setup_param_in}")
+        log(INFO, f"SecAgg Params: {setup_param_ins}")
         return SetupParamRes()
 
-    def ask_keys(self) -> AskKeysRes:
+    def ask_keys(self, ask_keys_ins: AskKeysIns) -> AskKeysRes:
         self.sk1, self.pk1 = secagg_utils.generate_key_pairs()
         self.sk2, self.pk2 = secagg_utils.generate_key_pairs()
         log(INFO, "Created SecAgg Key Pairs")

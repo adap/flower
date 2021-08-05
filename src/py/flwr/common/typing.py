@@ -114,6 +114,11 @@ class SetupParamRes:
 
 
 @dataclass
+class AskKeysIns:
+    pass
+
+
+@dataclass
 class AskKeysRes:
     """Ask Keys Stage Response from client to server"""
 

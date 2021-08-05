@@ -19,7 +19,7 @@ from typing import List, Tuple
 from flwr import common
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
-from flwr.common.typing import AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
+from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_bridge import GRPCBridge
 
@@ -62,8 +62,8 @@ class GrpcClientProxy(ClientProxy):
         setup_param_res = serde.setup_param_res_from_proto(client_msg.sec_agg_res)
         return setup_param_res
 
-    def ask_keys(self) -> common.AskKeysRes:
-        ask_keys_msg = serde.ask_keys_to_proto()
+    def ask_keys(self, ask_keys_ins: AskKeysIns) -> common.AskKeysRes:
+        ask_keys_msg = serde.ask_keys_ins_to_proto(ask_keys_ins)
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(sec_agg_msg=ask_keys_msg)
         )

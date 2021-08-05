@@ -21,6 +21,8 @@ from flwr.client.client import Client
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
+from flwr.server.server import Server
+
 # pylint: disable=missing-function-docstring
 
 
@@ -44,7 +46,7 @@ def handle(
         if server_msg.sec_agg_msg.HasField("setup_param"):
             return _setup_param(client, server_msg.sec_agg_msg), 0, True
         elif server_msg.sec_agg_msg.HasField("ask_keys"):
-            return _ask_keys(client), 0, True
+            return _ask_keys(client, server_msg.sec_agg_msg), 0, True
         elif server_msg.sec_agg_msg.HasField("share_keys"):
             return _share_keys(client, server_msg.sec_agg_msg), 0, True
         elif server_msg.sec_agg_msg.HasField("ask_vectors"):
@@ -97,17 +99,18 @@ def _reconnect(
 
 def _setup_param(client: Client, setup_param_msg: ServerMessage.SecAggMsg) -> ClientMessage:
     try:
-        setup_param_in = serde.setup_param_ins_from_proto(setup_param_msg)
-        setup_param_res = client.setup_param(setup_param_in)
+        setup_param_ins = serde.setup_param_ins_from_proto(setup_param_msg)
+        setup_param_res = client.setup_param(setup_param_ins)
         setup_param_res_proto = serde.setup_param_res_to_proto(setup_param_res)
         return ClientMessage(sec_agg_res=setup_param_res_proto)
     except Exception as e:
         return _error_res(e)
 
 
-def _ask_keys(client: Client) -> ClientMessage:
+def _ask_keys(client: Client, ask_keys_msg: ServerMessage.SecAggMsg) -> ClientMessage:
     try:
-        ask_keys_res = client.ask_keys()
+        ask_keys_ins = serde.ask_keys_ins_from_proto(ask_keys_msg)
+        ask_keys_res = client.ask_keys(ask_keys_ins)
         ask_keys_res_proto = serde.ask_keys_res_to_proto(ask_keys_res)
         return ClientMessage(sec_agg_res=ask_keys_res_proto)
     except Exception as e:
