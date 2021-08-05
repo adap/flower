@@ -75,13 +75,16 @@ class RayClientProxy(ClientProxy):
         """Disconnect and (optionally) reconnect later."""
         return common.Disconnect(reason="")  # Nothing to do here (yet)
 
+
 if ray is not None:
+
     @ray.remote  # type: ignore
-    def launch_and_get_parameters(client_fn: ClientFn, cid: str) -> common.ParametersRes:
+    def launch_and_get_parameters(
+        client_fn: ClientFn, cid: str
+    ) -> common.ParametersRes:
         """Exectue get_parameters remotely."""
         client: Client = _create_client(client_fn, cid)
         return client.get_parameters()
-
 
     @ray.remote  # type: ignore
     def launch_and_fit(
@@ -90,7 +93,6 @@ if ray is not None:
         """Exectue fit remotely."""
         client: Client = _create_client(client_fn, cid)
         return client.fit(fit_ins)
-
 
     @ray.remote  # type: ignore
     def launch_and_evaluate(
