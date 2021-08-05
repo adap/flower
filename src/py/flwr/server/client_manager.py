@@ -30,7 +30,7 @@ class ClientManager(ABC):
     @abstractmethod
     def num_available(self) -> int:
         """Return the number of available clients.
-        
+
         Returns
         -------
         int
@@ -55,8 +55,7 @@ class ClientManager(ABC):
 
     @abstractmethod
     def unregister(self, client: ClientProxy) -> None:
-        """Unregister Flower ClientProxy instance.
-        This method is idempotent.
+        """Unregister Flower ClientProxy instance. This method is idempotent.
 
         Parameters
         ----------
@@ -80,7 +79,7 @@ class ClientManager(ABC):
         criterion: Optional[Criterion] = None,
     ) -> List[ClientProxy]:
         """Sample a number of Flower ClientProxy instances and return them.
-        
+
         Parameters
         ----------
         num_clients : int
@@ -118,7 +117,7 @@ class SimpleClientManager(ClientManager):
         Returns
         -------
         result : bool
-            Indicates that the required number of clients is present. 
+            Indicates that the required number of clients is present.
         """
         with self._cv:
             return self._cv.wait_for(
@@ -127,7 +126,7 @@ class SimpleClientManager(ClientManager):
 
     def num_available(self) -> int:
         """Return the number of available clients.
-        
+
         Returns
         -------
         int
@@ -159,14 +158,12 @@ class SimpleClientManager(ClientManager):
         return True
 
     def unregister(self, client: ClientProxy) -> None:
-        """Unregister Flower ClientProxy instance.
-        This method is idempotent.
+        """Unregister Flower ClientProxy instance. This method is idempotent.
 
         Parameters
         ----------
         client : ClientProxy
             Client to be unregistered with ClientManager
-
         """
         if client.cid in self.clients:
             del self.clients[client.cid]
