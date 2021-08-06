@@ -152,5 +152,5 @@ examples/**/dataset/**
 # Datasets
 baselines/datasets/leaf
 
-# Testing secure aggregation
+#Testing for secagg
 tests/
