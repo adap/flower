@@ -34,6 +34,7 @@ class SecAggClient(Client):
         return self.client.evaluate(ins)
 
     def setup_param(self, setup_param_ins: SetupParamIns):
+        # Assigning parameter values to object fields
         self.sample_num = setup_param_ins.sample_num
         self.secagg_id = setup_param_ins.secagg_id
         self.share_num = setup_param_ins.share_num
@@ -51,6 +52,9 @@ class SecAggClient(Client):
         return SetupParamRes()
 
     def ask_keys(self, ask_keys_ins: AskKeysIns) -> AskKeysRes:
+        # Create 2 sets private public key pairs
+        # One for creating pairwise masks
+        # One for encrypting message to distribute shares
         self.sk1, self.pk1 = secagg_utils.generate_key_pairs()
         self.sk2, self.pk2 = secagg_utils.generate_key_pairs()
         log(INFO, "Created SecAgg Key Pairs")
@@ -60,6 +64,8 @@ class SecAggClient(Client):
         )
 
     def share_keys(self, share_keys_in: ShareKeysIns) -> ShareKeysRes:
+        # Distribute shares for private mask seed and first private key
+
         self.public_keys_dict = share_keys_in.public_keys_dict
         # check size is larger than threshold
         if len(self.public_keys_dict) < self.threshold:
@@ -78,7 +84,10 @@ class SecAggClient(Client):
             raise Exception(
                 "Own public keys are displayed in dict incorrectly, should not happen!")
 
+        # Generate private mask seed
         self.b = secagg_utils.rand_bytes(32)
+
+        # Create shares
         b_shares = secagg_utils.create_shares(
             self.b, self.threshold, self.sample_num
         )
@@ -108,6 +117,7 @@ class SecAggClient(Client):
         return share_keys_res
 
     def ask_vectors(self, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
+        # Receive shares and fit model
         packet_list = ask_vectors_ins.ask_vectors_in_list
         fit_ins = ask_vectors_ins.fit_ins
         available_clients: List[int] = []
@@ -115,7 +125,7 @@ class SecAggClient(Client):
         if len(packet_list)+1 < self.threshold:
             raise Exception("Available neighbours number smaller than threshold")
 
-        # decode all packets
+        # decode all packets and verify all packets are valid. Save shares received
         for packet in packet_list:
             source = packet.source
             available_clients.append(source)
@@ -153,6 +163,8 @@ class SecAggClient(Client):
                             np.array([[0.2, 0.5, -1.9], [0.0, -2.4, 1.9]])]
         print(weights)
         # temporary code end
+
+        # Quantize weight update vector
         dimensions_list: List[Tuple] = [a.shape for a in weights]
         quantized_weights = secagg_utils.quantize(
             weights, self.clipping_range, self.target_range)
@@ -176,11 +188,14 @@ class SecAggClient(Client):
                 quantized_weights = secagg_utils.weights_subtraction(
                     quantized_weights, pairwise_mask)
 
+        # Take mod of final weight update vector and return to server
         quantized_weights = secagg_utils.weights_mod(quantized_weights, self.mod_range)
         log(INFO, "Sent vectors")
         return AskVectorsRes(parameters=weights_to_parameters(quantized_weights))
 
     def unmask_vectors(self, unmask_vectors_ins: UnmaskVectorsIns) -> UnmaskVectorsRes:
+        # Send private mask seed share for every avaliable client (including itself)
+        # Send first private key share for building pairwise mask for every dropped client
         available_clients = unmask_vectors_ins.available_clients
         if len(available_clients) < self.threshold:
             raise Exception("Available neighbours number smaller than threshold")
