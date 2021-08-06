@@ -18,12 +18,14 @@ Client's side:
         answer = sum(question)
         return response, answer
 
+Let's now see what we need to implement in order to get this simple function between the server and client to work!
+
 Message Types for Protocol Buffers
 ----------------------------------
 The first thing we need to do is to define a message type for the RPC system in :code:`transport.proto`. 
 Note that we have to do it for both the request and response messages. For more details of the syntax of proto3, please see the  `official documentation <https://developers.google.com/protocol-buffers/docs/proto3>`_.
 
-Within ServerMessage block:
+Within the ServerMessage block:
 .. code-block:: proto 
     message ExampleIns{
         string question=1;
@@ -37,7 +39,7 @@ Within ServerMessage block:
         ExampleIns example_ins=5;
     }
 
-Within ClientMessage block:
+Within the ClientMessage block:
 .. code-block:: proto 
     message ExampleRes{
         string response=1;
