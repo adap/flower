@@ -19,11 +19,15 @@ from flwr.common.typing import Weights
 
 # Key Generation
 
+# Generate private and public key pairs with Cryptography
+
 
 def generate_key_pairs() -> Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]:
     sk = ec.generate_private_key(ec.SECP384R1())
     pk = sk.public_key()
     return sk, pk
+
+# Serialize private key
 
 
 def private_key_to_bytes(sk: ec.EllipticCurvePrivateKey) -> bytes:
@@ -33,9 +37,13 @@ def private_key_to_bytes(sk: ec.EllipticCurvePrivateKey) -> bytes:
         encryption_algorithm=serialization.NoEncryption(),
     )
 
+# Deserialize private key
+
 
 def bytes_to_private_key(b: bytes) -> ec.EllipticCurvePrivateKey:
     return serialization.load_pem_private_key(data=b, password=None)
+
+# Serialize public key
 
 
 def public_key_to_bytes(pk: ec.EllipticCurvePublicKey) -> bytes:
@@ -44,9 +52,14 @@ def public_key_to_bytes(pk: ec.EllipticCurvePublicKey) -> bytes:
         format=serialization.PublicFormat.SubjectPublicKeyInfo,
     )
 
+# Deserialize public key
+
 
 def bytes_to_public_key(b: bytes) -> ec.EllipticCurvePublicKey:
     return serialization.load_pem_public_key(data=b)
+
+# Generate shared key by exchange function and key derivation function
+# Key derivation function is needed to obtain final shared key of exactly 32 bytes
 
 
 def generate_shared_key(
@@ -64,11 +77,15 @@ def generate_shared_key(
 
 # Authenticated Encryption
 
+# Encrypt plaintext with Fernet. Key must be 32 bytes.
+
 
 def encrypt(key: bytes, plaintext: bytes) -> bytes:
     # key must be url safe
     f = Fernet(key)
     return f.encrypt(plaintext)
+
+# Decrypt ciphertext with Fernet. Key must be 32 bytes.
 
 
 def decrypt(key: bytes, token: bytes):
@@ -77,6 +94,8 @@ def decrypt(key: bytes, token: bytes):
     return f.decrypt(token)
 
 # Shamir's Secret Sharing Scheme
+
+# Create shares with PyCryptodome. Each share must be processed to be a byte string with pickle for RPC
 
 
 def create_shares(
@@ -110,6 +129,8 @@ def create_shares(
 def shamir_split(threshold: int, num: int, chunk: bytes) -> List[Tuple[int, bytes]]:
     return Shamir.split(threshold, num, chunk)
 
+# Reconstructing secret with PyCryptodome
+
 
 def combine_shares(share_list: List[bytes]) -> bytes:
     for idx, share in enumerate(share_list):
@@ -137,10 +158,14 @@ def shamir_combine(shares: List[Tuple[int, bytes]]) -> bytes:
 
 
 # Random Bytes Generator
+
+# Generate random bytes with os. Usually 32 bytes for Fernet
 def rand_bytes(num: int = 32) -> bytes:
     return os.urandom(num)
 
 # Pseudo Bytes Generator
+
+# Pseudo random generator for creating masks.
 
 
 def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -> Weights:
@@ -155,9 +180,13 @@ def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -
 
 
 # String Concatenation
+
+# Unambiguous string concatenation of source, destination, and two secret shares. We assume they do not contain the '|' character
 def share_keys_plaintext_concat(source: int, destination: int, b_share: bytes, sk_share: bytes) -> bytes:
     concat = b'||'
     return concat.join([str(source).encode(), str(destination).encode(), b_share, sk_share])
+
+# Unambiguous string splitting to obtain source, destination and two secret shares.
 
 
 def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, bytes]:
@@ -171,6 +200,10 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
 
 # Weight Quantization
 
+# Clip weight vector to [-clipping_range, clipping_range]
+# Transform weight vector to range [0, target_range] and take floor
+# If final value is target_range, take 1 from it so it is an integer from 0 to target_range-1
+
 
 def quantize(weight: Weights, clipping_range: float, target_range: int) -> Weights:
     quantized_list = []
@@ -179,6 +212,9 @@ def quantize(weight: Weights, clipping_range: float, target_range: int) -> Weigh
     for arr in weight:
         quantized_list.append(f(arr).astype(int))
     return quantized_list
+
+# Transform weight vector to range [-clipping_range, clipping_range]
+# Convert to float
 
 
 def reverse_quantize(weight: Weights, clipping_range: float, target_range: int) -> Weights:
@@ -190,25 +226,37 @@ def reverse_quantize(weight: Weights, clipping_range: float, target_range: int) 
 
 # Weight Manipulation
 
+# Create dimensions list of each element in weights
+
 
 def weights_shape(weights: Weights) -> List[Tuple]:
     return [arr.shape for arr in weights]
+
+# Generate zero weights based on dimensions list
 
 
 def weights_zero_generate(dimensions_list: List[Tuple]) -> Weights:
     return [np.zeros(dimensions) for dimensions in dimensions_list]
 
+# Add two weights together
+
 
 def weights_addition(a: Weights, b: Weights) -> Weights:
     return [a[idx]+b[idx] for idx in range(len(a))]
+
+# Subtract one weight from the other
 
 
 def weights_subtraction(a: Weights, b: Weights) -> Weights:
     return [a[idx]-b[idx] for idx in range(len(a))]
 
+# Take mod of a weights with an integer
+
 
 def weights_mod(a: Weights, b: int) -> Weights:
     return [a[idx] % b for idx in range(len(a))]
+
+# Divide weight by an integer
 
 
 def weights_divide(a: Weights, b: int) -> Weights:
