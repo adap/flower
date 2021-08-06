@@ -17,10 +17,7 @@
 
 from typing import Callable, Dict, Union, cast
 
-try:
-    import ray
-except ImportError:
-    ray = None  # type: ignore
+import ray
 
 from flwr import common
 from flwr.client import Client, NumPyClient
