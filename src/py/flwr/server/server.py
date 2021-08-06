@@ -345,6 +345,7 @@ class Server:
         if threshold is None:
             threshold = max(2, int(share_num * 0.9))
 
+        # Quantization parameters
         if clipping_range is None:
             clipping_range = 3
         if target_range is None:
@@ -368,6 +369,7 @@ class Server:
             and threshold >= 2
         ), "SecAgg parameters not accepted"
 
+        # Sample clients
         client_list = self._client_manager.sample(
             num_clients=sample_num)
         setup_param_clients: Dict[int, ClientProxy] = {}
@@ -403,6 +405,8 @@ class Server:
         if len(ask_keys_results) < min_num:
             raise Exception("Not enough available clients after ask keys stage")
         share_keys_clients: Dict[int, ClientProxy] = {}
+
+        # Build public keys dict
         for idx, client in ask_keys_clients.items():
             if client in [result[0] for result in ask_keys_results]:
                 pos = [result[0] for result in ask_keys_results].index(client)
@@ -417,6 +421,8 @@ class Server:
         share_keys_results = share_keys_results_and_failures[0]
         if len(share_keys_results) < min_num:
             raise Exception("Not enough available clients after share keys stage")
+
+        # Build forward packet list dictionary
         total_packet_list: List[ShareKeysPacket] = []
         forward_packet_list_dict: Dict[int, List[ShareKeysPacket]] = {}
         ask_vectors_clients: Dict[int, ClientProxy] = {}
@@ -447,6 +453,8 @@ class Server:
         # testing code
         masked_vector = secagg_utils.weights_zero_generate([(2, 3), (2, 3)])
         # end testing code
+
+        # Add all collected masked vectors and compuute available and dropout clients set
         unmask_vectors_clients: Dict[int, ClientProxy] = {}
         dropout_clients = ask_vectors_clients.copy()
         for idx, client in ask_vectors_clients.items():
@@ -464,6 +472,7 @@ class Server:
             unmask_vectors_clients, dropout_clients, sample_num, share_num)
         unmask_vectors_results = unmask_vectors_results_and_failures[0]
 
+        # Build collected shares dict
         collected_shares_dict: Dict[int, List[bytes]] = {}
         for idx in ask_vectors_clients.keys():
             collected_shares_dict[idx] = []
@@ -475,6 +484,8 @@ class Server:
             for owner_id, share in unmask_vectors_res.share_dict.items():
                 collected_shares_dict[owner_id].append(share)
 
+        # Remove mask for every client who is available before ask vectors stage,
+        # but divide vector by number of clients available after ask vectors
         for client_id, share_list in collected_shares_dict.items():
             if len(share_list) < threshold:
                 raise Exception(
