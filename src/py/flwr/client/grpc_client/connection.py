@@ -18,7 +18,7 @@ import json
 from contextlib import contextmanager
 from logging import DEBUG
 from queue import Queue
-from typing import Callable, Iterator, Tuple
+from typing import Callable, Iterator, List, Tuple, Union
 
 import grpc
 
@@ -59,7 +59,7 @@ def insecure_grpc_connection(
             ]
         }
     )
-    options = []
+    options: List[Tuple[str, Union[int, str]]] = []
     # NOTE: the retry feature will be enabled by default >=v1.40.0
     options.append(("grpc.enable_retries", 1))
     options.append(("grpc.service_config", service_config_json))
