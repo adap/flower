@@ -14,6 +14,7 @@
 # ==============================================================================
 """Provides contextmanager which manages a gRPC channel to connect to the
 server."""
+import json
 from contextlib import contextmanager
 from logging import DEBUG
 from queue import Queue
@@ -41,13 +42,31 @@ def insecure_grpc_connection(
     server_address: str, max_message_length: int = GRPC_MAX_MESSAGE_LENGTH
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish an insecure gRPC connection to a gRPC server."""
-    channel = grpc.insecure_channel(
-        server_address,
-        options=[
-            ("grpc.max_send_message_length", max_message_length),
-            ("grpc.max_receive_message_length", max_message_length),
-        ],
+    service_config_json = json.dumps(
+        {
+            "methodConfig": [
+                {
+                    # To apply retry to all methods, put [{}] in the "name" field
+                    "name": [{}],
+                    "retryPolicy": {
+                        "maxAttempts": 8,
+                        "initialBackoff": "0.1s",
+                        "maxBackoff": "1s",
+                        "backoffMultiplier": 2,
+                        "retryableStatusCodes": ["UNAVAILABLE"],
+                    },
+                }
+            ]
+        }
     )
+    options = []
+    # NOTE: the retry feature will be enabled by default >=v1.40.0
+    options.append(("grpc.enable_retries", 1))
+    options.append(("grpc.service_config", service_config_json))
+    options.append(("grpc.max_send_message_length", max_message_length))
+    options.append(("grpc.max_receive_message_length", max_message_length))
+
+    channel = grpc.insecure_channel(server_address, options=options)
     channel.subscribe(on_channel_state_change)
 
     queue: Queue[ClientMessage] = Queue(  # pylint: disable=unsubscriptable-object
