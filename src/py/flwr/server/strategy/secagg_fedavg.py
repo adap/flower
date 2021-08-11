@@ -104,3 +104,20 @@ class SecAggFedAvg(FedAvg, SecAggStrategy):
 
     def get_sec_agg_param(self) -> Dict[str, int]:
         return {}
+
+    def sec_agg_configure_fit(
+        self, rnd: int, parameters: Parameters, client_manager: ClientManager, sample_num: int, min_num: int
+    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
+        config = {}
+        if self.on_fit_config_fn is not None:
+            # Custom fit config function provided
+            config = self.on_fit_config_fn(rnd)
+        fit_ins = FitIns(parameters, config)
+
+        clients = client_manager.sample(
+            num_clients=sample_num, min_num_clients=min_num
+        )
+
+        # Return client/config pairs
+        return [(client, fit_ins) for client in clients]

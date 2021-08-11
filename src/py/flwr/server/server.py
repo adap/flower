@@ -331,11 +331,11 @@ class Server:
         param_dict = self.process_param_dict(self.strategy.get_sec_agg_param())
 
         # Sample clients
-        client_list = self._client_manager.sample(
-            num_clients=param_dict['sample_num'])
+        client_instructions = self.strategy.sec_agg_configure_fit(
+            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager, sample_num=param_dict['sample_num'], min_num=param_dict['min_num'])
         setup_param_clients: Dict[int, ClientProxy] = {}
-        for idx, client in enumerate(client_list):
-            setup_param_clients[idx] = client
+        for idx, value in enumerate(client_instructions):
+            setup_param_clients[idx] = value[0]
 
         # Stage 0: Setup
         # Give rnd, sample_num, share_num, threshold, client id
