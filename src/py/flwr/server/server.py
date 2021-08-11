@@ -160,7 +160,7 @@ class Server:
             # Train model and replace previous global model
             if secagg == 1:
                 # hard code methods
-                self.test = self.sec_agg_fit_round(rnd=current_round)
+                res_fit = self.sec_agg_fit_round(rnd=current_round)
                 # TO BE REMOVED
                 res_fit = self.fit_round(rnd=current_round)
                 if res_fit:
@@ -329,7 +329,9 @@ class Server:
         target_range: int = None,
         mod_range: int = None,
         timeout: int = None,
-    ) -> Optional[Optional[Parameters]]:
+    ) -> Optional[
+        Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
+    ]:
         log(INFO, "SecAgg setup")
         # Setup parameters
         if sample_num is None:
@@ -528,6 +530,7 @@ class Server:
         print(aggregated_vector)
         aggregated_parameters = weights_to_parameters(aggregated_vector)
         raise Exception("Terminate")
+        return aggregated_parameters, None, None
 
     def disconnect_all_clients(self) -> None:
         """Send shutdown signal to all clients."""
