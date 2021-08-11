@@ -101,3 +101,6 @@ class SecAggFedAvg(FedAvg, SecAggStrategy):
                         on_evaluate_config_fn=on_evaluate_config_fn,
                         accept_failures=accept_failures,
                         initial_parameters=initial_parameters)
+
+    def get_sec_agg_param(self) -> Dict[str, int]:
+        return {}

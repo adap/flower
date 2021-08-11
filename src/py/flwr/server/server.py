@@ -322,61 +322,17 @@ class Server:
 
     def sec_agg_fit_round(
         self,
-        rnd: int,
-        sample_num: int = None,
-        min_num: int = None,
-        share_num: int = None,
-        threshold: int = None,
-        clipping_range: float = None,
-        target_range: int = None,
-        mod_range: int = None,
-        timeout: int = None,
+        rnd: int
     ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
         log(INFO, "SecAgg setup")
         # Setup parameters
-        if sample_num is None:
-            sample_num = max(2, self._client_manager.num_available())
-        if min_num is None:
-            min_num = max(2, int(sample_num * 0.9))
-        if share_num is None:
-            # Complete graph
-            share_num = sample_num
-        elif share_num % 2 == 0 and share_num != sample_num:
-            # we want share_num of each node to be either odd or sample_num
-            share_num += 1
-        if threshold is None:
-            threshold = max(2, int(share_num * 0.9))
-
-        # Quantization parameters
-        if clipping_range is None:
-            clipping_range = 3
-        if target_range is None:
-            target_range = 10000
-        if mod_range is None:
-            mod_range = sample_num*target_range
-        if timeout is None:
-            timeout = 20
-
-        log(
-            INFO,
-            f"SecAgg parameters: rnd = {rnd}, sample_num = {sample_num}, min_num = {min_num}, share_num = {share_num}, threshold = {threshold}, timeout = {timeout}",
-        )
-
-        assert (
-            sample_num >= 2
-            and min_num >= 2
-            and sample_num >= min_num
-            and share_num <= sample_num
-            and threshold <= share_num
-            and threshold >= 2
-            and (share_num % 2 == 1 or share_num == sample_num)
-        ), "SecAgg parameters not accepted"
+        param_dict = self.process_param_dict(self.strategy.get_sec_agg_param())
 
         # Sample clients
         client_list = self._client_manager.sample(
-            num_clients=sample_num)
+            num_clients=param_dict['sample_num'])
         setup_param_clients: Dict[int, ClientProxy] = {}
         for idx, client in enumerate(client_list):
             setup_param_clients[idx] = client
@@ -386,16 +342,16 @@ class Server:
         log(INFO, "SecAgg setup params")
         setup_param_results_and_failures = setup_param(
             clients=setup_param_clients,
-            sample_num=sample_num,
-            share_num=share_num,
-            threshold=threshold,
-            clipping_range=clipping_range,
-            target_range=target_range,
-            mod_range=mod_range
+            sample_num=param_dict['sample_num'],
+            share_num=param_dict['share_num'],
+            threshold=param_dict['threshold'],
+            clipping_range=param_dict['clipping_range'],
+            target_range=param_dict['target_range'],
+            mod_range=param_dict['mod_range']
         )
         setup_param_results = setup_param_results_and_failures[0]
         ask_keys_clients: Dict[int, ClientProxy] = {}
-        if len(setup_param_results) < min_num:
+        if len(setup_param_results) < param_dict['min_num']:
             raise Exception("Not enough available clients after setup param stage")
         for idx, client in setup_param_clients.items():
             if client in [result[0] for result in setup_param_results]:
@@ -407,7 +363,7 @@ class Server:
 
         public_keys_dict: Dict[int, AskKeysRes] = {}
         ask_keys_results = ask_keys_results_and_failures[0]
-        if len(ask_keys_results) < min_num:
+        if len(ask_keys_results) < param_dict['min_num']:
             raise Exception("Not enough available clients after ask keys stage")
         share_keys_clients: Dict[int, ClientProxy] = {}
 
@@ -421,10 +377,10 @@ class Server:
         # Stage 2: Share Keys
         log(INFO, "SecAgg share keys")
         share_keys_results_and_failures = share_keys(
-            share_keys_clients, public_keys_dict, sample_num, share_num
+            share_keys_clients, public_keys_dict, param_dict['sample_num'], param_dict['share_num']
         )
         share_keys_results = share_keys_results_and_failures[0]
-        if len(share_keys_results) < min_num:
+        if len(share_keys_results) < param_dict['min_num']:
             raise Exception("Not enough available clients after share keys stage")
 
         # Build forward packet list dictionary
@@ -452,7 +408,7 @@ class Server:
         ask_vectors_results_and_failures = ask_vectors(
             ask_vectors_clients, forward_packet_list_dict, fit_ins)
         ask_vectors_results = ask_vectors_results_and_failures[0]
-        if len(ask_vectors_results) < min_num:
+        if len(ask_vectors_results) < param_dict['min_num']:
             raise Exception("Not enough available clients after ask vectors stage")
         #masked_vector = secagg_utils.weights_zero_generate(parameters_to_weights(self.parameters).shape)
         # testing code
@@ -474,7 +430,7 @@ class Server:
         # Stage 4: Unmask Vectors
         log(INFO, "SecAgg unmask vectors")
         unmask_vectors_results_and_failures = unmask_vectors(
-            unmask_vectors_clients, dropout_clients, sample_num, share_num)
+            unmask_vectors_clients, dropout_clients, param_dict['sample_num'], param_dict['share_num'])
         unmask_vectors_results = unmask_vectors_results_and_failures[0]
 
         # Build collected shares dict
@@ -482,7 +438,7 @@ class Server:
         for idx in ask_vectors_clients.keys():
             collected_shares_dict[idx] = []
 
-        if len(unmask_vectors_results) < min_num:
+        if len(unmask_vectors_results) < param_dict['min_num']:
             raise Exception("Not enough available clients after unmask vectors stage")
         for result in unmask_vectors_results:
             unmask_vectors_res = result[1]
@@ -492,30 +448,31 @@ class Server:
         # Remove mask for every client who is available before ask vectors stage,
         # but divide vector by number of clients available after ask vectors
         for client_id, share_list in collected_shares_dict.items():
-            if len(share_list) < threshold:
+            if len(share_list) < param_dict['threshold']:
                 raise Exception(
                     "Not enough shares to recover secret in unmask vectors stage")
             seed = secagg_utils.combine_shares(share_list=share_list)
             if client_id in unmask_vectors_clients.keys():
                 # seed is an available client's b
                 private_mask = secagg_utils.pseudo_rand_gen(
-                    seed, mod_range, secagg_utils.weights_shape(masked_vector))
+                    seed, param_dict['mod_range'], secagg_utils.weights_shape(masked_vector))
                 masked_vector = secagg_utils.weights_subtraction(
                     masked_vector, private_mask)
             else:
                 # seed is a dropout client's sk1
                 neighbor_list: List[int] = []
-                if share_num == sample_num:
+                if param_dict['share_num'] == param_dict['sample_num']:
                     neighbor_list = list(ask_vectors_clients.keys()).remove(client_id)
                 else:
-                    for i in range(-int(share_num / 2), int(share_num / 2) + 1):
-                        if i != 0 and ((i + client_id) % sample_num) in ask_vectors_clients.keys():
-                            neighbor_list.append((i + client_id) % sample_num)
+                    for i in range(-int(param_dict['share_num'] / 2), int(param_dict['share_num'] / 2) + 1):
+                        if i != 0 and ((i + client_id) % param_dict['sample_num']) in ask_vectors_clients.keys():
+                            neighbor_list.append((i + client_id) %
+                                                 param_dict['sample_num'])
                 for neighbor_id in neighbor_list:
                     shared_key = secagg_utils.generate_shared_key(
                         seed, secagg_utils.bytes_to_public_key(public_keys_dict[neighbor_id].pk1))
                     pairwise_mask = secagg_utils.pseudo_rand_gen(
-                        shared_key, mod_range, secagg_utils.weights_shape(masked_vector))
+                        shared_key, param_dict['mod_range'], secagg_utils.weights_shape(masked_vector))
                     if client_id > neighbor_id:
                         masked_vector = secagg_utils.weights_addition(
                             masked_vector, pairwise_mask)
@@ -523,13 +480,13 @@ class Server:
                         masked_vector = secagg_utils.weights_subtraction(
                             masked_vector, pairwise_mask)
 
-        masked_vector = secagg_utils.weights_mod(masked_vector, mod_range)
+        masked_vector = secagg_utils.weights_mod(masked_vector, param_dict['mod_range'])
         # Divide vector by number of clients who have given us their masked vector
         # i.e. those participating in final unmask vectors stage
         masked_vector = secagg_utils.weights_divide(
             masked_vector, len(unmask_vectors_clients))
         aggregated_vector = secagg_utils.reverse_quantize(
-            masked_vector, clipping_range, target_range)
+            masked_vector, param_dict['clipping_range'], param_dict['target_range'])
         print(aggregated_vector)
         aggregated_parameters = weights_to_parameters(aggregated_vector)
         raise Exception("Terminate")
@@ -557,6 +514,53 @@ class Server:
         parameters_res = random_client.get_parameters()
         log(INFO, "Received initial parameters from one random client")
         return parameters_res.parameters
+
+    def process_param_dict(self, param_dict: Dict[str, int]) -> Dict[str, int]:
+        if 'sample_num' not in param_dict:
+            param_dict['sample_num'] = max(2, self._client_manager.num_available())
+
+        if 'min_num' not in param_dict:
+            param_dict['min_num'] = max(2, int(param_dict['sample_num'] * 0.9))
+
+        if 'share_num' not in param_dict:
+            # Complete graph
+            param_dict['share_num'] = param_dict['sample_num']
+        elif param_dict['share_num'] % 2 == 0 and param_dict['share_num'] != param_dict['sample_num']:
+            # we want share_num of each node to be either odd or sample_num
+            param_dict['share_num'] += 1
+
+        if 'threshold' not in param_dict:
+            param_dict['threshold'] = max(2, int(param_dict['share_num'] * 0.9))
+
+        # Quantization parameters
+        if 'clipping_range' not in param_dict:
+            param_dict['clipping_range'] = 3
+
+        if 'target_range' not in param_dict:
+            param_dict['target_range'] = 10000
+
+        if 'mod_range' not in param_dict:
+            param_dict['mod_range'] = param_dict['sample_num'] * \
+                param_dict['target_range']
+
+        if 'timeout' not in param_dict:
+            param_dict['timeout'] = 20
+
+        log(
+            INFO,
+            f"SecAgg parameters: sample_num = {param_dict['sample_num']}, min_num = {param_dict['min_num']}, share_num = {param_dict['share_num']}, threshold = {param_dict['threshold']}, timeout = {param_dict['timeout']}",
+        )
+
+        assert (
+            param_dict['sample_num'] >= 2
+            and param_dict['min_num'] >= 2
+            and param_dict['sample_num'] >= param_dict['min_num']
+            and param_dict['share_num'] <= param_dict['sample_num']
+            and param_dict['threshold'] <= param_dict['share_num']
+            and param_dict['threshold'] >= 2
+            and (param_dict['share_num'] % 2 == 1 or param_dict['share_num'] == param_dict['sample_num'])
+        ), "SecAgg parameters not accepted"
+        return param_dict
 
 
 def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:
