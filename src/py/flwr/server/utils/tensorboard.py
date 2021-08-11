@@ -34,7 +34,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
 
     It will log loss, num_examples and all metrics which are of type float or int.
 
-    This can either be used as a decorated as shown in the example variant 1
+    This can either be used as a decorator as shown in the example variant 1
     or directly as shown in the example variant 2.
 
     Example:
