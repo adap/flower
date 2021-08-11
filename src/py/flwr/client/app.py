@@ -54,7 +54,7 @@ def start_client(
     Returns:
         None.
     """
-
+    # Automatically inherit secagg relevant functions regardless of strategy
     client = SecAggClient(client)
     while True:
         sleep_duration: int = 0

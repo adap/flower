@@ -326,10 +326,9 @@ class Server:
     ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
-        log(INFO, "SecAgg setup")
+        log(INFO, "SecAgg get param from dict")
         # Setup parameters
         param_dict = self.process_param_dict(self.strategy.get_sec_agg_param())
-
         # Sample clients
         client_instructions = self.strategy.sec_agg_configure_fit(
             rnd=rnd, parameters=self.parameters, client_manager=self._client_manager, sample_num=param_dict['sample_num'], min_num=param_dict['min_num'])
