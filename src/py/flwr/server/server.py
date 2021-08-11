@@ -532,6 +532,10 @@ class Server:
         if 'threshold' not in param_dict:
             param_dict['threshold'] = max(2, int(param_dict['share_num'] * 0.9))
 
+        # To be modified
+        if 'max_weight' not in param_dict:
+            param_dict['max_weight'] = 1
+
         # Quantization parameters
         if 'clipping_range' not in param_dict:
             param_dict['clipping_range'] = 3
@@ -541,7 +545,7 @@ class Server:
 
         if 'mod_range' not in param_dict:
             param_dict['mod_range'] = param_dict['sample_num'] * \
-                param_dict['target_range']
+                param_dict['target_range'] * param_dict['max_weight']
 
         if 'timeout' not in param_dict:
             param_dict['timeout'] = 20
@@ -559,6 +563,7 @@ class Server:
             and param_dict['threshold'] <= param_dict['share_num']
             and param_dict['threshold'] >= 2
             and (param_dict['share_num'] % 2 == 1 or param_dict['share_num'] == param_dict['sample_num'])
+            and param_dict['target_range']*param_dict['sample_num']*param_dict['max_weight'] <= param_dict['mod_range']
         ), "SecAgg parameters not accepted"
         return param_dict
 
