@@ -36,6 +36,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.fedavg import FedAvg
+from flwr.server.strategy.secagg_strategy import SecAggStrategy
 
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
@@ -70,7 +71,7 @@ to easily transform `Weights` to `Parameters`.
 """
 
 
-class SecAggFedAvg(FedAvg):
+class SecAggFedAvg(FedAvg, SecAggStrategy):
     """Configurable FedAvg strategy implementation."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -89,40 +90,14 @@ class SecAggFedAvg(FedAvg):
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
     ) -> None:
-        """Federated Averaging strategy.
 
-        Implementation based on https://arxiv.org/abs/1602.05629
-
-        Parameters
-        ----------
-        fraction_fit : float, optional
-            Fraction of clients used during training. Defaults to 0.1.
-        fraction_eval : float, optional
-            Fraction of clients used during validation. Defaults to 0.1.
-        min_fit_clients : int, optional
-            Minimum number of clients used during training. Defaults to 2.
-        min_eval_clients : int, optional
-            Minimum number of clients used during validation. Defaults to 2.
-        min_available_clients : int, optional
-            Minimum number of total clients in the system. Defaults to 2.
-        eval_fn : Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
-            Optional function used for validation. Defaults to None.
-        on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure training. Defaults to None.
-        on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure validation. Defaults to None.
-        accept_failures : bool, optional
-            Whether or not accept rounds containing failures. Defaults to True.
-        initial_parameters : Parameters, optional
-            Initial global model parameters.
-        """
-        super().__init__(fraction_fit=fraction_fit,
-                         fraction_eval=fraction_eval,
-                         min_fit_clients=min_fit_clients,
-                         min_eval_clients=min_eval_clients,
-                         min_available_clients=min_available_clients,
-                         eval_fn=eval_fn,
-                         on_fit_config_fn=on_fit_config_fn,
-                         on_evaluate_config_fn=on_evaluate_config_fn,
-                         accept_failures=accept_failures,
-                         initial_parameters=initial_parameters)
+        FedAvg.__init__(self, fraction_fit=fraction_fit,
+                        fraction_eval=fraction_eval,
+                        min_fit_clients=min_fit_clients,
+                        min_eval_clients=min_eval_clients,
+                        min_available_clients=min_available_clients,
+                        eval_fn=eval_fn,
+                        on_fit_config_fn=on_fit_config_fn,
+                        on_evaluate_config_fn=on_evaluate_config_fn,
+                        accept_failures=accept_failures,
+                        initial_parameters=initial_parameters)
