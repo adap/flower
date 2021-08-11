@@ -133,7 +133,7 @@ class Server:
         return self._client_manager
 
     # pylint: disable=too-many-locals
-    def fit(self, num_rounds: int) -> History:
+    def fit(self, num_rounds: int, secagg: int) -> History:
         """Run federated averaging for a number of rounds."""
         history = History()
 
@@ -158,7 +158,7 @@ class Server:
 
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
-            if isinstance(self.strategy, SecAgg):
+            if secagg == 1:
                 # hard code methods
                 self.test = self.sec_agg_fit_round(rnd=current_round)
                 # TO BE REMOVED

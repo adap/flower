@@ -23,7 +23,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
 from flwr.server.server import Server
-from flwr.server.strategy import FedAvg, Strategy
+from flwr.server.strategy import FedAvg, Strategy, secagg
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
@@ -35,6 +35,7 @@ def start_server(  # pylint: disable=too-many-arguments
     strategy: Optional[Strategy] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     force_final_distributed_eval: bool = False,
+    secagg: bool = False
 ) -> None:
     """Start a Flower server using the gRPC transport layer.
 
@@ -107,6 +108,8 @@ def _init_defaults(
         config = {}
     if "num_rounds" not in config:
         config["num_rounds"] = 1
+    if "secagg" not in config:
+        config["secagg"] = 1
 
     return server, config
 
@@ -115,7 +118,7 @@ def _fl(
     server: Server, config: Dict[str, int], force_final_distributed_eval: bool
 ) -> None:
     # Fit model
-    hist = server.fit(num_rounds=config["num_rounds"])
+    hist = server.fit(num_rounds=config["num_rounds"], secagg=config["secagg"])
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
     log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
     log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
