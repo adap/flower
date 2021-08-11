@@ -11,7 +11,7 @@ from flwr.common import (
 )
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
-from flwr.server.strategy import secagg
+
 from .client import Client
 from flwr.common.logger import log
 from logging import DEBUG, INFO, WARNING

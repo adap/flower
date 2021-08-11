@@ -42,7 +42,6 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import Strategy, FedAvg
-from flwr.server.strategy.secagg import SecAgg
 from flwr.common.typing import AskKeysIns, AskKeysRes, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
 
 DEPRECATION_WARNING_EVALUATE = """
@@ -369,6 +368,7 @@ class Server:
             and share_num <= sample_num
             and threshold <= share_num
             and threshold >= 2
+            and (share_num % 2 == 1 or share_num == sample_num)
         ), "SecAgg parameters not accepted"
 
         # Sample clients

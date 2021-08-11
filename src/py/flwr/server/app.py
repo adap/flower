@@ -23,7 +23,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
 from flwr.server.server import Server
-from flwr.server.strategy import FedAvg, Strategy, secagg
+from flwr.server.strategy import FedAvg, Strategy
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
@@ -35,7 +35,6 @@ def start_server(  # pylint: disable=too-many-arguments
     strategy: Optional[Strategy] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     force_final_distributed_eval: bool = False,
-    secagg: bool = False
 ) -> None:
     """Start a Flower server using the gRPC transport layer.
 
@@ -109,7 +108,8 @@ def _init_defaults(
     if "num_rounds" not in config:
         config["num_rounds"] = 1
     if "secagg" not in config:
-        config["secagg"] = 1
+        # secure aggregation is not set as default
+        config["secagg"] = 0
 
     return server, config
 
