@@ -43,7 +43,7 @@ class SecAggClient(Client):
         self.clipping_range = param_dict['clipping_range']
         self.target_range = param_dict['target_range']
         self.mod_range = param_dict['mod_range']
-        self.max_weight = param_dict['max_weight']
+        self.max_weights_factor = param_dict['max_weights_factor']
 
         # key is the secagg_id of another client
         # value is the secret share we possess that contributes to the client's secret
@@ -163,13 +163,26 @@ class SecAggClient(Client):
         # temporary code
         weights: Weights = [np.array([[-0.2, -0.5, 1.9], [0.0, 2.4, -1.9]]),
                             np.array([[0.2, 0.5, -1.9], [0.0, -2.4, 1.9]])]
+
         print(weights)
         # temporary code end
 
         # Quantize weight update vector
-        dimensions_list: List[Tuple] = [a.shape for a in weights]
         quantized_weights = secagg_utils.quantize(
             weights, self.clipping_range, self.target_range)
+
+        # IMPORTANT NEED SOME FUNCTION TO GET CORRECT WEIGHT FACTOR
+        # NOW WE HARD CODE IT AS 1
+        weights_factor = self.secagg_id+1
+        print(weights_factor)
+        # weights factor cannoot exceed maximum
+        weights_factor = min(weights_factor, self.max_weights_factor)
+        quantized_weights = secagg_utils.weights_multiply(
+            quantized_weights, weights_factor)
+        quantized_weights = secagg_utils.factor_weights_combine(
+            weights_factor, quantized_weights)
+
+        dimensions_list: List[Tuple] = [a.shape for a in quantized_weights]
 
         # add private mask
         private_mask = secagg_utils.pseudo_rand_gen(

@@ -407,7 +407,7 @@ class Server:
             raise Exception("Not enough available clients after ask vectors stage")
         #masked_vector = secagg_utils.weights_zero_generate(parameters_to_weights(self.parameters).shape)
         # testing code
-        masked_vector = secagg_utils.weights_zero_generate([(2, 3), (2, 3)])
+        masked_vector = secagg_utils.weights_zero_generate([(1), (2, 3), (2, 3)])
         # end testing code
 
         # Add all collected masked vectors and compuute available and dropout clients set
@@ -474,12 +474,13 @@ class Server:
                     else:
                         masked_vector = secagg_utils.weights_subtraction(
                             masked_vector, pairwise_mask)
-
         masked_vector = secagg_utils.weights_mod(masked_vector, param_dict['mod_range'])
         # Divide vector by number of clients who have given us their masked vector
         # i.e. those participating in final unmask vectors stage
+        total_weights_factor, masked_vector = secagg_utils.factor_weights_extract(
+            masked_vector)
         masked_vector = secagg_utils.weights_divide(
-            masked_vector, len(unmask_vectors_clients))
+            masked_vector, total_weights_factor)
         aggregated_vector = secagg_utils.reverse_quantize(
             masked_vector, param_dict['clipping_range'], param_dict['target_range'])
         print(aggregated_vector)
@@ -528,8 +529,8 @@ class Server:
             param_dict['threshold'] = max(2, int(param_dict['share_num'] * 0.9))
 
         # To be modified
-        if 'max_weight' not in param_dict:
-            param_dict['max_weight'] = 1
+        if 'max_weights_factor' not in param_dict:
+            param_dict['max_weights_factor'] = 5
 
         # Quantization parameters
         if 'clipping_range' not in param_dict:
@@ -540,7 +541,7 @@ class Server:
 
         if 'mod_range' not in param_dict:
             param_dict['mod_range'] = param_dict['sample_num'] * \
-                param_dict['target_range'] * param_dict['max_weight']
+                param_dict['target_range'] * param_dict['max_weights_factor']
 
         if 'timeout' not in param_dict:
             param_dict['timeout'] = 20
@@ -558,7 +559,7 @@ class Server:
             and param_dict['threshold'] <= param_dict['share_num']
             and param_dict['threshold'] >= 2
             and (param_dict['share_num'] % 2 == 1 or param_dict['share_num'] == param_dict['sample_num'])
-            and param_dict['target_range']*param_dict['sample_num']*param_dict['max_weight'] <= param_dict['mod_range']
+            and param_dict['target_range']*param_dict['sample_num']*param_dict['max_weights_factor'] <= param_dict['mod_range']
         ), "SecAgg parameters not accepted"
         return param_dict
 

@@ -226,6 +226,18 @@ def reverse_quantize(weight: Weights, clipping_range: float, target_range: int) 
 
 # Weight Manipulation
 
+# Combine factor with weights
+
+
+def factor_weights_combine(weights_factor: int, weights: Weights) -> Weights:
+    return [np.array([weights_factor])]+weights
+
+# Extract factor from weights
+
+
+def factor_weights_extract(weights: Weights) -> Tuple[int, Weights]:
+    return weights[0][0], weights[1:]
+
 # Create dimensions list of each element in weights
 
 
@@ -255,6 +267,13 @@ def weights_subtraction(a: Weights, b: Weights) -> Weights:
 
 def weights_mod(a: Weights, b: int) -> Weights:
     return [a[idx] % b for idx in range(len(a))]
+
+
+# Multiply weight by an integer
+
+
+def weights_multiply(a: Weights, b: int) -> Weights:
+    return [a[idx] * b for idx in range(len(a))]
 
 # Divide weight by an integer
 
