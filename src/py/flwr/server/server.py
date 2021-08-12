@@ -343,12 +343,7 @@ class Server:
         log(INFO, "SecAgg setup params")
         setup_param_results_and_failures = setup_param(
             clients=setup_param_clients,
-            sample_num=param_dict['sample_num'],
-            share_num=param_dict['share_num'],
-            threshold=param_dict['threshold'],
-            clipping_range=param_dict['clipping_range'],
-            target_range=param_dict['target_range'],
-            mod_range=param_dict['mod_range']
+            param_dict=param_dict
         )
         setup_param_results = setup_param_results_and_failures[0]
         ask_keys_clients: Dict[int, ClientProxy] = {}
@@ -658,13 +653,13 @@ def evaluate_client(
 
 def setup_param(
     clients: List[ClientProxy],
-    sample_num: int,
-    share_num: int,
-    threshold: int,
-    clipping_range: float,
-    target_range: int,
-    mod_range: int
+    param_dict: Dict[str, Scalar]
 ) -> SetupParamResultsAndFailures:
+    def param_dict_with_secagg_id(param_dict: Dict[str, Scalar], secagg_id: int):
+        new_param_dict = param_dict.copy()
+        new_param_dict[
+            'secagg_id'] = secagg_id
+        return new_param_dict
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(
@@ -672,13 +667,7 @@ def setup_param(
                 (
                     c,
                     SetupParamIns(
-                        secagg_id=idx,
-                        sample_num=sample_num,
-                        share_num=share_num,
-                        threshold=threshold,
-                        clipping_range=clipping_range,
-                        target_range=target_range,
-                        mod_range=mod_range
+                        param_dict=param_dict_with_secagg_id(param_dict, idx),
                     ),
                 ),
             )
@@ -695,6 +684,7 @@ def setup_param(
             # Success case
             result = future.result()
             results.append(result)
+    print(failures)
     return results, failures
 
 

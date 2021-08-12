@@ -99,13 +99,7 @@ class Disconnect:
 
 @dataclass
 class SetupParamIns:
-    secagg_id: int
-    sample_num: int
-    share_num: int
-    threshold: int
-    clipping_range: float
-    target_range: int
-    mod_range: int
+    param_dict: Dict[str, Scalar]
 
 
 @dataclass

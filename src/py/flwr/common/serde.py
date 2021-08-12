@@ -189,13 +189,7 @@ def setup_param_ins_to_proto(
 ) -> ServerMessage.SecAggMsg:
     return ServerMessage.SecAggMsg(
         setup_param=ServerMessage.SecAggMsg.SetupParam(
-            secagg_id=setup_param_ins.secagg_id,
-            sample_num=setup_param_ins.sample_num,
-            share_num=setup_param_ins.share_num,
-            threshold=setup_param_ins.threshold,
-            clipping_range=setup_param_ins.clipping_range,
-            target_range=setup_param_ins.target_range,
-            mod_range=setup_param_ins.mod_range
+            param_dict=metrics_to_proto(setup_param_ins.param_dict)
         )
     )
 
@@ -204,13 +198,7 @@ def setup_param_ins_from_proto(
     setup_param_msg: ServerMessage.SecAggMsg,
 ) -> typing.SetupParamIns:
     return typing.SetupParamIns(
-        secagg_id=setup_param_msg.setup_param.secagg_id,
-        sample_num=setup_param_msg.setup_param.sample_num,
-        share_num=setup_param_msg.setup_param.share_num,
-        threshold=setup_param_msg.setup_param.threshold,
-        clipping_range=setup_param_msg.setup_param.clipping_range,
-        target_range=setup_param_msg.setup_param.target_range,
-        mod_range=setup_param_msg.setup_param.mod_range,
+        param_dict=metrics_from_proto(setup_param_msg.setup_param.param_dict)
     )
 
 

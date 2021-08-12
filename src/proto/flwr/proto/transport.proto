@@ -46,13 +46,7 @@ message ServerMessage {
   }
   message SecAggMsg{
     message SetupParam{
-      int64 secagg_id=1;
-      int64 sample_num=2;
-      int64 share_num=3;
-      int64 threshold=4;
-      float clipping_range=5;
-      int64 target_range=6;
-      int64 mod_range=7;
+      map<string, Scalar> param_dict = 1;
     }
     message AskKeys{}
     message ShareKeys{
