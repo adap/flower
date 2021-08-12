@@ -37,7 +37,7 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate_qffl, weighted_loss_avg
-from .fedavg import DEPRECATION_WARNING, FedAvg
+from .fedavg import FedAvg
 
 
 class QFedAvg(FedAvg):
