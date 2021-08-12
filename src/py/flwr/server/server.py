@@ -326,17 +326,19 @@ class Server:
     ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
-        log(INFO, "SecAgg get param from dict")
         # Setup parameters
+        log(INFO, "SecAgg get param from dict")
         param_dict = self.process_param_dict(self.strategy.get_sec_agg_param())
         # Sample clients
-        client_instructions = self.strategy.sec_agg_configure_fit(
+        client_instruction_list = self.strategy.sec_agg_configure_fit(
             rnd=rnd, parameters=self.parameters, client_manager=self._client_manager, sample_num=param_dict['sample_num'], min_num=param_dict['min_num'])
         setup_param_clients: Dict[int, ClientProxy] = {}
-        for idx, value in enumerate(client_instructions):
+        client_instructions: Dict[int, FitIns] = {}
+        for idx, value in enumerate(client_instruction_list):
             setup_param_clients[idx] = value[0]
+            client_instructions[idx] = value[1]
 
-        # Stage 0: Setup
+        # === Stage 0: Setup ===
         # Give rnd, sample_num, share_num, threshold, client id
         log(INFO, "SecAgg setup params")
         setup_param_results_and_failures = setup_param(
@@ -356,7 +358,7 @@ class Server:
             if client in [result[0] for result in setup_param_results]:
                 ask_keys_clients[idx] = client
 
-        # Stage 1: Ask Public Keys
+        # === Stage 1: Ask Public Keys ===
         log(INFO, "SecAgg ask keys")
         ask_keys_results_and_failures = ask_keys(ask_keys_clients)
 
@@ -373,7 +375,7 @@ class Server:
                 public_keys_dict[idx] = ask_keys_results[pos][1]
                 share_keys_clients[idx] = client
 
-        # Stage 2: Share Keys
+        # === Stage 2: Share Keys ===
         log(INFO, "SecAgg share keys")
         share_keys_results_and_failures = share_keys(
             share_keys_clients, public_keys_dict, param_dict['sample_num'], param_dict['share_num']
@@ -401,11 +403,10 @@ class Server:
             if destination in ask_vectors_clients.keys():
                 forward_packet_list_dict[destination].append(packet)
 
-        # Stage 3: Ask Vectors
+        # === Stage 3: Ask Vectors ===
         log(INFO, "SecAgg ask vectors")
-        fit_ins = FitIns(parameters=self.parameters, config={})
         ask_vectors_results_and_failures = ask_vectors(
-            ask_vectors_clients, forward_packet_list_dict, fit_ins)
+            ask_vectors_clients, forward_packet_list_dict, client_instructions)
         ask_vectors_results = ask_vectors_results_and_failures[0]
         if len(ask_vectors_results) < param_dict['min_num']:
             raise Exception("Not enough available clients after ask vectors stage")
@@ -426,7 +427,7 @@ class Server:
                 masked_vector = secagg_utils.weights_addition(
                     masked_vector, parameters_to_weights(client_parameters))
 
-        # Stage 4: Unmask Vectors
+        # === Stage 4: Unmask Vectors ===
         log(INFO, "SecAgg unmask vectors")
         unmask_vectors_results_and_failures = unmask_vectors(
             unmask_vectors_clients, dropout_clients, param_dict['sample_num'], param_dict['share_num'])
@@ -761,12 +762,12 @@ def share_keys_client(client: ClientProxy, idx: int, public_keys_dict: Dict[int,
     return client, client.share_keys(ShareKeysIns(public_keys_dict=local_dict))
 
 
-def ask_vectors(clients: List[ClientProxy], forward_packet_list_dict: Dict[int, List[ShareKeysPacket]], fit_ins: FitIns) -> AskVectorsResultsAndFailures:
+def ask_vectors(clients: List[ClientProxy], forward_packet_list_dict: Dict[int, List[ShareKeysPacket]], client_instructions: Dict[int, FitIns]) -> AskVectorsResultsAndFailures:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(
                 lambda p: ask_vectors_client(*p),
-                (client, forward_packet_list_dict[idx], fit_ins),
+                (client, forward_packet_list_dict[idx], client_instructions[idx]),
             )
             for idx, client in clients.items()
         ]
