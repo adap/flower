@@ -89,6 +89,7 @@ class SecAggFedAvg(FedAvg, SecAggStrategy):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
+        sec_agg_param_dict: Dict[str, Scalar] = {}
     ) -> None:
 
         FedAvg.__init__(self, fraction_fit=fraction_fit,
@@ -101,9 +102,10 @@ class SecAggFedAvg(FedAvg, SecAggStrategy):
                         on_evaluate_config_fn=on_evaluate_config_fn,
                         accept_failures=accept_failures,
                         initial_parameters=initial_parameters)
+        self.sec_agg_param_dict = sec_agg_param_dict
 
     def get_sec_agg_param(self) -> Dict[str, int]:
-        return {}
+        return self.sec_agg_param_dict
 
     def sec_agg_configure_fit(
         self, rnd: int, parameters: Parameters, client_manager: ClientManager, sample_num: int, min_num: int

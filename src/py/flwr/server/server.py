@@ -511,7 +511,7 @@ class Server:
         log(INFO, "Received initial parameters from one random client")
         return parameters_res.parameters
 
-    def process_param_dict(self, param_dict: Dict[str, int]) -> Dict[str, int]:
+    def process_param_dict(self, param_dict: Dict[str, Scalar]) -> Dict[str, Scalar]:
         if 'sample_num' not in param_dict:
             param_dict['sample_num'] = max(2, self._client_manager.num_available())
 
