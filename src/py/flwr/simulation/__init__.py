@@ -12,4 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""LEAF datasets."""
+"""Flower simulation."""
+
+import pkg_resources
+
+installed_packages = {pkg.key for pkg in list(pkg_resources.working_set)}
+
+
+if "ray" in installed_packages:
+    from flwr.simulation.app import start_simulation
+else:
+    RAY_IMPORT_ERROR: str = """Unable to import module `ray`.
+
+To install the necessary dependencies, install `flwr` with the `simulation` extra:
+
+    pip install -U flwr["simulation"]
+"""
+
+    def start_simulation(*args, **kwargs):  # type: ignore
+        """Print error stating that ray is missing."""
+        raise ImportError(RAY_IMPORT_ERROR)
+
+
+__all__ = [
+    "start_simulation",
+]

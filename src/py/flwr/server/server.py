@@ -115,7 +115,7 @@ class Server:
         history = History()
 
         # Initialize parameters
-        log(INFO, "Getting initial parameters")
+        log(INFO, "Initializing global parameters")
         self.parameters = self._get_initial_parameters()
         log(INFO, "Evaluating initial parameters")
         res = self.strategy.evaluate(parameters=self.parameters)
@@ -297,10 +297,11 @@ class Server:
             client_manager=self._client_manager
         )
         if parameters is not None:
-            log(INFO, "Received initial parameters from strategy")
+            log(INFO, "Using initial parameters provided by strategy")
             return parameters
 
         # Get initial parameters from one of the clients
+        log(INFO, "Requesting initial parameters from one random client")
         random_client = self._client_manager.sample(1)[0]
         parameters_res = random_client.get_parameters()
         log(INFO, "Received initial parameters from one random client")

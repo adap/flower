@@ -9,7 +9,7 @@ import unittest
 class TestStringMethods(unittest.TestCase):
     """Test string methods."""
 
-    def test_upper(self):
+    def test_upper(self) -> None:
         """Testing upper method."""
         self.assertEqual("foo".upper(), "FOO")
 
