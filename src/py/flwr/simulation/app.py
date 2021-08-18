@@ -18,23 +18,13 @@
 from logging import INFO
 from typing import Any, Callable, Dict, Optional
 
-try:
-    import ray
-except ImportError:
-    ray = None  # type: ignore
+import ray
 
 from flwr.client.client import Client
 from flwr.common.logger import log
 from flwr.server.app import _fl, _init_defaults
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
-
-RAY_IMPORT_ERROR: str = """Unable to import module `ray`.
-
-To install the necessary dependencies, install `flwr` with the `simulation` extra:
-
-    pip install -U flwr["simulation"]
-"""
 
 
 def start_simulation(  # pylint: disable=too-many-arguments
@@ -76,10 +66,6 @@ def start_simulation(  # pylint: disable=too-many-arguments
         Optional dictionary containing `ray.init` arguments.
     """
 
-    # Ray cannot be assumed to be installed
-    if ray is None:
-        raise ImportError(RAY_IMPORT_ERROR)
-
     # Initialize Ray
     if not ray_init_args:
         ray_init_args = {}
@@ -110,4 +96,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
         initialized_server.client_manager().register(client=client_proxy)
 
     # Start training
-    _fl(server=initialized_server, config=initialized_config)
+    _fl(
+        server=initialized_server,
+        config=initialized_config,
+        force_final_distributed_eval=False,
+    )

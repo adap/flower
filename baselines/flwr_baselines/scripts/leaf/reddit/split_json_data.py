@@ -18,10 +18,10 @@ import json
 import pickle
 from os import PathLike
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Any, BinaryIO, Dict, List, Optional, Tuple, Union
 
 
-def check_between_zero_and_one(value: str):
+def check_between_zero_and_one(value: str) -> float:
     fvalue = float(value)
     if fvalue < 0 or fvalue > 1:
         raise argparse.ArgumentTypeError(
@@ -32,10 +32,10 @@ def check_between_zero_and_one(value: str):
 
 def split_json_and_save(
     list_datasets: List[Tuple[str, float]],
-    path_to_json: PathLike,
-    save_root: PathLike,
-    users_list: Optional[List[str]] = None,
-):
+    path_to_json: PathLike[Any],
+    save_root: Path,
+    prev_users: Optional[List[str]] = None,
+) -> List[str]:
     """Splits LEAF generated datasets and creates individual client partitions.
 
     Args:
@@ -44,11 +44,17 @@ def split_json_and_save(
         path_to_json (PathLike): Path to LEAF JSON file containing dataset.
         save_root (PathLike): Root directory where to save the individual client
             partition files.
+        prev_users (Optional[List[str]]): List containing previous users. This is
+            useful when partitioning data into train, val, test datasets.
     """
-    if users_list is None:
-        users_list = []
+    # users_list = []
+    if prev_users is None:
+        prev_users = []
+
+    users_list: List[str] = prev_users
 
     new_users = []
+
     with open(path_to_json) as f:
         js = json.load(f)
         if not users_list:
@@ -62,7 +68,7 @@ def split_json_and_save(
             start_idx = 0
             for split_id, (dataset, fraction) in enumerate(list_datasets):
                 end_idx = start_idx + int(fraction * num_samples)
-                data = {}
+                data: Dict[str, Union[str, int]] = {}
                 data["idx"] = user_idx
                 data["character"] = u
                 if split_id == len(list_datasets) - 1:  # Make sure we use last indices
@@ -71,11 +77,11 @@ def split_json_and_save(
                 data["y"] = y[start_idx:end_idx]
                 start_idx = end_idx
 
-                save_dir = save_root / str(user_idx)
+                save_dir: Path = save_root / str(user_idx)
                 save_dir.mkdir(parents=True, exist_ok=True)
-
-                with open(save_dir / f"{dataset}.pickle", "wb") as f:
-                    pickle.dump(data, f)
+                g: BinaryIO
+                with open(save_dir / f"{dataset}.pickle", "wb") as g:
+                    pickle.dump(data, g)
 
     return new_users
 
@@ -133,5 +139,5 @@ if __name__ == "__main__":
         list_datasets=list_datasets,
         path_to_json=original_test_dataset,
         save_root=save_root,
-        users_list=users_list,
+        prev_users=users_list,
     )
