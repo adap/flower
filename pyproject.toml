@@ -53,9 +53,6 @@ numpy = "^1.19.0"
 grpcio = "^1.27.2"
 google = "^2.0.3"
 protobuf = "^3.12.1"
-types-protobuf = "^3.17.4"
-types-setuptools = "^57.0.2"
-types-dataclasses = "^0.1.7"
 dataclasses = { version = "==0.6", markers = "python_version < '3.7'"  }
 # Optional dependencies
 tensorflow-cpu = { version = "==2.4.0", optional = true }
@@ -78,6 +75,9 @@ http-logger = ["boto3", "boto3_type_annotations", "tensorflow-cpu", "boto3", "bo
 ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
 
 [tool.poetry.dev-dependencies]
+types-protobuf = "^3.17.4"
+types-setuptools = "^57.0.2"
+types-dataclasses = "^0.1.7"
 isort = "==5.9.2"
 black = "==21.7b0"
 docformatter = "==1.4"
