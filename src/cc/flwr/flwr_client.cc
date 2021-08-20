@@ -16,7 +16,7 @@
 #include <grpcpp/grpcpp.h>
 #include <queue>
 #include <optional>
-#include <windows.h>
+//#include <windows.h>
 #include <map>
 #include "transport.grpc.pb.h"
 #include "typing.h"
@@ -121,7 +121,7 @@ void start_client(std::string server_address, Client* client, int grpc_max_messa
 
 		// Sleep and reconnect afterwards
 		std::cout << "Disconnect, then re-establish connection after" << sleep_duration << "second(s)" << std::endl;
-		Sleep(sleep_duration * 1000);
+		//Sleep(sleep_duration * 1000);
 	}
 }
 
@@ -130,6 +130,6 @@ int main(int argc, char** argv) {
 	std::string target_str = "localhost:50051";
 	Example_client client;
 	start_client(target_str, &client);
-	std::cin.get(); //keep the window
+	//std::cin.get(); //keep the window
 	return 0;
 }
