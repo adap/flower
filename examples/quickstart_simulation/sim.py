@@ -24,14 +24,12 @@ class FlwrClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         self.model.set_weights(parameters)
-        self.model.fit(
-            self.x_train, self.y_train, epochs=1, verbose=2, steps_per_epoch=2
-        )
+        self.model.fit(self.x_train, self.y_train, epochs=2, verbose=2)
         return self.model.get_weights(), len(self.x_train), {}
 
     def evaluate(self, parameters, config):
         self.model.set_weights(parameters)
-        loss, acc = self.model.evaluate(self.x_val, self.y_val, verbose=2, steps=2)
+        loss, acc = self.model.evaluate(self.x_val, self.y_val, verbose=2)
         return loss, len(self.x_val), {"accuracy": acc}
 
 
@@ -57,6 +55,7 @@ def client_fn(cid: str) -> fl.client.Client:
     )
 
     # Create and return client
+    print("CID:", cid)
     return FlwrClient(model, x_train_cid, y_train_cid)
 
 
@@ -66,10 +65,13 @@ def main() -> None:
         client_fn=client_fn,
         num_clients=NUM_CLIENTS,
         client_resources={"num_cpus": 4},
-        num_rounds=2,
+        num_rounds=5,
         strategy=fl.server.strategy.FedAvg(
             fraction_fit=0.1,
             fraction_eval=0.1,
+            min_fit_clients=10,
+            min_eval_clients=10,
+            min_available_clients=NUM_CLIENTS,
         ),
     )
 

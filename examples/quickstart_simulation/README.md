@@ -13,12 +13,12 @@ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/qui
 This will create a new directory called `quickstart_simulation` containing the following files:
 
 ```shell
--- pyproject.toml
--- sim.py
--- README.md
+-- README.md       <- Your're reading this right now
+-- sim.py          <- Actual example code
+-- pyproject.toml  <- Project dependencies for Poetry
 ```
 
-Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml` (the modern alternative to `requirements.txt`). We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
 ```shell
 poetry install
