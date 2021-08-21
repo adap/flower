@@ -19,6 +19,7 @@ Paper: https://arxiv.org/abs/2003.00295
 """
 
 
+from tkinter import W
 from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
@@ -105,6 +106,8 @@ class FedAdagrad(FedOpt):
             initial_parameters=initial_parameters,
             eta=eta,
             eta_l=eta_l,
+            beta_1=0.0,
+            beta_2=0.0,
             tau=tau,
         )
         self.v_t: Optional[Weights] = None
@@ -126,11 +129,15 @@ class FedAdagrad(FedOpt):
         if fedavg_parameters_aggregated is None:
             return None, {}
 
-        fedavg_aggregate = parameters_to_weights(fedavg_parameters_aggregated)
+        fedavg_weights_aggregate = parameters_to_weights(fedavg_parameters_aggregated)
         aggregated_updates = [
             subset_weights - self.current_weights[idx]
-            for idx, subset_weights in enumerate(fedavg_aggregate)
+            for idx, subset_weights in enumerate(fedavg_weights_aggregate)
         ]
+
+        self.delta_t = (
+            self.beta_1 * self.delta_t + (1.0 - self.beta_1) * aggregated_updates
+        )
 
         # Adagrad
         delta_t = aggregated_updates
