@@ -129,7 +129,9 @@ def _fl(
         res = server.evaluate_round(rnd=-1)
         if res is not None:
             loss, _, (results, failures) = res
-            r = requests.post(url = "http://localhost:8000", data = {'loss':loss})
+            print("===========SENDING LOSS TO LOCAL SERVER=========")
+            r = requests.post(url = "http://localhost:8000/result", data = {'loss':loss})
+            print("======================SENT=======================")
             log(INFO, "app_evaluate: federated loss: %s", str(loss))
             log(
                 INFO,
