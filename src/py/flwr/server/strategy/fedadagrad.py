@@ -19,7 +19,6 @@ Paper: https://arxiv.org/abs/2003.00295
 """
 
 
-from tkinter import W
 from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
@@ -134,10 +133,6 @@ class FedAdagrad(FedOpt):
             subset_weights - self.current_weights[idx]
             for idx, subset_weights in enumerate(fedavg_weights_aggregate)
         ]
-
-        self.delta_t = (
-            self.beta_1 * self.delta_t + (1.0 - self.beta_1) * aggregated_updates
-        )
 
         # Adagrad
         delta_t = aggregated_updates
