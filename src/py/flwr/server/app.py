@@ -128,8 +128,9 @@ def _fl(
         # Evaluate the final trained model
         res = server.evaluate_round(rnd=-1)
         if res is not None:
-            loss, _, (results, failures) = res
+            loss, metrics, (results, failures) = res
             print("===========SENDING LOSS TO LOCAL SERVER=========")
+            print(metrics)
             r = requests.post(url = "http://localhost:8000/result", json = {'loss':loss,'accuracy':results[0][1].metrics['accuracy']})
             print("======================SENT=======================")
             log(INFO, "app_evaluate: federated loss: %s", str(loss))
