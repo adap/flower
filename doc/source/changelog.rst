@@ -14,6 +14,10 @@ Incompatible changes:
 
   Prior behaviour was to perform a final round of distributed evaluation on all connected clients, which is often not required (e.g., when using server-side evaluation). The prior behaviour can be enabled by passing :code:`force_final_distributed_eval=True` to :code:`start_server`.
 
+* **Renamed q-FedAvg strategy** (`#802 <https://github.com/adap/flower/pull/802>`_)
+
+  The strategy named :code:`QffedAvg` was renamed to `QFedAvg` to better reflect the notation given in the original paper (q-FFL is the optimization objective, q-FedAvg is the proposed solver). Note the the original (now deprecated) :code:`QffedAvg` class is still available for compatibility reasons (it will be removed in a future release).
+
 
 v0.16.0 (2021-05-11)
 --------------------
