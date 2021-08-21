@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "pytorch_federated_variational_autoencoder"
+version = "0.1.0"
+description = "Federated Variation Autoencoder Example Implementation"
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+flwr = "^0.16.0"
+torch = "^1.9.0"
+torchvision = "^0.10.0"
+Pillow = "8.2.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

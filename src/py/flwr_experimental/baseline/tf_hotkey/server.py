@@ -128,7 +128,7 @@ def main() -> None:
         )
 
     if server_setting.strategy == "qffedavg":
-        strategy = fl.server.strategy.QffedAvg(
+        strategy = fl.server.strategy.QFedAvg(
             q_param=0.2,
             qffl_learning_rate=0.1,
             fraction_fit=server_setting.sample_fraction,
