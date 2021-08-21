@@ -29,7 +29,7 @@ from .fedavg import FedAvg
 class FedOpt(FedAvg):
     """Configurable FedAdagrad strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         *,
@@ -78,7 +78,7 @@ class FedOpt(FedAvg):
             eta (float, optional): Server-side learning rate. Defaults to 1e-1.
             eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.
             beta_1 (float, optional): Momentum parameter. Defaults to 0.
-            beta_2 (float, optional): Second moment parameter. Defaults to 0.99.
+            beta_2 (float, optional): Second moment parameter. Defaults to 0.0.
             tau (float, optional): Controls the algorithm's degree of adaptability.
                 Defaults to 1e-9.
         """
