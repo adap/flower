@@ -55,7 +55,6 @@ def client_fn(cid: str) -> fl.client.Client:
     )
 
     # Create and return client
-    print("CID:", cid)
     return FlwrClient(model, x_train_cid, y_train_cid)
 
 
