@@ -23,6 +23,7 @@ project(Flower C CXX)
 
 include(../cmake/common.cmake)
 
+find_package(TorchVision REQUIRED)
 # Proto file
 get_filename_component(trans_proto "../../proto/flwr/proto/transport.proto" ABSOLUTE)
 get_filename_component(trans_proto_path "${trans_proto}" PATH)
@@ -60,11 +61,20 @@ target_link_libraries(trans_grpc_proto
 foreach(_target
   flwr_client)
   add_executable(${_target} "${_target}.cc")
+  target_sources(${_target} PRIVATE cifar10.cpp
+	                            transform.cpp
+	                            cifar10.h
+                               	    transform.h
+  )
   target_link_libraries(${_target}
      trans_grpc_proto
      ${_REFLECTION}
      ${_GRPC_GRPCPP}
-     ${_PROTOBUF_LIBPROTOBUF})
+     ${_PROTOBUF_LIBPROTOBUF}
+     TorchVision::TorchVision)
+  if(DOWNLOAD_DATASETS)
+    add_dependencies(${_target} cifar10)
+  endif()
 endforeach()
 
 
