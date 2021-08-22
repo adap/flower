@@ -59,6 +59,7 @@ typedef std::map<std::string, Scalar> Metrics;
 
 class Parameters {
 public:
+	Parameters() {};
 	Parameters(std::list<std::string> tensors, std::string tensor_type)
 		:tensors(tensors), tensor_type(tensor_type) {};
 
@@ -124,6 +125,7 @@ private:
 
 class FitRes {
 public:
+	FitRes() {};
 	FitRes(Parameters parameters, int num_examples, int num_examples_ceil, float fit_duration, Metrics metrics)
 		: parameters(parameters), num_examples(num_examples), num_examples_ceil(num_examples_ceil),
 		fit_duration(fit_duration), metrics(metrics) {};
@@ -196,6 +198,7 @@ private:
 
 class EvaluateRes {
 public:
+	EvaluateRes() {};
 	EvaluateRes(float loss, int num_examples, float accuracy, Metrics metrics)
 		: loss(loss), num_examples(num_examples), accuracy(accuracy), metrics(metrics) {};
 
