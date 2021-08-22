@@ -40,7 +40,7 @@ Parameters parameters_from_proto(MessageParameters msg) {
 	return Parameters(tensors, msg.tensor_type());
 }
 
-ProtoScalar scalar_to_proto(Scalar scalar_msg) {
+ProtoScalar scalar_to_proto(LocalScalar scalar_msg) {
 	// Deserialize... 
 	ProtoScalar s;
 	if (scalar_msg.getBool() != std::nullopt) {
@@ -68,9 +68,9 @@ ProtoScalar scalar_to_proto(Scalar scalar_msg) {
 
 }
 
-Scalar scalar_from_proto(ProtoScalar scalar_msg) {
+LocalScalar scalar_from_proto(ProtoScalar scalar_msg) {
 	// Deserialize... 
-	Scalar s;
+	LocalScalar s;
 	switch (scalar_msg.scalar_case()) {
 	case 1:
 		s.setFloat(scalar_msg.double_());

@@ -11,7 +11,7 @@
 * The Scalar defined in "transport" uses "double" and "int64", I am not sure if there should be changed
 *
 */
-class Scalar {
+class LocalScalar {
 public:
 	// getters
 	std::optional<bool> getBool() {
@@ -55,7 +55,7 @@ private:
 	std::optional<std::string> string = std::nullopt;
 };
 
-typedef std::map<std::string, Scalar> Metrics;
+typedef std::map<std::string, LocalScalar> Metrics;
 
 class Parameters {
 public:
@@ -101,26 +101,26 @@ private:
 
 class FitIns {
 public:
-	FitIns(Parameters parameters, std::map<std::string, Scalar> config)
+	FitIns(Parameters parameters, std::map<std::string, LocalScalar> config)
 		: parameters(parameters), config(config) {};
 
 	Parameters getParameters() {
 		return parameters;
 	}
-	std::map<std::string, Scalar> getConfig() {
+	std::map<std::string, LocalScalar> getConfig() {
 		return config;
 	}
 
 	void setParameters(Parameters p) {
 		parameters = p;
 	}
-	void setConfig(std::map<std::string, Scalar> config) {
+	void setConfig(std::map<std::string, LocalScalar> config) {
 		this->config = config;
 	}
 private:
 	// Fit instructions for a client
 	Parameters parameters;
-	std::map<std::string, Scalar> config;
+	std::map<std::string, LocalScalar> config;
 };
 
 class FitRes {
@@ -173,27 +173,27 @@ private:
 
 class EvaluateIns {
 public:
-	EvaluateIns(Parameters parameters, std::map<std::string, Scalar> config)
+	EvaluateIns(Parameters parameters, std::map<std::string, LocalScalar> config)
 		: parameters(parameters), config(config) {};
 
 	Parameters getParameters() {
 		return parameters;
 	}
-	std::map<std::string, Scalar> getConfig() {
+	std::map<std::string, LocalScalar> getConfig() {
 		return config;
 	}
 
 	void setParameters(Parameters p) {
 		parameters = p;
 	}
-	void setConfig(std::map<std::string, Scalar> config) {
+	void setConfig(std::map<std::string, LocalScalar> config) {
 		this->config = config;
 	}
 
 private:
 	// Evaluate instructions for a client
 	Parameters parameters;
-	std::map<std::string, Scalar> config;
+	std::map<std::string, LocalScalar> config;
 };
 
 class EvaluateRes {
