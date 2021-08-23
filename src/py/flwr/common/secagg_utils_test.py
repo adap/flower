@@ -2,12 +2,14 @@
 import base64
 import os
 import random
+from typing import List
 
 from cryptography.fernet import Fernet
 import numpy as np
 from numpy.core.numerictypes import issubdtype
 from numpy.testing._private.utils import assert_almost_equal
-from flwr.common.secagg_utils import bytes_to_private_key, bytes_to_public_key, combine_shares, create_shares, decrypt, encrypt, generate_key_pairs, generate_shared_key, private_key_to_bytes, pseudo_rand_gen, public_key_to_bytes, quantize, rand_bytes, reverse_quantize, share_keys_plaintext_concat, share_keys_plaintext_separate, weights_addition, weights_divide, weights_mod, weights_shape, weights_subtraction, weights_zero_generate
+from flwr.common.secagg_utils import bytes_to_private_key, bytes_to_public_key, combine_shares, create_shares, decrypt, encrypt, factor_weights_combine, factor_weights_extract, generate_key_pairs, generate_shared_key, private_key_to_bytes, pseudo_rand_gen, public_key_to_bytes, quantize, rand_bytes, reverse_quantize, share_keys_plaintext_concat, share_keys_plaintext_separate, weights_addition, weights_divide, weights_mod, weights_multiply, weights_shape, weights_subtraction, weights_zero_generate
+from flwr.common.typing import Weights
 
 # Test if generated shared key is identical
 
@@ -133,6 +135,19 @@ def test_quantize():
                 np.testing.assert_almost_equal(n, compare_n, 3)
 
 
+def test_factor_weights_operations():
+    weights = [np.array([[-2, 5, 19], [0, 24, -3]]),
+               np.array([[2, 5, -19], [0, -24, 8]])]
+    factor = 10000
+    combined_weights = factor_weights_combine(factor, weights)
+    assert(isinstance(combined_weights, List))
+    for i in combined_weights:
+        assert(isinstance(i, np.ndarray))
+    derived_factor, derived_weights = factor_weights_extract(combined_weights)
+    assert(derived_factor == factor)
+    assert(derived_weights == weights)
+
+
 def test_weights_manipulation():
     weights1 = [np.array([[-2, 5, 19], [0, 24, -3]]),
                 np.array([[2, 5, -19], [0, -24, 8]])]
@@ -147,6 +162,7 @@ def test_weights_manipulation():
     add = weights_addition(weights1, weights2)
     subtract = weights_subtraction(weights1, weights2)
     mod = weights_mod(weights1, 10)
+    multiply = weights_multiply(weights1, 4)
     divide = weights_divide(weights1, 4)
     for idx1, elm in enumerate(weights1):
         for idx2, n in enumerate(elm):
@@ -155,7 +171,21 @@ def test_weights_manipulation():
             assert(subtract[idx1].flatten()[idx2] == weights1[idx1].flatten()[
                    idx2]-weights2[idx1].flatten()[idx2])
             assert(mod[idx1].flatten()[idx2] == weights1[idx1].flatten()[idx2] % 10)
+            assert(multiply[idx1].flatten()[idx2] == weights1[idx1].flatten()[idx2] * 4)
             assert(divide[idx1].flatten()[idx2] == weights1[idx1].flatten()[idx2]/4)
 
 
-
+def test_all():
+    test_key_generation
+    test_serde_private_keys()
+    test_serde_public_keys()
+    test_encrypt_decrypt()
+    test_create_shares()
+    test_combine_shares()
+    test_rand_bytes()
+    test_pseudo_rand_gen()
+    test_string_concat()
+    test_quantize()
+    test_factor_weights_operations()
+    test_weights_manipulation()
+    print("test done")
