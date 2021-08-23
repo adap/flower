@@ -164,6 +164,8 @@ class Server:
                     raise Exception("Strategy not compatible with secure aggregation")
                 res_fit = self.sec_agg_fit_round(rnd=current_round)
                 # TO BE REMOVED
+                print(parameters_to_weights(res_fit[0]))
+                raise Exception("SUCCESS")
                 res_fit = self.fit_round(rnd=current_round)
                 if res_fit:
                     parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
@@ -483,9 +485,7 @@ class Server:
             masked_vector, total_weights_factor)
         aggregated_vector = secagg_utils.reverse_quantize(
             masked_vector, param_dict['clipping_range'], param_dict['target_range'])
-        print(aggregated_vector)
         aggregated_parameters = weights_to_parameters(aggregated_vector)
-        raise Exception("Terminate")
         return aggregated_parameters, None, None
 
     def disconnect_all_clients(self) -> None:
@@ -515,6 +515,7 @@ class Server:
         if 'sample_num' not in param_dict:
             param_dict['sample_num'] = max(2, self._client_manager.num_available())
 
+        # IMPORTANT: To be changed when Daniel fixed the client sampler bug
         if 'min_num' not in param_dict:
             param_dict['min_num'] = max(2, int(param_dict['sample_num'] * 0.9))
 
