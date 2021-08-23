@@ -35,15 +35,15 @@ class SecAggClient(Client):
 
     def setup_param(self, setup_param_ins: SetupParamIns):
         # Assigning parameter values to object fields
-        param_dict = setup_param_ins.param_dict
-        self.sample_num = param_dict['sample_num']
-        self.secagg_id = param_dict['secagg_id']
-        self.share_num = param_dict['share_num']
-        self.threshold = param_dict['threshold']
-        self.clipping_range = param_dict['clipping_range']
-        self.target_range = param_dict['target_range']
-        self.mod_range = param_dict['mod_range']
-        self.max_weights_factor = param_dict['max_weights_factor']
+        sec_agg_param_dict = setup_param_ins.sec_agg_param_dict
+        self.sample_num = sec_agg_param_dict['sample_num']
+        self.secagg_id = sec_agg_param_dict['secagg_id']
+        self.share_num = sec_agg_param_dict['share_num']
+        self.threshold = sec_agg_param_dict['threshold']
+        self.clipping_range = sec_agg_param_dict['clipping_range']
+        self.target_range = sec_agg_param_dict['target_range']
+        self.mod_range = sec_agg_param_dict['mod_range']
+        self.max_weights_factor = sec_agg_param_dict['max_weights_factor']
 
         # key is the secagg_id of another client
         # value is the secret share we possess that contributes to the client's secret

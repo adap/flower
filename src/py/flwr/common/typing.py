@@ -99,7 +99,7 @@ class Disconnect:
 
 @dataclass
 class SetupParamIns:
-    param_dict: Dict[str, Scalar]
+    sec_agg_param_dict: Dict[str, Scalar]
 
 
 @dataclass

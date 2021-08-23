@@ -189,7 +189,7 @@ def setup_param_ins_to_proto(
 ) -> ServerMessage.SecAggMsg:
     return ServerMessage.SecAggMsg(
         setup_param=ServerMessage.SecAggMsg.SetupParam(
-            param_dict=metrics_to_proto(setup_param_ins.param_dict)
+            sec_agg_param_dict=metrics_to_proto(setup_param_ins.sec_agg_param_dict)
         )
     )
 
@@ -198,7 +198,8 @@ def setup_param_ins_from_proto(
     setup_param_msg: ServerMessage.SecAggMsg,
 ) -> typing.SetupParamIns:
     return typing.SetupParamIns(
-        param_dict=metrics_from_proto(setup_param_msg.setup_param.param_dict)
+        sec_agg_param_dict=metrics_from_proto(
+            setup_param_msg.setup_param.sec_agg_param_dict)
     )
 
 

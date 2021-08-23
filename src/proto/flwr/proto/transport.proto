@@ -46,7 +46,7 @@ message ServerMessage {
   }
   message SecAggMsg{
     message SetupParam{
-      map<string, Scalar> param_dict = 1;
+      map<string, Scalar> sec_agg_param_dict = 1;
     }
     message AskKeys{}
     message ShareKeys{
