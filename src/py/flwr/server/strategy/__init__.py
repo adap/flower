@@ -32,6 +32,7 @@ __all__ = [
     "FastAndSlow",
     "FaultTolerantFedAvg",
     "FedAdagrad",
+    "FedAdam",
     "FedAvg",
     "FedFSv0",
     "FedFSv1",
