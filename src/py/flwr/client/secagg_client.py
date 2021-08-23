@@ -173,6 +173,7 @@ class SecAggClient(Client):
 
         # IMPORTANT NEED SOME FUNCTION TO GET CORRECT WEIGHT FACTOR
         # NOW WE HARD CODE IT AS 1
+        # Generally, should be fit_res.num_examples
         weights_factor = self.secagg_id+1
         print(weights_factor)
         # weights factor cannoot exceed maximum
