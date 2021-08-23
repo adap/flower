@@ -18,7 +18,7 @@
 import concurrent.futures
 from pickle import LIST
 import timeit
-from logging import DEBUG, INFO, WARNING
+from logging import DEBUG, INFO, WARN, WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -328,18 +328,20 @@ class Server:
     ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
-        # Setup parameters
-        log(INFO, "SecAgg get param from dict")
-        sec_agg_param_dict = self.process_sec_agg_param_dict(
-            self.strategy.get_sec_agg_param())
         # Sample clients
-        client_instruction_list = self.strategy.sec_agg_configure_fit(
-            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager, sample_num=sec_agg_param_dict['sample_num'], min_num=sec_agg_param_dict['min_num'])
+        client_instruction_list = self.strategy.configure_fit(
+            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager)
         setup_param_clients: Dict[int, ClientProxy] = {}
         client_instructions: Dict[int, FitIns] = {}
         for idx, value in enumerate(client_instruction_list):
             setup_param_clients[idx] = value[0]
             client_instructions[idx] = value[1]
+
+        # Get sec agg parameters
+        log(INFO, "SecAgg get param from dict")
+        sec_agg_param_dict = self.strategy.get_sec_agg_param()
+        sec_agg_param_dict["sample_num"] = len(client_instruction_list)
+        sec_agg_param_dict = self.process_sec_agg_param_dict(sec_agg_param_dict)
 
         # === Stage 0: Setup ===
         # Give rnd, sample_num, share_num, threshold, client id
@@ -514,58 +516,71 @@ class Server:
         log(INFO, "Received initial parameters from one random client")
         return parameters_res.parameters
 
-    def process_sec_agg_param_dict(self, param_dict: Dict[str, Scalar]) -> Dict[str, Scalar]:
-        if 'sample_num' not in param_dict:
-            param_dict['sample_num'] = max(2, self._client_manager.num_available())
+    def process_sec_agg_param_dict(self, sec_agg_param_dict: Dict[str, Scalar]) -> Dict[str, Scalar]:
+        # min_num will be replaced with intended min_num based on sample_num
+        # if both min_frac or min_num not provided, we take maximum of either 2 or 0.9 * sampled
+        # if either one is provided, we use that
+        # Otherwise, we take the maximum
+        # Note we will eventually check whether min_num>=2
+        if 'min_frac' not in sec_agg_param_dict:
+            if 'min_num' not in sec_agg_param_dict:
+                sec_agg_param_dict['min_num'] = max(
+                    2, int(0.9*sec_agg_param_dict['sample_num']))
+        else:
+            if 'min_num' not in sec_agg_param_dict:
+                sec_agg_param_dict['min_num'] = int(
+                    sec_agg_param_dict['min_frac']*sec_agg_param_dict['sample_num'])
+            else:
+                sec_agg_param_dict['min_num'] = max(sec_agg_param_dict['min_num'], int(
+                    sec_agg_param_dict['min_frac']*sec_agg_param_dict['sample_num']))
 
-        # IMPORTANT: To be changed when Daniel fixed the client sampler bug
-        if 'min_num' not in param_dict:
-            param_dict['min_num'] = max(2, int(param_dict['sample_num'] * 0.9))
-
-        if 'share_num' not in param_dict:
+        if 'share_num' not in sec_agg_param_dict:
             # Complete graph
-            param_dict['share_num'] = param_dict['sample_num']
-        elif param_dict['share_num'] % 2 == 0 and param_dict['share_num'] != param_dict['sample_num']:
+            sec_agg_param_dict['share_num'] = sec_agg_param_dict['sample_num']
+        elif sec_agg_param_dict['share_num'] % 2 == 0 and sec_agg_param_dict['share_num'] != sec_agg_param_dict['sample_num']:
             # we want share_num of each node to be either odd or sample_num
-            param_dict['share_num'] += 1
+            log(WARNING, "share_num value changed due to sample num and share_num constraints! See documentation for reason")
+            sec_agg_param_dict['share_num'] += 1
 
-        if 'threshold' not in param_dict:
-            param_dict['threshold'] = max(2, int(param_dict['share_num'] * 0.9))
+        if 'threshold' not in sec_agg_param_dict:
+            sec_agg_param_dict['threshold'] = max(
+                2, int(sec_agg_param_dict['share_num'] * 0.9))
 
         # To be modified
-        if 'max_weights_factor' not in param_dict:
-            param_dict['max_weights_factor'] = 5
+        if 'max_weights_factor' not in sec_agg_param_dict:
+            sec_agg_param_dict['max_weights_factor'] = 5
 
         # Quantization parameters
-        if 'clipping_range' not in param_dict:
-            param_dict['clipping_range'] = 3
+        if 'clipping_range' not in sec_agg_param_dict:
+            sec_agg_param_dict['clipping_range'] = 3
 
-        if 'target_range' not in param_dict:
-            param_dict['target_range'] = 10000
+        if 'target_range' not in sec_agg_param_dict:
+            sec_agg_param_dict['target_range'] = 10000
 
-        if 'mod_range' not in param_dict:
-            param_dict['mod_range'] = param_dict['sample_num'] * \
-                param_dict['target_range'] * param_dict['max_weights_factor']
+        if 'mod_range' not in sec_agg_param_dict:
+            sec_agg_param_dict['mod_range'] = sec_agg_param_dict['sample_num'] * \
+                sec_agg_param_dict['target_range'] * \
+                sec_agg_param_dict['max_weights_factor']
 
-        if 'timeout' not in param_dict:
-            param_dict['timeout'] = 20
+        if 'timeout' not in sec_agg_param_dict:
+            sec_agg_param_dict['timeout'] = 20
 
         log(
             INFO,
-            f"SecAgg parameters: sample_num = {param_dict['sample_num']}, min_num = {param_dict['min_num']}, share_num = {param_dict['share_num']}, threshold = {param_dict['threshold']}, timeout = {param_dict['timeout']}",
+            f"SecAgg parameters: {sec_agg_param_dict}",
         )
 
         assert (
-            param_dict['sample_num'] >= 2
-            and param_dict['min_num'] >= 2
-            and param_dict['sample_num'] >= param_dict['min_num']
-            and param_dict['share_num'] <= param_dict['sample_num']
-            and param_dict['threshold'] <= param_dict['share_num']
-            and param_dict['threshold'] >= 2
-            and (param_dict['share_num'] % 2 == 1 or param_dict['share_num'] == param_dict['sample_num'])
-            and param_dict['target_range']*param_dict['sample_num']*param_dict['max_weights_factor'] <= param_dict['mod_range']
+            sec_agg_param_dict['sample_num'] >= 2
+            and sec_agg_param_dict['min_num'] >= 2
+            and sec_agg_param_dict['sample_num'] >= sec_agg_param_dict['min_num']
+            and sec_agg_param_dict['share_num'] <= sec_agg_param_dict['sample_num']
+            and sec_agg_param_dict['threshold'] <= sec_agg_param_dict['share_num']
+            and sec_agg_param_dict['threshold'] >= 2
+            and (sec_agg_param_dict['share_num'] % 2 == 1 or sec_agg_param_dict['share_num'] == sec_agg_param_dict['sample_num'])
+            and sec_agg_param_dict['target_range']*sec_agg_param_dict['sample_num']*sec_agg_param_dict['max_weights_factor'] <= sec_agg_param_dict['mod_range']
         ), "SecAgg parameters not accepted"
-        return param_dict
+        return sec_agg_param_dict
 
 
 def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:

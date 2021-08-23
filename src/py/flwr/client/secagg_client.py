@@ -176,8 +176,12 @@ class SecAggClient(Client):
         # Generally, should be fit_res.num_examples
         weights_factor = self.secagg_id+1
         print(weights_factor)
+
         # weights factor cannoot exceed maximum
-        weights_factor = min(weights_factor, self.max_weights_factor)
+        if weights_factor > self.max_weights_factor:
+            weights_factor = self.max_weights_factor
+            log(WARNING, "weights_factor exceeds allowed range and has been clipped. Either increase max_weights_factor, or train with fewer data. (Or server is performing unweighted aggregation)")
+
         quantized_weights = secagg_utils.weights_multiply(
             quantized_weights, weights_factor)
         quantized_weights = secagg_utils.factor_weights_combine(
