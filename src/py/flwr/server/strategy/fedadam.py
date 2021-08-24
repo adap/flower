@@ -117,7 +117,7 @@ class FedAdam(FedOpt):
         self.v_t: Optional[Weights] = None
 
     def __repr__(self) -> str:
-        rep = f"FedAdagrad(accept_failures={self.accept_failures})"
+        rep = f"FedAdam(accept_failures={self.accept_failures})"
         return rep
 
     def aggregate_fit(
