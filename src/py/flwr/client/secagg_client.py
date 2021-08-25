@@ -7,11 +7,11 @@ from flwr.common import (
     FitIns,
     FitRes,
     ParametersRes,
-    secagg_utils,
+
 )
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
-
+from flwr.common.secagg import secagg_primitives
 from .client import Client
 from flwr.common.logger import log
 from logging import DEBUG, INFO, WARNING
@@ -57,12 +57,12 @@ class SecAggClient(Client):
         # Create 2 sets private public key pairs
         # One for creating pairwise masks
         # One for encrypting message to distribute shares
-        self.sk1, self.pk1 = secagg_utils.generate_key_pairs()
-        self.sk2, self.pk2 = secagg_utils.generate_key_pairs()
+        self.sk1, self.pk1 = secagg_primitives.generate_key_pairs()
+        self.sk2, self.pk2 = secagg_primitives.generate_key_pairs()
         log(INFO, "Created SecAgg Key Pairs")
         return AskKeysRes(
-            pk1=secagg_utils.public_key_to_bytes(self.pk1),
-            pk2=secagg_utils.public_key_to_bytes(self.pk2),
+            pk1=secagg_primitives.public_key_to_bytes(self.pk1),
+            pk2=secagg_primitives.public_key_to_bytes(self.pk2),
         )
 
     def share_keys(self, share_keys_in: ShareKeysIns) -> ShareKeysRes:
@@ -82,19 +82,20 @@ class SecAggClient(Client):
             raise Exception("Some public keys are identical")
 
         # sanity check that own public keys are correct in dict
-        if self.public_keys_dict[self.secagg_id].pk1 != secagg_utils.public_key_to_bytes(self.pk1) or self.public_keys_dict[self.secagg_id].pk2 != secagg_utils.public_key_to_bytes(self.pk2):
+        if self.public_keys_dict[self.secagg_id].pk1 != secagg_primitives.public_key_to_bytes(self.pk1) or self.public_keys_dict[self.secagg_id].pk2 != secagg_primitives.public_key_to_bytes(self.pk2):
             raise Exception(
                 "Own public keys are displayed in dict incorrectly, should not happen!")
 
         # Generate private mask seed
-        self.b = secagg_utils.rand_bytes(32)
+        self.b = secagg_primitives.rand_bytes(32)
 
         # Create shares
-        b_shares = secagg_utils.create_shares(
+        b_shares = secagg_primitives.create_shares(
             self.b, self.threshold, self.sample_num
         )
-        sk1_shares = secagg_utils.create_shares(
-            secagg_utils.private_key_to_bytes(self.sk1), self.threshold, self.sample_num
+        sk1_shares = secagg_primitives.create_shares(
+            secagg_primitives.private_key_to_bytes(
+                self.sk1), self.threshold, self.sample_num
         )
 
         share_keys_res = ShareKeysRes(share_keys_res_list=[])
@@ -105,12 +106,12 @@ class SecAggClient(Client):
                 self.b_share_dict[self.secagg_id] = b_shares[idx]
                 self.sk1_share_dict[self.secagg_id] = sk1_shares[idx]
             else:
-                shared_key = secagg_utils.generate_shared_key(
-                    self.sk2, secagg_utils.bytes_to_public_key(client_public_keys.pk2))
+                shared_key = secagg_primitives.generate_shared_key(
+                    self.sk2, secagg_primitives.bytes_to_public_key(client_public_keys.pk2))
                 self.shared_key_2_dict[client_secagg_id] = shared_key
-                plaintext = secagg_utils.share_keys_plaintext_concat(
+                plaintext = secagg_primitives.share_keys_plaintext_concat(
                     self.secagg_id, client_secagg_id, b_shares[idx], sk1_shares[idx])
-                ciphertext = secagg_utils.encrypt(shared_key, plaintext)
+                ciphertext = secagg_primitives.encrypt(shared_key, plaintext)
                 share_keys_packet = ShareKeysPacket(
                     source=self.secagg_id, destination=client_secagg_id, ciphertext=ciphertext)
                 share_keys_res.share_keys_res_list.append(share_keys_packet)
@@ -137,9 +138,9 @@ class SecAggClient(Client):
                 raise Exception(
                     "Received packet meant for another user. Not supposed to happen")
             shared_key = self.shared_key_2_dict[source]
-            plaintext = secagg_utils.decrypt(shared_key, ciphertext)
+            plaintext = secagg_primitives.decrypt(shared_key, ciphertext)
             try:
-                plaintext_source, plaintext_destination, plaintext_b_share, plaintext_sk1_share = secagg_utils.share_keys_plaintext_separate(
+                plaintext_source, plaintext_destination, plaintext_b_share, plaintext_sk1_share = secagg_primitives.share_keys_plaintext_separate(
                     plaintext)
             except:
                 raise Exception(
@@ -168,7 +169,7 @@ class SecAggClient(Client):
         # temporary code end
 
         # Quantize weight update vector
-        quantized_weights = secagg_utils.quantize(
+        quantized_weights = secagg_primitives.quantize(
             weights, self.clipping_range, self.target_range)
 
         # IMPORTANT NEED SOME FUNCTION TO GET CORRECT WEIGHT FACTOR
@@ -182,34 +183,35 @@ class SecAggClient(Client):
             weights_factor = self.max_weights_factor
             log(WARNING, "weights_factor exceeds allowed range and has been clipped. Either increase max_weights_factor, or train with fewer data. (Or server is performing unweighted aggregation)")
 
-        quantized_weights = secagg_utils.weights_multiply(
+        quantized_weights = secagg_primitives.weights_multiply(
             quantized_weights, weights_factor)
-        quantized_weights = secagg_utils.factor_weights_combine(
+        quantized_weights = secagg_primitives.factor_weights_combine(
             weights_factor, quantized_weights)
 
         dimensions_list: List[Tuple] = [a.shape for a in quantized_weights]
 
         # add private mask
-        private_mask = secagg_utils.pseudo_rand_gen(
+        private_mask = secagg_primitives.pseudo_rand_gen(
             self.b, self.mod_range, dimensions_list)
-        quantized_weights = secagg_utils.weights_addition(
+        quantized_weights = secagg_primitives.weights_addition(
             quantized_weights, private_mask)
 
         for client in available_clients:
             # add pairwise mask
-            shared_key = secagg_utils.generate_shared_key(
-                self.sk1, secagg_utils.bytes_to_public_key(self.public_keys_dict[client].pk1))
-            pairwise_mask = secagg_utils.pseudo_rand_gen(
+            shared_key = secagg_primitives.generate_shared_key(
+                self.sk1, secagg_primitives.bytes_to_public_key(self.public_keys_dict[client].pk1))
+            pairwise_mask = secagg_primitives.pseudo_rand_gen(
                 shared_key, self.mod_range, dimensions_list)
             if self.secagg_id > client:
-                quantized_weights = secagg_utils.weights_addition(
+                quantized_weights = secagg_primitives.weights_addition(
                     quantized_weights, pairwise_mask)
             else:
-                quantized_weights = secagg_utils.weights_subtraction(
+                quantized_weights = secagg_primitives.weights_subtraction(
                     quantized_weights, pairwise_mask)
 
         # Take mod of final weight update vector and return to server
-        quantized_weights = secagg_utils.weights_mod(quantized_weights, self.mod_range)
+        quantized_weights = secagg_primitives.weights_mod(
+            quantized_weights, self.mod_range)
         log(INFO, "Sent vectors")
         return AskVectorsRes(parameters=weights_to_parameters(quantized_weights))
 
