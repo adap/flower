@@ -29,5 +29,4 @@ __all__ = [
     "Client",
     "KerasClient",
     "NumPyClient",
-    "SecAggClient",
 ]
