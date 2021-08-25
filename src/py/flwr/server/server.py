@@ -151,7 +151,8 @@ class Server:
                 # TO BE REMOVED
                 print(parameters_to_weights(res_fit[0]))
                 raise Exception("SUCCESS")
-                res_fit = self.fit_round(rnd=current_round)
+                res_fit = secagg_server_logic.sec_agg_fit_round(
+                    server=self, rnd=current_round)
                 if res_fit:
                     parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
                     log(INFO, parameters_prime)
@@ -357,3 +358,63 @@ def reconnect_client(
     later."""
     disconnect = client.reconnect(reconnect)
     return client, disconnect
+
+
+def fit_clients(
+    client_instructions: List[Tuple[ClientProxy, FitIns]]
+) -> FitResultsAndFailures:
+    """Refine parameters concurrently on all selected clients."""
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(fit_client, c, ins) for c, ins in client_instructions
+        ]
+        concurrent.futures.wait(futures)
+    # Gather results
+    results: List[Tuple[ClientProxy, FitRes]] = []
+    failures: List[BaseException] = []
+    for future in futures:
+        failure = future.exception()
+        if failure is not None:
+            failures.append(failure)
+        else:
+            # Success case
+            result = future.result()
+            results.append(result)
+    return results, failures
+
+
+def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
+    """Refine parameters on a single client."""
+    fit_res = client.fit(ins)
+    return client, fit_res
+
+
+def evaluate_clients(
+    client_instructions: List[Tuple[ClientProxy, EvaluateIns]]
+) -> EvaluateResultsAndFailures:
+    """Evaluate parameters concurrently on all selected clients."""
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(evaluate_client, c, ins) for c, ins in client_instructions
+        ]
+        concurrent.futures.wait(futures)
+    # Gather results
+    results: List[Tuple[ClientProxy, EvaluateRes]] = []
+    failures: List[BaseException] = []
+    for future in futures:
+        failure = future.exception()
+        if failure is not None:
+            failures.append(failure)
+        else:
+            # Success case
+            result = future.result()
+            results.append(result)
+    return results, failures
+
+
+def evaluate_client(
+    client: ClientProxy, ins: EvaluateIns
+) -> Tuple[ClientProxy, EvaluateRes]:
+    """Evaluate parameters on a single client."""
+    evaluate_res = client.evaluate(ins)
+    return client, evaluate_res
