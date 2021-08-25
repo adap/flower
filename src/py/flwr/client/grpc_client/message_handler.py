@@ -20,6 +20,7 @@ from typing import Tuple
 from flwr.client.client import Client
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
+from flwr.common.secagg import secagg_client_logic
 
 from flwr.server.server import Server
 
@@ -140,7 +141,8 @@ def _ask_vectors(client: Client, ask_vectors_msg: ServerMessage.SecAggMsg) -> Cl
 def _unmask_vectors(client: Client, unmask_vectors_msg: ServerMessage.SecAggMsg) -> ClientMessage:
     try:
         unmask_vectors_ins = serde.unmask_vectors_ins_from_proto(unmask_vectors_msg)
-        unmask_vectors_res = client.unmask_vectors(unmask_vectors_ins)
+        unmask_vectors_res = client.unmask_vectors(
+            unmask_vectors_ins)
         unmask_vectors_res_proto = serde.unmask_vectors_res_to_proto(unmask_vectors_res)
         return ClientMessage(sec_agg_res=unmask_vectors_res_proto)
     except Exception as e:

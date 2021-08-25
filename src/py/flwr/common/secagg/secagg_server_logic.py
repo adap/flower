@@ -26,7 +26,7 @@ UnmaskVectorsResultsAndFailures = Tuple[
 FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
 
 
-# No type annotation for Server because of cirular dependency!
+# No type annotation for server because of cirular dependency!
 def sec_agg_fit_round(server, rnd: int
                       ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]

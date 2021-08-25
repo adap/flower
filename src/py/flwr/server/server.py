@@ -147,7 +147,7 @@ class Server:
                 if not isinstance(self.strategy, SecAggStrategy):
                     raise Exception("Strategy not compatible with secure aggregation")
                 res_fit = secagg_server_logic.sec_agg_fit_round(
-                    server=self, rnd=current_round)
+                    self, rnd=current_round)
                 # TO BE REMOVED
                 print(parameters_to_weights(res_fit[0]))
                 raise Exception("SUCCESS")

@@ -11,7 +11,7 @@ from flwr.common import (
 )
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
-from flwr.common.secagg import secagg_primitives
+from flwr.common.secagg import secagg_primitives, secagg_client_logic
 from .client import Client
 from flwr.common.logger import log
 from logging import DEBUG, INFO, WARNING
@@ -34,199 +34,16 @@ class SecAggClient(Client):
         return self.client.evaluate(ins)
 
     def setup_param(self, setup_param_ins: SetupParamIns):
-        # Assigning parameter values to object fields
-        sec_agg_param_dict = setup_param_ins.sec_agg_param_dict
-        self.sample_num = sec_agg_param_dict['sample_num']
-        self.secagg_id = sec_agg_param_dict['secagg_id']
-        self.share_num = sec_agg_param_dict['share_num']
-        self.threshold = sec_agg_param_dict['threshold']
-        self.clipping_range = sec_agg_param_dict['clipping_range']
-        self.target_range = sec_agg_param_dict['target_range']
-        self.mod_range = sec_agg_param_dict['mod_range']
-        self.max_weights_factor = sec_agg_param_dict['max_weights_factor']
-
-        # key is the secagg_id of another client
-        # value is the secret share we possess that contributes to the client's secret
-        self.b_share_dict: Dict[int, bytes] = {}
-        self.sk1_share_dict: Dict[int, bytes] = {}
-        self.shared_key_2_dict: Dict[int, bytes] = {}
-        log(INFO, f"SecAgg Params: {setup_param_ins}")
-        return SetupParamRes()
+        return secagg_client_logic.setup_param(self, setup_param_ins)
 
     def ask_keys(self, ask_keys_ins: AskKeysIns) -> AskKeysRes:
-        # Create 2 sets private public key pairs
-        # One for creating pairwise masks
-        # One for encrypting message to distribute shares
-        self.sk1, self.pk1 = secagg_primitives.generate_key_pairs()
-        self.sk2, self.pk2 = secagg_primitives.generate_key_pairs()
-        log(INFO, "Created SecAgg Key Pairs")
-        return AskKeysRes(
-            pk1=secagg_primitives.public_key_to_bytes(self.pk1),
-            pk2=secagg_primitives.public_key_to_bytes(self.pk2),
-        )
+        return secagg_client_logic.ask_keys(self, ask_keys_ins)
 
     def share_keys(self, share_keys_in: ShareKeysIns) -> ShareKeysRes:
-        # Distribute shares for private mask seed and first private key
-
-        self.public_keys_dict = share_keys_in.public_keys_dict
-        # check size is larger than threshold
-        if len(self.public_keys_dict) < self.threshold:
-            raise Exception("Available neighbours number smaller than threshold")
-
-        # check if all public keys received are unique
-        pk_list: List[bytes] = []
-        for i in self.public_keys_dict.values():
-            pk_list.append(i.pk1)
-            pk_list.append(i.pk2)
-        if len(set(pk_list)) != len(pk_list):
-            raise Exception("Some public keys are identical")
-
-        # sanity check that own public keys are correct in dict
-        if self.public_keys_dict[self.secagg_id].pk1 != secagg_primitives.public_key_to_bytes(self.pk1) or self.public_keys_dict[self.secagg_id].pk2 != secagg_primitives.public_key_to_bytes(self.pk2):
-            raise Exception(
-                "Own public keys are displayed in dict incorrectly, should not happen!")
-
-        # Generate private mask seed
-        self.b = secagg_primitives.rand_bytes(32)
-
-        # Create shares
-        b_shares = secagg_primitives.create_shares(
-            self.b, self.threshold, self.sample_num
-        )
-        sk1_shares = secagg_primitives.create_shares(
-            secagg_primitives.private_key_to_bytes(
-                self.sk1), self.threshold, self.sample_num
-        )
-
-        share_keys_res = ShareKeysRes(share_keys_res_list=[])
-
-        for idx, p in enumerate(self.public_keys_dict.items()):
-            client_secagg_id, client_public_keys = p
-            if client_secagg_id == self.secagg_id:
-                self.b_share_dict[self.secagg_id] = b_shares[idx]
-                self.sk1_share_dict[self.secagg_id] = sk1_shares[idx]
-            else:
-                shared_key = secagg_primitives.generate_shared_key(
-                    self.sk2, secagg_primitives.bytes_to_public_key(client_public_keys.pk2))
-                self.shared_key_2_dict[client_secagg_id] = shared_key
-                plaintext = secagg_primitives.share_keys_plaintext_concat(
-                    self.secagg_id, client_secagg_id, b_shares[idx], sk1_shares[idx])
-                ciphertext = secagg_primitives.encrypt(shared_key, plaintext)
-                share_keys_packet = ShareKeysPacket(
-                    source=self.secagg_id, destination=client_secagg_id, ciphertext=ciphertext)
-                share_keys_res.share_keys_res_list.append(share_keys_packet)
-
-        log(INFO, "Sent shares for other clients")
-        return share_keys_res
+        return secagg_client_logic.share_keys(self, share_keys_in)
 
     def ask_vectors(self, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
-        # Receive shares and fit model
-        packet_list = ask_vectors_ins.ask_vectors_in_list
-        fit_ins = ask_vectors_ins.fit_ins
-        available_clients: List[int] = []
-
-        if len(packet_list)+1 < self.threshold:
-            raise Exception("Available neighbours number smaller than threshold")
-
-        # decode all packets and verify all packets are valid. Save shares received
-        for packet in packet_list:
-            source = packet.source
-            available_clients.append(source)
-            destination = packet.destination
-            ciphertext = packet.ciphertext
-            if destination != self.secagg_id:
-                raise Exception(
-                    "Received packet meant for another user. Not supposed to happen")
-            shared_key = self.shared_key_2_dict[source]
-            plaintext = secagg_primitives.decrypt(shared_key, ciphertext)
-            try:
-                plaintext_source, plaintext_destination, plaintext_b_share, plaintext_sk1_share = secagg_primitives.share_keys_plaintext_separate(
-                    plaintext)
-            except:
-                raise Exception(
-                    "Decryption of ciphertext failed. Not supposed to happen")
-            if plaintext_source != source:
-                raise Exception(
-                    "Received packet source is different from intended source. Not supposed to happen")
-            if plaintext_destination != destination:
-                raise Exception(
-                    "Received packet destination is different from intended destination. Not supposed to happen")
-            self.b_share_dict[source] = plaintext_b_share
-            self.sk1_share_dict[source] = plaintext_sk1_share
-
-        # fit client
-        # IMPORTANT ASSUMPTION: ASSUME ALL CLIENTS FIT SAME AMOUNT OF DATA
-        '''
-        fit_res = self.client.fit(fit_ins)
-        parameters = fit_res.parameters
-        weights = parameters_to_weights(parameters)
-        '''
-        # temporary code
-        weights: Weights = [np.array([[-0.2, -0.5, 1.9], [0.0, 2.4, -1.9]]),
-                            np.array([[0.2, 0.5, -1.9], [0.0, -2.4, 1.9]])]
-
-        print(weights)
-        # temporary code end
-
-        # Quantize weight update vector
-        quantized_weights = secagg_primitives.quantize(
-            weights, self.clipping_range, self.target_range)
-
-        # IMPORTANT NEED SOME FUNCTION TO GET CORRECT WEIGHT FACTOR
-        # NOW WE HARD CODE IT AS 1
-        # Generally, should be fit_res.num_examples
-        weights_factor = self.secagg_id+1
-        print(weights_factor)
-
-        # weights factor cannoot exceed maximum
-        if weights_factor > self.max_weights_factor:
-            weights_factor = self.max_weights_factor
-            log(WARNING, "weights_factor exceeds allowed range and has been clipped. Either increase max_weights_factor, or train with fewer data. (Or server is performing unweighted aggregation)")
-
-        quantized_weights = secagg_primitives.weights_multiply(
-            quantized_weights, weights_factor)
-        quantized_weights = secagg_primitives.factor_weights_combine(
-            weights_factor, quantized_weights)
-
-        dimensions_list: List[Tuple] = [a.shape for a in quantized_weights]
-
-        # add private mask
-        private_mask = secagg_primitives.pseudo_rand_gen(
-            self.b, self.mod_range, dimensions_list)
-        quantized_weights = secagg_primitives.weights_addition(
-            quantized_weights, private_mask)
-
-        for client in available_clients:
-            # add pairwise mask
-            shared_key = secagg_primitives.generate_shared_key(
-                self.sk1, secagg_primitives.bytes_to_public_key(self.public_keys_dict[client].pk1))
-            pairwise_mask = secagg_primitives.pseudo_rand_gen(
-                shared_key, self.mod_range, dimensions_list)
-            if self.secagg_id > client:
-                quantized_weights = secagg_primitives.weights_addition(
-                    quantized_weights, pairwise_mask)
-            else:
-                quantized_weights = secagg_primitives.weights_subtraction(
-                    quantized_weights, pairwise_mask)
-
-        # Take mod of final weight update vector and return to server
-        quantized_weights = secagg_primitives.weights_mod(
-            quantized_weights, self.mod_range)
-        log(INFO, "Sent vectors")
-        return AskVectorsRes(parameters=weights_to_parameters(quantized_weights))
+        return secagg_client_logic.ask_vectors(self, ask_vectors_ins)
 
     def unmask_vectors(self, unmask_vectors_ins: UnmaskVectorsIns) -> UnmaskVectorsRes:
-        # Send private mask seed share for every avaliable client (including itself)
-        # Send first private key share for building pairwise mask for every dropped client
-        available_clients = unmask_vectors_ins.available_clients
-        if len(available_clients) < self.threshold:
-            raise Exception("Available neighbours number smaller than threshold")
-
-        dropout_clients = unmask_vectors_ins.dropout_clients
-        share_dict: Dict[int, bytes] = {}
-        for idx in available_clients:
-            share_dict[idx] = self.b_share_dict[idx]
-        for idx in dropout_clients:
-            share_dict[idx] = self.sk1_share_dict[idx]
-        log(INFO, "Sent shares for unmasking")
-        return UnmaskVectorsRes(share_dict=share_dict)
+        return secagg_client_logic.unmask_vectors(self, unmask_vectors_ins)
