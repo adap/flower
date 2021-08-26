@@ -129,10 +129,10 @@ def sec_agg_fit_round(server, rnd: int
     ask_vectors_results = ask_vectors_results_and_failures[0]
     if len(ask_vectors_results) < sec_agg_param_dict['min_num']:
         raise Exception("Not enough available clients after ask vectors stage")
-    #masked_vector = secagg_primitives.weights_zero_generate(parameters_to_weights(server.parameters).shape)
-    # testing code
-    masked_vector = secagg_primitives.weights_zero_generate([(1), (2, 3), (2, 3)])
-    # end testing code
+
+    # Get shape of vector sent by first client
+    masked_vector = secagg_primitives.weights_zero_generate(
+        [i.shape for i in parameters_to_weights(ask_vectors_results[0][1].parameters)])
 
     # Add all collected masked vectors and compuute available and dropout clients set
     unmask_vectors_clients: Dict[int, ClientProxy] = {}
@@ -244,7 +244,7 @@ def process_sec_agg_param_dict(sec_agg_param_dict: Dict[str, Scalar]) -> Dict[st
 
     # To be modified
     if 'max_weights_factor' not in sec_agg_param_dict:
-        sec_agg_param_dict['max_weights_factor'] = 5
+        sec_agg_param_dict['max_weights_factor'] = 1000
 
     # Quantization parameters
     if 'clipping_range' not in sec_agg_param_dict:
@@ -313,7 +313,6 @@ def setup_param(
             # Success case
             result = future.result()
             results.append(result)
-    print(failures)
     return results, failures
 
 

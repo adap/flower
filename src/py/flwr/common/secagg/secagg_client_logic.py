@@ -158,10 +158,10 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
     weights = parameters_to_weights(parameters)
     '''
     # temporary code
-    weights: Weights = [np.array([[-0.2, -0.5, 1.9], [0.0, 2.4, -1.9]]),
-                        np.array([[0.2, 0.5, -1.9], [0.0, -2.4, 1.9]])]
+    weights: Weights = secagg_primitives.weights_zero_generate(
+        [(20000), (20000), (20000), (20000), (20000)])
 
-    print(weights)
+    # print(weights)
     # temporary code end
 
     # Quantize weight update vector
