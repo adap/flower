@@ -55,15 +55,15 @@ def sec_agg_fit_round(server, rnd: int
         setup_param_clients[idx] = value[0]
         client_instructions[idx] = value[1]
 
-    # Get sec agg parameters
-    log(INFO, "SecAgg get param from dict")
+    # Get sec_agg parameters from strategy
+    log(INFO, "Get sec_agg_param_dict from strategy")
     sec_agg_param_dict = server.strategy.get_sec_agg_param()
     sec_agg_param_dict["sample_num"] = len(client_instruction_list)
     sec_agg_param_dict = process_sec_agg_param_dict(sec_agg_param_dict)
 
     # === Stage 0: Setup ===
     # Give rnd, sample_num, share_num, threshold, client id
-    log(INFO, "SecAgg setup params")
+    log(INFO, "SecAgg Stage 0: Setting up Params")
     setup_param_results_and_failures = setup_param(
         clients=setup_param_clients,
         sec_agg_param_dict=sec_agg_param_dict
@@ -77,7 +77,7 @@ def sec_agg_fit_round(server, rnd: int
             ask_keys_clients[idx] = client
 
     # === Stage 1: Ask Public Keys ===
-    log(INFO, "SecAgg ask keys")
+    log(INFO, "SecAgg Stage 1: Asking Keys")
     ask_keys_results_and_failures = ask_keys(ask_keys_clients)
 
     public_keys_dict: Dict[int, AskKeysRes] = {}
@@ -94,7 +94,7 @@ def sec_agg_fit_round(server, rnd: int
             share_keys_clients[idx] = client
 
     # === Stage 2: Share Keys ===
-    log(INFO, "SecAgg share keys")
+    log(INFO, "SecAgg Stage 2: Sharing Keys")
     share_keys_results_and_failures = share_keys(
         share_keys_clients, public_keys_dict, sec_agg_param_dict[
             'sample_num'], sec_agg_param_dict['share_num']
@@ -123,7 +123,7 @@ def sec_agg_fit_round(server, rnd: int
             forward_packet_list_dict[destination].append(packet)
 
     # === Stage 3: Ask Vectors ===
-    log(INFO, "SecAgg ask vectors")
+    log(INFO, "SecAgg Stage 3: Asking Vectors")
     ask_vectors_results_and_failures = ask_vectors(
         ask_vectors_clients, forward_packet_list_dict, client_instructions)
     ask_vectors_results = ask_vectors_results_and_failures[0]
@@ -147,7 +147,7 @@ def sec_agg_fit_round(server, rnd: int
                 masked_vector, parameters_to_weights(client_parameters))
 
     # === Stage 4: Unmask Vectors ===
-    log(INFO, "SecAgg unmask vectors")
+    log(INFO, "SecAgg Stage 4: Unmasking Vectors")
     unmask_vectors_results_and_failures = unmask_vectors(
         unmask_vectors_clients, dropout_clients, sec_agg_param_dict['sample_num'], sec_agg_param_dict['share_num'])
     unmask_vectors_results = unmask_vectors_results_and_failures[0]
@@ -165,7 +165,7 @@ def sec_agg_fit_round(server, rnd: int
             collected_shares_dict[owner_id].append(share)
 
     # Remove mask for every client who is available before ask vectors stage,
-    # but divide vector by number of clients available after ask vectors
+    # Divide vector by first element
     for client_id, share_list in collected_shares_dict.items():
         if len(share_list) < sec_agg_param_dict['threshold']:
             raise Exception(
@@ -242,7 +242,7 @@ def process_sec_agg_param_dict(sec_agg_param_dict: Dict[str, Scalar]) -> Dict[st
         sec_agg_param_dict['threshold'] = max(
             2, int(sec_agg_param_dict['share_num'] * 0.9))
 
-    # To be modified
+    # Maximum number of example trained set to 1000
     if 'max_weights_factor' not in sec_agg_param_dict:
         sec_agg_param_dict['max_weights_factor'] = 1000
 
@@ -259,7 +259,7 @@ def process_sec_agg_param_dict(sec_agg_param_dict: Dict[str, Scalar]) -> Dict[st
             sec_agg_param_dict['max_weights_factor']
 
     if 'timeout' not in sec_agg_param_dict:
-        sec_agg_param_dict['timeout'] = 20
+        sec_agg_param_dict['timeout'] = 30
 
     log(
         INFO,

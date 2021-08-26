@@ -56,6 +56,7 @@ def start_client(
     """
     # Automatically inherit sec_agg relevant functions regardless of strategy
     client = SecAggClient(client)
+
     while True:
         sleep_duration: int = 0
         with insecure_grpc_connection(

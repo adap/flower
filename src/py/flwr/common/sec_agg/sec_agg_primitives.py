@@ -31,7 +31,7 @@ from numpy.core.fromnumeric import clip
 
 from flwr.common.typing import Weights
 
-# Key Generation
+# Key Generation  ====================================================================
 
 # Generate private and public key pairs with Cryptography
 
@@ -89,7 +89,7 @@ def generate_shared_key(
     ).derive(sharedk)
     return base64.urlsafe_b64encode(derivedk)
 
-# Authenticated Encryption
+# Authenticated Encryption ================================================================
 
 # Encrypt plaintext with Fernet. Key must be 32 bytes.
 
@@ -107,7 +107,7 @@ def decrypt(key: bytes, token: bytes):
     f = Fernet(key)
     return f.decrypt(token)
 
-# Shamir's Secret Sharing Scheme
+# Shamir's Secret Sharing Scheme ============================================================
 
 # Create shares with PyCryptodome. Each share must be processed to be a byte string with pickle for RPC
 
@@ -171,13 +171,13 @@ def shamir_combine(shares: List[Tuple[int, bytes]]) -> bytes:
     return Shamir.combine(shares)
 
 
-# Random Bytes Generator
+# Random Bytes Generator =============================================================
 
 # Generate random bytes with os. Usually 32 bytes for Fernet
 def rand_bytes(num: int = 32) -> bytes:
     return os.urandom(num)
 
-# Pseudo Bytes Generator
+# Pseudo Bytes Generator ==============================================================
 
 # Pseudo random generator for creating masks.
 
@@ -193,7 +193,7 @@ def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -
     return output
 
 
-# String Concatenation
+# String Concatenation ===================================================================
 
 # Unambiguous string concatenation of source, destination, and two secret shares. We assume they do not contain the '|' character
 def share_keys_plaintext_concat(source: int, destination: int, b_share: bytes, sk_share: bytes) -> bytes:
@@ -212,7 +212,7 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
         plaintext_list[3],
     )
 
-# Weight Quantization
+# Weight Quantization ======================================================================
 
 # Clip weight vector to [-clipping_range, clipping_range]
 # Transform weight vector to range [0, target_range] and take floor
@@ -238,7 +238,7 @@ def reverse_quantize(weight: Weights, clipping_range: float, target_range: int) 
         reverse_quantized_list.append(f(arr.astype(float)))
     return reverse_quantized_list
 
-# Weight Manipulation
+# Weight Manipulation =============================================================
 
 # Combine factor with weights
 

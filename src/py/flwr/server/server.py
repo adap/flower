@@ -143,16 +143,18 @@ class Server:
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
             if sec_agg == 1:
-                # hard code methods
+                # Check is strategy compatible with sec_agg
                 if not isinstance(self.strategy, SecAggStrategy):
                     raise Exception("Strategy not compatible with secure aggregation")
+
                 res_fit = sec_agg_server_logic.sec_agg_fit_round(
                     self, rnd=current_round)
-                # TO BE REMOVED
+
+                # TO BE REMOVED ===================================================
                 print(parameters_to_weights(res_fit[0]))
                 raise Exception("SUCCESS")
-                res_fit = sec_agg_server_logic.sec_agg_fit_round(
-                    server=self, rnd=current_round)
+                # END ============================================================
+
                 if res_fit:
                     parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
                     log(INFO, parameters_prime)

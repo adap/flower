@@ -44,13 +44,14 @@ def setup_param(client, setup_param_ins: SetupParamIns):
         client.test = 1
         client.test_vector_shape = [(sec_agg_param_dict['test_vector_dimension'],)]
         client.test_dropout_value = sec_agg_param_dict['test_dropout_value']
+    # End =================================================================
 
     # key is the sec_agg_id of another client (int)
     # value is the secret share we possess that contributes to the client's secret (bytes)
     client.b_share_dict = {}
     client.sk1_share_dict = {}
     client.shared_key_2_dict = {}
-    log(INFO, f"SecAgg Params: {setup_param_ins}")
+    log(INFO, "SecAgg Stage 0: Parameters Set Up")
     return SetupParamRes()
 
 
@@ -60,7 +61,7 @@ def ask_keys(client, ask_keys_ins: AskKeysIns) -> AskKeysRes:
     # One for encrypting message to distribute shares
     client.sk1, client.pk1 = sec_agg_primitives.generate_key_pairs()
     client.sk2, client.pk2 = sec_agg_primitives.generate_key_pairs()
-    log(INFO, "Created SecAgg Key Pairs")
+    log(INFO, "SecAgg Stage 1: Created Key Pairs")
     return AskKeysRes(
         pk1=sec_agg_primitives.public_key_to_bytes(client.pk1),
         pk2=sec_agg_primitives.public_key_to_bytes(client.pk2),
@@ -118,7 +119,7 @@ def share_keys(client, share_keys_in: ShareKeysIns) -> ShareKeysRes:
                 source=client.sec_agg_id, destination=client_sec_agg_id, ciphertext=ciphertext)
             share_keys_res.share_keys_res_list.append(share_keys_packet)
 
-    log(INFO, "Sent shares for other clients")
+    log(INFO, "SecAgg Stage 2: Sent Shares via Packets")
     return share_keys_res
 
 
@@ -172,9 +173,7 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
             raise Exception("Force dropout due to testing")
         weights: Weights = sec_agg_primitives.weights_zero_generate(
             client.test_vector_shape)
-
-    # print(weights)
-    # temporary code end
+    # END =================================================================
 
     # Quantize weight update vector
     quantized_weights = sec_agg_primitives.quantize(
@@ -183,8 +182,10 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
     # IMPORTANT NEED SOME FUNCTION TO GET CORRECT WEIGHT FACTOR
     # NOW WE HARD CODE IT AS 1
     # Generally, should be fit_res.num_examples
+    # To be removed =======================================================
     weights_factor = client.sec_agg_id+1
     print(weights_factor)
+    # End =================================================================
 
     # weights factor cannoot exceed maximum
     if weights_factor > client.max_weights_factor:
@@ -220,7 +221,7 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
     # Take mod of final weight update vector and return to server
     quantized_weights = sec_agg_primitives.weights_mod(
         quantized_weights, client.mod_range)
-    log(INFO, "Sent vectors")
+    log(INFO, "SecAgg Stage 3: Sent Vectors")
     return AskVectorsRes(parameters=weights_to_parameters(quantized_weights))
 
 
@@ -237,5 +238,5 @@ def unmask_vectors(client, unmask_vectors_ins: UnmaskVectorsIns) -> UnmaskVector
         share_dict[idx] = client.b_share_dict[idx]
     for idx in dropout_clients:
         share_dict[idx] = client.sk1_share_dict[idx]
-    log(INFO, "Sent shares for unmasking")
+    log(INFO, "SecAgg Stage 4: Sent Shares for Unmasking")
     return UnmaskVectorsRes(share_dict=share_dict)
