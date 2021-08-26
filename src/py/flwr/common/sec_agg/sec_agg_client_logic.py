@@ -94,11 +94,11 @@ def share_keys(client, share_keys_in: ShareKeysIns) -> ShareKeysRes:
 
     # Create shares
     b_shares = sec_agg_primitives.create_shares(
-        client.b, client.threshold, client.sample_num
+        client.b, client.threshold, client.share_num
     )
     sk1_shares = sec_agg_primitives.create_shares(
         sec_agg_primitives.private_key_to_bytes(
-            client.sk1), client.threshold, client.sample_num
+            client.sk1), client.threshold, client.share_num
     )
 
     share_keys_res = ShareKeysRes(share_keys_res_list=[])
