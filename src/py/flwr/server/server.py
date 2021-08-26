@@ -37,13 +37,13 @@ from flwr.common import (
 )
 from flwr.common.logger import log
 from flwr.common.parameter import parameters_to_weights
-from flwr.common.secagg import secagg_server_logic
+from flwr.common.sec_agg import sec_agg_server_logic
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import Strategy, FedAvg
 from flwr.common.typing import AskKeysIns, AskKeysRes, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
-from flwr.server.strategy.secagg_strategy import SecAggStrategy
+from flwr.server.strategy.sec_agg_strategy import SecAggStrategy
 
 DEPRECATION_WARNING_EVALUATE = """
 DEPRECATION WARNING: Method
@@ -117,7 +117,7 @@ class Server:
         return self._client_manager
 
     # pylint: disable=too-many-locals
-    def fit(self, num_rounds: int, secagg: int) -> History:
+    def fit(self, num_rounds: int, sec_agg: int) -> History:
         """Run federated averaging for a number of rounds."""
         history = History()
 
@@ -142,16 +142,16 @@ class Server:
 
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
-            if secagg == 1:
+            if sec_agg == 1:
                 # hard code methods
                 if not isinstance(self.strategy, SecAggStrategy):
                     raise Exception("Strategy not compatible with secure aggregation")
-                res_fit = secagg_server_logic.sec_agg_fit_round(
+                res_fit = sec_agg_server_logic.sec_agg_fit_round(
                     self, rnd=current_round)
                 # TO BE REMOVED
                 print(parameters_to_weights(res_fit[0]))
                 raise Exception("SUCCESS")
-                res_fit = secagg_server_logic.sec_agg_fit_round(
+                res_fit = sec_agg_server_logic.sec_agg_fit_round(
                     server=self, rnd=current_round)
                 if res_fit:
                     parameters_prime, _, _ = res_fit  # fit_metrics_aggregated

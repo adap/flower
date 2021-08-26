@@ -23,7 +23,7 @@ from flwr.common import (
 )
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
-from flwr.common.secagg import secagg_client_logic
+from flwr.common.sec_agg import sec_agg_client_logic
 from .client import Client
 
 
@@ -44,16 +44,16 @@ class SecAggClient(Client):
         return self.client.evaluate(ins)
 
     def setup_param(self, setup_param_ins: SetupParamIns):
-        return secagg_client_logic.setup_param(self, setup_param_ins)
+        return sec_agg_client_logic.setup_param(self, setup_param_ins)
 
     def ask_keys(self, ask_keys_ins: AskKeysIns) -> AskKeysRes:
-        return secagg_client_logic.ask_keys(self, ask_keys_ins)
+        return sec_agg_client_logic.ask_keys(self, ask_keys_ins)
 
     def share_keys(self, share_keys_in: ShareKeysIns) -> ShareKeysRes:
-        return secagg_client_logic.share_keys(self, share_keys_in)
+        return sec_agg_client_logic.share_keys(self, share_keys_in)
 
     def ask_vectors(self, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
-        return secagg_client_logic.ask_vectors(self, ask_vectors_ins)
+        return sec_agg_client_logic.ask_vectors(self, ask_vectors_ins)
 
     def unmask_vectors(self, unmask_vectors_ins: UnmaskVectorsIns) -> UnmaskVectorsRes:
-        return secagg_client_logic.unmask_vectors(self, unmask_vectors_ins)
+        return sec_agg_client_logic.unmask_vectors(self, unmask_vectors_ins)

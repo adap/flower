@@ -153,5 +153,5 @@ examples/**/dataset/**
 # Datasets
 baselines/datasets/leaf
 
-#Testing for secagg
+#Testing for sec_agg
 tests/

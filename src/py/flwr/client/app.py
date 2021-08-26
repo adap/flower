@@ -27,7 +27,7 @@ from .grpc_client.connection import insecure_grpc_connection
 from .grpc_client.message_handler import handle
 from .keras_client import KerasClient, KerasClientWrapper
 from .numpy_client import NumPyClient, NumPyClientWrapper
-from .secagg_client import SecAggClient
+from .sec_agg_client import SecAggClient
 
 
 def start_client(
@@ -54,7 +54,7 @@ def start_client(
     Returns:
         None.
     """
-    # Automatically inherit secagg relevant functions regardless of strategy
+    # Automatically inherit sec_agg relevant functions regardless of strategy
     client = SecAggClient(client)
     while True:
         sleep_duration: int = 0

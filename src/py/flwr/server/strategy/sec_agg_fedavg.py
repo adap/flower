@@ -36,7 +36,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.fedavg import FedAvg
-from flwr.server.strategy.secagg_strategy import SecAggStrategy
+from flwr.server.strategy.sec_agg_strategy import SecAggStrategy
 
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy

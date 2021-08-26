@@ -22,8 +22,8 @@ from .fedadagrad import FedAdagrad as FedAdagrad
 from .fedavg import FedAvg as FedAvg
 from .fedfs_v0 import FedFSv0 as FedFSv0
 from .fedfs_v1 import FedFSv1 as FedFSv1
-from .secagg_fedavg import SecAggFedAvg as SecAggFedAvg
-from .secagg_strategy import SecAggStrategy as SecAggStrategy
+from .sec_agg_fedavg import SecAggFedAvg as SecAggFedAvg
+from .sec_agg_strategy import SecAggStrategy as SecAggStrategy
 from .qfedavg import QFedAvg as QFedAvg
 from .qfedavg import QffedAvg as QffedAvg  # Deprecated
 from .strategy import Strategy as Strategy

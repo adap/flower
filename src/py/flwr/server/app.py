@@ -107,9 +107,9 @@ def _init_defaults(
         config = {}
     if "num_rounds" not in config:
         config["num_rounds"] = 1
-    if "secagg" not in config:
+    if "sec_agg" not in config:
         # secure aggregation is not set as default
-        config["secagg"] = 0
+        config["sec_agg"] = 0
 
     return server, config
 
@@ -118,7 +118,7 @@ def _fl(
     server: Server, config: Dict[str, int], force_final_distributed_eval: bool
 ) -> None:
     # Fit model
-    hist = server.fit(num_rounds=config["num_rounds"], secagg=config["secagg"])
+    hist = server.fit(num_rounds=config["num_rounds"], sec_agg=config["sec_agg"])
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
     log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
     log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))

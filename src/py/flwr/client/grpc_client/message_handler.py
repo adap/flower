@@ -20,7 +20,6 @@ from typing import Tuple
 from flwr.client.client import Client
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
-from flwr.common.secagg import secagg_client_logic
 
 from flwr.server.server import Server
 
