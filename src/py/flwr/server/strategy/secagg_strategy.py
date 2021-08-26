@@ -30,4 +30,5 @@ class SecAggStrategy(ABC):
         max_weights_factor: maximum weights factor mulitplied on weights vector
         timeout: not used, but timeout for gRPC in the future
 
-        Note: do not use secagg_id or sample_num, as it will be used overwritten on server side'''
+        Note: do not use secagg_id or sample_num, as it will be used overwritten on server side. 
+        test, test_vector_shape and test_dropout_value also used for testing temporarily'''

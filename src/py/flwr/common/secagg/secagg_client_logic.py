@@ -17,7 +17,7 @@ from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
 from flwr.common.secagg import secagg_primitives
 from flwr.common.logger import log
-from logging import DEBUG, INFO, WARNING
+from logging import DEBUG, ERROR, INFO, WARNING
 from typing import Dict, List, Tuple
 from flwr.common import (
     AskKeysRes,
@@ -37,6 +37,13 @@ def setup_param(client, setup_param_ins: SetupParamIns):
     client.target_range = sec_agg_param_dict['target_range']
     client.mod_range = sec_agg_param_dict['mod_range']
     client.max_weights_factor = sec_agg_param_dict['max_weights_factor']
+
+    # Testing , to be removed================================================
+    client.test = 0
+    if 'test' in sec_agg_param_dict and sec_agg_param_dict['test'] == 1:
+        client.test = 1
+        client.test_vector_shape = [(sec_agg_param_dict['test_vector_dimension'],)]
+        client.test_dropout_value = sec_agg_param_dict['test_dropout_value']
 
     # key is the secagg_id of another client (int)
     # value is the secret share we possess that contributes to the client's secret (bytes)
@@ -156,10 +163,15 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
     fit_res = client.client.fit(fit_ins)
     parameters = fit_res.parameters
     weights = parameters_to_weights(parameters)
+    weights_factor = fit_res.num_examples
     '''
-    # temporary code
-    weights: Weights = secagg_primitives.weights_zero_generate(
-        [(20000), (20000), (20000), (20000), (20000)])
+    # temporary code=========================================================
+    if client.test == 1:
+        if client.secagg_id % 10 < client.test_dropout_value:
+            log(ERROR, "Force dropout due to testing!!")
+            raise Exception("Force dropout due to testing")
+        weights: Weights = secagg_primitives.weights_zero_generate(
+            client.test_vector_shape)
 
     # print(weights)
     # temporary code end
