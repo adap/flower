@@ -170,18 +170,19 @@ def sec_agg_fit_round(server, rnd: int
         if len(share_list) < sec_agg_param_dict['threshold']:
             raise Exception(
                 "Not enough shares to recover secret in unmask vectors stage")
-        seed = sec_agg_primitives.combine_shares(share_list=share_list)
+        secret = sec_agg_primitives.combine_shares(share_list=share_list)
         if client_id in unmask_vectors_clients.keys():
-            # seed is an available client's b
+            # secret is an available client's b
             private_mask = sec_agg_primitives.pseudo_rand_gen(
-                seed, sec_agg_param_dict['mod_range'], sec_agg_primitives.weights_shape(masked_vector))
+                secret, sec_agg_param_dict['mod_range'], sec_agg_primitives.weights_shape(masked_vector))
             masked_vector = sec_agg_primitives.weights_subtraction(
                 masked_vector, private_mask)
         else:
-            # seed is a dropout client's sk1
+            # secret is a dropout client's sk1
             neighbor_list: List[int] = []
             if sec_agg_param_dict['share_num'] == sec_agg_param_dict['sample_num']:
-                neighbor_list = list(ask_vectors_clients.keys()).remove(client_id)
+                neighbor_list = list(ask_vectors_clients.keys())
+                neighbor_list.remove(client_id)
             else:
                 for i in range(-int(sec_agg_param_dict['share_num'] / 2), int(sec_agg_param_dict['share_num'] / 2) + 1):
                     if i != 0 and ((i + client_id) % sec_agg_param_dict['sample_num']) in ask_vectors_clients.keys():
@@ -189,7 +190,7 @@ def sec_agg_fit_round(server, rnd: int
                                              sec_agg_param_dict['sample_num'])
             for neighbor_id in neighbor_list:
                 shared_key = sec_agg_primitives.generate_shared_key(
-                    seed, sec_agg_primitives.bytes_to_public_key(public_keys_dict[neighbor_id].pk1))
+                    sec_agg_primitives.bytes_to_private_key(secret), sec_agg_primitives.bytes_to_public_key(public_keys_dict[neighbor_id].pk1))
                 pairwise_mask = sec_agg_primitives.pseudo_rand_gen(
                     shared_key, sec_agg_param_dict['mod_range'], sec_agg_primitives.weights_shape(masked_vector))
                 if client_id > neighbor_id:
