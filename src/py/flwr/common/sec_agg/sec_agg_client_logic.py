@@ -179,7 +179,6 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
     # Generally, should be fit_res.num_examples
 
     weights_factor = client.sec_agg_id+1
-    print(weights_factor)
 
     # END =================================================================
 
