@@ -160,10 +160,28 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
         client.sk1_share_dict[source] = plaintext_sk1_share
 
     # fit client
+    # IMPORTANT ASSUMPTION: ASSUME ALL CLIENTS FIT SAME AMOUNT OF DATA
+    '''
     fit_res = client.client.fit(fit_ins)
     parameters = fit_res.parameters
     weights = parameters_to_weights(parameters)
     weights_factor = fit_res.num_examples
+    '''
+    # temporary code=========================================================
+    if client.test == 1:
+        if client.sec_agg_id % 10 < client.test_dropout_value:
+            log(ERROR, "Force dropout due to testing!!")
+            raise Exception("Force dropout due to testing")
+        weights: Weights = sec_agg_primitives.weights_zero_generate(
+            client.test_vector_shape)
+     # IMPORTANT NEED SOME FUNCTION TO GET CORRECT WEIGHT FACTOR
+    # NOW WE HARD CODE IT AS 1
+    # Generally, should be fit_res.num_examples
+
+    weights_factor = client.sec_agg_id+1
+    print(weights_factor)
+
+    # END =================================================================
 
     # Quantize weight update vector
     quantized_weights = sec_agg_primitives.quantize(
