@@ -33,7 +33,7 @@ class CifarClient(fl.client.NumPyClient):
 def test_start_server(sample_num=2, min_num=2, vector_dimension=100000, dropout_value=0):
     fl.server.start_server("localhost:8080", config={
                            "num_rounds": 1, "sec_agg": 1},
-                           strategy=SecAggFedAvg(fraction_fit=1, min_available_clients=sample_num,
+                           strategy=SecAggFedAvg(fraction_fit=1, min_fit_clients=sample_num, min_available_clients=sample_num,
                                                  sec_agg_param_dict={"min_num": min_num,
                                                                      "test": 1,
                                                                      "test_vector_dimension": vector_dimension,

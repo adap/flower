@@ -170,11 +170,11 @@ def sec_agg_fit_round(server, rnd: int
         if len(share_list) < sec_agg_param_dict['threshold']:
             raise Exception(
                 "Not enough shares to recover secret in unmask vectors stage")
-        seed = sec_agg_primitives.combine_shares(share_list=share_list)
+        secret = sec_agg_primitives.combine_shares(share_list=share_list)
         if client_id in unmask_vectors_clients.keys():
             # seed is an available client's b
             private_mask = sec_agg_primitives.pseudo_rand_gen(
-                seed, sec_agg_param_dict['mod_range'], sec_agg_primitives.weights_shape(masked_vector))
+                secret, sec_agg_param_dict['mod_range'], sec_agg_primitives.weights_shape(masked_vector))
             masked_vector = sec_agg_primitives.weights_subtraction(
                 masked_vector, private_mask)
         else:
@@ -191,7 +191,7 @@ def sec_agg_fit_round(server, rnd: int
 
             for neighbor_id in neighbor_list:
                 shared_key = sec_agg_primitives.generate_shared_key(
-                    sec_agg_primitives.bytes_to_private_key(seed), sec_agg_primitives.bytes_to_public_key(public_keys_dict[neighbor_id].pk1))
+                    sec_agg_primitives.bytes_to_private_key(secret), sec_agg_primitives.bytes_to_public_key(public_keys_dict[neighbor_id].pk1))
                 pairwise_mask = sec_agg_primitives.pseudo_rand_gen(
                     shared_key, sec_agg_param_dict['mod_range'], sec_agg_primitives.weights_shape(masked_vector))
                 if client_id > neighbor_id:
