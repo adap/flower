@@ -1,9 +1,31 @@
 import flwr as fl
+import os
+import tensorflow as tf
+import time
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-
+from multiprocessing import Process
 from flwr.server.strategy.sec_agg_fedavg import SecAggFedAvg
 
 # Testing
+# Define Flower client
+
+model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+
+
+class CifarClient(fl.client.NumPyClient):
+    def get_parameters(self):  # type: ignore
+        return model.get_weights()
+
+    def fit(self, parameters, config):  # type: ignore
+        model.set_weights(parameters)
+        model.fit(x_train, y_train, epochs=1, batch_size=32)
+        return model.get_weights(), len(x_train), {}
+
+    def evaluate(self, parameters, config):  # type: ignore
+        model.set_weights(parameters)
+        loss, accuracy = model.evaluate(x_test, y_test)
+        return loss, len(x_test), {"accuracy": accuracy}
 
 
 def test_start_server(vector_dimension=100000, dropout_value=0):
@@ -18,3 +40,35 @@ def test_start_client(server_address: str,
                       client,
                       grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,):
     fl.client.start_numpy_client(server_address, client, grpc_max_message_length)
+
+
+def test_start_simulation():
+    """Start a FL simulation."""
+    # This will hold all the processes which we are going to create
+    processes = []
+
+    # Start the server
+    server_process = Process(
+        target=test_start_server
+    )
+    server_process.start()
+    processes.append(server_process)
+
+    # Optionally block the script here for a second or two so the server has time to start
+    time.sleep(2)
+
+    # Define model
+
+    # Load CIFAR-10 dataset
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+
+    # Start all the clients
+    for i in range(2):
+        client_process = Process(target=test_start_client,
+                                 args=("localhost:8080", CifarClient()))
+        client_process.start()
+        processes.append(client_process)
+
+    # Block until all processes are finished
+    for p in processes:
+        p.join()
