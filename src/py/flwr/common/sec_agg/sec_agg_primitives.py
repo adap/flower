@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from logging import WARNING, log
 from typing import List, Tuple
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -221,11 +222,24 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
 
 def quantize(weight: Weights, clipping_range: float, target_range: int) -> Weights:
     quantized_list = []
+    check_clipping_range(weight, clipping_range)
     f = np.vectorize(lambda x:  min(target_range-1, (sorted((-clipping_range, x, clipping_range))
                                                      [1]+clipping_range)*target_range/(2*clipping_range)))
     for arr in weight:
         quantized_list.append(f(arr).astype(int))
     return quantized_list
+
+# Quick check that all numbers are within the clipping range
+# Throw warning if there exists numbers that exceed it
+
+
+def check_clipping_range(weight: Weights, clipping_range: float):
+    for arr in weight:
+        for x in arr.flatten():
+            if(x < -clipping_range or x > clipping_range):
+                log(WARNING,
+                    f"There are some numbers in the local vector that exceeds clipping range. Please increase the clipping range to account for value {x}")
+                return
 
 # Transform weight vector to range [-clipping_range, clipping_range]
 # Convert to float

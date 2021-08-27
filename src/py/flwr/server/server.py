@@ -150,14 +150,8 @@ class Server:
                 res_fit = sec_agg_server_logic.sec_agg_fit_round(
                     self, rnd=current_round)
 
-                # TO BE REMOVED ===================================================
-                print(parameters_to_weights(res_fit[0]))
-                raise Exception("SUCCESS")
-                # END ============================================================
-
                 if res_fit:
                     parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
-                    log(INFO, parameters_prime)
                     if parameters_prime:
                         self.parameters = parameters_prime
             else:
