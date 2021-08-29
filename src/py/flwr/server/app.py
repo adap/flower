@@ -27,6 +27,7 @@ from flwr.server.strategy import FedAvg, Strategy
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
+
 def start_server(  # pylint: disable=too-many-arguments
     server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,
@@ -127,7 +128,8 @@ def _fl(
         # Evaluate the final trained model
         res = server.evaluate_round(rnd=-1)
         if res is not None:
-            loss, metrics, (results, failures) = res
+            loss, _, (results, failures) = res
+            log(INFO, "app_evaluate: federated loss: %s", str(loss))
             log(
                 INFO,
                 "app_evaluate: results %s",
