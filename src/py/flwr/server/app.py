@@ -26,7 +26,6 @@ from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
-import requests
 
 def start_server(  # pylint: disable=too-many-arguments
     server_address: str = DEFAULT_SERVER_ADDRESS,
@@ -129,11 +128,6 @@ def _fl(
         res = server.evaluate_round(rnd=-1)
         if res is not None:
             loss, metrics, (results, failures) = res
-            print("===========SENDING LOSS TO LOCAL SERVER=========")
-            print(metrics)
-            r = requests.post(url = "http://localhost:8000/result", json = {'loss':loss,'accuracy':results[0][1].metrics['accuracy']})
-            print("======================SENT=======================")
-            log(INFO, "app_evaluate: federated loss: %s", str(loss))
             log(
                 INFO,
                 "app_evaluate: results %s",
