@@ -118,4 +118,4 @@ testpaths = [
 ]
 
 [tool.poetry.scripts]
-flwr = "flwr.cli:cli"
+flwr = "flwr.cli.cli:app"
