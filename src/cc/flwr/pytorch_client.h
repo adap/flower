@@ -101,44 +101,44 @@ public:
         torch::optim::Optimizer& optimizer,
         torch::Device device)
     : net(net), num_epochs(num_epochs), train_loader(train_loader), test_loader(test_loader), optimizer(optimizer), device(device){};
+    
 
-    Parameters getModel() {
-        // Serialize
-        std::ostringstream stream;
-        torch::save(net, stream);
-        std::string str = stream.str();
-        const char* chr = str.c_str();
+    Parameters getWeight(){
         std::list<std::string> tensors;
-        tensors.push_back(str);
-        return Parameters(tensors, "pyotorch example");
-        
+        for (auto p : net->parameters()) {
+            tensors.push_back(p.toString());
+        }
+        return Parameters(tensors, "pytorch example");
     }
-
+    
+    void setWeight(Parameters parameter){
+        std::list<std::string> tensors = parameter.getTensors();
+        for (auto p : net->parameters()) {
+            p.set_data(torch::tensor(tensors.front()));
+            tensors.erase();
+        }
+    }
+    
     virtual ParametersRes get_parameters() override {
         //std::cout << "DEBUG: get parameters" << std::endl;
-
-        return ParametersRes(getModel());
+        
+        return ParametersRes(getWeight());
     }
 
     virtual FitRes fit(FitIns ins) override {
-        // get weight
-
-
-        //
 
         clock_t startTime, endTime;
         startTime = clock();
         
         // set weight
+        setWeight(ins.getParameters());
 
-
-        // 
         int num_samples = train(net, num_epochs, train_loader, optimizer, device);
 
         endTime = clock();
         
         FitRes f;
-        f.setParameters(getModel());
+        f.setParameters(getWeight());
         f.setNum_example(num_samples);
         f.setNum_examples_ceil(num_samples);
         f.setFit_duration((float)(endTime - startTime) / CLOCKS_PER_SEC);
@@ -146,8 +146,9 @@ public:
     }
 
     virtual EvaluateRes evaluate(EvaluateIns ins) override {
-        // get weight from ins
+        
         //set weight 
+        setWeight(ins.getParameters());
 
         std::tuple<size_t, float, double> result = test(net, test_loader, device);
 
