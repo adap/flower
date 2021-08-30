@@ -30,6 +30,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    Parameters,
     Scalar,
     Weights,
     parameters_to_weights,
@@ -49,11 +50,6 @@ from typing import List, Optional, Tuple
 import numpy as np
 
 
-
-current_weights:Optional[Weights] = None
-
-
-
 class FedAvgGrad(FedAvg):
     """Configurable fault-tolerant FedAvg strategy implementation."""
 
@@ -65,10 +61,13 @@ class FedAvgGrad(FedAvg):
         min_fit_clients: int = 2,
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
-        eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
+        eval_fn: Optional[
+            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
-        initial_parameters: Optional[Weights] = None,
+        initial_parameters: Optional[Parameters] = None,
+        global_parameters: Optional[Parameters] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -82,30 +81,20 @@ class FedAvgGrad(FedAvg):
             accept_failures=True,
             initial_parameters=initial_parameters,
         )
+        self.current_global_parameters= global_parameters
 
 
     def __repr__(self) -> str:
         return "FedAvgGrad()"
 
 
-    def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
-        """Evaluate model weights using an evaluation function (if
-        provided)."""
-
-        if self.eval_fn is None:
-            # No evaluation function provided
-            return None
-        return self.eval_fn(weights)
-
-
     def configure_fit(
-        self, rnd: int, weights: Weights, client_manager: ClientManager
+        self, rnd: int, parameters: Parameters , client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
-
-        current_weights = weights
-
-        parameters = weights_to_parameters(weights)
+        """Configure the next round of training."""
+        self.current_global_parameters = parameters
         config = {}
+
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(rnd)
@@ -128,34 +117,24 @@ class FedAvgGrad(FedAvg):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Optional[Weights]:
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
-            return None
+            return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
-            return None
+            return None, {}
         # Convert results
         weights_results = [
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
 
+        aggregated_weights = np.array(aggregate(weights_results),dtype=object)
+        current_global_weights = parameters_to_weights(self.current_global_parameters)
+        current_weights = np.array(current_global_weights,dtype=object)
 
-        aggregated_weights = aggregate(weights_results)
+        final_weights = np.subtract(current_weights,aggregated_weights)
 
-        ar1 = np.array(aggregated_weights,dtype=object)
+        return weights_to_parameters(final_weights), {}
 
-        ar2 = np.array(current_weights, dtype=object)
-
-        if ar1.shape == ar2.shape:
-
-                res = np.add(ar2, ar1)
-
-                final_weights = []
-
-                for x in res:
-                    hold = np.array(x)
-                    final_weights.append(hold)
-
-                return final_weights

@@ -10,7 +10,7 @@ from torchvision.datasets import MNIST
 from torchvision.transforms import ToTensor
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
-
+import copy
 
 def main():
     class MnistModel(nn.Module):
@@ -55,7 +55,9 @@ def main():
     #Flower Client
     class MnistClient(fl.client.NumPyClient):
         def get_parameters(self):
-            return [val.cpu().numpy() for _, val in model.state_dict().items()]
+            parameters = [val.cpu().numpy() for _, val in model.state_dict().items()]
+            return copy.deepcopy(parameters)
+
 
 
         def set_parameters(self, parameters):
@@ -67,19 +69,20 @@ def main():
 
         def fit(self, parameters, config):
             self.set_parameters(parameters)
-
+            #current_parameters contains the parameters before the training process
             current_parameters = self.get_parameters()
 
             train(1, 0.5, model, F.cross_entropy, train_dl, valid_dl, accuracy)
-
+            # new_parameters contains the parameters after the training process
             new_parameters = self.get_parameters()
 
             current_parameters = np.array(current_parameters, dtype=object)
             new_parameters = np.array(new_parameters, dtype=object)
 
-            difference_in_parameters = np.subtract(new_parameters, current_parameters)
+            # finding difference in current_parameters and new_parameters
+            difference_in_parameters = np.subtract(current_parameters, new_parameters)
 
-            result=[]
+            result = []
 
             for x in difference_in_parameters:
                 hold = np.array(x)
