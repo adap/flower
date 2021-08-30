@@ -50,6 +50,7 @@ int train(vision::models::ResNet18& net, int64_t num_epochs,
 {
     net->to(device);
     net->train();
+    int num_total = 0;
     for (size_t epoch = 1; epoch <= num_epochs; ++epoch)
     {
         size_t num_samples = 0;
@@ -85,14 +86,16 @@ int train(vision::models::ResNet18& net, int64_t num_epochs,
 
         std::cout << "Epoch [" << (epoch + 1) << "/" << num_epochs << "], Trainset - Loss: "
             << sample_mean_loss << ", Accuracy: " << accuracy << std::endl;
+        num_total+=num_samples;
     }
-    return num_samples;
+    return num_total;
 }
 
 /*
 * pytorch client
 *
 */
+template <typename DataLoader>
 class pytorch_client : public Client {
 public:
     pytorch_client(vision::models::ResNet18& net, int64_t num_epochs,
@@ -113,9 +116,12 @@ public:
     
     void setWeight(Parameters parameter){
         std::list<std::string> tensors = parameter.getTensors();
-        for (auto p : net->parameters()) {
-            p.set_data(torch::tensor(tensors.front()));
-            tensors.erase();
+        auto t = tensors.begin();
+	for (auto p : net->parameters()) {
+	    
+	    p.set_data(torch::tensor(t->c_str()));
+            t++;
+	    
         }
     }
     

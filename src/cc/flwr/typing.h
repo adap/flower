@@ -12,7 +12,7 @@
 *
 */
 namespace flwr {
-	class Scalar {
+	class scalar {
 	public:
 		// getters
 		std::optional<bool> getBool() {
@@ -56,7 +56,7 @@ namespace flwr {
 		std::optional<std::string> string = std::nullopt;
 	};
 
-	typedef std::map<std::string, Scalar> Metrics;
+	typedef std::map<std::string, scalar> Metrics;
 
 	class Parameters {
 	public:
@@ -102,26 +102,26 @@ namespace flwr {
 
 	class FitIns {
 	public:
-		FitIns(Parameters parameters, std::map<std::string, Scalar> config)
+		FitIns(Parameters parameters, std::map<std::string, scalar> config)
 			: parameters(parameters), config(config) {};
 
 		Parameters getParameters() {
 			return parameters;
 		}
-		std::map<std::string, Scalar> getConfig() {
+		std::map<std::string, scalar> getConfig() {
 			return config;
 		}
 
 		void setParameters(Parameters p) {
 			parameters = p;
 		}
-		void setConfig(std::map<std::string, Scalar> config) {
+		void setConfig(std::map<std::string, scalar> config) {
 			this->config = config;
 		}
 	private:
 		// Fit instructions for a client
 		Parameters parameters;
-		std::map<std::string, Scalar> config;
+		std::map<std::string, scalar> config;
 	};
 
 	class FitRes {
@@ -174,27 +174,27 @@ namespace flwr {
 
 	class EvaluateIns {
 	public:
-		EvaluateIns(Parameters parameters, std::map<std::string, Scalar> config)
+		EvaluateIns(Parameters parameters, std::map<std::string, scalar> config)
 			: parameters(parameters), config(config) {};
 
 		Parameters getParameters() {
 			return parameters;
 		}
-		std::map<std::string, Scalar> getConfig() {
+		std::map<std::string, scalar> getConfig() {
 			return config;
 		}
 
 		void setParameters(Parameters p) {
 			parameters = p;
 		}
-		void setConfig(std::map<std::string, Scalar> config) {
+		void setConfig(std::map<std::string, scalar> config) {
 			this->config = config;
 		}
 
 	private:
 		// Evaluate instructions for a client
 		Parameters parameters;
-		std::map<std::string, Scalar> config;
+		std::map<std::string, scalar> config;
 	};
 
 	class EvaluateRes {

@@ -17,7 +17,7 @@ using flwr::FitIns;
 using flwr::FitRes;
 using flwr::Parameters;
 using flwr::ParametersRes;
-using flwr::Scalar;
+using flwr::scalar;
 using flwr::Metrics;
 
 /*
@@ -48,7 +48,7 @@ Parameters parameters_from_proto(MessageParameters msg) {
 	return Parameters(tensors, msg.tensor_type());
 }
 
-ProtoScalar scalar_to_proto(Scalar scalar_msg) {
+ProtoScalar scalar_to_proto(scalar scalar_msg) {
 	// Deserialize... 
 	ProtoScalar s;
 	if (scalar_msg.getBool() != std::nullopt) {
@@ -76,9 +76,9 @@ ProtoScalar scalar_to_proto(Scalar scalar_msg) {
 
 }
 
-Scalar scalar_from_proto(ProtoScalar scalar_msg) {
+scalar scalar_from_proto(ProtoScalar scalar_msg) {
 	// Deserialize... 
-	Scalar s;
+	scalar s;
 	switch (scalar_msg.scalar_case()) {
 	case 1:
 		s.setFloat(scalar_msg.double_());

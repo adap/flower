@@ -1,29 +1,42 @@
-# Copyright 2018 gRPC authors.
+# Copyright
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# cmake build file for C++ helloworld example.
+# cmake build file for C++ flower client example.
 # Assumes protobuf and gRPC have been installed using cmake.
-# See cmake_externalproject/CMakeLists.txt for all-in-one cmake build
-# that automatically builds all the dependencies before building helloworld.
+# that automatically builds all the dependencies before building flwr client
 
 cmake_minimum_required(VERSION 3.5.1)
 
 project(Flower C CXX)
+set (CMAKE_CXX_STANDARD 17)
+set(CMAKE_PREFIX_PATH "/home/jiang/libtorch;/home/jiang/torchvision_cpp;/home/jiang/grpc_lib")
 
-include(../cmake/common.cmake)
+find_package(Threads REQUIRED)
+
+set(protobuf_MODULE_COMPATIBLE TRUE)
+find_package(Protobuf CONFIG REQUIRED)
+message(STATUS "Using protobuf ${Protobuf_VERSION}")
+
+set(_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
+set(_REFLECTION gRPC::grpc++_reflection)
+
+
+if(CMAKE_CROSSCOMPILING)
+  find_program(_PROTOBUF_PROTOC protoc)
+else()
+  set(_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
+endif()
+
+find_package(gRPC CONFIG REQUIRED)
+message(STATUS "Using gRPC ${gRPC_VERSION}")
+set(_GRPC_GRPCPP gRPC::grpc++)
+if(CMAKE_CROSSCOMPILING)
+  find_program(_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)
+else()
+  set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
+endif()
 
 find_package(TorchVision REQUIRED)
+
 # Proto file
 get_filename_component(trans_proto "../../proto/flwr/proto/transport.proto" ABSOLUTE)
 get_filename_component(trans_proto_path "${trans_proto}" PATH)
@@ -51,30 +64,39 @@ add_library(trans_grpc_proto
   ${trans_grpc_srcs}
   ${trans_grpc_hdrs}
   ${trans_proto_srcs}
-  ${trans_proto_hdrs})
+  ${trans_proto_hdrs}
+  "message_handler.h"
+  "serde.h"
+  "client.h"
+  "pytorch_client.h"
+  "start.h"
+  "typing.h")
 target_link_libraries(trans_grpc_proto
   ${_REFLECTION}
   ${_GRPC_GRPCPP}
   ${_PROTOBUF_LIBPROTOBUF})
 
-# Targets flower client
-foreach(_target
-  flwr_client)
-  add_executable(${_target} "${_target}.cc")
-  target_sources(${_target} PRIVATE cifar10.cpp
-	                            transform.cpp
-	                            cifar10.h
-                               	    transform.h
-  )
-  target_link_libraries(${_target}
-     trans_grpc_proto
-     ${_REFLECTION}
-     ${_GRPC_GRPCPP}
-     ${_PROTOBUF_LIBPROTOBUF}
-     TorchVision::TorchVision)
-  if(DOWNLOAD_DATASETS)
-    add_dependencies(${_target} cifar10)
-  endif()
-endforeach()
 
+find_package(TorchVision REQUIRED)
+
+add_library(helper
+	"cifar10.h"
+        "cifar10.cpp"
+	"transform.h"
+	"transform.cpp")
+target_link_libraries(helper
+	TorchVision::TorchVision)
+
+# Targets flower client
+set(_target flwr_client)
+add_executable(${_target} "${_target}.cc")
+
+#target_include_directories(${EXECUTABLE_NAME} ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(${_target}
+     trans_grpc_proto
+     helper)
+
+if(DOWNLOAD_DATASETS)
+  add_dependencies(${_target} cifar10)
+endif()
 

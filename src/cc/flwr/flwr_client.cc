@@ -15,11 +15,25 @@
 //#include <windows.h>
 #include <map>
 #include "transport.grpc.pb.h"
-#include "typing.h"
-#include "serde.h"
-#include "message_handler.h"
+//#include "typing.h"
+//#include "serde.h"
+//#include "message_handler.h"
 #include "start.h"
 #include "pytorch_client.h"
+#include <torch/torch.h>
+#include <torchvision/vision.h>
+#include <torchvision/models/resnet.h>
+#include "cifar10.h"
+#include "transform.h"
+
+using grpc::Channel;
+using grpc::ClientContext;
+using grpc::Status;
+using grpc::ClientReaderWriter;
+using flower::transport::ClientMessage;
+using flower::transport::ServerMessage;
+using flower::transport::FlowerService;
+
 
 int main(int argc, char** argv) {
     // Check if we can work with GPUs
@@ -33,7 +47,7 @@ int main(int argc, char** argv) {
     // Load CIFAR10 Dataset
     int64_t kTrainBatchSize = 64;
     int64_t kTestBatchSize(kTrainBatchSize);
-    const std::string CIFAR10_DATASET_PATH = "/home/pedro/repos/flower_cpp/data/cifar-10-batches-bin/";
+    const std::string CIFAR10_DATASET_PATH = "/home/jiang/myflwr/flower_cpp/cifar-10-batches-bin/";
     std::vector<double> norm_mean = { 0.4914, 0.4822, 0.4465 };
     std::vector<double> norm_std = { 0.247, 0.243, 0.261 };
     auto train_dataset = CIFAR10(CIFAR10_DATASET_PATH, CIFAR10::Mode::kTrain)

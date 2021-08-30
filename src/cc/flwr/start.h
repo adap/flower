@@ -1,5 +1,8 @@
 #pragma once
 #include "transport.grpc.pb.h"
+#include "client.h"
+#include "message_handler.h"
+#include <grpcpp/grpcpp.h>
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
