@@ -11,6 +11,14 @@ using flower::transport::ServerMessage_EvaluateIns;
 using flower::transport::ClientMessage_EvaluateRes;
 using flower::transport::ServerMessage_FitIns;
 using flower::transport::ClientMessage_FitRes;
+using flwr::EvaluateIns;
+using flwr::EvaluateRes;
+using flwr::FitIns;
+using flwr::FitRes;
+using flwr::Parameters;
+using flwr::ParametersRes;
+using flwr::Scalar;
+using flwr::Metrics;
 
 /*
 * Serde
@@ -40,7 +48,7 @@ Parameters parameters_from_proto(MessageParameters msg) {
 	return Parameters(tensors, msg.tensor_type());
 }
 
-ProtoScalar scalar_to_proto(LocalScalar scalar_msg) {
+ProtoScalar scalar_to_proto(Scalar scalar_msg) {
 	// Deserialize... 
 	ProtoScalar s;
 	if (scalar_msg.getBool() != std::nullopt) {
@@ -68,9 +76,9 @@ ProtoScalar scalar_to_proto(LocalScalar scalar_msg) {
 
 }
 
-LocalScalar scalar_from_proto(ProtoScalar scalar_msg) {
+Scalar scalar_from_proto(ProtoScalar scalar_msg) {
 	// Deserialize... 
-	LocalScalar s;
+	Scalar s;
 	switch (scalar_msg.scalar_case()) {
 	case 1:
 		s.setFloat(scalar_msg.double_());
