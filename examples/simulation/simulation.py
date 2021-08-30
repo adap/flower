@@ -7,7 +7,6 @@ import flwr as fl
 import numpy as np
 import tensorflow as tf
 from flwr.server.strategy import FedAvg
-
 import dataset
 
 # Make TensorFlow log less verbose

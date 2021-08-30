@@ -116,9 +116,7 @@ class CifarClient(fl.client.Client):
         num_examples_train = len(self.trainset)
         metrics = {"duration": timeit.default_timer() - fit_begin}
         return FitRes(
-            parameters=params_prime,
-            num_examples=num_examples_train,
-            metrics=metrics
+            parameters=params_prime, num_examples=num_examples_train, metrics=metrics
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:

@@ -12,4 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""LEAF datasets."""
+"""Contains server side utilities to be used in combination with various
+components."""
+
+
+from .tensorboard import tensorboard as tensorboard
+
+__all__ = ["tensorboard"]
