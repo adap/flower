@@ -56,16 +56,18 @@ protobuf = "^3.12.1"
 dataclasses = { version = "==0.6", markers = "python_version < '3.7'"  }
 # Optional dependencies
 tensorflow-cpu = { version = "==2.4.0", optional = true }
-torch = { version = "^1.8.0", optional = true }
-torchvision = { version = "^0.9.0", optional = true }
+torch = { version = "^1.9.0", optional = true }
+torchvision = { version = "^0.10.0", optional = true }
 boto3 = { version = "^1.12.36", optional = true }
 boto3_type_annotations = { version = "^0.3.1", optional = true }
 paramiko = { version = "^2.7.1", optional = true }
 docker = { version = "^4.2.0", optional = true }
 matplotlib = { version = "^3.2.1", optional = true }
 tqdm = { version = "^4.48.2", optional = true }
+ray = { extras = ["default"], version = "^1.5.2", optional = true }
 
 [tool.poetry.extras]
+simulation = ["ray"]
 baseline = ["tensorflow-cpu", "boto3", "boto3_type_annotations", "paramiko", "docker", "matplotlib"]
 examples-pytorch = ["torch", "torchvision", "tqdm"]
 examples-tensorflow = ["tensorflow-cpu"]
@@ -73,10 +75,13 @@ http-logger = ["boto3", "boto3_type_annotations", "tensorflow-cpu", "boto3", "bo
 ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
 
 [tool.poetry.dev-dependencies]
-isort = "==5.8.0"
-black = "==21.5b1"
+types-protobuf = "^3.17.4"
+types-setuptools = "^57.0.2"
+types-dataclasses = "^0.1.7"
+isort = "==5.9.2"
+black = "==21.7b0"
 docformatter = "==1.4"
-mypy = "==0.800"
+mypy = "==0.910"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"

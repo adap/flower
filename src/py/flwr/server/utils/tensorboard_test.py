@@ -12,4 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""LEAF datasets."""
+"""(De-)Serialization Tests."""
+
+
+from tempfile import TemporaryDirectory
+
+from .tensorboard import tensorboard
+
+
+def test_tensorboard() -> None:
+    """Test if tensorboard returns a decorator."""
+
+    # Prepare
+    with TemporaryDirectory() as tmpdir:
+        my_decorator = tensorboard(tmpdir)
+
+    # Assert
+    assert callable(my_decorator)
