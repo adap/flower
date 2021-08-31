@@ -176,7 +176,8 @@ class Server:
                 history.add_loss_centralized(rnd=current_round, loss=loss_cen)
                 history.add_metrics_centralized(rnd=current_round, metrics=metrics_cen)
 
-            # Evaluate model on a sample of available clients
+            # REMOVE TEMPORARILY FOR TEST
+            '''# Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(rnd=current_round)
             if res_fed:
                 loss_fed, evaluate_metrics_fed, _ = res_fed
@@ -184,7 +185,7 @@ class Server:
                     history.add_loss_distributed(rnd=current_round, loss=loss_fed)
                     history.add_metrics_distributed(
                         rnd=current_round, metrics=evaluate_metrics_fed
-                    )
+                    )'''
 
         # Bookkeeping
         end_time = timeit.default_timer()
