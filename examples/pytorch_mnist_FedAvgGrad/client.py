@@ -82,13 +82,7 @@ def main():
             # finding difference in current_parameters and new_parameters
             difference_in_parameters = np.subtract(current_parameters, new_parameters)
 
-            result = []
-
-            for x in difference_in_parameters:
-                hold = np.array(x)
-                result.append(hold)
-
-            return result, len(train_dl), {}
+            return difference_in_parameters, len(train_dl), {}
 
 
         def evaluate(self, parameters, config):
