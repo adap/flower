@@ -36,7 +36,6 @@ def server():
 @click.option("-p","--strategy-params",type=str,help="JSON. Sets the parameters for selected strategy. Parameters available are: fraction_fit: float, fraction_eval: float, min_fit_clients: int, min_eval_clients: int, min_available_clients:int, accept_failures: bool")
 
 def start(server_address,grpc_max_message_length,force_final_distributed_eval,strategy,num_rounds, strategy_params):
-    print(server_address,grpc_max_message_length,force_final_distributed_eval,strategy,num_rounds, strategy_params)
     if not strategy in strategy_mapping:
         raise ValueError("Value for strategy is invalid")
     
