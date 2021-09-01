@@ -12,12 +12,15 @@
 * The Scalar defined in "transport" uses "double" and "int64", I am not sure if there should be changed
 *
 */
+#include <optional>
+#include <list>
+#include <map>
 
 namespace flwr{
   class Scalar{
     public:
-	  // getters
-      std::optional<bool> getBool(){
+	   // getters
+        std::optional<bool> getBool(){
 			return b;
 		}
 		std::optional<std::string> getBytes()
@@ -195,7 +198,7 @@ public:
 	{
 		fit_duration = f;
 	}
-	void setMetrics(Metrics m)
+	void setMetrics(flwr::Metrics m)
 	{
 		metrics = m;
 	}

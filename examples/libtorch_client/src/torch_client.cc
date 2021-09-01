@@ -1,10 +1,33 @@
 #include "torch_client.h"
 
-TorchClient::TorchClient(int64_t client_id, std::string connection_string) : client_id(client_id), connection_string(connection_string) {
-
+template<typename DataLoader>
+TorchClient<DataLoader>::TorchClient(int64_t client_id,
+        vision::models::ResNet18& net,
+        DataLoader& train_loader,
+        DataLoader& test_loader,
+        torch::optim::Optimizer& optimizer,
+        torch::Device device) : net(net), train_loader(train_loader), test_loader(test_loader), optimizer(optimizer), device(device){
 };
 
-flwr::Parameters TorchClient::get_parameters() {
+template<typename DataLoader>
+flwr::EvaluateRes TorchClient<DataLoader>::evaluate(flwr::EvaluateIns ins) {
+  flwr::EvaluateRes resp;  
+
+  return resp;
+};
+
+template<typename DataLoader>
+flwr::FitRes TorchClient<DataLoader>::fit(flwr::FitIns ins) {
+  // int num_samples = train(net, train_loader, optimizer, device);
+  flwr::FitRes resp;
+
+  resp.setParameters(this->get_parameters());
+  resp.setNum_example(30);
+  return resp;
+};
+
+template<typename DataLoader>
+flwr::ParametersRes TorchClient<DataLoader>::get_parameters() {
   // Serialize
   //std::ostringstream stream;
   //torch::save(net, stream);
@@ -13,18 +36,6 @@ flwr::Parameters TorchClient::get_parameters() {
   //std::list<std::string> tensors;
   //tensors.push_back(str);
   std::string tensors = "my_bytes";
-  std::string type_str = "float32"
+  std::string type_str = "float32";
   return flwr::Parameters(tensors, "Pytorch example");
-        
-}
-
-virtual FitRes TorchClient::fit(flwr::FitIns ins) override {
-  clock_t startTime, endTime;
-  //startTime = clock();
-  // int num_samples = train(net, train_loader, optimizer, device);
-  endTime = clock();
-  FitRes resp;
-  resp.setParameters(getModel());
-  resp.setNum_example(30);
-  return resp;
-}
+};

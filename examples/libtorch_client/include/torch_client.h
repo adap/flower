@@ -88,17 +88,25 @@ std::tuple<size_t, float, double> train(vision::models::ResNet18& net,
 * pytorch client
 *
 */
+
+template<typename DataLoader>
 class TorchClient : public flwr::Client {
   private:
     vision::models::ResNet18& net;
-    torch::data::datasets::Dataset<CIFAR10>& trainset;
-    torch::data::datasets::Dataset<CIFAR10>& testset;
+    DataLoader& train_loader;
+    DataLoader& test_loader;
     torch::optim::Optimizer& optimizer;
+    torch::Device device;
     int64_t client_id;
-    std::string connection_string;
 
   public:
-    TorchClient(int64_t client_id, std::string connection_string);
+    TorchClient(int64_t client_id,
+        vision::models::ResNet18& net,
+        DataLoader& trainset,
+        DataLoader& testset,
+        torch::optim::Optimizer& optimizer,
+        torch::Device device);
+
     flwr::ParametersRes get_parameters() override;
     flwr::EvaluateRes evaluate(flwr::EvaluateIns ins) override;
     flwr::FitRes fit(flwr::FitIns ins) override;

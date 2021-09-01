@@ -55,9 +55,9 @@ int main(int argc, char** argv) {
     torch::optim::SGD optimizer(net->parameters(), lr);
 
     int64_t num_epochs = 1;
-    std::string target_str = "localhost:50051";
-    TorchClient client(0, "127.0.0.1:8888");
-    start_client(target_str, &client);
+    TorchClient client(0, net, train_loader, test_loader, optimizer, device);
+    //std::string server_add = "[::]:8080";
+    //start_client(server_add, &client);
     //std::cin.get(); //keep the window
     return 0;
 }

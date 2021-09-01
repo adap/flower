@@ -147,37 +147,7 @@ ClientMessage_FitRes fit_res_to_proto(flwr::FitRes res) {
 		google::protobuf::Map< ::std::string, ::flower::transport::Scalar > proto = metrics_to_proto(res.getMetrics().value());
 		metrics_msg = &proto;
 	}
-	// Legacy case, will be removed in a future release
-	if (res.getNum_examples_ceil() != std::nullopt && res.getFit_duration() != std::nullopt) {
-		*(cres.mutable_parameters()) = parameters_proto;
-		cres.set_num_examples(res.getNum_example());
-		cres.set_num_examples_ceil(res.getNum_examples_ceil().value());
-		cres.set_fit_duration(res.getFit_duration().value());
-		if (metrics_msg != NULL) {
-			*cres.mutable_metrics() = *metrics_msg;
-		}
-		return cres;
-	}
-	// Legacy case, will be removed in a future release
-	if (res.getNum_examples_ceil() != std::nullopt) {
-		*(cres.mutable_parameters()) = parameters_proto;
-		cres.set_num_examples(res.getNum_example());
-		cres.set_num_examples_ceil(res.getNum_examples_ceil().value()); // Deprecated
-		if (metrics_msg != NULL) {
-			*cres.mutable_metrics() = *metrics_msg;
-		}
-		return cres;
-	}
-	// Legacy case, will be removed in a future release
-	if (res.getFit_duration() != std::nullopt) {
-		*(cres.mutable_parameters()) = parameters_proto;
-		cres.set_num_examples(res.getNum_example());
-		cres.set_fit_duration(res.getFit_duration().value());
-		if (metrics_msg != NULL) {
-			*cres.mutable_metrics() = *metrics_msg;
-		}
-		return cres;
-	}
+
 	// Forward - compatible case
 	*(cres.mutable_parameters()) = parameters_proto;
 	cres.set_num_examples(res.getNum_example());
