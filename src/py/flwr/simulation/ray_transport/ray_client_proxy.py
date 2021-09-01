@@ -18,7 +18,6 @@
 from typing import Callable, Dict, Union, cast
 
 import ray
-from ray.worker import get as get
 
 from flwr import common
 from flwr.client import Client, NumPyClient
