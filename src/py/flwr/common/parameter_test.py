@@ -38,3 +38,19 @@ def test_serialisation_deserialisation() -> None:
     # Test false positive
     with pytest.raises(AssertionError, match="Arrays are not equal"):
         np.testing.assert_equal(arr_deserialized, np.ones((3, 2)))
+
+
+def test_serialisation_deserialisation_float32() -> None:
+    """Test if after serialization/deserialisation the np.ndarray is
+    identical."""
+    arr = [b"\x01\x02", b"\x03\x04", b"\x05\x06"]
+
+    arr_serialized = ndarray_to_bytes(arr)
+    arr_deserialized = bytes_to_ndarray(arr_serialized)
+
+    # Assert deserialized array is equal to original
+    np.testing.assert_equal(arr_deserialized, arr)
+
+    # Test false positive
+    with pytest.raises(AssertionError, match="Arrays are not equal"):
+        np.testing.assert_equal(arr_deserialized, np.ones((3, 2)))

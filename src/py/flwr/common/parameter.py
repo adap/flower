@@ -31,7 +31,10 @@ def weights_to_parameters(weights: Weights) -> Parameters:
 
 def parameters_to_weights(parameters: Parameters) -> Weights:
     """Convert parameters object to NumPy weights."""
-    return [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
+    return [
+        bytes_to_ndarray(tensor, parameters.tensor_type)
+        for tensor in parameters.tensors
+    ]
 
 
 def ndarray_to_bytes(ndarray: np.ndarray) -> bytes:
@@ -41,8 +44,27 @@ def ndarray_to_bytes(ndarray: np.ndarray) -> bytes:
     return bytes_io.getvalue()
 
 
-def bytes_to_ndarray(tensor: bytes) -> np.ndarray:
-    """Deserialize NumPy ndarray from bytes."""
-    bytes_io = BytesIO(tensor)
-    ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
-    return cast(np.ndarray, ndarray_deserialized)
+def bytes_to_ndarray(tensor: bytes, tensor_type: str = "numpy.ndarray") -> np.ndarray:
+    """Deserialize bytes into numpy arrays according to incoming `tensor_type`.
+
+    Args:
+        tensor (bytes): Bytes object encoding weights.
+        tensor_type (str, optional): String describing the original format of bytes.
+            Defaults to "numpy.ndarray".
+
+    Returns:
+       weights (np.ndarray): Weights in numpy array format.
+    """
+    base_types = {"float32": np.float32, "float64": np.float64}
+    weights = None
+    if tensor_type == "numpy.ndarray":
+        bytes_io = BytesIO(tensor)
+        ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
+        weights = cast(np.ndarray, ndarray_deserialized)
+    else:
+        try:
+            dtype = base_types[tensor_type]
+            weights = np.frombuffer(tensor, dtype=dtype.newbyteorder(">"))
+        except KeyError:
+            print(f"tensor_type '{tensor_type}' unknown.")
+    return weights
