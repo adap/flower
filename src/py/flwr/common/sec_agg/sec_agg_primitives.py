@@ -128,13 +128,12 @@ def create_shares(
         share_list.append([])
 
     with ThreadPoolExecutor(max_workers=10) as executor:
-        chunk_shares_list = list(executor.map(
+        for chunk_shares in executor.map(
             lambda arg: shamir_split(*arg), secret_padded_chunk
-        ))
-    for chunk_shares in chunk_shares_list:
-        for idx, share in chunk_shares:
-            # idx start with 1
-            share_list[idx - 1].append((idx, share))
+        ):
+            for idx, share in chunk_shares:
+                # idx start with 1
+                share_list[idx - 1].append((idx, share))
 
     for idx, shares in enumerate(share_list):
         share_list[idx] = pickle.dumps(shares)
@@ -164,9 +163,8 @@ def combine_shares(share_list: List[bytes]) -> bytes:
         chunk_shares_list.append(chunk_shares)
 
     with ThreadPoolExecutor(max_workers=10) as executor:
-        chunk_list = list(executor.map(shamir_combine, chunk_shares_list))
-    for chunk in chunk_list:
-        secret_padded += chunk
+        for chunk in executor.map(shamir_combine, chunk_shares_list):
+            secret_padded += chunk
 
     secret = unpad(secret_padded, 16)
     return bytes(secret)
@@ -192,7 +190,7 @@ def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -
     output = []
     for dimension in dimensions_list:
         flat_arr = np.array([random.randrange(0, num_range)
-                            for i in range(np.prod(dimension))])
+                             for i in range(np.prod(dimension))])
         modified_arr = np.reshape(flat_arr, dimension)
         output.append(modified_arr)
     return output
