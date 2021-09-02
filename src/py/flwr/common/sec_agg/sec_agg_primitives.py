@@ -207,7 +207,7 @@ def share_keys_plaintext_concat(source: int, destination: int, b_share: bytes, s
 
 
 def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, bytes]:
-    plaintext_list = plaintext.split("babcdefg")
+    plaintext_list = plaintext.split(b"abcdefg")
     return (
         int(plaintext_list[0].decode("utf-8", "strict")),
         int(plaintext_list[1].decode("utf-8", "strict")),
