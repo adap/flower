@@ -1,0 +1,4 @@
+TODO list:
+- Move server methods to secagg strategy as opposed to server
+- Find better way to promote secagg clients
+- Specify numberof training data

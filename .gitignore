@@ -154,4 +154,3 @@ examples/**/dataset/**
 baselines/datasets/leaf
 
 #Testing for sec_agg
-tests/
