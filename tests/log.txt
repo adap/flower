@@ -1,16 +1,2 @@
 Starting
-This is secagg sampling 4 try 0 
-Client without communication stage 0:0.0004030000000003753 
-Client without communication stage 1:0.05305179999999954 
-Client without communication stage 2:0.014016800000000273 
-Client without communication stage 3:0.5670728999999994 
-Client without communication stage 4:0.00042509999999928993 
-Server time without communication:0.3710405999999997 
-first element 0.0This is secagg sampling 4 try 1 
-Client without communication stage 0:0.0004676000000003455 
-Client without communication stage 1:0.07623970000000035 
-Client without communication stage 2:0.017027200000000242 
-Client without communication stage 3:0.7198964999999999 
-Client without communication stage 4:0.0003779000000001531 
-Server time without communication:0.49130329999999844 
-first element 0.0This is secagg sampling 4 try 2 
+This is secagg sampling 100 dropping out 00% try 0 

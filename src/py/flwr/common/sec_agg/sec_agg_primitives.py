@@ -200,6 +200,7 @@ def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -
 
 # Unambiguous string concatenation of source, destination, and two secret shares. We assume they do not contain the 'abcdef' string
 def share_keys_plaintext_concat(source: int, destination: int, b_share: bytes, sk_share: bytes) -> bytes:
+    return pickle.dumps([source, destination, b_share, sk_share])
     concat = b'abcdefg'
     return concat.join([str(source).encode(), str(destination).encode(), b_share, sk_share])
 
@@ -207,6 +208,8 @@ def share_keys_plaintext_concat(source: int, destination: int, b_share: bytes, s
 
 
 def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, bytes]:
+    l = pickle.loads(plaintext)
+    return tuple(l)
     plaintext_list = plaintext.split(b"abcdefg")
     return (
         int(plaintext_list[0].decode("utf-8", "strict")),

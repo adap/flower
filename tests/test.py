@@ -1,7 +1,7 @@
 import timeit
 import numpy as np
 
-from flwr.common.sec_agg import sec_agg_test
+from flwr.common.sec_agg import sec_agg_test, sec_agg_primitives_test
 import random
 from flwr.common import weights_to_parameters
 from flwr.common.sec_agg.sec_agg_primitives import combine_shares, create_shares
@@ -27,12 +27,13 @@ print(quantized_weights)'''
 
 
 if __name__ == "__main__":
+    sec_agg_primitives_test.test_all()
     # test_combine_shares()
     f = open("log.txt", "w")
     f.write("Starting\n")
     f.close()
-    sample_num_list = [100, 200, 300, 400, 500]
-    dropout_value_list = [0, 1, 2, 3]
+    sample_num_list = [100, 200, 300]
+    dropout_value_list = [0, 1, 2]
 
     for sample_num in sample_num_list:
         for dropout_value in dropout_value_list:
