@@ -28,7 +28,7 @@ print(quantized_weights)'''
 
 if __name__ == "__main__":
     # test_combine_shares()
-    sec_agg_test.test_start_simulation(sample_num=10, dropout_value=1, num_rounds=1)
+    sec_agg_test.test_start_simulation(sample_num=50, dropout_value=0, num_rounds=1)
 
 
 '''# TESTING
