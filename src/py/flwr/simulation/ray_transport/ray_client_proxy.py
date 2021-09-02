@@ -17,10 +17,7 @@
 
 from typing import Callable, Dict, Union, cast
 
-try:
-    import ray
-except ImportError:
-    ray = None  # type: ignore
+import ray
 
 from flwr import common
 from flwr.client import Client, NumPyClient
@@ -43,7 +40,7 @@ class RayClientProxy(ClientProxy):
         future_paramseters_res = launch_and_get_parameters.options(
             **self.resources
         ).remote(self.client_fn, self.cid)
-        res = ray.get(future_paramseters_res)
+        res = ray.worker.get(future_paramseters_res)
         return cast(
             common.ParametersRes,
             res,
@@ -54,7 +51,7 @@ class RayClientProxy(ClientProxy):
         future_fit_res = launch_and_fit.options(**self.resources).remote(
             self.client_fn, self.cid, ins
         )
-        res = ray.get(future_fit_res)
+        res = ray.worker.get(future_fit_res)
         return cast(
             common.FitRes,
             res,
@@ -65,7 +62,7 @@ class RayClientProxy(ClientProxy):
         future_evaluate_res = launch_and_evaluate.options(**self.resources).remote(
             self.client_fn, self.cid, ins
         )
-        res = ray.get(future_evaluate_res)
+        res = ray.worker.get(future_evaluate_res)
         return cast(
             common.EvaluateRes,
             res,
