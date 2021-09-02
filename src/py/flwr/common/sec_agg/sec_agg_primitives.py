@@ -128,9 +128,9 @@ def create_shares(
         share_list.append([])
 
     with ThreadPoolExecutor(max_workers=10) as executor:
-        chunk_shares_list = executor.map(
+        chunk_shares_list = list(executor.map(
             lambda arg: shamir_split(*arg), secret_padded_chunk
-        )
+        ))
     for chunk_shares in chunk_shares_list:
         for idx, share in chunk_shares:
             # idx start with 1
@@ -162,7 +162,7 @@ def combine_shares(share_list: List[bytes]) -> bytes:
         chunk_shares_list.append(chunk_shares)
 
     with ThreadPoolExecutor(max_workers=10) as executor:
-        chunk_list = executor.map(shamir_combine, chunk_shares_list)
+        chunk_list = list(executor.map(shamir_combine, chunk_shares_list))
     for chunk in chunk_list:
         secret_padded += chunk
 
