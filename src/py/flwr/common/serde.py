@@ -259,6 +259,7 @@ def share_keys_ins_from_proto(share_keys_msg: ServerMessage.SecAggMsg) -> typing
 def share_keys_res_to_proto(share_keys_res: typing.ShareKeysRes) -> ClientMessage.SecAggRes:
     share_keys_res_msg = ClientMessage.SecAggRes.ShareKeysRes()
     for packet in share_keys_res.share_keys_res_list:
+        print(("send", len(packet.ciphertext)))
         proto_packet = ClientMessage.SecAggRes.ShareKeysRes.Packet(
             source=packet.source, destination=packet.destination, ciphertext=packet.ciphertext
         )
@@ -273,6 +274,7 @@ def share_keys_res_from_proto(share_keys_res_msg: ClientMessage.SecAggRes) -> ty
         packet = typing.ShareKeysPacket(
             source=proto_packet.source, destination=proto_packet.destination, ciphertext=proto_packet.ciphertext
         )
+        print(("receive", len(packet.ciphertext)))
         packet_list.append(packet)
     return typing.ShareKeysRes(share_keys_res_list=packet_list)
 

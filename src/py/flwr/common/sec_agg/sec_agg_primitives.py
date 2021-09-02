@@ -137,7 +137,6 @@ def create_shares(
 
     for idx, shares in enumerate(share_list):
         share_list[idx] = pickle.dumps(shares)
-        print(("split", len(share_list[idx])))
 
     return share_list
 
@@ -150,7 +149,6 @@ def shamir_split(threshold: int, num: int, chunk: bytes) -> List[Tuple[int, byte
 
 def combine_shares(share_list: List[bytes]) -> bytes:
     for idx, share in enumerate(share_list):
-        print(len(share))
         share_list[idx] = pickle.loads(share)
 
     chunk_num = len(share_list[0])
