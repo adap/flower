@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "pytorch_federated_variational_autoencoder"
 version = "0.1.0"
-description = "Federated Variation Autoencoder Example Implementation"
-authors = ["Your Name <you@example.com>"]
+description = "Federated Variational Autoencoder Example"
+authors = ["The Flower Authors <enquiries@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
