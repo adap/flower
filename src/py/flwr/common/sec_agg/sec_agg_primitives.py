@@ -137,7 +137,7 @@ def create_shares(
 
     for idx, shares in enumerate(share_list):
         share_list[idx] = pickle.dumps(shares)
-        print(len(share_list[idx]))
+        print(("split", len(share_list[idx])))
 
     return share_list
 
