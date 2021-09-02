@@ -65,7 +65,7 @@ class FedYogi(FedOpt):
         beta_2: float = 0.99,
         tau: float = 1e-9,
     ) -> None:
-        """Federated learning strategy using Adagrad on server-side.
+        """Federated learning strategy using Yogi on server-side.
 
         Implementation based on https://arxiv.org/abs/2003.00295
 
@@ -117,7 +117,7 @@ class FedYogi(FedOpt):
         self.v_t: Optional[Weights] = None
 
     def __repr__(self) -> str:
-        rep = f"FedAdagrad(accept_failures={self.accept_failures})"
+        rep = f"FedYogi(accept_failures={self.accept_failures})"
         return rep
 
     def aggregate_fit(
@@ -138,7 +138,8 @@ class FedYogi(FedOpt):
             x - y for x, y in zip(fedavg_weights_aggregate, self.current_weights)
         ]
 
-        # Adam
+        # Yogi
+
         if not self.delta_t:
             self.delta_t = [np.zeros_like(x) for x in self.current_weights]
 
