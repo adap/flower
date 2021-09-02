@@ -18,6 +18,7 @@ from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.typing import AskKeysIns, AskKeysRes, AskVectorsIns, AskVectorsRes, FitIns, FitRes, Parameters, Scalar, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.common.sec_agg import sec_agg_primitives
+import timeit
 import concurrent.futures
 
 from flwr.common.logger import log
@@ -45,7 +46,8 @@ def sec_agg_fit_round(server, rnd: int
                       ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
 ]:
-
+    total_time = 0
+    total_time = total_time-timeit.default_timer()
     # Sample clients
     client_instruction_list = server.strategy.configure_fit(
         rnd=rnd, parameters=server.parameters, client_manager=server._client_manager)
@@ -64,10 +66,12 @@ def sec_agg_fit_round(server, rnd: int
     # === Stage 0: Setup ===
     # Give rnd, sample_num, share_num, threshold, client id
     log(INFO, "SecAgg Stage 0: Setting up Params")
+    total_time = total_time+timeit.default_timer()
     setup_param_results_and_failures = setup_param(
         clients=setup_param_clients,
         sec_agg_param_dict=sec_agg_param_dict
     )
+    total_time = total_time-timeit.default_timer()
     setup_param_results = setup_param_results_and_failures[0]
     ask_keys_clients: Dict[int, ClientProxy] = {}
     if len(setup_param_results) < sec_agg_param_dict['min_num']:
@@ -78,8 +82,9 @@ def sec_agg_fit_round(server, rnd: int
 
     # === Stage 1: Ask Public Keys ===
     log(INFO, "SecAgg Stage 1: Asking Keys")
+    total_time = total_time+timeit.default_timer()
     ask_keys_results_and_failures = ask_keys(ask_keys_clients)
-
+    total_time = total_time-timeit.default_timer()
     public_keys_dict: Dict[int, AskKeysRes] = {}
     ask_keys_results = ask_keys_results_and_failures[0]
     if len(ask_keys_results) < sec_agg_param_dict['min_num']:
@@ -95,10 +100,12 @@ def sec_agg_fit_round(server, rnd: int
 
     # === Stage 2: Share Keys ===
     log(INFO, "SecAgg Stage 2: Sharing Keys")
+    total_time = total_time+timeit.default_timer()
     share_keys_results_and_failures = share_keys(
         share_keys_clients, public_keys_dict, sec_agg_param_dict[
             'sample_num'], sec_agg_param_dict['share_num']
     )
+    total_time = total_time-timeit.default_timer()
     share_keys_results = share_keys_results_and_failures[0]
     if len(share_keys_results) < sec_agg_param_dict['min_num']:
         raise Exception("Not enough available clients after share keys stage")
@@ -124,8 +131,10 @@ def sec_agg_fit_round(server, rnd: int
 
     # === Stage 3: Ask Vectors ===
     log(INFO, "SecAgg Stage 3: Asking Vectors")
+    total_time = total_time+timeit.default_timer()
     ask_vectors_results_and_failures = ask_vectors(
         ask_vectors_clients, forward_packet_list_dict, client_instructions)
+    total_time = total_time-timeit.default_timer()
     ask_vectors_results = ask_vectors_results_and_failures[0]
     if len(ask_vectors_results) < sec_agg_param_dict['min_num']:
         raise Exception("Not enough available clients after ask vectors stage")
@@ -148,10 +157,11 @@ def sec_agg_fit_round(server, rnd: int
 
     # === Stage 4: Unmask Vectors ===
     log(INFO, "SecAgg Stage 4: Unmasking Vectors")
+    total_time = total_time+timeit.default_timer()
     unmask_vectors_results_and_failures = unmask_vectors(
         unmask_vectors_clients, dropout_clients, sec_agg_param_dict['sample_num'], sec_agg_param_dict['share_num'])
     unmask_vectors_results = unmask_vectors_results_and_failures[0]
-
+    total_time = total_time-timeit.default_timer()
     # Build collected shares dict
     collected_shares_dict: Dict[int, List[bytes]] = {}
     for idx in ask_vectors_clients.keys():
@@ -210,8 +220,12 @@ def sec_agg_fit_round(server, rnd: int
         masked_vector, total_weights_factor)
     aggregated_vector = sec_agg_primitives.reverse_quantize(
         masked_vector, sec_agg_param_dict['clipping_range'], sec_agg_param_dict['target_range'])
-    print(("First element", aggregated_vector[0].flatten()[0]))
     aggregated_parameters = weights_to_parameters(aggregated_vector)
+    total_time = total_time+timeit.default_timer()
+    f = open("log.txt", "a")
+    f.write(f"Server time without communication:{total_time} \n")
+    f.write(f"first element {aggregated_vector[0].flatten()[0]}\n\n\n")
+    f.close()
     return aggregated_parameters, None, None
 
 
@@ -254,7 +268,7 @@ def process_sec_agg_param_dict(sec_agg_param_dict: Dict[str, Scalar]) -> Dict[st
         sec_agg_param_dict['clipping_range'] = 3
 
     if 'target_range' not in sec_agg_param_dict:
-        sec_agg_param_dict['target_range'] = 10000
+        sec_agg_param_dict['target_range'] = 16777216
 
     if 'mod_range' not in sec_agg_param_dict:
         sec_agg_param_dict['mod_range'] = sec_agg_param_dict['sample_num'] * \

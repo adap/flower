@@ -28,7 +28,19 @@ print(quantized_weights)'''
 
 if __name__ == "__main__":
     # test_combine_shares()
-    sec_agg_test.test_start_simulation(sample_num=20, dropout_value=0, num_rounds=1)
+    f = open("log.txt", "w")
+    f.write("Starting\n")
+    f.close()
+    sample_num_list = [4, 5]
+    dropout_value = [0, 1, 2, 3]
+
+    for sample_num in sample_num_list:
+        for i in range(10):
+            f = open("log.txt", "a")
+            f.write(f"This is secagg sampling {sample_num} try {i} \n")
+            f.close()
+            sec_agg_test.test_start_simulation(
+                sample_num=sample_num, share_num=sample_num, threshold=int(sample_num / 2), dropout_value=0, num_rounds=1)
 
 
 '''# TESTING
