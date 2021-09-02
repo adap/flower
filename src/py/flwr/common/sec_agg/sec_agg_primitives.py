@@ -204,7 +204,7 @@ def share_keys_plaintext_concat(source: int, destination: int, b_share: bytes, s
 
 
 def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, bytes]:
-    return tuple(pickle.dumps(plaintext))
+    return tuple(pickle.loads(plaintext))
 
 # Weight Quantization ======================================================================
 
