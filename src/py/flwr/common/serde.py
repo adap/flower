@@ -259,7 +259,7 @@ def share_keys_ins_from_proto(share_keys_msg: ServerMessage.SecAggMsg) -> typing
 def share_keys_res_to_proto(share_keys_res: typing.ShareKeysRes) -> ClientMessage.SecAggRes:
     share_keys_res_msg = ClientMessage.SecAggRes.ShareKeysRes()
     for packet in share_keys_res.share_keys_res_list:
-        print(("send", len(packet.ciphertext)))
+        print(("send stage 2", len(packet.ciphertext)))
         proto_packet = ClientMessage.SecAggRes.ShareKeysRes.Packet(
             source=packet.source, destination=packet.destination, ciphertext=packet.ciphertext
         )
@@ -274,7 +274,7 @@ def share_keys_res_from_proto(share_keys_res_msg: ClientMessage.SecAggRes) -> ty
         packet = typing.ShareKeysPacket(
             source=proto_packet.source, destination=proto_packet.destination, ciphertext=proto_packet.ciphertext
         )
-        print(("receive", len(packet.ciphertext)))
+        print(("receive stage 2", len(packet.ciphertext)))
         packet_list.append(packet)
     return typing.ShareKeysRes(share_keys_res_list=packet_list)
 
@@ -287,6 +287,7 @@ def ask_vectors_ins_to_proto(ask_vectors_ins: typing.AskVectorsIns) -> ServerMes
     for packet in packet_list:
         proto_packet = ServerMessage.SecAggMsg.AskVectors.Packet(
             source=packet.source, destination=packet.destination, ciphertext=packet.ciphertext)
+        print(("send stage 3", len(packet.ciphertext)))
         proto_packet_list.append(proto_packet)
     fit_ins = ServerMessage.SecAggMsg.AskVectors.FitIns(parameters=parameters_to_proto(
         ask_vectors_ins.fit_ins.parameters), config=metrics_to_proto(ask_vectors_ins.fit_ins.config))
@@ -299,6 +300,7 @@ def ask_vectors_ins_from_proto(ask_vectors_msg: ServerMessage.SecAggMsg) -> typi
     for proto_packet in proto_packet_list:
         packet = typing.ShareKeysPacket(
             source=proto_packet.source, destination=proto_packet.destination, ciphertext=proto_packet.ciphertext)
+        print(("receive stage 3", len(proto_packet.ciphertext)))
         packet_list.append(packet)
     fit_ins = typing.FitIns(parameters=parameters_from_proto(
         ask_vectors_msg.ask_vectors.fit_ins.parameters), config=metrics_from_proto(ask_vectors_msg.ask_vectors.fit_ins.config))
