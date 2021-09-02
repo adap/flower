@@ -75,4 +75,4 @@ def test_start_simulation(sample_num=2, min_num=2, vector_dimension=100000, drop
 
 
 if __name__ == '__main__':
-    test_start_simulation()
+    test_start_simulation(sample_num=10, dropout_value=1, num_rounds=1)
