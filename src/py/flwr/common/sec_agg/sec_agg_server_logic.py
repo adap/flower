@@ -210,6 +210,7 @@ def sec_agg_fit_round(server, rnd: int
         masked_vector, total_weights_factor)
     aggregated_vector = sec_agg_primitives.reverse_quantize(
         masked_vector, sec_agg_param_dict['clipping_range'], sec_agg_param_dict['target_range'])
+    print(("First element", aggregated_vector[0].flatten()[0]))
     aggregated_parameters = weights_to_parameters(aggregated_vector)
     return aggregated_parameters, None, None
 

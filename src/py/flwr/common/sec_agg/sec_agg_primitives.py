@@ -128,12 +128,13 @@ def create_shares(
         share_list.append([])
 
     with ThreadPoolExecutor(max_workers=10) as executor:
-        for chunk_shares in executor.map(
+        chunk_shares_list = executor.map(
             lambda arg: shamir_split(*arg), secret_padded_chunk
-        ):
-            for idx, share in chunk_shares:
-                # idx start with 1
-                share_list[idx - 1].append((idx, share))
+        )
+    for chunk_shares in chunk_shares_list:
+        for idx, share in chunk_shares:
+            # idx start with 1
+            share_list[idx - 1].append((idx, share))
 
     for idx, shares in enumerate(share_list):
         share_list[idx] = pickle.dumps(shares)
@@ -161,8 +162,9 @@ def combine_shares(share_list: List[bytes]) -> bytes:
         chunk_shares_list.append(chunk_shares)
 
     with ThreadPoolExecutor(max_workers=10) as executor:
-        for chunk in executor.map(shamir_combine, chunk_shares_list):
-            secret_padded += chunk
+        chunk_list = executor.map(shamir_combine, chunk_shares_list)
+    for chunk in chunk_list:
+        secret_padded += chunk
 
     secret = unpad(secret_padded, 16)
     return bytes(secret)
