@@ -31,16 +31,18 @@ if __name__ == "__main__":
     f = open("log.txt", "w")
     f.write("Starting\n")
     f.close()
-    sample_num_list = [4, 5]
-    dropout_value = [0, 1, 2, 3]
+    sample_num_list = [100, 200, 300, 400, 500]
+    dropout_value_list = [0, 1, 2, 3]
 
     for sample_num in sample_num_list:
-        for i in range(10):
-            f = open("log.txt", "a")
-            f.write(f"This is secagg sampling {sample_num} try {i} \n")
-            f.close()
-            sec_agg_test.test_start_simulation(
-                sample_num=sample_num, share_num=sample_num, threshold=int(sample_num / 2), dropout_value=0, num_rounds=1)
+        for dropout_value in dropout_value_list:
+            for i in range(10):
+                f = open("log.txt", "a")
+                f.write(
+                    f"This is secagg sampling {sample_num} dropping out {dropout_value}0% try {i} \n")
+                f.close()
+                sec_agg_test.test_start_simulation(
+                    sample_num=sample_num, share_num=sample_num, threshold=int(sample_num / 2), dropout_value=dropout_value, num_rounds=1)
 
 
 '''# TESTING
