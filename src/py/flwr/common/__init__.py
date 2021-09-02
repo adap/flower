@@ -32,7 +32,7 @@ from .typing import Scalar as Scalar
 from .typing import Weights as Weights
 from .typing import AskKeysRes as AskKeysRes
 
-GRPC_MAX_MESSAGE_LENGTH: int = 2147483647  # 536_870_912  # == 512 * 1024 * 1024
+GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912  # == 512 * 1024 * 1024
 
 __all__ = [
     "bytes_to_ndarray",
