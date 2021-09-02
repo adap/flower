@@ -200,14 +200,14 @@ def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -
 
 # Unambiguous string concatenation of source, destination, and two secret shares. We assume they do not contain the '|' character
 def share_keys_plaintext_concat(source: int, destination: int, b_share: bytes, sk_share: bytes) -> bytes:
-    concat = b'||'
+    concat = b'\n'
     return concat.join([str(source).encode(), str(destination).encode(), b_share, sk_share])
 
 # Unambiguous string splitting to obtain source, destination and two secret shares.
 
 
 def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, bytes]:
-    plaintext_list = plaintext.split(b"||")
+    plaintext_list = plaintext.split(b"\n")
     return (
         int(plaintext_list[0].decode("utf-8", "strict")),
         int(plaintext_list[1].decode("utf-8", "strict")),
