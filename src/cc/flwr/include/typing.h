@@ -1,4 +1,19 @@
-#pragma once
+/***********************************************************************************************************
+ *
+ * @file typing.h
+ *
+ * @brief C++ Flower type definitions
+ * There is no "bytes" type in C++, so "string" is used instead (char* can also be used if needed)
+ * as defined in https://developers.google.com/protocol-buffers/docs/proto#scalar
+ *
+ * @author Lekang Jiang
+ *
+ * @version 1.0
+ *
+ * @date 03/09/2021
+ *
+ * ********************************************************************************************************/
+
 /*
 * Typing
 *
@@ -12,11 +27,14 @@
 * The Scalar defined in "transport" uses "double" and "int64", I am not sure if there should be changed
 *
 */
+
+#pragma once
 #include <optional>
 #include <list>
 #include <map>
 
 namespace flwr{
+
   class Scalar{
     public:
 	   // getters
