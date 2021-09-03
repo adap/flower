@@ -1,2 +1,12 @@
 Starting
-This is secagg sampling 100 dropping out 00% try 0 
+This is secagg sampling 10 dropping out 00% with vector size 100000 try 0 
+Client without communication stage 0:0.0008779000000007642 
+Client without communication stage 1:0.15209470000000103 
+Client without communication stage 2:0.06781499999999951 
+Client without communication stage 3:3.3563381999999997 
+Client without communication stage 4:0.00045250000000152113 
+Server time without communication:4.714802499999998 
+first element 0.0
+
+
+This is secagg sampling 10 dropping out 00% with vector size 100000 try 1 

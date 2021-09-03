@@ -189,7 +189,7 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
     '''
     # temporary code=========================================================
     if client.test == 1:
-        if client.sec_agg_id % 10 < client.test_dropout_value:
+        if client.sec_agg_id % 20 < client.test_dropout_value:
             log(ERROR, "Force dropout due to testing!!")
             raise Exception("Force dropout due to testing")
         weights: Weights = sec_agg_primitives.weights_zero_generate(

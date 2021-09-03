@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from __future__ import division
+from __future__ import print_function
+import math
 from logging import WARNING, log
+import functools
 from typing import List, Tuple
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -109,6 +113,7 @@ def decrypt(key: bytes, token: bytes):
     return f.decrypt(token)
 
 # Shamir's Secret Sharing Scheme ============================================================
+
 
 # Create shares with PyCryptodome. Each share must be processed to be a byte string with pickle for RPC
 
