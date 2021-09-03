@@ -6,8 +6,9 @@ Unreleased
 
 What's new?
 
-* **New built-in strategies** (`#828 <https://github.com/adap/flower/pull/828>`_)
+* **New built-in strategies** (`#828 <https://github.com/adap/flower/pull/828>`_ `#822 <https://github.com/adap/flower/pull/822>`_ )
     * FedYogi
+    * FedAdam
     
 Incompatible changes:
 
