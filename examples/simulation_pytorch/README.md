@@ -2,7 +2,7 @@
 
 This is the code splits CIFAR-10 dataset into `pool_size` partitions (user defined) and does a few rounds of CIFAR-10 training.
 
-## Requiremets
+## Requirements
 
 *    Flower nightly release (or development version from `main` branch)
 *    PyTorch 1.7.1 (but most likely will work with older versions)
