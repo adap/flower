@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et al.,
-2020] strategy.
+"""Adaptive Federated Optimization using Yogi (FedYogi) [Reddi et al., 2020]
+strategy.
 
 Paper: https://arxiv.org/abs/2003.00295
 """
@@ -36,14 +36,14 @@ from flwr.server.client_proxy import ClientProxy
 from .fedopt import FedOpt
 
 
-class FedAdagrad(FedOpt):
-    """Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et
-    al., 2020] strategy.
+class FedYogi(FedOpt):
+    """Adaptive Federated Optimization using Yogi (FedYogi) [Reddi et al.,
+    2020] strategy.
 
     Paper: https://arxiv.org/abs/2003.00295
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         *,
@@ -59,11 +59,13 @@ class FedAdagrad(FedOpt):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Parameters,
-        eta: float = 1e-1,
-        eta_l: float = 1e-1,
-        tau: float = 1e-9,
+        eta: float = 1e-2,
+        eta_l: float = 0.0316,
+        beta_1: float = 0.9,
+        beta_2: float = 0.99,
+        tau: float = 1e-3,
     ) -> None:
-        """Federated learning strategy using Adagrad on server-side.
+        """Federated learning strategy using Yogi on server-side.
 
         Implementation based on https://arxiv.org/abs/2003.00295
 
@@ -89,6 +91,8 @@ class FedAdagrad(FedOpt):
             initial_parameters (Parameters): Initial set of parameters from the server.
             eta (float, optional): Server-side learning rate. Defaults to 1e-1.
             eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.
+            beta_1 (float, optional): Momentum parameter. Defaults to 0.9.
+            beta_2 (float, optional): Second moment parameter. Defaults to 0.99.
             tau (float, optional): Controls the algorithm's degree of adaptability.
                 Defaults to 1e-9.
         """
@@ -105,14 +109,15 @@ class FedAdagrad(FedOpt):
             initial_parameters=initial_parameters,
             eta=eta,
             eta_l=eta_l,
-            beta_1=0.0,
-            beta_2=0.0,
+            beta_1=beta_1,
+            beta_2=beta_2,
             tau=tau,
         )
+        self.delta_t: Optional[Weights] = None
         self.v_t: Optional[Weights] = None
 
     def __repr__(self) -> str:
-        rep = f"FedAdagrad(accept_failures={self.accept_failures})"
+        rep = f"FedYogi(accept_failures={self.accept_failures})"
         return rep
 
     def aggregate_fit(
@@ -130,25 +135,32 @@ class FedAdagrad(FedOpt):
 
         fedavg_weights_aggregate = parameters_to_weights(fedavg_parameters_aggregated)
         aggregated_updates = [
-            subset_weights - self.current_weights[idx]
-            for idx, subset_weights in enumerate(fedavg_weights_aggregate)
+            x - y for x, y in zip(fedavg_weights_aggregate, self.current_weights)
         ]
 
-        # Adagrad
-        delta_t = aggregated_updates
+        # Yogi
+
+        if not self.delta_t:
+            self.delta_t = [np.zeros_like(x) for x in self.current_weights]
+
+        self.delta_t = [
+            self.beta_1 * x + (1.0 - self.beta_1) * y
+            for x, y in zip(self.delta_t, aggregated_updates)
+        ]
+
         if not self.v_t:
-            self.v_t = [np.zeros_like(subset_weights) for subset_weights in delta_t]
+            self.v_t = [np.zeros_like(x) for x in self.delta_t]
 
         self.v_t = [
-            self.v_t[idx] + np.multiply(subset_weights, subset_weights)
-            for idx, subset_weights in enumerate(delta_t)
+            x + (1.0 - self.beta_2) * np.multiply(y, y) * np.sign(x - np.multiply(y, y))
+            for x, y in zip(self.v_t, self.delta_t)
         ]
 
         new_weights = [
-            self.current_weights[idx]
-            + self.eta * delta_t[idx] / (np.sqrt(self.v_t[idx]) + self.tau)
-            for idx in range(len(delta_t))
+            x + self.eta * y / (np.sqrt(z) + self.tau)
+            for x, y, z in zip(self.current_weights, self.delta_t, self.v_t)
         ]
+
         self.current_weights = new_weights
 
         return weights_to_parameters(self.current_weights), metrics_aggregated
