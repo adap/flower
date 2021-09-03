@@ -5,7 +5,7 @@ requires = [
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "simulation_ray"
+name = "simulation_pytorch"
 version = "0.1.0"
 description = "Federated Learning Simulation with Flower and PyTorch"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
