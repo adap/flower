@@ -14,11 +14,13 @@
 #include <optional>
 #include <map>
 #include "transport.grpc.pb.h"
-//#include "typing.h"
+#include "typing.h"
 //#include "serde.h"
 //#include "message_handler.h"
+#include "client.h"
 #include "start.h"
-#include "torch_client.h"
+//#include "torch_client.h"
+#include "torch_client.cc"
 
 int main(int argc, char** argv) {
 
@@ -33,7 +35,7 @@ int main(int argc, char** argv) {
 
     // Load CIFAR10 Training Dataset and DataLoader
     int64_t kTrainBatchSize = 64;
-    const std::string CIFAR10_DATASET_PATH = "/home/pedro/repos/flower_cpp/data/cifar-10-batches-bin/";
+    const std::string CIFAR10_DATASET_PATH = "/home/lekang/myflwr/flower/src/cc/data/";
     std::vector<double> norm_mean = { 0.4914, 0.4822, 0.4465 };
     std::vector<double> norm_std = { 0.247, 0.243, 0.261 };
     auto train_dataset = CIFAR10(CIFAR10_DATASET_PATH, CIFAR10::Mode::kTrain)

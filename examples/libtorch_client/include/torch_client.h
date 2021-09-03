@@ -100,6 +100,7 @@ class TorchClient : public flwr::Client {
     int64_t client_id;
 
   public:
+    //TorchClient(){};
     TorchClient(int64_t client_id,
         vision::models::ResNet18& net,
         DataLoader& trainset,
@@ -107,8 +108,8 @@ class TorchClient : public flwr::Client {
         torch::optim::Optimizer& optimizer,
         torch::Device device);
 
-    flwr::ParametersRes get_parameters() override;
-    flwr::EvaluateRes evaluate(flwr::EvaluateIns ins) override;
-    flwr::FitRes fit(flwr::FitIns ins) override;
+    virtual flwr::ParametersRes get_parameters() override;
+    virtual flwr::EvaluateRes evaluate(flwr::EvaluateIns ins) override;
+    virtual flwr::FitRes fit(flwr::FitIns ins) override;
 
 };

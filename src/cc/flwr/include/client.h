@@ -7,8 +7,8 @@
 namespace flwr{
 class Client {
 public:
-	virtual ParametersRes get_parameters();
-	virtual FitRes fit(FitIns ins);
-	virtual EvaluateRes evaluate(EvaluateIns ins);
+	virtual ParametersRes get_parameters()=0;
+	virtual FitRes fit(FitIns ins)=0;
+	virtual EvaluateRes evaluate(EvaluateIns ins)=0;
 };
 }
