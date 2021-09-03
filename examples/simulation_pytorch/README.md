@@ -1,6 +1,6 @@
 # example_simulation_ray
 
-This is the code splits CIFAR-10 dataset into `pool_size` partitions (user defined) and does a few rounds of CIFAR-10 training.
+This code splits CIFAR-10 dataset into `pool_size` partitions (user defined) and does a few rounds of CIFAR-10 training.
 
 ## Requirements
 
