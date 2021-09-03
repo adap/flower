@@ -3,8 +3,6 @@
  * @file typing.h
  *
  * @brief C++ Flower type definitions
- * There is no "bytes" type in C++, so "string" is used instead (char* can also be used if needed)
- * as defined in https://developers.google.com/protocol-buffers/docs/proto#scalar
  *
  * @author Lekang Jiang
  *
@@ -14,31 +12,25 @@
  *
  * ********************************************************************************************************/
 
-/*
-* Typing
-*
-* There is no "bytes" type in C++, so "string" is used instead
-* as defined in https://developers.google.com/protocol-buffers/docs/proto#scalar
-*
-*/
-
-/*
-* In C++ Class is easier to use than Union, and I think it can perform the same function as Union in Python
-* The Scalar defined in "transport" uses "double" and "int64", I am not sure if there should be changed
-*
-*/
-
 #pragma once
 #include <optional>
 #include <list>
 #include <map>
 
-namespace flwr{
-
-  class Scalar{
-    public:
-	   // getters
-        std::optional<bool> getBool(){
+namespace flwr {
+	/**
+	* This class contains C++ types corresponding to ProtoBuf types that 
+	* ProtoBuf considers to be "Scalar Value Types", even though some of them arguably do
+	* not conform to other definitions of what a scalar is. 
+	* There is no "bytes" type in C++, so "string" is used instead of bytes in Python (char* can also be used if needed)
+	* In C++, Class is easier to use than Union (can be changed if needed)
+	* Source: https://developers.google.com/protocol-buffers/docs/overview#scalar
+	* 
+	*/
+	class Scalar {
+	public:
+		// Getters
+		std::optional<bool> getBool() {
 			return b;
 		}
 		std::optional<std::string> getBytes()
@@ -58,7 +50,7 @@ namespace flwr{
 			return string;
 		}
 
-		// setters
+		// Setters
 		void setBool(bool b)
 		{
 			this->b = b;
@@ -88,216 +80,237 @@ namespace flwr{
 		std::optional<std::string> string = std::nullopt;
 	};
 
-  typedef std::map<std::string, flwr::Scalar> Metrics;
+	typedef std::map<std::string, flwr::Scalar> Metrics;
 
-class Parameters{
-public:
-	Parameters(){};
-	Parameters(std::list<std::string> tensors, std::string tensor_type)
-		: tensors(tensors), tensor_type(tensor_type){};
+	/**
+	* Model parameters
+	*/
+	class Parameters {
+	public:
+		Parameters() {};
+		Parameters(std::list<std::string> tensors, std::string tensor_type)
+			: tensors(tensors), tensor_type(tensor_type) {};
 
-	// getters
-	std::list<std::string> getTensors()
-	{
-		return tensors;
-	}
-	std::string getTensor_type()
-	{
-		return tensor_type;
-	}
+		// Getters
+		std::list<std::string> getTensors()
+		{
+			return tensors;
+		}
+		std::string getTensor_type()
+		{
+			return tensor_type;
+		}
 
-	// setters
-	void setTensors(std::list<std::string> tensors)
-	{
-		this->tensors = tensors;
-	}
-	void setTensor_type(std::string tensor_type)
-	{
-		this->tensor_type = tensor_type;
-	}
+		// Setters
+		void setTensors(std::list<std::string> tensors)
+		{
+			this->tensors = tensors;
+		}
+		void setTensor_type(std::string tensor_type)
+		{
+			this->tensor_type = tensor_type;
+		}
 
-private:
-	std::list<std::string> tensors;
-	std::string tensor_type;
-};
+	private:
+		std::list<std::string> tensors;
+		std::string tensor_type;
+	};
 
-class ParametersRes
-{
-public:
-	ParametersRes(Parameters parameters)
-		: parameters(parameters){};
+	/**
+	* Response when asked to return parameters
+	*/
+	class ParametersRes
+	{
+	public:
+		ParametersRes(Parameters parameters)
+			: parameters(parameters) {};
 
-	Parameters getParameters()
-	{
-		return parameters;
-	}
-	void setParameters(Parameters p)
-	{
-		parameters = p;
-	}
+		Parameters getParameters()
+		{
+			return parameters;
+		}
+		void setParameters(Parameters p)
+		{
+			parameters = p;
+		}
 
-private:
-	// Response when asked to return parameters
-	Parameters parameters;
-};
+	private:
+		Parameters parameters;
+	};
 
-class FitIns
-{
-public:
-	FitIns(Parameters parameters, std::map<std::string, flwr::Scalar> config)
-		: parameters(parameters), config(config){};
+	/**
+	* Fit instructions for a client
+	*/
+	class FitIns
+	{
+	public:
+		FitIns(Parameters parameters, std::map<std::string, flwr::Scalar> config)
+			: parameters(parameters), config(config) {};
 
-	Parameters getParameters()
-	{
-		return parameters;
-	}
-	std::map<std::string, Scalar> getConfig()
-	{
-		return config;
-	}
+		// Getters
+		Parameters getParameters()
+		{
+			return parameters;
+		}
+		std::map<std::string, Scalar> getConfig()
+		{
+			return config;
+		}
 
-	void setParameters(Parameters p)
-	{
-		parameters = p;
-	}
-	void setConfig(std::map<std::string, Scalar> config)
-	{
-		this->config = config;
-	}
+		// Setters
+		void setParameters(Parameters p)
+		{
+			parameters = p;
+		}
+		void setConfig(std::map<std::string, Scalar> config)
+		{
+			this->config = config;
+		}
 
-private:
-	// Fit instructions for a client
-	Parameters parameters;
-	std::map<std::string, Scalar> config;
-};
+	private:
+		Parameters parameters;
+		std::map<std::string, Scalar> config;
+	};
 
-class FitRes
-{
-public:
-	FitRes(){};
-	FitRes(Parameters parameters, int num_examples, int num_examples_ceil, float fit_duration, Metrics metrics)
-		: parameters(parameters), num_examples(num_examples), num_examples_ceil(num_examples_ceil),
-		  fit_duration(fit_duration), metrics(metrics){};
+	/**
+	* Fit response from a client
+	*/
+	class FitRes
+	{
+	public:
+		FitRes() {};
+		FitRes(Parameters parameters, int num_examples, int num_examples_ceil, float fit_duration, Metrics metrics)
+			: parameters(parameters), num_examples(num_examples), num_examples_ceil(num_examples_ceil),
+			fit_duration(fit_duration), metrics(metrics) {};
 
-	Parameters getParameters()
-	{
-		return parameters;
-	}
-	int getNum_example()
-	{
-		return num_examples;
-	}
-	std::optional<int> getNum_examples_ceil()
-	{
-		return num_examples_ceil;
-	}
-	std::optional<float> getFit_duration()
-	{
-		return fit_duration;
-	}
-	std::optional<Metrics> getMetrics()
-	{
-		return metrics;
-	}
+		// Getters
+		Parameters getParameters()
+		{
+			return parameters;
+		}
+		int getNum_example()
+		{
+			return num_examples;
+		}
+		std::optional<int> getNum_examples_ceil()
+		{
+			return num_examples_ceil;
+		}
+		std::optional<float> getFit_duration()
+		{
+			return fit_duration;
+		}
+		std::optional<Metrics> getMetrics()
+		{
+			return metrics;
+		}
 
-	void setParameters(Parameters p)
-	{
-		parameters = p;
-	}
-	void setNum_example(int n)
-	{
-		num_examples = n;
-	}
-	void setNum_examples_ceil(int n)
-	{
-		num_examples_ceil = n;
-	}
-	void setFit_duration(float f)
-	{
-		fit_duration = f;
-	}
-	void setMetrics(flwr::Metrics m)
-	{
-		metrics = m;
-	}
+		// Setters
+		void setParameters(Parameters p)
+		{
+			parameters = p;
+		}
+		void setNum_example(int n)
+		{
+			num_examples = n;
+		}
+		void setNum_examples_ceil(int n)
+		{
+			num_examples_ceil = n;
+		}
+		void setFit_duration(float f)
+		{
+			fit_duration = f;
+		}
+		void setMetrics(flwr::Metrics m)
+		{
+			metrics = m;
+		}
 
-private:
-	// Fit response from a client
-	Parameters parameters;
-	int num_examples;
-	std::optional<int> num_examples_ceil = std::nullopt; // Deprecated
-	std::optional<float> fit_duration = std::nullopt;	 // Deprecated
-	std::optional<Metrics> metrics = std::nullopt;
-};
+	private:
+		Parameters parameters;
+		int num_examples;
+		std::optional<int> num_examples_ceil = std::nullopt; 
+		std::optional<float> fit_duration = std::nullopt;	 
+		std::optional<Metrics> metrics = std::nullopt;
+	};
 
-class EvaluateIns
-{
-public:
-	EvaluateIns(Parameters parameters, std::map<std::string, Scalar> config)
-		: parameters(parameters), config(config){};
+	/**
+	* Evaluate instructions for a client
+	*/
+	class EvaluateIns
+	{
+	public:
+		EvaluateIns(Parameters parameters, std::map<std::string, Scalar> config)
+			: parameters(parameters), config(config) {};
 
-	Parameters getParameters()
-	{
-		return parameters;
-	}
-	std::map<std::string, Scalar> getConfig()
-	{
-		return config;
-	}
+		// Getters
+		Parameters getParameters()
+		{
+			return parameters;
+		}
+		std::map<std::string, Scalar> getConfig()
+		{
+			return config;
+		}
 
-	void setParameters(Parameters p)
-	{
-		parameters = p;
-	}
-	void setConfig(std::map<std::string, Scalar> config)
-	{
-		this->config = config;
-	}
+		// Setters
+		void setParameters(Parameters p)
+		{
+			parameters = p;
+		}
+		void setConfig(std::map<std::string, Scalar> config)
+		{
+			this->config = config;
+		}
 
-private:
-	// Evaluate instructions for a client
-	Parameters parameters;
-	std::map<std::string, Scalar> config;
-};
+	private:
+		Parameters parameters;
+		std::map<std::string, Scalar> config;
+	};
 
-class EvaluateRes
-{
-public:
-	EvaluateRes(){};
-	EvaluateRes(float loss, int num_examples, float accuracy, Metrics metrics)
-		: loss(loss), num_examples(num_examples), metrics(metrics){};
+	/**
+	* Evaluate response from a client
+	*/
+	class EvaluateRes
+	{
+	public:
+		EvaluateRes() {};
+		EvaluateRes(float loss, int num_examples, float accuracy, Metrics metrics)
+			: loss(loss), num_examples(num_examples), metrics(metrics) {};
 
-	float getLoss()
-	{
-		return loss;
-	}
-	int getNum_example()
-	{
-		return num_examples;
-	}
-	std::optional<Metrics> getMetrics()
-	{
-		return metrics;
-	}
+		// Getters
+		float getLoss()
+		{
+			return loss;
+		}
+		int getNum_example()
+		{
+			return num_examples;
+		}
+		std::optional<Metrics> getMetrics()
+		{
+			return metrics;
+		}
 
-	void setLoss(float f)
-	{
-		loss = f;
-	}
-	void setNum_example(int n)
-	{
-		num_examples = n;
-	}
-	void setMetrics(Metrics m)
-	{
-		metrics = m;
-	}
+		// Setters
+		void setLoss(float f)
+		{
+			loss = f;
+		}
+		void setNum_example(int n)
+		{
+			num_examples = n;
+		}
+		void setMetrics(Metrics m)
+		{
+			metrics = m;
+		}
 
-private:
-	// Evaluate response from a client
-	float loss;
-	int num_examples;
-	std::optional<Metrics> metrics = std::nullopt;
-};
+	private:
+		float loss;
+		int num_examples;
+		std::optional<Metrics> metrics = std::nullopt;
+	};
 
 }
