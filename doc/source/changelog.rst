@@ -6,10 +6,12 @@ Unreleased
 
 What's new?
 
-* **New built-in strategies** (`#828 <https://github.com/adap/flower/pull/828>`_ `#822 <https://github.com/adap/flower/pull/822>`_ )
+* **New built-in strategies** (`#828 <https://github.com/adap/flower/pull/828>`_ `#822 <https://github.com/adap/flower/pull/822>`_)
     * FedYogi
     * FedAdam
-    
+
+* **Warning when `min_available_clients` is misconfigured** (`#830 <https://github.com/adap/flower/pull/830>`_)
+
 Incompatible changes:
 
 * **Disabled final distributed evaluation** (`#800 <https://github.com/adap/flower/pull/800>`_)
