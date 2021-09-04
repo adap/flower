@@ -160,7 +160,6 @@ def sec_agg_fit_round(server, rnd: int
     total_time = total_time+timeit.default_timer()
     unmask_vectors_results_and_failures = unmask_vectors(
         unmask_vectors_clients, dropout_clients, sec_agg_param_dict['sample_num'], sec_agg_param_dict['share_num'])
-    print(unmask_vectors_results_and_failures)
     unmask_vectors_results = unmask_vectors_results_and_failures[0]
     total_time = total_time-timeit.default_timer()
     # Build collected shares dict
@@ -458,7 +457,7 @@ def unmask_vectors_client(client: ClientProxy, idx: int, clients: List[ClientPro
     local_dropout_clients: List[int] = []
     for i in range(-int(share_num / 2), int(share_num / 2) + 1):
         if ((i + idx) % sample_num) in clients:
-            local_clients.append([(i + idx) % sample_num])
+            local_clients.append((i + idx) % sample_num)
         if ((i + idx) % sample_num) in dropout_clients:
-            local_dropout_clients.append([(i + idx) % sample_num])
+            local_dropout_clients.append((i + idx) % sample_num)
     return client, client.unmask_vectors(UnmaskVectorsIns(available_clients=local_clients, dropout_clients=dropout_clients))
