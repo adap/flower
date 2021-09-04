@@ -251,20 +251,24 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
 
 def unmask_vectors(client, unmask_vectors_ins: UnmaskVectorsIns) -> UnmaskVectorsRes:
     total_time = -timeit.default_timer()
+    print(1)
     # Send private mask seed share for every avaliable client (including itclient)
     # Send first private key share for building pairwise mask for every dropped client
     available_clients = unmask_vectors_ins.available_clients
     if len(available_clients) < client.threshold:
         raise Exception("Available neighbours number smaller than threshold")
-
+    print(2)
     dropout_clients = unmask_vectors_ins.dropout_clients
+    print(3)
     share_dict: Dict[int, bytes] = {}
     for idx in available_clients:
         share_dict[idx] = client.b_share_dict[idx]
+    print(4)
     for idx in dropout_clients:
         share_dict[idx] = client.sk1_share_dict[idx]
     log(INFO, "SecAgg Stage 4 Completed: Sent Shares for Unmasking")
     total_time = total_time+timeit.default_timer()
+    print(5)
     if client.sec_agg_id == 3:
         f = open("log.txt", "a")
         f.write(f"Client without communication stage 4:{total_time} \n")
