@@ -1,3 +1,17 @@
+/*************************************************************************************************
+ *
+ * @file message_handler.h
+ *
+ * @brief Handle server messages by calling appropriate client methods
+ *
+ * @autheor Lekang Jiang
+ *
+ * @version 1.0
+ *
+ * @date 04/09/2021
+ *
+ *************************************************************************************************/
+
 #pragma once
 #include "client.h"
 #include "serde.h"
@@ -11,9 +25,6 @@ using flower::transport::ClientMessage_FitRes;
 using flower::transport::ServerMessage_Reconnect;
 using flower::transport::ClientMessage_Disconnect;
 
-/*
-* Message Handler
-*/
 std::tuple<ClientMessage, int> _reconnect(ServerMessage_Reconnect reconnect_msg) {
 	// Determine the reason for sending Disconnect message
 	Reason reason = Reason::ACK;
@@ -35,16 +46,15 @@ std::tuple<ClientMessage, int> _reconnect(ServerMessage_Reconnect reconnect_msg)
 ClientMessage _get_parameters(flwr::Client* client) {
 	// No need to deserialize get_parameters_msg(it's empty)
 	//std::cout << "DEBUG: client getparameter" << std::endl;
-	//ParametersRes parameters_res = client->get_parameters();
+
 	ClientMessage cm;
 	//std::cout << "DEBUG: parameter res_to_proto" << std::endl;
-	//std::cout << client->get_parameters().getParameters().getTensor_type() << std::endl;
-	//ClientMessage_ParametersRes parameters_res_proto = parameters_res_to_proto(client->get_parameters());
 	//std::cout << parameters_res_proto.parameters().DebugString() << std::endl;
+
 	*(cm.mutable_parameters_res()) = parameters_res_to_proto(client->get_parameters());
-	//cm.set_allocated_parameters_res(&parameters_res_proto);
+
 	//std::cout << cm.parameters_res().DebugString() << std::endl;
-	//std::cout << "DEBUG: getparameter done" << std::endl;
+
 	return cm;
 }
 
