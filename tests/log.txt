@@ -1,12 +1,42 @@
 Starting
-This is secagg sampling 10 dropping out 00% with vector size 100000 try 0 
-Client without communication stage 0:0.0008779000000007642 
-Client without communication stage 1:0.15209470000000103 
-Client without communication stage 2:0.06781499999999951 
-Client without communication stage 3:3.3563381999999997 
-Client without communication stage 4:0.00045250000000152113 
-Server time without communication:4.714802499999998 
+This is secagg sampling 5 dropping out 0% with vector size 100000 try 0 
+Client without communication stage 0:0.0004166999999997145 
+Client without communication stage 1:0.04946120000000054 
+Client without communication stage 2:0.01961809999999975 
+Client without communication stage 3:0.9759967999999999 
+Client without communication stage 4:0.0006953000000002874 
+Server time without communication:0.7019637999999979 
 first element 0.0
 
 
-This is secagg sampling 10 dropping out 00% with vector size 100000 try 1 
+This is secagg sampling 5 dropping out 0% with vector size 100000 try 1 
+Client without communication stage 0:0.0004288000000007841 
+Client without communication stage 1:0.07511630000000036 
+Client without communication stage 2:0.025697599999999987 
+Client without communication stage 3:1.5437384000000005 
+Client without communication stage 4:0.0004284999999999428 
+Server time without communication:0.7958521999999988 
+first element 0.0
+
+
+This is secagg sampling 5 dropping out 0% with vector size 100000 try 2 
+Client without communication stage 0:0.00045669999999997657 
+Client without communication stage 1:0.07503049999999956 
+Client without communication stage 2:0.03666519999999984 
+Client without communication stage 3:1.1280381999999998 
+Client without communication stage 4:0.0004249999999998977 
+Server time without communication:0.6266254 
+first element 0.0
+
+
+This is secagg sampling 5 dropping out 0% with vector size 100000 try 3 
+Client without communication stage 0:0.00047229999999931493 
+Client without communication stage 1:0.07186689999999984 
+Client without communication stage 2:0.02204539999999966 
+Client without communication stage 3:1.2825392000000004 
+Client without communication stage 4:0.0003911999999992588 
+Server time without communication:0.637455000000001 
+first element 0.0
+
+
+This is secagg sampling 5 dropping out 0% with vector size 100000 try 4 

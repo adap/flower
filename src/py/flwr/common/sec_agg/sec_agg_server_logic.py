@@ -160,6 +160,7 @@ def sec_agg_fit_round(server, rnd: int
     total_time = total_time+timeit.default_timer()
     unmask_vectors_results_and_failures = unmask_vectors(
         unmask_vectors_clients, dropout_clients, sec_agg_param_dict['sample_num'], sec_agg_param_dict['share_num'])
+    print(unmask_vectors_results_and_failures)
     unmask_vectors_results = unmask_vectors_results_and_failures[0]
     total_time = total_time-timeit.default_timer()
     # Build collected shares dict
