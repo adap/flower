@@ -49,10 +49,8 @@ def client_fn(cid: str) -> fl.client.Client:
     (x_train, y_train), _ = tf.keras.datasets.mnist.load_data()
     partition_size = math.floor(len(x_train) / NUM_CLIENTS)
     idx_from, idx_to = int(cid) * partition_size, (int(cid) + 1) * partition_size
-    x_train_cid, y_train_cid = (
-        x_train[idx_from:idx_to] / 255.0,
-        y_train[idx_from:idx_to] / 255.0,
-    )
+    x_train_cid = x_train[idx_from:idx_to] / 255.0
+    y_train_cid = y_train[idx_from:idx_to]
 
     # Create and return client
     return FlwrClient(model, x_train_cid, y_train_cid)
