@@ -62,7 +62,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use
         `flwr.server.strategy.FedAvg`.
-    ray_init_args : Optional[Dict[str, Any]] (default: None)
+    ray_init_args : Optional[Dict[str, Any]] (default: {'ignore_reinit_error': True})
         Optional dictionary containing `ray.init` arguments.
     """
 
