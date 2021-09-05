@@ -1,0 +1,17 @@
+[build-system]
+requires = [
+    "poetry==1.1.6",
+]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "quickstart_simulation"
+version = "0.1.0"
+description = "Federated Learning Simulation Quickstart with Flower"
+authors = ["The Flower Authors <enquiries@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.2"
+flwr = {extras = ["simulation"], version = "^0.17.0"}
+# flwr = {extras = ["simulation"], path = "../../", develop = true }  # For development
+tensorflow-cpu = "2.6.0"
