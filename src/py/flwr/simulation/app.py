@@ -68,7 +68,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # Initialize Ray
     if not ray_init_args:
-        ray_init_args = {}
+        ray_init_args = {
+            "ignore_reinit_error": True,
+        }
     ray.init(**ray_init_args)
     log(
         INFO,
