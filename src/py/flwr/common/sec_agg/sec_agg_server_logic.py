@@ -137,15 +137,20 @@ def sec_agg_fit_round(server, rnd: int
     total_time = total_time-timeit.default_timer()
     ask_vectors_results = ask_vectors_results_and_failures[0]
     f = open("log.txt", "a")
-    f.write(f"Stage 3 results:{ask_vectors_results_and_failures[1]} \n")
+    f.write(
+        f"Stage 3 results:{ask_vectors_results_and_failures[1]} \n{sec_agg_param_dict['min_num']}")
     f.close()
     if len(ask_vectors_results) < sec_agg_param_dict['min_num']:
         raise Exception("Not enough available clients after ask vectors stage")
-
+    f = open("log.txt", "a")
+    f.write(f"ok")
+    f.close()
     # Get shape of vector sent by first client
     masked_vector = sec_agg_primitives.weights_zero_generate(
         [i.shape for i in parameters_to_weights(ask_vectors_results[0][1].parameters)])
-
+    f = open("log.txt", "a")
+    f.write(f"ok2")
+    f.close()
     # Add all collected masked vectors and compuute available and dropout clients set
     unmask_vectors_clients: Dict[int, ClientProxy] = {}
     dropout_clients = ask_vectors_clients.copy()
