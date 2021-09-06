@@ -162,7 +162,9 @@ def sec_agg_fit_round(server, rnd: int
             client_parameters = ask_vectors_results[pos][1].parameters
             masked_vector = sec_agg_primitives.weights_addition(
                 masked_vector, parameters_to_weights(client_parameters))
-
+    f = open("log.txt", "a")
+    f.write(f"ok3")
+    f.close()
     # === Stage 4: Unmask Vectors ===
     log(INFO, "SecAgg Stage 4: Unmasking Vectors")
     total_time = total_time+timeit.default_timer()
@@ -468,4 +470,4 @@ def unmask_vectors_client(client: ClientProxy, idx: int, clients: List[ClientPro
             local_clients.append((i + idx) % sample_num)
         if ((i + idx) % sample_num) in dropout_clients:
             local_dropout_clients.append((i + idx) % sample_num)
-    return client, client.unmask_vectors(UnmaskVectorsIns(available_clients=local_clients, dropout_clients=dropout_clients))
+    return client, client.unmask_vectors(UnmaskVectorsIns(available_clients=local_clients, dropout_clients=local_dropout_clients))
