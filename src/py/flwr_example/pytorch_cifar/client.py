@@ -101,7 +101,7 @@ class CifarClient(fl.client.Client):
 
         # Return the number of evaluation examples and the evaluation result (loss)
         return EvaluateRes(
-            num_examples=len(self.testset), loss=float(loss), accuracy=float(accuracy)
+            loss=float(loss), num_examples=len(self.testset), accuracy=float(accuracy)
         )
 
 

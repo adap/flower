@@ -6,11 +6,110 @@ Unreleased
 
 What's new?
 
-* **Generalized** :code:`Client.fit` **and** :code:`Client.evaluate` **return values** (`#610 <https://github.com/adap/flower/pull/610>`_, `#572 <https://github.com/adap/flower/pull/572>`_)
+* **New built-in strategies** (`#828 <https://github.com/adap/flower/pull/828>`_ `#822 <https://github.com/adap/flower/pull/822>`_)
+    * FedYogi
+    * FedAdam
+
+* **Warning when `min_available_clients` is misconfigured** (`#830 <https://github.com/adap/flower/pull/830>`_)
+
+Incompatible changes:
+
+* **Disabled final distributed evaluation** (`#800 <https://github.com/adap/flower/pull/800>`_)
+
+  Prior behaviour was to perform a final round of distributed evaluation on all connected clients, which is often not required (e.g., when using server-side evaluation). The prior behaviour can be enabled by passing :code:`force_final_distributed_eval=True` to :code:`start_server`.
+
+* **Renamed q-FedAvg strategy** (`#802 <https://github.com/adap/flower/pull/802>`_)
+
+  The strategy named :code:`QffedAvg` was renamed to `QFedAvg` to better reflect the notation given in the original paper (q-FFL is the optimization objective, q-FedAvg is the proposed solver). Note the the original (now deprecated) :code:`QffedAvg` class is still available for compatibility reasons (it will be removed in a future release).
+
+
+v0.16.0 (2021-05-11)
+--------------------
+
+What's new?
+
+* **New built-in strategies** (`#549 <https://github.com/adap/flower/pull/549>`_)
+    * (abstract) FedOpt
+    * FedAdagrad
+
+* **Custom metrics for server and strategies** (`#717 <https://github.com/adap/flower/pull/717>`_)
+
+  The Flower server is now fully task-agnostic, all remaining instances of task-specific metrics (such as :code:`accuracy`) have been replaced by custom metrics dictionaries. Flower 0.15 introduced the capability to pass a dictionary containing custom metrics from client to server. As of this release, custom metrics replace task-specific metrics on the server.
+
+  Custom metric dictionaries are now used in two user-facing APIs: they are returned from Strategy methods :code:`aggregate_fit`/:code:`aggregate_evaluate` and they enable evaluation functions passed to build-in strategies (via :code:`eval_fn`) to return more than two evaluation metrics. Strategies can even return *aggregated* metrics dictionaries for the server to keep track of.
+
+  Stratey implementations should migrate their :code:`aggregate_fit` and :code:`aggregate_evaluate` methods to the new return type (e.g., by simply returning an empty :code:`{}`), server-side evaluation functions should migrate from :code:`return loss, accuracy` to :code:`return loss, {"accuracy": accuracy}`.
+
+  Flower 0.15-style return types are deprecated (but still supported), compatibility will be removed in a future release.
+
+* **Migration warnings for deprecated functionality** (`#690 <https://github.com/adap/flower/pull/690>`_)
+
+  Earlier versions of Flower were often migrated to new APIs, while maintaining compatibility with legacy APIs. This release introduces detailed warning messages if usage of deprecated APIs is detected. The new warning messages often provide details on how to migrate to more recent APIs, thus easing the transition from one release to another.
+
+* Improved docs and docstrings (`#691 <https://github.com/adap/flower/pull/691>`_ `#692 <https://github.com/adap/flower/pull/692>`_ `#713 <https://github.com/adap/flower/pull/713>`_)
+
+* MXNet example and documentation
+
+* FedBN implementation in example PyTorch: From Centralized To Federated (`#696 <https://github.com/adap/flower/pull/696>`_ `#702 <https://github.com/adap/flower/pull/702>`_ `#705 <https://github.com/adap/flower/pull/705>`_)
+
+Incompatible changes:
+
+* **Serialization-agnostic server** (`#721 <https://github.com/adap/flower/pull/721>`_)
+
+  The Flower server is now fully serialization-agnostic. Prior usage of class :code:`Weights` (which represents parameters as deserialized NumPy ndarrays) was replaced by class :code:`Parameters` (e.g., in :code:`Strategy`). :code:`Parameters` objects are fully serialization-agnostic and represents parameters as byte arrays, the :code:`tensor_type` attributes indicates how these byte arrays should be interpreted (e.g., for serialization/deserialization).
+
+  Built-in strategies implement this approach by handling serialization and deserialization to/from :code:`Weights` internally. Custom/3rd-party Strategy implementations should update to the slighly changed Strategy method definitions. Strategy authors can consult PR `#721 <https://github.com/adap/flower/pull/721>`_ to see how strategies can easily migrate to the new format.
+
+* Deprecated :code:`flwr.server.Server.evaluate`, use :code:`flwr.server.Server.evaluate_round` instead (`#717 <https://github.com/adap/flower/pull/717>`_)
+
+
+v0.15.0 (2021-03-12)
+--------------------
+
+What's new?
+
+* **Server-side parameter initialization** (`#658 <https://github.com/adap/flower/pull/658>`_)
+
+  Model parameters can now be initialized on the server-side. Server-side parameter initialization works via a new :code:`Strategy` method called :code:`initialize_parameters`.
+
+  Built-in strategies support a new constructor argument called :code:`initial_parameters` to set the initial parameters. Built-in strategies will provide these initial parameters to the server on startup and then delete them to free the memory afterwards.
+
+  .. code-block:: python
+
+    # Create model
+    model = tf.keras.applications.EfficientNetB0(
+        input_shape=(32, 32, 3), weights=None, classes=10
+    )
+    model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+
+    # Create strategy and initilize parameters on the server-side
+    strategy = fl.server.strategy.FedAvg(
+        # ... (other constructor arguments)
+        initial_parameters=model.get_weights(),
+    )
+
+    # Start Flower server with the strategy
+    fl.server.start_server("[::]:8080", config={"num_rounds": 3}, strategy=strategy)
+
+  If no initial parameters are provided to the strategy, the server will continue to use the current behaviour (namely, it will ask one of the connected clients for its parameters and use these as the initial global parameters).
+
+Deprecations
+
+* Deprecate :code:`flwr.server.strategy.DefaultStrategy` (migrate to :code:`flwr.server.strategy.FedAvg`, which is equivalent)
+
+
+v0.14.0 (2021-02-18)
+--------------------
+
+What's new?
+
+* **Generalized** :code:`Client.fit` **and** :code:`Client.evaluate` **return values** (`#610 <https://github.com/adap/flower/pull/610>`_, `#572 <https://github.com/adap/flower/pull/572>`_, `#633 <https://github.com/adap/flower/pull/633>`_)
 
   Clients can now return an additional dictionary mapping :code:`str` keys to values of the following types: :code:`bool`, :code:`bytes`, :code:`float`, :code:`int`, :code:`str`. This means one can return almost arbitrary values from :code:`fit`/:code:`evaluate` and make use of them on the server side!
   
-  In case you wondered: this feature is compatible with existing projects. The additional dictionary return value is optional, which means that :code:`NumPyClient` can handle either three or four return values. See the example below for details.
+  This improvement also allowed for more consistent return types between :code:`fit` and :code:`evaluate`: :code:`evaluate` should now return a tuple :code:`(float, int, dict)` representing the loss, number of examples, and a dictionary holding arbitrary problem-specific values like accuracy. 
+  
+  In case you wondered: this feature is compatible with existing projects, the additional dictionary return value is optional. New code should however migrate to the new return types to be compatible with upcoming Flower releases (:code:`fit`: :code:`List[np.ndarray], int, Dict[str, Scalar]`, :code:`evaluate`: :code:`float, int, Dict[str, Scalar]`). See the example below for details.
 
   *Code example:* note the additional dictionary return values in both :code:`FlwrClient.fit` and :code:`FlwrClient.evaluate`: 
 
@@ -25,7 +124,7 @@ What's new?
         def evaluate(self, parameters, config):
             net.set_parameters(parameters)
             loss, accuracy, custom_metric = test(net, testloader)
-            return len(testloader), loss, accuracy, {"custom_metric": custom_metric}
+            return loss, len(testloader), {"accuracy": accuracy, "custom_metric": custom_metric}
 
 * **Generalized** :code:`config` **argument in** :code:`Client.fit` **and** :code:`Client.evaluate` (`#595 <https://github.com/adap/flower/pull/595>`_)
 
@@ -47,12 +146,8 @@ What's new?
         def evaluate(self, parameters, config):
             net.set_parameters(parameters)
             batch_size: int = config["batch_size"]
-            loss, accuracy, custom_metric = test(net, testloader, batch_size)
-            return len(testloader), loss, accuracy, {"custom_metric": custom_metric}
-
-* New built-in strategies (`#549 <https://github.com/adap/flower/pull/549>`_)
-    * (abstract) FedOpt
-    * FedAdagrad
+            loss, accuracy = test(net, testloader, batch_size)
+            return loss, len(testloader), {"accuracy": accuracy}
 
 
 v0.13.0 (2021-01-08)

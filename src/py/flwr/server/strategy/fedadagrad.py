@@ -23,7 +23,14 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from flwr.common import FitRes, Scalar, Weights
+from flwr.common import (
+    FitRes,
+    Parameters,
+    Scalar,
+    Weights,
+    parameters_to_weights,
+    weights_to_parameters,
+)
 from flwr.server.client_proxy import ClientProxy
 
 from .fedopt import FedOpt
@@ -45,11 +52,13 @@ class FedAdagrad(FedOpt):
         min_fit_clients: int = 2,
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
-        eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
+        eval_fn: Optional[
+            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
-        current_weights: Weights,
+        initial_parameters: Parameters,
         eta: float = 1e-1,
         eta_l: float = 1e-1,
         tau: float = 1e-9,
@@ -77,7 +86,7 @@ class FedAdagrad(FedOpt):
                 Function used to configure validation. Defaults to None.
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
-            current_weights (Weights): Current set of weights from the server.
+            initial_parameters (Parameters): Initial set of parameters from the server.
             eta (float, optional): Server-side learning rate. Defaults to 1e-1.
             eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.
             tau (float, optional): Controls the algorithm's degree of adaptability.
@@ -93,9 +102,11 @@ class FedAdagrad(FedOpt):
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
-            current_weights=current_weights,
+            initial_parameters=initial_parameters,
             eta=eta,
             eta_l=eta_l,
+            beta_1=0.0,
+            beta_2=0.0,
             tau=tau,
         )
         self.v_t: Optional[Weights] = None
@@ -109,17 +120,18 @@ class FedAdagrad(FedOpt):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Optional[Weights]:
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
-        fedavg_aggregate = super().aggregate_fit(
+        fedavg_parameters_aggregated, metrics_aggregated = super().aggregate_fit(
             rnd=rnd, results=results, failures=failures
         )
-        if fedavg_aggregate is None:
-            return None
+        if fedavg_parameters_aggregated is None:
+            return None, {}
 
+        fedavg_weights_aggregate = parameters_to_weights(fedavg_parameters_aggregated)
         aggregated_updates = [
             subset_weights - self.current_weights[idx]
-            for idx, subset_weights in enumerate(fedavg_aggregate)
+            for idx, subset_weights in enumerate(fedavg_weights_aggregate)
         ]
 
         # Adagrad
@@ -139,4 +151,4 @@ class FedAdagrad(FedOpt):
         ]
         self.current_weights = new_weights
 
-        return self.current_weights
+        return weights_to_parameters(self.current_weights), metrics_aggregated

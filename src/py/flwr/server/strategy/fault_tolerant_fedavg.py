@@ -17,7 +17,15 @@
 
 from typing import Callable, Dict, List, Optional, Tuple
 
-from flwr.common import EvaluateRes, FitRes, Scalar, Weights, parameters_to_weights
+from flwr.common import (
+    EvaluateRes,
+    FitRes,
+    Parameters,
+    Scalar,
+    Weights,
+    parameters_to_weights,
+    weights_to_parameters,
+)
 from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
@@ -35,11 +43,14 @@ class FaultTolerantFedAvg(FedAvg):
         min_fit_clients: int = 1,
         min_eval_clients: int = 1,
         min_available_clients: int = 1,
-        eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
+        eval_fn: Optional[
+            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         min_completion_rate_fit: float = 0.5,
         min_completion_rate_evaluate: float = 0.5,
+        initial_parameters: Optional[Parameters] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -51,6 +62,7 @@ class FaultTolerantFedAvg(FedAvg):
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=True,
+            initial_parameters=initial_parameters,
         )
         self.completion_rate_fit = min_completion_rate_fit
         self.completion_rate_evaluate = min_completion_rate_evaluate
@@ -63,39 +75,46 @@ class FaultTolerantFedAvg(FedAvg):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Optional[Weights]:
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
-            return None
+            return None, {}
         # Check if enough results are available
         completion_rate = len(results) / (len(results) + len(failures))
         if completion_rate < self.completion_rate_fit:
             # Not enough results for aggregation
-            return None
+            return None, {}
         # Convert results
         weights_results = [
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
-        return aggregate(weights_results)
+        return weights_to_parameters(aggregate(weights_results)), {}
 
     def aggregate_evaluate(
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
-    ) -> Optional[float]:
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
-            return None
+            return None, {}
         # Check if enough results are available
         completion_rate = len(results) / (len(results) + len(failures))
         if completion_rate < self.completion_rate_evaluate:
             # Not enough results for aggregation
-            return None
-        return weighted_loss_avg(
-            [
-                (evaluate_res.num_examples, evaluate_res.loss, evaluate_res.accuracy)
-                for client, evaluate_res in results
-            ]
+            return None, {}
+        return (
+            weighted_loss_avg(
+                [
+                    (
+                        evaluate_res.num_examples,
+                        evaluate_res.loss,
+                        evaluate_res.accuracy,
+                    )
+                    for client, evaluate_res in results
+                ]
+            ),
+            {},
         )

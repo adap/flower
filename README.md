@@ -4,6 +4,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/main/CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/workflows/Build/badge.svg)
 ![Downloads](https://pepy.tech/badge/flwr)
+[![Slack](https://img.shields.io/badge/Chat-Slack-red)](https://flower.dev/join-slack)
 
 Flower (`flwr`) is a framework for building federated learning systems. The
 design of Flower is based on a few guiding principles:
@@ -19,19 +20,22 @@ design of Flower is based on a few guiding principles:
 * **Framework-agnostic**: Different machine learning frameworks have different
   strengths. Flower can be used with any machine learning framework, for
   example, [PyTorch](https://pytorch.org),
-  [TensorFlow](https://tensorflow.org), or even raw [NumPy](https://numpy.org/)
+  [TensorFlow](https://tensorflow.org), [MXNet](https://mxnet.apache.org/), [scikit-learn](https://scikit-learn.org/), or even raw [NumPy](https://numpy.org/)
   for users who enjoy computing gradients by hand.
 
 * **Understandable**: Flower is written with maintainability in mind. The
   community is encouraged to both read and contribute to the codebase.
 
+Meet the Flower community on [flower.dev](https://flower.dev)!
+
 ## Documentation
 
-[Flower Documentation](https://flower.dev):
-
+[Flower Docs](https://flower.dev/docs):
 * [Installation](https://flower.dev/docs/installation.html)
 * [Quickstart (TensorFlow)](https://flower.dev/docs/quickstart_tensorflow.html)
 * [Quickstart (PyTorch)](https://flower.dev/docs/quickstart_pytorch.html)
+* [Quickstart (MXNet)](https://flower.dev/docs/example-mxnet-walk-through.html)
+* [Quickstart (scikit-learn [code example])](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 
 ## Flower Usage Examples
 
@@ -45,18 +49,20 @@ Quickstart examples:
 
 * [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/examples/quickstart_tensorflow)
 * [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/examples/quickstart_pytorch)
+* [Quickstart (MXNet)](https://github.com/adap/flower/tree/main/examples/quickstart_mxnet)
 
 Other [examples](https://github.com/adap/flower/tree/main/examples):
 
 * [Raspberry Pi & Nvidia Jetson Tutorial](https://github.com/adap/flower/tree/main/examples/embedded_devices)
+* [PyTorch: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/pytorch_from_centralized_to_federated)
+* [MXNet: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/mxnet_from_centralized_to_federated)
+* [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced_tensorflow)
+* [Single-Machine Simulation of Federated Learning Systems](https://github.com/adap/flower/tree/main/examples/simulation)
+* [Federated learning example with scikit-learn](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 
-## Flower Baselines
+## Flower Baselines / Datasets
 
-*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline](https://github.com/adap/flower/tree/main/src/py/flwr_experimental/baseline).
-
-## Flower Datasets
-
-*Coming soon* - curious minds can take a peek at [src/py/flwr_experimental/baseline/dataset](https://github.com/adap/flower/tree/main/src/py/flwr_experimental/baseline/dataset).
+*Coming soon* - curious minds can take a peek at [baselines](https://github.com/adap/flower/tree/main/baselines).
 
 ## Citation
 

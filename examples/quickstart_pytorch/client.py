@@ -52,21 +52,22 @@ def main():
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             train(net, trainloader, epochs=1)
-            return self.get_parameters(), len(trainloader)
+            return self.get_parameters(), len(trainloader), {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
-            return len(testloader), float(loss), float(accuracy)
+            return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
     # Start client
-    fl.client.start_numpy_client("0.0.0.0:8080", client=CifarClient())
+    fl.client.start_numpy_client("[::]:8080", client=CifarClient())
 
 
 def train(net, trainloader, epochs):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    net.train()
     for _ in range(epochs):
         for images, labels in trainloader:
             images, labels = images.to(DEVICE), labels.to(DEVICE)
@@ -80,6 +81,7 @@ def test(net, testloader):
     """Validate the network on the entire test set."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
+    net.eval()
     with torch.no_grad():
         for data in testloader:
             images, labels = data[0].to(DEVICE), data[1].to(DEVICE)

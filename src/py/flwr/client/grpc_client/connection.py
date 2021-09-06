@@ -53,7 +53,7 @@ def insecure_grpc_connection(
     queue: Queue[ClientMessage] = Queue(  # pylint: disable=unsubscriptable-object
         maxsize=1
     )
-    stub = FlowerServiceStub(channel)  # type: ignore
+    stub = FlowerServiceStub(channel)
 
     server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
 

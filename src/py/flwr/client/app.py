@@ -141,6 +141,16 @@ def start_keras_client(
         None.
     """
 
+    # Deprecation warning
+    warning = """
+    DEPRECATION WARNING: KerasClient is deprecated, migrate to NumPyClient.
+
+    KerasClient will be removed in a future release, please migrate to either
+    NumPyClient (recommended) or Client. NumPyClient is recommended because it
+    is conceptually very similar to KerasClient.
+    """
+    print(warning)
+
     # Wrap the Keras client
     flower_client = KerasClientWrapper(client)
 

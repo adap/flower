@@ -18,7 +18,7 @@
 from typing import List, Optional, Tuple
 from unittest.mock import MagicMock
 
-from flwr.common import EvaluateRes, FitRes, Parameters, Weights
+from flwr.common import EvaluateRes, FitRes, Parameters, Weights, parameters_to_weights
 from flwr.server.client_proxy import ClientProxy
 
 from .fault_tolerant_fedavg import FaultTolerantFedAvg
@@ -30,10 +30,10 @@ def test_aggregate_fit_no_results_no_failures() -> None:
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.1)
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = []
-    expected: Optional[Weights] = None
+    expected: Optional[Parameters] = None
 
     # Execute
-    actual = strategy.aggregate_fit(1, results, failures)
+    actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -45,10 +45,10 @@ def test_aggregate_fit_no_results() -> None:
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.1)
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = [Exception()]
-    expected: Optional[Weights] = None
+    expected: Optional[Parameters] = None
 
     # Execute
-    actual = strategy.aggregate_fit(1, results, failures)
+    actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -62,10 +62,10 @@ def test_aggregate_fit_not_enough_results() -> None:
         (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, 1, 0.1))
     ]
     failures: List[BaseException] = [Exception(), Exception()]
-    expected: Optional[Weights] = None
+    expected: Optional[Parameters] = None
 
     # Execute
-    actual = strategy.aggregate_fit(1, results, failures)
+    actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -82,10 +82,11 @@ def test_aggregate_fit_just_enough_results() -> None:
     expected: Optional[Weights] = []
 
     # Execute
-    actual = strategy.aggregate_fit(1, results, failures)
+    actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
-    assert actual == expected
+    assert actual
+    assert parameters_to_weights(actual) == expected
 
 
 def test_aggregate_fit_no_failures() -> None:
@@ -99,10 +100,11 @@ def test_aggregate_fit_no_failures() -> None:
     expected: Optional[Weights] = []
 
     # Execute
-    actual = strategy.aggregate_fit(1, results, failures)
+    actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
-    assert actual == expected
+    assert actual
+    assert parameters_to_weights(actual) == expected
 
 
 def test_aggregate_evaluate_no_results_no_failures() -> None:
@@ -114,7 +116,7 @@ def test_aggregate_evaluate_no_results_no_failures() -> None:
     expected: Optional[float] = None
 
     # Execute
-    actual = strategy.aggregate_evaluate(1, results, failures)
+    actual, _ = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -129,7 +131,7 @@ def test_aggregate_evaluate_no_results() -> None:
     expected: Optional[float] = None
 
     # Execute
-    actual = strategy.aggregate_evaluate(1, results, failures)
+    actual, _ = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -140,13 +142,13 @@ def test_aggregate_evaluate_not_enough_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.5)
     results: List[Tuple[ClientProxy, EvaluateRes]] = [
-        (MagicMock(), EvaluateRes(1, 2.3, 0.12))
+        (MagicMock(), EvaluateRes(loss=2.3, num_examples=1))
     ]
     failures: List[BaseException] = [Exception(), Exception()]
     expected: Optional[float] = None
 
     # Execute
-    actual = strategy.aggregate_evaluate(1, results, failures)
+    actual, _ = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -157,13 +159,13 @@ def test_aggregate_evaluate_just_enough_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.5)
     results: List[Tuple[ClientProxy, EvaluateRes]] = [
-        (MagicMock(), EvaluateRes(1, 2.3, 0.12))
+        (MagicMock(), EvaluateRes(loss=2.3, num_examples=1))
     ]
     failures: List[BaseException] = [Exception()]
     expected: Optional[float] = 2.3
 
     # Execute
-    actual = strategy.aggregate_evaluate(1, results, failures)
+    actual, _ = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected
@@ -174,13 +176,13 @@ def test_aggregate_evaluate_no_failures() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.99)
     results: List[Tuple[ClientProxy, EvaluateRes]] = [
-        (MagicMock(), EvaluateRes(1, 2.3, 0.12))
+        (MagicMock(), EvaluateRes(loss=2.3, num_examples=1))
     ]
     failures: List[BaseException] = []
     expected: Optional[float] = 2.3
 
     # Execute
-    actual = strategy.aggregate_evaluate(1, results, failures)
+    actual, _ = strategy.aggregate_evaluate(1, results, failures)
 
     # Assert
     assert actual == expected

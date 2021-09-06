@@ -26,7 +26,7 @@ from .typing import Parameters, Weights
 def weights_to_parameters(weights: Weights) -> Parameters:
     """Convert NumPy weights to parameters object."""
     tensors = [ndarray_to_bytes(ndarray) for ndarray in weights]
-    return Parameters(tensors=tensors, tensor_type="numpy.nda")
+    return Parameters(tensors=tensors, tensor_type="numpy.ndarray")
 
 
 def parameters_to_weights(parameters: Parameters) -> Weights:
@@ -35,14 +35,14 @@ def parameters_to_weights(parameters: Parameters) -> Weights:
 
 
 def ndarray_to_bytes(ndarray: np.ndarray) -> bytes:
-    """Serialize NumPy array to bytes."""
+    """Serialize NumPy ndarray to bytes."""
     bytes_io = BytesIO()
     np.save(bytes_io, ndarray, allow_pickle=False)
     return bytes_io.getvalue()
 
 
 def bytes_to_ndarray(tensor: bytes) -> np.ndarray:
-    """Deserialize NumPy array from bytes."""
+    """Deserialize NumPy ndarray from bytes."""
     bytes_io = BytesIO(tensor)
     ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
     return cast(np.ndarray, ndarray_deserialized)

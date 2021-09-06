@@ -75,3 +75,9 @@ server.strategy.FedAvg
     :members:
 
     .. automethod:: __init__
+
+
+typing
+------
+.. automodule:: flwr.common.typing
+  :members:

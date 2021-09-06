@@ -3,6 +3,7 @@
 data/
 doc/source/api_documentation
 doc/source/_build
+flwr_logs
 
 # Editor
 .vscode
@@ -145,3 +146,9 @@ dmypy.json
 # Poetry
 poetry.lock
 *.pkl
+
+# Examples
+examples/**/dataset/**
+
+# Datasets
+baselines/datasets/leaf

@@ -18,11 +18,17 @@ Flower's design goals was to make this simple. Read on to learn more.
    installation
    quickstart_tensorflow
    quickstart_pytorch
+   quickstart_mxnet
+   quickstart_scikitlearn
+   evaluation
    strategies
    implementing-strategies
+   saving-progress
    examples
    example_walkthrough_pytorch_mnist
    example-pytorch-from-centralized-to-federated
+   example-mxnet-walk-through
+   fedbn-example-pytorch-from-centralized-to-federated
    recommended-env-setup
    changelog
 
