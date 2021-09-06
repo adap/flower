@@ -18,23 +18,13 @@
 from logging import INFO
 from typing import Any, Callable, Dict, Optional
 
-try:
-    import ray
-except ImportError:
-    ray = None  # type: ignore
+import ray
 
 from flwr.client.client import Client
 from flwr.common.logger import log
 from flwr.server.app import _fl, _init_defaults
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
-
-RAY_IMPORT_ERROR: str = """Unable to import module `ray`.
-
-To install the necessary dependencies, install `flwr` with the `simulation` extra:
-
-    pip install -U flwr["simulation"]
-"""
 
 
 def start_simulation(  # pylint: disable=too-many-arguments
@@ -72,17 +62,15 @@ def start_simulation(  # pylint: disable=too-many-arguments
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use
         `flwr.server.strategy.FedAvg`.
-    ray_init_args : Optional[Dict[str, Any]] (default: None)
+    ray_init_args : Optional[Dict[str, Any]] (default: {'ignore_reinit_error': True})
         Optional dictionary containing `ray.init` arguments.
     """
 
-    # Ray cannot be assumed to be installed
-    if ray is None:
-        raise ImportError(RAY_IMPORT_ERROR)
-
     # Initialize Ray
     if not ray_init_args:
-        ray_init_args = {}
+        ray_init_args = {
+            "ignore_reinit_error": True,
+        }
     ray.init(**ray_init_args)
     log(
         INFO,

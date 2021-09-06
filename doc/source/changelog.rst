@@ -6,13 +6,21 @@ Unreleased
 
 What's new?
 
-* Nothing yet.
+* **New built-in strategies** (`#828 <https://github.com/adap/flower/pull/828>`_ `#822 <https://github.com/adap/flower/pull/822>`_)
+    * FedYogi
+    * FedAdam
+
+* **Warning when `min_available_clients` is misconfigured** (`#830 <https://github.com/adap/flower/pull/830>`_)
 
 Incompatible changes:
 
 * **Disabled final distributed evaluation** (`#800 <https://github.com/adap/flower/pull/800>`_)
 
   Prior behaviour was to perform a final round of distributed evaluation on all connected clients, which is often not required (e.g., when using server-side evaluation). The prior behaviour can be enabled by passing :code:`force_final_distributed_eval=True` to :code:`start_server`.
+
+* **Renamed q-FedAvg strategy** (`#802 <https://github.com/adap/flower/pull/802>`_)
+
+  The strategy named :code:`QffedAvg` was renamed to `QFedAvg` to better reflect the notation given in the original paper (q-FFL is the optimization objective, q-FedAvg is the proposed solver). Note the the original (now deprecated) :code:`QffedAvg` class is still available for compatibility reasons (it will be removed in a future release).
 
 
 v0.16.0 (2021-05-11)
