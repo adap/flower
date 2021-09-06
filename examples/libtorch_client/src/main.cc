@@ -1,25 +1,19 @@
-/*
- *
+/*************************************************************************************************
  * 
- * 
- * Last modified 22/08/2021
+ * @file main.cc
  *
- */
+ * @brief Define a network, load datasets and start the flower client
+ *
+ * @version 1.0
+ *
+ * @date 06/09/2021
+ *
+ * ***********************************************************************************************/
 
 #include <iostream>
 #include <memory>
 #include <string>
-#include <grpcpp/grpcpp.h>
-#include <queue>
-#include <optional>
-#include <map>
-#include "transport.grpc.pb.h"
-#include "typing.h"
-//#include "serde.h"
-//#include "message_handler.h"
-#include "client.h"
 #include "start.h"
-//#include "torch_client.h"
 #include "torch_client.cc"
 
 int main(int argc, char** argv) {
@@ -57,9 +51,15 @@ int main(int argc, char** argv) {
     torch::optim::SGD optimizer(net->parameters(), lr);
 
     int64_t num_epochs = 1;
+    
+    // Initialize TorchClient
     TorchClient client(0, net, train_loader, test_loader, optimizer, device);
-    //std::string server_add = "[::]:8080";
-    //start_client(server_add, &client);
-    //std::cin.get(); //keep the window
+    
+    // Define a server address
+    std::string server_add = "localhost:50051";
+    
+    // Start client
+    start_client(server_add, &client);
+    
     return 0;
 }

@@ -134,7 +134,7 @@ google::protobuf::Map<std::string, ProtoScalar> metrics_to_proto(flwr::Metrics m
 * Deserialize protobuf metrics type to client metrics type
 * "Any" is used in Python, this part might be changed if needed
 */
-flwr::Metrics metrics_from_proto(google::protobuf::Map<std::string, ProtoScalar> proto）{
+flwr::Metrics metrics_from_proto(google::protobuf::Map<std::string, ProtoScalar> proto){
 	flwr::Metrics metrics;
 
 	for (auto& [key, value] : proto) {

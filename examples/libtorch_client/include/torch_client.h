@@ -1,3 +1,15 @@
+/***********************************************************************************************************
+ * 
+ * @file libtorch_client.h
+ *
+ * @brief Define an example flower client, train and test method
+ *
+ * @version 1.0
+ *
+ * @date 06/09/2021
+ *
+ * ********************************************************************************************************/
+
 #pragma once
 #include "client.h"
 #include <iostream>
@@ -7,7 +19,11 @@
 #include "cifar10.h"
 #include <ctime>
 
-/*template <typename DataLoader>
+/**
+ * Validate the network on the entire test set
+ *
+ */
+template <typename DataLoader>
 std::tuple<size_t, float, double> test(vision::models::ResNet18& net,
     DataLoader& test_loader,
     torch::Device device)
@@ -42,6 +58,9 @@ std::tuple<size_t, float, double> test(vision::models::ResNet18& net,
     return std::make_tuple(num_samples, running_loss, accuracy);
 }
 
+/**
+ * Train the net work on the training set
+ */
 template <typename DataLoader>
 std::tuple<size_t, float, double> train(vision::models::ResNet18& net, 
     DataLoader& train_loader,
@@ -83,11 +102,13 @@ std::tuple<size_t, float, double> train(vision::models::ResNet18& net,
 
     return std::make_tuple(num_samples, mean_loss, accuracy);
 }
-*/
-/*
-* pytorch client
-*
-*/
+
+
+/**
+ * A concrete libtorch flower example extends from flwr::Client abstract class
+ * Uses ResNet18 as base model
+ *
+ */
 
 template<typename DataLoader>
 class TorchClient : public flwr::Client {
@@ -100,7 +121,6 @@ class TorchClient : public flwr::Client {
     int64_t client_id;
 
   public:
-    //TorchClient(){};
     TorchClient(int64_t client_id,
         vision::models::ResNet18& net,
         DataLoader& trainset,

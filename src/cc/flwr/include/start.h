@@ -8,13 +8,12 @@
  *
  * @version 1.0
  *
- * @date 04/09/2021
+ * @date 06/09/2021
  *
  *************************************************************************************************/
 
 #pragma once
-//#include "transport.grpc.pb.h"
-//#include "client.h"
+#include <grpcpp/grpcpp.h>
 #include "message_handler.h"
 using grpc::Channel;
 using grpc::ClientContext;
