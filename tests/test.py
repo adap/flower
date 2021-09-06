@@ -33,7 +33,7 @@ if __name__ == "__main__":
     f.write("Starting\n")
     f.close()
     sample_num_list = [100, 200, 300, 400, 500]
-    dropout_value_list = [0, 1]
+    dropout_value_list = [1, 0]
     vector_dimension_list = [100000, 200000, 300000, 400000, 500000]
     for sample_num in sample_num_list:
         for dropout_value in dropout_value_list:
