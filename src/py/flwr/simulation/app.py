@@ -15,7 +15,7 @@
 """Flower simulation app."""
 
 
-from logging import INFO
+from logging import INFO, WARNING
 from typing import Any, Callable, Dict, Optional
 
 import ray
@@ -26,6 +26,17 @@ from flwr.server.app import _fl, _init_defaults
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 
+
+WARNING_MESSAGE_RAY_INIT = """
+A RuntimeError was raised by `ray.init()`. The arguments passed to `ray.init()`
+did not contain the following key/value pair:
+
+    "ignore_reinit_error": True
+
+Consider including the `"ignore_reinit_error": True` in your `ray_init_args`:
+
+    start_simulation(..., ray_init_args={"ignore_reinit_error": True})
+"""
 
 def start_simulation(  # pylint: disable=too-many-arguments
     client_fn: Callable[[str], Client],
@@ -62,16 +73,34 @@ def start_simulation(  # pylint: disable=too-many-arguments
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use
         `flwr.server.strategy.FedAvg`.
-    ray_init_args : Optional[Dict[str, Any]] (default: {'ignore_reinit_error': True})
-        Optional dictionary containing `ray.init` arguments.
+    ray_init_args : Optional[Dict[str, Any]] (default: None)
+        Optional dictionary containing arguments for the call to `ray.init`.
+        If ray_init_args is None (the default), Ray will be initialized with
+        the following default args: 
+        
+            {
+                "ignore_reinit_error": True,
+                "include_dashboard": False,
+            }
+
+        An empty dictionary can be used (ray_init_args={}) to prevent any
+        arguments from being passed to ray.init.
     """
 
     # Initialize Ray
     if not ray_init_args:
         ray_init_args = {
             "ignore_reinit_error": True,
+            "include_dashboard": False,
         }
-    ray.init(**ray_init_args)
+
+    try:
+        ray.init(**ray_init_args)
+    except RuntimeError as error:
+        if "ignore_reinit_error" not in ray_init_args:
+            log(WARNING, WARNING_MESSAGE_RAY_INIT)
+        raise error
+
     log(
         INFO,
         "Ray initialized with resources: %s",
