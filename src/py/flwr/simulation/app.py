@@ -15,7 +15,7 @@
 """Flower simulation app."""
 
 
-from logging import INFO, WARNING
+from logging import INFO
 from typing import Any, Callable, Dict, Optional
 
 import ray
