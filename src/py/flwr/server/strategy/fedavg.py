@@ -68,6 +68,13 @@ instead. Use
 to easily transform `Weights` to `Parameters`.
 """
 
+WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
+Setting `min_available_clients` lower than `min_fit_clients` or
+`min_eval_clients` can cause the server to fail when there are too few clients
+connected to the server. `min_available_clients` must be set to a value larger
+than or equal to the values of `min_fit_clients` and `min_eval_clients`.
+"""
+
 
 class FedAvg(Strategy):
     """Configurable FedAvg strategy implementation."""
@@ -116,10 +123,17 @@ class FedAvg(Strategy):
             Initial global model parameters.
         """
         super().__init__()
-        self.min_fit_clients = min_fit_clients
-        self.min_eval_clients = min_eval_clients
+
+        if (
+            min_fit_clients > min_available_clients
+            or min_eval_clients > min_available_clients
+        ):
+            log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
+
         self.fraction_fit = fraction_fit
         self.fraction_eval = fraction_eval
+        self.min_fit_clients = min_fit_clients
+        self.min_eval_clients = min_eval_clients
         self.min_available_clients = min_available_clients
         self.eval_fn = eval_fn
         self.on_fit_config_fn = on_fit_config_fn
