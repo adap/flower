@@ -32,7 +32,7 @@ if __name__ == "__main__":
     f = open("log.txt", "w")
     f.write("Starting\n")
     f.close()
-    sample_num_list = [100, 200, 300, 400, 500]
+    sample_num_list = [400, 500, 100, 200, 300]
     dropout_value_list = [0, 1]
     vector_dimension_list = [100000, 200000, 300000, 400000, 500000]
     for vector_dimension in vector_dimension_list:
