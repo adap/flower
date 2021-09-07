@@ -27,17 +27,6 @@ from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 
 
-WARNING_MESSAGE_RAY_INIT = """
-A RuntimeError was raised by `ray.init()`. The arguments passed to `ray.init()`
-did not contain the following key/value pair:
-
-    "ignore_reinit_error": True
-
-Consider including the `"ignore_reinit_error": True` in your `ray_init_args`:
-
-    start_simulation(..., ray_init_args={"ignore_reinit_error": True})
-"""
-
 def start_simulation(  # pylint: disable=too-many-arguments
     client_fn: Callable[[str], Client],
     num_clients: int,
@@ -76,8 +65,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
     ray_init_args : Optional[Dict[str, Any]] (default: None)
         Optional dictionary containing arguments for the call to `ray.init`.
         If ray_init_args is None (the default), Ray will be initialized with
-        the following default args: 
-        
+        the following default args:
+
             {
                 "ignore_reinit_error": True,
                 "include_dashboard": False,
@@ -87,20 +76,19 @@ def start_simulation(  # pylint: disable=too-many-arguments
         arguments from being passed to ray.init.
     """
 
-    # Initialize Ray
+    # Default arguments for Ray initialization
     if not ray_init_args:
         ray_init_args = {
             "ignore_reinit_error": True,
             "include_dashboard": False,
         }
 
-    try:
-        ray.init(**ray_init_args)
-    except RuntimeError as error:
-        if "ignore_reinit_error" not in ray_init_args:
-            log(WARNING, WARNING_MESSAGE_RAY_INIT)
-        raise error
+    # Shut down Ray if it has already been initialized
+    if ray.is_initialized():
+        ray.shutdown()
 
+    # Initialize Ray
+    ray.init(**ray_init_args)
     log(
         INFO,
         "Ray initialized with resources: %s",
