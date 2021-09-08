@@ -36,7 +36,7 @@ if __name__ == "__main__":
     dropout_value_list = [0, 1]
     vector_dimension_list = [100000, 200000, 300000, 400000, 500000]
 
-    for vector_dimension in vector_dimension_list:
+    '''for vector_dimension in vector_dimension_list:
         for sample_num in [100]:
             for dropout_value in dropout_value_list:
                 for i in range(10):
@@ -46,9 +46,9 @@ if __name__ == "__main__":
                     f.close()
                     sec_agg_test.test_start_simulation(
                         sample_num=sample_num, share_num=51, threshold=26, vector_dimension=vector_dimension, dropout_value=dropout_value, num_rounds=1)
-
+'''
     for vector_dimension in [100000]:
-        for sample_num in sample_num_list:
+        for sample_num in [400, 500]:
             for dropout_value in dropout_value_list:
                 for i in range(10):
                     f = open("log.txt", "a")
