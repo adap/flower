@@ -18,7 +18,6 @@
 import timeit
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple, Union, cast
-from flwr.common.typing import Properties
 
 import numpy as np
 
@@ -35,6 +34,7 @@ from flwr.common import (
     parameters_to_weights,
     weights_to_parameters,
 )
+from flwr.common.typing import Properties
 
 from .client import Client
 
@@ -178,7 +178,7 @@ class NumPyClientWrapper(Client):
         self.properties: Properties = {"tensor_str": "numpy.ndarray"}
 
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
-        return PropertiesIns(properties=self.properties)
+        return PropertiesRes(properties=self.properties)
 
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
