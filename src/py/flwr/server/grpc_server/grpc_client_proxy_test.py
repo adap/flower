@@ -21,6 +21,7 @@ from unittest.mock import MagicMock
 import numpy as np
 
 import flwr
+from flwr.common.typing import Properties
 from flwr.proto.transport_pb2 import ClientMessage, Parameters
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
 
@@ -86,3 +87,17 @@ class GrpcClientProxyTestCase(unittest.TestCase):
             evaluate_res.loss,
             evaluate_res.accuracy,
         )
+
+    def test_get_properties(self) -> None:
+        """This test is currently quite simple and should be improved."""
+        # Prepare
+        client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
+        client.properties = {"tensor_str": 42}
+        request_properties: Properties = {"tensor_str": 41}
+        ins: flwr.common.PropertiesIns = flwr.common.PropertiesIns(request_properties)
+
+        # Execute
+        value: flwr.common.PropertiesRes = client.get_properties(ins)
+
+        # Assert
+        assert value.properties["tensor_str"] == 42

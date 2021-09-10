@@ -44,13 +44,13 @@ message ServerMessage {
     Parameters parameters = 1;
     map<string, Scalar> config = 2;
   }
-  message GetProperties { map<string, Scalar> properties = 1; }
+  message PropertiesIns { map<string, Scalar> properties = 1; }
   oneof msg {
     Reconnect reconnect = 1;
     GetParameters get_parameters = 2;
     FitIns fit_ins = 3;
     EvaluateIns evaluate_ins = 4;
-    GetProperties get_properties = 5;
+    PropertiesIns properties_ins = 5;
   }
 }
 
