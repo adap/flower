@@ -58,8 +58,8 @@ def start_insecure_grpc_server(
         # returning RESOURCE_EXHAUSTED status, or None to indicate no limit.
         maximum_concurrent_rpcs=max_concurrent_workers,
         options=[
-            # Maximum number of concurrent incoming streams to allow on a http2 connection.
-            # Int valued.
+            # Maximum number of concurrent incoming streams to allow on a http2
+            # connection. Int valued.
             ("grpc.max_concurrent_streams", max(100, max_concurrent_workers)),
             # Maximum message length that the channel can send.
             # Int valued, bytes. -1 means unlimited.
