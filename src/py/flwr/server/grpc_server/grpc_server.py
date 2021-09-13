@@ -13,26 +13,55 @@
 # limitations under the License.
 # ==============================================================================
 """Implements utility function to create a grpc server."""
+
+
 import concurrent.futures
+import sys
+from logging import ERROR
+from typing import Optional, Tuple, Union
 
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.logger import log
 from flwr.proto import transport_pb2_grpc
 from flwr.server.client_manager import ClientManager
 from flwr.server.grpc_server import flower_service_servicer as fss
 
+FILELIKE = Union[Union[str, bytes]]
+SSLFILES = Tuple[FILELIKE, FILELIKE, FILELIKE]
 
-def start_insecure_grpc_server(
+INVALID_SSL_FILES_ERR_MSG = """
+    When setting any of root_certificate, certificate, or private_key
+    you have to set all of them.
+"""
+
+
+def valid_ssl_files(ssl_files: SSLFILES) -> bool:
+    """Validate type SSLFILES and exit if invalid."""
+    is_valid = all(ssl_files)
+
+    if not is_valid:
+        log(ERROR, INVALID_SSL_FILES_ERR_MSG)
+
+    return is_valid
+
+
+def start_grpc_server(
     client_manager: ClientManager,
     server_address: str,
     max_concurrent_workers: int = 1000,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    ssl_files: Optional[SSLFILES] = None,
 ) -> grpc.Server:
-    """Create grpc server and return registered FlowerServiceServicer instance.
+    """Create gRPC server and return instance of grpc.Server.
 
     If used in a main function server.wait_for_termination(timeout=None)
     should be called as otherwise the server will immediately stop.
+
+    **SSL/TLS**
+    To enable SSL/TLS you have to pass all of root_certificate, certificate,
+    and private_key. Setting only some will make the process exit with code 1.
 
     Parameters
     ----------
@@ -41,11 +70,20 @@ def start_insecure_grpc_server(
     server_address : str
         Server address in the form of HOST:PORT e.g. "[::]:8080"
     max_concurrent_workers : int
-        Set the maximum number of clients you want the server to process
-        before returning RESOURCE_EXHAUSTED status (default: 1000)
+        Maximum number of clients the server can process before returning
+        RESOURCE_EXHAUSTED status (default: 1000)
     max_message_length : int
         Maximum message length that the server can send or receive.
         Int valued in bytes. -1 means unlimited. (default: GRPC_MAX_MESSAGE_LENGTH)
+    ssl_files : str, str, str
+        Certificates to start secure SSL/TLS server. Expected parameter is a tuple
+        consisting of:
+
+            * File path to the CA certificate.
+            * File path to the server certificate.
+            * File path to the private key.
+
+        (default: None)
 
     Returns
     -------
@@ -73,7 +111,33 @@ def start_insecure_grpc_server(
     servicer = fss.FlowerServiceServicer(client_manager)
     transport_pb2_grpc.add_FlowerServiceServicer_to_server(servicer, server)
 
-    server.add_insecure_port(server_address)
+    if ssl_files is not None:
+        if not valid_ssl_files(ssl_files):
+            sys.exit(1)
+
+        root_certificate, certificate, private_key = ssl_files
+
+        with open(root_certificate, "rb") as file:
+            root_certificate_b = file.read()
+        with open(certificate, "rb") as file:
+            certificate_b = file.read()
+        with open(private_key, "rb") as file:
+            private_key_b = file.read()
+
+        server_credentials = grpc.ssl_server_credentials(
+            ((private_key_b, certificate_b),),
+            root_certificates=root_certificate_b,
+            # A boolean indicating whether or not to require clients to be
+            # authenticated. May only be True if root_certificates is not None.
+            # We are explicitly setting the current gRPC default to document
+            # the option. For further reference see:
+            # https://grpc.github.io/grpc/python/grpc.html#create-server-credentials
+            require_client_auth=False,
+        )
+        server.add_secure_port(server_address, server_credentials)
+    else:
+        server.add_insecure_port(server_address)
+
     server.start()
 
     return server

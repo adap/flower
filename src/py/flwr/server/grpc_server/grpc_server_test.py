@@ -19,7 +19,8 @@ from contextlib import closing
 from typing import cast
 
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.server.grpc_server import certificates
+from flwr.server.grpc_server.grpc_server import start_grpc_server
 
 
 def unused_tcp_port() -> int:
@@ -30,15 +31,34 @@ def unused_tcp_port() -> int:
         return cast(int, sock.getsockname()[1])
 
 
-def test_integration_start_and_shutdown_server() -> None:
+def test_integration_start_and_shutdown_insecure_server() -> None:
     """Create server and check if FlowerServiceServicer is returned."""
     # Prepare
     port = unused_tcp_port()
     client_manager = SimpleClientManager()
 
     # Execute
-    server = start_insecure_grpc_server(
+    server = start_grpc_server(
         client_manager=client_manager, server_address=f"[::]:{port}"
+    )
+
+    # Teardown
+    server.stop(1)
+
+
+def test_integration_start_and_shutdown_secure_server() -> None:
+    """Create server and check if FlowerServiceServicer is returned."""
+    # Prepare
+    port = unused_tcp_port()
+    client_manager = SimpleClientManager()
+
+    ssl_files = certificates.get_paths()
+
+    # Execute
+    server = start_grpc_server(
+        client_manager=client_manager,
+        server_address=f"[::]:{port}",
+        ssl_files=ssl_files,
     )
 
     # Teardown
