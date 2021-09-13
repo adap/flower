@@ -16,13 +16,14 @@
 
 
 import unittest
+from typing import Dict, Mapping, Optional
 from unittest.mock import MagicMock
 
 import numpy as np
 
 import flwr
 from flwr.common.typing import Properties
-from flwr.proto.transport_pb2 import ClientMessage, Parameters
+from flwr.proto.transport_pb2 import ClientMessage, Parameters, Scalar
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
 
 MESSAGE_PARAMETERS = Parameters(tensors=[], tensor_type="np")
@@ -34,6 +35,10 @@ MESSAGE_FIT_RES = ClientMessage(
         fit_duration=12.3,
     )
 )
+CLIENT_PROPERTIES: Dict[str, Scalar] = {"tensor_str": 0}
+MESSAGE_PROPERTIES_RES = ClientMessage(
+    properties_res=ClientMessage.PropertiesRes(properties=CLIENT_PROPERTIES)
+)
 
 
 class GrpcClientProxyTestCase(unittest.TestCase):
@@ -44,6 +49,9 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         self.bridge_mock = MagicMock()
         # Set return_value for usually blocking get_client_message method
         self.bridge_mock.request.return_value = MESSAGE_FIT_RES
+        # Set return_value for get_properties
+        self.bridge_mock_get_proprieties = MagicMock()
+        self.bridge_mock_get_proprieties.request.return_value = MESSAGE_PROPERTIES_RES
 
     def test_get_parameters(self) -> None:
         """This test is currently quite simple and should be improved."""
@@ -91,13 +99,13 @@ class GrpcClientProxyTestCase(unittest.TestCase):
     def test_get_properties(self) -> None:
         """This test is currently quite simple and should be improved."""
         # Prepare
-        client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
-        client.properties = {"tensor_str": 42}
-        request_properties: Properties = {"tensor_str": 41}
+        client = GrpcClientProxy(cid="1", bridge=self.bridge_mock_get_proprieties)
+        request_properties: Properties = {"tensor_str": "str"}
         ins: flwr.common.PropertiesIns = flwr.common.PropertiesIns(request_properties)
 
         # Execute
         value: flwr.common.PropertiesRes = client.get_properties(ins)
+        print(value)
 
         # Assert
-        assert value.properties["tensor_str"] == 42
+        assert value.properties["tensor_str"] == "numpy.ndarray"
