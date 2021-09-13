@@ -16,7 +16,6 @@
 
 
 import unittest
-from typing import Dict, Mapping, Optional
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -35,7 +34,7 @@ MESSAGE_FIT_RES = ClientMessage(
         fit_duration=12.3,
     )
 )
-CLIENT_PROPERTIES: Dict[str, Scalar] = {"tensor_str": 0}
+CLIENT_PROPERTIES = {"tensor_str": Scalar(string="numpy.ndarray")}
 MESSAGE_PROPERTIES_RES = ClientMessage(
     properties_res=ClientMessage.PropertiesRes(properties=CLIENT_PROPERTIES)
 )
