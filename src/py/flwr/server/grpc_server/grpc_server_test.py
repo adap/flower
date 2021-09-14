@@ -52,7 +52,7 @@ def test_integration_start_and_shutdown_secure_server() -> None:
     port = unused_tcp_port()
     client_manager = SimpleClientManager()
 
-    ssl_files = certificates.get_paths()
+    ssl_files = certificates.load()
 
     # Execute
     server = start_grpc_server(
