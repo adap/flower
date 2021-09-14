@@ -81,13 +81,13 @@ def start_grpc_server(
     max_message_length : int
         Maximum message length that the server can send or receive.
         Int valued in bytes. -1 means unlimited. (default: GRPC_MAX_MESSAGE_LENGTH)
-    ssl_files : str, str, str
+    ssl_files : tuple of union of (str, bytes)
         Certificates to start secure SSL/TLS server. Expected parameter is a tuple
-        consisting of:
+        with three elements in this order beeing a file like of
 
-            * File path to the CA certificate.
-            * File path to the server certificate.
-            * File path to the private key.
+            * CA certificate.
+            * server certificate.
+            * private key.
 
         (default: None)
 
@@ -95,6 +95,16 @@ def start_grpc_server(
     -------
     server : grpc.Server
         An instance of a gRPC server which is already started
+
+    Examples
+    --------
+    Starting a SSL/TLS enabled server.
+
+    >>> start_grpc_server(
+    >>>     client_manager=ClientManager(),
+    >>>     server_address="localhost:8080",
+    >>>     ssl_files=("/crts/root.pem", "/crts/localhost.crt", "/crts/localhost.key")
+    >>> )
     """
     server = grpc.server(
         concurrent.futures.ThreadPoolExecutor(max_workers=max_concurrent_workers),
