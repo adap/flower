@@ -34,9 +34,7 @@ def train(net, trainloader, epochs):
             recon_images, mu, logvar = net(images)
             recon_loss = F.mse_loss(recon_images, images)
             kld_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
-            loss = (
-                recon_loss + 0.05 * kld_loss
-            ) 
+            loss = recon_loss + 0.05 * kld_loss
             loss.backward()
             optimizer.step()
 
@@ -56,7 +54,7 @@ def test(net, testloader):
 
 
 def sample(net):
-    """Generates samples using the decoder of the trained VAE"""
+    """Generates samples using the decoder of the trained VAE."""
     with torch.no_grad():
         z = torch.randn(10)
         z = z.to(DEVICE)
@@ -65,33 +63,37 @@ def sample(net):
 
 
 def generate(net, image):
-    """Reproduce the input with trained VAE"""
+    """Reproduce the input with trained VAE."""
     with torch.no_grad():
         return net.forward(image)
 
 
-# Load model and data
-net = Net()
-trainloader, testloader = load_data()
+def main():
+    # Load model and data
+    net = Net()
+    trainloader, testloader = load_data()
 
-class CifarClient(fl.client.NumPyClient):
-    def get_parameters(self):
-        return [val.cpu().numpy() for _, val in net.state_dict().items()]
+    class CifarClient(fl.client.NumPyClient):
+        def get_parameters(self):
+            return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
-    def set_parameters(self, parameters):
-        params_dict = zip(net.state_dict().keys(), parameters)
-        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-        net.load_state_dict(state_dict, strict=True)
+        def set_parameters(self, parameters):
+            params_dict = zip(net.state_dict().keys(), parameters)
+            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            net.load_state_dict(state_dict, strict=True)
 
-    def fit(self, parameters, config):
-        self.set_parameters(parameters)
-        train(net, trainloader, epochs=1)
-        return self.get_parameters(), len(trainloader), {}
+        def fit(self, parameters, config):
+            self.set_parameters(parameters)
+            train(net, trainloader, epochs=1)
+            return self.get_parameters(), len(trainloader), {}
 
-    def evaluate(self, parameters, config):
-        self.set_parameters(parameters)
-        loss = test(net, testloader)
-        return float(loss), len(testloader)
+        def evaluate(self, parameters, config):
+            self.set_parameters(parameters)
+            loss = test(net, testloader)
+            return float(loss), len(testloader)
+
+    fl.client.start_numpy_client("[::]:8080", client=CifarClient())
 
 
-fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+if __name__ == "__main__":
+    main()

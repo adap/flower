@@ -23,7 +23,6 @@ Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml
 
 ```shell
 poetry install
-poetry shell
 ```
 
 Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:

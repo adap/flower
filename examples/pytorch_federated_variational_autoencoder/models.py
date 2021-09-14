@@ -3,16 +3,16 @@ import torch.nn as nn
 
 
 class Flatten(nn.Module):
-    """Flattens input by reshaping it into a one-dimensional tensor"""
+    """Flattens input by reshaping it into a one-dimensional tensor."""
 
     def forward(self, input):
         return input.view(input.size(0), -1)
 
 
 class UnFlatten(nn.Module):
-    """Unflattens a tensor converting it to a desired shape"""
+    """Unflattens a tensor converting it to a desired shape."""
 
-    def forward(self, input): 
+    def forward(self, input):
         return input.view(-1, 16, 6, 6)
 
 
@@ -44,7 +44,7 @@ class Net(nn.Module):
         )
 
     def reparametrize(self, h):
-        """Reparametrization layer of VAE"""
+        """Reparametrization layer of VAE."""
         mu, logvar = self.fc1(h), self.fc2(h)
         std = torch.exp(logvar / 2)
         eps = torch.randn_like(std)
@@ -52,13 +52,13 @@ class Net(nn.Module):
         return z, mu, logvar
 
     def encode(self, x):
-        """Encoder of the VAE"""
+        """Encoder of the VAE."""
         h = self.encoder(x)
         z, mu, logvar = self.reparametrize(h)
         return z, mu, logvar
 
     def decode(self, z):
-        """Decoder of the VAE"""
+        """Decoder of the VAE."""
         z = self.fc3(z)
         z = self.decoder(z)
         return z
