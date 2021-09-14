@@ -44,7 +44,7 @@ message ServerMessage {
     Parameters parameters = 1;
     map<string, Scalar> config = 2;
   }
-  message PropertiesIns { map<string, Scalar> properties = 1; }
+  message PropertiesIns { map<string, Scalar> config = 1; }
   oneof msg {
     Reconnect reconnect = 1;
     GetParameters get_parameters = 2;
