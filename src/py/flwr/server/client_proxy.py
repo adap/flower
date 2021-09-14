@@ -42,7 +42,6 @@ class ClientProxy(ABC):
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
 
-    @abstractmethod
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         """Returns the client's properties."""
 

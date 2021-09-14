@@ -89,7 +89,7 @@ class NumPyClient(ABC):
             The local model parameters as a list of NumPy ndarrays.
         """
 
-    @abstractmethod
+    # @abstractmethod
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         """Returns a client's set of properties.
 
@@ -98,6 +98,7 @@ class NumPyClient(ABC):
         properties : PropertiesRes
             Response containing `properties` of the client.
         """
+        return {"properties": {}}
 
     @abstractmethod
     def fit(

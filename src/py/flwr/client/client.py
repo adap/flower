@@ -41,7 +41,6 @@ class Client(ABC):
             The current local model parameters.
         """
 
-    @abstractmethod
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         """Return set of client's properties.
 
@@ -50,6 +49,7 @@ class Client(ABC):
         PropertiesRes
             Client's properties.
         """
+        return PropertiesRes(properties={})
 
     @abstractmethod
     def fit(self, ins: FitIns) -> FitRes:
