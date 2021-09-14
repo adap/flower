@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Certificate module for secure gRPC server tests."""
+"""Certificate package for secure gRPC server tests."""
 from .certificates import get_paths
 
 __all__ = ["get_paths"]
