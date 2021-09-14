@@ -21,18 +21,15 @@ from typing import Tuple
 module_dir = dirname(abspath(__file__))
 
 
-def get_absolute_path(filepath: str) -> str:
-    """Return absolute path to file in directory of this module."""
-    real_path = join(module_dir, filepath)
-    return real_path
-
-
-def get_paths() -> Tuple[str, str, str]:
-    """Return path to all certificates required by gRPC server."""
+def load() -> Tuple[str, str, str]:
+    """Start SSL/TLS enabled server."""
+    # Trigger script which generates the certificates
     subprocess.run(["bash", "generate.sh"], check=True, cwd=module_dir)
 
-    root_certificate = get_absolute_path("root.pem")
-    certificate = get_absolute_path("localhost.crt")
-    key = get_absolute_path("localhost.key")
+    ssl_files = (
+        join(module_dir, "ca.cert"),
+        join(module_dir, "server.pem"),
+        join(module_dir, "server.key"),
+    )
 
-    return root_certificate, certificate, key
+    return ssl_files

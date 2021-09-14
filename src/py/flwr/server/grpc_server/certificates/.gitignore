@@ -1,6 +1,5 @@
-localhost.crt
-localhost.csr
-localhost.key
-root.key
-root.pem
-root.srl
+*.crt
+*.csr
+*.key
+*.pem
+*.srl

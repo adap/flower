@@ -13,6 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 """Certificate package for secure gRPC server tests."""
-from .certificates import get_paths
+from .certificates import load
 
-__all__ = ["get_paths"]
+__all__ = ["load"]

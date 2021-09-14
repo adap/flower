@@ -6,54 +6,24 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 CA_PASSWORD=notsafe
 
-if [ -f "root.key" ]; then
+if [ -f "ca.crt" ]; then
     echo "Skipping certificate generation as they already exist."
     exit 0
 fi
 
-rm -f localhost.crt localhost.csr localhost.key root.key root.pem root.srl
+rm -f *.crt *.csr *.key *.key *.pem *.srl
 
 
-# Generate the root certificate authority key with the set password
-openssl genrsa \
-    -des3 \
-    -passout pass:$CA_PASSWORD \
-    -out root.key \
-    2048
+# Generate the root certificate authority key and certificate based on key
+openssl genrsa -out ca.key 4096
+openssl req -new -x509 -key ca.key -sha256 -subj "/C=DE/ST=HH/O=CA, Inc." -days 365 -out ca.crt
 
-# Generate a root-certificate based on the root-key.
-openssl req \
-    -x509 \
-    -new \
-    -nodes \
-    -key root.key \
-    -passin pass:$CA_PASSWORD \
-    -config root.conf \
-    -sha256 \
-    -out \
-    root.pem
+# Generate a new private key for the server
+openssl genrsa -out server.key 4096
 
-# Generate a new private key
-openssl genrsa \
-    -out localhost.key \
-    2048
+# Create a signing CSR
+openssl req -new -key server.key -out server.csr -config certificate.conf
 
-# Generate a Certificate Signing Request (CSR) based on that private key
-openssl req \
-    -new \
-    -key localhost.key \
-    -out localhost.csr \
-    -config root.conf
-
-# Create the certificate for the server using the localhost.conf config.
-openssl x509 \
-    -req \
-    -in localhost.csr \
-    -CA root.pem \
-    -CAkey root.key \
-    -CAcreateserial \
-    -out localhost.crt \
-    -days 1024 \
-    -sha256 \
-    -extfile localhost.conf \
-    -passin pass:$CA_PASSWORD
+# Generate a certificate for the server
+openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.pem \
+        -days 365 -sha256 -extfile certificate.conf -extensions req_ext

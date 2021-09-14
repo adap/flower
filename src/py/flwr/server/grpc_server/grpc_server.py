@@ -87,7 +87,7 @@ def start_grpc_server(
 
             * CA certificate.
             * server certificate.
-            * private key.
+            * server private key.
 
         (default: None)
 
