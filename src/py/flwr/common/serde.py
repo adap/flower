@@ -178,14 +178,14 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
 
 def properties_ins_to_proto(ins: typing.PropertiesIns) -> ServerMessage.PropertiesIns:
     """Serialize flower.PropertiesIns to ProtoBuf message."""
-    properties = properties_to_proto(ins.properties)
-    return ServerMessage.PropertiesIns(properties=properties)
+    config = properties_to_proto(ins.config)
+    return ServerMessage.PropertiesIns(config=config)
 
 
 def properties_ins_from_proto(msg: ServerMessage.PropertiesIns) -> typing.PropertiesIns:
     """Deserialize flower.PropertiesIns from ProtoBuf message."""
-    properties = properties_from_proto(msg.properties)
-    return typing.PropertiesIns(properties=properties)
+    config = properties_from_proto(msg.config)
+    return typing.PropertiesIns(config=config)
 
 
 def properties_res_to_proto(res: typing.PropertiesRes) -> ClientMessage.PropertiesRes:

@@ -89,7 +89,7 @@ class EvaluateRes:
 class PropertiesIns:
     """Properties requests for a client."""
 
-    properties: Properties
+    config: Properties
 
 
 @dataclass

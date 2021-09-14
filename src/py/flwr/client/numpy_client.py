@@ -90,7 +90,7 @@ class NumPyClient(ABC):
         """
 
     # @abstractmethod
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_properties(self, config: Dict[str, Scalar]) -> Dict[str, Scalar]:
         """Returns a client's set of properties.
 
         Returns

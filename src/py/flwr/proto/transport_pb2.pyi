@@ -136,7 +136,7 @@ class ServerMessage(google.protobuf.message.Message):
 
     class PropertiesIns(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-        class PropertiesEntry(google.protobuf.message.Message):
+        class ConfigEntry(google.protobuf.message.Message):
             DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
             KEY_FIELD_NUMBER: builtins.int
             VALUE_FIELD_NUMBER: builtins.int
@@ -153,16 +153,16 @@ class ServerMessage(google.protobuf.message.Message):
             def HasField(self, field_name: typing_extensions.Literal[u"value",b"value"]) -> builtins.bool: ...
             def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
 
-        PROPERTIES_FIELD_NUMBER: builtins.int
+        CONFIG_FIELD_NUMBER: builtins.int
 
         @property
-        def properties(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
+        def config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
 
         def __init__(self,
             *,
-            properties : typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+            config : typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"properties",b"properties"]) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal[u"config",b"config"]) -> None: ...
 
     RECONNECT_FIELD_NUMBER: builtins.int
     GET_PARAMETERS_FIELD_NUMBER: builtins.int
