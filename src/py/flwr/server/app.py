@@ -21,7 +21,7 @@ from typing import Dict, Optional, Tuple
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.server.grpc_server.grpc_server import SSLFILES, start_grpc_server
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
 
@@ -35,50 +35,72 @@ def start_server(  # pylint: disable=too-many-arguments
     strategy: Optional[Strategy] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     force_final_distributed_eval: bool = False,
+    ssl_files: Optional[SSLFILES] = None,
 ) -> None:
     """Start a Flower server using the gRPC transport layer.
 
-    Arguments:
-        server_address: Optional[str] (default: `"[::]:8080"`). The IPv6
-            address of the server.
-        server: Optional[flwr.server.Server] (default: None). An implementation
-            of the abstract base class `flwr.server.Server`. If no instance is
-            provided, then `start_server` will create one.
-        config: Optional[Dict[str, int]] (default: None). The only currently
-            supported values is `num_rounds`, so a full configuration object
-            instructing the server to perform three rounds of federated
-            learning looks like the following: `{"num_rounds": 3}`.
-        strategy: Optional[flwr.server.Strategy] (default: None). An
-            implementation of the abstract base class `flwr.server.Strategy`.
-            If no strategy is provided, then `start_server` will use
-            `flwr.server.strategy.FedAvg`.
-        grpc_max_message_length: int (default: 536_870_912, this equals 512MB).
-            The maximum length of gRPC messages that can be exchanged with the
-            Flower clients. The default should be sufficient for most models.
-            Users who train very large models might need to increase this
-            value. Note that the Flower clients need to be started with the
-            same value (see `flwr.client.start_client`), otherwise clients will
-            not know about the increased limit and block larger messages.
-        force_final_distributed_eval: bool (default: False).
-            Forces a distributed evaulation to occur after the last training
-            epoch when enabled.
+    Parameters
+    ----------
+    server_address : str
+        The IPv6 address of the server. (default: `"[::]:8080"`)
+    server : flwr.server.Server
+        An implementation of the abstract base class `flwr.server.Server`. If no
+        instance is provided, then `start_server` will create one. (default: None)
+    config : Dict[str, int]
+        The only currently supported values is `num_rounds`, so a full
+        configuration object instructing the server to perform three rounds of
+        federated learning looks like the following: `{"num_rounds": 3}`.
+        (default: None)
+    strategy : flwr.server.Strategy
+        An implementation of the abstract base class `flwr.server.Strategy`.
+        If no strategy is provided, then `start_server` will use
+        `flwr.server.strategy.FedAvg`. (default: None)
+    grpc_max_message_length : int
+        The maximum length of gRPC messages that can be exchanged with the
+        Flower clients. The default should be sufficient for most models.
+        Users who train very large models might need to increase this
+        value. Note that the Flower clients need to be started with the
+        same value (see `flwr.client.start_client`), otherwise clients will
+        not know about the increased limit and block larger messages.
+        (default: 536_870_912, this equals 512MB)
+    force_final_distributed_eval : bool
+        Forces a distributed evaluation to occur after the last training
+        epoch when enabled. (default: False)
+    ssl_files : tuple of union of (str, bytes)
+        Certificates to start secure SSL/TLS server. Expected parameter is a tuple
+        with three elements in this order beeing a file like of
 
-    Returns:
-        None.
+            * CA certificate.
+            * server certificate.
+            * server private key.
+
+        (default: None)
+
+    Examples
+    --------
+    Starting a insecure server.
+
+    >>> start_server()
+
+    Starting a SSL/TLS enabled server.
+
+    >>> start_server(
+    >>>     ssl_files=("/crts/root.pem", "/crts/localhost.crt", "/crts/localhost.key")
+    >>> )
     """
     initialized_server, initialized_config = _init_defaults(server, config, strategy)
 
     # Start gRPC server
-    grpc_server = start_insecure_grpc_server(
+    grpc_server = start_grpc_server(
         client_manager=initialized_server.client_manager(),
         server_address=server_address,
         max_message_length=grpc_max_message_length,
+        ssl_files=ssl_files,
     )
-    log(
-        INFO,
-        "Flower server running (insecure, %s rounds)",
-        initialized_config["num_rounds"],
-    )
+    num_rounds = initialized_config["num_rounds"]
+    ssl_status = "enabled" if ssl_files is not None else "disabled"
+    msg = f"Flower server running ({num_rounds} rounds)\nSSL/TLS is {ssl_status}"
+    log(INFO, msg)
 
     _fl(
         server=initialized_server,
