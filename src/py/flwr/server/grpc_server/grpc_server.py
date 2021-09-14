@@ -18,7 +18,7 @@
 import concurrent.futures
 import sys
 from logging import ERROR
-from typing import Optional, Tuple, Union
+from typing import ByteString, Optional, Tuple, Union
 
 import grpc
 
@@ -28,13 +28,19 @@ from flwr.proto import transport_pb2_grpc
 from flwr.server.client_manager import ClientManager
 from flwr.server.grpc_server import flower_service_servicer as fss
 
-FILELIKE = Union[Union[str, bytes]]
+FILELIKE = Union[str, bytes]
 SSLFILES = Tuple[FILELIKE, FILELIKE, FILELIKE]
 
 INVALID_SSL_FILES_ERR_MSG = """
     When setting any of root_certificate, certificate, or private_key
     you have to set all of them.
 """
+
+
+def read_to_byte_string(file_like: FILELIKE) -> ByteString:
+    """Read file_like and return as ByteString."""
+    with open(file_like, "rb") as file:
+        return file.read()
 
 
 def valid_ssl_files(ssl_files: SSLFILES) -> bool:
@@ -115,14 +121,9 @@ def start_grpc_server(
         if not valid_ssl_files(ssl_files):
             sys.exit(1)
 
-        root_certificate, certificate, private_key = ssl_files
-
-        with open(root_certificate, "rb") as file:
-            root_certificate_b = file.read()
-        with open(certificate, "rb") as file:
-            certificate_b = file.read()
-        with open(private_key, "rb") as file:
-            private_key_b = file.read()
+        root_certificate_b, certificate_b, private_key_b = [
+            read_to_byte_string(file_path) for file_path in ssl_files
+        ]
 
         server_credentials = grpc.ssl_server_credentials(
             ((private_key_b, certificate_b),),
