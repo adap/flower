@@ -26,7 +26,7 @@ def load() -> Tuple[str, str, str]:
     subprocess.run(["bash", "generate.sh"], check=True, cwd=module_dir)
 
     ssl_files = (
-        join(module_dir, "ca.cert"),
+        join(module_dir, "ca.crt"),
         join(module_dir, "server.pem"),
         join(module_dir, "server.key"),
     )
