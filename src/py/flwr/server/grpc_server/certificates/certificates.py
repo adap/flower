@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Utility for loading SSL credentials for SSL/TLS enabled gRPC server
-tests."""
+"""Utility for loading SSL credentials for SSL/TLS enabled gRPC servertests."""
 import subprocess
 from os.path import abspath, dirname, join
 from typing import Tuple
