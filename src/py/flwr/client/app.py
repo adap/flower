@@ -17,12 +17,13 @@
 
 import time
 from logging import INFO
+from typing import Optional
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 
 from .client import Client
-from .grpc_client.connection import insecure_grpc_connection
+from .grpc_client.connection import grpc_connection
 from .grpc_client.message_handler import handle
 from .keras_client import KerasClient, KerasClientWrapper
 from .numpy_client import NumPyClient, NumPyClientWrapper
@@ -32,6 +33,7 @@ def start_client(
     server_address: str,
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    root_certificates: Optional[str] = None,
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
@@ -48,14 +50,20 @@ def start_client(
             value. Note that the Flower server needs to be started with the
             same value (see `flwr.server.start_server`), otherwise it will not
             know about the increased limit and block larger messages.
+        root_certificates: str (default: None)
+            Path to the PEM-encoded root certificates. If provided a secure connection
+            using the certificate will be established to a SSL/TLS enabled Flower server
+            (default: None)
 
     Returns:
         None.
     """
     while True:
         sleep_duration: int = 0
-        with insecure_grpc_connection(
-            server_address, max_message_length=grpc_max_message_length
+        with grpc_connection(
+            server_address,
+            max_message_length=grpc_max_message_length,
+            root_certificates=root_certificates,
         ) as conn:
             receive, send = conn
             log(INFO, "Opened (insecure) gRPC connection")
@@ -84,6 +92,7 @@ def start_numpy_client(
     server_address: str,
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    root_certificates: Optional[str] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -100,6 +109,10 @@ def start_numpy_client(
             value. Note that the Flower server needs to be started with the
             same value (see `flwr.server.start_server`), otherwise it will not
             know about the increased limit and block larger messages.
+        root_certificates: str (default: None)
+            Path to the PEM-encoded root certificates. If provided a secure connection
+            using the certificate will be established to a SSL/TLS enabled Flower server
+            (default: None)
 
     Returns:
         None.
@@ -113,6 +126,7 @@ def start_numpy_client(
         server_address=server_address,
         client=flower_client,
         grpc_max_message_length=grpc_max_message_length,
+        root_certificates=root_certificates,
     )
 
 
