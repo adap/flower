@@ -16,12 +16,13 @@
  * Initializer
  */
 template<typename DataLoader>
-TorchClient<DataLoader>::TorchClient(int64_t client_id,
-       vision::models::ResNet18& net,
-        DataLoader& train_loader,
-        DataLoader& test_loader,
-        torch::optim::Optimizer& optimizer,
-        torch::Device device) : net(net), train_loader(train_loader), test_loader(test_loader), optimizer(optimizer), device(device){
+TorchClient<DataLoader>::TorchClient(
+  std::string client_id,
+  vision::models::ResNet18& net,
+  DataLoader& train_loader,
+  DataLoader& test_loader,
+  torch::optim::Optimizer& optimizer,
+  torch::Device device) : net(net), train_loader(train_loader), test_loader(test_loader), optimizer(optimizer), device(device){
 };
 
 /**

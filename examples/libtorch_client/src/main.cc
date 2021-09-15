@@ -17,6 +17,16 @@
 #include "torch_client.cc"
 
 int main(int argc, char** argv) {
+    if (argc != 4){
+        std::cout << "Client takes three arguments as follows: " << std::endl;
+        std::cout << "./client  CLIENT_ID  SERVER_URL  PATH_TO_CIFAR_DATA " << std::endl;
+        std::cout << "Example: ./client  0 localhost:8888 /home/user/data " << std::endl;
+        return 0;
+    }
+    // Parsing arguments
+    const std::string CLIENT_ID  = argv[1];
+    const std::string SERVER_URL = argv[2];
+    const std::string PATH_TO_DATA = argv[3];
 
     // Check if we can train using CUDA
     auto cuda_available = torch::cuda::is_available();
@@ -29,7 +39,7 @@ int main(int argc, char** argv) {
 
     // Load CIFAR10 Training Dataset and DataLoader
     int64_t kTrainBatchSize = 64;
-    const std::string CIFAR10_DATASET_PATH = "/home/lekang/myflwr/flower/src/cc/data/";
+    const std::string CIFAR10_DATASET_PATH = PATH_TO_DATA;
     std::vector<double> norm_mean = { 0.4914, 0.4822, 0.4465 };
     std::vector<double> norm_std = { 0.247, 0.243, 0.261 };
     auto train_dataset = CIFAR10(CIFAR10_DATASET_PATH, CIFAR10::Mode::kTrain)
@@ -53,10 +63,10 @@ int main(int argc, char** argv) {
     int64_t num_epochs = 1;
     
     // Initialize TorchClient
-    TorchClient client(0, net, train_loader, test_loader, optimizer, device);
+    TorchClient client(CLIENT_ID, net, train_loader, test_loader, optimizer, device);
     
     // Define a server address
-    std::string server_add = "localhost:50051";
+    std::string server_add = SERVER_URL;
     
     // Start client
     start_client(server_add, &client);

@@ -22,10 +22,12 @@ project(LibTorchClient VERSION 0.10
         DESCRIPTION "Creates a Libtorch client that trains a ResNet18 models on CIFAR10."
         LANGUAGES CXX)
 
+set(EXECUTABLE_NAME client)
+
 # Choose existing gRPC or build a new one
 include(cmake/common.cmake)
 
-# Include Torchvision, which includes Torch 
+# Include Torchvision, which in turn includes Torch 
 find_package(TorchVision REQUIRED)
 
 # Protobuf file defining flower messages
@@ -33,7 +35,7 @@ get_filename_component(trans_proto "../../src/proto/flwr/proto/transport.proto" 
 get_filename_component(trans_proto_path "${trans_proto}" PATH)
 
 ## gRPC 
-# Generated C++ sources and headers from protobuff
+# Generated C++ sources and headers from protobuf
 set(trans_proto_srcs "transport.pb.cc")
 set(trans_proto_hdrs "transport.pb.h")
 set(trans_grpc_srcs "transport.grpc.pb.cc")
@@ -70,25 +72,37 @@ target_link_libraries(trans_grpc_proto
   ${_PROTOBUF_LIBPROTOBUF})
 
 # Targets flower client
-add_executable(client "src/main.cc"
-                      "src/cifar10.cc"
-                      "src/torch_client.cc"
-                      "src/transform.cc"
-                      "include/torch_client.h"
-                      "include/cifar10.h"
-                      "../../src/cc/flwr/include/client.h"
-                      "../../src/cc/flwr/include/start.h"
-                      "include/transform.h")
-target_link_libraries(client
+add_executable(${EXECUTABLE_NAME}
+                  "src/main.cc"
+                  "src/cifar10.cc"
+                  "src/torch_client.cc"
+                  "src/transform.cc"
+                  "include/torch_client.h"
+                  "include/cifar10.h"
+                  "../../src/cc/flwr/include/client.h"
+                  "../../src/cc/flwr/include/start.h"
+                  "include/transform.h")
+
+target_link_libraries(${EXECUTABLE_NAME}
      trans_grpc_proto
      gRPC::grpc++_reflection
      ${_GRPC_GRPCPP}
      ${_PROTOBUF_LIBPROTOBUF}
      TorchVision::TorchVision)
 
+# Dataset fetching
 if(DOWNLOAD_DATASETS)
-   add_dependencies(client cifar10)
- endif()
+  set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data CACHE PATH "Dataset download directory")
+  file(MAKE_DIRECTORY ${DATA_DIR})
+
+  add_custom_target(cifar10 COMMAND ${CMAKE_COMMAND}
+    -D DATA_DIR=${DATA_DIR}
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch_cifar10.cmake)
+
+  add_dependencies(${EXECUTABLE_NAME} cifar10)
+
+endif()
+
 #add_executable(flwr_client src/client.cc)
 #target_include_directories(flwr_client include)
 #target_link_libraries(flwr_client grpc++)

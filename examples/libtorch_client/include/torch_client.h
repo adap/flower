@@ -121,7 +121,7 @@ class TorchClient : public flwr::Client {
     int64_t client_id;
 
   public:
-    TorchClient(int64_t client_id,
+    TorchClient(std::string client_id,
         vision::models::ResNet18& net,
         DataLoader& trainset,
         DataLoader& testset,
