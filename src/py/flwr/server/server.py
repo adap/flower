@@ -33,6 +33,7 @@ from flwr.common import (
     weights_to_parameters,
 )
 from flwr.common.logger import log
+from flwr.common.typing import PropertiesIns
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
@@ -245,6 +246,11 @@ class Server:
         client_instructions = self.strategy.configure_fit(
             rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
         )
+        for client, _ in client_instructions:
+            properties_ins = PropertiesIns(config={"tensor_type": "REQUIRED"})
+            tensor_type = client.get_properties(properties_ins)
+            log(DEBUG, f"fit_round: Tensor type {tensor_type}")
+
         if not client_instructions:
             log(INFO, "fit_round: no clients selected, cancel")
             return None

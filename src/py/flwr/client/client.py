@@ -17,7 +17,15 @@
 
 from abc import ABC, abstractmethod
 
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
+from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    ParametersRes,
+    PropertiesIns,
+    PropertiesRes,
+)
 
 
 class Client(ABC):
@@ -32,6 +40,16 @@ class Client(ABC):
         ParametersRes
             The current local model parameters.
         """
+
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        """Return set of client's properties.
+
+        Returns
+        -------
+        PropertiesRes
+            Client's properties.
+        """
+        return PropertiesRes(properties={})
 
     @abstractmethod
     def fit(self, ins: FitIns) -> FitRes:
