@@ -30,6 +30,7 @@ Scalar = Union[bool, bytes, float, int, str]
 
 Metrics = Dict[str, Scalar]
 
+Config = Dict[str, Scalar]
 Properties = Dict[str, Scalar]
 
 
@@ -89,7 +90,7 @@ class EvaluateRes:
 class PropertiesIns:
     """Properties requests for a client."""
 
-    config: Properties
+    config: Config
 
 
 @dataclass
