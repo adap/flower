@@ -42,4 +42,4 @@ if __name__ == "__main__":
                 sys.exit("Forced dropout")
 
     # Start Flower client
-    fl.client.start_numpy_client("0.0.0.0:8080", client=CifarClient(dropout_prob=0.2))
+    fl.client.start_numpy_client("localhost:8080", client=CifarClient(dropout_prob=0.2))
