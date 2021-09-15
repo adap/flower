@@ -251,4 +251,11 @@ class NumPyClientWrapper(Client):
                 accuracy=accuracy,  # Deprecated
                 metrics=metrics,
             )
+        else:
+            msg = (
+                "NumPyClient.evaluate returned tuple with %s elements." % len(results)
+                + "It has to return a tuple with either 3 or 4 elements."
+            )
+            raise Exception(msg)
+
         return evaluate_res
