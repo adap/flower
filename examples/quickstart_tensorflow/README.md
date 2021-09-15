@@ -35,7 +35,7 @@ poetry run python3 -c "import flwr"
 
 If you don't see any errors you're good to go!
 
-# Run Federated Learning with TensorFlow/Keras and Flower
+## Run Federated Learning with TensorFlow/Keras and Flower
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 

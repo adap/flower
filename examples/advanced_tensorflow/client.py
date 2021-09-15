@@ -1,10 +1,11 @@
 import argparse
 import os
 
-import numpy as np
 import tensorflow as tf
 
 import flwr as fl
+
+import certificates
 
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -83,7 +84,16 @@ def main() -> None:
 
     # Start Flower client
     client = CifarClient(model, x_train, y_train, x_test, y_test)
-    fl.client.start_numpy_client("[::]:8080", client=client)
+
+    # Load certificates and extract root_certificate path
+    ssl_files = certificates.load()
+    root_certificate = ssl_files[0]
+
+    fl.client.start_numpy_client(
+        "[::]:8080",
+        client=client,
+        root_certificates=root_certificate
+    )
 
 
 def load_partition(idx: int):
