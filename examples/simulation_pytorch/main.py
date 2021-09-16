@@ -1,4 +1,5 @@
 import flwr as fl
+from flwr.common.typing import Scalar
 import ray
 import torch
 import torchvision
@@ -72,6 +73,7 @@ class CifarRayClient(fl.client.NumPyClient):
     def __init__(self, cid: str, fed_dir_data: str):
         self.cid = cid
         self.fed_dir = Path(fed_dir_data)
+        self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
 
         # instantiate model
         self.net = Net()
@@ -81,6 +83,10 @@ class CifarRayClient(fl.client.NumPyClient):
 
     def get_parameters(self):
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+
+    # def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_properties(self, ins):
+        return self.properties
 
     def set_parameters(self, parameters):
         params_dict = zip(self.net.state_dict().keys(), parameters)

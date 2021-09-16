@@ -22,12 +22,16 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 import numpy as np
 
 from flwr.common import (
+    Config,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
     Metrics,
     ParametersRes,
+    Properties,
+    PropertiesIns,
+    PropertiesRes,
     Scalar,
     parameters_to_weights,
     weights_to_parameters,
@@ -84,6 +88,16 @@ class NumPyClient(ABC):
         -------
         parameters : List[numpy.ndarray]
             The local model parameters as a list of NumPy ndarrays.
+        """
+
+    @abstractmethod
+    def get_properties(self, config: Config) -> Properties:
+        """Returns a client's set of properties.
+
+        Returns
+        -------
+        properties : PropertiesRes
+            Response containing `properties` of the client.
         """
 
     @abstractmethod
@@ -162,6 +176,10 @@ class NumPyClientWrapper(Client):
 
     def __init__(self, numpy_client: NumPyClient) -> None:
         self.numpy_client = numpy_client
+        self.properties: Properties = {"tensor_type": "numpy.ndarray"}
+
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        return PropertiesRes(properties=self.properties)
 
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
