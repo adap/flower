@@ -111,7 +111,7 @@ class KerasClientWrapper(Client):
 
     def __init__(self, keras_client: KerasClient) -> None:
         self.keras_client = keras_client
-        self.properties: Properties = {"tensor_str": "numpy.ndarray"}
+        self.properties: Properties = {"tensor_type": "numpy.ndarray"}
 
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
