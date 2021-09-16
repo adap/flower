@@ -33,13 +33,39 @@ def start_insecure_grpc_server(
 
     If used in a main function server.wait_for_termination(timeout=None)
     should be called as otherwise the server will immediately stop.
+
+    Parameters
+    ----------
+    client_manager : ClientManager
+        Instance of ClientManager
+    server_address : str
+        Server address in the form of HOST:PORT e.g. "[::]:8080"
+    max_concurrent_workers : int
+        Set the maximum number of clients you want the server to process
+        before returning RESOURCE_EXHAUSTED status (default: 1000)
+    max_message_length : int
+        Maximum message length that the server can send or receive.
+        Int valued in bytes. -1 means unlimited. (default: GRPC_MAX_MESSAGE_LENGTH)
+
+    Returns
+    -------
+    server : grpc.Server
+        An instance of a gRPC server which is already started
     """
     server = grpc.server(
         concurrent.futures.ThreadPoolExecutor(max_workers=max_concurrent_workers),
+        # Set the maximum number of concurrent RPCs this server will service before
+        # returning RESOURCE_EXHAUSTED status, or None to indicate no limit.
         maximum_concurrent_rpcs=max_concurrent_workers,
         options=[
+            # Maximum number of concurrent incoming streams to allow on a http2
+            # connection. Int valued.
             ("grpc.max_concurrent_streams", max(100, max_concurrent_workers)),
+            # Maximum message length that the channel can send.
+            # Int valued, bytes. -1 means unlimited.
             ("grpc.max_send_message_length", max_message_length),
+            # Maximum message length that the channel can receive.
+            # Int valued, bytes. -1 means unlimited.
             ("grpc.max_receive_message_length", max_message_length),
         ],
     )
