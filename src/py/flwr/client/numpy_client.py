@@ -74,7 +74,7 @@ release.
 
 EXCEPTION_MESSAGE_WRONG_RETURN_TYPE = """
 NumPyClient.evaluate did not return a tuple with 3 elements.
-The return type should be have the following type signature:
+The return type should have the following type signature:
 
     Tuple[float, int, Dict[str, Scalar]]
     
