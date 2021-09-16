@@ -1,6 +1,5 @@
 from collections import OrderedDict
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 import torchvision.transforms as transforms
@@ -90,7 +89,7 @@ def main():
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss = test(net, testloader)
-            return float(loss), len(testloader)
+            return float(loss), len(testloader), {}
 
     fl.client.start_numpy_client("[::]:8080", client=CifarClient())
 
