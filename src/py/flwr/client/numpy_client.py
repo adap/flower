@@ -72,6 +72,19 @@ instead. Note that the deprecated return format will be removed in a future
 release.
 """
 
+EXCEPTION_MESSAGE_WRONG_RETURN_TYPE = """
+NumPyClient.evaluate did not return a tuple with 3 elements.
+The return type should be have the following type signature:
+
+    Tuple[float, int, Dict[str, Scalar]]
+    
+Example
+-------
+
+    0.5, 10, {"accuracy": 0.95}
+
+"""
+
 
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
@@ -252,11 +265,6 @@ class NumPyClientWrapper(Client):
                 metrics=metrics,
             )
         else:
-            msg = (
-                "NumPyClient.evaluate returned tuple with %s elements." % len(results)
-                + "It has to return a tuple with three elements. as all other options"
-                + "are deprecated and will soon be removed."
-            )
-            raise Exception(msg)
+            raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE)
 
         return evaluate_res
