@@ -45,14 +45,14 @@ def handle(
     if server_msg.HasField("sec_agg_msg"):
         f = open("logserver.txt", "a")
         f.write(
-            f"{sys.getsizeof(server_msg)}\n")
+            f"{server_msg.ByteSize()}\n")
         f.close()
         if server_msg.sec_agg_msg.HasField("setup_param"):
             t = (_setup_param(client, server_msg.sec_agg_msg), 0, True)
             if client.sec_agg_id == 3:
                 f = open("logclient.txt", "a")
                 f.write(
-                    f"{sys.getsizeof(t[0])}\n")
+                    f"{t[0].ByteSize()}\n")
                 f.close()
             return t
         elif server_msg.sec_agg_msg.HasField("ask_keys"):
@@ -60,7 +60,7 @@ def handle(
             if client.sec_agg_id == 3:
                 f = open("logclient.txt", "a")
                 f.write(
-                    f"{sys.getsizeof(t[0])}\n")
+                    f"{t[0].ByteSize()}\n")
                 f.close()
             return t
         elif server_msg.sec_agg_msg.HasField("share_keys"):
@@ -68,7 +68,7 @@ def handle(
             if client.sec_agg_id == 3:
                 f = open("logclient.txt", "a")
                 f.write(
-                    f"{sys.getsizeof(t[0])}\n")
+                    f"{t[0].ByteSize()}\n")
                 f.close()
             return t
         elif server_msg.sec_agg_msg.HasField("ask_vectors"):
@@ -76,7 +76,7 @@ def handle(
             if client.sec_agg_id == 3:
                 f = open("logclient.txt", "a")
                 f.write(
-                    f"{sys.getsizeof(t[0])}\n")
+                    f"{t[0].ByteSize()}\n")
                 f.close()
             return t
         elif server_msg.sec_agg_msg.HasField("unmask_vectors"):
@@ -84,7 +84,7 @@ def handle(
             if client.sec_agg_id == 3:
                 f = open("logclient.txt", "a")
                 f.write(
-                    f"{sys.getsizeof(t[0])}\n")
+                    f"{t[0].ByteSize()}\n")
                 f.close()
             return t
     raise UnkownServerMessage()
