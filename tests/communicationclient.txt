@@ -1,0 +1,121 @@
+Starting real experiments
+This is secagg sampling 100 dropping out 0% with vector size 100000 try 0 
+4
+442
+43906
+800298
+4647
+This is secagg sampling 100 dropping out 5% with vector size 100000 try 0 
+4
+442
+43906
+800298
+5826
+This is secagg sampling 100 dropping out 0% with vector size 200000 try 0 
+4
+442
+43906
+1600298
+4647
+This is secagg sampling 100 dropping out 5% with vector size 200000 try 0 
+4
+442
+43906
+1600298
+5826
+This is secagg sampling 100 dropping out 0% with vector size 300000 try 0 
+4
+442
+43906
+2400302
+4647
+This is secagg sampling 100 dropping out 5% with vector size 300000 try 0 
+4
+442
+43906
+2400302
+5826
+This is secagg sampling 100 dropping out 0% with vector size 400000 try 0 
+4
+442
+43906
+3200302
+4647
+This is secagg sampling 100 dropping out 5% with vector size 400000 try 0 
+4
+442
+43906
+3200302
+5826
+This is secagg sampling 100 dropping out 0% with vector size 500000 try 0 
+4
+442
+43906
+4000302
+4647
+This is secagg sampling 100 dropping out 5% with vector size 500000 try 0 
+4
+442
+43906
+4000302
+5826
+This is secagg sampling 100 dropping out 0% with vector size 100000 try 0 
+4
+442
+43906
+800298
+4647
+This is secagg sampling 100 dropping out 5% with vector size 100000 try 0 
+4
+442
+43906
+800298
+5826
+This is secagg sampling 200 dropping out 0% with vector size 100000 try 0 
+4
+442
+43928
+800298
+4669
+This is secagg sampling 200 dropping out 5% with vector size 100000 try 0 
+4
+442
+43928
+800298
+5848
+This is secagg sampling 300 dropping out 0% with vector size 100000 try 0 
+4
+442
+43928
+800298
+4669
+This is secagg sampling 300 dropping out 5% with vector size 100000 try 0 
+4
+442
+43928
+800298
+5848
+This is secagg sampling 400 dropping out 0% with vector size 100000 try 0 
+4
+442
+43928
+800298
+4669
+This is secagg sampling 400 dropping out 5% with vector size 100000 try 0 
+4
+442
+43928
+800298
+5848
+This is secagg sampling 500 dropping out 0% with vector size 100000 try 0 
+4
+442
+43928
+800298
+4669
+This is secagg sampling 500 dropping out 5% with vector size 100000 try 0 
+4
+442
+43928
+800298
+5848
