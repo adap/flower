@@ -189,10 +189,9 @@ class NumPyClientWrapper(Client):
 
     def __init__(self, numpy_client: NumPyClient) -> None:
         self.numpy_client = numpy_client
-        self.properties: Properties = {"tensor_type": "numpy.ndarray"}
 
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
-        return PropertiesRes(properties=self.properties)
+        return self.numpy_client.get_properties(ins)
 
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
