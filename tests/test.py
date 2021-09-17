@@ -45,7 +45,7 @@ if __name__ == "__main__":
     for vector_dimension in vector_dimension_list:
         for sample_num in [100]:
             for dropout_value in dropout_value_list:
-                for i in range(10):
+                for i in range(1):
                     f = open("log.txt", "a")
                     f.write(
                         f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     for vector_dimension in [100000]:
         for sample_num in sample_num_list:
             for dropout_value in dropout_value_list:
-                for i in range(10):
+                for i in range(1):
                     f = open("log.txt", "a")
                     f.write(
                         f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
