@@ -33,6 +33,7 @@ from flwr.common import (
     weights_to_parameters,
 )
 from flwr.common.logger import log
+from flwr.common.parameter import parameters_to_weights
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
@@ -336,7 +337,7 @@ def reconnect_client(
     return client, disconnect
 
 
-def fit_clients(
+'''def fit_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]]
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
@@ -357,6 +358,7 @@ def fit_clients(
             result = future.result()
             results.append(result)
     return results, failures
+    '''
 
 
 def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
@@ -394,3 +396,72 @@ def evaluate_client(
     """Evaluate parameters on a single client."""
     evaluate_res = client.evaluate(ins)
     return client, evaluate_res
+
+
+def fit_clients(
+    client_instructions: List[Tuple[ClientProxy, FitIns]]
+) -> FitResultsAndFailures:
+    """Refine weights concurrently on all selected clients."""
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(fit_client, c, ins) for c, ins in client_instructions
+        ]
+    # Aggregate
+    failures: List[BaseException] = []
+    aggregated_weights: Weights
+    aggregated_weightings: int = 0
+    received_first_set_of_weights = False
+    for future in futures:
+        if not future.done():
+            continue
+        failure = future.exception()
+        if failure is not None:
+            failures.append(failure)
+        else:
+            _, fit_res = future.result()
+            # if aggregated_weights is None:
+            if not received_first_set_of_weights:
+                aggregated_weights = parameters_to_weights(fit_res.parameters)
+                aggregated_weightings += fit_res.num_examples
+                received_first_set_of_weights = True
+            else:
+                aggregated_weights, aggregated_weightings = aggregate_one(
+                    aggregated_weights, aggregated_weightings, fit_res
+                )
+
+    # Divide aggregated weights by aggregated weightings
+    aggregated_weights = [layer / aggregated_weightings for layer in aggregated_weights]
+
+    # Transform back to parameters because that's what FitRes needs
+    parameters = weights_to_parameters(aggregated_weights)
+
+    # Fake list of results ;)
+    results: List[Tuple[ClientProxy, FitRes]] = [
+        (
+            client_instructions[0][0],
+            FitRes(parameters=parameters, num_examples=1, num_examples_ceil=1),
+        )
+    ]
+    return results, failures
+
+
+def aggregate_one(
+    aggregated_weights: Weights, aggregated_weightings: int, result: FitRes
+) -> Tuple[Weights, int]:
+    """Add one result to the online aggregation."""
+    new_weights = parameters_to_weights(result.parameters)
+    new_weighting = result.num_examples
+
+    # Multiply the incoming weights with their weighting (i.e., num_examples)
+    weighted_new_weights = [layer * new_weighting for layer in new_weights]
+
+    # Add each incoming (weighted) weight layer to the matching existing weight layers
+    aggregated_weights = [
+        layer_old + layer_new
+        for layer_old, layer_new in zip(aggregated_weights, weighted_new_weights)
+    ]
+
+    # Add the weighting factor to the aggregated weightings
+    aggregated_weightings += new_weighting
+
+    return aggregated_weights, aggregated_weightings
