@@ -111,7 +111,6 @@ class KerasClientWrapper(Client):
 
     def __init__(self, keras_client: KerasClient) -> None:
         self.keras_client = keras_client
-        self.properties: Properties = {"tensor_type": "numpy.ndarray"}
 
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
@@ -120,7 +119,7 @@ class KerasClientWrapper(Client):
         return ParametersRes(parameters=parameters)
 
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
-        return PropertiesRes(properties=self.properties)
+        return self.keras_client.get_properties(ins)
 
     def fit(self, ins: FitIns) -> FitRes:
         """Refine the provided weights using the locally held dataset."""
