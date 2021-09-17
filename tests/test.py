@@ -32,11 +32,17 @@ if __name__ == "__main__":
     f = open("log.txt", "w")
     f.write("Starting real experiments\n")
     f.close()
+    f = open("logserver.txt", "w")
+    f.write("Starting real experiments\n")
+    f.close()
+    f = open("logclient.txt", "w")
+    f.write("Starting real experiments\n")
+    f.close()
     sample_num_list = [100, 200, 300, 400, 500]
     dropout_value_list = [0, 1]
     vector_dimension_list = [100000, 200000, 300000, 400000, 500000]
 
-    '''for vector_dimension in vector_dimension_list:
+    for vector_dimension in vector_dimension_list:
         for sample_num in [100]:
             for dropout_value in dropout_value_list:
                 for i in range(10):
@@ -44,14 +50,30 @@ if __name__ == "__main__":
                     f.write(
                         f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
                     f.close()
+                    f = open("logserver.txt", "a")
+                    f.write(
+                        f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
+                    f.close()
+                    f = open("logclient.txt", "a")
+                    f.write(
+                        f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
+                    f.close()
                     sec_agg_test.test_start_simulation(
                         sample_num=sample_num, share_num=51, threshold=26, vector_dimension=vector_dimension, dropout_value=dropout_value, num_rounds=1)
-'''
+
     for vector_dimension in [100000]:
-        for sample_num in [400, 500]:
+        for sample_num in sample_num_list:
             for dropout_value in dropout_value_list:
                 for i in range(10):
                     f = open("log.txt", "a")
+                    f.write(
+                        f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
+                    f.close()
+                    f = open("logserver.txt", "a")
+                    f.write(
+                        f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
+                    f.close()
+                    f = open("logclient.txt", "a")
                     f.write(
                         f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
                     f.close()

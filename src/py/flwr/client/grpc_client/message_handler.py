@@ -20,7 +20,7 @@ from typing import Tuple
 from flwr.client.client import Client
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
-
+import sys
 from flwr.server.server import Server
 
 # pylint: disable=missing-function-docstring
@@ -43,16 +43,50 @@ def handle(
     if server_msg.HasField("evaluate_ins"):
         return _evaluate(client, server_msg.evaluate_ins), 0, True
     if server_msg.HasField("sec_agg_msg"):
+        f = open("logserver.txt", "a")
+        f.write(
+            f"{sys.getsizeof(server_msg)}\n")
+        f.close()
         if server_msg.sec_agg_msg.HasField("setup_param"):
-            return _setup_param(client, server_msg.sec_agg_msg), 0, True
+            t = (_setup_param(client, server_msg.sec_agg_msg), 0, True)
+            if client.sec_agg_id == 3:
+                f = open("logclient.txt", "a")
+                f.write(
+                    f"{sys.getsizeof(t[0])}\n")
+                f.close()
+            return t
         elif server_msg.sec_agg_msg.HasField("ask_keys"):
-            return _ask_keys(client, server_msg.sec_agg_msg), 0, True
+            t = (_ask_keys(client, server_msg.sec_agg_msg), 0, True)
+            if client.sec_agg_id == 3:
+                f = open("logclient.txt", "a")
+                f.write(
+                    f"{sys.getsizeof(t[0])}\n")
+                f.close()
+            return t
         elif server_msg.sec_agg_msg.HasField("share_keys"):
-            return _share_keys(client, server_msg.sec_agg_msg), 0, True
+            t = (_share_keys(client, server_msg.sec_agg_msg), 0, True)
+            if client.sec_agg_id == 3:
+                f = open("logclient.txt", "a")
+                f.write(
+                    f"{sys.getsizeof(t[0])}\n")
+                f.close()
+            return t
         elif server_msg.sec_agg_msg.HasField("ask_vectors"):
-            return _ask_vectors(client, server_msg.sec_agg_msg), 0, True
+            t = (_ask_vectors(client, server_msg.sec_agg_msg), 0, True)
+            if client.sec_agg_id == 3:
+                f = open("logclient.txt", "a")
+                f.write(
+                    f"{sys.getsizeof(t[0])}\n")
+                f.close()
+            return t
         elif server_msg.sec_agg_msg.HasField("unmask_vectors"):
-            return _unmask_vectors(client, server_msg.sec_agg_msg), 0, True
+            t = (_unmask_vectors(client, server_msg.sec_agg_msg), 0, True)
+            if client.sec_agg_id == 3:
+                f = open("logclient.txt", "a")
+                f.write(
+                    f"{sys.getsizeof(t[0])}\n")
+                f.close()
+            return t
     raise UnkownServerMessage()
 
 

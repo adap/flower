@@ -19,6 +19,7 @@ from flwr.common.typing import AskKeysIns, AskKeysRes, AskVectorsIns, AskVectors
 from flwr.server.client_proxy import ClientProxy
 from flwr.common.sec_agg import sec_agg_primitives
 import timeit
+import sys
 import concurrent.futures
 
 from flwr.common.logger import log

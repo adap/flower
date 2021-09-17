@@ -25,6 +25,7 @@ from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
 from flwr.common.sec_agg import sec_agg_client_logic
 from .client import Client
+import sys
 
 
 class SecAggClient(Client):
