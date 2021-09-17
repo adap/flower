@@ -22,26 +22,38 @@ import numpy as np
 
 from .typing import Parameters, Weights
 
+BASIC_C_TYPES = {"float32": np.float32, "float64": np.float64}
 
-def weights_to_parameters(weights: Weights) -> Parameters:
+
+def weights_to_parameters(
+    weights: Weights, dest_tensor_type: str = "numpy.ndarray"
+) -> Parameters:
     """Convert NumPy weights to parameters object."""
-    tensors = [ndarray_to_bytes(ndarray) for ndarray in weights]
-    return Parameters(tensors=tensors, tensor_type="numpy.ndarray")
+    tensors = [ndarray_to_bytes(ndarray, dest_tensor_type) for ndarray in weights]
+    return Parameters(tensors=tensors, tensor_type=dest_tensor_type)
 
 
-def parameters_to_weights(parameters: Parameters) -> Weights:
+def parameters_to_weights(parameters: Parameters, orig_tensor_type: str) -> Weights:
     """Convert parameters object to NumPy weights."""
-    return [
-        bytes_to_ndarray(tensor, parameters.tensor_type)
-        for tensor in parameters.tensors
-    ]
+    return [bytes_to_ndarray(tensor, orig_tensor_type) for tensor in parameters.tensors]
 
 
-def ndarray_to_bytes(ndarray: np.ndarray) -> bytes:
+def ndarray_to_bytes(
+    numpy_array: np.ndarray, tensor_type: str = "numpy.ndarray"
+) -> bytes:
     """Serialize NumPy ndarray to bytes."""
-    bytes_io = BytesIO()
-    np.save(bytes_io, ndarray, allow_pickle=False)
-    return bytes_io.getvalue()
+    if tensor_type == "numpy.ndarray":
+        bytes_io = BytesIO()
+        np.save(bytes_io, numpy_array, allow_pickle=False)
+        serialized_array = bytes_io.getvalue()
+    else:
+        try:
+            dtype = BASIC_C_TYPES[tensor_type]
+            serialized_array = numpy_array.astype(dtype).tobytes()
+        except KeyError:
+            print(f"tensor_type '{tensor_type}' unknown.")
+
+    return serialized_array
 
 
 def bytes_to_ndarray(tensor: bytes, tensor_type: str = "numpy.ndarray") -> np.ndarray:
@@ -55,7 +67,6 @@ def bytes_to_ndarray(tensor: bytes, tensor_type: str = "numpy.ndarray") -> np.nd
     Returns:
        weights (np.ndarray): Weights in numpy array format.
     """
-    base_types = {"float32": np.float32, "float64": np.float64}
     weights = None
     if tensor_type == "numpy.ndarray":
         bytes_io = BytesIO(tensor)
@@ -63,7 +74,7 @@ def bytes_to_ndarray(tensor: bytes, tensor_type: str = "numpy.ndarray") -> np.nd
         weights = cast(np.ndarray, ndarray_deserialized)
     else:
         try:
-            dtype = base_types[tensor_type]
+            dtype = BASIC_C_TYPES[tensor_type]
             weights = np.frombuffer(tensor, dtype=dtype.newbyteorder(">"))
         except KeyError:
             print(f"tensor_type '{tensor_type}' unknown.")
