@@ -12,7 +12,7 @@ from torchvision import transforms
 from torchvision.datasets import MNIST
 
 
-class PyTorchLightningClient(fl.client.NumPyClient):
+class FlowerClient(fl.client.NumPyClient):
     def __init__(self, model, train_loader, val_loader):
         self.model = model
         self.train_loader = train_loader
@@ -54,9 +54,9 @@ def main() -> None:
     # Model and data
     model = mnist.LitAutoEncoder()
     train_loader, val_loader = mnist.load_data()
-    
+
     # Flower client
-    client = PyTorchLightningClient(model, train_loader, val_loader)
+    client = FlowerClient(model, train_loader, val_loader)
     fl.client.start_numpy_client("[::]:8080", client)
 
 
