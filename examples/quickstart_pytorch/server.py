@@ -1,5 +1,17 @@
 import flwr as fl
 
-# Start Flower server for three rounds of federated learning
+
 if __name__ == "__main__":
-    fl.server.start_server("[::]:8080", config={"num_rounds": 3})
+
+    # Define strategy
+    strategy = fl.server.strategy.FedAvg(
+        fraction_fit=0.5,
+        fraction_eval=0.5,
+    )
+
+    # Start server
+    fl.server.start_server(
+        server_address="[::]:8080",
+        config={"num_rounds": 3},
+        strategy=strategy,
+    )
