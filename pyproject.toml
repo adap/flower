@@ -130,6 +130,6 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = "torch.*"
-follow_imports = skip
+follow_imports = "skip"
 follow_imports_for_stubs = true
 
