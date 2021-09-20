@@ -40,10 +40,10 @@ flwr::ParametersRes TorchClient<DataLoader>::get_parameters() {
   //tensors.push_back(str);
   std::list<std::string> tensors;
   std::string tensor = "my_bytes";
-  std::string type_str = "float32";
   tensors.push_back(tensor);
-  tensors.push_back(type_str);
-  return flwr::Parameters(tensors, "Pytorch example");
+
+  std::string tensor_str = "float32";
+  return flwr::Parameters(tensors, tensor_str); 
 };
 
 /**
