@@ -11,7 +11,7 @@ description = "Federated Learning Quickstart with Flower and PyTorch Lightning"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
-flwr = "^0.13.0"  # For development: { path = "../../", develop = true }
-pytorch-lightning = "^1.1.3"
-torchvision = "^0.8.0"
+python = "^3.7"
+flwr = "^0.16.0"  # For development: { path = "../../", develop = true }
+pytorch-lightning = "^1.4.7"
+torchvision = "^0.10.0"

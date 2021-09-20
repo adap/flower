@@ -13,10 +13,11 @@ from torchvision.datasets import MNIST
 
 
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(self, model, train_loader, val_loader):
+    def __init__(self, model, train_loader, val_loader, test_loader):
         self.model = model
         self.train_loader = train_loader
         self.val_loader = val_loader
+        self.test_loader = test_loader
 
     def get_parameters(self):
         encoder_params = _get_parameters(self.model.encoder)
@@ -29,15 +30,20 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
-        trainer = pl.Trainer(max_epochs=1)
+
+        trainer = pl.Trainer(max_epochs=1, progress_bar_refresh_rate=0)
         trainer.fit(self.model, self.train_loader, self.val_loader)
-        return self.get_parameters(), 55000
+
+        return self.get_parameters(), 55000, {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
-        # res = self.trainer.test(test_dataloaders=self.val_loader)
-        # return 5000, res[0]["test_loss"], 0.0, {}
-        return 5000, 5.0, 0.1  # FIXME
+
+        trainer = pl.Trainer(progress_bar_refresh_rate=0)
+        results = trainer.test(self.model, self.test_loader)
+        loss = results[0]["test_loss"]
+
+        return loss, 5000, {"loss": loss}
 
 
 def _get_parameters(model):
@@ -53,10 +59,10 @@ def _set_parameters(model, parameters):
 def main() -> None:
     # Model and data
     model = mnist.LitAutoEncoder()
-    train_loader, val_loader = mnist.load_data()
+    train_loader, val_loader, test_loader = mnist.load_data()
 
     # Flower client
-    client = FlowerClient(model, train_loader, val_loader)
+    client = FlowerClient(model, train_loader, val_loader, test_loader)
     fl.client.start_numpy_client("[::]:8080", client)
 
 

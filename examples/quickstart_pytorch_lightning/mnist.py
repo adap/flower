@@ -44,37 +44,51 @@ class LitAutoEncoder(pl.LightningModule):
         self.log("train_loss", loss)
         return loss
 
-    def validation_step(self, val_batch, batch_idx):
-        x, y = val_batch
+    def validation_step(self, batch, batch_idx):
+        self._evaluate(batch, "val")
+
+    def test_step(self, batch, batch_idx):
+        self._evaluate(batch, "test")
+
+    def _evaluate(self, batch, stage=None):
+        x, y = batch
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
         x_hat = self.decoder(z)
         loss = F.mse_loss(x_hat, x)
-        self.log("val_loss", loss)
-
-
-def main() -> None:
-    # data
-    dataset = MNIST("", train=True, download=True, transform=transforms.ToTensor())
-    mnist_train, mnist_val = random_split(dataset, [55000, 5000])
-
-    train_loader = DataLoader(mnist_train, batch_size=32)
-    val_loader = DataLoader(mnist_val, batch_size=32)
-
-    # model
-    model = LitAutoEncoder()
-
-    # training
-    trainer = pl.Trainer()
-    trainer.fit(model, train_loader, val_loader)
+        if stage:
+            self.log(f"{stage}_loss", loss, prog_bar=True)
 
 
 def load_data():
-    dataset = MNIST("", train=True, download=True, transform=transforms.ToTensor())
-    mnist_train, mnist_val = random_split(dataset, [55000, 5000])
-    train_loader = DataLoader(mnist_train, batch_size=32)
-    val_loader = DataLoader(mnist_val, batch_size=32)
-    return train_loader, val_loader
+    # Training / validation set
+    trainset = MNIST("", train=True, download=True, transform=transforms.ToTensor())
+    mnist_train, mnist_val = random_split(trainset, [55000, 5000])
+    train_loader = DataLoader(mnist_train, batch_size=32, shuffle=True, num_workers=16)
+    val_loader = DataLoader(mnist_val, batch_size=32, shuffle=False, num_workers=16)
+
+    # Test set
+    testset = MNIST("", train=False, download=True, transform=transforms.ToTensor())
+    test_loader = DataLoader(testset, batch_size=32, shuffle=False, num_workers=16)
+
+    return train_loader, val_loader, test_loader
+
+
+def main() -> None:
+    """Centralized training."""
+
+    # Load data
+    train_loader, val_loader, test_loader = load_data()
+
+    # Load model
+    model = LitAutoEncoder()
+
+    # Train
+    trainer = pl.Trainer(max_epochs=5, progress_bar_refresh_rate=0)
+    trainer.fit(model, train_loader, val_loader)
+
+    # Test
+    trainer.test(model, test_loader)
 
 
 if __name__ == "__main__":
