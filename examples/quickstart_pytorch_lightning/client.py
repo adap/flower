@@ -43,7 +43,7 @@ class FlowerClient(fl.client.NumPyClient):
         results = trainer.test(self.model, self.test_loader)
         loss = results[0]["test_loss"]
 
-        return loss, 5000, {"loss": loss}
+        return loss, 10000, {"loss": loss}
 
 
 def _get_parameters(model):
