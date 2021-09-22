@@ -25,6 +25,8 @@ from flwr.proto.transport_pb2 import (
     ServerMessage,
 )
 
+from flwr.client.client import Client
+
 from . import typing
 
 # pylint: disable=missing-function-docstring
@@ -173,6 +175,8 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     )
 
 
+def error_res_to_proto(res: typing.ErrorRes) -> ClientMessage.ErrorRes:
+    return ClientMessage.ErrorRes(msg=res.msg)
 # === Evaluate messages ===
 
 

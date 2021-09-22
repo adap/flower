@@ -5,12 +5,12 @@ requires = [
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "quickstart_tensorflow"
+name = "tensorflow_dropout"
 version = "0.1.0"
-description = "Keras Federated Learning Quickstart with Flower"
+description = "Tensorflow Dropout"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
-flwr = "^0.15.0"  # For development: { path = "../../", develop = true }
+flwr =  { path = "../../", develop = true } # "^0.15.0"  # For development:
 tensorflow-cpu = "2.4.1"

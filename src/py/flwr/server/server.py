@@ -263,6 +263,8 @@ class Server:
             len(results),
             len(failures),
         )
+        print("failures")
+        print(failures)
 
         # Aggregate training results
         aggregated_result: Union[

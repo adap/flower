@@ -26,6 +26,7 @@ if __name__ == "__main__":
             return model.get_weights()
 
         def fit(self, parameters, config):  # type: ignore
+            self.check_dropout()
             model.set_weights(parameters)
             model.fit(x_train, y_train, epochs=1, batch_size=32)
             return model.get_weights(), len(x_train), {}
@@ -39,7 +40,7 @@ if __name__ == "__main__":
             # Add this whenever you want to simulate dropout
             r = random.random()
             if r < self.dropout_prob:
-                sys.exit("Forced dropout")
+                raise Exception("Forced Dropout")
 
     # Start Flower client
-    fl.client.start_numpy_client("localhost:8080", client=CifarClient(dropout_prob=0.2))
+    fl.client.start_numpy_client("localhost:8080", client=CifarClient(dropout_prob=1.0))
