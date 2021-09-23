@@ -27,6 +27,9 @@ from .typing import FitRes as FitRes
 from .typing import Metrics as Metrics
 from .typing import Parameters as Parameters
 from .typing import ParametersRes as ParametersRes
+from .typing import Properties as Properties
+from .typing import PropertiesIns as PropertiesIns
+from .typing import PropertiesRes as PropertiesRes
 from .typing import Reconnect as Reconnect
 from .typing import Scalar as Scalar
 from .typing import Weights as Weights
@@ -46,6 +49,9 @@ __all__ = [
     "Parameters",
     "parameters_to_weights",
     "ParametersRes",
+    "Properties",
+    "PropertiesIns",
+    "PropertiesRes",
     "Reconnect",
     "Scalar",
     "Weights",

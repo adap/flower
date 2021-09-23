@@ -82,7 +82,7 @@ def disconnect_from_proto(msg: ClientMessage.Disconnect) -> typing.Disconnect:
     return typing.Disconnect(reason="UNKNOWN")
 
 
-# === GetWeights messages ===
+# === GetParameters messages ===
 
 
 def get_parameters_to_proto() -> ServerMessage.GetParameters:
@@ -173,6 +173,33 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     )
 
 
+# === Properties messages ===
+
+
+def properties_ins_to_proto(ins: typing.PropertiesIns) -> ServerMessage.PropertiesIns:
+    """Serialize flower.PropertiesIns to ProtoBuf message."""
+    config = properties_to_proto(ins.config)
+    return ServerMessage.PropertiesIns(config=config)
+
+
+def properties_ins_from_proto(msg: ServerMessage.PropertiesIns) -> typing.PropertiesIns:
+    """Deserialize flower.PropertiesIns from ProtoBuf message."""
+    config = properties_from_proto(msg.config)
+    return typing.PropertiesIns(config=config)
+
+
+def properties_res_to_proto(res: typing.PropertiesRes) -> ClientMessage.PropertiesRes:
+    """Serialize flower.PropertiesIns to ProtoBuf message."""
+    properties_msg = properties_to_proto(res.properties)
+    return ClientMessage.PropertiesRes(properties=properties_msg)
+
+
+def properties_res_from_proto(msg: ClientMessage.PropertiesRes) -> typing.PropertiesRes:
+    """Deserialize flower.PropertiesRes from ProtoBuf message."""
+    properties = properties_from_proto(msg.properties)
+    return typing.PropertiesRes(properties=properties)
+
+
 # === Evaluate messages ===
 
 
@@ -220,6 +247,25 @@ def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRe
     )
 
 
+# === Properties messages ===
+
+
+def properties_to_proto(properties: typing.Properties) -> Any:
+    """Serialize... ."""
+    proto = {}
+    for key in properties:
+        proto[key] = scalar_to_proto(properties[key])
+    return proto
+
+
+def properties_from_proto(proto: Any) -> typing.Properties:
+    """Deserialize... ."""
+    properties = {}
+    for k in proto:
+        properties[k] = scalar_from_proto(proto[k])
+    return properties
+
+
 # === Metrics messages ===
 
 
@@ -237,6 +283,9 @@ def metrics_from_proto(proto: Any) -> typing.Metrics:
     for k in proto:
         metrics[k] = scalar_from_proto(proto[k])
     return metrics
+
+
+# === Scalar messages ===
 
 
 def scalar_to_proto(scalar: typing.Scalar) -> Scalar:

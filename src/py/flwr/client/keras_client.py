@@ -27,6 +27,9 @@ from flwr.common import (
     FitRes,
     Metrics,
     ParametersRes,
+    Properties,
+    PropertiesIns,
+    PropertiesRes,
     Scalar,
     Weights,
     parameters_to_weights,
@@ -108,12 +111,16 @@ class KerasClientWrapper(Client):
 
     def __init__(self, keras_client: KerasClient) -> None:
         self.keras_client = keras_client
+        self.properties: Properties = {"tensor_str": "numpy.ndarray"}
 
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
         weights = self.keras_client.get_weights()
         parameters = weights_to_parameters(weights)
         return ParametersRes(parameters=parameters)
+
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        return PropertiesRes(properties=self.properties)
 
     def fit(self, ins: FitIns) -> FitRes:
         """Refine the provided weights using the locally held dataset."""

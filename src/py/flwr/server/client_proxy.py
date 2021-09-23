@@ -24,6 +24,9 @@ from flwr.common import (
     FitIns,
     FitRes,
     ParametersRes,
+    Properties,
+    PropertiesIns,
+    PropertiesRes,
     Reconnect,
 )
 
@@ -33,10 +36,15 @@ class ClientProxy(ABC):
 
     def __init__(self, cid: str):
         self.cid = cid
+        self.properties: Properties = {}
 
     @abstractmethod
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
+
+    @abstractmethod
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        """Returns the client's properties."""
 
     @abstractmethod
     def fit(self, ins: FitIns) -> FitRes:
