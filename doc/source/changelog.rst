@@ -14,8 +14,8 @@ What's new?
   The feature is still experimental, so there's no stability guarantee for the API. It's also not quite ready for prime time and comes with a few known caveats. However, those who are curious are encouraged to try it out and share their thoughts.
 
 * **New built-in strategies** (`#828 <https://github.com/adap/flower/pull/828>`_ `#822 <https://github.com/adap/flower/pull/822>`_)
-    * FedYogi
-    * FedAdam
+    * FedYogi - Federated learning strategy using Yogi on server-side. Implementation based on https://arxiv.org/abs/2003.00295
+    * FedAdam - Federated learning strategy using Adam on server-side. Implementation based on https://arxiv.org/abs/2003.00295
 
 * **New PyTorch Lightning code example** (`#617 <https://github.com/adap/flower/pull/617>`_)
 
