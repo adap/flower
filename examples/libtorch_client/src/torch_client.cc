@@ -1,17 +1,4 @@
-/***********************************************************************************************************
- * 
- * @file torch_client.cc
- * 
- * @brief Implementation of TorchClient methods
- *
- * @version 1.0
- *
- * @date 06/09/2021
- *
- * ********************************************************************************************************/
-
 #include "torch_client.h"
-
 /**
  * Initializer
  */
@@ -32,16 +19,10 @@ TorchClient<DataLoader>::TorchClient(
 template<typename DataLoader>
 flwr::ParametersRes TorchClient<DataLoader>::get_parameters() {
   // Serialize
-  //std::ostringstream stream;
-  //torch::save(net, stream);
-  //std::string str = stream.str();
-  //const char* chr = str.c_str();
-  //std::list<std::string> tensors;
-  //tensors.push_back(str);
+  std::ostringstream stream;
+  torch::save(net, stream);
   std::list<std::string> tensors;
-  std::string tensor = "my_bytes";
-  tensors.push_back(tensor);
-
+  tensors.push_back(stream.str());
   std::string tensor_str = "float32";
   return flwr::Parameters(tensors, tensor_str); 
 };
