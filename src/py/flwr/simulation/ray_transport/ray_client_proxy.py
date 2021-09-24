@@ -46,6 +46,20 @@ class RayClientProxy(ClientProxy):
             res,
         )
 
+    def get_properties(self, ins: common.PropertiesIns) -> common.PropertiesRes:
+        """Returns client's properties."""
+        future_properties_res = launch_and_get_properties.options(
+            **self.resources
+        ).remote(self.client_fn, self.cid, ins)
+        future_properties_res = launch_and_get_properties(**self.resources).remote(
+            self.client_fn, self.cid, ins
+        )
+        res = ray.worker.get(future_properties_res)
+        return cast(
+            common.PropertiesRes,
+            res,
+        )
+
     def fit(self, ins: common.FitIns) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         future_fit_res = launch_and_fit.options(**self.resources).remote(
@@ -87,6 +101,15 @@ def launch_and_fit(
     """Exectue fit remotely."""
     client: Client = _create_client(client_fn, cid)
     return client.fit(fit_ins)
+
+
+@ray.remote  # type: ignore
+def launch_and_get_properties(
+    client_fn: ClientFn, cid: str, properties_ins: common.PropertiesIns
+) -> common.PropertiesRes:
+    """Exectue get_properties remotely."""
+    client: Client = _create_client(client_fn, cid)
+    return client.get_properties(properties_ins)
 
 
 @ray.remote  # type: ignore

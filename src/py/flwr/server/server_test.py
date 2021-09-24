@@ -27,6 +27,8 @@ from flwr.common import (
     FitRes,
     Parameters,
     ParametersRes,
+    PropertiesIns,
+    PropertiesRes,
     Reconnect,
     ndarray_to_bytes,
 )
@@ -40,6 +42,9 @@ class SuccessClient(ClientProxy):
 
     def get_parameters(self) -> ParametersRes:
         # This method is not expected to be called
+        raise Exception()
+
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         raise Exception()
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -58,6 +63,9 @@ class FailingCLient(ClientProxy):
     """Test class."""
 
     def get_parameters(self) -> ParametersRes:
+        raise Exception()
+
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         raise Exception()
 
     def fit(self, ins: FitIns) -> FitRes:
