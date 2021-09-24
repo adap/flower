@@ -1,18 +1,39 @@
 Changelog
 =========
 
-Unreleased
-----------
+v0.17.0 (2021-09-24)
+--------------------
 
 What's new?
+~~~~~~~~~~~
+
+* **Experimental virtual client engine** (`#781 <https://github.com/adap/flower/pull/781>`_ `#790 <https://github.com/adap/flower/pull/790>`_ `#791 <https://github.com/adap/flower/pull/791>`_)
+
+  One of Flower's goals is to enable research at scale. This release enables a first (experimental) peek at a major new feature, codenamed the virtual client engine. Virtual clients enable simulations that scale to a (very) large number of clients on a single machine or compute cluster. The easiest way to test the new functionality is to look at the two new code examples called :code:`quickstart_simulation` and :code:`simulation_pytorch`.
+
+  The feature is still experimental, so there's no stability guarantee for the API. It's also not quite ready for prime time and comes with a few known caveats. However, those who are curious are encouraged to try it out and share their thoughts.
 
 * **New built-in strategies** (`#828 <https://github.com/adap/flower/pull/828>`_ `#822 <https://github.com/adap/flower/pull/822>`_)
-    * FedYogi
-    * FedAdam
+    * FedYogi - Federated learning strategy using Yogi on server-side. Implementation based on https://arxiv.org/abs/2003.00295
+    * FedAdam - Federated learning strategy using Adam on server-side. Implementation based on https://arxiv.org/abs/2003.00295
 
-* **Warning when `min_available_clients` is misconfigured** (`#830 <https://github.com/adap/flower/pull/830>`_)
+* **New PyTorch Lightning code example** (`#617 <https://github.com/adap/flower/pull/617>`_)
+
+* **New Variational Auto-Encoder code example** (`#752 <https://github.com/adap/flower/pull/752>`_)
+
+* **New scikit-learn code example** (`#748 <https://github.com/adap/flower/pull/748>`_)
+
+* **New experimental TensorBoard strategy** (`#789 <https://github.com/adap/flower/pull/789>`_)
+
+* **Minor updates**
+    * Improved advanced TensorFlow code example (`#769 <https://github.com/adap/flower/pull/769>`_)
+    * Warning when :code:`min_available_clients` is misconfigured (`#830 <https://github.com/adap/flower/pull/830>`_)
+    * Improved gRPC server docs (`#841 <https://github.com/adap/flower/pull/841>`_)
+    * Improved error message in :code:`NumPyClient` (`#851 <https://github.com/adap/flower/pull/851>`_)
+    * Improved PyTorch quickstart code example (`#852 <https://github.com/adap/flower/pull/852>`_)
 
 Incompatible changes:
+~~~~~~~~~~~~~~~~~~~~~
 
 * **Disabled final distributed evaluation** (`#800 <https://github.com/adap/flower/pull/800>`_)
 
@@ -21,6 +42,10 @@ Incompatible changes:
 * **Renamed q-FedAvg strategy** (`#802 <https://github.com/adap/flower/pull/802>`_)
 
   The strategy named :code:`QffedAvg` was renamed to `QFedAvg` to better reflect the notation given in the original paper (q-FFL is the optimization objective, q-FedAvg is the proposed solver). Note the the original (now deprecated) :code:`QffedAvg` class is still available for compatibility reasons (it will be removed in a future release).
+
+* **Deprecated and renamed code example** :code:`simulation_pytorch` **to** :code:`simulation_pytorch_legacy` (`#791 <https://github.com/adap/flower/pull/791>`_)
+
+  This example has been replaced by a new example. The new example is based on the experimental virtual client engine, which will become the new default way of doing most types of large-scale simulations in Flower. The existing example was kept for reference purposes, but it might be removed in the future.
 
 
 v0.16.0 (2021-05-11)
@@ -103,7 +128,7 @@ v0.14.0 (2021-02-18)
 
 What's new?
 
-* **Generalized** :code:`Client.fit` **and** :code:`Client.evaluate` **return values** (`#610 <https://github.com/adap/flower/pull/610>`_, `#572 <https://github.com/adap/flower/pull/572>`_, `#633 <https://github.com/adap/flower/pull/633>`_)
+* **Generalized** :code:`Client.fit` **and** :code:`Client.evaluate` **return values** (`#610 <https://github.com/adap/flower/pull/610>`_ `#572 <https://github.com/adap/flower/pull/572>`_ `#633 <https://github.com/adap/flower/pull/633>`_)
 
   Clients can now return an additional dictionary mapping :code:`str` keys to values of the following types: :code:`bool`, :code:`bytes`, :code:`float`, :code:`int`, :code:`str`. This means one can return almost arbitrary values from :code:`fit`/:code:`evaluate` and make use of them on the server side!
   
@@ -164,7 +189,7 @@ What's new?
 
 Bugfix:
 
-* :code:`Server.fit` does not disconnect clients when finished, disconnecting the clients is now handled in :code:`flwr.server.start_server` (`#553 <https://github.com/adap/flower/pull/553>`_, `#540 <https://github.com/adap/flower/issues/540>`_).
+* :code:`Server.fit` does not disconnect clients when finished, disconnecting the clients is now handled in :code:`flwr.server.start_server` (`#553 <https://github.com/adap/flower/pull/553>`_ `#540 <https://github.com/adap/flower/issues/540>`_).
 
 
 v0.12.0 (2020-12-07)
@@ -173,8 +198,8 @@ v0.12.0 (2020-12-07)
 Important changes:
 
 * Added an example for embedded devices (`#507 <https://github.com/adap/flower/pull/507>`_)
-* Added a new NumPyClient (in addition to the existing KerasClient) (`#504 <https://github.com/adap/flower/pull/504>`_, `#508 <https://github.com/adap/flower/pull/508>`_)
-* Deprecated `flwr_examples` package and started to migrate examples into the top-level `examples` directory (`#494 <https://github.com/adap/flower/pull/494>`_, `#512 <https://github.com/adap/flower/pull/512>`_)
+* Added a new NumPyClient (in addition to the existing KerasClient) (`#504 <https://github.com/adap/flower/pull/504>`_ `#508 <https://github.com/adap/flower/pull/508>`_)
+* Deprecated `flwr_examples` package and started to migrate examples into the top-level `examples` directory (`#494 <https://github.com/adap/flower/pull/494>`_ `#512 <https://github.com/adap/flower/pull/512>`_)
 
 
 v0.11.0 (2020-11-30)
