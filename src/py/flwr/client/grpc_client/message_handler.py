@@ -24,7 +24,7 @@ from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 # pylint: disable=missing-function-docstring
 
 
-class UnkownServerMessage(Exception):
+class UnknownServerMessage(Exception):
     """Signifies that the received message is unknown."""
 
 
@@ -40,7 +40,9 @@ def handle(
         return _fit(client, server_msg.fit_ins), 0, True
     if server_msg.HasField("evaluate_ins"):
         return _evaluate(client, server_msg.evaluate_ins), 0, True
-    raise UnkownServerMessage()
+    if server_msg.HasField("properties_ins"):
+        return _get_properties(client, server_msg.properties_ins), 0, True
+    raise UnknownServerMessage()
 
 
 def _get_parameters(client: Client) -> ClientMessage:
@@ -48,6 +50,18 @@ def _get_parameters(client: Client) -> ClientMessage:
     parameters_res = client.get_parameters()
     parameters_res_proto = serde.parameters_res_to_proto(parameters_res)
     return ClientMessage(parameters_res=parameters_res_proto)
+
+
+def _get_properties(
+    client: Client, properties_msg: ServerMessage.PropertiesIns
+) -> ClientMessage:
+    # Deserialize get_properties instruction
+    properties_ins = serde.properties_ins_from_proto(properties_msg)
+    # Request for properties
+    properties_res = client.get_properties(properties_ins)
+    # Serialize response
+    properties_res_proto = serde.properties_res_to_proto(properties_res)
+    return ClientMessage(properties_res=properties_res_proto)
 
 
 def _fit(client: Client, fit_msg: ServerMessage.FitIns) -> ClientMessage:
