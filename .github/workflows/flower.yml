@@ -25,7 +25,7 @@ jobs:
           sudo apt-get install clang-format-10
           python -m pip install -U pip==21.2.4
           python -m pip install -U setuptools==57.5.0
-          python -m pip install -U poetry==1.1.8
+          python -m pip install -U poetry==1.1.10
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
@@ -46,7 +46,7 @@ jobs:
         run: |
           python -m pip install -U pip==21.2.4
           python -m pip install -U setuptools==57.5.0
-          python -m pip install -U poetry==1.1.8
+          python -m pip install -U poetry==1.1.10
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory + optional)
         run: |
@@ -75,7 +75,7 @@ jobs:
         run: |
           python -m pip install -U pip==21.2.4
           python -m pip install -U setuptools==57.5.0
-          python -m pip install -U poetry==1.1.8
+          python -m pip install -U poetry==1.1.10
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory + optional)
         run: |
@@ -95,7 +95,7 @@ jobs:
         run: |
           python -m pip install -U pip==21.2.4
           python -m pip install -U setuptools==57.5.0
-          python -m pip install -U poetry==1.1.8
+          python -m pip install -U poetry==1.1.10
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory + optional)
         run: |
