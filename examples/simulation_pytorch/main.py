@@ -231,7 +231,7 @@ if __name__ == "__main__":
     # start simulation
     fl.simulation.start_simulation(
         client_fn=client_fn,
-        num_clients=pool_size,
+        clients_ids=pool_size,
         client_resources=client_resources,
         num_rounds=5,
         strategy=strategy,

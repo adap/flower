@@ -16,7 +16,7 @@
 
 
 from logging import INFO
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import ray
 
@@ -29,7 +29,7 @@ from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 
 def start_simulation(  # pylint: disable=too-many-arguments
     client_fn: Callable[[str], Client],
-    num_clients: int,
+    clients_ids: Union[int, List[str]],
     client_resources: Optional[Dict[str, int]] = None,
     num_rounds: int = 1,
     strategy: Optional[Strategy] = None,
@@ -49,8 +49,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
         hyperparameters, ...) should be (re-)created in either the call to
         `client_fn` or the call to any of the client methods (e.g., load
         evaluation data in the `evaluate` method itself).
-    num_clients : int
-        The total number of clients in this simulation.
+    clients_ids : Union[int, List[str]]
+        List of possible `client_id`s (if List[str]) for simulated clients or
+        the total number of clients in this simulation (if int).
     client_resources : Optional[Dict[str, int]] (default: None)
         CPU and GPU resources for a single client. Supported keys are
         `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`.
@@ -104,12 +105,22 @@ def start_simulation(  # pylint: disable=too-many-arguments
         initialized_config,
     )
 
+    # Check if a number of client or a list of clients_ids was passed
+    num_clients: int
+    list_clients: List[str]
+    if isinstance(clients_ids, int):
+        num_clients = clients_ids
+        list_clients = [str(x) for x in range(num_clients)]
+    else:
+        num_clients = len(clients_ids)
+        list_clients = clients_ids
+
     # Register one RayClientProxy object for each client with the ClientManager
     resources = client_resources if client_resources is not None else {}
-    for i in range(num_clients):
+    for cid in list_clients:
         client_proxy = RayClientProxy(
             client_fn=client_fn,
-            cid=str(i),
+            cid=cid,
             resources=resources,
         )
         initialized_server.client_manager().register(client=client_proxy)
