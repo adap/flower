@@ -108,7 +108,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         An empty dictionary can be used (ray_init_args={}) to prevent any
         arguments from being passed to ray.init.
     """
-    list_clients: List[str]
+    cids: List[str]
 
     # clients_ids takes precedence
     if clients_ids is not None:
