@@ -116,13 +116,13 @@ def start_simulation(  # pylint: disable=too-many-arguments
             log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
             sys.exit()
         else:
-            list_clients = clients_ids
+            cids = clients_ids
     else:
         if num_clients is None:
             log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
             sys.exit()
         else:
-            list_clients = [str(x) for x in range(num_clients)]
+            cids = [str(x) for x in range(num_clients)]
 
     # Default arguments for Ray initialization
     if not ray_init_args:
@@ -154,7 +154,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # Register one RayClientProxy object for each client with the ClientManager
     resources = client_resources if client_resources is not None else {}
-    for cid in list_clients:
+    for cid in cids:
         client_proxy = RayClientProxy(
             client_fn=client_fn,
             cid=cid,
