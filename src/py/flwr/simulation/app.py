@@ -32,7 +32,7 @@ INVALID ARGUMENTS ERROR
 
 Invalid Arguments in method:
 
-`start_simulation(  # pylint: disable=too-many-arguments
+`start_simulation(
     *,
     client_fn: Callable[[str], Client],
     num_clients: Optional[int] = None,
