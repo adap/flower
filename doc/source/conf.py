@@ -75,8 +75,7 @@ html_theme_options = {
     # GitHub
     "repository_url": "https://github.com/adap/flower",
     "repository_branch": "main",
-    "path_to_docs": "doc",
-
+    "path_to_docs": "doc/source/",
     "home_page_in_toc": True,
     "use_repository_button": True,
     "use_issues_button": True,
