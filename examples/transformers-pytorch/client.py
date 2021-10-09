@@ -16,41 +16,43 @@ from transformers import AdamW
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-CHECKPOINT = "distilbert-base-uncased" #transformer model
+CHECKPOINT = "distilbert-base-uncased"  # transformer model
+
 
 def load_data():
     """Load IMDB data (training and eval)"""
     raw_datasets = load_dataset("imdb")
     raw_datasets = raw_datasets.shuffle(seed=42)
 
-    #remove unnecessary data split
-    del raw_datasets['unsupervised']
+    # remove unnecessary data split
+    del raw_datasets["unsupervised"]
 
     tokenizer = AutoTokenizer.from_pretrained(CHECKPOINT)
 
     def tokenize_function(examples):
-        return tokenizer(examples['text'], truncation=True)
+        return tokenizer(examples["text"], truncation=True)
 
-    #random 100 samples
-    population = random.sample(range(len(raw_datasets['train'])), 100)
+    # random 100 samples
+    population = random.sample(range(len(raw_datasets["train"])), 100)
 
     tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)
-    tokenized_datasets['train'] = tokenized_datasets['train'].select(population)
-    tokenized_datasets['test'] = tokenized_datasets['test'].select(population)
-
+    tokenized_datasets["train"] = tokenized_datasets["train"].select(population)
+    tokenized_datasets["test"] = tokenized_datasets["test"].select(population)
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
     trainloader = DataLoader(
-        tokenized_datasets['train'], shuffle=True, batch_size=32,
-        collate_fn=data_collator
+        tokenized_datasets["train"],
+        shuffle=True,
+        batch_size=32,
+        collate_fn=data_collator,
     )
 
     testloader = DataLoader(
-        tokenized_datasets['test'], batch_size=32,
-        collate_fn=data_collator
+        tokenized_datasets["test"], batch_size=32, collate_fn=data_collator
     )
 
     return trainloader, testloader
+
 
 def train(net, trainloader, epochs):
     optimizer = AdamW(net.parameters(), lr=5e-5)
@@ -76,16 +78,17 @@ def test(net, testloader):
         logits = outputs.logits
         loss += outputs.loss.item()
         predictions = torch.argmax(logits, dim=-1)
-        metric.add_batch(predictions=predictions, references=batch['labels'])
+        metric.add_batch(predictions=predictions, references=batch["labels"])
     loss /= len(testloader.dataset)
-    accuracy = metric.compute()['accuracy']
+    accuracy = metric.compute()["accuracy"]
     return loss, accuracy
 
 
 def main():
-    net = AutoModelForSequenceClassification \
-            .from_pretrained(CHECKPOINT, num_labels=2).to(DEVICE)
-    
+    net = AutoModelForSequenceClassification.from_pretrained(
+        CHECKPOINT, num_labels=2
+    ).to(DEVICE)
+
     trainloader, testloader = load_data()
 
     # Flower client

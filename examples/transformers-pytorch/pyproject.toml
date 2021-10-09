@@ -18,5 +18,5 @@ python = "^3.6.2"
 flwr = "^0.16.0"
 # flwr = { path = "../../", develop = true }  # Development
 torch = "1.9.0"
-transformers = "4.11.2"
+transformers = "4.11.3"
 datasets = "1.12.1"
