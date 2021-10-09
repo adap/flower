@@ -15,31 +15,30 @@ Here we are using an identity layer for base model, which just passes the
 input as it is to the head model.
 """
 base = tf.keras.Sequential(
-    [
-        tf.keras.Input(shape=(32,32,3)),
-        tf.keras.layers.Lambda(lambda x: x)
-    ]
+    [tf.keras.Input(shape=(32, 32, 3)), tf.keras.layers.Lambda(lambda x: x)]
 )
 
-base.compile(loss='categorical_crossentropy', optimizer='sgd')
-base.save("identity_model", save_format='tf')
+base.compile(loss="categorical_crossentropy", optimizer="sgd")
+base.save("identity_model", save_format="tf")
 
 """Define the head model.
 
 This is the model architecture that we will train using Flower. 
 """
-head = tf.keras.Sequential([
-    tf.keras.Input(shape=(32,32,3)),
-    tf.keras.layers.Conv2D(6, 5, activation='relu'),
-    tf.keras.layers.MaxPooling2D(pool_size=(2, 2)), 
-    tf.keras.layers.Conv2D(16, 5, activation='relu'),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(units=120, activation='relu'),
-    tf.keras.layers.Dense(units=84, activation='relu'),
-    tf.keras.layers.Dense(units=10, activation='softmax')
-])
+head = tf.keras.Sequential(
+    [
+        tf.keras.Input(shape=(32, 32, 3)),
+        tf.keras.layers.Conv2D(6, 5, activation="relu"),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        tf.keras.layers.Conv2D(16, 5, activation="relu"),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(units=120, activation="relu"),
+        tf.keras.layers.Dense(units=84, activation="relu"),
+        tf.keras.layers.Dense(units=10, activation="softmax"),
+    ]
+)
 
-head.compile(loss='categorical_crossentropy', optimizer='sgd')
+head.compile(loss="categorical_crossentropy", optimizer="sgd")
 
 
 """Convert the model for TFLite.
@@ -51,10 +50,8 @@ Copy them in your Android code under the assets/model directory.
 """
 
 base_path = bases.saved_model_base.SavedModelBase("identity_model")
-converter = TFLiteTransferConverter(10,
-                                    base_path,
-                                    heads.KerasModelHead(head),
-                                    optimizers.SGD(1e-3),
-                                    train_batch_size=32)
+converter = TFLiteTransferConverter(
+    10, base_path, heads.KerasModelHead(head), optimizers.SGD(1e-3), train_batch_size=32
+)
 
-converter.convert_and_save('tflite_model')
+converter.convert_and_save("tflite_model")

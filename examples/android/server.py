@@ -20,6 +20,7 @@ def main() -> None:
     # Start Flower server for four rounds of federated learning
     fl.server.start_server("[::]:8999", config={"num_rounds": 10}, strategy=strategy)
 
+
 def fit_config(rnd: int):
     """Return training configuration dict for each round.
 
@@ -31,6 +32,7 @@ def fit_config(rnd: int):
         "local_epochs": 5,
     }
     return config
+
 
 if __name__ == "__main__":
     main()
