@@ -274,10 +274,12 @@ class FedAvgAndroid(Strategy):
         """Convert parameters object to NumPy weights."""
         return [self.bytes_to_ndarray(tensor) for tensor in parameters.tensors]
 
+    # pylint: disable=R0201
     def ndarray_to_bytes(self, ndarray: np.ndarray) -> bytes:
         """Serialize NumPy array to bytes."""
         return cast(bytes, ndarray.tobytes())
 
+    # pylint: disable=R0201
     def bytes_to_ndarray(self, tensor: bytes) -> np.ndarray:
         """Deserialize NumPy array from bytes."""
         ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)
