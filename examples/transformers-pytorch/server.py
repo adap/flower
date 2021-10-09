@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     # Start server
     fl.server.start_server(
-        server_address="[::]:8080",
+        server_address="[::]:9999",
         config={"num_rounds": 3},
         strategy=strategy,
     )
