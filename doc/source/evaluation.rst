@@ -40,7 +40,7 @@ An evaluation function is any function that can take the current global model pa
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
-        # ... other FedAvg agruments 
+        # ... other FedAvg arguments 
         eval_fn=get_eval_fn(model),
     )
 

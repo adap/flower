@@ -21,7 +21,8 @@ from unittest.mock import MagicMock
 import numpy as np
 
 import flwr
-from flwr.proto.transport_pb2 import ClientMessage, Parameters
+from flwr.common.typing import Config
+from flwr.proto.transport_pb2 import ClientMessage, Parameters, Scalar
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
 
 MESSAGE_PARAMETERS = Parameters(tensors=[], tensor_type="np")
@@ -33,6 +34,10 @@ MESSAGE_FIT_RES = ClientMessage(
         fit_duration=12.3,
     )
 )
+CLIENT_PROPERTIES = {"tensor_type": Scalar(string="numpy.ndarray")}
+MESSAGE_PROPERTIES_RES = ClientMessage(
+    properties_res=ClientMessage.PropertiesRes(properties=CLIENT_PROPERTIES)
+)
 
 
 class GrpcClientProxyTestCase(unittest.TestCase):
@@ -43,6 +48,9 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         self.bridge_mock = MagicMock()
         # Set return_value for usually blocking get_client_message method
         self.bridge_mock.request.return_value = MESSAGE_FIT_RES
+        # Set return_value for get_properties
+        self.bridge_mock_get_proprieties = MagicMock()
+        self.bridge_mock_get_proprieties.request.return_value = MESSAGE_PROPERTIES_RES
 
     def test_get_parameters(self) -> None:
         """This test is currently quite simple and should be improved."""
@@ -86,3 +94,18 @@ class GrpcClientProxyTestCase(unittest.TestCase):
             evaluate_res.loss,
             evaluate_res.accuracy,
         )
+
+    def test_get_properties(self) -> None:
+        """This test is currently quite simple and should be improved."""
+        # Prepare
+        client = GrpcClientProxy(cid="1", bridge=self.bridge_mock_get_proprieties)
+        request_properties: Config = {"tensor_type": "str"}
+        ins: flwr.common.PropertiesIns = flwr.common.PropertiesIns(
+            config=request_properties
+        )
+
+        # Execute
+        value: flwr.common.PropertiesRes = client.get_properties(ins)
+
+        # Assert
+        assert value.properties["tensor_type"] == "numpy.ndarray"
