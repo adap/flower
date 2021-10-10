@@ -16,8 +16,7 @@ from transformers import AdamW
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-CHECKPOINT = "distilbert-base-uncased"  # transformer model
-
+CHECKPOINT = "distilbert-base-uncased"  # transformer model checkpoint
 
 def load_data():
     """Load IMDB data (training and eval)"""
@@ -38,6 +37,9 @@ def load_data():
     tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)
     tokenized_datasets["train"] = tokenized_datasets["train"].select(population)
     tokenized_datasets["test"] = tokenized_datasets["test"].select(population)
+
+    tokenized_datasets = tokenized_datasets.remove_columns('text')
+    tokenized_datasets = tokenized_datasets.rename_column("label","labels")
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
     trainloader = DataLoader(
@@ -103,7 +105,9 @@ def main():
 
         def fit(self, parameters, config):
             self.set_parameters(parameters)
+            print("Training Started...")
             train(net, trainloader, epochs=1)
+            print("Training Finished.")
             return self.get_parameters(), len(trainloader), {}
 
         def evaluate(self, parameters, config):
