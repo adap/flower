@@ -13,7 +13,7 @@ To make a release the following things need to happen:
 1. Update the `changelog.rst` section header :code:`Unreleased` to contain the version number and date for the release you are building. Create a pull request with the change.
 2. Tag the release commit with the version number as soon as the PR is merged: :code:`git tag v0.12.3`, then :code:`git push --tags`
 3. Build the release with `./dev/build.sh`, then publish it with `./dev/publish.sh`
-4. Create an entry in GitHub releases with the release notes for the previously tagged commit.
+4. Create an entry in GitHub releases with the release notes for the previously tagged commit and attach the build artifacts (:code:`.whl` and :code:`.tar.gz`).
 
 After the release
 -----------------

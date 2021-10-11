@@ -1,12 +1,12 @@
 [build-system]
 requires = [
-    "poetry==1.1.8",
+    "poetry==1.1.10",
 ]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "0.17.0"
+version = "0.18.0"
 description = "Flower - A Friendly Federated Learning Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
@@ -115,3 +115,21 @@ testpaths = [
     "src/py/flwr",
     "src/py/flwr_tool",
 ]
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = true
+
+[[tool.mypy.overrides]]
+module = "flwr_example.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "flwr_experimental.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "torch.*"
+follow_imports = "skip"
+follow_imports_for_stubs = true
+
