@@ -4,6 +4,11 @@ Changelog
 Unreleased
 ----------
 
+Incompatible changes:
+~~~~~~~~~~~~~~~~~~~~~
+
+* **Removed deprecated KerasClient** (`#857 <https://github.com/adap/flower/pull/857>`_)
+
 
 v0.17.0 (2021-09-24)
 --------------------
