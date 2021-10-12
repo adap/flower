@@ -22,12 +22,16 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 import numpy as np
 
 from flwr.common import (
+    Config,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
     Metrics,
     ParametersRes,
+    Properties,
+    PropertiesIns,
+    PropertiesRes,
     Scalar,
     parameters_to_weights,
     weights_to_parameters,
@@ -72,6 +76,19 @@ instead. Note that the deprecated return format will be removed in a future
 release.
 """
 
+EXCEPTION_MESSAGE_WRONG_RETURN_TYPE = """
+NumPyClient.evaluate did not return a tuple with 3 elements.
+The return type should have the following type signature:
+
+    Tuple[float, int, Dict[str, Scalar]]
+
+Example
+-------
+
+    0.5, 10, {"accuracy": 0.95}
+
+"""
+
 
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
@@ -84,6 +101,23 @@ class NumPyClient(ABC):
         -------
         parameters : List[numpy.ndarray]
             The local model parameters as a list of NumPy ndarrays.
+        """
+
+    @abstractmethod
+    def get_properties(self, config: Config) -> Properties:
+        """Returns a client's set of properties.
+
+        Parameters
+        ----------
+        config : Config
+            Configuration parameters requested by the server.
+            This can be used to tell the client which parameters
+            are needed along with some Scalar attributes.
+
+        Returns
+        -------
+        PropertiesRes :
+            Response containing `properties` of the client.
         """
 
     @abstractmethod
@@ -162,6 +196,10 @@ class NumPyClientWrapper(Client):
 
     def __init__(self, numpy_client: NumPyClient) -> None:
         self.numpy_client = numpy_client
+
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        properties = self.numpy_client.get_properties(ins.config)
+        return PropertiesRes(properties=properties)
 
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
@@ -251,4 +289,7 @@ class NumPyClientWrapper(Client):
                 accuracy=accuracy,  # Deprecated
                 metrics=metrics,
             )
+        else:
+            raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE)
+
         return evaluate_res

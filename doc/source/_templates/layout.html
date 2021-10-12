@@ -23,7 +23,6 @@
 {% endblock %}
 
 <!-- Docs TOC is "d-none d-xl-block col-xl-2" -->
-
 {% block docs_sidebar %}
 <div class="col-12 {{ sidebar_width_class }} bd-sidebar site-navigation show{% if is_single_page %} single-page{% endif %}" id="site-navigation">
     {% if not is_single_page %}
@@ -40,9 +39,7 @@
         <div class="col-12 col-md-9 pl-md-3 pr-md-0">
         {{ super() }}
         {% if theme_show_prev_next %}
-        <div class='prev-next-bottom'>
-            {{ prev_next(prev, next) }}
-        </div>
+            {% include "_templates/prev-next.html" %}
         {% endif %}
         </div>
     </div>
