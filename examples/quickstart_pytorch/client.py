@@ -39,10 +39,9 @@ class Net(nn.Module):
         return x
 
 
-def train(net, trainloader, epochs):
+def train(net, optimizer, trainloader, epochs):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     net.train()
     for _ in range(epochs):
         for images, labels in trainloader:
@@ -82,6 +81,23 @@ def load_data():
     testloader = DataLoader(testset, batch_size=32)
     return trainloader, testloader
 
+def get_sgd_optimizer_state(optimizer: torch.optim.SGD):
+    """Return params from optimizer state"""
+    params = []
+    state_dict = optimizer.state_dict() # Has two keys: state, param_groups
+    state = state_dict["state"]
+    for _, val in state.items():
+        tensor = val["momentum_buffer"]
+        params.append(tensor.numpy())
+    return params
+
+def set_sgd_optimizer_state(optimizer: torch.optim.SGD, params):
+    """Set params in optimizer state"""
+    state_dict = optimizer.state_dict() # Has two keys: state, param_groups
+    state = state_dict["state"]
+    for idx, param in enumerate(params):
+        state[idx] = { "momentum_buffer": torch.from_numpy(param) }
+    optimizer.load_state_dict(state_dict)
 
 # #############################################################################
 # 2. Federation of the pipeline with Flower
@@ -93,28 +109,43 @@ def main():
 
     # Load model
     net = Net().to(DEVICE)
+    optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+
+    num_parameter_groups = len(list(net.parameters()))
 
     # Load data (CIFAR-10)
     trainloader, testloader = load_data()
 
     # Flower client
     class CifarClient(fl.client.NumPyClient):
+        def get_properties(self):
+            return {}
+
         def get_parameters(self):
-            return [val.cpu().numpy() for _, val in net.state_dict().items()]
+            net_params = [val.cpu().numpy() for _, val in net.state_dict().items()]
+            opt_params = get_sgd_optimizer_state(optimizer)
+            params = net_params + opt_params
+            return params
 
         def set_parameters(self, parameters):
-            params_dict = zip(net.state_dict().keys(), parameters)
+            net_params = parameters
+            opt_params = []
+            if len(parameters) > num_parameter_groups:
+                net_params, opt_params = parameters[:10], parameters[10:]
+            params_dict = zip(net.state_dict().keys(), net_params)
             state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            set_sgd_optimizer_state(optimizer, opt_params)
             net.load_state_dict(state_dict, strict=True)
 
         def fit(self, parameters, config):
             self.set_parameters(parameters)
-            train(net, trainloader, epochs=1)
+            train(net, optimizer, trainloader, epochs=1)
             return self.get_parameters(), len(trainloader), {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
+            print(float(loss), len(testloader), {"accuracy": float(accuracy)})
             return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
     # Start client
