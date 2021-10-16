@@ -4,6 +4,17 @@ Changelog
 Unreleased
 ----------
 
+What's new?
+~~~~~~~~~~~
+
+* **Client properties** (`#795 <https://github.com/adap/flower/pull/795>`_)
+
+* **Experimental Android support with TFLite** (`#865 <https://github.com/adap/flower/pull/865>`_)
+
+  Android support has finally arrived in :code:`main`! Flower is both client-agnostic and framework-agnostic by design. One can integrate arbitrary client platforms and with this release, using Flower on Android has become a lot easier.
+
+  The example uses TFLite on the client side, along with a new :code:`FedAvgAndroid` strategy. The Android client and :code:`FedAvgAndroid` are still experimental, but they are a first step towards a fully-fledged Android SDK and a unified :code:`FedAvg` implementation that integrated the new functionality from :code:`FedAvgAndroid`.
+
 
 v0.17.0 (2021-09-24)
 --------------------
