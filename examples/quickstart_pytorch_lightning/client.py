@@ -2,14 +2,9 @@ import flwr as fl
 import mnist
 import pytorch_lightning as pl
 from collections import OrderedDict
-
+import wandb
 
 import torch
-from torch import nn
-from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
-from torchvision import transforms
-from torchvision.datasets import MNIST
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -33,17 +28,14 @@ class FlowerClient(fl.client.NumPyClient):
 
         trainer = pl.Trainer(max_epochs=1, progress_bar_refresh_rate=0)
         trainer.fit(self.model, self.train_loader, self.val_loader)
-
+        results = trainer.validate(self.model, self.test_loader)
+        val_loss = results[0]["val_loss"]
+        wandb.log({"val_loss": val_loss})
         return self.get_parameters(), 55000, {}
 
+    # As we are doing centralized evaluation we can ignore this
     def evaluate(self, parameters, config):
-        self.set_parameters(parameters)
-
-        trainer = pl.Trainer(progress_bar_refresh_rate=0)
-        results = trainer.test(self.model, self.test_loader)
-        loss = results[0]["test_loss"]
-
-        return loss, 10000, {"loss": loss}
+        pass
 
 
 def _get_parameters(model):
@@ -57,6 +49,19 @@ def _set_parameters(model, parameters):
 
 
 def main() -> None:
+    # Configure wandb
+    config = wandb.config
+    config.dataset = "mnist"
+    config.model = "LitAutoEncoder"
+
+    # Init wandb
+    run = wandb.init(
+        entity="flwr",
+        project="quickstart_pytorch_lightning",
+        name="client_" + wandb.util.generate_id(),
+        config=config,
+    )
+
     # Model and data
     model = mnist.LitAutoEncoder()
     train_loader, val_loader, test_loader = mnist.load_data()
@@ -64,6 +69,9 @@ def main() -> None:
     # Flower client
     client = FlowerClient(model, train_loader, val_loader, test_loader)
     fl.client.start_numpy_client("[::]:8080", client)
+
+    # Tell wandb that we are done
+    run.finish()
 
 
 if __name__ == "__main__":

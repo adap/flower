@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Group all processes in wandb
+export WANDB_RUN_GROUP=`python -c "import wandb; print(wandb.util.generate_id())"`
+
 python server.py &
 sleep 3 # Sleep for 3s to give the server enough time to start
 
