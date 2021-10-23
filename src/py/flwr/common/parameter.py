@@ -19,12 +19,31 @@ from io import BytesIO
 from typing import cast
 
 import numpy as np
+from numpy.core.fromnumeric import shape
 
 from .typing import Parameters, Weights
-
+###
+import os
+###
 
 def weights_to_parameters(weights: Weights) -> Parameters:
     """Convert NumPy weights to parameters object."""
+    ###
+    # Flatten parameters into 1D array of 32-bit floats
+    out_array = weights[0]
+    out_array = out_array.flatten("C")
+    for i in range(1, len(weights)):
+        nparray = weights[i]
+        nparray = nparray.flatten("C")
+        out_array = np.concatenate((out_array, nparray))
+    out_array.astype("float32")
+    # Save array to .f32 file
+    files = [f for f in os.listdir("data")]
+    i = len(files) + 1
+    output = os.path.join("data", "parameters" + str(i) + ".f32")
+    out_array.astype("float32")
+    out_array.tofile(output)
+    ###
     tensors = [ndarray_to_bytes(ndarray) for ndarray in weights]
     return Parameters(tensors=tensors, tensor_type="numpy.ndarray")
 
@@ -38,6 +57,7 @@ def ndarray_to_bytes(ndarray: np.ndarray) -> bytes:
     """Serialize NumPy ndarray to bytes."""
     bytes_io = BytesIO()
     np.save(bytes_io, ndarray, allow_pickle=False)
+    ## Try saving here
     return bytes_io.getvalue()
 
 
