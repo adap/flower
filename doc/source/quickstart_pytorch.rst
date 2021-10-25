@@ -126,7 +126,7 @@ The Flower clients will use a simle CNN adapted from 'PyTorch: A 60 Minute Blitz
             return x
 
     # Load model and data
-    net = Net()
+    net = Net().to(DEVICE)
     trainloader, testloader = load_data()
 
 After loading the data set with :code:`load_data()` we define the Flower interface. 
