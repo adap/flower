@@ -83,6 +83,7 @@ def start_client(
 def start_numpy_client(
     server_address: str,
     client: NumPyClient,
+    name: str,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
@@ -106,7 +107,7 @@ def start_numpy_client(
     """
 
     # Wrap the NumPyClient
-    flower_client = NumPyClientWrapper(client)
+    flower_client = NumPyClientWrapper(client, name)
 
     # Start
     start_client(

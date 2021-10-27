@@ -26,23 +26,31 @@ from .typing import Parameters, Weights
 import os
 ###
 
-def weights_to_parameters(weights: Weights) -> Parameters:
+def weights_to_parameters(weights: Weights, name: str, epoch: int) -> Parameters:
     """Convert NumPy weights to parameters object."""
     ###
-    # Flatten parameters into 1D array of 32-bit floats
-    out_array = weights[0]
-    out_array = out_array.flatten("C")
-    for i in range(1, len(weights)):
-        nparray = weights[i]
-        nparray = nparray.flatten("C")
-        out_array = np.concatenate((out_array, nparray))
-    out_array.astype("float32")
-    # Save array to .f32 file
-    files = [f for f in os.listdir("data")]
-    i = len(files) + 1
-    output = os.path.join("data", "parameters" + str(i) + ".f32")
-    out_array.astype("float32")
-    out_array.tofile(output)
+    # Wipe previous data and ignore initialization parameters
+    if(name == "ignore"):
+        for f in os.listdir("data"):
+            os.remove(os.path.join("data", f))
+    else:
+        # Flatten parameters into 1D array of 32-bit floats
+        out_array = weights[0]
+        out_array = out_array.flatten("C")
+        for i in range(1, len(weights)):
+            nparray = weights[i]
+            nparray = nparray.flatten("C")
+            out_array = np.concatenate((out_array, nparray))
+        out_array.astype("float32")
+        # Save array to .f32 file
+        files = [f for f in os.listdir("data")]
+        output = name + "Epoch" + str(epoch) + ".f32"
+        while output in files:
+            epoch += 1
+            output = name + "Epoch" + str(epoch) + ".f32"
+        output = os.path.join("data", output)
+        out_array.tofile(output)
+
     ###
     tensors = [ndarray_to_bytes(ndarray) for ndarray in weights]
     return Parameters(tensors=tensors, tensor_type="numpy.ndarray")

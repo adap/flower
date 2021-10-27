@@ -245,7 +245,6 @@ class Server:
         client_instructions = self.strategy.configure_fit(
             rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
         )
-
         if not client_instructions:
             log(INFO, "fit_round: no clients selected, cancel")
             return None
@@ -394,4 +393,7 @@ def evaluate_client(
 ) -> Tuple[ClientProxy, EvaluateRes]:
     """Evaluate parameters on a single client."""
     evaluate_res = client.evaluate(ins)
+    ###
+    
+    ###
     return client, evaluate_res

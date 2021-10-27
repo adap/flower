@@ -22,16 +22,12 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 import numpy as np
 
 from flwr.common import (
-    Config,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
     Metrics,
     ParametersRes,
-    Properties,
-    PropertiesIns,
-    PropertiesRes,
     Scalar,
     parameters_to_weights,
     weights_to_parameters,
@@ -101,23 +97,6 @@ class NumPyClient(ABC):
         -------
         parameters : List[numpy.ndarray]
             The local model parameters as a list of NumPy ndarrays.
-        """
-
-    @abstractmethod
-    def get_properties(self, config: Config) -> Properties:
-        """Returns a client's set of properties.
-
-        Parameters
-        ----------
-        config : Config
-            Configuration parameters requested by the server.
-            This can be used to tell the client which parameters
-            are needed along with some Scalar attributes.
-
-        Returns
-        -------
-        PropertiesRes :
-            Response containing `properties` of the client.
         """
 
     @abstractmethod
@@ -194,17 +173,14 @@ class NumPyClient(ABC):
 class NumPyClientWrapper(Client):
     """Wrapper which translates between Client and NumPyClient."""
 
-    def __init__(self, numpy_client: NumPyClient) -> None:
+    def __init__(self, numpy_client: NumPyClient, name: str) -> None:
         self.numpy_client = numpy_client
-
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
-        properties = self.numpy_client.get_properties(ins.config)
-        return PropertiesRes(properties=properties)
+        self.name = name
 
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
         parameters = self.numpy_client.get_parameters()
-        parameters_proto = weights_to_parameters(parameters)
+        parameters_proto = weights_to_parameters(parameters, name="ignore", epoch=0)
         return ParametersRes(parameters=parameters_proto)
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -226,7 +202,7 @@ class NumPyClientWrapper(Client):
 
         # Return FitRes
         fit_duration = timeit.default_timer() - fit_begin
-        parameters_prime_proto = weights_to_parameters(parameters_prime)
+        parameters_prime_proto = weights_to_parameters(parameters_prime, self.name, 1)
         return FitRes(
             parameters=parameters_prime_proto,
             num_examples=num_examples,

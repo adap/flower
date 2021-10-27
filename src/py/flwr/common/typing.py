@@ -30,9 +30,6 @@ Scalar = Union[bool, bytes, float, int, str]
 
 Metrics = Dict[str, Scalar]
 
-Config = Dict[str, Scalar]
-Properties = Dict[str, Scalar]
-
 
 @dataclass
 class Parameters:
@@ -84,20 +81,6 @@ class EvaluateRes:
     num_examples: int
     accuracy: Optional[float] = None  # Deprecated
     metrics: Optional[Metrics] = None
-
-
-@dataclass
-class PropertiesIns:
-    """Properties requests for a client."""
-
-    config: Config
-
-
-@dataclass
-class PropertiesRes:
-    """Properties response from a client."""
-
-    properties: Properties
 
 
 @dataclass
