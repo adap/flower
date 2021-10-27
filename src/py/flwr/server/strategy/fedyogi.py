@@ -114,6 +114,7 @@ class FedYogi(FedOpt):
             tau=tau,
         )
         self.delta_t: Optional[Weights] = None
+        self.m_t: Optional[Weights] = None
         self.v_t: Optional[Weights] = None
 
     def __repr__(self) -> str:
@@ -134,22 +135,22 @@ class FedYogi(FedOpt):
             return None, {}
 
         fedavg_weights_aggregate = parameters_to_weights(fedavg_parameters_aggregated)
-        aggregated_updates = [
+        self.delta_t = [
             x - y for x, y in zip(fedavg_weights_aggregate, self.current_weights)
         ]
 
         # Yogi
 
-        if not self.delta_t:
-            self.delta_t = [np.zeros_like(x) for x in self.current_weights]
-
-        self.delta_t = [
+        if not self.m_t:
+            self.m_t = [np.zeros_like(x) for x in self.current_weights]
+        
+        self.m_t = [
             self.beta_1 * x + (1.0 - self.beta_1) * y
-            for x, y in zip(self.delta_t, aggregated_updates)
+            for x, y in zip(self.m_t, self.delta_t)
         ]
 
         if not self.v_t:
-            self.v_t = [np.zeros_like(x) for x in self.delta_t]
+            self.v_t = [np.zeros_like(x) for x in self.current_weights]
 
         self.v_t = [
             x + (1.0 - self.beta_2) * np.multiply(y, y) * np.sign(x - np.multiply(y, y))
@@ -158,7 +159,7 @@ class FedYogi(FedOpt):
 
         new_weights = [
             x + self.eta * y / (np.sqrt(z) + self.tau)
-            for x, y, z in zip(self.current_weights, self.delta_t, self.v_t)
+            for x, y, z in zip(self.current_weights, self.m_t, self.v_t)
         ]
 
         self.current_weights = new_weights
