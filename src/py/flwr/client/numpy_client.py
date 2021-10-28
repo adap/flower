@@ -20,6 +20,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
+import os
 
 from flwr.common import (
     EvaluateIns,
@@ -180,7 +181,21 @@ class NumPyClientWrapper(Client):
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
         parameters = self.numpy_client.get_parameters()
-        parameters_proto = weights_to_parameters(parameters, name="ignore", epoch=0)
+        parameters_proto = weights_to_parameters(parameters)
+        ###
+        for f in os.listdir("data"):
+            os.remove(os.path.join("data", f))
+        # Create shape file
+        shape_file = open(os.path.join("data", "shapes.txt"), "w")
+        for weight in parameters:
+            shape = tuple(weight.shape)
+            shape_str = ""
+            for num in shape:
+                shape_str += str(num) + ","
+            shape_str = shape_str[:len(shape_str) - 1] + "\n"
+            shape_file.write(shape_str)
+        shape_file.close()
+        ###
         return ParametersRes(parameters=parameters_proto)
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -202,7 +217,7 @@ class NumPyClientWrapper(Client):
 
         # Return FitRes
         fit_duration = timeit.default_timer() - fit_begin
-        parameters_prime_proto = weights_to_parameters(parameters_prime, self.name, 1)
+        parameters_prime_proto = weights_to_parameters(parameters_prime)
         return FitRes(
             parameters=parameters_prime_proto,
             num_examples=num_examples,
@@ -214,8 +229,60 @@ class NumPyClientWrapper(Client):
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset."""
         parameters: List[np.ndarray] = parameters_to_weights(ins.parameters)
-
         results = self.numpy_client.evaluate(parameters, ins.config)
+
+        ###
+        # Dump data
+        # Flatten parameters into 1D array of 64-bit floats
+        out_array = parameters[0]
+        out_array = out_array.flatten("C")
+        for i in range(1, len(parameters)):
+            nparray = parameters[i]
+            nparray = nparray.flatten("C")
+            out_array = np.concatenate((out_array, nparray))
+        out_array.astype("float64")
+        # Save array to .f64 file
+        files = [f for f in os.listdir("data")]
+        round = 1
+        output = self.name + "Round" + str(round) + ".f64"
+        while output in files:
+            round += 1
+            output = self.name + "Round" + str(round) + ".f64"
+        output = os.path.join("data", output)
+        out_array.tofile(output)
+
+        # Load data
+        # Read in shapes file
+        shape_file = open(os.path.join("data", "shapes.txt"), "r")
+        every_shape_list = []
+        subarray_size_list = []
+        prev_total = 0
+        for shape_str in shape_file:
+            shape_str = shape_str.strip("\n")
+            shape_list = shape_str.split(",")
+            total = 1
+            for i in range(len(shape_list)):
+                shape_list[i] = int(shape_list[i])
+                total *= shape_list[i]
+            every_shape_list.append(shape_list)
+            total = prev_total + total
+            prev_total = total
+            subarray_size_list.append(total)
+        subarray_size_list = subarray_size_list[:len(subarray_size_list) - 1]
+        # Read in binary file
+        weights_list = np.fromfile(os.path.join("data", self.name + "Round" + str(round) + ".f64"), dtype="float64")
+        # Reconstruct parameters
+        weights_list = np.split(weights_list, subarray_size_list)
+        for i in range(len(weights_list)):
+            weights_list[i] = weights_list[i].reshape(every_shape_list[i])
+        # Evaluate with loaded parameters
+        results_from_file = self.numpy_client.evaluate(weights_list, ins.config)
+        # Compare results
+        print("Normal data loss: " + self.name + " " + str(results[0]))
+        print("Loaded data loss: " + self.name + " " + str(results_from_file[0]))
+        ###
+
+        
         if len(results) == 3:
             if (
                 isinstance(results[0], float)

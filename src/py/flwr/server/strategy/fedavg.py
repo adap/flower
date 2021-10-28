@@ -254,7 +254,7 @@ class FedAvg(Strategy):
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
-        return weights_to_parameters(aggregate(weights_results), name="Server", epoch=rnd), {}
+        return weights_to_parameters(aggregate(weights_results)), {}
 
     def aggregate_evaluate(
         self,

@@ -33,6 +33,7 @@ from flwr.common import (
     Scalar,
     Weights,
     weights_to_parameters,
+    parameters_to_weights
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
@@ -395,37 +396,4 @@ def evaluate_client(
 ) -> Tuple[ClientProxy, EvaluateRes]:
     """Evaluate parameters on a single client."""
     evaluate_res = client.evaluate(ins)
-    ###
-    # Read in shapes file
-    shape_file = open(os.path.join("data", "shapes.txt"), "r")
-    every_shape_list = []
-    subarray_size_list = []
-    prev_total = 0
-    for shape_str in shape_file:
-        shape_str = shape_str.strip("\n")
-        shape_list = shape_str.split(",")
-        total = 1
-        for i in range(len(shape_list)):
-            shape_list[i] = int(shape_list[i])
-            total *= shape_list[i]
-        every_shape_list.append(shape_list)
-        total = prev_total + total
-        prev_total = total
-        subarray_size_list.append(total)
-    subarray_size_list = subarray_size_list[:len(subarray_size_list) - 1]
-    # Read in binary file
-    weights_list = np.fromfile(os.path.join("data", "Client1Epoch1.f32"), dtype="float32")
-    # Reconstruct parameters
-    weights_list = np.split(weights_list, subarray_size_list)
-    for i in range(len(weights_list)):
-        weights_list[i] = weights_list[i].reshape(every_shape_list[i])
-    parameters = weights_to_parameters(weights_list, name="testing", epoch=0)
-    # Evaluate with loaded parameters
-    ins.parameters = parameters
-    evaluate_res_from_file = client.evaluate(ins)
-    # Compare results
-    print(evaluate_res.loss)
-    print(evaluate_res_from_file.loss)
-    ###
-    
     return client, evaluate_res
