@@ -29,10 +29,22 @@ import os
 def weights_to_parameters(weights: Weights, name: str, epoch: int) -> Parameters:
     """Convert NumPy weights to parameters object."""
     ###
-    # Wipe previous data and ignore initialization parameters
+    # Wipe previous data, create shapes file, and ignore initialization parameters
     if(name == "ignore"):
         for f in os.listdir("data"):
             os.remove(os.path.join("data", f))
+        # Create shape file
+        shape_file = open(os.path.join("data", "shapes.txt"), "w")
+        for weight in weights:
+            shape = tuple(weight.shape)
+            shape_str = ""
+            for num in shape:
+                shape_str += str(num) + ","
+            shape_str = shape_str[:len(shape_str) - 1] + "\n"
+            shape_file.write(shape_str)
+        shape_file.close()
+    elif(name == "testing"):
+        pass
     else:
         # Flatten parameters into 1D array of 32-bit floats
         out_array = weights[0]
