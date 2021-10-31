@@ -52,21 +52,21 @@ def _get_parameters(client: Client) -> ClientMessage:
 
 def _fit(client: Client, fit_msg: ServerMessage.FitIns) -> ClientMessage:
     # Deserialize fit instruction
-    fit_ins = serde.fit_ins_from_proto(fit_msg)
+    fit_ins = serde.fit_ins_from_proto(fit_msg, client.name)
     # Perform fit
     fit_res = client.fit(fit_ins)
     # Serialize fit result
-    fit_res_proto = serde.fit_res_to_proto(fit_res)
+    fit_res_proto = serde.fit_res_to_proto(fit_res, client.name)
     return ClientMessage(fit_res=fit_res_proto)
 
 
 def _evaluate(client: Client, evaluate_msg: ServerMessage.EvaluateIns) -> ClientMessage:
     # Deserialize evaluate instruction
-    evaluate_ins = serde.evaluate_ins_from_proto(evaluate_msg)
+    evaluate_ins = serde.evaluate_ins_from_proto(evaluate_msg, client.name)
     # Perform evaluation
     evaluate_res = client.evaluate(evaluate_ins)
     # Serialize evaluate result
-    evaluate_res_proto = serde.evaluate_res_to_proto(evaluate_res)
+    evaluate_res_proto = serde.evaluate_res_to_proto(evaluate_res, client.name)
     return ClientMessage(evaluate_res=evaluate_res_proto)
 
 

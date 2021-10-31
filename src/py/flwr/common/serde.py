@@ -24,8 +24,12 @@ from flwr.proto.transport_pb2 import (
     Scalar,
     ServerMessage,
 )
+from numpy.core import records
 
-from . import typing
+from . import typing, parameter
+import pickle
+import os
+import numpy as np
 
 # pylint: disable=missing-function-docstring
 
@@ -103,28 +107,87 @@ def parameters_res_to_proto(res: typing.ParametersRes) -> ClientMessage.Paramete
 def parameters_res_from_proto(msg: ClientMessage.ParametersRes) -> typing.ParametersRes:
     """."""
     parameters = parameters_from_proto(msg.parameters)
+    ###
+    # Clean the directory
+    for f in os.listdir("data"):
+        os.remove(os.path.join("data", f))
+    # Create shape file
+    weights = parameter.parameters_to_weights(parameters)
+    shape_file = open(os.path.join("data", "shapes.txt"), "w")
+    for weight in weights:
+        shape = tuple(weight.shape)
+        shape_str = ""
+        for num in shape:
+            shape_str += str(num) + ","
+        shape_str = shape_str[:len(shape_str) - 1] + "\n"
+        shape_file.write(shape_str)
+    shape_file.close()
+    ###
     return typing.ParametersRes(parameters=parameters)
 
 
 # === Fit messages ===
 
 
-def fit_ins_to_proto(ins: typing.FitIns) -> ServerMessage.FitIns:
+def fit_ins_to_proto(ins: typing.FitIns, cid: str) -> ServerMessage.FitIns:
     """Serialize flower.FitIns to ProtoBuf message."""
+    ###
+    # Dump data
+    # Create file name
+    i = 1
+    file_name = "client" + cid[11:] + "fit_ins" + str(i) + ".f64"
+    files = [f for f in os.listdir("data")]
+    while file_name in files:
+        i += 1
+        file_name = "client" + cid[11:] + "fit_ins" + str(i) + ".f64"
+    # Decode bytes into array
+    weights = parameter.parameters_to_weights(ins.parameters)
+    # Flatten parameters into 1D array of 64-bit floats
+    out_array = weights[0]
+    out_array = out_array.flatten("C")
+    for j in range(1, len(weights)):
+        nparray = weights[j]
+        nparray = nparray.flatten("C")
+        out_array = np.concatenate((out_array, nparray))
+    out_array = out_array.astype("float64")
+    # Save array to .f64 file
+    out_array.tofile(os.path.join("data", file_name))
+    
+    
+    ###
     parameters_proto = parameters_to_proto(ins.parameters)
     config_msg = metrics_to_proto(ins.config)
     return ServerMessage.FitIns(parameters=parameters_proto, config=config_msg)
 
 
-def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
+def fit_ins_from_proto(msg: ServerMessage.FitIns, name: str) -> typing.FitIns:
     """Deserialize flower.FitIns from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
     config = metrics_from_proto(msg.config)
     return typing.FitIns(parameters=parameters, config=config)
 
 
-def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
+def fit_res_to_proto(res: typing.FitRes, name: str) -> ClientMessage.FitRes:
     """Serialize flower.FitIns to ProtoBuf message."""
+    ###
+    i = 1
+    file_name = "client" + name + "fit_res" + str(i) + ".f32"
+    files = [f for f in os.listdir("data")]
+    while file_name in files:
+        i += 1
+        file_name = "client" + name + "fit_res" + str(i) + ".f32"
+    # Decode bytes into array
+    weights = parameter.parameters_to_weights(res.parameters)
+    # Flatten parameters into 1D array of 32-bit floats
+    out_array = weights[0]
+    out_array = out_array.flatten("C")
+    for i in range(1, len(weights)):
+        nparray = weights[i]
+        nparray = nparray.flatten("C")
+        out_array = np.concatenate((out_array, nparray))
+    # Save array to .f32 file
+    out_array.tofile(os.path.join("data", file_name))
+    ###
     parameters_proto = parameters_to_proto(res.parameters)
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     # Legacy case, will be removed in a future release
@@ -160,7 +223,7 @@ def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
     )
 
 
-def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
+def fit_res_from_proto(msg: ClientMessage.FitRes, cid: str) -> typing.FitRes:
     """Deserialize flower.FitRes from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
     metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
@@ -176,21 +239,41 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
 # === Evaluate messages ===
 
 
-def evaluate_ins_to_proto(ins: typing.EvaluateIns) -> ServerMessage.EvaluateIns:
+def evaluate_ins_to_proto(ins: typing.EvaluateIns, cid: str) -> ServerMessage.EvaluateIns:
     """Serialize flower.EvaluateIns to ProtoBuf message."""
+    ###
+    weights = parameter.parameters_to_weights(ins.parameters)
+    i = 1
+    file_name = "client" + cid[11:] + "eval_ins" + str(i) + ".f64"
+    files = [f for f in os.listdir("data")]
+    while file_name in files:
+        i += 1
+        file_name = "client" + cid[11:] + "eval_ins" + str(i) + ".f64"
+    # Decode bytes into array
+    weights = parameter.parameters_to_weights(ins.parameters)
+    # Flatten parameters into 1D array of 64-bit floats
+    out_array = weights[0]
+    out_array = out_array.flatten("C")
+    for i in range(1, len(weights)):
+        nparray = weights[i]
+        nparray = nparray.flatten("C")
+        out_array = np.concatenate((out_array, nparray))
+    # Save array to .f64 file
+    out_array.tofile(os.path.join("data", file_name))
+    ###
     parameters_proto = parameters_to_proto(ins.parameters)
     config_msg = metrics_to_proto(ins.config)
     return ServerMessage.EvaluateIns(parameters=parameters_proto, config=config_msg)
 
 
-def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIns:
+def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns, name: str) -> typing.EvaluateIns:
     """Deserialize flower.EvaluateIns from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
     config = metrics_from_proto(msg.config)
     return typing.EvaluateIns(parameters=parameters, config=config)
 
 
-def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
+def evaluate_res_to_proto(res: typing.EvaluateRes, name: str) -> ClientMessage.EvaluateRes:
     """Serialize flower.EvaluateIns to ProtoBuf message."""
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     # Legacy case, will be removed in a future release
@@ -209,7 +292,7 @@ def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
     )
 
 
-def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRes:
+def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes, cid: str) -> typing.EvaluateRes:
     """Deserialize flower.EvaluateRes from ProtoBuf message."""
     metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
     return typing.EvaluateRes(

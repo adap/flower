@@ -44,20 +44,20 @@ class GrpcClientProxy(ClientProxy):
 
     def fit(self, ins: common.FitIns) -> common.FitRes:
         """Refine the provided weights using the locally held dataset."""
-        fit_ins_msg = serde.fit_ins_to_proto(ins)
+        fit_ins_msg = serde.fit_ins_to_proto(ins, self.cid)
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(fit_ins=fit_ins_msg)
         )
-        fit_res = serde.fit_res_from_proto(client_msg.fit_res)
+        fit_res = serde.fit_res_from_proto(client_msg.fit_res, self.cid)
         return fit_res
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
-        evaluate_msg = serde.evaluate_ins_to_proto(ins)
+        evaluate_msg = serde.evaluate_ins_to_proto(ins, self.cid)
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(evaluate_ins=evaluate_msg)
         )
-        evaluate_res = serde.evaluate_res_from_proto(client_msg.evaluate_res)
+        evaluate_res = serde.evaluate_res_from_proto(client_msg.evaluate_res, self.cid)
         return evaluate_res
 
     def reconnect(self, reconnect: common.Reconnect) -> common.Disconnect:
