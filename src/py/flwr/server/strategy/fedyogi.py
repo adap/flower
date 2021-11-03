@@ -152,7 +152,7 @@ class FedYogi(FedOpt):
             self.v_t = [np.zeros_like(x) for x in self.delta_t]
 
         self.v_t = [
-            x + (1.0 - self.beta_2) * np.multiply(y, y) * np.sign(x - np.multiply(y, y))
+            x - (1.0 - self.beta_2) * np.multiply(y, y) * np.sign(x - np.multiply(y, y))
             for x, y in zip(self.v_t, self.delta_t)
         ]
 
