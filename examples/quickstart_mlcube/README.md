@@ -60,3 +60,7 @@ Now you are ready to start the clients. We have prepared a simple script called 
 ```
 
 Congrats! You have just run a Federated Learning experiment using TensorFlow/Keras in MLCube using Flower for federation.
+
+# Background
+
+Wondering how this works? Most of the interaction with MLCube happens in `mlcube_utils.py` which reads and writes to the file system. It also provides a function called `run_task` which invokes `mlcube_docker run ...` to execute the appropriate task. The custom client we have implemented in `client.py` will run the MLCube 'download' task when its instantiated. fit and evaluate also interface through the `mlcube_utils.py` helpers for reading and writing to disk and calling the appropriate MLCube tasks.
