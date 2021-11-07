@@ -53,11 +53,11 @@ class CifarClient(fl.client.NumPyClient):
         if USE_FEDBN:
             keys = [k for k in self.model.state_dict().keys() if "bn" not in k]
             params_dict = zip(keys, parameters)
-            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             self.model.load_state_dict(state_dict, strict=False)
         else:
             params_dict = zip(self.model.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             self.model.load_state_dict(state_dict, strict=True)
 
     def fit(
