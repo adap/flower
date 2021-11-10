@@ -51,7 +51,7 @@ jobs:
       - name: Install dependencies (mandatory + optional)
         run: |
           python -m poetry install --extras "baseline"
-          python -m pip install -U tensorflow-cpu==2.6.0
+          python -m pip install -U tensorflow-cpu==2.6.2
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
