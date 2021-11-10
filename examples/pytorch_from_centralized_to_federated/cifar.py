@@ -10,7 +10,7 @@ https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 # mypy: ignore-errors
 # pylint: disable=W0223
 
-
+import sys
 from typing import Tuple
 
 import torch
@@ -20,6 +20,9 @@ import torchvision
 import torchvision.transforms as transforms
 from torch import Tensor
 from torchvision.datasets import CIFAR10
+from iai_cifar import CIFARDataset
+
+from flwr.common.logger import FLOWER_LOGGER
 
 DATA_ROOT = "./dataset"
 
@@ -57,9 +60,19 @@ def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoade
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
-    trainset = CIFAR10(DATA_ROOT, train=True, download=True, transform=transform)
+    # use default if no args
+    train_path = 's3://public.s3.integrate.ai/fl-demo/train_centralized.pkl'
+    if len(sys.argv) > 1:
+        train_path = f's3://public.s3.integrate.ai/fl-demo/split_train_20210816_161809/{sys.argv[1]}'
+
+    # use a fixed test path
+    test_path = 's3://public.s3.integrate.ai/fl-demo/test.pkl'
+    FLOWER_LOGGER.info('Loading train set %s', train_path)
+    trainset = CIFARDataset(data_path=train_path, transform=transform)
+    FLOWER_LOGGER.info('Loading test set %s', test_path)
+    testset = CIFARDataset(data_path=test_path, transform=transform)
+
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True)
-    testset = CIFAR10(DATA_ROOT, train=False, download=True, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
     return trainloader, testloader
 
