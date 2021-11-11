@@ -55,23 +55,27 @@ class Net(nn.Module):
         return x
 
 
-def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
-    """Load CIFAR-10 (training and test set)."""
+def load_data_set() -> Tuple[torch.utils.data.Dataset, torch.utils.data.Dataset]:
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
     # use default if no args
-    train_path = 's3://public.s3.integrate.ai/fl-demo/train_centralized.pkl'
+    train_path = './data/train_centralized.pkl'
     if len(sys.argv) > 1:
-        train_path = f's3://public.s3.integrate.ai/fl-demo/split_train_20210816_161809/{sys.argv[1]}'
+         train_path = f'./data/split_train_20210816_161809/{sys.argv[1]}'
 
     # use a fixed test path
-    test_path = 's3://public.s3.integrate.ai/fl-demo/test.pkl'
+    test_path = './data/test.pkl'
     FLOWER_LOGGER.info('Loading train set %s', train_path)
     trainset = CIFARDataset(data_path=train_path, transform=transform)
     FLOWER_LOGGER.info('Loading test set %s', test_path)
     testset = CIFARDataset(data_path=test_path, transform=transform)
+    return trainset, testset
 
+
+def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+    """Load CIFAR-10 (training and test set)."""
+    trainset, testset = load_data_set()
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True)
     testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
     return trainloader, testloader

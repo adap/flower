@@ -32,7 +32,9 @@ class CIFARDataset(Dataset):
         self.X, self.y = X, y
 
     def _load_data(self, data_path) -> Tuple:
-        with smart_open.open(data_path, "rb") as f:
+        with smart_open.open(
+                data_path, "rb"
+        ) as f:
             output = pickle.load(f)
         return output["data"], output["labels"]
 
