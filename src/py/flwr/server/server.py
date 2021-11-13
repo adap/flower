@@ -18,7 +18,7 @@
 import concurrent.futures
 import timeit
 from logging import DEBUG, INFO, WARNING
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 from flwr.common import (
     Disconnect,
@@ -395,3 +395,45 @@ def evaluate_client(
     """Evaluate parameters on a single client."""
     evaluate_res = client.evaluate(ins)
     return client, evaluate_res
+
+
+def execute_round(
+    instructions: Sequence[
+        Union[
+            Tuple[ClientProxy, FitIns],
+            Tuple[ClientProxy, EvaluateIns],
+        ]
+    ],
+    task_fn: Union[
+        Callable[[ClientProxy, FitIns], FitRes],
+        Callable[[ClientProxy, EvaluateIns], EvaluateRes],
+    ],
+    max_workers: Optional[int] = None,
+    round_timeout: Optional[float] = None,
+) -> Tuple[Set[Any], Set[Any]]:
+    """Execute instructions and collect results that are ready within round_timeout."""
+    start_time = timeit.default_timer()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(task_fn, cp, ins) for cp, ins in instructions}
+        finished_futures = set()
+        try:
+            for future in concurrent.futures.as_completed(futures, round_timeout):
+                finished_futures.add(future)
+            end_time = timeit.default_timer()
+            elapsed = end_time - start_time
+            log(
+                INFO,
+                "All clients returned results within %ss (timeout %s)",
+                elapsed,
+                round_timeout,
+            )
+        except concurrent.futures.TimeoutError:
+            log(
+                INFO,
+                "Round timeout (%ss) reached, %s (out of %s) clients returned results",
+                round_timeout,
+                len(finished_futures),
+                len(futures),
+            )
+    unfinished_futures = futures - finished_futures
+    return finished_futures, unfinished_futures
