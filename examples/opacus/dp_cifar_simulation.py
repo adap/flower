@@ -54,7 +54,7 @@ def get_eval_fn() -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]
         model = Net()
         # Set weights in model.
         state_dict = OrderedDict({
-            k: torch.Tensor(np.atleast_1d(v))
+            k: torch.tensor(np.atleast_1d(v))
             for k, v in zip(model.state_dict().keys(), weights)
         })
         model.load_state_dict(state_dict, strict=True)
