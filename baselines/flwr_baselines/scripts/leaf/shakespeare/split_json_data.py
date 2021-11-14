@@ -21,7 +21,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 
 def check_between_zero_and_one(value: str):
-    """Tests if value is between 0 an 1"""
+    """Tests if value is between 0 an 1."""
     fvalue = float(value)
     if fvalue < 0 or fvalue > 1:
         raise argparse.ArgumentTypeError(
@@ -31,7 +31,7 @@ def check_between_zero_and_one(value: str):
 
 
 def save_partition(save_root: Path, user_idx: int, dataset: str, data: Dict[str, str]):
-    """Saves partition for specific client
+    """Saves partition for specific client.
 
     Args:
         save_root (Path): Root folder where to save partition
@@ -52,7 +52,7 @@ def process_user(
     list_datasets: List[Tuple[str, float]],
     save_root: Path,
 ):
-    """Creates and saves partition for user
+    """Creates and saves partition for user.
 
     Args:
         json_file (Dict[str, Any]): JSON file containing user data

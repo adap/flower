@@ -72,7 +72,7 @@ def save_partitions(
 
 
 def process_user(json_file, user_str, list_datasets, global_idx, save_root):
-    """Precesses individual user"""
+    """Precesses individual user."""
     image = json_file["user_data"][user_str]["x"]
     label = json_file["user_data"][user_str]["y"]
     num_samples = len(label)

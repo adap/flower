@@ -126,7 +126,7 @@ The Flower clients will use a simle CNN adapted from 'PyTorch: A 60 Minute Blitz
             return x
 
     # Load model and data
-    net = Net()
+    net = Net().to(DEVICE)
     trainloader, testloader = load_data()
 
 After loading the data set with :code:`load_data()` we define the Flower interface. 
@@ -163,7 +163,7 @@ which can be implemented in the following way:
 
         def set_parameters(self, parameters):
             params_dict = zip(net.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             net.load_state_dict(state_dict, strict=True)
 
         def fit(self, parameters, config):
