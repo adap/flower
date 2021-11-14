@@ -16,7 +16,7 @@
 
 
 from logging import INFO
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union, cast
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
@@ -31,7 +31,7 @@ DEFAULT_SERVER_ADDRESS = "[::]:8080"
 def start_server(  # pylint: disable=too-many-arguments
     server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,
-    config: Optional[Dict[str, int]] = None,
+    config: Optional[Dict[str, Union[Optional[int], Optional[float]]]] = None,
     strategy: Optional[Strategy] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     force_final_distributed_eval: bool = False,
@@ -44,10 +44,14 @@ def start_server(  # pylint: disable=too-many-arguments
         server: Optional[flwr.server.Server] (default: None). An implementation
             of the abstract base class `flwr.server.Server`. If no instance is
             provided, then `start_server` will create one.
-        config: Optional[Dict[str, int]] (default: None). The only currently
-            supported values is `num_rounds`, so a full configuration object
-            instructing the server to perform three rounds of federated
-            learning looks like the following: `{"num_rounds": 3}`.
+        config: Optional[Dict[str, Union[Optional[int], Optional[float]]]] (default: None).
+            Currently supported keys are `num_rounds` (value type: `int`),
+            `max_workers` (value type: `int`), and `round_timeout` (value type:
+            `float`). A full configuration dictionary look like this:
+            `{"num_rounds": 3, "max_workers": 64, "round_timeout": 60}`.
+            This instructs the server to perform three rounds of federated
+            learning, configure the `ThreadPoolExecutor` to use at most 64
+            workers, and time-box communication rounds to 60 seconds.
         strategy: Optional[flwr.server.Strategy] (default: None). An
             implementation of the abstract base class `flwr.server.Strategy`.
             If no strategy is provided, then `start_server` will use
@@ -92,9 +96,9 @@ def start_server(  # pylint: disable=too-many-arguments
 
 def _init_defaults(
     server: Optional[Server],
-    config: Optional[Dict[str, int]],
+    config: Optional[Dict[str, Union[Optional[int], Optional[float]]]],
     strategy: Optional[Strategy],
-) -> Tuple[Server, Dict[str, int]]:
+) -> Tuple[Server, Dict[str, Union[Optional[int], Optional[float]]]]:
     # Create server instance if none was given
     if server is None:
         client_manager = SimpleClientManager()
@@ -107,15 +111,22 @@ def _init_defaults(
         config = {}
     if "num_rounds" not in config:
         config["num_rounds"] = 1
-
+    if "max_workers" not in config:
+        config["max_workers"] = None
+    if "round_timeout" not in config:
+        config["round_timeout"] = None
     return server, config
 
 
 def _fl(
-    server: Server, config: Dict[str, int], force_final_distributed_eval: bool
+    server: Server,
+    config: Dict[str, Union[Optional[int], Optional[float]]],
+    force_final_distributed_eval: bool,
 ) -> None:
     # Fit model
-    hist = server.fit(num_rounds=config["num_rounds"])
+    server.set_max_workers(max_workers=cast(Optional[int], config["max_workers"]))
+    server.set_round_timeout(round_timeout=config["round_timeout"])
+    hist = server.fit(num_rounds=cast(int, config["num_rounds"]))
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
     log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
     log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))

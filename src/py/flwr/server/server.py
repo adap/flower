@@ -100,6 +100,16 @@ class Server:
             tensors=[], tensor_type="numpy.ndarray"
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
+        self.max_workers: Optional[int] = None
+        self.round_timeout: Optional[float] = None
+
+    def set_max_workers(self, max_workers: Optional[int]) -> None:
+        """Set the max_workers used by ThreadPoolExecutor."""
+        self.max_workers = max_workers
+
+    def set_round_timeout(self, round_timeout: Optional[float]) -> None:
+        """Set the timeout for upcoming communication rounds."""
+        self.round_timeout = round_timeout
 
     def set_strategy(self, strategy: Strategy) -> None:
         """Replace server strategy."""
@@ -206,7 +216,11 @@ class Server:
         )
 
         # Collect `evaluate` results from all clients participating in this round
-        results, failures = evaluate_clients(client_instructions)
+        results, failures = evaluate_clients(
+            client_instructions,
+            max_workers=self.max_workers,
+            round_timeout=self.round_timeout,
+        )
         log(
             DEBUG,
             "evaluate_round received %s results and %s failures",
@@ -257,7 +271,11 @@ class Server:
         )
 
         # Collect `fit` results from all clients participating in this round
-        results, failures = fit_clients(client_instructions)
+        results, failures = fit_clients(
+            client_instructions,
+            max_workers=self.max_workers,
+            round_timeout=self.round_timeout,
+        )
         log(
             DEBUG,
             "fit_round received %s results and %s failures",
@@ -288,7 +306,12 @@ class Server:
     def disconnect_all_clients(self) -> None:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
-        _ = shutdown(clients=[all_clients[k] for k in all_clients.keys()])
+        clients = [all_clients[k] for k in all_clients.keys()]
+        _ = shutdown(
+            clients=clients,
+            max_workers=self.max_workers,
+            round_timeout=self.round_timeout,
+        )
 
     def _get_initial_parameters(self) -> Parameters:
         """Get initial parameters from one of the available clients."""
@@ -309,47 +332,76 @@ class Server:
         return parameters_res.parameters
 
 
-def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:
+def shutdown(
+    clients: List[ClientProxy],
+    max_workers: Optional[int],
+    round_timeout: Optional[float],
+) -> ReconnectResultsAndFailures:
     """Instruct clients to disconnect and never reconnect."""
+
+    # Prepare client/message pairs
     reconnect = Reconnect(seconds=None)
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(reconnect_client, c, reconnect) for c in clients]
-        concurrent.futures.wait(futures)
+    client_instructions = [(cp, reconnect) for cp in clients]
+
+    # Send messages, wait for results
+    finished_fs, unfinished_fs = execute_round(
+        instructions=client_instructions,
+        task_fn=reconnect_client,
+        max_workers=max_workers,
+        round_timeout=round_timeout,
+    )
+
     # Gather results
     results: List[Tuple[ClientProxy, Disconnect]] = []
     failures: List[BaseException] = []
-    for future in futures:
+
+    for future in finished_fs:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
         else:
             result = future.result()
             results.append(result)
+
+    for future in unfinished_fs:
+        failures.append(TimeoutError())  # FIXME
+
     return results, failures
 
 
 def reconnect_client(
     client: ClientProxy, reconnect: Reconnect
 ) -> Tuple[ClientProxy, Disconnect]:
-    """Instruct a single client to disconnect and (optionally) reconnect
-    later."""
+    """Instruct a single client to disconnect.
+
+    The message can include an optional reconnection offset that asks
+    the client to disconnect now and reconnect after waiting the given
+    number of seconds.
+    """
     disconnect = client.reconnect(reconnect)
     return client, disconnect
 
 
 def fit_clients(
-    client_instructions: List[Tuple[ClientProxy, FitIns]]
+    client_instructions: List[Tuple[ClientProxy, FitIns]],
+    max_workers: Optional[int],
+    round_timeout: Optional[float],
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(fit_client, c, ins) for c, ins in client_instructions
-        ]
-        concurrent.futures.wait(futures)
+
+    # Send messages, wait for results
+    finished_fs, unfinished_fs = execute_round(
+        instructions=client_instructions,
+        task_fn=fit_client,
+        max_workers=max_workers,
+        round_timeout=round_timeout,
+    )
+
     # Gather results
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = []
-    for future in futures:
+
+    for future in finished_fs:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
@@ -357,6 +409,10 @@ def fit_clients(
             # Success case
             result = future.result()
             results.append(result)
+
+    for future in unfinished_fs:
+        failures.append(TimeoutError())  # FIXME
+
     return results, failures
 
 
@@ -367,18 +423,25 @@ def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
 
 
 def evaluate_clients(
-    client_instructions: List[Tuple[ClientProxy, EvaluateIns]]
+    client_instructions: List[Tuple[ClientProxy, EvaluateIns]],
+    max_workers: Optional[int],
+    round_timeout: Optional[float],
 ) -> EvaluateResultsAndFailures:
     """Evaluate parameters concurrently on all selected clients."""
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(evaluate_client, c, ins) for c, ins in client_instructions
-        ]
-        concurrent.futures.wait(futures)
+
+    # Send messages, wait for results
+    finished_fs, unfinished_fs = execute_round(
+        instructions=client_instructions,
+        task_fn=evaluate_client,
+        max_workers=max_workers,
+        round_timeout=round_timeout,
+    )
+
     # Gather results
     results: List[Tuple[ClientProxy, EvaluateRes]] = []
     failures: List[BaseException] = []
-    for future in futures:
+
+    for future in finished_fs:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
@@ -386,6 +449,10 @@ def evaluate_clients(
             # Success case
             result = future.result()
             results.append(result)
+
+    for future in unfinished_fs:
+        failures.append(TimeoutError())  # FIXME
+
     return results, failures
 
 
@@ -411,7 +478,7 @@ def execute_round(
     max_workers: Optional[int] = None,
     round_timeout: Optional[float] = None,
 ) -> Tuple[Set[Any], Set[Any]]:
-    """Execute instructions and collect results that are ready within round_timeout."""
+    """Execute instructions and collect results that are ready in time."""
     start_time = timeit.default_timer()
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(task_fn, cp, ins) for cp, ins in instructions}

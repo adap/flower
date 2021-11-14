@@ -124,7 +124,7 @@ def test_fit_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = fit_clients(client_instructions)
+    results, failures = fit_clients(client_instructions, None, None)
 
     # Assert
     assert len(results) == 1
@@ -148,7 +148,7 @@ def test_eval_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = evaluate_clients(client_instructions)
+    results, failures = evaluate_clients(client_instructions, None, None)
 
     # Assert
     assert len(results) == 1
@@ -182,6 +182,7 @@ def test_execute_round_timeout_none() -> None:
     finished_fs, unfinished_fs = execute_round(
         client_instructions,
         task_fn=fit_client,  # type: ignore
+        max_workers=None,
         round_timeout=round_timeout,
     )
 
@@ -201,6 +202,7 @@ def test_execute_round_timeout_high() -> None:
     finished_fs, unfinished_fs = execute_round(
         client_instructions,
         task_fn=fit_client,  # type: ignore
+        max_workers=None,
         round_timeout=round_timeout,
     )
 
@@ -220,6 +222,7 @@ def test_execute_round_timeout_some() -> None:
     finished_fs, unfinished_fs = execute_round(
         client_instructions,
         task_fn=fit_client,  # type: ignore
+        max_workers=None,
         round_timeout=round_timeout,
     )
 
@@ -239,6 +242,7 @@ def test_execute_round_timeout_all() -> None:
     finished_fs, unfinished_fs = execute_round(
         client_instructions,
         task_fn=fit_client,  # type: ignore
+        max_workers=None,
         round_timeout=round_timeout,
     )
 
