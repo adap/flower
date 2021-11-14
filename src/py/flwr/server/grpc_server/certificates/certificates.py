@@ -21,7 +21,10 @@ module_dir = dirname(abspath(__file__))
 
 
 def load() -> Tuple[str, str, str]:
-    """Start SSL/TLS enabled server."""
+    """Generate and load certificates.
+    
+    This function should only be used in the context of testing.
+    """
     # Trigger script which generates the certificates
     subprocess.run(["bash", "generate.sh"], check=True, cwd=module_dir)
 
