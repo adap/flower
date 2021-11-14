@@ -38,7 +38,7 @@ def start_client(dataset: DATASET) -> None:
 
         def set_parameters(self, parameters):
             params_dict = zip(net.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             net.load_state_dict(state_dict, strict=True)
 
         def fit(self, parameters, config):

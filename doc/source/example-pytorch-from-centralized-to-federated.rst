@@ -142,9 +142,10 @@ Having defined defining the data loading, model architecture, training, and eval
         print("Load data")
         trainloader, testloader = load_data()
         print("Start training")
-        train(net=Net(), trainloader=trainloader, epochs=2, device=DEVICE)
+        net=Net().to(DEVICE)
+        train(net=net, trainloader=trainloader, epochs=2, device=DEVICE)
         print("Evaluate model")
-        loss, accuracy = test(net=Net(), testloader=testloader, device=DEVICE)
+        loss, accuracy = test(net=net, testloader=testloader, device=DEVICE)
         print("Loss: ", loss)
         print("Accuracy: ", accuracy)
 
@@ -254,7 +255,7 @@ We included type annotations to give you a better understanding of the data type
         def set_parameters(self, parameters: List[np.ndarray]) -> None:
             # Set model parameters from a list of NumPy ndarrays
             params_dict = zip(self.model.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             self.model.load_state_dict(state_dict, strict=True)
 
         def fit(

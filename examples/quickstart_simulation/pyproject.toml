@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "poetry==1.1.8",
+    "poetry==1.1.10",
 ]
 build-backend = "poetry.masonry.api"
 
@@ -12,6 +12,6 @@ authors = ["The Flower Authors <enquiries@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
-flwr = {extras = ["simulation"], version = "^0.17.0"}
-# flwr = {extras = ["simulation"], path = "../../", develop = true }  # For development
-tensorflow-cpu = "2.6.0"
+flwr = { extras = ["simulation"], version = "^0.17.0" }
+# flwr = { extras = ["simulation"], path = "../../", develop = true }  # Development
+tensorflow-cpu = "2.6.2"
