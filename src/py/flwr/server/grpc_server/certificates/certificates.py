@@ -22,7 +22,7 @@ module_dir = dirname(abspath(__file__))
 
 def load() -> Tuple[str, str, str]:
     """Generate and load certificates.
-    
+
     This function should only be used in the context of testing.
     """
     # Trigger script which generates the certificates
