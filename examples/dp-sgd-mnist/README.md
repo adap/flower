@@ -90,6 +90,3 @@ poetry run python3 server.py --num-clients 3  --num-rounds 20
 ```shell
 poetry run python3 client.py --num-clients 3 --partition 1 --local-epochs 4 --dpsgd True
 ```
-
-Running this example with 10 clients and DPSGD enabled keeping all other parameters at their default,
-should converge to ~89% test set accuracy.
