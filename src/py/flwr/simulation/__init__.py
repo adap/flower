@@ -14,12 +14,11 @@
 # ==============================================================================
 """Flower simulation."""
 
-import pkg_resources
+import importlib
 
-installed_packages = {pkg.key for pkg in list(pkg_resources.working_set)}
+is_ray_installed = importlib.util.find_spec("ray") is not None
 
-
-if "ray" in installed_packages:
+if is_ray_installed:
     from flwr.simulation.app import start_simulation
 else:
     RAY_IMPORT_ERROR: str = """Unable to import module `ray`.

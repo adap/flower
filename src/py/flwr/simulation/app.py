@@ -15,8 +15,9 @@
 """Flower simulation app."""
 
 
-from logging import INFO
-from typing import Any, Callable, Dict, Optional
+import sys
+from logging import ERROR, INFO
+from typing import Any, Callable, Dict, List, Optional
 
 import ray
 
@@ -26,10 +27,37 @@ from flwr.server.app import _fl, _init_defaults
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 
+INVALID_ARGUMENTS_START_SIMULATION = """
+INVALID ARGUMENTS ERROR
+
+Invalid Arguments in method:
+
+`start_simulation(
+    *,
+    client_fn: Callable[[str], Client],
+    num_clients: Optional[int] = None,
+    clients_ids: Optional[List[str]] = None,
+    client_resources: Optional[Dict[str, int]] = None,
+    num_rounds: int = 1,
+    strategy: Optional[Strategy] = None,
+    ray_init_args: Optional[Dict[str, Any]] = None,
+) -> None:`
+
+REASON:
+    Method requires:
+        - Either `num_clients`[int] or `clients_ids`[List[str]]
+        to be set exclusively.
+        OR
+        - `len(clients_ids)` == `num_clients`
+
+"""
+
 
 def start_simulation(  # pylint: disable=too-many-arguments
+    *,
     client_fn: Callable[[str], Client],
-    num_clients: int,
+    num_clients: Optional[int] = None,
+    clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, int]] = None,
     num_rounds: int = 1,
     strategy: Optional[Strategy] = None,
@@ -49,8 +77,13 @@ def start_simulation(  # pylint: disable=too-many-arguments
         hyperparameters, ...) should be (re-)created in either the call to
         `client_fn` or the call to any of the client methods (e.g., load
         evaluation data in the `evaluate` method itself).
-    num_clients : int
-        The total number of clients in this simulation.
+    num_clients : Optional[int]
+        The total number of clients in this simulation. This must be set if
+        `clients_ids` is not set and vice-versa.
+    clients_ids : Optional[List[str]]
+        List `client_id`s for each client. This is only required if
+        `num_clients` is not set. Setting both `num_clients` and `clients_ids`
+        with `len(clients_ids)` not equal to `num_clients` generates an error.
     client_resources : Optional[Dict[str, int]] (default: None)
         CPU and GPU resources for a single client. Supported keys are
         `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`.
@@ -75,6 +108,21 @@ def start_simulation(  # pylint: disable=too-many-arguments
         An empty dictionary can be used (ray_init_args={}) to prevent any
         arguments from being passed to ray.init.
     """
+    cids: List[str]
+
+    # clients_ids takes precedence
+    if clients_ids is not None:
+        if (num_clients is not None) and (len(clients_ids) != num_clients):
+            log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
+            sys.exit()
+        else:
+            cids = clients_ids
+    else:
+        if num_clients is None:
+            log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
+            sys.exit()
+        else:
+            cids = [str(x) for x in range(num_clients)]
 
     # Default arguments for Ray initialization
     if not ray_init_args:
@@ -106,10 +154,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # Register one RayClientProxy object for each client with the ClientManager
     resources = client_resources if client_resources is not None else {}
-    for i in range(num_clients):
+    for cid in cids:
         client_proxy = RayClientProxy(
             client_fn=client_fn,
-            cid=str(i),
+            cid=cid,
             resources=resources,
         )
         initialized_server.client_manager().register(client=client_proxy)
