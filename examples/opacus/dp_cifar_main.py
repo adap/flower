@@ -12,15 +12,15 @@ from opacus import PrivacyEngine
 
 # Define parameters.
 PARAMS = {
-    'batch_size': 32,
-    'train_split': 0.7,
-    'local_epochs': 1
+    "batch_size": 32,
+    "train_split": 0.7,
+    "local_epochs": 1,
 }
 PRIVACY_PARAMS = {
     # 'target_epsilon': 5.0,
-    'target_delta': 1e-5,
-    'noise_multiplier': 0.4,
-    'max_grad_norm': 1.2
+    "target_delta": 1e-5,
+    "noise_multiplier": 0.4,
+    "max_grad_norm": 1.2,
 }
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -57,8 +57,11 @@ def train(net, trainloader, privacy_engine, epochs):
             loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
-    epsilon, _ = optimizer.privacy_engine.get_privacy_spent(PRIVACY_PARAMS['target_delta'])
+    epsilon, _ = optimizer.privacy_engine.get_privacy_spent(
+        PRIVACY_PARAMS["target_delta"]
+    )
     return epsilon
+
 
 def test(net, testloader):
     criterion = torch.nn.CrossEntropyLoss()
@@ -85,10 +88,10 @@ class DPCifarClient(fl.client.NumPyClient):
         # Create a privacy engine which will add DP and keep track of the privacy budget.
         self.privacy_engine = PrivacyEngine(
             self.model,
-            sample_rate = sample_rate,
-            target_delta = PRIVACY_PARAMS['target_delta'],
-            max_grad_norm = PRIVACY_PARAMS['max_grad_norm'],
-            noise_multiplier = PRIVACY_PARAMS['noise_multiplier']
+            sample_rate=sample_rate,
+            target_delta=PRIVACY_PARAMS["target_delta"],
+            max_grad_norm=PRIVACY_PARAMS["max_grad_norm"],
+            noise_multiplier=PRIVACY_PARAMS["noise_multiplier"],
         )
 
     def get_parameters(self):
@@ -101,11 +104,13 @@ class DPCifarClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
-        epsilon = train(self.model, self.trainloader, self.privacy_engine, PARAMS['local_epochs'])
+        epsilon = train(
+            self.model, self.trainloader, self.privacy_engine, PARAMS["local_epochs"]
+        )
         print(f"epsilon = {epsilon:.2f}")
-        return self.get_parameters(), len(self.trainloader), {"epsilon":epsilon}
+        return self.get_parameters(), len(self.trainloader), {"epsilon": epsilon}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
         loss, accuracy = test(self.model, self.testloader)
-        return float(loss), len(self.testloader), {"accuracy":float(accuracy)}
+        return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
