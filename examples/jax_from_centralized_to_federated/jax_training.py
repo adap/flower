@@ -9,7 +9,6 @@ please read the JAX documentation or the mentioned tutorial.
 
 """
 
-
 import jax
 import jax.numpy as jnp
 from sklearn.datasets import make_regression
@@ -19,7 +18,7 @@ key = jax.random.PRNGKey(0)
 
 def load_data():
     # create our dataset
-    X, y = make_regression(n_features=3)
+    X, y = make_regression(n_features=3, random_state=0)
     X, X_test, y, y_test = train_test_split(X, y)
     return X, y, X_test, y_test
 
@@ -39,7 +38,7 @@ def train(params, grad_fn, X, y):
     num_examples = X.shape[0]
     for epochs in range(10):
         grads = grad_fn(params, X, y)
-        params = jax.tree_multimap(lambda p, g: p - 0.01 * g, params, grads)
+        params = jax.tree_multimap(lambda p, g: p - 0.05 * g, params, grads)
         loss = loss_fn(params,X, y)
         #if epochs % 10 == 9:
         #    print(f'For Epoch {epochs} loss {loss}')
