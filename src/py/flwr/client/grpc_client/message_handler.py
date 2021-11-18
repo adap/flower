@@ -23,10 +23,32 @@ from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 # pylint: disable=missing-function-docstring
 
+from flwr import common
+from dissononce.processing.impl.handshakestate import HandshakeState
+from dissononce.processing.impl.symmetricstate import SymmetricState
+from dissononce.processing.impl.cipherstate import CipherState
+from dissononce.processing.handshakepatterns.interactive.XX import XXHandshakePattern
+from dissononce.cipher.aesgcm import AESGCMCipher
+from dissononce.dh.x25519.x25519 import X25519DH
+from dissononce.hash.sha256 import SHA256Hash
+import dissononce, logging
 
 class UnkownServerMessage(Exception):
     """Signifies that the received message is unknown."""
 
+# prepare handshake objects
+client_s = X25519DH().generate_keypair()
+client_handshakestate = HandshakeState(
+    SymmetricState(
+        CipherState(
+            AESGCMCipher()
+        ),
+        SHA256Hash()
+    ),
+    X25519DH()
+)
+# initialize handshakestate objects
+client_handshakestate.initialize(XXHandshakePattern(), True, b'', s=client_s)
 
 def handle(
     client: Client, server_msg: ServerMessage
@@ -53,6 +75,26 @@ def _get_parameters(client: Client) -> ClientMessage:
 def _fit(client: Client, fit_msg: ServerMessage.FitIns) -> ClientMessage:
     # Deserialize fit instruction
     fit_ins = serde.fit_ins_from_proto(fit_msg)
+
+    if fit_ins.parameters.tensor_type == "handshake0": 
+        # print("received handshake signal")
+        # -> e
+        message_buffer = bytearray()
+        client_handshakestate.write_message(b'', message_buffer)
+        params: common.Parameters = common.Parameters(tensors=[bytes(message_buffer)], tensor_type="handshake")
+        fit_res_msg = serde.fit_res_to_proto(common.FitRes(params, 1))
+        return ClientMessage(fit_res=fit_res_msg)
+    elif fit_ins.parameters.tensor_type == "handshake1": 
+        # print("received handshake1")
+        # <- e, ee, s, es
+        client_handshakestate.read_message(fit_ins.parameters.tensors[0], bytearray())
+        # -> s, se
+        message_buffer = bytearray()
+        client_handshakestate.write_message(b'', message_buffer)
+        params: common.Parameters = common.Parameters([bytes(message_buffer)], "handshake")
+        fit_res_msg = serde.fit_res_to_proto(common.FitRes(params, 1))
+        return ClientMessage(fit_res=fit_res_msg)
+
     # Perform fit
     fit_res = client.fit(fit_ins)
     # Serialize fit result

@@ -21,6 +21,14 @@ from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_bridge import GRPCBridge
 
+from dissononce.processing.impl.handshakestate import HandshakeState
+from dissononce.processing.impl.symmetricstate import SymmetricState
+from dissononce.processing.impl.cipherstate import CipherState
+from dissononce.processing.handshakepatterns.interactive.XX import XXHandshakePattern
+from dissononce.cipher.aesgcm import AESGCMCipher
+from dissononce.dh.x25519.x25519 import X25519DH
+from dissononce.hash.sha256 import SHA256Hash
+import dissononce, logging
 
 class GrpcClientProxy(ClientProxy):
     """Flower client proxy which delegates over the network using gRPC."""
@@ -32,9 +40,57 @@ class GrpcClientProxy(ClientProxy):
     ):
         super().__init__(cid)
         self.bridge = bridge
+        self.auth = False 
+
+    def authenticate(self):
+        """Authenticate the client using XX Handshake"""
+        # prepare handshake objects
+        server_s = X25519DH().generate_keypair()
+        server_handshakestate = HandshakeState(
+            SymmetricState(
+                CipherState(
+                    AESGCMCipher()
+                ),
+                SHA256Hash()
+            ),
+            X25519DH()
+        )
+        # initialize handshakestate objects
+        server_handshakestate.initialize(XXHandshakePattern(), False, b'', s=server_s)
+
+        # signal handshake
+        params: common.Parameters = common.Parameters([], "handshake0")
+        fit_ins_msg = serde.fit_ins_to_proto(common.FitIns(params, {}))
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(fit_ins=fit_ins_msg)
+        )
+        fit_res_msg = serde.fit_res_from_proto(client_msg.fit_res)
+
+        # -> e
+        server_handshakestate.read_message(fit_res_msg.parameters.tensors[0], bytearray())
+
+        # <- e, ee, s, es
+        message_buffer = bytearray()
+        server_handshakestate.write_message(b'', message_buffer)
+        params: common.Parameters = common.Parameters([bytes(message_buffer)], "handshake1")
+        fit_ins_msg = serde.fit_ins_to_proto(common.FitIns(params, {}))
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(fit_ins=fit_ins_msg)
+        )
+        fit_res_msg = serde.fit_res_from_proto(client_msg.fit_res)
+
+        # -> s, se
+        server_handshakestate.read_message(fit_res_msg.parameters.tensors[0], bytearray())
+
+        # print("handshake complete")
+
+        self.auth = True
 
     def get_parameters(self) -> common.ParametersRes:
         """Return the current local model parameters."""
+        if not self.auth: 
+            self.authenticate()
+
         get_parameters_msg = serde.get_parameters_to_proto()
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(get_parameters=get_parameters_msg)
@@ -44,6 +100,8 @@ class GrpcClientProxy(ClientProxy):
 
     def fit(self, ins: common.FitIns) -> common.FitRes:
         """Refine the provided weights using the locally held dataset."""
+        if not self.auth: 
+            self.authenticate()
         fit_ins_msg = serde.fit_ins_to_proto(ins)
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(fit_ins=fit_ins_msg)
@@ -53,6 +111,8 @@ class GrpcClientProxy(ClientProxy):
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
+        if not self.auth: 
+            self.authenticate()
         evaluate_msg = serde.evaluate_ins_to_proto(ins)
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(evaluate_ins=evaluate_msg)
@@ -62,6 +122,8 @@ class GrpcClientProxy(ClientProxy):
 
     def reconnect(self, reconnect: common.Reconnect) -> common.Disconnect:
         """Disconnect and (optionally) reconnect later."""
+        if not self.auth: 
+            self.authenticate()
         reconnect_msg = serde.reconnect_to_proto(reconnect)
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(reconnect=reconnect_msg)
