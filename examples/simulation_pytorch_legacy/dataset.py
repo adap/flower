@@ -66,11 +66,11 @@ def load(num_partitions: int) -> PartitionedDataset:
         x_test, y_test = xy_test
 
         train_dl = DataLoader(
-            TensorDataset(torch.Tensor(x_train), torch.LongTensor(y_train)),
+            TensorDataset(torch.tensor(x_train), torch.LongTensor(y_train)),
             batch_size=32,
         )
         test_dl = DataLoader(
-            TensorDataset(torch.Tensor(x_test), torch.LongTensor(y_test)), batch_size=32
+            TensorDataset(torch.tensor(x_test), torch.LongTensor(y_test)), batch_size=32
         )
         list_of_dataloaders.append((train_dl, test_dl))
 

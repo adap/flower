@@ -255,7 +255,7 @@ We included type annotations to give you a better understanding of the data type
         def set_parameters(self, parameters: List[np.ndarray]) -> None:
             # Set model parameters from a list of NumPy ndarrays
             params_dict = zip(self.model.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             self.model.load_state_dict(state_dict, strict=True)
 
         def fit(
