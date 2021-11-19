@@ -1,4 +1,6 @@
-"""Flower client example using MXNet for MNIST classification."""
+"""
+Flower client example using JAX for linear regression.
+"""
 
 from typing import Dict, List, Tuple
 
@@ -12,7 +14,7 @@ import jax_training
 
 # Flower Client
 class MNISTClient(fl.client.NumPyClient):
-    """Flower client implementing MNIST classification using MXNet."""
+    """Flower client implementing using linear regression and JAX"""
 
     def __init__(
         self,
@@ -54,14 +56,9 @@ class MNISTClient(fl.client.NumPyClient):
         # Set model parameters, train model, return updated model parameters
         print("Start local training")
         self.params = self.set_parameters(parameters)
-        #print("Set Parameter before Training", self.params)
         self.params, loss, num_examples = jax_training.train(self.params, self.grad_fn, self.train_x, self.train_y)
-        #print("Set Parameter after Training", self.params)
         results = {"loss": float(loss)}
         print("Training results", results)
-        #parameter_value = []
-        #for _, val in self.params.items():
-        #    parameter_value.append(np.array(val))
         return self.get_parameters(), num_examples, results
 
     def evaluate(
@@ -70,7 +67,6 @@ class MNISTClient(fl.client.NumPyClient):
         # Set model parameters, evaluate model on local test dataset, return result
         print("Start evaluation")
         self.params = self.set_parameters(parameters)
-        #print("Parameter for Evaluation", self.params)
         loss, num_examples = jax_training.evaluation(self.params,self.grad_fn, self.test_x, self.test_y)
         print("Evaluation accuracy & loss", loss)
         return (

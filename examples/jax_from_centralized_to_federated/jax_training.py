@@ -57,6 +57,7 @@ def main():
     grad_fn = jax.grad(loss_fn)
     print("Model Shape", model_shape)
     params = load_model(model_shape)   
+    print("Params", params)
     params, loss, num_examples = train(params, grad_fn, X, y)
     evaluation(params, grad_fn, X_test, y_test)
 
