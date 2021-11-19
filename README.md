@@ -36,6 +36,7 @@ Meet the Flower community on [flower.dev](https://flower.dev)!
 * [Quickstart (PyTorch Lightning [code example])](https://github.com/adap/flower/tree/main/examples/quickstart_pytorch_lightning)
 * [Quickstart (MXNet)](https://flower.dev/docs/example-mxnet-walk-through.html)
 * [Quickstart (scikit-learn [code example])](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
+* [Quickstart (JAX [code example])](https://github.com/adap/flower/tree/main/examples/jax_from_centralized_to_federated)
 * [Quickstart (TFLite on Android [code example])](https://github.com/adap/flower/tree/main/examples/android)
 
 ## Flower Usage Examples
