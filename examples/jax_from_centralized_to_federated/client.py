@@ -2,7 +2,7 @@
 Flower client example using JAX for linear regression.
 """
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Callable
 
 import flwr as fl
 import numpy as np
@@ -18,12 +18,12 @@ class MNISTClient(fl.client.NumPyClient):
 
     def __init__(
         self,
-        params,
+        params: Dict,
         grad_fn: Callable,
-        train_x ,
-        train_y ,
-        test_x,
-        test_y,
+        train_x: List[np.ndarray],
+        train_y: List[np.ndarray],
+        test_x: List[np.ndarray],
+        test_y: List[np.ndarray],
     ) -> None:
         self.params= params
         self.grad_fn = grad_fn
