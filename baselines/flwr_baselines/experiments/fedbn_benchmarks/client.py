@@ -11,7 +11,7 @@ import numpy as np
 import torch
 import torchvision
 
-import cifar
+import local_training
 
 USE_FEDBN: bool = True
 
@@ -26,13 +26,15 @@ class CifarClient(fl.client.NumPyClient):
 
     def __init__(
         self,
-        model: cifar.Net,
+        model: local_training.Net,
         trainloader: torch.utils.data.DataLoader,
         testloader: torch.utils.data.DataLoader,
+        num_examples: Dict,
     ) -> None:
         self.model = model
         self.trainloader = trainloader
         self.testloader = testloader
+        self.num_examples = num_examples
 
     def get_parameters(self) -> List[np.ndarray]:
         self.model.train()
@@ -62,35 +64,35 @@ class CifarClient(fl.client.NumPyClient):
 
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str]
-    ) -> Tuple[List[np.ndarray], int]:
+    ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
-        cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
-        return self.get_parameters(), len(self.trainloader), {}
+        local_training.train(self.model, self.trainloader, epochs=1, device=DEVICE)
+        return self.get_parameters(), self.num_examples["trainset"], {}
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, str]
-    ) -> Tuple[int, float, float]:
+    ) -> Tuple[float, int, Dict]:
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
-        loss, accuracy = cifar.test(self.model, self.testloader, device=DEVICE)
-        return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
+        loss, accuracy = local_training.test(self.model, self.testloader, device=DEVICE)
+        return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
 
 
 def main() -> None:
     """Load data, start CifarClient."""
 
     # Load data
-    trainloader, testloader = cifar.load_data()
+    trainloader, testloader, num_examples = local_training.load_data()
 
     # Load model
-    model = cifar.Net().to(DEVICE).train()
+    model = local_training.Net().to(DEVICE).train()
 
     # Perform a single forward pass to properly initialize BatchNorm
     _ = model(next(iter(trainloader))[0].to(DEVICE))
 
     # Start client
-    client = CifarClient(model, trainloader, testloader)
+    client = CifarClient(model, trainloader, testloader, num_examples)
     fl.client.start_numpy_client("[::]:8080", client)
 
 
