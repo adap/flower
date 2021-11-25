@@ -19,7 +19,7 @@ class MNISTClient(fl.client.NumPyClient):
     def __init__(
         self,
         params,
-        grad_fn,
+        grad_fn: Callable,
         train_x ,
         train_y ,
         test_x,
@@ -63,7 +63,7 @@ class MNISTClient(fl.client.NumPyClient):
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict
-    ) -> Tuple[int, float, Dict]:
+    ) -> Tuple[float, int, Dict]:
         # Set model parameters, evaluate model on local test dataset, return result
         print("Start evaluation")
         self.params = self.set_parameters(parameters)

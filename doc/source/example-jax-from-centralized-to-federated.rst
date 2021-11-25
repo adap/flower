@@ -29,6 +29,7 @@ You can see that we do not yet import the :code:`flwr` package for federated lea
 
 .. code-block:: python
 
+    from typing import Dict, List, Tuple, Callable
     import jax
     import jax.numpy as jnp
     from sklearn.datasets import make_regression
@@ -40,7 +41,7 @@ The :code:`load_data()` function loads the mentioned training and test sets.
 
 .. code-block:: python
 
-    def load_data():
+    def load_data() -> Tuple[List[np.ndarray], List[np.ndarray], List[np.ndarray], List[np.ndarray]]:
         # create our dataset and start with similar datasets for different clients
         X, y = make_regression(n_features=3, random_state=0)
         X, X_test, y, y_test = train_test_split(X, y)
@@ -50,7 +51,7 @@ The model architecture (a very simple :code:`Linear Regression` model) is define
 
 .. code-block:: python
 
-    def load_model(model_shape):
+    def load_model(model_shape) -> Dict:
         # model weights
         params = {
             'b' : jax.random.uniform(key),
@@ -62,11 +63,11 @@ We now need to define the training (function :code:`train()`) which loops over t
 
 .. code-block:: python
 
-    def loss_fn(params, X, y):
+    def loss_fn(params, X, y) -> Callable:
         err = jnp.dot(X, params['w']) + params['b'] - y
         return jnp.mean(jnp.square(err))  # mse
 
-    def train(params, grad_fn, X, y):
+    def train(params, grad_fn, X, y) -> Tuple[np.array, float, int]:
         num_examples = X.shape[0]
         for epochs in range(10):
             grads = grad_fn(params, X, y)
@@ -80,7 +81,7 @@ The evaluation of the model is defined in function :code:`evaluation()`. The fun
 
 .. code-block:: python
 
-    def evaluation(params, grad_fn, X_test, y_test):
+    def evaluation(params, grad_fn, X_test, y_test) -> Tuple[float, int]:
         num_examples = X_test.shape[0]
         err_test = loss_fn(params, X_test, y_test)
         loss_test = jnp.mean(jnp.square(err_test))
@@ -143,7 +144,7 @@ Our *client* needs to import :code:`flwr`, but also :code:`jax` and :code:`jaxli
 
 .. code-block:: python
 
-    from typing import Dict, List, Tuple
+    from typing import Dict, List, Callable, Tuple
 
     import flwr as fl
     import numpy as np
@@ -187,12 +188,12 @@ We included type annotations to give you a better understanding of the data type
 
         def __init__(
             self,
-            params,
-            grad_fn,
-            train_x ,
-            train_y ,
-            test_x,
-            test_y,
+            params: Dict,
+            grad_fn: Callable,
+            train_x: List[np.ndarray],
+            train_y: List[np.ndarray],
+            test_x: List[np.ndarray],
+            test_y: List[np.ndarray],
         ) -> None:
             self.params= params
             self.grad_fn = grad_fn
@@ -201,14 +202,14 @@ We included type annotations to give you a better understanding of the data type
             self.test_x = test_x
             self.test_y = test_y
 
-        def get_parameters(self):
+        def get_parameters(self) -> Dict:
             # Return model parameters as a list of NumPy ndarrays,
             parameter_value = []
             for _, val in self.params.items():
                 parameter_value.append(np.array(val))
             return parameter_value
         
-        def set_parameters(self, parameters: List[np.ndarray]) -> None:
+        def set_parameters(self, parameters: List[np.ndarray]) -> Dict:
             # Collect model parameters and set new weight values
             value=jnp.ndarray
             params_item = list(zip(self.params.keys(),parameters))
@@ -232,7 +233,7 @@ We included type annotations to give you a better understanding of the data type
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict
-        ) -> Tuple[int, float, Dict]:
+        ) -> Tuple[float, int, Dict]:
             # Set model parameters, evaluate model on local test dataset, return result
             print("Start evaluation")
             self.params = self.set_parameters(parameters)

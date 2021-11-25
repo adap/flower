@@ -9,6 +9,7 @@ please read the JAX documentation or the mentioned tutorial.
 
 """
 
+from typing import Dict, List, Tuple, Callable
 import jax
 import jax.numpy as jnp
 from sklearn.datasets import make_regression
@@ -16,13 +17,13 @@ from sklearn.model_selection import train_test_split
 
 key = jax.random.PRNGKey(0)
 
-def load_data():
+def load_data() -> Tuple[List[np.ndarray], List[np.ndarray], List[np.ndarray], List[np.ndarray]]:
     # create our dataset
     X, y = make_regression(n_features=3, random_state=0)
     X, X_test, y, y_test = train_test_split(X, y)
     return X, y, X_test, y_test
 
-def load_model(model_shape):
+def load_model(model_shape) -> Dict:
     # model weights
     params = {
         'b' : jax.random.uniform(key),
@@ -30,11 +31,11 @@ def load_model(model_shape):
     }
     return params
 
-def loss_fn(params, X, y):
+def loss_fn(params, X, y) -> Callable:
     err = jnp.dot(X, params['w']) + params['b'] - y
     return jnp.mean(jnp.square(err))  # mse
 
-def train(params, grad_fn, X, y):
+def train(params, grad_fn, X, y) -> Tuple[np.array, float, int]:
     num_examples = X.shape[0]
     for epochs in range(10):
         grads = grad_fn(params, X, y)
@@ -44,7 +45,7 @@ def train(params, grad_fn, X, y):
         #    print(f'For Epoch {epochs} loss {loss}')
     return params, loss, num_examples
 
-def evaluation(params, grad_fn, X_test, y_test):
+def evaluation(params, grad_fn, X_test, y_test) -> Tuple[float, int]:
     num_examples = X_test.shape[0]
     err_test = loss_fn(params, X_test, y_test)
     loss_test = jnp.mean(jnp.square(err_test))
