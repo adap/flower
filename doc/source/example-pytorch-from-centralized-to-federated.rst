@@ -19,7 +19,7 @@ You can keep all these imports as they are even when we add the federated learni
 
 .. code-block:: python
 
-    from typing import Tuple
+    from typing import Tuple, Dict
 
     import torch
     import torch.nn as nn
@@ -59,7 +59,7 @@ The :code:`load_data()` function loads the CIFAR-10 training and test sets. The 
 
     DATA_ROOT = "~/data/cifar-10"
 
-    def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+    def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader, Dict]:
         """Load CIFAR-10 (training and test set)."""
         transform = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -244,7 +244,7 @@ We included type annotations to give you a better understanding of the data type
             model: cifar.Net,
             trainloader: torch.utils.data.DataLoader,
             testloader: torch.utils.data.DataLoader,
-            num_examples: dict(),
+            num_examples: Dict,
         ) -> None:
             self.model = model
             self.trainloader = trainloader
@@ -263,7 +263,7 @@ We included type annotations to give you a better understanding of the data type
 
         def fit(
             self, parameters: List[np.ndarray], config: Dict[str, str]
-        ) -> Tuple[List[np.ndarray], int]:
+        ) -> Tuple[List[np.ndarray], int, Dict]:
             # Set model parameters, train model, return updated model parameters
             self.set_parameters(parameters)
             cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
@@ -271,7 +271,7 @@ We included type annotations to give you a better understanding of the data type
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict[str, str]
-        ) -> Tuple[int, float, float]:
+        ) -> Tuple[float, int, Dict]:
             # Set model parameters, evaluate model on local test dataset, return result
             self.set_parameters(parameters)
             loss, accuracy = cifar.test(self.model, self.testloader, device=DEVICE)

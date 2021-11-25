@@ -29,7 +29,7 @@ class CifarClient(fl.client.NumPyClient):
         model: cifar.Net,
         trainloader: torch.utils.data.DataLoader,
         testloader: torch.utils.data.DataLoader,
-        num_examples: dict(),
+        num_examples: Dict,
     ) -> None:
         self.model = model
         self.trainloader = trainloader
@@ -64,7 +64,7 @@ class CifarClient(fl.client.NumPyClient):
 
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str]
-    ) -> Tuple[List[np.ndarray], int]:
+    ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
         cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
@@ -72,7 +72,7 @@ class CifarClient(fl.client.NumPyClient):
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, str]
-    ) -> Tuple[int, float, float]:
+    ) -> Tuple[float, int, Dict]:
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
         loss, accuracy = cifar.test(self.model, self.testloader, device=DEVICE)
