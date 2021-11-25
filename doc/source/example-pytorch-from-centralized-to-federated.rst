@@ -19,7 +19,7 @@ You can keep all these imports as they are even when we add the federated learni
 
 .. code-block:: python
 
-    from typing import Tuple
+    from typing import Tuple, Dict
 
     import torch
     import torch.nn as nn
@@ -59,7 +59,7 @@ The :code:`load_data()` function loads the CIFAR-10 training and test sets. The 
 
     DATA_ROOT = "~/data/cifar-10"
 
-    def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+    def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader, Dict]:
         """Load CIFAR-10 (training and test set)."""
         transform = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -68,7 +68,8 @@ The :code:`load_data()` function loads the CIFAR-10 training and test sets. The 
         trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True)
         testset = CIFAR10(DATA_ROOT, train=False, download=True, transform=transform)
         testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
-        return trainloader, testloader
+        num_examples = {"trainset" : len(trainset), "testset" : len(testset)}
+        return trainloader, testloader, num_examples
 
 We now need to define the training (function :code:`train()`) which loops over the training set, measures the the loss, backpropagetes it, and then takes one optimizer step for each batch of training examples.
 
@@ -140,7 +141,7 @@ Having defined defining the data loading, model architecture, training, and eval
         DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         print("Centralized PyTorch training")
         print("Load data")
-        trainloader, testloader = load_data()
+        trainloader, testloader, _ = load_data()
         print("Start training")
         net=Net().to(DEVICE)
         train(net=net, trainloader=trainloader, epochs=2, device=DEVICE)
@@ -243,10 +244,12 @@ We included type annotations to give you a better understanding of the data type
             model: cifar.Net,
             trainloader: torch.utils.data.DataLoader,
             testloader: torch.utils.data.DataLoader,
+            num_examples: Dict,
         ) -> None:
             self.model = model
             self.trainloader = trainloader
             self.testloader = testloader
+            self.num_examples = num_examples
 
         def get_parameters(self) -> List[np.ndarray]:
             # Return model parameters as a list of NumPy ndarrays
@@ -260,19 +263,19 @@ We included type annotations to give you a better understanding of the data type
 
         def fit(
             self, parameters: List[np.ndarray], config: Dict[str, str]
-        ) -> Tuple[List[np.ndarray], int]:
+        ) -> Tuple[List[np.ndarray], int, Dict]:
             # Set model parameters, train model, return updated model parameters
             self.set_parameters(parameters)
             cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
-            return self.get_parameters(), len(self.trainloader)
+            return self.get_parameters(), self.num_examples["trainset"], {}
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict[str, str]
-        ) -> Tuple[int, float, float]:
+        ) -> Tuple[float, int, Dict]:
             # Set model parameters, evaluate model on local test dataset, return result
             self.set_parameters(parameters)
             loss, accuracy = cifar.test(self.model, self.testloader, device=DEVICE)
-            return len(self.testloader), float(loss), float(accuracy)
+            return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
 
 All that's left to do it to define a function that loads both model and data, creates a :code:`CifarClient`, and starts this client.
 You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient` with the function :code:`fl.client.start_numpy_client()` by pointing it at the same IP adress we used in :code:`server.py`: 
@@ -285,10 +288,10 @@ You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient
         # Load model and data
         model = cifar.Net()
         model.to(DEVICE)
-        trainloader, testloader = cifar.load_data()
+        trainloader, testloader, num_examples = cifar.load_data()
 
         # Start client
-        client = CifarClient(model, trainloader, testloader)
+        client = CifarClient(model, trainloader, testloader, num_examples)
         fl.client.start_numpy_client("0.0.0.0:8080", client)
 
 
