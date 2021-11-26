@@ -7,15 +7,14 @@ import timeit
 from collections import OrderedDict
 from typing import Dict, List, Tuple
 
+import cnn_model
 import flwr as fl
 import numpy as np
 import torch
-import torchvision
-import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.nn.functional as F
-
-import cnn_model
+import torchvision
+import torchvision.transforms as transforms
 from utils import data_utils
 
 USE_FEDBN: bool = True
@@ -72,7 +71,13 @@ class CifarClient(fl.client.NumPyClient):
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
-        train(self.model, self.trainloader, self.num_examples["dataset"] ,epochs=1, device=DEVICE)
+        train(
+            self.model,
+            self.trainloader,
+            self.num_examples["dataset"],
+            epochs=1,
+            device=DEVICE,
+        )
         return self.get_parameters(), self.num_examples["trainset"], {}
 
     def evaluate(
@@ -80,87 +85,161 @@ class CifarClient(fl.client.NumPyClient):
     ) -> Tuple[float, int, Dict]:
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
-        loss, accuracy = test(self.model, self.num_examples["dataset"], self.testloader, device=DEVICE)
+        loss, accuracy = test(
+            self.model, self.num_examples["dataset"], self.testloader, device=DEVICE
+        )
         return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
 
 
-
 def load_partition(dataset: str):
-    """Load 'MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST-M' for the training and test data to simulate a partition."""
+    """Load 'MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST-M' for the training
+    and test data to simulate a partition."""
 
-    if dataset == 'MNIST':
-        print(f'Load {dataset} dataset')
+    if dataset == "MNIST":
+        print(f"Load {dataset} dataset")
 
-        transform = transforms.Compose([
-            transforms.Grayscale(num_output_channels=3),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
-        
-        trainset = data_utils.DigitsDataset(data_path="data/MNIST", channels=1, percent=0.1, train=True,  transform=transform)
-        testset = data_utils.DigitsDataset(data_path="data/MNIST", channels=1, percent=0.1, train=False, transform=transform)
+        transform = transforms.Compose(
+            [
+                transforms.Grayscale(num_output_channels=3),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
 
-    elif dataset == 'SVHN':
-        print(f'Load {dataset} dataset')
+        trainset = data_utils.DigitsDataset(
+            data_path="data/MNIST",
+            channels=1,
+            percent=0.1,
+            train=True,
+            transform=transform,
+        )
+        testset = data_utils.DigitsDataset(
+            data_path="data/MNIST",
+            channels=1,
+            percent=0.1,
+            train=False,
+            transform=transform,
+        )
 
-        transform = transforms.Compose([
-            transforms.Resize([28,28]),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
+    elif dataset == "SVHN":
+        print(f"Load {dataset} dataset")
 
-        trainset = data_utils.DigitsDataset(data_path='data/SVHN', channels=3, percent=0.1,  train=True,  transform=transform)
-        testset = data_utils.DigitsDataset(data_path='data/SVHN', channels=3, percent=0.1,  train=False, transform=transform)  
+        transform = transforms.Compose(
+            [
+                transforms.Resize([28, 28]),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
 
-    elif dataset == 'USPS':
-        print(f'Load {dataset} dataset')
+        trainset = data_utils.DigitsDataset(
+            data_path="data/SVHN",
+            channels=3,
+            percent=0.1,
+            train=True,
+            transform=transform,
+        )
+        testset = data_utils.DigitsDataset(
+            data_path="data/SVHN",
+            channels=3,
+            percent=0.1,
+            train=False,
+            transform=transform,
+        )
 
-        transform = transforms.Compose([
-            transforms.Resize([28,28]),
-            transforms.Grayscale(num_output_channels=3),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
+    elif dataset == "USPS":
+        print(f"Load {dataset} dataset")
 
-        trainset = data_utils.DigitsDataset(data_path='data/USPS', channels=1, percent=0.1,  train=True,  transform=transform)
-        testset = data_utils.DigitsDataset(data_path='data/USPS', channels=1, percent=0.1,  train=False, transform=transform)
+        transform = transforms.Compose(
+            [
+                transforms.Resize([28, 28]),
+                transforms.Grayscale(num_output_channels=3),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
 
-    elif dataset == 'SynthDigits':
-        print(f'Load {dataset} dataset')
+        trainset = data_utils.DigitsDataset(
+            data_path="data/USPS",
+            channels=1,
+            percent=0.1,
+            train=True,
+            transform=transform,
+        )
+        testset = data_utils.DigitsDataset(
+            data_path="data/USPS",
+            channels=1,
+            percent=0.1,
+            train=False,
+            transform=transform,
+        )
 
-        transform = transforms.Compose([
-            transforms.Resize([28,28]),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
+    elif dataset == "SynthDigits":
+        print(f"Load {dataset} dataset")
 
-        trainset = data_utils.DigitsDataset(data_path='data/SynthDigits/', channels=3, percent=0.1,  train=True,  transform=transform)
-        testset = data_utils.DigitsDataset(data_path='data/SynthDigits/', channels=3, percent=0.1,  train=False, transform=transform)
+        transform = transforms.Compose(
+            [
+                transforms.Resize([28, 28]),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
 
+        trainset = data_utils.DigitsDataset(
+            data_path="data/SynthDigits/",
+            channels=3,
+            percent=0.1,
+            train=True,
+            transform=transform,
+        )
+        testset = data_utils.DigitsDataset(
+            data_path="data/SynthDigits/",
+            channels=3,
+            percent=0.1,
+            train=False,
+            transform=transform,
+        )
 
-    elif dataset == 'MNIST-M':
-        print(f'Load {dataset} dataset')
+    elif dataset == "MNIST-M":
+        print(f"Load {dataset} dataset")
 
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
+        transform = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
 
-        trainset = data_utils.DigitsDataset(data_path='data/MNIST_M/', channels=3, percent=0.1,  train=True,  transform=transform)
-        testset = data_utils.DigitsDataset(data_path='data/MNIST_M/', channels=3, percent=0.1,  train=False, transform=transform)
+        trainset = data_utils.DigitsDataset(
+            data_path="data/MNIST_M/",
+            channels=3,
+            percent=0.1,
+            train=True,
+            transform=transform,
+        )
+        testset = data_utils.DigitsDataset(
+            data_path="data/MNIST_M/",
+            channels=3,
+            percent=0.1,
+            train=False,
+            transform=transform,
+        )
 
-    else: 
+    else:
         print("No valid dataset available")
 
-    num_examples = {"dataset": dataset, "trainset" : len(trainset), "testset" : len(testset)}
+    num_examples = {
+        "dataset": dataset,
+        "trainset": len(trainset),
+        "testset": len(testset),
+    }
 
     print(f"Loaded {dataset} dataset with {num_examples} samples. Good Luck!")
 
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True)
-    testloader  = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
 
     return trainloader, testloader, num_examples
-
 
 
 def train(model, traindata, dataset, epochs, device) -> None:
@@ -169,7 +248,9 @@ def train(model, traindata, dataset, epochs, device) -> None:
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-2, momentum=0.9)
 
-    print(f"Training {dataset} dataset with {epochs} local epoch(s) w/ {len(traindata)} batches each")
+    print(
+        f"Training {dataset} dataset with {epochs} local epoch(s) w/ {len(traindata)} batches each"
+    )
 
     # Train the network
     model.to(device)
@@ -195,11 +276,14 @@ def train(model, traindata, dataset, epochs, device) -> None:
             _, predicted = torch.max(outputs.data, 1)  # pylint: disable=no-member
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-            if i == len(traindata)-1:  # print every 100 mini-batches
+            if i == len(traindata) - 1:  # print every 100 mini-batches
                 accuracy = correct / total
-                print("Dataset %s with [%d, %5d] loss: %.3f accuracy: %.03f" % (dataset, epoch + 1, i + 1, running_loss / 2000, accuracy))
+                print(
+                    "Dataset %s with [%d, %5d] loss: %.3f accuracy: %.03f"
+                    % (dataset, epoch + 1, i + 1, running_loss / 2000, accuracy)
+                )
                 running_loss = 0.0
-        
+
 
 def test(model, dataset, testdata, device) -> Tuple[float, float]:
     """Validate the network on the entire test set."""
@@ -221,15 +305,21 @@ def test(model, dataset, testdata, device) -> Tuple[float, float]:
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
     accuracy = correct / total
-    #print("Dataset %s with evaluation loss: %.3f" % (dataset, loss))
+    # print("Dataset %s with evaluation loss: %.3f" % (dataset, loss))
     return loss, accuracy
+
 
 def main() -> None:
     """Load data, start CifarClient."""
 
     # Parse command line argument `partition`
     parser = argparse.ArgumentParser(description="Flower")
-    parser.add_argument("--partition", type=str, choices=['MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST-M'], required=True)
+    parser.add_argument(
+        "--partition",
+        type=str,
+        choices=["MNIST", "SVHN", "USPS", "SynthDigits", "MNIST-M"],
+        required=True,
+    )
     args = parser.parse_args()
 
     # Load model
@@ -245,7 +335,6 @@ def main() -> None:
     client = CifarClient(model, trainloader, testloader, num_examples)
     print("Start client of dataset", num_examples["dataset"])
     fl.client.start_numpy_client("[::]:8080", client)
-
 
 
 if __name__ == "__main__":
