@@ -1,5 +1,6 @@
 """Flower client example using PyTorch for CIFAR-10 image classification."""
 
+import argparse
 import os
 import sys
 import timeit
@@ -10,8 +11,12 @@ import flwr as fl
 import numpy as np
 import torch
 import torchvision
+import torchvision.transforms as transforms
+import torch.nn as nn
+import torch.nn.functional as F
 
-import local_training
+import cnn_model
+from utils import data_utils
 
 USE_FEDBN: bool = True
 
@@ -26,7 +31,7 @@ class CifarClient(fl.client.NumPyClient):
 
     def __init__(
         self,
-        model: local_training.Net,
+        model: cnn_model.CNNModel,
         trainloader: torch.utils.data.DataLoader,
         testloader: torch.utils.data.DataLoader,
         num_examples: Dict,
@@ -67,7 +72,7 @@ class CifarClient(fl.client.NumPyClient):
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
-        local_training.train(self.model, self.trainloader, epochs=1, device=DEVICE)
+        train(self.model, self.trainloader, self.num_examples["dataset"] ,epochs=1, device=DEVICE)
         return self.get_parameters(), self.num_examples["trainset"], {}
 
     def evaluate(
@@ -75,25 +80,172 @@ class CifarClient(fl.client.NumPyClient):
     ) -> Tuple[float, int, Dict]:
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
-        loss, accuracy = local_training.test(self.model, self.testloader, device=DEVICE)
+        loss, accuracy = test(self.model, self.num_examples["dataset"], self.testloader, device=DEVICE)
         return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
 
+
+
+def load_partition(dataset: str):
+    """Load 'MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST-M' for the training and test data to simulate a partition."""
+
+    if dataset == 'MNIST':
+        print(f'Load {dataset} dataset')
+
+        transform = transforms.Compose([
+            transforms.Grayscale(num_output_channels=3),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+        
+        trainset = data_utils.DigitsDataset(data_path="data/MNIST", channels=1, percent=0.1, train=True,  transform=transform)
+        testset = data_utils.DigitsDataset(data_path="data/MNIST", channels=1, percent=0.1, train=False, transform=transform)
+
+    elif dataset == 'SVHN':
+        print(f'Load {dataset} dataset')
+
+        transform = transforms.Compose([
+            transforms.Resize([28,28]),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+        trainset = data_utils.DigitsDataset(data_path='data/SVHN', channels=3, percent=0.1,  train=True,  transform=transform)
+        testset = data_utils.DigitsDataset(data_path='data/SVHN', channels=3, percent=0.1,  train=False, transform=transform)  
+
+    elif dataset == 'USPS':
+        print(f'Load {dataset} dataset')
+
+        transform = transforms.Compose([
+            transforms.Resize([28,28]),
+            transforms.Grayscale(num_output_channels=3),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+        trainset = data_utils.DigitsDataset(data_path='data/USPS', channels=1, percent=0.1,  train=True,  transform=transform)
+        testset = data_utils.DigitsDataset(data_path='data/USPS', channels=1, percent=0.1,  train=False, transform=transform)
+
+    elif dataset == 'SynthDigits':
+        print(f'Load {dataset} dataset')
+
+        transform = transforms.Compose([
+            transforms.Resize([28,28]),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+        trainset = data_utils.DigitsDataset(data_path='data/SynthDigits/', channels=3, percent=0.1,  train=True,  transform=transform)
+        testset = data_utils.DigitsDataset(data_path='data/SynthDigits/', channels=3, percent=0.1,  train=False, transform=transform)
+
+
+    elif dataset == 'MNIST-M':
+        print(f'Load {dataset} dataset')
+
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+        trainset = data_utils.DigitsDataset(data_path='data/MNIST_M/', channels=3, percent=0.1,  train=True,  transform=transform)
+        testset = data_utils.DigitsDataset(data_path='data/MNIST_M/', channels=3, percent=0.1,  train=False, transform=transform)
+
+    else: 
+        print("No valid dataset available")
+
+    num_examples = {"dataset": dataset, "trainset" : len(trainset), "testset" : len(testset)}
+
+    print(f"Loaded {dataset} dataset with {num_examples} samples. Good Luck!")
+
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True)
+    testloader  = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
+
+    return trainloader, testloader, num_examples
+
+
+
+def train(model, traindata, dataset, epochs, device) -> None:
+    """Train the network."""
+    # Define loss and optimizer
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=1e-2, momentum=0.9)
+
+    print(f"Training {dataset} dataset with {epochs} local epoch(s) w/ {len(traindata)} batches each")
+
+    # Train the network
+    model.to(device)
+    model.train()
+    for epoch in range(epochs):  # loop over the dataset multiple times
+        running_loss = 0.0
+        total = 0.0
+        correct = 0
+        for i, data in enumerate(traindata, 0):
+            images, labels = data[0].to(device), data[1].to(device)
+
+            # zero the parameter gradients
+            optimizer.zero_grad()
+
+            # forward + backward + optimize
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+            # print statistics
+            running_loss += loss.item()
+            _, predicted = torch.max(outputs.data, 1)  # pylint: disable=no-member
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+            if i == len(traindata)-1:  # print every 100 mini-batches
+                accuracy = correct / total
+                print("Dataset %s with [%d, %5d] loss: %.3f accuracy: %.03f" % (dataset, epoch + 1, i + 1, running_loss / 2000, accuracy))
+                running_loss = 0.0
+        
+
+def test(model, dataset, testdata, device) -> Tuple[float, float]:
+    """Validate the network on the entire test set."""
+    # Define loss and metrics
+    criterion = nn.CrossEntropyLoss()
+    correct = 0
+    total = 0
+    loss = 0.0
+
+    # Evaluate the network
+    model.to(device)
+    model.eval()
+    with torch.no_grad():
+        for data in testdata:
+            images, labels = data[0].to(device), data[1].to(device)
+            outputs = model(images)
+            loss += criterion(outputs, labels).item()
+            _, predicted = torch.max(outputs.data, 1)  # pylint: disable=no-member
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+    accuracy = correct / total
+    #print("Dataset %s with evaluation loss: %.3f" % (dataset, loss))
+    return loss, accuracy
 
 def main() -> None:
     """Load data, start CifarClient."""
 
-    # Load data
-    trainloader, testloader, num_examples = local_training.load_data()
+    # Parse command line argument `partition`
+    parser = argparse.ArgumentParser(description="Flower")
+    parser.add_argument("--partition", type=str, choices=['MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST-M'], required=True)
+    args = parser.parse_args()
 
     # Load model
-    model = local_training.Net().to(DEVICE).train()
+    model = cnn_model.CNNModel().to(DEVICE).train()
+
+    # Load data
+    trainloader, testloader, num_examples = load_partition(args.partition)
 
     # Perform a single forward pass to properly initialize BatchNorm
     _ = model(next(iter(trainloader))[0].to(DEVICE))
 
     # Start client
     client = CifarClient(model, trainloader, testloader, num_examples)
+    print("Start client of dataset", num_examples["dataset"])
     fl.client.start_numpy_client("[::]:8080", client)
+
 
 
 if __name__ == "__main__":

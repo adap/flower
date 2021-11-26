@@ -161,7 +161,7 @@ def test(model, test_loader, loss_fun, device):
     return test_loss/len(test_loader), correct /len(test_loader.dataset)
 
 ################# Key Function ########################
-def communication(args, server_model, models, client_weights):
+def communication(args, server_model, models, client_weights, client_num):
     with torch.no_grad():
         # aggregate params
         if args.mode.lower() == 'fedbn':
@@ -297,7 +297,7 @@ def main():
                     train(model, train_loader, optimizer, loss_fun, client_num, device)
          
         # aggregation
-        server_model, models = communication(args, server_model, models, client_weights)
+        server_model, models = communication(args, server_model, models, client_weights, client_num)
         
         # report after aggregation
         for client_idx in range(client_num):
