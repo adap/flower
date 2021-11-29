@@ -14,6 +14,7 @@ import jax
 import jax.numpy as jnp
 from sklearn.datasets import make_regression
 from sklearn.model_selection import train_test_split
+import numpy as np
 
 key = jax.random.PRNGKey(0)
 
@@ -37,12 +38,12 @@ def loss_fn(params, X, y) -> Callable:
 
 def train(params, grad_fn, X, y) -> Tuple[np.array, float, int]:
     num_examples = X.shape[0]
-    for epochs in range(10):
+    for epochs in range(50):
         grads = grad_fn(params, X, y)
         params = jax.tree_multimap(lambda p, g: p - 0.05 * g, params, grads)
         loss = loss_fn(params,X, y)
-        #if epochs % 10 == 9:
-        #    print(f'For Epoch {epochs} loss {loss}')
+        if epochs % 10 == 0:
+            print(f'For Epoch {epochs} loss {loss}')
     return params, loss, num_examples
 
 def evaluation(params, grad_fn, X_test, y_test) -> Tuple[float, int]:
@@ -60,7 +61,9 @@ def main():
     params = load_model(model_shape)   
     print("Params", params)
     params, loss, num_examples = train(params, grad_fn, X, y)
-    evaluation(params, grad_fn, X_test, y_test)
+    print("Training loss:", loss)
+    loss, num_examples = evaluation(params, grad_fn, X_test, y_test)
+    print("Evaluation loss:", loss)
 
 
 if __name__ == "__main__":
