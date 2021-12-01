@@ -16,19 +16,23 @@
 
 
 from flwr import common
-from flwr.common import serde
+from flwr.common import serde, SecretsManager
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_bridge import GRPCBridge
+from flwr.common.logger import log
+from logging import WARNING
+
 
 from dissononce.processing.impl.handshakestate import HandshakeState
 from dissononce.processing.impl.symmetricstate import SymmetricState
 from dissononce.processing.impl.cipherstate import CipherState
-from dissononce.processing.handshakepatterns.interactive.XX import XXHandshakePattern
+from dissononce.processing.handshakepatterns.interactive.XK import XKHandshakePattern
 from dissononce.cipher.aesgcm import AESGCMCipher
 from dissononce.dh.x25519.x25519 import X25519DH
 from dissononce.hash.sha256 import SHA256Hash
-import dissononce, logging
+from dissononce.exceptions.decrypt import DecryptFailedException
+
 
 class GrpcClientProxy(ClientProxy):
     """Flower client proxy which delegates over the network using gRPC."""
@@ -40,12 +44,11 @@ class GrpcClientProxy(ClientProxy):
     ):
         super().__init__(cid)
         self.bridge = bridge
-        self.auth = False 
+        self.auth = 0 
 
     def authenticate(self):
         """Authenticate the client using XX Handshake"""
         # prepare handshake objects
-        server_s = X25519DH().generate_keypair()
         server_handshakestate = HandshakeState(
             SymmetricState(
                 CipherState(
@@ -56,7 +59,7 @@ class GrpcClientProxy(ClientProxy):
             X25519DH()
         )
         # initialize handshakestate objects
-        server_handshakestate.initialize(XXHandshakePattern(), False, b'', s=server_s)
+        server_handshakestate.initialize(XKHandshakePattern(), False, b'', s=SecretsManager.server_key_pair())
 
         # signal handshake
         params: common.Parameters = common.Parameters([], "handshake0")
@@ -66,25 +69,28 @@ class GrpcClientProxy(ClientProxy):
         )
         fit_res_msg = serde.fit_res_from_proto(client_msg.fit_res)
 
-        # -> e
-        server_handshakestate.read_message(fit_res_msg.parameters.tensors[0], bytearray())
+        try: 
+            # <- e, es
+            server_handshakestate.read_message(fit_res_msg.parameters.tensors[0], bytearray())
 
-        # <- e, ee, s, es
-        message_buffer = bytearray()
-        server_handshakestate.write_message(b'', message_buffer)
-        params: common.Parameters = common.Parameters([bytes(message_buffer)], "handshake1")
-        fit_ins_msg = serde.fit_ins_to_proto(common.FitIns(params, {}))
-        client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(fit_ins=fit_ins_msg)
-        )
-        fit_res_msg = serde.fit_res_from_proto(client_msg.fit_res)
+            # -> e, ee
+            message_buffer = bytearray()
+            server_handshakestate.write_message(b'', message_buffer)
+            params: common.Parameters = common.Parameters([bytes(message_buffer)], "handshake1")
+            fit_ins_msg = serde.fit_ins_to_proto(common.FitIns(params, {}))
+            client_msg: ClientMessage = self.bridge.request(
+                ServerMessage(fit_ins=fit_ins_msg)
+            )
+            fit_res_msg = serde.fit_res_from_proto(client_msg.fit_res)
 
-        # -> s, se
-        server_handshakestate.read_message(fit_res_msg.parameters.tensors[0], bytearray())
-
-        # print("handshake complete")
-
-        self.auth = True
+            # <- s, se
+            server_handshakestate.read_message(fit_res_msg.parameters.tensors[0], bytearray())
+            print("handshake complete")
+            self.auth = 1
+        except DecryptFailedException:
+            log(WARNING, f"Unknown client trying to connect with public key {server_handshakestate.rs.data.hex()}")
+            self.auth = -1
+            
 
     def get_parameters(self) -> common.ParametersRes:
         """Return the current local model parameters."""

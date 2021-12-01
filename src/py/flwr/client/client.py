@@ -18,10 +18,23 @@
 from abc import ABC, abstractmethod
 
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
+from dissononce.processing.impl.handshakestate import HandshakeState
 
 
 class Client(ABC):
     """Abstract base class for Flower clients."""
+
+    client_handshake_state = None
+
+    @abstractmethod
+    def get_hss(self) -> HandshakeState:
+        """Return the current local model parameters.
+
+        Returns
+        -------
+        ParametersRes
+            The current local model parameters.
+        """
 
     @abstractmethod
     def get_parameters(self) -> ParametersRes:
