@@ -1,43 +1,31 @@
 import flwr as fl
-from numpy import save
+import numpy as np
 import ray
 import torch
-import torchvision
-import torch.nn as nn
-import torch.nn.functional as F
-import numpy as np
-import pickle
 
-from flwr.common.typing import Scalar
-from flwr.dataset.utils.common import create_lda_partitions, XYList
 from collections import OrderedDict
 from pathlib import Path
 from PIL import Image
-from typing import Dict, Callable, Optional, Tuple
-
+from torch.nn import GroupNorm
 from torch.utils.data import DataLoader, Dataset
-from torchvision.models import resnet18
 from torchvision.datasets import CIFAR10
+from torchvision.models import resnet18
 from torchvision.transforms import Compose, Normalize, ToTensor, RandomHorizontalFlip
+from typing import Dict, Callable, Optional, Tuple
+from flwr.common.typing import Scalar
 
-transforms_train = Compose(
-    [
-        RandomHorizontalFlip(),
-        ToTensor(),
-        Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-    ]
-)
 transforms_test = Compose(
     [ToTensor(), Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))]
 )
+transforms_train = Compose([RandomHorizontalFlip(), transforms_test])
 
 
 def get_resnet18_gn(num_classes: int = 10):
-    model = resnet18(norm_layer=lambda x: nn.GroupNorm(2, x), num_classes=num_classes)
+    model = resnet18(norm_layer=lambda x: GroupNorm(2, x), num_classes=num_classes)
     return model
 
 
-class FL_CIFAR(Dataset):
+class CIFARClientDataset(Dataset):
     def __init__(self, path_to_file: Path, transform=None):
         super().__init__()
         self.transform = transform
@@ -88,8 +76,6 @@ def test(net, testloader, device: str):
     return loss, accuracy
 
 
-# Flower client that will be spawned by Ray
-# Adapted from Pytorch quickstart example
 class CifarRayClient(fl.client.NumPyClient):
     def __init__(self, cid: str, fed_dir: Path):
         self.cid = cid
@@ -118,24 +104,17 @@ class CifarRayClient(fl.client.NumPyClient):
         return net
 
     def fit(self, parameters, config):
-        print(f"fit() on client cid={self.cid}")
         net = self.set_parameters(parameters)
-
-        # load data for this client and get trainloader
         num_workers = len(ray.worker.get_resource_ids()["CPU"])
 
-        trainset = FL_CIFAR(
+        trainset = CIFARClientDataset(
             path_to_file=Path(self.fed_dir) / f"{self.cid}" / "train.pt",
             transform=transforms_train,
         )
-        print("pre")
-        # trainloader = DataLoader(
-        #    trainset, batch_size=int(config["batch_size"]), workers=num_workers
-        # )
-        trainloader = DataLoader(trainset, batch_size=5)
-        print("pos")
-        print("hello3")
-        # send model to device
+        trainloader = DataLoader(
+            trainset, batch_size=int(config["batch_size"]), num_workers=num_workers
+        )
+        # trainloader = DataLoader(trainset, batch_size=int(config["batch_size"]))
         net.to(self.device)
 
         # train
@@ -145,14 +124,13 @@ class CifarRayClient(fl.client.NumPyClient):
         return self.get_parameters(net), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
-
-        # print(f"evaluate() on client cid={self.cid}")
         self.set_parameters(parameters)
-
         # load data for this client and get trainloader
         num_workers = len(ray.worker.get_resource_ids()["CPU"])
-        validationset = FL_CIFAR(path_dir=Path(self.fed_dir) / self.cid / "test.pt")
-        valloader = DataLoader(validationset, batch_size=50, workers=num_workers)
+        validationset = CIFARClientDataset(
+            path_dir=Path(self.fed_dir) / self.cid / "test.pt"
+        )
+        valloader = DataLoader(validationset, batch_size=50, num_workers=num_workers)
 
         # send model to device
         self.net.to(self.device)
@@ -162,16 +140,6 @@ class CifarRayClient(fl.client.NumPyClient):
 
         # return statistics
         return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
-
-
-def fit_config(rnd: int) -> Dict[str, str]:
-    """Return a configuration with static batch size and (local) epochs."""
-    config = {
-        "epoch_global": str(rnd),
-        "epochs": str(5),
-        "batch_size": str(64),
-    }
-    return config
 
 
 def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
@@ -186,7 +154,7 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
 
 
 def get_eval_fn(
-    testset: torchvision.datasets.CIFAR10,
+    testset: CIFAR10,
 ) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
@@ -207,55 +175,3 @@ def get_eval_fn(
         return loss, {"accuracy": accuracy}
 
     return evaluate
-
-
-def main():
-    # Generate partitions
-    root_dir = "./data"
-    fed_dir = Path(root_dir) / "partitions"
-    trainset = CIFAR10(root=root_dir, train=True, download=True)
-    XYData = (trainset.data, np.array(trainset.targets, dtype=np.long))
-    train_partitions, dist = create_lda_partitions(
-        dataset=XYData, num_partitions=500, concentration=0.1
-    )
-    for idx, partition in enumerate(train_partitions):
-        path_dir = fed_dir / f"{idx}"
-        path_dir.mkdir(exist_ok=True, parents=True)
-        torch.save(partition, path_dir / "train.pt")
-
-    # Prepare centralized test
-    testset = CIFAR10(
-        root="./data", train=False, download=True, transform=transforms_test
-    )
-    pool_size = 500  # number of dataset partions (= number of total clients)
-    client_resources = {"num_cpus": 1}  # each client will get allocated 1 CPUs
-
-    # configure the strategy
-    strategy = fl.server.strategy.FedAvg(
-        fraction_fit=0.1,
-        min_fit_clients=10,
-        min_available_clients=pool_size,  # All clients should be available
-        on_fit_config_fn=fit_config,
-        eval_fn=get_eval_fn(testset),
-    )
-
-    def client_fn(cid: str):
-        # create a single client instance
-        return CifarRayClient(cid, fed_dir)
-
-    # (optional) specify ray config
-    ray_config = {"include_dashboard": False}
-
-    # start simulation
-    fl.simulation.start_simulation(
-        client_fn=client_fn,
-        num_clients=pool_size,
-        client_resources=client_resources,
-        num_rounds=5,
-        strategy=strategy,
-        ray_init_args=ray_config,
-    )
-
-
-if __name__ == "__main__":
-    main()

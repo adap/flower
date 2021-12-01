@@ -1,27 +1,38 @@
+from pathlib import Path
 import numpy as np
-import torch
-import torchvision
 
 from flwr.dataset.utils.common import create_lda_partitions
 from flwr.dataset.utils.common import XY
-from typing import List, Tuple
-from torchvision.datasets import CIFAR10
-
-list_partitions, dist = create_lda_partitions(
-    XY=dataset, num_partitions=num_partitions, concentration=concentration
-)
+from flwr.common.parameter import weights_to_parameters
+from torch.nn import Module
+from torch import save
 
 
-def save_partitions(partition_dir: Path, list_partitions: XYList):
-    partition_dir.mkdir(parents=True, exist_ok=True)
-    for idx, partition in enumerate(list_partitions):
-        partition_file = partition_dir / f"{idx:03d}.pickle"
-        with open(partition_file, "rb") as f:
-            pickle.dump(partition, f)
+def torch_model_to_parameters(model: Module):
+    weights = [val.cpu().numpy() for _, val in model.state_dict().items()]
+    parameters = weights_to_parameters(weights)
+
+    return parameters
 
 
-def generate_partitions(root: str = "./data"):
-    for is_train, dataset in [(True, "train"), (False, "test")]:
-        list_partitions = partition_cifar10(root=root, train=is_train)
-        partition_dir = Path(root) / dataset
-        save_partitions(partition_dir=partition_dir, list_partitions=list_partitions)
+def partition_and_save(
+    dataset: XY,
+    fed_dir: Path,
+    dirichlet_dist: np.ndarray = None,
+    num_partitions: int = 500,
+    concentration: float = 0.1,
+) -> np.ndarray:
+    # Create partitions
+    clients_partitions, dist = create_lda_partitions(
+        dataset=dataset,
+        dirichlet_dist=dirichlet_dist,
+        num_partitions=num_partitions,
+        concentration=concentration,
+    )
+    # Save partions
+    for idx, partition in enumerate(clients_partitions):
+        path_dir = fed_dir / f"{idx}"
+        path_dir.mkdir(exist_ok=True, parents=True)
+        save(partition, path_dir / "train.pt")
+
+    return dist
