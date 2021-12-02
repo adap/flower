@@ -71,14 +71,14 @@ class CifarClient(fl.client.NumPyClient):
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
-        train(
+        loss, accuracy = train(
             self.model,
             self.trainloader,
             self.num_examples["dataset"],
             epochs=1,
             device=DEVICE,
         )
-        return self.get_parameters(), self.num_examples["trainset"], {}
+        return self.get_parameters(), self.num_examples["trainset"], {"loss": loss, "accuracy": accuracy}
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, str]
@@ -120,6 +120,7 @@ def load_partition(dataset: str):
             train=False,
             transform=transform,
         )
+        
 
     elif dataset == "SVHN":
         print(f"Load {dataset} dataset")
@@ -255,6 +256,9 @@ def train(model, traindata, dataset, epochs, device) -> None:
     # Train the network
     model.to(device)
     model.train()
+    loss = 0.0
+    accracy = 0.0
+    train_iter = iter(traindata)
     for epoch in range(epochs):  # loop over the dataset multiple times
         running_loss = 0.0
         total = 0.0
@@ -276,13 +280,17 @@ def train(model, traindata, dataset, epochs, device) -> None:
             _, predicted = torch.max(outputs.data, 1)  # pylint: disable=no-member
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
+            loss = running_loss
+            accuracy = correct / total
             if i == len(traindata) - 1:  # print every 100 mini-batches
                 accuracy = correct / total
                 print(
                     "Dataset %s with [%d, %5d] loss: %.3f accuracy: %.03f"
-                    % (dataset, epoch + 1, i + 1, running_loss / 2000, accuracy)
+                    % (dataset, epoch + 1, i + 1, running_loss / len(traindata), accuracy)
                 )
                 running_loss = 0.0
+    return loss / 743, accuracy 
+
 
 
 def test(model, dataset, testdata, device) -> Tuple[float, float]:
