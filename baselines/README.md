@@ -12,19 +12,10 @@ Project dependencies (such as `flwr` and `torch`) are defined in `pyproject.toml
 
 ```shell
 poetry install
-poetry shell
 ```
 
 Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
 
 ```shell
-python3 -c "import flwr_baselines"
-```
-
-### TLDR
-
-There is also a short way which might not be suitable for everyone.
-
-```shell
-./dev/bootstrap.sh
+poetry run python3 -c "import flwr_baselines"
 ```
