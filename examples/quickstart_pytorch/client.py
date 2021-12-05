@@ -116,6 +116,7 @@ def main():
     # Flower client
     class CifarClient(fl.client.NumPyClient):
         client_handshake_state = None
+        cipherstate = None
 
         def get_hss(self):
             if CifarClient.client_handshake_state:
