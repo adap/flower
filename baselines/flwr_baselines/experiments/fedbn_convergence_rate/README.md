@@ -33,7 +33,7 @@ A more detailed explanation of the datasets are given in the following table.
 The Research team from the [FedBN paper](https://arxiv.org/pdf/2102.07623.pdf) prepared a pre-processed dataset on their GitHub repository that is available [here](https://github.com/med-air/FedBN). Please download their data, save it in a `/data` directory and unzip afterwards. 
 The training data contains only 7438 samples and is splitted in 10 files but only one file is used for **FedBN: Convergence Rate** baseline. Therefore, 743 samples are used for the local training. 
 
-## Training Setup
+## Training Setup ##
 
 ### CNN Architecture
 
@@ -62,7 +62,7 @@ The CNN architecture is given in the paper and reused to create the **FedBN - Co
 
 Before you run any program of the baseline experiment, please get the required data and place it in the `/data` directory. 
 
-As soons as you have downloaded the data you are ready to start the baseline experiment. The baseline contains different programms:
+As soon as you have downloaded the data you are ready to start the baseline experiment. The baseline contains different programms:
 
 * utils/data_utils.py
 * cnn_model.py
@@ -70,7 +70,16 @@ As soons as you have downloaded the data you are ready to start the baseline exp
 * server.py 
 * run.sh
 
-In order to run the experiment you simply make `run.sh` executable and run it. The `run.sh` creates first the files where the evaluation results are saved and starts the `server.py` and 5 clients in parallel with `client.py`. Each client loads another dataset as explained before. The clients saves the training and evaluation parameters in a dict with the following informations:
+In order to run the experiment you simply make `run.sh` executable and run it. 
+
+```bash
+chmod u+x run.sh
+```
+```bash
+./run.sh
+```
+
+The `run.sh` creates first the files where the evaluation results are saved and starts the `server.py` and 5 clients in parallel with `client.py`. Each client loads another dataset as explained before. The clients save the training and evaluation parameters in a dict with the following informations:
 
 ```python
 train_dict = {"dataset": self.num_examples["dataset"], "fl_round" : fl_round, "strategy": self.mode , "train_loss": loss, "train_accuracy": accuracy}
@@ -79,4 +88,65 @@ train_dict = {"dataset": self.num_examples["dataset"], "fl_round" : fl_round, "s
 test_dict =  {"dataset": self.num_examples["dataset"], "fl_round" : fl_round, "strategy": self.mode, "test_loss": loss, "test_accuracy": accuracy}
 ```
 
-The `utils/data_utils.py` prepares/loads the data for the training and `cnn_model.py` set up the CNN model architecture.   
+The `utils/data_utils.py` prepares/loads the data for the training and `cnn_model.py` set up the [CNN model architecture](#cnn-architecture). This baseline only takes one single file with 743 samples from the downloaded dataset. 
+
+### Server
+
+This baseline compares the Federate Averaging (FedAvg) with Federated Batch Normalization (FedBN). In both cases we are using the FedAvg on the server-side. All parameters being created in the model architecture are sent from the client to the server and aggegated. However, in the case of FedBN, we are setting up the client to exclude the BN layer from the transmission to the server. FedBN is therefore a strategy that is on the client-side. 
+The server is kept very simple and the same for both settings. We are using FedAvg on the server-side with the parameters `min_fit_clients`, `min_eval_clients`, and `min_available_clients` that are set to the value `5` since we have five clients to be trained and evaluated in each FL round. All in all, the *FedBN* paper runs 600 FL rounds that can be set up correspondingly.     
+
+```python
+import flwr as fl
+
+if __name__ == "__main__":
+    strategy = fl.server.strategy.FedAvg(
+        min_fit_clients=5,
+        min_eval_clients=5,
+        min_available_clients=5,
+    )
+    fl.server.start_server("[::]:8080", config={"num_rounds": 100}, strategy=strategy)
+
+```
+
+### Client
+
+The client is a little bit more complex. However, it can be devided in different parts. The main parts are:
+
+* `load_partition()`
+    * load the right dataset
+* `train()`
+    * perfom the local training
+* `test()`
+    * evaluating the training results
+* `CifarClient(fl.client.NumPyClient)`
+    * starts Flower client
+* `main()`
+    * start all previous process in a main() file
+
+The `load_partition()` loads the datasets saved in the `/data` dierctory.  
+You can directly see that the training and evaluation process is defined within the client. We are using PyTorch to train and evaluate the model with the parameters given in the chapter [Training Setup](#training-setup). 
+
+The Flower client `CifarClient(fl.client.NumPyClient)` has the usual structure:
+
+* get_paramaters()
+* set_parameters()
+* fit()
+* evaluate()
+
+We will take a closer look to `set_parameters()` in order to demonstrate the difference between FedAvg and FedBN. 
+
+```python 
+def set_parameters(self, parameters: List[np.ndarray])-> None:
+    self.model.train()
+    if self.mode == 'fedbn':
+        keys = [k for k in self.model.state_dict().keys() if "bn" not in k]
+        params_dict = zip(keys, parameters)
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        self.model.load_state_dict(state_dict, strict=False)
+    else:
+        params_dict = zip(self.model.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        self.model.load_state_dict(state_dict, strict=True)
+```
+
+You can see that the local clients take all model parameters and sets them for the FedAvg strategy top train a new local model. However, in the case of FedBN, the parameters for the BN layer is excluded. 

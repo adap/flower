@@ -97,6 +97,7 @@ class CifarClient(fl.client.NumPyClient):
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
         global fl_round
+        print(f"FL Round:{fl_round}")
         loss, accuracy = test(
             self.model, self.num_examples["dataset"], self.testloader, device=DEVICE
         )
@@ -263,7 +264,7 @@ def train(model, traindata, dataset, epochs, device) -> None:
     """Train the network."""
     # Define loss and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=1e-2, momentum=0.9)
+    optimizer = torch.optim.SGD(model.parameters(), lr=1e-2)
 
     print(
         f"Training {dataset} dataset with {epochs} local epoch(s) w/ {len(traindata)} batches each"
