@@ -39,7 +39,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.8.3"
 # Mandatory dependencies
-flwr = "^0.15.0"  # For development: { path = "../../", develop = true }
+flwr = "^0.17.0"  # For development: { path = "../../", develop = true }
 torch = "^1.9.0"
 torchvision = "^0.10.0"
 
@@ -57,6 +57,7 @@ mypy-protobuf = "==1.23"
 rope = "==0.19.0"
 sphinx = "==3.4.3"
 sphinx-book-theme = "==0.0.39"
+hydra-core = "==1.1.1"
 
 [tool.isort]
 line_length = 88

@@ -1,0 +1,6 @@
+---
+name: FedAdagrad
+expected_accuracy: 73.1
+eta: 0.01
+eta_l: 0.1
+tau: 0.001
