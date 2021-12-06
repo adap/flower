@@ -32,7 +32,7 @@ FILELIKE = Union[str, bytes]
 SSLFILES = Tuple[FILELIKE, FILELIKE, FILELIKE]
 
 INVALID_SSL_FILES_ERR_MSG = """
-    When setting any of root_certificate, certificate, or private_key
+    When setting any of root_certificate, certificate, or private_key,
     you have to set all of them.
 """
 
