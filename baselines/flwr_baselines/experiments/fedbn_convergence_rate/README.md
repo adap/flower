@@ -2,7 +2,7 @@
 
 ## Experiment Introduction
 
-The **FedBN - Convergence Rate** baseline is based on the paper [FEDBN: FEDERATED LEARNING ON NON-IID FEATURES VIA LOCAL BATCH NORMALIZATION](https://arxiv.org/pdf/2102.07623.pdf) and reproduces the results being presented in *Chapter 5 - Convergence Rate (Figure 3)* by running Flower as the federated learning framework. This experiment uses 5 completly different image datasets of digits to emulate a non-IID data distribution between the clients. Therefore, 5 clients are used for the training. The local training is setup with 1 epoch and a CNN model is used together with the SGD optimizer. The loss is calculated by the cross entropy loss. 
+The **FedBN - Convergence Rate** baseline is based on the paper [FEDBN: FEDERATED LEARNING ON NON-IID FEATURES VIA LOCAL BATCH NORMALIZATION](https://arxiv.org/pdf/2102.07623.pdf) and reproduces the results being presented in *Chapter 5 - Convergence Rate (Figure 3)* by running Flower as the federated learning framework. This experiment uses 5 completely different image datasets of digits to emulate a non-IID data distribution between the clients. Therefore, 5 clients are used for the training. The local training is set up with 1 epoch and a CNN model is used together with the SGD optimizer. The loss is calculated by the cross-entropy loss. 
 
 ## Dataset 
 
@@ -16,7 +16,7 @@ The **FedBN - Convergence Rate** baseline is based on the paper [FEDBN: FEDERATE
 * [USPS](https://ieeexplore.ieee.org/document/291440)
 * [SynthDigits](https://arxiv.org/pdf/1505.07818.pdf)
 
-A more detailed explanation of the datasets are given in the following table. 
+A more detailed explanation of the datasets is given in the following table. 
 
 |     | MNIST     | MNIST-M   | SVHN  |  USPS    | SynthDigits |
 |--- |---        |---        |---    |---            |---    |
@@ -30,8 +30,8 @@ A more detailed explanation of the datasets are given in the following table.
 
 ### Dataset Download
 
-The Research team from the [FedBN paper](https://arxiv.org/pdf/2102.07623.pdf) prepared a pre-processed dataset on their GitHub repository that is available [here](https://github.com/med-air/FedBN). Please download their data, save it in a `/data` directory and unzip afterwards. 
-The training data contains only 7438 samples and is splitted in 10 files but only one file is used for **FedBN: Convergence Rate** baseline. Therefore, 743 samples are used for the local training. 
+The Research team from the [FedBN paper](https://arxiv.org/pdf/2102.07623.pdf) prepared a pre-processed dataset on their GitHub repository that is available [here](https://github.com/med-air/FedBN). Please download their data, save it in a `/data` directory and unzip afterward. 
+The training data contains only 7438 samples and is split into 10 files but only one file is used for **FedBN: Convergence Rate** baseline. Therefore, 743 samples are used for the local training. 
 
 ## Training Setup ##
 
@@ -62,7 +62,7 @@ The CNN architecture is given in the paper and reused to create the **FedBN - Co
 
 Before you run any program of the baseline experiment, please get the required data and place it in the `/data` directory. 
 
-As soon as you have downloaded the data you are ready to start the baseline experiment. The baseline contains different programms:
+As soon as you have downloaded the data you are ready to start the baseline experiment. The baseline contains different programs:
 
 * utils/data_utils.py
 * cnn_model.py
@@ -70,7 +70,7 @@ As soon as you have downloaded the data you are ready to start the baseline expe
 * server.py 
 * run.sh
 
-In order to run the experiment you simply make `run.sh` executable and run it. 
+In order to run the experiment, you simply make `run.sh` executable and run it. 
 
 ```bash
 chmod u+x run.sh
@@ -79,7 +79,7 @@ chmod u+x run.sh
 ./run.sh
 ```
 
-The `run.sh` creates first the files where the evaluation results are saved and starts the `server.py` and 5 clients in parallel with `client.py`. Each client loads another dataset as explained before. The clients save the training and evaluation parameters in a dict with the following informations:
+The `run.sh` creates first the files where the evaluation results are saved and starts the `server.py` and 5 clients in parallel with `client.py`. Each client loads another dataset as explained before. The clients save the training and evaluation parameters in a dict with the following information:
 
 ```python
 train_dict = {"dataset": self.num_examples["dataset"], "fl_round" : fl_round, "strategy": self.mode , "train_loss": loss, "train_accuracy": accuracy}
@@ -92,7 +92,7 @@ The `utils/data_utils.py` prepares/loads the data for the training and `cnn_mode
 
 ### Server
 
-This baseline compares the Federate Averaging (FedAvg) with Federated Batch Normalization (FedBN). In both cases we are using the FedAvg on the server-side. All parameters being created in the model architecture are sent from the client to the server and aggegated. However, in the case of FedBN, we are setting up the client to exclude the BN layer from the transmission to the server. FedBN is therefore a strategy that is on the client-side. 
+This baseline compares the Federate Averaging (FedAvg) with Federated Batch Normalization (FedBN). In both cases, we are using the FedAvg on the server-side. All parameters being created in the model architecture are sent from the client to the server and aggregated. However, in the case of FedBN, we are setting up the client to exclude the BN layer from the transmission to the server. FedBN is therefore a strategy that is on the client-side. 
 The server is kept very simple and the same for both settings. We are using FedAvg on the server-side with the parameters `min_fit_clients`, `min_eval_clients`, and `min_available_clients` that are set to the value `5` since we have five clients to be trained and evaluated in each FL round. All in all, the *FedBN* paper runs 600 FL rounds that can be set up correspondingly.     
 
 ```python
@@ -133,7 +133,7 @@ The Flower client `CifarClient(fl.client.NumPyClient)` has the usual structure:
 * fit()
 * evaluate()
 
-We will take a closer look to `set_parameters()` in order to demonstrate the difference between FedAvg and FedBN. 
+We will take a closer look at `set_parameters()` in order to demonstrate the difference between FedAvg and FedBN. 
 
 ```python 
 def set_parameters(self, parameters: List[np.ndarray])-> None:
@@ -149,4 +149,5 @@ def set_parameters(self, parameters: List[np.ndarray])-> None:
         self.model.load_state_dict(state_dict, strict=True)
 ```
 
-You can see that the local clients take all model parameters and sets them for the FedAvg strategy top train a new local model. However, in the case of FedBN, the parameters for the BN layer is excluded. 
+You can see that the local clients take all model parameters and set them for the FedAvg strategy to train a new local model. However, in the case of FedBN, the parameters for the BN layer are excluded. 
+
