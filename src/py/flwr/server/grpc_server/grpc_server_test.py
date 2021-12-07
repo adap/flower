@@ -15,12 +15,32 @@
 """Tests for module server."""
 
 import socket
+import subprocess
 from contextlib import closing
-from typing import cast
+from os.path import abspath, dirname, join
+from typing import Tuple, cast
 
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server import certificates
 from flwr.server.grpc_server.grpc_server import start_grpc_server
+
+root_dir = dirname(abspath(join(__file__, "../../../../..")))
+
+
+def load_certificates() -> Tuple[str, str, str]:
+    """Generate and load SSL/TLS credentials/certificates.
+
+    Utility function for loading for SSL/TLS enabled gRPC servertests.
+    """
+    # Trigger script which generates the certificates
+    subprocess.run(["bash", "./dev/certificates/generate.sh"], check=True, cwd=root_dir)
+
+    ssl_files = (
+        join(root_dir, ".flwr_cache/certificates/ca.crt"),
+        join(root_dir, ".flwr_cache/certificates/server.pem"),
+        join(root_dir, ".flwr_cache/certificates/server.key"),
+    )
+
+    return ssl_files
 
 
 def unused_tcp_port() -> int:
@@ -52,7 +72,7 @@ def test_integration_start_and_shutdown_secure_server() -> None:
     port = unused_tcp_port()
     client_manager = SimpleClientManager()
 
-    ssl_files = certificates.load()
+    ssl_files = load_certificates()
 
     # Execute
     server = start_grpc_server(
