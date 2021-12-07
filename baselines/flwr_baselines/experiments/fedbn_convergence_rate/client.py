@@ -1,12 +1,13 @@
+# pylint: disable=wrong-import-order
 """Flower client example using PyTorch for CIFAR-10 image classification."""
 
 import argparse
+import json
 import os
 import sys
 import timeit
 from collections import OrderedDict
 from typing import Dict, List, Tuple
-import json
 
 import cnn_model
 import flwr as fl
@@ -31,7 +32,7 @@ DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Flower Client
 class CifarClient(fl.client.NumPyClient):
-    """Flower client implementing CIFAR-10 image classification using
+    """Flower client implementing image classification using
     PyTorch."""
 
     def __init__(
