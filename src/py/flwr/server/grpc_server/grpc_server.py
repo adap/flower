@@ -32,7 +32,7 @@ FILELIKE = Union[str, bytes]
 SSLFILES = Tuple[FILELIKE, FILELIKE, FILELIKE]
 
 INVALID_SSL_FILES_ERR_MSG = """
-    When setting any of root_certificate, certificate, or private_key
+    When setting any of root_certificate, certificate, or private_key,
     you have to set all of them.
 """
 
@@ -82,8 +82,9 @@ def start_grpc_server(
         Maximum message length that the server can send or receive.
         Int valued in bytes. -1 means unlimited. (default: GRPC_MAX_MESSAGE_LENGTH)
     ssl_files : tuple of union of (str, bytes)
-        Certificates to start secure SSL/TLS server. Expected parameter is a tuple
-        with three elements in this order beeing a file like of
+        Tuple containing root certificate, server certificate, and private key to start
+        a secure SSL/TLS server. The tuple is expected to have three file-like
+        elements in the following order:
 
             * CA certificate.
             * server certificate.
