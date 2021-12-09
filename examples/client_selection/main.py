@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import Dict, Callable, Optional, Tuple
 from dataset_utils import getCIFAR10, do_fl_partitioning, get_dataloader, get_dataset
 from flwr.common.typing import Scalar
-from .priority_client_manager import PriorityClientManager
-from .keyword_criterion import KeywordCriterion
+from priority_client_manager import PriorityClientManager
+from keyword_criterion import KeywordCriterion
 
 # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
 # borrowed from Pytorch quickstart example
@@ -185,8 +185,9 @@ def get_eval_fn(
 
 
 # Besides the steps decrived in `examples/simulation_pytorch`, this example:
-# 1. Modifies a client's `get_parameters` to return the client's `priority`.
-# 2. Defines a `ClientManager` that calls `get_parameters` from `ClientProxy`s
+# 1. Creates a `Criterion` object that is filter clients that have a `priority`.
+# 2. Modifies a client's `get_parameters` to return the client's `priority`.
+# 3. Defines a `ClientManager` that calls `get_parameters` from `ClientProxy`s
 # and samples them accordingly.
 if __name__ == "__main__":
 
@@ -206,7 +207,7 @@ if __name__ == "__main__":
     )
 
     # configure the strategy
-    strategy = fl.sever.strategy.FedAvg(
+    strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.1,
         min_fit_clients=10,
         min_available_clients=pool_size,  # All clients should be available

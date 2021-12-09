@@ -58,7 +58,7 @@ class PriorityClientManager(SimpleClientManager):
         # This could be used, for example, to send a different configuration based on round, etc...
         ins = PropertiesIns(config={})
         num_samples_vect = [
-            self.clients[cid].get_properties(ins=ins).properties["num_samples"]
+            self.clients[cid].get_properties(ins=ins).properties["priority"]
             for cid in available_cids
         ]
         prob = np.asarray(num_samples_vect) / np.sum(num_samples_vect)
