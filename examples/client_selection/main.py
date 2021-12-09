@@ -11,7 +11,7 @@ from typing import Dict, Callable, Optional, Tuple
 from dataset_utils import getCIFAR10, do_fl_partitioning, get_dataloader, get_dataset
 from flwr.common.typing import Scalar
 from .priority_client_manager import PriorityClientManager
-from .priority_criterion import PriorityCriterion
+from .keyword_criterion import KeywordCriterion
 
 # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
 # borrowed from Pytorch quickstart example
@@ -87,9 +87,6 @@ class CifarRayClient(fl.client.NumPyClient):
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def get_properties(self, ins):
-        dataset = get_dataset(self.fed_dir, self.cid, "train")
-        if "num_samples" not in self.properties:
-            self.properties["num_samples"] = len(dataset)
         return self.properties
 
     def set_parameters(self, parameters):
@@ -209,7 +206,7 @@ if __name__ == "__main__":
     )
 
     # configure the strategy
-    strategy = flwr.sever.strategy.FedAvg(
+    strategy = fl.sever.strategy.FedAvg(
         fraction_fit=0.1,
         min_fit_clients=10,
         min_available_clients=pool_size,  # All clients should be available
@@ -225,7 +222,7 @@ if __name__ == "__main__":
     ray_config = {"include_dashboard": False}
 
     # create criterion that checks for keyword `priority` in `get_parameters`.
-    criterion = PriorityCriterion(keyword="priority")
+    criterion = KeywordCriterion(keyword="priority")
 
     # create a client manager
     client_manager = PriorityClientManager(criterion=criterion)
