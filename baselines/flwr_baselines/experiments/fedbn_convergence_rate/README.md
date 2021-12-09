@@ -33,6 +33,8 @@ A more detailed explanation of the datasets is given in the following table.
 The Research team from the [FedBN paper](https://arxiv.org/pdf/2102.07623.pdf) prepared a pre-processed dataset on their GitHub repository that is available [here](https://github.com/med-air/FedBN). Please download their data, save it in a `/data` directory and unzip afterward. 
 The training data contains only 7438 samples and is split into 10 files but only one file is used for **FedBN: Convergence Rate** baseline. Therefore, 743 samples are used for the local training. 
 
+For the original data, please find the download link in FedBN Github repository [here](https://github.com/med-air/FedBN). After downloading the data, save it in a `/data` directory and unzip afterward. Please refer to `utils/data_preprocess.py` to process the original data.
+
 ## Training Setup ##
 
 ### CNN Architecture
