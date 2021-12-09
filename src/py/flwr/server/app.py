@@ -20,7 +20,7 @@ from typing import Dict, Optional, Tuple
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
-from flwr.server.client_manager import SimpleClientManager
+from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
@@ -91,13 +91,15 @@ def start_server(  # pylint: disable=too-many-arguments
 
 
 def _init_defaults(
-    server: Optional[Server],
-    config: Optional[Dict[str, int]],
-    strategy: Optional[Strategy],
+    server: Optional[Server] = None,
+    config: Optional[Dict[str, int]] = None,
+    strategy: Optional[Strategy] = None,
+    client_manager: Optional[ClientManager] = None,
 ) -> Tuple[Server, Dict[str, int]]:
     # Create server instance if none was given
     if server is None:
-        client_manager = SimpleClientManager()
+        if client_manager is None:
+            client_manager = SimpleClientManager()
         if strategy is None:
             strategy = FedAvg()
         server = Server(client_manager=client_manager, strategy=strategy)
