@@ -1,5 +1,5 @@
 """
-This file is used to pre-process all data in Digit-5 dataset.
+This file is used to download and pre-process all data in Digit-5 dataset.
 i.e., splitted data into train&test set  in a stratified way.
 The function to process data into 10 partitions is also provided.
 """
@@ -12,10 +12,6 @@ import scipy.io as scio
 import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit, StratifiedKFold
 from collections import  Counter
-from matplotlib import pylab as plt
-
-
-
 
 def stratified_split(X,y):
     sss = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=0)
@@ -249,6 +245,7 @@ def split(data_path, percentage=0.1):
 
 
 if __name__  == '__main__':
+    print('Processing...')        
     print('--------MNIST---------')
     process_mnist()
     print('--------SVHN---------')
