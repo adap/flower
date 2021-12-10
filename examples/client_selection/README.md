@@ -1,4 +1,4 @@
-# client_selection 
+# Client Selection 
 
 This code shows how to modify a `SimpleClientManager` to select clients based on their `priority` proterty. To keep things simple, a client's priority will be their own `client_id` (cid).
 This code builds on top of `simulation_pytorch`.
