@@ -3,9 +3,6 @@
 
 import argparse
 import json
-import os
-import sys
-import timeit
 from collections import OrderedDict
 from typing import Dict, List, Tuple
 
@@ -19,8 +16,6 @@ import torchvision
 import torchvision.transforms as transforms
 from utils import data_utils
 
-#USE_FEDBN: bool = True
-
 fl_round = 0
 
 eval_list = []
@@ -32,8 +27,7 @@ DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Flower Client
 class CifarClient(fl.client.NumPyClient):
-    """Flower client implementing image classification using
-    PyTorch."""
+    """Flower client implementing image classification using PyTorch."""
 
     def __init__(
         self,
@@ -41,7 +35,7 @@ class CifarClient(fl.client.NumPyClient):
         trainloader: torch.utils.data.DataLoader,
         testloader: torch.utils.data.DataLoader,
         num_examples: Dict,
-        mode:str,
+        mode: str,
     ) -> None:
         self.model = model
         self.trainloader = trainloader
@@ -51,8 +45,9 @@ class CifarClient(fl.client.NumPyClient):
 
     def get_parameters(self) -> List[np.ndarray]:
         self.model.train()
-        if self.mode == 'fedbn':
-            # Return model parameters as a list of NumPy ndarrays, excluding parameters of BN layers when using FedBN
+        if self.mode == "fedbn":
+            # Return model parameters as a list of NumPy ndarrays,
+            # excluding parameters of BN layers when using FedBN
             return [
                 val.cpu().numpy()
                 for name, val in self.model.state_dict().items()
@@ -65,7 +60,7 @@ class CifarClient(fl.client.NumPyClient):
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         # Set model parameters from a list of NumPy ndarrays
         self.model.train()
-        if self.mode == 'fedbn':
+        if self.mode == "fedbn":
             keys = [k for k in self.model.state_dict().keys() if "bn" not in k]
             params_dict = zip(keys, parameters)
             state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
@@ -80,6 +75,16 @@ class CifarClient(fl.client.NumPyClient):
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
+        test_loss, test_accuracy = test(
+            self.model, self.num_examples["dataset"], self.trainloader, device=DEVICE
+        )
+        test_dict = {
+            "dataset": self.num_examples["dataset"],
+            "fl_round": fl_round,
+            "strategy": self.mode,
+            "train_loss": test_loss,
+            "train_accuracy": test_accuracy,
+        }
         loss, accuracy = train(
             self.model,
             self.trainloader,
@@ -87,10 +92,12 @@ class CifarClient(fl.client.NumPyClient):
             epochs=1,
             device=DEVICE,
         )
-        train_dict = {"dataset": self.num_examples["dataset"], "fl_round" : fl_round, "strategy": self.mode , "train_loss": loss, "train_accuracy": accuracy}
-        eval_list.append(train_dict)
-        #print(train_dict)
-        return self.get_parameters(), self.num_examples["trainset"], {"loss":loss, "accuracy": accuracy}
+        eval_list.append(test_dict)
+        return (
+            self.get_parameters(),
+            self.num_examples["trainset"],
+            {"loss": loss, "accuracy": accuracy},
+        )
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, str]
@@ -102,14 +109,25 @@ class CifarClient(fl.client.NumPyClient):
         loss, accuracy = test(
             self.model, self.num_examples["dataset"], self.testloader, device=DEVICE
         )
-        test_dict = {"dataset": self.num_examples["dataset"], "fl_round" : fl_round, "strategy": self.mode, "test_loss": loss, "test_accuracy": accuracy}
+        test_dict = {
+            "dataset": self.num_examples["dataset"],
+            "fl_round": fl_round,
+            "strategy": self.mode,
+            "test_loss": loss,
+            "test_accuracy": accuracy,
+        }
         eval_list.append(test_dict)
-        #print(test_dict)
         fl_round += 1
-        return float(loss), self.num_examples["testset"], {"loss":loss, "accuracy": accuracy}
+        return (
+            float(loss),
+            self.num_examples["testset"],
+            {"loss": loss, "accuracy": accuracy},
+        )
 
 
-def load_partition(dataset: str):
+def load_partition(
+    dataset: str,
+) -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader, Dict]:
     """Load 'MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST-M' for the training
     and test data to simulate a partition."""
 
@@ -138,7 +156,6 @@ def load_partition(dataset: str):
             train=False,
             transform=transform,
         )
-        
 
     elif dataset == "SVHN":
         print(f"Load {dataset} dataset")
@@ -261,7 +278,7 @@ def load_partition(dataset: str):
     return trainloader, testloader, num_examples
 
 
-def train(model, traindata, dataset, epochs, device) -> None:
+def train(model, traindata, dataset, epochs, device) -> Tuple[float, float]:
     """Train the network."""
     # Define loss and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -304,12 +321,17 @@ def train(model, traindata, dataset, epochs, device) -> None:
                 accuracy = correct / total
                 print(
                     "Train Dataset %s with [%d, %5d] loss: %.3f accuracy: %.03f"
-                    % (dataset, epoch + 1, i + 1, running_loss / len(traindata), accuracy)
+                    % (
+                        dataset,
+                        epoch + 1,
+                        i + 1,
+                        running_loss / len(traindata),
+                        accuracy,
+                    )
                 )
                 running_loss = 0.0
         loss = loss / len(traindata)
-    return loss , accuracy 
-
+    return loss, accuracy
 
 
 def test(model, dataset, testdata, device) -> Tuple[float, float]:
@@ -340,7 +362,7 @@ def test(model, dataset, testdata, device) -> Tuple[float, float]:
 def main() -> None:
     """Load data, start CifarClient."""
 
-    # Parse command line argument `partition`
+    # Parse command line argument `partition` (type of dataset) and `mode` (type of strategy)
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
         "--partition",
@@ -370,8 +392,10 @@ def main() -> None:
     client = CifarClient(model, trainloader, testloader, num_examples, args.mode)
     print("Start client of dataset", num_examples["dataset"])
     fl.client.start_numpy_client("[::]:8080", client)
-    with open(f"{args.partition}_{args.mode}_results.json", mode='r+') as f:
-        json.dump(eval_list,f)
+
+    # Save train and evaluation loss and accuracy in json file
+    with open(f"{args.partition}_{args.mode}_results.json", mode="r+") as f:
+        json.dump(eval_list, f)
 
 
 if __name__ == "__main__":
