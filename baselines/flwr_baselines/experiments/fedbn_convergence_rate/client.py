@@ -25,6 +25,7 @@ eval_list = []
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
 
+# mypy: allow-any-generics
 # Flower Client
 class CifarClient(fl.client.NumPyClient):
     """Flower client implementing image classification using PyTorch."""
@@ -34,7 +35,7 @@ class CifarClient(fl.client.NumPyClient):
         model: cnn_model.CNNModel,
         trainloader: torch.utils.data.DataLoader,
         testloader: torch.utils.data.DataLoader,
-        num_examples: Dict,
+        num_examples: Dict[str, int, int],
         mode: str,
     ) -> None:
         self.model = model
