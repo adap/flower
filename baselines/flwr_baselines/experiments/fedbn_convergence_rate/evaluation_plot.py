@@ -1,6 +1,6 @@
 import json
+
 import matplotlib.pyplot as plt
-import numpy as np
 
 fedavg_step_number = []
 fedavg_loss = []
