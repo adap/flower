@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as func
 
+
 # pylint: disable=unsubscriptable-object
 class CNNModel(nn.Module):
     """Model for benchmark experiment on Digits."""

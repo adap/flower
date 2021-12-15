@@ -88,11 +88,8 @@ chmod u+x run.sh
 ./run.sh
 ```
 
-The `run.sh` creates first the files where the evaluation results are saved and starts the `server.py` and 5 clients in parallel with `client.py`. Each client loads another dataset as explained before. The clients save the training and evaluation parameters in a dict with the following information:
+The `run.sh` creates first the files where the evaluation results are saved and starts the `server.py` and 5 clients in parallel with `client.py`. Each client loads another dataset as explained before. The clients save the evaluation results after the parameters are sent from the server to the client and right before the local training. The saved parameters are included in a dict with the following information:
 
-```python
-train_dict = {"dataset": self.num_examples["dataset"], "fl_round" : fl_round, "strategy": self.mode , "train_loss": loss, "train_accuracy": accuracy}
-```
 ```python
 test_dict =  {"dataset": self.num_examples["dataset"], "fl_round" : fl_round, "strategy": self.mode, "test_loss": loss, "test_accuracy": accuracy}
 ```
