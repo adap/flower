@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as func
 
-
+# pylint: disable=unsubscriptable-object
 class CNNModel(nn.Module):
     """Model for benchmark experiment on Digits."""
 
@@ -23,6 +23,7 @@ class CNNModel(nn.Module):
         self.bn5 = nn.BatchNorm1d(512)
         self.fc3 = nn.Linear(512, num_classes)
 
+    # pylint: disable=arguments-differ,invalid-name
     def forward(self, x):
         x = func.relu(self.bn1(self.conv1(x)))
         x = func.max_pool2d(x, 2)
