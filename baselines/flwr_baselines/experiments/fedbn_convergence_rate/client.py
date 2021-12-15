@@ -35,7 +35,7 @@ class CifarClient(fl.client.NumPyClient):
         model: cnn_model.CNNModel,
         trainloader: torch.utils.data.DataLoader,
         testloader: torch.utils.data.DataLoader,
-        num_examples: Dict[str, int, int],
+        num_examples: Dict,
         mode: str,
     ) -> None:
         self.model = model
