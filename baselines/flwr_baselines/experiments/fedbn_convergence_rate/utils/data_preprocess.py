@@ -5,16 +5,15 @@ function to process data into 10 partitions is also provided.
 """
 import os
 import sys
-from pathlib import Path
 
-base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(base_path)
+# base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# sys.path.append(base_path)
 import pickle as pkl
 from collections import Counter
 import numpy as np
 import scipy.io as scio
 import torch
-from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
+from sklearn.model_selection import StratifiedShuffleSplit
 
 
 def stratified_split(X, y):
@@ -242,10 +241,6 @@ def split(data_path, percentage=0.1):
 
 
 if __name__ == "__main__":
-
-    path = Path('./data')
-    path.mkdir(exist_ok=True)
-
     print("Processing...")
     print("--------MNIST---------")
     process_mnist()

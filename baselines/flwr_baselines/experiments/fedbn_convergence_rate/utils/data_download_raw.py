@@ -2,7 +2,6 @@ import wget
 import gzip
 import shutil
 from torchvision import datasets
-from torchvision.datasets.utils import download_url
 from pathlib import Path
 from typing import Dict
 # from scipy.io import loadmat
@@ -22,7 +21,8 @@ def download_all(data: Dict, out_dir: Path):
 
     for k, v in data.items():
         print(f"Downloading: {k}\n")
-        wget.download(v, out=str(out_dir/k))    
+        wget.download(v, out=str(out_dir/k))
+
 
 def get_synthDigits(out_dir: Path):
 
@@ -62,10 +62,11 @@ def get_MNISTM(out_dir: Path):
     val_labels = np.zeros(0)
     val = np.zeros([0, 28, 28, 3], np.uint8)
 
-
     # Save dataset as pickle
     with open(out_dir/'mnistm_data.pkl', 'wb') as f:
-        pickle.dump({ 'train': train, 'train_label': train_labels, 'test': test, 'test_label': test_labels, 'valid': val, 'valid_label': val_labels}, f, pickle.HIGHEST_PROTOCOL)
+        pickle.dump({'train': train, 'train_label': train_labels, 'test': test,
+                     'test_label': test_labels, 'valid': val,
+                     'valid_label': val_labels}, f, pickle.HIGHEST_PROTOCOL)
 
 
 def get_USPS(out_dir: Path):

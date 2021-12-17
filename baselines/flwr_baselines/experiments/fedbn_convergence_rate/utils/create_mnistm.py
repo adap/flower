@@ -1,5 +1,6 @@
 
-# ! This script has been borrowed and adapted. Original script: https://github.com/pumpikano/tf-dann/blob/master/create_mnistm.py
+# ! This script has been borrowed and adapted.
+# Original script: https://github.com/pumpikano/tf-dann/blob/master/create_mnistm.py
 
 import tarfile
 import numpy as np
