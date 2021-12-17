@@ -5,12 +5,12 @@ function to process data into 10 partitions is also provided.
 """
 import os
 import sys
+from pathlib import Path
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_path)
 import pickle as pkl
 from collections import Counter
-
 import numpy as np
 import scipy.io as scio
 import torch
@@ -38,8 +38,8 @@ def process_mnist():
     (14000, 28, 28)
     (14000,)
     """
-    mnist_train = "../data/MNIST/training.pt"
-    mnist_test = "../data/MNIST/test.pt"
+    mnist_train = "./data/MNIST/training.pt"
+    mnist_test = "./data/MNIST/test.pt"
     train = torch.load(mnist_train)
     test = torch.load(mnist_test)
 
@@ -59,10 +59,10 @@ def process_mnist():
     print("Test imgs:\t", test_stratified[0].shape)
     print("Test labels:\t", test_stratified[1].shape)
 
-    with open("../data/MNIST/train.pkl", "wb") as f:
+    with open("./data/MNIST/train.pkl", "wb") as f:
         pkl.dump(train_stratified, f, pkl.HIGHEST_PROTOCOL)
 
-    with open("../data/MNIST/test.pkl", "wb") as f:
+    with open("./data/MNIST/test.pkl", "wb") as f:
         pkl.dump(test_stratified, f, pkl.HIGHEST_PROTOCOL)
 
 
@@ -75,8 +75,8 @@ def process_svhn():
     (19858, 32, 32, 3)
     (19858,)
     """
-    train = scio.loadmat("../data/SVHN/train_32x32.mat")
-    test = scio.loadmat("../data/SVHN/test_32x32.mat")
+    train = scio.loadmat("./data/SVHN/train_32x32.mat")
+    test = scio.loadmat("./data/SVHN/test_32x32.mat")
 
     train_img = train["X"]
     train_tar = train["y"].astype(np.int64).squeeze()
@@ -100,10 +100,10 @@ def process_svhn():
     print("Test imgs:\t", test_stratified[0].shape)
     print("Test labels:\t", test_stratified[1].shape)
 
-    with open("../data/SVHN/train.pkl", "wb") as f:
+    with open("./data/SVHN/train.pkl", "wb") as f:
         pkl.dump(train_stratified, f, pkl.HIGHEST_PROTOCOL)
 
-    with open("../data/SVHN/test.pkl", "wb") as f:
+    with open("./data/SVHN/test.pkl", "wb") as f:
         pkl.dump(test_stratified, f, pkl.HIGHEST_PROTOCOL)
 
 
@@ -119,7 +119,7 @@ def process_usps():
     """
     import bz2
 
-    train_path = "../data/USPS/usps.bz2"
+    train_path = "./data/USPS/usps.bz2"
     with bz2.open(train_path) as fp:
         raw_data = [l.decode().split() for l in fp.readlines()]
     imgs = [[x.split(":")[-1] for x in data[1:]] for data in raw_data]
@@ -130,7 +130,7 @@ def process_usps():
     train_img = imgs
     train_tar = np.array(targets)
 
-    test_path = "../data/USPS/usps.t.bz2"
+    test_path = "./data/USPS/usps.t.bz2"
     with bz2.open(test_path) as fp:
         raw_data = [l.decode().split() for l in fp.readlines()]
     imgs = [[x.split(":")[-1] for x in data[1:]] for data in raw_data]
@@ -151,17 +151,17 @@ def process_usps():
     print("Test imgs:\t", test_stratified[0].shape)
     print("Test labels:\t", test_stratified[1].shape)
 
-    with open("../data/USPS/train.pkl", "wb") as f:
+    with open("./data/USPS/train.pkl", "wb") as f:
         pkl.dump(train_stratified, f, pkl.HIGHEST_PROTOCOL)
 
-    with open("../data/USPS/test.pkl", "wb") as f:
+    with open("./data/USPS/test.pkl", "wb") as f:
         pkl.dump(test_stratified, f, pkl.HIGHEST_PROTOCOL)
 
 
 def process_synth():
     """(391162, 32, 32, 3) (391162,) (97791, 32, 32, 3) (97791,)"""
-    train = scio.loadmat("../data/SynthDigits/synth_train_32x32.mat")
-    test = scio.loadmat("../data/SynthDigits/synth_test_32x32.mat")
+    train = scio.loadmat("./data/SynthDigits/synth_train_32x32.mat")
+    test = scio.loadmat("./data/SynthDigits/synth_test_32x32.mat")
 
     train_img = train["X"]
     train_tar = train["y"].astype(np.int64).squeeze()
@@ -182,10 +182,10 @@ def process_synth():
     print("Test imgs:\t", test_stratified[0].shape)
     print("Test labels:\t", test_stratified[1].shape)
 
-    with open("../data/SynthDigits/train.pkl", "wb") as f:
+    with open("./data/SynthDigits/train.pkl", "wb") as f:
         pkl.dump(train_stratified, f, pkl.HIGHEST_PROTOCOL)
 
-    with open("../data/SynthDigits/test.pkl", "wb") as f:
+    with open("./data/SynthDigits/test.pkl", "wb") as f:
         pkl.dump(test_stratified, f, pkl.HIGHEST_PROTOCOL)
 
 
@@ -197,7 +197,7 @@ def process_mnistm():
     (14000,)
     :return:
     """
-    data = np.load("../data/MNIST_M/mnistm_data.pkl", allow_pickle=True)
+    data = np.load("./data/MNIST_M/mnistm_data.pkl", allow_pickle=True)
     train_img = data["train"]
     train_tar = data["train_label"]
     valid_img = data["valid"]
@@ -215,10 +215,10 @@ def process_mnistm():
     print("Test imgs:\t", test_stratified[0].shape)
     print("Test labels:\t", test_stratified[1].shape)
 
-    with open("../data/MNIST_M/train.pkl", "wb") as f:
+    with open("./data/MNIST_M/train.pkl", "wb") as f:
         pkl.dump(train_stratified, f, pkl.HIGHEST_PROTOCOL)
 
-    with open("../data/MNIST_M/test.pkl", "wb") as f:
+    with open("./data/MNIST_M/test.pkl", "wb") as f:
         pkl.dump(test_stratified, f, pkl.HIGHEST_PROTOCOL)
 
 
@@ -242,6 +242,10 @@ def split(data_path, percentage=0.1):
 
 
 if __name__ == "__main__":
+
+    path = Path('./data')
+    path.mkdir(exist_ok=True)
+
     print("Processing...")
     print("--------MNIST---------")
     process_mnist()
@@ -249,18 +253,24 @@ if __name__ == "__main__":
     process_svhn()
     print("--------USPS---------")
     process_usps()
-    print("--------SynthDigits---------")
-    process_synth()
     print("--------MNIST-M---------")
     process_mnistm()
+    print("--------SynthDigits---------")
+    try:
+        process_synth()
+    except Exception as exception:
+        print(f"unable to process SynthDigits: {exception}")
 
     base_paths = [
-        "../data/MNIST",
-        "../data/SVHN",
-        "../data/USPS",
-        "../data/SynthDigits",
-        "../data/MNIST_M",
+        "./data/MNIST",
+        "./data/SVHN",
+        "./data/USPS",
+        "./data/MNIST_M",
+        "./data/SynthDigits",
     ]
     for path in base_paths:
         print(f"Spliting {os.path.basename(path)}")
-        split(path)
+        try:
+            split(path)
+        except Exception as exception:
+            print(f"Failed to split: {path} --> {exception}")

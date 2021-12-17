@@ -56,6 +56,6 @@ if __name__ == "__main__":
     destination = "data/data.zip"
     download_file_from_google_drive(file_id, destination)
     print("Extracting...")
-    with zipfile.ZipFile(destination, "w+") as zip_ref:
+    with zipfile.ZipFile(destination, "r") as zip_ref:
         for file in tqdm(iterable=zip_ref.namelist(), total=len(zip_ref.namelist())):
             zip_ref.extract(member=file, path=os.path.dirname(destination))

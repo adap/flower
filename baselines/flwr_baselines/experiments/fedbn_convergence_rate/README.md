@@ -35,11 +35,17 @@ The training data contains only 7438 samples and is split into 10 files but only
 
 For the original data, please run the folloing to download and perform preprocessing:
 ```bash
-cd ./utils
-# download 
-python data_download.py
+# download data (will create a directory in ./path)
+python utils/data_download.py
 # preprocess
-python data_preprocess.py
+python utils/data_preprocess.py
+```
+
+All the datasets (with the exception of SynthDigits) can be downloaded from the original sources:
+
+```bash
+# download
+python utils/data_download_raw.py # then run `data_preprocess.py` as before.
 ```
 
 ## Training Setup ##
