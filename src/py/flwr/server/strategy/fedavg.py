@@ -68,6 +68,13 @@ instead. Use
 to easily transform `Weights` to `Parameters`.
 """
 
+WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
+Setting `min_available_clients` lower than `min_fit_clients` or
+`min_eval_clients` can cause the server to fail when there are too few clients
+connected to the server. `min_available_clients` must be set to a value larger
+than or equal to the values of `min_fit_clients` and `min_eval_clients`.
+"""
+
 
 class FedAvg(Strategy):
     """Configurable FedAvg strategy implementation."""
@@ -92,32 +99,41 @@ class FedAvg(Strategy):
 
         Implementation based on https://arxiv.org/abs/1602.05629
 
-        Args:
-            fraction_fit (float, optional): Fraction of clients used during
-                training. Defaults to 0.1.
-            fraction_eval (float, optional): Fraction of clients used during
-                validation. Defaults to 0.1.
-            min_fit_clients (int, optional): Minimum number of clients used
-                during training. Defaults to 2.
-            min_eval_clients (int, optional): Minimum number of clients used
-                during validation. Defaults to 2.
-            min_available_clients (int, optional): Minimum number of total
-                clients in the system. Defaults to 2.
-            eval_fn (Callable[[Weights], Optional[Tuple[float, float]]], optional):
-                Function used for validation. Defaults to None.
-            on_fit_config_fn (Callable[[int], Dict[str, Scalar]], optional):
-                Function used to configure training. Defaults to None.
-            on_evaluate_config_fn (Callable[[int], Dict[str, Scalar]], optional):
-                Function used to configure validation. Defaults to None.
-            accept_failures (bool, optional): Whether or not accept rounds
-                containing failures. Defaults to True.
-            initial_parameters (Parameters, optional): Initial global model parameters.
+        Parameters
+        ----------
+        fraction_fit : float, optional
+            Fraction of clients used during training. Defaults to 0.1.
+        fraction_eval : float, optional
+            Fraction of clients used during validation. Defaults to 0.1.
+        min_fit_clients : int, optional
+            Minimum number of clients used during training. Defaults to 2.
+        min_eval_clients : int, optional
+            Minimum number of clients used during validation. Defaults to 2.
+        min_available_clients : int, optional
+            Minimum number of total clients in the system. Defaults to 2.
+        eval_fn : Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Optional function used for validation. Defaults to None.
+        on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
+            Function used to configure training. Defaults to None.
+        on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
+            Function used to configure validation. Defaults to None.
+        accept_failures : bool, optional
+            Whether or not accept rounds containing failures. Defaults to True.
+        initial_parameters : Parameters, optional
+            Initial global model parameters.
         """
         super().__init__()
-        self.min_fit_clients = min_fit_clients
-        self.min_eval_clients = min_eval_clients
+
+        if (
+            min_fit_clients > min_available_clients
+            or min_eval_clients > min_available_clients
+        ):
+            log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
+
         self.fraction_fit = fraction_fit
         self.fraction_eval = fraction_eval
+        self.min_fit_clients = min_fit_clients
+        self.min_eval_clients = min_eval_clients
         self.min_available_clients = min_available_clients
         self.eval_fn = eval_fn
         self.on_fit_config_fn = on_fit_config_fn

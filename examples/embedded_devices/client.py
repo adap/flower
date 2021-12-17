@@ -26,7 +26,7 @@ import torch
 import torchvision
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
 
-from . import utils
+import utils
 
 # pylint: disable=no-member
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -42,7 +42,7 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
     """Set model weights from a list of NumPy ndarrays."""
     state_dict = OrderedDict(
         {
-            k: torch.Tensor(np.atleast_1d(v))
+            k: torch.tensor(np.atleast_1d(v))
             for k, v in zip(model.state_dict().keys(), weights)
         }
     )
@@ -114,12 +114,9 @@ class CifarClient(fl.client.Client):
         weights_prime: Weights = get_weights(self.model)
         params_prime = fl.common.weights_to_parameters(weights_prime)
         num_examples_train = len(self.trainset)
-        fit_duration = timeit.default_timer() - fit_begin
+        metrics = {"duration": timeit.default_timer() - fit_begin}
         return FitRes(
-            parameters=params_prime,
-            num_examples=num_examples_train,
-            num_examples_ceil=num_examples_train,
-            fit_duration=fit_duration,
+            parameters=params_prime, num_examples=num_examples_train, metrics=metrics
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
@@ -137,8 +134,9 @@ class CifarClient(fl.client.Client):
         loss, accuracy = utils.test(self.model, testloader, device=DEVICE)
 
         # Return the number of evaluation examples and the evaluation result (loss)
+        metrics = {"accuracy": float(accuracy)}
         return EvaluateRes(
-            num_examples=len(self.testset), loss=float(loss), accuracy=float(accuracy)
+            num_examples=len(self.testset), loss=float(loss), metrics=metrics
         )
 
 

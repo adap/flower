@@ -24,7 +24,7 @@ import numpy as np
 import torch
 import torchvision
 
-from . import utils
+import utils
 
 # pylint: disable=no-member
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -123,7 +123,7 @@ def main() -> None:
     )
 
 
-def fit_config(rnd: int) -> Dict[str, str]:
+def fit_config(rnd: int) -> Dict[str, fl.common.Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
     config = {
         "epoch_global": str(rnd),
@@ -139,7 +139,7 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
     """Set model weights from a list of NumPy ndarrays."""
     state_dict = OrderedDict(
         {
-            k: torch.Tensor(np.atleast_1d(v))
+            k: torch.tensor(np.atleast_1d(v))
             for k, v in zip(model.state_dict().keys(), weights)
         }
     )
@@ -159,7 +159,8 @@ def get_eval_fn(
         model.to(DEVICE)
 
         testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
-        return utils.test(model, testloader, device=DEVICE)
+        loss, accuracy = utils.test(model, testloader, device=DEVICE)
+        return loss, {"accuracy": accuracy}
 
     return evaluate
 

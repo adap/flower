@@ -348,14 +348,14 @@ class PytorchMNISTClient(fl.client.Client):
         """
         state_dict = OrderedDict(
             {
-                k: torch.Tensor(v)
+                k: torch.tensor(v)
                 for k, v in zip(self.model.state_dict().keys(), weights)
             }
         )
         self.model.load_state_dict(state_dict, strict=True)
 
     def get_parameters(self) -> fl.common.ParametersRes:
-        """Encapsulates the weights into Flower Parameters """
+        """Encapsulates the weights into Flower Parameters."""
         weights: fl.common.Weights = self.get_weights()
         parameters = fl.common.weights_to_parameters(weights)
         return fl.common.ParametersRes(parameters=parameters)

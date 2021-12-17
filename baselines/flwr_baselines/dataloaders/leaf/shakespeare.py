@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
-import json
+"""Creates a PyTorch Dataset for Leaf Shakespeare."""
 import pickle
-from os import PathLike
+from pathlib import Path
+from typing import List
 
 import numpy as np
+from flwr.dataset.utils.common import XY
 from torch.utils.data import Dataset
 
 LEAF_CHARACTERS = (
@@ -25,34 +26,42 @@ LEAF_CHARACTERS = (
 )
 
 
-class ShakespeareDataset(Dataset):
+class ShakespeareDataset(Dataset[XY]):  # type: ignore
     """Creates a PyTorch Dataset for Leaf Shakespeare.
 
     Args:
         Dataset (torch.utils.data.Dataset): PyTorch Dataset
     """
 
-    def __init__(self, path_to_pickle: PathLike):
+    def __init__(self, path_to_pickle: Path):
 
-        self.CHARACTERS = LEAF_CHARACTERS
-        self.NUM_LETTERS = len(self.CHARACTERS)  # 80
-        self.x, self.y = [], []
+        self.characters: str = LEAF_CHARACTERS
+        self.num_letters: int = len(self.characters)  # 80
 
-        with open(path_to_pickle, "rb") as f:
-            data = pickle.load(f)
-            self.x = data["x"]
-            self.y = data["y"]
-            self.idx = data["idx"]
+        with open(path_to_pickle, "rb") as open_file:
+            data = pickle.load(open_file)
+            self.sentence = data["x"]
+            self.next_word = data["y"]
+            self.index = data["idx"]
             self.char = data["character"]
 
-    def word_to_indices(self, word: str):
-        indices = [self.CHARACTERS.find(c) for c in word]
+    def word_to_indices(self, word: str) -> List[int]:
+        """Converts a sequence of characters into position indices in the
+        reference string `self.characters`.
+
+        Args:
+            word (str): Sequence of characters to be converted.
+
+        Returns:
+            List[int]: List with positions.
+        """
+        indices: List[int] = [self.characters.find(c) for c in word]
         return indices
 
-    def __len__(self):
-        return len(self.y)
+    def __len__(self) -> int:
+        return len(self.next_word)
 
-    def __getitem__(self, idx: int):
-        x = np.array(self.word_to_indices(self.x[idx]))
-        y = np.array(self.CHARACTERS.find(self.y[idx]))
-        return x, y
+    def __getitem__(self, idx: int) -> XY:
+        sentence_indices = np.array(self.word_to_indices(self.sentence[idx]))
+        next_word_index = np.array(self.characters.find(self.next_word[idx]))
+        return sentence_indices, next_word_index

@@ -3,6 +3,11 @@
 data/
 doc/source/api_documentation
 doc/source/_build
+flwr_logs
+
+# Datasets
+cifar-10-python.tar.gz
+cifar-10-batches-py
 
 # Editor
 .vscode
