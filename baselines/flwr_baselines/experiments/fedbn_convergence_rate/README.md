@@ -88,10 +88,11 @@ As soon as you have downloaded the data you are ready to start the baseline expe
 In order to run the experiment, you simply make `run.sh` executable and run it. 
 
 ```bash
-chmod u+x run.sh
-```
-```bash
-./run.sh
+chmod +x run.sh
+# now compare fedavg vs fedbn
+./run.sh fedavg
+# you might want ot wait for the above to finish before running in FedBN mode.
+./run.sh fedbn
 ```
 
 The `run.sh` creates first the files where the evaluation results are saved and starts the `server.py` and 5 clients in parallel with `client.py`. Each client loads another dataset as explained before. The clients save the evaluation results after the parameters are sent from the server to the client and right before the local training. The saved parameters are included in a dict with the following information:
