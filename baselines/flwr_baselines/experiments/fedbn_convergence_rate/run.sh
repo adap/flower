@@ -1,5 +1,17 @@
 #!/bin/bash
 
+dirname = data
+
+
+if [ ! -d "data" ]
+then
+    echo "File doesn't exist. Creating now"
+    mkdir ./data
+    echo "File created"
+else
+    echo "File exists"
+fi
+
 echo "Start Trainign with FedAvg"
 
 python server.py &
