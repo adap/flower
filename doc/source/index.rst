@@ -59,6 +59,17 @@ intended to help along the way.
    release_process
 
 
+FAQ
+---
+
+Find the most frequent questions from the community and their answer. 
+
+.. toctree::
+   :maxdepth: 1
+   :caption: FAQ
+
+   faq-section
+
 About
 -----
 
