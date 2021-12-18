@@ -52,7 +52,9 @@ class Net(nn.Module):
         return x
 
 
-def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader, Dict]:
+def load_data() -> Tuple[
+    torch.utils.data.DataLoader, torch.utils.data.DataLoader, Dict
+]:
     """Load CIFAR-10 (training and test set)."""
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -61,7 +63,7 @@ def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoade
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True)
     testset = CIFAR10(DATA_ROOT, train=False, download=True, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
-    num_examples = {"trainset" : len(trainset), "testset" : len(testset)}
+    num_examples = {"trainset": len(trainset), "testset": len(testset)}
     return trainloader, testloader, num_examples
 
 
