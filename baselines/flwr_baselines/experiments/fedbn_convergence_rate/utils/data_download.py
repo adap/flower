@@ -1,15 +1,13 @@
 import os
+import requests
 import zipfile
 
-import requests
+from pathlib import Path
 from tqdm import tqdm
 from typing import Any
-from pathlib import Path
 
 
-def download_file_from_google_drive(
-        id: Any,
-        destination: str) -> None:
+def download_file_from_google_drive(id: Any, destination: str) -> None:
     URL = "https://docs.google.com/uc?export=download"
 
     session = requests.Session()
@@ -35,10 +33,7 @@ def get_confirm_token(response: Any) -> None:
     return None
 
 
-def save_response_content(
-        response: Any,
-        destination: str,
-        total_length: float) -> None:
+def save_response_content(response: Any, destination: str, total_length: float) -> None:
     CHUNK_SIZE = 32768
 
     with open(destination, "wb") as f:
@@ -51,7 +46,7 @@ def save_response_content(
 
 
 if __name__ == "__main__":
-    Path('./data').mkdir(exist_ok=True)
+    Path("./data").mkdir(exist_ok=True)
     file_id = "1P8g7uHyVxQJPcBKE8TAzfdKbimpRbj0I"
     destination = "data/data.zip"
     download_file_from_google_drive(file_id, destination)

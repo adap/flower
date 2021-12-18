@@ -1,12 +1,11 @@
-
 # ! This script has been borrowed and adapted.
 # Original script: https://github.com/pumpikano/tf-dann/blob/master/create_mnistm.py
 
-import tarfile
 import numpy as np
 import skimage
 import skimage.io
 import skimage.transform
+import tarfile
 
 
 def compose_image(digit, background):
@@ -16,7 +15,7 @@ def compose_image(digit, background):
     x = np.random.randint(0, w - dw)
     y = np.random.randint(0, h - dh)
 
-    bg = background[x:x+dw, y:y+dh]
+    bg = background[x: x + dw, y: y + dh]
     return np.abs(bg - digit).astype(np.uint8)
 
 
@@ -34,17 +33,17 @@ def create_mnistm(X):
     http://jmlr.org/papers/volume17/15-239/15-239.pdf
     """
 
-    BST_PATH = './data/MNIST_M/BSR_bsds500.tgz'
+    BST_PATH = "./data/MNIST_M/BSR_bsds500.tgz"
 
     rand = np.random.RandomState(42)
 
     f = tarfile.open(BST_PATH)
     train_files = []
     for name in f.getnames():
-        if name.startswith('BSR/BSDS500/data/images/train/'):
+        if name.startswith("BSR/BSDS500/data/images/train/"):
             train_files.append(name)
 
-    print('Loading BSR training images')
+    print("Loading BSR training images")
     background_data = []
     for name in train_files:
         try:
@@ -58,7 +57,7 @@ def create_mnistm(X):
     for i in range(X.shape[0]):
 
         if i % 1000 == 0:
-            print('Processing example', i)
+            print("Processing example", i)
 
         bg_img = rand.choice(background_data)
 
