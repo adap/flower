@@ -1,7 +1,7 @@
 FAQ
 ===
 
-Find here the answers of questions frequently asked. 
+This page collects answers to commonly asked questions about Federated Learning with Flower.
 
 .. dropdown:: :fa:`eye,mr-1` Can I combine federated learning with blockchain?
 
