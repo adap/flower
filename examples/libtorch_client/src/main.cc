@@ -13,7 +13,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include "start.h"
+#include "start.cc"
 #include "torch_client.cc"
 
 int main(int argc, char** argv) {
@@ -69,7 +69,8 @@ int main(int argc, char** argv) {
     std::string server_add = SERVER_URL;
     
     // Start client
-    start_client(server_add, &client);
+    start s;
+    s.start_client(server_add, &client);
     
     return 0;
 }

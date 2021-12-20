@@ -141,3 +141,6 @@ def _fl(
 
     # Graceful shutdown
     server.disconnect_all_clients()
+
+if __name__ == "__main__":
+    start_server("[::]:8080", config={"num_rounds": 3})

@@ -180,7 +180,7 @@ namespace flwr {
 	public:
 		FitRes() {};
 		FitRes(Parameters parameters, int num_examples, int num_examples_ceil, float fit_duration, Metrics metrics)
-			: parameters(parameters), num_examples(num_examples), num_examples_ceil(num_examples_ceil),
+			: parameters(parameters), num_examples(num_examples),
 			fit_duration(fit_duration), metrics(metrics) {};
 
 		// Getters
@@ -192,10 +192,10 @@ namespace flwr {
 		{
 			return num_examples;
 		}
-		std::optional<int> getNum_examples_ceil()
+		/*std::optional<int> getNum_examples_ceil()
 		{
 			return num_examples_ceil;
-		}
+		}*/
 		std::optional<float> getFit_duration()
 		{
 			return fit_duration;
@@ -214,10 +214,10 @@ namespace flwr {
 		{
 			num_examples = n;
 		}
-		void setNum_examples_ceil(int n)
+		/*void setNum_examples_ceil(int n)
 		{
 			num_examples_ceil = n;
-		}
+		}*/
 		void setFit_duration(float f)
 		{
 			fit_duration = f;
@@ -230,7 +230,7 @@ namespace flwr {
 	private:
 		Parameters parameters;
 		int num_examples;
-		std::optional<int> num_examples_ceil = std::nullopt; 
+		//std::optional<int> num_examples_ceil = std::nullopt; 
 		std::optional<float> fit_duration = std::nullopt;	 
 		std::optional<Metrics> metrics = std::nullopt;
 	};

@@ -72,8 +72,10 @@ ClientMessage _fit(flwr::Client* client, ServerMessage_FitIns fit_msg) {
 ClientMessage _evaluate(flwr::Client* client, ServerMessage_EvaluateIns evaluate_msg) {
 	// Deserialize evaluate instruction
 	flwr::EvaluateIns evaluate_ins = evaluate_ins_from_proto(evaluate_msg);
+	//std::cout << "DEBUG: evaluate_ins_from_proto" << std::endl;
 	// Perform evaluation
 	flwr::EvaluateRes evaluate_res = client->evaluate(evaluate_ins);
+	//std::cout << "DEBUG: client_evaluate" << std::endl;
 	// Serialize evaluate result
 	ClientMessage cm;
 	*cm.mutable_evaluate_res() = evaluate_res_to_proto(evaluate_res);
