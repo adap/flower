@@ -25,18 +25,19 @@ A more detailed explanation of the datasets is given in the following table.
 | pixelsize | 28x28 | 28 x 28 | 32 x32 | 16 x16 | 32 x32 |
 | labels | 0-9 | 0-9 | 1-10 | 0-9 | 1-10 |
 | number of trainset | 60.000 | 60.000 | 73.257 | 9,298 | 50.000 |
-| number of testset| 10.000 | 10.000 | 26.032 | - | 0 |
+| number of testset| 10.000 | 10.000 | 26.032 | - | - |
 | image shape | (28,28) | (28,28,3) | (32,32,3) | (16,16) | (32,32,3) |
 
 ### Dataset Download
 
-The Research team from the [FedBN paper](https://arxiv.org/pdf/2102.07623.pdf) prepared a pre-processed dataset on their GitHub repository that is available [here](https://github.com/med-air/FedBN). Please download their data, save it in a `/data` directory and unzip afterward. 
+The Research team from the [FedBN paper](https://arxiv.org/pdf/2102.07623.pdf) prepared a preprocessed dataset on their GitHub repository that is available [here](https://github.com/med-air/FedBN). Please download their data, save it in a `/data` directory and unzip afterward. 
 The training data contains only 7438 samples and is split into 10 files but only one file is used for **FedBN: Convergence Rate** baseline. Therefore, 743 samples are used for the local training. 
 
-For the original data, please run the folloing to download and perform preprocessing:
+For the original data, please run the following to download and perform preprocessing:
 ```bash
 # download data (will create a directory in ./path)
 python utils/data_download.py
+
 # preprocess
 python utils/data_preprocess.py
 ```
@@ -45,7 +46,10 @@ All the datasets (with the exception of SynthDigits) can be downloaded from the 
 
 ```bash
 # download
-python utils/data_download_raw.py # then run `data_preprocess.py` as before.
+python utils/data_download_raw.py 
+
+# preprocess
+python utils/data_preprocess.py
 ```
 
 ## Training Setup ##
@@ -56,11 +60,11 @@ The CNN architecture is given in the paper and reused to create the **FedBN - Co
 
 | Layer | Details| 
 | ----- | ------ |
-| 1 | Conv2D(3,64, 5,1,2) <br> BN(64), ReLU, MaxPool2D(2,2)  |
-| 2 | Conv2D(64, 64, 5, 1, 2) <br> BN(64), ReLU, MaxPool2D(2,2) |
-| 3 | Conv2D(64, 128, 5, 1, 2) <br> BN(128), ReLU |
-| 4 | FC(6272, 2048) <br> BN(2048), ReLU |
-| 5 | FC(2048, 512) <br> BN(512), ReLU |
+| 1 | Conv2D(3,64, 5,1,2) <br/> BN(64), ReLU, MaxPool2D(2,2)  |
+| 2 | Conv2D(64, 64, 5, 1, 2) <br/> BN(64), ReLU, MaxPool2D(2,2) |
+| 3 | Conv2D(64, 128, 5, 1, 2) <br/> BN(128), ReLU |
+| 4 | FC(6272, 2048) <br/> BN(2048), ReLU |
+| 5 | FC(2048, 512) <br/> BN(512), ReLU |
 | 6 | FC(512, 10) |
 
 ### Training Paramater
@@ -75,23 +79,24 @@ The CNN architecture is given in the paper and reused to create the **FedBN - Co
 
 ## Running the Experiment
 
-Before you run any program of the baseline experiment, please get the required data and place it in the `/data` directory. 
+Before you run any program of the baseline experiment, [please get the required data](dataset-download), and place it in the `/data` directory. 
 
-As soon as you have downloaded the data you are ready to start the baseline experiment. The baseline contains different programs:
+As soon as you have downloaded the data you are ready to start the baseline experiment. The baseline requires different programs:
 
-* utils/data_utils.py
 * cnn_model.py
 * client.py
-* server.py 
+* server.py
 * run.sh
+* utils/data_utils.py
+* evaluation_plot.py
 
-In order to run the experiment, you simply make `run.sh` executable and run it. 
+In order to run the experiment, you simply make `run.sh` executable and run it.
 
 ```bash
 chmod +x run.sh
-# now compare fedavg vs fedbn
+# train the CNN with FedAvg strategy
 ./run.sh fedavg
-# you might want ot wait for the above to finish before running in FedBN mode.
+# train the CNN with FedBN strategy
 ./run.sh fedbn
 ```
 
@@ -102,6 +107,15 @@ test_dict =  {"dataset": self.num_examples["dataset"], "fl_round" : fl_round, "s
 ```
 
 The `utils/data_utils.py` prepares/loads the data for the training and `cnn_model.py` set up the [CNN model architecture](#cnn-architecture). This baseline only takes one single file with 743 samples from the downloaded dataset. 
+
+If you want to compare the results from both strategy runs you can run:
+
+```bash
+# create the evalutation plot
+python evaluation_plot.py
+```
+
+This will create a plot `convergence_rate.png` including the train loss after the server aggregation from a certain client for the FedAvg and FedBN stretegy. A very good difference between both stretagies is visible for the SVHN dataset. The train loss for FedBN has a more stable and deeper decrease than for the FedAvg strategy.
 
 ### Server
 
