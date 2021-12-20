@@ -5,7 +5,7 @@ This page collects answers to commonly asked questions about Federated Learning 
 
 .. dropdown:: :fa:`eye,mr-1` Can I combine federated learning with blockchain?
 
-    Yes, of course. A list of available examples using Flower within a blockchain environment are available here:
+    Yes, of course. A list of available examples using Flower within a blockchain environment is available here:
 
     * `Flower meets Nevermined GitHub Repository <https://github.com/nevermined-io/fl-demo/tree/master/image-classification-flower>`_.
     * `Flower meets Nevermined YouTube video <https://www.youtube.com/watch?v=A0A9hSlPhKI>`_.
