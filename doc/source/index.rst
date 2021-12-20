@@ -31,6 +31,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    fedbn-example-pytorch-from-centralized-to-federated
    recommended-env-setup
    changelog
+   faq-section
 
 
 API Reference
@@ -58,17 +59,6 @@ intended to help along the way.
    architecture
    release_process
 
-
-FAQ
----
-
-Find the most frequent questions from the community and their answer. 
-
-.. toctree::
-   :maxdepth: 1
-   :caption: FAQ
-
-   faq-section
 
 About
 -----
