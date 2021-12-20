@@ -15,7 +15,7 @@ This page collects answers to commonly asked questions about Federated Learning 
 
 .. dropdown:: :fa:`eye,mr-1` Does Flower support federated learning on Android devices?
 
-    Yes, it does. Please find have a look to our `blog post <https://flower.dev/blog/2021-12-15-federated-learning-on-android-devices-with-flower>`_ or check out the `example on Flower GitHub <https://github.com/adap/flower/tree/main/examples/android>`_.
+    Yes, it does. Please take a look at our `blog post <https://flower.dev/blog/2021-12-15-federated-learning-on-android-devices-with-flower>`_ or check out the `Android code example on GitHub <https://github.com/adap/flower/tree/main/examples/android>`_.
 
 .. dropdown:: :fa:`eye,mr-1` How can I run Federated Learning on a Raspberry Pi?
 
