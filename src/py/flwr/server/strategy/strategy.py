@@ -54,13 +54,13 @@ class Strategy(ABC):
 
     @abstractmethod
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, fl_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training.
 
         Parameters
         ----------
-        rnd : int
+        fl_round : int
             The current round of federated learning.
         parameters : Parameters
             The current (global) model parameters.
@@ -78,7 +78,7 @@ class Strategy(ABC):
     @abstractmethod
     def aggregate_fit(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Union[
@@ -89,7 +89,7 @@ class Strategy(ABC):
 
         Parameters
         ----------
-        rnd : int
+        fl_round : int
             The current round of federated learning.
         results : List[Tuple[ClientProxy, FitRes]]
             Successful updates from the previously selected and configured
@@ -117,12 +117,12 @@ class Strategy(ABC):
 
     @abstractmethod
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, fl_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation.
 
         Arguments:
-            rnd: Integer. The current round of federated learning.
+            fl_round: Integer. The current round of federated learning.
             parameters: Parameters. The current (global) model parameters.
             client_manager: ClientManager. The client manager which holds all currently
                 connected clients.
@@ -138,7 +138,7 @@ class Strategy(ABC):
     @abstractmethod
     def aggregate_evaluate(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Union[
@@ -148,7 +148,7 @@ class Strategy(ABC):
         """Aggregate evaluation results.
 
         Arguments:
-            rnd: int. The current round of federated learning.
+            fl_round: int. The current round of federated learning.
             results: List[Tuple[ClientProxy, FitRes]]. Successful updates from the
                 previously selected and configured clients. Each pair of
                 `(ClientProxy, FitRes` constitutes a successful update from one of the

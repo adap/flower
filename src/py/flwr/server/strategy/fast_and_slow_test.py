@@ -52,8 +52,8 @@ class FastAndSlowTestCase(unittest.TestCase):
         ]
 
         # Execute and assert
-        for rnd, r_fast, r_slow, expected in values:
-            actual = fast_and_slow.is_fast_round(rnd, r_fast, r_slow)
+        for fl_round, r_fast, r_slow, expected in values:
+            actual = fast_and_slow.is_fast_round(fl_round, r_fast, r_slow)
             assert actual == expected
 
     def test_next_timeout_below_max(self) -> None:

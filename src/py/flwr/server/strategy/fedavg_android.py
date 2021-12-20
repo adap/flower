@@ -172,13 +172,13 @@ class FedAvgAndroid(Strategy):
         return loss, metrics
 
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, fl_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
-            config = self.on_fit_config_fn(rnd)
+            config = self.on_fit_config_fn(fl_round)
         fit_ins = FitIns(parameters, config)
 
         # Sample clients
@@ -193,7 +193,7 @@ class FedAvgAndroid(Strategy):
         return [(client, fit_ins) for client in clients]
 
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, fl_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         # Do not configure federated evaluation if a centralized evaluation
@@ -205,11 +205,11 @@ class FedAvgAndroid(Strategy):
         config = {}
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
-            config = self.on_evaluate_config_fn(rnd)
+            config = self.on_evaluate_config_fn(fl_round)
         evaluate_ins = EvaluateIns(parameters, config)
 
         # Sample clients
-        if rnd >= 0:
+        if fl_round >= 0:
             sample_size, min_num_clients = self.num_evaluation_clients(
                 client_manager.num_available()
             )
@@ -224,7 +224,7 @@ class FedAvgAndroid(Strategy):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -243,7 +243,7 @@ class FedAvgAndroid(Strategy):
 
     def aggregate_evaluate(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:

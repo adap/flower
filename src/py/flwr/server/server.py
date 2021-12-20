@@ -41,13 +41,13 @@ from flwr.server.strategy import FedAvg, Strategy
 DEPRECATION_WARNING_EVALUATE = """
 DEPRECATION WARNING: Method
 
-    Server.evaluate(self, rnd: int) -> Optional[
+    Server.evaluate(self, fl_round: int) -> Optional[
         Tuple[Optional[float], EvaluateResultsAndFailures]
     ]
 
 is deprecated and will be removed in a future release, use
 
-    Server.evaluate_round(self, rnd: int) -> Optional[
+    Server.evaluate_round(self, fl_round: int) -> Optional[
         Tuple[Optional[float], Dict[str, Scalar], EvaluateResultsAndFailures]
     ]
 
@@ -126,8 +126,8 @@ class Server:
                 res[0],
                 res[1],
             )
-            history.add_loss_centralized(rnd=0, loss=res[0])
-            history.add_metrics_centralized(rnd=0, metrics=res[1])
+            history.add_loss_centralized(fl_round=0, loss=res[0])
+            history.add_metrics_centralized(fl_round=0, metrics=res[1])
 
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
@@ -135,7 +135,7 @@ class Server:
 
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
-            res_fit = self.fit_round(rnd=current_round)
+            res_fit = self.fit_round(fl_round=current_round)
             if res_fit:
                 parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
@@ -153,17 +153,17 @@ class Server:
                     metrics_cen,
                     timeit.default_timer() - start_time,
                 )
-                history.add_loss_centralized(rnd=current_round, loss=loss_cen)
-                history.add_metrics_centralized(rnd=current_round, metrics=metrics_cen)
+                history.add_loss_centralized(fl_round=current_round, loss=loss_cen)
+                history.add_metrics_centralized(fl_round=current_round, metrics=metrics_cen)
 
             # Evaluate model on a sample of available clients
-            res_fed = self.evaluate_round(rnd=current_round)
+            res_fed = self.evaluate_round(fl_round=current_round)
             if res_fed:
                 loss_fed, evaluate_metrics_fed, _ = res_fed
                 if loss_fed:
-                    history.add_loss_distributed(rnd=current_round, loss=loss_fed)
+                    history.add_loss_distributed(fl_round=current_round, loss=loss_fed)
                     history.add_metrics_distributed(
-                        rnd=current_round, metrics=evaluate_metrics_fed
+                        fl_round=current_round, metrics=evaluate_metrics_fed
                     )
 
         # Bookkeeping
@@ -173,11 +173,11 @@ class Server:
         return history
 
     def evaluate(
-        self, rnd: int
+        self, fl_round: int
     ) -> Optional[Tuple[Optional[float], EvaluateResultsAndFailures]]:
         """Validate current global model on a number of clients."""
         log(WARNING, DEPRECATION_WARNING_EVALUATE)
-        res = self.evaluate_round(rnd)
+        res = self.evaluate_round(fl_round)
         if res is None:
             return None
         # Deconstruct
@@ -185,7 +185,7 @@ class Server:
         return loss, results_and_failures
 
     def evaluate_round(
-        self, rnd: int
+        self, fl_round: int
     ) -> Optional[
         Tuple[Optional[float], Dict[str, Scalar], EvaluateResultsAndFailures]
     ]:
@@ -193,7 +193,7 @@ class Server:
 
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_evaluate(
-            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
+            fl_round=fl_round, parameters=self.parameters, client_manager=self._client_manager
         )
         if not client_instructions:
             log(INFO, "evaluate_round: no clients selected, cancel")
@@ -218,7 +218,7 @@ class Server:
         aggregated_result: Union[
             Tuple[Optional[float], Dict[str, Scalar]],
             Optional[float],  # Deprecated
-        ] = self.strategy.aggregate_evaluate(rnd, results, failures)
+        ] = self.strategy.aggregate_evaluate(fl_round, results, failures)
 
         metrics_aggregated: Dict[str, Scalar] = {}
         if aggregated_result is None:
@@ -235,7 +235,7 @@ class Server:
         return loss_aggregated, metrics_aggregated, (results, failures)
 
     def fit_round(
-        self, rnd: int
+        self, fl_round: int
     ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
@@ -243,7 +243,7 @@ class Server:
 
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
-            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
+            fl_round=fl_round, parameters=self.parameters, client_manager=self._client_manager
         )
 
         if not client_instructions:
@@ -269,7 +269,7 @@ class Server:
         aggregated_result: Union[
             Tuple[Optional[Parameters], Dict[str, Scalar]],
             Optional[Weights],  # Deprecated
-        ] = self.strategy.aggregate_fit(rnd, results, failures)
+        ] = self.strategy.aggregate_fit(fl_round, results, failures)
 
         metrics_aggregated: Dict[str, Scalar] = {}
         if aggregated_result is None:

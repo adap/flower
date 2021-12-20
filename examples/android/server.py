@@ -21,7 +21,7 @@ def main() -> None:
     fl.server.start_server("[::]:8999", config={"num_rounds": 10}, strategy=strategy)
 
 
-def fit_config(rnd: int):
+def fit_config(fl_round: int):
     """Return training configuration dict for each round.
 
     Keep batch size fixed at 32, perform two rounds of training with one

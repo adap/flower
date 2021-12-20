@@ -72,7 +72,7 @@ class FaultTolerantFedAvg(FedAvg):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -93,7 +93,7 @@ class FaultTolerantFedAvg(FedAvg):
 
     def aggregate_evaluate(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:

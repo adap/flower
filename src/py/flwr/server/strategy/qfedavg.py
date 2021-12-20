@@ -104,7 +104,7 @@ class QFedAvg(FedAvg):
         return max(num_clients, self.min_eval_clients), self.min_available_clients
 
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, fl_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         weights = parameters_to_weights(parameters)
@@ -113,7 +113,7 @@ class QFedAvg(FedAvg):
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
-            config = self.on_fit_config_fn(rnd)
+            config = self.on_fit_config_fn(fl_round)
         fit_ins = FitIns(parameters, config)
 
         # Sample clients
@@ -128,7 +128,7 @@ class QFedAvg(FedAvg):
         return [(client, fit_ins) for client in clients]
 
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, fl_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         # Do not configure federated evaluation if a centralized evaluation
@@ -140,7 +140,7 @@ class QFedAvg(FedAvg):
         config = {}
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
-            config = self.on_evaluate_config_fn(rnd)
+            config = self.on_evaluate_config_fn(fl_round)
         evaluate_ins = EvaluateIns(parameters, config)
 
         # Sample clients
@@ -156,7 +156,7 @@ class QFedAvg(FedAvg):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -213,7 +213,7 @@ class QFedAvg(FedAvg):
 
     def aggregate_evaluate(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:

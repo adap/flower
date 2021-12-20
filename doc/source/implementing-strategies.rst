@@ -24,26 +24,26 @@ implemented:
 
         @abstractmethod
         def configure_fit(
-            self, rnd: int, weights: Weights, client_manager: ClientManager
+            self, fl_round: int, weights: Weights, client_manager: ClientManager
         ) -> List[Tuple[ClientProxy, FitIns]]:
 
         @abstractmethod
         def aggregate_fit(
             self,
-            rnd: int,
+            fl_round: int,
             results: List[Tuple[ClientProxy, FitRes]],
             failures: List[BaseException],
         ) -> Optional[Weights]:
 
         @abstractmethod
         def configure_evaluate(
-            self, rnd: int, weights: Weights, client_manager: ClientManager
+            self, fl_round: int, weights: Weights, client_manager: ClientManager
         ) -> List[Tuple[ClientProxy, EvaluateIns]]:
 
         @abstractmethod
         def aggregate_evaluate(
             self,
-            rnd: int,
+            fl_round: int,
             results: List[Tuple[ClientProxy, EvaluateRes]],
             failures: List[BaseException],
         ) -> Optional[float]:
@@ -59,16 +59,16 @@ previously shown abstract methods:
 
     class SotaStrategy(Strategy):
 
-        def configure_fit(self, rnd, weights, client_manager):
+        def configure_fit(self, fl_round, weights, client_manager):
             # Your implementation here
 
-        def aggregate_fit(self, rnd, results, failures):
+        def aggregate_fit(self, fl_round, results, failures):
             # Your implementation here
 
-        def configure_evaluate(self, rnd, weights, client_manager):
+        def configure_evaluate(self, fl_round, weights, client_manager):
             # Your implementation here
 
-        def aggregate_evaluate(self, rnd, results, failures):
+        def aggregate_evaluate(self, fl_round, results, failures):
             # Your implementation here
 
         def evaluate(self, weights):

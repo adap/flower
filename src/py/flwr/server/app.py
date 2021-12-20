@@ -126,7 +126,7 @@ def _fl(
         server.strategy.eval_fn = None  # type: ignore
 
         # Evaluate the final trained model
-        res = server.evaluate_round(rnd=-1)
+        res = server.evaluate_round(fl_round=-1)
         if res is not None:
             loss, _, (results, failures) = res
             log(INFO, "app_evaluate: federated loss: %s", str(loss))

@@ -110,7 +110,7 @@ class FastAndSlow(FedAvg):
 
     # pylint: disable=too-many-locals
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, fl_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
 
@@ -136,19 +136,19 @@ class FastAndSlow(FedAvg):
             log(
                 DEBUG,
                 msg,
-                str(rnd),
+                str(fl_round),
                 str(sample_size),
             )
             clients = self._contribution_based_sampling(
                 sample_size=sample_size, client_manager=client_manager
             )
         elif self.importance_sampling:
-            if rnd == 1:
+            if fl_round == 1:
                 # Sample with 1/k in the first round
                 log(
                     DEBUG,
                     "FedFS round %s, sample %s clients with 1/k",
-                    str(rnd),
+                    str(fl_round),
                     str(sample_size),
                 )
                 clients = self._one_over_k_sampling(
@@ -156,12 +156,12 @@ class FastAndSlow(FedAvg):
                 )
             else:
                 fast_round = is_fast_round(
-                    rnd - 1, r_fast=self.r_fast, r_slow=self.r_slow
+                    fl_round - 1, r_fast=self.r_fast, r_slow=self.r_slow
                 )
                 log(
                     DEBUG,
                     "FedFS round %s, sample %s clients, fast_round %s",
-                    str(rnd),
+                    str(fl_round),
                     str(sample_size),
                     str(fast_round),
                 )
@@ -179,7 +179,7 @@ class FastAndSlow(FedAvg):
         config = {}
         if self.on_fit_config_fn is not None:
             # Use custom fit config function if provided
-            config = self.on_fit_config_fn(rnd)
+            config = self.on_fit_config_fn(fl_round)
 
         # Set timeout for this round
         if self.dynamic_timeout:
@@ -197,7 +197,7 @@ class FastAndSlow(FedAvg):
                 # Initial round has not past durations, use max_timeout
                 config["timeout"] = str(self.t_slow)
         elif self.alternating_timeout:
-            use_fast_timeout = is_fast_round(rnd - 1, self.r_fast, self.r_slow)
+            use_fast_timeout = is_fast_round(fl_round - 1, self.r_fast, self.r_slow)
             config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
         else:
             config["timeout"] = str(self.t_slow)
@@ -299,7 +299,7 @@ class FastAndSlow(FedAvg):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -326,7 +326,7 @@ class FastAndSlow(FedAvg):
                 cid = client.cid
                 assert fit_res.num_examples_ceil is not None
                 contribution: Tuple[int, int, int] = (
-                    rnd,
+                    fl_round,
                     fit_res.num_examples,
                     fit_res.num_examples_ceil,
                 )
@@ -351,7 +351,7 @@ class FastAndSlow(FedAvg):
 
     def aggregate_evaluate(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
@@ -380,12 +380,12 @@ class FastAndSlow(FedAvg):
         )
 
 
-def is_fast_round(rnd: int, r_fast: int, r_slow: int) -> bool:
+def is_fast_round(fl_round: int, r_fast: int, r_slow: int) -> bool:
     """Determine if the round is fast or slow.
 
     :meta private:
     """
-    remainder = rnd % (r_fast + r_slow)
+    remainder = fl_round % (r_fast + r_slow)
     return remainder - r_fast < 0
 
 

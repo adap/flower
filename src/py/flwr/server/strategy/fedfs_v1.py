@@ -102,7 +102,7 @@ class FedFSv1(FedAvg):
 
     # pylint: disable=too-many-locals
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, fl_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
 
@@ -123,23 +123,23 @@ class FedFSv1(FedAvg):
             return []
 
         # Sample clients
-        if rnd == 1:
+        if fl_round == 1:
             # Sample with 1/k in the first round
             log(
                 DEBUG,
                 "FedFS round %s, sample %s clients with 1/k",
-                str(rnd),
+                str(fl_round),
                 str(sample_size),
             )
             clients = self._one_over_k_sampling(
                 sample_size=sample_size, client_manager=client_manager
             )
         else:
-            fast_round = is_fast_round(rnd - 1, r_fast=self.r_fast, r_slow=self.r_slow)
+            fast_round = is_fast_round(fl_round - 1, r_fast=self.r_fast, r_slow=self.r_slow)
             log(
                 DEBUG,
                 "FedFS round %s, sample %s clients, fast_round %s",
-                str(rnd),
+                str(fl_round),
                 str(sample_size),
                 str(fast_round),
             )
@@ -153,7 +153,7 @@ class FedFSv1(FedAvg):
         config = {}
         if self.on_fit_config_fn is not None:
             # Use custom fit config function if provided
-            config = self.on_fit_config_fn(rnd)
+            config = self.on_fit_config_fn(fl_round)
 
         # Set timeout for this round
         if self.durations:
@@ -242,7 +242,7 @@ class FedFSv1(FedAvg):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -268,7 +268,7 @@ class FedFSv1(FedAvg):
             cid = client.cid
             assert fit_res.num_examples_ceil is not None
             contribution: Tuple[int, int, int] = (
-                rnd,
+                fl_round,
                 fit_res.num_examples,
                 fit_res.num_examples_ceil,
             )
@@ -292,7 +292,7 @@ class FedFSv1(FedAvg):
 
     def aggregate_evaluate(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:

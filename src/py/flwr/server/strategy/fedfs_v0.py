@@ -94,7 +94,7 @@ class FedFSv0(FedAvg):
 
     # pylint: disable=too-many-locals
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, fl_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
 
@@ -123,10 +123,10 @@ class FedFSv0(FedAvg):
         config = {}
         if self.on_fit_config_fn is not None:
             # Use custom fit config function if provided
-            config = self.on_fit_config_fn(rnd)
+            config = self.on_fit_config_fn(fl_round)
 
         # Set timeout for this round
-        use_fast_timeout = is_fast_round(rnd - 1, self.r_fast, self.r_slow)
+        use_fast_timeout = is_fast_round(fl_round - 1, self.r_fast, self.r_slow)
         config["timeout"] = str(self.t_fast if use_fast_timeout else self.t_slow)
 
         # Fit instructions
@@ -167,7 +167,7 @@ class FedFSv0(FedAvg):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -193,7 +193,7 @@ class FedFSv0(FedAvg):
             cid = client.cid
             assert fit_res.num_examples_ceil is not None
             contribution: Tuple[int, int, int] = (
-                rnd,
+                fl_round,
                 fit_res.num_examples,
                 fit_res.num_examples_ceil,
             )
@@ -205,7 +205,7 @@ class FedFSv0(FedAvg):
 
     def aggregate_evaluate(
         self,
-        rnd: int,
+        fl_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:

@@ -140,10 +140,10 @@ class CifarRayClient(fl.client.NumPyClient):
         return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
 
 
-def fit_config(rnd: int) -> Dict[str, str]:
+def fit_config(fl_round: int) -> Dict[str, str]:
     """Return a configuration with static batch size and (local) epochs."""
     config = {
-        "epoch_global": str(rnd),
+        "epoch_global": str(fl_round),
         "epochs": str(5),
         "batch_size": str(64),
     }
