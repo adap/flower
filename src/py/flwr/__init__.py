@@ -16,9 +16,15 @@
 
 
 from . import client, server, simulation
+from importlib.metadata import version
 
 __all__ = [
     "client",
     "server",
     "simulation",
 ]
+
+try:
+    __version__ = version(__name__)
+except:
+    pass
