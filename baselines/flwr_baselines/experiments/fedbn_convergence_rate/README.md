@@ -117,6 +117,12 @@ python evaluation_plot.py
 
 This will create a plot `convergence_rate.png` including the train loss after the server aggregation from a certain client for the FedAvg and FedBN stretegy. A very good difference between both stretagies is visible for the SVHN dataset. The train loss for FedBN has a more stable and deeper decrease than for the FedAvg strategy.
 
+ ![Illustraation of convergence rate on the SVHN client trained with Flower using FedBN and FedAvg.](convergence_rate_FedBN_FedAvg_comparison.png)
+
+ This baseline was created to recreate the [FedBN code given in the GitHub repository](https://github.com/med-air/FedBN). The following image shows therefore the convergence rate again of of the SVHN client but with same strategy, FedBN, using Flower and the code used by the FedBN authors. The decrease of convergence rate for both cases is the same. 
+
+ ![Illustraation of convergence rate on the SVHN client trained with Flower and the traditional FedBN code.](convergence_rate_Flower_FedBN_comparison.png)
+
 ### Server
 
 This baseline compares the Federate Averaging (FedAvg) with Federated Batch Normalization (FedBN). In both cases, we are using the FedAvg on the server-side. All parameters being created in the model architecture are sent from the client to the server and aggregated. However, in the case of FedBN, we are setting up the client to exclude the BN layer from the transmission to the server. FedBN is therefore a strategy that is on the client-side. 
