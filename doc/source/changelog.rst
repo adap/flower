@@ -15,6 +15,10 @@ What's new?
 
   The example uses TFLite on the client side, along with a new :code:`FedAvgAndroid` strategy. The Android client and :code:`FedAvgAndroid` are still experimental, but they are a first step towards a fully-fledged Android SDK and a unified :code:`FedAvg` implementation that integrated the new functionality from :code:`FedAvgAndroid`.
 
+Incompatible changes:
+~~~~~~~~~~~~~~~~~~~~~
+
+* **Removed support for Python 3.6** (`#871 <https://github.com/adap/flower/pull/871>`_)
 
 v0.17.0 (2021-09-24)
 --------------------
