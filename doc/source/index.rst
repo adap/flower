@@ -31,6 +31,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    fedbn-example-pytorch-from-centralized-to-federated
    recommended-env-setup
    changelog
+   faq
 
 
 API Reference
