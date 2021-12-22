@@ -42,6 +42,15 @@ class GrpcClientProxy(ClientProxy):
         parameters_res = serde.parameters_res_from_proto(client_msg.parameters_res)
         return parameters_res
 
+    def get_properties(self, ins: common.PropertiesIns) -> common.PropertiesRes:
+        """Requests client's set of internal properties."""
+        properties_msg = serde.properties_ins_to_proto(ins)
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(properties_ins=properties_msg)
+        )
+        properties_res = serde.properties_res_from_proto(client_msg.properties_res)
+        return properties_res
+
     def fit(self, ins: common.FitIns) -> common.FitRes:
         """Refine the provided weights using the locally held dataset."""
         fit_ins_msg = serde.fit_ins_to_proto(ins)

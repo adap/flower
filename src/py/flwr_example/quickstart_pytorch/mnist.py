@@ -348,7 +348,7 @@ class PytorchMNISTClient(fl.client.Client):
         """
         state_dict = OrderedDict(
             {
-                k: torch.Tensor(v)
+                k: torch.tensor(v)
                 for k, v in zip(self.model.state_dict().keys(), weights)
             }
         )
