@@ -14,4 +14,4 @@ authors = ["The Flower Authors <enquiries@flower.dev>"]
 python = "^3.6.2"
 flwr = { extras = ["simulation"], version = "^0.17.0" }
 # flwr = { extras = ["simulation"], path = "../../", develop = true }  # Development
-tensorflow-cpu = "2.6.0"
+tensorflow-cpu = "2.6.2"
