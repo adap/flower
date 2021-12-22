@@ -65,7 +65,9 @@ def test_aggregate_fit() -> None:
     expected: Weights = [array([0.15, 0.15, 0.15, 0.15], dtype=float32)]
 
     # Execute
-    actual_aggregated, _ = strategy.aggregate_fit(fl_round=1, results=results, failures=[])
+    actual_aggregated, _ = strategy.aggregate_fit(
+        fl_round=1, results=results, failures=[]
+    )
     if actual_aggregated:
         actual_list = parameters_to_weights(actual_aggregated)
         actual = actual_list[0]

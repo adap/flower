@@ -37,7 +37,9 @@ class History:
         """Add one loss entry (from centralized evaluation)."""
         self.losses_centralized.append((fl_round, loss))
 
-    def add_metrics_distributed(self, fl_round: int, metrics: Dict[str, Scalar]) -> None:
+    def add_metrics_distributed(
+        self, fl_round: int, metrics: Dict[str, Scalar]
+    ) -> None:
         """Add metrics entries (from distributed evaluation)."""
         for key in metrics:
             # if not (isinstance(metrics[key], float) or isinstance(metrics[key], int)):
@@ -46,7 +48,9 @@ class History:
                 self.metrics_distributed[key] = []
             self.metrics_distributed[key].append((fl_round, metrics[key]))
 
-    def add_metrics_centralized(self, fl_round: int, metrics: Dict[str, Scalar]) -> None:
+    def add_metrics_centralized(
+        self, fl_round: int, metrics: Dict[str, Scalar]
+    ) -> None:
         """Add metrics entries (from centralized evaluation)."""
         for key in metrics:
             # if not (isinstance(metrics[key], float) or isinstance(metrics[key], int)):
@@ -60,12 +64,18 @@ class History:
         if self.losses_distributed:
             rep += "History (loss, distributed):\n" + reduce(
                 lambda a, b: a + b,
-                [f"\tround {fl_round}: {loss}\n" for fl_round, loss in self.losses_distributed],
+                [
+                    f"\tround {fl_round}: {loss}\n"
+                    for fl_round, loss in self.losses_distributed
+                ],
             )
         if self.losses_centralized:
             rep += "History (loss, centralized):\n" + reduce(
                 lambda a, b: a + b,
-                [f"\tround {fl_round}: {loss}\n" for fl_round, loss in self.losses_centralized],
+                [
+                    f"\tround {fl_round}: {loss}\n"
+                    for fl_round, loss in self.losses_centralized
+                ],
             )
         if self.metrics_distributed:
             rep += "History (metrics, distributed):\n" + str(self.metrics_distributed)

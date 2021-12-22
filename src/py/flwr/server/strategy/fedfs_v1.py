@@ -135,7 +135,9 @@ class FedFSv1(FedAvg):
                 sample_size=sample_size, client_manager=client_manager
             )
         else:
-            fast_round = is_fast_round(fl_round - 1, r_fast=self.r_fast, r_slow=self.r_slow)
+            fast_round = is_fast_round(
+                fl_round - 1, r_fast=self.r_fast, r_slow=self.r_slow
+            )
             log(
                 DEBUG,
                 "FedFS round %s, sample %s clients, fast_round %s",

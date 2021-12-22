@@ -104,7 +104,9 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                 )
 
                 # Write aggregated loss
-                with writer.as_default(step=fl_round):  # pylint: disable=not-context-manager
+                with writer.as_default(
+                    step=fl_round
+                ):  # pylint: disable=not-context-manager
                     tf.summary.scalar(
                         "server/loss_aggregated", loss_aggregated, step=fl_round
                     )

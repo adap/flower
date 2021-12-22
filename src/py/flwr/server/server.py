@@ -154,7 +154,9 @@ class Server:
                     timeit.default_timer() - start_time,
                 )
                 history.add_loss_centralized(fl_round=current_round, loss=loss_cen)
-                history.add_metrics_centralized(fl_round=current_round, metrics=metrics_cen)
+                history.add_metrics_centralized(
+                    fl_round=current_round, metrics=metrics_cen
+                )
 
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(fl_round=current_round)
@@ -193,7 +195,9 @@ class Server:
 
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_evaluate(
-            fl_round=fl_round, parameters=self.parameters, client_manager=self._client_manager
+            fl_round=fl_round,
+            parameters=self.parameters,
+            client_manager=self._client_manager,
         )
         if not client_instructions:
             log(INFO, "evaluate_round: no clients selected, cancel")
@@ -243,7 +247,9 @@ class Server:
 
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
-            fl_round=fl_round, parameters=self.parameters, client_manager=self._client_manager
+            fl_round=fl_round,
+            parameters=self.parameters,
+            client_manager=self._client_manager,
         )
 
         if not client_instructions:
