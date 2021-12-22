@@ -15,7 +15,7 @@ def compose_image(digit, background):
     x = np.random.randint(0, w - dw)
     y = np.random.randint(0, h - dh)
 
-    bg = background[x: x + dw, y: y + dh]
+    bg = background[x : x + dw, y : y + dh]
     return np.abs(bg - digit).astype(np.uint8)
 
 
