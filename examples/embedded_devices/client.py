@@ -42,7 +42,7 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
     """Set model weights from a list of NumPy ndarrays."""
     state_dict = OrderedDict(
         {
-            k: torch.Tensor(np.atleast_1d(v))
+            k: torch.tensor(np.atleast_1d(v))
             for k, v in zip(model.state_dict().keys(), weights)
         }
     )
