@@ -53,7 +53,7 @@ class CifarClient(fl.client.NumPyClient):
         # Set model parameters from a list of NumPy ndarrays.
         state_dict = OrderedDict(
             {
-                k: torch.Tensor(v)
+                k: torch.tensor(v)
                 for k, v in zip(self.model.state_dict().keys(), parameters)
             }
         )
