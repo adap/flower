@@ -14,9 +14,9 @@
 # ==============================================================================
 """Flower main package."""
 
+from importlib.metadata import version
 
 from . import client, server, simulation
-from importlib.metadata import version
 
 __all__ = [
     "client",
