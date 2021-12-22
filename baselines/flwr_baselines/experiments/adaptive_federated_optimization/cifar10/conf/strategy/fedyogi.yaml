@@ -1,8 +1,0 @@
----
-name: FedYogi
-expected_accuracy: 78.0
-beta_1: 0.9
-beta_2: 0.99
-eta: 0.01
-eta_l: 0.03162
-tau: 0.001
