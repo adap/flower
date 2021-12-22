@@ -20,7 +20,7 @@ design of Flower is based on a few guiding principles:
 * **Framework-agnostic**: Different machine learning frameworks have different
   strengths. Flower can be used with any machine learning framework, for
   example, [PyTorch](https://pytorch.org),
-  [TensorFlow](https://tensorflow.org), [MXNet](https://mxnet.apache.org/), [scikit-learn](https://scikit-learn.org/), or even raw [NumPy](https://numpy.org/)
+  [TensorFlow](https://tensorflow.org), [PyTorch Lightning](https://pytorchlightning.ai/), [MXNet](https://mxnet.apache.org/), [scikit-learn](https://scikit-learn.org/), [TFLite](https://tensorflow.org/lite/), or even raw [NumPy](https://numpy.org/)
   for users who enjoy computing gradients by hand.
 
 * **Understandable**: Flower is written with maintainability in mind. The
@@ -37,6 +37,7 @@ Meet the Flower community on [flower.dev](https://flower.dev)!
 * [Quickstart (PyTorch Lightning [code example])](https://github.com/adap/flower/tree/main/examples/quickstart_pytorch_lightning)
 * [Quickstart (MXNet)](https://flower.dev/docs/example-mxnet-walk-through.html)
 * [Quickstart (scikit-learn [code example])](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
+* [Quickstart (TFLite on Android [code example])](https://github.com/adap/flower/tree/main/examples/android)
 
 ## Flower Usage Examples
 
@@ -57,6 +58,7 @@ Quickstart examples:
 Other [examples](https://github.com/adap/flower/tree/main/examples):
 
 * [Raspberry Pi & Nvidia Jetson Tutorial](https://github.com/adap/flower/tree/main/examples/embedded_devices)
+* [Android & TFLite](https://github.com/adap/flower/tree/main/examples/android)
 * [PyTorch: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/pytorch_from_centralized_to_federated)
 * [MXNet: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/mxnet_from_centralized_to_federated)
 * [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced_tensorflow)
@@ -64,7 +66,7 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 
 ## Flower Baselines / Datasets
 
-*Coming soon* - curious minds can take a peek at [baselines](https://github.com/adap/flower/tree/main/baselines).
+*Experimental* - curious minds can take a peek at [baselines](https://github.com/adap/flower/tree/main/baselines).
 
 ## Citation
 
