@@ -53,7 +53,7 @@ class FedOpt(FedAvg):
     ) -> None:
         """Federated Optim strategy interface.
 
-        Implementation based on https://arxiv.org/abs/2003.00295
+        Implementation based on https://arxiv.org/abs/2003.00295v5
 
         Args:
             fraction_fit (float, optional): Fraction of clients used during
@@ -100,6 +100,8 @@ class FedOpt(FedAvg):
         self.tau = tau
         self.beta_1 = beta_1
         self.beta_2 = beta_2
+        self.m_t: Optional[Weights] = None
+        self.v_t: Optional[Weights] = None
 
     def __repr__(self) -> str:
         rep = f"FedOpt(accept_failures={self.accept_failures})"
