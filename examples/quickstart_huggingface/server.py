@@ -5,8 +5,8 @@ if __name__ == "__main__":
 
     # Define strategy
     strategy = fl.server.strategy.FedAvg(
-        fraction_fit=0.5,
-        fraction_eval=0.5,
+        fraction_fit=1.0,
+        fraction_eval=1.0,
     )
 
     # Start server
