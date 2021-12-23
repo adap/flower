@@ -52,6 +52,7 @@ python = "^3.6.2"
 numpy = "^1.19.0"
 grpcio = "^1.27.2"
 google = "^2.0.3"
+importlib-metadata = { version = "^1.0", python = "<3.8" }
 protobuf = "^3.12.1"
 dataclasses = { version = "==0.6", markers = "python_version < '3.7'"  }
 # Optional dependencies

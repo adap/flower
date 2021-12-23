@@ -14,7 +14,7 @@
 # ==============================================================================
 """Flower main package."""
 
-from importlib.metadata import version
+import sys
 
 from . import client, server, simulation
 
@@ -24,7 +24,9 @@ __all__ = [
     "simulation",
 ]
 
-try:
-    __version__ = version(__name__)
-except:
-    pass
+if sys.version_info >= (3, 8):
+    import importlib.metadata as importlib_metadata
+else:
+    import importlib_metadata
+
+__version__ = importlib_metadata.version(__name__)
