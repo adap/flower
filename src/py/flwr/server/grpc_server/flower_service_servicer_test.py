@@ -75,6 +75,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
             client_manager=self.client_manager_mock,
             client=self.grpc_client_proxy_mock,
             context=self.context_mock,
+            with_rpc_termination_callback=True,
         )
 
         # Assert
@@ -91,6 +92,27 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         self.client_manager_mock.unregister.assert_called_once_with(
             self.grpc_client_proxy_mock
         )
+
+    def test_register_client_without_callback(self) -> None:
+        """Test register_client function."""
+        # Prepare
+        self.client_manager_mock.register.return_value = True
+
+        # Execute
+        register_client(
+            client_manager=self.client_manager_mock,
+            client=self.grpc_client_proxy_mock,
+            context=self.context_mock,
+            with_rpc_termination_callback=False,
+        )
+
+        # Assert
+        self.context_mock.add_callback.assert_not_called()
+
+        self.client_manager_mock.register.assert_called_once_with(
+            self.grpc_client_proxy_mock
+        )
+        self.client_manager_mock.unregister.assert_not_called()
 
     def test_join(self) -> None:
         """Test Join method of FlowerServiceServicer."""
