@@ -17,7 +17,9 @@
 Relevant knowledge for reading this modules code:
     - https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
 """
-from typing import Callable, Iterator
+from typing import Callable, Iterator, Dict
+from uuid import uuid4
+import secrets
 
 import grpc
 
@@ -38,15 +40,20 @@ def default_grpc_client_factory(cid: str, bridge: GRPCBridge) -> GrpcClientProxy
     return GrpcClientProxy(cid=cid, bridge=bridge)
 
 
+def generate_identifier() -> str:
+    return secrets.token_urlsafe()
+
+
 def register_client(
     client_manager: ClientManager,
     client: GrpcClientProxy,
     context: grpc.ServicerContext,
+    with_rpc_termination_callback: bool,
 ) -> bool:
     """Try registering GrpcClientProxy with ClientManager."""
     is_success = client_manager.register(client)
 
-    if is_success:
+    if is_success and with_rpc_termination_callback:
 
         def rpc_termination_callback() -> None:
             client.bridge.close()
@@ -71,6 +78,8 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         self.client_manager: ClientManager = client_manager
         self.grpc_bridge_factory = grpc_bridge_factory
         self.client_factory = grpc_client_factory
+        # Will map ServerMessage.identifier to a specific bridge.
+        self.message_bridge_map: Dict[str, GRPCBridge] = {}
 
     def Join(  # pylint: disable=invalid-name
         self,
@@ -86,10 +95,15 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                 wrapping the actual message
             - The Join method is (pretty much) protocol unaware
         """
-        peer = context.peer()
+        peer = context.peer()  # Used as cid for the GrpcClientProxy
         bridge = self.grpc_bridge_factory()
         client = self.client_factory(peer, bridge)
-        is_success = register_client(self.client_manager, client, context)
+        is_success = register_client(
+            client_manager=self.client_manager,
+            client=client,
+            context=context,
+            with_rpc_termination_callback=True,
+        )
 
         if is_success:
             # Get iterators
@@ -107,3 +121,49 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                     bridge.set_client_message(client_message)
                 except StopIteration:
                     break
+
+        # else: If not is_success do something else
+
+    def Async(  # pylint: disable=invalid-name
+        self, request: ClientMessage, context: grpc.ServicerContext
+    ) -> ServerMessage:
+        """Method will be invoked by each GrpcClientProxy which participates in the network.
+
+        Protocol:
+            - New clients connect while sending an empty ClientMessage and awaits a
+              ServerMessage which has the identifier field set.
+            - If the client has worked on a previous instruction it sends a
+              ClientMessage with the reply_to field set to the ServerMessage
+              identifier field.
+        """
+        print("Async method invoked")
+
+        client_message = request
+        if not client_message.reply_to:
+            # If the reply_to field is not set we will create a new client
+            peer = uuid4()  # Used as cid for the GrpcClientProxy
+            bridge = self.grpc_bridge_factory()
+            client = self.client_factory(peer, bridge)
+            is_success = register_client(
+                client_manager=self.client_manager,
+                client=client,
+                context=context,
+                with_rpc_termination_callback=False,
+            )
+
+            if not is_success:
+                # If not is_success do something
+                pass
+        else:
+            bridge = self.message_bridge_map[client_message.reply_to]
+            bridge.set_client_message(client_message)
+            del self.message_bridge_map[client_message.reply_to]
+
+        server_message_iterator = bridge.server_message_iterator()
+        server_message = next(server_message_iterator)
+        server_message.identifier = generate_identifier()
+        self.message_bridge_map[server_message.identifier] = bridge
+
+        print(self.message_bridge_map.keys())
+
+        return server_message

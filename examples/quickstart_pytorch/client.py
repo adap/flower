@@ -100,6 +100,9 @@ def main():
 
     # Flower client
     class CifarClient(fl.client.NumPyClient):
+        def get_properties(self, config):
+            pass
+
         def get_parameters(self):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -119,7 +122,7 @@ def main():
             return float(loss), num_examples["testset"], {"accuracy": float(accuracy)}
 
     # Start client
-    fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+    fl.client.start_numpy_client("[::]:8080", client=CifarClient(), use_async=True)
 
 
 if __name__ == "__main__":

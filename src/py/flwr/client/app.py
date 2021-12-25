@@ -23,6 +23,9 @@ from flwr.common.logger import log
 
 from .client import Client
 from .grpc_client.connection import insecure_grpc_connection
+from .grpc_async_client.connection import (
+    insecure_grpc_connection as insecure_grpc_async_connection,
+)
 from .grpc_client.message_handler import handle
 from .keras_client import KerasClient, KerasClientWrapper
 from .numpy_client import NumPyClient, NumPyClientWrapper
@@ -32,6 +35,7 @@ def start_client(
     server_address: str,
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    use_async: bool = False,
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
@@ -52,10 +56,15 @@ def start_client(
     Returns:
         None.
     """
+    connection = (
+        insecure_grpc_async_connection if use_async else insecure_grpc_connection
+    )
+
     while True:
         sleep_duration: int = 0
-        with insecure_grpc_connection(
-            server_address, max_message_length=grpc_max_message_length
+        with connection(
+            server_address,
+            max_message_length=grpc_max_message_length,
         ) as conn:
             receive, send = conn
             log(INFO, "Opened (insecure) gRPC connection")
@@ -84,6 +93,7 @@ def start_numpy_client(
     server_address: str,
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    use_async: bool = False,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -113,6 +123,7 @@ def start_numpy_client(
         server_address=server_address,
         client=flower_client,
         grpc_max_message_length=grpc_max_message_length,
+        use_async=use_async,
     )
 
 

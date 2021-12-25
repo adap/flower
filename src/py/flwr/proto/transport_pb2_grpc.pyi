@@ -13,6 +13,10 @@ class FlowerServiceStub:
         request: typing.Iterator[global___ClientMessage],
     ) -> typing.Iterator[global___ServerMessage]: ...
 
+    def Async(self,
+        request: global___ClientMessage,
+    ) -> global___ServerMessage: ...
+
 
 class FlowerServiceServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -20,6 +24,12 @@ class FlowerServiceServicer(metaclass=abc.ABCMeta):
         request: typing.Iterator[global___ClientMessage],
         context: grpc.ServicerContext,
     ) -> typing.Iterator[global___ServerMessage]: ...
+
+    @abc.abstractmethod
+    def Async(self,
+        request: global___ClientMessage,
+        context: grpc.ServicerContext,
+    ) -> global___ServerMessage: ...
 
 
 def add_FlowerServiceServicer_to_server(servicer: FlowerServiceServicer, server: grpc.Server) -> None: ...

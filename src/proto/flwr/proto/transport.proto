@@ -18,7 +18,15 @@ syntax = "proto3";
 package flower.transport;
 
 service FlowerService {
+  // The Join method assumes that the client after connecting will await a
+  // ServerMessage and return a ClientMessage after which it again awaits
+  // a new ServerMessage
   rpc Join(stream ClientMessage) returns (stream ServerMessage) {}
+
+  // The Async method assumes that the client will send an empty ClientMessage
+  // the first time it connects. This will indicate the server that it is
+  // looking for an instruction to work on.
+  rpc Async(ClientMessage) returns (ServerMessage) {}
 }
 
 message Parameters {
@@ -52,6 +60,16 @@ message ServerMessage {
     EvaluateIns evaluate_ins = 4;
     PropertiesIns properties_ins = 5;
   }
+  // This should be secret identifier which if set in the ClientMessage.reply_to
+  // field will be used by the server to match it against the previously send
+  // ServerMessage In Python > 3.6 you can the following to generate a secure
+  // identifier:
+  //
+  //  import secrets
+  //  secrets.token_urlsafe()
+  //
+  // Each identifier should only be ever used once.
+  string identifier = 6;
 }
 
 message ClientMessage {
@@ -78,6 +96,9 @@ message ClientMessage {
     EvaluateRes evaluate_res = 4;
     PropertiesRes properties_res = 5;
   }
+  // Setting this field is required if the ServerMessage had its identifier
+  // field set.
+  string reply_to = 6;
 }
 
 message Scalar {

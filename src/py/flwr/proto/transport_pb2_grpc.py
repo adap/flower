@@ -19,13 +19,30 @@ class FlowerServiceStub(object):
                 request_serializer=flwr_dot_proto_dot_transport__pb2.ClientMessage.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_transport__pb2.ServerMessage.FromString,
                 )
+        self.Async = channel.unary_unary(
+                '/flower.transport.FlowerService/Async',
+                request_serializer=flwr_dot_proto_dot_transport__pb2.ClientMessage.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_transport__pb2.ServerMessage.FromString,
+                )
 
 
 class FlowerServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def Join(self, request_iterator, context):
-        """Missing associated documentation comment in .proto file."""
+        """The Join method assumes that the client after connecting will await a
+        ServerMessage and return a ClientMessage after which it again awaits
+        a new ServerMessage
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Async(self, request, context):
+        """The Async method assumes that the client will send an empty ClientMessage
+        the first time it connects. This will indicate the server that it is
+        looking for an instruction to work on.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -35,6 +52,11 @@ def add_FlowerServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Join': grpc.stream_stream_rpc_method_handler(
                     servicer.Join,
+                    request_deserializer=flwr_dot_proto_dot_transport__pb2.ClientMessage.FromString,
+                    response_serializer=flwr_dot_proto_dot_transport__pb2.ServerMessage.SerializeToString,
+            ),
+            'Async': grpc.unary_unary_rpc_method_handler(
+                    servicer.Async,
                     request_deserializer=flwr_dot_proto_dot_transport__pb2.ClientMessage.FromString,
                     response_serializer=flwr_dot_proto_dot_transport__pb2.ServerMessage.SerializeToString,
             ),
@@ -60,6 +82,23 @@ class FlowerService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.stream_stream(request_iterator, target, '/flower.transport.FlowerService/Join',
+            flwr_dot_proto_dot_transport__pb2.ClientMessage.SerializeToString,
+            flwr_dot_proto_dot_transport__pb2.ServerMessage.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Async(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flower.transport.FlowerService/Async',
             flwr_dot_proto_dot_transport__pb2.ClientMessage.SerializeToString,
             flwr_dot_proto_dot_transport__pb2.ServerMessage.FromString,
             options, channel_credentials,
