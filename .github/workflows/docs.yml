@@ -2,6 +2,10 @@ name: Docs
 
 jobs:
   build_docs:
+    on:
+      pull_request:
+        branches:
+          - main
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
