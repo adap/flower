@@ -25,8 +25,8 @@ __all__ = [
 ]
 
 if sys.version_info < (3, 8):
-    import importlib_metadata  # pylint: disable=import-error
+    import importlib_metadata  # pylint: disable=import-error, no-name-in-module
 else:
-    import importlib.metadata as importlib_metadata  # pylint: disable=import-error
+    import importlib.metadata as importlib_metadata  # pylint: disable=import-error, no-name-in-module
 
 __version__ = importlib_metadata.version(__name__)
