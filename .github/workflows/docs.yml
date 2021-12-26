@@ -4,9 +4,36 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
+  build_docs:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build docs
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7.9
+      - name: Install build tools
+        run: |
+          python -m pip install -U pip==21.2.4
+          python -m pip install -U setuptools==58.1.0
+          python -m pip install -U poetry==1.1.10
+          poetry config virtualenvs.create false
+      - name: Install dependencies (mandatory only)
+        run: python -m poetry install --extras "baseline examples-tensorflow examples-pytorch http-logger ops simulation"
+      - name: Build and deploy docs
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+        run: ./dev/build-docs.sh
+
   deploy_docs:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
