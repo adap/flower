@@ -72,6 +72,19 @@ Run Linters and Tests
 
   $ ./dev/test.sh
 
+Run Github Actions (CI) locally
+~~~~~~~~~~~~~~~~~~~~~
+
+Developers could run the full set of Github Actions workflows under their local
+environment by using `Act <https://github.com/nektos/act>_`. Please refer to
+the installation instructions under the linked repository and run the next
+command under Flower main cloned repository folder::
+
+  $ act
+
+The Flower default workflow would run by setting up the required Docker
+machines underneath.
+
 
 Build Release
 -------------
