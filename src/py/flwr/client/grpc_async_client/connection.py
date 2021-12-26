@@ -16,7 +16,7 @@
 server."""
 from contextlib import contextmanager
 from logging import DEBUG
-from typing import Callable, Dict, Iterator, Tuple, Optional, List
+from typing import Callable, Dict, Iterator, Tuple
 
 import grpc
 
@@ -52,15 +52,12 @@ def insecure_grpc_connection(
 
     # Use a dict to be able to access it in the
     # subsequent two functions by reference
-    storage: Dict[str, Optional[ServerMessage]] = {"server_message": None}
-    storage["server_message"] = stub.Async(ClientMessage())
+    storage: Dict[str, ServerMessage] = {"server_message": stub.Async(ClientMessage())}
 
     def receive() -> ServerMessage:
-        print("Receive async")
         return storage["server_message"]
 
     def send(msg: ClientMessage) -> None:
-        print("Send async")
         if storage["server_message"] is not None:
             msg.reply_to = storage["server_message"].identifier
         storage["server_message"] = stub.Async(msg)

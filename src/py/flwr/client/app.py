@@ -22,10 +22,10 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 
 from .client import Client
-from .grpc_client.connection import insecure_grpc_connection
 from .grpc_async_client.connection import (
     insecure_grpc_connection as insecure_grpc_async_connection,
 )
+from .grpc_client.connection import insecure_grpc_connection
 from .grpc_client.message_handler import handle
 from .keras_client import KerasClient, KerasClientWrapper
 from .numpy_client import NumPyClient, NumPyClientWrapper

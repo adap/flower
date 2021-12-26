@@ -17,9 +17,9 @@
 Relevant knowledge for reading this modules code:
     - https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
 """
-from typing import Callable, Iterator, Dict
-from uuid import uuid4
 import secrets
+from typing import Callable, Dict, Iterator
+from uuid import uuid4
 
 import grpc
 
@@ -40,6 +40,7 @@ def default_grpc_client_factory(cid: str, bridge: GRPCBridge) -> GrpcClientProxy
     return GrpcClientProxy(cid=cid, bridge=bridge)
 
 
+# TODO: write test for this
 def generate_identifier() -> str:
     return secrets.token_urlsafe()
 
@@ -124,10 +125,12 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
 
         # else: If not is_success do something else
 
+    # TODO: After the PoC is done re-implement test-driven.
     def Async(  # pylint: disable=invalid-name
         self, request: ClientMessage, context: grpc.ServicerContext
     ) -> ServerMessage:
-        """Method will be invoked by each GrpcClientProxy which participates in the network.
+        """Method will be invoked by each GrpcClientProxy which participates in
+        the network.
 
         Protocol:
             - New clients connect while sending an empty ClientMessage and awaits a
@@ -136,12 +139,10 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
               ClientMessage with the reply_to field set to the ServerMessage
               identifier field.
         """
-        print("Async method invoked")
-
         client_message = request
         if not client_message.reply_to:
             # If the reply_to field is not set we will create a new client
-            peer = uuid4()  # Used as cid for the GrpcClientProxy
+            peer = str(uuid4())  # Used as cid for the GrpcClientProxy
             bridge = self.grpc_bridge_factory()
             client = self.client_factory(peer, bridge)
             is_success = register_client(
@@ -157,13 +158,16 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         else:
             bridge = self.message_bridge_map[client_message.reply_to]
             bridge.set_client_message(client_message)
-            del self.message_bridge_map[client_message.reply_to]
+
+            # Also this is atomic (thread safe) the Google Python Style Guide
+            # says not to rely on that.
+            # TODO: Write a class which can handle this explicitly in threadsafe
+            #       form
+            self.message_bridge_map.pop(client_message.reply_to)
 
         server_message_iterator = bridge.server_message_iterator()
         server_message = next(server_message_iterator)
         server_message.identifier = generate_identifier()
         self.message_bridge_map[server_message.identifier] = bridge
-
-        print(self.message_bridge_map.keys())
 
         return server_message
