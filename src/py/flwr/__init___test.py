@@ -14,6 +14,8 @@
 # ==============================================================================
 """Test for flwr __init__.py."""
 
+import semver
+
 
 def test_version() -> None:
     """Tests if version is correctly imported."""
@@ -21,4 +23,4 @@ def test_version() -> None:
     from flwr import __version__  # pylint: disable=import-outside-toplevel
 
     # Assert
-    assert isinstance(__version__, str)
+    semver.VersionInfo.parse(__version__)
