@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.9
+          python-version: 3.7.12
       - name: Install
         run: |
           python -m pip install poetry==1.1.10
@@ -28,7 +28,7 @@ jobs:
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
-          path: './examples/quickstart_pytorch/dataset'
+          path: "./examples/quickstart_pytorch/dataset"
           key: pytorch-datasets
       - name: Download Datasets
         run: |
@@ -48,10 +48,10 @@ jobs:
             then echo "Client process 1 started correctly";
             else echo "Client process 1 crashed" && exit 1;
           fi
-          
+
           python client.py 2 &
           sleep 3
-          
+
           if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
             then echo "Client process 2 started correctly";
             else echo "Client process 2 crashed" && exit 1;
@@ -71,7 +71,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.9
+          python-version: 3.7.12
       - name: Install
         run: |
           python -m pip install poetry==1.1.10
@@ -83,7 +83,7 @@ jobs:
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
-          path: '~/.keras'
+          path: "~/.keras"
           key: keras-datasets
       - name: Download Datasets
         run: |
@@ -102,10 +102,10 @@ jobs:
             then echo "Client process 1 started correctly";
             else echo "Client process 1 crashed" && exit 1;
           fi
-          
+
           python client.py 2 &
           sleep 3
-          
+
           if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
             then echo "Client process 2 started correctly";
             else echo "Client process 2 crashed" && exit 1;
@@ -125,7 +125,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.9
+          python-version: 3.7.12
       - name: Install
         run: |
           python -m pip install poetry==1.1.10
@@ -137,7 +137,7 @@ jobs:
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
-          path: './examples/pytorch_from_centralized_to_federated/dataset'
+          path: "./examples/pytorch_from_centralized_to_federated/dataset"
           key: pytorch-datasets
       - name: Download Datasets
         run: |
@@ -181,7 +181,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.9
+          python-version: 3.7.12
       - name: Install
         run: |
           python -m pip install poetry==1.1.10

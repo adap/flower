@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python: [3.6.11, 3.7.9, 3.8.3, 3.9.5]
+        python: [3.6.15, 3.7.12, 3.8.12, 3.9.9]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -41,7 +41,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.9
+          python-version: 3.7.12
       - name: Install build tools
         run: |
           python -m pip install -U pip==21.2.4
@@ -55,7 +55,7 @@ jobs:
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
-          path: '~/.keras'
+          path: "~/.keras"
           key: keras-datasets
       - name: Download Datasets
         run: |
@@ -70,7 +70,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.9
+          python-version: 3.7.12
       - name: Install build tools
         run: |
           python -m pip install -U pip==21.2.4
@@ -90,7 +90,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.9
+          python-version: 3.7.12
       - name: Install build tools
         run: |
           python -m pip install -U pip==21.2.4
