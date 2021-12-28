@@ -2,4 +2,4 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-pyenv uninstall -f baselines-3.7.9
+pyenv uninstall -f baselines-3.7.12
