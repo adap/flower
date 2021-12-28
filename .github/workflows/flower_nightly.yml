@@ -2,7 +2,7 @@ name: Nightly Release
 
 on:
   schedule:
-    - cron:  '0 23 * * *'
+    - cron: "0 23 * * *"
 
 jobs:
   release:
@@ -12,7 +12,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.9
+          python-version: 3.7.12
       - name: Install build tools
         run: |
           python -m pip install -U pip==21.2.4
