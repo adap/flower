@@ -16,7 +16,7 @@ jobs:
       - name: Build docs
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.9
+          python-version: 3.7.12
       - name: Install build tools
         run: |
           python -m pip install -U pip==21.2.4
@@ -40,7 +40,7 @@ jobs:
       - name: Deploy docs
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7.9
+          python-version: 3.7.12
       - name: Install build tools
         run: |
           python -m pip install -U pip==21.2.4
