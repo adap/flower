@@ -23,9 +23,9 @@ jobs:
           python-version: 3.8.12
       - name: Install build tools
         run: |
-          python -m pip install -U pip==21.2.4
-          python -m pip install -U setuptools==58.1.0
-          python -m pip install -U poetry==1.1.10
+          python -m pip install -U pip==21.3.1
+          python -m pip install -U setuptools==59.6.0
+          python -m pip install -U poetry==1.1.12
           poetry config virtualenvs.create false
       - name: Install dependencies
         run: |
