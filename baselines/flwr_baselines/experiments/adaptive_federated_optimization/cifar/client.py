@@ -1,7 +1,6 @@
-import sys
 from collections import OrderedDict
 from pathlib import Path
-from typing import Callable, Dict, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 import flwr as fl
 import numpy as np
@@ -11,11 +10,10 @@ from flwr.common.parameter import Parameters, Weights
 from flwr.common.typing import Scalar
 from PIL import Image
 from torch import Tensor
-from torch.nn import GroupNorm, Module
+from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset
-from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, RandomHorizontalFlip, ToTensor
-from cifar.utils import get_model, train, test
+from .utils import get_model, train, test
 
 transforms_test = Compose(
     [ToTensor(), Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))]

@@ -13,7 +13,7 @@ get_initial_parameters:
   _target_: cifar.utils.get_initial_parameters
 
 get_eval_fn:
-  _target_: cifar.utils.get_eval_fn
+  _target_: ..cifar10.utils.get_eval_fn
 ray_config:
   include_dashboard: False
 defaults:

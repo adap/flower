@@ -102,7 +102,7 @@ def get_eval_fn(
         state_dict = OrderedDict(
             {
                 k: torch.tensor(np.atleast_1d(v))
-                for k, v in zip(np.state_dict().keys(), weights)
+                for k, v in zip(net.state_dict().keys(), weights)
             }
         )
         net.load_state_dict(state_dict, strict=True)

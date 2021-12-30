@@ -43,7 +43,9 @@ flwr = "^0.17.0"
 # flwr = { path = "../", develop = true }  # For development
 torch = "^1.10.1"
 torchvision = "^0.11.2"
-hydra-core = { git = "https://github.com/pedropgusmao/hydra.git" }
+omegaconf = { git = "https://github.com/pedropgusmao/omegaconf.git" } 
+hydra-core = { git = "https://github.com/pedropgusmao/hydra.git", branch="main" }
+#ray = { extras = ["default"], version = "==1.9.1"}
 
 [tool.poetry.dev-dependencies]
 isort = "==5.9.2"
