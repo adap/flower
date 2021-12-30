@@ -17,7 +17,8 @@ What's new?
 
 * **Minor updates**
     * Update num_examples caclulation in PyTorch code examples in (`#909 <https://github.com/adap/flower/pull/909>`_)
-    * Expose Flower version through "flwr.__version__" (`#952 <https://github.com/adap/flower/pull/952>`_)
+    * Expose Flower version through "flwr.__version__" (`#952 <https://github.com/adap/flower/pull/952>`_)#974
+    * :code:`start_server` in :code:`app.py` now return a :code:`History` object containing metrics from training (`#974 <https://github.com/adap/flower/pull/974>`_)
 
 
 Incompatible changes:
