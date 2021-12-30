@@ -16,7 +16,7 @@
 
 
 import sys
-from logging import ERROR, INFO
+from logging import ERROR, INFO, WARNING
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import ray
@@ -53,13 +53,28 @@ REASON:
 """
 
 
+DEPRECATION_WARNING_NUM_ROUNDS = """
+DEPRECATION WARNING: deprecated argument
+
+    num_rounds
+
+used, use config argument instead:
+
+    config = {"num_rounds": 1}
+
+Note that the deprecated argument num_rounds will be removed in a future
+release.
+"""
+
+
 def start_simulation(  # pylint: disable=too-many-arguments
     *,
     client_fn: Callable[[str], Client],
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, int]] = None,
-    num_rounds: int = 1,
+    config: Optional[Dict[str, Union[Optional[int], Optional[float]]]] = None,
+    num_rounds: Optional[int] = None,  # Deprecated
     strategy: Optional[Strategy] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
 ) -> None:
@@ -89,8 +104,16 @@ def start_simulation(  # pylint: disable=too-many-arguments
         `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`.
         To understand the GPU utilization caused by `num_gpus`, consult the Ray
         documentation on GPU support.
-    num_rounds : int (default: 1)
-        The number of rounds to train.
+    config: Optional[Dict[str, Union[Optional[int], Optional[float]]]] (default: None).
+        Currently supported keys are `num_rounds` (value type: `int`),
+        `max_workers` (value type: `int`), and `round_timeout` (value type:
+        `float`). A full configuration dictionary look like this:
+        `{"num_rounds": 3, "max_workers": 64, "round_timeout": 60}`.
+        This instructs the server to perform three rounds of federated
+        learning, configure the `ThreadPoolExecutor` to use at most 64
+        workers, and time-box communication rounds to 60 seconds.
+    num_rounds : Optional[int] (deprecated, default: None)
+        Deprecated, use config instead.
     strategy : Optional[flwr.server.Strategy] (default: None)
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use
@@ -143,10 +166,18 @@ def start_simulation(  # pylint: disable=too-many-arguments
         ray.cluster_resources(),
     )
 
+    # Warn if the user uses the deprecated argument num_rounds
+    if num_rounds is not None:
+        log(WARNING, DEPRECATION_WARNING_NUM_ROUNDS)
+    else:
+        num_rounds = 1
+
     # Initialize server and server config
-    config: Optional[Dict[str, Union[int, None, float, None]]] = {
-        "num_rounds": num_rounds
-    }
+    if config is None:
+        config: Optional[Dict[str, Union[int, None, float, None]]] = {
+            "num_rounds": num_rounds
+        }
+
     initialized_server, initialized_config = _init_defaults(None, config, strategy)
     log(
         INFO,
