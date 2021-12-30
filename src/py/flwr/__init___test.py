@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2021 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,23 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower main package."""
+"""Test for flwr __init__.py."""
 
-import sys
+import semver
 
-from . import client, server, simulation
 
-__all__ = [
-    "client",
-    "server",
-    "simulation",
-]
+def test_version() -> None:
+    """Tests if version is correctly imported."""
+    # Execute
+    from flwr import __version__  # pylint: disable=import-outside-toplevel
 
-# pylint: disable=import-error, no-name-in-module
-if sys.version_info < (3, 8):
-    import importlib_metadata
-else:
-    import importlib.metadata as importlib_metadata
-# pylint: enable=import-error, no-name-in-module
-
-__version__: str = importlib_metadata.version(__name__)
+    # Assert
+    semver.VersionInfo.parse(__version__)
