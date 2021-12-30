@@ -31,4 +31,4 @@ else:
     import importlib.metadata as importlib_metadata
 # pylint: enable=import-error, no-name-in-module
 
-__version__ = importlib_metadata.version(__name__)
+__version__: str = importlib_metadata.version(__name__)

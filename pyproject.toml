@@ -52,9 +52,9 @@ python = "^3.6.2"
 numpy = "^1.19.0"
 grpcio = "^1.27.2"
 google = "^2.0.3"
-importlib-metadata = { version = "^1.0", python = "<3.8" }
 protobuf = "^3.12.1"
-dataclasses = { version = "==0.6", markers = "python_version < '3.7'"  }
+importlib-metadata = { version = "^1.4.0", markers = "python_version < '3.8'" }
+dataclasses = { version = "==0.6", markers = "python_version < '3.7'" }
 # Optional dependencies
 tensorflow-cpu = { version = "==2.6.2", optional = true }
 torch = { version = "^1.10.1", optional = true }
@@ -76,9 +76,9 @@ http-logger = ["boto3", "boto3_type_annotations", "tensorflow-cpu", "boto3", "bo
 ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
 
 [tool.poetry.dev-dependencies]
-types-protobuf = "^3.17.4"
-types-setuptools = "^57.0.2"
-types-dataclasses = "^0.1.7"
+types-protobuf = "==3.18.2"
+types-setuptools = "==57.4.5"
+types-dataclasses = "==0.6.2"
 isort = "==5.9.2"
 black = "==21.7b0"
 docformatter = "==1.4"
