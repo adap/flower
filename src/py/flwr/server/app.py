@@ -28,12 +28,13 @@ from flwr.server.strategy import FedAvg, Strategy
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 
-def start_server(
+def start_server(  # pylint: disable=too-many-arguments
     server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,
     config: Optional[Dict[str, int]] = None,
     strategy: Optional[Strategy] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    force_final_distributed_eval: bool = False,
 ) -> None:
     """Start a Flower server using the gRPC transport layer.
 
@@ -58,6 +59,9 @@ def start_server(
             value. Note that the Flower clients need to be started with the
             same value (see `flwr.client.start_client`), otherwise clients will
             not know about the increased limit and block larger messages.
+        force_final_distributed_eval: bool (default: False).
+            Forces a distributed evaulation to occur after the last training
+            epoch when enabled.
 
     Returns:
         None.
@@ -76,7 +80,11 @@ def start_server(
         initialized_config["num_rounds"],
     )
 
-    _fl(server=initialized_server, config=initialized_config)
+    _fl(
+        server=initialized_server,
+        config=initialized_config,
+        force_final_distributed_eval=force_final_distributed_eval,
+    )
 
     # Stop the gRPC server
     grpc_server.stop(grace=1)
@@ -103,7 +111,9 @@ def _init_defaults(
     return server, config
 
 
-def _fl(server: Server, config: Dict[str, int]) -> None:
+def _fl(
+    server: Server, config: Dict[str, int], force_final_distributed_eval: bool
+) -> None:
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
@@ -111,22 +121,23 @@ def _fl(server: Server, config: Dict[str, int]) -> None:
     log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
     log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
 
-    # Temporary workaround to force distributed evaluation
-    server.strategy.eval_fn = None  # type: ignore
+    if force_final_distributed_eval:
+        # Temporary workaround to force distributed evaluation
+        server.strategy.eval_fn = None  # type: ignore
 
-    # Evaluate the final trained model
-    res = server.evaluate_round(rnd=-1)
-    if res is not None:
-        loss, _, (results, failures) = res
-        log(INFO, "app_evaluate: federated loss: %s", str(loss))
-        log(
-            INFO,
-            "app_evaluate: results %s",
-            str([(res[0].cid, res[1]) for res in results]),
-        )
-        log(INFO, "app_evaluate: failures %s", str(failures))
-    else:
-        log(INFO, "app_evaluate: no evaluation result")
+        # Evaluate the final trained model
+        res = server.evaluate_round(rnd=-1)
+        if res is not None:
+            loss, _, (results, failures) = res
+            log(INFO, "app_evaluate: federated loss: %s", str(loss))
+            log(
+                INFO,
+                "app_evaluate: results %s",
+                str([(res[0].cid, res[1]) for res in results]),
+            )
+            log(INFO, "app_evaluate: failures %s", str(failures))
+        else:
+            log(INFO, "app_evaluate: no evaluation result")
 
     # Graceful shutdown
     server.disconnect_all_clients()

@@ -18,6 +18,8 @@ Flower's design goals was to make this simple. Read on to learn more.
    installation
    quickstart_tensorflow
    quickstart_pytorch
+   quickstart_huggingface
+   quickstart_pytorch_lightning
    quickstart_mxnet
    quickstart_scikitlearn
    evaluation
@@ -31,6 +33,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    fedbn-example-pytorch-from-centralized-to-federated
    recommended-env-setup
    changelog
+   faq
 
 
 API Reference

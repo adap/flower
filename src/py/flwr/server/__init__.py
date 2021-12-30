@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Server."""
+"""Flower server."""
 
 
 from .app import start_server as start_server

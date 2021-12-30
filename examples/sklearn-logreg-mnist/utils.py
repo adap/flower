@@ -46,8 +46,10 @@ def set_initial_params(model: LogisticRegression):
 
 
 def load_mnist() -> Dataset:
-    """Loads the MNIST dataset using OpenML Dataset link:
-    https://www.openml.org/d/554."""
+    """Loads the MNIST dataset using OpenML.
+
+    OpenML dataset link: https://www.openml.org/d/554
+    """
     mnist_openml = openml.datasets.get_dataset(554)
     Xy, _, _, _ = mnist_openml.get_data(dataset_format="array")
     X = Xy[:, :-1]  # the last column contains labels

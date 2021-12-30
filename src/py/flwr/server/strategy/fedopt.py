@@ -29,7 +29,7 @@ from .fedavg import FedAvg
 class FedOpt(FedAvg):
     """Configurable FedAdagrad strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         *,
@@ -47,11 +47,13 @@ class FedOpt(FedAvg):
         initial_parameters: Parameters,
         eta: float = 1e-1,
         eta_l: float = 1e-1,
+        beta_1: float = 0.0,
+        beta_2: float = 0.0,
         tau: float = 1e-9,
     ) -> None:
         """Federated Optim strategy interface.
 
-        Implementation based on https://arxiv.org/abs/2003.00295
+        Implementation based on https://arxiv.org/abs/2003.00295v5
 
         Args:
             fraction_fit (float, optional): Fraction of clients used during
@@ -75,6 +77,8 @@ class FedOpt(FedAvg):
             initial_parameters (Parameters): Initial set of parameters from the server.
             eta (float, optional): Server-side learning rate. Defaults to 1e-1.
             eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.
+            beta_1 (float, optional): Momentum parameter. Defaults to 0.0.
+            beta_2 (float, optional): Second moment parameter. Defaults to 0.0.
             tau (float, optional): Controls the algorithm's degree of adaptability.
                 Defaults to 1e-9.
         """
@@ -94,6 +98,10 @@ class FedOpt(FedAvg):
         self.eta = eta
         self.eta_l = eta_l
         self.tau = tau
+        self.beta_1 = beta_1
+        self.beta_2 = beta_2
+        self.m_t: Optional[Weights] = None
+        self.v_t: Optional[Weights] = None
 
     def __repr__(self) -> str:
         rep = f"FedOpt(accept_failures={self.accept_failures})"
