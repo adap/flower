@@ -53,7 +53,7 @@ numpy = "^1.19.0"
 grpcio = "^1.27.2"
 google = "^2.0.3"
 protobuf = "^3.12.1"
-importlib-metadata = { version = "^4.10.0", markers = "python_version < '3.8'" }
+importlib-metadata = { version = "^1.4.0", markers = "python_version < '3.8'" }
 dataclasses = { version = "==0.6", markers = "python_version < '3.7'" }
 # Optional dependencies
 tensorflow-cpu = { version = "==2.6.2", optional = true }
