@@ -19,20 +19,20 @@ Once Pyenv is set up, you can use it to install `Python Version 3.6 <https://doc
 
 .. code-block:: shell
 
-    pyenv install 3.7.9
+    pyenv install 3.7.12
 
 Create the virtualenv with:
 
 .. code-block:: shell
 
-    pyenv virtualenv 3.7.9 ml-federated-3.7.9
+    pyenv virtualenv 3.7.12 ml-federated-3.7.12
 
 
 Activate the virtualenv by running the following command:
 
 .. code-block:: shell
 
-    echo ml-federated-3.7.9 > .python-version
+    echo ml-federated-3.7.12 > .python-version
 
 
 Virtualenv with Poetry
@@ -58,13 +58,13 @@ If you prefer to use Anaconda for your virtual environment then install and setu
 
 .. code-block:: shell
 
-    conda create -n ml-federated-3.7.9 python=3.7.9
+    conda create -n ml-federated-3.7.12 python=3.7.12
 
 and activate the virtual environment with:
 
 .. code-block:: shell
 
-    conda activate ml-federated-3.7.9
+    conda activate ml-federated-3.7.12
 
 
 And then?

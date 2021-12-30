@@ -11,9 +11,4 @@ echo "Format code and run all test scripts"
 ./dev/test.sh
 ./baselines/dev/test.sh
 
-./dev/test-baseline.sh
-./dev/test-example-pytorch.sh
-./dev/test-example-tensorflow.sh
-./dev/test-logserver.sh
-./dev/test-ops.sh
 ./dev/test-tool.sh
