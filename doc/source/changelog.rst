@@ -19,6 +19,15 @@ What's new?
     * Update num_examples caclulation in PyTorch code examples in (`#909 <https://github.com/adap/flower/pull/909>`_)
     * Expose Flower version through "flwr.__version__" (`#952 <https://github.com/adap/flower/pull/952>`_)
 
+
+Incompatible changes:
+~~~~~~~~~~~~~~~~~~~~~
+
+* **Removed** :code:`flwr_example` **and** :code:`flwr_experimental` **from release build** (`#869 <https://github.com/adap/flower/pull/869>`_)
+  
+  The packages :code:`flwr_example` and :code:`flwr_experimental` have been deprecated since Flower 0.12.0 and they are not longer included in Flower release builds. The associated extras (:code:`baseline`, :code:`examples-pytorch`, :code:`examples-tensorflow`, :code:`http-logger`, :code:`ops`) are now no-op and will be removed in an upcoming release.
+
+
 v0.17.0 (2021-09-24)
 --------------------
 
@@ -217,7 +226,7 @@ Important changes:
 
 * Added an example for embedded devices (`#507 <https://github.com/adap/flower/pull/507>`_)
 * Added a new NumPyClient (in addition to the existing KerasClient) (`#504 <https://github.com/adap/flower/pull/504>`_ `#508 <https://github.com/adap/flower/pull/508>`_)
-* Deprecated `flwr_examples` package and started to migrate examples into the top-level `examples` directory (`#494 <https://github.com/adap/flower/pull/494>`_ `#512 <https://github.com/adap/flower/pull/512>`_)
+* Deprecated `flwr_example` package and started to migrate examples into the top-level `examples` directory (`#494 <https://github.com/adap/flower/pull/494>`_ `#512 <https://github.com/adap/flower/pull/512>`_)
 
 
 v0.11.0 (2020-11-30)
