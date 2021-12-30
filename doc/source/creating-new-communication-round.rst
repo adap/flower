@@ -20,8 +20,11 @@ Client's side:
 
 Let's now see what we need to implement in order to get this simple function between the server and client to work!
 
+
+
 Message Types for Protocol Buffers
 ----------------------------------
+
 The first thing we need to do is to define a message type for the RPC system in :code:`transport.proto`. 
 Note that we have to do it for both the request and response messages. For more details of the syntax of proto3, please see the  `official documentation <https://developers.google.com/protocol-buffers/docs/proto3>`_.
 
@@ -67,11 +70,14 @@ If it compiles succesfully, you should see the following message:
   Writing mypy to flwr/proto/transport_pb2.pyi
   Writing mypy to flwr/proto/transport_pb2_grpc.pyi
 
+
 Serialization and Deserialization Functions
 --------------------------------------------
+
 Our next step is to add functions to serialize and deserialize Python datatypes to or from our defined RPC message types. You should add these functions in :code:`serde.py`: 
 
 The four functions:
+
 .. code-block:: python
     def example_msg_to_proto(question: str, l: List[int]) -> ServerMessage.ExampleIns:
         return ServerMessage.ExampleIns(question=question, l=l)
@@ -91,7 +97,9 @@ The four functions:
 
 Sending the Message from the Server
 -----------------------------------
+
 Now write the request function in your Client Proxy class (e.g. :code:`grpc_client_proxy.py`) using the serde functions you just created:
+
 .. code-block:: python
     def request(self, question: str, l: List[int]) -> Tuple[str, int]:
         request_msg = serde.example_msg_to_proto(question, l)
@@ -101,15 +109,20 @@ Now write the request function in your Client Proxy class (e.g. :code:`grpc_clie
         response, answer = serde.example_res_from_proto(client_msg.examples_res)
         return response, answer
 
+
 Receiving the Message by the Client
 -----------------------------------
+
 Last step! Modify the code in :code:`message_handler.py` to check the field of your message and call the example_response function. Remember to use the serde functions!
+
 Within the handle function:
+
 .. code-block:: python
     if server_msg.HasField("example_ins"):
         return _example_response(client, server_msg.example_ins), 0, True
 
 And add a new function:
+
 .. code-block:: python
     def _example_response(client:Client, msg:ServerMessage.example_ins)->ClientMessage:
         question,l=serde.evaluate_ins_from_proto(msg)
@@ -118,5 +131,6 @@ And add a new function:
         return ClientMessage(examples_res=example_res)
 
 Hopefully, when you run your program you will get the intended result!
+
 .. code-block:: shell
   ('Here you go Alice!', 6)
