@@ -1,7 +1,8 @@
-Creating a New Communication Round
-==================================
+Creating New Messages
+=====================
 
-This is a simple guide for creating a new communication round between the server and clients in Flower.
+This is a simple guide for creating a new type of message between the server and clients in Flower.
+
 Let's suppose we have the following example functions in :code:`server.py` and :code:`numpy_client.py`...
 
 Server's side:
