@@ -1,17 +1,18 @@
-# Flower Example using PyTorch
+# Federated HuggingFace Transformers using Flower and PyTorch
 
-This introductory example to Flower uses PyTorch, but deep knowledge of PyTorch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
-Running this example in itself is quite easy.
+This introductory example to using [HuggingFace](https://huggingface.co) Transformers with Flower with PyTorch. This example has been extended from the [quickstart_pytorch](https://flower.dev/docs/quickstart_pytorch.html) example. The training script closely follows the [HuggingFace course](https://huggingface.co/course/chapter3?fw=pt), so you are encouraged to check that out for detailed explaination for the transformer pipeline. 
+
+Like `quickstart_pytorch`, running this example in itself is also meant to be quite easy.
 
 ## Project Setup
 
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_pytorch . && rm -rf flower && cd quickstart_pytorch
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/transformers-pytorch . && rm -rf flower && cd transformers-pytorch
 ```
 
-This will create a new directory called `quickstart_pytorch` containing the following files:
+This will create a new directory called `transformers-pytorch` containing the following files:
 
 ```shell
 -- pyproject.toml
@@ -35,7 +36,7 @@ python3 -c "import flwr"
 
 If you don't see any errors you're good to go!
 
-# Run Federated Learning with PyTorch and Flower
+# Run Federated Learning with Flower
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
@@ -57,4 +58,4 @@ Start client 2 in the second terminal:
 python3 client.py
 ```
 
-You will see that PyTorch is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart_pytorch.html) for a detailed explanation.
+You will see that PyTorch is starting a federated training. 
