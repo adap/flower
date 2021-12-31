@@ -18,6 +18,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 CHECKPOINT = "distilbert-base-uncased"  # transformer model checkpoint
 
+
 def load_data():
     """Load IMDB data (training and eval)"""
     raw_datasets = load_dataset("imdb")
@@ -38,8 +39,8 @@ def load_data():
     tokenized_datasets["train"] = tokenized_datasets["train"].select(population)
     tokenized_datasets["test"] = tokenized_datasets["test"].select(population)
 
-    tokenized_datasets = tokenized_datasets.remove_columns('text')
-    tokenized_datasets = tokenized_datasets.rename_column("label","labels")
+    tokenized_datasets = tokenized_datasets.remove_columns("text")
+    tokenized_datasets = tokenized_datasets.rename_column("label", "labels")
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
     trainloader = DataLoader(
