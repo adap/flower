@@ -16,9 +16,9 @@ What's new?
   The example uses TFLite on the client side, along with a new :code:`FedAvgAndroid` strategy. The Android client and :code:`FedAvgAndroid` are still experimental, but they are a first step towards a fully-fledged Android SDK and a unified :code:`FedAvg` implementation that integrated the new functionality from :code:`FedAvgAndroid`.
 
 * **Minor updates**
-    * Update num_examples caclulation in PyTorch code examples in (`#909 <https://github.com/adap/flower/pull/909>`_)
-    * Expose Flower version through "flwr.__version__" (`#952 <https://github.com/adap/flower/pull/952>`_)
-
+    * Update :code:`num_examples` calculation in PyTorch code examples in (`#909 <https://github.com/adap/flower/pull/909>`_)
+    * Expose Flower version through :code:`flwr.__version__` (`#952 <https://github.com/adap/flower/pull/952>`_)
+    * Make :code:`max_workers` (used by :code:`ThreadPoolExecutor`) configurable (`#978 <https://github.com/adap/flower/pull/978>`_)
 
 Incompatible changes:
 ~~~~~~~~~~~~~~~~~~~~~
