@@ -22,4 +22,4 @@ echo "ARGS: ${@}"
 
 ./build_image.sh --build-arg BASE_IMAGE_TYPE=gpu
 
-docker run --runtime nvidia --rm flower_client ${@}
+docker run --platform linux/arm64 --runtime nvidia --rm flower_client ${@}

@@ -22,4 +22,4 @@ echo "ARGS: ${@}"
 
 ./build_image.sh --build-arg BASE_IMAGE_TYPE=cpu
 
-docker run --rm flower_client ${@}
+docker run --rm --platform linux/arm64 flower_client ${@}

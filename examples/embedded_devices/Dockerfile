@@ -3,7 +3,7 @@ ARG BASE_IMAGE_TYPE=cpu
 # each Dockerfile used in the `base_images` directory 
 FROM jafermarq/jetsonfederated_$BASE_IMAGE_TYPE:latest
 
-RUN apt-get install wget -y
+RUN apt-get update && apt-get install wget -y
 
 # Download and extract CIFAR-10
 # To keep things simple, we keep this as part of the docker image.
