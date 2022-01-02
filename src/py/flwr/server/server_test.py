@@ -91,7 +91,7 @@ def test_fit_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = fit_clients(client_instructions)
+    results, failures = fit_clients(client_instructions, None)
 
     # Assert
     assert len(results) == 1
@@ -115,7 +115,7 @@ def test_eval_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = evaluate_clients(client_instructions)
+    results, failures = evaluate_clients(client_instructions, None)
 
     # Assert
     assert len(results) == 1
