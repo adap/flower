@@ -127,3 +127,25 @@ Depending on the model of RapsberryPi you have, running the smaller `Net` model 
 # note that pulling the base image, extracting the content might take a while (specially on a RPi 3) the first time you run this.
 $ ./run_pi.sh --server_address=<SERVER_ADDRESS> --cid=0 --model=Net
 ```
+
+### e2e Emulation with Docker+QEMU
+
+You could emulate the clients under your native _x86-64_ platform without the need of specific hardware (_Jetson_ or _Raspberry Pi_). To do so, we must install _QEMU_ and apply the required _Docker_ configuration by running the subsequent commands (under and APT-based distro):
+
+```bash
+sudo apt-get install qemu binfmt-support qemu-user-static # Install the qemu packages
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes # This step will execute the registering scripts
+```
+
+Then, we could go on and create a server instance with your local IP address:
+
+```bash
+poetry run python3 server.py --server_address 192.168.0.167:4000 --model=Net
+```
+
+And then, run different clients, running each one of the subsequent commands in different terminals:
+
+```bash
+./run_pi.sh --server_address=192.168.0.167:4000 --cid=0 --model=Net
+./run_pi.sh --server_address=192.168.0.167:4000 --cid=1 --model=Net
+```
