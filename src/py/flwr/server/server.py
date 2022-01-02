@@ -388,7 +388,7 @@ def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
 
 def evaluate_clients(
     client_instructions: List[Tuple[ClientProxy, EvaluateIns]],
-    max_workers: Optional[int]
+    max_workers: Optional[int],
 ) -> EvaluateResultsAndFailures:
     """Evaluate parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
