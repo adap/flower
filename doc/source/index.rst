@@ -60,6 +60,7 @@ intended to help along the way.
    good-first-contributions
    architecture
    release_process
+   creating-new-messages
 
 
 About
