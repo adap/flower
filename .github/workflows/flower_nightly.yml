@@ -1,11 +1,11 @@
-name: Nightly Release
+name: Release
 
 on:
   schedule:
     - cron: "0 23 * * *"
 
 jobs:
-  release:
+  nightly_release:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
