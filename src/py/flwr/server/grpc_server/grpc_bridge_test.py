@@ -57,7 +57,7 @@ def test_workflow_successful() -> None:
     worker_thread = start_worker(rounds, bridge, client_messages_received)
 
     # Execute
-    # Simluate remote client side
+    # Simulate remote client side
     for _ in range(rounds):
         try:
             _ = next(server_message_iterator)

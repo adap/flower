@@ -59,7 +59,7 @@ class SuccessClient(ClientProxy):
         return Disconnect(reason="UNKNOWN")
 
 
-class FailingCLient(ClientProxy):
+class FailingClient(ClientProxy):
     """Test class."""
 
     def get_parameters(self) -> ParametersRes:
@@ -82,7 +82,7 @@ def test_fit_clients() -> None:
     """Test fit_clients."""
     # Prepare
     clients: List[ClientProxy] = [
-        FailingCLient("0"),
+        FailingClient("0"),
         SuccessClient("1"),
     ]
     arr = np.array([[1, 2], [3, 4], [5, 6]])
@@ -103,7 +103,7 @@ def test_eval_clients() -> None:
     """Test eval_clients."""
     # Prepare
     clients: List[ClientProxy] = [
-        FailingCLient("0"),
+        FailingClient("0"),
         SuccessClient("1"),
     ]
     arr = np.array([[1, 2], [3, 4], [5, 6]])
