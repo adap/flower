@@ -8,6 +8,7 @@ num_total_clients: 5000
 num_rounds: 4000
 root_dir: "./data"
 cpus_per_client: 1
+hydra.job.chdir: False
 
 get_initial_parameters:
   _target_: cifar.utils.get_initial_parameters

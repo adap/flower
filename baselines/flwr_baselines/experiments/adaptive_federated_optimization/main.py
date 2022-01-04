@@ -1,10 +1,11 @@
+from os import chdir
 from pathlib import Path
 from typing import Dict
 import numpy as np
 
 import flwr as fl
 import hydra
-from hydra.utils import call, instantiate, to_absolute_path
+from hydra.utils import call, get_original_cwd, instantiate, to_absolute_path
 
 from omegaconf import DictConfig
 from torchvision.datasets import CIFAR10
@@ -21,6 +22,10 @@ from cifar.utils import (
 
 @hydra.main(config_path="conf/cifar10", config_name="config")
 def main(cfg: DictConfig) -> None:
+    # Make sure we are on the right directory.
+    # This will not be necessary in hydra 1.3
+    chdir(get_original_cwd())
+
     # Create or load partitions
     fed_dir = (
         Path(to_absolute_path(cfg.root_dir))

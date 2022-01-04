@@ -68,8 +68,8 @@ ops = []
 types-protobuf = "==3.18.2"
 types-setuptools = "==57.4.5"
 types-dataclasses = "==0.6.2"
-isort = "==5.9.2"
-black = "==21.7b0"
+isort = "==5.10.1"
+black = "==21.12b0"
 docformatter = "==1.4"
 mypy = "==0.910"
 pylint = "==2.8.2"
@@ -91,11 +91,11 @@ multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
-known_first_party = ["flwr", "flwr_tool"]
+known_first_party = ["flwr", "flwr_experimental", "flwr_tool"]
 
 [tool.black]
 line-length = 88
-target-version = ["py36", "py37", "py38"]
+target-version = ["py36", "py37", "py38", "py39"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
