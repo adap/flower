@@ -129,7 +129,7 @@ if os.getenv("FLOWER_INTEGRATION"):
 
         def setUp(self) -> None:
             """Prepare tests."""
-            # Filter false positiv warning
+            # Filter false positive warning
             warnings.filterwarnings(
                 "ignore",
                 category=ResourceWarning,
