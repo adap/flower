@@ -123,7 +123,7 @@ if os.getenv("FLOWER_INTEGRATION"):
         # pylint: disable=too-many-instance-attributes
         def setUp(self) -> None:
             """Create an instance."""
-            # Filter false positiv warning
+            # Filter false positive warning
             warnings.filterwarnings(
                 "ignore",
                 category=ResourceWarning,
