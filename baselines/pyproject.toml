@@ -43,6 +43,7 @@ flwr = "^0.17.0"
 # flwr = { path = "../", develop = true }  # For development
 torch = "^1.10.1"
 torchvision = "^0.11.2"
+numpy = "^1.20.0"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.10.1"
@@ -81,3 +82,17 @@ addopts = "-qq"
 testpaths = [
     "flwr_baselines",
 ]
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = true
+plugins = "numpy.typing.mypy_plugin"
+
+[[tool.mypy.overrides]]
+module = "flwr_baselines.scripts.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "torch.*"
+follow_imports = "skip"
+follow_imports_for_stubs = true
