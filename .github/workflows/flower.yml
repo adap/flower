@@ -1,4 +1,4 @@
-name: Build Core
+name: Core
 
 on:
   push:
