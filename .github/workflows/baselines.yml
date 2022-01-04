@@ -1,4 +1,4 @@
-name: Test Baselines
+name: Baselines
 
 on:
   push:
@@ -13,7 +13,7 @@ defaults:
     working-directory: baselines
 
 jobs:
-  test:
+  test_baselines:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
