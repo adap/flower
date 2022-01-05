@@ -199,7 +199,7 @@ class EC2Adapter(Adapter):
             timeout (int): Timeout in minutes
             num_instance (int): Number of instances to start if currently available in EC2
         """
-        # The instance will be set to terminate after stutdown
+        # The instance will be set to terminate after shutdown
         # This is a fail safe in case something happens and the instances
         # are not correctly shutdown
         user_data = ["#!/bin/bash", f"sudo shutdown -P {timeout}"]
