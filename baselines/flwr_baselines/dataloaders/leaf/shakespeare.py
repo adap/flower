@@ -62,6 +62,10 @@ class ShakespeareDataset(Dataset[XY]):  # type: ignore
         return len(self.next_word)
 
     def __getitem__(self, idx: int) -> XY:
-        sentence_indices = np.array(self.word_to_indices(self.sentence[idx]))
-        next_word_index = np.array(self.characters.find(self.next_word[idx]))
+        sentence_indices: np.typing.NDArray[np.float64] = np.array(
+            self.word_to_indices(self.sentence[idx])
+        )
+        next_word_index: np.typing.NDArray[np.float64] = np.array(
+            self.characters.find(self.next_word[idx])
+        )
         return sentence_indices, next_word_index
