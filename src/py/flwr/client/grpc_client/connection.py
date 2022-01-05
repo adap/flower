@@ -67,7 +67,7 @@ def grpc_connection(
 
     Examples
     --------
-    Starting a SSL/TLS enabled connection to server.
+    Establishing a SSL/TLS-enabled connection to server:
 
     >>> from pathlib import Path
     >>> with grpc_connection(
