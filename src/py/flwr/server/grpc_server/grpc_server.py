@@ -18,7 +18,7 @@
 import concurrent.futures
 import sys
 from logging import ERROR
-from typing import ByteString, Optional, Tuple
+from typing import Optional, Tuple
 
 import grpc
 
@@ -34,7 +34,7 @@ INVALID_SSL_FILES_ERR_MSG = """
 """
 
 
-def valid_ssl_files(ssl_files: Tuple[ByteString, ByteString, ByteString]) -> bool:
+def valid_ssl_files(ssl_files: Tuple[bytes, bytes, bytes]) -> bool:
     """Validate ssl_files tuple."""
     is_valid = (
         all(isinstance(ssl_file, bytes) for ssl_file in ssl_files)
@@ -52,7 +52,7 @@ def start_grpc_server(
     server_address: str,
     max_concurrent_workers: int = 1000,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    ssl_files: Optional[Tuple[ByteString, ByteString, ByteString]] = None,
+    ssl_files: Optional[Tuple[bytes, bytes, bytes]] = None,
 ) -> grpc.Server:
     """Create gRPC server and return instance of grpc.Server.
 
@@ -75,7 +75,7 @@ def start_grpc_server(
     max_message_length : int
         Maximum message length that the server can send or receive.
         Int valued in bytes. -1 means unlimited. (default: GRPC_MAX_MESSAGE_LENGTH)
-    ssl_files : Tuple[ByteString, ByteString, ByteString]
+    ssl_files : Tuple[bytes, bytes, bytes]
         Tuple containing root certificate, server certificate, and private key to start
         a secure SSL/TLS server. The tuple is expected to have three byte string
         elements in the following order:
