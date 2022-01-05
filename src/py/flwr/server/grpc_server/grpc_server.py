@@ -79,7 +79,7 @@ def start_grpc_server(
         Int valued in bytes. -1 means unlimited. (default: GRPC_MAX_MESSAGE_LENGTH)
     ssl_files : Tuple[ByteString, ByteString, ByteString]
         Tuple containing root certificate, server certificate, and private key to start
-        a secure SSL/TLS server. The tuple is expected to have three file-like
+        a secure SSL/TLS server. The tuple is expected to have three byte strings
         elements in the following order:
 
             * CA certificate.
