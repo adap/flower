@@ -21,7 +21,7 @@ from os.path import abspath, dirname, join
 from typing import Tuple, cast
 
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_grpc_server
+from flwr.server.grpc_server.grpc_server import start_grpc_server, valid_ssl_files
 
 root_dir = dirname(abspath(join(__file__, "../../../../..")))
 
@@ -49,6 +49,30 @@ def unused_tcp_port() -> int:
         sock.bind(("", 0))
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return cast(int, sock.getsockname()[1])
+
+
+def test_valid_ssl_files_correctly() -> None:
+    """Test is validation function works correctly when passed valid list."""
+    # Prepare
+    ssl_files = load_certificates()
+
+    # Execute
+    is_valid = valid_ssl_files(ssl_files)
+
+    # Assert
+    assert is_valid
+
+
+def test_valid_ssl_files_correctly() -> None:
+    """Test is validation function works correctly when passed invalid list."""
+    # Prepare
+    ssl_files = ["/dev/null", "/dev/null"]
+
+    # Execute
+    is_valid = valid_ssl_files(ssl_files)
+
+    # Assert
+    assert not is_valid
 
 
 def test_integration_start_and_shutdown_insecure_server() -> None:

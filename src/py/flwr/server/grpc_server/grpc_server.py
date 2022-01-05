@@ -18,6 +18,7 @@
 import concurrent.futures
 import sys
 from logging import ERROR
+from pathlib import Path
 from typing import ByteString, Optional, Tuple, Union
 
 import grpc
@@ -44,8 +45,9 @@ def read_to_byte_string(file_like: FILELIKE) -> ByteString:
 
 
 def valid_ssl_files(ssl_files: SSLFILES) -> bool:
-    """Validate type SSLFILES and exit if invalid."""
-    is_valid = all(ssl_files)
+    """Validate type SSLFILES."""
+    all_files = [Path(ssl_file).is_file() for ssl_file in ssl_files]
+    is_valid = all(all_files) and len(all_files) == 3
 
     if not is_valid:
         log(ERROR, INVALID_SSL_FILES_ERR_MSG)
