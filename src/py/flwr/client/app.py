@@ -130,10 +130,10 @@ def start_numpy_client(
             value. Note that the Flower server needs to be started with the
             same value (see `flwr.server.start_server`), otherwise it will not
             know about the increased limit and block larger messages.
-        root_certificate: str (default: None)
+        root_certificate: bytes (default: None)
             PEM-encoded root certificate as bytes. If provided, a secure connection
-            using the certificate(s) will be established to a SSL/TLS enabled Flower server
-            (default: None)
+            using the certificate(s) will be established to a SSL/TLS enabled Flower
+            server
 
     Returns
     -------
