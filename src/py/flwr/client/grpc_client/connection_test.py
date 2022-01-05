@@ -24,7 +24,7 @@ import grpc
 
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.server.grpc_server.grpc_server import start_grpc_server
 
 from .connection import insecure_grpc_connection
 
@@ -82,7 +82,7 @@ def test_integration_connection() -> None:
     # Prepare
     port = unused_tcp_port()
 
-    server = start_insecure_grpc_server(
+    server = start_grpc_server(
         client_manager=SimpleClientManager(), server_address=f"[::]:{port}"
     )
 

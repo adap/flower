@@ -21,7 +21,7 @@ from typing import Dict, Optional, Tuple
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.server.grpc_server.grpc_server import start_grpc_server
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
@@ -70,7 +70,7 @@ def start_server(  # pylint: disable=too-many-arguments
     initialized_server, initialized_config = _init_defaults(server, config, strategy)
 
     # Start gRPC server
-    grpc_server = start_insecure_grpc_server(
+    grpc_server = start_grpc_server(
         client_manager=initialized_server.client_manager(),
         server_address=server_address,
         max_message_length=grpc_max_message_length,
