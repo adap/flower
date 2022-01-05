@@ -50,10 +50,10 @@ def start_client(
             value. Note that the Flower server needs to be started with the
             same value (see `flwr.server.start_server`), otherwise it will not
             know about the increased limit and block larger messages.
-        root_certificates: str (default: None)
-            Path to the PEM-encoded root certificates. If provided a secure connection
-            using the certificate will be established to a SSL/TLS enabled Flower server
-            (default: None)
+        root_certificate: str (default: None)
+            Path to the PEM-encoded root certificates file. If provided, a secure
+            connection using the certificate(s) will be established to a SSL/TLS-enabled
+            Flower server (default: None)
 
     Returns:
         None.
