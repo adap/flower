@@ -148,7 +148,7 @@ def start_numpy_client(
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting a SSL/TLS enabled client.
+    Starting a SSL/TLS-enabled client:
 
     >>> from pathlib import Path
     >>> start_client(
