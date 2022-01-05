@@ -54,7 +54,7 @@ def start_client(
         root_certificate: bytes (default: None)
             PEM-encoded root certificate as bytes. If provided, a secure connection
             using the certificate(s) will be established to a SSL/TLS-enabled Flower
-            server (default: None)
+            server
 
     Returns
     -------
