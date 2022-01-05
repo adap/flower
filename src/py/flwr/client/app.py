@@ -126,7 +126,7 @@ def start_numpy_client(
         server_address=server_address,
         client=flower_client,
         grpc_max_message_length=grpc_max_message_length,
-        root_certificates=root_certificates,
+        root_certificate=root_certificate,
     )
 
 
