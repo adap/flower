@@ -27,6 +27,8 @@ from flwr.common import (
     FitRes,
     Parameters,
     ParametersRes,
+    PropertiesIns,
+    PropertiesRes,
     Reconnect,
     ndarray_to_bytes,
 )
@@ -42,6 +44,9 @@ class SuccessClient(ClientProxy):
         # This method is not expected to be called
         raise Exception()
 
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        raise Exception()
+
     def fit(self, ins: FitIns) -> FitRes:
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
@@ -54,10 +59,13 @@ class SuccessClient(ClientProxy):
         return Disconnect(reason="UNKNOWN")
 
 
-class FailingCLient(ClientProxy):
+class FailingClient(ClientProxy):
     """Test class."""
 
     def get_parameters(self) -> ParametersRes:
+        raise Exception()
+
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         raise Exception()
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -74,7 +82,7 @@ def test_fit_clients() -> None:
     """Test fit_clients."""
     # Prepare
     clients: List[ClientProxy] = [
-        FailingCLient("0"),
+        FailingClient("0"),
         SuccessClient("1"),
     ]
     arr = np.array([[1, 2], [3, 4], [5, 6]])
@@ -95,7 +103,7 @@ def test_eval_clients() -> None:
     """Test eval_clients."""
     # Prepare
     clients: List[ClientProxy] = [
-        FailingCLient("0"),
+        FailingClient("0"),
         SuccessClient("1"),
     ]
     arr = np.array([[1, 2], [3, 4], [5, 6]])
