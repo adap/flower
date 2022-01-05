@@ -17,7 +17,7 @@ server."""
 from contextlib import contextmanager
 from logging import DEBUG
 from queue import Queue
-from typing import ByteString, Callable, Iterator, Optional, Tuple
+from typing import Callable, Iterator, Optional, Tuple
 
 import grpc
 
@@ -40,7 +40,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 def grpc_connection(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificate: Optional[ByteString] = None,
+    root_certificate: Optional[bytes] = None,
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish an insecure gRPC connection to a gRPC server.
 
@@ -57,8 +57,8 @@ def grpc_connection(
         (see `flwr.server.start_server`), otherwise it will not know about the
         increased limit and block larger messages.
         (default: 536_870_912, this equals 512MB)
-    root_certificate : ByteString
-        PEM-encoded root certificate as ByteString. If provided, a secure connection
+    root_certificate : bytes
+        PEM-encoded root certificate as bytes. If provided, a secure connection
         using the certificate(s) will be established to a SSL/TLS enabled Flower server
         (default: None)
 
@@ -87,9 +87,7 @@ def grpc_connection(
     ]
 
     if root_certificate is not None:
-        with open(root_certificate, "rb") as file:
-            ssl_channel_credentials = grpc.ssl_channel_credentials(file.read())
-
+        ssl_channel_credentials = grpc.ssl_channel_credentials(root_certificate)
         channel = grpc.secure_channel(
             server_address, ssl_channel_credentials, options=channel_options
         )

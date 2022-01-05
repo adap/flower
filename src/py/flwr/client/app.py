@@ -17,7 +17,7 @@
 
 import time
 from logging import INFO
-from typing import ByteString, Optional
+from typing import Optional
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
@@ -33,7 +33,7 @@ def start_client(
     server_address: str,
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificate: Optional[ByteString] = None,
+    root_certificate: Optional[bytes] = None,
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
@@ -51,8 +51,8 @@ def start_client(
             value. Note that the Flower server needs to be started with the
             same value (see `flwr.server.start_server`), otherwise it will not
             know about the increased limit and block larger messages.
-        root_certificate: ByteString (default: None)
-            PEM-encoded root certificate as ByteString. If provided, a secure
+        root_certificate: bytes (default: None)
+            PEM-encoded root certificate as bytes. If provided, a secure
             connection using the certificate(s) will be established to a SSL/TLS-enabled
             Flower server (default: None)
 
@@ -112,7 +112,7 @@ def start_numpy_client(
     server_address: str,
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificate: Optional[ByteString] = None,
+    root_certificate: Optional[bytes] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -131,7 +131,7 @@ def start_numpy_client(
             same value (see `flwr.server.start_server`), otherwise it will not
             know about the increased limit and block larger messages.
         root_certificate: str (default: None)
-            PEM-encoded root certificate as ByteString. If provided, a secure connection
+            PEM-encoded root certificate as bytes. If provided, a secure connection
             using the certificate(s) will be established to a SSL/TLS enabled Flower server
             (default: None)
 
