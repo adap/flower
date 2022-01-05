@@ -28,7 +28,6 @@ from flwr.proto import transport_pb2_grpc
 from flwr.server.client_manager import ClientManager
 from flwr.server.grpc_server import flower_service_servicer as fss
 
-SSL_FILES = Tuple[ByteString, ByteString, ByteString]
 
 INVALID_SSL_FILES_ERR_MSG = """
     When setting any of root_certificate, certificate, or private_key,
@@ -36,10 +35,10 @@ INVALID_SSL_FILES_ERR_MSG = """
 """
 
 
-def valid_ssl_files(ssl_files: SSL_FILES) -> bool:
-    """Validate type SSL_FILES."""
+def valid_ssl_files(ssl_files: Tuple[ByteString, ByteString, ByteString]) -> bool:
+    """Validate ssl_files tuple."""
     is_valid = (
-        all([isinstance(ssl_file, bytes) for ssl_file in ssl_files])
+        all(isinstance(ssl_file, bytes) for ssl_file in ssl_files)
         and len(ssl_files) == 3
     )
 
@@ -54,7 +53,7 @@ def start_grpc_server(
     server_address: str,
     max_concurrent_workers: int = 1000,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    ssl_files: Optional[SSL_FILES] = None,
+    ssl_files: Optional[Tuple[ByteString, ByteString, ByteString]] = None,
 ) -> grpc.Server:
     """Create gRPC server and return instance of grpc.Server.
 
