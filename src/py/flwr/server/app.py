@@ -36,6 +36,7 @@ def start_server(  # pylint: disable=too-many-arguments
     strategy: Optional[Strategy] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     force_final_distributed_eval: bool = False,
+    ssl_files: Optional[Tuple[bytes, bytes, bytes]] = None,
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
 
@@ -65,8 +66,8 @@ def start_server(  # pylint: disable=too-many-arguments
             Forces a distributed evaluation to occur after the last training
             epoch when enabled.
         ssl_files : Tuple[bytes, bytes, bytes] (default: None)
-            Tuple containing root certificate, server certificate, and private key to start
-            a secure SSL/TLS server. The tuple is expected to have three byte string
+            Tuple containing root certificate, server certificate, and private key to
+            start a secure SSL/TLS server. The tuple is expected to have three bytes
             elements in the following order:
 
                 * CA certificate.
@@ -86,7 +87,11 @@ def start_server(  # pylint: disable=too-many-arguments
     Starting a SSL/TLS enabled server.
 
     >>> start_server(
-    >>>     ssl_files=("/crts/root.pem", "/crts/localhost.crt", "/crts/localhost.key")
+    >>>     ssl_files=(
+    >>>         Path("/crts/root.pem").read_bytes(),
+    >>>         Path("/crts/localhost.crt").read_bytes(),
+    >>>         Path("/crts/localhost.key").read_bytes()
+    >>>     )
     >>> )
     """
     initialized_server, initialized_config = _init_defaults(server, config, strategy)

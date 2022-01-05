@@ -76,15 +76,13 @@ def start_grpc_server(
         Maximum message length that the server can send or receive.
         Int valued in bytes. -1 means unlimited. (default: GRPC_MAX_MESSAGE_LENGTH)
     ssl_files : Tuple[bytes, bytes, bytes]
-        Tuple containing root certificate, server certificate, and private key to start
-        a secure SSL/TLS server. The tuple is expected to have three byte string
-        elements in the following order:
+            Tuple containing root certificate, server certificate, and private key to
+            start a secure SSL/TLS server. The tuple is expected to have three bytes
+            elements in the following order:
 
-            * CA certificate.
-            * server certificate.
-            * server private key.
-
-        (default: None)
+                * CA certificate.
+                * server certificate.
+                * server private key.
 
     Returns
     -------
