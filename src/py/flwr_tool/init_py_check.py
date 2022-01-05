@@ -12,8 +12,7 @@ import sys
 
 
 def check_missing_init_files(absolute_path: str) -> None:
-    """Searches through the specified absolute_path and looks for missing __init__.py
-    files."""
+    """Search absolute_path and look for missing __init__.py files."""
     path = os.walk(absolute_path)
     warning_list = []
     ignore_list = ["__pycache__$", ".pytest_cache.*$", "dist", "flwr.egg-info$"]
