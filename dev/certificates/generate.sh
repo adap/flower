@@ -6,7 +6,7 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
 
 CA_PASSWORD=notsafe
 
-CERT_DIR=.flwr_cache/certificates
+CERT_DIR=.cache/certificates
 
 # Generate directories if not exists
 mkdir -p .cache/certificates
