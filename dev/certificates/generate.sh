@@ -9,9 +9,9 @@ CA_PASSWORD=notsafe
 CERT_DIR=.flwr_cache/certificates
 
 # Generate directories if not exists
-mkdir -p .flwr_cache/certificates
+mkdir -p .cache/certificates
 
-# if [ -f ".flwr_cache/certificates/ca.crt" ]; then
+# if [ -f ".cache/certificates/ca.crt" ]; then
 #     echo "Skipping certificate generation as they already exist."
 #     exit 0
 # fi
