@@ -52,9 +52,9 @@ def start_client(
             same value (see `flwr.server.start_server`), otherwise it will not
             know about the increased limit and block larger messages.
         root_certificate: bytes (default: None)
-            PEM-encoded root certificate as bytes. If provided, a secure
-            connection using the certificate(s) will be established to a SSL/TLS-enabled
-            Flower server (default: None)
+            PEM-encoded root certificate as bytes. If provided, a secure connection
+            using the certificate(s) will be established to a SSL/TLS-enabled Flower
+            server (default: None)
 
     Returns
     -------
@@ -132,8 +132,8 @@ def start_numpy_client(
             know about the increased limit and block larger messages.
         root_certificate: bytes (default: None)
             PEM-encoded root certificate as bytes. If provided, a secure connection
-            using the certificate(s) will be established to a SSL/TLS enabled Flower
-            server
+            using the certificate(s) will be established to a SSL/TLS-enabled Flower
+            server (default: None)
 
     Returns
     -------
