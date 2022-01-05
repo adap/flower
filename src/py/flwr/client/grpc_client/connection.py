@@ -57,9 +57,9 @@ def grpc_connection(
         (see `flwr.server.start_server`), otherwise it will not know about the
         increased limit and block larger messages.
         (default: 536_870_912, this equals 512MB)
-    root_certificates : str
-        Path to the PEM-encoded root certificates. If provided a secure connection
-        using the certificate will be established to a SSL/TLS enabled Flower server
+    root_certificate : str
+        Path to the PEM-encoded root certificate file. If provided, a secure connection
+        using the certificate(s) will be established to a SSL/TLS enabled Flower server
         (default: None)
     """
     channel_options = [
