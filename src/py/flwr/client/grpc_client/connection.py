@@ -60,7 +60,6 @@ def grpc_connection(
     root_certificate : Optional[bytes] (default: None)
         PEM-encoded root certificate as bytes. If provided, a secure connection
         using the certificate(s) will be established to a SSL/TLS enabled Flower server
-        (default: None)
 
     Returns
     -------
