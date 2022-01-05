@@ -141,7 +141,7 @@ def start_numpy_client(
 
     Examples
     --------
-    Starting a client with unsecure server connection.
+    Starting a client with insecure server connection.
 
     >>> start_client(
     >>>     server_address=localhost:8080,
