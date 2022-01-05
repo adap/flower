@@ -141,14 +141,14 @@ def start_numpy_client(
 
     Examples
     --------
-    Starting a client with insecure server connection.
+    Starting a client with an insecure server connection:
 
     >>> start_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting a SSL/TLS enabled client.
+    Starting a SSL/TLS-enabled client:
 
     >>> from pathlib import Path
     >>> start_client(
