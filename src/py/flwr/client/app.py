@@ -37,7 +37,8 @@ def start_client(
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
-    Arguments:
+    Parameters
+    ----------
         server_address: str. The IPv6 address of the server. If the Flower
             server runs on the same machine on port 8080, then `server_address`
             would be `"[::]:8080"`.
@@ -55,8 +56,9 @@ def start_client(
             connection using the certificate(s) will be established to a SSL/TLS-enabled
             Flower server (default: None)
 
-    Returns:
-        None.
+    Returns
+    -------
+        None
 
     Examples
     --------
@@ -110,11 +112,12 @@ def start_numpy_client(
     server_address: str,
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificate: Optional[str] = None,
+    root_certificate: Optional[ByteString] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
-    Arguments:
+    Parameters
+    ----------
         server_address: str. The IPv6 address of the server. If the Flower
             server runs on the same machine on port 8080, then `server_address`
             would be `"[::]:8080"`.
@@ -128,12 +131,31 @@ def start_numpy_client(
             same value (see `flwr.server.start_server`), otherwise it will not
             know about the increased limit and block larger messages.
         root_certificate: str (default: None)
-            Path to the PEM-encoded root certificate file. If provided, a secure connection
+            PEM-encoded root certificate as ByteString. If provided, a secure connection
             using the certificate(s) will be established to a SSL/TLS enabled Flower server
             (default: None)
 
-    Returns:
-        None.
+    Returns
+    -------
+        None
+
+    Examples
+    --------
+    Starting a client with unsecure server connection.
+
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client=FlowerClient(),
+    >>> )
+
+    Starting a SSL/TLS enabled client.
+
+    >>> from pathlib import Path
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client=FlowerClient(),
+    >>>     root_certificate=Path("/crts/root.pem").read_bytes(),
+    >>> )
     """
 
     # Wrap the NumPyClient
