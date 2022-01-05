@@ -21,7 +21,8 @@ from typing import Dict, Optional, Tuple
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.server.grpc_server.grpc_server import start_grpc_server
+from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
 
@@ -35,7 +36,7 @@ def start_server(  # pylint: disable=too-many-arguments
     strategy: Optional[Strategy] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     force_final_distributed_eval: bool = False,
-) -> None:
+) -> History:
     """Start a Flower server using the gRPC transport layer.
 
     Arguments:
@@ -60,16 +61,16 @@ def start_server(  # pylint: disable=too-many-arguments
             same value (see `flwr.client.start_client`), otherwise clients will
             not know about the increased limit and block larger messages.
         force_final_distributed_eval: bool (default: False).
-            Forces a distributed evaulation to occur after the last training
+            Forces a distributed evaluation to occur after the last training
             epoch when enabled.
 
     Returns:
-        None.
+        hist: flwr.server.history.History. Object containing metrics from training.
     """
     initialized_server, initialized_config = _init_defaults(server, config, strategy)
 
     # Start gRPC server
-    grpc_server = start_insecure_grpc_server(
+    grpc_server = start_grpc_server(
         client_manager=initialized_server.client_manager(),
         server_address=server_address,
         max_message_length=grpc_max_message_length,
@@ -80,7 +81,7 @@ def start_server(  # pylint: disable=too-many-arguments
         initialized_config["num_rounds"],
     )
 
-    _fl(
+    hist = _fl(
         server=initialized_server,
         config=initialized_config,
         force_final_distributed_eval=force_final_distributed_eval,
@@ -88,6 +89,8 @@ def start_server(  # pylint: disable=too-many-arguments
 
     # Stop the gRPC server
     grpc_server.stop(grace=1)
+
+    return hist
 
 
 def _init_defaults(
@@ -113,7 +116,7 @@ def _init_defaults(
 
 def _fl(
     server: Server, config: Dict[str, int], force_final_distributed_eval: bool
-) -> None:
+) -> History:
     # Fit model
     hist = server.fit(num_rounds=config["num_rounds"])
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
@@ -141,3 +144,5 @@ def _fl(
 
     # Graceful shutdown
     server.disconnect_all_clients()
+
+    return hist
