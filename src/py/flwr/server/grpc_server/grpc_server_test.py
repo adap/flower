@@ -35,9 +35,9 @@ def load_certificates() -> Tuple[str, str, str]:
     subprocess.run(["bash", "./dev/certificates/generate.sh"], check=True, cwd=root_dir)
 
     ssl_files = (
-        join(root_dir, ".flwr_cache/certificates/ca.crt"),
-        join(root_dir, ".flwr_cache/certificates/server.pem"),
-        join(root_dir, ".flwr_cache/certificates/server.key"),
+        join(root_dir, ".cache/certificates/ca.crt"),
+        join(root_dir, ".cache/certificates/server.pem"),
+        join(root_dir, ".cache/certificates/server.key"),
     )
 
     return ssl_files
