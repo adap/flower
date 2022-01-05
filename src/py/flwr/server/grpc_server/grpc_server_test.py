@@ -54,7 +54,7 @@ def unused_tcp_port() -> int:
 def test_valid_ssl_files_when_correct() -> None:
     """Test is validation function works correctly when passed valid list."""
     # Prepare
-    ssl_files = [b"a_byte_string", b"a_byte_string", b"a_byte_string"]
+    ssl_files = (b"a_byte_string", b"a_byte_string", b"a_byte_string")
 
     # Execute
     is_valid = valid_ssl_files(ssl_files)
@@ -66,10 +66,10 @@ def test_valid_ssl_files_when_correct() -> None:
 def test_valid_ssl_files_when_wrong() -> None:
     """Test is validation function works correctly when passed invalid list."""
     # Prepare
-    ssl_files = ["not_a_byte_string", b"a_byte_string", b"a_byte_string"]
+    ssl_files = ("not_a_byte_string", b"a_byte_string", b"a_byte_string")
 
     # Execute
-    is_valid = valid_ssl_files(ssl_files)
+    is_valid = valid_ssl_files(ssl_files)  # type: ignore
 
     # Assert
     assert not is_valid
