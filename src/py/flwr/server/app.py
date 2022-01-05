@@ -80,7 +80,7 @@ def start_server(  # pylint: disable=too-many-arguments
 
     Examples
     --------
-    Starting a insecure server.
+    Starting an insecure server:
 
     >>> start_server()
 
