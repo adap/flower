@@ -67,8 +67,8 @@ def grpc_connection(
         ("grpc.max_receive_message_length", max_message_length),
     ]
 
-    if root_certificates is not None:
-        with open(root_certificates, "rb") as file:
+    if root_certificate is not None:
+        with open(root_certificate, "rb") as file:
             ssl_channel_credentials = grpc.ssl_channel_credentials(file.read())
 
         channel = grpc.secure_channel(
