@@ -40,7 +40,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 def grpc_connection(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificates: Optional[str] = None,
+    root_certificate: Optional[str] = None,
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish an insecure gRPC connection to a gRPC server.
 
