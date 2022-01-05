@@ -11,7 +11,6 @@ from omegaconf import DictConfig
 from torchvision.datasets import CIFAR10
 
 from cifar.client import (
-    RayClient,
     transforms_test,
 )
 from cifar.utils import (
@@ -26,7 +25,7 @@ def main(cfg: DictConfig) -> None:
     # This will not be necessary in hydra 1.3
     chdir(get_original_cwd())
 
-    # Create or load partitions
+    # Create or load federated partitions
     fed_dir = (
         Path(to_absolute_path(cfg.root_dir))
         / f"{cfg.dataset}"
@@ -35,7 +34,6 @@ def main(cfg: DictConfig) -> None:
         / f"{cfg.lda_concentration:.2f}"
     )
 
-    # Create Partitions
     trainset = CIFAR10(root=to_absolute_path(cfg.root_dir), train=True, download=True)
     flwr_trainset = (trainset.data, np.array(trainset.targets, dtype=np.int32))
     partition_and_save(
@@ -57,10 +55,6 @@ def main(cfg: DictConfig) -> None:
     # Define client resources and ray configs
     client_resources = {"num_cpus": cfg.cpus_per_client}
     ray_config = {"include_dashboard": cfg.ray_config.include_dashboard}
-
-    def client_fn(cid: str) -> RayClient:
-        # create a single client instance
-        return RayClient(cid, fed_dir)
 
     # Helper functions
     def fit_config(rnd: int) -> Dict[str, str]:
@@ -84,6 +78,7 @@ def main(cfg: DictConfig) -> None:
         eval_fn=get_eval_fn(testset),
         initial_parameters=initial_parameters,
     )
+    client_fn = call(cfg.get_ray_client_fn, fed_dir)
     # start simulation
     fl.simulation.start_simulation(
         client_fn=client_fn,

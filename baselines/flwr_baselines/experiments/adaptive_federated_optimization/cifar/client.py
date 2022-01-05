@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 
 import flwr as fl
 import numpy as np
@@ -105,3 +105,11 @@ class RayClient(fl.client.NumPyClient):
         )
         net.load_state_dict(state_dict, strict=True)
         return net
+
+
+def get_ray_client_fn(fed_dir: Path) -> Callable[[str], RayClient]:
+    def client_fn(cid: str) -> RayClient:
+        # create a single client instance
+        return RayClient(cid, fed_dir)
+
+    return client_fn
