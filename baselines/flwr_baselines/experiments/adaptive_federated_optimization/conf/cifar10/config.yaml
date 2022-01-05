@@ -4,17 +4,17 @@ batch_size: 20
 epochs_per_round: 1
 lda_concentration: 0.1
 num_clients_per_round: 10
-num_total_clients: 5000
+num_total_clients: 500
 num_rounds: 4000
 root_dir: "./data"
 cpus_per_client: 1
 hydra.job.chdir: False
-
 get_initial_parameters:
   _target_: cifar.utils.get_initial_parameters
-
 get_eval_fn:
-  _target_: ..cifar10.utils.get_eval_fn
+  _target_: cifar.utils.get_eval_fn
+get_ray_client_fn:
+  _target_: cifar.client.get_ray_client_fn
 ray_config:
   include_dashboard: False
 defaults:

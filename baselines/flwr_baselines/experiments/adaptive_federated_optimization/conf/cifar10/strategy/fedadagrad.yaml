@@ -3,6 +3,6 @@ name: FedAdagrad
 expected_accuracy: 73.1
 init:
   _target_: flwr.server.strategy.FedAdagrad
-  eta: 0.01
-  tau: 0.001
-eta_l: 0.1 # client's learning rate
+  eta: 0.1
+  tau: 0.01
+eta_l: 0.03162
