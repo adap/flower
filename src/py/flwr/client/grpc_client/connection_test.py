@@ -26,7 +26,7 @@ from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.grpc_server.grpc_server import start_grpc_server
 
-from .connection import insecure_grpc_connection
+from .connection import grpc_connection
 
 EXPECTED_NUM_SERVER_MESSAGE = 10
 
@@ -91,7 +91,7 @@ def test_integration_connection() -> None:
     def run_client() -> int:
         messages_received: int = 0
 
-        with insecure_grpc_connection(server_address=f"[::]:{port}") as conn:
+        with grpc_connection(server_address=f"[::]:{port}") as conn:
             receive, send = conn
 
             # Setup processing loop
