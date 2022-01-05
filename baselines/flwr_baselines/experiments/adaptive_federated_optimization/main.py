@@ -26,15 +26,17 @@ def main(cfg: DictConfig) -> None:
     chdir(get_original_cwd())
 
     # Create or load federated partitions
+    path_original_dataset = Path(to_absolute_path(cfg.root_dir))
     fed_dir = (
-        Path(to_absolute_path(cfg.root_dir))
+        path_original_dataset
         / f"{cfg.dataset}"
         / "partitions"
         / f"{cfg.num_total_clients}"
         / f"{cfg.lda_concentration:.2f}"
     )
+    call(cfg.gen_federated_partitions, path_original_dataset, fed_dir)
 
-    trainset = CIFAR10(root=to_absolute_path(cfg.root_dir), train=True, download=True)
+    """trainset = CIFAR10(root=to_absolute_path(cfg.root_dir), train=True, download=True)
     flwr_trainset = (trainset.data, np.array(trainset.targets, dtype=np.int32))
     partition_and_save(
         dataset=flwr_trainset,
@@ -42,7 +44,7 @@ def main(cfg: DictConfig) -> None:
         dirichlet_dist=None,
         num_partitions=cfg.num_total_clients,
         concentration=cfg.lda_concentration,
-    )
+    )"""
 
     # Download testset for centralized evaluation
     testset = CIFAR10(

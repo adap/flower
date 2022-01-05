@@ -9,6 +9,12 @@ num_rounds: 4000
 root_dir: "./data"
 cpus_per_client: 1
 hydra.job.chdir: False
+gen_federated_partitions:
+  _target_: cifar.utils.gen_cifar10_partitions
+    path_original_dataset: ???
+    fed_dir: ???
+    num_total_clients: ${num_total_clients}
+    lda_concentration: ${lda_concentration},
 get_initial_parameters:
   _target_: cifar.utils.get_initial_parameters
 get_eval_fn:

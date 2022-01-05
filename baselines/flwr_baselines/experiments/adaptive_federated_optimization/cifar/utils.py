@@ -8,6 +8,7 @@ from flwr.common.parameter import weights_to_parameters
 from flwr.common.typing import Parameters, Weights
 from flwr.dataset.utils.common import XY, create_lda_partitions
 from torch.nn import GroupNorm, Module
+from torchvision.datasets import CIFAR10
 from torchvision.models import ResNet, resnet18
 from typing import Callable, Dict, Optional, Tuple
 
@@ -115,3 +116,21 @@ def get_eval_fn(
         return loss, {"accuracy": accuracy}
 
     return evaluate
+
+
+def gen_cifar10_partitions(
+    path_original_dataset: Path,
+    fed_dir: Path,
+    num_total_clients: int,
+    lda_concentration: float,
+) -> None:
+
+    trainset = CIFAR10(root=path_original_dataset, train=True, download=True)
+    flwr_trainset = (trainset.data, np.array(trainset.targets, dtype=np.int32))
+    partition_and_save(
+        dataset=flwr_trainset,
+        fed_dir=fed_dir,
+        dirichlet_dist=None,
+        num_partitions=num_total_clients,
+        concentration=lda_concentration,
+    )
