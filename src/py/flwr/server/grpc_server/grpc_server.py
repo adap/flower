@@ -28,7 +28,6 @@ from flwr.proto import transport_pb2_grpc
 from flwr.server.client_manager import ClientManager
 from flwr.server.grpc_server import flower_service_servicer as fss
 
-
 INVALID_SSL_FILES_ERR_MSG = """
     When setting any of root_certificate, certificate, or private_key,
     all of them need to be set.
