@@ -63,7 +63,7 @@ def start_client(
         with grpc_connection(
             server_address,
             max_message_length=grpc_max_message_length,
-            root_certificates=root_certificates,
+            root_certificate=root_certificate,
         ) as conn:
             receive, send = conn
             log(INFO, "Opened (insecure) gRPC connection")
