@@ -84,7 +84,7 @@ def start_server(  # pylint: disable=too-many-arguments
 
     >>> start_server()
 
-    Starting a SSL/TLS enabled server.
+    Starting an SSL/TLS-enabled server:
 
     >>> start_server(
     >>>     ssl_files=(
