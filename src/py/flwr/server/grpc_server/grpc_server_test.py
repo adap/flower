@@ -13,11 +13,11 @@
 # limitations under the License.
 # ==============================================================================
 """Tests for module server."""
-
 import socket
 import subprocess
 from contextlib import closing
 from os.path import abspath, dirname, join
+from pathlib import Path
 from typing import Tuple, cast
 
 from flwr.server.client_manager import SimpleClientManager
@@ -51,10 +51,10 @@ def unused_tcp_port() -> int:
         return cast(int, sock.getsockname()[1])
 
 
-def test_valid_ssl_files_correctly() -> None:
+def test_valid_ssl_files_when_correct() -> None:
     """Test is validation function works correctly when passed valid list."""
     # Prepare
-    ssl_files = load_certificates()
+    ssl_files = [b"a_byte_string", b"a_byte_string", b"a_byte_string"]
 
     # Execute
     is_valid = valid_ssl_files(ssl_files)
@@ -63,10 +63,10 @@ def test_valid_ssl_files_correctly() -> None:
     assert is_valid
 
 
-def test_valid_ssl_files_correctly() -> None:
+def test_valid_ssl_files_when_wrong() -> None:
     """Test is validation function works correctly when passed invalid list."""
     # Prepare
-    ssl_files = ["/dev/null", "/dev/null"]
+    ssl_files = ["not_a_byte_string", b"a_byte_string", b"a_byte_string"]
 
     # Execute
     is_valid = valid_ssl_files(ssl_files)
@@ -102,7 +102,11 @@ def test_integration_start_and_shutdown_secure_server() -> None:
     server = start_grpc_server(
         client_manager=client_manager,
         server_address=f"[::]:{port}",
-        ssl_files=ssl_files,
+        ssl_files=(
+            Path(ssl_files[0]).read_bytes(),
+            Path(ssl_files[1]).read_bytes(),
+            Path(ssl_files[2]).read_bytes(),
+        ),
     )
 
     # Teardown

@@ -18,8 +18,7 @@
 import concurrent.futures
 import sys
 from logging import ERROR
-from pathlib import Path
-from typing import ByteString, Optional, Tuple, Union
+from typing import ByteString, Optional, Tuple
 
 import grpc
 
@@ -29,8 +28,7 @@ from flwr.proto import transport_pb2_grpc
 from flwr.server.client_manager import ClientManager
 from flwr.server.grpc_server import flower_service_servicer as fss
 
-FILELIKE = Union[str, bytes]
-SSLFILES = Tuple[FILELIKE, FILELIKE, FILELIKE]
+SSLFILES = Tuple[ByteString, ByteString, ByteString]
 
 INVALID_SSL_FILES_ERR_MSG = """
     When setting any of root_certificate, certificate, or private_key,
@@ -38,16 +36,12 @@ INVALID_SSL_FILES_ERR_MSG = """
 """
 
 
-def read_to_byte_string(file_like: FILELIKE) -> ByteString:
-    """Read file_like and return as ByteString."""
-    with open(file_like, "rb") as file:
-        return file.read()
-
-
 def valid_ssl_files(ssl_files: SSLFILES) -> bool:
     """Validate type SSLFILES."""
-    all_files = [Path(ssl_file).is_file() for ssl_file in ssl_files]
-    is_valid = all(all_files) and len(all_files) == 3
+    is_valid = (
+        all([isinstance(ssl_file, bytes) for ssl_file in ssl_files])
+        and len(ssl_files) == 3
+    )
 
     if not is_valid:
         log(ERROR, INVALID_SSL_FILES_ERR_MSG)
@@ -83,7 +77,7 @@ def start_grpc_server(
     max_message_length : int
         Maximum message length that the server can send or receive.
         Int valued in bytes. -1 means unlimited. (default: GRPC_MAX_MESSAGE_LENGTH)
-    ssl_files : Tuple[Union[str, bytes]]
+    ssl_files : Tuple[bytes, bytes, bytes]
         Tuple containing root certificate, server certificate, and private key to start
         a secure SSL/TLS server. The tuple is expected to have three file-like
         elements in the following order:
@@ -103,11 +97,15 @@ def start_grpc_server(
     --------
     Starting a SSL/TLS enabled server.
 
+    >>> from pathlib import Path
     >>> start_grpc_server(
     >>>     client_manager=ClientManager(),
     >>>     server_address="localhost:8080",
-    >>>     ssl_files=("/crts/root.pem", "/crts/localhost.crt", "/crts/localhost.key")
-    >>> )
+    >>>     ssl_files=(
+    >>>         Path("/crts/root.pem").read_bytes(),
+    >>>         Path("/crts/localhost.crt").read_bytes(),
+    >>>         Path("/crts/localhost.key").read_bytes()
+    >>>     )
     """
     server = grpc.server(
         concurrent.futures.ThreadPoolExecutor(max_workers=max_concurrent_workers),
@@ -134,9 +132,7 @@ def start_grpc_server(
         if not valid_ssl_files(ssl_files):
             sys.exit(1)
 
-        root_certificate_b, certificate_b, private_key_b = [
-            read_to_byte_string(file_path) for file_path in ssl_files
-        ]
+        root_certificate_b, certificate_b, private_key_b = ssl_files
 
         server_credentials = grpc.ssl_server_credentials(
             ((private_key_b, certificate_b),),
