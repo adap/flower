@@ -7,13 +7,15 @@ establish a secure connection to it with a Flower client.
 A more involved code example in which a connection is used can be found 
 `here <https://github.com/adap/flower/tree/main/examples/advanced_tensorflow>`_.
 
-It has it's own README.md file which will 
+The code example comes with a README.md file which will explain how to start it. Although it is
+already SSL-enabled, it might be less descriptive on how. Stick to this guide for a deeper
+introduction to the topic.
 
 Certificates
 ------------
 
-Using SSL-enabled connections requires certificates to be passed to the server and client.
-For the purpose of this guide we are going to generate self-signed certificates. As this can become
+Using SSL-enabled connections requires certificates to be passed to the server and client. For
+the purpose of this guide we are going to generate self-signed certificates. As this can become
 quite complex we are going to ask you to run the script in
 `examples/advanced_tensorflow/certificates/generate.sh`
 
