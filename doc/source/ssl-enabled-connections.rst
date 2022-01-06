@@ -30,7 +30,7 @@ The approach how the SSL certificates are generated in this example can serve as
 starting point but should not be taken as complete for production environments. Please refer to other
 sources regarding the issue of correctly generating certificates for production environments.
 
-In case you are a researcher you might be just fine using the self signed certificates generated using
+In case you are a researcher you might be just fine using the self-signed certificates generated using
 the scripts which are part of this guide.
 
 Server
