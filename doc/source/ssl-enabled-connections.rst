@@ -60,7 +60,7 @@ reading those as byte strings which is the data type server expects the certific
 Client
 ------
 
-We are now going to show how to write a sever which uses the previously generated scripts.
+We are now going to show how to write a client which uses the previously generated scripts:
 
 .. code-block:: python
 
