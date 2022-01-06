@@ -2,7 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: Slack Channel
     url: https://flower.dev/join-slack
-    about: Connect with other Flower user and contributers and discuss with them or ask them a questions.
+    about: Connect with other Flower users and contributors and discuss with them or ask them questions.
   - name: Discussion
     url: https://github.com/adap/flower/discussions
     about: Ask about new features or general questions. Please use the discussion area in most of the cases instead of the issues. 

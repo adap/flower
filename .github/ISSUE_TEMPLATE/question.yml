@@ -1,5 +1,5 @@
 name: Question
-description: Do you have a questions? Please check our Flower Slack channel or the Flower Discussion.
+description: Do you have questions? Please check our Flower Slack channel or the Flower Discussion.
 labels: ['question']
 
 body:

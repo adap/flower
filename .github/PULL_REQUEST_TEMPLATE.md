@@ -7,14 +7,14 @@ the contribution guidelines: https://github.com/adap/flower/blob/main/CONTRIBUTI
 
 <!--
 Example: Fixes #1234. See also #3456.
-Please use keywords (e.g., Fixes) to create link to the issues or pull requests
+Please use keywords (e.g., Fixes) to create a link to the issues or pull requests
 you resolved.
 -->
 
 #### What does this implement/fix? Explain your changes.
 
 <!--
-Explain why you this PR is needed and what kind of changes have you done.
+Explain why this PR is needed and what kind of changes have you done.
 Example: the variable rnd was not clear and therefore renamed to fl_round. 
 -->
 

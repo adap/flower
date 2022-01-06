@@ -11,11 +11,11 @@ body:
   attributes:
     label: Describe what the documentation is missing. 
     description: >
-      Which part of the documentation needs an improvement?
+      Which part of the documentation needs improvement?
   validations:
     required: true
 - type: textarea
   attributes:
     label: Suggest your improvement.
     description: >
-      What information do you want to change/add.
+      What information do you want to change/add?

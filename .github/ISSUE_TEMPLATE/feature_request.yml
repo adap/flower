@@ -19,4 +19,4 @@ body:
     required: true
 - type: textarea
   attributes:
-    label: Is there something esle you want to add?
+    label: Is there something else you want to add?
