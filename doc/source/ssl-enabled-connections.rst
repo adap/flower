@@ -54,8 +54,7 @@ We are now going to show how to write a sever which uses the previously generate
       )
   )
 
-When setting certificates the server expects a tuple of three certificates. We are using :code:`Path` to simplify
-reading those as byte strings which is the data type server expects the certificates to be passed to it.
+When providing certificates, the server expects a tuple of three certificates. :code:`Path` can be used to easily read the contents of those files into byte strings, which is the data type :code:`start_server` expects.
 
 Client
 ------
