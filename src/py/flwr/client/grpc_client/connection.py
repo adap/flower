@@ -40,7 +40,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 def grpc_connection(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificate: Optional[bytes] = None,
+    root_certificates: Optional[bytes] = None,
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish an insecure gRPC connection to a gRPC server.
 
@@ -57,9 +57,10 @@ def grpc_connection(
         (see `flwr.server.start_server`), otherwise it will not know about the
         increased limit and block larger messages.
         (default: 536_870_912, this equals 512MB)
-    root_certificate : Optional[bytes] (default: None)
-        PEM-encoded root certificate as bytes. If provided, a secure connection using
-        the certificate(s) will be established to a SSL/TLS enabled Flower server
+    root_certificates : Optional[bytes] (default: None)
+        The PEM-encoded root certificates as a byte string. If provided, a secure
+        connection using the certificates will be established to a SSL/TLS-enabled
+        Flower server.
 
     Returns
     -------
@@ -73,7 +74,7 @@ def grpc_connection(
     >>> with grpc_connection(
     >>>     server_address,
     >>>     max_message_length=grpc_max_message_length,
-    >>>     root_certificate=Path("/crts/root.pem").read_bytes(),
+    >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> ) as conn:
     >>>     receive, send = conn
     >>>     server_message = receive()
@@ -85,8 +86,8 @@ def grpc_connection(
         ("grpc.max_receive_message_length", max_message_length),
     ]
 
-    if root_certificate is not None:
-        ssl_channel_credentials = grpc.ssl_channel_credentials(root_certificate)
+    if root_certificates is not None:
+        ssl_channel_credentials = grpc.ssl_channel_credentials(root_certificates)
         channel = grpc.secure_channel(
             server_address, ssl_channel_credentials, options=channel_options
         )
