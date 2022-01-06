@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Tuple, cast
 
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_grpc_server, valid_ssl_files
+from flwr.server.grpc_server.grpc_server import start_grpc_server, valid_certificates
 
 root_dir = dirname(abspath(join(__file__, "../../../../..")))
 
@@ -34,13 +34,13 @@ def load_certificates() -> Tuple[str, str, str]:
     # Trigger script which generates the certificates
     subprocess.run(["bash", "./dev/certificates/generate.sh"], check=True, cwd=root_dir)
 
-    ssl_files = (
+    certificates = (
         join(root_dir, ".cache/certificates/ca.crt"),
         join(root_dir, ".cache/certificates/server.pem"),
         join(root_dir, ".cache/certificates/server.key"),
     )
 
-    return ssl_files
+    return certificates
 
 
 def unused_tcp_port() -> int:
@@ -51,25 +51,25 @@ def unused_tcp_port() -> int:
         return cast(int, sock.getsockname()[1])
 
 
-def test_valid_ssl_files_when_correct() -> None:
+def test_valid_certificates_when_correct() -> None:
     """Test is validation function works correctly when passed valid list."""
     # Prepare
-    ssl_files = (b"a_byte_string", b"a_byte_string", b"a_byte_string")
+    certificates = (b"a_byte_string", b"a_byte_string", b"a_byte_string")
 
     # Execute
-    is_valid = valid_ssl_files(ssl_files)
+    is_valid = valid_certificates(certificates)
 
     # Assert
     assert is_valid
 
 
-def test_valid_ssl_files_when_wrong() -> None:
+def test_valid_certificates_when_wrong() -> None:
     """Test is validation function works correctly when passed invalid list."""
     # Prepare
-    ssl_files = ("not_a_byte_string", b"a_byte_string", b"a_byte_string")
+    certificates = ("not_a_byte_string", b"a_byte_string", b"a_byte_string")
 
     # Execute
-    is_valid = valid_ssl_files(ssl_files)  # type: ignore
+    is_valid = valid_certificates(certificates)  # type: ignore
 
     # Assert
     assert not is_valid
@@ -96,16 +96,16 @@ def test_integration_start_and_shutdown_secure_server() -> None:
     port = unused_tcp_port()
     client_manager = SimpleClientManager()
 
-    ssl_files = load_certificates()
+    certificates = load_certificates()
 
     # Execute
     server = start_grpc_server(
         client_manager=client_manager,
         server_address=f"[::]:{port}",
-        ssl_files=(
-            Path(ssl_files[0]).read_bytes(),
-            Path(ssl_files[1]).read_bytes(),
-            Path(ssl_files[2]).read_bytes(),
+        certificates=(
+            Path(certificates[0]).read_bytes(),
+            Path(certificates[1]).read_bytes(),
+            Path(certificates[2]).read_bytes(),
         ),
     )
 
