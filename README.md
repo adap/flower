@@ -71,6 +71,14 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 
 *Experimental* - curious minds can take a peek at [baselines](https://github.com/adap/flower/tree/main/baselines).
 
+## Community
+
+Flower is built by a wonderful community of researchers and engineers. [Join Slack](https://flower.dev/join-slack) to meet them, [contributions](#contributing-to-flower) are welcome.
+
+<a href="https://github.com/adap/flower/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=adap/flower" />
+</a>
+
 ## Citation
 
 If you publish work that uses Flower, please cite Flower as follows: 

@@ -42,7 +42,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         self.client_messages = [CLIENT_MESSAGE for _ in range(5)]
         self.client_messages_iterator = iter(self.client_messages)
 
-        # Define corosponding responses from bridge
+        # Define corresponding responses from bridge
         self.server_messages = [SERVER_MESSAGE for _ in self.client_messages]
         self.server_messages_iterator = iter(self.server_messages)
 
