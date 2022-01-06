@@ -17,7 +17,7 @@ server."""
 from contextlib import contextmanager
 from logging import DEBUG
 from queue import Queue
-from typing import Callable, Iterator, Tuple
+from typing import Callable, Iterator, Optional, Tuple
 
 import grpc
 
@@ -37,17 +37,62 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def insecure_grpc_connection(
-    server_address: str, max_message_length: int = GRPC_MAX_MESSAGE_LENGTH
+def grpc_connection(
+    server_address: str,
+    max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    root_certificate: Optional[bytes] = None,
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
-    """Establish an insecure gRPC connection to a gRPC server."""
-    channel = grpc.insecure_channel(
-        server_address,
-        options=[
-            ("grpc.max_send_message_length", max_message_length),
-            ("grpc.max_receive_message_length", max_message_length),
-        ],
-    )
+    """Establish an insecure gRPC connection to a gRPC server.
+
+    Parameters
+    ----------
+    server_address : str
+        The IPv6 address of the server. If the Flower server runs on the same machine
+        on port 8080, then `server_address` would be `"[::]:8080"`.
+    grpc_max_message_length : int
+        The maximum length of gRPC messages that can be exchanged with the Flower
+        server. The default should be sufficient for most models. Users who train
+        very large models might need to increase this value. Note that the Flower
+        server needs to be started with the same value
+        (see `flwr.server.start_server`), otherwise it will not know about the
+        increased limit and block larger messages.
+        (default: 536_870_912, this equals 512MB)
+    root_certificate : Optional[bytes] (default: None)
+        PEM-encoded root certificate as bytes. If provided, a secure connection using
+        the certificate(s) will be established to a SSL/TLS enabled Flower server
+
+    Returns
+    -------
+    receive, send : Callable, Callable
+
+    Examples
+    --------
+    Establishing a SSL/TLS-enabled connection to the server:
+
+    >>> from pathlib import Path
+    >>> with grpc_connection(
+    >>>     server_address,
+    >>>     max_message_length=grpc_max_message_length,
+    >>>     root_certificate=Path("/crts/root.pem").read_bytes(),
+    >>> ) as conn:
+    >>>     receive, send = conn
+    >>>     server_message = receive()
+    >>>     # do something here
+    >>>     send(client_message)
+    """
+    channel_options = [
+        ("grpc.max_send_message_length", max_message_length),
+        ("grpc.max_receive_message_length", max_message_length),
+    ]
+
+    if root_certificate is not None:
+        ssl_channel_credentials = grpc.ssl_channel_credentials(root_certificate)
+        channel = grpc.secure_channel(
+            server_address, ssl_channel_credentials, options=channel_options
+        )
+    else:
+        channel = grpc.insecure_channel(server_address, options=channel_options)
+
     channel.subscribe(on_channel_state_change)
 
     queue: Queue[ClientMessage] = Queue(  # pylint: disable=unsubscriptable-object
