@@ -34,7 +34,7 @@ In case you are a researcher you might be just fine using the self signed certif
 the scripts which are part of this guide.
 
 Server
-------------
+------
 
 We are now going to show how to write a sever which uses the previously generated scripts.
 
