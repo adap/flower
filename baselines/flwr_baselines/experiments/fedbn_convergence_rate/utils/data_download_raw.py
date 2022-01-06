@@ -119,7 +119,7 @@ def get_SVHN(out_dir: Path):
 
 def get_MNIST(out_dir: Path):
     """Downloads MNIST using torchvision routines. Then, move processed files
-    to directory expected by `utils/data_processing.py`. Delete the rest. """
+    to directory expected by `utils/data_processing.py`. Delete the rest."""
 
     if (out_dir / "MNIST").exists():
         print(f"> Directory ({out_dir}) exists, skipping downloading MNIST.")
