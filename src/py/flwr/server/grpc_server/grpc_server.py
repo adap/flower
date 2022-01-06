@@ -28,21 +28,21 @@ from flwr.proto import transport_pb2_grpc
 from flwr.server.client_manager import ClientManager
 from flwr.server.grpc_server import flower_service_servicer as fss
 
-INVALID_SSL_FILES_ERR_MSG = """
+INVALID_CERTIFICATES_ERR_MSG = """
     When setting any of root_certificate, certificate, or private_key,
     all of them need to be set.
 """
 
 
-def valid_ssl_files(ssl_files: Tuple[bytes, bytes, bytes]) -> bool:
-    """Validate ssl_files tuple."""
+def valid_certificates(certificates: Tuple[bytes, bytes, bytes]) -> bool:
+    """Validate certificates tuple."""
     is_valid = (
-        all(isinstance(ssl_file, bytes) for ssl_file in ssl_files)
-        and len(ssl_files) == 3
+        all(isinstance(certificate, bytes) for certificate in certificates)
+        and len(certificates) == 3
     )
 
     if not is_valid:
-        log(ERROR, INVALID_SSL_FILES_ERR_MSG)
+        log(ERROR, INVALID_CERTIFICATES_ERR_MSG)
 
     return is_valid
 
@@ -52,7 +52,7 @@ def start_grpc_server(
     server_address: str,
     max_concurrent_workers: int = 1000,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    ssl_files: Optional[Tuple[bytes, bytes, bytes]] = None,
+    certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
 ) -> grpc.Server:
     """Create gRPC server and return instance of grpc.Server.
 
@@ -75,7 +75,7 @@ def start_grpc_server(
     max_message_length : int
         Maximum message length that the server can send or receive.
         Int valued in bytes. -1 means unlimited. (default: GRPC_MAX_MESSAGE_LENGTH)
-    ssl_files : Tuple[bytes, bytes, bytes] (default: None)
+    certificates : Tuple[bytes, bytes, bytes] (default: None)
         Tuple containing root certificate, server certificate, and private key to
         start a secure SSL/TLS server. The tuple is expected to have three bytes
         elements in the following order:
@@ -97,7 +97,7 @@ def start_grpc_server(
     >>> start_grpc_server(
     >>>     client_manager=ClientManager(),
     >>>     server_address="localhost:8080",
-    >>>     ssl_files=(
+    >>>     certificates=(
     >>>         Path("/crts/root.pem").read_bytes(),
     >>>         Path("/crts/localhost.crt").read_bytes(),
     >>>         Path("/crts/localhost.key").read_bytes()
@@ -124,11 +124,11 @@ def start_grpc_server(
     servicer = fss.FlowerServiceServicer(client_manager)
     transport_pb2_grpc.add_FlowerServiceServicer_to_server(servicer, server)
 
-    if ssl_files is not None:
-        if not valid_ssl_files(ssl_files):
+    if certificates is not None:
+        if not valid_certificates(certificates):
             sys.exit(1)
 
-        root_certificate_b, certificate_b, private_key_b = ssl_files
+        root_certificate_b, certificate_b, private_key_b = certificates
 
         server_credentials = grpc.ssl_server_credentials(
             ((private_key_b, certificate_b),),
