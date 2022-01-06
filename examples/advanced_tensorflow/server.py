@@ -28,15 +28,9 @@ def main() -> None:
         initial_parameters=fl.common.weights_to_parameters(model.get_weights()),
     )
 
-    # Load path to certificates
-    ssl_files = certificates.load()
-
     # Start Flower SSL/TLS enabled server for three rounds of federated learning
     fl.server.start_server(
-        "[::]:8080",
-        config={"num_rounds": 4},
-        strategy=strategy,
-        ssl_files=ssl_files
+        "[::]:8080", config={"num_rounds": 4}, strategy=strategy, ssl_files=ssl_files
     )
 
 

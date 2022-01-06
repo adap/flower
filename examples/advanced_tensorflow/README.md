@@ -44,7 +44,7 @@ If you don't see any errors you're good to go!
 
 ## Run Federated Learning with TensorFlow/Keras and Flower
 
-The included `run.sh` will start the Flower server (using `server.py`), sleep for 2 seconds to ensure the the server is up, and then start 10 Flower clients (using `client.py`). You can simply start everything in a terminal as follows:
+The included `run.sh` will call a script to generate SSL/TLS certificates (which will be used by server and clients), start the Flower server (using `server.py`), sleep for 2 seconds to ensure the the server is up, and then start 10 Flower clients (using `client.py`). You can simply start everything in a terminal as follows:
 
 ```shell
 poetry run ./run.sh

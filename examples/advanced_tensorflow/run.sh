@@ -1,5 +1,7 @@
 #!/bin/bash
 
+./certificates/generate.sh
+
 python server.py &
 sleep 2 # Sleep for 2s to give the server enough time to start
 
