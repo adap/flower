@@ -1,6 +1,6 @@
 # Flower Example using PyTorch
 
-This introductory example to Flower uses PyTorch, but deep knowledge of PyToch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
+This introductory example to Flower uses PyTorch, but deep knowledge of PyTorch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
 Running this example in itself is quite easy.
 
 ## Project Setup

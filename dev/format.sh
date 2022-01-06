@@ -10,6 +10,7 @@ python -m docformatter -i -r src/py/flwr_experimental
 python -m black -q baselines/flwr_baselines/experiments/fedbn_convergence_rate
 python -m docformatter -i -r baselines/flwr_baselines/experiments/fedbn_convergence_rate
 python -m isort baselines/flwr_baselines/experiments/fedbn_convergence_rate
+python -m docformatter -i -r src/py/flwr_tool
 
 # Protos
 find src/proto/flwr/proto -name *.proto | grep "\.proto" | xargs clang-format-10 -i
