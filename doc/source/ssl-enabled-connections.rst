@@ -1,8 +1,8 @@
 Guide: SSL-enabled Server and Client
 ====================================
 
-In this segment we will learn, how to start a SSL-enabled secure server and
-establish a secure connection to it with a Flower client.
+This guide describes how to a SSL-enabled secure Flower server can be started and
+how a Flower client can establish a secure connections to it.
 
 A more involved code example in which a connection is used can be found 
 `here <https://github.com/adap/flower/tree/main/examples/advanced_tensorflow>`_.
