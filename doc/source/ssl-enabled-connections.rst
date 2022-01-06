@@ -83,8 +83,8 @@ We are again using :code:`Path` to simplify reading those as byte strings.
 Conclusion
 ----------
 
-You should now have a learned how to generated self-signed certificates using the given script, start a
-SSL-enabled server and establish a secure connection with a client to it.
+You should now have learned how to generate self-signed certificates using the given script, start a
+SSL-enabled server, and have a client establish a secure connection to it.
 
 Additional Resources
 --------------------
