@@ -27,7 +27,7 @@ root_dir = dirname(abspath(join(__file__, "../../../../..")))
 
 
 def load_certificates() -> Tuple[str, str, str]:
-    """Generate and load SSL/TLS credentials/certificates.
+    """Generate and load SSL credentials/certificates.
 
     Utility function for loading for SSL-enabled gRPC servertests.
     """

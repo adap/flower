@@ -12,7 +12,7 @@ It has it's own README.md file which will
 Certificates
 ------------
 
-Using SSL/TLS for a secure connection requires certificates to be passed to the server and client.
+Using SSL-enabled connections requires certificates to be passed to the server and client.
 For the purpose of this guide we are going to generate self-signed certificates. As this can become
 quite complex we are going to ask you to run the script in
 `examples/advanced_tensorflow/certificates/generate.sh`

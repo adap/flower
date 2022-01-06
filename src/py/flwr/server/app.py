@@ -67,7 +67,7 @@ def start_server(  # pylint: disable=too-many-arguments
             epoch when enabled.
         certificates : Tuple[bytes, bytes, bytes] (default: None)
             Tuple containing root certificate, server certificate, and private key to
-            start a secure SSL/TLS server. The tuple is expected to have three bytes
+            start a secure SSL-enabled server. The tuple is expected to have three bytes
             elements in the following order:
 
                 * CA certificate.
@@ -84,7 +84,7 @@ def start_server(  # pylint: disable=too-many-arguments
 
     >>> start_server()
 
-    Starting a SSL/TLS-enabled server:
+    Starting a SSL-enabled server:
 
     >>> start_server(
     >>>     certificates=(
@@ -105,7 +105,7 @@ def start_server(  # pylint: disable=too-many-arguments
     )
     num_rounds = initialized_config["num_rounds"]
     ssl_status = "enabled" if certificates is not None else "disabled"
-    msg = f"Flower server running ({num_rounds} rounds)\nSSL/TLS is {ssl_status}"
+    msg = f"Flower server running ({num_rounds} rounds)\nSSL is {ssl_status}"
     log(INFO, msg)
 
     hist = _fl(
