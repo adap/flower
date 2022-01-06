@@ -1,7 +1,7 @@
-Guide: SSL/TLS enabled Server and Client
-=================================
+Guide: SSL-enabled Server and Client
+====================================
 
-In this segment we will learn, how to start a SSL/TLS enabled secure server and
+In this segment we will learn, how to start a SSL-enabled secure server and
 establish a secure connection to it with a Flower client.
 
 A more involved code example in which a connection is used can be found 
@@ -30,14 +30,66 @@ The approach how the SSL certificates are generated in this example can serve as
 starting point but should not be taken as complete for production environments. Please refer to other
 sources regarding the issue of correctly generating certificates for production environments.
 
-In case you are a researcher you might be fine using the self signed certificates generated using the
-scripts which are part of this guide.
+In case you are a researcher you might be just fine using the self signed certificates generated using
+the scripts which are part of this guide.
 
-Server Setup
+Server
 ------------
 
-To
+We are now going to show how to write a sever which uses the previously generated scripts.
 
 .. code-block:: python
 
-  
+  from pathlib import Path
+  import flwr as fl
+
+  # Start server
+  fl.server.start_server(
+      server_address="0.0.0.0:8080",
+      config={"num_rounds": 4},
+      certificates=(
+          Path(".cache/certificates/ca.crt").read_bytes(),
+          Path(".cache/certificates/server.pem").read_bytes(),
+          Path(".cache/certificates/server.key").read_bytes(),
+      )
+  )
+
+When setting certificates the server expects a tuple of three certificates. We are using `Path` to simplify
+reading those as byte strings which is the data type server expects the certificates to be passed to it.
+
+Client
+------
+
+We are now going to show how to write a sever which uses the previously generated scripts.
+
+.. code-block:: python
+
+  from pathlib import Path
+  import flwr as fl
+
+  # Define client somewhere
+  client = MyFlowerClient()
+
+  # Start client
+  fl.client.start_numpy_client(
+      "localhost:8080",
+      client=client,
+      root_certificates=Path(".cache/certificates/ca.crt").read_bytes(),
+  )
+
+When setting the root_certificates the client expects the PEM-encoded root certificates as a byte string.
+We are using `Path` to simplify reading those as byte strings.
+
+Conclusion
+----------
+
+You should now have a learned how to generated self-signed certificates using the given script, start a
+SSL-enabled server and establish a secure connection with a client to it.
+
+Additional Resources
+--------------------
+
+These additional sources might be relevant if you would like to dive deeper into the topic of certificates.
+
+* `Let's Encrypt <https://letsencrypt.org/docs/>_`
+* `certbot <https://certbot.eff.org/>`_

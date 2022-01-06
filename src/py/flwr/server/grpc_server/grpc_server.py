@@ -91,7 +91,7 @@ def start_grpc_server(
 
     Examples
     --------
-    Starting a SSL/TLS enabled server.
+    Starting a SSL-enabled server.
 
     >>> from pathlib import Path
     >>> start_grpc_server(

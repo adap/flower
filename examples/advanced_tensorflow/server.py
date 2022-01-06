@@ -1,9 +1,7 @@
 from typing import Dict, Optional, Tuple
-
+from pathlib import Path
 import flwr as fl
 import tensorflow as tf
-
-import certificates
 
 
 def main() -> None:
@@ -28,9 +26,16 @@ def main() -> None:
         initial_parameters=fl.common.weights_to_parameters(model.get_weights()),
     )
 
-    # Start Flower SSL/TLS enabled server for three rounds of federated learning
+    # Start Flower SSL-enabled server for three rounds of federated learning
     fl.server.start_server(
-        "[::]:8080", config={"num_rounds": 4}, strategy=strategy, ssl_files=ssl_files
+        "0.0.0.0:8080",
+        config={"num_rounds": 4},
+        strategy=strategy,
+        certificates=(
+            Path(".cache/certificates/ca.crt").read_bytes(),
+            Path(".cache/certificates/server.pem").read_bytes(),
+            Path(".cache/certificates/server.key").read_bytes(),
+        ),
     )
 
 
