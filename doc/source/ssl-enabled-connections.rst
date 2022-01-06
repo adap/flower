@@ -24,7 +24,7 @@ with the following command sequence:
   cd examples/advanced_tensorflow/certificates
   ./generate.sh
 
-This will generate the certificates in `examples/advanced_tensorflow/.cache/certificates`
+This will generate the certificates in `examples/advanced_tensorflow/.cache/certificates`.
 
 The approach how the SSL certificates are generated in this example can serve as an inspiration and
 starting point but should not be taken as complete for production environments. Please refer to other
