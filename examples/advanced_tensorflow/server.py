@@ -14,7 +14,7 @@ class AggregateCustomMetricStrategy(fl.server.strategy.FedAvg):
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Optional[float]:
-        """Aggregate evaluation losses using weighted average."""
+        """Aggregate evaluation accuracies using weighted average."""
         if not results:
             return None
 
