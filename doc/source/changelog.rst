@@ -14,8 +14,19 @@ What's new?
   Android support has finally arrived in :code:`main`! Flower is both client-agnostic and framework-agnostic by design. One can integrate arbitrary client platforms and with this release, using Flower on Android has become a lot easier.
 
   The example uses TFLite on the client side, along with a new :code:`FedAvgAndroid` strategy. The Android client and :code:`FedAvgAndroid` are still experimental, but they are a first step towards a fully-fledged Android SDK and a unified :code:`FedAvg` implementation that integrated the new functionality from :code:`FedAvgAndroid`.
+
 * **Minor updates**
     * Update num_examples caclulation in PyTorch code examples in (`#909 <https://github.com/adap/flower/pull/909>`_)
+    * Expose Flower version through "flwr.__version__" (`#952 <https://github.com/adap/flower/pull/952>`_)
+    * :code:`start_server` in :code:`app.py` now returns a :code:`History` object containing metrics from training (`#974 <https://github.com/adap/flower/pull/974>`_)
+
+
+Incompatible changes:
+~~~~~~~~~~~~~~~~~~~~~
+
+* **Removed** :code:`flwr_example` **and** :code:`flwr_experimental` **from release build** (`#869 <https://github.com/adap/flower/pull/869>`_)
+  
+  The packages :code:`flwr_example` and :code:`flwr_experimental` have been deprecated since Flower 0.12.0 and they are not longer included in Flower release builds. The associated extras (:code:`baseline`, :code:`examples-pytorch`, :code:`examples-tensorflow`, :code:`http-logger`, :code:`ops`) are now no-op and will be removed in an upcoming release.
 
 Incompatible changes:
 ~~~~~~~~~~~~~~~~~~~~~
@@ -220,7 +231,7 @@ Important changes:
 
 * Added an example for embedded devices (`#507 <https://github.com/adap/flower/pull/507>`_)
 * Added a new NumPyClient (in addition to the existing KerasClient) (`#504 <https://github.com/adap/flower/pull/504>`_ `#508 <https://github.com/adap/flower/pull/508>`_)
-* Deprecated `flwr_examples` package and started to migrate examples into the top-level `examples` directory (`#494 <https://github.com/adap/flower/pull/494>`_ `#512 <https://github.com/adap/flower/pull/512>`_)
+* Deprecated `flwr_example` package and started to migrate examples into the top-level `examples` directory (`#494 <https://github.com/adap/flower/pull/494>`_ `#512 <https://github.com/adap/flower/pull/512>`_)
 
 
 v0.11.0 (2020-11-30)
