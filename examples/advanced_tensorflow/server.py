@@ -1,8 +1,33 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import flwr as fl
+from flwr.server.client_proxy import ClientProxy
+from flwr.common import (
+    EvaluateRes,
+)
 import tensorflow as tf
 
+class AggregateCustomMetricStrategy(fl.server.strategy.FedAvg):
+    def aggregate_evaluate(
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[BaseException],
+    ) -> Optional[float]:
+        """Aggregate evaluation losses using weighted average."""
+        if not results:
+            return None
+
+        # Weigh accuracy of each client by number of examples used
+        accuracies = [r.metrics["accuracy"] * r.num_examples for _, r in results]
+        examples = [r.num_examples for _, r in results]
+
+        # Aggregate and print custom metric
+        accuracy_aggregated = sum(accuracies) / sum(examples)
+        print(f"Round {rnd} accuracy aggregated from client results: {accuracy_aggregated}")
+
+        # Call aggregate_evaluate from base class (FedAvg)
+        return super().aggregate_evaluate(rnd, results, failures)
 
 def main() -> None:
     # Load and compile model for
@@ -14,7 +39,7 @@ def main() -> None:
     model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
     # Create strategy
-    strategy = fl.server.strategy.FedAvg(
+    strategy = AggregateCustomMetricStrategy(
         fraction_fit=0.3,
         fraction_eval=0.2,
         min_fit_clients=3,
