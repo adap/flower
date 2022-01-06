@@ -77,8 +77,8 @@ We are now going to show how to write a sever which uses the previously generate
       root_certificates=Path(".cache/certificates/ca.crt").read_bytes(),
   )
 
-When setting the root_certificates the client expects the PEM-encoded root certificates as a byte string.
-We are using :code:`Path` to simplify reading those as byte strings.
+When setting :code:`root_certificates`, the client expects the PEM-encoded root certificates as a byte string.
+We are again using :code:`Path` to simplify reading those as byte strings.
 
 Conclusion
 ----------
