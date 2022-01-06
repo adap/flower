@@ -89,7 +89,7 @@ SSL-enabled server and establish a secure connection with a client to it.
 Additional Resources
 --------------------
 
-These additional sources might be relevant if you would like to dive deeper into the topic of certificates.
+These additional sources might be relevant if you would like to dive deeper into the topic of certificates:
 
 * `Let's Encrypt <https://letsencrypt.org/docs/>_`
 * `certbot <https://certbot.eff.org/>`_
