@@ -15,10 +15,6 @@ What's new?
 
   The example uses TFLite on the client side, along with a new :code:`FedAvgAndroid` strategy. The Android client and :code:`FedAvgAndroid` are still experimental, but they are a first step towards a fully-fledged Android SDK and a unified :code:`FedAvg` implementation that integrated the new functionality from :code:`FedAvgAndroid`.
 
-* **SSL-enabled server and client** (`#842 <https://github.com/adap/flower/pull/842>`_,  `#844 <https://github.com/adap/flower/pull#84/844>`_,  `#845 <https://github.com/adap/flower/pull#84/845>`_, `#847 <https://github.com/adap/flower/pull#84/847>`_)
-
-While we used secure SSL connections in various commercial projects we wanted to integrate into Flower core since a while. It finally is done and will hopefully make it easier for everyone to secure the workloads in the future.
-
 * **Minor updates**
     * Update num_examples caclulation in PyTorch code examples in (`#909 <https://github.com/adap/flower/pull/909>`_)
     * Expose Flower version through "flwr.__version__" (`#952 <https://github.com/adap/flower/pull/952>`_)

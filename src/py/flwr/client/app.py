@@ -54,7 +54,7 @@ def start_client(
         root_certificates: bytes (default: None)
             The PEM-encoded root certificates as a byte string. If provided, a secure
             connection using the certificates will be established to a
-            SSL-enabled Flower server.
+            SSL/TLS-enabled Flower server.
 
     Returns
     -------
@@ -69,7 +69,7 @@ def start_client(
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting a SSL-enabled client:
+    Starting a SSL/TLS-enabled client:
 
     >>> from pathlib import Path
     >>> start_client(
@@ -133,7 +133,7 @@ def start_numpy_client(
         root_certificates: bytes (default: None)
             The PEM-encoded root certificates a byte string. If provided, a secure
             connection using the certificates will be established to a
-            SSL-enabled Flower server.
+            SSL/TLS-enabled Flower server.
 
     Returns
     -------
@@ -148,7 +148,7 @@ def start_numpy_client(
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting a SSL-enabled client:
+    Starting a SSL/TLS-enabled client:
 
     >>> from pathlib import Path
     >>> start_client(
