@@ -59,8 +59,8 @@ def start_grpc_server(
     If used in a main function server.wait_for_termination(timeout=None)
     should be called as otherwise the server will immediately stop.
 
-    **SSL/TLS**
-    To enable SSL/TLS you have to pass all of root_certificate, certificate,
+    **SSL**
+    To enable SSL you have to pass all of root_certificate, certificate,
     and private_key. Setting only some will make the process exit with code 1.
 
     Parameters
@@ -77,7 +77,7 @@ def start_grpc_server(
         Int valued in bytes. -1 means unlimited. (default: GRPC_MAX_MESSAGE_LENGTH)
     certificates : Tuple[bytes, bytes, bytes] (default: None)
         Tuple containing root certificate, server certificate, and private key to
-        start a secure SSL/TLS server. The tuple is expected to have three bytes
+        start a secure SSL-enabled server. The tuple is expected to have three bytes
         elements in the following order:
 
             * CA certificate.
@@ -91,7 +91,7 @@ def start_grpc_server(
 
     Examples
     --------
-    Starting a SSL/TLS enabled server.
+    Starting a SSL-enabled server.
 
     >>> from pathlib import Path
     >>> start_grpc_server(
