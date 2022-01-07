@@ -17,7 +17,7 @@ Certificates
 Using SSL-enabled connections requires certificates to be passed to the server and client. For
 the purpose of this guide we are going to generate self-signed certificates. As this can become
 quite complex we are going to ask you to run the script in
-`examples/advanced_tensorflow/certificates/generate.sh`
+:code:`examples/advanced_tensorflow/certificates/generate.sh`
 
 with the following command sequence:
 
@@ -26,7 +26,7 @@ with the following command sequence:
   cd examples/advanced_tensorflow/certificates
   ./generate.sh
 
-This will generate the certificates in `examples/advanced_tensorflow/.cache/certificates`.
+This will generate the certificates in :code:`examples/advanced_tensorflow/.cache/certificates`.
 
 The approach how the SSL certificates are generated in this example can serve as an inspiration and
 starting point but should not be taken as complete for production environments. Please refer to other
