@@ -6,7 +6,7 @@ body:
 - type: markdown
   attributes:
     value: >
-    #### We are happy that you want to improve the documentation. Please contact us if you are planning to add a new chapter or blog post.
+      #### We are happy that you want to improve the documentation. Please contact us if you are planning to add a new chapter or blog post.
 - type: textarea
   attributes:
     label: Describe what the documentation is missing. 
