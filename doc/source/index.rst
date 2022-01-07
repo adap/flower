@@ -26,6 +26,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    strategies
    implementing-strategies
    saving-progress
+   ssl-enabled-connections
    examples
    example_walkthrough_pytorch_mnist
    example-pytorch-from-centralized-to-federated
