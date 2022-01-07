@@ -11,14 +11,17 @@ cpus_per_client: 1
 hydra.job.chdir: False
 gen_federated_partitions:
   _target_: cifar.utils.gen_cifar10_partitions
-    path_original_dataset: ???
-    fed_dir: ???
-    num_total_clients: ${num_total_clients}
-    lda_concentration: ${lda_concentration},
+  num_total_clients: ${num_total_clients}
+  lda_concentration: ${lda_concentration}
 get_initial_parameters:
   _target_: cifar.utils.get_initial_parameters
 get_eval_fn:
-  _target_: cifar.utils.get_eval_fn
+  _target_: cifar.utils.get_cifar10_eval_fn
+gen_fit_config_fn:
+  _target_: cifar.utils.gen_fit_config
+  epochs_per_round: ${epochs_per_round}
+  batch_size: ${batch_size}
+  client_learning_rate: ${client_learning_rate}
 get_ray_client_fn:
   _target_: cifar.client.get_ray_client_fn
 ray_config:

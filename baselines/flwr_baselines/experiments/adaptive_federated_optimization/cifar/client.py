@@ -8,17 +8,13 @@ import ray
 import torch
 from flwr.common.parameter import Parameters, Weights
 from flwr.common.typing import Scalar
+from flwr.server.history import History
 from PIL import Image
 from torch import Tensor
 from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset
-from torchvision.transforms import Compose, Normalize, RandomHorizontalFlip, ToTensor
 from .utils import get_model, train, test
-
-transforms_test = Compose(
-    [ToTensor(), Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))]
-)
-transforms_train = Compose([RandomHorizontalFlip(), transforms_test])
+from torchvision.transforms import Compose
 
 
 class ClientDataset(Dataset):
