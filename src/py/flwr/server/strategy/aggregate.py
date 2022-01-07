@@ -41,13 +41,13 @@ def aggregate(results: List[Tuple[Weights, int]]) -> Weights:
     return weights_prime
 
 
-def weighted_loss_avg(results: List[Tuple[int, float, Optional[float]]]) -> float:
+def weighted_avg(results: List[Tuple[int, float, Optional[float]]]) -> float:
     """Aggregate evaluation results obtained from multiple clients."""
     num_total_evaluation_examples = sum(
-        [num_examples for num_examples, _, _ in results]
+        [num_examples for num_examples, _ in results]
     )
-    weighted_losses = [num_examples * loss for num_examples, loss, _ in results]
-    return sum(weighted_losses) / num_total_evaluation_examples
+    weighted_values = [num_examples * value for num_examples, value in results]
+    return sum(weighted_values) / num_total_evaluation_examples
 
 
 def aggregate_qffl(

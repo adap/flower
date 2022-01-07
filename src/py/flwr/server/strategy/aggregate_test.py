@@ -19,7 +19,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 
-from .aggregate import aggregate, weighted_loss_avg
+from .aggregate import aggregate, weighted_avg
 
 
 def test_aggregate() -> None:
@@ -41,31 +41,30 @@ def test_aggregate() -> None:
     np.testing.assert_equal(expected, actual)
 
 
-def test_weighted_loss_avg_single_value() -> None:
+def test_weighted_avg_single_value() -> None:
     """Test weighted loss averaging."""
     # Prepare
     results: List[Tuple[int, float, Optional[float]]] = [(5, 0.5, 0.1)]
     expected = 0.5
 
     # Execute
-    actual = weighted_loss_avg(results)
+    actual = weighted_avg(results)
 
     # Assert
     assert expected == actual
 
 
-def test_weighted_loss_avg_multiple_values() -> None:
+def test_weighted_avg_multiple_values() -> None:
     """Test weighted loss averaging."""
     # Prepare
     results: List[Tuple[int, float, Optional[float]]] = [
         (1, 2.0, 0.1),
         (2, 1.0, 0.1),
-        (1, 2.0, 0.1),
     ]
     expected = 1.5
 
     # Execute
-    actual = weighted_loss_avg(results)
+    actual = weighted_avg(results)
 
     # Assert
     assert expected == actual

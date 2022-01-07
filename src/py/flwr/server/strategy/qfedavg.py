@@ -36,7 +36,7 @@ from flwr.common import (
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate_qffl, weighted_loss_avg
+from .aggregate import aggregate_qffl, weighted_avg
 from .fedavg import FedAvg
 
 
@@ -224,12 +224,11 @@ class QFedAvg(FedAvg):
         if not self.accept_failures and failures:
             return None, {}
         return (
-            weighted_loss_avg(
+            weighted_avg(
                 [
                     (
                         evaluate_res.num_examples,
                         evaluate_res.loss,
-                        evaluate_res.accuracy,
                     )
                     for client, evaluate_res in results
                 ]

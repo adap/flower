@@ -37,7 +37,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate, weighted_loss_avg
+from .aggregate import aggregate, weighted_avg
 from .strategy import Strategy
 
 DEPRECATION_WARNING = """
@@ -253,12 +253,11 @@ class FedAvgAndroid(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-        loss_aggregated = weighted_loss_avg(
+        loss_aggregated = weighted_avg(
             [
                 (
                     evaluate_res.num_examples,
                     evaluate_res.loss,
-                    evaluate_res.accuracy,
                 )
                 for _, evaluate_res in results
             ]

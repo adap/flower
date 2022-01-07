@@ -36,7 +36,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate, weighted_loss_avg
+from .aggregate import aggregate, weighted_avg
 from .fedavg import FedAvg
 
 E = 0.001
@@ -366,12 +366,11 @@ class FastAndSlow(FedAvg):
             return None, {}
 
         return (
-            weighted_loss_avg(
+            weighted_avg(
                 [
                     (
                         evaluate_res.num_examples,
                         evaluate_res.loss,
-                        evaluate_res.accuracy,
                     )
                     for client, evaluate_res in results
                 ]

@@ -1,0 +1,16 @@
+[build-system]
+requires = [
+    "poetry==1.1.12",
+]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "tensorflow_example"
+version = "0.1.0"
+description = "Tensorflow example"
+authors = ["The Flower Authors <enquiries@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.2"
+flwr = { path = "../../", develop = true }
+tensorflow-cpu = "^2.6.2"
