@@ -17,7 +17,7 @@ What's new?
 
 * **SSL-enabled server and client** (`#842 <https://github.com/adap/flower/pull/842>`_,  `#844 <https://github.com/adap/flower/pull#84/844>`_,  `#845 <https://github.com/adap/flower/pull#84/845>`_, `#847 <https://github.com/adap/flower/pull#84/847>`_, `#993 <https://github.com/adap/flower/pull#84/993>`_, `#994 <https://github.com/adap/flower/pull#84/994>`_)
 
-SSL enables secure encrypted connections between clients and servers. This release open-sources the Flower secure gRPC implementation to make encrypted communication channels accessible to all Flower users.
+  SSL enables secure encrypted connections between clients and servers. This release open-sources the Flower secure gRPC implementation to make encrypted communication channels accessible to all Flower users.
 
 * **Minor updates**
     * Update num_examples caclulation in PyTorch code examples in (`#909 <https://github.com/adap/flower/pull/909>`_)
