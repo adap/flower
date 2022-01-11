@@ -18,12 +18,15 @@ Flower's design goals was to make this simple. Read on to learn more.
    installation
    quickstart_tensorflow
    quickstart_pytorch
+   quickstart_huggingface
+   quickstart_pytorch_lightning
    quickstart_mxnet
    quickstart_scikitlearn
    evaluation
    strategies
    implementing-strategies
    saving-progress
+   ssl-enabled-connections
    examples
    example_walkthrough_pytorch_mnist
    example-pytorch-from-centralized-to-federated
@@ -58,6 +61,7 @@ intended to help along the way.
    good-first-contributions
    architecture
    release_process
+   creating-new-messages
 
 
 About
