@@ -23,45 +23,44 @@ import tensorflow as tf
 
 
 class QuantizableBase(object):
-    """Base model abstract base class that handles quantization."""
+  """Base model abstract base class that handles quantization."""
 
-    __metaclass__ = abc.ABCMeta
+  __metaclass__ = abc.ABCMeta
 
-    def __init__(self, quantize, representative_dataset):
-        """Constructs a QuantizableBase instance.
+  def __init__(self, quantize, representative_dataset):
+    """Constructs a QuantizableBase instance.
 
-        Args:
-          quantize: whether the model weights should be quantized.
-          representative_dataset: generator that yields representative data for full
-            integer quantization. If None, hybrid quantization is performed.
+    Args:
+      quantize: whether the model weights should be quantized.
+      representative_dataset: generator that yields representative data for full
+        integer quantization. If None, hybrid quantization is performed.
 
-        Raises:
-          ValueError: when an unsupported combination of arguments is used.
-        """
-        if representative_dataset and not quantize:
-            raise ValueError(
-                "representative_dataset cannot be specified when quantize is False."
-            )
-        self._quantize = quantize
-        self._representative_dataset = representative_dataset
+    Raises:
+      ValueError: when an unsupported combination of arguments is used.
+    """
+    if representative_dataset and not quantize:
+      raise ValueError(
+          'representative_dataset cannot be specified when quantize is False.')
+    self._quantize = quantize
+    self._representative_dataset = representative_dataset
 
-    @abc.abstractmethod
-    def prepare_converter(self):
-        """Prepares an initial configuration of a TFLiteConverter.
+  @abc.abstractmethod
+  def prepare_converter(self):
+    """Prepares an initial configuration of a TFLiteConverter.
 
-        Quantization parameters are possibly added to this configuration
-        when the model is generated.
+    Quantization parameters are possibly added to this configuration
+    when the model is generated.
 
-        Returns:
-          TFLiteConverter instance.
-        """
+    Returns:
+      TFLiteConverter instance.
+    """
 
-    def tflite_model(self):
-        converter = self.prepare_converter()
-        if self._quantize and self._representative_dataset:
-            converter.optimizations = [tf.lite.Optimize.DEFAULT]
-            converter.representative_dataset = self._representative_dataset
-        elif self._quantize:
-            converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
+  def tflite_model(self):
+    converter = self.prepare_converter()
+    if self._quantize and self._representative_dataset:
+      converter.optimizations = [tf.lite.Optimize.DEFAULT]
+      converter.representative_dataset = self._representative_dataset
+    elif self._quantize:
+      converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
 
-        return converter.convert()
+    return converter.convert()

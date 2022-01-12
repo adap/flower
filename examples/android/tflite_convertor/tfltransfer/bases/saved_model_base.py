@@ -21,53 +21,48 @@ import tensorflow as tf
 
 # pylint: disable=g-bad-import-order
 from tfltransfer.bases import quantizable_base
-
 # pylint: enable=g-bad-import-order
 
 
 class SavedModelBase(quantizable_base.QuantizableBase):
-    """Base model configuration that reads a specified SavedModel.
+  """Base model configuration that reads a specified SavedModel.
 
-    The SavedModel should contain a signature that converts samples to
-    bottlenecks. This is assumed by default to be the main serving
-    signature, but this can be configured.
+  The SavedModel should contain a signature that converts
+  samples to bottlenecks. This is assumed by default to be
+  the main serving signature, but this can be configured.
+  """
+
+  def __init__(self,
+               model_dir,
+               tag=tf.saved_model.SERVING,
+               signature_key='serving_default',
+               quantize=False,
+               representative_dataset=None):
+    """Constructs a base model from a SavedModel.
+
+    Args:
+      model_dir: path to the SavedModel to load.
+      tag: MetaGraphDef tag to be used.
+      signature_key: signature name for the forward pass.
+      quantize: whether the model weights should be quantized.
+      representative_dataset: generator that yields representative data for full
+        integer quantization. If None, hybrid quantization is performed.
     """
+    super(SavedModelBase, self).__init__(quantize, representative_dataset)
+    self._model_dir = model_dir
+    self._tag = tag
+    self._signature_key = signature_key
 
-    def __init__(
-        self,
-        model_dir,
-        tag=tf.saved_model.SERVING,
-        signature_key="serving_default",
-        quantize=False,
-        representative_dataset=None,
-    ):
-        """Constructs a base model from a SavedModel.
+    loaded_model = tf.saved_model.load(model_dir, tags=[tag])
+    signature = loaded_model.signatures[signature_key]
+    self._bottleneck_shape = (
+        tuple(next(signature.output_shapes.values().__iter__())[1:]))
 
-        Args:
-          model_dir: path to the SavedModel to load.
-          tag: MetaGraphDef tag to be used.
-          signature_key: signature name for the forward pass.
-          quantize: whether the model weights should be quantized.
-          representative_dataset: generator that yields representative data for full
-            integer quantization. If None, hybrid quantization is performed.
-        """
-        super(SavedModelBase, self).__init__(quantize, representative_dataset)
-        self._model_dir = model_dir
-        self._tag = tag
-        self._signature_key = signature_key
+  def prepare_converter(self):
+    """Prepares an initial configuration of a TFLiteConverter."""
+    return tf.lite.TFLiteConverter.from_saved_model(
+        self._model_dir, signature_keys=[self._signature_key], tags=[self._tag])
 
-        loaded_model = tf.saved_model.load(model_dir, tags=[tag])
-        signature = loaded_model.signatures[signature_key]
-        self._bottleneck_shape = tuple(
-            next(signature.output_shapes.values().__iter__())[1:]
-        )
-
-    def prepare_converter(self):
-        """Prepares an initial configuration of a TFLiteConverter."""
-        return tf.lite.TFLiteConverter.from_saved_model(
-            self._model_dir, signature_keys=[self._signature_key], tags=[self._tag]
-        )
-
-    def bottleneck_shape(self):
-        """Reads the shape of the bottleneck produced by the model."""
-        return self._bottleneck_shape
+  def bottleneck_shape(self):
+    """Reads the shape of the bottleneck produced by the model."""
+    return self._bottleneck_shape
