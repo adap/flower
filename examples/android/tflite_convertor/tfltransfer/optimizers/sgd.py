@@ -22,35 +22,36 @@ import tensorflow.compat.v1 as tfv1
 
 
 class SGD(object):
-  """SGD optimizer configuration for transfer learning converter."""
+    """SGD optimizer configuration for transfer learning converter."""
 
-  def __init__(self, learning_rate):
-    self._learning_rate = learning_rate
+    def __init__(self, learning_rate):
+        self._learning_rate = learning_rate
 
-  def generate_optimizer_model(self, parameter_shapes):
-    """Generates a TFLite model that represents an optimizer step.
+    def generate_optimizer_model(self, parameter_shapes):
+        """Generates a TFLite model that represents an optimizer step.
 
-    The generated model accepts as inputs model parameters' current
-    values and gradients, and returns as outputs the new values.
+        The generated model accepts as inputs model parameters' current
+        values and gradients, and returns as outputs the new values.
 
-    Args:
-      parameter_shapes: list of model parameter shapes.
+        Args:
+          parameter_shapes: list of model parameter shapes.
 
-    Returns:
-      TFLite optimizer model.
-    """
-    with tfv1.Session(graph=tf.Graph()) as sess:
-      current_values = [
-          tfv1.placeholder(tf.float32, shape) for shape in parameter_shapes
-      ]
-      gradients = [
-          tfv1.placeholder(tf.float32, shape) for shape in parameter_shapes
-      ]
+        Returns:
+          TFLite optimizer model.
+        """
+        with tfv1.Session(graph=tf.Graph()) as sess:
+            current_values = [
+                tfv1.placeholder(tf.float32, shape) for shape in parameter_shapes
+            ]
+            gradients = [
+                tfv1.placeholder(tf.float32, shape) for shape in parameter_shapes
+            ]
 
-      new_values = [
-          current - self._learning_rate * gradient
-          for current, gradient in zip(current_values, gradients)
-      ]
-      converter = tfv1.lite.TFLiteConverter.from_session(
-          sess, current_values + gradients, new_values)
-      return converter.convert()
+            new_values = [
+                current - self._learning_rate * gradient
+                for current, gradient in zip(current_values, gradients)
+            ]
+            converter = tfv1.lite.TFLiteConverter.from_session(
+                sess, current_values + gradients, new_values
+            )
+            return converter.convert()
