@@ -36,6 +36,18 @@ Flower's design goals was to make this simple. Read on to learn more.
    changelog
    faq
 
+Baselines
+---------
+
+Baselines are a set of organized scripts used to reproduce results from well-known publications or benchmarks. You can check which baselines already exist and/or contribute your own baseline.
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Baselines
+   
+   execute-baselines
+   contribute-baselines
+
 
 API Reference
 -------------
