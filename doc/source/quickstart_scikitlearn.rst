@@ -29,10 +29,89 @@ Or simply install all dependencies using Poetry:
 
   $ poetry install
 
+
 Flower Client
 -------------
 
 Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server.
+However, before setting up the client and server, we will define all functionalities that we need for our federated learning setup within :code:`utils.py`.
+First we import all libraries and define the return list for different functions. 
+
+.. code-block:: python
+  from typing import Tuple, Union, List
+  import numpy as np
+  from sklearn.linear_model import LogisticRegression
+  import openml
+
+  XY = Tuple[np.ndarray, np.ndarray]
+  Dataset = Tuple[XY, XY]
+  LogRegParams = Union[XY, Tuple[np.ndarray]]
+  XYList = List[XY]
+
+Before we can start the Flower client later, we have to initialize the model parameters that is done in . The scikit model parameters are uninitialized until :code:`model.fit` is called therefore we need to defince :code:`set_initial_params()`. It initializes the model parameters that the Flower server will ask for.  
+
+Flower later requires the model parameters with a :code:`get_model_parameters()` function and to set the model parameters with :code:`set_model_params()`.
+
+.. code-block:: python
+
+  def get_model_parameters(model: LogisticRegression) -> LogRegParams:
+      """Returns the paramters of a sklearn LogisticRegression model."""
+      if model.fit_intercept:
+          params = (model.coef_, model.intercept_)
+      else:
+          params = (model.coef_,)
+      return params
+
+
+  def set_model_params(
+      model: LogisticRegression, params: LogRegParams
+  ) -> LogisticRegression:
+      """Sets the parameters of a sklean LogisticRegression model."""
+      model.coef_ = params[0]
+      if model.fit_intercept:
+          model.intercept_ = params[1]
+      return model
+
+
+  def set_initial_params(model: LogisticRegression):
+      n_classes = 10  # MNIST has 10 classes
+      n_features = 784  # Number of features in dataset
+      model.classes_ = np.array([i for i in range(10)])
+
+      model.coef_ = np.zeros((n_classes, n_features))
+      if model.fit_intercept:
+          model.intercept_ = np.zeros((n_classes,))
+
+
+  def load_mnist() -> Dataset:
+      """Loads the MNIST dataset using OpenML.
+
+      OpenML dataset link: https://www.openml.org/d/554
+      """
+      mnist_openml = openml.datasets.get_dataset(554)
+      Xy, _, _, _ = mnist_openml.get_data(dataset_format="array")
+      X = Xy[:, :-1]  # the last column contains labels
+      y = Xy[:, -1]
+      # First 60000 samples consist of the train set
+      x_train, y_train = X[:60000], y[:60000]
+      x_test, y_test = X[60000:], y[60000:]
+      return (x_train, y_train), (x_test, y_test)
+
+
+  def shuffle(X: np.ndarray, y: np.ndarray) -> XY:
+      """Shuffle X and y."""
+      rng = np.random.default_rng()
+      idx = rng.permutation(len(X))
+      return X[idx], y[idx]
+
+
+  def partition(X: np.ndarray, y: np.ndarray, num_partitions: int) -> XYList:
+      """Split X and y into a number of partitions."""
+      return list(
+          zip(np.array_split(X, num_partitions), np.array_split(y, num_partitions))
+      )
+
+
 In a file called :code:`client.py`, import Flower and scikit related packages:
 
 .. code-block:: python
@@ -47,19 +126,18 @@ In a file called :code:`client.py`, import Flower and scikit related packages:
   import utils
 
 
-We load the MNIST dataset from `OpenML<https://www.openml.org/d/554>`_, a popular image classification dataset of handwritten digits for machine learning. The MXNet utility :code:`mx.test_utils.get_mnist()` downloads the training and test data. 
+We load the MNIST dataset from `OpenML<https://www.openml.org/d/554>`_, a popular image classification dataset of handwritten digits for machine learning. The utility :code:` utils.load_mnist()` downloads the training and test data. The training set is split afterwards split into 10 partitions. 
 
 .. code-block:: python
 
-    def load_data():
-        print("Download Dataset")
-        mnist = mx.test_utils.get_mnist()
-        batch_size = 100
-        train_data = mx.io.NDArrayIter(
-            mnist["train_data"], mnist["train_label"], batch_size, shuffle=True
-        )
-        val_data = mx.io.NDArrayIter(mnist["test_data"], mnist["test_label"], batch_size)
-        return train_data, val_data
+if __name__ == "__main__":
+
+    # Load MNIST dataset from https://www.openml.org/d/554
+    (X_train, y_train), (X_test, y_test) = utils.load_mnist()
+        
+    # Split train set into 10 partitions and randomly use one for training.
+    partition_id = np.random.choice(10)
+    (X_train, y_train) = utils.partition(X_train, y_train, 10)[partition_id]
 
 Define the training and loss with MXNet. We train the model by looping over the dataset, measure the corresponding loss, and optimize it. 
 
