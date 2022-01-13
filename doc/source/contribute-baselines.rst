@@ -26,7 +26,7 @@ We are aware that a few libraries are only available within the Conda environmen
 
 Here is a checklist for adding a new baseline:
 
-* add requirements or library to :code:`pyproject.toml` or the :code:`requirements.txt`
+* add required Python packages to :code:`pyproject.toml` or :code:`requirements.txt`
 * add all required code
 * add a dataset downloader
 * add an experiment plot
