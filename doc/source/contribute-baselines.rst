@@ -24,7 +24,7 @@ At the end please also add a plot the results of the experiment that are perform
 
 We are aware that a few libraries are only available within the Conda environment. However, please make sure that your code runs as well outside of Conda to keep the usability of the Flower framework. 
 
-Here is a checklist for your contribution:
+Here is a checklist for adding a new baseline:
 
 * add requirements or library to :code:`pyproject.toml` or the :code:`requirements.txt`
 * add all required code
