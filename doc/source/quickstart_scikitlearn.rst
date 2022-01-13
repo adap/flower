@@ -1,5 +1,5 @@
 Quickstart (scikit-learn)
-==================
+=========================
 
 In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit. 
 
@@ -25,7 +25,7 @@ Since we want to use MXNet, let's go ahead and install it:
 
 Or simply install all dependencies using Poetry:
 
-:: code-block:: shell
+.. code-block:: shell
 
   $ poetry install
 
@@ -34,85 +34,23 @@ Flower Client
 -------------
 
 Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server.
-However, before setting up the client and server, we will define all functionalities that we need for our federated learning setup within :code:`utils.py`.
-First we import all libraries and define the return list for different functions. 
+However, before setting up the client and server, we will define all functionalities that we need for our federated learning setup within :code:`utils.py`. The :code:`utils.py` contains different functions defining all the machine learning basics:
 
-.. code-block:: python
-  from typing import Tuple, Union, List
-  import numpy as np
-  from sklearn.linear_model import LogisticRegression
-  import openml
+* get_model_parameters()
+    * Returns the paramters of a sklearn LogisticRegression model
+* set_model_params()
+    * Sets the parameters of a sklean LogisticRegression model
+* set_initial_params()
+    * Initializes the model parameters that the Flower server will ask for
+* load_mnist()
+    * Loads the MNIST dataset using OpenML
+* shuffle()
+    * Shuffles data and its label
+* partition()
+    * Splits datasets into a number of partitions.
 
-  XY = Tuple[np.ndarray, np.ndarray]
-  Dataset = Tuple[XY, XY]
-  LogRegParams = Union[XY, Tuple[np.ndarray]]
-  XYList = List[XY]
-
-Before we can start the Flower client later, we have to initialize the model parameters that is done in . The scikit model parameters are uninitialized until :code:`model.fit` is called therefore we need to defince :code:`set_initial_params()`. It initializes the model parameters that the Flower server will ask for.  
-
-Flower later requires the model parameters with a :code:`get_model_parameters()` function and to set the model parameters with :code:`set_model_params()`.
-
-.. code-block:: python
-
-  def get_model_parameters(model: LogisticRegression) -> LogRegParams:
-      """Returns the paramters of a sklearn LogisticRegression model."""
-      if model.fit_intercept:
-          params = (model.coef_, model.intercept_)
-      else:
-          params = (model.coef_,)
-      return params
-
-
-  def set_model_params(
-      model: LogisticRegression, params: LogRegParams
-  ) -> LogisticRegression:
-      """Sets the parameters of a sklean LogisticRegression model."""
-      model.coef_ = params[0]
-      if model.fit_intercept:
-          model.intercept_ = params[1]
-      return model
-
-
-  def set_initial_params(model: LogisticRegression):
-      n_classes = 10  # MNIST has 10 classes
-      n_features = 784  # Number of features in dataset
-      model.classes_ = np.array([i for i in range(10)])
-
-      model.coef_ = np.zeros((n_classes, n_features))
-      if model.fit_intercept:
-          model.intercept_ = np.zeros((n_classes,))
-
-
-  def load_mnist() -> Dataset:
-      """Loads the MNIST dataset using OpenML.
-
-      OpenML dataset link: https://www.openml.org/d/554
-      """
-      mnist_openml = openml.datasets.get_dataset(554)
-      Xy, _, _, _ = mnist_openml.get_data(dataset_format="array")
-      X = Xy[:, :-1]  # the last column contains labels
-      y = Xy[:, -1]
-      # First 60000 samples consist of the train set
-      x_train, y_train = X[:60000], y[:60000]
-      x_test, y_test = X[60000:], y[60000:]
-      return (x_train, y_train), (x_test, y_test)
-
-
-  def shuffle(X: np.ndarray, y: np.ndarray) -> XY:
-      """Shuffle X and y."""
-      rng = np.random.default_rng()
-      idx = rng.permutation(len(X))
-      return X[idx], y[idx]
-
-
-  def partition(X: np.ndarray, y: np.ndarray, num_partitions: int) -> XYList:
-      """Split X and y into a number of partitions."""
-      return list(
-          zip(np.array_split(X, num_partitions), np.array_split(y, num_partitions))
-      )
-
-
-In a file called :code:`client.py`, import Flower and scikit related packages:
+Please check out :code:`utils.py` `here <https://github.com/adap/flower/blob/main/examples/sklearn-logreg-mnist/utils.py>`_ for more details.
+The pre-defined functions are used in the :code:`client.py` and imported. The :code:`client.py` also requires to import several packages such as Flower and scikit:
 
 .. code-block:: python
       
@@ -126,103 +64,29 @@ In a file called :code:`client.py`, import Flower and scikit related packages:
   import utils
 
 
-We load the MNIST dataset from `OpenML<https://www.openml.org/d/554>`_, a popular image classification dataset of handwritten digits for machine learning. The utility :code:` utils.load_mnist()` downloads the training and test data. The training set is split afterwards split into 10 partitions. 
+We load the MNIST dataset from `OpenML <https://www.openml.org/d/554>`_, a popular image classification dataset of handwritten digits for machine learning. The utility :code:`utils.load_mnist()` downloads the training and test data. The training set is split afterwards into 10 partitions with :code:`utils.partition()`. 
 
 .. code-block:: python
 
-if __name__ == "__main__":
+    if __name__ == "__main__":
 
-    # Load MNIST dataset from https://www.openml.org/d/554
-    (X_train, y_train), (X_test, y_test) = utils.load_mnist()
-        
-    # Split train set into 10 partitions and randomly use one for training.
-    partition_id = np.random.choice(10)
-    (X_train, y_train) = utils.partition(X_train, y_train, 10)[partition_id]
+        (X_train, y_train), (X_test, y_test) = utils.load_mnist()
 
-Define the training and loss with MXNet. We train the model by looping over the dataset, measure the corresponding loss, and optimize it. 
-
-.. code-block:: python
-
-    def train(net, train_data, epoch):
-        trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.03})
-        trainer = gluon.Trainer(net.collect_params(), "sgd", {"learning_rate": 0.01})
-        accuracy_metric = mx.metric.Accuracy()
-        loss_metric = mx.metric.CrossEntropy()
-        metrics = mx.metric.CompositeEvalMetric()
-        for child_metric in [accuracy_metric, loss_metric]:
-            metrics.add(child_metric)
-        softmax_cross_entropy_loss = gluon.loss.SoftmaxCrossEntropyLoss()
-        for i in range(epoch):
-            train_data.reset()
-            num_examples = 0
-            for batch in train_data:
-                data = gluon.utils.split_and_load(
-                    batch.data[0], ctx_list=DEVICE, batch_axis=0
-                )
-                label = gluon.utils.split_and_load(
-                    batch.label[0], ctx_list=DEVICE, batch_axis=0
-                )
-                outputs = []
-                with ag.record():
-                    for x, y in zip(data, label):
-                        z = net(x)
-                        loss = softmax_cross_entropy_loss(z, y)
-                        loss.backward()
-                        outputs.append(z.softmax())
-                        num_examples += len(x)
-                metrics.update(label, outputs)
-                trainer.step(batch.data[0].shape[0])
-            trainings_metric = metrics.get_name_value()
-            print("Accuracy & loss at epoch %d: %s" % (i, trainings_metric))
-        return trainings_metric, num_examples
+        partition_id = np.random.choice(10)
+        (X_train, y_train) = utils.partition(X_train, y_train, 10)[partition_id]
 
 
-Next, we define the validation of our machine learning model. We loop over the test set and measure both loss and accuracy on the test set. 
+Next, the logistic regression model is defined and initialized with :code:`utils.set_initial_params()`.
 
 .. code-block:: python
 
-    def test(net, val_data):
-        accuracy_metric = mx.metric.Accuracy()
-        loss_metric = mx.metric.CrossEntropy()
-        metrics = mx.metric.CompositeEvalMetric()
-        for child_metric in [accuracy_metric, loss_metric]:
-            metrics.add(child_metric)
-        val_data.reset()
-        num_examples = 0
-        for batch in val_data:
-            data = gluon.utils.split_and_load(batch.data[0], ctx_list=DEVICE, batch_axis=0)
-            label = gluon.utils.split_and_load(
-                batch.label[0], ctx_list=DEVICE, batch_axis=0
-            )
-            outputs = []
-            for x in data:
-                outputs.append(net(x).softmax())
-                num_examples += len(x)
-            metrics.update(label, outputs)
-        return metrics.get_name_value(), num_examples
+    model = LogisticRegression(
+        penalty="l2",
+        max_iter=1,  # local epoch
+        warm_start=True,  # prevent refreshing weights when fitting
+    )
 
-After defining the training and testing of a MXNet machine learning model, we use these functions to implement a Flower client.
-
-Our Flower clients will use a simple :code:`Sequential` model:
-
-.. code-block:: python
-
-    def main():
-        def model():
-            net = nn.Sequential()
-            net.add(nn.Dense(256, activation="relu"))
-            net.add(nn.Dense(64, activation="relu"))
-            net.add(nn.Dense(10))
-            net.collect_params().initialize()
-            return net
-
-        train_data, val_data = load_data()
-
-        model = model()
-        init = nd.random.uniform(shape=(2, 784))
-        model(init)
-
-After loading the dataset with :code:`load_data()` we perform one forward propagation to initialize the model and model parameters with :code:`model(init)`. Next, we implement a Flower client. 
+    utils.set_initial_params(model)
 
 The Flower server interacts with clients through an interface called
 :code:`Client`. When the server selects a particular client for training, it
@@ -230,15 +94,16 @@ sends training instructions over the network. The client receives those
 instructions and calls one of the :code:`Client` methods to run your code
 (i.e., to train the neural network we defined earlier).
 
-Flower provides a convenience class called :code:`NumPyClient` which makes it
-easier to implement the :code:`Client` interface when your workload uses MXNet.
-Implementing :code:`NumPyClient` usually means defining the following methods
+Flower provides a convenience class called :code:`MnistClient` which makes it
+easier to implement the :code:`Client` interface when your workload uses scikit.
+Implementing :code:`MnistClient` usually means defining the following methods
 (:code:`set_parameters` is optional though):
 
 #. :code:`get_parameters`
     * return the model weight as a list of NumPy ndarrays
 #. :code:`set_parameters` (optional)
     * update the local model weights with the parameters received from the server
+    * is directly imported with :code:`utils.set_model_params()`
 #. :code:`fit`
     * set the local model weights
     * train the local model
@@ -246,61 +111,97 @@ Implementing :code:`NumPyClient` usually means defining the following methods
 #. :code:`evaluate`
     * test the local model
 
-They can be implemented in the following way:
+The methods can be impleted in the following way:
 
 .. code-block:: python
 
-    class MNISTClient(fl.client.NumPyClient):
-        def get_parameters(self):
-            param = []
-            for val in model.collect_params(".*weight").values():
-                p = val.data()
-                param.append(p.asnumpy())
-            return param
+    class MnistClient(fl.client.NumPyClient):
+        def get_parameters(self):  # type: ignore
+            return utils.get_model_parameters(model)
 
-        def set_parameters(self, parameters):
-            params = zip(model.collect_params(".*weight").keys(), parameters)
-            for key, value in params:
-                model.collect_params().setattr(key, value)
+        def fit(self, parameters, config):  # type: ignore
+            utils.set_model_params(model, parameters)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                model.fit(X_train, y_train)
+            print(f"Training finished for round {config['rnd']}")
+            return utils.get_model_parameters(model), len(X_train), {}
 
-        def fit(self, parameters, config):
-            self.set_parameters(parameters)
-            [accuracy, loss], num_examples = train(model, train_data, epoch=2)
-            results = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
-            return self.get_parameters(), num_examples, results
+        def evaluate(self, parameters, config):  # type: ignore
+            utils.set_model_params(model, parameters)
+            loss = log_loss(y_test, model.predict_proba(X_test))
+            accuracy = model.score(X_test, y_test)
+            return loss, len(X_test), {"accuracy": accuracy}
 
-        def evaluate(self, parameters, config):
-            self.set_parameters(parameters)
-            [accuracy, loss], num_examples = test(model, val_data)
-            print("Evaluation accuracy & loss", accuracy, loss)
-            return float(loss[1]), val_data.batch_size, {"accuracy": float(accuracy[1])}
-    
 
-We can now create an instance of our class :code:`MNISTClient` and add one line
+We can now create an instance of our class :code:`MnistClient` and add one line
 to actually run this client:
 
 .. code-block:: python
 
-     fl.client.start_numpy_client("0.0.0.0:8080", client=MNISTClient())
+    fl.client.start_numpy_client("0.0.0.0:8080", client=MnistClient())
 
 That's it for the client. We only have to implement :code:`Client` or
-:code:`NumPyClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
+:code:`MnistClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
 :code:`"[::]:8080"`. If we run a truly federated workload with the server and
 clients running on different machines, all that needs to change is the
-:code:`server_address` we point the client at.
+:code:`server_address` we point to the client.
 
 Flower Server
 -------------
 
-For simple workloads we can start a Flower server and leave all the
-configuration possibilities at their default values. In a file named
+The following Flower server is a little bit more advanced and returns evaluation function for the server-side evaluation.
+First, we import again all required libraries such as Flower and scikit.
+
 :code:`server.py`, import Flower and start the server:
 
 .. code-block:: python
 
     import flwr as fl
+    import utils
+    from sklearn.metrics import log_loss
+    from sklearn.linear_model import LogisticRegression
+    from typing import Dict
 
-    fl.server.start_server(config={"num_rounds": 3})
+The number of federated learning rounds is set in :code:`fit_round()` and the evaluation is defined in :code:`get_eval_fn()`.
+The evaluation function is called after each federated learning round and gives you the information about loss and accuracy.
+
+.. code-block:: python
+
+    def fit_round(rnd: int) -> Dict:
+        """Send round number to client."""
+        return {"rnd": rnd}
+
+
+    def get_eval_fn(model: LogisticRegression):
+        """Return an evaluation function for server-side evaluation."""
+
+        _, (X_test, y_test) = utils.load_mnist()
+
+        def evaluate(parameters: fl.common.Weights):
+            utils.set_model_params(model, parameters)
+            loss = log_loss(y_test, model.predict_proba(X_test))
+            accuracy = model.score(X_test, y_test)
+            return loss, {"accuracy": accuracy}
+
+        return evaluate
+
+The :code:`main` contains the server side parameter initialization :code:`utils.set_initial_params()` as well as the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federate averaging, with two clients and evaluation after each federated learning round.
+The server can be started with the command :code:`fl.server.start_server("0.0.0.0:8080", strategy=strategy, config={"num_rounds": 3})`.
+
+.. code-block:: python
+
+    # Start Flower server for five rounds of federated learning
+    if __name__ == "__main__":
+        model = LogisticRegression()
+        utils.set_initial_params(model)
+        strategy = fl.server.strategy.FedAvg(
+            min_available_clients=2,
+            eval_fn=get_eval_fn(model),
+            on_fit_config_fn=fit_round,
+        )
+        fl.server.start_server("0.0.0.0:8080", strategy=strategy, config={"num_rounds": 3})
+
 
 Train the model, federated!
 ---------------------------
@@ -311,66 +212,55 @@ therefore have to start the server first:
 
 .. code-block:: shell
 
-    $ python server.py
+    $ python3 server.py
 
 Once the server is running we can start the clients in different terminals.
 Open a new terminal and start the first client:
 
 .. code-block:: shell
 
-    $ python client.py
+    $ python3 client.py
 
 Open another terminal and start the second client:
 
 .. code-block:: shell
 
-    $ python client.py
+    $ python3 client.py
 
 Each client will have its own dataset.
 You should now see how the training does in the very first terminal (the one that started the server):
 
 .. code-block:: shell
 
-    INFO flower 2021-03-11 11:59:04,512 | app.py:76 | Flower server running (insecure, 3 rounds)
-    INFO flower 2021-03-11 11:59:04,512 | server.py:72 | Getting initial parameters
-    INFO flower 2021-03-11 11:59:09,089 | server.py:74 | Evaluating initial parameters
-    INFO flower 2021-03-11 11:59:09,089 | server.py:87 | [TIME] FL starting
-    DEBUG flower 2021-03-11 11:59:11,997 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-03-11 11:59:14,652 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-03-11 11:59:14,656 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-03-11 11:59:14,811 | server.py:149 | evaluate received 2 results and 0 failures
-    DEBUG flower 2021-03-11 11:59:14,812 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-03-11 11:59:18,499 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-03-11 11:59:18,503 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-03-11 11:59:18,784 | server.py:149 | evaluate received 2 results and 0 failures
-    DEBUG flower 2021-03-11 11:59:18,786 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-03-11 11:59:22,551 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-03-11 11:59:22,555 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-03-11 11:59:22,789 | server.py:149 | evaluate received 2 results and 0 failures
-    INFO flower 2021-03-11 11:59:22,789 | server.py:122 | [TIME] FL finished in 13.700094900001204
-    INFO flower 2021-03-11 11:59:22,790 | app.py:109 | app_fit: losses_distributed [(1, 1.5717803835868835), (2, 0.6093432009220123), (3, 0.4424773305654526)]
-    INFO flower 2021-03-11 11:59:22,790 | app.py:110 | app_fit: accuracies_distributed []
-    INFO flower 2021-03-11 11:59:22,791 | app.py:111 | app_fit: losses_centralized []
-    INFO flower 2021-03-11 11:59:22,791 | app.py:112 | app_fit: accuracies_centralized []
-    DEBUG flower 2021-03-11 11:59:22,793 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-03-11 11:59:23,111 | server.py:149 | evaluate received 2 results and 0 failures
-    INFO flower 2021-03-11 11:59:23,112 | app.py:121 | app_evaluate: federated loss: 0.4424773305654526
-    INFO flower 2021-03-11 11:59:23,112 | app.py:125 | app_evaluate: results [('ipv4:127.0.0.1:44344', EvaluateRes(loss=0.443320095539093, num_examples=100, accuracy=0.0, metrics={'accuracy': 0.8752475247524752})), ('ipv4:127.0.0.1:44346', EvaluateRes(loss=0.44163456559181213, num_examples=100, accuracy=0.0, metrics={'accuracy': 0.8761386138613861}))]
-    INFO flower 2021-03-11 11:59:23,112 | app.py:127 | app_evaluate: failures []
+    INFO flower 2022-01-13 13:43:14,859 | app.py:73 | Flower server running (insecure, 3 rounds)
+    INFO flower 2022-01-13 13:43:14,859 | server.py:118 | Getting initial parameters
+    INFO flower 2022-01-13 13:43:17,903 | server.py:306 | Received initial parameters from one random client
+    INFO flower 2022-01-13 13:43:17,903 | server.py:120 | Evaluating initial parameters
+    INFO flower 2022-01-13 13:43:17,992 | server.py:123 | initial parameters (loss, other metrics): 2.3025850929940455, {'accuracy': 0.098}
+    INFO flower 2022-01-13 13:43:17,992 | server.py:133 | FL starting
+    DEBUG flower 2022-01-13 13:43:19,814 | server.py:251 | fit_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2022-01-13 13:43:20,046 | server.py:260 | fit_round received 2 results and 0 failures
+    INFO flower 2022-01-13 13:43:20,220 | server.py:148 | fit progress: (1, 1.3365667871792377, {'accuracy': 0.6605}, 2.227397900000142)
+    INFO flower 2022-01-13 13:43:20,220 | server.py:199 | evaluate_round: no clients selected, cancel
+    DEBUG flower 2022-01-13 13:43:20,220 | server.py:251 | fit_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2022-01-13 13:43:20,456 | server.py:260 | fit_round received 2 results and 0 failures
+    INFO flower 2022-01-13 13:43:20,603 | server.py:148 | fit progress: (2, 0.721620492535375, {'accuracy': 0.7796}, 2.6108531999998377)
+    INFO flower 2022-01-13 13:43:20,603 | server.py:199 | evaluate_round: no clients selected, cancel
+    DEBUG flower 2022-01-13 13:43:20,603 | server.py:251 | fit_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2022-01-13 13:43:20,837 | server.py:260 | fit_round received 2 results and 0 failures
+    INFO flower 2022-01-13 13:43:20,967 | server.py:148 | fit progress: (3, 0.5843629244915138, {'accuracy': 0.8217}, 2.9750180000010005)
+    INFO flower 2022-01-13 13:43:20,968 | server.py:199 | evaluate_round: no clients selected, cancel
+    INFO flower 2022-01-13 13:43:20,968 | server.py:172 | FL finished in 2.975252800000817
+    INFO flower 2022-01-13 13:43:20,968 | app.py:109 | app_fit: losses_distributed []
+    INFO flower 2022-01-13 13:43:20,968 | app.py:110 | app_fit: metrics_distributed {}
+    INFO flower 2022-01-13 13:43:20,968 | app.py:111 | app_fit: losses_centralized [(0, 2.3025850929940455), (1, 1.3365667871792377), (2, 0.721620492535375), (3, 0.5843629244915138)]
+    INFO flower 2022-01-13 13:43:20,968 | app.py:112 | app_fit: metrics_centralized {'accuracy': [(0, 0.098), (1, 0.6605), (2, 0.7796), (3, 0.8217)]}
+    DEBUG flower 2022-01-13 13:43:20,968 | server.py:201 | evaluate_round: strategy sampled 2 clients (out of 2)
+    DEBUG flower 2022-01-13 13:43:21,232 | server.py:210 | evaluate_round received 2 results and 0 failures
+    INFO flower 2022-01-13 13:43:21,232 | app.py:121 | app_evaluate: federated loss: 0.5843629240989685
+    INFO flower 2022-01-13 13:43:21,232 | app.py:122 | app_evaluate: results [('ipv4:127.0.0.1:53980', EvaluateRes(loss=0.5843629240989685, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.8217})), ('ipv4:127.0.0.1:53982', EvaluateRes(loss=0.5843629240989685, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.8217}))]
+    INFO flower 2022-01-13 13:43:21,232 | app.py:127 | app_evaluate: failures []
 
 Congratulations!
 You've successfully built and run your first federated learning system.
-The full `source code <https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist>`_ for this example can be found in :code:`examples/quickstart_mxnet`.
-
-
-Quickstart (scikit-learn [code example])
-========================================
-
-Let's build a federated learning system using scikit-learn and Flower!
-
-Before scikti-learn and Flower can be imported we have to install both:
-
-.. code-block:: shell
-
-  $ pip install -U scikit-learn flwr
-
+The full `source code <https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist>`_ for this example can be found in :code:`examples/sklearn-logreg-mnist`.
