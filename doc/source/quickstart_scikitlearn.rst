@@ -111,7 +111,7 @@ Implementing :code:`MnistClient` usually means defining the following methods
 #. :code:`evaluate`
     * test the local model
 
-The methods can be impleted in the following way:
+The methods can be implemented in the following way:
 
 .. code-block:: python
 
@@ -150,7 +150,7 @@ clients running on different machines, all that needs to change is the
 Flower Server
 -------------
 
-The following Flower server is a little bit more advanced and returns evaluation function for the server-side evaluation.
+The following Flower server is a little bit more advanced and returns an evaluation function for the server-side evaluation.
 First, we import again all required libraries such as Flower and scikit.
 
 :code:`server.py`, import Flower and start the server:
@@ -164,7 +164,7 @@ First, we import again all required libraries such as Flower and scikit.
     from typing import Dict
 
 The number of federated learning rounds is set in :code:`fit_round()` and the evaluation is defined in :code:`get_eval_fn()`.
-The evaluation function is called after each federated learning round and gives you the information about loss and accuracy.
+The evaluation function is called after each federated learning round and gives you information about loss and accuracy.
 
 .. code-block:: python
 
@@ -186,7 +186,7 @@ The evaluation function is called after each federated learning round and gives 
 
         return evaluate
 
-The :code:`main` contains the server side parameter initialization :code:`utils.set_initial_params()` as well as the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federate averaging, with two clients and evaluation after each federated learning round.
+The :code:`main` contains the server-side parameter initialization :code:`utils.set_initial_params()` as well as the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federate averaging, with two clients and evaluation after each federated learning round.
 The server can be started with the command :code:`fl.server.start_server("0.0.0.0:8080", strategy=strategy, config={"num_rounds": 3})`.
 
 .. code-block:: python
@@ -207,8 +207,7 @@ Train the model, federated!
 ---------------------------
 
 With both client and server ready, we can now run everything and see federated
-learning in action. Federated learning systems usually have a server and multiple clients. We
-therefore have to start the server first:
+learning in action. Federated learning systems usually have a server and multiple clients. We, therefore, have to start the server first:
 
 .. code-block:: shell
 
