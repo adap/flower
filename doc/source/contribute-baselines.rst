@@ -27,7 +27,7 @@ We are aware that a few libraries are only available within the Conda environmen
 Here is a checklist for adding a new baseline:
 
 * add required Python packages to :code:`pyproject.toml` or :code:`requirements.txt`
-* add all required code
+* add all required code under :code:`baselines/flwr_baselines/publications/[new_publication]`
 * add a dataset downloader
 * add an experiment plot
 * add a :code:`README.md`
