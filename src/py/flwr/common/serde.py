@@ -17,6 +17,7 @@
 
 from typing import Any, List, cast
 
+from flwr.client.client import Client
 from flwr.proto.transport_pb2 import (
     ClientMessage,
     Parameters,
@@ -24,8 +25,6 @@ from flwr.proto.transport_pb2 import (
     Scalar,
     ServerMessage,
 )
-
-from flwr.client.client import Client
 
 from . import typing
 
@@ -177,6 +176,8 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
 
 def error_res_to_proto(res: typing.ErrorRes) -> ClientMessage.ErrorRes:
     return ClientMessage.ErrorRes(msg=res.msg)
+
+
 # === Properties messages ===
 
 
