@@ -11,7 +11,7 @@ Before you start to work on a new baseline or experiment please check the `Flowe
 Requirements
 ------------
 
-A contribution is really easy. You only have to make sure that your federated learning experiments are running with Flower. As soon as you have created an experiment with Flower included you can contribute it. 
+Contributing a new baseline is really easy. You only have to make sure that your federated learning experiments are running with Flower. As soon as you have created a Flower-based experiment, you can contribute it.
 
 It is recommended (but not required) to use `Hydra <https://hydra.cc/>`_ to execute the experiment. 
 
