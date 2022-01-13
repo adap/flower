@@ -45,7 +45,7 @@ Flower Baselines are a collection of organised scripts used to reproduce results
    :maxdepth: 1
    :caption: Baselines
    
-   execute-baselines
+   using-baselines
    contributing-baselines
 
 

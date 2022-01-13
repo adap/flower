@@ -1,5 +1,5 @@
-Executing Baselines
-===================
+Using Baselines
+===============
 
 Structure
 ---------
@@ -44,4 +44,4 @@ The following table lists all currently available baselines and the correspondin
       - :code:`flower/baselines/flwr_baselines/publications/fedopt/sparse_gradient_task`
     * - `FedProx <https://arxiv.org/pdf/1812.06127.pdf>`_
       - system heterogeneity
-      - :code:`flower/baselines/flwr_baselines/publications/ fedprox/system_heterogeneity`
+      - :code:`flower/baselines/flwr_baselines/publications/fedprox/system_heterogeneity`
