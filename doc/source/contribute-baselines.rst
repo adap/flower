@@ -14,7 +14,7 @@ Requirements
 
 A contribution is really easy. You only have to make sure that your federated learning experiments are running with Flower. As soon as you have created an experiment with Flower included you can contribute it. 
 
-It is recommended to use `Hydra <https://hydra.cc/>`_ to execute the experiment but not necessary. 
+It is recommended (but not required) to use `Hydra <https://hydra.cc/>`_ to execute the experiment. 
 
 Please make sure that you add your baseline or experiment to the corresponding directory as explained in `Execute Baseline <https://flower.dev/docs/execute-baseline.html>`_. Also add a :code:`README.md` with a short explanation of the paper and a detailed description of how to execute the baseline. 
 Please also check if all requirements or library are listed in the :code:`pyproject.toml` or the :code:`requirements.txt` available in the directory `flower/baselines/flwr_baselines <https://github.com/adap/flower/blob/main/baselines>`_. If the requirement or library is not yet listed please add it. If the versions are different please make your that your baseline is running with the already existing version listed in :code:`pyproject.toml` or the :code:`requirements.txt`.
