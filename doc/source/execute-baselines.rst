@@ -4,16 +4,16 @@ Executing Baselines
 Structure
 ---------
 
-All baselines are available in the directory `flower/baselines/flwr_baselines <https://github.com/adap/flower/blob/main/baselines>`_. This directory has two different files:
+All baselines are available in the directory `baselines <https://github.com/adap/flower/blob/main/baselines>`_. This directory has two different files:
 
 .. code-block:: shell
 
     - pyproject.toml
     - requirements.txt
 
-Both files contain all the information about required libraries and their versions. 
-You can install each library separately by using :code: `pip install` or you can use poetry and run code:`poetry install` in the directory where you find the :code:`pyproject.toml` file. After installing all requirements you can start to run your baseline.
-Go to the baseline that you want to execute. The file system is structured that you can first find the paper with their unique identifier such as FedProx represents the paper "Federated Optimization in Heterogeneous Networks". The :code:`fedprox` section contains all available experiments that the paper is covering.   
+Both files contain all the information about required Python packages (libraries, frameworks, ...) and their versions. You can install each library separately by using :code: `pip install` or you can use Poetry and run code:`poetry install` in the directory where you find the :code:`pyproject.toml` file. After installing all requirements, you can start to run your baseline.
+
+Go to the baseline that you want to execute. The directories and files are structured so that you can first find the paper with their unique identifier such that, for example, :code:`FedProx` refers to the paper "Federated Optimization in Heterogeneous Networks". The :code:`fedprox` section contains all available experiments from that paper.
 
 .. code-block:: shell   
 
@@ -22,13 +22,12 @@ Go to the baseline that you want to execute. The file system is structured that 
     |---|---experiment1/
     |---|---experiment2/
 
-The experiment area contains a :code:`README.md` covering the correspondent paper, its abstract, and goal as well as a detailed description of how to run the baseline.
-Please use the :code:`README.md` to execute the baseline.  
+The experiment area contains a :code:`README.md` covering the corresponding paper, its abstract, and goal as well as a detailed description of how to run the baseline. Please use the :code:`README.md` to see how to execute each individual baseline.
 
 Available Baselines
 -------------------
 
-The following table lists all baselines and their papers. If you want to add another baseline or experiment, please check the `Contribute Baseline <https://flower.dev/docs/contribute-baseline.html>`_ section. 
+The following table lists all currently available baselines and the corresponding papers. If you want to add a new baseline or experiment, please check the `Contributing Baselines <https://flower.dev/docs/contributing-baselines.html>`_ section. 
 
 .. list-table::
     :widths: 20 30 50
