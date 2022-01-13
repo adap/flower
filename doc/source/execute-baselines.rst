@@ -38,10 +38,10 @@ The following table lists all currently available baselines and the correspondin
       - Directory 
     * - `FedBN <https://arxiv.org/pdf/2102.07623.pdf>`_
       - convergence rate
-      - flower/baselines/flwr_baselines/publications/ fedbn/convergence_rate
+      - :code:`flower/baselines/flwr_baselines/publications/fedbn/convergence_rate`
     * - `FedOpt <https://arxiv.org/pdf/2003.00295.pdf>`_
       - sparse gradient task
-      - flower/baselines/flwr_baselines/publications/ fedopt/sparse_gradient_task
+      - :code:`flower/baselines/flwr_baselines/publications/fedopt/sparse_gradient_task`
     * - `FedProx <https://arxiv.org/pdf/1812.06127.pdf>`_
       - system heterogeneity
-      - flower/baselines/flwr_baselines/publications/ fedprox/system_heterogeneity
+      - :code:`flower/baselines/flwr_baselines/publications/ fedprox/system_heterogeneity`
