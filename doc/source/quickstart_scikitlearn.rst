@@ -17,7 +17,7 @@ Now that we have a rough idea of what is going on, let's get started. We first n
 
   $ pip install flwr
 
-Since we want to use MXNet, let's go ahead and install it:
+Since we want to use scikt-learn, let's go ahead and install it:
 
 .. code-block:: shell
 
@@ -151,7 +151,7 @@ Flower Server
 -------------
 
 The following Flower server is a little bit more advanced and returns an evaluation function for the server-side evaluation.
-First, we import again all required libraries such as Flower and scikit.
+First, we import again all required libraries such as Flower and scikit-learn.
 
 :code:`server.py`, import Flower and start the server:
 
