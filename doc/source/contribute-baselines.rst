@@ -1,8 +1,7 @@
 Contribute Baselines
 ====================
 
-Do you have a new federated learning paper and want to add a new baseline to Flower? Or do you want to add a new experiment to an already existing baseline paper?
-Great, we really appreciate your contribution.
+Do you have a new federated learning paper and want to add a new baseline to Flower? Or do you want to add a new experiment to an already existing baseline paper? Great, we really appreciate your contribution.
 
 The goal of creating baselines is to reproduce the experiments in the paper for better comparison to new strategies, datasets, federated pipelines, and so on. 
 
