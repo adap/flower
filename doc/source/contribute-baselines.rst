@@ -1,5 +1,5 @@
-Contribute Baselines
-====================
+Contributing Baselines
+======================
 
 Do you have a new federated learning paper and want to add a new baseline to Flower? Or do you want to add a new experiment to an already existing baseline paper? Great, we really appreciate your contribution.
 
