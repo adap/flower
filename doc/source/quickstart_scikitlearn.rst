@@ -1,7 +1,7 @@
 Quickstart (scikit-learn)
 =========================
 
-In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit. 
+In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit-learn. 
 
 It is recommended to create a virtual environment and run everything within this `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_. 
 
@@ -36,21 +36,21 @@ Flower Client
 Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server.
 However, before setting up the client and server, we will define all functionalities that we need for our federated learning setup within :code:`utils.py`. The :code:`utils.py` contains different functions defining all the machine learning basics:
 
-* get_model_parameters()
-    * Returns the paramters of a sklearn LogisticRegression model
-* set_model_params()
-    * Sets the parameters of a sklean LogisticRegression model
-* set_initial_params()
+* :code:`get_model_parameters()`
+    * Returns the paramters of a :code:`sklearn` LogisticRegression model
+* :code:`set_model_params()`
+    * Sets the parameters of a :code:`sklean` LogisticRegression model
+* :code:`set_initial_params()`
     * Initializes the model parameters that the Flower server will ask for
-* load_mnist()
+* :code:`load_mnist()`
     * Loads the MNIST dataset using OpenML
-* shuffle()
+* :code:`shuffle()`
     * Shuffles data and its label
-* partition()
-    * Splits datasets into a number of partitions.
+* :code:`partition()`
+    * Splits datasets into a number of partitions
 
 Please check out :code:`utils.py` `here <https://github.com/adap/flower/blob/main/examples/sklearn-logreg-mnist/utils.py>`_ for more details.
-The pre-defined functions are used in the :code:`client.py` and imported. The :code:`client.py` also requires to import several packages such as Flower and scikit:
+The pre-defined functions are used in the :code:`client.py` and imported. The :code:`client.py` also requires to import several packages such as Flower and scikit-learn:
 
 .. code-block:: python
       
@@ -92,11 +92,11 @@ The Flower server interacts with clients through an interface called
 :code:`Client`. When the server selects a particular client for training, it
 sends training instructions over the network. The client receives those
 instructions and calls one of the :code:`Client` methods to run your code
-(i.e., to train the neural network we defined earlier).
+(i.e., to fit the logistic regression we defined earlier).
 
-Flower provides a convenience class called :code:`MnistClient` which makes it
-easier to implement the :code:`Client` interface when your workload uses scikit.
-Implementing :code:`MnistClient` usually means defining the following methods
+Flower provides a convenience class called :code:`NumPyClient` which makes it
+easier to implement the :code:`Client` interface when your workload uses scikit-learn.
+Implementing :code:`NumPyClient` usually means defining the following methods
 (:code:`set_parameters` is optional though):
 
 #. :code:`get_parameters`
@@ -142,10 +142,10 @@ to actually run this client:
     fl.client.start_numpy_client("0.0.0.0:8080", client=MnistClient())
 
 That's it for the client. We only have to implement :code:`Client` or
-:code:`MnistClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
-:code:`"[::]:8080"`. If we run a truly federated workload with the server and
+:code:`NumPyClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"0.0.0.0:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
+:code:`"0.0.0.0:8080"`. If we run a truly federated workload with the server and
 clients running on different machines, all that needs to change is the
-:code:`server_address` we point to the client.
+:code:`server_address` we pass to the client.
 
 Flower Server
 -------------
@@ -186,8 +186,7 @@ The evaluation function is called after each federated learning round and gives 
 
         return evaluate
 
-The :code:`main` contains the server-side parameter initialization :code:`utils.set_initial_params()` as well as the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federate averaging, with two clients and evaluation after each federated learning round.
-The server can be started with the command :code:`fl.server.start_server("0.0.0.0:8080", strategy=strategy, config={"num_rounds": 3})`.
+The :code:`main` contains the server-side parameter initialization :code:`utils.set_initial_params()` as well as the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federated averaging (or FedAvg), with two clients and evaluation after each federated learning round. The server can be started with the command :code:`fl.server.start_server("0.0.0.0:8080", strategy=strategy, config={"num_rounds": 3})`.
 
 .. code-block:: python
 
