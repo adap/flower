@@ -35,7 +35,6 @@ Here is a checklist for adding a new baseline:
 Usability
 ---------
 
-Flower is known for its usability. Therefore, make sure that your baseline or experiment can be executed with a single command such as :code:`./run.sh` or :code:`python3 main.py`.
-How you set up the experiments and the related code structure is up to you as an author but keep in mind that other users can easily execute your baseline.
+Flower is known and loved for its usability. Therefore, make sure that your baseline or experiment can be executed with a single command such as :code:`./run.sh` or :code:`python3 main.py`. How you organise the experiments and the related code structure is up to you as an author, but please keep in mind to make sure that other users can easily understand and execute your baseline.
 
-We see forward to your contribution.
+We look forward to your contribution!
