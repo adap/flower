@@ -27,9 +27,9 @@ root_dir = dirname(abspath(join(__file__, "../../../../..")))
 
 
 def load_certificates() -> Tuple[str, str, str]:
-    """Generate and load SSL/TLS credentials/certificates.
+    """Generate and load SSL credentials/certificates.
 
-    Utility function for loading for SSL/TLS enabled gRPC servertests.
+    Utility function for loading for SSL-enabled gRPC servertests.
     """
     # Trigger script which generates the certificates
     subprocess.run(["bash", "./dev/certificates/generate.sh"], check=True, cwd=root_dir)
