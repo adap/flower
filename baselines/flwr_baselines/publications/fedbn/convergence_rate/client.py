@@ -46,7 +46,6 @@ class CifarClient(fl.client.NumPyClient):
 
     def get_parameters(self) -> List[np.ndarray]:
         self.model.train()
-        #print("Get Parameters")
         if self.mode == "fedbn":
             # Return model parameters as a list of NumPy ndarrays,
             # excluding parameters of BN layers when using FedBN
@@ -61,9 +60,7 @@ class CifarClient(fl.client.NumPyClient):
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         # Set model parameters from a list of NumPy ndarrays
-        #print("Start Set parameter before model.train")
         self.model.train()
-        #print("Start Set parameter")
         if self.mode == "fedbn":
             keys = [k for k in self.model.state_dict().keys() if "bn" not in k]
             params_dict = zip(keys, parameters)
@@ -78,7 +75,6 @@ class CifarClient(fl.client.NumPyClient):
         self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
-        #print("Get parameters FedBN")
         self.set_parameters(parameters)
         test_loss, test_accuracy = test(
             self.model, self.num_examples["dataset"], self.trainloader, device=DEVICE
