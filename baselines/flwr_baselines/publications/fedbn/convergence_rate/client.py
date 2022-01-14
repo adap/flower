@@ -86,7 +86,6 @@ class CifarClient(fl.client.NumPyClient):
             "train_loss": test_loss,
             "train_accuracy": test_accuracy,
         }
-        print("Start training")
         loss, accuracy = train(
             self.model,
             self.trainloader,
@@ -394,7 +393,6 @@ def main() -> None:
     client = CifarClient(model, trainloader, testloader, num_examples, args.mode)
     print("Start client of dataset", num_examples["dataset"])
     fl.client.start_numpy_client("0.0.0.0:8080", client)
-    print("save data")
     # Save train and evaluation loss and accuracy in json file
     with open(f"results/{args.partition}_{args.mode}_results.json", mode="r+") as f:
         json.dump(eval_list, f)
