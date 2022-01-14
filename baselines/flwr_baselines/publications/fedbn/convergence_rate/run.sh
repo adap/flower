@@ -1,19 +1,20 @@
 #!/bin/bash
-mode=${1:-"fedbn"}
+mode=${1:-"fedavg"}
 
 echo "Start Trainign with $mode"
+mkdir results
 
 python server.py &
-sleep 5 # Sleep for 2s to give the server enough time to start
+sleep 5 # Sleep for 5s to give the server enough time to start
 
 for i in 'MNIST' 'SVHN' 'USPS' 'SynthDigits' 'MNIST-M'; do
-    touch "${i}_"$mode"_results.json"
-    sleep 2 
+    touch "results/${i}_"$mode"_results.json"
+    sleep 5 
 done
 
 for i in 'MNIST' 'SVHN' 'USPS' 'SynthDigits' 'MNIST-M' ; do
     echo "Starting client $i"
-    python client.py --partition=${i} --mode="$mode" &
+    python3 client.py --partition=${i} --mode="$mode" &
     sleep 2 &
 done
 

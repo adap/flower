@@ -46,6 +46,7 @@ class CifarClient(fl.client.NumPyClient):
 
     def get_parameters(self) -> List[np.ndarray]:
         self.model.train()
+        #print("Get Parameters")
         if self.mode == "fedbn":
             # Return model parameters as a list of NumPy ndarrays,
             # excluding parameters of BN layers when using FedBN
@@ -60,7 +61,9 @@ class CifarClient(fl.client.NumPyClient):
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         # Set model parameters from a list of NumPy ndarrays
+        #print("Start Set parameter before model.train")
         self.model.train()
+        #print("Start Set parameter")
         if self.mode == "fedbn":
             keys = [k for k in self.model.state_dict().keys() if "bn" not in k]
             params_dict = zip(keys, parameters)
@@ -75,6 +78,7 @@ class CifarClient(fl.client.NumPyClient):
         self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
+        #print("Get parameters FedBN")
         self.set_parameters(parameters)
         test_loss, test_accuracy = test(
             self.model, self.num_examples["dataset"], self.trainloader, device=DEVICE
@@ -86,6 +90,7 @@ class CifarClient(fl.client.NumPyClient):
             "train_loss": test_loss,
             "train_accuracy": test_accuracy,
         }
+        print("Start training")
         loss, accuracy = train(
             self.model,
             self.trainloader,
@@ -392,10 +397,10 @@ def main() -> None:
     # Start client
     client = CifarClient(model, trainloader, testloader, num_examples, args.mode)
     print("Start client of dataset", num_examples["dataset"])
-    fl.client.start_numpy_client("[::]:8080", client)
-
+    fl.client.start_numpy_client("0.0.0.0:8080", client)
+    print("save data")
     # Save train and evaluation loss and accuracy in json file
-    with open(f"{args.partition}_{args.mode}_results.json", mode="r+") as f:
+    with open(f"results/{args.partition}_{args.mode}_results.json", mode="r+") as f:
         json.dump(eval_list, f)
 
 
