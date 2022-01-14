@@ -71,9 +71,9 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 
 The Flower community presents different Federated Learning papers and shows how to run the their experiments with Flower. The baselines are categorized by the paper and its benchmark experiments. 
 * [FedBN: Federated Learning on non-IID Features via Local Batch Normalization](https://arxiv.org/pdf/2102.07623.pdf):
-  * [Convergence Rate](https://github.com/adap/flower/tree/main/baselines/flwr_baseline/experiments/fedbn_convergence_rate)
+  * [Convergence Rate](https://github.com/adap/flower/tree/main/baselines/flwr_baseline/publications/fedbn/convergence_rate)
 
-*Experimental* - curious minds can take a peek at [baselines](https://github.com/adap/flower/tree/main/baselines).
+Find all information about [using baselines](https://flower.dev/docs/using-baselines.html) as well as [contributing a baseline](https://flower.dev/docs/contributing-baselines.html) at the Flower documentation.
 
 ## Community
 
