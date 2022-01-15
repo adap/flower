@@ -79,7 +79,7 @@ The only requirement for the server is to have flower installed. You can do so b
    * Install **RasberriPi OS (Debian-32bit)**. This is the recommended OS for those starting with RPi and that want a friendly Desktop environment. We recomend following the steps provided by the [official RPi site](https://www.raspberrypi.com/documentation/computers/getting-started.html) and flash your device with the [RPi Imager](https://www.raspberrypi.com/software/).
 
 
-1. Install docker (+ post-installation steps as in [Docker Docs](https://docs.docker.com/engine/install/linux-postinstall/)):
+2. Install docker (+ post-installation steps as in [Docker Docs](https://docs.docker.com/engine/install/linux-postinstall/)):
     ```bash
     # make sure your OS is up-to-date
     $ sudo apt-get update
@@ -97,7 +97,7 @@ The only requirement for the server is to have flower installed. You can do so b
     $ newgrp docker
     ```
 
-2. (optional) additional packages: you could install `TMUX` (see point `6` above) and `htop` as a replacement for `jtop` (which is only available for Jetson devices). Htop can be installed via: `sudo apt-get install htop -y`.
+3. (optional) additional packages: you could install `TMUX` (see point `6` above) and `htop` as a replacement for `jtop` (which is only available for Jetson devices). Htop can be installed via: `sudo apt-get install htop -y`.
 
 # Running FL training with Flower
 
