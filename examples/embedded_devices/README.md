@@ -73,9 +73,13 @@ The only requirement for the server is to have flower installed. You can do so b
 
 ## Setting up a Raspberry Pi (3B+ or 4B)
 
-1. Install Ubuntu server 20.04 LTS 64-bit for Rapsberry Pi. You can do this by using one of the images provided [by Ubuntu](https://ubuntu.com/download/raspberry-pi) and then use Etcher. Alternativelly, astep-by-step installation guide, showing how to download and flash the image onto a uSD card and, go throught the first boot process, can be found [here](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi#1-overview). Please note that the first time you boot your RPi it will automatically update the system (which will lock `sudo` and prevent running the commands below for a few minutes)
+1. Choosing an OS for your RPi. Choose one of the following:
+   * Install **Ubuntu server 20.04 LTS 64-bit** for Rapsberry Pi. You can do this by using one of the images provided [by Ubuntu](https://ubuntu.com/download/raspberry-pi) and then use Etcher. Alternativelly, astep-by-step installation guide, showing how to download and flash the image onto a uSD card and, go throught the first boot process, can be found [here](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi#1-overview). Please note that the first time you boot your RPi it will automatically update the system (which will lock `sudo` and prevent running the commands below for a few minutes)
+  
+   * Install **RasberriPi OS (Debian-32bit)**. This is the recommended OS for those starting with RPi and that want a friendly Desktop environment. We recomend following the steps provided by the [official RPi site](https://www.raspberrypi.com/documentation/computers/getting-started.html) and flash your device with the [RPi Imager](https://www.raspberrypi.com/software/).
 
-2. Install docker (+ post-installation steps as in [Docker Docs](https://docs.docker.com/engine/install/linux-postinstall/)):
+
+1. Install docker (+ post-installation steps as in [Docker Docs](https://docs.docker.com/engine/install/linux-postinstall/)):
     ```bash
     # make sure your OS is up-to-date
     $ sudo apt-get update
@@ -93,11 +97,11 @@ The only requirement for the server is to have flower installed. You can do so b
     $ newgrp docker
     ```
 
-3. (optional) additional packages: you could install `TMUX` (see point `6` above) and `htop` as a replacement for `jtop` (which is only available for Jetson devices). Htop can be installed via: `sudo apt-get install htop -y`.
+2. (optional) additional packages: you could install `TMUX` (see point `6` above) and `htop` as a replacement for `jtop` (which is only available for Jetson devices). Htop can be installed via: `sudo apt-get install htop -y`.
 
 # Running FL training with Flower
 
-For this demo we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. To keep the client side simple, the datasets will be downloaded when building the docker image. This will happen as the first stage in both `run_pi.sh` and `run_jetson.sh`. 
+For this demo we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. To keep the client side simple, the datasets will be downloaded when building the docker image. This will happen as the first stage in both `run_pi.sh` and `run_jetson.sh`. If you chose the Debian-32bit OS, you should use `run_pi_debian.sh` instead of `run_pi.sh`.
 
 >If you'd like to make use of your own dataset you could [mount it](https://docs.docker.com/storage/volumes/) to the client docker container when calling `docker run`. We leave this an other more advanced topics for a future example.
 
@@ -125,5 +129,5 @@ Depending on the model of RapsberryPi you have, running the smaller `Net` model 
 
 ```bash
 # note that pulling the base image, extracting the content might take a while (specially on a RPi 3) the first time you run this.
-$ ./run_pi.sh --server_address=<SERVER_ADDRESS> --cid=0 --model=Net
+$ ./run_pi.sh --server_address=<SERVER_ADDRESS> --cid=0 --model=Net # or `./run_pi_debian.sh <...>` 
 ```

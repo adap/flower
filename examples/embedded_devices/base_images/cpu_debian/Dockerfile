@@ -1,6 +1,6 @@
-# From an ubuntu18 image bult for Arm, we build from source Pytorch and Torchvision
+# From a Debian image ready for 32-bit RaspberryPi OS
 
-FROM arm64v8/ubuntu:18.04
+FROM --platform=linux/arm/v7 debian:stable
 
 # basics
 RUN apt-get update
@@ -34,7 +34,7 @@ RUN git clone https://github.com/pytorch/vision.git
 # checkout v0.7.0 (the one compatible with PyTorch 1.6)
 WORKDIR vision
 RUN git checkout v0.7.0 && git submodule update --recursive
-RUN apt-get install libavcodec-dev libavformat-dev libswscale-dev libjpeg8-dev zlib1g-dev -y
+RUN apt-get install libavcodec-dev libavformat-dev libswscale-dev libjpeg62-turbo-dev zlib1g-dev -y
 RUN python3 setup.py install
 
 WORKDIR /app
