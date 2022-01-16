@@ -8,6 +8,7 @@ warnings.filterwarnings("ignore")
 
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
+
 def load_data():
     """Load CIFAR-10 (training and test set)."""
     transform = transforms.Compose(
@@ -70,7 +71,7 @@ def train(net, trainloader, valloader, epochs):
     return results
 
 
-def test(net, testloader, steps:int = None):
+def test(net, testloader, steps: int = None):
     """Validate the network on the entire test set."""
     print("Starting evalutation...")
     criterion = torch.nn.CrossEntropyLoss()
