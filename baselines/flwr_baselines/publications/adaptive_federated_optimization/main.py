@@ -24,10 +24,12 @@ def main(cfg: DictConfig) -> None:
 
     # Create federated partitions - checkout the config files for details
     path_original_dataset = Path(to_absolute_path(cfg.root_dir))
-    fed_dir = call(cfg.gen_federated_partitions, path_original_dataset)
+    fed_dir = call(
+        cfg.gen_federated_partitions, path_original_dataset=path_original_dataset
+    )
 
     # Get centralized evaluation function - see config files for details
-    eval_fn = call(cfg.get_eval_fn, path_original_dataset)
+    eval_fn = call(cfg.get_eval_fn, path_original_dataset=path_original_dataset)
 
     # Define client resources and ray configs
     client_resources = {"num_cpus": cfg.cpus_per_client}
@@ -47,7 +49,9 @@ def main(cfg: DictConfig) -> None:
         on_fit_config_fn=on_fit_config_fn,
         eval_fn=eval_fn,
         initial_parameters=initial_parameters,
+        accept_failures=False,
     )
+
     # start simulation
     if cfg.is_simulation:
         client_fn = call(cfg.get_ray_client_fn, fed_dir=fed_dir)
