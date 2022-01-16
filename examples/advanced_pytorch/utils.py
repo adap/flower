@@ -44,7 +44,7 @@ def load_partition(idx: int):
 
 def train(net, trainloader, valloader, epochs):
     """Train the network on the training set."""
-    print('Starting training...')
+    print("Starting training...")
     criterion = torch.nn.CrossEntropyLoss().to(DEVICE)
     optimizer = torch.optim.SGD(
         net.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4
@@ -70,21 +70,26 @@ def train(net, trainloader, valloader, epochs):
     return results
 
 
-def test(net, testloader):
+def test(net, testloader, steps:int = None):
     """Validate the network on the entire test set."""
-    print('Starting evalutation...')
+    print("Starting evalutation...")
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
     net.eval()
     with torch.no_grad():
-        for images, labels in testloader:
+        for batch_idx, (images, labels) in enumerate(testloader):
             images, labels = images.to(DEVICE), labels.to(DEVICE)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    loss /= len(testloader.dataset)
+            if steps is not None and batch_idx == steps:
+                break
+    if steps is None:
+        loss /= len(testloader.dataset)
+    else:
+        loss /= total
     accuracy = correct / total
     return loss, accuracy
 
