@@ -1,5 +1,3 @@
-#include "torch_client.h"
-
 /**
  * Validate the network on the entire test set
  *

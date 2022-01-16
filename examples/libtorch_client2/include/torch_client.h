@@ -66,3 +66,5 @@ class TorchClient : public flwr::Client {
     virtual flwr::FitRes fit(flwr::FitIns ins) override;
 
 };
+
+#include "torch_client_impl.h"
