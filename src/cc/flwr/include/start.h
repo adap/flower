@@ -26,7 +26,7 @@ using flower::transport::ClientMessage;
 using flower::transport::ServerMessage;
 using flower::transport::FlowerService;
 
-int GRPC_MAX_MESSAGE_LENGTH = 536870912;  //  == 512 * 1024 * 1024
+#define GRPC_MAX_MESSAGE_LENGTH 536870912  //  == 512 * 1024 * 1024
 
 /**
  * @brief Start a C++ Flower Client which connects to a gRPC server

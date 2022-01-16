@@ -23,13 +23,11 @@ set(EXECUTABLE_NAME client)
 file(GLOB SRC_FILES src/*.cpp)
 
 file(GLOB FLWR_SRC_FILES ../../src/cc/flwr/src/*.cc)
-file(GLOB FLWR_INCLUDE_FILES ../../src/cc/flwr/include/*)
 set(FLWR_INCLUDE_DIR ../../src/cc/flwr/include)
 set(PROTO_FILES transport.proto)
 
 add_library(flwr STATIC
   ${FLWR_SRC_FILES}
-  ${FLWR_INCLUDE_FILES}
   ${PROTO_FILES})
 target_link_libraries(flwr
   protobuf::libprotobuf
@@ -44,6 +42,8 @@ get_target_property(grpc_cpp_plugin_location grpc_cpp_plugin LOCATION)
 protobuf_generate(TARGET flwr LANGUAGE grpc GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc PLUGIN "protoc-gen-grpc=${grpc_cpp_plugin_location}")
 
 add_executable(${EXECUTABLE_NAME}
+  ${FLWR_INCLUDE_FILES}
+  ${PROTO_FILES}
   ${SRC_FILES})
 target_include_directories(${EXECUTABLE_NAME} PUBLIC
   include

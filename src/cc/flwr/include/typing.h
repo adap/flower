@@ -13,6 +13,7 @@
  * ********************************************************************************************************/
 
 #pragma once
+#include <string>
 #include <optional>
 #include <list>
 #include <map>
