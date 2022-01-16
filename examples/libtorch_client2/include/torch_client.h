@@ -10,8 +10,6 @@
  *
  * ********************************************************************************************************/
 
-#ifndef TORCH_CLIENT_H
-#define TORCH_CLIENT_H
 #pragma once
 #include "client.h"
 #include <iostream>
@@ -135,4 +133,3 @@ class TorchClient : public flwr::Client {
     virtual flwr::FitRes fit(flwr::FitIns ins) override;
 
 };
-#endif

@@ -12,6 +12,8 @@
  *
  *************************************************************************************************/
 
+#ifndef START_H
+#define START_H
 #pragma once
 #include "client.h"
 #include <grpcpp/grpcpp.h>
@@ -51,3 +53,4 @@ class start
 public:
 	void start_client(std::string server_address, flwr::Client* client, int grpc_max_message_length = GRPC_MAX_MESSAGE_LENGTH);
 };
+#endif

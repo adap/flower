@@ -77,7 +77,7 @@ elseif(GRPC_FETCHCONTENT)
     # v1.25.0, v1.26.0 etc..
     # For the purpose of testing, we override the tag used to the commit
     # that's currently under test.
-    GIT_TAG        vGRPC_TAG_VERSION_OF_YOUR_CHOICE)
+    GIT_TAG       v1.43.0)
   FetchContent_MakeAvailable(grpc)
 
   # Since FetchContent uses add_subdirectory under the hood, we can use
@@ -98,7 +98,7 @@ else()
   # Find Protobuf installation
   # Looks for protobuf-config.cmake file installed by Protobuf's cmake installation.
   set(protobuf_MODULE_COMPATIBLE TRUE)
-  find_package(Protobuf CONFIG REQUIRED)
+  find_package(Protobuf REQUIRED)
   message(STATUS "Using protobuf ${Protobuf_VERSION}")
 
   set(_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
@@ -111,7 +111,7 @@ else()
 
   # Find gRPC installation
   # Looks for gRPCConfig.cmake file installed by gRPC's cmake installation.
-  find_package(gRPC CONFIG REQUIRED)
+  find_package(gRPC REQUIRED)
   message(STATUS "Using gRPC ${gRPC_VERSION}")
 
   set(_GRPC_GRPCPP gRPC::grpc++)

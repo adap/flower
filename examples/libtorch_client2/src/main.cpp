@@ -13,8 +13,14 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include "start.h"
+#include "cifar10.h"
 #include "torch_client.h"
+extern int GRPC_MAX_MESSAGE_LENGTH;  //  == 512 * 1024 * 1024
+class start
+{
+public:
+	void start_client(std::string server_address, flwr::Client* client, int grpc_max_message_length = GRPC_MAX_MESSAGE_LENGTH);
+};
 
 int main(int argc, char** argv) {
     if (argc != 4){
@@ -74,3 +80,4 @@ int main(int argc, char** argv) {
     
     return 0;
 }
+
