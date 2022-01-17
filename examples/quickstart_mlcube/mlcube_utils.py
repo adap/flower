@@ -4,6 +4,8 @@ import subprocess
 import tensorflow as tf
 import json
 
+from flwr.common import weights_to_parameters
+
 
 MODULE_PATH = os.path.abspath(__file__)
 MODULE_DIR = os.path.dirname(MODULE_PATH)
@@ -29,9 +31,9 @@ def run_task(task_name: str):
         "mlcube_docker",
         "run",
         "--mlcube=.",
-        "--platform=platforms/docker.yaml",
         f"--task=run/{task_name}.yaml",
     ]
+#        "--platform=platforms/docker.yaml",
 
     print()
     print('\n\033[32m' + " ".join(command) + '\033[39m\n')
@@ -50,14 +52,7 @@ def run_task(task_name: str):
 def save_parameteras_as_model(parameters):
     """Write model to $WORKSPACE/model_in/mnist_model from parameters."""
     filepath = workspace_path("model_in/mnist_model")
-    model = tf.keras.models.Sequential(
-        [
-            tf.keras.layers.Flatten(input_shape=(28, 28)),
-            tf.keras.layers.Dense(128, activation="relu"),
-            tf.keras.layers.Dropout(0.2),
-            tf.keras.layers.Dense(10, activation="softmax"),
-        ]
-    )
+    model = get_model()
     model.compile(
         optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
     )
@@ -112,10 +107,16 @@ def write_hyperparameters(optimizer, epochs, batch_size):
         for param in params:
             f.write(f"{param}\n")
 
-
+def get_model():
+    """Create example model"""
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Flatten(input_shape=(28, 28)),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Dense(10, activation='softmax')
+    ])
+    return model
 def initial_parameters():
     """Return initial checkpoint parameters."""
-    package_directory = os.path.dirname(os.path.abspath(__file__))
-    filepath = os.path.join(package_directory, "mlcube/workspace/initial_checkpoint")
-    model = tf.keras.models.load_model(filepath)
-    return model.get_weights()
+    model = get_model()
+    return weights_to_parameters(model.get_weights())
