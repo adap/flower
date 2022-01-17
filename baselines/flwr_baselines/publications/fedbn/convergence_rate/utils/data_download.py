@@ -1,9 +1,10 @@
 import os
+import zipfile
 from pathlib import Path
+from typing import Any
+
 import requests
 from tqdm import tqdm
-from typing import Any
-import zipfile
 
 
 def download_file_from_google_drive(id: Any, destination: str) -> None:

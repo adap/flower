@@ -1,13 +1,14 @@
 import gzip
-import numpy as np
-from pathlib import Path
 import pickle
 import shutil
-import torch
-from torchvision import datasets
+from pathlib import Path
 from typing import Dict
+
+import numpy as np
+import torch
 import wget
 from create_mnistm import create_mnistm
+from torchvision import datasets
 
 
 def decompress(infile, tofile):

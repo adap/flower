@@ -3,12 +3,13 @@
 i.e., splitted data into train&test set  in a stratified way. The
 function to process data into 10 partitions is also provided.
 """
-from collections import Counter
-import numpy as np
 import os
 import pickle as pkl
-import torch
+from collections import Counter
+
+import numpy as np
 import scipy.io as scio
+import torch
 from sklearn.model_selection import StratifiedShuffleSplit
 
 

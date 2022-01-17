@@ -1,11 +1,12 @@
 # ! This script has been borrowed and adapted.
 # Original script: https://github.com/pumpikano/tf-dann/blob/master/create_mnistm.py
 
+import tarfile
+
 import numpy as np
 import skimage
 import skimage.io
 import skimage.transform
-import tarfile
 
 
 def compose_image(digit, background):
