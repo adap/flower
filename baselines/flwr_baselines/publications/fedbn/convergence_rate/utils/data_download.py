@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
-from tqdm import tqdm # type: ignore
+from tqdm import tqdm  # type: ignore
 
 
 def download_file_from_google_drive(id: Any, destination: str) -> None:
