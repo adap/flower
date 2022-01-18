@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
-from tqdm import tqdm
+from tqdm import tqdm # type: ignore
 
 
 def download_file_from_google_drive(id: Any, destination: str) -> None:
@@ -14,23 +14,23 @@ def download_file_from_google_drive(id: Any, destination: str) -> None:
 
     response = session.get(URL, params={"id": id}, stream=True)
     token = get_confirm_token(response)
+    print("This is token", token)
 
     if token:
         params = {"id": id, "confirm": token}
         print("ID", params["id"])
         response = session.get(URL, params=params, stream=True)
-        total_length = response.headers.get("content-length")
+        total_length = response.headers.get("content-length") 
     print("Downloading...")
-    save_response_content(response, destination, total_length)
+    save_response_content(response, destination, total_length) # type:ignore
     print("Dowload done")
 
 
-def get_confirm_token(response: Any) -> None:
+def get_confirm_token(response: Any) -> Any:
     for key, value in response.cookies.items():
         if key.startswith("download_warning"):
             return value
-
-    return None
+    return None # No error!
 
 
 def save_response_content(response: Any, destination: str, total_length: float) -> None:
