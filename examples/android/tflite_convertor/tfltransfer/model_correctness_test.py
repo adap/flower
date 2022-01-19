@@ -23,6 +23,7 @@ import unittest
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.compat import v1 as tfv1
 
 # pylint: disable=g-bad-import-order
 from tfltransfer import bases
@@ -364,7 +365,7 @@ class ModelCorrectnessTest(unittest.TestCase):
             include_top=False,
             weights="imagenet",
         )
-        mobilenet_keras.save(mobilenet_dir, save_format="tf")
+        tfv1.keras.experimental.export_saved_model(mobilenet_keras, mobilenet_dir)
         cls.mobilenet_dir = mobilenet_dir
 
     def setUp(self):
