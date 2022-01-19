@@ -80,12 +80,17 @@ This format is deprecated and will be removed in a future release. It should use
 instead.
 """
 
-FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
+FitResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, FitRes]],
+    List[BaseException],
+]
 EvaluateResultsAndFailures = Tuple[
-    List[Tuple[ClientProxy, EvaluateRes]], List[BaseException]
+    List[Tuple[ClientProxy, EvaluateRes]],
+    List[BaseException],
 ]
 ReconnectResultsAndFailures = Tuple[
-    List[Tuple[ClientProxy, Disconnect]], List[BaseException]
+    List[Tuple[ClientProxy, Disconnect]],
+    List[BaseException],
 ]
 
 
