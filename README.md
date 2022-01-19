@@ -37,7 +37,7 @@ Meet the Flower community on [flower.dev](https://flower.dev)!
 * [Quickstart (Hugging Face [code example])](https://flower.dev/docs/quickstart_huggingface.html)
 * [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/quickstart_pytorch_lightning.html)
 * [Quickstart (MXNet)](https://flower.dev/docs/example-mxnet-walk-through.html)
-* [Quickstart (scikit-learn [code example])](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
+* [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 * [Quickstart (TFLite on Android [code example])](https://github.com/adap/flower/tree/main/examples/android)
 
 ## Flower Usage Examples
