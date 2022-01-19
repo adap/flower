@@ -59,7 +59,7 @@ class ClientDataset(Dataset):
     def __len__(self) -> int:
         return len(self.Y)
 
-    def __getitem__(self, idx: Union[int, Tensor]) -> Tuple[Tensor, int]:
+    def __getitem__(self, idx: Union[int, torch.Tensor]) -> Tuple[Tensor, int]:
         if torch.is_tensor(idx):
             idx = idx.tolist()
         x = Image.fromarray(self.X[idx])
@@ -190,7 +190,7 @@ def gen_cifar10_partitions(
     dataset_name: str,
     num_total_clients: int,
     lda_concentration: float,
-) -> None:
+) -> Path:
     fed_dir = (
         path_original_dataset
         / f"{dataset_name}"
@@ -226,7 +226,7 @@ def plot_metric_from_history(
     strategy_name: str,
     expected_maximum: float,
     save_path: Path,
-):
+) -> None:
     x, y = zip(*hist.metrics_centralized[metric_str])
     plt.plot(x, y * 100)  # Accuracy 0-100%
     # Set expected graph
