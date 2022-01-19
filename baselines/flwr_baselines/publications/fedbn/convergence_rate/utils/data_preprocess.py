@@ -8,9 +8,9 @@ import pickle as pkl
 from collections import Counter
 
 import numpy as np
-import scipy.io as scio
+import scipy.io as scio  # type: ignore
 import torch
-from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import StratifiedShuffleSplit  # type: ignore
 
 
 def stratified_split(X, y):

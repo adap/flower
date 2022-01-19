@@ -2,14 +2,15 @@
 # Original script: https://github.com/pumpikano/tf-dann/blob/master/create_mnistm.py
 
 import tarfile
+from typing import Dict, List, Tuple, Any
 
 import numpy as np
-import skimage
-import skimage.io
-import skimage.transform
+import skimage  # type: ignore
+import skimage.io  # type: ignore
+import skimage.transform  # type: ignore
 
 
-def compose_image(digit, background):
+def compose_image(digit: Any, background: Any) -> Any:
     """Difference-blend a digit and a random patch from a background image."""
     w, h, _ = background.shape
     dw, dh, _ = digit.shape
@@ -20,14 +21,14 @@ def compose_image(digit, background):
     return np.abs(bg - digit).astype(np.uint8)
 
 
-def mnist_to_img(x):
+def mnist_to_img(x: Any) -> Any:
     """Binarize MNIST digit and convert to RGB."""
     x = (x > 0).float()
     d = x.reshape([28, 28, 1]) * 255
     return np.concatenate([d, d, d], 2)
 
 
-def create_mnistm(X):
+def create_mnistm(X: Any) -> Any:
     """
     Give an array of MNIST digits, blend random background patches to
     build the MNIST-M dataset as described in
@@ -61,7 +62,6 @@ def create_mnistm(X):
             print("Processing example", i)
 
         bg_img = rand.choice(background_data)
-
         d = mnist_to_img(X[i])
         d = compose_image(d, bg_img)
         X_[i] = d

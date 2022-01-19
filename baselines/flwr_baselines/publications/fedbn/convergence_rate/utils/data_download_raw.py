@@ -6,9 +6,9 @@ from typing import Dict
 
 import numpy as np
 import torch
-import wget
-from create_mnistm import create_mnistm
-from torchvision import datasets
+import wget  # type: ignore
+from create_mnistm import create_mnistm  # type: ignore
+from torchvision import datasets  # type: ignore
 
 
 def decompress(infile, tofile):
@@ -124,6 +124,7 @@ def get_MNIST(out_dir: Path):
 
     if (out_dir / "MNIST").exists():
         print(f"> Directory ({out_dir}) exists, skipping downloading MNIST.")
+        print(type(out_dir))
         return
 
     datasets.MNIST(out_dir, train=True, download=True)
@@ -132,12 +133,8 @@ def get_MNIST(out_dir: Path):
 
     train_file = "training.pt"
     test_file = "test.pt"
-    shutil.move(
-        out_dir / "MNIST" / "processed" / train_file, out_dir / "MNIST" / train_file
-    )
-    shutil.move(
-        out_dir / "MNIST" / "processed" / test_file, out_dir / "MNIST" / test_file
-    )
+    shutil.move(out_dir / "MNIST" / "processed" / train_file, out_dir / "MNIST" / train_file)  # type: ignore[arg-type]
+    shutil.move(out_dir / "MNIST" / "processed" / test_file, out_dir / "MNIST" / test_file)  # type: ignore[arg-type]
     shutil.rmtree(out_dir / "MNIST" / "raw")
     shutil.rmtree(out_dir / "MNIST" / "processed")
 
@@ -148,7 +145,7 @@ if __name__ == "__main__":
 
     data_dir.mkdir(exist_ok=True)
 
-    get_MNIST(data_dir)
+    get_MNIST(data_dir)  # type: ignore[arg-type]
 
     get_SVHN(data_dir / "SVHN")
 

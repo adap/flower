@@ -8,8 +8,8 @@ import os
 
 import numpy as np
 import torch
-import torchvision.transforms as transforms
-from PIL import Image
+import torchvision.transforms as transforms  # type: ignore
+from PIL import Image  # type: ignore
 from torch.utils.data import Dataset
 
 
