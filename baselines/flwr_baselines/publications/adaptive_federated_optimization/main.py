@@ -1,6 +1,8 @@
 from os import chdir, getcwd
 from pathlib import Path
+from re import I
 from typing import Dict
+from flwr.common.typing import Parameters
 import numpy as np
 
 import flwr as fl
@@ -40,7 +42,7 @@ def main(cfg: DictConfig) -> None:
     )
 
     # select strategy
-    initial_parameters = call(cfg.get_initial_parameters)
+    initial_parameters: Parameters = call(cfg.get_initial_parameters)
     strategy = instantiate(
         cfg.strategy.init,
         fraction_fit=float(cfg.num_clients_per_round) / cfg.num_total_clients,
@@ -51,6 +53,7 @@ def main(cfg: DictConfig) -> None:
         initial_parameters=initial_parameters,
         accept_failures=False,
     )
+    strategy.initial_parameters = initial_parameters
 
     # start simulation
     if cfg.is_simulation:

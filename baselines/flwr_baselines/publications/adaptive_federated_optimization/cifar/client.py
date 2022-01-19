@@ -3,13 +3,14 @@ from pathlib import Path
 from typing import Callable, Dict, Tuple
 
 import flwr as fl
+from flwr.common import parameter
 import numpy as np
 import ray
 import torch
 
 from flwr.common import weights_to_parameters
 from flwr.common.parameter import Parameters
-from flwr.common.typing import Scalar
+from flwr.common.typing import Scalar, Weights
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose
 from cifar.utils import (
@@ -29,17 +30,19 @@ class RayClient(fl.client.NumPyClient):
         self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    def get_parameters(self) -> Parameters:
-        net = get_cifar_model(self.num_classes)
+    def get_parameters(self, net=None) -> Weights:
+        if net is None:
+            net = get_cifar_model(self.num_classes)
         weights = [val.cpu().numpy() for _, val in net.state_dict().items()]
-        return weights_to_parameters(weights)
+        #parameters = weights_to_parameters(weights)
+        return weights 
 
     def get_properties(self, ins: Dict[str, Scalar]) -> Dict[str, Scalar]:
         return self.properties
 
     def fit(
-        self, parameters: Parameters, config: Dict[str, Scalar]
-    ) -> Tuple[Parameters, int, Dict[str, Scalar]]:
+        self, parameters: Weights , config: Dict[str, Scalar]
+    ) -> Tuple[Weights, int, Dict[str, Scalar]]:
         net = self.set_parameters(parameters)
         net.to(self.device)
         num_workers = len(ray.worker.get_resource_ids()["CPU"])
@@ -78,9 +81,10 @@ class RayClient(fl.client.NumPyClient):
         # return statistics
         return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
 
-    def set_parameters(self, parameters: Parameters):
+    def set_parameters(self, parameters: Weights):
         net = get_cifar_model(self.num_classes)
-        params_dict = zip(net.state_dict().keys(), parameters)
+        weights = parameters
+        params_dict = zip(net.state_dict().keys(), weights)
         state_dict = OrderedDict(
             {k: torch.from_numpy(np.copy(v)) for k, v in params_dict}
         )
