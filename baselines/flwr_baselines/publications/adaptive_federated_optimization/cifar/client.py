@@ -3,23 +3,15 @@ from pathlib import Path
 from typing import Callable, Dict, Tuple
 
 import flwr as fl
-from flwr.common import parameter
 import numpy as np
 import ray
 import torch
-
-from flwr.common import weights_to_parameters
+from cifar.utils import ClientDataset, get_cifar_model, get_transforms, test, train
+from flwr.common import parameter, weights_to_parameters
 from flwr.common.parameter import Parameters
 from flwr.common.typing import Scalar, Weights
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose
-from cifar.utils import (
-    ClientDataset,
-    get_cifar_model,
-    get_transforms,
-    test,
-    train,
-)
 
 
 class RayClient(fl.client.NumPyClient):
@@ -34,14 +26,14 @@ class RayClient(fl.client.NumPyClient):
         if net is None:
             net = get_cifar_model(self.num_classes)
         weights = [val.cpu().numpy() for _, val in net.state_dict().items()]
-        #parameters = weights_to_parameters(weights)
-        return weights 
+        # parameters = weights_to_parameters(weights)
+        return weights
 
     def get_properties(self, ins: Dict[str, Scalar]) -> Dict[str, Scalar]:
         return self.properties
 
     def fit(
-        self, parameters: Weights , config: Dict[str, Scalar]
+        self, parameters: Weights, config: Dict[str, Scalar]
     ) -> Tuple[Weights, int, Dict[str, Scalar]]:
         net = self.set_parameters(parameters)
         net.to(self.device)

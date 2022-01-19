@@ -2,19 +2,15 @@ from os import chdir, getcwd
 from pathlib import Path
 from re import I
 from typing import Dict
-from flwr.common.typing import Parameters
-import numpy as np
 
 import flwr as fl
 import hydra
+import numpy as np
+from cifar.utils import plot_metric_from_history
+from flwr.common.typing import Parameters
 from hydra.utils import call, get_original_cwd, instantiate, to_absolute_path
-
 from omegaconf import DictConfig
 from torchvision.datasets import CIFAR10
-
-from cifar.utils import (
-    plot_metric_from_history,
-)
 
 
 @hydra.main(config_path="conf/cifar10", config_name="config")

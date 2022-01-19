@@ -1,9 +1,10 @@
+from collections import OrderedDict
 from pathlib import Path
+from typing import Callable, Dict, Optional, Tuple, Union
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-
-from collections import OrderedDict
 from flwr.common.parameter import weights_to_parameters
 from flwr.common.typing import Parameters, Scalar, Weights
 from flwr.dataset.utils.common import XY, create_lda_partitions
@@ -15,7 +16,6 @@ from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import CIFAR10, CIFAR100
 from torchvision.models import ResNet, resnet18
 from torchvision.transforms import Compose, Normalize, RandomHorizontalFlip, ToTensor
-from typing import Callable, Dict, Optional, Tuple, Union
 
 # transforms
 transform_cifar10_test = Compose(
