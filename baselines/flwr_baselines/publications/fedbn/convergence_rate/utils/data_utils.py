@@ -1,19 +1,20 @@
+"""
+This code creates 10 different partitions of each datasets
+"""
 import os
 import sys
+import numpy as np
+from PIL import Image  # type: ignore
+from torch.utils.data import Dataset
 
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_path)
 
-import os
-
-import numpy as np
-import torch
-import torchvision.transforms as transforms  # type: ignore
-from PIL import Image  # type: ignore
-from torch.utils.data import Dataset
-
-
 class DigitsDataset(Dataset):
+    """
+    Split datasets
+    """
+    #pylint: disable=too-many-arguments
     def __init__(
         self,
         data_path,
@@ -31,7 +32,7 @@ class DigitsDataset(Dataset):
                             self.images, self.labels = np.load(
                                 os.path.join(
                                     data_path,
-                                    "partitions/train_part{}.pkl".format(part),
+                                    f"partitions/train_part{part}.pkl",
                                 ),
                                 allow_pickle=True,
                             )
@@ -39,7 +40,7 @@ class DigitsDataset(Dataset):
                             images, labels = np.load(
                                 os.path.join(
                                     data_path,
-                                    "partitions/train_part{}.pkl".format(part),
+                                    f"partitions/train_part{part}.pkl",
                                 ),
                                 allow_pickle=True,
                             )
@@ -77,7 +78,7 @@ class DigitsDataset(Dataset):
         elif self.channels == 3:
             image = Image.fromarray(image, mode="RGB")
         else:
-            raise ValueError("{} channel is not allowed.".format(self.channels))
+            raise ValueError(f"{self.channels} channel is not allowed.")
 
         if self.transform is not None:
             image = self.transform(image)

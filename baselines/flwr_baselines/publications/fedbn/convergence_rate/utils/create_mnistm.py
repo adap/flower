@@ -1,15 +1,18 @@
-# ! This script has been borrowed and adapted.
-# Original script: https://github.com/pumpikano/tf-dann/blob/master/create_mnistm.py
+""" 
+! This script has been borrowed and adapted.
+Original script: https://github.com/pumpikano/tf-dann/blob/master/create_mnistm.py
 
+It creatse the MNIST-M dataset based on MNIST
+"""
 import tarfile
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import numpy as np
 import skimage  # type: ignore
 import skimage.io  # type: ignore
 import skimage.transform  # type: ignore
 
-
+#pylint: disable=invalid-name
 def compose_image(digit: Any, background: Any) -> Any:
     """Difference-blend a digit and a random patch from a background image."""
     w, h, _ = background.shape
@@ -27,6 +30,7 @@ def mnist_to_img(x: Any) -> Any:
     d = x.reshape([28, 28, 1]) * 255
     return np.concatenate([d, d, d], 2)
 
+#pylint: enable=invalid-name
 
 def create_mnistm(X: Any) -> Any:
     """
