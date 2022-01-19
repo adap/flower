@@ -4,6 +4,7 @@ from typing import Callable, Dict, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 import torch
 from flwr.common.parameter import weights_to_parameters
 from flwr.common.typing import Parameters, Scalar, Weights
@@ -73,7 +74,7 @@ class ClientDataset(Dataset):
 def partition_and_save(
     dataset: XY,
     fed_dir: Path,
-    dirichlet_dist: np.ndarray = None,
+    dirichlet_dist: npt.NDArray[np.float32] = None,
     num_partitions: int = 500,
     concentration: float = 0.1,
 ) -> np.ndarray:
