@@ -33,6 +33,7 @@ from flwr.common import (
     Reconnect,
     ndarray_to_bytes,
 )
+from flwr.server.client_manager import SimpleClientManager
 
 from .client_proxy import ClientProxy
 from .server import evaluate_clients, execute_round, fit_client, fit_clients
@@ -92,7 +93,7 @@ class SuccessClient(ClientProxy):
         return Disconnect(reason="UNKNOWN")
 
 
-class FailingCLient(ClientProxy):
+class FailingClient(ClientProxy):
     """Test class."""
 
     def get_parameters(self) -> ParametersRes:
@@ -115,7 +116,7 @@ def test_fit_clients() -> None:
     """Test fit_clients."""
     # Prepare
     clients: List[ClientProxy] = [
-        FailingCLient("0"),
+        FailingClient("0"),
         SuccessClient("1"),
     ]
     arr = np.array([[1, 2], [3, 4], [5, 6]])
@@ -136,7 +137,7 @@ def test_eval_clients() -> None:
     """Test eval_clients."""
     # Prepare
     clients: List[ClientProxy] = [
-        FailingCLient("0"),
+        FailingClient("0"),
         SuccessClient("1"),
     ]
     arr = np.array([[1, 2], [3, 4], [5, 6]])
@@ -169,6 +170,18 @@ def _create_client_instructions(
     # client_instructions: List[Tuple[ClientProxy, Union[FitIns, EvaluateIns]]] = [
     client_instructions = [(c, ins) for c in clients]
     return client_instructions
+
+
+def test_set_max_workers() -> None:
+    """Test eval_clients."""
+    # Prepare
+    server = Server(client_manager=SimpleClientManager())
+
+    # Execute
+    server.set_max_workers(42)
+
+    # Assert
+    assert server.max_workers == 42
 
 
 def test_execute_round_timeout_none() -> None:

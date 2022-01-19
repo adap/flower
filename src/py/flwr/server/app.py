@@ -21,7 +21,8 @@ from typing import Dict, Optional, Tuple, Union, cast
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.server.grpc_server.grpc_server import start_grpc_server
+from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
 
@@ -35,10 +36,12 @@ def start_server(  # pylint: disable=too-many-arguments
     strategy: Optional[Strategy] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     force_final_distributed_eval: bool = False,
-) -> None:
+    certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+) -> History:
     """Start a Flower server using the gRPC transport layer.
 
-    Arguments:
+    Arguments
+    ---------
         server_address: Optional[str] (default: `"[::]:8080"`). The IPv6
             address of the server.
         server: Optional[flwr.server.Server] (default: None). An implementation
@@ -64,27 +67,52 @@ def start_server(  # pylint: disable=too-many-arguments
             same value (see `flwr.client.start_client`), otherwise clients will
             not know about the increased limit and block larger messages.
         force_final_distributed_eval: bool (default: False).
-            Forces a distributed evaulation to occur after the last training
+            Forces a distributed evaluation to occur after the last training
             epoch when enabled.
+        certificates : Tuple[bytes, bytes, bytes] (default: None)
+            Tuple containing root certificate, server certificate, and private key to
+            start a secure SSL-enabled server. The tuple is expected to have three bytes
+            elements in the following order:
 
-    Returns:
-        None.
+                * CA certificate.
+                * server certificate.
+                * server private key.
+
+    Returns
+    -------
+        hist: flwr.server.history.History. Object containing metrics from training.
+
+    Examples
+    --------
+    Starting an insecure server:
+
+    >>> start_server()
+
+    Starting a SSL-enabled server:
+
+    >>> start_server(
+    >>>     certificates=(
+    >>>         Path("/crts/root.pem").read_bytes(),
+    >>>         Path("/crts/localhost.crt").read_bytes(),
+    >>>         Path("/crts/localhost.key").read_bytes()
+    >>>     )
+    >>> )
     """
     initialized_server, initialized_config = _init_defaults(server, config, strategy)
 
     # Start gRPC server
-    grpc_server = start_insecure_grpc_server(
+    grpc_server = start_grpc_server(
         client_manager=initialized_server.client_manager(),
         server_address=server_address,
         max_message_length=grpc_max_message_length,
+        certificates=certificates,
     )
-    log(
-        INFO,
-        "Flower server running (insecure, %s rounds)",
-        initialized_config["num_rounds"],
-    )
+    num_rounds = initialized_config["num_rounds"]
+    ssl_status = "enabled" if certificates is not None else "disabled"
+    msg = f"Flower server running ({num_rounds} rounds)\nSSL is {ssl_status}"
+    log(INFO, msg)
 
-    _fl(
+    hist = _fl(
         server=initialized_server,
         config=initialized_config,
         force_final_distributed_eval=force_final_distributed_eval,
@@ -92,6 +120,8 @@ def start_server(  # pylint: disable=too-many-arguments
 
     # Stop the gRPC server
     grpc_server.stop(grace=1)
+
+    return hist
 
 
 def _init_defaults(
@@ -122,7 +152,7 @@ def _fl(
     server: Server,
     config: Dict[str, Union[Optional[int], Optional[float]]],
     force_final_distributed_eval: bool,
-) -> None:
+) -> History:
     # Fit model
     server.set_max_workers(max_workers=cast(Optional[int], config["max_workers"]))
     server.set_round_timeout(round_timeout=config["round_timeout"])
@@ -152,3 +182,5 @@ def _fl(
 
     # Graceful shutdown
     server.disconnect_all_clients()
+
+    return hist
