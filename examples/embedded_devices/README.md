@@ -76,7 +76,7 @@ The only requirement for the server is to have flower installed. You can do so b
 1. Choosing an OS for your RPi. Choose one of the following:
    * Install **Ubuntu server 20.04 LTS 64-bit** for Rapsberry Pi. You can do this by using one of the images provided [by Ubuntu](https://ubuntu.com/download/raspberry-pi) and then use Etcher. Alternativelly, astep-by-step installation guide, showing how to download and flash the image onto a uSD card and, go throught the first boot process, can be found [here](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi#1-overview). Please note that the first time you boot your RPi it will automatically update the system (which will lock `sudo` and prevent running the commands below for a few minutes)
   
-   * Install **RasberriPi OS (Debian-32bit)**. This is the recommended OS for those starting with RPi and that want a friendly Desktop environment. We recomend following the steps provided by the [official RPi site](https://www.raspberrypi.com/documentation/computers/getting-started.html) and flash your device with the [RPi Imager](https://www.raspberrypi.com/software/).
+   * Install **RaspberryPi OS (Debian-32bit)**. This is the recommended OS for those starting with RPi and that want a friendly Desktop environment. We recomend following the steps provided by the [official RPi site](https://www.raspberrypi.com/documentation/computers/getting-started.html) and flash your device with the [RPi Imager](https://www.raspberrypi.com/software/).
 
 
 2. Install docker (+ post-installation steps as in [Docker Docs](https://docs.docker.com/engine/install/linux-postinstall/)):
