@@ -100,6 +100,11 @@ class Server:
             tensors=[], tensor_type="numpy.ndarray"
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
+        self.max_workers: Optional[int] = None
+
+    def set_max_workers(self, max_workers: Optional[int]) -> None:
+        """Set the max_workers used by ThreadPoolExecutor."""
+        self.max_workers = max_workers
 
     def set_strategy(self, strategy: Strategy) -> None:
         """Replace server strategy."""
@@ -206,7 +211,10 @@ class Server:
         )
 
         # Collect `evaluate` results from all clients participating in this round
-        results, failures = evaluate_clients(client_instructions)
+        results, failures = evaluate_clients(
+            client_instructions,
+            max_workers=self.max_workers,
+        )
         log(
             DEBUG,
             "evaluate_round received %s results and %s failures",
@@ -257,7 +265,10 @@ class Server:
         )
 
         # Collect `fit` results from all clients participating in this round
-        results, failures = fit_clients(client_instructions)
+        results, failures = fit_clients(
+            client_instructions,
+            max_workers=self.max_workers,
+        )
         log(
             DEBUG,
             "fit_round received %s results and %s failures",
@@ -288,7 +299,11 @@ class Server:
     def disconnect_all_clients(self) -> None:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
-        _ = shutdown(clients=[all_clients[k] for k in all_clients.keys()])
+        clients = [all_clients[k] for k in all_clients.keys()]
+        _ = shutdown(
+            clients=clients,
+            max_workers=self.max_workers,
+        )
 
     def _get_initial_parameters(self) -> Parameters:
         """Get initial parameters from one of the available clients."""
@@ -309,10 +324,13 @@ class Server:
         return parameters_res.parameters
 
 
-def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:
+def shutdown(
+    clients: List[ClientProxy],
+    max_workers: Optional[int],
+) -> ReconnectResultsAndFailures:
     """Instruct clients to disconnect and never reconnect."""
     reconnect = Reconnect(seconds=None)
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(reconnect_client, c, reconnect) for c in clients]
         concurrent.futures.wait(futures)
     # Gather results
@@ -338,14 +356,16 @@ def reconnect_client(
 
 
 def fit_clients(
-    client_instructions: List[Tuple[ClientProxy, FitIns]]
+    client_instructions: List[Tuple[ClientProxy, FitIns]],
+    max_workers: Optional[int],
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [
             executor.submit(fit_client, c, ins) for c, ins in client_instructions
         ]
         concurrent.futures.wait(futures)
+
     # Gather results
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = []
@@ -367,10 +387,11 @@ def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
 
 
 def evaluate_clients(
-    client_instructions: List[Tuple[ClientProxy, EvaluateIns]]
+    client_instructions: List[Tuple[ClientProxy, EvaluateIns]],
+    max_workers: Optional[int],
 ) -> EvaluateResultsAndFailures:
     """Evaluate parameters concurrently on all selected clients."""
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [
             executor.submit(evaluate_client, c, ins) for c, ins in client_instructions
         ]

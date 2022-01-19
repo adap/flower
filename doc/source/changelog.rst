@@ -15,11 +15,15 @@ What's new?
 
   The example uses TFLite on the client side, along with a new :code:`FedAvgAndroid` strategy. The Android client and :code:`FedAvgAndroid` are still experimental, but they are a first step towards a fully-fledged Android SDK and a unified :code:`FedAvg` implementation that integrated the new functionality from :code:`FedAvgAndroid`.
 
-* **Minor updates**
-    * Update num_examples caclulation in PyTorch code examples in (`#909 <https://github.com/adap/flower/pull/909>`_)
-    * Expose Flower version through "flwr.__version__" (`#952 <https://github.com/adap/flower/pull/952>`_)
-    * :code:`start_server` in :code:`app.py` now returns a :code:`History` object containing metrics from training (`#974 <https://github.com/adap/flower/pull/974>`_)
+* **SSL-enabled server and client** (`#842 <https://github.com/adap/flower/pull/842>`_,  `#844 <https://github.com/adap/flower/pull#84/844>`_,  `#845 <https://github.com/adap/flower/pull#84/845>`_, `#847 <https://github.com/adap/flower/pull#84/847>`_, `#993 <https://github.com/adap/flower/pull#84/993>`_, `#994 <https://github.com/adap/flower/pull#84/994>`_)
 
+  SSL enables secure encrypted connections between clients and servers. This release open-sources the Flower secure gRPC implementation to make encrypted communication channels accessible to all Flower users.
+
+* **Minor updates**
+    * Update :code:`num_examples` calculation in PyTorch code examples in (`#909 <https://github.com/adap/flower/pull/909>`_)
+    * Expose Flower version through :code:`flwr.__version__` (`#952 <https://github.com/adap/flower/pull/952>`_)
+    * :code:`start_server` in :code:`app.py` now returns a :code:`History` object containing metrics from training (`#974 <https://github.com/adap/flower/pull/974>`_)
+    * Make :code:`max_workers` (used by :code:`ThreadPoolExecutor`) configurable (`#978 <https://github.com/adap/flower/pull/978>`_)
 
 Incompatible changes:
 ~~~~~~~~~~~~~~~~~~~~~
