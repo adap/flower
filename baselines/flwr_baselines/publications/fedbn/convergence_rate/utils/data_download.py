@@ -20,9 +20,9 @@ def download_file_from_google_drive(id: Any, destination: str) -> None:
         params = {"id": id, "confirm": token}
         print("ID", params["id"])
         response = session.get(URL, params=params, stream=True)
-        total_length = response.headers.get("content-length") 
+        total_length = response.headers.get("content-length")
     print("Downloading...")
-    save_response_content(response, destination, total_length) # type:ignore
+    save_response_content(response, destination, total_length)  # type:ignore
     print("Dowload done")
 
 
@@ -30,7 +30,7 @@ def get_confirm_token(response: Any) -> Any:
     for key, value in response.cookies.items():
         if key.startswith("download_warning"):
             return value
-    return None # No error!
+    return None  # No error!
 
 
 def save_response_content(response: Any, destination: str, total_length: float) -> None:
