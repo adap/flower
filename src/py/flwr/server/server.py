@@ -343,7 +343,9 @@ def shutdown(
     # Execute instructions on all selected clients and gather results as they arrive
     start_time = timeit.default_timer()
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        submitted_fs: Set[Future[Tuple[ClientProxy, Disconnect]]] = {
+        # Full type is `Set[Future[Tuple[ClientProxy, Disconnect]]]`
+        # (Future is not generic before Python 3.9)
+        submitted_fs = {
             executor.submit(reconnect_client, cp, ins)
             for cp, ins in client_instructions
         }
@@ -403,7 +405,9 @@ def fit_clients(
     # Execute instructions on all selected clients and gather results as they arrive
     start_time = timeit.default_timer()
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        submitted_fs: Set[Future[Tuple[ClientProxy, FitRes]]] = {
+        # Full type is `Set[Future[Tuple[ClientProxy, FitRes]]]`
+        # (Future is not generic before Python 3.9)
+        submitted_fs = {
             executor.submit(fit_client, cp, ins) for cp, ins in client_instructions
         }
         finished_fs = set()
@@ -460,7 +464,9 @@ def evaluate_clients(
     # Execute instructions on all selected clients and gather results as they arrive
     start_time = timeit.default_timer()
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        submitted_fs: Set[Future[Tuple[ClientProxy, EvaluateRes]]] = {
+        # Full type is `Set[Future[Tuple[ClientProxy, EvaluateRes]]]`
+        # (Future is not generic before Python 3.9)
+        submitted_fs = {
             executor.submit(evaluate_client, cp, ins) for cp, ins in client_instructions
         }
         finished_fs = set()
