@@ -17,9 +17,8 @@
 
 import concurrent.futures
 import timeit
-from concurrent.futures import Future
 from logging import DEBUG, INFO, WARNING
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
     Disconnect,
@@ -306,8 +305,9 @@ class Server:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
         clients = [all_clients[k] for k in all_clients.keys()]
-        _ = shutdown(
-            clients=clients,
+        client_instructions = [(cp, Reconnect(seconds=None)) for cp in clients]
+        _ = reconnect_clients(
+            client_instructions=client_instructions,
             max_workers=self.max_workers,
         )
 
@@ -330,15 +330,12 @@ class Server:
         return parameters_res.parameters
 
 
-def shutdown(
-    clients: List[ClientProxy],
+def reconnect_clients(
+    client_instructions: List[Tuple[ClientProxy, Reconnect]],
     max_workers: Optional[int],
     round_timeout: Optional[float] = None,
 ) -> ReconnectResultsAndFailures:
     """Instruct clients to disconnect and never reconnect."""
-
-    reconnect = Reconnect(seconds=None)
-    client_instructions = [(cp, reconnect) for cp in clients]
 
     # Execute instructions on all selected clients and gather results as they arrive
     start_time = timeit.default_timer()
