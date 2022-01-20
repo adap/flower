@@ -49,16 +49,11 @@ numpy = "^1.20.0"
 isort = "==5.10.1"
 black = "==21.12b0"
 docformatter = "==1.4"
-mypy = "==0.910"
+mypy = "==0.931"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
-grpcio-tools = "==1.32.0"
-mypy-protobuf = "==1.23"
-rope = "==0.19.0"
-sphinx = "==3.4.3"
-sphinx-book-theme = "==0.0.39"
 
 [tool.isort]
 line_length = 88
@@ -71,7 +66,7 @@ known_first_party = ["flwr_baselines"]
 
 [tool.black]
 line-length = 88
-target-version = ["py36", "py37", "py38", "py39"]
+target-version = ["py38", "py39"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
@@ -85,7 +80,7 @@ testpaths = [
 
 [tool.mypy]
 ignore_missing_imports = true
-strict = true
+strict = false
 plugins = "numpy.typing.mypy_plugin"
 
 [[tool.mypy.overrides]]
