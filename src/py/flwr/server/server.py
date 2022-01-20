@@ -305,7 +305,8 @@ class Server:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
         clients = [all_clients[k] for k in all_clients.keys()]
-        client_instructions = [(cp, Reconnect(seconds=None)) for cp in clients]
+        reconnect = Reconnect(seconds=None)
+        client_instructions = [(cp, reconnect) for cp in clients]
         _ = reconnect_clients(
             client_instructions=client_instructions,
             max_workers=self.max_workers,
