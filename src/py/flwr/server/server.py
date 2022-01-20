@@ -404,7 +404,8 @@ def evaluate_clients(
     """Evaluate parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         submitted_fs = [
-            executor.submit(evaluate_client, cp, ins) for cp, ins in client_instructions
+            executor.submit(evaluate_client, client_proxy, ins)
+            for client_proxy, ins in client_instructions
         ]
         concurrent.futures.wait(submitted_fs)
 
