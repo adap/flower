@@ -1,5 +1,5 @@
 ---
-dataset: "cifar10"
+dataset_name: "cifar10"
 num_classes: 10
 batch_size: 20
 epochs_per_round: 1
@@ -14,7 +14,7 @@ is_simulation: True
 
 gen_federated_partitions:
   _target_: cifar.utils.gen_cifar10_partitions
-  dataset_name: ${dataset}
+  dataset_name: ${dataset_name}
   num_total_clients: ${num_total_clients}
   lda_concentration: ${lda_concentration}
 

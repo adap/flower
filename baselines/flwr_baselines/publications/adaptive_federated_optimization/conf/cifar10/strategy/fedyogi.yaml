@@ -2,7 +2,7 @@
 name: FedYogi
 expected_accuracy: 78.0
 init:
-  _target_: flwr.server.strategy.FedAdagrad
+  _target_: flwr.server.strategy.FedYogi
   beta_1: 0.9
   beta_2: 0.99
   eta: 0.01

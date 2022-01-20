@@ -74,7 +74,7 @@ class ClientDataset(Dataset):
 def partition_and_save(
     dataset: XY,
     fed_dir: Path,
-    dirichlet_dist: npt.NDArray[np.float32] = None,
+    dirichlet_dist: Optional[npt.NDArray[np.float32]] = None,
     num_partitions: int = 500,
     concentration: float = 0.1,
 ) -> np.ndarray:
@@ -223,16 +223,20 @@ def get_initial_parameters(num_classes: int = 10) -> Parameters:
 
 def plot_metric_from_history(
     hist: History,
+    dataset_name: str,
     metric_str: str,
     strategy_name: str,
     expected_maximum: float,
     save_path: Path,
 ) -> None:
     x, y = zip(*hist.metrics_centralized[metric_str])
-    plt.plot(x, y * 100)  # Accuracy 0-100%
+    plt.figure()
+    plt.plot(x, np.asarray(y) * 100, label=strategy_name)  # Accuracy 0-100%
     # Set expected graph
     plt.axhline(y=expected_maximum, color="r", linestyle="--")
-    plt.title(f"Centralized Validation - {strategy_name}")
+    plt.title(f"Centralized Validation - {dataset_name}")
     plt.xlabel("Rounds")
     plt.ylabel("Accuracy")
+    plt.legend(loc="upper left")
     plt.savefig(save_path)
+    plt.close()

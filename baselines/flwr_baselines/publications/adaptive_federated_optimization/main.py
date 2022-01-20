@@ -72,10 +72,11 @@ def main(cfg: DictConfig) -> None:
 
     plot_metric_from_history(
         hist=hist,
+        dataset_name= cfg.dataset_name,
         metric_str="accuracy",
         strategy_name=cfg.strategy.name,
         expected_maximum=cfg.strategy.expected_accuracy,
-        save_path=Path(to_absolute_path(log_dir)) / f"{cfg.strategy.name}.png",
+        save_path=Path(to_absolute_path(log_dir)) / f"{cfg.dataset_name}_{cfg.strategy.name}.png",
     )
 
 
