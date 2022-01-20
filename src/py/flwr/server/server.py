@@ -338,8 +338,8 @@ def reconnect_clients(
     """Instruct clients to disconnect and never reconnect."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         submitted_fs = [
-            executor.submit(reconnect_client, cp, ins)
-            for cp, ins in client_instructions
+            executor.submit(reconnect_client, client_proxy, ins)
+            for client_proxy, ins in client_instructions
         ]
         concurrent.futures.wait(submitted_fs)
 
