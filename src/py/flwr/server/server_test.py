@@ -27,12 +27,15 @@ from flwr.common import (
     FitRes,
     Parameters,
     ParametersRes,
+    PropertiesIns,
+    PropertiesRes,
     Reconnect,
     ndarray_to_bytes,
 )
+from flwr.server.client_manager import SimpleClientManager
 
 from .client_proxy import ClientProxy
-from .server import evaluate_clients, fit_clients
+from .server import Server, evaluate_clients, fit_clients
 
 
 class SuccessClient(ClientProxy):
@@ -40,6 +43,9 @@ class SuccessClient(ClientProxy):
 
     def get_parameters(self) -> ParametersRes:
         # This method is not expected to be called
+        raise Exception()
+
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         raise Exception()
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -54,10 +60,13 @@ class SuccessClient(ClientProxy):
         return Disconnect(reason="UNKNOWN")
 
 
-class FailingCLient(ClientProxy):
+class FailingClient(ClientProxy):
     """Test class."""
 
     def get_parameters(self) -> ParametersRes:
+        raise Exception()
+
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         raise Exception()
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -74,7 +83,7 @@ def test_fit_clients() -> None:
     """Test fit_clients."""
     # Prepare
     clients: List[ClientProxy] = [
-        FailingCLient("0"),
+        FailingClient("0"),
         SuccessClient("1"),
     ]
     arr = np.array([[1, 2], [3, 4], [5, 6]])
@@ -83,7 +92,7 @@ def test_fit_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = fit_clients(client_instructions)
+    results, failures = fit_clients(client_instructions, None)
 
     # Assert
     assert len(results) == 1
@@ -95,7 +104,7 @@ def test_eval_clients() -> None:
     """Test eval_clients."""
     # Prepare
     clients: List[ClientProxy] = [
-        FailingCLient("0"),
+        FailingClient("0"),
         SuccessClient("1"),
     ]
     arr = np.array([[1, 2], [3, 4], [5, 6]])
@@ -107,10 +116,22 @@ def test_eval_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = evaluate_clients(client_instructions)
+    results, failures = evaluate_clients(client_instructions, None)
 
     # Assert
     assert len(results) == 1
     assert len(failures) == 1
     assert results[0][1].loss == 1.0
     assert results[0][1].num_examples == 1
+
+
+def test_set_max_workers() -> None:
+    """Test eval_clients."""
+    # Prepare
+    server = Server(client_manager=SimpleClientManager())
+
+    # Execute
+    server.set_max_workers(42)
+
+    # Assert
+    assert server.max_workers == 42

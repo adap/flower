@@ -23,12 +23,16 @@ from dissononce.processing.impl.handshakestate import HandshakeState
 import numpy as np
 
 from flwr.common import (
+    Config,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
     Metrics,
     ParametersRes,
+    Properties,
+    PropertiesIns,
+    PropertiesRes,
     Scalar,
     parameters_to_weights,
     weights_to_parameters,
@@ -98,6 +102,23 @@ class NumPyClient(ABC):
         -------
         parameters : List[numpy.ndarray]
             The local model parameters as a list of NumPy ndarrays.
+        """
+
+    @abstractmethod
+    def get_properties(self, config: Config) -> Properties:
+        """Returns a client's set of properties.
+
+        Parameters
+        ----------
+        config : Config
+            Configuration parameters requested by the server.
+            This can be used to tell the client which parameters
+            are needed along with some Scalar attributes.
+
+        Returns
+        -------
+        PropertiesRes :
+            Response containing `properties` of the client.
         """
 
     @abstractmethod
@@ -179,6 +200,10 @@ class NumPyClientWrapper(Client):
 
     def get_hss(self) -> HandshakeState: 
         return self.numpy_client.get_hss()
+        
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        properties = self.numpy_client.get_properties(ins.config)
+        return PropertiesRes(properties=properties)
 
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""

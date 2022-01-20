@@ -44,12 +44,13 @@ message ServerMessage {
     Parameters parameters = 1;
     map<string, Scalar> config = 2;
   }
-
+  message PropertiesIns { map<string, Scalar> config = 1; }
   oneof msg {
     Reconnect reconnect = 1;
     GetParameters get_parameters = 2;
     FitIns fit_ins = 3;
     EvaluateIns evaluate_ins = 4;
+    PropertiesIns properties_ins = 5;
   }
 }
 
@@ -69,12 +70,13 @@ message ClientMessage {
     float accuracy = 3 [ deprecated = true ];
     map<string, Scalar> metrics = 4;
   }
-
+  message PropertiesRes { map<string, Scalar> properties = 1; }
   oneof msg {
     Disconnect disconnect = 1;
     ParametersRes parameters_res = 2;
     FitRes fit_res = 3;
     EvaluateRes evaluate_res = 4;
+    PropertiesRes properties_res = 5;
   }
 }
 

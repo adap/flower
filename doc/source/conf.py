@@ -34,7 +34,7 @@ copyright = u"2021 Adap GmbH"
 author = u"The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = u"0.17.0"
+release = u"0.18.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -48,6 +48,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
+    "sphinx_panels",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -75,8 +76,7 @@ html_theme_options = {
     # GitHub
     "repository_url": "https://github.com/adap/flower",
     "repository_branch": "main",
-    "path_to_docs": "doc",
-
+    "path_to_docs": "doc/source/",
     "home_page_in_toc": True,
     "use_repository_button": True,
     "use_issues_button": True,
