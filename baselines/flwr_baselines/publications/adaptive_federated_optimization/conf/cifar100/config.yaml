@@ -1,0 +1,44 @@
+---
+dataset_name: "cifar100"
+num_classes: 100
+batch_size: 20
+epochs_per_round: 1
+lda_concentration: 0.1
+num_clients_per_round: 10
+num_total_clients: 500
+num_rounds: 4000
+root_dir: "./data"
+cpus_per_client: 1
+hydra.job.chdir: False
+is_simulation: True
+
+gen_federated_partitions:
+  _target_: cifar.utils.gen_cifar100_partitions
+  dataset_name: ${dataset_name}
+  num_total_clients: ${num_total_clients}
+  lda_concentration: ${lda_concentration}
+
+get_initial_parameters:
+  _target_: cifar.utils.get_initial_parameters
+  num_classes: ${num_classes}
+
+get_eval_fn:
+  _target_: cifar.utils.get_cifar_eval_fn
+  num_classes: ${num_classes}
+
+gen_on_fit_config_fn:
+  _target_: cifar.utils.gen_on_fit_config_fn
+  epochs_per_round: ${epochs_per_round}
+  batch_size: ${batch_size}
+
+get_ray_client_fn:
+  _target_: cifar.client.get_ray_client_fn
+  fed_dir: None
+  num_classes: ${num_classes}
+
+ray_config:
+  include_dashboard: False
+
+defaults:
+  - _self_
+  - strategy: "fedavg"
