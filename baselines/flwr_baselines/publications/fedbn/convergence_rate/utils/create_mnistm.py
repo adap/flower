@@ -1,4 +1,4 @@
-""" 
+"""
 ! This script has been borrowed and adapted.
 Original script: https://github.com/pumpikano/tf-dann/blob/master/create_mnistm.py
 
@@ -30,7 +30,6 @@ def mnist_to_img(x: Any) -> Any:
     d = x.reshape([28, 28, 1]) * 255
     return np.concatenate([d, d, d], 2)
 
-#pylint: enable=invalid-name
 
 def create_mnistm(X: Any) -> Any:
     """
@@ -39,13 +38,15 @@ def create_mnistm(X: Any) -> Any:
     http://jmlr.org/papers/volume17/15-239/15-239.pdf
     """
 
-    BST_PATH = "./data/MNIST_M/BSR_bsds500.tgz"
+    bst_path = "./data/MNIST_M/BSR_bsds500.tgz"
 
+    # pylint: disable=no-member
     rand = np.random.RandomState(42)
+    # pylint: disable=no-member
 
-    f = tarfile.open(BST_PATH)
+    bsr_file = tarfile.open(bst_path)
     train_files = []
-    for name in f.getnames():
+    for name in bsr_file.getnames():
         if name.startswith("BSR/BSDS500/data/images/train/"):
             train_files.append(name)
 
@@ -53,7 +54,7 @@ def create_mnistm(X: Any) -> Any:
     background_data = []
     for name in train_files:
         try:
-            fp = f.extractfile(name)
+            fp = bsr_file.extractfile(name)
             bg_img = skimage.io.imread(fp)
             background_data.append(bg_img)
         except:

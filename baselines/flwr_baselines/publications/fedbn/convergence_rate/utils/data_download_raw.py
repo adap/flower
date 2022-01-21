@@ -12,13 +12,15 @@ from torchvision import datasets  # type: ignore
 
 
 def decompress(infile, tofile):
+    """
+    Take data file and unzip it
+    """
     with open(infile, "rb") as inf, open(tofile, "w", encoding="utf8") as tof:
         decom_str = gzip.decompress(inf.read()).decode("utf-8")
         tof.write(decom_str)
 
 
 def download_all(data: Dict, out_dir: Path):
-
     for k, v in data.items():
         print(f"Downloading: {k}\n")
         wget.download(v, out=str(out_dir / k))
@@ -30,6 +32,7 @@ def get_synthDigits(out_dir: Path):
         print(f"Directory ({out_dir}) exists, skipping downloading SynthDigits.")
         return
 
+    #pylint: disable=line-too-long
     out_dir.mkdir()
     data = {}
     data[
@@ -39,8 +42,9 @@ def get_synthDigits(out_dir: Path):
         "synth_test_32x32.mat"
     ] = "https://github.com/domainadaptation/datasets/blob/master/synth/synth_test_32x32.mat?raw=true"
     download_all(data, out_dir)
+    #pylint: disable=line-too-long
 
-    # TODO: How to proceed? It seems these `.mat` have no data. URLs found here:
+    # todo: How to proceed? It seems these `.mat` have no data. URLs found here:
     # https://domainadaptation.org/api/salad.datasets.digits.html#module-salad.datasets.digits.synth
 
 
