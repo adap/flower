@@ -100,8 +100,9 @@ def start_grpc_server(
     >>>     certificates=(
     >>>         Path("/crts/root.pem").read_bytes(),
     >>>         Path("/crts/localhost.crt").read_bytes(),
-    >>>         Path("/crts/localhost.key").read_bytes()
-    >>>     )
+    >>>         Path("/crts/localhost.key").read_bytes(),
+    >>>     ),
+    >>> )
     """
     server = grpc.server(
         concurrent.futures.ThreadPoolExecutor(max_workers=max_concurrent_workers),
