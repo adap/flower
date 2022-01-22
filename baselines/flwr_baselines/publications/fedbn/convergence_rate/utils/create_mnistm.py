@@ -12,7 +12,8 @@ import skimage  # type: ignore
 import skimage.io  # type: ignore
 import skimage.transform  # type: ignore
 
-#pylint: disable=invalid-name
+
+# pylint: disable=invalid-name
 def compose_image(digit: Any, background: Any) -> Any:
     """Difference-blend a digit and a random patch from a background image."""
     w, h, _ = background.shape

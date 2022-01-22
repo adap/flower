@@ -5,7 +5,7 @@ a plot to compare e.g. fedbn with fedavg.
 
 import json
 
-import matplotlib.pyplot as plt # type: ignore
+import matplotlib.pyplot as plt  # type: ignore
 
 fedavg_step_number = []
 fedavg_loss = []
@@ -29,6 +29,7 @@ def get_evaluation_numbers() -> None:
         if "train_loss" in item:
             fedbn_step_number.append(item["fl_round"])
             fedbn_loss.append(item["train_loss"])
+
 
 def main() -> None:
     """

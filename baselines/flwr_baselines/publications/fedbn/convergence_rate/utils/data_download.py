@@ -10,7 +10,8 @@ from typing import Any
 import requests
 from tqdm import tqdm  # type: ignore
 
-#pylint: disable=invalid-name
+
+# pylint: disable=invalid-name
 def download_file_from_google_drive(id: Any, destination: str) -> None:
     """
     Download zip from Google drive
@@ -28,9 +29,12 @@ def download_file_from_google_drive(id: Any, destination: str) -> None:
         response = session.get(url, params=params, stream=True)
         total_length = response.headers.get("content-length")
     print("Downloading...")
-    save_response_content(response, destination, total_length) # type:ignore
+    save_response_content(response, destination, total_length)  # type:ignore
     print("Dowload done")
-#pylint: enable=invalid-name
+
+
+# pylint: enable=invalid-name
+
 
 def get_confirm_token(response: Any) -> Any:
     """

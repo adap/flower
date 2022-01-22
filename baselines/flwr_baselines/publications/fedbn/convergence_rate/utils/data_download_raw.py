@@ -32,7 +32,7 @@ def get_synthDigits(out_dir: Path):
         print(f"Directory ({out_dir}) exists, skipping downloading SynthDigits.")
         return
 
-    #pylint: disable=line-too-long
+    # pylint: disable=line-too-long
     out_dir.mkdir()
     data = {}
     data[
@@ -42,7 +42,7 @@ def get_synthDigits(out_dir: Path):
         "synth_test_32x32.mat"
     ] = "https://github.com/domainadaptation/datasets/blob/master/synth/synth_test_32x32.mat?raw=true"
     download_all(data, out_dir)
-    #pylint: disable=line-too-long
+    # pylint: disable=line-too-long
 
     # todo: How to proceed? It seems these `.mat` have no data. URLs found here:
     # https://domainadaptation.org/api/salad.datasets.digits.html#module-salad.datasets.digits.synth

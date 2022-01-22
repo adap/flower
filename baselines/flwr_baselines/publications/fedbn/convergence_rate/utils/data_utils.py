@@ -3,6 +3,7 @@ This code creates 10 different partitions of each datasets
 """
 import os
 import sys
+
 import numpy as np
 from PIL import Image  # type: ignore
 from torch.utils.data import Dataset
@@ -10,11 +11,13 @@ from torch.utils.data import Dataset
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_path)
 
+
 class DigitsDataset(Dataset):
     """
     Split datasets
     """
-    #pylint: disable=too-many-arguments
+
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         data_path,
