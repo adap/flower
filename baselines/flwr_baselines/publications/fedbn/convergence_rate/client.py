@@ -292,9 +292,6 @@ def train(model, traindata, dataset, epochs, device) -> Tuple[float, float]:
     # Train the network
     model.to(device)
     model.train()
-    loss = 0.0
-    accracy = 0.0
-    train_iter = iter(traindata)
     for epoch in range(epochs):  # loop over the dataset multiple times
         running_loss = 0.0
         total = 0.0
