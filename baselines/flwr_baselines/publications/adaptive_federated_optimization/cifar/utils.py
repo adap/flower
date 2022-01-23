@@ -16,32 +16,25 @@ from torch.nn import GroupNorm, Module
 from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import CIFAR10, CIFAR100
 from torchvision.models import ResNet, resnet18
-from torchvision.transforms import Compose, Normalize, RandomHorizontalFlip, ToTensor
+from torchvision.transforms import CenterCrop, Compose, Normalize, RandomCrop, RandomHorizontalFlip, ToTensor
 
 # transforms
-transform_cifar10_test = Compose(
-    [ToTensor(), Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))]
-)
-transform_cifar100_test = Compose(
-    [ToTensor(), Normalize((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762))]
-)
-transform_cifar10_train = Compose([RandomHorizontalFlip(), transform_cifar10_test])
-transform_cifar100_train = Compose([RandomHorizontalFlip(), transform_cifar100_test])
-
-
 def get_transforms(num_classes: int = 10) -> Dict[str, Compose]:
-    if num_classes == 10:
-        transforms = {
-            "train": transform_cifar10_train,
-            "test": transform_cifar10_test,
-        }
-    else:
-        transforms = {
-            "train": transform_cifar100_train,
-            "test": transform_cifar100_test,
-        }
-
-    return transforms
+    normalize_cifar10=Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+    normalize_cifar100=Normalize((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762))
+    normalize_cifar = normalize_cifar10 if num_classes == 10 else normalize_cifar100
+    train_transform = Compose([
+        RandomCrop(24),
+        RandomHorizontalFlip(),
+        ToTensor(),
+        normalize_cifar
+    ])
+    test_transform = Compose([
+        CenterCrop(24),
+        ToTensor(),
+        normalize_cifar
+    ])
+    return {"train": train_transform, "test": test_transform}
 
 
 def get_cifar_model(num_classes: int = 10) -> Module:
@@ -71,7 +64,7 @@ class ClientDataset(Dataset):
         return x, y
 
 
-def partition_and_save(
+def partition_cifar10_and_save(
     dataset: XY,
     fed_dir: Path,
     dirichlet_dist: Optional[npt.NDArray[np.float32]] = None,
@@ -84,6 +77,29 @@ def partition_and_save(
         dirichlet_dist=dirichlet_dist,
         num_partitions=num_partitions,
         concentration=concentration,
+    )
+    # Save partions
+    for idx, partition in enumerate(clients_partitions):
+        path_dir = fed_dir / f"{idx}"
+        path_dir.mkdir(exist_ok=True, parents=True)
+        torch.save(partition, path_dir / "train.pt")
+
+    return dist
+
+def partition_cifar100_and_save(
+    dataset: XY,
+    fed_dir: Path,
+    dirichlet_dist: Optional[npt.NDArray[np.float32]] = None,
+    num_partitions: int = 500,
+    concentration_coarse: float = 0.1,
+    concentration_fine: float = 0.1,
+) -> np.ndarray:
+    # Create partitions
+    clients_partitions, dist = create_lda_partitions(
+        dataset=dataset,
+        dirichlet_dist=dirichlet_dist,
+        num_partitions=num_partitions,
+        concentration=concentration_coarse,
     )
     # Save partions
     for idx, partition in enumerate(clients_partitions):
@@ -153,15 +169,13 @@ def get_cifar_eval_fn(
 ) -> Callable[[Weights], Optional[Tuple[float, Dict[str, float]]]]:
     """Returns an evaluation function for centralized evaluation."""
     CIFAR = CIFAR10 if num_classes == 10 else CIFAR100
-    transform_test = (
-        transform_cifar10_test if num_classes == 10 else transform_cifar100_test
-    )
+    transforms = get_transforms(num_classes=num_classes)
 
     testset = CIFAR(
         root=path_original_dataset,
         train=False,
         download=True,
-        transform=transform_test,
+        transform=transforms["test"],
     )
 
     def evaluate(weights: Weights) -> Optional[Tuple[float, Dict[str, float]]]:
@@ -202,7 +216,7 @@ def gen_cifar10_partitions(
 
     trainset = CIFAR10(root=path_original_dataset, train=True, download=True)
     flwr_trainset = (trainset.data, np.array(trainset.targets, dtype=np.int32))
-    partition_and_save(
+    partition_cifar10_and_save(
         dataset=flwr_trainset,
         fed_dir=fed_dir,
         dirichlet_dist=None,
@@ -212,6 +226,33 @@ def gen_cifar10_partitions(
 
     return fed_dir
 
+def gen_cifar100_partitions(
+    path_original_dataset: Path,
+    dataset_name: str,
+    num_total_clients: int,
+    lda_concentration_coarse: float,
+    lda_concentration_fine: float,
+) -> Path:
+    fed_dir = (
+        path_original_dataset
+        / f"{dataset_name}"
+        / "partitions"
+        / f"{num_total_clients}"
+        / f"{lda_concentration_coarse:.2f}_{lda_concentration_fine:.2f}"
+    )
+
+    trainset = CIFAR100(root=path_original_dataset, train=True, download=True)
+    flwr_trainset = (trainset.data, np.array(trainset.targets, dtype=np.int32))
+    partition_cifar100_and_save(
+        dataset=flwr_trainset,
+        fed_dir=fed_dir,
+        dirichlet_dist=None,
+        num_partitions=num_total_clients,
+        concentration_coarse=lda_concentration_coarse,
+        concentration_fine=lda_concentration_fine,
+    )
+
+    return fed_dir
 
 def get_initial_parameters(num_classes: int = 10) -> Parameters:
     model = get_cifar_model(num_classes)
