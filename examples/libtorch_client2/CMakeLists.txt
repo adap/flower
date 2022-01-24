@@ -17,14 +17,14 @@ set(FETCHCONTENT_QUIET OFF)
 FetchContent_MakeAvailable(gRPC)
 
 include(FindProtobuf)
-find_package(Protobuf CONFIG REQUIRED)
+find_package(Protobuf REQUIRED)
 
 set(EXECUTABLE_NAME client)
 file(GLOB SRC_FILES src/*.cpp)
 
 file(GLOB FLWR_SRC_FILES ../../src/cc/flwr/src/*.cc)
 set(FLWR_INCLUDE_DIR ../../src/cc/flwr/include)
-set(PROTO_FILES transport.proto)
+set(PROTO_FILES ../../src/proto/flwr/proto/transport.proto)
 
 add_library(flwr STATIC
   ${FLWR_SRC_FILES}
