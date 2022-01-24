@@ -51,7 +51,7 @@ class RayClientProxy(ClientProxy):
         future_properties_res = launch_and_get_properties.options(
             **self.resources
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.worker.get(future_get_properties_res)
+        res = ray.worker.get(future_properties_res)
         return cast(
             common.PropertiesRes,
             res,

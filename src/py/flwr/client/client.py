@@ -52,6 +52,16 @@ class Client(ABC):
         return PropertiesRes(properties={})
 
     @abstractmethod
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        """Return set of client's properties.
+
+        Returns
+        -------
+        PropertiesRes
+            Client's properties.
+        """
+
+    @abstractmethod
     def fit(self, ins: FitIns) -> FitRes:
         """Refine the provided weights using the locally held dataset.
 

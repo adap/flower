@@ -73,7 +73,7 @@ class CifarRayClient(fl.client.NumPyClient):
     def __init__(self, cid: str, fed_dir_data: str):
         self.cid = cid
         self.fed_dir = Path(fed_dir_data)
-        self.properties: Dict[str, Scalar] = {"tensor_str": "numpy.ndarray"}
+        self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
 
         # instantiate model
         self.net = Net()
@@ -154,7 +154,7 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
     """Set model weights from a list of NumPy ndarrays."""
     state_dict = OrderedDict(
         {
-            k: torch.Tensor(np.atleast_1d(v))
+            k: torch.tensor(np.atleast_1d(v))
             for k, v in zip(model.state_dict().keys(), weights)
         }
     )

@@ -21,7 +21,7 @@ from unittest.mock import MagicMock
 import numpy as np
 
 import flwr
-from flwr.common.typing import Properties
+from flwr.common.typing import Config
 from flwr.proto.transport_pb2 import ClientMessage, Parameters, Scalar
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
 
@@ -34,7 +34,7 @@ MESSAGE_FIT_RES = ClientMessage(
         fit_duration=12.3,
     )
 )
-CLIENT_PROPERTIES = {"tensor_str": Scalar(string="numpy.ndarray")}
+CLIENT_PROPERTIES = {"tensor_type": Scalar(string="numpy.ndarray")}
 MESSAGE_PROPERTIES_RES = ClientMessage(
     properties_res=ClientMessage.PropertiesRes(properties=CLIENT_PROPERTIES)
 )
@@ -99,12 +99,13 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         """This test is currently quite simple and should be improved."""
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock_get_proprieties)
-        request_properties: Properties = {"tensor_str": "str"}
-        ins: flwr.common.PropertiesIns = flwr.common.PropertiesIns(request_properties)
+        request_properties: Config = {"tensor_type": "str"}
+        ins: flwr.common.PropertiesIns = flwr.common.PropertiesIns(
+            config=request_properties
+        )
 
         # Execute
         value: flwr.common.PropertiesRes = client.get_properties(ins)
-        print(value)
 
         # Assert
-        assert value.properties["tensor_str"] == "numpy.ndarray"
+        assert value.properties["tensor_type"] == "numpy.ndarray"

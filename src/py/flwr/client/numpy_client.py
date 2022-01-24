@@ -22,12 +22,14 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 import numpy as np
 
 from flwr.common import (
+    Config,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
     Metrics,
     ParametersRes,
+    Properties,
     PropertiesIns,
     PropertiesRes,
     Scalar,
@@ -114,6 +116,23 @@ class NumPyClient(ABC):
         return {"properties": {}}
 
     @abstractmethod
+    def get_properties(self, config: Config) -> Properties:
+        """Returns a client's set of properties.
+
+        Parameters
+        ----------
+        config : Config
+            Configuration parameters requested by the server.
+            This can be used to tell the client which parameters
+            are needed along with some Scalar attributes.
+
+        Returns
+        -------
+        PropertiesRes :
+            Response containing `properties` of the client.
+        """
+
+    @abstractmethod
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
     ) -> Union[
@@ -193,6 +212,10 @@ class NumPyClientWrapper(Client):
 
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         return PropertiesRes(properties=self.properties)
+
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        properties = self.numpy_client.get_properties(ins.config)
+        return PropertiesRes(properties=properties)
 
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""

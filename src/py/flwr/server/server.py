@@ -81,12 +81,17 @@ This format is deprecated and will be removed in a future release. It should use
 instead.
 """
 
-FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
+FitResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, FitRes]],
+    List[BaseException],
+]
 EvaluateResultsAndFailures = Tuple[
-    List[Tuple[ClientProxy, EvaluateRes]], List[BaseException]
+    List[Tuple[ClientProxy, EvaluateRes]],
+    List[BaseException],
 ]
 ReconnectResultsAndFailures = Tuple[
-    List[Tuple[ClientProxy, Disconnect]], List[BaseException]
+    List[Tuple[ClientProxy, Disconnect]],
+    List[BaseException],
 ]
 
 
@@ -101,6 +106,11 @@ class Server:
             tensors=[], tensor_type="numpy.ndarray"
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
+        self.max_workers: Optional[int] = None
+
+    def set_max_workers(self, max_workers: Optional[int]) -> None:
+        """Set the max_workers used by ThreadPoolExecutor."""
+        self.max_workers = max_workers
 
     def set_strategy(self, strategy: Strategy) -> None:
         """Replace server strategy."""
@@ -207,7 +217,10 @@ class Server:
         )
 
         # Collect `evaluate` results from all clients participating in this round
-        results, failures = evaluate_clients(client_instructions)
+        results, failures = evaluate_clients(
+            client_instructions,
+            max_workers=self.max_workers,
+        )
         log(
             DEBUG,
             "evaluate_round received %s results and %s failures",
@@ -246,10 +259,6 @@ class Server:
         client_instructions = self.strategy.configure_fit(
             rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
         )
-        for client, _ in client_instructions:
-            properties_ins = PropertiesIns(config={"tensor_type": "REQUIRED"})
-            tensor_type = client.get_properties(properties_ins)
-            log(DEBUG, f"fit_round: Tensor type {tensor_type}")
 
         if not client_instructions:
             log(INFO, "fit_round: no clients selected, cancel")
@@ -262,7 +271,10 @@ class Server:
         )
 
         # Collect `fit` results from all clients participating in this round
-        results, failures = fit_clients(client_instructions)
+        results, failures = fit_clients(
+            client_instructions,
+            max_workers=self.max_workers,
+        )
         log(
             DEBUG,
             "fit_round received %s results and %s failures",
@@ -293,7 +305,13 @@ class Server:
     def disconnect_all_clients(self) -> None:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
-        _ = shutdown(clients=[all_clients[k] for k in all_clients.keys()])
+        clients = [all_clients[k] for k in all_clients.keys()]
+        instruction = Reconnect(seconds=None)
+        client_instructions = [(client_proxy, instruction) for client_proxy in clients]
+        _ = reconnect_clients(
+            client_instructions=client_instructions,
+            max_workers=self.max_workers,
+        )
 
     def _get_initial_parameters(self) -> Parameters:
         """Get initial parameters from one of the available clients."""
@@ -314,16 +332,22 @@ class Server:
         return parameters_res.parameters
 
 
-def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:
+def reconnect_clients(
+    client_instructions: List[Tuple[ClientProxy, Reconnect]],
+    max_workers: Optional[int],
+) -> ReconnectResultsAndFailures:
     """Instruct clients to disconnect and never reconnect."""
-    reconnect = Reconnect(seconds=None)
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(reconnect_client, c, reconnect) for c in clients]
-        concurrent.futures.wait(futures)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        submitted_fs = [
+            executor.submit(reconnect_client, client_proxy, ins)
+            for client_proxy, ins in client_instructions
+        ]
+        concurrent.futures.wait(submitted_fs)
+
     # Gather results
     results: List[Tuple[ClientProxy, Disconnect]] = []
     failures: List[BaseException] = []
-    for future in futures:
+    for future in submitted_fs:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
@@ -343,18 +367,21 @@ def reconnect_client(
 
 
 def fit_clients(
-    client_instructions: List[Tuple[ClientProxy, FitIns]]
+    client_instructions: List[Tuple[ClientProxy, FitIns]],
+    max_workers: Optional[int],
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(fit_client, c, ins) for c, ins in client_instructions
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        submitted_fs = [
+            executor.submit(fit_client, client_proxy, ins)
+            for client_proxy, ins in client_instructions
         ]
-        concurrent.futures.wait(futures)
+        concurrent.futures.wait(submitted_fs)
+
     # Gather results
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = []
-    for future in futures:
+    for future in submitted_fs:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
@@ -372,18 +399,21 @@ def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
 
 
 def evaluate_clients(
-    client_instructions: List[Tuple[ClientProxy, EvaluateIns]]
+    client_instructions: List[Tuple[ClientProxy, EvaluateIns]],
+    max_workers: Optional[int],
 ) -> EvaluateResultsAndFailures:
     """Evaluate parameters concurrently on all selected clients."""
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(evaluate_client, c, ins) for c, ins in client_instructions
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        submitted_fs = [
+            executor.submit(evaluate_client, client_proxy, ins)
+            for client_proxy, ins in client_instructions
         ]
-        concurrent.futures.wait(futures)
+        concurrent.futures.wait(submitted_fs)
+
     # Gather results
     results: List[Tuple[ClientProxy, EvaluateRes]] = []
     failures: List[BaseException] = []
-    for future in futures:
+    for future in submitted_fs:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)

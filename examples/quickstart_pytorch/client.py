@@ -80,7 +80,8 @@ def load_data():
     testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
     trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
     testloader = DataLoader(testset, batch_size=32)
-    return trainloader, testloader
+    num_examples = {"trainset": len(trainset), "testset": len(testset)}
+    return trainloader, testloader, num_examples
 
 
 # #############################################################################
@@ -95,7 +96,7 @@ def main():
     net = Net().to(DEVICE)
 
     # Load data (CIFAR-10)
-    trainloader, testloader = load_data()
+    trainloader, testloader, num_examples = load_data()
 
     # Flower client
     class CifarClient(fl.client.NumPyClient):
@@ -104,18 +105,18 @@ def main():
 
         def set_parameters(self, parameters):
             params_dict = zip(net.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             net.load_state_dict(state_dict, strict=True)
 
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             train(net, trainloader, epochs=1)
-            return self.get_parameters(), len(trainloader), {}
+            return self.get_parameters(), num_examples["trainset"], {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
-            return float(loss), len(testloader), {"accuracy": float(accuracy)}
+            return float(loss), num_examples["testset"], {"accuracy": float(accuracy)}
 
     # Start client
     fl.client.start_numpy_client("[::]:8080", client=CifarClient())

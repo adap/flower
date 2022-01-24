@@ -217,7 +217,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
     def test_split_array_at_indices_not_increasing(self) -> None:
         """Tests if exception is thrown for split not having increasing
         values."""
-        # Prepae
+        # Prepare
         x = np.ones((100, 3, 32, 32), dtype=np.float32)
         split_idx = np.arange(start=0, stop=90, step=10, dtype=np.int64)
         split_idx[1] = 70
