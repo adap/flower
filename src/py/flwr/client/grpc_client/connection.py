@@ -91,10 +91,10 @@ def grpc_connection(
         channel = grpc.secure_channel(
             server_address, ssl_channel_credentials, options=channel_options
         )
-        log(INFO, "Opened secure gRPC connection using certificates.")
+        log(INFO, "Opened secure gRPC connection using certificates")
     else:
         channel = grpc.insecure_channel(server_address, options=channel_options)
-        log(INFO, "Opened insecure gRPC connection as no certificates where passed.")
+        log(INFO, "Opened insecure gRPC connection as no certificates where passed")
 
     channel.subscribe(on_channel_state_change)
 
