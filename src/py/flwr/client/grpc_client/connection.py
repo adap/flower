@@ -15,7 +15,7 @@
 """Provides contextmanager which manages a gRPC channel to connect to the
 server."""
 from contextlib import contextmanager
-from logging import DEBUG
+from logging import DEBUG, INFO
 from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple
 
@@ -91,8 +91,10 @@ def grpc_connection(
         channel = grpc.secure_channel(
             server_address, ssl_channel_credentials, options=channel_options
         )
+        log(INFO, "Opened secure gRPC connection using certificates")
     else:
         channel = grpc.insecure_channel(server_address, options=channel_options)
+        log(INFO, "Opened insecure gRPC connection (no certificates were passed)")
 
     channel.subscribe(on_channel_state_change)
 
@@ -111,4 +113,4 @@ def grpc_connection(
     finally:
         # Make sure to have a final
         channel.close()
-        log(DEBUG, "Insecure gRPC channel closed")
+        log(DEBUG, "gRPC channel closed")
