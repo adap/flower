@@ -61,7 +61,7 @@ def save_parameteras_as_model(parameters):
 
 def load_model_parameters():
     """Load and return model parameters."""
-    filepath = workspace_path("model_out/mnist_model")
+    filepath = workspace_path("model/mnist_model")
     model = tf.keras.models.load_model(filepath)
     parameters = model.get_weights()
     return parameters
@@ -75,7 +75,7 @@ def load_train_metrics():
 
     data["loss"] = float(data["loss"])
     data["accuracy"] = float(data["accuracy"])
-    data["num_examples"] = int(data["num_examples"])
+    data["num_examples"] = 1 #int(data["num_examples"])
 
     return data
 
@@ -88,7 +88,7 @@ def load_evaluate_metrics():
 
     data["loss"] = float(data["loss"])
     data["accuracy"] = float(data["accuracy"])
-    data["num_examples"] = int(data["num_examples"])
+    data["num_examples"] = 1 #int(data["num_examples"])
 
     return data
 
