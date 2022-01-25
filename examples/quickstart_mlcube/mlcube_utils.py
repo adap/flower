@@ -31,9 +31,8 @@ def run_task(task_name: str):
         "mlcube_docker",
         "run",
         "--mlcube=.",
-        f"--task=run/{task_name}.yaml",
+        f"--task={task_name}"
     ]
-#        "--platform=platforms/docker.yaml",
 
     print()
     print('\n\033[32m' + " ".join(command) + '\033[39m\n')

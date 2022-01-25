@@ -12,10 +12,6 @@ git clone https://github.com/danieljanes/mlcube_examples.git -b rename-fl-exampl
 cp -r mlcube_examples/mnist_fl/tensorflow mlcube
 rm -rf mlcube_examples
 
-#git clone -b initial_checkpoint https://github.com/msheller/mlcube_examples.git && \
-#cp -r mlcube_examples/mnist_openfl mlcube && \
-#rm -rf mlcube_examples
-
 # Build mlcube
 pushd mlcube
 poetry run mlcube_docker configure --mlcube=. 
