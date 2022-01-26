@@ -88,7 +88,7 @@ def load_evaluate_metrics():
 
     data["loss"] = float(data["loss"])
     data["accuracy"] = float(data["accuracy"])
-    data["num_examples"] = 1 #int(data["num_examples"])
+    data["num_examples"] = 1 # int(data["num_examples"])
 
     return data
 
