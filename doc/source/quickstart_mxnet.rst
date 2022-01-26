@@ -209,10 +209,10 @@ to actually run this client:
      fl.client.start_numpy_client("0.0.0.0:8080", client=MNISTClient())
 
 That's it for the client. We only have to implement :code:`Client` or
-:code:`NumPyClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
-:code:`"[::]:8080"`. If we run a truly federated workload with the server and
+:code:`NumPyClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"0.0.0.0:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
+:code:`"0.0.0.0:8080"`. If we run a truly federated workload with the server and
 clients running on different machines, all that needs to change is the
-:code:`server_address` we point the client at.
+:code:`server_address` we pass to the client.
 
 Flower Server
 -------------

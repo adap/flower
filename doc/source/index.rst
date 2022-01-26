@@ -36,6 +36,18 @@ Flower's design goals was to make this simple. Read on to learn more.
    changelog
    faq
 
+Flower Baselines
+----------------
+
+Flower Baselines are a collection of organised scripts used to reproduce results from well-known publications or benchmarks. You can check which baselines already exist and/or contribute your own baseline.
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Baselines
+   
+   using-baselines
+   contributing-baselines
+
 
 API Reference
 -------------
