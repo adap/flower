@@ -86,7 +86,6 @@ def start_client(
             root_certificates=root_certificates,
         ) as conn:
             receive, send = conn
-            log(INFO, "Opened (insecure) gRPC connection")
 
             while True:
                 server_message = receive()
