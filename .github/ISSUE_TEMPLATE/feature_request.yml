@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest a new baseline, strategy, example, ...
+labels: ['feature request']
+
+body:
+- type: markdown
+  attributes:
+    value: >
+      #### If you want to propose a new feature, please check the PRs if someone already works on this feature.
+- type: textarea
+  attributes:
+    label: Describe the type of feature and its functionality.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Describe step by step what files and adjustments are you planning to include.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Is there something else you want to add?

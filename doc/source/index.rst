@@ -1,0 +1,96 @@
+Flower Documentation
+====================
+
+Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
+
+
+User Guide
+----------
+
+The user guide is targeted at researchers and developers who want to use Flower
+to bring existing machine learning workloads into a federated setting. One of
+Flower's design goals was to make this simple. Read on to learn more.
+
+.. toctree::
+   :maxdepth: 1
+   :caption: User Guide
+
+   installation
+   quickstart_tensorflow
+   quickstart_pytorch
+   quickstart_huggingface
+   quickstart_pytorch_lightning
+   quickstart_mxnet
+   quickstart_scikitlearn
+   evaluation
+   strategies
+   implementing-strategies
+   saving-progress
+   ssl-enabled-connections
+   examples
+   example_walkthrough_pytorch_mnist
+   example-pytorch-from-centralized-to-federated
+   example-mxnet-walk-through
+   fedbn-example-pytorch-from-centralized-to-federated
+   recommended-env-setup
+   changelog
+   faq
+
+Flower Baselines
+----------------
+
+Flower Baselines are a collection of organised scripts used to reproduce results from well-known publications or benchmarks. You can check which baselines already exist and/or contribute your own baseline.
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Baselines
+   
+   using-baselines
+   contributing-baselines
+
+
+API Reference
+-------------
+
+.. toctree::
+   :maxdepth: 3
+   :caption: API Reference
+
+   flwr <apiref-flwr>
+
+
+Contributor Guide
+-----------------
+
+The Flower authors welcome external contributions. The following guides are
+intended to help along the way.
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributor Guide
+
+   getting-started-for-contributors
+   good-first-contributions
+   architecture
+   release_process
+   creating-new-messages
+
+
+About
+-----
+
+.. toctree::
+   :maxdepth: 1
+   :caption: About
+
+   people
+   organizations
+   publications
+
+
+.. Indices and tables
+.. ------------------
+
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
