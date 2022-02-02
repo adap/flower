@@ -73,7 +73,7 @@ Run Linters and Tests
   $ ./dev/test.sh
 
 Run Github Actions (CI) locally
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Developers could run the full set of Github Actions workflows under their local
 environment by using `Act <https://github.com/nektos/act>_`. Please refer to
