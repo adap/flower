@@ -1,0 +1,17 @@
+[build-system]
+requires = [
+    "poetry==1.1.12",
+]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "simulation_pytorch"
+version = "0.1.0"
+description = "Federated Learning Simulation with Flower and PyTorch"
+authors = ["The Flower Authors <enquiries@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.2"
+flwr = {extras = ["simulation"], version = "^0.17.0"}
+# flwr = {extras = ["simulation"], path = "../../", develop = true }  # For development
+tensorflow = "^2.6.2"
