@@ -97,7 +97,7 @@ def fit_config(rnd: int) -> Dict[str, str]:
     """Return a configuration with static batch size and (local) epochs."""
     config = {
         "epoch_global": str(rnd),
-        "epochs": str(20),  # number of local epochs
+        "epochs": str(5),  # number of local epochs
         "batch_size": str(64),
     }
     return config
