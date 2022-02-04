@@ -1,7 +1,5 @@
 # Flower Example using TensorFlow/Keras + MLCube
 
-**Status: experimental**
-
 This introductory example to Flower uses MLCube together with Keras but deep knowledge of Keras is not necessarily required to run the example. However, it will help you understanding how to adapt Flower to your use-cases with MLCube.
 Running this example in itself is quite easy.
 
@@ -38,7 +36,7 @@ For the MLCube setup we have prepared a script which you can execute in your she
 ./dev/setup.sh
 ```
 
-# Run Federated Learning with TensorFlow/Keras in MLCube with Flower
+## Run Federated Learning with TensorFlow/Keras in MLCube with Flower
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
@@ -53,7 +51,6 @@ Now you are ready to start the clients. We have prepared a simple script called 
 ./client.sh 1
 ```
 
-
 ```shell
 # Shell 2
 ./client.sh 2
@@ -61,6 +58,6 @@ Now you are ready to start the clients. We have prepared a simple script called 
 
 Congrats! You have just run a Federated Learning experiment using TensorFlow/Keras in MLCube using Flower for federation.
 
-# Background
+## Background
 
 Wondering how this works? Most of the interaction with MLCube happens in `mlcube_utils.py` which reads and writes to the file system. It also provides a function called `run_task` which invokes `mlcube_docker run ...` to execute the appropriate task. The custom client we have implemented in `client.py` will run the MLCube 'download' task when its instantiated. fit and evaluate also interface through the `mlcube_utils.py` helpers for reading and writing to disk and calling the appropriate MLCube tasks.
