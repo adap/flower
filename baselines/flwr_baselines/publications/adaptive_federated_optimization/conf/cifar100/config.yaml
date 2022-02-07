@@ -3,7 +3,8 @@ dataset_name: "cifar100"
 num_classes: 100
 batch_size: 20
 epochs_per_round: 1
-lda_concentration: 0.1
+lda_concentration_coarse: 0.1
+lda_concentration_fine: 10
 num_clients_per_round: 10
 num_total_clients: 500
 num_rounds: 4000
@@ -16,7 +17,8 @@ gen_federated_partitions:
   _target_: cifar.utils.gen_cifar100_partitions
   dataset_name: ${dataset_name}
   num_total_clients: ${num_total_clients}
-  lda_concentration: ${lda_concentration}
+  lda_concentration_coarse: ${lda_concentration_coarse}
+  lda_concentration_fine: ${lda_concentration_fine}
 
 get_initial_parameters:
   _target_: cifar.utils.get_initial_parameters
