@@ -1,8 +1,6 @@
 from collections import OrderedDict
 from pathlib import Path
-from turtle import st
 from typing import Callable, Dict, List, Optional, Tuple, Union
-from isort import find_imports_in_code
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,13 +12,12 @@ from flwr.dataset.utils.common import (
     XY,
     create_lda_partitions,
     shuffle,
-    sample_without_replacement,
     sort_by_label,
     split_array_at_indices,
 )
 from flwr.server.history import History
 from PIL import Image
-from torch import Tensor, load, save
+from torch import Tensor, load
 from torch.nn import GroupNorm, Module
 from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import CIFAR10, CIFAR100
@@ -163,17 +160,18 @@ def train(
     epochs: int,
     device: str,
     learning_rate: float = 0.01,
-    momentum: float = 0.9,
 ) -> None:
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=momentum)
+    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
     net.train()
     for _ in range(epochs):
         for images, labels in trainloader:
             images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
-            loss = criterion(net(images), labels)
+            a = net(images)
+            # loss = criterion(net(images), labels)
+            loss = criterion(a, labels)
             loss.backward()
             optimizer.step()
 
@@ -228,7 +226,7 @@ def get_cifar_eval_fn(
     def evaluate(weights: Weights) -> Optional[Tuple[float, Dict[str, float]]]:
         """Use the entire CIFAR-10 test set for evaluation."""
         # determine device
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         net = get_cifar_model(num_classes=num_classes)
         state_dict = OrderedDict(
             {
@@ -363,7 +361,7 @@ def gen_cifar100_partitions(
                     if norm_factor > 0.0:
                         coarse_dist[k] = coarse_dist[k] / norm_factor
 
-        partitions[client_id] = (np.array(x), np.array(y))
+        partitions[client_id] = (np.array(x), np.array(y, dtype=np.int64))
 
         # Save partions
     for idx, partition in enumerate(partitions):
@@ -388,7 +386,7 @@ def plot_metric_from_history(
     metric_str: str,
     strategy_name: str,
     expected_maximum: float,
-    save_path: Path,
+    save_plot_path: Path,
 ) -> None:
     x, y = zip(*hist.metrics_centralized[metric_str])
     plt.figure()
@@ -399,5 +397,5 @@ def plot_metric_from_history(
     plt.xlabel("Rounds")
     plt.ylabel("Accuracy")
     plt.legend(loc="upper left")
-    plt.savefig(save_path)
+    plt.savefig(save_plot_path)
     plt.close()
