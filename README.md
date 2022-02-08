@@ -1,5 +1,19 @@
 # Flower - A Friendly Federated Learning Framework
 
+<p align="center">
+  <a href="https://flower.dev/">
+    <img src="https://flower.dev/_next/static/chunks/images/logo-ed1336acd844fd699f2520e537e349b2.gif" width="140px" alt="Flower Website" />
+  </a>
+</p>
+<p align="center">
+    <a href="https://flower.dev/">Website</a> |
+    <a href="https://flower.dev/blog">Blog</a> |
+    <a href="https://flower.dev/docs/">Docs</a> |
+    <a href="https://flower.dev/conf/flower-summit-2021">Conference</a> |
+    <a href="https://flower.dev/join-slack">Slack</a>
+    <br /><br />
+</p>
+
 [![GitHub license](https://img.shields.io/github/license/adap/flower)](https://github.com/adap/flower/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/main/CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/workflows/Build/badge.svg)
