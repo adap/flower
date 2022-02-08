@@ -96,9 +96,7 @@ class ClientDataset(Dataset):
     def __len__(self) -> int:
         return len(self.Y)
 
-    def __getitem__(self, idx: Union[int, torch.Tensor]) -> Tuple[Tensor, int]:
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
+    def __getitem__(self, idx: int) -> Tuple[Tensor, int]:
         x = Image.fromarray(self.X[idx])
         y = self.Y[idx]
 
