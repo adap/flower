@@ -95,3 +95,10 @@ ignore_errors = true
 module = "torch.*"
 follow_imports = "skip"
 follow_imports_for_stubs = true
+
+[tool.pylint.typecheck]
+generated-members="numpy.*, torch.*"
+
+[tool.pylint.messages_control]
+disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
+signature-mutators=["hydra.main"]

@@ -36,7 +36,6 @@ gen_on_fit_config_fn:
 plot_results:
   _target_: cifar.utils.plot_metric_from_history
   dataset_name: ${dataset_name}
-  metric_str: accuracy
   strategy_name: ${strategy.name}
   expected_maximum: ${strategy.expected_accuracy}
   save_plot_path: ./${dataset_name}_${strategy.name}.png

@@ -1,4 +1,4 @@
-from os import chdir, getcwd
+from os import chdir
 from pathlib import Path
 
 import flwr as fl
@@ -10,9 +10,10 @@ from omegaconf import DictConfig
 
 @hydra.main(config_path="conf/cifar10", config_name="config")
 def main(cfg: DictConfig) -> None:
+    """General-purpose main function that receives cfg from Hydra."""
+
     # Make sure we are on the right directory.
     # This will not be necessary in hydra 1.3
-    log_dir = getcwd()
     chdir(get_original_cwd())
 
     # Create federated partitions - checkout the config files for details
@@ -65,6 +66,7 @@ def main(cfg: DictConfig) -> None:
             strategy=strategy,
         )
 
+    # Plot results
     call(cfg.plot_results, hist=hist)
 
 

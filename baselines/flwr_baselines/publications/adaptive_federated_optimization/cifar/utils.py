@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,6 +31,9 @@ from torchvision.transforms import (
     ToTensor,
 )
 
+CIFAR100_NUM_COARSE_CLASSES = 20
+CIFAR100_NUM_FINE_CLASSES = 5
+
 cifar100_coarse_to_real = [
     [4, 30, 55, 72, 95],
     [1, 32, 67, 73, 91],
@@ -60,9 +63,9 @@ cifar100_real_to_coarse = [
     6, 11, 5, 10, 7, 6, 13, 15, 3, 15,
     0, 11, 1, 10, 12, 14, 16, 9, 11, 5,
     5, 19, 8, 8, 15, 13, 14, 17, 18, 10,
-    16, 4, 17, 4, 2, 0, 17, 4, 18, 17, 
-    10, 3, 2, 12, 12, 16, 12, 1, 9, 19, 
-    2, 10, 0, 1, 16, 12, 9, 13, 15, 13, 
+    16, 4, 17, 4, 2, 0, 17, 4, 18, 17,
+    10, 3, 2, 12, 12, 16, 12, 1, 9, 19,
+    2, 10, 0, 1, 16, 12, 9, 13, 15, 13,
     16, 19, 2, 4, 6, 19, 5, 5, 8, 19,
     18, 1, 2, 15, 6, 0, 17, 8, 14, 13,
 ]
@@ -70,6 +73,15 @@ cifar100_real_to_coarse = [
 
 # transforms
 def get_transforms(num_classes: int = 10) -> Dict[str, Compose]:
+    """Returns the right Transform Compose for both train and evaluation.
+
+    Args:
+        num_classes (int, optional): Defines whether CIFAR10 or CIFAR100. Defaults to 10.
+
+    Returns:
+        Dict[str, Compose]: Dictionary with 'train' and 'test' keywords and Transforms
+        for each
+    """
     normalize_cifar10 = Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
     normalize_cifar100 = Normalize((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762))
     normalize_cifar = normalize_cifar10 if num_classes == 10 else normalize_cifar100
@@ -81,6 +93,15 @@ def get_transforms(num_classes: int = 10) -> Dict[str, Compose]:
 
 
 def get_cifar_model(num_classes: int = 10) -> Module:
+    """Generates ResNet18 model using GroupNormalization rather than
+    BatchNormalization. Two groups are used.
+
+    Args:
+        num_classes (int, optional): Number of classes {10,100}. Defaults to 10.
+
+    Returns:
+        Module: ResNet18 network.
+    """
     model: ResNet = resnet18(
         norm_layer=lambda x: GroupNorm(2, x), num_classes=num_classes
     )
@@ -89,20 +110,56 @@ def get_cifar_model(num_classes: int = 10) -> Module:
 
 class ClientDataset(Dataset):
     def __init__(self, path_to_data: Path, transform: Compose = None):
+        """Implement local dataset.
+
+        Args:
+            path_to_data (Path): Path to local '.pt' file is located.
+            transform (Compose, optional): Transforms to be used when sampling.
+            Defaults to None.
+        """
         super().__init__()
         self.transform = transform
-        self.X, self.Y = load(path_to_data)
+        self.inputs, self.labels = load(path_to_data)
 
     def __len__(self) -> int:
-        return len(self.Y)
+        """Size of the dataset.
+
+        Returns:
+            int: Number of samples in the dataset.
+        """
+        return len(self.labels)
 
     def __getitem__(self, idx: int) -> Tuple[Tensor, int]:
-        x = Image.fromarray(self.X[idx])
-        y = self.Y[idx]
+        """Fetches item in dataset.
+
+        Args:
+            idx (int): Position of item being fetched.
+
+        Returns:
+            Tuple[Tensor, int]: Tensor image and respective label
+        """
+        this_input = Image.fromarray(self.inputs[idx])
+        this_label = self.labels[idx]
 
         if self.transform:
-            x = self.transform(x)
-        return x, y
+            this_input = self.transform(this_input)
+        return this_input, this_label
+
+
+def save_partitions(
+    list_partitions: List[XY], fed_dir: Path, partition_type: str = "train"
+):
+    """Saves partitions to individual files.
+
+    Args:
+        list_partitions (List[XY]): List of partitions to be saves
+        fed_dir (Path): Root directory where to save partitions.
+        partition_type (str, optional): Partition type ("train" or "test"). Defaults to "train".
+    """
+    for idx, partition in enumerate(list_partitions):
+        path_dir = fed_dir / f"{idx}"
+        path_dir.mkdir(exist_ok=True, parents=True)
+        torch.save(partition, path_dir / f"{partition_type}.pt")
 
 
 def partition_cifar10_and_save(
@@ -112,6 +169,19 @@ def partition_cifar10_and_save(
     num_partitions: int = 500,
     concentration: float = 0.1,
 ) -> np.ndarray:
+    """Creates and saves partitions for CIFAR10.
+
+    Args:
+        dataset (XY): Original complete dataset.
+        fed_dir (Path): Root directory where to save partitions.
+        dirichlet_dist (Optional[npt.NDArray[np.float32]], optional):
+            Pre-defined distributions to be used for sampling if exist. Defaults to None.
+        num_partitions (int, optional): Number of partitions. Defaults to 500.
+        concentration (float, optional): Alpha value for Dirichlet. Defaults to 0.1.
+
+    Returns:
+        np.ndarray: Generated dirichlet distributions.
+    """
     # Create partitions
     clients_partitions, dist = create_lda_partitions(
         dataset=dataset,
@@ -120,36 +190,206 @@ def partition_cifar10_and_save(
         concentration=concentration,
     )
     # Save partions
-    for idx, partition in enumerate(clients_partitions):
-        path_dir = fed_dir / f"{idx}"
-        path_dir.mkdir(exist_ok=True, parents=True)
-        torch.save(partition, path_dir / "train.pt")
+    save_partitions(list_partitions=clients_partitions, fed_dir=fed_dir)
 
     return dist
+
+
+def gen_cifar10_partitions(
+    path_original_dataset: Path,
+    dataset_name: str,
+    num_total_clients: int,
+    lda_concentration: float,
+) -> Path:
+    """Defines root path for partitions and calls functions to create them.
+
+    Args:
+        path_original_dataset (Path): Path to original (unpartitioned) dataset.
+        dataset_name (str): Friendly name to dataset.
+        num_total_clients (int): Number of clients.
+        lda_concentration (float): Concentration (alpha) used when generation Dirichlet
+        distributions.
+
+    Returns:
+        Path: [description]
+    """
+    fed_dir = (
+        path_original_dataset
+        / f"{dataset_name}"
+        / "partitions"
+        / f"{num_total_clients}"
+        / f"{lda_concentration:.2f}"
+    )
+
+    trainset = CIFAR10(root=path_original_dataset, train=True, download=True)
+    flwr_trainset = (trainset.data, np.array(trainset.targets, dtype=np.int32))
+    partition_cifar10_and_save(
+        dataset=flwr_trainset,
+        fed_dir=fed_dir,
+        dirichlet_dist=None,
+        num_partitions=num_total_clients,
+        concentration=lda_concentration,
+    )
+
+    return fed_dir
+
+
+def sample_and_update_lists(
+    x_list: np.ndarray, y_list: np.ndarray, real_class: int
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+
+    """samples and returns disired list.
+
+    Args:
+        x_list (np.ndarray): list of images.
+        y_list ([np.ndarray]): list of labels
+        real_class ([int]): real fine classe id
+
+    Returns:
+        Tuple[np.ndarry, np.ndarray]: Partitions and updated list of inputs
+    """
+
+    sample_x: np.ndarray = x_list[real_class][0]
+    x_list[real_class] = np.delete(x_list[real_class], 0, 0)
+
+    sample_y: np.ndarray = y_list[real_class][0]
+    y_list[real_class] = np.delete(y_list[real_class], 0, 0)
+
+    return sample_x, sample_y, x_list, y_list
+
+
+def shuffle_and_create_cifar100_lda_dists(
+    dataset: XY,
+    lda_concentration_coarse: float,
+    lda_concentration_fine: float,
+    num_partitions: int,
+):
+
+    x_orig, y_orig = shuffle(dataset.data, np.array(dataset.targets, dtype=np.int32))
+
+    x_orig, y_orig = sort_by_label(x_orig, y_orig)
+
+    _, start_idx = np.unique(y_orig, return_index=True)
+    x_list = split_array_at_indices(x_orig, start_idx)
+    y_list = split_array_at_indices(y_orig, start_idx)
+
+    lda_concentration_coarse_vector = np.repeat(
+        lda_concentration_coarse, CIFAR100_NUM_COARSE_CLASSES
+    )
+    lda_concentration_fine_vector = np.repeat(
+        lda_concentration_fine, CIFAR100_NUM_FINE_CLASSES
+    )
+
+    coarse_dist = np.random.default_rng().dirichlet(
+        alpha=lda_concentration_coarse_vector, size=num_partitions
+    )
+    fine_dist = np.random.default_rng().dirichlet(
+        alpha=lda_concentration_fine_vector,
+        size=(num_partitions, CIFAR100_NUM_COARSE_CLASSES),
+    )
+    return x_list, y_list, coarse_dist, fine_dist
 
 
 def partition_cifar100_and_save(
     dataset: XY,
     fed_dir: Path,
-    dirichlet_dist: Optional[npt.NDArray[np.float32]] = None,
-    num_partitions: int = 500,
-    concentration_coarse: float = 0.1,
-    concentration_fine: float = 0.1,
-) -> np.ndarray:
-    # Create partitions
-    clients_partitions, dist = create_lda_partitions(
-        dataset=dataset,
-        dirichlet_dist=dirichlet_dist,
-        num_partitions=num_partitions,
-        concentration=concentration_coarse,
-    )
-    # Save partions
-    for idx, partition in enumerate(clients_partitions):
-        path_dir = fed_dir / f"{idx}"
-        path_dir.mkdir(exist_ok=True, parents=True)
-        torch.save(partition, path_dir / "train.pt")
+    num_partitions: int,
+    lda_concentration_coarse: float,
+    lda_concentration_fine: float,
+):
+    """Partitions CIFAR100 and saves local datasets.
 
-    return dist
+    Args:
+        dataset (XY): Dataset to be partitioned
+        fed_dir (Path): Root directory where to save partitions
+        num_partitions (int): Number of partitions
+        lda_concentration_coarse (float): Concentration for the higer-level classes
+        lda_concentration_fine (float): Concentration for fine labels.
+    """
+
+    x_list, y_list, coarse_dist, fine_dist = shuffle_and_create_cifar100_lda_dists(
+        dataset, lda_concentration_coarse, lda_concentration_fine, num_partitions
+    )
+
+    # Assuming balanced distribution
+    len_dataset = len(dataset.targets)
+    partitions: List[XY] = [(_, _) for _ in range(num_partitions)]
+
+    remaining_samples_counter = (len_dataset // 100) * np.ones(
+        (CIFAR100_NUM_COARSE_CLASSES, CIFAR100_NUM_FINE_CLASSES)
+    )
+
+    for client_id in range(num_partitions):
+        x_this_client, y_this_client = [], []
+
+        for _ in range(len_dataset // num_partitions):
+            coarse_class = np.random.choice(
+                CIFAR100_NUM_COARSE_CLASSES, p=coarse_dist[client_id]
+            )
+            fine_class = np.random.choice(
+                CIFAR100_NUM_FINE_CLASSES, p=fine_dist[client_id][coarse_class]
+            )
+            real_class = cifar100_coarse_to_real[coarse_class][fine_class]
+
+            # obtain sample
+            sample_x, sample_y, x_list, y_list = sample_and_update_lists(
+                x_list, y_list, real_class
+            )
+
+            x_this_client.append(sample_x)
+            y_this_client.append(sample_y)
+
+            # Update and renormalize
+            # check fine class is empty
+            remaining_samples_counter[coarse_class, fine_class] -= 1
+            if remaining_samples_counter[coarse_class, fine_class] == 0:
+                for k in range(num_partitions):
+                    fine_dist[k][coarse_class][fine_class] = 0.0
+                    norm_factor = np.sum(fine_dist[k][coarse_class])
+                    if norm_factor > 0:
+                        fine_dist[k][coarse_class] = (
+                            fine_dist[k][coarse_class] / norm_factor
+                        )
+            # Check coarse class is empty
+            if np.sum(remaining_samples_counter[coarse_class]) == 0:
+                for k in range(num_partitions):
+                    coarse_dist[k][coarse_class] = 0.0
+                    norm_factor = np.sum(coarse_dist[k])
+                    if norm_factor > 0.0:
+                        coarse_dist[k] = coarse_dist[k] / norm_factor
+
+        partitions.append(
+            (np.array(x_this_client), np.array(y_this_client, dtype=np.int64))
+        )
+    save_partitions(list_partitions=partitions, fed_dir=fed_dir, partition_type="train")
+
+
+def gen_cifar100_partitions(
+    path_original_dataset: Path,
+    dataset_name: str,
+    num_total_clients: int,
+    lda_concentration_coarse: float,
+    lda_concentration_fine: float,
+) -> Path:
+    fed_dir = (
+        path_original_dataset
+        / f"{dataset_name}"
+        / "partitions"
+        / f"{num_total_clients}"
+        / f"{lda_concentration_coarse:.2f}_{lda_concentration_fine:.2f}"
+    )
+
+    trainset = CIFAR100(root=path_original_dataset, train=True, download=True)
+
+    partition_cifar100_and_save(
+        dataset=trainset,
+        fed_dir=fed_dir,
+        num_partitions=num_total_clients,
+        lda_concentration_coarse=lda_concentration_coarse,
+        lda_concentration_fine=lda_concentration_fine,
+    )
+
+    return fed_dir
 
 
 def train(
@@ -167,9 +407,7 @@ def train(
         for images, labels in trainloader:
             images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
-            a = net(images)
-            # loss = criterion(net(images), labels)
-            loss = criterion(a, labels)
+            loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
 
@@ -194,6 +432,17 @@ def test(net: Module, testloader: DataLoader, device: str) -> Tuple[float, float
 def gen_on_fit_config_fn(
     epochs_per_round: int, batch_size: int, client_learning_rate: float
 ) -> Callable[[int], Dict[str, Scalar]]:
+    """Generates ` On_fit_config`
+
+    Args:
+        epochs_per_round (int):  number of local epochs.
+        batch_size (int): Batch size
+        client_learning_rate (float): Learning rate of clinet
+
+    Returns:
+        Callable[[int], Dict[str, Scalar]]: Function to be called at the beginnig of each rounds.
+    """
+
     def on_fit_config(rnd: int) -> Dict[str, Scalar]:
         """Return a configuration with specific client learning rate."""
         local_config = {
@@ -243,134 +492,15 @@ def get_cifar_eval_fn(
     return evaluate
 
 
-def gen_cifar10_partitions(
-    path_original_dataset: Path,
-    dataset_name: str,
-    num_total_clients: int,
-    lda_concentration: float,
-) -> Path:
-    fed_dir = (
-        path_original_dataset
-        / f"{dataset_name}"
-        / "partitions"
-        / f"{num_total_clients}"
-        / f"{lda_concentration:.2f}"
-    )
-
-    trainset = CIFAR10(root=path_original_dataset, train=True, download=True)
-    flwr_trainset = (trainset.data, np.array(trainset.targets, dtype=np.int32))
-    partition_cifar10_and_save(
-        dataset=flwr_trainset,
-        fed_dir=fed_dir,
-        dirichlet_dist=None,
-        num_partitions=num_total_clients,
-        concentration=lda_concentration,
-    )
-
-    return fed_dir
-
-
-def gen_cifar100_partitions(
-    path_original_dataset: Path,
-    dataset_name: str,
-    num_total_clients: int,
-    lda_concentration_coarse: float,
-    lda_concentration_fine: float,
-) -> Path:
-    fed_dir = (
-        path_original_dataset
-        / f"{dataset_name}"
-        / "partitions"
-        / f"{num_total_clients}"
-        / f"{lda_concentration_coarse:.2f}_{lda_concentration_fine:.2f}"
-    )
-    num_coarse_classes = 20
-    num_fine_classes = 5
-
-    trainset = CIFAR100(root=path_original_dataset, train=True, download=True)
-    x, y = shuffle(trainset.data, np.array(trainset.targets, dtype=np.int32))
-
-    x, y = sort_by_label(x, y)
-
-    _, start_idx = np.unique(y, return_index=True)
-    x_list = split_array_at_indices(x, start_idx)
-    y_list = split_array_at_indices(y, start_idx)
-
-    lda_concentration_coarse_vector = np.repeat(
-        lda_concentration_coarse, num_coarse_classes
-    )
-    lda_concentration_fine_vector = np.repeat(lda_concentration_fine, num_fine_classes)
-
-    coarse_dist = np.random.default_rng().dirichlet(
-        alpha=lda_concentration_coarse_vector, size=num_total_clients
-    )
-    fine_dist = np.random.default_rng().dirichlet(
-        alpha=lda_concentration_fine_vector,
-        size=(num_total_clients, num_coarse_classes),
-    )
-
-    # Assuming balanced distribution
-    samples_per_client = len(y) // num_total_clients
-    samples_per_class = len(y) // 100
-    partitions: List[XY] = [(_, _) for _ in range(num_total_clients)]
-
-    remaining_samples_counter = samples_per_class * np.ones(
-        (num_coarse_classes, num_fine_classes)
-    )
-
-    for client_id in range(num_total_clients):
-        x, y = [], []
-
-        for _ in range(samples_per_client):
-            coarse_class = np.random.choice(
-                num_coarse_classes, p=coarse_dist[client_id]
-            )
-            fine_class = np.random.choice(
-                num_fine_classes, p=fine_dist[client_id][coarse_class]
-            )
-            real_class = cifar100_coarse_to_real[coarse_class][fine_class]
-
-            # obtain sample
-            sample_x = x_list[real_class][0]
-            x_list[real_class] = np.delete(x_list[real_class], 0, 0)
-
-            sample_y = y_list[real_class][0]
-            y_list[real_class] = np.delete(y_list[real_class], 0, 0)
-
-            x.append(sample_x)
-            y.append(sample_y)
-
-            # Update and renormalize
-            # check fine class is empty
-            remaining_samples_counter[coarse_class, fine_class] -= 1
-            if remaining_samples_counter[coarse_class, fine_class] == 0:
-                for k in range(num_total_clients):
-                    fine_dist[k][coarse_class][fine_class] = 0.0
-                    norm_factor = np.sum(fine_dist[k][coarse_class])
-                    if norm_factor > 0:
-                        fine_dist[k][coarse_class] = (
-                            fine_dist[k][coarse_class] / norm_factor
-                        )
-            # Check coarse class is empty
-            if np.sum(remaining_samples_counter[coarse_class]) == 0:
-                for k in range(num_total_clients):
-                    coarse_dist[k][coarse_class] = 0.0
-                    norm_factor = np.sum(coarse_dist[k])
-                    if norm_factor > 0.0:
-                        coarse_dist[k] = coarse_dist[k] / norm_factor
-
-        partitions[client_id] = (np.array(x), np.array(y, dtype=np.int64))
-
-        # Save partions
-    for idx, partition in enumerate(partitions):
-        path_dir = fed_dir / f"{idx}"
-        path_dir.mkdir(exist_ok=True, parents=True)
-        torch.save(partition, path_dir / "train.pt")
-
-    return fed_dir
-
-
 def get_initial_parameters(num_classes: int = 10) -> Parameters:
+    """Returns initial parameters from a model.
+
+    Args:
+        num_classes (int, optional): Defines if using CIFAR10 or 100. Defaults to 10.
+
+    Returns:
+        Parameters: Parameters to be sent back to the server.
+    """
     model = get_cifar_model(num_classes)
     weights = [val.cpu().numpy() for _, val in model.state_dict().items()]
     parameters = weights_to_parameters(weights)
@@ -381,14 +511,22 @@ def get_initial_parameters(num_classes: int = 10) -> Parameters:
 def plot_metric_from_history(
     hist: History,
     dataset_name: str,
-    metric_str: str,
     strategy_name: str,
     expected_maximum: float,
     save_plot_path: Path,
 ) -> None:
-    x, y = zip(*hist.metrics_centralized[metric_str])
+    """Simple plotting method for Classification Task.
+
+    Args:
+        hist (History): Object containing evaluation for all rounds.
+        dataset_name (str): Name of the dataset.
+        strategy_name (str): Strategy being used
+        expected_maximum (float): Expected final accuracy.
+        save_plot_path (Path): Where to save the plot.
+    """
+    rounds, values = zip(*hist.metrics_centralized["accuracy"])
     plt.figure()
-    plt.plot(x, np.asarray(y) * 100, label=strategy_name)  # Accuracy 0-100%
+    plt.plot(rounds, np.asarray(values) * 100, label=strategy_name)  # Accuracy 0-100%
     # Set expected graph
     plt.axhline(y=expected_maximum, color="r", linestyle="--")
     plt.title(f"Centralized Validation - {dataset_name}")
