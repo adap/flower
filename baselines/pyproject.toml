@@ -101,4 +101,4 @@ generated-members="numpy.*, torch.*"
 
 [tool.pylint.messages_control]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
-signature-mutators=["hydra.main"]
+signature-mutators="hydra.main.main"

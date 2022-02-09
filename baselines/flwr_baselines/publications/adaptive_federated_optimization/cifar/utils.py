@@ -1,3 +1,4 @@
+"""Util functions for CIFAR10/100."""
 from collections import OrderedDict
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
@@ -109,8 +110,10 @@ def get_cifar_model(num_classes: int = 10) -> Module:
 
 
 class ClientDataset(Dataset):
+    """Client Dataset."""
+
     def __init__(self, path_to_data: Path, transform: Compose = None):
-        """Implement local dataset.
+        """Implements local dataset.
 
         Args:
             path_to_data (Path): Path to local '.pt' file is located.
@@ -140,9 +143,9 @@ class ClientDataset(Dataset):
         """
         this_input = Image.fromarray(self.inputs[idx])
         this_label = self.labels[idx]
-
         if self.transform:
             this_input = self.transform(this_input)
+
         return this_input, this_label
 
 
@@ -234,38 +237,27 @@ def gen_cifar10_partitions(
     return fed_dir
 
 
-def sample_and_update_lists(
-    x_list: np.ndarray, y_list: np.ndarray, real_class: int
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-
-    """samples and returns disired list.
-
-    Args:
-        x_list (np.ndarray): list of images.
-        y_list ([np.ndarray]): list of labels
-        real_class ([int]): real fine classe id
-
-    Returns:
-        Tuple[np.ndarry, np.ndarray]: Partitions and updated list of inputs
-    """
-
-    sample_x: np.ndarray = x_list[real_class][0]
-    x_list[real_class] = np.delete(x_list[real_class], 0, 0)
-
-    sample_y: np.ndarray = y_list[real_class][0]
-    y_list[real_class] = np.delete(y_list[real_class], 0, 0)
-
-    return sample_x, sample_y, x_list, y_list
-
-
 def shuffle_and_create_cifar100_lda_dists(
     dataset: XY,
     lda_concentration_coarse: float,
     lda_concentration_fine: float,
     num_partitions: int,
-):
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Shuffles the original dataset and creates the two-level LDA
+    distributions.
 
-    x_orig, y_orig = shuffle(dataset.data, np.array(dataset.targets, dtype=np.int32))
+    Args:
+        dataset (XY): original dataset in XY format
+        lda_concentration_coarse (float): Concentration for coarse (first) level
+        lda_concentration_fine (float): Concentration for coarse (second) level
+        num_partitions (int): Number of partitions
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray,np.ndarray]: organized list of
+        yet-to-be-partioned dataset and LDA distributions.
+    """
+
+    x_orig, y_orig = shuffle(dataset[0], np.array(dataset[1], dtype=np.int32))
 
     x_orig, y_orig = sort_by_label(x_orig, y_orig)
 
@@ -297,6 +289,7 @@ def partition_cifar100_and_save(
     lda_concentration_coarse: float,
     lda_concentration_fine: float,
 ):
+    # pylint: disable-msg=too-many-locals
     """Partitions CIFAR100 and saves local datasets.
 
     Args:
@@ -312,13 +305,13 @@ def partition_cifar100_and_save(
     )
 
     # Assuming balanced distribution
-    len_dataset = len(dataset.targets)
-    partitions: List[XY] = [(_, _) for _ in range(num_partitions)]
+    len_dataset = len(dataset[1])
 
     remaining_samples_counter = (len_dataset // 100) * np.ones(
         (CIFAR100_NUM_COARSE_CLASSES, CIFAR100_NUM_FINE_CLASSES)
     )
 
+    partitions = []
     for client_id in range(num_partitions):
         x_this_client, y_this_client = [], []
 
@@ -332,9 +325,11 @@ def partition_cifar100_and_save(
             real_class = cifar100_coarse_to_real[coarse_class][fine_class]
 
             # obtain sample
-            sample_x, sample_y, x_list, y_list = sample_and_update_lists(
-                x_list, y_list, real_class
-            )
+            sample_x: np.ndarray = x_list[real_class][0]
+            x_list[real_class] = np.delete(x_list[real_class], 0, 0)
+
+            sample_y: np.ndarray = y_list[real_class][0]
+            y_list[real_class] = np.delete(y_list[real_class], 0, 0)
 
             x_this_client.append(sample_x)
             y_this_client.append(sample_y)
@@ -371,6 +366,19 @@ def gen_cifar100_partitions(
     lda_concentration_coarse: float,
     lda_concentration_fine: float,
 ) -> Path:
+    """Generates CIFAR100 partitions and return root directory where the
+    partitions are.
+
+    Args:
+        path_original_dataset (Path): Path to original dataset
+        dataset_name (str): Dataset name
+        num_total_clients (int): Number of total clients/partitions
+        lda_concentration_coarse (float): Concentration for first level LDA
+        lda_concentration_fine (float): Concentration for second level LDA
+
+    Returns:
+        Path: Path to where partitions are saved
+    """
     fed_dir = (
         path_original_dataset
         / f"{dataset_name}"
@@ -380,9 +388,9 @@ def gen_cifar100_partitions(
     )
 
     trainset = CIFAR100(root=path_original_dataset, train=True, download=True)
-
+    trainset_xy = (trainset.data, trainset.targets)
     partition_cifar100_and_save(
-        dataset=trainset,
+        dataset=trainset_xy,
         fed_dir=fed_dir,
         num_partitions=num_total_clients,
         lda_concentration_coarse=lda_concentration_coarse,

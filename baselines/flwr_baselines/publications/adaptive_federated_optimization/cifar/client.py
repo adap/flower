@@ -1,20 +1,23 @@
+"""Flower Client for CIFAR10/100."""
 from collections import OrderedDict
 from pathlib import Path
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Tuple
 
 import flwr as fl
 import numpy as np
 import ray
 import torch
-from cifar.utils import ClientDataset, get_cifar_model, get_transforms, test, train
 from flwr.common.typing import Scalar, Weights
-from torch.nn import Module
 from torch.utils.data import DataLoader
+
+from .utils import ClientDataset, get_cifar_model, get_transforms, test, train
 
 
 class RayClient(fl.client.NumPyClient):
+    """Ray Virtual Client."""
+
     def __init__(self, cid: str, fed_dir: Path, num_classes: int):
-        """Ray Virtual Client.
+        """Implements Ray Virtual Client.
 
         Args:
             cid (str): Client ID, in our case a str representation of an int.
