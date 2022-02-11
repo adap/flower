@@ -110,6 +110,12 @@ flwr::ParametersRes TorchClient<DataLoader>::get_parameters() {
   return flwr::Parameters(tensors, tensor_str); 
 };
 
+template<typename DataLoader>
+flwr::PropertiesRes TorchClient<DataLoader>::get_properties(flwr::PropertiesIns ins) {
+  flwr::Properties p;
+  return p.setPropertiesRes(static_cast<flwr::Properties>(ins.getPropertiesIns()));
+}
+
 /**
  * Refine the provided weights using the locally held dataset
  * Simple settings are used for testing, needs updates in the future

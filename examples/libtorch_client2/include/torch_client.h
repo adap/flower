@@ -62,6 +62,7 @@ class TorchClient : public flwr::Client {
         torch::Device device);
 
     virtual flwr::ParametersRes get_parameters() override;
+    virtual flwr::PropertiesRes get_properties(flwr::PropertiesIns ins) override;
     virtual flwr::EvaluateRes evaluate(flwr::EvaluateIns ins) override;
     virtual flwr::FitRes fit(flwr::FitIns ins) override;
 

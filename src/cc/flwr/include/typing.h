@@ -314,4 +314,45 @@ namespace flwr {
 		std::optional<Metrics> metrics = std::nullopt;
 	};
 
+	typedef std::map<std::string, flwr::Scalar> Config;
+	typedef std::map<std::string, flwr::Scalar> Properties;
+
+	class PropertiesIns
+	{
+	public:
+		PropertiesIns(){};
+
+		std::map<std::string, flwr::Scalar> getPropertiesIns()
+		{
+			return static_cast<std::map<std::string, flwr::Scalar>>(config);
+		}
+
+		void setPropertiesIns(Config c)
+		{
+			config = c;
+		}
+	private:
+		Config config;
+
+	}
+
+	class PropertiesRes
+	{
+        public:
+                PropertiesRes(){};
+
+                Properties getPropertiesRes()
+                {
+                        return properties;
+                }
+
+                void setPropertiesRes(Properties p)
+                {
+			properties = p;
+                }
+        private:
+                Properties properties;
+
+        }
+
 }
