@@ -7,11 +7,14 @@ if __name__ == "__main__":
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.5,
         fraction_eval=0.5,
+        min_available_clients = 5,
+        min_fit_clients = 5,
+        min_eval_clients = 5
     )
 
     # Start server
     fl.server.start_server(
         server_address="[::]:8080",
-        config={"num_rounds": 3},
+        config={"num_rounds": 10},
         strategy=strategy,
     )

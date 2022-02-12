@@ -8,6 +8,16 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
+import sys
+
+from flwr.common import SecretsManager
+from dissononce.processing.impl.handshakestate import HandshakeState
+from dissononce.processing.impl.symmetricstate import SymmetricState
+from dissononce.processing.impl.cipherstate import CipherState
+from dissononce.processing.handshakepatterns.interactive.XK import XKHandshakePattern
+from dissononce.cipher.aesgcm import AESGCMCipher
+from dissononce.dh.x25519.x25519 import X25519DH
+from dissononce.hash.sha256 import SHA256Hash
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -98,8 +108,40 @@ def main():
     # Load data (CIFAR-10)
     trainloader, testloader, num_examples = load_data()
 
+    if len(sys.argv) != 2: 
+        print("client.py <client-id>")
+        exit()
+
+    client_idx = int(sys.argv[1])
+
     # Flower client
     class CifarClient(fl.client.NumPyClient):
+        client_handshake_state = None
+        cipherstate = None
+
+        def get_hss(self):
+            if CifarClient.client_handshake_state:
+                return CifarClient.client_handshake_state
+
+            # prepare handshake objects
+            CifarClient.client_handshake_state = HandshakeState(
+                SymmetricState(
+                    CipherState(
+                        AESGCMCipher()
+                    ),
+                    SHA256Hash()
+                ),
+                X25519DH()
+            )
+
+            # initialize handshakestate objects
+            CifarClient.client_handshake_state.initialize(
+                XKHandshakePattern(), True, b'', 
+                s=SecretsManager.client_key_pair(client_idx), 
+                rs=SecretsManager.server_public_key()
+            )
+            return CifarClient.client_handshake_state
+
         def get_parameters(self):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 

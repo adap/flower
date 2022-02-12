@@ -123,6 +123,9 @@ class SimpleClientManager(ClientManager):
         min_num_clients: Optional[int] = None,
         criterion: Optional[Criterion] = None,
     ) -> List[ClientProxy]:
+        bad_client_proxys = list(filter(lambda proxy: proxy.auth == -1, self.clients.values()))
+        for client_proxy in bad_client_proxys:
+            self.unregister(client_proxy)
         """Sample a number of Flower ClientProxy instances."""
         # Block until at least num_clients are connected.
         if min_num_clients is None:

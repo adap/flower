@@ -34,6 +34,7 @@ from .typing import PropertiesRes as PropertiesRes
 from .typing import Reconnect as Reconnect
 from .typing import Scalar as Scalar
 from .typing import Weights as Weights
+from .secrets import SecretsManager as SecretsManager
 
 GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912  # == 512 * 1024 * 1024
 
@@ -58,4 +59,5 @@ __all__ = [
     "Scalar",
     "Weights",
     "weights_to_parameters",
+    "SecretsManager"
 ]

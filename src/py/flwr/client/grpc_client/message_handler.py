@@ -23,9 +23,11 @@ from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 # pylint: disable=missing-function-docstring
 
+from flwr import common
 
 class UnknownServerMessage(Exception):
     """Signifies that the received message is unknown."""
+
 
 
 def handle(
@@ -65,8 +67,29 @@ def _get_properties(
 
 
 def _fit(client: Client, fit_msg: ServerMessage.FitIns) -> ClientMessage:
+
     # Deserialize fit instruction
     fit_ins = serde.fit_ins_from_proto(fit_msg)
+
+    if fit_ins.parameters.tensor_type == "handshake0": 
+        print("received handshake signal")
+        # -> e, es
+        message_buffer = bytearray()
+        client.get_hss().write_message(b'', message_buffer)
+        params: common.Parameters = common.Parameters(tensors=[bytes(message_buffer)], tensor_type="handshake")
+        fit_res_msg = serde.fit_res_to_proto(common.FitRes(params, 1))
+        return ClientMessage(fit_res=fit_res_msg)
+    elif fit_ins.parameters.tensor_type == "handshake1": 
+        print("received handshake1")
+        # <- e, ee
+        client.get_hss().read_message(fit_ins.parameters.tensors[0], bytearray())
+        # -> s, se
+        message_buffer = bytearray()
+        client.get_hss().write_message(b'', message_buffer)
+        params: common.Parameters = common.Parameters([bytes(message_buffer)], "handshake")
+        fit_res_msg = serde.fit_res_to_proto(common.FitRes(params, 1))
+        return ClientMessage(fit_res=fit_res_msg)
+
     # Perform fit
     fit_res = client.fit(fit_ins)
     # Serialize fit result

@@ -18,6 +18,7 @@
 import timeit
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple, Union, cast
+from dissononce.processing.impl.handshakestate import HandshakeState
 
 import numpy as np
 
@@ -197,6 +198,9 @@ class NumPyClientWrapper(Client):
     def __init__(self, numpy_client: NumPyClient) -> None:
         self.numpy_client = numpy_client
 
+    def get_hss(self) -> HandshakeState: 
+        return self.numpy_client.get_hss()
+        
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         properties = self.numpy_client.get_properties(ins.config)
         return PropertiesRes(properties=properties)
