@@ -36,6 +36,7 @@ from flwr.common import (
     parameters_to_weights,
     weights_to_parameters,
 )
+from flwr.common.typing import ErrorRes
 
 from .client import Client
 
@@ -214,7 +215,11 @@ class NumPyClientWrapper(Client):
 
         # Train
         fit_begin = timeit.default_timer()
-        results = self.numpy_client.fit(parameters, ins.config)
+        try:
+            results = self.numpy_client.fit(parameters, ins.config)
+        except Exception as e:
+            return ErrorRes(msg=str(e))
+
         if len(results) == 2:
             print(DEPRECATION_WARNING_FIT)
             results = cast(Tuple[List[np.ndarray], int], results)

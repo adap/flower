@@ -1,0 +1,16 @@
+[build-system]
+requires = [
+    "poetry==1.1.8",
+]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "tensorflow_dropout"
+version = "0.1.0"
+description = "Tensorflow Dropout"
+authors = ["The Flower Authors <enquiries@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.2"
+flwr =  { path = "../../", develop = true } # "^0.15.0"  # For development:
+tensorflow-cpu = "2.4.1"

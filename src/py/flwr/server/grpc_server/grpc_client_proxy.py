@@ -57,6 +57,8 @@ class GrpcClientProxy(ClientProxy):
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(fit_ins=fit_ins_msg)
         )
+        if client_msg.HasField("error_res"):
+            raise Exception(client_msg.error_res.msg)
         fit_res = serde.fit_res_from_proto(client_msg.fit_res)
         return fit_res
 

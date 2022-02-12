@@ -112,3 +112,8 @@ class Disconnect:
     """Disconnect message from client to server."""
 
     reason: str
+
+
+@dataclass
+class ErrorRes:
+    msg: str

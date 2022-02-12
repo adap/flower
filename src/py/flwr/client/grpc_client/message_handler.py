@@ -19,6 +19,7 @@ from typing import Tuple
 
 from flwr.client.client import Client
 from flwr.common import serde
+from flwr.common.typing import ErrorRes
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 # pylint: disable=missing-function-docstring
@@ -69,6 +70,8 @@ def _fit(client: Client, fit_msg: ServerMessage.FitIns) -> ClientMessage:
     fit_ins = serde.fit_ins_from_proto(fit_msg)
     # Perform fit
     fit_res = client.fit(fit_ins)
+    if type(fit_res) == ErrorRes:
+        return ClientMessage(error_res=serde.error_res_to_proto(fit_res))
     # Serialize fit result
     fit_res_proto = serde.fit_res_to_proto(fit_res)
     return ClientMessage(fit_res=fit_res_proto)
