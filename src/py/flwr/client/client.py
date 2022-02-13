@@ -32,16 +32,6 @@ class Client(ABC):
     """Abstract base class for Flower clients."""
 
     @abstractmethod
-    def get_parameters(self) -> ParametersRes:
-        """Return the current local model parameters.
-
-        Returns
-        -------
-        ParametersRes
-            The current local model parameters.
-        """
-
-    @abstractmethod
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         """Return set of client's properties.
 
@@ -49,6 +39,16 @@ class Client(ABC):
         -------
         PropertiesRes
             Client's properties.
+        """
+
+    @abstractmethod
+    def get_parameters(self) -> ParametersRes:
+        """Return the current local model parameters.
+
+        Returns
+        -------
+        ParametersRes
+            The current local model parameters.
         """
 
     @abstractmethod
