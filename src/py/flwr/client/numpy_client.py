@@ -93,7 +93,6 @@ Example
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
-    @abstractmethod
     def get_properties(self, config: Config) -> Properties:
         """Returns a client's set of properties.
 
@@ -109,6 +108,7 @@ class NumPyClient(ABC):
         PropertiesRes :
             Response containing `properties` of the client.
         """
+        pass
 
     @abstractmethod
     def get_parameters(self) -> List[np.ndarray]:
@@ -189,6 +189,10 @@ class NumPyClient(ABC):
         supported for compatibility reasons. They will however be removed
         in a future release, please migrate to (float, int, Dict[str, Scalar]).
         """
+
+
+def has_get_properties(client: NumPyClient) -> bool:
+    return type(client).get_properties != NumPyClient.get_properties
 
 
 class NumPyClientWrapper(Client):

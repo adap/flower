@@ -31,15 +31,21 @@ from flwr.common import (
 class Client(ABC):
     """Abstract base class for Flower clients."""
 
-    @abstractmethod
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         """Return set of client's properties.
+
+        Parameters
+        ----------
+        ins : PropertiesIns
+            The get properties instructions received from the server containing
+            a dictionary of configuration values used to configure.
 
         Returns
         -------
         PropertiesRes
             Client's properties.
         """
+        pass
 
     @abstractmethod
     def get_parameters(self) -> ParametersRes:
@@ -87,3 +93,7 @@ class Client(ABC):
             other details such as the number of local data examples used for
             evaluation.
         """
+
+
+def has_get_properties(client: Client) -> bool:
+    return type(client).get_properties != Client.get_properties

@@ -17,7 +17,7 @@
 
 from typing import Tuple
 
-from flwr.client.client import Client
+from flwr.client.client import Client, has_get_properties
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
@@ -62,6 +62,11 @@ def _reconnect(
 def _get_properties(
     client: Client, properties_msg: ServerMessage.PropertiesIns
 ) -> ClientMessage:
+    # Check if client overrides get_properties
+    if not has_get_properties(client=client):
+        # If client does not override get_properties, don't call it
+        return ClientMessage()  # TODO
+
     # Deserialize get_properties instruction
     properties_ins = serde.properties_ins_from_proto(properties_msg)
     # Request for properties

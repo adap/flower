@@ -26,7 +26,9 @@ from .client import Client
 from .grpc_client.connection import grpc_connection
 from .grpc_client.message_handler import handle
 from .keras_client import KerasClient, KerasClientWrapper
+from .keras_client import has_get_properties as kerasclient_has_get_properties
 from .numpy_client import NumPyClient, NumPyClientWrapper
+from .numpy_client import has_get_properties as numpyclient_has_get_properties
 
 
 def start_client(
@@ -160,6 +162,12 @@ def start_numpy_client(
     # Wrap the NumPyClient
     flower_client = NumPyClientWrapper(client)
 
+    # Remove NumPyClientWrapper.get_properties with the base class version
+    # Client.get_properties if method was not overridden by user-provided
+    # NumPyClient instance
+    if not numpyclient_has_get_properties(client=client):
+        flower_client.get_properties = Client.get_properties
+
     # Start
     start_client(
         server_address=server_address,
@@ -206,6 +214,12 @@ def start_keras_client(
 
     # Wrap the Keras client
     flower_client = KerasClientWrapper(client)
+
+    # Remove KerasClientWrapper.get_properties with the base class version
+    # Client.get_properties if method was not overridden by user-provided
+    # KerasClient instance
+    if not kerasclient_has_get_properties(client=client):
+        flower_client.get_properties = Client.get_properties
 
     # Start
     start_client(
