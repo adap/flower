@@ -34,22 +34,29 @@ def handle(
     if server_msg.HasField("reconnect"):
         disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect)
         return disconnect_msg, sleep_duration, False
+    if server_msg.HasField("properties_ins"):
+        return _get_properties(client, server_msg.properties_ins), 0, True
     if server_msg.HasField("get_parameters"):
         return _get_parameters(client), 0, True
     if server_msg.HasField("fit_ins"):
         return _fit(client, server_msg.fit_ins), 0, True
     if server_msg.HasField("evaluate_ins"):
         return _evaluate(client, server_msg.evaluate_ins), 0, True
-    if server_msg.HasField("properties_ins"):
-        return _get_properties(client, server_msg.properties_ins), 0, True
     raise UnknownServerMessage()
 
 
-def _get_parameters(client: Client) -> ClientMessage:
-    # No need to deserialize get_parameters_msg (it's empty)
-    parameters_res = client.get_parameters()
-    parameters_res_proto = serde.parameters_res_to_proto(parameters_res)
-    return ClientMessage(parameters_res=parameters_res_proto)
+def _reconnect(
+    reconnect_msg: ServerMessage.Reconnect,
+) -> Tuple[ClientMessage, int]:
+    # Determine the reason for sending Disconnect message
+    reason = Reason.ACK
+    sleep_duration = None
+    if reconnect_msg.seconds is not None:
+        reason = Reason.RECONNECT
+        sleep_duration = reconnect_msg.seconds
+    # Build Disconnect message
+    disconnect = ClientMessage.Disconnect(reason=reason)
+    return ClientMessage(disconnect=disconnect), sleep_duration
 
 
 def _get_properties(
@@ -62,6 +69,13 @@ def _get_properties(
     # Serialize response
     properties_res_proto = serde.properties_res_to_proto(properties_res)
     return ClientMessage(properties_res=properties_res_proto)
+
+
+def _get_parameters(client: Client) -> ClientMessage:
+    # No need to deserialize get_parameters_msg (it's empty)
+    parameters_res = client.get_parameters()
+    parameters_res_proto = serde.parameters_res_to_proto(parameters_res)
+    return ClientMessage(parameters_res=parameters_res_proto)
 
 
 def _fit(client: Client, fit_msg: ServerMessage.FitIns) -> ClientMessage:
@@ -82,17 +96,3 @@ def _evaluate(client: Client, evaluate_msg: ServerMessage.EvaluateIns) -> Client
     # Serialize evaluate result
     evaluate_res_proto = serde.evaluate_res_to_proto(evaluate_res)
     return ClientMessage(evaluate_res=evaluate_res_proto)
-
-
-def _reconnect(
-    reconnect_msg: ServerMessage.Reconnect,
-) -> Tuple[ClientMessage, int]:
-    # Determine the reason for sending Disconnect message
-    reason = Reason.ACK
-    sleep_duration = None
-    if reconnect_msg.seconds is not None:
-        reason = Reason.RECONNECT
-        sleep_duration = reconnect_msg.seconds
-    # Build Disconnect message
-    disconnect = ClientMessage.Disconnect(reason=reason)
-    return ClientMessage(disconnect=disconnect), sleep_duration
