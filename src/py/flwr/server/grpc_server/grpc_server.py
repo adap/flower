@@ -47,7 +47,7 @@ def valid_certificates(certificates: Tuple[bytes, bytes, bytes]) -> bool:
     return is_valid
 
 
-def start_grpc_server(
+def start_grpc_server(  # pylint: disable=too-many-arguments
     client_manager: ClientManager,
     server_address: str,
     max_concurrent_workers: int = 1000,
