@@ -334,7 +334,7 @@ namespace flwr {
 	private:
 		Config config;
 
-	}
+	};
 
 	class PropertiesRes
 	{
@@ -353,6 +353,6 @@ namespace flwr {
         private:
                 Properties properties;
 
-        }
+        };
 
 }

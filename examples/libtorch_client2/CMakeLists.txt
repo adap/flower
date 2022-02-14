@@ -1,57 +1,114 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16)
 project(LIBTORCHCLIENT VERSION 0.10
   DESCRIPTION "Creates a LibTorch client that trains a ResNet18 model on CIFAR10."
   LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
+set(ABSL_PROPAGATE_CXX_STD ON)
 
-# Add dependencies
+######################
+### Add dependencies
 find_package(Torch REQUIRED)
 find_package(TorchVision REQUIRED)
+
+
+######################
+### Download gRPC 
+
 include(FetchContent)
 FetchContent_Declare(
   gRPC
   GIT_REPOSITORY https://github.com/grpc/grpc
-  GIT_TAG        v1.43.0
+  GIT_TAG        v1.43.2
 )
 set(FETCHCONTENT_QUIET OFF)
 FetchContent_MakeAvailable(gRPC)
 
-include(FindProtobuf)
-find_package(Protobuf REQUIRED)
+set(_PROTOBUF_LIBPROTOBUF libprotobuf)
+set(_REFLECTION grpc++_reflection)
+set(_PROTOBUF_PROTOC $<TARGET_FILE:protoc>)
+set(_GRPC_GRPCPP grpc++)
+if(CMAKE_CROSSCOMPILING)
+    find_program(_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)
+else()
+    set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:grpc_cpp_plugin>)
+endif()
 
-set(EXECUTABLE_NAME client)
-file(GLOB SRC_FILES src/*.cpp)
 
-file(GLOB FLWR_SRC_FILES ../../src/cc/flwr/src/*.cc)
-set(FLWR_INCLUDE_DIR ../../src/cc/flwr/include)
-set(PROTO_FILES ../../src/proto/flwr/proto/transport.proto)
+######################
+### FLWR_GRPC_PROTO
 
-add_library(flwr STATIC
-  ${FLWR_SRC_FILES}
-  ${PROTO_FILES})
-target_link_libraries(flwr
-  protobuf::libprotobuf
-  grpc++)
+get_filename_component(FLWR_PROTO "../../src/proto/flwr/proto/transport.proto" ABSOLUTE)
+get_filename_component(FLWR_PROTO_PATH "${FLWR_PROTO}" PATH)
+
+set(FLWR_PROTO_SRCS "${CMAKE_CURRENT_BINARY_DIR}/transport.pb.cc")
+set(FLWR_PROTO_HDRS "${CMAKE_CURRENT_BINARY_DIR}/transport.pb.h")
+set(FLWR_GRPC_SRCS "${CMAKE_CURRENT_BINARY_DIR}/transport.grpc.pb.cc")
+set(FLAR_GRPC_HDRS "${CMAKE_CURRENT_BINARY_DIR}/transport.grpc.pb.h")
+
+# External building command to generate gRPC source files.
+add_custom_command(
+  OUTPUT "${FLWR_PROTO_SRCS}" "${FLWR_PROTO_HDRS}" "${FLWR_GRPC_SRCS}" "${FLWR_GRPC_HDRS}"
+  COMMAND ${_PROTOBUF_PROTOC}
+  ARGS  --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
+        --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
+	-I "${FLWR_PROTO_PATH}"
+        --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+        "${FLWR_PROTO}"
+  DEPENDS "${FLWR_PROTO}"
+)
+
+add_library(flwr_grpc_proto 
+  ${FLWR_GRPC_SRCS}
+  ${FLWR_GRPC_HDRS}
+  ${FLWR_PROTO_SRCS}
+  ${FLWR_PROTO_HDRS}
+)
+
+target_include_directories(flwr_grpc_proto PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(flwr_grpc_proto
+  ${_REFLECTION}
+  ${_GRPC_GRPCPP}
+  ${_PROTOBUF_LIBPROTOBUF}
+)
+
+######################
+### FLWR_LIB
+
+file(GLOB FLWR_SRCS "../../src/cc/flwr/src/*.cc")
+set(FLWR_INCLUDE_DIR "../../src/cc/flwr/include")
+
+add_library(flwr ${FLWR_SRCS})
+
 target_include_directories(flwr PUBLIC
-  proto
   ${CMAKE_CURRENT_BINARY_DIR}
-  ${FLWR_INCLUDE_DIR})
-protobuf_generate(TARGET flwr LANGUAGE cpp)
-cmake_policy(SET CMP0026 OLD)
-get_target_property(grpc_cpp_plugin_location grpc_cpp_plugin LOCATION)
-protobuf_generate(TARGET flwr LANGUAGE grpc GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc PLUGIN "protoc-gen-grpc=${grpc_cpp_plugin_location}")
+  ${FLWR_INCLUDE_DIR}
+)
 
-add_executable(${EXECUTABLE_NAME}
-  ${FLWR_INCLUDE_FILES}
-  ${PROTO_FILES}
-  ${SRC_FILES})
+target_link_libraries(flwr
+  flwr_grpc_proto
+)
+
+######################
+### FLWR_CLIENT
+
+file(GLOB FLWR_CLIENT_SRCS src/*.cc)
+set(EXECUTABLE_NAME flwr_client)
+add_executable(${EXECUTABLE_NAME} ${FLWR_CLIENT_SRCS})
+
 target_include_directories(${EXECUTABLE_NAME} PUBLIC
   include
   ${FLWR_INCLUDE_DIR}
-  ${TORCH_INCLUDE_DIRS})
+  ${TORCH_INCLUDE_DIRS}
+)
+
 target_link_libraries(${EXECUTABLE_NAME}
   TorchVision::TorchVision
-  flwr)
+  flwr
+)
+
+######################
+### Helper functions 
 
 function(check_files BASE_DIR FILES_TO_CHECK FILE_MD5S MISSING_FILES)
     foreach(FILE_TO_CHECK ${${FILES_TO_CHECK}})
