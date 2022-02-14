@@ -52,7 +52,7 @@ def start_grpc_server(
     server_address: str,
     max_concurrent_workers: int = 1000,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    keepalive_time_ms: int = 7200000,
+    keepalive_time_ms: int = 210000,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
 ) -> grpc.Server:
     """Create gRPC server and return instance of grpc.Server.
@@ -140,7 +140,7 @@ def start_grpc_server(
         # to set it to 210000 (3 minutes and 30 seconds to cover Azure and others).
         # Users using mobile Flower clients may increase it if their server environment
         # allows them to have long running idle TCP connections.
-        ("grpc.keepalive_time_ms", 210000),
+        ("grpc.keepalive_time_ms", keepalive_time_ms),
         # Setting this to zero will allow sending unlimited keepalive's between sending
         # a data frame. This is especially important
         ("grpc.http2.max_pings_without_data", 0),
