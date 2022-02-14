@@ -33,7 +33,7 @@ class MLCubeClient(fl.client.NumPyClient):
 
 
 def main():
-    """Start Flower client
+    """Start Flower client.
 
     Use first argument passed as workspace name
     """

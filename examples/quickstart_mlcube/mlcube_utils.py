@@ -107,7 +107,7 @@ def write_hyperparameters(workspace: str, optimizer, epochs, batch_size):
 
 
 def get_model():
-    """Create example model"""
+    """Create example model."""
     model = tf.keras.models.Sequential(
         [
             tf.keras.layers.Flatten(input_shape=(28, 28)),
