@@ -121,6 +121,16 @@ class NumPyClient(ABC):
         """
 
     @abstractmethod
+    def get_parameters(self) -> List[np.ndarray]:
+        """Return the current local model parameters.
+
+        Returns
+        -------
+        parameters : List[numpy.ndarray]
+            The local model parameters as a list of NumPy ndarrays.
+        """
+
+    @abstractmethod
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
     ) -> Union[
