@@ -74,11 +74,12 @@ class SleepingClientProxy(ClientProxy):
 class SuccessClient(ClientProxy):
     """Test class."""
 
-    def get_parameters(self) -> ParametersRes:
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         # This method is not expected to be called
         raise Exception()
 
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_parameters(self) -> ParametersRes:
+        # This method is not expected to be called
         raise Exception()
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -96,10 +97,10 @@ class SuccessClient(ClientProxy):
 class FailingClient(ClientProxy):
     """Test class."""
 
-    def get_parameters(self) -> ParametersRes:
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         raise Exception()
 
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_parameters(self) -> ParametersRes:
         raise Exception()
 
     def fit(self, ins: FitIns) -> FitRes:

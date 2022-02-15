@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides contextmanager which manages a gRPC channel to connect to the
-server."""
+"""Contextmanager managing a gRPC channel to the Flower server."""
+
+
 from contextlib import contextmanager
 from logging import DEBUG, INFO
 from queue import Queue
@@ -26,9 +27,11 @@ from flwr.common.logger import log
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub
 
-# Uncomment these flags in case you are debugging
+# The following flags can be uncommented for debugging. Other possible values:
+# https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
+# import os
 # os.environ["GRPC_VERBOSITY"] = "debug"
-# os.environ["GRPC_TRACE"] = "connectivity_state"
+# os.environ["GRPC_TRACE"] = "tcp,http"
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -49,7 +52,7 @@ def grpc_connection(
     server_address : str
         The IPv6 address of the server. If the Flower server runs on the same machine
         on port 8080, then `server_address` would be `"[::]:8080"`.
-    grpc_max_message_length : int
+    max_message_length : int
         The maximum length of gRPC messages that can be exchanged with the Flower
         server. The default should be sufficient for most models. Users who train
         very large models might need to increase this value. Note that the Flower
@@ -73,7 +76,7 @@ def grpc_connection(
     >>> from pathlib import Path
     >>> with grpc_connection(
     >>>     server_address,
-    >>>     max_message_length=grpc_max_message_length,
+    >>>     max_message_length=max_message_length,
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> ) as conn:
     >>>     receive, send = conn
@@ -81,6 +84,8 @@ def grpc_connection(
     >>>     # do something here
     >>>     send(client_message)
     """
+    # Possible options:
+    # https://github.com/grpc/grpc/blob/v1.43.x/include/grpc/impl/codegen/grpc_types.h
     channel_options = [
         ("grpc.max_send_message_length", max_message_length),
         ("grpc.max_receive_message_length", max_message_length),

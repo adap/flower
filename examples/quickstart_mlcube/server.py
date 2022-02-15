@@ -8,7 +8,9 @@ def main():
     strategy = FedAvg(initial_parameters=mlcube.initial_parameters())
     # Start Flower server for three rounds of federated learning
     fl.server.start_server(
-        "0.0.0.0:8080", strategy=strategy, config={"num_rounds": 3},
+        "0.0.0.0:8080",
+        strategy=strategy,
+        config={"num_rounds": 3},
     )
 
 
