@@ -219,7 +219,6 @@ class Server:
         results, failures = evaluate_clients(
             client_instructions,
             max_workers=self.max_workers,
-            round_timeout=None,
         )
         log(
             DEBUG,
@@ -274,7 +273,6 @@ class Server:
         results, failures = fit_clients(
             client_instructions,
             max_workers=self.max_workers,
-            round_timeout=None,
         )
         log(
             DEBUG,
@@ -312,7 +310,6 @@ class Server:
         _ = reconnect_clients(
             client_instructions=client_instructions,
             max_workers=self.max_workers,
-            round_timeout=None,
         )
 
     def _get_initial_parameters(self) -> Parameters:
@@ -337,7 +334,6 @@ class Server:
 def reconnect_clients(
     client_instructions: List[Tuple[ClientProxy, Reconnect]],
     max_workers: Optional[int],
-    round_timeout: Optional[float] = None,
 ) -> ReconnectResultsAndFailures:
     """Instruct clients to disconnect and never reconnect."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -345,9 +341,9 @@ def reconnect_clients(
             executor.submit(reconnect_client, client_proxy, ins)
             for client_proxy, ins in client_instructions
         }
-        finished_fs, unfinished_fs = concurrent.futures.wait(
+        finished_fs, _ = concurrent.futures.wait(
             fs=submitted_fs,
-            timeout=round_timeout,
+            timeout=None,
         )
 
     # Gather results
@@ -360,9 +356,6 @@ def reconnect_clients(
         else:
             result = future.result()
             results.append(result)
-    for future in unfinished_fs:
-        failures.append(TimeoutError())
-
     return results, failures
 
 
@@ -377,7 +370,6 @@ def reconnect_client(
 def fit_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]],
     max_workers: Optional[int],
-    round_timeout: Optional[float] = None,
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -385,9 +377,9 @@ def fit_clients(
             executor.submit(fit_client, client_proxy, ins)
             for client_proxy, ins in client_instructions
         }
-        finished_fs, unfinished_fs = concurrent.futures.wait(
+        finished_fs, _ = concurrent.futures.wait(
             fs=submitted_fs,
-            timeout=round_timeout,
+            timeout=None,
         )
 
     # Gather results
@@ -401,9 +393,6 @@ def fit_clients(
             # Success case
             result = future.result()
             results.append(result)
-    for future in unfinished_fs:
-        failures.append(TimeoutError())
-
     return results, failures
 
 
@@ -416,7 +405,6 @@ def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
 def evaluate_clients(
     client_instructions: List[Tuple[ClientProxy, EvaluateIns]],
     max_workers: Optional[int],
-    round_timeout: Optional[float] = None,
 ) -> EvaluateResultsAndFailures:
     """Evaluate parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -424,9 +412,9 @@ def evaluate_clients(
             executor.submit(evaluate_client, client_proxy, ins)
             for client_proxy, ins in client_instructions
         }
-        finished_fs, unfinished_fs = concurrent.futures.wait(
+        finished_fs, _ = concurrent.futures.wait(
             fs=submitted_fs,
-            timeout=round_timeout,
+            timeout=None,
         )
 
     # Gather results
@@ -440,9 +428,6 @@ def evaluate_clients(
             # Success case
             result = future.result()
             results.append(result)
-    for future in unfinished_fs:
-        failures.append(TimeoutError())
-
     return results, failures
 
 
