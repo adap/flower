@@ -15,8 +15,7 @@
 """Flower server tests."""
 
 
-import time
-from typing import List, Tuple
+from typing import List
 
 import numpy as np
 
@@ -37,38 +36,6 @@ from flwr.server.client_manager import SimpleClientManager
 
 from .client_proxy import ClientProxy
 from .server import Server, evaluate_clients, fit_clients
-
-
-class SleepingClientProxy(ClientProxy):
-    """ClientProxy that blocks for exec_time seconds."""
-
-    def __init__(self, cid: str, exec_time: float):
-        super().__init__(cid)
-        self.cid = cid
-        self.exec_time = exec_time
-
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
-        raise Exception()
-
-    def get_parameters(self) -> ParametersRes:
-        # This method is not expected to be called
-        raise Exception()
-
-    def fit(self, ins: FitIns) -> FitRes:
-        # Sleep to simulate client-side execution
-        time.sleep(self.exec_time)
-
-        # Return some result
-        arr = np.array([[1, 2], [3, 4], [5, 6]])
-        arr_serialized = ndarray_to_bytes(arr)
-        return FitRes(Parameters(tensors=[arr_serialized], tensor_type=""), 1, 1, 12.3)
-
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        # This method is not expected to be called
-        raise Exception()
-
-    def reconnect(self, reconnect: Reconnect) -> Disconnect:
-        raise Exception()
 
 
 class SuccessClient(ClientProxy):
@@ -168,96 +135,3 @@ def test_set_max_workers() -> None:
 
     # Assert
     assert server.max_workers == 42
-
-
-def _create_client_instructions(
-    exec_times: List[float],
-) -> List[Tuple[ClientProxy, FitIns]]:
-    clients: List[ClientProxy] = [
-        SleepingClientProxy(str(i), t) for i, t in enumerate(exec_times)
-    ]
-    arr = np.array([[1, 2], [3, 4], [5, 6]])
-    arr_serialized = ndarray_to_bytes(arr)
-    ins: FitIns = FitIns(Parameters(tensors=[arr_serialized], tensor_type=""), {})
-    client_instructions = [(cp, ins) for cp in clients]
-    return client_instructions
-
-
-def test_execute_round_timeout_none() -> None:
-    """Test if all results are returned."""
-    # Prepare
-    round_timeout = None
-    exec_times = [0.1, 0.3, 0.2]
-    client_instructions = _create_client_instructions(exec_times)
-
-    # Execute
-    results, failures = fit_clients(
-        client_instructions,
-        max_workers=None,
-        round_timeout=round_timeout,
-    )
-
-    # Assert
-    assert len(results) + len(failures) == len(exec_times)
-    assert len(results) == len(exec_times)
-    assert len(failures) == 0
-
-
-def test_execute_round_timeout_high() -> None:
-    """Test if all results are returned."""
-    # Prepare
-    round_timeout = 2
-    exec_times = [1.1, 1.3, 1.2]
-    client_instructions = _create_client_instructions(exec_times)
-
-    # Execute
-    results, failures = fit_clients(
-        client_instructions,
-        max_workers=None,
-        round_timeout=round_timeout,
-    )
-
-    # Assert
-    assert len(results) + len(failures) == len(exec_times)
-    assert len(results) == len(exec_times)
-    assert len(failures) == 0
-
-
-def test_execute_round_timeout_some() -> None:
-    """Test if fast clients finish successfully."""
-    # Prepare
-    round_timeout = 1.35
-    exec_times = [1.1, 1.3, 1.2, 1.5, 1.4]
-    client_instructions = _create_client_instructions(exec_times)
-
-    # Execute
-    results, failures = fit_clients(
-        client_instructions,
-        max_workers=None,
-        round_timeout=round_timeout,
-    )
-
-    # Assert
-    assert len(results) + len(failures) == len(exec_times)
-    assert len(results) == 3
-    assert len(failures) == 2
-
-
-def test_execute_round_timeout_all() -> None:
-    """Test if all stragglers are returned as failures."""
-    # Prepare
-    round_timeout = 0.5
-    exec_times = [1.1, 1.3, 1.2, 1.5, 1.4]
-    client_instructions = _create_client_instructions(exec_times)
-
-    # Execute
-    results, failures = fit_clients(
-        client_instructions,
-        max_workers=None,
-        round_timeout=round_timeout,
-    )
-
-    # Assert
-    assert len(results) + len(failures) == len(exec_times)
-    assert len(results) == 0
-    assert len(failures) == len(exec_times)
