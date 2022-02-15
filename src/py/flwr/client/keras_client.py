@@ -44,16 +44,6 @@ class KerasClient(ABC):
     """Abstract base class for Flower clients which use Keras."""
 
     @abstractmethod
-    def get_weights(self) -> Weights:
-        """Return the current local model weights.
-
-        Returns:
-            The local model weights as a list of NumPy ndarrays. In many cases,
-            it will be sufficient to just return the return value of Keras'
-            `model.get_weights()`.
-        """
-
-    @abstractmethod
     def get_properties(self, config: Config) -> Properties:
         """Returns a client's set of properties.
 
@@ -68,6 +58,16 @@ class KerasClient(ABC):
         -------
         PropertiesRes:
             Response containing `properties` of the client.
+        """
+
+    @abstractmethod
+    def get_weights(self) -> Weights:
+        """Return the current local model weights.
+
+        Returns:
+            The local model weights as a list of NumPy ndarrays. In many cases,
+            it will be sufficient to just return the return value of Keras'
+            `model.get_weights()`.
         """
 
     @abstractmethod
@@ -130,15 +130,16 @@ class KerasClientWrapper(Client):
     def __init__(self, keras_client: KerasClient) -> None:
         self.keras_client = keras_client
 
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        """Return the current client properties."""
+        properties = self.keras_client.get_properties(ins.config)
+        return PropertiesRes(properties=properties)
+
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
         weights = self.keras_client.get_weights()
         parameters = weights_to_parameters(weights)
         return ParametersRes(parameters=parameters)
-
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
-        properties = self.keras_client.get_properties(ins.config)
-        return PropertiesRes(properties=properties)
 
     def fit(self, ins: FitIns) -> FitRes:
         """Refine the provided weights using the locally held dataset."""
