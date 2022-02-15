@@ -27,7 +27,10 @@ def main(cfg: DictConfig) -> None:
     eval_fn = call(cfg.get_eval_fn, path_original_dataset=path_original_dataset)
 
     # Define client resources and ray configs
-    client_resources = {"num_cpus": cfg.cpus_per_client, "num_gpus": cfg.gpus_per_client}
+    client_resources = {
+        "num_cpus": cfg.cpus_per_client,
+        "num_gpus": cfg.gpus_per_client,
+    }
     ray_config = {"include_dashboard": cfg.ray_config.include_dashboard}
 
     on_fit_config_fn = call(
