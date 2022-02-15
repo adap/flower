@@ -82,11 +82,11 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
         TCP connections by terminating them after some time (4 minutes in the case
         of Azure). Flower does not use application-level keepalive signals and relies
         on the assumption that the transport layer will fail in cases where the
-        connection is not longer active. `keepalive_time_ms` can be used to customize
+        connection is no longer active. `keepalive_time_ms` can be used to customize
         the keepalive interval for specific environments. The default Flower gRPC
         keepalive of 210000 ms (3 minutes 30 seconds) ensures that Flower can keep
-        the long running streaming connection alive most cloud providers. The actual
-        gRPC default of this setting is 7200000 (2 hours), which results dropped
+        the long running streaming connection alive in most environments. The actual
+        gRPC default of this setting is 7200000 (2 hours), which results in dropped
         connections in some cloud environments.
 
         These settings are related to the issue described here:
