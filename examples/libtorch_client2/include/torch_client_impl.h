@@ -112,8 +112,9 @@ flwr::ParametersRes TorchClient<DataLoader>::get_parameters() {
 
 template<typename DataLoader>
 flwr::PropertiesRes TorchClient<DataLoader>::get_properties(flwr::PropertiesIns ins) {
-  flwr::Properties p;
-  return p.setPropertiesRes(static_cast<flwr::Properties>(ins.getPropertiesIns()));
+  flwr::PropertiesRes p;
+  p.setPropertiesRes(static_cast<flwr::Properties>(ins.getPropertiesIns()));
+  return p;
 }
 
 /**
