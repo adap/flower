@@ -45,7 +45,7 @@ torch = "^1.10.1"
 torchvision = "^0.11.2"
 omegaconf = { git = "https://github.com/pedropgusmao/omegaconf.git" } 
 hydra-core = { git = "https://github.com/pedropgusmao/hydra.git", branch="main" }
-ray = { extras = ["default"], version = "^1.9.1"}
+ray = { extras = ["default"], version = "^1.9.2"}
 numpy = "^1.20.0"
 matplotlib = "^3.5.1"
 
