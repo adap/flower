@@ -30,7 +30,7 @@ Note: If you use this implementation in your work, please remember to cite the o
 ## Running experiments
 
 Experiments are organized by dataset under the `conf` folder using [hydra](https://hydra.cc/docs/tutorials/), e.g. `conf/cifar10` for the CIFAR10 dataset. 
-Each dataset contains a `config.yaml` file containing common setup variables and a `strategy` subforlder with different strategy parameters.
+Each dataset contains a `config.yaml` file containing common setup variables and a `strategy` subfolder with different strategy parameters.
 
 You can run specific experiments by passing a `conf` subfolder and a given `strategy` as follows. 
 ```sh
