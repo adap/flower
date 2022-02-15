@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides contextmanager which manages a gRPC channel to connect to the
-server."""
+"""Contextmanager managing a gRPC channel to the Flower server."""
+
+
 from contextlib import contextmanager
 from logging import DEBUG, INFO
 from queue import Queue
@@ -26,12 +27,11 @@ from flwr.common.logger import log
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub
 
-# Uncomment these flags in case you are debugging
+# The following flags can be uncommented for debugging. Other possible values:
+# https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
 # import os
 # os.environ["GRPC_VERBOSITY"] = "debug"
 # os.environ["GRPC_TRACE"] = "tcp,http"
-# Check possible values here:
-# https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:

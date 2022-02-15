@@ -77,23 +77,25 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
         Maximum message length that the server can send or receive.
         Int valued in bytes. -1 means unlimited. (default: GRPC_MAX_MESSAGE_LENGTH)
     keepalive_time_ms : int
-        The primary reason we are customizing this setting is that some cloud
-        providers, for example, Azure clean up idle TCP connections aggressively
-        and terminate them after some time (in case of Azure 4 minutes). As of
-        2022-02-13 Flower has no application level keepalive signals and relies on
-        the assumption that the transport layer will fail in case the connection is
-        no longer active. Configuring the gRPC keepalive to 210000 seconds (3 minutes
-        30 seconds) will ensure that on most cloud providers we can keep the long
-        running streaming connection which is as of 2022-02-13 the default in Flower.
-        The actual gRPC default of this setting is 7200000 (2 hours).
+        Flower uses a default gRPC keepalive time of 210000ms (3 minutes 30 seconds)
+        because some cloud providers (for example, Azure) agressively clean up idle
+        TCP connections by terminating them after some time (4 minutes in the case
+        of Azure). Flower does not use application-level keepalive signals and relies
+        on the assumption that the transport layer will fail in cases where the
+        connection is not longer active. `keepalive_time_ms` can be used to customize
+        the keepalive interval for specific environments. The default Flower gRPC
+        keepalive of 210000 ms (3 minutes 30 seconds) ensures that Flower can keep
+        the long running streaming connection alive most cloud providers. The actual
+        gRPC default of this setting is 7200000 (2 hours), which results dropped
+        connections in some cloud environments.
 
         These settings are related to the issue described here:
         - https://github.com/grpc/proposal/blob/master/A8-client-side-keepalive.md
         - https://github.com/grpc/grpc/blob/master/doc/keepalive.md
         - https://grpc.io/docs/guides/performance/
 
-        Users using mobile Flower clients may increase it if their server environment
-        allows them to have long running idle TCP connections.
+        Mobile Flower clients may choose to increase this value if their server
+        environment allows long-running idle TCP connections.
         (default: 210000)
     certificates : Tuple[bytes, bytes, bytes] (default: None)
         Tuple containing root certificate, server certificate, and private key to
@@ -136,13 +138,14 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
         # Maximum message length that the channel can receive.
         # Int valued, bytes. -1 means unlimited.
         ("grpc.max_receive_message_length", max_message_length),
-        # The actual gRPC default of this setting is 7200000 (2 hours). We are going
-        # to set it to 210000 (3 minutes and 30 seconds to cover Azure and others).
-        # Users using mobile Flower clients may increase it if their server environment
-        # allows them to have long running idle TCP connections.
+        # The gRPC default for this setting is 7200000 (2 hours). Flower uses a
+        # customized default of 210000 (3 minutes and 30 seconds) to improve
+        # compatibility with popular cloud providers. Mobile Flower clients may
+        # choose to increase this value if their server environment allows
+        # long-running idle TCP connections.
         ("grpc.keepalive_time_ms", keepalive_time_ms),
-        # Setting this to zero will allow sending unlimited keepalive's between sending
-        # a data frame. This is especially important
+        # Setting this to zero will allow sending unlimited keepalive pings in between
+        # sending actual data frames.
         ("grpc.http2.max_pings_without_data", 0),
     ]
 
