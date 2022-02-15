@@ -94,16 +94,6 @@ class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
     @abstractmethod
-    def get_parameters(self) -> List[np.ndarray]:
-        """Return the current local model parameters.
-
-        Returns
-        -------
-        parameters : List[numpy.ndarray]
-            The local model parameters as a list of NumPy ndarrays.
-        """
-
-    @abstractmethod
     def get_properties(self, config: Config) -> Properties:
         """Returns a client's set of properties.
 
@@ -118,6 +108,16 @@ class NumPyClient(ABC):
         -------
         PropertiesRes :
             Response containing `properties` of the client.
+        """
+
+    @abstractmethod
+    def get_parameters(self) -> List[np.ndarray]:
+        """Return the current local model parameters.
+
+        Returns
+        -------
+        parameters : List[numpy.ndarray]
+            The local model parameters as a list of NumPy ndarrays.
         """
 
     @abstractmethod
@@ -198,6 +198,7 @@ class NumPyClientWrapper(Client):
         self.numpy_client = numpy_client
 
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        """Return the current client properties."""
         properties = self.numpy_client.get_properties(ins.config)
         return PropertiesRes(properties=properties)
 
