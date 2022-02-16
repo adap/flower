@@ -54,7 +54,7 @@ protobuf = "^3.12.1"
 importlib-metadata = { version = "^1.4.0", markers = "python_version < '3.8'" }
 dataclasses = { version = "==0.6", markers = "python_version < '3.7'" }
 # Optional dependencies
-ray = { extras = ["default"], version = "==1.6.0", optional = true }
+ray = { extras = ["default"], version = "^1.9.2", optional = true }
 
 [tool.poetry.extras]
 simulation = ["ray"]
@@ -71,7 +71,7 @@ types-dataclasses = "==0.6.2"
 isort = "==5.10.1"
 black = "==21.12b0"
 docformatter = "==1.4"
-mypy = "==0.910"
+mypy = "==0.931"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
@@ -124,4 +124,3 @@ ignore_errors = true
 module = "torch.*"
 follow_imports = "skip"
 follow_imports_for_stubs = true
-
