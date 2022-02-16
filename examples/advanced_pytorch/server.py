@@ -1,5 +1,6 @@
 from typing import Dict, Optional, Tuple
 from collections import OrderedDict
+import argparse
 
 import flwr as fl
 import torch
@@ -7,6 +8,7 @@ import torch
 import utils
 
 import warnings
+
 warnings.filterwarnings("ignore")
 
 
@@ -32,17 +34,19 @@ def evaluate_config(rnd: int):
     return {"val_steps": val_steps}
 
 
-def get_eval_fn(model):
+def get_eval_fn(model: torch.nn.Module, toy: bool):
     """Return an evaluation function for server-side evaluation."""
 
     # Load data and model here to avoid the overhead of doing it in `evaluate` itself
     trainset, _, _ = utils.load_data()
 
-    # Use the last 5k training examples as a validation set
     n_train = len(trainset)
-    # valset = torch.utils.data.Subset(trainset, range(n_train - 5000, n_train))
-    valset = torch.utils.data.Subset(trainset, range(n_train - 10, n_train))
-
+    if toy:
+        # use only 10 samples as validation set
+        valset = torch.utils.data.Subset(trainset, range(n_train - 10, n_train))
+    else:
+        # Use the last 5k training examples as a validation set
+        valset = torch.utils.data.Subset(trainset, range(n_train - 5000, n_train))
 
     # The `evaluate` function will be called after every round
     def evaluate(
@@ -60,21 +64,37 @@ def get_eval_fn(model):
 
 
 def main():
+    """
     # Load model for
     # 1. server-side parameter initialization
     # 2. server-side parameter evaluation
+    """
+
+    # Parse command line argument `partition`
+    parser = argparse.ArgumentParser(description="Flower")
+    parser.add_argument(
+        "--toy",
+        type=bool,
+        default=False,
+        required=False,
+        help="Set to true to use only 10 datasamples for validation. \
+            Useful for testing purposes. Default: False",
+    )
+
+    args = parser.parse_args()
+
     model = utils.load_efficientnet(classes=10)
 
     model_weights = [val.cpu().numpy() for _, val in model.state_dict().items()]
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
-        # fraction_fit=0.3,
-        # fraction_eval=0.2,
-        # min_fit_clients=3,
-        # min_eval_clients=2,
-        # min_available_clients=10,
-        eval_fn=get_eval_fn(model),
+        fraction_fit=0.3,
+        fraction_eval=0.2,
+        min_fit_clients=3,
+        min_eval_clients=2,
+        min_available_clients=10,
+        eval_fn=get_eval_fn(model, args.toy),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
         initial_parameters=fl.common.weights_to_parameters(model_weights),
@@ -83,5 +103,6 @@ def main():
     # Start Flower server for four rounds of federated learning
     fl.server.start_server("0.0.0.0:8080", config={"num_rounds": 4}, strategy=strategy)
 
-if  __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

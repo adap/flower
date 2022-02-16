@@ -70,9 +70,9 @@ class CifarClient(fl.client.NumPyClient):
         steps: int = config["val_steps"]
 
         # Evaluate global model parameters on the local test data and return results
-        testloader = DataLoader(self.testset, batch_size=steps)
+        testloader = DataLoader(self.testset, batch_size=32)
 
-        loss, accuracy = utils.test(self.model, testloader)
+        loss, accuracy = utils.test(self.model, testloader, steps)
         return float(loss), len(self.testset), {"accuracy": float(accuracy)}
 
 
@@ -99,6 +99,15 @@ def main() -> None:
     # Parse command line argument `partition`
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument("--partition", type=int, choices=range(0, 10), required=True)
+    parser.add_argument(
+        "--toy",
+        type=bool,
+        default=False,
+        required=False,
+        help="Set to true to quicky run the client using only 10 datasamples. \
+        Useful for testing purposes. Default: False",
+    )
+
     args = parser.parse_args()
 
     # Load PyTorch model
@@ -107,7 +116,7 @@ def main() -> None:
     # Load a subset of CIFAR-10 to simulate the local data partition
     trainset, testset = utils.load_partition(args.partition)
 
-    if True:
+    if args.toy:
         trainset = torch.utils.data.Subset(trainset, range(10))
         testset = torch.utils.data.Subset(testset, range(10))
 
@@ -117,5 +126,5 @@ def main() -> None:
     fl.client.start_numpy_client("0.0.0.0:8080", client=client)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
