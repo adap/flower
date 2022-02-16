@@ -12,6 +12,16 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
 
+global___Code = Code
+class _Code(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[Code.V], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+    OK = Code.V(0)
+    GET_PARAMETERS_NOT_IMPLEMENTED = Code.V(1)
+class Code(metaclass=_Code):
+    V = typing.NewType('V', builtins.int)
+OK = Code.V(0)
+GET_PARAMETERS_NOT_IMPLEMENTED = Code.V(1)
+
 global___Reason = Reason
 class _Reason(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[Reason.V], builtins.type):
     DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
@@ -27,6 +37,21 @@ RECONNECT = Reason.V(1)
 POWER_DISCONNECTED = Reason.V(2)
 WIFI_UNAVAILABLE = Reason.V(3)
 ACK = Reason.V(4)
+
+class Status(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    CODE_FIELD_NUMBER: builtins.int
+    MESSAGE_FIELD_NUMBER: builtins.int
+    code: global___Code.V = ...
+    message: typing.Text = ...
+
+    def __init__(self,
+        *,
+        code : global___Code.V = ...,
+        message : typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal[u"code",b"code",u"message",b"message"]) -> None: ...
+global___Status = Status
 
 class Parameters(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
@@ -328,16 +353,22 @@ class ClientMessage(google.protobuf.message.Message):
             def HasField(self, field_name: typing_extensions.Literal[u"value",b"value"]) -> builtins.bool: ...
             def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
 
+        STATUS_FIELD_NUMBER: builtins.int
         PROPERTIES_FIELD_NUMBER: builtins.int
+
+        @property
+        def status(self) -> global___Status: ...
 
         @property
         def properties(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
 
         def __init__(self,
             *,
+            status : typing.Optional[global___Status] = ...,
             properties : typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"properties",b"properties"]) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal[u"status",b"status"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal[u"properties",b"properties",u"status",b"status"]) -> None: ...
 
     DISCONNECT_FIELD_NUMBER: builtins.int
     PARAMETERS_RES_FIELD_NUMBER: builtins.int
