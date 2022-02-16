@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# download the CIFAR10 dataset if not already downloaded
+python -c "from torchvision.datasets import CIFAR10; \
+    CIFAR10('./dataset', train=True, download=True)" 
+
 python server.py &
 sleep 2 # Sleep for 2s to give the server enough time to start
 
