@@ -313,5 +313,6 @@ def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
 
 def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
     """Deserialize... ."""
-    scalar = getattr(scalar_msg, scalar_msg.WhichOneof("scalar"))
+    scalar_field = scalar_msg.WhichOneof("scalar")
+    scalar = getattr(scalar_msg, cast(str, scalar_field))
     return cast(typing.Scalar, scalar)
