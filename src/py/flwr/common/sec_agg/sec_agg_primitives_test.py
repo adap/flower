@@ -190,7 +190,7 @@ def test_weights_manipulation():
 
 
 def test_all():
-    test_key_generation
+    test_key_generation()
     test_serde_private_keys()
     test_serde_public_keys()
     test_encrypt_decrypt()

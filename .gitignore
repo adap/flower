@@ -1,6 +1,7 @@
 # Flower files
 .flower_ops
 data/
+.idea/
 doc/source/api_documentation
 doc/source/_build
 flwr_logs
