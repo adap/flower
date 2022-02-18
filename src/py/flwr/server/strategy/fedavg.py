@@ -276,6 +276,7 @@ class FedAvg(Strategy):
             assert (
                 self.initial_parameters is not None
             ), "When using server-side optimization, model needs to be initialized."
+            initial_weights = parameters_to_weights(self.initial_parameters)
 
             # remember that updates are the opposite of gradients
             pseudo_gradient = [
@@ -285,9 +286,12 @@ class FedAvg(Strategy):
                 )
             ]
             if self.server_momentum > 0.0:
-                if self.momentum_vector is not None:
+                if rnd > 1:
+                    assert (
+                        self.momentum_vector
+                    ), "Momentum should have been created on round 1."
                     self.momentum_vector = [
-                        x + self.server_momentum * y
+                        self.server_momentum * x + y
                         for x, y in zip(self.momentum_vector, pseudo_gradient)
                     ]
                 else:
@@ -299,15 +303,12 @@ class FedAvg(Strategy):
             # SGD
             fedavg_result = [
                 x - self.server_learning_rate * y
-                for x, y in zip(fedavg_result, pseudo_gradient)
+                for x, y in zip(initial_weights, pseudo_gradient)
             ]
             # Update current weights
             self.initial_parameters = weights_to_parameters(fedavg_result)
 
-        else:
-            final_results = fedavg_result
-
-        return weights_to_parameters(final_results), {}
+        return weights_to_parameters(fedavg_result), {}
 
     def aggregate_evaluate(
         self,
