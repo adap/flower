@@ -192,32 +192,32 @@ def properties_ins_from_proto(msg: ServerMessage.PropertiesIns) -> typing.Proper
 
 def properties_res_to_proto(res: typing.PropertiesRes) -> ClientMessage.PropertiesRes:
     """Serialize PropertiesIns to ProtoBuf message."""
-    status_msg = Status(code=code_to_proto(res.status.code), message=res.status.message)
+    status_msg = status_to_proto(res.status)
     properties_msg = properties_to_proto(res.properties)
     return ClientMessage.PropertiesRes(status=status_msg, properties=properties_msg)
 
 
 def properties_res_from_proto(msg: ClientMessage.PropertiesRes) -> typing.PropertiesRes:
     """Deserialize PropertiesRes from ProtoBuf message."""
-    status = typing.Status(
-        code=code_from_proto(msg.status.code), message=msg.status.message
-    )
+    status = status_from_proto(msg=msg.status)
     properties = properties_from_proto(msg.properties)
     return typing.PropertiesRes(status=status, properties=properties)
 
 
-def code_to_proto(code: typing.Code) -> Code:
+def status_to_proto(status: typing.Status) -> Status:
     """Serialize Code to ProtoBuf message."""
-    if code == typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED:
-        return Code.GET_PARAMETERS_NOT_IMPLEMENTED
-    return Code.OK
+    code = Code.OK
+    if status.code == typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED:
+        code = Code.GET_PARAMETERS_NOT_IMPLEMENTED
+    return Status(code=code, message=status.message)
 
 
-def code_from_proto(msg: Code) -> typing.Code:
+def status_from_proto(msg: Status) -> typing.Status:
     """Deserialize Code from ProtoBuf message."""
-    if msg == Code.GET_PARAMETERS_NOT_IMPLEMENTED:
-        return typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED
-    return typing.Code.OK
+    code = typing.Code.OK
+    if msg.code == Code.GET_PARAMETERS_NOT_IMPLEMENTED:
+        code = typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED
+    return typing.Status(code=code, message=msg.message)
 
 
 # === Evaluate messages ===
