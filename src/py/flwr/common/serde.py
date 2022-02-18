@@ -19,10 +19,12 @@ from typing import Any, List, cast
 
 from flwr.proto.transport_pb2 import (
     ClientMessage,
+    Code,
     Parameters,
     Reason,
     Scalar,
     ServerMessage,
+    Status,
 )
 
 from . import typing
@@ -45,14 +47,14 @@ def parameters_from_proto(msg: Parameters) -> typing.Parameters:
 
 
 def reconnect_to_proto(reconnect: typing.Reconnect) -> ServerMessage.Reconnect:
-    """Serialize flower.Reconnect to ProtoBuf message."""
+    """Serialize Reconnect to ProtoBuf message."""
     if reconnect.seconds is not None:
         return ServerMessage.Reconnect(seconds=reconnect.seconds)
     return ServerMessage.Reconnect()
 
 
 def reconnect_from_proto(msg: ServerMessage.Reconnect) -> typing.Reconnect:
-    """Deserialize flower.Reconnect from ProtoBuf message."""
+    """Deserialize Reconnect from ProtoBuf message."""
     return typing.Reconnect(seconds=msg.seconds)
 
 
@@ -60,7 +62,7 @@ def reconnect_from_proto(msg: ServerMessage.Reconnect) -> typing.Reconnect:
 
 
 def disconnect_to_proto(disconnect: typing.Disconnect) -> ClientMessage.Disconnect:
-    """Serialize flower.Disconnect to ProtoBuf message."""
+    """Serialize Disconnect to ProtoBuf message."""
     reason_proto = Reason.UNKNOWN
     if disconnect.reason == "RECONNECT":
         reason_proto = Reason.RECONNECT
@@ -72,7 +74,7 @@ def disconnect_to_proto(disconnect: typing.Disconnect) -> ClientMessage.Disconne
 
 
 def disconnect_from_proto(msg: ClientMessage.Disconnect) -> typing.Disconnect:
-    """Deserialize flower.Disconnect from ProtoBuf message."""
+    """Deserialize Disconnect from ProtoBuf message."""
     if msg.reason == Reason.RECONNECT:
         return typing.Disconnect(reason="RECONNECT")
     if msg.reason == Reason.POWER_DISCONNECTED:
@@ -110,21 +112,21 @@ def parameters_res_from_proto(msg: ClientMessage.ParametersRes) -> typing.Parame
 
 
 def fit_ins_to_proto(ins: typing.FitIns) -> ServerMessage.FitIns:
-    """Serialize flower.FitIns to ProtoBuf message."""
+    """Serialize FitIns to ProtoBuf message."""
     parameters_proto = parameters_to_proto(ins.parameters)
     config_msg = metrics_to_proto(ins.config)
     return ServerMessage.FitIns(parameters=parameters_proto, config=config_msg)
 
 
 def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
-    """Deserialize flower.FitIns from ProtoBuf message."""
+    """Deserialize FitIns from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
     config = metrics_from_proto(msg.config)
     return typing.FitIns(parameters=parameters, config=config)
 
 
 def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
-    """Serialize flower.FitIns to ProtoBuf message."""
+    """Serialize FitIns to ProtoBuf message."""
     parameters_proto = parameters_to_proto(res.parameters)
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     # Legacy case, will be removed in a future release
@@ -161,7 +163,7 @@ def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
 
 
 def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
-    """Deserialize flower.FitRes from ProtoBuf message."""
+    """Deserialize FitRes from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
     metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
     return typing.FitRes(
@@ -177,48 +179,66 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
 
 
 def properties_ins_to_proto(ins: typing.PropertiesIns) -> ServerMessage.PropertiesIns:
-    """Serialize flower.PropertiesIns to ProtoBuf message."""
+    """Serialize PropertiesIns to ProtoBuf message."""
     config = properties_to_proto(ins.config)
     return ServerMessage.PropertiesIns(config=config)
 
 
 def properties_ins_from_proto(msg: ServerMessage.PropertiesIns) -> typing.PropertiesIns:
-    """Deserialize flower.PropertiesIns from ProtoBuf message."""
+    """Deserialize PropertiesIns from ProtoBuf message."""
     config = properties_from_proto(msg.config)
     return typing.PropertiesIns(config=config)
 
 
 def properties_res_to_proto(res: typing.PropertiesRes) -> ClientMessage.PropertiesRes:
-    """Serialize flower.PropertiesIns to ProtoBuf message."""
+    """Serialize PropertiesIns to ProtoBuf message."""
+    status_msg = status_to_proto(res.status)
     properties_msg = properties_to_proto(res.properties)
-    return ClientMessage.PropertiesRes(properties=properties_msg)
+    return ClientMessage.PropertiesRes(status=status_msg, properties=properties_msg)
 
 
 def properties_res_from_proto(msg: ClientMessage.PropertiesRes) -> typing.PropertiesRes:
-    """Deserialize flower.PropertiesRes from ProtoBuf message."""
+    """Deserialize PropertiesRes from ProtoBuf message."""
+    status = status_from_proto(msg=msg.status)
     properties = properties_from_proto(msg.properties)
-    return typing.PropertiesRes(properties=properties)
+    return typing.PropertiesRes(status=status, properties=properties)
+
+
+def status_to_proto(status: typing.Status) -> Status:
+    """Serialize Code to ProtoBuf message."""
+    code = Code.OK
+    if status.code == typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED:
+        code = Code.GET_PARAMETERS_NOT_IMPLEMENTED
+    return Status(code=code, message=status.message)
+
+
+def status_from_proto(msg: Status) -> typing.Status:
+    """Deserialize Code from ProtoBuf message."""
+    code = typing.Code.OK
+    if msg.code == Code.GET_PARAMETERS_NOT_IMPLEMENTED:
+        code = typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED
+    return typing.Status(code=code, message=msg.message)
 
 
 # === Evaluate messages ===
 
 
 def evaluate_ins_to_proto(ins: typing.EvaluateIns) -> ServerMessage.EvaluateIns:
-    """Serialize flower.EvaluateIns to ProtoBuf message."""
+    """Serialize EvaluateIns to ProtoBuf message."""
     parameters_proto = parameters_to_proto(ins.parameters)
     config_msg = metrics_to_proto(ins.config)
     return ServerMessage.EvaluateIns(parameters=parameters_proto, config=config_msg)
 
 
 def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIns:
-    """Deserialize flower.EvaluateIns from ProtoBuf message."""
+    """Deserialize EvaluateIns from ProtoBuf message."""
     parameters = parameters_from_proto(msg.parameters)
     config = metrics_from_proto(msg.config)
     return typing.EvaluateIns(parameters=parameters, config=config)
 
 
 def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
-    """Serialize flower.EvaluateIns to ProtoBuf message."""
+    """Serialize EvaluateIns to ProtoBuf message."""
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     # Legacy case, will be removed in a future release
     if res.accuracy is not None:
@@ -237,7 +257,7 @@ def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
 
 
 def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRes:
-    """Deserialize flower.EvaluateRes from ProtoBuf message."""
+    """Deserialize EvaluateRes from ProtoBuf message."""
     metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
     return typing.EvaluateRes(
         loss=msg.loss,
