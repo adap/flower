@@ -45,7 +45,6 @@ class Client(ABC):
         PropertiesRes
             Client's properties.
         """
-        pass
 
     @abstractmethod
     def get_parameters(self) -> ParametersRes:
@@ -96,4 +95,5 @@ class Client(ABC):
 
 
 def has_get_properties(client: Client) -> bool:
+    """Check if Client implements get_properties."""
     return type(client).get_properties != Client.get_properties

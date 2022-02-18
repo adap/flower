@@ -15,26 +15,19 @@
 """Client message handler tests."""
 
 
-from typing import Dict, List, Tuple
-
-import numpy as np
-
 from flwr.client import Client
 from flwr.common import (
-    Config,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
     ParametersRes,
-    Properties,
     PropertiesIns,
     PropertiesRes,
-    Scalar,
     serde,
     typing,
 )
-from flwr.proto.transport_pb2 import ClientMessage, Code, Reason, ServerMessage, Status
+from flwr.proto.transport_pb2 import ClientMessage, Code, ServerMessage, Status
 
 from .message_handler import handle
 
@@ -94,7 +87,7 @@ def test_client_without_get_properties() -> None:
 
     assert actual_msg == expected_msg
     assert actual_sleep_duration == 0
-    assert actual_keep_going == True
+    assert actual_keep_going is True
 
 
 def test_client_with_get_properties() -> None:
@@ -123,4 +116,4 @@ def test_client_with_get_properties() -> None:
 
     assert actual_msg == expected_msg
     assert actual_sleep_duration == 0
-    assert actual_keep_going == True
+    assert actual_keep_going is True

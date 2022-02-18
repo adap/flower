@@ -60,7 +60,6 @@ class KerasClient(ABC):
         PropertiesRes:
             Response containing `properties` of the client.
         """
-        pass
 
     @abstractmethod
     def get_weights(self) -> Weights:
@@ -127,6 +126,7 @@ class KerasClient(ABC):
 
 
 def has_get_properties(client: KerasClient) -> bool:
+    """Check if KerasClient implements get_properties."""
     return type(client).get_properties != KerasClient.get_properties
 
 

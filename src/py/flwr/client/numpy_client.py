@@ -110,7 +110,6 @@ class NumPyClient(ABC):
         PropertiesRes :
             Response containing `properties` of the client.
         """
-        pass
 
     @abstractmethod
     def get_parameters(self) -> List[np.ndarray]:
@@ -194,6 +193,7 @@ class NumPyClient(ABC):
 
 
 def has_get_properties(client: NumPyClient) -> bool:
+    """Check if NumPyClient implements get_properties."""
     return type(client).get_properties != NumPyClient.get_properties
 
 
