@@ -166,7 +166,7 @@ def start_numpy_client(
     # Client.get_properties if method was not overridden by user-provided
     # NumPyClient instance
     if not numpyclient_has_get_properties(client=client):
-        flower_client.get_properties = Client.get_properties
+        del flower_client.get_properties
 
     # Start
     start_client(
@@ -219,7 +219,7 @@ def start_keras_client(
     # Client.get_properties if method was not overridden by user-provided
     # KerasClient instance
     if not kerasclient_has_get_properties(client=client):
-        flower_client.get_properties = Client.get_properties
+        del flower_client.get_properties
 
     # Start
     start_client(
