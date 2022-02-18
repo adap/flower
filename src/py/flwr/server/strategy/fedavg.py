@@ -21,6 +21,8 @@ Paper: https://arxiv.org/abs/1602.05629
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple
 
+from sklearn.datasets import fetch_kddcup99
+
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -281,7 +283,10 @@ class FedAvg(Strategy):
             ]
             if self.server_momentum > 0.0:
                 if self.momentum_vector is not None:
-                    self.momentum_vector += self.server_momentum * pseudo_gradient
+                    self.momentum_vector = [
+                        x + self.server_momentum * y
+                        for x, y in zip(self.momentum_vector, pseudo_gradient)
+                    ]
                 else:
                     self.momentum_vector = pseudo_gradient
 
@@ -289,7 +294,11 @@ class FedAvg(Strategy):
                 pseudo_gradient = self.momentum_vector
 
             # SGD
-            fedavg_result -= self.server_learning_rate * pseudo_gradient
+            fedavg_result = [
+                x - self.server_learning_rate * y
+                for x, y in zip(fedavg_result, pseudo_gradient)
+            ]
+            # Update current weights
             self.initial_parameters = weights_to_parameters(fedavg_result)
 
         else:
