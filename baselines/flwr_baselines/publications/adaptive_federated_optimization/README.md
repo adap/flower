@@ -26,6 +26,16 @@ Note: If you use this implementation in your work, please remember to cite the o
 
 **[Link to paper.](https://arxiv.org/pdf/2003.00295.pdf)**
 
+## Currently implemented
+
+We have currently implemented the following experiments: 
+
+| Dataset      | Model | Strategies
+| ----------- | ----------- | ----------- |
+| CIFAR10      | ResNet18       | FeAvg, FedYogi, FedAdam, FedAdagrad |
+| CIFAR100   | ResNet18        | FeAvg, FedYogi, FedAdam, FedAdagrad |
+
+More experiments to be added soon. 
 
 ## Running experiments
 
