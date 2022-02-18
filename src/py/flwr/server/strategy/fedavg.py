@@ -21,8 +21,6 @@ Paper: https://arxiv.org/abs/1602.05629
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple
 
-from sklearn.datasets import fetch_kddcup99
-
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
