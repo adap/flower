@@ -274,6 +274,11 @@ class FedAvg(Strategy):
         # following convention described in
         # https://pytorch.org/docs/stable/generated/torch.optim.SGD.html
         if self.server_opt:
+            # You need to initialize the model
+            assert (
+                self.initial_parameters is not None
+            ), "When using server-side optimization, model needs to be initialized."
+
             # remember that updates are the opposite of gradients
             pseudo_gradient = [
                 x - y
