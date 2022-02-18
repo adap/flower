@@ -16,6 +16,7 @@
 
 
 from flwr.common import (
+    Code,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -23,6 +24,7 @@ from flwr.common import (
     ParametersRes,
     PropertiesIns,
     PropertiesRes,
+    Status,
 )
 
 from .client import Client, has_get_properties
@@ -32,7 +34,9 @@ class OverridingClient(Client):
     """Client overriding `get_properties`."""
 
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
-        return PropertiesRes()
+        return PropertiesRes(
+            status=Status(code=Code.OK, message="Success"), properties={}
+        )
 
     def get_parameters(self) -> ParametersRes:
         # This method is not expected to be called
