@@ -3,23 +3,23 @@
 isort:skip_file
 """
 import abc
+import flwr.proto.transport_pb2
 import grpc
 import typing
 
-from .transport_pb2 import *
 class FlowerServiceStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
-    def Join(self,
-        request: typing.Iterator[global___ClientMessage],
-    ) -> typing.Iterator[global___ServerMessage]: ...
+    Join: grpc.StreamStreamMultiCallable[
+        flwr.proto.transport_pb2.ClientMessage,
+        flwr.proto.transport_pb2.ServerMessage]
 
 
 class FlowerServiceServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def Join(self,
-        request: typing.Iterator[global___ClientMessage],
+        request_iterator: typing.Iterator[flwr.proto.transport_pb2.ClientMessage],
         context: grpc.ServicerContext,
-    ) -> typing.Iterator[global___ServerMessage]: ...
+    ) -> typing.Iterator[flwr.proto.transport_pb2.ServerMessage]: ...
 
 
 def add_FlowerServiceServicer_to_server(servicer: FlowerServiceServicer, server: grpc.Server) -> None: ...
