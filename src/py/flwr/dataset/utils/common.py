@@ -17,6 +17,8 @@
 # pylint: disable=invalid-name
 
 from typing import List, Tuple, Union, cast
+from numpy import array_like 
+from numpy.random import SeedSequence, BitGenerator, Generator
 
 import numpy as np
 
@@ -379,6 +381,7 @@ def create_lda_partitions(
     num_partitions: int = 100,
     concentration: Union[float, np.ndarray, List[float]] = 0.5,
     accept_imbalanced: bool = False,
+    seed: Optional[int, array_like[ints], SeedSequence, BitGenerator, Generator] = None, 
 ) -> Tuple[XYList, np.ndarray]:
     """Create imbalanced non-iid partitions using Latent Dirichlet Allocation
     (LDA) without resampling.
@@ -390,12 +393,22 @@ def create_lda_partitions(
             validation sets.
         num_partitions (int, optional): Number of partitions to be created.
             Defaults to 100.
-        concentration (float, optional): Dirichlet Concentration (:math:`\\alpha`)
-            parameter. Set to float('inf') to get uniform partitions.
+        concentration (float, np.ndarray, List[float]): Dirichlet Concentration
+            (:math:`\\alpha`) parameter. Set to float('inf') to get uniform partitions.
             An :math:`\\alpha \\to \\Inf` generates uniform distributions over classes.
             An :math:`\\alpha \\to 0.0` generates one class per client. Defaults to 0.5.
         accept_imbalanced (bool): Whether or not to accept imbalanced output classes.
             Default False.
+        seed (None, int, array_like[ints], SeedSequence, BitGenerator, Generator):
+            A seed to initialize the BitGenerator for generating the Dirichlet
+            distribution. This is defined in the official Numpy documentation as follows:
+            If None, then fresh, unpredictable entropy will be pulled from the OS.
+            If an int or array_like[ints] is passed, then it will be passed to
+            SeedSequence to derive the initial BitGenerator state.
+            One may also pass in a SeedSequence instance.
+            Additionally, when passed a BitGenerator, it will be wrapped by Generator.
+            If passed a Generator, it will be returned unaltered.
+            See official Numpy Documentation for further details. 
 
     Returns:
         Tuple[XYList, numpy.ndarray]: List of XYList containing partitions
@@ -451,7 +464,7 @@ def create_lda_partitions(
     )
 
     if dirichlet_dist is None:
-        dirichlet_dist = np.random.default_rng().dirichlet(
+        dirichlet_dist = np.random.default_rng(seed).dirichlet(
             alpha=concentration, size=num_partitions
         )
 
