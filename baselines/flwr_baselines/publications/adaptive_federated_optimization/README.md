@@ -30,10 +30,10 @@ Note: If you use this implementation in your work, please remember to cite the o
 
 We have currently implemented the following experiments: 
 
-| Dataset      | Model | Strategies
-| ----------- | ----------- | ----------- |
-| CIFAR10      | ResNet18       | FeAvg, FedYogi, FedAdam, FedAdagrad |
-| CIFAR100   | ResNet18        | FeAvg, FedYogi, FedAdam, FedAdagrad |
+| Dataset  | Model    | Strategies                          |
+| -------- | -------- | ----------------------------------- |
+| CIFAR10  | ResNet18 | FeAvg, FedYogi, FedAdam, FedAdagrad |
+| CIFAR100 | ResNet18 | FeAvg, FedYogi, FedAdam, FedAdagrad |
 
 More experiments to be added soon. 
 
@@ -60,9 +60,3 @@ To help visualize results, the script also plots evaluation curves. Here are som
 <img src="cifar10_fedavg.jpeg" alt="CIFAR10 - FedAvg" width="400" />
 <img src="cifar10_fedadam.jpeg" alt="CIFAR10 - FedAdam" width="400" />
 </center>
-
-### Current implementations:
-- CIFAR10
-- CIFAR100
-
-
