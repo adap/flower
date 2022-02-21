@@ -337,16 +337,19 @@ def reconnect_clients(
 ) -> ReconnectResultsAndFailures:
     """Instruct clients to disconnect and never reconnect."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        submitted_fs = [
+        submitted_fs = {
             executor.submit(reconnect_client, client_proxy, ins)
             for client_proxy, ins in client_instructions
-        ]
-        concurrent.futures.wait(submitted_fs)
+        }
+        finished_fs, _ = concurrent.futures.wait(
+            fs=submitted_fs,
+            timeout=None,
+        )
 
     # Gather results
     results: List[Tuple[ClientProxy, Disconnect]] = []
     failures: List[BaseException] = []
-    for future in submitted_fs:
+    for future in finished_fs:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
@@ -359,8 +362,7 @@ def reconnect_clients(
 def reconnect_client(
     client: ClientProxy, reconnect: Reconnect
 ) -> Tuple[ClientProxy, Disconnect]:
-    """Instruct a single client to disconnect and (optionally) reconnect
-    later."""
+    """Instruct client to disconnect and (optionally) reconnect later."""
     disconnect = client.reconnect(reconnect)
     return client, disconnect
 
@@ -371,16 +373,19 @@ def fit_clients(
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        submitted_fs = [
+        submitted_fs = {
             executor.submit(fit_client, client_proxy, ins)
             for client_proxy, ins in client_instructions
-        ]
-        concurrent.futures.wait(submitted_fs)
+        }
+        finished_fs, _ = concurrent.futures.wait(
+            fs=submitted_fs,
+            timeout=None,
+        )
 
     # Gather results
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = []
-    for future in submitted_fs:
+    for future in finished_fs:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
@@ -403,16 +408,19 @@ def evaluate_clients(
 ) -> EvaluateResultsAndFailures:
     """Evaluate parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        submitted_fs = [
+        submitted_fs = {
             executor.submit(evaluate_client, client_proxy, ins)
             for client_proxy, ins in client_instructions
-        ]
-        concurrent.futures.wait(submitted_fs)
+        }
+        finished_fs, _ = concurrent.futures.wait(
+            fs=submitted_fs,
+            timeout=None,
+        )
 
     # Gather results
     results: List[Tuple[ClientProxy, EvaluateRes]] = []
     failures: List[BaseException] = []
-    for future in submitted_fs:
+    for future in finished_fs:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
