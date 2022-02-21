@@ -31,16 +31,17 @@ class UnknownServerMessage(Exception):
 def handle(
     client: Client, server_msg: ServerMessage
 ) -> Tuple[ClientMessage, int, bool]:
-    if server_msg.HasField("reconnect"):
+    field = server_msg.WhichOneof("msg")
+    if field == "reconnect":
         disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect)
         return disconnect_msg, sleep_duration, False
-    if server_msg.HasField("properties_ins"):
+    if field == "properties_ins":
         return _get_properties(client, server_msg.properties_ins), 0, True
-    if server_msg.HasField("get_parameters"):
+    if field == "get_parameters":
         return _get_parameters(client), 0, True
-    if server_msg.HasField("fit_ins"):
+    if field == "fit_ins":
         return _fit(client, server_msg.fit_ins), 0, True
-    if server_msg.HasField("evaluate_ins"):
+    if field == "evaluate_ins":
         return _evaluate(client, server_msg.evaluate_ins), 0, True
     raise UnknownServerMessage()
 

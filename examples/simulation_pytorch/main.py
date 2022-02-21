@@ -12,12 +12,10 @@ from dataset_utils import getCIFAR10, do_fl_partitioning, get_dataloader
 from utils import Net, train, test
 
 
-parser = argparse.ArgumentParser(
-    description="Flower Simulation with PyTorch"
-)
+parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
-parser.add_argument('--num_client_cpus', type=int, default=1)
-parser.add_argument('--num_rounds', type=int, default=10)
+parser.add_argument("--num_client_cpus", type=int, default=1)
+parser.add_argument("--num_rounds", type=int, default=10)
 
 
 # Flower client that will be spawned by Ray
@@ -154,7 +152,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     pool_size = 100  # number of dataset partions (= number of total clients)
-    client_resources = {"num_cpus": args.num_client_cpus}  # each client will get allocated 1 CPUs
+    client_resources = {
+        "num_cpus": args.num_client_cpus
+    }  # each client will get allocated 1 CPUs
 
     # download CIFAR10 dataset
     train_path, testset = getCIFAR10()
