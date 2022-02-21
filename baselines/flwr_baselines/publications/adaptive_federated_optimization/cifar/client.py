@@ -53,6 +53,7 @@ class RayClient(fl.client.NumPyClient):
         Returns:
             Dict[str, Scalar]: Returned properties.
         """
+        # pylint: disable=unused-argument
         return self.properties
 
     def fit(
