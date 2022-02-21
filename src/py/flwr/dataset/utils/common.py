@@ -16,11 +16,13 @@
 
 # pylint: disable=invalid-name
 
-from typing import List, Tuple, Union, cast
-from numpy import array_like 
-from numpy.random import SeedSequence, BitGenerator, Generator
+
+from typing import List, Optional, Tuple, Union, cast
 
 import numpy as np
+import numpy.typing as npt
+from np.random import BitGenerator, Generator, SeedSequence
+from npt import ArrayLike
 
 XY = Tuple[np.ndarray, np.ndarray]
 XYList = List[XY]
@@ -381,7 +383,9 @@ def create_lda_partitions(
     num_partitions: int = 100,
     concentration: Union[float, np.ndarray, List[float]] = 0.5,
     accept_imbalanced: bool = False,
-    seed: Optional[int, array_like[ints], SeedSequence, BitGenerator, Generator] = None, 
+    seed: Optional[
+        Union[int, ArrayLike[int], SeedSequence, BitGenerator, Generator]
+    ] = None,
 ) -> Tuple[XYList, np.ndarray]:
     """Create imbalanced non-iid partitions using Latent Dirichlet Allocation
     (LDA) without resampling.
@@ -408,7 +412,7 @@ def create_lda_partitions(
             One may also pass in a SeedSequence instance.
             Additionally, when passed a BitGenerator, it will be wrapped by Generator.
             If passed a Generator, it will be returned unaltered.
-            See official Numpy Documentation for further details. 
+            See official Numpy Documentation for further details.
 
     Returns:
         Tuple[XYList, numpy.ndarray]: List of XYList containing partitions
