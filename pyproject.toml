@@ -47,7 +47,7 @@ exclude = [
 [tool.poetry.dependencies]
 python = "^3.6.2"
 # Mandatory dependencies
-numpy = "^1.19.0"
+numpy = "^1.20.0"
 grpcio = "^1.27.2"
 google = "^2.0.3"
 protobuf = "^3.12.1"
@@ -111,6 +111,7 @@ testpaths = [
 [tool.mypy]
 ignore_missing_imports = true
 strict = true
+plugins = "numpy.typing.mypy_plugin"
 
 [[tool.mypy.overrides]]
 module = "flwr_example.*"
