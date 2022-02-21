@@ -20,9 +20,7 @@
 from typing import List, Optional, Tuple, Union, cast
 
 import numpy as np
-import numpy.typing as npt
-from np.random import BitGenerator, Generator, SeedSequence
-from npt import ArrayLike
+from numpy.random import BitGenerator, Generator, SeedSequence
 
 XY = Tuple[np.ndarray, np.ndarray]
 XYList = List[XY]
@@ -383,9 +381,7 @@ def create_lda_partitions(
     num_partitions: int = 100,
     concentration: Union[float, np.ndarray, List[float]] = 0.5,
     accept_imbalanced: bool = False,
-    seed: Optional[
-        Union[int, ArrayLike[int], SeedSequence, BitGenerator, Generator]
-    ] = None,
+    seed: Optional[Union[int, SeedSequence, BitGenerator, Generator]] = None,
 ) -> Tuple[XYList, np.ndarray]:
     """Create imbalanced non-iid partitions using Latent Dirichlet Allocation
     (LDA) without resampling.
@@ -403,12 +399,10 @@ def create_lda_partitions(
             An :math:`\\alpha \\to 0.0` generates one class per client. Defaults to 0.5.
         accept_imbalanced (bool): Whether or not to accept imbalanced output classes.
             Default False.
-        seed (None, int, array_like[ints], SeedSequence, BitGenerator, Generator):
+        seed (None, int, SeedSequence, BitGenerator, Generator):
             A seed to initialize the BitGenerator for generating the Dirichlet
-            distribution. This is defined in the official Numpy documentation as follows:
+            distribution. This is defined in Numpy's official documentation as follows:
             If None, then fresh, unpredictable entropy will be pulled from the OS.
-            If an int or array_like[ints] is passed, then it will be passed to
-            SeedSequence to derive the initial BitGenerator state.
             One may also pass in a SeedSequence instance.
             Additionally, when passed a BitGenerator, it will be wrapped by Generator.
             If passed a Generator, it will be returned unaltered.
@@ -418,6 +412,7 @@ def create_lda_partitions(
         Tuple[XYList, numpy.ndarray]: List of XYList containing partitions
             for each dataset and the dirichlet probability density functions.
     """
+    # pylint: disable=too-many-arguments,too-many-locals
 
     x, y = dataset
     x, y = shuffle(x, y)
