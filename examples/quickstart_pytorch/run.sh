@@ -1,7 +1,7 @@
 #!/bin/bash
 
 python server.py &
-sleep 2 # Sleep for 2s to give the server enough time to start
+sleep 3  # Sleep for 3s to give the server enough time to start
 
 for i in `seq 0 1`; do
     echo "Starting client $i"
