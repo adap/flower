@@ -1,5 +1,6 @@
 import argparse
 import os
+import random
 
 import numpy as np
 import tensorflow as tf
@@ -9,13 +10,18 @@ import flwr as fl
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
-
 # Define Flower client
 class CifarClient(fl.client.NumPyClient):
     def __init__(self, model, x_train, y_train, x_test, y_test):
         self.model = model
         self.x_train, self.y_train = x_train, y_train
         self.x_test, self.y_test = x_test, y_test
+
+    # def get_properties(self, config):
+    #     # This is only an example
+    #     level = round(random.uniform(0, 1), 2)
+    #     result = {"battery_level": level}
+    #     return result
 
     def get_parameters(self):
         """Get parameters of the local model."""
