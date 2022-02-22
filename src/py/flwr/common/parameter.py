@@ -25,13 +25,28 @@ from .typing import Parameters, Weights
 
 def weights_to_parameters(weights: Weights) -> Parameters:
     """Convert NumPy weights to parameters object."""
-    tensors = [ndarray_to_bytes(ndarray) for ndarray in weights]
-    return Parameters(tensors=tensors, tensor_type="numpy.ndarray")
+    dtypes = []
+    shapes = []
+    tensors = []
+    # tensors = [ndarray_to_bytes(ndarray) for ndarray in weights]
+    for ndarray in weights:
+        dtypes.append(ndarray.dtype)
+        shapes.append(ndarray.shape)
+        tensors.append(ndarray.tobytes())
+    return Parameters(tensors=tensors, tensor_type="numpy.ndarray", shapes=shapes, dtypes=dtypes)
 
 
 def parameters_to_weights(parameters: Parameters) -> Weights:
     """Convert parameters object to NumPy weights."""
-    return [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
+    weights = []
+    total_n = len(parameters.dtypes)
+    for i in range(total_n):
+        dtype = parameters.dtypes[i]
+        shape = parameters.shapes[i]
+        weights.append(np.ndarray(
+            buffer=parameters.tensors[i], dtype=dtype, shape=shape))
+    return weights
+    # return [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
 
 
 def ndarray_to_bytes(ndarray: np.ndarray) -> bytes:

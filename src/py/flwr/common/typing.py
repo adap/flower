@@ -16,8 +16,7 @@
 
 
 from dataclasses import dataclass
-from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -35,27 +34,14 @@ Config = Dict[str, Scalar]
 Properties = Dict[str, Scalar]
 
 
-class Code(Enum):
-    """Client status codes."""
-
-    OK = 0
-    GET_PARAMETERS_NOT_IMPLEMENTED = 1
-
-
-@dataclass
-class Status:
-    """Client status."""
-
-    code: Code
-    message: str
-
-
 @dataclass
 class Parameters:
     """Model parameters."""
 
     tensors: List[bytes]
     tensor_type: str
+    shapes: List[Tuple]
+    dtypes: List[np.dtype]
 
 
 @dataclass
@@ -113,7 +99,6 @@ class PropertiesIns:
 class PropertiesRes:
     """Properties response from a client."""
 
-    status: Status
     properties: Properties
 
 
