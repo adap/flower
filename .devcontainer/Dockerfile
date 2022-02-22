@@ -15,6 +15,14 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
+# A persistent volume will be configured in devcontainer.json so we don't loose the commandhistory
+# after rebuilding the container
+RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
+    && mkdir /commandhistory \
+    && touch /commandhistory/.bash_history \
+    && chown -R $USERNAME /commandhistory \
+    && echo $SNIPPET >> "/home/$USERNAME/.bashrc"
+
 # Install system dependencies
 RUN apt update 
 RUN apt install -y curl wget gnupg python3 python-is-python3 python3-pip git \
@@ -24,14 +32,6 @@ RUN python -m pip install \
     pip==21.3.1 \
     setuptools==59.6.0 \
     poetry==1.1.12
-
-# A persistent volume will be configured in devcontainer.json so we don't loose the commandhistory
-# after rebuilding the container
-RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
-    && mkdir /commandhistory \
-    && touch /commandhistory/.bash_history \
-    && chown -R $USERNAME /commandhistory \
-    && echo $SNIPPET >> "/home/$USERNAME/.bashrc"
 
 USER $USERNAME
 ENV PATH="/home/$USERNAME/.local/bin:${PATH}"
