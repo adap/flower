@@ -1,11 +1,11 @@
 [build-system]
 requires = [
-    "poetry==1.1.10",
+    "poetry==1.1.12",
 ]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "simulation_pytorch"
+name = "flwr_client_selection_pytorch"
 version = "0.1.0"
 description = "Federated Learning Simulation with Flower and PyTorch"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
