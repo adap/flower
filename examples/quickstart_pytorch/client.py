@@ -80,7 +80,7 @@ def load_data():
     testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
     trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
     testloader = DataLoader(testset, batch_size=32)
-    num_examples = {"trainset" : len(trainset), "testset" : len(testset)}
+    num_examples = {"trainset": len(trainset), "testset": len(testset)}
     return trainloader, testloader, num_examples
 
 

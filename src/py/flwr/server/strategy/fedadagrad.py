@@ -65,7 +65,7 @@ class FedAdagrad(FedOpt):
     ) -> None:
         """Federated learning strategy using Adagrad on server-side.
 
-        Implementation based on https://arxiv.org/abs/2003.00295
+        Implementation based on https://arxiv.org/abs/2003.00295v5
 
         Args:
             fraction_fit (float, optional): Fraction of clients used during
@@ -109,7 +109,6 @@ class FedAdagrad(FedOpt):
             beta_2=0.0,
             tau=tau,
         )
-        self.v_t: Optional[Weights] = None
 
     def __repr__(self) -> str:
         rep = f"FedAdagrad(accept_failures={self.accept_failures})"
@@ -129,26 +128,29 @@ class FedAdagrad(FedOpt):
             return None, {}
 
         fedavg_weights_aggregate = parameters_to_weights(fedavg_parameters_aggregated)
-        aggregated_updates = [
-            subset_weights - self.current_weights[idx]
-            for idx, subset_weights in enumerate(fedavg_weights_aggregate)
-        ]
 
         # Adagrad
-        delta_t = aggregated_updates
-        if not self.v_t:
-            self.v_t = [np.zeros_like(subset_weights) for subset_weights in delta_t]
-
-        self.v_t = [
-            self.v_t[idx] + np.multiply(subset_weights, subset_weights)
-            for idx, subset_weights in enumerate(delta_t)
+        delta_t = [
+            x - y for x, y in zip(fedavg_weights_aggregate, self.current_weights)
         ]
+
+        # m_t
+        if not self.m_t:
+            self.m_t = [np.zeros_like(x) for x in delta_t]
+        self.m_t = [
+            self.beta_1 * x + (1 - self.beta_1) * y for x, y in zip(self.m_t, delta_t)
+        ]
+
+        # v_t
+        if not self.v_t:
+            self.v_t = [np.zeros_like(x) for x in delta_t]
+        self.v_t = [x + np.multiply(y, y) for x, y in zip(self.v_t, delta_t)]
 
         new_weights = [
-            self.current_weights[idx]
-            + self.eta * delta_t[idx] / (np.sqrt(self.v_t[idx]) + self.tau)
-            for idx in range(len(delta_t))
+            x + self.eta * y / (np.sqrt(z) + self.tau)
+            for x, y, z in zip(self.current_weights, self.m_t, self.v_t)
         ]
+
         self.current_weights = new_weights
 
         return weights_to_parameters(self.current_weights), metrics_aggregated

@@ -25,6 +25,7 @@ from flwr.client.client import Client
 from flwr.common.logger import log
 from flwr.server.app import _fl, _init_defaults
 from flwr.server.client_manager import ClientManager
+from flwr.server.history import History
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 
@@ -65,7 +66,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     strategy: Optional[Strategy] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
     client_manager: Optional[ClientManager] = None,
-) -> None:
+) -> History:
     """Start a Ray-based Flower simulation server.
 
     Parameters
@@ -114,6 +115,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
         An implementation of the abstract base class `ClientManager`. If
         no client_manager is provided, then `start_server` will use
         `flwr.server.strategy.SimpleClientManager`.
+
+    Returns:
+        hist: flwr.server.history.History. Object containing metrics from training.
     """
     cids: List[str]
 
@@ -172,8 +176,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
         initialized_server.client_manager().register(client=client_proxy)
 
     # Start training
-    _fl(
+    hist = _fl(
         server=initialized_server,
         config=initialized_config,
         force_final_distributed_eval=False,
     )
+
+    return hist

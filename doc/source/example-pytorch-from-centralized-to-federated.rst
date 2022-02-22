@@ -71,9 +71,9 @@ The :code:`load_data()` function loads the CIFAR-10 training and test sets. The 
         num_examples = {"trainset" : len(trainset), "testset" : len(testset)}
         return trainloader, testloader, num_examples
 
-We now need to define the training (function :code:`train()`) which loops over the training set, measures the the loss, backpropagetes it, and then takes one optimizer step for each batch of training examples.
+We now need to define the training (function :code:`train()`) which loops over the training set, measures the loss, backpropagates it, and then takes one optimizer step for each batch of training examples.
 
-The evalution of the model is defined in function :code:`test()`. The function loops over all test samples and measures the loss of the model based on the test dataset. 
+The evaluation of the model is defined in the function :code:`test()`. The function loops over all test samples and measures the loss of the model based on the test dataset. 
 
 .. code-block:: python
 
@@ -133,7 +133,7 @@ The evalution of the model is defined in function :code:`test()`. The function l
         accuracy = correct / total
         return loss, accuracy
 
-Having defined defining the data loading, model architecture, training, and evaluation we can put everything together and train our CNN on CIFAR-10.
+Having defined the data loading, model architecture, training, and evaluation we can put everything together and train our CNN on CIFAR-10.
 
 .. code-block:: python
 
