@@ -25,8 +25,8 @@ cmake --build build
 python server.py
 ```
 ```bash
-build/client 0 [::]:8080 
+build/flwr_client 0 [::]:8888 
 ```
 ```bash
-build/client 1 [::]:8080 
+build/flwr_client 1 [::]:8888
 ```
