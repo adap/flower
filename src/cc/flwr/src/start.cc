@@ -38,9 +38,7 @@ void start::start_client(std::string server_address, flwr::Client* client, int g
 
         // Check connection status
         Status status = reader_writer->Finish();
-        if (!status.ok()) {
-            std::cout << "RouteChat rpc failed." << std::endl;
-        }
+	std::cout << status.error_message() << std::endl;
 
         if (sleep_duration == 0) {
             std::cout << "Disconnect and shut down." << std::endl;
