@@ -1,5 +1,7 @@
+from ast import Bytes
 from collections import OrderedDict
 from io import BytesIO
+import struct
 from typing import Callable, Dict, List, Tuple
 
 import numpy as np
@@ -19,11 +21,11 @@ from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 from numpy import bytes_, numarray
 
 
-class FedAvgLibCpp(FedAvg):
+class FedAvgCpp(FedAvg):
     def __init__(
         self,
-        fraction_fit: float = 0.1,
-        fraction_eval: float = 0.1,
+        fraction_fit: float = 1.0,
+        fraction_eval: float = 1.0,
         min_fit_clients: int = 2,
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
@@ -47,7 +49,6 @@ class FedAvgLibCpp(FedAvg):
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
         )
-        self.internal_model = None
 
     def aggregate_fit(
         self,
@@ -66,13 +67,12 @@ class FedAvgLibCpp(FedAvg):
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
+        print(weights_results)
         aggregated_weights = aggregate(weights_results)
-        parameters_results = weights_to_parameters(
-            aggregated_weights,
-            tensor_type="libtorch",
-            model=self.internal_model,
-        )
-        return (parameters_results, {})
+        print(weights_results)
+        parameters_results = weights_to_parameters(aggregated_weights)
+
+        return parameters_results, {}
 
     def aggregate_evaluate(
         self,
@@ -98,70 +98,24 @@ class FedAvgLibCpp(FedAvg):
         )
         return loss_aggregated, {}
 
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
-        """Initialize global model parameters."""
-        list_with_one_client = client_manager.sample(num_clients=1, min_num_clients=1)
-        initial_parameters_res = list_with_one_client[0].get_parameters()
-        initial_parameters = initial_parameters_res.parameters
-
-        if initial_parameters.tensor_type == "libtorch":
-            self.internal_model = bytes_to_libtorch(initial_parameters.tensors[0])
-
-        return initial_parameters
-
-
-## Serialization methods
-
-
-def parameters_to_weights(parameters: Parameters) -> Weights:
-    """Convert parameters object to libtorch weights.
-    There is only one 'layer'."""
-    #print(parameters.tensor_type)
-    if parameters.tensor_type == "libtorch":
-        #print(parameters.tensors[0])
-        model = bytes_to_libtorch(parameters.tensors[0])
-        return libtorch_to_weights(model)
-
-
-def bytes_to_libtorch(serialized_model: bytes) -> torch.nn.Module:
-    model = torch.load(BytesIO(serialized_model))
-    return model
-
-
-def libtorch_to_weights(model: torch.nn.Module) -> Weights:
-    #for _, val in model.state_dict().items():
-        #print(val.cpu().numpy())
-    return [val.cpu().numpy() for _, val in model.state_dict().items()]
-    #p = libtorch_to_parameter(model)
-    #return [bytes_to_ndarray(tensor) for tensor in p.tensors]
-
-def weights_to_parameters(
-    weights: Weights, tensor_type: str, model: torch.nn.Module
-) -> Parameters:
-    if tensor_type == "libtorch":
-        model = weights_to_libtorch(weights, model)
-        #print(model)
-        return libtorch_to_parameter(model)
-
-
-def weights_to_libtorch(weights: Weights, model: torch.nn.Module) -> torch.nn.Module:
-    #print(type(weights))
-    #print(model)
-    #print("hello")
-    #tensors = [ndarray_to_bytes(ndarray) for ndarray in weights]
-    #parameters = Parameters(tensors=tensors, tensor_type="numpy.ndarray")
-    params_dict = zip(model.state_dict().keys(), weights)
-    #print(list(params_dict))
+def weights_to_parameters(weights)-> Parameters:
+    tensors = [ndarray_to_bytes(tensor) for tensor in weights]
+    return Parameters(tensors=tensors, tensor_type="cpp_double")
     
-    state_dict = OrderedDict({k: torch.Tensor(np.array(v)) for k, v in params_dict})
-    #print(state_dict)
-    model.load_state_dict(state_dict, strict=True)
-    return model
+def parameters_to_weights(parameters: Parameters) -> Weights:
+    """Convert parameters object to NumPy weights."""
+    weights = [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
+    return weights
 
+def bytes_to_ndarray(tensor_bytes: Bytes)-> np.ndarray:
+    list_doubles = []
+    for idx in range(0, len(tensor_bytes), 8):
+        this_double  = struct.unpack('d',tensor_bytes[idx:idx+8])
+        list_doubles.append(this_double[0])
+    weights_np = np.asarray(list_doubles)
+    return weights_np
 
-def libtorch_to_parameter(model: torch.nn.Module) -> Parameters:
-    bytes_io = BytesIO()
-    model.save(bytes_io)
-    return Parameters(tensors=bytes_io.getvalue(), tensor_type="libtorch")
+def ndarray_to_bytes(a:np.ndarray) -> Bytes:
+    doublelist = a.tolist()
+    buf = struct.pack('%sd' % len(doublelist), *doublelist) 
+    return buf

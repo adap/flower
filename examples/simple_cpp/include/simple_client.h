@@ -9,30 +9,32 @@
  * @date 06/09/2021
  *
  * ********************************************************************************************************/
-
 #pragma once
 #include "client.h"
-#include <iostream>
+#include "synthetic_dataset.h"
+#include "line_fit_model.h"
 #include <ctime>
-
-typedef std::vector<std::tuple<float,float> Dataset
-
+#include <memory>
+#include <string>
+#include <tuple>
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <list>
 /**
  * Validate the network on the entire test set
  *
  */
-std::tuple<size_t, float, double> test(float alpha, float beta, Dataset& testset);
-std::tuple<size_t, float, double> train(float alpha, float beta, Dataset& trainset);
 
 class SimpleFlwrClient : public flwr::Client {
   private:
-    float alpha, beta;
     int64_t client_id;
-    Dataset& trainset;
-    Dataset& testset;
+    LineFitModel& model;
+    SyntheticDataset& dataset;
 
   public:
-    SimpleFlwrClient(std::string client_id, Dataset& trainset, Dataset& testset);
+    SimpleFlwrClient(std::string client_id, LineFitModel& model, SyntheticDataset& dataset);
+    void set_parameters(flwr::Parameters params);
 
     virtual flwr::ParametersRes get_parameters() override;
     virtual flwr::PropertiesRes get_properties(flwr::PropertiesIns ins) override;

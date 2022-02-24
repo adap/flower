@@ -1,6 +1,3 @@
-#include <iostream>
-#include <memory>
-#include <string>
 #include "simple_client.h"
 #include "start.h"
 
@@ -8,7 +5,7 @@ int  main(int argc, char** argv){
   if (argc != 3){
     std::cout << "Client takes three arguments as follows: " << std::endl;
     std::cout << "./client  CLIENT_ID  SERVER_URL" << std::endl;
-    std::cout << "Example: ./client  0 localhost:8888" << std::endl;
+    std::cout << "Example: ./flwr_client  0 localhost:8888" << std::endl;
     return 0;
   }
 
@@ -16,15 +13,17 @@ int  main(int argc, char** argv){
   const std::string CLIENT_ID  = argv[1];
   const std::string SERVER_URL = argv[2];
 
-  // Populate training set and validation set
-  const size_t NUM_SAMPLES = 1000;
-  const float TRUE_ALPHA = 0.5;
-  const float TRUE_BETA = 1.5;
-  Dataset trainset, testset;  // Defined in simple_client.h
-  //Initialize them here 
+  // Populate local datasets
+  std::vector<double> ms{3.5, 9.3}; //  b + m_0*x0 + m_1*x1
+  double b = 1.7;
+
+  SyntheticDataset local_data = SyntheticDataset(ms, b, 1000, 100, 500);
+
+  // Define a model
+  LineFitModel model = LineFitModel(500, 0.01, ms.size());
 
   // Initialize TorchClient
-  SimpleFlwrClient client(CLIENT_ID, trainset, testset);
+  SimpleFlwrClient client(CLIENT_ID, model, local_data);
     
   // Define a server address
   std::string server_add = SERVER_URL;

@@ -5,12 +5,13 @@ In this example you will train a linear model on synthetic data using C++ client
 # Acknowledgements 
 Many thanks to the original contributors to this code:
 - Lekang Jiang (original author and main contributor)
-- Francisco José Solís
+- Francisco José Solís (code re-organization)
+- Andreea Zacharia
 
 # Install requirements
-TODO
+You'll need CMake and 
 
-### Building 
+### Building the example
 This example provides you with a `CMakeLists.txt` file to configure and build the client. Feel free to take a look inside it to see what is happening under the hood.
 
 
@@ -23,7 +24,9 @@ cmake --build build
 ```bash 
 python server.py
 ```
-
 ```bash
 build/client 0 [::]:8080 
+```
+```bash
+build/client 1 [::]:8080 
 ```

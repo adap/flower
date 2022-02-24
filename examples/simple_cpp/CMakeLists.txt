@@ -90,7 +90,7 @@ set(EXECUTABLE_NAME flwr_client)
 add_executable(${EXECUTABLE_NAME} ${FLWR_CLIENT_SRCS})
 
 target_include_directories(${EXECUTABLE_NAME} PUBLIC
-  include
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
   ${FLWR_INCLUDE_DIR}
 )
 
