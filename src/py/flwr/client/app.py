@@ -162,9 +162,10 @@ def start_numpy_client(
     # Wrap the NumPyClient
     flower_client = NumPyClientWrapper(client)
 
-    # Remove NumPyClientWrapper.get_properties with the base class version
-    # Client.get_properties if method was not overridden by user-provided
-    # NumPyClient instance
+    # Delete get_properties method from NumPyClientWrapper if the user-provided
+    # NumPyClient instance does not implement get_properties. This enables the
+    # following call to start_client to handle NumPyClientWrapper instances like any
+    # other Client instance (which might or might not implement get_properties).
     if not numpyclient_has_get_properties(client=client):
         del NumPyClientWrapper.get_properties
 
@@ -215,9 +216,10 @@ def start_keras_client(
     # Wrap the Keras client
     flower_client = KerasClientWrapper(client)
 
-    # Remove KerasClientWrapper.get_properties with the base class version
-    # Client.get_properties if method was not overridden by user-provided
-    # KerasClient instance
+    # Delete get_properties method from KerasClientWrapper if the user-provided
+    # KerasClient instance does not implement get_properties. This enables the
+    # following call to start_client to handle KerasClientWrapper instances like any
+    # other Client instance (which might or might not implement get_properties).
     if not kerasclient_has_get_properties(client=client):
         del KerasClientWrapper.get_properties
 
