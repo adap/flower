@@ -141,7 +141,7 @@ class SimpleClientManager(ClientManager):
         if num_clients > len(available_cids):
             log(
                 INFO,
-                "Sampling failed as number of available clients"
+                "Sampling failed: number of available clients"
                 " (%s) is less than number of requested clients (%s).",
                 len(available_cids),
                 num_clients,
