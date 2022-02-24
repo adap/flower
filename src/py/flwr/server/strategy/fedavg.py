@@ -211,16 +211,17 @@ class FedAvg(Strategy):
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        # Do not configure federated evaluation if a centralized evaluation
-        # function is provided
-        if self.eval_fn is not None:
-            return []
 
         # Parameters and config
         config = {}
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
             config = self.on_evaluate_config_fn(rnd)
+        
+        # Do not configure federated evaluation if a centralized evaluation function is provided and fed_eval!=1 in self.on_evaluate_config_fn 
+        if self.eval_fn is not None and (not "fed_eval" in config or config["fed_eval"]!=1):
+            return []
+        
         evaluate_ins = EvaluateIns(parameters, config)
 
         # Sample clients
