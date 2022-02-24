@@ -30,8 +30,8 @@ def weights_to_parameters(weights: Weights) -> Parameters:
     tensors = []
     # tensors = [ndarray_to_bytes(ndarray) for ndarray in weights]
     for ndarray in weights:
-        dtypes.append(ndarray.dtype)
-        shapes.append(ndarray.shape)
+        dtypes.append(str(ndarray.dtype))
+        shapes.append(str(ndarray.shape))
         tensors.append(ndarray.tobytes())
     return Parameters(tensors=tensors, tensor_type="numpy.ndarray", shapes=shapes, dtypes=dtypes)
 
@@ -42,7 +42,7 @@ def parameters_to_weights(parameters: Parameters) -> Weights:
     total_n = len(parameters.dtypes)
     for i in range(total_n):
         dtype = parameters.dtypes[i]
-        shape = parameters.shapes[i]
+        shape = tuple(int(x) for x in parameters.shapes[i][1:-1].split(","))
         weights.append(np.ndarray(
             buffer=parameters.tensors[i], dtype=dtype, shape=shape))
     return weights

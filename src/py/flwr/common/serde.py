@@ -34,13 +34,13 @@ from . import typing
 
 def parameters_to_proto(parameters: typing.Parameters) -> Parameters:
     """."""
-    return Parameters(tensors=parameters.tensors, tensor_type=parameters.tensor_type)
+    return Parameters(tensors=parameters.tensors, tensor_type=parameters.tensor_type, shapes=parameters.shapes, dtypes=parameters.dtypes)
 
 
 def parameters_from_proto(msg: Parameters) -> typing.Parameters:
     """."""
     tensors: List[bytes] = list(msg.tensors)
-    return typing.Parameters(tensors=tensors, tensor_type=msg.tensor_type)
+    return typing.Parameters(tensors=tensors, tensor_type=msg.tensor_type, shapes=msg.shapes, dtypes=msg.dtypes)
 
 
 #  === Reconnect message ===

@@ -56,8 +56,8 @@ class Parameters:
 
     tensors: List[bytes]
     tensor_type: str
-    shapes: List[Tuple]
-    dtypes: List[np.dtype]
+    shapes: List[str]
+    dtypes: List[str]
 
 
 @dataclass
