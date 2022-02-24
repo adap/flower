@@ -48,12 +48,12 @@ Now you are ready to start the clients. We have prepared a simple script called 
 
 ```shell
 # Shell 1
-./client.sh 1
+./dev/client.sh 1
 ```
 
 ```shell
 # Shell 2
-./client.sh 2
+./dev/client.sh 2
 ```
 
 Congrats! You have just run a Federated Learning experiment using TensorFlow/Keras in MLCube using Flower for federation.
