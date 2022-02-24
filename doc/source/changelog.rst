@@ -24,6 +24,7 @@ What's new?
     * Expose Flower version through :code:`flwr.__version__` (`#952 <https://github.com/adap/flower/pull/952>`_)
     * :code:`start_server` in :code:`app.py` now returns a :code:`History` object containing metrics from training (`#974 <https://github.com/adap/flower/pull/974>`_)
     * Make :code:`max_workers` (used by :code:`ThreadPoolExecutor`) configurable (`#978 <https://github.com/adap/flower/pull/978>`_)
+    * Decrease default gRPC keep-alive time (`#1069 <https://github.com/adap/flower/pull/1069>`_)
     * Increase sleep time after server start to three seconds in all code examples (`#1086 <https://github.com/adap/flower/pull/1086>`_)
 
 Incompatible changes:
