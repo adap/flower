@@ -17,8 +17,8 @@
 
 from typing import Tuple
 
-from flwr.client.client import Client
-from flwr.common import serde
+from flwr.client.client import Client, has_get_properties
+from flwr.common import serde, typing
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 # pylint: disable=missing-function-docstring
@@ -31,6 +31,24 @@ class UnknownServerMessage(Exception):
 def handle(
     client: Client, server_msg: ServerMessage
 ) -> Tuple[ClientMessage, int, bool]:
+    """Handle incoming messages from the server.
+
+    Parameters
+    ----------
+    client : Client
+        The Client instance provided by the user.
+
+    Returns
+    -------
+    client_message: ClientMessage
+        The message comming from the server, to be processed by the client.
+    sleep_duration : int
+        Number of seconds that the client should disconnect from the server.
+    keep_going : bool
+        Flag that indicates whether the client should continue to process the
+        next message from the server (True) or disconnect and optionally
+        reconnect later (False).
+    """
     field = server_msg.WhichOneof("msg")
     if field == "reconnect":
         disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect)
@@ -63,6 +81,19 @@ def _reconnect(
 def _get_properties(
     client: Client, properties_msg: ServerMessage.PropertiesIns
 ) -> ClientMessage:
+    # Check if client overrides get_properties
+    if not has_get_properties(client=client):
+        # If client does not override get_properties, don't call it
+        properties_res = typing.PropertiesRes(
+            status=typing.Status(
+                code=typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED,
+                message="Client does not implement get_properties",
+            ),
+            properties={},
+        )
+        properties_res_proto = serde.properties_res_to_proto(properties_res)
+        return ClientMessage(properties_res=properties_res_proto)
+
     # Deserialize get_properties instruction
     properties_ins = serde.properties_ins_from_proto(properties_msg)
     # Request for properties
