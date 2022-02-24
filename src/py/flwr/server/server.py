@@ -169,13 +169,12 @@ class Server:
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(rnd=current_round)
             if res_fed:
-                loss_fed, evaluate_metrics_fed, _ = res_fed
+                loss_fed, _, (metrics_res,_) = res_fed 
                 if loss_fed:
                     history.add_loss_distributed(rnd=current_round, loss=loss_fed)
                     history.add_metrics_distributed(
-                        rnd=current_round, metrics=evaluate_metrics_fed
+                        rnd=current_round, metrics={f"Client {i}": metrics_res[i][1].metrics for i in range(len(metrics_res))}
                     )
-
         # Bookkeeping
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
