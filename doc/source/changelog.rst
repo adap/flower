@@ -17,7 +17,7 @@ What's new?
 
 * **Client properties (feature preview)** (`#795 <https://github.com/adap/flower/pull/795>`_)
 
-  Clients can implement a new method :code:`get_properties` to enable server-side strategies to query clients 
+  Clients can implement a new method :code:`get_properties` to enable server-side strategies to query client properties.
 
 * **Experimental Android support with TFLite** (`#865 <https://github.com/adap/flower/pull/865>`_)
 
@@ -27,19 +27,19 @@ What's new?
 
 * **Make gRPC keepalive time user-configurable and decrease default keepalive time** (`#1069 <https://github.com/adap/flower/pull/1069>`_)
 
-  TODO
+  The default gRPC keepalive time has been reduced to increase the compatibility of Flower with more cloud environments (for example, Microsoft Azure). Users can configure the keepalive time to customize the gRPC stack based on specific requirements.
 
 * **New differential privacy example using Opacus and PyTorch** (`#805 <https://github.com/adap/flower/pull/805>`_)
 
-  TODO
+  A new code example (:code:`opacus`) demonstrates differentially-private federated learning with Opacus, PyTorch, and Flower.
 
 * **New Hugging Face Transformers code example** (`#863 <https://github.com/adap/flower/pull/863>`_)
 
-  TODO
+  A new code example (:code:`quickstart_huggingface`) demonstrates usage of Hugging Face Transformers with Flower.
 
 * **New MLCube code example** (`#779 <https://github.com/adap/flower/pull/779>`_, `#1034 <https://github.com/adap/flower/pull/1034>`_, `#1065 <https://github.com/adap/flower/pull/1065>`_, `#1090 <https://github.com/adap/flower/pull/1090>`_)
 
-  TODO
+  A new code example (:code:`quickstart_mlcube`) demonstrates usage of MLCube with Flower.
 
 * **SSL-enabled server and client** (`#842 <https://github.com/adap/flower/pull/842>`_,  `#844 <https://github.com/adap/flower/pull/844>`_,  `#845 <https://github.com/adap/flower/pull/845>`_, `#847 <https://github.com/adap/flower/pull/847>`_, `#993 <https://github.com/adap/flower/pull/993>`_, `#994 <https://github.com/adap/flower/pull/994>`_)
 
@@ -47,7 +47,7 @@ What's new?
 
 * **Updated** :code:`FedAdam` **and** :code:`FedYogi` **strategies** (`#885 <https://github.com/adap/flower/pull/885>`_, `#895 <https://github.com/adap/flower/pull/895>`_)
 
-  :code:`FedAdam` and :code:`FedAdam` ... TODO
+  :code:`FedAdam` and :code:`FedAdam` match the latest version of the Adaptive Federated Optimization paper.
 
 * **Initialize** :code:`start_simulation` **with a list of client IDs** (`#860 <https://github.com/adap/flower/pull/860>`_)
 
