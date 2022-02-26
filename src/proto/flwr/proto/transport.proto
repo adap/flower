@@ -32,6 +32,8 @@ message Status {
 message Parameters {
   repeated bytes tensors = 1;
   string tensor_type = 2;
+  repeated string shapes = 3;
+  repeated string dtypes = 4;
 }
 enum Reason {
   UNKNOWN = 0;

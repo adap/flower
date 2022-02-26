@@ -102,7 +102,7 @@ class Server:
     ) -> None:
         self._client_manager: ClientManager = client_manager
         self.parameters: Parameters = Parameters(
-            tensors=[], tensor_type="numpy.ndarray"
+            tensors=[], tensor_type="numpy.ndarray", shapes=[], dtypes=[]
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
         self.max_workers: Optional[int] = None

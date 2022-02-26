@@ -66,15 +66,23 @@ class Parameters(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TENSORS_FIELD_NUMBER: builtins.int
     TENSOR_TYPE_FIELD_NUMBER: builtins.int
+    SHAPES_FIELD_NUMBER: builtins.int
+    DTYPES_FIELD_NUMBER: builtins.int
     @property
     def tensors(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
     tensor_type: typing.Text
+    @property
+    def shapes(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    @property
+    def dtypes(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     def __init__(self,
         *,
         tensors: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
         tensor_type: typing.Text = ...,
+        shapes: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        dtypes: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["tensor_type",b"tensor_type","tensors",b"tensors"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dtypes",b"dtypes","shapes",b"shapes","tensor_type",b"tensor_type","tensors",b"tensors"]) -> None: ...
 global___Parameters = Parameters
 
 class ServerMessage(google.protobuf.message.Message):

@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -56,6 +56,8 @@ class Parameters:
 
     tensors: List[bytes]
     tensor_type: str
+    shapes: List[str]
+    dtypes: List[str]
 
 
 @dataclass
