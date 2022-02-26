@@ -20,36 +20,58 @@ implemented:
 
 .. code-block:: python
 
-    class Strategy(ABC):
 
-        @abstractmethod
-        def configure_fit(
-            self, rnd: int, weights: Weights, client_manager: ClientManager
-        ) -> List[Tuple[ClientProxy, FitIns]]:
+class Strategy(ABC):
+    """Abstract base class for server strategy implementations."""
 
-        @abstractmethod
-        def aggregate_fit(
-            self,
-            rnd: int,
-            results: List[Tuple[ClientProxy, FitRes]],
-            failures: List[BaseException],
-        ) -> Optional[Weights]:
+    @abstractmethod
+    def initialize_parameters(
+        self, client_manager: ClientManager
+    ) -> Optional[Parameters]:
+        """Initialize the (global) model parameters."""
 
-        @abstractmethod
-        def configure_evaluate(
-            self, rnd: int, weights: Weights, client_manager: ClientManager
-        ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+    @abstractmethod
+    def configure_fit(
+        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
 
-        @abstractmethod
-        def aggregate_evaluate(
-            self,
-            rnd: int,
-            results: List[Tuple[ClientProxy, EvaluateRes]],
-            failures: List[BaseException],
-        ) -> Optional[float]:
+    @abstractmethod
+    def aggregate_fit(
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[BaseException],
+    ) -> Union[
+        Tuple[Optional[Parameters], Dict[str, Scalar]],
+        Optional[Weights],  # Deprecated
+    ]:
+        """Aggregate training results."""
 
-        @abstractmethod
-        def evaluate(self, weights: Weights) -> Optional[Tuple[float, float]]:
+    @abstractmethod
+    def configure_evaluate(
+        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation."""
+
+    @abstractmethod
+    def aggregate_evaluate(
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[BaseException],
+    ) -> Union[
+        Tuple[Optional[float], Dict[str, Scalar]],
+        Optional[float],  # Deprecated
+    ]:
+        """Aggregate evaluation results."""
+
+    @abstractmethod
+    def evaluate(
+        self, parameters: Parameters
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate the current model parameters."""
+
 
 Creating a new strategy means implmenting a new :code:`class` derived from the
 abstract base class :code:`Strategy` which provides implementations for the
@@ -58,6 +80,8 @@ previously shown abstract methods:
 .. code-block:: python
 
     class SotaStrategy(Strategy):
+        def initialize_parameters(self, client_manager):
+            # Your implementation here
 
         def configure_fit(self, rnd, weights, client_manager):
             # Your implementation here
@@ -76,23 +100,28 @@ previously shown abstract methods:
 
 The following sections describe each of those methods in detail.
 
+The :code:`initialize_parameters` method
+----------------------------------------
+
+*coming soon*
+
 The :code:`configure_fit` method
------------------------------------
+--------------------------------
 
 *coming soon*
 
 The :code:`aggregate_fit` method
------------------------------------
+--------------------------------
 
 *coming soon*
 
 The :code:`configure_evaluate` method
-----------------------------------------
+-------------------------------------
 
 *coming soon*
 
 The :code:`aggregate_evaluate` method
-----------------------------------------
+-------------------------------------
 
 *coming soon*
 
