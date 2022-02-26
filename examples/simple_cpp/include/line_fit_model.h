@@ -16,7 +16,9 @@ class LineFitModel {
 
   std::vector<double> predict(std::vector<std::vector<double>> X);
 
-  std::tuple<size_t, float, double> StochasticGradientDescent(SyntheticDataset &dataset);
+  std::tuple<size_t, double, double> train_SGD(SyntheticDataset &dataset);
+
+  std::tuple<size_t, double, double> evaluate(SyntheticDataset &test_dataset);
 
   std::vector<double> get_pred_weights();
 

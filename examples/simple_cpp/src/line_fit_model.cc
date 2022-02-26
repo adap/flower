@@ -54,7 +54,7 @@ std::vector<double> LineFitModel::predict(std::vector<std::vector<double>> X) {
     return prediction;
 }
 
-std::tuple<size_t, float, double> LineFitModel::StochasticGradientDescent(SyntheticDataset &dataset) {
+std::tuple<size_t, double, double> LineFitModel::train_SGD(SyntheticDataset &dataset) {
     int features = dataset.get_features_count();
     std::vector<std::vector<double>> data_points = dataset.get_data_points();
 
@@ -111,7 +111,7 @@ std::tuple<size_t, float, double> LineFitModel::StochasticGradientDescent(Synthe
     }
     std::cout << std::endl << std::fixed << pred_b << std::endl;
 
-    double accuracy = 0.0;
+    double accuracy = training_error;
     return std::make_tuple(dataset.size(), training_error, accuracy);
 
 }
@@ -125,3 +125,21 @@ double LineFitModel::compute_mse(std::vector<double> true_y, std::vector<double>
 
     return error / (1.0 * true_y.size());
 }
+
+std::tuple<size_t, double, double> LineFitModel::evaluate(SyntheticDataset &test_dataset) {
+    std::vector<std::vector<double>> data_points = test_dataset.get_data_points();
+    int num_features = data_points[0].size();
+    std::vector<std::vector<double>> X(test_dataset.size(), std::vector<double>(num_features));
+    std::vector<double> y(test_dataset.size());
+
+    for (int i = 0; i < test_dataset.size(); i++) {
+        std::vector<double> point = data_points[i];
+        y[i] = point.back();
+        point.pop_back();
+        X[i] = point;
+    }
+
+    double test_loss = compute_mse(y, predict(X));
+    return std::make_tuple(test_dataset.size(), test_loss, test_loss);
+}
+

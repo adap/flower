@@ -79,7 +79,7 @@ flwr::FitRes SimpleFlwrClient::fit(flwr::FitIns ins) {
     flwr::Parameters p = ins.getParameters();
     this->set_parameters(p);
 
-    std::tuple<size_t, float, double> result = this->model.StochasticGradientDescent(this->training_dataset);
+    std::tuple<size_t, float, double> result = this->model.train_SGD(this->training_dataset);
 
     resp.setParameters(this->get_parameters().getParameters());
     resp.setNum_example(std::get<0>(result));
@@ -95,13 +95,17 @@ flwr::EvaluateRes SimpleFlwrClient::evaluate(flwr::EvaluateIns ins) {
     flwr::EvaluateRes resp;
     flwr::Parameters p = ins.getParameters();
     this->set_parameters(p);
-    // Evaluation goes here and must return a loss, a number_of_examples and an "accuracy"
-    // TODO
 
-    std::tuple<size_t, float, double> result;
-    //resp.setNum_example(std::get<0>(result));
-    //resp.setLoss(std::get<1>(result));
-    resp.setNum_example(1);
+    // Evaluation returns a number_of_examples, a loss and an "accuracy"
+    std::tuple<size_t, double, double> result = this->model.evaluate(this->test_dataset);
+
+    resp.setNum_example(std::get<0>(result));
+    resp.setLoss(std::get<1>(result));
+
+    flwr::Scalar loss_metric = flwr::Scalar();
+    loss_metric.setFloat(std::get<2>(result));
+    std::map<std::string, flwr::Scalar> metric = {{"loss", loss_metric}};
+    resp.setMetrics(metric);
 
     return resp;
 
