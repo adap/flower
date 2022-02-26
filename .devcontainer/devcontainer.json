@@ -1,0 +1,17 @@
+{
+  "dockerFile": "Dockerfile",
+  "postCreateCommand": "poetry install --extras \"simulation\"",
+  "extensions": ["ms-python.python"],
+  "settings": {
+    "files.watcherExclude": {},
+    "search.exclude": {},
+    "terminal.integrated.defaultProfile.linux": "bash"
+  },
+  "remoteUser": "flwr-vscode",
+  "containerEnv": {
+    "POETRY_VIRTUALENVS_CREATE": "false"
+  },
+  "mounts": [
+    "source=flwr-bashhistory,target=/commandhistory,type=volume"
+  ]
+}

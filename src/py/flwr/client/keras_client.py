@@ -45,7 +45,6 @@ from .client import Client
 class KerasClient(ABC):
     """Abstract base class for Flower clients which use Keras."""
 
-    @abstractmethod
     def get_properties(self, config: Config) -> Properties:
         """Returns a client's set of properties.
 
@@ -124,6 +123,11 @@ class KerasClient(ABC):
             and a `float` representing the accuracy of the (global) model
             weights on the local dataset.
         """
+
+
+def has_get_properties(client: KerasClient) -> bool:
+    """Check if KerasClient implements get_properties."""
+    return type(client).get_properties != KerasClient.get_properties
 
 
 class KerasClientWrapper(Client):
