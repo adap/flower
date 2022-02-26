@@ -8,37 +8,26 @@
 #include <vector>
 
 class SyntheticDataset {
+ public:
+  // Generates the synthetic dataset of size size around given vector m of size ms_size and given bias b.
+  SyntheticDataset(std::vector<double> ms, double b, size_t size);
 
-public:
-    // Generates the synthetic dataset of size size around random vector m of size ms_size.
-    SyntheticDataset(std::vector<double> ms,double b, size_t training_size, size_t validation_size, size_t  test_size);
+  // Returns the size of the dataset.
+  size_t size();
 
-    // Returns the size of the dataset.
-    size_t size();
+  // Returns the dataset.
+  std::vector<std::vector<double>> get_data_points();
 
-    // Returns the training subset of the dataset.
-    std::vector<std::vector<double> > get_training_data();
+  int get_features_count();
 
-    // Returns the validation subset of the dataset.
-    std::vector<std::vector<double> > get_validation_data();
+ private:
+  std::vector<double> ms;
+  double b;
 
-    // Returns the test subset of the dataset.
-    std::vector<std::vector<double> > get_test_data();
+  // The label is the last position in the vector.
+  // TODO: consider changing this to a pair with the label.
 
-    int get_features_count();
-
-private:
-    std::vector<double> ms;
-    double b;
-    size_t training_size, validation_size, test_size;
-
-    // The label is the last position in the vector.
-    // TODO: consider changing this to a pair with the label.
-
-    std::vector<std::vector<double> > training_data;
-    std::vector<std::vector<double> > validation_data;
-    std::vector<std::vector<double> > test_data;
+  std::vector<std::vector<double>> data_points;
 };
-
 
 #endif //FLOWER_CPP_SYNTHETIC_DATASET_H

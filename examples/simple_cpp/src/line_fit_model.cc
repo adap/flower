@@ -10,7 +10,8 @@
 #include <algorithm>
 #include <random>
 
-LineFitModel::LineFitModel(int num_iterations, double learning_rate, int num_params) : num_iterations(num_iterations), learning_rate(learning_rate) {
+LineFitModel::LineFitModel(int num_iterations, double learning_rate, int num_params)
+        : num_iterations(num_iterations), learning_rate(learning_rate) {
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_int_distribution<> distr(-10.0, 10.0);
@@ -21,27 +22,27 @@ LineFitModel::LineFitModel(int num_iterations, double learning_rate, int num_par
     this->pred_b = 0.0;
     this->batch_size = 64;
 }
-std::vector<double> LineFitModel::get_pred_weights(){
+std::vector<double> LineFitModel::get_pred_weights() {
     std::vector<double> copy_of_weights(this->pred_weights);
     return copy_of_weights;
 }
 
-void LineFitModel::set_pred_weights(std::vector<double> new_weights){
+void LineFitModel::set_pred_weights(std::vector<double> new_weights) {
     this->pred_weights.assign(new_weights.begin(), new_weights.end());
 }
 
-double LineFitModel::get_bias(){
+double LineFitModel::get_bias() {
     return this->pred_b;
 }
-void LineFitModel::set_bias(double new_bias){
+void LineFitModel::set_bias(double new_bias) {
     this->pred_b = new_bias;
 }
 
-size_t LineFitModel::get_model_size(){
+size_t LineFitModel::get_model_size() {
     return this->pred_weights.size();
 };
 
-std::vector<double> LineFitModel::predict(std::vector<std::vector<double> > X) {
+std::vector<double> LineFitModel::predict(std::vector<std::vector<double>> X) {
     std::vector<double> prediction(X.size(), 0.0);
     for (int i = 0; i < X.size(); i++) {
         for (int j = 0; j < X[i].size(); j++) {
@@ -53,15 +54,14 @@ std::vector<double> LineFitModel::predict(std::vector<std::vector<double> > X) {
     return prediction;
 }
 
-std::tuple<size_t, float, double> LineFitModel::StochasticGradientDescent(SyntheticDataset& dataset) {
+std::tuple<size_t, float, double> LineFitModel::StochasticGradientDescent(SyntheticDataset &dataset) {
     int features = dataset.get_features_count();
-    std::vector<std::vector<double> > data_points = dataset.get_training_data();
+    std::vector<std::vector<double>> data_points = dataset.get_data_points();
 
     std::vector<double> data_indices(dataset.size());
     for (int i = 0; i < dataset.size(); i++) {
         data_indices.push_back(i);
     }
-
 
     std::vector<double> dW(features);
     std::vector<double> err(batch_size, 10000);
@@ -72,8 +72,7 @@ std::tuple<size_t, float, double> LineFitModel::StochasticGradientDescent(Synthe
         std::mt19937 g(rd());
         std::shuffle(data_indices.begin(), data_indices.end(), g);
 
-
-        std::vector<std::vector<double> > X(this->batch_size, std::vector<double>(features));
+        std::vector<std::vector<double>> X(this->batch_size, std::vector<double>(features));
         std::vector<double> y(this->batch_size);
 
         for (int i = 0; i < this->batch_size; i++) {
@@ -92,11 +91,12 @@ std::tuple<size_t, float, double> LineFitModel::StochasticGradientDescent(Synthe
         err = LinearAlgebraUtil::subtract_vector(y, pred);
 
         dW = LinearAlgebraUtil::multiply_matrix_vector(LinearAlgebraUtil::transpose_vector(X), err);
-        dW = LinearAlgebraUtil::multiply_vector_scalar(dW, (-2.0/this->batch_size));
+        dW = LinearAlgebraUtil::multiply_vector_scalar(dW, (-2.0 / this->batch_size));
 
-        dB =  (-2.0/this->batch_size) * std::accumulate(err.begin(), err.end(), 0.0);
+        dB = (-2.0 / this->batch_size) * std::accumulate(err.begin(), err.end(), 0.0);
 
-        this->pred_weights = LinearAlgebraUtil::subtract_vector(pW, LinearAlgebraUtil::multiply_vector_scalar(dW, learning_rate));
+        this->pred_weights =
+                LinearAlgebraUtil::subtract_vector(pW, LinearAlgebraUtil::multiply_vector_scalar(dW, learning_rate));
         this->pred_b = pB - learning_rate * dB;
 
         if (iteration % 250 == 0) {
@@ -109,9 +109,9 @@ std::tuple<size_t, float, double> LineFitModel::StochasticGradientDescent(Synthe
     for (int i = 0; i < pred_weights.size(); i++) {
         std::cout << std::fixed << pred_weights[i] << " ";
     }
-    std::cout << std::endl << std::fixed<< pred_b << std::endl;
+    std::cout << std::endl << std::fixed << pred_b << std::endl;
 
-    double accuracy = 0.0; 
+    double accuracy = 0.0;
     return std::make_tuple(dataset.size(), training_error, accuracy);
 
 }

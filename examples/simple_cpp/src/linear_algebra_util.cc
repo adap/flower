@@ -14,7 +14,8 @@ std::vector<double> LinearAlgebraUtil::subtract_vector(std::vector<double> v1, s
     return result;
 }
 
-std::vector<double> LinearAlgebraUtil::multiply_matrix_vector(std::vector<std::vector<double> > mat, std::vector<double> v) {
+std::vector<double>
+LinearAlgebraUtil::multiply_matrix_vector(std::vector<std::vector<double>> mat, std::vector<double> v) {
     std::vector<double> result(mat.size(), 0.0);
     for (int i = 0; i < mat.size(); i++) {
         for (int j = 0; j < mat[0].size(); j++) {
@@ -39,8 +40,8 @@ std::vector<double> LinearAlgebraUtil::multiply_vector_scalar(std::vector<double
     return v;
 }
 
-std::vector<std::vector<double> > LinearAlgebraUtil::transpose_vector(std::vector<std::vector<double> > v) {
-    std::vector<std::vector<double> > vT(v[0].size(), std::vector<double>(v.size()));
+std::vector<std::vector<double>> LinearAlgebraUtil::transpose_vector(std::vector<std::vector<double>> v) {
+    std::vector<std::vector<double>> vT(v[0].size(), std::vector<double>(v.size()));
     for (int i = 0; i < v.size(); i++) {
         for (int j = 0; j < v[0].size(); j++) {
             vT[j][i] = v[i][j];

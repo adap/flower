@@ -11,33 +11,32 @@
 #include "linear_algebra_util.h"
 
 class LineFitModel {
-public:
-    LineFitModel(int num_iterations, double learning_rate, int num_params);
+ public:
+  LineFitModel(int num_iterations, double learning_rate, int num_params);
 
-    std::vector<double> predict(std::vector<std::vector<double> > X);
+  std::vector<double> predict(std::vector<std::vector<double>> X);
 
-    std::tuple<size_t, float, double> StochasticGradientDescent(SyntheticDataset& dataset);
+  std::tuple<size_t, float, double> StochasticGradientDescent(SyntheticDataset &dataset);
 
-    std::vector<double> get_pred_weights();
+  std::vector<double> get_pred_weights();
 
-    void set_pred_weights(std::vector<double> new_pred_weights);
+  void set_pred_weights(std::vector<double> new_pred_weights);
 
-    double get_bias();
+  double get_bias();
 
-    void set_bias(double new_bias);
+  void set_bias(double new_bias);
 
-    size_t get_model_size();
+  size_t get_model_size();
 
-private:
-    int num_iterations;
-    int batch_size;
-    double learning_rate;
+ private:
+  int num_iterations;
+  int batch_size;
+  double learning_rate;
 
-    std::vector<double> pred_weights;
-    double pred_b;
+  std::vector<double> pred_weights;
+  double pred_b;
 
-    double compute_mse(std::vector<double> true_y, std::vector<double> pred) ;
+  double compute_mse(std::vector<double> true_y, std::vector<double> pred);
 };
-
 
 #endif //FLOWER_CPP_LINE_FIT_MODEL_H
