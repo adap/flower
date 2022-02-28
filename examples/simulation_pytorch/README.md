@@ -4,7 +4,7 @@ This code splits CIFAR-10 dataset into `pool_size` partitions (user defined) and
 
 ## Requirements
 
-*    Flower 0.17.0
+*    Flower 0.18.0
 *    A recent version of PyTorch. This example has been tested with Pytorch 1.7.1, 1.8.2 (LTS) and 1.10.2.
 *    A recent version of Ray. This example has been tested with Ray 1.4.1, 1.6 and 1.9.2.
 
