@@ -26,14 +26,16 @@ from .client import Client
 from .grpc_client.connection import grpc_connection
 from .grpc_client.message_handler import handle
 from .keras_client import KerasClient, KerasClientWrapper
+from .keras_client import has_get_properties as kerasclient_has_get_properties
 from .numpy_client import NumPyClient, NumPyClientWrapper
+from .numpy_client import has_get_properties as numpyclient_has_get_properties
 
 
 def start_client(
     server_address: str,
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificate: Optional[bytes] = None,
+    root_certificates: Optional[bytes] = None,
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
@@ -51,10 +53,10 @@ def start_client(
             value. Note that the Flower server needs to be started with the
             same value (see `flwr.server.start_server`), otherwise it will not
             know about the increased limit and block larger messages.
-        root_certificate: bytes (default: None)
-            PEM-encoded root certificate as bytes. If provided, a secure connection
-            using the certificate(s) will be established to a SSL/TLS-enabled Flower
-            server
+        root_certificates: bytes (default: None)
+            The PEM-encoded root certificates as a byte string. If provided, a secure
+            connection using the certificates will be established to a
+            SSL-enabled Flower server.
 
     Returns
     -------
@@ -69,13 +71,13 @@ def start_client(
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting a SSL/TLS-enabled client:
+    Starting a SSL-enabled client:
 
     >>> from pathlib import Path
     >>> start_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
-    >>>     root_certificate=Path("/crts/root.pem").read_bytes(),
+    >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
     while True:
@@ -83,10 +85,9 @@ def start_client(
         with grpc_connection(
             server_address,
             max_message_length=grpc_max_message_length,
-            root_certificate=root_certificate,
+            root_certificates=root_certificates,
         ) as conn:
             receive, send = conn
-            log(INFO, "Opened (insecure) gRPC connection")
 
             while True:
                 server_message = receive()
@@ -112,7 +113,7 @@ def start_numpy_client(
     server_address: str,
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificate: Optional[bytes] = None,
+    root_certificates: Optional[bytes] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -130,10 +131,10 @@ def start_numpy_client(
             value. Note that the Flower server needs to be started with the
             same value (see `flwr.server.start_server`), otherwise it will not
             know about the increased limit and block larger messages.
-        root_certificate: bytes (default: None)
-            PEM-encoded root certificate as bytes. If provided, a secure connection
-            using the certificate(s) will be established to a SSL/TLS-enabled Flower
-            server
+        root_certificates: bytes (default: None)
+            The PEM-encoded root certificates a byte string. If provided, a secure
+            connection using the certificates will be established to a
+            SSL-enabled Flower server.
 
     Returns
     -------
@@ -148,25 +149,32 @@ def start_numpy_client(
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting a SSL/TLS-enabled client:
+    Starting a SSL-enabled client:
 
     >>> from pathlib import Path
     >>> start_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
-    >>>     root_certificate=Path("/crts/root.pem").read_bytes(),
+    >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
 
     # Wrap the NumPyClient
     flower_client = NumPyClientWrapper(client)
 
+    # Delete get_properties method from NumPyClientWrapper if the user-provided
+    # NumPyClient instance does not implement get_properties. This enables the
+    # following call to start_client to handle NumPyClientWrapper instances like any
+    # other Client instance (which might or might not implement get_properties).
+    if not numpyclient_has_get_properties(client=client):
+        del NumPyClientWrapper.get_properties
+
     # Start
     start_client(
         server_address=server_address,
         client=flower_client,
         grpc_max_message_length=grpc_max_message_length,
-        root_certificate=root_certificate,
+        root_certificates=root_certificates,
     )
 
 
@@ -207,6 +215,13 @@ def start_keras_client(
 
     # Wrap the Keras client
     flower_client = KerasClientWrapper(client)
+
+    # Delete get_properties method from KerasClientWrapper if the user-provided
+    # KerasClient instance does not implement get_properties. This enables the
+    # following call to start_client to handle KerasClientWrapper instances like any
+    # other Client instance (which might or might not implement get_properties).
+    if not kerasclient_has_get_properties(client=client):
+        del KerasClientWrapper.get_properties
 
     # Start
     start_client(

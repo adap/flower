@@ -1,5 +1,19 @@
 # Flower - A Friendly Federated Learning Framework
 
+<p align="center">
+  <a href="https://flower.dev/">
+    <img src="https://flower.dev/_next/static/chunks/images/logo-ed1336acd844fd699f2520e537e349b2.gif" width="140px" alt="Flower Website" />
+  </a>
+</p>
+<p align="center">
+    <a href="https://flower.dev/">Website</a> |
+    <a href="https://flower.dev/blog">Blog</a> |
+    <a href="https://flower.dev/docs/">Docs</a> |
+    <a href="https://flower.dev/conf/flower-summit-2021">Conference</a> |
+    <a href="https://flower.dev/join-slack">Slack</a>
+    <br /><br />
+</p>
+
 [![GitHub license](https://img.shields.io/github/license/adap/flower)](https://github.com/adap/flower/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/main/CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/workflows/Build/badge.svg)
@@ -37,7 +51,7 @@ Meet the Flower community on [flower.dev](https://flower.dev)!
 * [Quickstart (Hugging Face [code example])](https://flower.dev/docs/quickstart_huggingface.html)
 * [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/quickstart_pytorch_lightning.html)
 * [Quickstart (MXNet)](https://flower.dev/docs/example-mxnet-walk-through.html)
-* [Quickstart (scikit-learn [code example])](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
+* [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 * [Quickstart (TFLite on Android [code example])](https://github.com/adap/flower/tree/main/examples/android)
 
 ## Flower Usage Examples
@@ -70,6 +84,14 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 ## Flower Baselines / Datasets
 
 *Experimental* - curious minds can take a peek at [baselines](https://github.com/adap/flower/tree/main/baselines).
+
+## Community
+
+Flower is built by a wonderful community of researchers and engineers. [Join Slack](https://flower.dev/join-slack) to meet them, [contributions](#contributing-to-flower) are welcome.
+
+<a href="https://github.com/adap/flower/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=adap/flower" />
+</a>
 
 ## Citation
 

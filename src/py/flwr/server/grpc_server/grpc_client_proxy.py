@@ -33,15 +33,6 @@ class GrpcClientProxy(ClientProxy):
         super().__init__(cid)
         self.bridge = bridge
 
-    def get_parameters(self) -> common.ParametersRes:
-        """Return the current local model parameters."""
-        get_parameters_msg = serde.get_parameters_to_proto()
-        client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(get_parameters=get_parameters_msg)
-        )
-        parameters_res = serde.parameters_res_from_proto(client_msg.parameters_res)
-        return parameters_res
-
     def get_properties(self, ins: common.PropertiesIns) -> common.PropertiesRes:
         """Requests client's set of internal properties."""
         properties_msg = serde.properties_ins_to_proto(ins)
@@ -50,6 +41,15 @@ class GrpcClientProxy(ClientProxy):
         )
         properties_res = serde.properties_res_from_proto(client_msg.properties_res)
         return properties_res
+
+    def get_parameters(self) -> common.ParametersRes:
+        """Return the current local model parameters."""
+        get_parameters_msg = serde.get_parameters_to_proto()
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(get_parameters=get_parameters_msg)
+        )
+        parameters_res = serde.parameters_res_from_proto(client_msg.parameters_res)
+        return parameters_res
 
     def fit(self, ins: common.FitIns) -> common.FitRes:
         """Refine the provided weights using the locally held dataset."""

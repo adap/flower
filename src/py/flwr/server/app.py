@@ -36,7 +36,7 @@ def start_server(  # pylint: disable=too-many-arguments
     strategy: Optional[Strategy] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     force_final_distributed_eval: bool = False,
-    ssl_files: Optional[Tuple[bytes, bytes, bytes]] = None,
+    certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
 
@@ -65,9 +65,9 @@ def start_server(  # pylint: disable=too-many-arguments
         force_final_distributed_eval: bool (default: False).
             Forces a distributed evaluation to occur after the last training
             epoch when enabled.
-        ssl_files : Tuple[bytes, bytes, bytes] (default: None)
+        certificates : Tuple[bytes, bytes, bytes] (default: None)
             Tuple containing root certificate, server certificate, and private key to
-            start a secure SSL/TLS server. The tuple is expected to have three bytes
+            start a secure SSL-enabled server. The tuple is expected to have three bytes
             elements in the following order:
 
                 * CA certificate.
@@ -84,10 +84,10 @@ def start_server(  # pylint: disable=too-many-arguments
 
     >>> start_server()
 
-    Starting a SSL/TLS-enabled server:
+    Starting a SSL-enabled server:
 
     >>> start_server(
-    >>>     ssl_files=(
+    >>>     certificates=(
     >>>         Path("/crts/root.pem").read_bytes(),
     >>>         Path("/crts/localhost.crt").read_bytes(),
     >>>         Path("/crts/localhost.key").read_bytes()
@@ -101,11 +101,11 @@ def start_server(  # pylint: disable=too-many-arguments
         client_manager=initialized_server.client_manager(),
         server_address=server_address,
         max_message_length=grpc_max_message_length,
-        ssl_files=ssl_files,
+        certificates=certificates,
     )
     num_rounds = initialized_config["num_rounds"]
-    ssl_status = "enabled" if ssl_files is not None else "disabled"
-    msg = f"Flower server running ({num_rounds} rounds)\nSSL/TLS is {ssl_status}"
+    ssl_status = "enabled" if certificates is not None else "disabled"
+    msg = f"Flower server running ({num_rounds} rounds)\nSSL is {ssl_status}"
     log(INFO, msg)
 
     hist = _fl(

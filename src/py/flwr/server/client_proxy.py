@@ -39,12 +39,12 @@ class ClientProxy(ABC):
         self.properties: Properties = {}
 
     @abstractmethod
-    def get_parameters(self) -> ParametersRes:
-        """Return the current local model parameters."""
-
-    @abstractmethod
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         """Returns the client's properties."""
+
+    @abstractmethod
+    def get_parameters(self) -> ParametersRes:
+        """Return the current local model parameters."""
 
     @abstractmethod
     def fit(self, ins: FitIns) -> FitRes:
