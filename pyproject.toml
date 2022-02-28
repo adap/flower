@@ -48,7 +48,7 @@ exclude = [
 python = "^3.6.2"
 # Mandatory dependencies
 numpy = "^1.19.0"
-grpcio = "^1.27.2"
+grpcio = ">=1.27.2,<=1.43.0"
 google = "^2.0.3"
 protobuf = "^3.12.1"
 importlib-metadata = { version = "^1.4.0", markers = "python_version < '3.8'" }
