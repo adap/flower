@@ -59,7 +59,7 @@ def test_aggregate_fit_not_enough_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.5)
     results: List[Tuple[ClientProxy, FitRes]] = [
-        (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, 1, 0.1))
+        (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, {}))
     ]
     failures: List[BaseException] = [Exception(), Exception()]
     expected: Optional[Parameters] = None
@@ -76,7 +76,7 @@ def test_aggregate_fit_just_enough_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.5)
     results: List[Tuple[ClientProxy, FitRes]] = [
-        (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, 1, 0.1))
+        (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, {}))
     ]
     failures: List[BaseException] = [Exception()]
     expected: Optional[Weights] = []
@@ -94,7 +94,7 @@ def test_aggregate_fit_no_failures() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.99)
     results: List[Tuple[ClientProxy, FitRes]] = [
-        (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, 1, 0.1))
+        (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, {}))
     ]
     failures: List[BaseException] = []
     expected: Optional[Weights] = []
