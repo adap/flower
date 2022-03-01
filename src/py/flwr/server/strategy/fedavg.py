@@ -214,7 +214,7 @@ class FedAvg(Strategy):
         # Do not configure federated evaluation if fraction eval is 0.
         if self.fraction_eval == 0.0:
             return []
-        
+
         # Parameters and config
         config = {}
         if self.on_evaluate_config_fn is not None:
