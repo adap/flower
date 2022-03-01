@@ -109,7 +109,7 @@ class FaultTolerantFedAvg(FedAvg):
             weighted_loss_avg(
                 [
                     (evaluate_res.num_examples, evaluate_res.loss)
-                    for client, evaluate_res in results
+                    for _, evaluate_res in results
                 ]
             ),
             {},
