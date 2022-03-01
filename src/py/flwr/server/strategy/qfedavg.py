@@ -133,7 +133,7 @@ class QFedAvg(FedAvg):
         """Configure the next round of evaluation."""
         # Do not configure federated evaluation if a centralized evaluation
         # function is provided
-        if self.eval_fn is not None:
+        if self.fraction_eval == 0.0:
             return []
 
         # Parameters and config
