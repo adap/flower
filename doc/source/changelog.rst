@@ -7,6 +7,7 @@ Unreleased
 Incompatible changes:
 ~~~~~~~~~~~~~~~~~~~~~
 
+* **Removed deprecated KerasClient** (`#857 <https://github.com/adap/flower/pull/857>`_)
 * **Removed no-op extra installs (deprecated in Flower 0.18)** (`#973 <https://github.com/adap/flower/pull/973>`_)
 
 
