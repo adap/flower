@@ -58,11 +58,6 @@ ray = { extras = ["default"], version = "^1.9.2", optional = true }
 
 [tool.poetry.extras]
 simulation = ["ray"]
-baseline = []
-examples-pytorch = []
-examples-tensorflow = []
-http-logger = []
-ops = []
 
 [tool.poetry.dev-dependencies]
 types-protobuf = "==3.19.12"
