@@ -21,6 +21,7 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 import numpy as np
 
 from flwr.common import (
+    Code,
     Config,
     EvaluateIns,
     EvaluateRes,
@@ -32,6 +33,7 @@ from flwr.common import (
     PropertiesIns,
     PropertiesRes,
     Scalar,
+    Status,
     Weights,
     parameters_to_weights,
     weights_to_parameters,
@@ -43,17 +45,6 @@ from .client import Client
 class KerasClient(ABC):
     """Abstract base class for Flower clients which use Keras."""
 
-    @abstractmethod
-    def get_weights(self) -> Weights:
-        """Return the current local model weights.
-
-        Returns:
-            The local model weights as a list of NumPy ndarrays. In many cases,
-            it will be sufficient to just return the return value of Keras'
-            `model.get_weights()`.
-        """
-
-    @abstractmethod
     def get_properties(self, config: Config) -> Properties:
         """Returns a client's set of properties.
 
@@ -68,6 +59,16 @@ class KerasClient(ABC):
         -------
         PropertiesRes:
             Response containing `properties` of the client.
+        """
+
+    @abstractmethod
+    def get_weights(self) -> Weights:
+        """Return the current local model weights.
+
+        Returns:
+            The local model weights as a list of NumPy ndarrays. In many cases,
+            it will be sufficient to just return the return value of Keras'
+            `model.get_weights()`.
         """
 
     @abstractmethod
@@ -124,21 +125,30 @@ class KerasClient(ABC):
         """
 
 
+def has_get_properties(client: KerasClient) -> bool:
+    """Check if KerasClient implements get_properties."""
+    return type(client).get_properties != KerasClient.get_properties
+
+
 class KerasClientWrapper(Client):
     """Wrapper which translates between Client and KerasClient."""
 
     def __init__(self, keras_client: KerasClient) -> None:
         self.keras_client = keras_client
 
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        """Return the current client properties."""
+        properties = self.keras_client.get_properties(ins.config)
+        return PropertiesRes(
+            status=Status(code=Code.OK, message="Success"),
+            properties=properties,
+        )
+
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
         weights = self.keras_client.get_weights()
         parameters = weights_to_parameters(weights)
         return ParametersRes(parameters=parameters)
-
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
-        properties = self.keras_client.get_properties(ins.config)
-        return PropertiesRes(properties=properties)
 
     def fit(self, ins: FitIns) -> FitRes:
         """Refine the provided weights using the locally held dataset."""

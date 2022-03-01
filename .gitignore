@@ -4,10 +4,14 @@ data/
 doc/source/api_documentation
 doc/source/_build
 flwr_logs
+.cache
 
 # Datasets
 cifar-10-python.tar.gz
 cifar-10-batches-py
+
+# macOS
+.DS_Store
 
 # Editor
 .vscode
