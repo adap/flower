@@ -7,7 +7,9 @@ Unreleased
 Incompatible changes:
 ~~~~~~~~~~~~~~~~~~~~~
 
-* **Removed support for Python 3.6** (`#871 <https://github.com/adap/flower/pull/871>`_)
+* **Removed deprecated support for Python 3.6** (`#871 <https://github.com/adap/flower/pull/871>`_)
+* **Removed deprecated KerasClient** (`#857 <https://github.com/adap/flower/pull/857>`_)
+* **Removed deprecated no-op extra installs** (`#973 <https://github.com/adap/flower/pull/973>`_)
 
 
 v0.18.0 (2022-02-28)
