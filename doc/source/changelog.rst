@@ -4,6 +4,11 @@ Changelog
 Unreleased
 ----------
 
+Incompatible changes:
+~~~~~~~~~~~~~~~~~~~~~
+
+* **Removed deprecated KerasClient** (`#857 <https://github.com/adap/flower/pull/857>`_)
+
 
 v0.18.0 (2022-02-28)
 --------------------
@@ -73,10 +78,6 @@ Incompatible changes:
   
   The packages :code:`flwr_example` and :code:`flwr_experimental` have been deprecated since Flower 0.12.0 and they are not longer included in Flower release builds. The associated extras (:code:`baseline`, :code:`examples-pytorch`, :code:`examples-tensorflow`, :code:`http-logger`, :code:`ops`) are now no-op and will be removed in an upcoming release.
 
-Incompatible changes:
-~~~~~~~~~~~~~~~~~~~~~
-
-* **Removed deprecated KerasClient** (`#857 <https://github.com/adap/flower/pull/857>`_)
 
 v0.17.0 (2021-09-24)
 --------------------
