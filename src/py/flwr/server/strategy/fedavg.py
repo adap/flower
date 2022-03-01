@@ -270,11 +270,7 @@ class FedAvg(Strategy):
             return None, {}
         loss_aggregated = weighted_loss_avg(
             [
-                (
-                    evaluate_res.num_examples,
-                    evaluate_res.loss,
-                    evaluate_res.accuracy,
-                )
+                (evaluate_res.num_examples, evaluate_res.loss)
                 for _, evaluate_res in results
             ]
         )
