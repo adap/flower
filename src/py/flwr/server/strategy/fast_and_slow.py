@@ -368,12 +368,8 @@ class FastAndSlow(FedAvg):
         return (
             weighted_loss_avg(
                 [
-                    (
-                        evaluate_res.num_examples,
-                        evaluate_res.loss,
-                        evaluate_res.accuracy,
-                    )
-                    for client, evaluate_res in results
+                    (evaluate_res.num_examples, evaluate_res.loss)
+                    for _, evaluate_res in results
                 ]
             ),
             {},
