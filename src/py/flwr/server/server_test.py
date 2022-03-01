@@ -59,7 +59,7 @@ class SuccessClient(ClientProxy):
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        return EvaluateRes(loss=1.0, num_examples=1)
+        return EvaluateRes(loss=1.0, num_examples=1, metrics={})
 
     def reconnect(self, reconnect: Reconnect) -> Disconnect:
         return Disconnect(reason="UNKNOWN")

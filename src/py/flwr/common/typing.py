@@ -79,7 +79,7 @@ class FitRes:
 
     parameters: Parameters
     num_examples: int
-    metrics: Optional[Metrics] = None
+    metrics: Dict[str, Scalar]
 
 
 @dataclass
@@ -96,7 +96,7 @@ class EvaluateRes:
 
     loss: float
     num_examples: int
-    metrics: Optional[Metrics] = None
+    metrics: Dict[str, Scalar]
 
 
 @dataclass

@@ -53,8 +53,8 @@ def test_aggregate_fit() -> None:
     client_0 = GrpcClientProxy(cid="0", bridge=bridge)
     client_1 = GrpcClientProxy(cid="1", bridge=bridge)
     results: List[Tuple[ClientProxy, FitRes]] = [
-        (client_0, FitRes(param_0, num_examples=5)),
-        (client_1, FitRes(param_1, num_examples=5)),
+        (client_0, FitRes(param_0, num_examples=5, metrics={})),
+        (client_1, FitRes(param_1, num_examples=5, metrics={})),
     ]
     expected: Weights = [array([0.15, 0.15, 0.15, 0.15], dtype=float32)]
 

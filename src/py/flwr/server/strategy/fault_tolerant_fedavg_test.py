@@ -142,7 +142,7 @@ def test_aggregate_evaluate_not_enough_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.5)
     results: List[Tuple[ClientProxy, EvaluateRes]] = [
-        (MagicMock(), EvaluateRes(loss=2.3, num_examples=1))
+        (MagicMock(), EvaluateRes(loss=2.3, num_examples=1, metrics={}))
     ]
     failures: List[BaseException] = [Exception(), Exception()]
     expected: Optional[float] = None
@@ -159,7 +159,7 @@ def test_aggregate_evaluate_just_enough_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.5)
     results: List[Tuple[ClientProxy, EvaluateRes]] = [
-        (MagicMock(), EvaluateRes(loss=2.3, num_examples=1))
+        (MagicMock(), EvaluateRes(loss=2.3, num_examples=1, metrics={}))
     ]
     failures: List[BaseException] = [Exception()]
     expected: Optional[float] = 2.3
@@ -176,7 +176,7 @@ def test_aggregate_evaluate_no_failures() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.99)
     results: List[Tuple[ClientProxy, EvaluateRes]] = [
-        (MagicMock(), EvaluateRes(loss=2.3, num_examples=1))
+        (MagicMock(), EvaluateRes(loss=2.3, num_examples=1, metrics={}))
     ]
     failures: List[BaseException] = []
     expected: Optional[float] = 2.3
