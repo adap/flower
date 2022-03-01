@@ -79,7 +79,7 @@ def upload_file(local_filepath: str, s3_key: Optional[str]) -> None:
             logging.error(err)
 
 
-def continous_logfile_upload(stop_condition: Event, interval: int) -> None:
+def continuous_logfile_upload(stop_condition: Event, interval: int) -> None:
     """Call upload_logfile function regularly until stop_condition Event is
     set."""
     while True:
@@ -207,7 +207,7 @@ def main() -> None:
     # Start file upload loop
     sync_loop_stop_condition = Event()
     sync_loop = Thread(
-        target=continous_logfile_upload,
+        target=continuous_logfile_upload,
         args=(sync_loop_stop_condition, LOGFILE_UPLOAD_INTERVAL),
     )
     sync_loop.start()

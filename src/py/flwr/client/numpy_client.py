@@ -22,6 +22,7 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 import numpy as np
 
 from flwr.common import (
+    Code,
     Config,
     EvaluateIns,
     EvaluateRes,
@@ -33,6 +34,7 @@ from flwr.common import (
     PropertiesIns,
     PropertiesRes,
     Scalar,
+    Status,
     parameters_to_weights,
     weights_to_parameters,
 )
@@ -93,17 +95,6 @@ Example
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
-    @abstractmethod
-    def get_parameters(self) -> List[np.ndarray]:
-        """Return the current local model parameters.
-
-        Returns
-        -------
-        parameters : List[numpy.ndarray]
-            The local model parameters as a list of NumPy ndarrays.
-        """
-
-    @abstractmethod
     def get_properties(self, config: Config) -> Properties:
         """Returns a client's set of properties.
 
@@ -118,6 +109,16 @@ class NumPyClient(ABC):
         -------
         PropertiesRes :
             Response containing `properties` of the client.
+        """
+
+    @abstractmethod
+    def get_parameters(self) -> List[np.ndarray]:
+        """Return the current local model parameters.
+
+        Returns
+        -------
+        parameters : List[numpy.ndarray]
+            The local model parameters as a list of NumPy ndarrays.
         """
 
     @abstractmethod
@@ -191,6 +192,11 @@ class NumPyClient(ABC):
         """
 
 
+def has_get_properties(client: NumPyClient) -> bool:
+    """Check if NumPyClient implements get_properties."""
+    return type(client).get_properties != NumPyClient.get_properties
+
+
 class NumPyClientWrapper(Client):
     """Wrapper which translates between Client and NumPyClient."""
 
@@ -198,8 +204,12 @@ class NumPyClientWrapper(Client):
         self.numpy_client = numpy_client
 
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        """Return the current client properties."""
         properties = self.numpy_client.get_properties(ins.config)
-        return PropertiesRes(properties=properties)
+        return PropertiesRes(
+            status=Status(code=Code.OK, message="Success"),
+            properties=properties,
+        )
 
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""

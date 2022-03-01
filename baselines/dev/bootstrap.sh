@@ -13,9 +13,9 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 rm -f poetry.lock
 
 # Upgrade/install spcific versions of `pip`, `setuptools`, and `poetry`
-python -m pip install -U pip==21.2.4
-python -m pip install -U setuptools==58.1.0
-python -m pip install -U poetry==1.1.10
+python -m pip install -U pip==21.3.1
+python -m pip install -U setuptools==59.6.0
+python -m pip install -U poetry==1.1.12
 
 # Use `poetry` to install project dependencies
 python -m poetry install
