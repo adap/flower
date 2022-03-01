@@ -79,8 +79,6 @@ class FitRes:
 
     parameters: Parameters
     num_examples: int
-    num_examples_ceil: Optional[int] = None  # Deprecated
-    fit_duration: Optional[float] = None  # Deprecated
     metrics: Optional[Metrics] = None
 
 
@@ -98,7 +96,6 @@ class EvaluateRes:
 
     loss: float
     num_examples: int
-    accuracy: Optional[float] = None  # Deprecated
     metrics: Optional[Metrics] = None
 
 

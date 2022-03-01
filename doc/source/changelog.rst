@@ -4,6 +4,11 @@ Changelog
 Unreleased
 ----------
 
+Incompatible changes:
+~~~~~~~~~~~~~~~~~~~~~
+
+* **Removed deprecated proto fields from** :code:`FitRes` **and** :code:`EvaluateRes` (`#869 <https://github.com/adap/flower/pull/869>`_)
+ 
 
 v0.18.0 (2022-02-28)
 --------------------
