@@ -59,7 +59,7 @@ class CifarPartitionedTestCase(unittest.TestCase):
         self.ds = x, y
 
         # Make sure subsequent shuffle in tests
-        # produce other permuations
+        # produce other permutations
         np.random.seed(3000)
 
     def test_assert_identity(self) -> None:
