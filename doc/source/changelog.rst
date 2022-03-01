@@ -4,6 +4,8 @@ Changelog
 Unreleased
 ----------
 
+* **Disable federated evaluation** (`#1091 <https://github.com/adap/flower/pull/1091>`_)
+
 Incompatible changes:
 ~~~~~~~~~~~~~~~~~~~~~
 
