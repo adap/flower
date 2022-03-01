@@ -15,9 +15,8 @@
 """Flower client app."""
 
 
-import timeit
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, List, Tuple
 
 import numpy as np
 
@@ -30,7 +29,6 @@ from flwr.common import (
     FitRes,
     Metrics,
     ParametersRes,
-    Properties,
     PropertiesIns,
     PropertiesRes,
     Scalar,
