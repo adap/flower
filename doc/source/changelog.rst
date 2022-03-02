@@ -4,7 +4,7 @@ Changelog
 Unreleased
 ----------
 
-* **Disable federated evaluation** (`#1091 <https://github.com/adap/flower/pull/1091>`_)
+* **Enable both federated evaluation and centralized evaluation to be used at the same time in all built-in strategies** (`#1091 <https://github.com/adap/flower/pull/1091>`_)
 
 Incompatible changes:
 ~~~~~~~~~~~~~~~~~~~~~
