@@ -253,26 +253,20 @@ class ClientMessage(google.protobuf.message.Message):
 
         PARAMETERS_FIELD_NUMBER: builtins.int
         NUM_EXAMPLES_FIELD_NUMBER: builtins.int
-        NUM_EXAMPLES_CEIL_FIELD_NUMBER: builtins.int
-        FIT_DURATION_FIELD_NUMBER: builtins.int
         METRICS_FIELD_NUMBER: builtins.int
         @property
         def parameters(self) -> global___Parameters: ...
         num_examples: builtins.int
-        num_examples_ceil: builtins.int
-        fit_duration: builtins.float
         @property
         def metrics(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
         def __init__(self,
             *,
             parameters: typing.Optional[global___Parameters] = ...,
             num_examples: builtins.int = ...,
-            num_examples_ceil: builtins.int = ...,
-            fit_duration: builtins.float = ...,
             metrics: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
         def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["fit_duration",b"fit_duration","metrics",b"metrics","num_examples",b"num_examples","num_examples_ceil",b"num_examples_ceil","parameters",b"parameters"]) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["metrics",b"metrics","num_examples",b"num_examples","parameters",b"parameters"]) -> None: ...
 
     class EvaluateRes(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -293,21 +287,18 @@ class ClientMessage(google.protobuf.message.Message):
 
         NUM_EXAMPLES_FIELD_NUMBER: builtins.int
         LOSS_FIELD_NUMBER: builtins.int
-        ACCURACY_FIELD_NUMBER: builtins.int
         METRICS_FIELD_NUMBER: builtins.int
         num_examples: builtins.int
         loss: builtins.float
-        accuracy: builtins.float
         @property
         def metrics(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
         def __init__(self,
             *,
             num_examples: builtins.int = ...,
             loss: builtins.float = ...,
-            accuracy: builtins.float = ...,
             metrics: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal["accuracy",b"accuracy","loss",b"loss","metrics",b"metrics","num_examples",b"num_examples"]) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["loss",b"loss","metrics",b"metrics","num_examples",b"num_examples"]) -> None: ...
 
     class PropertiesRes(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
