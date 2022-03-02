@@ -105,7 +105,7 @@ def start_server(  # pylint: disable=too-many-arguments
     )
     num_rounds = initialized_config["num_rounds"]
     ssl_status = "enabled" if certificates is not None else "disabled"
-    msg = f"Flower server running ({num_rounds} rounds)\nSSL is {ssl_status}"
+    msg = f"Flower server running ({num_rounds} rounds), SSL is {ssl_status}"
     log(INFO, msg)
 
     hist = _fl(
