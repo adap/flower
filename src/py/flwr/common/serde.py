@@ -129,32 +129,6 @@ def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
     """Serialize FitIns to ProtoBuf message."""
     parameters_proto = parameters_to_proto(res.parameters)
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
-    # Legacy case, will be removed in a future release
-    if res.num_examples_ceil is not None and res.fit_duration is not None:
-        return ClientMessage.FitRes(
-            parameters=parameters_proto,
-            num_examples=res.num_examples,
-            num_examples_ceil=res.num_examples_ceil,  # Deprecated
-            fit_duration=res.fit_duration,  # Deprecated
-            metrics=metrics_msg,
-        )
-    # Legacy case, will be removed in a future release
-    if res.num_examples_ceil is not None:
-        return ClientMessage.FitRes(
-            parameters=parameters_proto,
-            num_examples=res.num_examples,
-            num_examples_ceil=res.num_examples_ceil,  # Deprecated
-            metrics=metrics_msg,
-        )
-    # Legacy case, will be removed in a future release
-    if res.fit_duration is not None:
-        return ClientMessage.FitRes(
-            parameters=parameters_proto,
-            num_examples=res.num_examples,
-            fit_duration=res.fit_duration,  # Deprecated
-            metrics=metrics_msg,
-        )
-    # Forward-compatible case
     return ClientMessage.FitRes(
         parameters=parameters_proto,
         num_examples=res.num_examples,
@@ -169,8 +143,6 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     return typing.FitRes(
         parameters=parameters,
         num_examples=msg.num_examples,
-        num_examples_ceil=msg.num_examples_ceil,  # Deprecated
-        fit_duration=msg.fit_duration,  # Deprecated
         metrics=metrics,
     )
 
@@ -240,15 +212,6 @@ def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIn
 def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
     """Serialize EvaluateIns to ProtoBuf message."""
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
-    # Legacy case, will be removed in a future release
-    if res.accuracy is not None:
-        return ClientMessage.EvaluateRes(
-            loss=res.loss,
-            num_examples=res.num_examples,
-            accuracy=res.accuracy,  # Deprecated
-            metrics=metrics_msg,
-        )
-    # Forward-compatible case
     return ClientMessage.EvaluateRes(
         loss=res.loss,
         num_examples=res.num_examples,
@@ -262,7 +225,6 @@ def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRe
     return typing.EvaluateRes(
         loss=msg.loss,
         num_examples=msg.num_examples,
-        accuracy=msg.accuracy,  # Deprecated
         metrics=metrics,
     )
 

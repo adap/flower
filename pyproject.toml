@@ -48,9 +48,8 @@ exclude = [
 python = "^3.6.2"
 # Mandatory dependencies
 numpy = "^1.19.0"
-grpcio = ">=1.27.2,<=1.43.0"
-google = "^2.0.3"
-protobuf = "^3.12.1"
+grpcio = "^1.41.0"
+protobuf = "^3.19.0"
 importlib-metadata = { version = "^1.4.0", markers = "python_version < '3.8'" }
 dataclasses = { version = "==0.6", markers = "python_version < '3.7'" }
 # Optional dependencies
@@ -71,7 +70,7 @@ pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
-grpcio-tools = "==1.32.0"
+grpcio-tools = "==1.41.0"
 mypy-protobuf = "==3.2.0"
 rope = "==0.19.0"
 sphinx = "==3.5.4"
