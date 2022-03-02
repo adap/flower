@@ -10,6 +10,7 @@ Incompatible changes:
 * **Removed deprecated KerasClient** (`#857 <https://github.com/adap/flower/pull/857>`_)
 * **Removed deprecated proto fields from** :code:`FitRes` **and** :code:`EvaluateRes` (`#869 <https://github.com/adap/flower/pull/869>`_)
 * **Removed no-op extra installs (deprecated in Flower 0.18)** (`#973 <https://github.com/adap/flower/pull/973>`_)
+* **Removed deprecated QffedAvg strategy (replaced by QFedAvg)** (`#1107 <https://github.com/adap/flower/pull/1107>`_)
 
 
 v0.18.0 (2022-02-28)
