@@ -37,13 +37,17 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8.3"
+python = "^3.7.12"
 # Mandatory dependencies
 flwr = "^0.18.0"
 # flwr = { path = "../", develop = true }  # For development
 torch = "^1.10.1"
 torchvision = "^0.11.2"
+omegaconf = { git = "https://github.com/pedropgusmao/omegaconf.git" } 
+hydra-core = { git = "https://github.com/pedropgusmao/hydra.git", branch="main" }
+ray = { extras = ["default"], version = "^1.9.2"}
 numpy = "^1.20.0"
+matplotlib = "^3.5.1"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.10.1"
@@ -91,3 +95,10 @@ ignore_errors = true
 module = "torch.*"
 follow_imports = "skip"
 follow_imports_for_stubs = true
+
+[tool.pylint.typecheck]
+generated-members="numpy.*, torch.*"
+
+[tool.pylint.messages_control]
+disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
+signature-mutators="hydra.main.main"
