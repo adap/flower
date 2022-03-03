@@ -6,7 +6,7 @@ In this example you will train a linear model on synthetic data using C++ client
 Many thanks to the original contributors to this code:
 - Lekang Jiang (original author and main contributor)
 - Francisco José Solís (code re-organization)
-- Andreea Zaharia
+- Andreea Zaharia (training algorithm and data generation)
 
 # Install requirements
 You'll need CMake and Python.
