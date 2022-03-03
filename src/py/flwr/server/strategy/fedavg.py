@@ -174,7 +174,6 @@ class FedAvg(Strategy):
     ) -> Optional[Parameters]:
         """Initialize global model parameters."""
         initial_parameters = self.initial_parameters
-        self.initial_parameters = None  # Don't keep initial parameters in memory
         if isinstance(initial_parameters, list):
             log(WARNING, DEPRECATION_WARNING_INITIAL_PARAMETERS)
             initial_parameters = weights_to_parameters(weights=initial_parameters)
