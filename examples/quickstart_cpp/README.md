@@ -1,4 +1,4 @@
-# Simple Flower Client using C++
+# Flower Clients in C++
 
 In this example you will train a linear model on synthetic data using C++ clients.
 
