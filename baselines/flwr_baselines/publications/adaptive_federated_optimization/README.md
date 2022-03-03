@@ -32,8 +32,8 @@ We have currently implemented the following experiments:
 
 | Dataset  | Model    | Strategies                          |
 | -------- | -------- | ----------------------------------- |
-| CIFAR10  | ResNet18 | FeAvg, FedYogi, FedAdam, FedAdagrad |
-| CIFAR100 | ResNet18 | FeAvg, FedYogi, FedAdam, FedAdagrad |
+| CIFAR10  | ResNet18 | FeAvg, FedAvgM, FedYogi, FedAdam, FedAdagrad |
+| CIFAR100 | ResNet18 | FeAvg, FedAvgM, FedYogi, FedAdam, FedAdagrad |
 
 More experiments to be added soon. 
 
