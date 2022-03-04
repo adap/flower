@@ -36,7 +36,6 @@ from flwr.common import (
     parameters_to_weights,
     weights_to_parameters,
 )
-from flwr.common.typing import Properties
 
 from .client import Client
 
@@ -171,10 +170,6 @@ class NumPyClientWrapper(Client):
 
     def __init__(self, numpy_client: NumPyClient) -> None:
         self.numpy_client = numpy_client
-        self.properties: Properties = {"tensor_str": "numpy.ndarray"}
-
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
-        return PropertiesRes(properties=self.properties)
 
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         """Return the current client properties."""
