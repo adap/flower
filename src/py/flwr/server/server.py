@@ -33,7 +33,6 @@ from flwr.common import (
     weights_to_parameters,
 )
 from flwr.common.logger import log
-from flwr.common.typing import PropertiesIns
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
