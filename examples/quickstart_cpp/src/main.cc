@@ -5,7 +5,7 @@ int main(int argc, char **argv) {
     if (argc != 3) {
         std::cout << "Client takes three arguments as follows: " << std::endl;
         std::cout << "./client  CLIENT_ID  SERVER_URL" << std::endl;
-        std::cout << "Example: ./flwr_client  0 localhost:8888" << std::endl;
+        std::cout << "Example: ./flwr_client 0 '[::]:8888'" << std::endl;
         return 0;
     }
 
@@ -16,10 +16,17 @@ int main(int argc, char **argv) {
     // Populate local datasets
     std::vector<double> ms{3.5, 9.3}; //  b + m_0*x0 + m_1*x1
     double b = 1.7;
-
+    std::cout <<"Training set:" << std::endl;
     SyntheticDataset local_training_data = SyntheticDataset(ms, b, 1000);
+    std::cout << std::endl;
+
+    std::cout <<"Validation set:" << std::endl;
     SyntheticDataset local_validation_data = SyntheticDataset(ms, b, 100);
+    std::cout << std::endl;
+
+    std::cout <<"Test set:" << std::endl;
     SyntheticDataset local_test_data = SyntheticDataset(ms, b, 500);
+    std::cout << std::endl;
 
     // Define a model
     LineFitModel model = LineFitModel(500, 0.01, ms.size());

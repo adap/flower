@@ -101,15 +101,15 @@ std::tuple<size_t, double, double> LineFitModel::train_SGD(SyntheticDataset &dat
 
         if (iteration % 250 == 0) {
             training_error = this->compute_mse(y, predict(X));
-            std::cout << "iteration: " << iteration << "  Training error: " << training_error << '\n';
+            std::cout << "Iteration: " << iteration << "  Training error: " << training_error << '\n';
         }
 
     }
-
-    for (int i = 0; i < pred_weights.size(); i++) {
-        std::cout << std::fixed << pred_weights[i] << " ";
+    std::cout <<"Local model:" << std::endl;
+    for (size_t i = 0; i < pred_weights.size(); i++) {
+        std::cout << "  m" << i <<"_local = "<< std::fixed << pred_weights[i] << std::endl;
     }
-    std::cout << std::endl << std::fixed << pred_b << std::endl;
+    std::cout << "  b_local = "<< std::fixed << pred_b << std::endl <<std::endl;
 
     double accuracy = training_error;
     return std::make_tuple(dataset.size(), training_error, accuracy);

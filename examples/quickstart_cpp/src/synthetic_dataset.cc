@@ -13,12 +13,12 @@ SyntheticDataset::SyntheticDataset(std::vector<double> ms, double b, size_t size
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_int_distribution<> distr(-10.0, 10.0);
-
+    std::cout << "True parameters: " << std::endl;
     for (int i = 0; i < ms.size(); i++) {
-        std::cout << std::fixed << "m_" << i << " = " << ms[i] << '\n';
+        std::cout << std::fixed << "  m" << i << " = " << ms[i] << std::endl;
     }
 
-    std::cout << "b = " << b << '\n';
+    std::cout << "  b = " << std::fixed << b << std::endl;
 
     std::vector<std::vector<double>> xs(size, std::vector<double>(ms.size()));
     std::vector<double> ys(size, 0);

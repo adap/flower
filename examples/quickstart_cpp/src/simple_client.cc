@@ -38,7 +38,7 @@ flwr::ParametersRes SimpleFlwrClient::get_parameters() {
 void SimpleFlwrClient::set_parameters(flwr::Parameters params) {
 
     std::list<std::string> s = params.getTensors();
-    std::cout << "Received Layers: " << s.size() << std::endl;
+    std::cout << "Received " << s.size() <<" Layers from server:" << std::endl;
 
     if (s.empty() == 0) {
         // Layer 1
@@ -49,7 +49,8 @@ void SimpleFlwrClient::set_parameters(flwr::Parameters params) {
         std::vector<double> weights(weights_double, weights_double + num_bytes / sizeof(double));
         this->model.set_pred_weights(weights);
         for (auto x : this->model.get_pred_weights())
-            std::cout << "Pred Weights: " << x << std::endl;
+	for (size_t j=0; j < this->model.get_pred_weights().size(); j++)
+            std::cout << "  m"<< j <<"_server = " << std::fixed << this->model.get_pred_weights()[j] << std::endl;
 
         // Layer 2 = Bias
         auto layer_2 = std::next(layer, 1);
@@ -57,7 +58,7 @@ void SimpleFlwrClient::set_parameters(flwr::Parameters params) {
         const char *bias_char = (*layer_2).c_str();
         const double *bias_double = reinterpret_cast<const double *>(bias_char);
         this->model.set_bias(bias_double[0]);
-        std::cout << "Bias : " << this->model.get_bias() << std::endl;
+        std::cout << "  b_server = " << std::fixed << this->model.get_bias() << std::endl;
 
     }
 
@@ -74,6 +75,7 @@ flwr::PropertiesRes SimpleFlwrClient::get_properties(flwr::PropertiesIns ins) {
  * Simple settings are used for testing, needs updates in the future
  */
 flwr::FitRes SimpleFlwrClient::fit(flwr::FitIns ins) {
+    std::cout << "Fitting..." << std::endl;
     flwr::FitRes resp;
 
     flwr::Parameters p = ins.getParameters();
@@ -92,6 +94,7 @@ flwr::FitRes SimpleFlwrClient::fit(flwr::FitIns ins) {
  * Needs updates in the future
  */
 flwr::EvaluateRes SimpleFlwrClient::evaluate(flwr::EvaluateIns ins) {
+    std::cout << "Evaluating..." << std::endl;
     flwr::EvaluateRes resp;
     flwr::Parameters p = ins.getParameters();
     this->set_parameters(p);

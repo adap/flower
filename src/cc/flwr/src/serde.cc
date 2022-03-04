@@ -5,12 +5,9 @@
 */
 MessageParameters parameters_to_proto(flwr::Parameters parameters) {
 	MessageParameters mp;
-	//std::cout << "DEBUG: set tensor" << std::endl;
 	mp.set_tensor_type(parameters.getTensor_type());
-	//std::cout << "DEBUG: iterator" << std::endl;
 
 	for (auto& i : parameters.getTensors()) {
-		//std::cout << "DEBUG: add tensor" << std::endl;
 		mp.add_tensors(i);
 	}
 	return mp;
@@ -122,11 +119,9 @@ flwr::Metrics metrics_from_proto(google::protobuf::Map<std::string, ProtoScalar>
 * Serialize client ParametersRes type to protobuf ParametersRes type
 */
 ClientMessage_ParametersRes parameters_res_to_proto(flwr::ParametersRes res) {
-	//std::cout << "DEBUG: parameters to proto" << std::endl;
 	MessageParameters mp = parameters_to_proto(res.getParameters());
 	ClientMessage_ParametersRes cpr;
 	*(cpr.mutable_parameters()) = mp;
-	//std::cout << "DEBUG: parameter res to proto done" << cpr.DebugString() << std::endl;
 	return cpr;
 }
 

@@ -67,9 +67,7 @@ class FedAvgCpp(FedAvg):
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
-        print(weights_results)
         aggregated_weights = aggregate(weights_results)
-        print(weights_results)
         parameters_results = weights_to_parameters(aggregated_weights)
 
         return parameters_results, {}
@@ -86,12 +84,12 @@ class FedAvgCpp(FedAvg):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
+        print(results[0][1])
         loss_aggregated = weighted_loss_avg(
             [
                 (
                     evaluate_res.num_examples,
                     evaluate_res.loss,
-                    evaluate_res.accuracy,
                 )
                 for _, evaluate_res in results
             ]
