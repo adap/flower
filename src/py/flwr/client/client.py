@@ -46,16 +46,6 @@ class Client(ABC):
             Client's properties.
         """
 
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
-        """Return set of client's properties.
-
-        Returns
-        -------
-        PropertiesRes
-            Client's properties.
-        """
-        return PropertiesRes(properties={})
-
     @abstractmethod
     def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters.

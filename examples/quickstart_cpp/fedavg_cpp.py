@@ -98,24 +98,28 @@ class FedAvgCpp(FedAvg):
         )
         return loss_aggregated, {}
 
-def weights_to_parameters(weights)-> Parameters:
+
+def weights_to_parameters(weights) -> Parameters:
     tensors = [ndarray_to_bytes(tensor) for tensor in weights]
     return Parameters(tensors=tensors, tensor_type="cpp_double")
-    
+
+
 def parameters_to_weights(parameters: Parameters) -> Weights:
     """Convert parameters object to NumPy weights."""
     weights = [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
     return weights
 
-def bytes_to_ndarray(tensor_bytes: Bytes)-> np.ndarray:
+
+def bytes_to_ndarray(tensor_bytes: Bytes) -> np.ndarray:
     list_doubles = []
     for idx in range(0, len(tensor_bytes), 8):
-        this_double  = struct.unpack('d',tensor_bytes[idx:idx+8])
+        this_double = struct.unpack("d", tensor_bytes[idx : idx + 8])
         list_doubles.append(this_double[0])
     weights_np = np.asarray(list_doubles)
     return weights_np
 
-def ndarray_to_bytes(a:np.ndarray) -> Bytes:
+
+def ndarray_to_bytes(a: np.ndarray) -> Bytes:
     doublelist = a.tolist()
-    buf = struct.pack('%sd' % len(doublelist), *doublelist) 
+    buf = struct.pack("%sd" % len(doublelist), *doublelist)
     return buf
