@@ -160,13 +160,6 @@ def start_numpy_client(
     # Wrap the NumPyClient
     flower_client = NumPyClientWrapper(client)
 
-    # Delete get_properties method from NumPyClientWrapper if the user-provided
-    # NumPyClient instance does not implement get_properties. This enables the
-    # following call to start_client to handle NumPyClientWrapper instances like any
-    # other Client instance (which might or might not implement get_properties).
-    if not numpyclient_has_get_properties(client=client):
-        del NumPyClientWrapper.get_properties
-
     # Start
     start_client(
         server_address=server_address,

@@ -173,7 +173,10 @@ class NumPyClientWrapper(Client):
 
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         """Return the current client properties."""
-        properties = self.numpy_client.get_properties(ins.config)
+        if hasattr(self.numpy_client, 'get_properties'):
+            properties = self.numpy_client.get_properties(ins.config)
+        else:
+            properties = {}
         return PropertiesRes(
             status=Status(code=Code.OK, message="Success"),
             properties=properties,
