@@ -34,6 +34,8 @@ def start_client(
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    grpc_args = None,
+    grpc_kwargs = None,
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
@@ -84,6 +86,8 @@ def start_client(
             server_address,
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
+            grpc_args=grpc_args,
+            grpc_kwargs=grpc_kwargs,
         ) as conn:
             receive, send = conn
 
@@ -112,6 +116,8 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    grpc_args = None,
+    grpc_kwargs = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -173,4 +179,6 @@ def start_numpy_client(
         client=flower_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
+        grpc_args=grpc_args,
+        grpc_kwargs=grpc_kwargs,
     )

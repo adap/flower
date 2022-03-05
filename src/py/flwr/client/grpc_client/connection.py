@@ -18,7 +18,7 @@
 from contextlib import contextmanager
 from logging import DEBUG, INFO
 from queue import Queue
-from typing import Callable, Iterator, Optional, Tuple
+from typing import Callable, Iterator, Optional, Tuple, Iterable, Any, Dict
 
 import grpc
 
@@ -44,6 +44,8 @@ def grpc_connection(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    grpc_args: Optional[Iterable] = None,
+    grpc_kwargs: Optional[Dict[str, Any]] = None,
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish an insecure gRPC connection to a gRPC server.
 
@@ -91,6 +93,12 @@ def grpc_connection(
         ("grpc.max_receive_message_length", max_message_length),
     ]
 
+    # Check if gRPC arguments were provided
+    if grpc_args is None:
+        grpc_args = ()
+    if grpc_kwargs is None:
+        grpc_kwargs = {}
+
     if root_certificates is not None:
         ssl_channel_credentials = grpc.ssl_channel_credentials(root_certificates)
         channel = grpc.secure_channel(
@@ -108,7 +116,7 @@ def grpc_connection(
     )
     stub = FlowerServiceStub(channel)
 
-    server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
+    server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None), *grpc_args, **grpc_kwargs)
 
     receive: Callable[[], ServerMessage] = lambda: next(server_message_iterator)
     send: Callable[[ClientMessage], None] = lambda msg: queue.put(msg, block=False)
