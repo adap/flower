@@ -70,7 +70,7 @@ class CifarClient(fl.client.NumPyClient):
         steps: int = config["val_steps"]
 
         # Evaluate global model parameters on the local test data and return results
-        testloader = DataLoader(self.testset, batch_size=32)
+        testloader = DataLoader(self.testset, batch_size=16)
 
         loss, accuracy = utils.test(self.model, testloader, steps)
         return float(loss), len(self.testset), {"accuracy": float(accuracy)}
@@ -85,7 +85,7 @@ def client_dry_run():
     client = CifarClient(model, trainset, testset)
     client.fit(
         [val.cpu().numpy() for _, val in model.state_dict().items()],
-        {"batch_size": 32, "local_epochs": 1},
+        {"batch_size": 16, "local_epochs": 1},
     )
 
     client.evaluate(

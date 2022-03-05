@@ -18,7 +18,7 @@ def fit_config(rnd: int):
     local epoch, increase to two local epochs afterwards.
     """
     config = {
-        "batch_size": 32,
+        "batch_size": 16,
         "local_epochs": 1 if rnd < 2 else 2,
     }
     return config
@@ -60,7 +60,7 @@ def get_eval_fn(model: torch.nn.Module, toy: bool):
         loss, accuracy = utils.test(model, valset)
         return loss, {"accuracy": accuracy}
 
-    return
+    return evaluate
 
 
 def main():
@@ -89,9 +89,9 @@ def main():
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
-        fraction_fit=0.3,
+        fraction_fit=0.2,
         fraction_eval=0.2,
-        min_fit_clients=3,
+        min_fit_clients=2,
         min_eval_clients=2,
         min_available_clients=10,
         eval_fn=get_eval_fn(model, args.toy),

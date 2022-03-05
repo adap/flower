@@ -6,7 +6,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-DEVICE = torch.device("cpu")
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def load_data():
@@ -43,9 +43,10 @@ def load_partition(idx: int):
     return (train_parition, test_parition)
 
 
-def train(net, trainloader, valloader, epochs):
+def train(net, trainloader, valloader, epochs, cuda_device: None):
     """Train the network on the training set."""
     print("Starting training...")
+    net.to(DEVICE)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(DEVICE)
     optimizer = torch.optim.SGD(
         net.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4
@@ -58,6 +59,8 @@ def train(net, trainloader, valloader, epochs):
             loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
+
+    net.to("cpu")  # move model back to CPU
 
     train_loss, train_acc = test(net, trainloader)
     val_loss, val_acc = test(net, valloader)
@@ -74,6 +77,7 @@ def train(net, trainloader, valloader, epochs):
 def test(net, testloader, steps: int = None):
     """Validate the network on the entire test set."""
     print("Starting evalutation...")
+    net.to(DEVICE)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
     net.eval()
@@ -92,6 +96,7 @@ def test(net, testloader, steps: int = None):
     else:
         loss /= total
     accuracy = correct / total
+    net.to("cpu")  # move model back to CPU
     return loss, accuracy
 
 
@@ -119,7 +124,7 @@ def load_efficientnet(entrypoint: str = "nvidia_efficientnet_b0", classes: int =
     efficientnet = torch.hub.load(
         "NVIDIA/DeepLearningExamples:torchhub", entrypoint, pretrained=True
     )
-    efficientnet.to(DEVICE)
+
     if classes is not None:
         replace_classifying_layer(efficientnet, classes)
     return efficientnet

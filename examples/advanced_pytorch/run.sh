@@ -4,6 +4,11 @@
 python -c "from torchvision.datasets import CIFAR10; \
     CIFAR10('./dataset', train=True, download=True)" 
 
+# download the efficientnet model already downloaded
+python -c "import torch; torch.hub.load( \
+        'NVIDIA/DeepLearningExamples:torchhub', \
+        'nvidia_efficientnet_b0', pretrained=True)"
+
 python server.py &
 sleep 2 # Sleep for 2s to give the server enough time to start
 
