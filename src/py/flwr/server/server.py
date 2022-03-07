@@ -17,8 +17,8 @@
 
 import concurrent.futures
 import timeit
-from logging import DEBUG, INFO, WARNING
-from typing import Dict, List, Optional, Tuple, Union
+from logging import DEBUG, INFO
+from typing import Dict, List, Optional, Tuple
 
 from flwr.common import (
     Disconnect,
@@ -29,56 +29,12 @@ from flwr.common import (
     Parameters,
     Reconnect,
     Scalar,
-    Weights,
-    weights_to_parameters,
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import FedAvg, Strategy
-
-DEPRECATION_WARNING_EVALUATE = """
-DEPRECATION WARNING: Method
-
-    Server.evaluate(self, rnd: int) -> Optional[
-        Tuple[Optional[float], EvaluateResultsAndFailures]
-    ]
-
-is deprecated and will be removed in a future release, use
-
-    Server.evaluate_round(self, rnd: int) -> Optional[
-        Tuple[Optional[float], Dict[str, Scalar], EvaluateResultsAndFailures]
-    ]
-
-instead.
-"""
-
-DEPRECATION_WARNING_EVALUATE_ROUND = """
-DEPRECATION WARNING: The configured Strategy uses a deprecated aggregate_evaluate
-return format:
-
-    Strategy.aggregate_evaluate(...) -> Optional[float]
-
-This format is deprecated and will be removed in a future release. It should use
-
-    Strategy.aggregate_evaluate(...) -> Tuple[Optional[float], Dict[str, Scalar]]
-
-instead.
-"""
-
-DEPRECATION_WARNING_FIT_ROUND = """
-DEPRECATION WARNING: The configured Strategy uses a deprecated aggregate_fit
-return format:
-
-    Strategy.aggregate_fit(...) -> Optional[Weights]
-
-This format is deprecated and will be removed in a future release. It should use
-
-    Strategy.aggregate_fit(...) -> Tuple[Optional[Weights], Dict[str, Scalar]]
-
-instead.
-"""
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -182,18 +138,6 @@ class Server:
         log(INFO, "FL finished in %s", elapsed)
         return history
 
-    def evaluate(
-        self, rnd: int
-    ) -> Optional[Tuple[Optional[float], EvaluateResultsAndFailures]]:
-        """Validate current global model on a number of clients."""
-        log(WARNING, DEPRECATION_WARNING_EVALUATE)
-        res = self.evaluate_round(rnd)
-        if res is None:
-            return None
-        # Deconstruct
-        loss, _, results_and_failures = res
-        return loss, results_and_failures
-
     def evaluate_round(
         self, rnd: int
     ) -> Optional[
@@ -228,23 +172,12 @@ class Server:
         )
 
         # Aggregate the evaluation results
-        aggregated_result: Union[
-            Tuple[Optional[float], Dict[str, Scalar]],
-            Optional[float],  # Deprecated
+        aggregated_result: Tuple[
+            Optional[float],
+            Dict[str, Scalar],
         ] = self.strategy.aggregate_evaluate(rnd, results, failures)
 
-        metrics_aggregated: Dict[str, Scalar] = {}
-        if aggregated_result is None:
-            # Backward-compatibility, this will be removed in a future update
-            log(WARNING, DEPRECATION_WARNING_EVALUATE_ROUND)
-            loss_aggregated = None
-        elif isinstance(aggregated_result, float):
-            # Backward-compatibility, this will be removed in a future update
-            log(WARNING, DEPRECATION_WARNING_EVALUATE_ROUND)
-            loss_aggregated = aggregated_result
-        else:
-            loss_aggregated, metrics_aggregated = aggregated_result
-
+        loss_aggregated, metrics_aggregated = aggregated_result
         return loss_aggregated, metrics_aggregated, (results, failures)
 
     def fit_round(
@@ -282,23 +215,12 @@ class Server:
         )
 
         # Aggregate training results
-        aggregated_result: Union[
-            Tuple[Optional[Parameters], Dict[str, Scalar]],
-            Optional[Weights],  # Deprecated
+        aggregated_result: Tuple[
+            Optional[Parameters],
+            Dict[str, Scalar],
         ] = self.strategy.aggregate_fit(rnd, results, failures)
 
-        metrics_aggregated: Dict[str, Scalar] = {}
-        if aggregated_result is None:
-            # Backward-compatibility, this will be removed in a future update
-            log(WARNING, DEPRECATION_WARNING_FIT_ROUND)
-            parameters_aggregated = None
-        elif isinstance(aggregated_result, list):
-            # Backward-compatibility, this will be removed in a future update
-            log(WARNING, DEPRECATION_WARNING_FIT_ROUND)
-            parameters_aggregated = weights_to_parameters(aggregated_result)
-        else:
-            parameters_aggregated, metrics_aggregated = aggregated_result
-
+        parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
 
     def disconnect_all_clients(self) -> None:
