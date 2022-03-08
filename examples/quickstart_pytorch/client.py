@@ -5,7 +5,7 @@ import flwr as fl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision.transforms as transforms
+from torchvision.transforms import Compose, ToTensor, Normalize
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 
@@ -73,15 +73,10 @@ def test(net, testloader):
 
 def load_data():
     """Load CIFAR-10 (training and test set)."""
-    transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-    )
-    trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
-    testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
-    trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
-    testloader = DataLoader(testset, batch_size=32)
-    num_examples = {"trainset": len(trainset), "testset": len(testset)}
-    return trainloader, testloader, num_examples
+    trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    trainset = CIFAR10("./dataset", train=True, download=True, transform=trf)
+    testset = CIFAR10("./dataset", train=False, download=True, transform=trf)
+    return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
 
 
 # #############################################################################
@@ -90,13 +85,11 @@ def load_data():
 
 
 def main():
-    """Create model, load data, define Flower client, start Flower client."""
+    """Load model and data, define Flower client, start Flower client."""
 
-    # Load model
+    # Load model and data (simple CNN, CIFAR-10)
     net = Net().to(DEVICE)
-
-    # Load data (CIFAR-10)
-    trainloader, testloader, num_examples = load_data()
+    trainloader, testloader = load_data()
 
     # Flower client
     class CifarClient(fl.client.NumPyClient):
@@ -111,12 +104,12 @@ def main():
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             train(net, trainloader, epochs=1)
-            return self.get_parameters(), num_examples["trainset"], {}
+            return self.get_parameters(), len(trainloader.dataset), {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
-            return float(loss), num_examples["testset"], {"accuracy": float(accuracy)}
+            return float(loss), len(testloader.dataset), {"accuracy": float(accuracy)}
 
     # Start client
     fl.client.start_numpy_client("[::]:8080", client=CifarClient())
