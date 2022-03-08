@@ -15,7 +15,7 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 # #############################################################################
-# 1. PyTorch pipeline: model/train/test/dataloader
+# 1. PyTorch pipeline: model, train, test, and dataloader
 # #############################################################################
 
 # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
@@ -35,12 +35,11 @@ class Net(nn.Module):
         x = x.view(-1, 16 * 5 * 5)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+        return self.fc3(x)
 
 
 def train(net, trainloader, epochs):
-    """Train the network on the training set."""
+    """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     for _ in range(epochs):
@@ -51,7 +50,7 @@ def train(net, trainloader, epochs):
 
 
 def test(net, testloader):
-    """Validate the network on the entire test set."""
+    """Validate the model on the test set."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
     with torch.no_grad():
@@ -77,14 +76,12 @@ def load_data():
 
 
 def main():
-    """Load model and data, define Flower client, start Flower client."""
-
     # Load model and data (simple CNN, CIFAR-10)
     net = Net().to(DEVICE)
     trainloader, testloader = load_data()
 
-    # Flower client
-    class CifarClient(fl.client.NumPyClient):
+    # Define Flower client
+    class FlowerClient(fl.client.NumPyClient):
         def get_parameters(self):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -103,8 +100,8 @@ def main():
             loss, accuracy = test(net, testloader)
             return float(loss), len(testloader.dataset), {"accuracy": float(accuracy)}
 
-    # Start client
-    fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+    # Start Flower client
+    fl.client.start_numpy_client("[::]:8080", client=FlowerClient())
 
 
 if __name__ == "__main__":
