@@ -160,11 +160,6 @@ class NumPyClient(ABC):
         """
 
 
-def has_get_properties(client: NumPyClient) -> bool:
-    """Check if NumPyClient implements get_properties."""
-    return type(client).get_properties != NumPyClient.get_properties
-
-
 class NumPyClientWrapper(Client):
     """Wrapper which translates between Client and NumPyClient."""
 
@@ -173,7 +168,7 @@ class NumPyClientWrapper(Client):
 
     def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         """Return the current client properties."""
-        if hasattr(self.numpy_client, 'get_properties'):
+        if hasattr(self.numpy_client, "get_properties"):
             properties = self.numpy_client.get_properties(ins.config)
         else:
             properties = {}

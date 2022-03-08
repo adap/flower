@@ -21,7 +21,7 @@ import numpy as np
 
 from flwr.common import Config, Properties, Scalar
 
-from .numpy_client import NumPyClient, has_get_properties
+from .numpy_client import NumPyClient
 
 
 class OverridingClient(NumPyClient):
@@ -65,29 +65,3 @@ class NotOverridingClient(NumPyClient):
     ) -> Tuple[float, int, Dict[str, Scalar]]:
         # This method is not expected to be called
         raise Exception()
-
-
-def test_has_get_properties_true() -> None:
-    """Test fit_clients."""
-    # Prepare
-    client = OverridingClient()
-    expected = True
-
-    # Execute
-    actual = has_get_properties(client=client)
-
-    # Assert
-    assert actual == expected
-
-
-def test_has_get_properties_false() -> None:
-    """Test fit_clients."""
-    # Prepare
-    client = NotOverridingClient()
-    expected = False
-
-    # Execute
-    actual = has_get_properties(client=client)
-
-    # Assert
-    assert actual == expected

@@ -26,7 +26,6 @@ from .client import Client
 from .grpc_client.connection import grpc_connection
 from .grpc_client.message_handler import handle
 from .numpy_client import NumPyClient, NumPyClientWrapper
-from .numpy_client import has_get_properties as numpyclient_has_get_properties
 
 
 def start_client(
