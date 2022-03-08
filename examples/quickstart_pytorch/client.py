@@ -43,13 +43,10 @@ def train(net, trainloader, epochs):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-    net.train()
     for _ in range(epochs):
         for images, labels in trainloader:
-            images, labels = images.to(DEVICE), labels.to(DEVICE)
             optimizer.zero_grad()
-            loss = criterion(net(images), labels)
-            loss.backward()
+            criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
             optimizer.step()
 
 
@@ -57,18 +54,13 @@ def test(net, testloader):
     """Validate the network on the entire test set."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
-    net.eval()
     with torch.no_grad():
         for images, labels in testloader:
-            images, labels = images.to(DEVICE), labels.to(DEVICE)
-            outputs = net(images)
-            loss += criterion(outputs, labels).item()
-            _, predicted = torch.max(outputs.data, 1)
+            outputs = net(images.to(DEVICE))
+            loss += criterion(outputs, labels.to(DEVICE)).item()
             total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-    loss /= len(testloader.dataset)
-    accuracy = correct / total
-    return loss, accuracy
+            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+    return loss / len(testloader.dataset), correct / total
 
 
 def load_data():
