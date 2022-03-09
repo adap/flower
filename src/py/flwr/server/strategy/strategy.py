@@ -16,17 +16,9 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
-from flwr.common import (
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    Parameters,
-    Scalar,
-    Weights,
-)
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Scalar
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
@@ -81,10 +73,7 @@ class Strategy(ABC):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Union[
-        Tuple[Optional[Parameters], Dict[str, Scalar]],
-        Optional[Weights],  # Deprecated
-    ]:
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results.
 
         Parameters
@@ -141,10 +130,7 @@ class Strategy(ABC):
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
-    ) -> Union[
-        Tuple[Optional[float], Dict[str, Scalar]],
-        Optional[float],  # Deprecated
-    ]:
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation results.
 
         Arguments:
