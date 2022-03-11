@@ -17,7 +17,7 @@
 
 import time
 from logging import INFO
-from typing import Any, Dict, Iterable, Optional
+from typing import Optional
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
@@ -34,8 +34,7 @@ def start_client(
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
-    grpc_args: Optional[Iterable[Any]] = None,
-    grpc_kwargs: Optional[Dict[str, Any]] = None,
+    wait_for_ready: bool = False,
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
@@ -57,10 +56,8 @@ def start_client(
             The PEM-encoded root certificates as a byte string. If provided, a secure
             connection using the certificates will be established to a
             SSL-enabled Flower server.
-        grpc_args: Iterable. Optional arguments passed to the
-            grpc.StreamStreamMultiCallable.
-        grpc_kwargs: Dict[str, Any]. Optional keyword arguments passed to the
-            grpc.StreamStreamMultiCallable.
+        wait_for_ready: bool (default: False). If set to True, the client does not
+            fail fast, but waits until a connection to the server can be established.
 
     Returns
     -------
@@ -90,8 +87,7 @@ def start_client(
             server_address,
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
-            grpc_args=grpc_args,
-            grpc_kwargs=grpc_kwargs,
+            wait_for_ready=wait_for_ready,
         ) as conn:
             receive, send = conn
 
@@ -120,8 +116,7 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
-    grpc_args: Optional[Iterable[Any]] = None,
-    grpc_kwargs: Optional[Dict[str, Any]] = None,
+    wait_for_ready: bool = False,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -143,10 +138,8 @@ def start_numpy_client(
             The PEM-encoded root certificates a byte string. If provided, a secure
             connection using the certificates will be established to a
             SSL-enabled Flower server.
-        grpc_args: Iterable. Optional arguments passed to the
-            grpc.StreamStreamMultiCallable.
-        grpc_kwargs: Dict[str, Any]. Optional keyword arguments passed to the
-            grpc.StreamStreamMultiCallable.
+        wait_for_ready: bool (default: False). If set to True, the client does not
+            fail fast, but waits until a connection to the server can be established.
 
     Returns
     -------
@@ -187,6 +180,5 @@ def start_numpy_client(
         client=flower_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
-        grpc_args=grpc_args,
-        grpc_kwargs=grpc_kwargs,
+        wait_for_ready=wait_for_ready,
     )

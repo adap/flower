@@ -14,10 +14,11 @@
 # ==============================================================================
 """Contextmanager managing a gRPC channel to the Flower server."""
 
+
 from contextlib import contextmanager
 from logging import DEBUG, INFO
 from queue import Queue
-from typing import Any, Callable, Dict, Iterable, Iterator, Optional, Tuple
+from typing import Callable, Iterator, Optional, Tuple
 
 import grpc
 
@@ -43,8 +44,7 @@ def grpc_connection(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
-    grpc_args: Optional[Iterable[Any]] = None,
-    grpc_kwargs: Optional[Dict[str, Any]] = None,
+    wait_for_ready: bool = False,
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish an insecure gRPC connection to a gRPC server.
 
@@ -65,10 +65,8 @@ def grpc_connection(
         The PEM-encoded root certificates as a byte string. If provided, a secure
         connection using the certificates will be established to a SSL-enabled
         Flower server.
-    grpc_args: Iterable. Optional arguments passed to the
-        grpc.StreamStreamMultiCallable.
-    grpc_kwargs: Dict[str, Any]. Optional keyword arguments passed to the
-        grpc.StreamStreamMultiCallable.
+    wait_for_ready: bool (default: False). If set to True, the client does not
+        fail fast, but waits until a connection to the server can be established.
 
     Returns
     -------
@@ -96,12 +94,6 @@ def grpc_connection(
         ("grpc.max_receive_message_length", max_message_length),
     ]
 
-    # Check if gRPC arguments were provided
-    if grpc_args is None:
-        grpc_args = ()
-    if grpc_kwargs is None:
-        grpc_kwargs = {}
-
     if root_certificates is not None:
         ssl_channel_credentials = grpc.ssl_channel_credentials(root_certificates)
         channel = grpc.secure_channel(
@@ -120,7 +112,7 @@ def grpc_connection(
     stub = FlowerServiceStub(channel)
 
     server_message_iterator: Iterator[ServerMessage] = stub.Join(
-        iter(queue.get, None), *grpc_args, **grpc_kwargs
+        iter(queue.get, None), wait_for_ready=wait_for_ready
     )
 
     receive: Callable[[], ServerMessage] = lambda: next(server_message_iterator)
