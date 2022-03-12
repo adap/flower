@@ -227,16 +227,45 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
 
 # Clip weight vector to [-clipping_range, clipping_range]
 # Transform weight vector to range [0, target_range] and take floor
+# take floor => stochastic rounding
 # If final value is target_range, take 1 from it so it is an integer from 0 to target_range-1
 
 
 def quantize(weight: Weights, clipping_range: float, target_range: int) -> Weights:
     quantized_list = []
     check_clipping_range(weight, clipping_range)
-    f = np.vectorize(lambda x:  min(target_range-1, (sorted((-clipping_range, x, clipping_range))
-                                                     [1]+clipping_range)*target_range/(2*clipping_range)))
+    quantizer = target_range/(2*clipping_range)
     for arr in weight:
-        quantized_list.append(f(arr).astype(int))
+        # stochastic quantization
+        tmp = (np.clip(arr, -clipping_range, clipping_range) + clipping_range) * quantizer
+        quantized = np.ceil(tmp).astype(int)
+        rand_arr = np.random.rand(*quantized.shape)
+        # p(Q(x))
+        quantized[rand_arr < quantized - tmp] -= 1
+        quantized_list.append(quantized)
+    return quantized_list
+
+
+# quantize weight vectors (unbounded)
+# mod k (i.e., mod_range here)
+def quantize_unbounded(weight: Weights, clipping_range: float, target_range: int, mod_range: int) -> Weights:
+    quantized_list = []
+    check_clipping_range(weight, clipping_range)
+    quantizer = target_range/(2*clipping_range)
+    for arr in weight:
+        # stochastic quantization
+        tmp = (arr + clipping_range) * quantizer
+        quantized = np.ceil(tmp).astype(np.int32)
+        rand_arr = np.random.rand(*quantized.shape)
+        # p(Q(x))
+        quantized[rand_arr < quantized - tmp] -= 1
+        # mod k
+        if bin(mod_range).count("1") == 1:  # fast mod
+            msk = mod_range - 1
+            quantized = quantized & msk
+        else:
+            quantized = np.mod(quantized, mod_range)
+        quantized_list.append(quantized)
     return quantized_list
 
 # Quick check that all numbers are within the clipping range
