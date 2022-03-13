@@ -1,6 +1,7 @@
 from typing import Dict, Optional, Tuple
 from collections import OrderedDict
 import argparse
+from torch.utils.data import DataLoader
 
 import flwr as fl
 import torch
@@ -48,6 +49,7 @@ def get_eval_fn(model: torch.nn.Module, toy: bool):
         # Use the last 5k training examples as a validation set
         valset = torch.utils.data.Subset(trainset, range(n_train - 5000, n_train))
 
+    valLoader = DataLoader(valset, batch_size=16)
     # The `evaluate` function will be called after every round
     def evaluate(
         weights: fl.common.Weights,
@@ -57,7 +59,7 @@ def get_eval_fn(model: torch.nn.Module, toy: bool):
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         model.load_state_dict(state_dict, strict=True)
 
-        loss, accuracy = utils.test(model, valset)
+        loss, accuracy = utils.test(model, valLoader)
         return loss, {"accuracy": accuracy}
 
     return evaluate

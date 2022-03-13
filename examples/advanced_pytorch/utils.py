@@ -43,7 +43,7 @@ def load_partition(idx: int):
     return (train_parition, test_parition)
 
 
-def train(net, trainloader, valloader, epochs, cuda_device: None):
+def train(net, trainloader, valloader, epochs):
     """Train the network on the training set."""
     print("Starting training...")
     net.to(DEVICE)  # move model to GPU if available

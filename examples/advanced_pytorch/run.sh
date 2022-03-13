@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# download the CIFAR10 dataset if not already downloaded
+# download the CIFAR10 dataset and the efficientnet model
+# subsequent runs do not redownload
 python -c "from torchvision.datasets import CIFAR10; \
     CIFAR10('./dataset', train=True, download=True)" 
 
-# download the efficientnet model already downloaded
 python -c "import torch; torch.hub.load( \
         'NVIDIA/DeepLearningExamples:torchhub', \
         'nvidia_efficientnet_b0', pretrained=True)"
