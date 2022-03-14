@@ -5,7 +5,6 @@ from typing import Callable, Dict, Tuple
 
 import flwr as fl
 import numpy as np
-import ray
 import torch
 from flwr.common.typing import Scalar, Weights
 from torch.utils.data import DataLoader
@@ -71,15 +70,12 @@ class RayClient(fl.client.NumPyClient):
         """
         net = self.set_parameters(parameters)
         net.to(self.device)
-        num_workers = len(ray.worker.get_resource_ids()["CPU"])
         trainset = ClientDataset(
             path_to_data=Path(self.fed_dir) / f"{self.cid}" / "train.pt",
             transform=get_transforms(self.num_classes)["train"],
         )
 
-        trainloader = DataLoader(
-            trainset, batch_size=int(config["batch_size"]), num_workers=num_workers
-        )
+        trainloader = DataLoader(trainset, batch_size=int(config["batch_size"]))
         # train
         train(net, trainloader, epochs=int(config["epochs"]), device=self.device)
 
@@ -103,12 +99,11 @@ class RayClient(fl.client.NumPyClient):
         """
         net = self.set_parameters(parameters)
         # load data for this client and get trainloader
-        num_workers = len(ray.worker.get_resource_ids()["CPU"])
         validationset = ClientDataset(
             path_to_data=Path(self.fed_dir) / self.cid / "test.pt",
             transform=get_transforms()["test"],
         )
-        valloader = DataLoader(validationset, batch_size=50, num_workers=num_workers)
+        valloader = DataLoader(validationset, batch_size=50)
 
         # send model to device
         net.to(self.device)
