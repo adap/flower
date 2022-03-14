@@ -5,7 +5,6 @@ from typing import Callable, Dict, Tuple
 
 import flwr as fl
 import numpy as np
-import ray
 import torch
 from flwr.common.typing import Scalar, Weights
 from torch.utils.data import DataLoader
