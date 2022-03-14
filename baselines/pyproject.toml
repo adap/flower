@@ -48,7 +48,7 @@ hydra-core = { git = "https://github.com/pedropgusmao/hydra.git", branch="main" 
 ray = { extras = ["default"], version = "^1.9.2"}
 numpy = "^1.20.0"
 tqdm = "4.62.3"
-matplotlib = "^3.5.0"
+matplotlib = "^3.5.1"
 scikit-image = "^0.18.1"
 wget = "^3.2"
 
