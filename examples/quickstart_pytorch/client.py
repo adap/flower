@@ -10,16 +10,17 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 
 
+# #############################################################################
+# 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
+# #############################################################################
+
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-# #############################################################################
-# 1. PyTorch pipeline: model, train, test, and dataloader
-# #############################################################################
-
-# Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
 class Net(nn.Module):
+    """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
+
     def __init__(self) -> None:
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
@@ -65,8 +66,8 @@ def test(net, testloader):
 def load_data():
     """Load CIFAR-10 (training and test set)."""
     trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    trainset = CIFAR10("./dataset", train=True, download=True, transform=trf)
-    testset = CIFAR10("./dataset", train=False, download=True, transform=trf)
+    trainset = CIFAR10("./data", train=True, download=True, transform=trf)
+    testset = CIFAR10("./data", train=False, download=True, transform=trf)
     return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
 
 
