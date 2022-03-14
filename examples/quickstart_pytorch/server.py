@@ -1,10 +1,8 @@
 import flwr as fl
 
 
-def main():
-    # Start Flower server
-    fl.server.start_server(server_address="[::]:8080", config={"num_rounds": 3})
-
-
-if __name__ == "__main__":
-    main()
+# Start Flower server
+fl.server.start_server(
+    server_address="[::]:8080",
+    config={"num_rounds": 3},
+)

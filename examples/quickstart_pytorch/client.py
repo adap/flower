@@ -76,34 +76,30 @@ def load_data():
 # #############################################################################
 
 
-def main():
-    # Load model and data (simple CNN, CIFAR-10)
-    net = Net().to(DEVICE)
-    trainloader, testloader = load_data()
+# Load model and data (simple CNN, CIFAR-10)
+net = Net().to(DEVICE)
+trainloader, testloader = load_data()
 
-    # Define Flower client
-    class FlowerClient(fl.client.NumPyClient):
-        def get_parameters(self):
-            return [val.cpu().numpy() for _, val in net.state_dict().items()]
+# Define Flower client
+class FlowerClient(fl.client.NumPyClient):
+    def get_parameters(self):
+        return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
-        def set_parameters(self, parameters):
-            params_dict = zip(net.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-            net.load_state_dict(state_dict, strict=True)
+    def set_parameters(self, parameters):
+        params_dict = zip(net.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        net.load_state_dict(state_dict, strict=True)
 
-        def fit(self, parameters, config):
-            self.set_parameters(parameters)
-            train(net, trainloader, epochs=1)
-            return self.get_parameters(), len(trainloader.dataset), {}
+    def fit(self, parameters, config):
+        self.set_parameters(parameters)
+        train(net, trainloader, epochs=1)
+        return self.get_parameters(), len(trainloader.dataset), {}
 
-        def evaluate(self, parameters, config):
-            self.set_parameters(parameters)
-            loss, accuracy = test(net, testloader)
-            return float(loss), len(testloader.dataset), {"accuracy": float(accuracy)}
-
-    # Start Flower client
-    fl.client.start_numpy_client("[::]:8080", client=FlowerClient())
+    def evaluate(self, parameters, config):
+        self.set_parameters(parameters)
+        loss, accuracy = test(net, testloader)
+        return float(loss), len(testloader.dataset), {"accuracy": float(accuracy)}
 
 
-if __name__ == "__main__":
-    main()
+# Start Flower client
+fl.client.start_numpy_client("[::]:8080", client=FlowerClient())
