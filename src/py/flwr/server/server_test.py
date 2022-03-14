@@ -52,10 +52,14 @@ class SuccessClient(ClientProxy):
     def fit(self, ins: FitIns) -> FitRes:
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
-        return FitRes(Parameters(tensors=[arr_serialized], tensor_type=""), 1, 1, 12.3)
+        return FitRes(
+            parameters=Parameters(tensors=[arr_serialized], tensor_type=""),
+            num_examples=1,
+            metrics={},
+        )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        return EvaluateRes(loss=1.0, num_examples=1)
+        return EvaluateRes(loss=1.0, num_examples=1, metrics={})
 
     def reconnect(self, reconnect: Reconnect) -> Disconnect:
         return Disconnect(reason="UNKNOWN")
