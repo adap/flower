@@ -17,8 +17,8 @@
 
 import concurrent.futures
 import timeit
-from logging import DEBUG, INFO, WARNING
-from typing import Dict, List, Optional, Tuple, Union
+from logging import DEBUG, INFO
+from typing import Dict, List, Optional, Tuple
 
 from flwr.common import (
     Disconnect,
@@ -29,8 +29,6 @@ from flwr.common import (
     Parameters,
     Reconnect,
     Scalar,
-    Weights,
-    weights_to_parameters,
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
@@ -38,54 +36,17 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import FedAvg, Strategy
 
-DEPRECATION_WARNING_EVALUATE = """
-DEPRECATION WARNING: Method
-
-    Server.evaluate(self, rnd: int) -> Optional[
-        Tuple[Optional[float], EvaluateResultsAndFailures]
-    ]
-
-is deprecated and will be removed in a future release, use
-
-    Server.evaluate_round(self, rnd: int) -> Optional[
-        Tuple[Optional[float], Dict[str, Scalar], EvaluateResultsAndFailures]
-    ]
-
-instead.
-"""
-
-DEPRECATION_WARNING_EVALUATE_ROUND = """
-DEPRECATION WARNING: The configured Strategy uses a deprecated aggregate_evaluate
-return format:
-
-    Strategy.aggregate_evaluate(...) -> Optional[float]
-
-This format is deprecated and will be removed in a future release. It should use
-
-    Strategy.aggregate_evaluate(...) -> Tuple[Optional[float], Dict[str, Scalar]]
-
-instead.
-"""
-
-DEPRECATION_WARNING_FIT_ROUND = """
-DEPRECATION WARNING: The configured Strategy uses a deprecated aggregate_fit
-return format:
-
-    Strategy.aggregate_fit(...) -> Optional[Weights]
-
-This format is deprecated and will be removed in a future release. It should use
-
-    Strategy.aggregate_fit(...) -> Tuple[Optional[Weights], Dict[str, Scalar]]
-
-instead.
-"""
-
-FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
+FitResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, FitRes]],
+    List[BaseException],
+]
 EvaluateResultsAndFailures = Tuple[
-    List[Tuple[ClientProxy, EvaluateRes]], List[BaseException]
+    List[Tuple[ClientProxy, EvaluateRes]],
+    List[BaseException],
 ]
 ReconnectResultsAndFailures = Tuple[
-    List[Tuple[ClientProxy, Disconnect]], List[BaseException]
+    List[Tuple[ClientProxy, Disconnect]],
+    List[BaseException],
 ]
 
 
@@ -100,6 +61,11 @@ class Server:
             tensors=[], tensor_type="numpy.ndarray"
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
+        self.max_workers: Optional[int] = None
+
+    def set_max_workers(self, max_workers: Optional[int]) -> None:
+        """Set the max_workers used by ThreadPoolExecutor."""
+        self.max_workers = max_workers
 
     def set_strategy(self, strategy: Strategy) -> None:
         """Replace server strategy."""
@@ -172,18 +138,6 @@ class Server:
         log(INFO, "FL finished in %s", elapsed)
         return history
 
-    def evaluate(
-        self, rnd: int
-    ) -> Optional[Tuple[Optional[float], EvaluateResultsAndFailures]]:
-        """Validate current global model on a number of clients."""
-        log(WARNING, DEPRECATION_WARNING_EVALUATE)
-        res = self.evaluate_round(rnd)
-        if res is None:
-            return None
-        # Deconstruct
-        loss, _, results_and_failures = res
-        return loss, results_and_failures
-
     def evaluate_round(
         self, rnd: int
     ) -> Optional[
@@ -206,7 +160,10 @@ class Server:
         )
 
         # Collect `evaluate` results from all clients participating in this round
-        results, failures = evaluate_clients(client_instructions)
+        results, failures = evaluate_clients(
+            client_instructions,
+            max_workers=self.max_workers,
+        )
         log(
             DEBUG,
             "evaluate_round received %s results and %s failures",
@@ -215,23 +172,12 @@ class Server:
         )
 
         # Aggregate the evaluation results
-        aggregated_result: Union[
-            Tuple[Optional[float], Dict[str, Scalar]],
-            Optional[float],  # Deprecated
+        aggregated_result: Tuple[
+            Optional[float],
+            Dict[str, Scalar],
         ] = self.strategy.aggregate_evaluate(rnd, results, failures)
 
-        metrics_aggregated: Dict[str, Scalar] = {}
-        if aggregated_result is None:
-            # Backward-compatibility, this will be removed in a future update
-            log(WARNING, DEPRECATION_WARNING_EVALUATE_ROUND)
-            loss_aggregated = None
-        elif isinstance(aggregated_result, float):
-            # Backward-compatibility, this will be removed in a future update
-            log(WARNING, DEPRECATION_WARNING_EVALUATE_ROUND)
-            loss_aggregated = aggregated_result
-        else:
-            loss_aggregated, metrics_aggregated = aggregated_result
-
+        loss_aggregated, metrics_aggregated = aggregated_result
         return loss_aggregated, metrics_aggregated, (results, failures)
 
     def fit_round(
@@ -257,7 +203,10 @@ class Server:
         )
 
         # Collect `fit` results from all clients participating in this round
-        results, failures = fit_clients(client_instructions)
+        results, failures = fit_clients(
+            client_instructions,
+            max_workers=self.max_workers,
+        )
         log(
             DEBUG,
             "fit_round received %s results and %s failures",
@@ -266,29 +215,24 @@ class Server:
         )
 
         # Aggregate training results
-        aggregated_result: Union[
-            Tuple[Optional[Parameters], Dict[str, Scalar]],
-            Optional[Weights],  # Deprecated
+        aggregated_result: Tuple[
+            Optional[Parameters],
+            Dict[str, Scalar],
         ] = self.strategy.aggregate_fit(rnd, results, failures)
 
-        metrics_aggregated: Dict[str, Scalar] = {}
-        if aggregated_result is None:
-            # Backward-compatibility, this will be removed in a future update
-            log(WARNING, DEPRECATION_WARNING_FIT_ROUND)
-            parameters_aggregated = None
-        elif isinstance(aggregated_result, list):
-            # Backward-compatibility, this will be removed in a future update
-            log(WARNING, DEPRECATION_WARNING_FIT_ROUND)
-            parameters_aggregated = weights_to_parameters(aggregated_result)
-        else:
-            parameters_aggregated, metrics_aggregated = aggregated_result
-
+        parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
 
     def disconnect_all_clients(self) -> None:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
-        _ = shutdown(clients=[all_clients[k] for k in all_clients.keys()])
+        clients = [all_clients[k] for k in all_clients.keys()]
+        instruction = Reconnect(seconds=None)
+        client_instructions = [(client_proxy, instruction) for client_proxy in clients]
+        _ = reconnect_clients(
+            client_instructions=client_instructions,
+            max_workers=self.max_workers,
+        )
 
     def _get_initial_parameters(self) -> Parameters:
         """Get initial parameters from one of the available clients."""
@@ -309,16 +253,25 @@ class Server:
         return parameters_res.parameters
 
 
-def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:
+def reconnect_clients(
+    client_instructions: List[Tuple[ClientProxy, Reconnect]],
+    max_workers: Optional[int],
+) -> ReconnectResultsAndFailures:
     """Instruct clients to disconnect and never reconnect."""
-    reconnect = Reconnect(seconds=None)
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(reconnect_client, c, reconnect) for c in clients]
-        concurrent.futures.wait(futures)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        submitted_fs = {
+            executor.submit(reconnect_client, client_proxy, ins)
+            for client_proxy, ins in client_instructions
+        }
+        finished_fs, _ = concurrent.futures.wait(
+            fs=submitted_fs,
+            timeout=None,
+        )
+
     # Gather results
     results: List[Tuple[ClientProxy, Disconnect]] = []
     failures: List[BaseException] = []
-    for future in futures:
+    for future in finished_fs:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
@@ -331,25 +284,30 @@ def shutdown(clients: List[ClientProxy]) -> ReconnectResultsAndFailures:
 def reconnect_client(
     client: ClientProxy, reconnect: Reconnect
 ) -> Tuple[ClientProxy, Disconnect]:
-    """Instruct a single client to disconnect and (optionally) reconnect
-    later."""
+    """Instruct client to disconnect and (optionally) reconnect later."""
     disconnect = client.reconnect(reconnect)
     return client, disconnect
 
 
 def fit_clients(
-    client_instructions: List[Tuple[ClientProxy, FitIns]]
+    client_instructions: List[Tuple[ClientProxy, FitIns]],
+    max_workers: Optional[int],
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(fit_client, c, ins) for c, ins in client_instructions
-        ]
-        concurrent.futures.wait(futures)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        submitted_fs = {
+            executor.submit(fit_client, client_proxy, ins)
+            for client_proxy, ins in client_instructions
+        }
+        finished_fs, _ = concurrent.futures.wait(
+            fs=submitted_fs,
+            timeout=None,
+        )
+
     # Gather results
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = []
-    for future in futures:
+    for future in finished_fs:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)
@@ -367,18 +325,24 @@ def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
 
 
 def evaluate_clients(
-    client_instructions: List[Tuple[ClientProxy, EvaluateIns]]
+    client_instructions: List[Tuple[ClientProxy, EvaluateIns]],
+    max_workers: Optional[int],
 ) -> EvaluateResultsAndFailures:
     """Evaluate parameters concurrently on all selected clients."""
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(evaluate_client, c, ins) for c, ins in client_instructions
-        ]
-        concurrent.futures.wait(futures)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        submitted_fs = {
+            executor.submit(evaluate_client, client_proxy, ins)
+            for client_proxy, ins in client_instructions
+        }
+        finished_fs, _ = concurrent.futures.wait(
+            fs=submitted_fs,
+            timeout=None,
+        )
+
     # Gather results
     results: List[Tuple[ClientProxy, EvaluateRes]] = []
     failures: List[BaseException] = []
-    for future in futures:
+    for future in finished_fs:
         failure = future.exception()
         if failure is not None:
             failures.append(failure)

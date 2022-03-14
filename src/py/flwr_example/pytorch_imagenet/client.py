@@ -126,7 +126,7 @@ class ImageNetClient(fl.client.Client):
     def evaluate(self, ins: fl.common.EvaluateIns) -> fl.common.EvaluateRes:
 
         # Set the set so we are sure to generate the same batches
-        # accross all clients.
+        # across all clients.
         np.random.seed(123)
 
         print(f"Client {self.cid}: evaluate")

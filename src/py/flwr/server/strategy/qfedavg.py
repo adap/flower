@@ -131,9 +131,8 @@ class QFedAvg(FedAvg):
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        # Do not configure federated evaluation if a centralized evaluation
-        # function is provided
-        if self.eval_fn is not None:
+        # Do not configure federated evaluation if fraction_eval is 0
+        if self.fraction_eval == 0.0:
             return []
 
         # Parameters and config
@@ -226,64 +225,9 @@ class QFedAvg(FedAvg):
         return (
             weighted_loss_avg(
                 [
-                    (
-                        evaluate_res.num_examples,
-                        evaluate_res.loss,
-                        evaluate_res.accuracy,
-                    )
-                    for client, evaluate_res in results
+                    (evaluate_res.num_examples, evaluate_res.loss)
+                    for _, evaluate_res in results
                 ]
             ),
             {},
         )
-
-
-DEPRECATION_WARNING_QFFEDAVG = """
-DEPRECATION WARNING: Deprecated strategy
-
-    QffedAvg
-
-use
-
-    QFedAvg
-
-instead.
-"""
-
-
-class QffedAvg(QFedAvg):
-    """Configurable QFedAvg strategy implementation."""
-
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
-    def __init__(
-        self,
-        q_param: float = 0.2,
-        qffl_learning_rate: float = 0.1,
-        fraction_fit: float = 0.1,
-        fraction_eval: float = 0.1,
-        min_fit_clients: int = 1,
-        min_eval_clients: int = 1,
-        min_available_clients: int = 1,
-        eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
-        ] = None,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
-        accept_failures: bool = True,
-        initial_parameters: Optional[Parameters] = None,
-    ) -> None:
-        super().__init__(
-            q_param=q_param,
-            qffl_learning_rate=qffl_learning_rate,
-            fraction_fit=fraction_fit,
-            fraction_eval=fraction_eval,
-            min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
-            min_available_clients=min_available_clients,
-            eval_fn=eval_fn,
-            on_fit_config_fn=on_fit_config_fn,
-            on_evaluate_config_fn=on_evaluate_config_fn,
-            accept_failures=accept_failures,
-            initial_parameters=initial_parameters,
-        )
-        print(DEPRECATION_WARNING_QFFEDAVG)

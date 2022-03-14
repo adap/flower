@@ -9,22 +9,14 @@ git clone --depth=1 https://github.com/adap/flower.git && mv flower/baselines . 
 ```
 
 Project dependencies (such as `flwr` and `torch`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+Once inside your Python virtual environment containing `poetry`, go ahead and run:
 
 ```shell
 poetry install
-poetry shell
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+Poetry will install all your dependencies in a newly created virtual environment if you haven't create and/or activated one. To verify that everything works correctly you can run the following command:
 
 ```shell
-python3 -c "import flwr_baselines"
-```
-
-### TLDR
-
-There is also a short way which might not be suitable for everyone.
-
-```shell
-./dev/bootstrap.sh
+poetry run python3 -c "import flwr_baselines"
 ```

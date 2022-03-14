@@ -18,12 +18,15 @@ Flower's design goals was to make this simple. Read on to learn more.
    installation
    quickstart_tensorflow
    quickstart_pytorch
+   quickstart_huggingface
+   quickstart_pytorch_lightning
    quickstart_mxnet
    quickstart_scikitlearn
    evaluation
    strategies
    implementing-strategies
    saving-progress
+   ssl-enabled-connections
    examples
    example_walkthrough_pytorch_mnist
    example-pytorch-from-centralized-to-federated
@@ -32,6 +35,19 @@ Flower's design goals was to make this simple. Read on to learn more.
    fedbn-example-pytorch-from-centralized-to-federated
    recommended-env-setup
    changelog
+   faq
+
+Flower Baselines
+----------------
+
+Flower Baselines are a collection of organised scripts used to reproduce results from well-known publications or benchmarks. You can check which baselines already exist and/or contribute your own baseline.
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Baselines
+   
+   using-baselines
+   contributing-baselines
 
 
 API Reference
@@ -58,6 +74,8 @@ intended to help along the way.
    good-first-contributions
    architecture
    release_process
+   creating-new-messages
+   devcontainer
 
 
 About

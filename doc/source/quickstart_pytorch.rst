@@ -63,7 +63,8 @@ We use PyTorch to load CIFAR10, a popular colored image classification dataset f
         testset = CIFAR10(".", train=False, download=True, transform=transform)
         trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
         testloader = DataLoader(testset, batch_size=32)
-        return trainloader, testloader
+        num_examples = {"trainset" : len(trainset), "testset" : len(testset)}
+        return trainloader, testloader, num_examples
 
 Define the loss and optimizer with PyTorch. The training of the dataset is done by looping over the dataset, measure the corresponding loss and optimize it. 
 
@@ -127,7 +128,7 @@ The Flower clients will use a simle CNN adapted from 'PyTorch: A 60 Minute Blitz
 
     # Load model and data
     net = Net().to(DEVICE)
-    trainloader, testloader = load_data()
+    trainloader, testloader, num_examples = load_data()
 
 After loading the data set with :code:`load_data()` we define the Flower interface. 
 
@@ -169,12 +170,12 @@ which can be implemented in the following way:
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             train(net, trainloader, epochs=1)
-            return self.get_parameters(), len(trainloader), {}
+            return self.get_parameters(), num_examples["trainset"], {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
-            return float(loss), len(testloader), {"accuracy":float(accuracy)}
+            return float(loss), num_examples["testset"], {"accuracy": float(accuracy)}
 
 We can now create an instance of our class :code:`CifarClient` and add one line
 to actually run this client:
@@ -255,8 +256,8 @@ You should now see how the training does in the very first terminal (the one tha
     DEBUG flower 2021-02-25 14:03:09,276 | server.py:139 | evaluate: strategy sampled 2 clients
     DEBUG flower 2021-02-25 14:03:11,852 | server.py:149 | evaluate received 2 results and 0 failures
     INFO flower 2021-02-25 14:03:11,852 | app.py:121 | app_evaluate: federated loss: 473.76959228515625
-    INFO flower 2021-02-25 14:03:11,852 | app.py:125 | app_evaluate: results [('ipv6:[::1]:54758', EvaluateRes(loss=473.76959228515625, num_examples=313, accuracy=0.0, metrics={'accuracy': 0.4439})), ('ipv6:[::1]:54760', EvaluateRes(loss=473.76959228515625, num_examples=313, accuracy=0.0, metrics={'accuracy': 0.4439}))]
-    INFO flower 2021-02-25 14:03:11,852 | app.py:127 | app_evaluate: failures []
+    INFO flower 2021-02-25 14:03:11,852 | app.py:122 | app_evaluate: results [('ipv6:[::1]:36602', EvaluateRes(loss=351.4906005859375, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.6067})), ('ipv6:[::1]:36604', EvaluateRes(loss=353.92742919921875, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.6005}))]
+    INFO flower 2021-02-25 14:03:27,514 | app.py:127 | app_evaluate: failures []
 
 Congratulations!
 You've successfully built and run your first federated learning system.
