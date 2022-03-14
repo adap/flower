@@ -27,5 +27,6 @@ class CifarClient(fl.client.NumPyClient):
         loss, accuracy = model.evaluate(x_test, y_test)
         return loss, len(x_test), {"accuracy": accuracy}
 
+
 # Start Flower client
 fl.client.start_numpy_client("[::]:8080", client=CifarClient())
