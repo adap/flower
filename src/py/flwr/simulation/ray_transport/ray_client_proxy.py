@@ -37,8 +37,8 @@ class RayClientProxy(ClientProxy):
 
     def get_properties(self, ins: common.PropertiesIns) -> common.PropertiesRes:
         """Returns client's properties."""
-        future_properties_res = launch_and_get_properties.options(
-            **self.resources
+        future_properties_res = launch_and_get_properties.options(  # type: ignore
+            **self.resources,
         ).remote(self.client_fn, self.cid, ins)
         res = ray.worker.get(future_properties_res)
         return cast(
@@ -48,8 +48,8 @@ class RayClientProxy(ClientProxy):
 
     def get_parameters(self) -> common.ParametersRes:
         """Return the current local model parameters."""
-        future_paramseters_res = launch_and_get_parameters.options(
-            **self.resources
+        future_paramseters_res = launch_and_get_parameters.options(  # type: ignore
+            **self.resources,
         ).remote(self.client_fn, self.cid)
         res = ray.worker.get(future_paramseters_res)
         return cast(
@@ -59,9 +59,9 @@ class RayClientProxy(ClientProxy):
 
     def fit(self, ins: common.FitIns) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
-        future_fit_res = launch_and_fit.options(**self.resources).remote(
-            self.client_fn, self.cid, ins
-        )
+        future_fit_res = launch_and_fit.options(  # type: ignore
+            **self.resources,
+        ).remote(self.client_fn, self.cid, ins)
         res = ray.worker.get(future_fit_res)
         return cast(
             common.FitRes,
@@ -70,9 +70,9 @@ class RayClientProxy(ClientProxy):
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-        future_evaluate_res = launch_and_evaluate.options(**self.resources).remote(
-            self.client_fn, self.cid, ins
-        )
+        future_evaluate_res = launch_and_evaluate.options(  # type: ignore
+            **self.resources,
+        ).remote(self.client_fn, self.cid, ins)
         res = ray.worker.get(future_evaluate_res)
         return cast(
             common.EvaluateRes,
