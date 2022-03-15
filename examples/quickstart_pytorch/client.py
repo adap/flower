@@ -8,6 +8,7 @@ from torch.nn import GroupNorm
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.models import resnet18
+from tqdm import tqdm
 
 
 # #############################################################################
@@ -23,7 +24,7 @@ def train(net, trainloader, epochs):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     for _ in range(epochs):
-        for images, labels in trainloader:
+        for images, labels in tqdm(trainloader):
             optimizer.zero_grad()
             criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
             optimizer.step()
@@ -34,7 +35,7 @@ def test(net, testloader):
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
     with torch.no_grad():
-        for images, labels in testloader:
+        for images, labels in tqdm(testloader):
             outputs = net(images.to(DEVICE))
             loss += criterion(outputs, labels.to(DEVICE)).item()
             total += labels.size(0)
