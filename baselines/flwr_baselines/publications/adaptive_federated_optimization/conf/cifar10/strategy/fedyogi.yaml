@@ -1,0 +1,10 @@
+---
+name: FedYogi
+expected_accuracy: 78.0
+init:
+  _target_: flwr.server.strategy.FedYogi
+  beta_1: 0.9
+  beta_2: 0.99
+  eta: 0.01
+  tau: 0.001
+eta_l: 0.03162
