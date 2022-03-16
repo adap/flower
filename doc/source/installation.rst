@@ -5,7 +5,7 @@ Installing Flower
 Python Version
 --------------
 
-Flower requires `Python 3.7 <https://docs.python.org/3.7/>`_ or above. `Python 3.6 <https://docs.python.org/3.6/>`_ is still supported in Flower 0.18, but Flower 0.19 will drop support for Python 3.6.
+Flower requires `Python 3.6 <https://docs.python.org/3.6/>`_ or above.
 
 
 Install Stable Release
@@ -15,21 +15,6 @@ Stable releases are available on `PyPI <https://pypi.org/>`_::
 
   $ pip install flwr
 
-To use Flower with the Virtual Client Engine, install the necessary dependencies for using `start_simulation`:
-
-  $ pip install flwr[simulation]
-
-
-Verify Installation
--------------------
-
-The following command can be used to verify the Flower installation:
-
-  $ python3 -c "import flwr;print(flwr.__version__)"
-  0.18.0
-
-The installation should work as expected if there are no errors and the current Flower version gets printed on the command line.
-
 
 Install Nightly Release
 -----------------------
@@ -38,12 +23,15 @@ The latest (potentially unstable) changes in Flower are available as nightly rel
 
   $ pip install flwr-nightly
 
-Flower nightly releases 
 
-  $ pip install flwr-nightly[simulation]
-
-
-Contributor Install
+Install from GitHub
 -------------------
 
-Contributors can install development versions of Flower in multiple ways: `Contributor Installation <contributor-installation.html>`_
+Python packages can be installed from git repositories. Use the following
+command to install the latest version of Flower directly from GitHub::
+
+  $ pip install git+https://github.com/adap/flower.git
+
+One can also install a specific commit::
+
+  $ pip install git+https://github.com/adap/flower.git@39f1ba78d0f2175ef1193634be56b2a6f68dc864
