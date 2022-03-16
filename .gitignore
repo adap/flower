@@ -1,3 +1,5 @@
+examples/*/dev/*
+
 # Flower files
 .flower_ops
 data/
