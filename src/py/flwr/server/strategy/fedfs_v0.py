@@ -146,7 +146,7 @@ class FedFSv0(FedAvg):
         for idx, (cid, _) in enumerate(all_clients.items()):
             cid_idx[idx] = cid
             penalty = 0.0
-            if cid in self.contributions.keys():
+            if cid in self.contributions:
                 contribs: List[Tuple[int, int, int]] = self.contributions[cid]
                 penalty = statistics.mean([c / m for _, c, m in contribs])
             # `p` should be:
@@ -200,7 +200,7 @@ class FedFSv0(FedAvg):
                 fit_res.num_examples,
                 num_examples_ceil,
             )
-            if cid not in self.contributions.keys():
+            if cid not in self.contributions:
                 self.contributions[cid] = []
             self.contributions[cid].append(contribution)
 

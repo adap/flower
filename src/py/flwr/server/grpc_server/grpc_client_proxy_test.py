@@ -59,7 +59,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         value: flwr.common.ParametersRes = client.get_parameters()
 
         # Assert
-        assert value.parameters.tensors == []
+        assert not value.parameters.tensors
 
     def test_fit(self) -> None:
         """This test is currently quite simple and should be improved."""
