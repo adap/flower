@@ -88,7 +88,7 @@ class SoftmaxClassifierHead(object):
             cross_entropy = -tf.reduce_sum(labels * tf.math.log(predictions), 1)
             loss = tf.reduce_mean(cross_entropy)
             if self._l2_reg is not None:
-                loss += self._l2_reg * tf.reduce_sum(ws ** 2)
+                loss += self._l2_reg * tf.reduce_sum(ws**2)
         with tf.name_scope(scope + "/backprop"):
             # d_bs is also equal to combined sigmoid and cross-entropy gradient.
             d_bs = predictions - labels
