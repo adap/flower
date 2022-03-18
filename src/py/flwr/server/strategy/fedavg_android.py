@@ -272,7 +272,7 @@ class FedAvgAndroid(Strategy):
     # pylint: disable=R0201
     def ndarray_to_bytes(self, ndarray: np.ndarray) -> bytes:
         """Serialize NumPy array to bytes."""
-        return ndarray.tobytes()
+        return cast(bytes, ndarray.tobytes())
 
     # pylint: disable=R0201
     def bytes_to_ndarray(self, tensor: bytes) -> np.ndarray:
