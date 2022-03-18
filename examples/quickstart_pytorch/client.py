@@ -20,6 +20,7 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # 1. PyTorch pipeline: model/train/test/dataloader
 # #############################################################################
 
+
 def train(net, trainloader, epochs):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
@@ -73,7 +74,7 @@ def load_data():
 def main():
     """Create model, load data, define Flower client, start Flower client."""
 
-    # Load model  
+    # Load model
     net = resnet18(norm_layer=lambda x: GroupNorm(2, x), num_classes=10)
     net = net.to(DEVICE)
 

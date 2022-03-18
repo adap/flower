@@ -199,7 +199,7 @@ class FedFSv1(FedAvg):
         for idx, (cid, _) in enumerate(all_clients.items()):
             cid_idx[idx] = cid
 
-            if cid in self.contributions.keys():
+            if cid in self.contributions:
                 # Previously selected clients
                 contribs: List[Tuple[int, int, int]] = self.contributions[cid]
 
@@ -275,7 +275,7 @@ class FedFSv1(FedAvg):
                 fit_res.num_examples,
                 num_examples_ceil,
             )
-            if cid not in self.contributions.keys():
+            if cid not in self.contributions:
                 self.contributions[cid] = []
             self.contributions[cid].append(contribution)
 
