@@ -26,7 +26,6 @@ DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
 
 # mypy: allow-any-generics
-# Flower Client
 class FlowerClient(fl.client.NumPyClient):
     """Flower client implementing image classification using PyTorch."""
 
@@ -55,7 +54,7 @@ class FlowerClient(fl.client.NumPyClient):
                 if "bn" not in name
             ]
         else:
-            # Return model parameters as a list of NumPy ndarrays
+            # Return all model parameters as a list of NumPy ndarrays
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:

@@ -14,7 +14,6 @@ tqdm == 4.62.3
 matplotlib >= 3.5.0
 scikit-image >= 0.18.1
 wget >= 3.2
-ray >= 1.9.1
 
 ##### dev-dependencies
 isort == 5.10.1
