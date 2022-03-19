@@ -50,7 +50,7 @@ python = "^3.6.2"
 numpy = "^1.19.0"
 grpcio = "^1.41.0"
 protobuf = "^3.19.0"
-importlib-metadata = { version = "^1.4.0", markers = "python_version < '3.8'" }
+importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
 dataclasses = { version = "==0.6", markers = "python_version < '3.7'" }
 # Optional dependencies
 ray = { extras = ["default"], version = "^1.9.2", optional = true }
@@ -113,6 +113,18 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = "flwr_experimental.*"
 ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "importlib.metadata.*"
+follow_imports = "skip"
+follow_imports_for_stubs = true
+disallow_untyped_calls = false
+
+[[tool.mypy.overrides]]
+module = "importlib_metadata.*"
+follow_imports = "skip"
+follow_imports_for_stubs = true
+disallow_untyped_calls = false
 
 [[tool.mypy.overrides]]
 module = "torch.*"
