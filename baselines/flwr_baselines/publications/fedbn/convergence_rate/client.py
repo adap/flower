@@ -1,5 +1,5 @@
 # pylint: disable=wrong-import-order
-"""Flower client example using PyTorch for CIFAR-10 image classification."""
+"""FedBN client."""
 
 import argparse
 import json
@@ -27,7 +27,7 @@ DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # mypy: allow-any-generics
 # Flower Client
-class CifarClient(fl.client.NumPyClient):
+class FlowerClient(fl.client.NumPyClient):
     """Flower client implementing image classification using PyTorch."""
 
     def __init__(
@@ -358,7 +358,7 @@ def test(model, dataset, testdata, device) -> Tuple[float, float]:
 
 
 def main() -> None:
-    """Load data, start CifarClient."""
+    """Load data, start FlowerClient."""
 
     # Parse command line argument `partition` (type of dataset) and `mode` (type of strategy)
     parser = argparse.ArgumentParser(description="Flower")
@@ -387,7 +387,7 @@ def main() -> None:
     _ = model(next(iter(trainloader))[0].to(DEVICE))
 
     # Start client
-    client = CifarClient(model, trainloader, testloader, num_examples, args.mode)
+    client = FlowerClient(model, trainloader, testloader, num_examples, args.mode)
     print("Start client of dataset", num_examples["dataset"])
     fl.client.start_numpy_client("0.0.0.0:8080", client)
     # Save train and evaluation loss and accuracy in json file
