@@ -175,7 +175,7 @@ class QFedAvg(FedAvg):
                 client_grads = np.append(
                     client_grads, grad_list[i]
                 )  # output a flattened array
-            squared = np.square(client_grads)
+            squared = np.square(client_grads)  # type: ignore
             summed = np.sum(squared)
             return float(summed)
 

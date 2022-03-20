@@ -24,7 +24,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -45,13 +44,12 @@ exclude = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = "^3.7"
 # Mandatory dependencies
-numpy = "^1.19.0"
+numpy = ">=1.19.0,<1.21.0"
 grpcio = "^1.41.0"
 protobuf = "^3.19.0"
 importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
-dataclasses = { version = "==0.6", markers = "python_version < '3.7'" }
 # Optional dependencies
 ray = { extras = ["default"], version = "^1.9.2", optional = true }
 
@@ -89,7 +87,7 @@ known_first_party = ["flwr", "flwr_experimental", "flwr_tool"]
 
 [tool.black]
 line-length = 88
-target-version = ["py36", "py37", "py38", "py39"]
+target-version = ["py37", "py38", "py39"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
