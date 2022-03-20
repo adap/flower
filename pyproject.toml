@@ -46,7 +46,7 @@ exclude = [
 [tool.poetry.dependencies]
 python = "^3.7"
 # Mandatory dependencies
-numpy = "^1.19.0"
+numpy = "^1.20.0"
 grpcio = "^1.41.0"
 protobuf = "^3.19.0"
 importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
