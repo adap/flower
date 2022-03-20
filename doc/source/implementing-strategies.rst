@@ -208,17 +208,58 @@ The Flower server will call :code:`initialize_parameters`, which either returns 
 The :code:`configure_fit` method
 --------------------------------
 
-*coming soon*
+:code:`configure_fit` is responsible for configuring the upcoming round of training. What does *configure* mean in this context? Configuring a round means selecting clients and deciding what instructions to send to these clients. The signature of :code:`configure_fit` makes this clear:
+
+.. code-block:: python
+
+    @abstractmethod
+    def configure_fit(
+        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
+
+The return value is a list of tuples, each representing the instructions that will be sent to a particular client. Strategy implementations usually perform the following steps in :code:`configure_fit`:
+
+* Use the :code:`client_manager` to randomly sample all (or a subset of) available clients (each represented as a :code:`ClientProxy` object)
+* Pair each :code:`ClientProxy` with the same :code:`FitIns` holding the current global model :code:`parameters` and :code:`config` dict
+
+More sophisticated implementations can use :code:`configure_fit` to implement custom client selection logic. A client will only participate in a round if the corresponding :code:`ClientProxy` is included in the the list returned from :code:`configure_fit`.
+
+.. note::
+
+  The structure of this retun value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to train, for example, different models on different clients, or use differnt hyperparameters on different clients (via the :code:`config` dict).
 
 The :code:`aggregate_fit` method
 --------------------------------
 
 *coming soon*
 
+There can of course be failures, so it is not guaranteed that the server receives results from all the clients it sent instructions to (via :code:`configure_fit`).
+
 The :code:`configure_evaluate` method
 -------------------------------------
 
-*coming soon*
+:code:`configure_evaluate` is responsible for configuring the upcoming round of evaluation. What does *configure* mean in this context? Configuring a round means selecting clients and deciding what instructions to send to these clients. The signature of :code:`configure_evaluate` makes this clear:
+
+.. code-block:: python
+
+    @abstractmethod
+    def configure_evaluate(
+        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation."""
+
+The return value is a list of tuples, each representing the instructions that will be sent to a particular client. Strategy implementations usually perform the following steps in :code:`configure_evaluate`:
+
+* Use the :code:`client_manager` to randomly sample all (or a subset of) available clients (each represented as a :code:`ClientProxy` object)
+* Pair each :code:`ClientProxy` with the same :code:`EvaluateIns` holding the current global model :code:`parameters` and :code:`config` dict
+
+More sophisticated implementations can use :code:`configure_evaluate` to implement custom client selection logic. A client will only participate in a round if the corresponding :code:`ClientProxy` is included in the the list returned from :code:`configure_evaluate`.
+
+.. note::
+
+  The structure of this retun value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to evaluate, for example, different models on different clients, or use differnt hyperparameters on different clients (via the :code:`config` dict).
+
 
 The :code:`aggregate_evaluate` method
 -------------------------------------
