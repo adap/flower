@@ -20,50 +20,50 @@ implemented:
 
 .. code-block:: python
 
-  class Strategy(ABC):
-      """Abstract base class for server strategy implementations."""
+    class Strategy(ABC):
+        """Abstract base class for server strategy implementations."""
 
-      @abstractmethod
-      def initialize_parameters(
-          self, client_manager: ClientManager
-      ) -> Optional[Parameters]:
-          """Initialize the (global) model parameters."""
+        @abstractmethod
+        def initialize_parameters(
+            self, client_manager: ClientManager
+        ) -> Optional[Parameters]:
+            """Initialize the (global) model parameters."""
 
-      @abstractmethod
-      def configure_fit(
-          self, rnd: int, parameters: Parameters, client_manager: ClientManager
-      ) -> List[Tuple[ClientProxy, FitIns]]:
-          """Configure the next round of training."""
+        @abstractmethod
+        def configure_fit(
+            self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        ) -> List[Tuple[ClientProxy, FitIns]]:
+            """Configure the next round of training."""
 
-      @abstractmethod
-      def aggregate_fit(
-          self,
-          rnd: int,
-          results: List[Tuple[ClientProxy, FitRes]],
-          failures: List[BaseException],
-      ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-          """Aggregate training results."""
+        @abstractmethod
+        def aggregate_fit(
+            self,
+            rnd: int,
+            results: List[Tuple[ClientProxy, FitRes]],
+            failures: List[BaseException],
+        ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+            """Aggregate training results."""
 
-      @abstractmethod
-      def configure_evaluate(
-          self, rnd: int, parameters: Parameters, client_manager: ClientManager
-      ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-          """Configure the next round of evaluation."""
+        @abstractmethod
+        def configure_evaluate(
+            self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+            """Configure the next round of evaluation."""
 
-      @abstractmethod
-      def aggregate_evaluate(
-          self,
-          rnd: int,
-          results: List[Tuple[ClientProxy, EvaluateRes]],
-          failures: List[BaseException],
-      ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-          """Aggregate evaluation results."""
+        @abstractmethod
+        def aggregate_evaluate(
+            self,
+            rnd: int,
+            results: List[Tuple[ClientProxy, EvaluateRes]],
+            failures: List[BaseException],
+        ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+            """Aggregate evaluation results."""
 
-      @abstractmethod
-      def evaluate(
-          self, parameters: Parameters
-      ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-          """Evaluate the current model parameters."""
+        @abstractmethod
+        def evaluate(
+            self, parameters: Parameters
+        ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+            """Evaluate the current model parameters."""
 
 
 Creating a new strategy means implementing a new :code:`class` (derived from the
@@ -203,6 +203,7 @@ Built-in strategies return user-provided initial parameters. The following examp
 The Flower server will call :code:`initialize_parameters`, which either returns the parameters that were passed to :code:`initial_parameters`, or :code:`None`. If no parameters are returned from :code:`initialize_parameters` (i.e., :code:`None`), the server will randomly select one client and ask it to provide its parameters. This is a convenience feature and not recommended in practice, but it can be useful for prototyping. In practice, it is recommended to always use server-side parameter initialization.
 
 .. note::
+
     Server-side parameter initialization is a powerful mechanism. It can be used, for example, to resume training from a previously saved checkpoint. It is also the fundamental capability needed to implement hybrid approaches, for example, to fine-tune a pre-trained model using federated learning.
 
 The :code:`configure_fit` method
@@ -227,14 +228,27 @@ More sophisticated implementations can use :code:`configure_fit` to implement cu
 
 .. note::
 
-  The structure of this retun value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to train, for example, different models on different clients, or use differnt hyperparameters on different clients (via the :code:`config` dict).
+    The structure of this retun value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to train, for example, different models on different clients, or use differnt hyperparameters on different clients (via the :code:`config` dict).
 
 The :code:`aggregate_fit` method
 --------------------------------
 
-*coming soon*
+:code:`aggregate_fit` is responsible for aggregating the results returned by the clients that were selected and asked to train in :code:`configure_fit`.
 
-There can of course be failures, so it is not guaranteed that the server receives results from all the clients it sent instructions to (via :code:`configure_fit`).
+.. code-block:: python
+
+    @abstractmethod
+    def aggregate_fit(
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[BaseException],
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        """Aggregate training results."""
+
+Of course, failures can happen, so there is no guarantee that the server will get results from all the clients it sent instructions to (via :code:`configure_fit`). :code:`aggregate_fit` therefore receives a list of :code:`results`, but also a list of :code:`failues`.
+
+:code:`aggregate_fit` returns an optional :code:`Parameters` object and a dictionary of aggregated metrics. The :code:`Parameters` return value is optional because :code:`aggregate_fit` might decide that the results provided are not sufficient for aggregation (e.g., too many failures).
 
 The :code:`configure_evaluate` method
 -------------------------------------
@@ -258,15 +272,40 @@ More sophisticated implementations can use :code:`configure_evaluate` to impleme
 
 .. note::
 
-  The structure of this retun value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to evaluate, for example, different models on different clients, or use differnt hyperparameters on different clients (via the :code:`config` dict).
+    The structure of this retun value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to evaluate, for example, different models on different clients, or use differnt hyperparameters on different clients (via the :code:`config` dict).
 
 
 The :code:`aggregate_evaluate` method
 -------------------------------------
 
-*coming soon*
+:code:`aggregate_evaluate` is responsible for aggregating the results returned by the clients that were selected and asked to evaluate in :code:`configure_evaluate`.
+
+.. code-block:: python
+
+    @abstractmethod
+    def aggregate_evaluate(
+        self,
+        rnd: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[BaseException],
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        """Aggregate evaluation results."""
+
+Of course, failures can happen, so there is no guarantee that the server will get results from all the clients it sent instructions to (via :code:`configure_evaluate`). :code:`aggregate_evaluate` therefore receives a list of :code:`results`, but also a list of :code:`failues`.
+
+:code:`aggregate_evaluate` returns an optional :code:`float` (loss) and a dictionary of aggregated metrics. The :code:`float` return value is optional because :code:`aggregate_evaluate` might decide that the results provided are not sufficient for aggregation (e.g., too many failures).
 
 The :code:`evaluate` method
 ---------------------------
 
-*coming soon*
+:code:`evaluate` is responsible for evaluating model parameters on the server-side. Having :code:`evaluate` in addition to :code:`configure_evaluate`/:code:`aggregate_evaluate` enables strategies to perform both servers-side and client-side (federated) evaluation.
+
+.. code-block:: python
+
+    @abstractmethod
+    def evaluate(
+        self, parameters: Parameters
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate the current model parameters."""
+
+The return value is again optional because the strategy might not need to implement server-side evaluation or because the user-defined :code:`evaluate` method might not complete successfully (e.g., it might fail to load the server-side evaluation data).
