@@ -229,15 +229,3 @@ The :code:`evaluate` method
 ---------------------------
 
 *coming soon*
-
-Deprecated methods
-------------------
-
-The following methods were replaced by updated versions with the same type
-signature. Migrate to the new versions by renaming them (i.e., remove the
-:code:`on_` prefix):
-
-* :code:`on_configure_fit` (replaced by :code:`configure_fit`)
-* :code:`on_aggregate_fit` (replaced by :code:`aggregate_fit`)
-* :code:`on_configure_evaluate` (replaced by :code:`configure_evaluate`)
-* :code:`on_aggregate_evaluate` (replaced by :code:`aggregate_evaluate`)
