@@ -180,7 +180,7 @@ We included type annotations to give you a better understanding of the data type
 .. code-block:: python
 
 
-    class MNISTClient(fl.client.NumPyClient):
+    class FlowerClient(fl.client.NumPyClient):
         """Flower client implementing MNIST classification using MXNet."""
 
         def __init__(
