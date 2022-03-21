@@ -56,7 +56,7 @@ The model architecture (a very simple :code:`Linear Regression` model) is define
         }
         return params
 
-We now need to define the training (function :code:`train()`) which loops over the training set and measures the loss (function :code:`loss_fn()`) for each batch of training examples. The loss function is separate since JAX takes derivatives with a :code:`grad()` function being defined in the :code:`main()` function and called in :code:`train()`. 
+We now need to define the training (function :code:`train()`) which loops over the training set and measures the loss (function :code:`loss_fn()`) for each batch of training examples. The loss function is separate since JAX takes derivatives with a :code:`grad()` function (defined in the :code:`main()` function and called in :code:`train()`). 
 
 .. code-block:: python
 
