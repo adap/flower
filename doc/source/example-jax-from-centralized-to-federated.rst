@@ -7,7 +7,7 @@ We will structure the example similar to our `PyTorch - From Centralized To Fede
 First, we build a centralized training approach based on the `Linear Regression with JAX <https://coax.readthedocs.io/en/latest/examples/linear_regression/jax.html>`_ tutorial`.
 Then, we build upon the centralized training code to run the training in a federated fashion.
 
-Before we start setting up our JAX example we install the :code:`jax`, :code:`jaxlib`, :code:`sklearn`, and :code:`flwr` packages:
+Before we start building our JAX example, we need install the packages :code:`jax`, :code:`jaxlib`, :code:`scikit-learn`, and :code:`flwr`:
 
 .. code-block:: shell
 
