@@ -24,10 +24,10 @@ class FlowerClient(fl.client.NumPyClient):
         test_x: List[np.ndarray],
         test_y: List[np.ndarray],
     ) -> None:
-        self.params= params
+        self.params = params
         self.grad_fn = grad_fn
         self.train_x = train_x
-        self. train_y = train_y
+        self.train_y = train_y
         self.test_x = test_x
         self.test_y = test_y
 
