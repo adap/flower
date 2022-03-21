@@ -114,7 +114,7 @@ Let's take the next step and use what we've built to create a simple federated l
 JAX meets Flower
 ----------------
 
-The concept to federate an existing workload is always the same and easy to understand.
+The concept of federating an existing workload is always the same and easy to understand.
 We have to start a *server* and then use the code in :code:`jax_training.py` for the *clients* that are connected to the *server*.
 The *server* sends model parameters to the clients. The *clients* run the training and update the parameters.
 The updated parameters are sent back to the *server* which averages all received parameter updates.
