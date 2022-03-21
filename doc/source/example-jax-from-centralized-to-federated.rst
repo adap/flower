@@ -2,7 +2,7 @@ Example: JAX - Run JAX Federated
 ====================================
 
 This tutorial will show you how to use Flower to build a federated version of an existing JAX workload.
-We are using JAX to train a linear regression model on a sklearn regression dataset.
+We are using JAX to train a linear regression model on a scikit-learn dataset.
 We will structure the example similar to our `PyTorch - From Centralized To Federated <https://github.com/adap/flower/blob/main/examples/pytorch_from_centralized_to_federated>`_ walkthrough.
 First, we build a centralized training approach based on the `Linear Regression with JAX <https://coax.readthedocs.io/en/latest/examples/linear_regression/jax.html>`_ tutorial`.
 Then, we build upon the centralized training code to run the training in a federated fashion.
