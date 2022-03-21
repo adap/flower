@@ -104,6 +104,7 @@ testpaths = [
 [tool.mypy]
 ignore_missing_imports = true
 strict = true
+plugins = "numpy.typing.mypy_plugin"
 
 [[tool.mypy.overrides]]
 module = "flwr_example.*"
