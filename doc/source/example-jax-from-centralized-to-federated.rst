@@ -165,7 +165,7 @@ Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll ca
 #. :code:`fit`
     * update the parameters of the local model with the parameters received from the server
     * train the model on the local training set
-    * get the updated local model weights and return them to the server
+    * get the updated local model parameters and return them to the server
 #. :code:`evaluate`
     * update the parameters of the local model with the parameters received from the server
     * evaluate the updated model on the local test set
