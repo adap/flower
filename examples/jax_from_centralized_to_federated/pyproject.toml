@@ -9,7 +9,7 @@ python = "^3.8"
 jax = "^0.2.25"
 jaxlib = "^0.1.74"
 sklearn = "^1.0.1"
-flwr = "^0.17.0"
+flwr = "^0.18.0"
 numpy = "^1.21.4"
 
 [tool.poetry.dev-dependencies]
