@@ -15,7 +15,7 @@ Before we start building our JAX example, we need install the packages :code:`ja
 
 
 Linear Regression with JAX
--------------------------
+--------------------------
 
 We begin with a brief description of the centralized training code based on a :code:`Linear Regression` model.
 If you want a more in-depth explanation of what's going on then have a look at the official `JAX documentation <https://jax.readthedocs.io/>`_.
