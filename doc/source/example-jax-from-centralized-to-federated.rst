@@ -11,10 +11,7 @@ Before we start building our JAX example, we need install the packages :code:`ja
 
 .. code-block:: shell
 
-  $ pip install jax
-  $ pip install jaxlib
-  $ pip install sklearn
-  $ pip install flwr
+  $ pip install jax jaxlib scikit-learn flwr
 
 
 Linear Regression with JAX
