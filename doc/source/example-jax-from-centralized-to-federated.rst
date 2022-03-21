@@ -195,19 +195,19 @@ We included type annotations to give you a better understanding of the data type
             self.params= params
             self.grad_fn = grad_fn
             self.train_x = train_x
-            self. train_y = train_y
+            self.train_y = train_y
             self.test_x = test_x
             self.test_y = test_y
 
         def get_parameters(self) -> Dict:
-            # Return model parameters as a list of NumPy ndarrays,
+            # Return model parameters as a list of NumPy ndarrays
             parameter_value = []
             for _, val in self.params.items():
                 parameter_value.append(np.array(val))
             return parameter_value
         
         def set_parameters(self, parameters: List[np.ndarray]) -> Dict:
-            # Collect model parameters and set new weight values
+            # Collect model parameters and update the parameters of the local model
             value=jnp.ndarray
             params_item = list(zip(self.params.keys(),parameters))
             for item in params_item:
@@ -258,7 +258,7 @@ Having defined data loading, model architecture, training, and evaluation we can
         params = jax_training.load_model(model_shape)
 
         # Start Flower client
-        client = MNISTClient(params, grad_fn, train_x, train_y, test_x, test_y)
+        client = FlowerClient(params, grad_fn, train_x, train_y, test_x, test_y)
         fl.client.start_numpy_client("0.0.0.0:8080", client)
 
     if __name__ == "__main__":
@@ -277,5 +277,5 @@ Next Steps
 ----------
 
 The full source code for this example: `Jax: From Centralized To Federated (Code) <https://github.com/adap/flower/blob/main/examples/jax_from_centralized_to_federated>`_.
-Our example is of course somewhat over-simplified because both clients load very simple linear regression and the corresponding datset. 
-You're now prepared to explore this topic further. How about using a CNN or using a different dataset? How about adding more clients?
+Our example is of course somewhat over-simplified because both clients load the same dataset. 
+You're now prepared to explore this topic further. How about using a more sophisticated model or using a different dataset? How about adding more clients?
