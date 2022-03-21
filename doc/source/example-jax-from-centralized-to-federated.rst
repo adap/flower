@@ -20,7 +20,7 @@ Linear Regression with JAX
 We begin with a brief description of the centralized training code based on a :code:`Linear Regression` model.
 If you want a more in-depth explanation of what's going on then have a look at the official `JAX documentation <https://jax.readthedocs.io/>`_.
 
-Let's create a new file called:code:`jax_training.py` with all the components required for a traditional (centralized) linear regression training. 
+Let's create a new file called :code:`jax_training.py` with all the components required for a traditional (centralized) linear regression training. 
 First, the JAX packages :code:`jax` and :code:`jaxlib` needs to be imported. In addition, we need to import :code:`sklearn` since we use :code:`make_regression` as dataset and :code:`train_test_split` splits the dataset in a training and test set. 
 You can see that we do not yet import the :code:`flwr` package for federated learning. This will be done later. 
 
