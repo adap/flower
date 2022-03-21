@@ -85,7 +85,7 @@ The evaluation of the model is defined in the function :code:`evaluation()`. The
         #print(f'Test loss {loss_test}')
         return loss_test, num_examples
 
-Having defined the data loading, model architecture, training, and evaluation we can put everything together and train our model on JAX. As already mentioned the :code:`jax.grad()` is defined and passed to :code:`train()` funciton.    
+Having defined the data loading, model architecture, training, and evaluation we can put everything together and train our model using JAX. As already mentioned, the :code:`jax.grad()` function is defined in :code:`main()` and passed to :code:`train()`.
 
 .. code-block:: python
 
