@@ -242,7 +242,7 @@ We included type annotations to give you a better understanding of the data type
                 {"loss": float(loss)},
             )
 
-Having defined data loading, model architecture, training, and evaluation we can put everything together and train our :code:`Linear Regression` model.
+Having defined the federation process, we can run it.
 
 .. code-block:: python
 
@@ -271,7 +271,7 @@ And that's it. You can now open two additional terminal windows and run
 
     python3 client.py
 
-in each window (make sure that the server is still running before you do so) and see your MXNet project run federated learning across two clients. Congratulations!
+in each window (make sure that the server is still running before you do so) and see your JAX project run federated learning across two clients. Congratulations!
 
 Next Steps
 ----------

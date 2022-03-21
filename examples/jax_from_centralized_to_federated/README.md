@@ -2,7 +2,7 @@
 
 This example demonstrates how an already existing centralized JAX-based machine learning project can be federated with Flower.
 
-This introductory example for Flower uses JAX, but you're not required to be a JAX expert to run the example. The example will help you to understand how Flower can be used to build federated learning use cases based on an existing MXNet project.
+This introductory example for Flower uses JAX, but you're not required to be a JAX expert to run the example. The example will help you to understand how Flower can be used to build federated learning use cases based on an existing JAX project.
 
 ## Project Setup
 
@@ -39,7 +39,7 @@ If you don't see any errors you're good to go!
 
 ## Run JAX Federated
 
-This MXNet example is based on the [Linear Regression with JAX](https://coax.readthedocs.io/en/latest/examples/linear_regression/jax.html) tutorial and uses a sklearn dataset (generating a random dataset for a regression pronlem). Feel free to consult the tutorial if you want to get a better understanding of JAX. If you play around with the dataset, please keep in mind that the data samples are generated randomly depending on the settings being done while calling the dataset function. Please checkout out the [sklearn tutorial for further information](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_regression.html). The file `jax_training.py` contains all the steps that are described in the tutorial. It loads the train and test dataset and a linear regression model, trains the model with the training set, and evaluates the trained model on the test set.
+This JAX example is based on the [Linear Regression with JAX](https://coax.readthedocs.io/en/latest/examples/linear_regression/jax.html) tutorial and uses a sklearn dataset (generating a random dataset for a regression pronlem). Feel free to consult the tutorial if you want to get a better understanding of JAX. If you play around with the dataset, please keep in mind that the data samples are generated randomly depending on the settings being done while calling the dataset function. Please checkout out the [sklearn tutorial for further information](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_regression.html). The file `jax_training.py` contains all the steps that are described in the tutorial. It loads the train and test dataset and a linear regression model, trains the model with the training set, and evaluates the trained model on the test set.
 
 The only things we need are a simple Flower server (in `server.py`) and a Flower client (in `client.py`). The Flower client basically takes model and training code tells Flower how to call it.
 
