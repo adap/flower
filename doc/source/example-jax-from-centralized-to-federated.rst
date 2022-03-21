@@ -1,5 +1,5 @@
 Example: JAX - Run JAX Federated
-====================================
+================================
 
 This tutorial will show you how to use Flower to build a federated version of an existing JAX workload.
 We are using JAX to train a linear regression model on a scikit-learn dataset.
