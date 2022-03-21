@@ -45,6 +45,7 @@ class Client(ABC):
         PropertiesRes
             Client's properties.
         """
+        raise AttributeError(f'\'{self.__class__.__name__}\' object has no attribute \'get_properties\'')
 
     @abstractmethod
     def get_parameters(self) -> ParametersRes:
@@ -92,8 +93,3 @@ class Client(ABC):
             other details such as the number of local data examples used for
             evaluation.
         """
-
-
-def has_get_properties(client: Client) -> bool:
-    """Check if Client implements get_properties."""
-    return type(client).get_properties != Client.get_properties

@@ -17,7 +17,7 @@
 
 from typing import Tuple
 
-from flwr.client.client import Client, has_get_properties
+from flwr.client.client import Client
 from flwr.common import serde, typing
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
@@ -81,23 +81,22 @@ def _reconnect(
 def _get_properties(
     client: Client, properties_msg: ServerMessage.PropertiesIns
 ) -> ClientMessage:
-    # Check if client overrides get_properties
-    if not has_get_properties(client=client):
-        # If client does not override get_properties, don't call it
-        properties_res = typing.PropertiesRes(
-            status=typing.Status(
-                code=typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED,
-                message="Client does not implement get_properties",
-            ),
-            properties={},
-        )
-        properties_res_proto = serde.properties_res_to_proto(properties_res)
-        return ClientMessage(properties_res=properties_res_proto)
 
     # Deserialize get_properties instruction
     properties_ins = serde.properties_ins_from_proto(properties_msg)
-    # Request for properties
-    properties_res = client.get_properties(properties_ins)
+
+    try:
+        # Request for properties
+        properties_res = client.get_properties(properties_ins)
+    except AttributeError as ex:
+        properties_res = typing.PropertiesRes(
+            status=typing.Status(
+                code=typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED,
+                message=str(ex),
+            ),
+            properties={},
+        )
+
     # Serialize response
     properties_res_proto = serde.properties_res_to_proto(properties_res)
     return ClientMessage(properties_res=properties_res_proto)

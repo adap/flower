@@ -86,6 +86,7 @@ class NumPyClient(ABC):
             bool, bytes, float, int, or str. It can be used to communicate
             arbitrary property values back to the server.
         """
+        raise AttributeError(f'\'{self.__class__.__name__}\' object has no attribute \'get_properties\'')
 
     @abstractmethod
     def get_parameters(self) -> List[np.ndarray]:
@@ -158,11 +159,6 @@ class NumPyClient(ABC):
         extended format (int, float, float, Dict[str, Scalar]) have been
         deprecated and removed since Flower 0.19.
         """
-
-
-def has_get_properties(client: NumPyClient) -> bool:
-    """Check if NumPyClient implements get_properties."""
-    return type(client).get_properties != NumPyClient.get_properties
 
 
 class NumPyClientWrapper(Client):

@@ -27,7 +27,7 @@ from flwr.common import (
     Status,
 )
 
-from .client import Client, has_get_properties
+from .client import Client
 
 
 class OverridingClient(Client):
@@ -71,23 +71,27 @@ def test_has_get_properties_true() -> None:
     """Test fit_clients."""
     # Prepare
     client = OverridingClient()
-    expected = True
 
     # Execute
-    actual = has_get_properties(client=client)
-
-    # Assert
-    assert actual == expected
+    try:
+        client.get_properties(PropertiesIns(config={}))
+    except AttributeError:
+        assert False
+    else:
+        assert True
 
 
 def test_has_get_properties_false() -> None:
     """Test fit_clients."""
     # Prepare
     client = NotOverridingClient()
-    expected = False
 
     # Execute
-    actual = has_get_properties(client=client)
+    try:
+        client.get_properties(PropertiesIns(config={}))
+    except AttributeError:
+        assert True
+    else:
+        assert False
 
-    # Assert
-    assert actual == expected
+

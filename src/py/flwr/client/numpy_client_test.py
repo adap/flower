@@ -21,14 +21,14 @@ import numpy as np
 
 from flwr.common import Config, Properties, Scalar
 
-from .numpy_client import NumPyClient, has_get_properties
+from .numpy_client import NumPyClient
 
 
 class OverridingClient(NumPyClient):
     """Client overriding `get_properties`."""
 
     def get_properties(self, config: Config) -> Properties:
-        return Properties()
+        return {}
 
     def get_parameters(self) -> List[np.ndarray]:
         # This method is not expected to be called
@@ -71,23 +71,26 @@ def test_has_get_properties_true() -> None:
     """Test fit_clients."""
     # Prepare
     client = OverridingClient()
-    expected = True
 
     # Execute
-    actual = has_get_properties(client=client)
-
-    # Assert
-    assert actual == expected
+    try:
+        client.get_properties({})
+    except AttributeError:
+        assert False
+    else:
+        assert True
 
 
 def test_has_get_properties_false() -> None:
     """Test fit_clients."""
     # Prepare
     client = NotOverridingClient()
-    expected = False
 
     # Execute
-    actual = has_get_properties(client=client)
+    try:
+        client.get_properties({})
+    except AttributeError:
+        assert True
+    else:
+        assert False
 
-    # Assert
-    assert actual == expected
