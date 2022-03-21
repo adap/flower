@@ -50,7 +50,7 @@ def evaluation(params, grad_fn, X_test, y_test) -> Tuple[float, int]:
     num_examples = X_test.shape[0]
     err_test = loss_fn(params, X_test, y_test)
     loss_test = jnp.mean(jnp.square(err_test))
-    #print(f'Test loss {loss_test}')
+    # print(f'Test loss {loss_test}')
     return loss_test, num_examples
 
 def main():
