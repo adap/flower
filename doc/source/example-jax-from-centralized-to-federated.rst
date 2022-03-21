@@ -169,7 +169,7 @@ Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll ca
 #. :code:`evaluate`
     * update the parameters of the local model with the parameters received from the server
     * evaluate the updated model on the local test set
-    * return the local loss and accuracy to the server
+    * return the local loss to the server
 
 The challenging part is to transform the JAX parameters from :code:`DeviceArray` to :code:`NumPy Arrays` to make it readable for Flower. 
 
