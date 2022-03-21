@@ -74,7 +74,7 @@ We now need to define the training (function :code:`train()`) which loops over t
             #    print(f'For Epoch {epochs} loss {loss}')
         return params, loss, num_examples
 
-The evaluation of the model is defined in function :code:`evaluation()`. The functiontakes all test samples and measures the loss of the linear regression model. 
+The evaluation of the model is defined in the function :code:`evaluation()`. The function takes all test examples and measures the loss of the linear regression model. 
 
 .. code-block:: python
 
