@@ -171,7 +171,7 @@ Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll ca
     * evaluate the updated model on the local test set
     * return the local loss to the server
 
-The challenging part is to transform the JAX parameters from :code:`DeviceArray` to :code:`NumPy Arrays` to make it readable for Flower. 
+The challenging part is to transform the JAX model parameters from :code:`DeviceArray` to :code:`NumPy ndarray` to make them compatible with `NumPyClient`. 
 
 The two :code:`NumPyClient` methods :code:`fit` and :code:`evaluate` make use of the functions :code:`train()` and :code:`evaluate()` previously defined in :code:`jax_trainingt.py`.
 So what we really do here is we tell Flower through our :code:`NumPyClient` subclass which of our already defined functions to call for training and evaluation.
