@@ -82,7 +82,7 @@ The evaluation of the model is defined in the function :code:`evaluation()`. The
         num_examples = X_test.shape[0]
         err_test = loss_fn(params, X_test, y_test)
         loss_test = jnp.mean(jnp.square(err_test))
-        #print(f'Test loss {loss_test}')
+        # print(f'Test loss {loss_test}')
         return loss_test, num_examples
 
 Having defined the data loading, model architecture, training, and evaluation we can put everything together and train our model using JAX. As already mentioned, the :code:`jax.grad()` function is defined in :code:`main()` and passed to :code:`train()`.
