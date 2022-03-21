@@ -181,7 +181,7 @@ We included type annotations to give you a better understanding of the data type
 
 
     class MNISTClient(fl.client.NumPyClient):
-        """Flower client implementing MNIST classification using MXNet."""
+        """Flower client implementing using linear regression and JAX"""
 
         def __init__(
             self,
