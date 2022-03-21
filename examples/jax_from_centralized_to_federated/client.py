@@ -12,9 +12,8 @@ import jax.numpy as jnp
 import jax_training
 
 
-# Flower Client
-class MNISTClient(fl.client.NumPyClient):
-    """Flower client implementing using linear regression and JAX"""
+class FlowerClient(fl.client.NumPyClient):
+    """Flower client implementing using linear regression using JAX"""
 
     def __init__(
         self,
@@ -33,14 +32,14 @@ class MNISTClient(fl.client.NumPyClient):
         self.test_y = test_y
 
     def get_parameters(self):
-        # Return model parameters as a list of NumPy ndarrays,
+        # Return model parameters as a list of NumPy ndarrays
         parameter_value = []
         for _, val in self.params.items():
             parameter_value.append(np.array(val))
         return parameter_value
     
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
-        # Collect model parameters and set new weight values
+        # Collect model parameters and update the parameters of the local model
         value=jnp.ndarray
         params_item = list(zip(self.params.keys(),parameters))
         for item in params_item:
@@ -77,7 +76,7 @@ class MNISTClient(fl.client.NumPyClient):
 
 
 def main() -> None:
-    """Load data, start MNISTClient."""
+    """Load data, start FlowerClient."""
 
     # Load data
     train_x, train_y, test_x, test_y = jax_training.load_data()
@@ -88,7 +87,7 @@ def main() -> None:
     params = jax_training.load_model(model_shape)
 
     # Start Flower client
-    client = MNISTClient(params, grad_fn, train_x, train_y, test_x, test_y)
+    client = FlowerClient(params, grad_fn, train_x, train_y, test_x, test_y)
     fl.client.start_numpy_client("0.0.0.0:8080", client)
 
 
