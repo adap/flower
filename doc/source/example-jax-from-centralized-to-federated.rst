@@ -173,7 +173,7 @@ Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll ca
 
 The challenging part is to transform the JAX model parameters from :code:`DeviceArray` to :code:`NumPy ndarray` to make them compatible with `NumPyClient`. 
 
-The two :code:`NumPyClient` methods :code:`fit` and :code:`evaluate` make use of the functions :code:`train()` and :code:`evaluate()` previously defined in :code:`jax_trainingt.py`.
+The two :code:`NumPyClient` methods :code:`fit` and :code:`evaluate` make use of the functions :code:`train()` and :code:`evaluate()` previously defined in :code:`jax_training.py`.
 So what we really do here is we tell Flower through our :code:`NumPyClient` subclass which of our already defined functions to call for training and evaluation.
 We included type annotations to give you a better understanding of the data types that get passed around.
 
