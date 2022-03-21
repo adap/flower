@@ -159,7 +159,7 @@ def get_lr_schedule(
     def lr_schedule(epoch: int) -> float:
         """Learning rate schedule."""
         epoch += epoch_global
-        return lr_initial * lr_decay ** epoch
+        return lr_initial * lr_decay**epoch
 
     return lr_schedule
 
