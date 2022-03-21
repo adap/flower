@@ -70,8 +70,8 @@ We now need to define the training (function :code:`train()`) which loops over t
             grads = grad_fn(params, X, y)
             params = jax.tree_multimap(lambda p, g: p - 0.05 * g, params, grads)
             loss = loss_fn(params,X, y)
-            #if epochs % 10 == 9:
-            #    print(f'For Epoch {epochs} loss {loss}')
+            # if epochs % 10 == 9:
+            #     print(f'For Epoch {epochs} loss {loss}')
         return params, loss, num_examples
 
 The evaluation of the model is defined in the function :code:`evaluation()`. The function takes all test examples and measures the loss of the linear regression model. 
