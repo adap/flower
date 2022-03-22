@@ -35,6 +35,7 @@ __all__ = [
     "FedAdagrad",
     "FedAdam",
     "FedAvg",
+    "FedAvgM",
     "FedAvgAndroid",
     "FedFSv0",
     "FedFSv1",
