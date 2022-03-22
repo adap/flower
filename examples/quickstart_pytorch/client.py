@@ -37,7 +37,8 @@ def test(net, testloader):
     with torch.no_grad():
         for images, labels in tqdm(testloader):
             outputs = net(images.to(DEVICE))
-            loss += criterion(outputs, labels.to(DEVICE)).item()
+            labels = labels.to(DEVICE)
+            loss += criterion(outputs, labels).item()
             total += labels.size(0)
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     return loss / len(testloader.dataset), correct / total
