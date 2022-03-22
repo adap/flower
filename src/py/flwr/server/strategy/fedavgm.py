@@ -30,6 +30,7 @@ from flwr.common import (
     weights_to_parameters,
 )
 from flwr.common.logger import log
+from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate
@@ -154,6 +155,16 @@ class FedAvgM(FedAvg):
     def __repr__(self) -> str:
         rep = f"FedAvgM(accept_failures={self.accept_failures})"
         return rep
+
+    def initialize_parameters(
+        self, client_manager: ClientManager
+    ) -> Optional[Parameters]:
+        """Initialize global model parameters."""
+        initial_parameters = self.initial_parameters
+        if isinstance(initial_parameters, list):
+            log(WARNING, DEPRECATION_WARNING_INITIAL_PARAMETERS)
+            initial_parameters = weights_to_parameters(weights=initial_parameters)
+        return initial_parameters
 
     def aggregate_fit(
         self,
