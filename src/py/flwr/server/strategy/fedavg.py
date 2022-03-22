@@ -94,8 +94,6 @@ class FedAvg(Strategy):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
-        server_learning_rate: float = 1.0,
-        server_momentum: float = 0.0,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -123,11 +121,6 @@ class FedAvg(Strategy):
             Whether or not accept rounds containing failures. Defaults to True.
         initial_parameters : Parameters, optional
             Initial global model parameters.
-        server_learning_rate: float
-            Server-side learning rate used in server-side optimization.
-            Defaults to 1.0.
-        server_momentum: float
-            Server-side momentum factor used for FedAvgM. Defaults to 0.0.
         """
         super().__init__()
 
@@ -147,12 +140,6 @@ class FedAvg(Strategy):
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
-        self.server_learning_rate = server_learning_rate
-        self.server_momentum = server_momentum
-        self.server_opt: bool = (self.server_momentum != 0.0) or (
-            self.server_learning_rate != 1.0
-        )
-        self.momentum_vector: Optional[Weights] = None
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -174,6 +161,7 @@ class FedAvg(Strategy):
     ) -> Optional[Parameters]:
         """Initialize global model parameters."""
         initial_parameters = self.initial_parameters
+        self.initial_parameters = None  # Don't keep initial parameters in memory
         if isinstance(initial_parameters, list):
             log(WARNING, DEPRECATION_WARNING_INITIAL_PARAMETERS)
             initial_parameters = weights_to_parameters(weights=initial_parameters)
@@ -265,48 +253,7 @@ class FedAvg(Strategy):
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
-
-        fedavg_result = aggregate(weights_results)
-        # following convention described in
-        # https://pytorch.org/docs/stable/generated/torch.optim.SGD.html
-        if self.server_opt:
-            # You need to initialize the model
-            assert (
-                self.initial_parameters is not None
-            ), "When using server-side optimization, model needs to be initialized."
-            initial_weights = parameters_to_weights(self.initial_parameters)
-
-            # remember that updates are the opposite of gradients
-            pseudo_gradient = [
-                x - y
-                for x, y in zip(
-                    parameters_to_weights(self.initial_parameters), fedavg_result
-                )
-            ]
-            if self.server_momentum > 0.0:
-                if rnd > 1:
-                    assert (
-                        self.momentum_vector
-                    ), "Momentum should have been created on round 1."
-                    self.momentum_vector = [
-                        self.server_momentum * x + y
-                        for x, y in zip(self.momentum_vector, pseudo_gradient)
-                    ]
-                else:
-                    self.momentum_vector = pseudo_gradient
-
-                # No nesterov for now
-                pseudo_gradient = self.momentum_vector
-
-            # SGD
-            fedavg_result = [
-                x - self.server_learning_rate * y
-                for x, y in zip(initial_weights, pseudo_gradient)
-            ]
-            # Update current weights
-            self.initial_parameters = weights_to_parameters(fedavg_result)
-
-        return weights_to_parameters(fedavg_result), {}
+        return weights_to_parameters(aggregate(weights_results)), {}
 
     def aggregate_evaluate(
         self,
