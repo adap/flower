@@ -21,6 +21,7 @@ from .fault_tolerant_fedavg import FaultTolerantFedAvg as FaultTolerantFedAvg
 from .fedadagrad import FedAdagrad as FedAdagrad
 from .fedadam import FedAdam as FedAdam
 from .fedavg import FedAvg as FedAvg
+from .fedavgm import FedAvgM as FedAvgM
 from .fedavg_android import FedAvgAndroid as FedAvgAndroid
 from .fedfs_v0 import FedFSv0 as FedFSv0
 from .fedfs_v1 import FedFSv1 as FedFSv1
