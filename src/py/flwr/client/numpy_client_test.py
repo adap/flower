@@ -93,4 +93,3 @@ def test_has_get_properties_false() -> None:
         assert True
     else:
         assert False
-

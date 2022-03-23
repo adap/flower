@@ -80,7 +80,8 @@ def test_client_without_get_properties() -> None:
     expected_properties_res = ClientMessage.PropertiesRes(
         status=Status(
             code=Code.GET_PARAMETERS_NOT_IMPLEMENTED,
-            message="Client does not implement get_properties",
+            message="'FlowerClientWithoutProps' object has no "
+            "attribute 'get_properties'",
         )
     )
     expected_msg = ClientMessage(properties_res=expected_properties_res)

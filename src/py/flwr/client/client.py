@@ -45,7 +45,9 @@ class Client(ABC):
         PropertiesRes
             Client's properties.
         """
-        raise AttributeError(f'\'{self.__class__.__name__}\' object has no attribute \'get_properties\'')
+        raise AttributeError(
+            f"'{self.__class__.__name__}' object has no attribute 'get_properties'"
+        )
 
     @abstractmethod
     def get_parameters(self) -> ParametersRes:

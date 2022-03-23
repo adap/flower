@@ -86,7 +86,9 @@ class NumPyClient(ABC):
             bool, bytes, float, int, or str. It can be used to communicate
             arbitrary property values back to the server.
         """
-        raise AttributeError(f'\'{self.__class__.__name__}\' object has no attribute \'get_properties\'')
+        raise AttributeError(
+            f"'{self.__class__.__name__}' object has no attribute 'get_properties'"
+        )
 
     @abstractmethod
     def get_parameters(self) -> List[np.ndarray]:
