@@ -1,6 +1,5 @@
-"""
-! This script has been borrowed and adapted.
-Original script: https://github.com/pumpikano/tf-dann/blob/master/create_mnistm.py
+"""! This script has been borrowed and adapted. Original script:
+https://github.com/pumpikano/tf-dann/blob/master/create_mnistm.py.
 
 It creatse the MNIST-M dataset based on MNIST
 """
@@ -33,11 +32,9 @@ def mnist_to_img(x: Any) -> Any:
 
 
 def create_mnistm(X: Any) -> Any:
-    """
-    Give an array of MNIST digits, blend random background patches to
-    build the MNIST-M dataset as described in
-    http://jmlr.org/papers/volume17/15-239/15-239.pdf
-    """
+    """Give an array of MNIST digits, blend random background patches to build
+    the MNIST-M dataset as described in
+    http://jmlr.org/papers/volume17/15-239/15-239.pdf."""
 
     bst_path = "./data/MNIST_M/BSR_bsds500.tgz"
 

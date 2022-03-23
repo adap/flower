@@ -7,14 +7,14 @@ from typing import Dict
 import numpy as np
 import torch
 import wget  # type: ignore
-from create_mnistm import create_mnistm  # type: ignore
 from torchvision import datasets  # type: ignore
 
+from . import create_mnistm  # type: ignore
+
+# pylint: disable=invalid-name
 
 def decompress(infile, tofile):
-    """
-    Take data file and unzip it
-    """
+    """Take data file and unzip it."""
     with open(infile, "rb") as inf, open(tofile, "w", encoding="utf8") as tof:
         decom_str = gzip.decompress(inf.read()).decode("utf-8")
         tof.write(decom_str)
@@ -49,7 +49,8 @@ def get_synthDigits(out_dir: Path):
 
 
 def get_MNISTM(out_dir: Path):
-    """Creates MNISTM dataset as done by https://github.com/pumpikano/tf-dann#build-mnist-m-dataset"""
+    """Creates MNISTM dataset as done by https://github.com/pumpikano/tf-
+    dann#build-mnist-m-dataset."""
     # steps = 'https://github.com/pumpikano/tf-dann#build-mnist-m-dataset'
     if out_dir.exists():
         print(f"> Directory ({out_dir}) exists, skipping downloading MNISTM.")
@@ -123,8 +124,11 @@ def get_SVHN(out_dir: Path):
 
 
 def get_MNIST(out_dir: Path):
-    """Downloads MNIST using torchvision routines. Then, move processed files
-    to directory expected by `utils/data_processing.py`. Delete the rest."""
+    """Downloads MNIST using torchvision routines.
+
+    Then, move processed files to directory expected by
+    `utils/data_processing.py`. Delete the rest.
+    """
 
     if (out_dir / "MNIST").exists():
         print(f"> Directory ({out_dir}) exists, skipping downloading MNIST.")

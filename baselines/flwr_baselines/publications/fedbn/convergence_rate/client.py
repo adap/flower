@@ -6,17 +6,15 @@ import json
 from collections import OrderedDict
 from typing import Dict, List, Tuple
 
-import cnn_model
 import flwr as fl
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torchvision
-import torchvision.transforms as transforms
-from utils import data_utils
+from torch import nn
+from torchvision import transforms
 
-fl_round = 0
+from .utils import cnn_model, data_utils
+
+FL_ROUND = 0
 
 eval_list = []
 
@@ -46,6 +44,7 @@ class CifarClient(fl.client.NumPyClient):
 
     def get_parameters(self) -> List[np.ndarray]:
         self.model.train()
+        # pylint: disable = no-else-return
         if self.mode == "fedbn":
             # Return model parameters as a list of NumPy ndarrays,
             # excluding parameters of BN layers when using FedBN
@@ -61,6 +60,7 @@ class CifarClient(fl.client.NumPyClient):
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         # Set model parameters from a list of NumPy ndarrays
         self.model.train()
+        #pylint: disable=not-callable
         if self.mode == "fedbn":
             keys = [k for k in self.model.state_dict().keys() if "bn" not in k]
             params_dict = zip(keys, parameters)
@@ -70,6 +70,7 @@ class CifarClient(fl.client.NumPyClient):
             params_dict = zip(self.model.state_dict().keys(), parameters)
             state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             self.model.load_state_dict(state_dict, strict=True)
+        #pylint: enable=not-callable
 
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str]
@@ -81,7 +82,7 @@ class CifarClient(fl.client.NumPyClient):
         )
         test_dict = {
             "dataset": self.num_examples["dataset"],
-            "fl_round": fl_round,
+            "fl_round": FL_ROUND,
             "strategy": self.mode,
             "train_loss": test_loss,
             "train_accuracy": test_accuracy,
@@ -105,20 +106,20 @@ class CifarClient(fl.client.NumPyClient):
     ) -> Tuple[float, int, Dict]:
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
-        global fl_round
-        print(f"FL Round:{fl_round}")
+        global FL_ROUND
+        print(f"FL Round:{FL_ROUND}")
         loss, accuracy = test(
             self.model, self.num_examples["dataset"], self.testloader, device=DEVICE
         )
         test_dict = {
             "dataset": self.num_examples["dataset"],
-            "fl_round": fl_round,
+            "fl_round": FL_ROUND,
             "strategy": self.mode,
             "test_loss": loss,
             "test_accuracy": accuracy,
         }
         eval_list.append(test_dict)
-        fl_round += 1
+        FL_ROUND += 1
         return (
             float(loss),
             self.num_examples["testset"],

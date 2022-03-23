@@ -4,7 +4,7 @@ mode=${1:-"fedavg"}
 echo "Start Trainign with $mode"
 mkdir results
 
-python server.py &
+python3 server.py &
 sleep 5 # Sleep for 5s to give the server enough time to start
 
 for i in 'MNIST' 'SVHN' 'USPS' 'SynthDigits' 'MNIST-M'; do

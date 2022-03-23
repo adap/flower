@@ -1,15 +1,13 @@
-from collections import OrderedDict
+"""Define the model architecture."""
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as func
+from torch import nn
 
 
-# pylint: disable=unsubscriptable-object
+# pylint: disable=unsubscriptable-object,too-many-instance-attributes
 class CNNModel(nn.Module):
     """Model for benchmark experiment on Digits."""
 
-    def __init__(self, num_classes=10, **kwargs):
+    def __init__(self, num_classes=10):
         super(CNNModel, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, 5, 1, 2)
         self.bn1 = nn.BatchNorm2d(64)
@@ -26,23 +24,24 @@ class CNNModel(nn.Module):
 
     # pylint: disable=arguments-differ,invalid-name
     def forward(self, x):
-        x = func.relu(self.bn1(self.conv1(x)))
-        x = func.max_pool2d(x, 2)
+        """Forward pass."""
+        x = nn.functional.relu(self.bn1(self.conv1(x)))
+        x = nn.functional.max_pool2d(x, 2)
 
-        x = func.relu(self.bn2(self.conv2(x)))
-        x = func.max_pool2d(x, 2)
+        x = nn.functional.relu(self.bn2(self.conv2(x)))
+        x = nn.functional.max_pool2d(x, 2)
 
-        x = func.relu(self.bn3(self.conv3(x)))
+        x = nn.functional.relu(self.bn3(self.conv3(x)))
 
         x = x.view(x.shape[0], -1)
 
         x = self.fc1(x)
         x = self.bn4(x)
-        x = func.relu(x)
+        x = nn.functional.relu(x)
 
         x = self.fc2(x)
         x = self.bn5(x)
-        x = func.relu(x)
+        x = nn.functional.relu(x)
 
         x = self.fc3(x)
         return x

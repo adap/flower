@@ -1,7 +1,5 @@
-"""
-This code will download the required datasets from a Google Drive, save it in
-the directory ./data/data.zip and extracts it.
-"""
+"""This code will download the required datasets from a Google Drive, save it
+in the directory ./data/data.zip and extracts it."""
 import os
 import zipfile
 from pathlib import Path
@@ -10,12 +8,10 @@ from typing import Any
 import requests
 from tqdm import tqdm  # type: ignore
 
-
 # pylint: disable=invalid-name
+
 def download_file_from_google_drive(id: Any, destination: str) -> None:
-    """
-    Download zip from Google drive
-    """
+    """Download zip from Google drive."""
     url = "https://docs.google.com/uc?export=download"
 
     session = requests.Session()
@@ -37,9 +33,7 @@ def download_file_from_google_drive(id: Any, destination: str) -> None:
 
 
 def get_confirm_token(response: Any) -> Any:
-    """
-    Conform Google cookies
-    """
+    """Conform Google cookies."""
     for key, value in response.cookies.items():
         if key.startswith("download_warning"):
             return value
@@ -47,9 +41,7 @@ def get_confirm_token(response: Any) -> Any:
 
 
 def save_response_content(response: Any, destination: str, total_length: float) -> None:
-    """
-    save data in the given data file
-    """
+    """save data in the given data file."""
     chunk_size = 32768
 
     with open(destination, "wb") as file:

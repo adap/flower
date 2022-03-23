@@ -1,6 +1,4 @@
-"""
-This code creates 10 different partitions of each datasets
-"""
+"""This code creates 10 different partitions of each datasets."""
 import os
 import sys
 
@@ -13,9 +11,7 @@ sys.path.append(base_path)
 
 
 class DigitsDataset(Dataset):
-    """
-    Split datasets
-    """
+    """Split datasets."""
 
     # pylint: disable=too-many-arguments
     def __init__(

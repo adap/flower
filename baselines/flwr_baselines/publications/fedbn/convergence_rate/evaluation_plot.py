@@ -1,7 +1,5 @@
-"""
-This code takes the evalution results from the directory results/ and creates
-a plot to compare e.g. fedbn with fedavg.
-"""
+"""This code takes the evalution results from the directory results/ and
+creates a plot to compare e.g. fedbn with fedavg."""
 
 import json
 
@@ -14,9 +12,7 @@ fedbn_loss = []
 
 
 def get_evaluation_numbers() -> None:
-    """
-    Open the json files to get the evaluation results
-    """
+    """Open the json files to get the evaluation results."""
     with open("results/SVHN_fedavg_results.json") as fedavg_file:
         fedavg_list = json.load(fedavg_file)
     with open("results/SVHN_fedbn_results.json") as fedbn_file:
@@ -32,9 +28,7 @@ def get_evaluation_numbers() -> None:
 
 
 def main() -> None:
-    """
-    Plot evaluation results
-    """
+    """Plot evaluation results."""
     get_evaluation_numbers()
     # pylint: disable= unused-variable, invalid-name
     fig, ax = plt.subplots()
