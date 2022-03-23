@@ -40,22 +40,6 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
-DEPRECATION_WARNING_INITIAL_PARAMETERS = """
-DEPRECATION WARNING: deprecated initial parameter type
-
-    flwr.common.Weights (i.e., List[np.ndarray])
-
-will be removed in a future update, move to
-
-    flwr.common.Parameters
-
-instead. Use
-
-    parameters = flwr.common.weights_to_parameters(weights)
-
-to easily transform `Weights` to `Parameters`.
-"""
-
 
 class FedAvgAndroid(Strategy):
     """Configurable FedAvg strategy implementation."""
@@ -134,9 +118,6 @@ class FedAvgAndroid(Strategy):
         """Initialize global model parameters."""
         initial_parameters = self.initial_parameters
         self.initial_parameters = None  # Don't keep initial parameters in memory
-        if isinstance(initial_parameters, list):
-            log(WARNING, DEPRECATION_WARNING_INITIAL_PARAMETERS)
-            initial_parameters = self.weights_to_parameters(weights=initial_parameters)
         return initial_parameters
 
     def evaluate(
