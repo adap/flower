@@ -147,11 +147,11 @@ def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
     results: List[Tuple[ClientProxy, FitRes]] = [
         (
             MagicMock(),
-            FitRes(weights_to_parameters([weights0_0, weights0_1]), 1),
+            FitRes(weights_to_parameters([weights0_0, weights0_1]), 1, {}),
         ),
         (
             MagicMock(),
-            FitRes(weights_to_parameters([weights1_0, weights1_1]), 2),
+            FitRes(weights_to_parameters([weights1_0, weights1_1]), 2, {}),
         ),
     ]
     failures: List[BaseException] = []
@@ -190,11 +190,11 @@ def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
     results: List[Tuple[ClientProxy, FitRes]] = [
         (
             MagicMock(),
-            FitRes(weights_to_parameters([weights0_0, weights0_1]), 1),
+            FitRes(weights_to_parameters([weights0_0, weights0_1]), 1, {}),
         ),
         (
             MagicMock(),
-            FitRes(weights_to_parameters([weights1_0, weights1_1]), 2),
+            FitRes(weights_to_parameters([weights1_0, weights1_1]), 2, {}),
         ),
     ]
     failures: List[BaseException] = []
