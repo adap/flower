@@ -78,10 +78,10 @@ def get_MNISTM(out_dir: Path):
     test = torch.load("./data/MNIST/test.pt")
     print("Building train set...")
     train_labels = train[1]
-    train = create_mnistm(train[0])
+    train = create_mnistm.create_mnistm(train[0])
     print("Building test set...")
     test_labels = test[1]
-    test = create_mnistm(test[0])
+    test = create_mnistm.create_mnistm(test[0])
     val_labels = np.zeros(0)
     val = np.zeros([0, 28, 28, 3], np.uint8)
 
