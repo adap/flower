@@ -354,6 +354,8 @@ class FastAndSlow(FedAvg):
                     num_examples_ceil,
                 )
                 self.durations.append(cid_duration)
+        
+        # FIXME use metrics aggregation fn
 
         return weights_to_parameters(weights_prime), {}
 
@@ -372,6 +374,8 @@ class FastAndSlow(FedAvg):
         if completion_rate < self.min_completion_rate_evaluate:
             # Not enough results for aggregation
             return None, {}
+
+        # FIXME use metrics aggregation fn
 
         return (
             weighted_loss_avg(

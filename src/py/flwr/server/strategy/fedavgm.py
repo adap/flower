@@ -191,4 +191,6 @@ class FedAvgM(FedAvg):
             # Update current weights
             self.initial_parameters = weights_to_parameters(fedavg_result)
 
+        # FIXME use metrics aggregation fn
+        
         return weights_to_parameters(fedavg_result), {}

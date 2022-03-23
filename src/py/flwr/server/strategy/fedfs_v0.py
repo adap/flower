@@ -204,6 +204,8 @@ class FedFSv0(FedAvg):
                 self.contributions[cid] = []
             self.contributions[cid].append(contribution)
 
+        # FIXME use metrics aggregation fn
+
         return weights_to_parameters(weights_prime), {}
 
     def aggregate_evaluate(
@@ -222,6 +224,8 @@ class FedFSv0(FedAvg):
             # Not enough results for aggregation
             return None, {}
 
+        # FIXME use metrics aggregation fn
+        
         return (
             weighted_loss_avg(
                 [

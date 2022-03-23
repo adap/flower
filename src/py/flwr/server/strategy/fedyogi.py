@@ -112,6 +112,7 @@ class FedYogi(FedOpt):
             beta_1=beta_1,
             beta_2=beta_2,
             tau=tau,
+            # FIXME use metrics aggregation fn
         )
 
     def __repr__(self) -> str:

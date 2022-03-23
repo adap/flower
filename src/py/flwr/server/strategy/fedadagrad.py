@@ -108,6 +108,7 @@ class FedAdagrad(FedOpt):
             beta_1=0.0,
             beta_2=0.0,
             tau=tau,
+            # FIXME use metrics aggregation fn
         )
 
     def __repr__(self) -> str:

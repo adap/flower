@@ -18,7 +18,7 @@ Paper: https://arxiv.org/abs/1602.05629
 """
 
 
-from logging import WARNING
+from logging import INFO, WARNING
 from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.common import (
@@ -53,8 +53,8 @@ class FedAvg(Strategy):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
-        fraction_fit: float = 0.1,
-        fraction_eval: float = 0.1,
+        fraction_fit: float = 1.0,  # Select all connected clients
+        fraction_eval: float = 1.0,  # Select all connected clients
         min_fit_clients: int = 2,
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
@@ -65,6 +65,12 @@ class FedAvg(Strategy):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
+        fit_metrics_aggregation_fn: Optional[
+            Callable[[List[Tuple[Dict[str, Scalar], int]]], Dict[str, Scalar]]
+        ] = None,
+        evaluate_metrics_aggregation_fn: Optional[
+            Callable[[List[Tuple[Dict[str, Scalar], int]]], Dict[str, Scalar]]
+        ] = None,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -92,6 +98,10 @@ class FedAvg(Strategy):
             Whether or not accept rounds containing failures. Defaults to True.
         initial_parameters : Parameters, optional
             Initial global model parameters.
+        fit_metrics_aggregation_fn: Callable[[List[Tuple[Dict[str, Scalar], int]]], Dict[str, Scalar]]
+            Metrics aggregation function, optional.
+        evaluate_metrics_aggregation_fn: Callable[[List[Tuple[Dict[str, Scalar], int]]], Dict[str, Scalar]]
+            Metrics aggregation function, optional.
         """
         super().__init__()
 
@@ -111,6 +121,8 @@ class FedAvg(Strategy):
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
+        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
+        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -211,12 +223,23 @@ class FedAvg(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
+
         # Convert results
         weights_results = [
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        return weights_to_parameters(aggregate(weights_results)), {}
+        parameters_aggregated = weights_to_parameters(aggregate(weights_results))
+
+        # Aggregate custom metrics if aggregation fn was provided
+        metrics_aggregated = {}
+        if self.fit_metrics_aggregation_fn:
+            fit_metrics = [(res.metrics, res.num_examples) for _, res in results]
+            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
+        else:
+            log(INFO, "No fit_metrics_aggregation_fn")
+
+        return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
         self,
@@ -230,10 +253,21 @@ class FedAvg(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
+
+        # Aggregate loss
         loss_aggregated = weighted_loss_avg(
             [
                 (evaluate_res.num_examples, evaluate_res.loss)
                 for _, evaluate_res in results
             ]
         )
-        return loss_aggregated, {}
+
+        # Aggregate custom metrics if aggregation fn was provided
+        metrics_aggregated = {}
+        if self.evaluate_metrics_aggregation_fn:
+            eval_metrics = [(res.metrics, res.num_examples) for _, res in results]
+            metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
+        else:
+            log(INFO, "No evaluate_metrics_aggregation_fn")
+
+        return loss_aggregated, metrics_aggregated

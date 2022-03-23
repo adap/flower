@@ -84,11 +84,15 @@ class FaultTolerantFedAvg(FedAvg):
         if completion_rate < self.completion_rate_fit:
             # Not enough results for aggregation
             return None, {}
+        
         # Convert results
         weights_results = [
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
+
+        # FIXME use metrics aggregation fn
+
         return weights_to_parameters(aggregate(weights_results)), {}
 
     def aggregate_evaluate(
@@ -105,6 +109,9 @@ class FaultTolerantFedAvg(FedAvg):
         if completion_rate < self.completion_rate_evaluate:
             # Not enough results for aggregation
             return None, {}
+
+        # FIXME use metrics aggregation fn
+        
         return (
             weighted_loss_avg(
                 [
