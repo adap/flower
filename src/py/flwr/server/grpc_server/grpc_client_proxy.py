@@ -37,7 +37,8 @@ class GrpcClientProxy(ClientProxy):
         """Requests client's set of internal properties."""
         properties_msg = serde.properties_ins_to_proto(ins)
         client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(properties_ins=properties_msg)
+            ServerMessage(properties_ins=properties_msg),
+            timeout=None,
         )
         properties_res = serde.properties_res_from_proto(client_msg.properties_res)
         return properties_res
@@ -46,7 +47,8 @@ class GrpcClientProxy(ClientProxy):
         """Return the current local model parameters."""
         get_parameters_msg = serde.get_parameters_to_proto()
         client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(get_parameters=get_parameters_msg)
+            ServerMessage(get_parameters=get_parameters_msg),
+            timeout=None,
         )
         parameters_res = serde.parameters_res_from_proto(client_msg.parameters_res)
         return parameters_res
@@ -55,7 +57,8 @@ class GrpcClientProxy(ClientProxy):
         """Refine the provided weights using the locally held dataset."""
         fit_ins_msg = serde.fit_ins_to_proto(ins)
         client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(fit_ins=fit_ins_msg)
+            ServerMessage(fit_ins=fit_ins_msg),
+            timeout=None,
         )
         fit_res = serde.fit_res_from_proto(client_msg.fit_res)
         return fit_res
@@ -64,7 +67,8 @@ class GrpcClientProxy(ClientProxy):
         """Evaluate the provided weights using the locally held dataset."""
         evaluate_msg = serde.evaluate_ins_to_proto(ins)
         client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(evaluate_ins=evaluate_msg)
+            ServerMessage(evaluate_ins=evaluate_msg),
+            timeout=None,
         )
         evaluate_res = serde.evaluate_res_from_proto(client_msg.evaluate_res)
         return evaluate_res
@@ -73,7 +77,8 @@ class GrpcClientProxy(ClientProxy):
         """Disconnect and (optionally) reconnect later."""
         reconnect_msg = serde.reconnect_to_proto(reconnect)
         client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(reconnect=reconnect_msg)
+            ServerMessage(reconnect=reconnect_msg),
+            timeout=None,
         )
         disconnect = serde.disconnect_from_proto(client_msg.disconnect)
         return disconnect

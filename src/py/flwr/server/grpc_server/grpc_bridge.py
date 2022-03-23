@@ -111,7 +111,7 @@ class GRPCBridge:
             self._transition(Status.CLOSED)
 
     def request(
-        self, server_message: ServerMessage, timeout: Optional[float] = None
+        self, server_message: ServerMessage, timeout: Optional[float]
     ) -> ClientMessage:
         """Set server massage and wait for client message.
 
@@ -142,9 +142,12 @@ class GRPCBridge:
 
         # Read client message and transition to AWAITING_SERVER_MESSAGE
         with self._cv:
+            predicate = lambda: self._status in [
+                Status.CLOSED,
+                Status.CLIENT_MESSAGE_AVAILABLE,
+            ]
             self._cv.wait_for(
-                lambda: self._status
-                in [Status.CLOSED, Status.CLIENT_MESSAGE_AVAILABLE],
+                predicate=predicate,
                 timeout=timeout,
             )
 
