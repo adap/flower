@@ -19,6 +19,7 @@ from .mnistm import create_mnistm  # type: ignore
 
 # pylint: disable=invalid-name
 
+
 def decompress(infile, tofile):
     """Take data file and unzip it."""
 
@@ -160,6 +161,7 @@ def get_MNIST(out_dir: Path):
     shutil.rmtree(out_dir / "MNIST" / "raw")
     shutil.rmtree(out_dir / "MNIST" / "processed")
 
+
 def main():
     """Get all the datasets."""
 
@@ -176,6 +178,7 @@ def main():
     get_MNISTM(data_dir / "MNIST_M")
 
     get_synthDigits(data_dir / "SynthDigits")
+
 
 if __name__ == "__main__":
     main()
