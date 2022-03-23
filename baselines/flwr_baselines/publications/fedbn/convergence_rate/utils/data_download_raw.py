@@ -9,7 +9,7 @@ import torch
 import wget  # type: ignore
 from torchvision import datasets  # type: ignore
 
-from . import create_mnistm  # type: ignore
+from .mnistm import create_mnistm  # type: ignore
 
 # pylint: disable=invalid-name
 
