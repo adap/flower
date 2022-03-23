@@ -39,35 +39,6 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
-DEPRECATION_WARNING = """
-DEPRECATION WARNING: deprecated `eval_fn` return format
-
-    loss, accuracy
-
-move to
-
-    loss, {"accuracy": accuracy}
-
-instead. Note that compatibility with the deprecated return format will be
-removed in a future release.
-"""
-
-DEPRECATION_WARNING_INITIAL_PARAMETERS = """
-DEPRECATION WARNING: deprecated initial parameter type
-
-    flwr.common.Weights (i.e., List[np.ndarray])
-
-will be removed in a future update, move to
-
-    flwr.common.Parameters
-
-instead. Use
-
-    parameters = flwr.common.weights_to_parameters(weights)
-
-to easily transform `Weights` to `Parameters`.
-"""
-
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
 `min_eval_clients` can cause the server to fail when there are too few clients
@@ -162,9 +133,6 @@ class FedAvg(Strategy):
         """Initialize global model parameters."""
         initial_parameters = self.initial_parameters
         self.initial_parameters = None  # Don't keep initial parameters in memory
-        if isinstance(initial_parameters, list):
-            log(WARNING, DEPRECATION_WARNING_INITIAL_PARAMETERS)
-            initial_parameters = weights_to_parameters(weights=initial_parameters)
         return initial_parameters
 
     def evaluate(
@@ -178,12 +146,7 @@ class FedAvg(Strategy):
         eval_res = self.eval_fn(weights)
         if eval_res is None:
             return None
-        loss, other = eval_res
-        if isinstance(other, float):
-            print(DEPRECATION_WARNING)
-            metrics = {"accuracy": other}
-        else:
-            metrics = other
+        loss, metrics = eval_res
         return loss, metrics
 
     def configure_fit(

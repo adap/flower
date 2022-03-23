@@ -36,22 +36,6 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate
 from .fedavg import FedAvg
 
-DEPRECATION_WARNING_INITIAL_PARAMETERS = """
-DEPRECATION WARNING: deprecated initial parameter type
-
-    flwr.common.Weights (i.e., List[np.ndarray])
-
-will be removed in a future update, move to
-
-    flwr.common.Parameters
-
-instead. Use
-
-    parameters = flwr.common.weights_to_parameters(weights)
-
-to easily transform `Weights` to `Parameters`.
-"""
-
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
 `min_eval_clients` can cause the server to fail when there are too few clients
@@ -147,11 +131,7 @@ class FedAvgM(FedAvg):
         self, client_manager: ClientManager
     ) -> Optional[Parameters]:
         """Initialize global model parameters."""
-        initial_parameters = self.initial_parameters
-        if isinstance(initial_parameters, list):
-            log(WARNING, DEPRECATION_WARNING_INITIAL_PARAMETERS)
-            initial_parameters = weights_to_parameters(weights=initial_parameters)
-        return initial_parameters
+        return self.initial_parameters
 
     def aggregate_fit(
         self,
