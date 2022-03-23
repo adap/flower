@@ -10,6 +10,7 @@ from tqdm import tqdm  # type: ignore
 
 # pylint: disable=invalid-name
 
+
 def download_file_from_google_drive(id: Any, destination: str) -> None:
     """Download zip from Google drive."""
     url = "https://docs.google.com/uc?export=download"

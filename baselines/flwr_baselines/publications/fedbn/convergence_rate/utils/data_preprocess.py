@@ -14,6 +14,7 @@ from sklearn.model_selection import StratifiedShuffleSplit  # type: ignore
 
 # pylint: disable=invalid-name
 
+
 def stratified_split(X, y):
     sss = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=0)
 

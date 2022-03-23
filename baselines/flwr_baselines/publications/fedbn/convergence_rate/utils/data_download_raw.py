@@ -13,6 +13,7 @@ from . import create_mnistm  # type: ignore
 
 # pylint: disable=invalid-name
 
+
 def decompress(infile, tofile):
     """Take data file and unzip it."""
     with open(infile, "rb") as inf, open(tofile, "w", encoding="utf8") as tof:

@@ -59,7 +59,7 @@ class FlowerClient(fl.client.NumPyClient):
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         # Set model parameters from a list of NumPy ndarrays
         self.model.train()
-        #pylint: disable=not-callable
+        # pylint: disable=not-callable
         if self.mode == "fedbn":
             keys = [k for k in self.model.state_dict().keys() if "bn" not in k]
             params_dict = zip(keys, parameters)
@@ -69,7 +69,7 @@ class FlowerClient(fl.client.NumPyClient):
             params_dict = zip(self.model.state_dict().keys(), parameters)
             state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             self.model.load_state_dict(state_dict, strict=True)
-        #pylint: enable=not-callable
+        # pylint: enable=not-callable
 
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str]
