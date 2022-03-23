@@ -25,6 +25,10 @@ class GRPCBridgeClosed(Exception):
     """Error signaling that GRPCBridge is closed."""
 
 
+class GRPCBridgeTimeout(GRPCBridgeClosed):
+    """Error signaling that GRPCBridge is closed because of a timeout."""
+
+
 class Status(Enum):
     """Status through which the bridge can transition."""
 
@@ -63,8 +67,8 @@ class GRPCBridge:
     def _transition(self, next_status: Status) -> None:
         """Validate status transition and set next status.
 
-        The caller of the transition method will have to aquire
-        conditional variable.
+        The caller of the transition method must acquire the conditional
+        variable self._cv
         """
         if next_status == Status.CLOSED:
             self._status = next_status
@@ -106,14 +110,32 @@ class GRPCBridge:
         with self._cv:
             self._transition(Status.CLOSED)
 
-    def request(self, server_message: ServerMessage) -> ClientMessage:
-        """Set server massage and wait for client message."""
+    def request(
+        self, server_message: ServerMessage, timeout: Optional[float] = None
+    ) -> ClientMessage:
+        """Set server massage and wait for client message.
+
+        When calling this method the bridge must have the following status
+        -> Status.AWAITING_SERVER_MESSAGE
+
+        If it does not an exception will be thrown. Read the _transition method
+        to understand which transitions are valid.
+
+        When the timeout argument is present and not None, it should be a
+        floating point number specifying a timeout for the operation in seconds
+        (or fractions thereof).
+        """
         # Set server message and transition to SERVER_MESSAGE_AVAILABLE
         with self._cv:
             self._raise_if_closed()
 
+            print(self._status)
+
             if self._status != Status.AWAITING_SERVER_MESSAGE:
-                raise Exception("This should not happen")
+                raise Exception(
+                    f"{self._status} is not a valid status when"
+                    + " calling GRPCBridge.request"
+                )
 
             self._server_message = server_message  # Write
             self._transition(Status.SERVER_MESSAGE_AVAILABLE)
@@ -121,8 +143,14 @@ class GRPCBridge:
         # Read client message and transition to AWAITING_SERVER_MESSAGE
         with self._cv:
             self._cv.wait_for(
-                lambda: self._status in [Status.CLOSED, Status.CLIENT_MESSAGE_AVAILABLE]
+                lambda: self._status
+                in [Status.CLOSED, Status.CLIENT_MESSAGE_AVAILABLE],
+                timeout=timeout,
             )
+
+            if self._status != Status.CLIENT_MESSAGE_AVAILABLE:
+                self.close()
+                raise GRPCBridgeTimeout()
 
             self._raise_if_closed()
             client_message = self._client_message  # Read

@@ -20,13 +20,17 @@ from threading import Thread
 from typing import List, Union
 
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
-from flwr.server.grpc_server.grpc_bridge import GRPCBridge, GRPCBridgeClosed
+from flwr.server.grpc_server.grpc_bridge import (
+    GRPCBridge,
+    GRPCBridgeClosed,
+    GRPCBridgeTimeout,
+)
 
 
 def start_worker(
     rounds: int, bridge: GRPCBridge, results: List[ClientMessage]
 ) -> Thread:
-    """Simulate processing loop with five calls."""
+    """Simulate processing loop by calling request on bridge for num rounds."""
 
     def _worker() -> None:
         # Wait until the ServerMessage is available and extract
@@ -166,3 +170,25 @@ def test_server_message_iterator_close_while_blocking() -> None:
     # Assert
     assert len(client_messages_received) == 2
     assert isinstance(raised_error, GRPCBridgeClosed)
+
+
+def test_request_timeout_exception() -> None:
+    """Test if timeout exception is correctly thrown.
+
+    Close bridge if timeout is thrown.
+    """
+    # Prepare
+    bridge = GRPCBridge()
+    raised_error: Union[GRPCBridgeClosed, StopIteration, None] = None
+
+    # Execute
+    try:
+        bridge.request(
+            server_message=ServerMessage(),
+            timeout=1.0,
+        )
+    except GRPCBridgeTimeout as err:
+        raised_error = err
+
+    # Assert
+    assert isinstance(raised_error, GRPCBridgeTimeout)
