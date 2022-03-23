@@ -150,8 +150,8 @@ def get_MNIST(out_dir: Path):
     shutil.rmtree(out_dir / "MNIST" / "raw")
     shutil.rmtree(out_dir / "MNIST" / "processed")
 
-
-if __name__ == "__main__":
+def main():
+    """Get all the datasets"""
 
     data_dir = Path("./data")
 
@@ -166,3 +166,6 @@ if __name__ == "__main__":
     get_MNISTM(data_dir / "MNIST_M")
 
     get_synthDigits(data_dir / "SynthDigits")
+
+if __name__ == "__main__":
+    main()
