@@ -52,7 +52,7 @@ Flower's goal is to make federated learning accessible to everyone. This series 
 
 1. **Strategies in Federated Learning**
 
-   *--- coming soon ---*
+   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-2-Strategies-in-FL-PyTorch.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/tutorials/Flower-2-Strategies-in-FL-PyTorch.ipynb))
 
 1. **Privacy and Security in Federated Learning**
 
