@@ -6,16 +6,14 @@
 # Documentation: https://flower.dev
 
 ##### dependencies
-python >= 3.7.12
-flwr >= 0.17.0
+flwr >= 0.18.0
 torch >= 1.10.1
-torchvision == ^0.11.2
+torchvision == 0.11.2
 numpy >= 1.20.0
 tqdm == 4.62.3
 matplotlib >= 3.5.0
 scikit-image >= 0.18.1
 wget >= 3.2
-ray >=1.9.1
 
 ##### dev-dependencies
 isort == 5.10.1
