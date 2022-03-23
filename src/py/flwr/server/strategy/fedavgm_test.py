@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""FedAvg tests."""
+"""FedAvgM tests."""
 
 from typing import List, Tuple
 from unittest.mock import MagicMock
