@@ -16,6 +16,8 @@ from sklearn.model_selection import StratifiedShuffleSplit  # type: ignore
 
 
 def stratified_split(X, y):
+    """Provides train/test indices to split data in train/test sets."""
+   
     sss = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=0)
 
     for train_index, test_index in sss.split(X, y):

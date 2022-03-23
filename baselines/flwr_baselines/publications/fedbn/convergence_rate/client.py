@@ -391,8 +391,8 @@ def main() -> None:
     print("Start client of dataset", num_examples["dataset"])
     fl.client.start_numpy_client("0.0.0.0:8080", client)
     # Save train and evaluation loss and accuracy in json file
-    with open(f"results/{args.partition}_{args.mode}_results.json", mode="r+") as f:
-        json.dump(eval_list, f)
+    with open(f"results/{args.partition}_{args.mode}_results.json", mode="r+") as eval_file:
+        json.dump(eval_list, eval_file)
 
 
 if __name__ == "__main__":

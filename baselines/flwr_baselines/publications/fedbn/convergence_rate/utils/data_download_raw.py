@@ -1,3 +1,9 @@
+"""Download the raw datasets for MNIST, USPS, SVHN Create the MNISTM from MNIST
+And download the Synth Data (Syntehtic digits Windows TM font varying the
+orientation, blur and stroke colors).
+
+This dataset is already processed.
+"""
 import gzip
 import pickle
 import shutil
@@ -13,23 +19,24 @@ from .mnistm import create_mnistm  # type: ignore
 
 # pylint: disable=invalid-name
 
-
 def decompress(infile, tofile):
     """Take data file and unzip it."""
+
     with open(infile, "rb") as inf, open(tofile, "w", encoding="utf8") as tof:
         decom_str = gzip.decompress(inf.read()).decode("utf-8")
         tof.write(decom_str)
 
 
 def download_all(data: Dict, out_dir: Path):
-    """Downloading datasets"""
+    """Downloading datasets."""
+
     for k, v in data.items():
         print(f"Downloading: {k}\n")
         wget.download(v, out=str(out_dir / k))
 
 
 def get_synthDigits(out_dir: Path):
-    """get synth dataset"""
+    """get synth dataset."""
 
     if out_dir.exists():
         print(f"Directory ({out_dir}) exists, skipping downloading SynthDigits.")
@@ -94,7 +101,10 @@ def get_MNISTM(out_dir: Path):
 
 
 def get_USPS(out_dir: Path):
-    """get USPS data (handwritten digits from envelopes by the U.S. Postal Service)"""
+    """get USPS data (handwritten digits from envelopes by the U.S.
+
+    Postal Service)
+    """
 
     if out_dir.exists():
         print(f"> Directory ({out_dir}) exists, skipping downloading USPS.")
@@ -151,7 +161,7 @@ def get_MNIST(out_dir: Path):
     shutil.rmtree(out_dir / "MNIST" / "processed")
 
 def main():
-    """Get all the datasets"""
+    """Get all the datasets."""
 
     data_dir = Path("./data")
 
