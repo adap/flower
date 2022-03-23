@@ -62,7 +62,7 @@ class Adam(object):
             new_vs = []
             for cur_param, grad, m, v in zip(current_values, gradients, ms, vs):
                 m = (1 - self._beta1) * grad + self._beta1 * m
-                v = (1 - self._beta2) * (grad ** 2) + self._beta2 * v
+                v = (1 - self._beta2) * (grad**2) + self._beta2 * v
                 mhat = m / (1 - self._beta1 ** (step + 1))
                 vhat = v / (1 - self._beta2 ** (step + 1))
                 new_param = cur_param - (
