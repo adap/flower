@@ -36,19 +36,6 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate
 from .fedavg import FedAvg
 
-DEPRECATION_WARNING = """
-DEPRECATION WARNING: deprecated `eval_fn` return format
-
-    loss, accuracy
-
-move to
-
-    loss, {"accuracy": accuracy}
-
-instead. Note that compatibility with the deprecated return format will be
-removed in a future release.
-"""
-
 DEPRECATION_WARNING_INITIAL_PARAMETERS = """
 DEPRECATION WARNING: deprecated initial parameter type
 
@@ -181,7 +168,7 @@ class FedAvgM(FedAvg):
         # Convert results
         weights_results = [
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
-            for client, fit_res in results
+            for _, fit_res in results
         ]
 
         fedavg_result = aggregate(weights_results)
