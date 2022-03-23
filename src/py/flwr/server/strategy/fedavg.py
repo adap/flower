@@ -39,19 +39,6 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
-DEPRECATION_WARNING = """
-DEPRECATION WARNING: deprecated `eval_fn` return format
-
-    loss, accuracy
-
-move to
-
-    loss, {"accuracy": accuracy}
-
-instead. Note that compatibility with the deprecated return format will be
-removed in a future release.
-"""
-
 DEPRECATION_WARNING_INITIAL_PARAMETERS = """
 DEPRECATION WARNING: deprecated initial parameter type
 
@@ -178,12 +165,7 @@ class FedAvg(Strategy):
         eval_res = self.eval_fn(weights)
         if eval_res is None:
             return None
-        loss, other = eval_res
-        if isinstance(other, float):
-            print(DEPRECATION_WARNING)
-            metrics = {"accuracy": other}
-        else:
-            metrics = other
+        loss, metrics = eval_res
         return loss, metrics
 
     def configure_fit(

@@ -16,6 +16,7 @@ Incompatible changes:
 * **Removed deprecated proto fields from** :code:`FitRes` **and** :code:`EvaluateRes` (`#869 <https://github.com/adap/flower/pull/869>`_)
 * **Removed deprecated QffedAvg strategy (replaced by QFedAvg)** (`#1107 <https://github.com/adap/flower/pull/1107>`_)
 * **Removed deprecated DefaultStrategy strategy** (`#1142 <https://github.com/adap/flower/pull/1142>`_)
+* **Removed deprecated support for eval_fn accuracy return value** (`#1142 <https://github.com/adap/flower/pull/1142>`_)
 
 
 v0.18.0 (2022-02-28)
