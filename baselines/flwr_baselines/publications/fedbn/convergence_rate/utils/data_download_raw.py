@@ -22,12 +22,14 @@ def decompress(infile, tofile):
 
 
 def download_all(data: Dict, out_dir: Path):
+    """Downloading datasets"""
     for k, v in data.items():
         print(f"Downloading: {k}\n")
         wget.download(v, out=str(out_dir / k))
 
 
 def get_synthDigits(out_dir: Path):
+    """get synth dataset"""
 
     if out_dir.exists():
         print(f"Directory ({out_dir}) exists, skipping downloading SynthDigits.")
@@ -92,6 +94,7 @@ def get_MNISTM(out_dir: Path):
 
 
 def get_USPS(out_dir: Path):
+    """get USPS data (handwritten digits from envelopes by the U.S. Postal Service)"""
 
     if out_dir.exists():
         print(f"> Directory ({out_dir}) exists, skipping downloading USPS.")
@@ -110,7 +113,7 @@ def get_USPS(out_dir: Path):
 
 
 def get_SVHN(out_dir: Path):
-
+    """Get SVHN dataset (Street view house numbers)"""
     if out_dir.exists():
         print(f"> Directory ({out_dir}) exists, skipping downloading SVHN.")
         return
