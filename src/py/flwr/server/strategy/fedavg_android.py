@@ -196,9 +196,8 @@ class FedAvgAndroid(Strategy):
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        # Do not configure federated evaluation if a centralized evaluation
-        # function is provided
-        if self.eval_fn is not None:
+        # Do not configure federated evaluation if fraction_eval is 0
+        if self.fraction_eval == 0.0:
             return []
 
         # Parameters and config
@@ -255,11 +254,7 @@ class FedAvgAndroid(Strategy):
             return None, {}
         loss_aggregated = weighted_loss_avg(
             [
-                (
-                    evaluate_res.num_examples,
-                    evaluate_res.loss,
-                    evaluate_res.accuracy,
-                )
+                (evaluate_res.num_examples, evaluate_res.loss)
                 for _, evaluate_res in results
             ]
         )
@@ -277,7 +272,7 @@ class FedAvgAndroid(Strategy):
     # pylint: disable=R0201
     def ndarray_to_bytes(self, ndarray: np.ndarray) -> bytes:
         """Serialize NumPy array to bytes."""
-        return cast(bytes, ndarray.tobytes())
+        return ndarray.tobytes()
 
     # pylint: disable=R0201
     def bytes_to_ndarray(self, tensor: bytes) -> np.ndarray:

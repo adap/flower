@@ -231,7 +231,7 @@ class FastAndSlow(FedAvg):
         for idx, (cid, _) in enumerate(all_clients.items()):
             cid_idx[idx] = cid
             penalty = 0.0
-            if cid in self.contributions.keys():
+            if cid in self.contributions:
                 contribs: List[Tuple[int, int, int]] = self.contributions[cid]
                 penalty = statistics.mean([c / m for _, c, m in contribs])
             # `p` should be:
@@ -261,7 +261,7 @@ class FastAndSlow(FedAvg):
         for idx, (cid, _) in enumerate(all_clients.items()):
             cid_idx[idx] = cid
 
-            if cid in self.contributions.keys():
+            if cid in self.contributions:
                 # Previously selected clients
                 contribs: List[Tuple[int, int, int]] = self.contributions[cid]
 
@@ -324,26 +324,34 @@ class FastAndSlow(FedAvg):
             # Track contributions to the global model
             for client, fit_res in results:
                 cid = client.cid
-                assert fit_res.num_examples_ceil is not None
+
+                assert "num_examples_ceil" in fit_res.metrics
+                num_examples_ceil = cast(int, fit_res.metrics["num_examples_ceil"])
+
                 contribution: Tuple[int, int, int] = (
                     rnd,
                     fit_res.num_examples,
-                    fit_res.num_examples_ceil,
+                    num_examples_ceil,
                 )
-                if cid not in self.contributions.keys():
+                if cid not in self.contributions:
                     self.contributions[cid] = []
                 self.contributions[cid].append(contribution)
 
         if self.dynamic_timeout:
             self.durations = []
             for client, fit_res in results:
-                assert fit_res.fit_duration is not None
-                assert fit_res.num_examples_ceil is not None
+
+                assert "fit_duration" in fit_res.metrics
+                fit_duration: float = cast(float, fit_res.metrics["fit_duration"])
+
+                assert "num_examples_ceil" in fit_res.metrics
+                num_examples_ceil = cast(int, fit_res.metrics["num_examples_ceil"])
+
                 cid_duration = (
                     client.cid,
-                    fit_res.fit_duration,
+                    fit_duration,
                     fit_res.num_examples,
-                    fit_res.num_examples_ceil,
+                    num_examples_ceil,
                 )
                 self.durations.append(cid_duration)
 
@@ -368,12 +376,8 @@ class FastAndSlow(FedAvg):
         return (
             weighted_loss_avg(
                 [
-                    (
-                        evaluate_res.num_examples,
-                        evaluate_res.loss,
-                        evaluate_res.accuracy,
-                    )
-                    for client, evaluate_res in results
+                    (evaluate_res.num_examples, evaluate_res.loss)
+                    for _, evaluate_res in results
                 ]
             ),
             {},

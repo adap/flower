@@ -16,6 +16,7 @@
 
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Dict, List, Optional, Union
 
 import numpy as np
@@ -32,6 +33,21 @@ Metrics = Dict[str, Scalar]
 
 Config = Dict[str, Scalar]
 Properties = Dict[str, Scalar]
+
+
+class Code(Enum):
+    """Client status codes."""
+
+    OK = 0
+    GET_PARAMETERS_NOT_IMPLEMENTED = 1
+
+
+@dataclass
+class Status:
+    """Client status."""
+
+    code: Code
+    message: str
 
 
 @dataclass
@@ -63,9 +79,7 @@ class FitRes:
 
     parameters: Parameters
     num_examples: int
-    num_examples_ceil: Optional[int] = None  # Deprecated
-    fit_duration: Optional[float] = None  # Deprecated
-    metrics: Optional[Metrics] = None
+    metrics: Dict[str, Scalar]
 
 
 @dataclass
@@ -82,8 +96,7 @@ class EvaluateRes:
 
     loss: float
     num_examples: int
-    accuracy: Optional[float] = None  # Deprecated
-    metrics: Optional[Metrics] = None
+    metrics: Dict[str, Scalar]
 
 
 @dataclass
@@ -97,6 +110,7 @@ class PropertiesIns:
 class PropertiesRes:
     """Properties response from a client."""
 
+    status: Status
     properties: Properties
 
 
