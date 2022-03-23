@@ -19,7 +19,6 @@ Paper: https://arxiv.org/abs/1602.05629
 """
 
 
-from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, cast
 
 import numpy as np
@@ -33,7 +32,6 @@ from flwr.common import (
     Scalar,
     Weights,
 )
-from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
