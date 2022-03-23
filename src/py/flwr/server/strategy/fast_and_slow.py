@@ -354,10 +354,13 @@ class FastAndSlow(FedAvg):
                     num_examples_ceil,
                 )
                 self.durations.append(cid_duration)
-        
-        # FIXME use metrics aggregation fn
 
-        return weights_to_parameters(weights_prime), {}
+        parameters_aggregated = weights_to_parameters(weights_prime)
+
+        # FIXME use metrics aggregation fn
+        metrics_aggregated = {}
+
+        return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
         self,
@@ -375,17 +378,18 @@ class FastAndSlow(FedAvg):
             # Not enough results for aggregation
             return None, {}
 
-        # FIXME use metrics aggregation fn
-
-        return (
-            weighted_loss_avg(
-                [
-                    (evaluate_res.num_examples, evaluate_res.loss)
-                    for _, evaluate_res in results
-                ]
-            ),
-            {},
+        # Aggregate loss
+        loss_aggregated = weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss)
+                for _, evaluate_res in results
+            ]
         )
+
+        # FIXME use metrics aggregation fn
+        metrics_aggregated = {}
+
+        return loss_aggregated, metrics_aggregated
 
 
 def is_fast_round(rnd: int, r_fast: int, r_slow: int) -> bool:

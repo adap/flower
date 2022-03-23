@@ -90,10 +90,12 @@ class FaultTolerantFedAvg(FedAvg):
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
+        parameters_aggregated = weights_to_parameters(aggregate(weights_results))
 
         # FIXME use metrics aggregation fn
+        metrics_aggregated = {}
 
-        return weights_to_parameters(aggregate(weights_results)), {}
+        return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
         self,
@@ -110,14 +112,15 @@ class FaultTolerantFedAvg(FedAvg):
             # Not enough results for aggregation
             return None, {}
 
-        # FIXME use metrics aggregation fn
-        
-        return (
-            weighted_loss_avg(
-                [
-                    (evaluate_res.num_examples, evaluate_res.loss)
-                    for _, evaluate_res in results
-                ]
-            ),
-            {},
+        # Aggregate loss
+        loss_aggregated = weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss)
+                for _, evaluate_res in results
+            ]
         )
+
+        # FIXME use metrics aggregation fn
+        metrics_aggregated = {}
+
+        return loss_aggregated, metrics_aggregated

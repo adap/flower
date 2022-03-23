@@ -210,10 +210,12 @@ class QFedAvg(FedAvg):
             )
 
         weights_aggregated: Weights = aggregate_qffl(weights_before, deltas, hs_ffl)
+        parameters_aggregated = weights_to_parameters(weights_aggregated)
 
         # FIXME use metrics aggregation fn
+        metrics_aggregated = {}
 
-        return weights_to_parameters(weights_aggregated), {}
+        return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
         self,
@@ -228,14 +230,15 @@ class QFedAvg(FedAvg):
         if not self.accept_failures and failures:
             return None, {}
 
-        # FIXME use metrics aggregation fn
-        
-        return (
-            weighted_loss_avg(
-                [
-                    (evaluate_res.num_examples, evaluate_res.loss)
-                    for _, evaluate_res in results
-                ]
-            ),
-            {},
+        # Aggregate loss
+        loss_aggregated = weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss)
+                for _, evaluate_res in results
+            ]
         )
+
+        # FIXME use metrics aggregation fn
+        metrics_aggregated = {}
+
+        return loss_aggregated, metrics_aggregated

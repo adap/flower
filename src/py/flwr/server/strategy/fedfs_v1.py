@@ -296,9 +296,12 @@ class FedFSv1(FedAvg):
             )
             self.durations.append(cid_duration)
 
-        # FIXME use metrics aggregation fn
+        parameters_aggregated = weights_to_parameters(weights_prime)
 
-        return weights_to_parameters(weights_prime), {}
+        # FIXME use metrics aggregation fn
+        metrics_aggregated = {}
+
+        return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
         self,
@@ -316,14 +319,15 @@ class FedFSv1(FedAvg):
             # Not enough results for aggregation
             return None, {}
 
-        # FIXME use metrics aggregation fn
-        
-        return (
-            weighted_loss_avg(
-                [
-                    (evaluate_res.num_examples, evaluate_res.loss)
-                    for _, evaluate_res in results
-                ]
-            ),
-            {},
+        # Aggregate loss
+        loss_aggregated = weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss)
+                for _, evaluate_res in results
+            ]
         )
+
+        # FIXME use metrics aggregation fn
+        metrics_aggregated = {}
+
+        return loss_aggregated, metrics_aggregated
