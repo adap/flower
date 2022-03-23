@@ -251,7 +251,7 @@ class FedAvg(Strategy):
         # Convert results
         weights_results = [
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
-            for client, fit_res in results
+            for _, fit_res in results
         ]
         return weights_to_parameters(aggregate(weights_results)), {}
 
