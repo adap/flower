@@ -11,17 +11,17 @@ from tqdm import tqdm  # type: ignore
 # pylint: disable=invalid-name
 
 
-def download_file_from_google_drive(id: Any, destination: str) -> None:
+def download_file_from_google_drive(file_id: Any, destination: str) -> None:
     """Download zip from Google drive."""
     url = "https://docs.google.com/uc?export=download"
 
     session = requests.Session()
 
-    response = session.get(url, params={"id": id}, stream=True)
+    response = session.get(url, params={"id": file_id}, stream=True)
     token = get_confirm_token(response)
 
     if token:
-        params = {"id": id, "confirm": token}
+        params = {"id": file_id, "confirm": token}
         print("ID", params["id"])
         response = session.get(url, params=params, stream=True)
         total_length = response.headers.get("content-length")
@@ -45,13 +45,13 @@ def save_response_content(response: Any, destination: str, total_length: float) 
     """save data in the given data file."""
     chunk_size = 32768
 
-    with open(destination, "wb") as file:
+    with open(destination, "wb") as download_file:
         total_length = int(total_length)
         for chunk in tqdm(
             response.iter_content(chunk_size), total=int(total_length / chunk_size)
         ):
             if chunk:  # filter out keep-alive new chunks
-                file.write(chunk)
+                download_file.write(chunk)
 
 
 if __name__ == "__main__":

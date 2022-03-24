@@ -3,6 +3,7 @@
 i.e., splitted data into train&test set  in a stratified way. The
 function to process data into 10 partitions is also provided.
 """
+import bz2
 import os
 import pickle as pkl
 from collections import Counter
@@ -119,7 +120,6 @@ def process_usps():
     (1860,)
     :return:
     """
-    import bz2
 
     train_path = "./data/USPS/usps.bz2"
     with bz2.open(train_path) as fp:

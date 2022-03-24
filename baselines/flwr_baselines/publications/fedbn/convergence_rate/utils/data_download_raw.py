@@ -55,7 +55,7 @@ def get_synthDigits(out_dir: Path):
     download_all(data, out_dir)
     # pylint: disable=line-too-long
 
-    # todo: How to proceed? It seems these `.mat` have no data. URLs found here:
+    # How to proceed? It seems these `.mat` have no data. URLs found here:
     # https://domainadaptation.org/api/salad.datasets.digits.html#module-salad.datasets.digits.synth
 
 

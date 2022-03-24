@@ -12,7 +12,7 @@ import skimage.io  # type: ignore
 import skimage.transform  # type: ignore
 
 
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name, disable=no-member, bare-except
 def compose_image(digit: Any, background: Any) -> Any:
     """Difference-blend a digit and a random patch from a background image."""
     w, h, _ = background.shape
@@ -38,9 +38,7 @@ def create_mnistm(X: Any) -> Any:
 
     bst_path = "./data/MNIST_M/BSR_bsds500.tgz"
 
-    # pylint: disable=no-member
     rand = np.random.RandomState(42)
-    # pylint: disable=no-member
 
     bsr_file = tarfile.open(bst_path)
     train_files = []
@@ -57,6 +55,7 @@ def create_mnistm(X: Any) -> Any:
             background_data.append(bg_img)
         except:
             continue
+
 
     X_ = np.zeros([X.shape[0], 28, 28, 3], np.uint8)
     for i in range(X.shape[0]):
