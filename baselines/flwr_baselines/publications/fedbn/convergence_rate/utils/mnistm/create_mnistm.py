@@ -56,7 +56,6 @@ def create_mnistm(X: Any) -> Any:
         except:
             continue
 
-
     X_ = np.zeros([X.shape[0], 28, 28, 3], np.uint8)
     for i in range(X.shape[0]):
 
