@@ -84,7 +84,7 @@ class FaultTolerantFedAvg(FedAvg):
         if completion_rate < self.completion_rate_fit:
             # Not enough results for aggregation
             return None, {}
-        
+
         # Convert results
         weights_results = [
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)

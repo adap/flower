@@ -211,8 +211,6 @@ class FedFSv0(FedAvg):
 
         return parameters_aggregated, metrics_aggregated
 
-        
-
     def aggregate_evaluate(
         self,
         rnd: int,

@@ -19,7 +19,7 @@ Paper: https://arxiv.org/abs/2003.00295
 """
 
 
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.common import Parameters, Scalar, Weights, parameters_to_weights
 
@@ -45,6 +45,12 @@ class FedOpt(FedAvg):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Parameters,
+        fit_metrics_aggregation_fn: Optional[
+            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+        ] = None,
+        evaluate_metrics_aggregation_fn: Optional[
+            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+        ] = None,
         eta: float = 1e-1,
         eta_l: float = 1e-1,
         beta_1: float = 0.0,
@@ -75,6 +81,10 @@ class FedOpt(FedAvg):
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
             initial_parameters (Parameters): Initial set of parameters from the server.
+            fit_metrics_aggregation_fn: Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+                Metrics aggregation function, optional.
+            evaluate_metrics_aggregation_fn: Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+                Metrics aggregation function, optional.
             eta (float, optional): Server-side learning rate. Defaults to 1e-1.
             eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.
             beta_1 (float, optional): Momentum parameter. Defaults to 0.0.
@@ -93,6 +103,8 @@ class FedOpt(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
+            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
         self.current_weights = parameters_to_weights(initial_parameters)
         self.eta = eta
