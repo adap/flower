@@ -37,7 +37,7 @@ def start_worker(
         # although here we do nothing with the return value
         for _ in range(rounds):
             try:
-                client_message = bridge.request(ServerMessage())
+                client_message = bridge.request(ServerMessage(), timeout=None)
             except GRPCBridgeClosed:
                 break
 
