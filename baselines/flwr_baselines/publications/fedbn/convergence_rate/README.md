@@ -60,7 +60,7 @@ python utils/data_preprocess.py
 
 The CNN architecture is detailed in the paper and used to create the **FedBN - Convergence Rate** baseline.
 
-| Layer | Details| 
+| Layer | Details|
 | ----- | ------ |
 | 1 | Conv2D(3,64, 5,1,2) <br/> BN(64), ReLU, MaxPool2D(2,2)  |
 | 2 | Conv2D(64, 64, 5, 1, 2) <br/> BN(64), ReLU, MaxPool2D(2,2) |
