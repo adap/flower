@@ -89,7 +89,7 @@ def main() -> None:
 
     # Start Flower client
     client = FlowerClient(params, grad_fn, train_x, train_y, test_x, test_y)
-    fl.client.start_numpy_client("0.0.0.0:8080", client)
+    fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=client)
 
 
 if __name__ == "__main__":
