@@ -255,7 +255,7 @@ if __name__ == "__main__":
     process_usps()
     print("--------MNIST-M---------")
     process_mnistm()
-    print("--------SynthDigits---------")
+    print("-------SynthDigits-------")
     try:
         process_synth()
     except Exception as exception:
