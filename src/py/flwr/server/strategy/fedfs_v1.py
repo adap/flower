@@ -24,6 +24,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    MetricsAggregationFn,
     Parameters,
     Scalar,
     Weights,
@@ -73,12 +74,8 @@ class FedFSv1(FedAvg):
         t_max: int = 10,
         use_past_contributions: bool = False,
         initial_parameters: Optional[Parameters] = None,
-        fit_metrics_aggregation_fn: Optional[
-            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
-        ] = None,
-        evaluate_metrics_aggregation_fn: Optional[
-            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
-        ] = None,
+        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,

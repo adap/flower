@@ -25,6 +25,7 @@ import numpy as np
 
 from flwr.common import (
     FitRes,
+    MetricsAggregationFn,
     Parameters,
     Scalar,
     Weights,
@@ -57,12 +58,8 @@ class FedAdagrad(FedOpt):
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
-        fit_metrics_aggregation_fn: Optional[
-            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
-        ] = None,
-        evaluate_metrics_aggregation_fn: Optional[
-            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
-        ] = None,
+        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         accept_failures: bool = True,
         initial_parameters: Parameters,
         eta: float = 1e-1,
@@ -93,9 +90,9 @@ class FedAdagrad(FedOpt):
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
             initial_parameters (Parameters): Initial set of parameters from the server.
-            fit_metrics_aggregation_fn: Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+            fit_metrics_aggregation_fn: Optional[MetricsAggregationFn]
                 Metrics aggregation function, optional.
-            evaluate_metrics_aggregation_fn: Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+            evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
                 Metrics aggregation function, optional.
             eta (float, optional): Server-side learning rate. Defaults to 1e-1.
             eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.

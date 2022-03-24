@@ -23,6 +23,7 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.common import (
     FitRes,
+    MetricsAggregationFn,
     Parameters,
     Scalar,
     Weights,
@@ -63,12 +64,8 @@ class FedAvgM(FedAvg):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
-        fit_metrics_aggregation_fn: Optional[
-            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
-        ] = None,
-        evaluate_metrics_aggregation_fn: Optional[
-            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
-        ] = None,
+        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         server_learning_rate: float = 1.0,
         server_momentum: float = 0.0,
     ) -> None:

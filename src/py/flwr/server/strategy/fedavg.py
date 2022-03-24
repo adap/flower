@@ -26,6 +26,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    MetricsAggregationFn,
     Parameters,
     Scalar,
     Weights,
@@ -65,12 +66,8 @@ class FedAvg(Strategy):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
-        fit_metrics_aggregation_fn: Optional[
-            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
-        ] = None,
-        evaluate_metrics_aggregation_fn: Optional[
-            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
-        ] = None,
+        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -98,9 +95,9 @@ class FedAvg(Strategy):
             Whether or not accept rounds containing failures. Defaults to True.
         initial_parameters : Parameters, optional
             Initial global model parameters.
-        fit_metrics_aggregation_fn: Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn]
             Metrics aggregation function, optional.
-        evaluate_metrics_aggregation_fn: Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
             Metrics aggregation function, optional.
         """
         super().__init__()

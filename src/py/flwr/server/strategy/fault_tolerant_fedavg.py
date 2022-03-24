@@ -21,6 +21,7 @@ from typing import Callable, Dict, List, Optional, Tuple
 from flwr.common import (
     EvaluateRes,
     FitRes,
+    MetricsAggregationFn,
     Parameters,
     Scalar,
     Weights,
@@ -53,12 +54,8 @@ class FaultTolerantFedAvg(FedAvg):
         min_completion_rate_fit: float = 0.5,
         min_completion_rate_evaluate: float = 0.5,
         initial_parameters: Optional[Parameters] = None,
-        fit_metrics_aggregation_fn: Optional[
-            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
-        ] = None,
-        evaluate_metrics_aggregation_fn: Optional[
-            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
-        ] = None,
+        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
