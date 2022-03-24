@@ -3,7 +3,7 @@ Organizations
 
 
 Academia
-~~~~~~~~
+--------
 
 .. list-table:: 
 
@@ -25,10 +25,9 @@ Academia
 
 
 Industry
-~~~~~~~~
+--------
 
 .. figure:: _static/logo-adap.png
      :width: 50 %
      
 `Adap <https://adap.com>`_
-
