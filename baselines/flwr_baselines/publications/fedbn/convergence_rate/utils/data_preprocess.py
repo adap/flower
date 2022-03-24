@@ -239,8 +239,8 @@ def split(data_path, percentage=0.1):
         save_path = os.path.join(data_path, "partitions")
         if not os.path.exists(save_path):
             os.makedirs(save_path)
-        with open(os.path.join(save_path, "train_part{}.pkl".format(num)), "wb") as f:
-            pkl.dump((images_part, labels_part), f, pkl.HIGHEST_PROTOCOL)
+        with open(os.path.join(save_path, "train_part{}.pkl".format(num)), "wb") as file_split:
+            pkl.dump((images_part, labels_part), file_split, pkl.HIGHEST_PROTOCOL)
 
 
 if __name__ == "__main__":
