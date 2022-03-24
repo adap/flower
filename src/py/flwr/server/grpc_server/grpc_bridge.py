@@ -140,10 +140,13 @@ class GRPCBridge:
 
         # Read client message and transition to AWAITING_SERVER_MESSAGE
         with self._cv:
-            predicate = lambda: self._status in [
-                Status.CLOSED,
-                Status.CLIENT_MESSAGE_AVAILABLE,
-            ]
+
+            def predicate() -> bool:
+                return self._status in [
+                    Status.CLOSED,
+                    Status.CLIENT_MESSAGE_AVAILABLE,
+                ]
+
             self._cv.wait_for(
                 predicate=predicate,
                 timeout=timeout,
@@ -167,10 +170,14 @@ class GRPCBridge:
         """Return iterator over server messages."""
         while not self._is_closed():
             with self._cv:
-                self._cv.wait_for(
-                    lambda: self._status
-                    in [Status.CLOSED, Status.SERVER_MESSAGE_AVAILABLE]
-                )
+
+                def predicate() -> bool:
+                    return self._status in [
+                        Status.CLOSED,
+                        Status.SERVER_MESSAGE_AVAILABLE,
+                    ]
+
+                self._cv.wait_for(predicate=predicate)
 
                 self._raise_if_closed()
 
