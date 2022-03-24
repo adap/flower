@@ -8,4 +8,6 @@ if __name__ == "__main__":
         min_eval_clients=5,
         min_available_clients=5,
     )
-    fl.server.start_server(server_address="[::]:8000", config={"num_rounds": 2}, strategy=strategy)
+    fl.server.start_server(
+        server_address="[::]:8000", config={"num_rounds": 2}, strategy=strategy
+    )

@@ -12,7 +12,7 @@ import scipy.io as scio  # type: ignore
 import torch
 from sklearn import model_selection  # type: ignore
 
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name, too-many-locals, broad-except
 
 
 def stratified_split(X, y):

@@ -103,7 +103,7 @@ class FlowerClient(fl.client.NumPyClient):
         return (
             self.get_parameters(),
             self.num_examples["trainset"],
-            {"loss": loss, "accuracy": accuracy}
+            {"loss": loss, "accuracy": accuracy},
         )
 
     def evaluate(
@@ -130,7 +130,7 @@ class FlowerClient(fl.client.NumPyClient):
         return (
             float(loss),
             self.num_examples["testset"],
-            {"loss": loss, "accuracy": accuracy}
+            {"loss": loss, "accuracy": accuracy},
         )
 
 
