@@ -15,6 +15,7 @@
 """Fault-tolerant variant of FedAvg strategy."""
 
 
+from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.common import (
@@ -26,6 +27,7 @@ from flwr.common import (
     parameters_to_weights,
     weights_to_parameters,
 )
+from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
@@ -51,6 +53,12 @@ class FaultTolerantFedAvg(FedAvg):
         min_completion_rate_fit: float = 0.5,
         min_completion_rate_evaluate: float = 0.5,
         initial_parameters: Optional[Parameters] = None,
+        fit_metrics_aggregation_fn: Optional[
+            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+        ] = None,
+        evaluate_metrics_aggregation_fn: Optional[
+            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+        ] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -63,9 +71,13 @@ class FaultTolerantFedAvg(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=True,
             initial_parameters=initial_parameters,
+            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
         self.completion_rate_fit = min_completion_rate_fit
         self.completion_rate_evaluate = min_completion_rate_evaluate
+        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
+        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
         return "FaultTolerantFedAvg()"
@@ -92,8 +104,13 @@ class FaultTolerantFedAvg(FedAvg):
         ]
         parameters_aggregated = weights_to_parameters(aggregate(weights_results))
 
-        # FIXME use metrics aggregation fn
+        # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
+        if self.fit_metrics_aggregation_fn:
+            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
+        elif rnd == 1:
+            log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
 
@@ -120,7 +137,12 @@ class FaultTolerantFedAvg(FedAvg):
             ]
         )
 
-        # FIXME use metrics aggregation fn
+        # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
+        if self.evaluate_metrics_aggregation_fn:
+            eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
+        elif rnd == 1:
+            log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
         return loss_aggregated, metrics_aggregated

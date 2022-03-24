@@ -18,6 +18,7 @@ Paper: https://openreview.net/pdf?id=ByexElSYDr
 """
 
 
+from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
@@ -33,6 +34,7 @@ from flwr.common import (
     parameters_to_weights,
     weights_to_parameters,
 )
+from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
@@ -60,6 +62,12 @@ class QFedAvg(FedAvg):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
+        fit_metrics_aggregation_fn: Optional[
+            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+        ] = None,
+        evaluate_metrics_aggregation_fn: Optional[
+            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+        ] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -72,6 +80,8 @@ class QFedAvg(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
+            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
@@ -85,6 +95,8 @@ class QFedAvg(FedAvg):
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
+        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
+        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
         # pylint: disable=line-too-long
@@ -212,8 +224,13 @@ class QFedAvg(FedAvg):
         weights_aggregated: Weights = aggregate_qffl(weights_before, deltas, hs_ffl)
         parameters_aggregated = weights_to_parameters(weights_aggregated)
 
-        # FIXME use metrics aggregation fn
+        # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
+        if self.fit_metrics_aggregation_fn:
+            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
+        elif rnd == 1:
+            log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
 
@@ -238,7 +255,12 @@ class QFedAvg(FedAvg):
             ]
         )
 
-        # FIXME use metrics aggregation fn
+        # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
+        if self.evaluate_metrics_aggregation_fn:
+            eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
+        elif rnd == 1:
+            log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
         return loss_aggregated, metrics_aggregated

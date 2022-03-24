@@ -17,7 +17,7 @@
 
 import math
 import statistics
-from logging import DEBUG, INFO
+from logging import DEBUG, INFO, WARNING
 from typing import Callable, Dict, List, Optional, Tuple, cast
 
 import numpy as np
@@ -74,6 +74,12 @@ class FastAndSlow(FedAvg):
         t_fast: int = 10,
         t_slow: int = 10,
         initial_parameters: Optional[Parameters] = None,
+        fit_metrics_aggregation_fn: Optional[
+            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+        ] = None,
+        evaluate_metrics_aggregation_fn: Optional[
+            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
+        ] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -85,6 +91,8 @@ class FastAndSlow(FedAvg):
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             initial_parameters=initial_parameters,
+            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
         self.min_completion_rate_fit = min_completion_rate_fit
         self.min_completion_rate_evaluate = min_completion_rate_evaluate
@@ -98,6 +106,8 @@ class FastAndSlow(FedAvg):
         self.t_slow = t_slow
         self.contributions: Dict[str, List[Tuple[int, int, int]]] = {}
         self.durations: List[Tuple[str, float, int, int]] = []
+        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
+        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
         rep = f"FastAndSlow(importance_sampling={self.importance_sampling}, "
@@ -357,8 +367,13 @@ class FastAndSlow(FedAvg):
 
         parameters_aggregated = weights_to_parameters(weights_prime)
 
-        # FIXME use metrics aggregation fn
+        # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
+        if self.fit_metrics_aggregation_fn:
+            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
+        elif rnd == 1:
+            log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
 
@@ -386,8 +401,13 @@ class FastAndSlow(FedAvg):
             ]
         )
 
-        # FIXME use metrics aggregation fn
+        # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
+        if self.evaluate_metrics_aggregation_fn:
+            eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
+        elif rnd == 1:
+            log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
         return loss_aggregated, metrics_aggregated
 

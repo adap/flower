@@ -18,7 +18,7 @@ Paper: https://arxiv.org/abs/1602.05629
 """
 
 
-from logging import INFO, WARNING
+from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.common import (
@@ -66,10 +66,10 @@ class FedAvg(Strategy):
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[
-            Callable[[List[Tuple[Dict[str, Scalar], int]]], Dict[str, Scalar]]
+            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
         ] = None,
         evaluate_metrics_aggregation_fn: Optional[
-            Callable[[List[Tuple[Dict[str, Scalar], int]]], Dict[str, Scalar]]
+            Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
         ] = None,
     ) -> None:
         """Federated Averaging strategy.
@@ -79,9 +79,9 @@ class FedAvg(Strategy):
         Parameters
         ----------
         fraction_fit : float, optional
-            Fraction of clients used during training. Defaults to 0.1.
+            Fraction of clients used during training. Defaults to 1.0.
         fraction_eval : float, optional
-            Fraction of clients used during validation. Defaults to 0.1.
+            Fraction of clients used during validation. Defaults to 1.0.
         min_fit_clients : int, optional
             Minimum number of clients used during training. Defaults to 2.
         min_eval_clients : int, optional
@@ -98,9 +98,9 @@ class FedAvg(Strategy):
             Whether or not accept rounds containing failures. Defaults to True.
         initial_parameters : Parameters, optional
             Initial global model parameters.
-        fit_metrics_aggregation_fn: Callable[[List[Tuple[Dict[str, Scalar], int]]], Dict[str, Scalar]]
+        fit_metrics_aggregation_fn: Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
             Metrics aggregation function, optional.
-        evaluate_metrics_aggregation_fn: Callable[[List[Tuple[Dict[str, Scalar], int]]], Dict[str, Scalar]]
+        evaluate_metrics_aggregation_fn: Callable[[List[Tuple[int, Dict[str, Scalar]]]], Dict[str, Scalar]]
             Metrics aggregation function, optional.
         """
         super().__init__()
@@ -234,10 +234,10 @@ class FedAvg(Strategy):
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
-            fit_metrics = [(res.metrics, res.num_examples) for _, res in results]
+            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        else:
-            log(INFO, "No fit_metrics_aggregation_fn")
+        elif rnd == 1:
+            log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
 
@@ -265,9 +265,9 @@ class FedAvg(Strategy):
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.evaluate_metrics_aggregation_fn:
-            eval_metrics = [(res.metrics, res.num_examples) for _, res in results]
+            eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-        else:
-            log(INFO, "No evaluate_metrics_aggregation_fn")
+        elif rnd == 1:
+            log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
         return loss_aggregated, metrics_aggregated
