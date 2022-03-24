@@ -15,7 +15,7 @@ done
 for i in 'MNIST' 'SVHN' 'USPS' 'SynthDigits' 'MNIST-M' ; do
     echo "Starting client $i"
     python3 client.py --partition=${i} --mode="$mode" &
-    sleep 2 &
+    sleep 5 &
 done
 
 # This will allow you to use CTRL+C to stop all background processes

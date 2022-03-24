@@ -10,11 +10,12 @@ import torch
 from torch import nn
 from torchvision import transforms
 
-from utils import cnn_model, data_utils
+from .utils import cnn_model, data_utils
 
 FL_ROUND = 0
 
 eval_list = []
+
 
 # pylint: disable=no-member
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -102,7 +103,7 @@ class FlowerClient(fl.client.NumPyClient):
         return (
             self.get_parameters(),
             self.num_examples["trainset"],
-            {"loss": loss, "accuracy": accuracy},
+            {"loss": loss, "accuracy": accuracy}
         )
 
     def evaluate(
@@ -129,7 +130,7 @@ class FlowerClient(fl.client.NumPyClient):
         return (
             float(loss),
             self.num_examples["testset"],
-            {"loss": loss, "accuracy": accuracy},
+            {"loss": loss, "accuracy": accuracy}
         )
 
 
@@ -328,9 +329,10 @@ def train(model, traindata, dataset, epochs, device) -> Tuple[float, float]:
             accuracy = correct / total
             if i == len(traindata) - 1:  # print every 100 mini-batches
                 accuracy = correct / total
+                loss_batch = running_loss / len(traindata)
                 print(
                     f"Train Dataset {dataset} with [{epoch+1}, {i+1}] \
-                    loss: {running_loss / len(traindata)} accuracy: {accuracy}"
+                    loss: {loss_batch} accuracy: {accuracy}"
                 )
                 running_loss = 0.0
         loss = loss / len(traindata)
@@ -396,7 +398,7 @@ def main() -> None:
     # Start client
     client = FlowerClient(model, trainloader, testloader, num_examples, args.mode)
     print("Start client of dataset", num_examples["dataset"])
-    fl.client.start_numpy_client("0.0.0.0:8080", client)
+    fl.client.start_numpy_client(server_address="[::]:8000", client=client)
     # Save train and evaluation loss and accuracy in json file
     with open(
         f"results/{args.partition}_{args.mode}_results.json", mode="r+"
