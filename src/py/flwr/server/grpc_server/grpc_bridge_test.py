@@ -185,7 +185,7 @@ def test_request_timeout_exception() -> None:
     try:
         bridge.request(
             server_message=ServerMessage(),
-            timeout=1.0,
+            timeout=0.3,
         )
     except GRPCBridgeTimeout as err:
         raised_error = err
