@@ -129,8 +129,6 @@ class GRPCBridge:
         with self._cv:
             self._raise_if_closed()
 
-            print(self._status)
-
             if self._status != Status.AWAITING_SERVER_MESSAGE:
                 raise Exception(
                     f"{self._status} is not a valid status when"
