@@ -37,6 +37,7 @@ from flwr.server.client_proxy import ClientProxy
 from .fedopt import FedOpt
 
 
+# pylint: disable=too-many-locals
 class FedAdagrad(FedOpt):
     """Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et
     al., 2020] strategy.

@@ -43,6 +43,7 @@ from .aggregate import aggregate_qffl, weighted_loss_avg
 from .fedavg import FedAvg
 
 
+# pylint: disable=too-many-locals
 class QFedAvg(FedAvg):
     """Configurable QFedAvg strategy implementation."""
 
