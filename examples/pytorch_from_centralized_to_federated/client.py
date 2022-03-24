@@ -20,7 +20,7 @@ DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
 
 # Flower Client
-class CifarClient(fl.client.NumPyClient):
+class FlowerClient(fl.client.NumPyClient):
     """Flower client implementing CIFAR-10 image classification using
     PyTorch."""
 
@@ -92,8 +92,8 @@ def main() -> None:
     _ = model(next(iter(trainloader))[0].to(DEVICE))
 
     # Start client
-    client = CifarClient(model, trainloader, testloader, num_examples)
-    fl.client.start_numpy_client(server_address="[::]:8080", client=client)
+    client = FlowerClient(model, trainloader, testloader, num_examples)
+    fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=client)
 
 
 if __name__ == "__main__":
