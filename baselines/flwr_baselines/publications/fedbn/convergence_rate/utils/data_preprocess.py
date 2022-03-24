@@ -62,11 +62,11 @@ def process_mnist():
     print("Test imgs:\t", test_stratified[0].shape)
     print("Test labels:\t", test_stratified[1].shape)
 
-    with open("./data/MNIST/train.pkl", "wb") as f:
-        pkl.dump(train_stratified, f, pkl.HIGHEST_PROTOCOL)
+    with open("./data/MNIST/train.pkl", "wb") as mnist_train_file:
+        pkl.dump(train_stratified, mnist_train_file, pkl.HIGHEST_PROTOCOL)
 
-    with open("./data/MNIST/test.pkl", "wb") as f:
-        pkl.dump(test_stratified, f, pkl.HIGHEST_PROTOCOL)
+    with open("./data/MNIST/test.pkl", "wb") as mnist_test_file:
+        pkl.dump(test_stratified, mnist_test_file, pkl.HIGHEST_PROTOCOL)
 
 
 def process_svhn():
@@ -103,11 +103,11 @@ def process_svhn():
     print("Test imgs:\t", test_stratified[0].shape)
     print("Test labels:\t", test_stratified[1].shape)
 
-    with open("./data/SVHN/train.pkl", "wb") as f:
-        pkl.dump(train_stratified, f, pkl.HIGHEST_PROTOCOL)
+    with open("./data/SVHN/train.pkl", "wb") as svhn_train_file:
+        pkl.dump(train_stratified, svhn_train_file, pkl.HIGHEST_PROTOCOL)
 
-    with open("./data/SVHN/test.pkl", "wb") as f:
-        pkl.dump(test_stratified, f, pkl.HIGHEST_PROTOCOL)
+    with open("./data/SVHN/test.pkl", "wb") as svhn_test_file:
+        pkl.dump(test_stratified, svhn_test_file, pkl.HIGHEST_PROTOCOL)
 
 
 def process_usps():
@@ -153,11 +153,11 @@ def process_usps():
     print("Test imgs:\t", test_stratified[0].shape)
     print("Test labels:\t", test_stratified[1].shape)
 
-    with open("./data/USPS/train.pkl", "wb") as f:
-        pkl.dump(train_stratified, f, pkl.HIGHEST_PROTOCOL)
+    with open("./data/USPS/train.pkl", "wb") as usps_train_file:
+        pkl.dump(train_stratified, usps_train_file, pkl.HIGHEST_PROTOCOL)
 
-    with open("./data/USPS/test.pkl", "wb") as f:
-        pkl.dump(test_stratified, f, pkl.HIGHEST_PROTOCOL)
+    with open("./data/USPS/test.pkl", "wb") as usps_test_file:
+        pkl.dump(test_stratified, usps_test_file, pkl.HIGHEST_PROTOCOL)
 
 
 def process_synth():
@@ -184,11 +184,11 @@ def process_synth():
     print("Test imgs:\t", test_stratified[0].shape)
     print("Test labels:\t", test_stratified[1].shape)
 
-    with open("./data/SynthDigits/train.pkl", "wb") as f:
-        pkl.dump(train_stratified, f, pkl.HIGHEST_PROTOCOL)
+    with open("./data/SynthDigits/train.pkl", "wb") as synthdigits_train_file:
+        pkl.dump(train_stratified, synthdigits_train_file, pkl.HIGHEST_PROTOCOL)
 
-    with open("./data/SynthDigits/test.pkl", "wb") as f:
-        pkl.dump(test_stratified, f, pkl.HIGHEST_PROTOCOL)
+    with open("./data/SynthDigits/test.pkl", "wb") as synthdigits_test_file:
+        pkl.dump(test_stratified, synthdigits_test_file, pkl.HIGHEST_PROTOCOL)
 
 
 def process_mnistm():
@@ -217,11 +217,11 @@ def process_mnistm():
     print("Test imgs:\t", test_stratified[0].shape)
     print("Test labels:\t", test_stratified[1].shape)
 
-    with open("./data/MNIST_M/train.pkl", "wb") as f:
-        pkl.dump(train_stratified, f, pkl.HIGHEST_PROTOCOL)
+    with open("./data/MNIST_M/train.pkl", "wb") as mnistm_train_file:
+        pkl.dump(train_stratified, mnistm_train_file, pkl.HIGHEST_PROTOCOL)
 
-    with open("./data/MNIST_M/test.pkl", "wb") as f:
-        pkl.dump(test_stratified, f, pkl.HIGHEST_PROTOCOL)
+    with open("./data/MNIST_M/test.pkl", "wb") as mnistm_test_file:
+        pkl.dump(test_stratified, mnistm_test_file, pkl.HIGHEST_PROTOCOL)
 
 
 def split(data_path, percentage=0.1):
