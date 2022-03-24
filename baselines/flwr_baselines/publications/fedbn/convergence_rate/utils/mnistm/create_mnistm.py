@@ -39,22 +39,22 @@ def create_mnistm(X: Any) -> Any:
     bst_path = "./data/MNIST_M/BSR_bsds500.tgz"
 
     rand = np.random.RandomState(42)
-
-    bsr_file = tarfile.open(bst_path)
     train_files = []
-    for name in bsr_file.getnames():
-        if name.startswith("BSR/BSDS500/data/images/train/"):
-            train_files.append(name)
 
-    print("Loading BSR training images")
-    background_data = []
-    for name in train_files:
-        try:
-            fp = bsr_file.extractfile(name)
-            bg_img = skimage.io.imread(fp)
-            background_data.append(bg_img)
-        except:
-            continue
+    with tarfile.open(bst_path, "r") as bsr_file:
+        for name in bsr_file.getnames():
+            if name.startswith("BSR/BSDS500/data/images/train/"):
+                train_files.append(name)
+
+        print("Loading BSR training images")
+        background_data = []
+        for name in train_files:
+            try:
+                fp = bsr_file.extractfile(name)
+                bg_img = skimage.io.imread(fp)
+                background_data.append(bg_img)
+            except:
+                continue
 
     X_ = np.zeros([X.shape[0], 28, 28, 3], np.uint8)
     for i in range(X.shape[0]):

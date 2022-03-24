@@ -8,7 +8,7 @@ class CNNModel(nn.Module):
     """Model for benchmark experiment on Digits."""
 
     def __init__(self, num_classes=10):
-        super(CNNModel, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(3, 64, 5, 1, 2)
         self.bn1 = nn.BatchNorm2d(64)
         self.conv2 = nn.Conv2d(64, 64, 5, 1, 2)
