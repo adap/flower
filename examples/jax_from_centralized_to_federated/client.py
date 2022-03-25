@@ -1,6 +1,4 @@
-"""
-Flower client example using JAX for linear regression.
-"""
+"""Flower client example using JAX for linear regression."""
 
 from typing import Dict, List, Tuple, Callable
 
@@ -13,7 +11,7 @@ import jax_training
 
 
 class FlowerClient(fl.client.NumPyClient):
-    """Flower client implementing using linear regression using JAX"""
+    """Flower client implementing using linear regression using JAX."""
 
     def __init__(
         self,
@@ -37,25 +35,26 @@ class FlowerClient(fl.client.NumPyClient):
         for _, val in self.params.items():
             parameter_value.append(np.array(val))
         return parameter_value
-    
+
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         # Collect model parameters and update the parameters of the local model
-        value=jnp.ndarray
-        params_item = list(zip(self.params.keys(),parameters))
+        value = jnp.ndarray
+        params_item = list(zip(self.params.keys(), parameters))
         for item in params_item:
             key = item[0]
             value = item[1]
             self.params[key] = value
         return self.params
 
-    
     def fit(
         self, parameters: List[np.ndarray], config: Dict
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         print("Start local training")
         self.params = self.set_parameters(parameters)
-        self.params, loss, num_examples = jax_training.train(self.params, self.grad_fn, self.train_x, self.train_y)
+        self.params, loss, num_examples = jax_training.train(
+            self.params, self.grad_fn, self.train_x, self.train_y
+        )
         results = {"loss": float(loss)}
         print("Training results", results)
         return self.get_parameters(), num_examples, results
@@ -66,7 +65,9 @@ class FlowerClient(fl.client.NumPyClient):
         # Set model parameters, evaluate model on local test dataset, return result
         print("Start evaluation")
         self.params = self.set_parameters(parameters)
-        loss, num_examples = jax_training.evaluation(self.params,self.grad_fn, self.test_x, self.test_y)
+        loss, num_examples = jax_training.evaluation(
+            self.params, self.grad_fn, self.test_x, self.test_y
+        )
         print("Evaluation accuracy & loss", loss)
         return (
             float(loss),

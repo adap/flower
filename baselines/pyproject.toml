@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: Implementation :: CPython",
@@ -39,15 +40,17 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.7.12"
 # Mandatory dependencies
-flwr = "^0.18.0"
-# flwr = { path = "../", develop = true }  # For development
+flwr = { extras = ["simulation"], version = "^0.18.0" }
 torch = "^1.10.1"
 torchvision = "^0.11.2"
 omegaconf = "==2.2.0.dev1"
 hydra-core = "==1.2.0.dev2" 
-ray = { extras = ["default"], version = "^1.9.2"}
 numpy = "^1.20.0"
+tqdm = "4.62.3"
 matplotlib = "^3.5.1"
+scikit-image = "^0.18.1"
+scikit-learn = "^0.24.2"
+wget = "^3.2"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.10.1"
@@ -58,6 +61,7 @@ pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
+types-requests = "==2.27.7"
 
 [tool.isort]
 line_length = 88
