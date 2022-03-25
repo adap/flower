@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -30,6 +30,7 @@ Weights = List[np.ndarray]
 Scalar = Union[bool, bytes, float, int, str]
 
 Metrics = Dict[str, Scalar]
+MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]
 
 Config = Dict[str, Scalar]
 Properties = Dict[str, Scalar]
