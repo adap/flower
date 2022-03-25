@@ -23,6 +23,7 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.common import (
     FitRes,
+    MetricsAggregationFn,
     Parameters,
     Scalar,
     Weights,
@@ -50,6 +51,7 @@ class FedAvgM(FedAvg):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
+        *,
         fraction_fit: float = 0.1,
         fraction_eval: float = 0.1,
         min_fit_clients: int = 2,
@@ -62,6 +64,8 @@ class FedAvgM(FedAvg):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
+        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         server_learning_rate: float = 1.0,
         server_momentum: float = 0.0,
     ) -> None:
@@ -115,6 +119,8 @@ class FedAvgM(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
+            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
         self.server_learning_rate = server_learning_rate
         self.server_momentum = server_momentum
@@ -122,6 +128,8 @@ class FedAvgM(FedAvg):
             self.server_learning_rate != 1.0
         )
         self.momentum_vector: Optional[Weights] = None
+        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
+        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
         rep = f"FedAvgM(accept_failures={self.accept_failures})"
@@ -191,4 +199,14 @@ class FedAvgM(FedAvg):
             # Update current weights
             self.initial_parameters = weights_to_parameters(fedavg_result)
 
-        return weights_to_parameters(fedavg_result), {}
+        parameters_aggregated = weights_to_parameters(fedavg_result)
+
+        # Aggregate custom metrics if aggregation fn was provided
+        metrics_aggregated = {}
+        if self.fit_metrics_aggregation_fn:
+            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
+        elif rnd == 1:
+            log(WARNING, "No fit_metrics_aggregation_fn provided")
+
+        return parameters_aggregated, metrics_aggregated
