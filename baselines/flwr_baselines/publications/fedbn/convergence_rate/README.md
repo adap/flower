@@ -30,7 +30,7 @@ A more detailed explanation of the datasets is given in the following table.
 
 ### Dataset Download
 
-The [FedBN](https://arxiv.org/pdf/2102.07623.pdf) authors prepared a preprocessed dataset on their GitHub repository. It is available [here](https://github.com/med-air/FedBN). Please download the dataset, save it in a `/data` directory, and then unzip it.
+The [FedBN](https://arxiv.org/pdf/2102.07623.pdf) authors prepared a preprocessed dataset on their GitHub repository. It is available [here](https://github.com/med-air/FedBN). Please download the dataset, save it in a `/data` directory, and unzip it.
 
 The training data contains only 7438 samples and it is split into 10 files, but only one file is used for the **FedBN: Convergence Rate** baseline. Therefore, 743 samples are used for the local training.
 
