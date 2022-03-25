@@ -2,7 +2,7 @@
 Thanks for contributing a pull request! Please ensure you have taken a look at
 the contribution guidelines: https://github.com/adap/flower/blob/main/CONTRIBUTING.md
 
-Is there an entry in the changelog nessecary for this PR?
+Does the changelog need to be updated?
 See: https://github.com/adap/flower/blob/main/doc/source/changelog.rst
 -->
 
