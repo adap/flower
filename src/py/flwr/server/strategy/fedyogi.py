@@ -25,6 +25,7 @@ import numpy as np
 
 from flwr.common import (
     FitRes,
+    MetricsAggregationFn,
     Parameters,
     Scalar,
     Weights,
@@ -59,6 +60,8 @@ class FedYogi(FedOpt):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Parameters,
+        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         eta: float = 1e-2,
         eta_l: float = 0.0316,
         beta_1: float = 0.9,
@@ -89,6 +92,10 @@ class FedYogi(FedOpt):
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
             initial_parameters (Parameters): Initial set of parameters from the server.
+            fit_metrics_aggregation_fn: Optional[MetricsAggregationFn]
+                Metrics aggregation function, optional.
+            evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
+                Metrics aggregation function, optional.
             eta (float, optional): Server-side learning rate. Defaults to 1e-1.
             eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.
             beta_1 (float, optional): Momentum parameter. Defaults to 0.9.
@@ -107,6 +114,8 @@ class FedYogi(FedOpt):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
+            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
             eta=eta,
             eta_l=eta_l,
             beta_1=beta_1,

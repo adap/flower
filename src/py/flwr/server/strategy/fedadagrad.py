@@ -25,6 +25,7 @@ import numpy as np
 
 from flwr.common import (
     FitRes,
+    MetricsAggregationFn,
     Parameters,
     Scalar,
     Weights,
@@ -36,6 +37,7 @@ from flwr.server.client_proxy import ClientProxy
 from .fedopt import FedOpt
 
 
+# pylint: disable=too-many-locals
 class FedAdagrad(FedOpt):
     """Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et
     al., 2020] strategy.
@@ -57,6 +59,8 @@ class FedAdagrad(FedOpt):
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         accept_failures: bool = True,
         initial_parameters: Parameters,
         eta: float = 1e-1,
@@ -87,6 +91,10 @@ class FedAdagrad(FedOpt):
             accept_failures (bool, optional): Whether or not accept rounds
                 containing failures. Defaults to True.
             initial_parameters (Parameters): Initial set of parameters from the server.
+            fit_metrics_aggregation_fn: Optional[MetricsAggregationFn]
+                Metrics aggregation function, optional.
+            evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
+                Metrics aggregation function, optional.
             eta (float, optional): Server-side learning rate. Defaults to 1e-1.
             eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.
             tau (float, optional): Controls the algorithm's degree of adaptability.
@@ -103,6 +111,8 @@ class FedAdagrad(FedOpt):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
+            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
             eta=eta,
             eta_l=eta_l,
             beta_1=0.0,
