@@ -54,8 +54,8 @@ class FedAvg(Strategy):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
-        fraction_fit: float = 1.0,  # Select all connected clients
-        fraction_eval: float = 1.0,  # Select all connected clients
+        fraction_fit: float = 0.1,
+        fraction_eval: float = 0.1,
         min_fit_clients: int = 2,
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
@@ -76,9 +76,9 @@ class FedAvg(Strategy):
         Parameters
         ----------
         fraction_fit : float, optional
-            Fraction of clients used during training. Defaults to 1.0.
+            Fraction of clients used during training. Defaults to 0.1.
         fraction_eval : float, optional
-            Fraction of clients used during validation. Defaults to 1.0.
+            Fraction of clients used during validation. Defaults to 0.1.
         min_fit_clients : int, optional
             Minimum number of clients used during training. Defaults to 2.
         min_eval_clients : int, optional
