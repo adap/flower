@@ -115,3 +115,6 @@ class GrpcClientProxy(ClientProxy):
         )
         disconnect = serde.disconnect_from_proto(client_msg.disconnect)
         return disconnect
+
+    def __hash__(self):
+        return hash(self.cid)
