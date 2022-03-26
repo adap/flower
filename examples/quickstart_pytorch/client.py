@@ -1,13 +1,13 @@
-from collections import OrderedDict
 import warnings
+from collections import OrderedDict
 
 import flwr as fl
 import torch
-from torchvision.transforms import Compose, ToTensor, Normalize
-from torch.nn import GroupNorm
+import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
-from torchvision.models import resnet18
+from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
 
@@ -17,6 +17,27 @@ from tqdm import tqdm
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+
+class Net(nn.Module):
+    """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
+
+    def __init__(self) -> None:
+        super(Net, self).__init__()
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(-1, 16 * 5 * 5)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        return self.fc3(x)
 
 
 def train(net, trainloader, epochs):
@@ -56,9 +77,8 @@ def load_data():
 # 2. Federation of the pipeline with Flower
 # #############################################################################
 
-
-# Load model and data (ResNet-18, CIFAR-10)
-net = resnet18(norm_layer=lambda x: GroupNorm(2, x), num_classes=10).to(DEVICE)
+# Load model and data (simple CNN, CIFAR-10)
+net = Net().to(DEVICE)
 trainloader, testloader = load_data()
 
 # Define Flower client
@@ -79,7 +99,7 @@ class FlowerClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
         loss, accuracy = test(net, testloader)
-        return float(loss), len(testloader.dataset), {"accuracy": float(accuracy)}
+        return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
 # Start Flower client
