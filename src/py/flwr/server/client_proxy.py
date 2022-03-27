@@ -16,6 +16,7 @@
 
 
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from flwr.common import (
     Disconnect,
@@ -47,7 +48,7 @@ class ClientProxy(ABC):
         """Return the current local model parameters."""
 
     @abstractmethod
-    def fit(self, ins: FitIns) -> FitRes:
+    def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
         """Refine the provided weights using the locally held dataset."""
 
     @abstractmethod

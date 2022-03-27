@@ -15,7 +15,7 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
-from typing import Callable, Dict, Union, cast
+from typing import Callable, Dict, Optional, Union, cast
 
 import ray
 
@@ -57,12 +57,12 @@ class RayClientProxy(ClientProxy):
             res,
         )
 
-    def fit(self, ins: common.FitIns) -> common.FitRes:
+    def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         future_fit_res = launch_and_fit.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.worker.get(future_fit_res)
+        res = ray.worker.get(future_fit_res, timeout=timeout)
         return cast(
             common.FitRes,
             res,

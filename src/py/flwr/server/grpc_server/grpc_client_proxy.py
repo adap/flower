@@ -14,6 +14,7 @@
 # ==============================================================================
 """gRPC-based Flower ClientProxy implementation."""
 
+from typing import Optional
 
 from flwr import common
 from flwr.common import serde
@@ -51,11 +52,13 @@ class GrpcClientProxy(ClientProxy):
         parameters_res = serde.parameters_res_from_proto(client_msg.parameters_res)
         return parameters_res
 
-    def fit(self, ins: common.FitIns) -> common.FitRes:
+    def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Refine the provided weights using the locally held dataset."""
         fit_ins_msg = serde.fit_ins_to_proto(ins)
         client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(fit_ins=fit_ins_msg)
+            ServerMessage(
+                fit_ins=fit_ins_msg, timeout=timeout if timeout is not None else 0.0
+            )
         )
         fit_res = serde.fit_res_from_proto(client_msg.fit_res)
         return fit_res

@@ -37,6 +37,7 @@ def start_server(  # pylint: disable=too-many-arguments
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     force_final_distributed_eval: bool = False,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    request_timeout: Optional[float] = None,
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
 
@@ -112,6 +113,7 @@ def start_server(  # pylint: disable=too-many-arguments
         server=initialized_server,
         config=initialized_config,
         force_final_distributed_eval=force_final_distributed_eval,
+        request_timeout=request_timeout,
     )
 
     # Stop the gRPC server
@@ -142,10 +144,13 @@ def _init_defaults(
 
 
 def _fl(
-    server: Server, config: Dict[str, int], force_final_distributed_eval: bool
+    server: Server,
+    config: Dict[str, int],
+    force_final_distributed_eval: bool,
+    request_timeout: Optional[float],
 ) -> History:
     # Fit model
-    hist = server.fit(num_rounds=config["num_rounds"])
+    hist = server.fit(num_rounds=config["num_rounds"], timeout=request_timeout)
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
     log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
     log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))

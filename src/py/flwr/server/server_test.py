@@ -15,7 +15,7 @@
 """Flower server tests."""
 
 
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 
@@ -49,7 +49,7 @@ class SuccessClient(ClientProxy):
         # This method is not expected to be called
         raise Exception()
 
-    def fit(self, ins: FitIns) -> FitRes:
+    def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
         return FitRes(
@@ -74,7 +74,7 @@ class FailingClient(ClientProxy):
     def get_parameters(self) -> ParametersRes:
         raise Exception()
 
-    def fit(self, ins: FitIns) -> FitRes:
+    def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
         raise Exception()
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
@@ -97,7 +97,7 @@ def test_fit_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = fit_clients(client_instructions, None)
+    results, failures = fit_clients(client_instructions, None, None)
 
     # Assert
     assert len(results) == 1

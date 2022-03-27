@@ -69,7 +69,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
 
         # Execute
-        fit_res = client.fit(ins=ins)
+        fit_res = client.fit(ins=ins, timeout=None)
 
         # Assert
         assert fit_res.parameters.tensor_type == "np"

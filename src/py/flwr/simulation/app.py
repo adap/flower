@@ -171,6 +171,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         server=initialized_server,
         config=initialized_config,
         force_final_distributed_eval=False,
+        request_timeout=None,
     )
 
     return hist

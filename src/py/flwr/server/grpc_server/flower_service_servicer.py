@@ -17,7 +17,8 @@
 Relevant knowledge for reading this modules code:
     - https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
 """
-from typing import Callable, Iterator
+from threading import Thread
+from typing import Callable, Dict, Iterator, Optional
 
 import grpc
 
@@ -26,6 +27,38 @@ from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import ClientManager
 from flwr.server.grpc_server.grpc_bridge import GRPCBridge
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
+
+
+def next_with_timeout(
+    iterator: Iterator[ClientMessage],
+    timeout: Optional[float],
+) -> Optional[ClientMessage]:
+    """Return next in iterator or timeout before doing so."""
+    if timeout is None:
+        return next(iterator)
+
+    # Need some objects which can be accessed by reference from the worker threads
+    msg: Dict[str, Optional[ClientMessage]] = {"value": None}
+    stop_iteration: Dict[str, bool] = {"value": False}
+
+    def get_next() -> None:
+        try:
+            msg["value"] = next(iterator)
+        except StopIteration:
+            stop_iteration["value"] = True
+
+    worker_thread = Thread(target=get_next)
+    worker_thread.start()
+    worker_thread.join(timeout=timeout)
+
+    # Raise the exception from the thread in the main thread
+    # if present. This will ensure that StopIteration is correctly
+    # raised.
+    if stop_iteration["value"]:
+        raise StopIteration()
+
+    # Extract None or actual value of iterator
+    return msg["value"]
 
 
 def default_bridge_factory() -> GRPCBridge:
@@ -103,7 +136,35 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                     server_message = next(server_message_iterator)
                     yield server_message
                     # Wait for client message
-                    client_message = next(client_message_iterator)
+
+                    client_message = next_with_timeout(
+                        iterator=client_message_iterator,
+                        # Explicitly pass None as gRPC will default to 0 if
+                        # the timeout is not present
+                        timeout=server_message.timeout
+                        if server_message.timeout > 0
+                        else None,
+                    )
+
+                    if client_message is None:
+                        # Important to know:
+                        # Abort in gRPC always raises an exception so that all code
+                        # after the call to context.abort will not run. If you want
+                        # code to be executed afterwards use the:
+                        # rpc_termination_callback as seen in the register_client
+                        # function.
+                        context.abort(
+                            grpc.StatusCode.DEADLINE_EXCEEDED,
+                            f"Timeout of {server_message.timeout} "
+                            + "seconds was exceeded.",
+                        )
+                        # This return statement is only for the linter so it understands
+                        # that client_message in subsequent lines is not None
+                        # It does not understand that abort will terminate this
+                        # execution context through an exception.
+                        return
+
                     bridge.set_client_message(client_message)
                 except StopIteration:
+                    print("breaking")
                     break

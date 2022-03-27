@@ -76,7 +76,7 @@ class Server:
         return self._client_manager
 
     # pylint: disable=too-many-locals
-    def fit(self, num_rounds: int) -> History:
+    def fit(self, num_rounds: int, timeout: Optional[float] = None) -> History:
         """Run federated averaging for a number of rounds."""
         history = History()
 
@@ -101,7 +101,7 @@ class Server:
 
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
-            res_fit = self.fit_round(rnd=current_round)
+            res_fit = self.fit_round(rnd=current_round, timeout=timeout)
             if res_fit:
                 parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
@@ -181,7 +181,9 @@ class Server:
         return loss_aggregated, metrics_aggregated, (results, failures)
 
     def fit_round(
-        self, rnd: int
+        self,
+        rnd: int,
+        timeout: Optional[float],
     ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
@@ -204,8 +206,9 @@ class Server:
 
         # Collect `fit` results from all clients participating in this round
         results, failures = fit_clients(
-            client_instructions,
+            client_instructions=client_instructions,
             max_workers=self.max_workers,
+            timeout=timeout,
         )
         log(
             DEBUG,
@@ -292,11 +295,12 @@ def reconnect_client(
 def fit_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]],
     max_workers: Optional[int],
+    timeout: Optional[float],
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         submitted_fs = {
-            executor.submit(fit_client, client_proxy, ins)
+            executor.submit(fit_client, client_proxy, ins, timeout)
             for client_proxy, ins in client_instructions
         }
         finished_fs, _ = concurrent.futures.wait(
@@ -318,9 +322,11 @@ def fit_clients(
     return results, failures
 
 
-def fit_client(client: ClientProxy, ins: FitIns) -> Tuple[ClientProxy, FitRes]:
+def fit_client(
+    client: ClientProxy, ins: FitIns, timeout: Optional[float]
+) -> Tuple[ClientProxy, FitRes]:
     """Refine parameters on a single client."""
-    fit_res = client.fit(ins)
+    fit_res = client.fit(ins, timeout)
     return client, fit_res
 
 
