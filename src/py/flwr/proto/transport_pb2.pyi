@@ -199,6 +199,10 @@ class ServerMessage(google.protobuf.message.Message):
     @property
     def properties_ins(self) -> global___ServerMessage.PropertiesIns: ...
     timeout: builtins.float
+    """When the field is not explicitly set it will default to zero in gRPC
+    therefore all implementations using it should treat 0 as no timeout
+    """
+
     def __init__(self,
         *,
         reconnect: typing.Optional[global___ServerMessage.Reconnect] = ...,
