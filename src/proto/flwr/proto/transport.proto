@@ -60,6 +60,8 @@ message ServerMessage {
     EvaluateIns evaluate_ins = 4;
     PropertiesIns properties_ins = 5;
   }
+
+  float timeout = 20;
 }
 
 message ClientMessage {
