@@ -1,21 +1,20 @@
-# Flower Example using TensorFlow/Keras
-
-This introductory example to Flower uses Keras but deep knowledge of Keras is not necessarily required to run the example. However, it will help you understanding how to adapt Flower to your use-cases.
-Running this example in itself is quite easy.
+# Flower Example demonstrating the usage of request timeouts
+This introductory example to Flower demonstrates how request timeouts can be used in Flower.
 
 ## Project Setup
 
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_tensorflow . && rm -rf flower && cd quickstart_tensorflow
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/timeouts . && rm -rf flower && cd quickstart_tensorflow
 ```
 
-This will create a new directory called `quickstart_tensorflow` containing the following files:
+This will create a new directory called `timeouts` containing the following files:
 
 ```shell
 -- pyproject.toml
--- client.py
+-- client_slow.py
+-- client_fast.py
 -- server.py
 -- README.md
 ```
@@ -35,7 +34,7 @@ poetry run python3 -c "import flwr"
 
 If you don't see any errors you're good to go!
 
-# Run Federated Learning with TensorFlow/Keras and Flower
+# Run the example
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
@@ -43,18 +42,25 @@ Afterwards you are ready to start the Flower server as well as the clients. You 
 poetry run python3 server.py
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminals and run the following command in each:
+Now you are ready to start the Flower clients which will participate in the learning. To do so simply open three more terminals and run the following command in each:
 
+Slow client
 ```shell
-poetry run python3 client.py
+poetry run python3 client_slow.py
+```
+
+First fast client 
+```shell
+poetry run python3 client_fast.py
+```
+
+Second fast client 
+```shell
+poetry run python3 client_fast.py
 ```
 
 Alternatively you can run all of it in one shell as follows:
 
 ```shell
-poetry run python3 server.py &
-poetry run python3 client.py &
-poetry run python3 client.py
+poetry run ./run.sh
 ```
-
-You will see that Keras is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart_tensorflow.html) for a detailed explanation. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).
