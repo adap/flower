@@ -50,6 +50,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinx_panels",
     "sphinxcontrib.mermaid",
+    "sphinx_reredirects"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -59,6 +60,19 @@ templates_path = ["_templates"]
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+# Sphinx redirects, implemented after the doc filename changes.
+# To prevent 404 errors and redirect to the new pages.
+redirects = {
+    "quickstart_mxnet": "quickstart-mxnet",
+    "quickstart_pytorch_lightning": "quickstart-pytorch-lightning",
+    "example_walkthrough_pytorch_mnist": "example-walkthrough-pytorch-mnist",
+    "quickstart_huggingface": "quickstart-huggingface",
+    "quickstart_pytorch": "quickstart-pytorch",
+    "quickstart_tensorflow": "quickstart-tensorflow",
+    "release_process": "release-process",
+    "quickstart_scikitlearn": "quickstart-scikitlearn"
+}
 
 
 # -- Options for HTML output -------------------------------------------------
