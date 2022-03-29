@@ -130,7 +130,7 @@ Expanding the proposal template beyond the single-sentence description currently
 
 ## Alternatives Considered
 
-### Github Issues
+### GitHub Issues
 
 Using Github Issues for these kinds of proposals is doable. By, e.g., using tags, one could differentiate and filter them from other issues. The main issue is in discussing and reviewing a proposal: Github issues only have a single thread for comments. Proposals usually have multiple thread of discussion at the same time for various parts of the proposal. Managing these multiple discussions can be confusing when using Github Issues.
 
