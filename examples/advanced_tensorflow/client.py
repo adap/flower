@@ -19,7 +19,7 @@ class CifarClient(fl.client.NumPyClient):
 
     def get_properties(self):
         """Get properties of client."""
-        return {"foo": "bar"}
+        return {}
 
     def get_parameters(self):
         """Get parameters of the local model."""
