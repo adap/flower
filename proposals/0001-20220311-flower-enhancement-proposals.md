@@ -43,7 +43,7 @@ into one file, which is created incrementally in collaboration with the communit
 
 ## Motivation
 
-For far-fetching changes or features proposed to Flower, an abstraction beyond a single Github issues or pull request is required in order to understand and communicate upcoming changes to the project.
+For far-fetching changes or features proposed to Flower, an abstraction beyond a single Github issue or pull request is required in order to understand and communicate upcoming changes to the project.
 
 The purpose of this process is to reduce the amount of "tribal knowledge" in our community. By moving decisions from Slack threads, video calls and hallway conversations into a well tracked artifact, this process aims to enhance communication and discoverability.
 
