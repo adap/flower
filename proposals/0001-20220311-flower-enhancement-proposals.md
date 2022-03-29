@@ -55,7 +55,7 @@ Similarly, any technical effort (refactoring, major architectural change) that w
 
 ### Non-Goals
 
-For small changes and additions, going through the Enhancement Proposal process would be time-consuming and unnecessary. This, e.g., includes adding new Federated Learning algorithms, as these only add features without changing how flower works or is used.
+For small changes and additions, going through the Enhancement Proposal process would be time-consuming and unnecessary. This includes, for example, adding new Federated Learning algorithms, as these only add features without changing how Flower works or is used.
 
 Enhancement Proposals are different from feature requests, as they are already providing a laid-out path for an implementation and are championed by members of the community.
 
