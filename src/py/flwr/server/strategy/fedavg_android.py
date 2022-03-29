@@ -19,7 +19,6 @@ Paper: https://arxiv.org/abs/1602.05629
 """
 
 
-from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, cast
 
 import numpy as np
@@ -33,41 +32,11 @@ from flwr.common import (
     Scalar,
     Weights,
 )
-from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
-
-DEPRECATION_WARNING = """
-DEPRECATION WARNING: deprecated `eval_fn` return format
-
-    loss, accuracy
-
-move to
-
-    loss, {"accuracy": accuracy}
-
-instead. Note that compatibility with the deprecated return format will be
-removed in a future release.
-"""
-
-DEPRECATION_WARNING_INITIAL_PARAMETERS = """
-DEPRECATION WARNING: deprecated initial parameter type
-
-    flwr.common.Weights (i.e., List[np.ndarray])
-
-will be removed in a future update, move to
-
-    flwr.common.Parameters
-
-instead. Use
-
-    parameters = flwr.common.weights_to_parameters(weights)
-
-to easily transform `Weights` to `Parameters`.
-"""
 
 
 class FedAvgAndroid(Strategy):
@@ -104,8 +73,8 @@ class FedAvgAndroid(Strategy):
                 during validation. Defaults to 2.
             min_available_clients (int, optional): Minimum number of total
                 clients in the system. Defaults to 2.
-            eval_fn (Callable[[Weights], Optional[Tuple[float, float]]], optional):
-                Function used for validation. Defaults to None.
+            eval_fn : Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+                Optional function used for validation. Defaults to None.
             on_fit_config_fn (Callable[[int], Dict[str, Scalar]], optional):
                 Function used to configure training. Defaults to None.
             on_evaluate_config_fn (Callable[[int], Dict[str, Scalar]], optional):
@@ -147,9 +116,6 @@ class FedAvgAndroid(Strategy):
         """Initialize global model parameters."""
         initial_parameters = self.initial_parameters
         self.initial_parameters = None  # Don't keep initial parameters in memory
-        if isinstance(initial_parameters, list):
-            log(WARNING, DEPRECATION_WARNING_INITIAL_PARAMETERS)
-            initial_parameters = self.weights_to_parameters(weights=initial_parameters)
         return initial_parameters
 
     def evaluate(
@@ -163,12 +129,7 @@ class FedAvgAndroid(Strategy):
         eval_res = self.eval_fn(weights)
         if eval_res is None:
             return None
-        loss, other = eval_res
-        if isinstance(other, float):
-            print(DEPRECATION_WARNING)
-            metrics = {"accuracy": other}
-        else:
-            metrics = other
+        loss, metrics = eval_res
         return loss, metrics
 
     def configure_fit(
