@@ -25,6 +25,8 @@ This will create a new directory called `advanced_tensorflow` containing the fol
 -- server.py
 -- README.md
 -- run.sh
+-- certificate.conf
+-- generate.sh
 ```
 
 Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
