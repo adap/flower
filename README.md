@@ -60,9 +60,9 @@ Meet the Flower community on [flower.dev](https://flower.dev)!
 Flower Baselines is a collection of community-contributed experiments that reproduce the experiments performed in popular federated learning publications. Researchers can build on Flower Baselines to quickly evaluate new ideas:
 
 * [FedBN: Federated Learning on non-IID Features via Local Batch Normalization](https://arxiv.org/pdf/2102.07623.pdf):
-  * [Convergence Rate](https://github.com/adap/flower/tree/main/baselines/flwr_baseline/publications/fedbn/convergence_rate)
+  * [Convergence Rate](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/fedbn/convergence_rate)
 * [Adaptive Federated Optimization](https://arxiv.org/pdf/2003.00295.pdf)
-  * [CIFAR-10/100](https://github.com/adap/flower/tree/main/baselines/flwr_baseline/publications/adaptive_federated_optimization)
+  * [CIFAR-10/100](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/adaptive_federated_optimization)
 
 Check the Flower documentation to learn more: [Using Baselines](https://flower.dev/docs/using-baselines.html)
 
