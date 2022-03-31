@@ -76,6 +76,7 @@ sphinx = "==4.4.0"
 sphinx-book-theme = "==0.2.0"
 sphinx-panels = "==0.6.0"
 sphinxcontrib-mermaid = "==0.7.1"
+sphinx-reredirects = "==0.0.1"
 
 [tool.isort]
 line_length = 88
