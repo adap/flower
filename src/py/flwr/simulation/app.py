@@ -24,9 +24,10 @@ import ray
 from flwr.client.client import Client
 from flwr.common.logger import log
 from flwr.server.app import _fl, _init_defaults
+from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
-from flwr.server.client_manager import ClientManager
+
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 
 INVALID_ARGUMENTS_START_SIMULATION = """
