@@ -9,10 +9,10 @@ Like `quickstart_pytorch`, running this example in itself is also meant to be qu
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/transformers-pytorch . && rm -rf flower && cd transformers-pytorch
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_huggingface . && rm -rf flower && cd quickstart_huggingface
 ```
 
-This will create a new directory called `transformers-pytorch` containing the following files:
+This will create a new directory called `quickstart_huggingface` containing the following files:
 
 ```shell
 -- pyproject.toml

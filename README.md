@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://flower.dev/">
-    <img src="https://flower.dev/_next/static/chunks/images/logo-ed1336acd844fd699f2520e537e349b2.gif" width="140px" alt="Flower Website" />
+    <img src="https://flower.dev/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
   </a>
 </p>
 <p align="center">
@@ -34,7 +34,7 @@ design of Flower is based on a few guiding principles:
 * **Framework-agnostic**: Different machine learning frameworks have different
   strengths. Flower can be used with any machine learning framework, for
   example, [PyTorch](https://pytorch.org),
-  [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [MXNet](https://mxnet.apache.org/), [scikit-learn](https://scikit-learn.org/), [TFLite](https://tensorflow.org/lite/), or even raw [NumPy](https://numpy.org/)
+  [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [MXNet](https://mxnet.apache.org/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), or even raw [NumPy](https://numpy.org/)
   for users who enjoy computing gradients by hand.
 
 * **Understandable**: Flower is written with maintainability in mind. The
@@ -51,8 +51,22 @@ Meet the Flower community on [flower.dev](https://flower.dev)!
 * [Quickstart (Hugging Face [code example])](https://flower.dev/docs/quickstart_huggingface.html)
 * [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/quickstart_pytorch_lightning.html)
 * [Quickstart (MXNet)](https://flower.dev/docs/example-mxnet-walk-through.html)
+* [Quickstart (JAX [code example])](https://github.com/adap/flower/tree/main/examples/jax_from_centralized_to_federated)
 * [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 * [Quickstart (TFLite on Android [code example])](https://github.com/adap/flower/tree/main/examples/android)
+
+## Flower Baselines
+
+Flower Baselines is a collection of community-contributed experiments that reproduce the experiments performed in popular federated learning publications. Researchers can build on Flower Baselines to quickly evaluate new ideas:
+
+* [FedBN: Federated Learning on non-IID Features via Local Batch Normalization](https://arxiv.org/pdf/2102.07623.pdf):
+  * [Convergence Rate](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/fedbn/convergence_rate)
+* [Adaptive Federated Optimization](https://arxiv.org/pdf/2003.00295.pdf)
+  * [CIFAR-10/100](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/adaptive_federated_optimization)
+
+Check the Flower documentation to learn more: [Using Baselines](https://flower.dev/docs/using-baselines.html)
+
+The Flower community loves contributions! Make your work more visible and enable others to build on it by contributing it as a baseline: [Contributing Baselines](https://flower.dev/docs/contributing-baselines.html)
 
 ## Flower Usage Examples
 
@@ -78,12 +92,9 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 * [Android & TFLite](https://github.com/adap/flower/tree/main/examples/android)
 * [PyTorch: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/pytorch_from_centralized_to_federated)
 * [MXNet: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/mxnet_from_centralized_to_federated)
+* [JAX: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/jax_from_centralized_to_federated)
 * [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced_tensorflow)
 * [Single-Machine Simulation of Federated Learning Systems](https://github.com/adap/flower/tree/main/examples/simulation)
-
-## Flower Baselines / Datasets
-
-*Experimental* - curious minds can take a peek at [baselines](https://github.com/adap/flower/tree/main/baselines).
 
 ## Community
 
