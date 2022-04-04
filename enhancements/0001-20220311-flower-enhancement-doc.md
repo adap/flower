@@ -22,7 +22,7 @@ status: provisional
   - [Workflow](#workflow)
 - [Drawbacks](#drawbacks)
 - [Alternatives Considered](#alternatives-considered)
-  - [Github Issues](#github-issues)
+  - [GitHub Issues](#github-issues)
   - [Google Docs](#google-docs)
 
 ## Summary
@@ -46,9 +46,9 @@ into one file, which is created incrementally in collaboration with the communit
 
 ## Motivation
 
-For far-fetching changes or features proposed to Flower, an abstraction beyond a single Github issue or pull request is required in order to understand and communicate upcoming changes to the project.
+For far-fetching changes or features proposed to Flower, an abstraction beyond a single GitHub issue or pull request is required in order to understand and communicate upcoming changes to the project.
 
-The purpose of this process is to reduce the amount of "tribal knowledge" in our community. By moving decisions from Slack threads, video calls and hallway conversations into a well tracked artifact, this process aims to enhance communication and discoverability.
+The purpose of this process is to reduce the amount of "tribal knowledge" in our community. By moving decisions from Slack threads, video calls, and hallway conversations into a well tracked artifact, this process aims to enhance communication and discoverability.
 
 ### Goals
 
@@ -96,7 +96,7 @@ As reference, this document follows the above structure.
 - **status** (Required)
   The current status of the proposal. See [workflow](#workflow) for the possible states.
 - **authors** (Required)
-  A list of authors of the proposal. This is simply the Github ID.
+  A list of authors of the proposal. This is simply the GitHub ID.
 - **creation-date** (Required)
   The date that the proposal was first submitted in a PR.
 - **last-updated** (Optional)
