@@ -11,6 +11,6 @@ python -m flwr_tool.init_py_check src/py/flwr src/py/flwr_tool            && ech
 python -m docformatter -c -r src/py/flwr -e src/py/flwr/proto             && echo "- docformatter:  done" &&
 python -m mypy src/py                                                     && echo "- mypy:          done" &&
 python -m pylint --ignore=src/py/flwr/proto src/py/flwr                   && echo "- pylint:        done" &&
-# python -m flake8 src/py/flwr                                              && echo "- flake8:        done" &&
+python -m flake8 src/py/flwr                                              && echo "- flake8:        done" &&
 python -m pytest                                                          && echo "- pytest:        done" &&
 echo "- All Python checks passed"
