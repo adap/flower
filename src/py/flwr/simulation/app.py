@@ -26,6 +26,7 @@ from flwr.common.logger import log
 from flwr.server.app import _fl, _init_defaults
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
+from flwr.server.client_manager import ClientManager
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 
 INVALID_ARGUMENTS_START_SIMULATION = """
@@ -41,6 +42,7 @@ Invalid Arguments in method:
     client_resources: Optional[Dict[str, int]] = None,
     num_rounds: int = 1,
     strategy: Optional[Strategy] = None,
+    client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
 ) -> None:`
 
@@ -62,6 +64,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     client_resources: Optional[Dict[str, int]] = None,
     num_rounds: int = 1,
     strategy: Optional[Strategy] = None,
+    client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
 ) -> History:
     """Start a Ray-based Flower simulation server.
@@ -96,6 +99,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use
         `flwr.server.strategy.FedAvg`.
+    client_manager: Optional[flwr.server.ClientManager] (default: None)
+        An implementation of the abstract base class `flwr.server.ClientManager`.
+        If no strategy is provided, then `start_server` will use
+        `flwr.server.client_manager.SimpleClientManager`.
     ray_init_args : Optional[Dict[str, Any]] (default: None)
         Optional dictionary containing arguments for the call to `ray.init`.
         If ray_init_args is None (the default), Ray will be initialized with
@@ -149,7 +156,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # Initialize server and server config
     config = {"num_rounds": num_rounds}
-    initialized_server, initialized_config = _init_defaults(None, config, strategy)
+    initialized_server, initialized_config = _init_defaults(None, config, strategy, client_manager)
     log(
         INFO,
         "Starting Flower simulation running: %s",
