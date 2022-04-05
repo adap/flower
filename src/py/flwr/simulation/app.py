@@ -101,7 +101,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         `flwr.server.strategy.FedAvg`.
     client_manager: Optional[flwr.server.ClientManager] (default: None)
         An implementation of the abstract base class `flwr.server.ClientManager`.
-        If no implementation is provided, then `start_server` will use
+        If no implementation is provided, then `start_simulation` will use
         `flwr.server.client_manager.SimpleClientManager`.
     ray_init_args : Optional[Dict[str, Any]] (default: None)
         Optional dictionary containing arguments for the call to `ray.init`.
