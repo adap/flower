@@ -156,7 +156,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # Initialize server and server config
     config = {"num_rounds": num_rounds}
-    initialized_server, initialized_config = _init_defaults(None, config, strategy, client_manager)
+    initialized_server, initialized_config = _init_defaults(
+        None, config, strategy, client_manager
+    )
     log(
         INFO,
         "Starting Flower simulation running: %s",
