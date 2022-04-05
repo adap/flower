@@ -27,7 +27,6 @@ from flwr.server.app import _fl, _init_defaults
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
-
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 
 INVALID_ARGUMENTS_START_SIMULATION = """
@@ -102,7 +101,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         `flwr.server.strategy.FedAvg`.
     client_manager: Optional[flwr.server.ClientManager] (default: None)
         An implementation of the abstract base class `flwr.server.ClientManager`.
-        If no strategy is provided, then `start_server` will use
+        If no implementation is provided, then `start_server` will use
         `flwr.server.client_manager.SimpleClientManager`.
     ray_init_args : Optional[Dict[str, Any]] (default: None)
         Optional dictionary containing arguments for the call to `ray.init`.
