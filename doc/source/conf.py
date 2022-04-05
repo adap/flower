@@ -48,6 +48,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
+    "sphinx_copybutton",
     "sphinx_panels",
     "sphinxcontrib.mermaid",
 ]
@@ -66,22 +67,31 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_book_theme"
+html_theme = "furo"
 html_title = f"Flower {release}"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.dev/docs/"
 
-# https://sphinx-book-theme.readthedocs.io/en/latest/configure.html
 html_theme_options = {
-    # GitHub
-    "repository_url": "https://github.com/adap/flower",
-    "repository_branch": "main",
-    "path_to_docs": "doc/source/",
-    "home_page_in_toc": True,
-    "use_repository_button": True,
-    "use_issues_button": True,
-    "use_edit_page_button": True,
+    # Sphinx Book Theme
+    # https://sphinx-book-theme.readthedocs.io/en/latest/configure.html
+    # "repository_url": "https://github.com/adap/flower",
+    # "repository_branch": "main",
+    # "path_to_docs": "doc/source/",
+    # "home_page_in_toc": True,
+    # "use_repository_button": True,
+    # "use_issues_button": True,
+    # "use_edit_page_button": True,
+
+    # Furo
+    # https://pradyunsg.me/furo/customisation/
+    # "light_css_variables": {
+    #     "color-brand-primary": "#292F36",
+    #     "color-brand-content": "#292F36",  
+    #     "color-admonition-background": "#F2B705",
+    # },
+    "announcement": "Flower Summit 2022 <a href=\"https://flower.dev/conf/flower-summit-2022/\">register now</a>",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
