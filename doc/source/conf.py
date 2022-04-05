@@ -86,10 +86,11 @@ html_theme_options = {
 
     # Furo
     # https://pradyunsg.me/furo/customisation/
-    "light_css_variables": {
-        "color-brand-primary": "#292F36",
-        "color-brand-content": "#F2B705",
-    },
+    # "light_css_variables": {
+    #     "color-brand-primary": "#292F36",
+    #     "color-brand-content": "#292F36",  
+    #     "color-admonition-background": "#F2B705",
+    # },
     "announcement": "Flower Summit 2022 <a href=\"https://flower.dev/conf/flower-summit-2022/\">register now</a>",
 }
 
