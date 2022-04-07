@@ -117,7 +117,7 @@ The Flower server will execute and process received results in the following ord
       activate P
       P->>C1: ShareKeysIns
       deactivate P
-      P->>C2: 
+      P->>C2:
       P->>C3:
       C1->>P: ShareKeysRes
       C2->>P:
@@ -156,11 +156,124 @@ The Flower server will execute and process received results in the following ord
       deactivate P
       end
 
+The :code:`LightSecAgg` abstraction
+-----------------------------------
+
+In this implementation, each client will be assigned with a unique index (int) for secure aggregation, and thus many python dictionaries used have keys of int type rather than ClientProxy type.
+
+.. code-block:: python
+
+    class LightSecAggProtocol(ABC):
+        """Abstract base class for the LightSecAgg protocol implementations."""
+
+        @abstractmethod
+        def setup_config(
+            self, clients: List[ClientProxy], config_dict: Dict[str, Scalar]
+        ) -> LightSecAggSetupConfigResultsAndFailures:
+            """Configure the next round of secure aggregation."""
+
+        @abstractmethod
+        def ask_encrypted_encoded_masks(
+            self,
+            clients: List[ClientProxy], public_keys_dict: Dict[int, LightSecAggSetupConfigRes]
+        ) -> AskEncryptedEncodedMasksResultsAndFailures:
+            """Ask encrypted encoded masks. The protocol adopts Diffie-Hellman keys to build pair-wise secured channels to transfer encoded mask."""
+
+        @abstractmethod
+        def ask_masked_models(
+            self,
+            clients: List[ClientProxy],
+            forward_packet_list_dict: Dict[int, List[EncryptedEncodedMasksPacket]],
+            client_instructions=None: Dict[int, FitIns]
+        ) -> AskMaskedModelsResultsAndFailures:
+            """Ask the masked local models.
+            (If client_instructions is not None, local models will be trained in the ask vectors stage,
+            rather than trained parallelly as the protocol goes through the previous stages.)"""
+
+        @abstractmethod
+        def ask_aggregated_encoded_masks(
+            clients: List[ClientProxy]
+        ) -> AskAggregatedEncodedMasksResultsAndFailures:
+            """Ask aggregated encoded masks"""
+
+
+The Flower server will execute and process received results in the following order:
+
+.. mermaid::
+  sequenceDiagram
+      participant S as Flower Server
+      participant P as LightSecAgg Protocol
+      participant C1 as Flower Client
+      participant C2 as Flower Client
+      participant C3 as Flower Client
+
+      Note left of P: Stage 0:<br/>Setup Config
+      rect rgb(249, 219, 130)
+      S->>P: setup_config<br/>clients, config_dict
+      activate P
+      P->>C1: LightSecAggSetupConfigIns
+      deactivate P
+      P->>C2:
+      P->>C3:
+      C1->>P: LightSecAggSetupConfigRes
+      C2->>P:
+      C3->>P:
+      activate P
+      P-->>S: public keys
+      deactivate P
+      end
+
+      Note left of P: Stage 1:<br/>Ask Encrypted Encoded Masks
+      rect rgb(249, 219, 130)
+      S->>P: ask_encrypted_encoded_masks<br/>clients, public_keys_dict
+      activate P
+      P->>C1: AskEncryptedEncodedMasksIns
+      deactivate P
+      P->>C2:
+      P->>C3:
+      C1->>P: AskEncryptedEncodedMasksRes
+      C2->>P:
+      C3->>P:
+      activate P
+      P-->>S: forward packets
+      deactivate P
+      end
+
+      Note left of P: Stage 2:<br/>Ask Masked Models
+      rect rgb(249, 219, 130)
+      S->>P: share_keys<br/>clients, forward_packet_list_dict
+      activate P
+      P->>C1: AskMaskedModelsIns
+      deactivate P
+      P->>C2:
+      P->>C3:
+      C1->>P: AskMaskedModelsRes
+      C2->>P:
+      activate P
+      P-->>S: masked local models
+      deactivate P
+      end
+
+      Note left of P: Stage 3:<br/>Ask Aggregated Encoded Masks
+      rect rgb(249, 219, 130)
+      S->>P: ask_aggregated_encoded_masks<br/>clients
+      activate P
+      P->>C1: AskAggregatedEncodedMasksIns
+      deactivate P
+      P->>C2:
+      C1->>P: AskAggregatedEncodedMasksRes
+      C2->>P:
+      activate P
+      P-->>S: the aggregated model
+      deactivate P
+      end
 
 Types
 -----
 
 .. code-block:: python
+
+        # the SecAgg+ protocol
 
         ClientGraph = Dict[int, List[int]]
 
@@ -190,12 +303,12 @@ Types
 
 
         @dataclass
-        class SetupParamIns:
-            sec_agg_param_dict: Dict[str, Scalar]
+        class SetupConfigIns:
+            sec_agg_cfg_dict: Dict[str, Scalar]
 
 
         @dataclass
-        class SetupParamRes:
+        class SetupConfigRes:
             pass
 
 
@@ -250,6 +363,69 @@ Types
             share_dict: Dict[int, bytes]
 
 
+        # the LightSecAgg protocol
+
+        LightSecAggSetupConfigResultsAndFailures = Tuple[
+            List[Tuple[ClientProxy, LightSecAggSetupConfigRes]], List[BaseException]
+        ]
+
+        AskEncryptedEncodedMasksResultsAndFailures = Tuple[
+            List[Tuple[ClientProxy, AskEncryptedEncodedMasksRes]], List[BaseException]
+        ]
+
+        AskMaskedModelsResultsAndFailures = Tuple[
+            List[Tuple[ClientProxy, AskMaskedModelsRes]], List[BaseException]
+        ]
+
+        AskAggregatedEncodedMasksResultsAndFailures = Tuple[
+            List[Tuple[ClientProxy, AskAggregatedEncodedMasksRes]], List[BaseException]
+        ]
 
 
+        @dataclass
+        class LightSecAggSetupConfigIns:
+            sec_agg_cfg_dict: Dict[str, Scalar]
+
+
+        @dataclass
+        class LightSecAggSetupConfigRes:
+            pk: bytes
+
+
+        @dataclass
+        class AskEncryptedEncodedMasksIns:
+            public_keys_dict: Dict[int, LightSecAggSetupConfigRes]
+
+
+        @dataclass
+        class EncryptedEncodedMasksPacket:
+            source: int
+            destination: int
+            ciphertext: bytes
+
+
+        @dataclass
+        class AskEncryptedEncodedMasksRes:
+            packet_list: List[EncryptedEncodedMasksPacket]
+
+
+        @dataclass
+        class AskMaskedModelsIns:
+            packet_list: List[EncryptedEncodedMasksPacket]
+            fit_ins: FitIns
+
+
+        @dataclass
+        class AskMaskedModelsRes:
+            parameters: Parameters
+
+
+        @dataclass
+        class AskAggregatedEncodedMasksIns:
+            surviving_clients: List[int]
+
+
+        @dataclass
+        class AskAggregatedEncodedMasksRes:
+            aggregated_encoded_mask: Parameters
 
