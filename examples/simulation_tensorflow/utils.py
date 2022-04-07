@@ -2,10 +2,11 @@ from pathlib import Path
 import numpy as np
 import pickle
 import shutil
-from typing import Callable, Optional
-from tf.keras.applications import MobileNetV2
+from typing import Callable, Optional, Tuple
+from tensorflow.keras.applications import MobileNetV2
 from flwr.dataset.utils.common import create_lda_partitions
-from flwr.common.typing import Tuple, Weights, XY
+from flwr.common.typing import Weights
+from flwr.dataset.utils.common import XY
 
 def get_model() -> MobileNetV2:
     model = MobileNetV2((32, 32, 3), classes=10, weights=None)
