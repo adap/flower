@@ -35,8 +35,6 @@ sidebar_width_class = "col-md-3" %} {% endif %} {% block extrahead %} {{ super()
   </div>
   {% endblock %} {%- include "footer.html" %}
 </main>
-{% endblock %} {% block docs_toc %} {% endblock %} {% block docs_navbar %} {%-
-endblock %} {%- block footer %} {%- endblock %}
 
 <script
   async
@@ -71,5 +69,9 @@ endblock %} {%- block footer %} {%- endblock %}
 <script
   defer
   data-domain="flower.dev"
-  src="https://plausible.io/js/plausible.js"
-></script>
+  data-api="/static/pla/api/event"
+  src="/static/pla/js/script.js"
+/>
+
+{% endblock %} {% block docs_toc %} {% endblock %} {% block docs_navbar %} {%-
+endblock %} {%- block footer %} {%- endblock %}

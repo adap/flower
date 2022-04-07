@@ -1,0 +1,4 @@
+flwr==0.18.0
+ray==1.9.2
+torch==1.10.2
+torchvision==0.11.3

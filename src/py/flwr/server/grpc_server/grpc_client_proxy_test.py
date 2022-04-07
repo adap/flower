@@ -30,8 +30,6 @@ MESSAGE_FIT_RES = ClientMessage(
     fit_res=ClientMessage.FitRes(
         parameters=MESSAGE_PARAMETERS,
         num_examples=10,
-        num_examples_ceil=16,
-        fit_duration=12.3,
     )
 )
 CLIENT_PROPERTIES = {"tensor_type": Scalar(string="numpy.ndarray")}
@@ -61,7 +59,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         value: flwr.common.ParametersRes = client.get_parameters()
 
         # Assert
-        assert value.parameters.tensors == []
+        assert not value.parameters.tensors
 
     def test_fit(self) -> None:
         """This test is currently quite simple and should be improved."""
@@ -89,10 +87,9 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         evaluate_res = client.evaluate(evaluate_ins)
 
         # Assert
-        assert (0, 0.0, 0.0) == (
+        assert (0, 0.0) == (
             evaluate_res.num_examples,
             evaluate_res.loss,
-            evaluate_res.accuracy,
         )
 
     def test_get_properties(self) -> None:

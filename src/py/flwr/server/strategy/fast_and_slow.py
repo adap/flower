@@ -17,7 +17,7 @@
 
 import math
 import statistics
-from logging import DEBUG, INFO
+from logging import DEBUG, INFO, WARNING
 from typing import Callable, Dict, List, Optional, Tuple, cast
 
 import numpy as np
@@ -26,6 +26,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    MetricsAggregationFn,
     Parameters,
     Scalar,
     Weights,
@@ -74,6 +75,8 @@ class FastAndSlow(FedAvg):
         t_fast: int = 10,
         t_slow: int = 10,
         initial_parameters: Optional[Parameters] = None,
+        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -85,6 +88,8 @@ class FastAndSlow(FedAvg):
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             initial_parameters=initial_parameters,
+            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
         self.min_completion_rate_fit = min_completion_rate_fit
         self.min_completion_rate_evaluate = min_completion_rate_evaluate
@@ -98,6 +103,8 @@ class FastAndSlow(FedAvg):
         self.t_slow = t_slow
         self.contributions: Dict[str, List[Tuple[int, int, int]]] = {}
         self.durations: List[Tuple[str, float, int, int]] = []
+        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
+        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
         rep = f"FastAndSlow(importance_sampling={self.importance_sampling}, "
@@ -231,7 +238,7 @@ class FastAndSlow(FedAvg):
         for idx, (cid, _) in enumerate(all_clients.items()):
             cid_idx[idx] = cid
             penalty = 0.0
-            if cid in self.contributions.keys():
+            if cid in self.contributions:
                 contribs: List[Tuple[int, int, int]] = self.contributions[cid]
                 penalty = statistics.mean([c / m for _, c, m in contribs])
             # `p` should be:
@@ -261,7 +268,7 @@ class FastAndSlow(FedAvg):
         for idx, (cid, _) in enumerate(all_clients.items()):
             cid_idx[idx] = cid
 
-            if cid in self.contributions.keys():
+            if cid in self.contributions:
                 # Previously selected clients
                 contribs: List[Tuple[int, int, int]] = self.contributions[cid]
 
@@ -324,30 +331,48 @@ class FastAndSlow(FedAvg):
             # Track contributions to the global model
             for client, fit_res in results:
                 cid = client.cid
-                assert fit_res.num_examples_ceil is not None
+
+                assert "num_examples_ceil" in fit_res.metrics
+                num_examples_ceil = cast(int, fit_res.metrics["num_examples_ceil"])
+
                 contribution: Tuple[int, int, int] = (
                     rnd,
                     fit_res.num_examples,
-                    fit_res.num_examples_ceil,
+                    num_examples_ceil,
                 )
-                if cid not in self.contributions.keys():
+                if cid not in self.contributions:
                     self.contributions[cid] = []
                 self.contributions[cid].append(contribution)
 
         if self.dynamic_timeout:
             self.durations = []
             for client, fit_res in results:
-                assert fit_res.fit_duration is not None
-                assert fit_res.num_examples_ceil is not None
+
+                assert "fit_duration" in fit_res.metrics
+                fit_duration: float = cast(float, fit_res.metrics["fit_duration"])
+
+                assert "num_examples_ceil" in fit_res.metrics
+                num_examples_ceil = cast(int, fit_res.metrics["num_examples_ceil"])
+
                 cid_duration = (
                     client.cid,
-                    fit_res.fit_duration,
+                    fit_duration,
                     fit_res.num_examples,
-                    fit_res.num_examples_ceil,
+                    num_examples_ceil,
                 )
                 self.durations.append(cid_duration)
 
-        return weights_to_parameters(weights_prime), {}
+        parameters_aggregated = weights_to_parameters(weights_prime)
+
+        # Aggregate custom metrics if aggregation fn was provided
+        metrics_aggregated = {}
+        if self.fit_metrics_aggregation_fn:
+            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
+        elif rnd == 1:
+            log(WARNING, "No fit_metrics_aggregation_fn provided")
+
+        return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
         self,
@@ -365,19 +390,23 @@ class FastAndSlow(FedAvg):
             # Not enough results for aggregation
             return None, {}
 
-        return (
-            weighted_loss_avg(
-                [
-                    (
-                        evaluate_res.num_examples,
-                        evaluate_res.loss,
-                        evaluate_res.accuracy,
-                    )
-                    for client, evaluate_res in results
-                ]
-            ),
-            {},
+        # Aggregate loss
+        loss_aggregated = weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss)
+                for _, evaluate_res in results
+            ]
         )
+
+        # Aggregate custom metrics if aggregation fn was provided
+        metrics_aggregated = {}
+        if self.evaluate_metrics_aggregation_fn:
+            eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
+        elif rnd == 1:
+            log(WARNING, "No evaluate_metrics_aggregation_fn provided")
+
+        return loss_aggregated, metrics_aggregated
 
 
 def is_fast_round(rnd: int, r_fast: int, r_slow: int) -> bool:
