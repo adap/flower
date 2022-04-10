@@ -38,8 +38,7 @@ int main(int argc, char **argv) {
     std::string server_add = SERVER_URL;
 
     // Start client
-    start s;
-    s.start_client(server_add, &client);
+    start::start_client(server_add, &client);
 
     return 0;
 }
