@@ -1,0 +1,17 @@
+digraph "classes" {
+rankdir=BT
+charset="utf-8"
+"flwr.client.client.Client" [color="black", fontcolor="black", label="{Client|\l|evaluate(ins: EvaluateIns): EvaluateRes\lfit(ins: FitIns): FitRes\lget_parameters(): ParametersRes\lget_properties(ins: PropertiesIns): PropertiesRes\l}", shape="record", style="solid"];
+"flwr.client.numpy_client.NumPyClient" [color="black", fontcolor="black", label="{NumPyClient|\l|evaluate(parameters: List[np.ndarray], config: Dict[str, Scalar]): Tuple[float, int, Dict[str, Scalar]]\lfit(parameters: List[np.ndarray], config: Dict[str, Scalar]): Tuple[List[np.ndarray], int, Dict[str, Scalar]]\lget_parameters(): List[np.ndarray]\lget_properties(config: Config): Dict[str, Scalar]\l}", shape="record", style="solid"];
+"flwr.client.numpy_client.NumPyClientWrapper" [color="black", fontcolor="black", label="{NumPyClientWrapper|numpy_client\l|evaluate(ins: EvaluateIns): EvaluateRes\lfit(ins: FitIns): FitRes\lget_parameters(): ParametersRes\lget_properties(ins: PropertiesIns): PropertiesRes\l}", shape="record", style="solid"];
+"flwr.server.client_proxy.ClientProxy" [color="black", fontcolor="black", label="{ClientProxy|cid : str\lproperties : Dict\l|evaluate(ins: EvaluateIns): EvaluateRes\lfit(ins: FitIns): FitRes\lget_parameters(): ParametersRes\lget_properties(ins: PropertiesIns): PropertiesRes\lreconnect(reconnect: Reconnect): Disconnect\l}", shape="record", style="solid"];
+"flwr.server.grpc_server.grpc_bridge.GRPCBridge" [color="black", fontcolor="black", label="{GRPCBridge|\l|close(): \lrequest(server_message: ServerMessage): ClientMessage\lserver_message_iterator(): Iterator[ServerMessage]\lset_client_message(client_message: ClientMessage): \l}", shape="record", style="solid"];
+"flwr.server.grpc_server.grpc_client_proxy.GrpcClientProxy" [color="black", fontcolor="black", label="{GrpcClientProxy|bridge\l|evaluate(ins): \lfit(ins): \lget_parameters(): \lget_properties(ins): \lreconnect(reconnect): \l}", shape="record", style="solid"];
+"flwr.simulation.ray_transport.ray_client_proxy.RayClientProxy" [color="black", fontcolor="black", label="{RayClientProxy|client_fn : Callable\lresources : Dict[str, int]\l|evaluate(ins): \lfit(ins): \lget_parameters(): \lget_properties(ins): \lreconnect(reconnect): \l}", shape="record", style="solid"];
+
+"flwr.client.numpy_client.NumPyClientWrapper" -> "flwr.client.client.Client" [arrowhead="empty", arrowtail="none"];
+"flwr.server.grpc_server.grpc_client_proxy.GrpcClientProxy" -> "flwr.server.client_proxy.ClientProxy" [arrowhead="empty", arrowtail="none"];
+"flwr.simulation.ray_transport.ray_client_proxy.RayClientProxy" -> "flwr.server.client_proxy.ClientProxy" [arrowhead="empty", arrowtail="none"];
+"flwr.client.numpy_client.NumPyClient" -> "flwr.client.numpy_client.NumPyClientWrapper" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="numpy_client", style="solid"];
+"flwr.server.grpc_server.grpc_bridge.GRPCBridge" -> "flwr.server.grpc_server.grpc_client_proxy.GrpcClientProxy" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="bridge", style="solid"];
+}
