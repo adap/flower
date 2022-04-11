@@ -9,7 +9,7 @@ Centralized Evaluation
 Built-In Strategies
 ~~~~~~~~~~~~~~~~~~~
 
-All built-in strategies support centalized evaluation by providing an evaluation function during initialization.
+All built-in strategies support centralized evaluation by providing an evaluation function during initialization.
 An evaluation function is any function that can take the current global model parameters as input and return evaluation results:
 
 .. code-block:: python
@@ -50,7 +50,7 @@ An evaluation function is any function that can take the current global model pa
 Custom Strategies
 ~~~~~~~~~~~~~~~~~
 
-The :code:`Strategy` abstraction provides a method called :code:`evaluate` that can direcly be used to evaluate the current global model parameters.
+The :code:`Strategy` abstraction provides a method called :code:`evaluate` that can directly be used to evaluate the current global model parameters.
 The current server implementation calls :code:`evaluate` after parameter aggregation and before federated evaluation (see next paragraph).
 
 
