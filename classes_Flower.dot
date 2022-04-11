@@ -8,8 +8,8 @@ charset="utf-8"
 "flwr.server.criterion.Criterion" [color="black", fontcolor="black", label="Criterion", shape="record", style="solid"];
 //"flwr.common.logger.CustomHTTPHandler" [color="black", fontcolor="black", label="CustomHTTPHandler", shape="record", style="solid"];
 //"flwr.common.typing.Disconnect" [color="black", fontcolor="black", label="Disconnect", shape="record", style="solid"];
-//"flwr.common.typing.EvaluateIns" [color="black", fontcolor="black", label="EvaluateIns", shape="record", style="solid"];
-//"flwr.common.typing.EvaluateRes" [color="black", fontcolor="black", label="EvaluateRes", shape="record", style="solid"];
+"flwr.common.typing.EvaluateIns" [color="black", fontcolor="black", label="EvaluateIns", shape="record", style="solid"];
+"flwr.common.typing.EvaluateRes" [color="black", fontcolor="black", label="EvaluateRes", shape="record", style="solid"];
 //"flwr.server.server_test.FailingClient" [color="black", fontcolor="black", label="FailingClient", shape="record", style="solid"];
 "flwr.server.strategy.fast_and_slow.FastAndSlow" [color="black", fontcolor="black", label="FastAndSlow", shape="record", style="solid"];
 //"flwr.server.strategy.fast_and_slow_test.FastAndSlowTestCase" [color="black", fontcolor="black", label="FastAndSlowTestCase", shape="record", style="solid"];
@@ -23,8 +23,8 @@ charset="utf-8"
 "flwr.server.strategy.fedfs_v1.FedFSv1" [color="black", fontcolor="black", label="FedFSv1", shape="record", style="solid"];
 "flwr.server.strategy.fedopt.FedOpt" [color="black", fontcolor="black", label="FedOpt", shape="record", style="solid"];
 "flwr.server.strategy.fedyogi.FedYogi" [color="black", fontcolor="black", label="FedYogi", shape="record", style="solid"];
-//"flwr.common.typing.FitIns" [color="black", fontcolor="black", label="FitIns", shape="record", style="solid"];
-//"flwr.common.typing.FitRes" [color="black", fontcolor="black", label="FitRes", shape="record", style="solid"];
+"flwr.common.typing.FitIns" [color="black", fontcolor="black", label="FitIns", shape="record", style="solid"];
+"flwr.common.typing.FitRes" [color="black", fontcolor="black", label="FitRes", shape="record", style="solid"];
 //"flwr.client.grpc_client.message_handler_test.FlowerClientWithProps" [color="black", fontcolor="black", label="FlowerClientWithProps", shape="record", style="solid"];
 //"flwr.client.grpc_client.message_handler_test.FlowerClientWithoutProps" [color="black", fontcolor="black", label="FlowerClientWithoutProps", shape="record", style="solid"];
 //"flwr.proto.transport_pb2_grpc.FlowerService" [color="black", fontcolor="black", label="FlowerService", shape="record", style="solid"];
@@ -45,7 +45,7 @@ charset="utf-8"
 //"flwr.client.client_test.OverridingClient" [color="black", fontcolor="black", label="OverridingClient", shape="record", style="solid"];
 //"flwr.client.numpy_client_test.OverridingClient" [color="black", fontcolor="black", label="OverridingClient", shape="record", style="solid"];
 "flwr.common.typing.Parameters" [color="black", fontcolor="black", label="Parameters", shape="record", style="solid"];
-//"flwr.common.typing.ParametersRes" [color="black", fontcolor="black", label="ParametersRes", shape="record", style="solid"];
+"flwr.common.typing.ParametersRes" [color="black", fontcolor="black", label="ParametersRes", shape="record", style="solid"];
 //"flwr.common.typing.PropertiesIns" [color="black", fontcolor="black", label="PropertiesIns", shape="record", style="solid"];
 //"flwr.common.typing.PropertiesRes" [color="black", fontcolor="black", label="PropertiesRes", shape="record", style="solid"];
 "flwr.server.strategy.qfedavg.QFedAvg" [color="black", fontcolor="black", label="QFedAvg", shape="record", style="solid"];
@@ -86,31 +86,32 @@ charset="utf-8"
 "flwr.server.strategy.fedyogi.FedYogi" -> "flwr.server.strategy.fedopt.FedOpt" [arrowhead="empty", arrowtail="none"];
 "flwr.server.strategy.qfedavg.QFedAvg" -> "flwr.server.strategy.fedavg.FedAvg" [arrowhead="empty", arrowtail="none"];
 "flwr.simulation.ray_transport.ray_client_proxy.RayClientProxy" -> "flwr.server.client_proxy.ClientProxy" [arrowhead="empty", arrowtail="none"];
-"flwr.client.numpy_client.NumPyClient" -> "flwr.client.numpy_client.NumPyClientWrapper" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="numpy_client", style="solid"];
-//"flwr.common.typing.Code" -> "flwr.common.typing.Status" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="code", style="solid"];
-//"flwr.common.typing.Parameters" -> "flwr.common.typing.EvaluateIns" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="parameters", style="solid"];
-//"flwr.common.typing.Parameters" -> "flwr.common.typing.FitIns" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="parameters", style="solid"];
-//"flwr.common.typing.Parameters" -> "flwr.common.typing.FitRes" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="parameters", style="solid"];
-//"flwr.common.typing.Parameters" -> "flwr.common.typing.ParametersRes" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="parameters", style="solid"];
-"flwr.common.typing.Parameters" -> "flwr.server.server.Server" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="parameters", style="solid"];
-"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedavgm.FedAvgM" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="initial_parameters", style="solid"];
-//"flwr.common.typing.Status" -> "flwr.common.typing.PropertiesRes" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="status", style="solid"];
-"flwr.server.client_manager.ClientManager" -> "flwr.server.grpc_server.flower_service_servicer.FlowerServiceServicer" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="client_manager", style="solid"];
-"flwr.server.client_manager.ClientManager" -> "flwr.server.server.Server" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="_client_manager", style="solid"];
-"flwr.server.grpc_server.grpc_bridge.GRPCBridge" -> "flwr.server.grpc_server.grpc_client_proxy.GrpcClientProxy" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="bridge", style="solid"];
-"flwr.server.strategy.strategy.Strategy" -> "flwr.server.server.Server" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="strategy", style="solid"];
+"flwr.client.numpy_client.NumPyClient" -> "flwr.client.numpy_client.NumPyClientWrapper" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="numpy_client", style="solid"];
+//"flwr.common.typing.Code" -> "flwr.common.typing.Status" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="code", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.common.typing.EvaluateIns" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.common.typing.EvaluateRes" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.common.typing.FitIns" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.common.typing.FitRes" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.common.typing.ParametersRes" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.server.server.Server" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedavgm.FedAvgM" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="initial_parameters", style="solid"];
+//"flwr.common.typing.Status" -> "flwr.common.typing.PropertiesRes" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="status", style="solid"];
+"flwr.server.client_manager.ClientManager" -> "flwr.server.grpc_server.flower_service_servicer.FlowerServiceServicer" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="client_manager", style="solid"];
+"flwr.server.client_manager.ClientManager" -> "flwr.server.server.Server" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="_client_manager", style="solid"];
+"flwr.server.grpc_server.grpc_bridge.GRPCBridge" -> "flwr.server.grpc_server.grpc_client_proxy.GrpcClientProxy" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="bridge", style="solid"];
+"flwr.server.strategy.strategy.Strategy" -> "flwr.server.server.Server" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="strategy", style="solid"];
 "flwr.server.history.History" -> "flwr.server.server.Server" [arrowhead="diamond"]
 "flwr.server.criterion.Criterion" -> "flwr.server.client_manager.SimpleClientManager" [arrowhead="diamond"]
-"flwr.server.client_proxy.ClientProxy" -> "flwr.server.client_manager.SimpleClientManager" [arrowhead="diamond", fontcolor="green", label="client", style="solid"]
+"flwr.server.client_proxy.ClientProxy" -> "flwr.server.client_manager.SimpleClientManager" [arrowhead="diamond", fontcolor="black", label="client", style="solid"]
 
 // parameters
-"flwr.common.typing.Parameters" -> "flwr.server.strategy.fast_and_slow.FastAndSlow" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="initial_parameters", style="solid"];
-"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedavgm.FedAvgM" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="initial_parameters", style="solid"];
-"flwr.common.typing.Parameters" -> "flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="initial_parameters", style="solid"];
-"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedfs_v0.FedFSv0" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="initial_parameters", style="solid"];
-"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedfs_v1.FedFSv1" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="initial_parameters", style="solid"];
-"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedadagrad.FedAdagrad" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="initial_parameters", style="solid"];
-"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedadam.FedAdam" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="initial_parameters", style="solid"];
-"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedyogi.FedYogi" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="initial_parameters", style="solid"];
-"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedyogi.FedYogi" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="initial_parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.server.strategy.fast_and_slow.FastAndSlow" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="initial_parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedavgm.FedAvgM" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="initial_parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="initial_parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedfs_v0.FedFSv0" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="initial_parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedfs_v1.FedFSv1" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="initial_parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedadagrad.FedAdagrad" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="initial_parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedadam.FedAdam" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="initial_parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedyogi.FedYogi" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="initial_parameters", style="solid"];
+"flwr.common.typing.Parameters" -> "flwr.server.strategy.fedyogi.FedYogi" [arrowhead="diamond", arrowtail="none", fontcolor="black", label="initial_parameters", style="solid"];a
 }
