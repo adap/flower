@@ -63,6 +63,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     num_rounds: int = 1,
     strategy: Optional[Strategy] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
+    path_to_save_metrics = None
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -148,7 +149,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     )
 
     # Initialize server and server config
-    config = {"num_rounds": num_rounds}
+    config = {"num_rounds": num_rounds , "path_to_save_metrics": path_to_save_metrics}
     initialized_server, initialized_config = _init_defaults(None, config, strategy)
     log(
         INFO,

@@ -35,6 +35,8 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import FedAvg, Strategy
+from flwr.server.strategy.dp_adaptive_clip_strategy import DPAdaptiveClipStrategy
+import numpy as np
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -49,12 +51,28 @@ ReconnectResultsAndFailures = Tuple[
     List[BaseException],
 ]
 
+def save_metrics(hist, path_to_save_metrics):
+    
+    accs = np.array([])
+    losses = np.array([])
+    clip_norms = np.array([])
 
+    for (_, acc) in hist.metrics_centralized['accuracy']:
+        accs = np.append(accs, acc)
+    for (_, loss) in hist.losses_centralized:
+        losses = np.append(losses, loss)
+    for (_, clip_norm) in hist.clip_norms:
+        clip_norms = np.append(clip_norms, clip_norm)
+
+    np.save(path_to_save_metrics / "accs.npy", accs)
+    np.save(path_to_save_metrics / "losses.npy", losses)
+    if len(clip_norms) > 0:
+        np.save(path_to_save_metrics / "clip_norms.npy", clip_norms)
 class Server:
     """Flower server."""
 
     def __init__(
-        self, client_manager: ClientManager, strategy: Optional[Strategy] = None
+        self, client_manager: ClientManager, strategy: Optional[Strategy] = None, path_to_save_metrics = None
     ) -> None:
         self._client_manager: ClientManager = client_manager
         self.parameters: Parameters = Parameters(
@@ -62,6 +80,7 @@ class Server:
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
         self.max_workers: Optional[int] = None
+        self.path_to_save_metrics = path_to_save_metrics
 
     def set_max_workers(self, max_workers: Optional[int]) -> None:
         """Set the max_workers used by ThreadPoolExecutor."""
@@ -94,6 +113,8 @@ class Server:
             )
             history.add_loss_centralized(rnd=0, loss=res[0])
             history.add_metrics_centralized(rnd=0, metrics=res[1])
+            if isinstance(self.strategy, DPAdaptiveClipStrategy):
+                history.add_clip_norm(rnd=0, clip_norm=self.strategy.clip_norm)
 
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
@@ -121,6 +142,8 @@ class Server:
                 )
                 history.add_loss_centralized(rnd=current_round, loss=loss_cen)
                 history.add_metrics_centralized(rnd=current_round, metrics=metrics_cen)
+                if isinstance(self.strategy, DPAdaptiveClipStrategy):
+                    history.add_clip_norm(rnd=current_round, clip_norm=self.strategy.clip_norm)
 
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(rnd=current_round)
@@ -131,7 +154,7 @@ class Server:
                     history.add_metrics_distributed(
                         rnd=current_round, metrics=evaluate_metrics_fed
                     )
-
+        save_metrics(history, self.path_to_save_metrics)
         # Bookkeeping
         end_time = timeit.default_timer()
         elapsed = end_time - start_time

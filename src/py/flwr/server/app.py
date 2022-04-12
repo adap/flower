@@ -123,14 +123,14 @@ def start_server(  # pylint: disable=too-many-arguments
 def _init_defaults(
     server: Optional[Server],
     config: Optional[Dict[str, int]],
-    strategy: Optional[Strategy],
+    strategy: Optional[Strategy]
 ) -> Tuple[Server, Dict[str, int]]:
     # Create server instance if none was given
     if server is None:
         client_manager = SimpleClientManager()
         if strategy is None:
             strategy = FedAvg()
-        server = Server(client_manager=client_manager, strategy=strategy)
+        server = Server(client_manager=client_manager, strategy=strategy, path_to_save_metrics=config["path_to_save_metrics"])
 
     # Set default config values
     if config is None:

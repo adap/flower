@@ -28,6 +28,10 @@ class History:
         self.losses_centralized: List[Tuple[int, float]] = []
         self.metrics_distributed: Dict[str, List[Tuple[int, Scalar]]] = {}
         self.metrics_centralized: Dict[str, List[Tuple[int, Scalar]]] = {}
+        self.clip_norms: List[Tuple[int, float]] = []
+    def add_clip_norm(self, rnd:int, clip_norm: float) -> None:
+        """Add one clip norm entry."""
+        self.clip_norms.append((rnd, clip_norm))
 
     def add_loss_distributed(self, rnd: int, loss: float) -> None:
         """Add one loss entry (from distributed evaluation)."""
