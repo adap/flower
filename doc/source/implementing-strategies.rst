@@ -228,7 +228,7 @@ More sophisticated implementations can use :code:`configure_fit` to implement cu
 
 .. note::
 
-    The structure of this retun value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to train, for example, different models on different clients, or use differnt hyperparameters on different clients (via the :code:`config` dict).
+    The structure of this retun value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to train, for example, different models on different clients, or use different hyperparameters on different clients (via the :code:`config` dict).
 
 The :code:`aggregate_fit` method
 --------------------------------
