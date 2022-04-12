@@ -58,7 +58,7 @@ def start_server(  # pylint: disable=too-many-arguments
             `flwr.server.strategy.FedAvg`.
         client_manager: Optional[flwr.server.ClientManager] (default: None)
             An implementation of the abstract base class `flwr.server.ClientManager`.
-            If no implementation is provided, then `start_simulation` will use
+            If no implementation is provided, then `start_server` will use
             `flwr.server.client_manager.SimpleClientManager`.
         grpc_max_message_length: int (default: 536_870_912, this equals 512MB).
             The maximum length of gRPC messages that can be exchanged with the
