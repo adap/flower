@@ -99,7 +99,9 @@ def start_server(  # pylint: disable=too-many-arguments
     >>>     )
     >>> )
     """
-    initialized_server, initialized_config = _init_defaults(server, config, strategy, client_manager)
+    initialized_server, initialized_config = _init_defaults(
+        server, config, strategy, client_manager
+    )
 
     # Start gRPC server
     grpc_server = start_grpc_server(
