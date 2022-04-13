@@ -108,21 +108,17 @@ ignore_missing_imports = true
 strict = true
 
 [[tool.mypy.overrides]]
-module = "flwr_example.*"
+module = [
+    "flwr_example.*",
+    "flwr_experimental.*",
+]
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = "flwr_experimental.*"
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = "importlib.metadata.*"
-follow_imports = "skip"
-follow_imports_for_stubs = true
-disallow_untyped_calls = false
-
-[[tool.mypy.overrides]]
-module = "importlib_metadata.*"
+module = [
+    "importlib.metadata.*",
+    "importlib_metadata.*",
+]
 follow_imports = "skip"
 follow_imports_for_stubs = true
 disallow_untyped_calls = false
