@@ -119,6 +119,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     Returns:
         hist: flwr.server.history.History. Object containing metrics from training.
     """
+    # pylint: disable-msg=too-many-locals
     cids: List[str]
 
     # clients_ids takes precedence
