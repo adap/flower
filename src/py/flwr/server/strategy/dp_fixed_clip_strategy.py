@@ -34,12 +34,19 @@ class DPFixedClipStrategy(Strategy):
     ) -> None:
         super().__init__()
         self.strategy = strategy
-        num_sampled_clients = math.ceil(strategy.fraction_fit*total_clients)
-        self.noise_std_dev = noise_multiplier*clip_norm/(self.num_sampled_clients**(-0.5))
+        self.num_sampled_clients = math.ceil(strategy.fraction_fit*total_clients)
         self.clip_norm = clip_norm
+        self.noise_multiplier = noise_multiplier
+
     def __repr__(self) -> str:
         rep = f"Strategy with DP with Fixed Clipping enabled."
         return rep
+
+    # Instead of adding noise with std dev sigma = z*clip_norm at server, 
+    # add noise with std dev sigma_dash = z*clip_norm at server/sqrt(m) at 
+    # each of the m chosen clients.
+    def __calc_client_noise_stddev(self):
+        return self.noise_multiplier*self.clip_norm/(self.num_sampled_clients**(0.5))
 
     def initialize_parameters(
         self, client_manager: ClientManager
@@ -57,7 +64,7 @@ class DPFixedClipStrategy(Strategy):
         
         for _, fit_ins in client_instructions:
             fit_ins.config["clip_norm"] = self.clip_norm
-            fit_ins.config["noise_stddev"] = self.noise_std_dev
+            fit_ins.config["noise_stddev"] = self.__calc_client_noise_stddev()
 
         return client_instructions
     

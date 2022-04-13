@@ -34,10 +34,8 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         clip_norm_target_quantile = 0.5,
         clip_norm_bit_stddev = None
     ) -> None:
-
+        
         super().__init__(strategy, total_clients, noise_multiplier, init_clip_norm)
-        self.num_sampled_clients = math.ceil(strategy.fraction_fit*total_clients)
-        self.noise_multiplier = noise_multiplier
         self.clip_norm_lr = clip_norm_lr
         self.clip_norm_target_quantile = clip_norm_target_quantile
         if not clip_norm_bit_stddev:
@@ -47,7 +45,7 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         rep = f"Strategy with DP with Adaptive Clipping enabled."
         return rep
 
-    def __update_adaptive_parameters(self, results: List[Tuple[ClientProxy, FitRes]]):
+    def __update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]):
         norm_bit_set_count = 0
         for _, fit_res in results:
             if fit_res.metrics["norm_bit"]:
@@ -55,8 +53,7 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         noised_norm_bit_set_count = norm_bit_set_count + np.random.normal(0, self.clip_norm_bit_stddev)
         noised_norm_bit_set_fraction = noised_norm_bit_set_count/len(results)
         self.clip_norm *= math.exp(-self.clip_norm_lr*(noised_norm_bit_set_fraction-self.clip_norm_target_quantile))
-        self.noise_std_dev = self.noise_multiplier*self.clip_norm/(self.num_sampled_clients**(-0.5))
-
+        
     def aggregate_fit(
         self,
         rnd: int,
@@ -66,7 +63,7 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         if failures:
             return None, {}
         new_global_model = super().aggregate_fit(rnd, results, failures)
-        self.__update_adaptive_parameters(results)
+        self.__update_clip_norm(results)
         return new_global_model
     
     
