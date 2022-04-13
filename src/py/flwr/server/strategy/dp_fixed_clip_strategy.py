@@ -35,7 +35,7 @@ class DPFixedClipStrategy(Strategy):
         super().__init__()
         self.strategy = strategy
         num_sampled_clients = math.ceil(strategy.fraction_fit*total_clients)
-        self.noise_std_dev = noise_multiplier*clip_norm/num_sampled_clients
+        self.noise_std_dev = noise_multiplier*clip_norm/(self.num_sampled_clients**(-0.5))
         self.clip_norm = clip_norm
     def __repr__(self) -> str:
         rep = f"Strategy with DP with Fixed Clipping enabled."

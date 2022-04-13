@@ -55,7 +55,7 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         noised_norm_bit_set_count = norm_bit_set_count + np.random.normal(0, self.clip_norm_bit_stddev)
         noised_norm_bit_set_fraction = noised_norm_bit_set_count/len(results)
         self.clip_norm *= math.exp(-self.clip_norm_lr*(noised_norm_bit_set_fraction-self.clip_norm_target_quantile))
-        self.noise_std_dev = self.noise_multiplier*self.clip_norm/self.num_sampled_clients
+        self.noise_std_dev = self.noise_multiplier*self.clip_norm/(self.num_sampled_clients**(-0.5))
 
     def aggregate_fit(
         self,
