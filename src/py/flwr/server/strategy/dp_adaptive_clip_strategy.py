@@ -40,6 +40,7 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         self.clip_norm_target_quantile = clip_norm_target_quantile
         if not clip_norm_bit_stddev:
             self.clip_norm_bit_stddev = self.num_sampled_clients/20.0
+        self.noise_multiplier = (self.noise_multiplier**(-2) - (2*self.clip_norm_bit_stddev)**(-2))**(-0.5)
 
     def __repr__(self) -> str:
         rep = f"Strategy with DP with Adaptive Clipping enabled."
