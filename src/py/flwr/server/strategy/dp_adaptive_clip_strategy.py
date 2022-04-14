@@ -47,12 +47,15 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         return rep
 
     def __update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]):
+        # Calculating number of clients which set the norm indicator bit
         norm_bit_set_count = 0
         for _, fit_res in results:
             if fit_res.metrics["norm_bit"]:
                 norm_bit_set_count += 1
+        # Noising the count       
         noised_norm_bit_set_count = norm_bit_set_count + np.random.normal(0, self.clip_norm_bit_stddev)
         noised_norm_bit_set_fraction = noised_norm_bit_set_count/len(results)
+        # Geometric update
         self.clip_norm *= math.exp(-self.clip_norm_lr*(noised_norm_bit_set_fraction-self.clip_norm_target_quantile))
         
     def aggregate_fit(

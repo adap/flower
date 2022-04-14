@@ -34,6 +34,7 @@ class DPFixedClipStrategy(Strategy):
     ) -> None:
         super().__init__()
         self.strategy = strategy
+        # Doing fixed-size subsampling as in https://arxiv.org/abs/1905.03871.
         self.num_sampled_clients = math.ceil(strategy.fraction_fit*total_clients)
         self.clip_norm = clip_norm
         self.noise_multiplier = noise_multiplier
@@ -82,6 +83,7 @@ class DPFixedClipStrategy(Strategy):
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         if failures:
             return None, {}
+        # Forcing unweighted aggregation, as in https://arxiv.org/abs/1905.03871.
         for _, fit_res in results:
             fit_res.num_examples = 1
         

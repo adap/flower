@@ -77,6 +77,8 @@ class DPClient(Client):
         update_clipped_noised = [layer + np.random.normal(0, ins.config["noise_stddev"], layer.shape) for layer in update_clipped]
         
         res.parameters = weights_to_parameters([x+y for (x,y) in zip(original_weights, update_clipped_noised)])
+        
+        # Calculating the value of the norm indicator bit, required for adaptive clipping
         if self.adaptive_clip_enabled:
              res.metrics["norm_bit"] = False if scaling_factor < 1 else True
         return res
