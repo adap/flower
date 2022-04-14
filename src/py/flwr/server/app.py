@@ -23,6 +23,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.grpc_server.grpc_server import start_grpc_server
 from flwr.server.history import History
+from flwr.server.rest_server.rest_server import start_rest_server
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
 
@@ -97,12 +98,19 @@ def start_server(  # pylint: disable=too-many-arguments
     initialized_server, initialized_config = _init_defaults(server, config, strategy)
 
     # Start gRPC server
-    grpc_server = start_grpc_server(
+    # grpc_server = start_grpc_server(
+    #     client_manager=initialized_server.client_manager(),
+    #     server_address=server_address,
+    #     max_message_length=grpc_max_message_length,
+    #     certificates=certificates,
+    # )
+
+    # Start REST server
+    _rest_server = start_rest_server(
         client_manager=initialized_server.client_manager(),
         server_address=server_address,
-        max_message_length=grpc_max_message_length,
-        certificates=certificates,
     )
+
     num_rounds = initialized_config["num_rounds"]
     ssl_status = "enabled" if certificates is not None else "disabled"
     msg = f"Flower server running ({num_rounds} rounds), SSL is {ssl_status}"
@@ -115,7 +123,9 @@ def start_server(  # pylint: disable=too-many-arguments
     )
 
     # Stop the gRPC server
-    grpc_server.stop(grace=1)
+    # grpc_server.stop(grace=1)
+
+    # TODO stop server thread `_rest_server`
 
     return hist
 

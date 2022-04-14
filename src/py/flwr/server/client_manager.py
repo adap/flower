@@ -47,6 +47,10 @@ class ClientManager(ABC):
         """Unregister Flower ClientProxy instance."""
 
     @abstractmethod
+    def unregister_cid(self, cid: str) -> None:
+        """Unregister Flower ClientProxy instance."""
+
+    @abstractmethod
     def all(self) -> Dict[str, ClientProxy]:
         """Return all available clients."""
 
@@ -112,6 +116,17 @@ class SimpleClientManager(ClientManager):
         """
         if client.cid in self.clients:
             del self.clients[client.cid]
+
+            with self._cv:
+                self._cv.notify_all()
+
+    def unregister_cid(self, cid: str) -> None:
+        """Unregister Flower ClientProxy cid.
+
+        This method is idempotent.
+        """
+        if cid in self.clients:
+            del self.clients[cid]
 
             with self._cv:
                 self._cv.notify_all()

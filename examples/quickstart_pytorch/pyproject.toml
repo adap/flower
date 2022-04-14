@@ -12,8 +12,8 @@ authors = ["The Flower Authors <enquiries@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-flwr = "^0.18.0"
-# flwr = { path = "../../", develop = true }  # Development
+# flwr = "^0.18.0"  # TODO revert
+flwr = { path = "../../", develop = true }  # Development
 torch = "1.11.0"
 torchvision = "0.12.0"
 tqdm = "^4.63.0"

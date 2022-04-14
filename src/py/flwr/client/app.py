@@ -18,15 +18,112 @@
 import time
 from logging import INFO
 from typing import Optional
+from uuid import uuid4
+from xmlrpc.client import Server
+
+import requests
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
+from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 from .client import Client
 from .grpc_client.connection import grpc_connection
 from .grpc_client.message_handler import handle
 from .numpy_client import NumPyClient, NumPyClientWrapper
 from .numpy_client import has_get_properties as numpyclient_has_get_properties
+
+
+def conn(base_url: str, client_id: str):
+    """Provide receive/send primitives, similar to the way the gRPC works.
+
+    One notable difference is that `receive` can return `None`.
+    """
+
+    def receive() -> Optional[ServerMessage]:
+        """Receive next task from server."""
+
+        # Request instructions (task) from server
+        r = requests.get(f"{base_url}/ins/{client_id}")
+        print(f"[C-{client_id}] GET /ins/{client_id}:", r.status_code, r.headers)
+        if r.status_code != 200:
+            return None
+
+        # Deserialize ProtoBuf from bytes
+        server_msg = ServerMessage()
+        server_msg.ParseFromString(r.content)
+        return server_msg
+
+    def send(client_message: ClientMessage) -> None:
+        """Send task result back to server."""
+
+        # Serialize ProtoBuf to bytes
+        client_msg_bytes = client_message.SerializeToString()
+
+        # Send ClientMessage to server
+        r = requests.post(
+            f"{base_url}/res/{client_id}",
+            headers={"Content-Type": "application/protobuf"},
+            data=client_msg_bytes,
+        )
+        print(f"[C-{client_id}] POST /res/{client_id}:", r.status_code, r.headers)
+
+    return receive, send
+
+
+def start_rest_client(
+    server_address: str,
+    client: Client,
+    grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    root_certificates: Optional[bytes] = None,
+) -> None:
+    """Start a Flower Client which connects to a REST server."""
+
+    base_url = f"http://{server_address}"
+
+    # Generate random client id (changes on every call to this function)
+    client_id = str(uuid4().hex[:8])
+
+    # Note: this loop is almost an exact copy of the loop in start_client. If
+    # we wrapped the `requests` calls in a context manager then we could merge
+    # both implementations into one.
+    while True:
+        sleep_duration: int = 0
+
+        # client-HERE
+        r = requests.post(f"{base_url}/client/{client_id}")
+        print(f"[C-{client_id}] POST /client/{client_id}:", r.status_code, r.headers)
+
+        # client-BEAT / TODO move to background thread
+        r = requests.put(f"{base_url}/client/{client_id}")
+        print(f"[C-{client_id}] PUT /client/{client_id}:", r.status_code, r.headers)
+
+        receive, send = conn(base_url=base_url, client_id=client_id)
+
+        while True:
+            server_message = receive()
+            if server_message is None:
+                # TODO this should be pace-steered by the server
+                time.sleep(2)  # Wait for 2s before asking again
+                continue
+            client_message, sleep_duration, keep_going = handle(client, server_message)
+            send(client_message)
+            if not keep_going:
+                break
+
+        # client-AWAY
+        r = requests.delete(f"{base_url}/client/{client_id}")
+
+        if sleep_duration == 0:
+            log(INFO, "Disconnect and shut down")
+            break
+        # Sleep and reconnect afterwards
+        log(
+            INFO,
+            "Disconnect, then re-establish connection after %s second(s)",
+            sleep_duration,
+        )
+        time.sleep(sleep_duration)
 
 
 def start_client(
@@ -168,7 +265,13 @@ def start_numpy_client(
         del NumPyClientWrapper.get_properties
 
     # Start
-    start_client(
+    # start_client(
+    #     server_address=server_address,
+    #     client=flower_client,
+    #     grpc_max_message_length=grpc_max_message_length,
+    #     root_certificates=root_certificates,
+    # )
+    start_rest_client(
         server_address=server_address,
         client=flower_client,
         grpc_max_message_length=grpc_max_message_length,

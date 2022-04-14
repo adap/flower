@@ -52,6 +52,10 @@ protobuf = "^3.19.0"
 importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
 # Optional dependencies
 ray = { extras = ["default"], version = "^1.9.2", optional = true }
+# REST-related (TODO: make optional)
+fastapi = "^0.75.1"
+uvicorn = {extras = ["standard"], version = "^0.17.6"}
+requests = "^2.27.1"
 
 [tool.poetry.extras]
 simulation = ["ray"]

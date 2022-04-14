@@ -103,4 +103,4 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 # Start Flower client
-fl.client.start_numpy_client("[::]:8080", client=FlowerClient())
+fl.client.start_numpy_client("0.0.0.0:8080", client=FlowerClient())  # TODO revert
