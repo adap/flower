@@ -5,6 +5,7 @@ Paper: https://arxiv.org/pdf/1710.06963.pdf
 
 
 from typing import Callable, Dict, List, Optional, Tuple
+from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 
 import numpy as np
 
@@ -47,7 +48,8 @@ class DPFixedClipStrategy(Strategy):
     # add noise with std dev sigma_dash = z*clip_norm at server/sqrt(m) at 
     # each of the m chosen clients.
     def __calc_client_noise_stddev(self):
-        return self.noise_multiplier*self.clip_norm/(self.num_sampled_clients**(0.5))
+        # return self.noise_multiplier*self.clip_norm/(self.num_sampled_clients**(0.5))
+        return self.noise_multiplier*self.clip_norm
 
     def initialize_parameters(
         self, client_manager: ClientManager
@@ -84,7 +86,13 @@ class DPFixedClipStrategy(Strategy):
         if failures:
             return None, {}
         # Forcing unweighted aggregation, as in https://arxiv.org/abs/1905.03871.
+        noise_added = False
         for _, fit_res in results:
+            if not noise_added:
+                client_weights = parameters_to_weights(fit_res.parameters)
+                client_weights_noised = [layer + np.random.normal(0,self.__calc_client_noise_stddev(), layer.shape) for layer in client_weights]
+                fit_res.parameters = weights_to_parameters(client_weights_noised)
+                noise_added =  True
             fit_res.num_examples = 1
         
         return self.strategy.aggregate_fit(rnd, results, failures)
