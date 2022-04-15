@@ -20,7 +20,7 @@ from typing import Dict, Optional, Tuple
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
-from flwr.server.client_manager import SimpleClientManager
+from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.grpc_server.grpc_server import start_grpc_server
 from flwr.server.history import History
 from flwr.server.server import Server
@@ -34,6 +34,7 @@ def start_server(  # pylint: disable=too-many-arguments
     server: Optional[Server] = None,
     config: Optional[Dict[str, int]] = None,
     strategy: Optional[Strategy] = None,
+    client_manager: Optional[ClientManager] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     force_final_distributed_eval: bool = False,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
@@ -55,6 +56,10 @@ def start_server(  # pylint: disable=too-many-arguments
             implementation of the abstract base class `flwr.server.Strategy`.
             If no strategy is provided, then `start_server` will use
             `flwr.server.strategy.FedAvg`.
+        client_manager: Optional[flwr.server.ClientManager] (default: None)
+            An implementation of the abstract base class `flwr.server.ClientManager`.
+            If no implementation is provided, then `start_server` will use
+            `flwr.server.client_manager.SimpleClientManager`.
         grpc_max_message_length: int (default: 536_870_912, this equals 512MB).
             The maximum length of gRPC messages that can be exchanged with the
             Flower clients. The default should be sufficient for most models.
@@ -94,7 +99,9 @@ def start_server(  # pylint: disable=too-many-arguments
     >>>     )
     >>> )
     """
-    initialized_server, initialized_config = _init_defaults(server, config, strategy)
+    initialized_server, initialized_config = _init_defaults(
+        server, config, strategy, client_manager
+    )
 
     # Start gRPC server
     grpc_server = start_grpc_server(
@@ -124,10 +131,12 @@ def _init_defaults(
     server: Optional[Server],
     config: Optional[Dict[str, int]],
     strategy: Optional[Strategy],
+    client_manager: Optional[ClientManager],
 ) -> Tuple[Server, Dict[str, int]]:
     # Create server instance if none was given
     if server is None:
-        client_manager = SimpleClientManager()
+        if client_manager is None:
+            client_manager = SimpleClientManager()
         if strategy is None:
             strategy = FedAvg()
         server = Server(client_manager=client_manager, strategy=strategy)
