@@ -32,15 +32,21 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         init_clip_norm: float = 0.1,
         clip_norm_lr = 0.2,
         clip_norm_target_quantile = 0.5,
-        clip_norm_bit_stddev = None
+        clip_count_stddev = None
     ) -> None:
         
         super().__init__(strategy, total_clients, noise_multiplier, init_clip_norm)
         self.clip_norm_lr = clip_norm_lr
         self.clip_norm_target_quantile = clip_norm_target_quantile
-        if not clip_norm_bit_stddev:
-            self.clip_norm_bit_stddev = self.num_sampled_clients/20.0
-        self.noise_multiplier = (self.noise_multiplier**(-2) - (2*self.clip_norm_bit_stddev)**(-2))**(-0.5)
+        if not clip_count_stddev:
+            self.clip_count_stddev = self.num_sampled_clients/20.0 if noise_multiplier else 0
+        self.clip_count_stddev = clip_count_stddev
+        if self.noise_multiplier:
+            self.noise_multiplier = (self.noise_multiplier**(-2) - (2*self.clip_count_stddev)**(-2))**(-0.5)
+                
+        else:
+            if not clip_count_stddev:
+
 
     def __repr__(self) -> str:
         rep = f"Strategy with DP with Adaptive Clipping enabled."
@@ -53,7 +59,7 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
             if fit_res.metrics["norm_bit"]:
                 norm_bit_set_count += 1
         # Noising the count       
-        noised_norm_bit_set_count = norm_bit_set_count + np.random.normal(0, self.clip_norm_bit_stddev)
+        noised_norm_bit_set_count = norm_bit_set_count + np.random.normal(0, self.clip_count_stddev)
         noised_norm_bit_set_fraction = noised_norm_bit_set_count/len(results)
         # Geometric update
         self.clip_norm *= math.exp(-self.clip_norm_lr*(noised_norm_bit_set_fraction-self.clip_norm_target_quantile))
