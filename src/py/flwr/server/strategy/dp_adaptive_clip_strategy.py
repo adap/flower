@@ -44,9 +44,6 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
             self.clip_count_stddev = clip_count_stddev
         if noise_multiplier:
             self.noise_multiplier = (self.noise_multiplier**(-2) - (2*self.clip_count_stddev)**(-2))**(-0.5)
-                
-        else:
-            if not clip_count_stddev:
 
 
     def __repr__(self) -> str:
