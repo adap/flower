@@ -40,8 +40,9 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         self.clip_norm_target_quantile = clip_norm_target_quantile
         if not clip_count_stddev:
             self.clip_count_stddev = self.num_sampled_clients/20.0 if noise_multiplier else 0
-        self.clip_count_stddev = clip_count_stddev
-        if self.noise_multiplier:
+        else:
+            self.clip_count_stddev = clip_count_stddev
+        if noise_multiplier:
             self.noise_multiplier = (self.noise_multiplier**(-2) - (2*self.clip_count_stddev)**(-2))**(-0.5)
                 
         else:
