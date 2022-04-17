@@ -129,19 +129,19 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
     def Async(  # pylint: disable=invalid-name
         self, request: ClientMessage, context: grpc.ServicerContext
     ) -> ServerMessage:
-        """Method will be invoked by each GrpcClientProxy which participates in
-        the network.
+        """Method will be invoked by each request-response-based gRPC client
+        which participates in the network.
 
         Protocol:
-            - New clients connect while sending an empty ClientMessage and awaits a
-              ServerMessage which has the identifier field set.
-            - If the client has worked on a previous instruction it sends a
-              ClientMessage with the reply_to field set to the ServerMessage
-              identifier field.
+            - New clients connect by sending an empty ClientMessage and waiting
+              for a ServerMessage which has the identifier field set.
+            - If the client has worked on a previous instruction/ServerMessage,
+              it sends a ClientMessage with the reply_to field set to the
+              previous ServerMessage's identifier field.
         """
         client_message = request
         if not client_message.reply_to:
-            # If the reply_to field is not set we will create a new client
+            # If the reply_to field is not set we will create a new ClientProxy
             peer = str(uuid4())  # Used as cid for the GrpcClientProxy
             bridge = self.grpc_bridge_factory()
             client = self.client_factory(peer, bridge)
@@ -153,7 +153,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
             )
 
             if not is_success:
-                # If not is_success do something
+                # TODO If not is_success do something
                 pass
         else:
             bridge = self.message_bridge_map[client_message.reply_to]
