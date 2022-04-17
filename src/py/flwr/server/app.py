@@ -39,6 +39,7 @@ def start_server(  # pylint: disable=too-many-arguments
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     force_final_distributed_eval: bool = False,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    use_rest: bool = False,
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
 
@@ -104,19 +105,20 @@ def start_server(  # pylint: disable=too-many-arguments
         server, config, strategy, client_manager
     )
 
-    # Start gRPC server
-    # grpc_server = start_grpc_server(
-    #     client_manager=initialized_server.client_manager(),
-    #     server_address=server_address,
-    #     max_message_length=grpc_max_message_length,
-    #     certificates=certificates,
-    # )
-
-    # Start REST server
-    _rest_server = start_rest_server(
-        client_manager=initialized_server.client_manager(),
-        server_address=server_address,
-    )
+    if use_rest:
+        # Start REST server
+        _rest_server = start_rest_server(
+            client_manager=initialized_server.client_manager(),
+            server_address=server_address,
+        )
+    else:
+        # Start gRPC server
+        grpc_server = start_grpc_server(
+            client_manager=initialized_server.client_manager(),
+            server_address=server_address,
+            max_message_length=grpc_max_message_length,
+            certificates=certificates,
+        )
 
     num_rounds = initialized_config["num_rounds"]
     ssl_status = "enabled" if certificates is not None else "disabled"
@@ -129,10 +131,12 @@ def start_server(  # pylint: disable=too-many-arguments
         force_final_distributed_eval=force_final_distributed_eval,
     )
 
-    # Stop the gRPC server
-    # grpc_server.stop(grace=1)
-
-    # TODO stop server thread `_rest_server`
+    if use_rest:
+        # TODO stop REST server thread `_rest_server`
+        pass
+    else:
+        # Stop the gRPC server
+        grpc_server.stop(grace=1)
 
     return hist
 
