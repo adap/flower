@@ -41,6 +41,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 @contextmanager
 def grpc_connection(
+    client_id: str,
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
@@ -49,6 +50,8 @@ def grpc_connection(
 
     Parameters
     ----------
+    client_id : str
+        Ignored, only present to preserve API-compatibility.
     server_address : str
         The IPv6 address of the server. If the Flower server runs on the same machine
         on port 8080, then `server_address` would be `"[::]:8080"`.

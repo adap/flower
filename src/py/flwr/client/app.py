@@ -32,98 +32,61 @@ from .grpc_client.connection import grpc_connection
 from .grpc_client.message_handler import handle
 from .numpy_client import NumPyClient, NumPyClientWrapper
 from .numpy_client import has_get_properties as numpyclient_has_get_properties
+from .rest_client.connection import rest_not_a_connection
 
+# def start_rest_client(
+#     server_address: str,
+#     client: Client,
+#     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+#     root_certificates: Optional[bytes] = None,
+# ) -> None:
+#     """Start a Flower Client which connects to a REST server."""
 
-def conn(base_url: str, client_id: str):
-    """Provide receive/send primitives, similar to the way the gRPC works.
+#     base_url = f"http://{server_address}"
 
-    One notable difference is that `receive` can return `None`.
-    """
+#     # Generate random client id (changes on every call to this function)
+#     client_id = str(uuid4().hex[:8])
 
-    def receive() -> Optional[ServerMessage]:
-        """Receive next task from server."""
+#     # Note: this loop is almost an exact copy of the loop in start_client. If
+#     # we wrapped the `requests` calls in a context manager then we could merge
+#     # both implementations into one.
+#     while True:
+#         sleep_duration: int = 0
 
-        # Request instructions (task) from server
-        r = requests.get(f"{base_url}/ins/{client_id}")
-        print(f"[C-{client_id}] GET /ins/{client_id}:", r.status_code, r.headers)
-        if r.status_code != 200:
-            return None
+#         # client-HERE
+#         r = requests.post(f"{base_url}/client/{client_id}")
+#         print(f"[C-{client_id}] POST /client/{client_id}:", r.status_code, r.headers)
 
-        # Deserialize ProtoBuf from bytes
-        server_msg = ServerMessage()
-        server_msg.ParseFromString(r.content)
-        return server_msg
+#         # client-BEAT / TODO move to background thread
+#         r = requests.put(f"{base_url}/client/{client_id}")
+#         print(f"[C-{client_id}] PUT /client/{client_id}:", r.status_code, r.headers)
 
-    def send(client_message: ClientMessage) -> None:
-        """Send task result back to server."""
+#         receive, send = conn(base_url=base_url, client_id=client_id)
 
-        # Serialize ProtoBuf to bytes
-        client_msg_bytes = client_message.SerializeToString()
+#         while True:
+#             server_message = receive()
+#             if server_message is None:
+#                 # TODO this should be pace-steered by the server
+#                 time.sleep(2)  # Wait for 2s before asking again
+#                 continue
+#             client_message, sleep_duration, keep_going = handle(client, server_message)
+#             send(client_message)
+#             if not keep_going:
+#                 break
 
-        # Send ClientMessage to server
-        r = requests.post(
-            f"{base_url}/res/{client_id}",
-            headers={"Content-Type": "application/protobuf"},
-            data=client_msg_bytes,
-        )
-        print(f"[C-{client_id}] POST /res/{client_id}:", r.status_code, r.headers)
+#         # client-AWAY
+#         r = requests.delete(f"{base_url}/client/{client_id}")
 
-    return receive, send
-
-
-def start_rest_client(
-    server_address: str,
-    client: Client,
-    grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificates: Optional[bytes] = None,
-) -> None:
-    """Start a Flower Client which connects to a REST server."""
-
-    base_url = f"http://{server_address}"
-
-    # Generate random client id (changes on every call to this function)
-    client_id = str(uuid4().hex[:8])
-
-    # Note: this loop is almost an exact copy of the loop in start_client. If
-    # we wrapped the `requests` calls in a context manager then we could merge
-    # both implementations into one.
-    while True:
-        sleep_duration: int = 0
-
-        # client-HERE
-        r = requests.post(f"{base_url}/client/{client_id}")
-        print(f"[C-{client_id}] POST /client/{client_id}:", r.status_code, r.headers)
-
-        # client-BEAT / TODO move to background thread
-        r = requests.put(f"{base_url}/client/{client_id}")
-        print(f"[C-{client_id}] PUT /client/{client_id}:", r.status_code, r.headers)
-
-        receive, send = conn(base_url=base_url, client_id=client_id)
-
-        while True:
-            server_message = receive()
-            if server_message is None:
-                # TODO this should be pace-steered by the server
-                time.sleep(2)  # Wait for 2s before asking again
-                continue
-            client_message, sleep_duration, keep_going = handle(client, server_message)
-            send(client_message)
-            if not keep_going:
-                break
-
-        # client-AWAY
-        r = requests.delete(f"{base_url}/client/{client_id}")
-
-        if sleep_duration == 0:
-            log(INFO, "Disconnect and shut down")
-            break
-        # Sleep and reconnect afterwards
-        log(
-            INFO,
-            "Disconnect, then re-establish connection after %s second(s)",
-            sleep_duration,
-        )
-        time.sleep(sleep_duration)
+#         if sleep_duration == 0:
+#             log(INFO, "Disconnect and shut down")
+#             break
+#         # Sleep and reconnect afterwards
+#         log(
+#             INFO,
+#             "Disconnect, then re-establish connection after %s second(s)",
+#             sleep_duration,
+#         )
+#         time.sleep(sleep_duration)
 
 
 def start_client(
@@ -131,6 +94,7 @@ def start_client(
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    use_rest: bool = False,
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
@@ -175,10 +139,18 @@ def start_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
+
+    # Use either gRPC bidirectional streaming or REST request/response
+    connection = rest_not_a_connection if use_rest else grpc_connection
+
+    # Generate random client id (changes on every call to this function)
+    client_id = str(uuid4().hex[:8])
+
     while True:
         sleep_duration: int = 0
-        with grpc_connection(
-            server_address,
+        with connection(
+            client_id=client_id,
+            server_address=server_address,
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
         ) as conn:
@@ -186,6 +158,12 @@ def start_client(
 
             while True:
                 server_message = receive()
+                if server_message is None:
+                    # TODO this should be pace-steered by the server: the
+                    # server could return a sleep time to control when the
+                    # client should ask for tasks
+                    time.sleep(2)  # Wait for 2s before asking again
+                    continue
                 client_message, sleep_duration, keep_going = handle(
                     client, server_message
                 )
@@ -209,6 +187,7 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    use_rest: bool = False,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -265,15 +244,10 @@ def start_numpy_client(
         del NumPyClientWrapper.get_properties
 
     # Start
-    # start_client(
-    #     server_address=server_address,
-    #     client=flower_client,
-    #     grpc_max_message_length=grpc_max_message_length,
-    #     root_certificates=root_certificates,
-    # )
-    start_rest_client(
+    start_client(
         server_address=server_address,
         client=flower_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
+        use_rest=use_rest,
     )
