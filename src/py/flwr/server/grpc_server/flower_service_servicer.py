@@ -37,7 +37,7 @@ def next_with_timeout(
     if timeout is None:
         return next(iterator)
 
-    # Need some objects which can be accessed by reference from the worker threads
+    # Create two dicts which can be accessed by reference from worker threads
     msg: Dict[str, Optional[ClientMessage]] = {"msg": None}
     stop_iteration: Dict[str, bool] = {"stop_iteration": False}
 
