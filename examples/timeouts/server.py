@@ -1,12 +1,13 @@
 import flwr as fl
 
-# Start Flower server with a request_timeout of 3 seconds
-# This example has two fast clients which return withing 1 second
-# It also has one slow client which returns within 5 seconds
-# The first time the slow client is sampled the server will time it out
-# and we will have 2 our of 3 requests beeing successful.
-# The slow client will than crash as it will receive a DEADLINE_EXCEEDED
+# Start Flower server with a request_timeout of 3 seconds.
+# This example assumes two fast clients which return within 1 second.
+# It also assumes one slow client which returns within 5 seconds.
+# The first time the slow client is sampled, the server will time it out
+# and we will have 2 of our 3 requests being successful.
+# The slow client will then crash as it will receive a DEADLINE_EXCEEDED
 # response from the server which will terminate the connection.
+# Subsequent rounds will only see two available clients.
 fl.server.start_server(
     strategy=fl.server.strategy.FedAvg(
         fraction_fit=1,

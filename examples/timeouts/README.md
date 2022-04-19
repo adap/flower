@@ -1,4 +1,5 @@
 # Flower Example demonstrating the usage of request timeouts
+
 This introductory example to Flower demonstrates how request timeouts can be used in Flower.
 
 ## Project Setup

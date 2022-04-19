@@ -37,28 +37,28 @@ def next_with_timeout(
     if timeout is None:
         return next(iterator)
 
-    # Need some objects which can be accessed by reference from the worker threads
-    msg: Dict[str, Optional[ClientMessage]] = {"value": None}
-    stop_iteration: Dict[str, bool] = {"value": False}
+    # Create two dicts which can be accessed by reference from worker threads
+    msg: Dict[str, Optional[ClientMessage]] = {"msg": None}
+    stop_iteration: Dict[str, bool] = {"stop_iteration": False}
 
     def get_next() -> None:
         try:
-            msg["value"] = next(iterator)
-        except StopIteration:
-            stop_iteration["value"] = True
+            msg["msg"] = next(iterator)
+        except StopIteration as stop_iteration:
+            # Remember exception to re-raise later
+            stop_iteration["stop_iteration"] = stop_iteration
 
     worker_thread = Thread(target=get_next)
     worker_thread.start()
     worker_thread.join(timeout=timeout)
 
-    # Raise the exception from the thread in the main thread
-    # if present. This will ensure that StopIteration is correctly
-    # raised.
-    if stop_iteration["value"]:
-        raise StopIteration()
+    # Raise the exception from the gRPC thread if present. This will ensure that
+    # `StopIteration` is correctly raised.
+    if stop_iteration["stop_iteration"]:
+        raise stop_iteration["stop_iteration"]
 
-    # Extract None or actual value of iterator
-    return msg["value"]
+    # Return `None` or actual `ClientMessage` value of iterator
+    return msg["msg"]
 
 
 def default_bridge_factory() -> GRPCBridge:
@@ -135,24 +135,24 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                     # Get server message from bridge and yield it
                     server_message = next(server_message_iterator)
                     yield server_message
+
                     # Wait for client message
 
+                    # Explicitly pass None as ProtoBuf defaults to 0 if
+                    # server_message.timeout was not set
+                    timeout = (
+                        server_message.timeout if server_message.timeout > 0 else None
+                    )
                     client_message = next_with_timeout(
                         iterator=client_message_iterator,
-                        # Explicitly pass None as gRPC will default to 0 if
-                        # the timeout is not present
-                        timeout=server_message.timeout
-                        if server_message.timeout > 0
-                        else None,
+                        timeout=timeout,
                     )
-
                     if client_message is None:
-                        # Important to know:
-                        # Abort in gRPC always raises an exception so that all code
-                        # after the call to context.abort will not run. If you want
-                        # code to be executed afterwards use the:
-                        # rpc_termination_callback as seen in the register_client
-                        # function.
+                        # Important: calling `context.abort` in gRPC always
+                        # raises an exception so that all code after the call to
+                        # `context.abort` will not run. If susequent code should
+                        # be executed, the `rpc_termination_callback` can be used
+                        # (as shown in the `register_client` function).
                         context.abort(
                             grpc.StatusCode.DEADLINE_EXCEEDED,
                             f"Timeout of {server_message.timeout} "
@@ -160,8 +160,8 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                         )
                         # This return statement is only for the linter so it understands
                         # that client_message in subsequent lines is not None
-                        # It does not understand that abort will terminate this
-                        # execution context through an exception.
+                        # It does not understand that `context.abort` will terminate this
+                        # execution context by raising an exception.
                         return
 
                     bridge.set_client_message(client_message)
