@@ -20,6 +20,7 @@ from flwr.common.typing import AskKeysIns, AskKeysRes, AskVectorsIns, AskVectors
     SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.common.sec_agg import sec_agg_primitives
+from flwr_crypto_cpp import combine_shares
 import timeit
 import sys
 import concurrent.futures
@@ -208,7 +209,7 @@ def sec_agg_fit_round(server, rnd: int
             raise Exception(
                 "Not enough shares to recover secret in unmask vectors stage")
         shamir_reconstruction_time -= timeit.default_timer()
-        secret = sec_agg_primitives.combine_shares(share_list=share_list)
+        secret = combine_shares(share_list)
         shamir_reconstruction_time += timeit.default_timer()
         if client_id in unmask_vectors_clients.keys():
             # seed is an available client's b

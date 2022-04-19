@@ -1,10 +1,12 @@
 import timeit
 import numpy as np
-
+import sys
+sys.path.append(r"C:\Users\MSI-NB\Source\Repos\FANTOME-PAN\flower\src\py")
+from flwr_crypto_cpp import create_shares, combine_shares
 from flwr.common.sec_agg import sec_agg_test, sec_agg_primitives_test
 import random
 from flwr.common import weights_to_parameters
-from flwr.common.sec_agg.sec_agg_primitives import combine_shares, create_shares
+#from flwr.common.sec_agg.sec_agg_primitives import combine_shares, create_shares
 '''weights: Weights = [np.array([[-0.2, -0.5, 1.9], [0.0, 2.4, -1.9]]),
                     np.array([[0.2, 0.5, -1.9], [0.0, -2.4, 1.9]])]
 quantized_weights = sec_agg_primitives.quantize(
@@ -13,22 +15,23 @@ quantized_weights = sec_agg_primitives.weights_divide(quantized_weights, 4)
 print(quantized_weights)'''
 
 
-'''def test_combine_shares() -> None:
+def test_combine_shares() -> None:
     x = timeit.default_timer()
     message = b"Quack quack!"
-    share_num = 1000
-    threshold = 100
+    share_num = 1400
+    threshold = 700
     shares = create_shares(message, threshold, share_num)
     shares_collected = random.sample(shares, threshold)
     message_constructed = combine_shares(shares_collected)
     assert(message == message_constructed)
     y = timeit.default_timer()
-    print(y-x)'''
+    print(y-x)
 
 
 if __name__ == "__main__":
-    # sec_agg_primitives_test.test_all()
-    # test_combine_shares()
+    
+    #sec_agg_primitives_test.test_all()
+    #test_combine_shares()
     f = open("log.txt", "w")
     f.write("Starting real experiments\n")
     f.close()

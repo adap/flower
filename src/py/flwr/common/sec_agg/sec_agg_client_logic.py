@@ -17,6 +17,7 @@ from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.sec_agg.sec_agg_primitives import check_clipping_range
 from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
 from flwr.common.sec_agg import sec_agg_primitives
+from flwr_crypto_cpp import create_shares
 from flwr.common.logger import log
 from logging import DEBUG, ERROR, INFO, WARNING
 from typing import Dict, List, Tuple
@@ -108,10 +109,10 @@ def share_keys(client, share_keys_in: ShareKeysIns) -> ShareKeysRes:
     client.b = sec_agg_primitives.rand_bytes(32)
 
     # Create shares
-    b_shares = sec_agg_primitives.create_shares(
+    b_shares = create_shares(
         client.b, client.threshold, client.share_num
     )
-    sk1_shares = sec_agg_primitives.create_shares(
+    sk1_shares = create_shares(
         sec_agg_primitives.private_key_to_bytes(
             client.sk1), client.threshold, client.share_num
     )
@@ -198,7 +199,7 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
     # NOW WE HARD CODE IT AS 1
     # Generally, should be fit_res.num_examples
 
-    weights_factor = client.sec_agg_id+1
+    weights_factor = 1
 
     # END =================================================================
 
@@ -228,6 +229,7 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
         # add pairwise mask
         shared_key = sec_agg_primitives.generate_shared_key(
             client.sk1, sec_agg_primitives.bytes_to_public_key(client.public_keys_dict[client_id].pk1))
+        #print('shared key length: %d' % len(shared_key))
         pairwise_mask = sec_agg_primitives.pseudo_rand_gen(
             shared_key, client.mod_range, dimensions_list)
         if client.sec_agg_id > client_id:

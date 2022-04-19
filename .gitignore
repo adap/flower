@@ -2,12 +2,18 @@
 .flower_ops
 data/
 .idea/
+.vs/
+x64/
 doc/source/api_documentation
 doc/source/_build
 flwr_logs
 
 # Editor
 .vscode
+*.sln
+*.txt
+*.pyproj
+CppProperties.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
