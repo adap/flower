@@ -100,9 +100,6 @@ def main():
 
     # Flower client
     class CifarClient(fl.client.NumPyClient):
-        def get_properties(self, config):
-            pass
-
         def get_parameters(self):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
