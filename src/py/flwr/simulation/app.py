@@ -66,6 +66,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
+    keep_initialised: Optional[bool] = False,
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -115,6 +116,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
         An empty dictionary can be used (ray_init_args={}) to prevent any
         arguments from being passed to ray.init.
+    keep_initialised: Optional[bool] (default: False)
+        Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
 
     Returns:
         hist: flwr.server.history.History. Object containing metrics from training.
@@ -143,8 +146,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "include_dashboard": False,
         }
 
-    # Shut down Ray if it has already been initialized
-    if ray.is_initialized():
+    # Shut down Ray if it has already been initialized (unless asked not to)
+    if ray.is_initialized() and not keep_initialised:
         ray.shutdown()
 
     # Initialize Ray
