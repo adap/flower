@@ -24,6 +24,7 @@ import ray
 from flwr.client.client import Client
 from flwr.common.logger import log
 from flwr.server.app import _fl, _init_defaults
+from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
@@ -41,6 +42,7 @@ Invalid Arguments in method:
     client_resources: Optional[Dict[str, int]] = None,
     num_rounds: int = 1,
     strategy: Optional[Strategy] = None,
+    client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
 ) -> None:`
 
@@ -62,7 +64,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
     client_resources: Optional[Dict[str, int]] = None,
     num_rounds: int = 1,
     strategy: Optional[Strategy] = None,
+    client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
+    keep_initialised: Optional[bool] = False,
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -96,6 +100,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use
         `flwr.server.strategy.FedAvg`.
+    client_manager: Optional[flwr.server.ClientManager] (default: None)
+        An implementation of the abstract base class `flwr.server.ClientManager`.
+        If no implementation is provided, then `start_simulation` will use
+        `flwr.server.client_manager.SimpleClientManager`.
     ray_init_args : Optional[Dict[str, Any]] (default: None)
         Optional dictionary containing arguments for the call to `ray.init`.
         If ray_init_args is None (the default), Ray will be initialized with
@@ -108,10 +116,13 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
         An empty dictionary can be used (ray_init_args={}) to prevent any
         arguments from being passed to ray.init.
+    keep_initialised: Optional[bool] (default: False)
+        Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
 
     Returns:
         hist: flwr.server.history.History. Object containing metrics from training.
     """
+    # pylint: disable-msg=too-many-locals
     cids: List[str]
 
     # clients_ids takes precedence
@@ -135,8 +146,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "include_dashboard": False,
         }
 
-    # Shut down Ray if it has already been initialized
-    if ray.is_initialized():
+    # Shut down Ray if it has already been initialized (unless asked not to)
+    if ray.is_initialized() and not keep_initialised:
         ray.shutdown()
 
     # Initialize Ray
@@ -149,7 +160,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # Initialize server and server config
     config = {"num_rounds": num_rounds}
-    initialized_server, initialized_config = _init_defaults(None, config, strategy)
+    initialized_server, initialized_config = _init_defaults(
+        None, config, strategy, client_manager
+    )
     log(
         INFO,
         "Starting Flower simulation running: %s",
