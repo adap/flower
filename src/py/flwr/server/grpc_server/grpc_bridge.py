@@ -27,7 +27,7 @@ class InsWrapper:
     """Instruction wrapper class for a single server message."""
 
     server_message: ServerMessage
-    timeout: float
+    timeout: Optional[float]
 
 
 @dataclass
