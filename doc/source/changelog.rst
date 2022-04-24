@@ -4,6 +4,7 @@ Changelog
 Unreleased
 ----------
 
+* **Adding support for custom ClientManager as a simulation parameter** (`#1171 <https://github.com/adap/flower/pull/1171>`_)
 * **Aggregate custom metrics through user-provided functions** (`#1144 <https://github.com/adap/flower/pull/1144>`_)
 * **Enable both federated evaluation and centralized evaluation to be used at the same time in all built-in strategies** (`#1091 <https://github.com/adap/flower/pull/1091>`_)
 * **New FedAvgM strategy (FedAvg with momentum)** (`#1076 <https://github.com/adap/flower/pull/1076>`_)
