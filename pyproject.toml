@@ -83,6 +83,7 @@ sphinx-copybutton = "==0.5.0"
 sphinx-panels = "==0.6.0"
 sphinxcontrib-mermaid = "==0.7.1"
 furo = "==2022.3.4"
+sphinx-reredirects = "==0.0.1"
 
 [tool.isort]
 line_length = 88
