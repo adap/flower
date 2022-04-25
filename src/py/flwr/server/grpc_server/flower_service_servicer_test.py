@@ -21,6 +21,7 @@ from flwr.server.grpc_server.flower_service_servicer import (
     FlowerServiceServicer,
     register_client,
 )
+from flwr.server.grpc_server.grpc_bridge import InsWrapper, ResWrapper
 
 CLIENT_MESSAGE = ClientMessage()
 SERVER_MESSAGE = ServerMessage()
@@ -40,16 +41,22 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
 
         # Define client_messages to be processed by FlowerServiceServicer instance
         self.client_messages = [CLIENT_MESSAGE for _ in range(5)]
+        self.res_wrappers = [
+            ResWrapper(client_message=msg) for msg in self.client_messages
+        ]
         self.client_messages_iterator = iter(self.client_messages)
 
         # Define corresponding responses from bridge
-        self.server_messages = [SERVER_MESSAGE for _ in self.client_messages]
-        self.server_messages_iterator = iter(self.server_messages)
+        self.ins_wrappers = [
+            InsWrapper(server_message=SERVER_MESSAGE, timeout=None)
+            for _ in self.client_messages
+        ]
+        self.ins_wrapper_iterator = iter(self.ins_wrappers)
 
         # Mock for GRPCBridge
         self.grpc_bridge_mock = MagicMock()
-        self.grpc_bridge_mock.server_message_iterator.return_value = (
-            self.server_messages_iterator
+        self.grpc_bridge_mock.ins_wrapper_iterator.return_value = (
+            self.ins_wrapper_iterator
         )
 
         self.grpc_bridge_factory_mock = MagicMock()
@@ -126,8 +133,8 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
             self.grpc_client_proxy_mock
         )
 
-        self.grpc_bridge_mock.set_client_message.assert_has_calls(
-            [call(message) for message in self.client_messages]
+        self.grpc_bridge_mock.set_res_wrapper.assert_has_calls(
+            [call(res_wrapper=message) for message in self.res_wrappers]
         )
 
 
