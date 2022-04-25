@@ -162,5 +162,4 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                         res_wrapper=ResWrapper(client_message=client_message)
                     )
                 except StopIteration:
-                    print("breaking")
                     break
