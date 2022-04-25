@@ -117,8 +117,8 @@ def main() -> None:
 
     # Run server
     fl.server.start_server(
-        args.server_address,
-        server,
+        server_address=args.server_address,
+        server=server,
         config={"num_rounds": args.rounds},
     )
 
