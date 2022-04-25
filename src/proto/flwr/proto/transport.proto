@@ -60,10 +60,6 @@ message ServerMessage {
     EvaluateIns evaluate_ins = 4;
     PropertiesIns properties_ins = 5;
   }
-
-  // When the field is not explicitly set it will default to zero in gRPC
-  // therefore all implementations using it should treat 0 as no timeout
-  float timeout = 20;
 }
 
 message ClientMessage {
