@@ -4,6 +4,7 @@ Changelog
 Unreleased
 ----------
 
+* **Add experimental support for Python 3.10 and Python 3.11** (`#1135 <https://github.com/adap/flower/pull/1135>`_)
 * **Adding support for custom ClientManager as a simulation parameter** (`#1171 <https://github.com/adap/flower/pull/1171>`_)
 * **Aggregate custom metrics through user-provided functions** (`#1144 <https://github.com/adap/flower/pull/1144>`_)
 * **Enable both federated evaluation and centralized evaluation to be used at the same time in all built-in strategies** (`#1091 <https://github.com/adap/flower/pull/1091>`_)
