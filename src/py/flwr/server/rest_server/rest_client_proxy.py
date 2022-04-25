@@ -19,7 +19,7 @@ from flwr import common
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.rest_server.rest_server import State
+from flwr.server.state import State
 
 
 class RestClientProxy(ClientProxy):

@@ -21,7 +21,7 @@ from fastapi import FastAPI, Request, Response, status
 
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.rest_server.rest_client_proxy import RestClientProxy
-from flwr.server.rest_server.rest_server import State
+from flwr.server.state import State
 
 app = FastAPI()
 

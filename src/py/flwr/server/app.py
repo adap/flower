@@ -25,7 +25,9 @@ from flwr.server.grpc_server.grpc_server import start_grpc_server
 from flwr.server.history import History
 from flwr.server.rest_server.rest_server import start_rest_server
 from flwr.server.server import Server
+from flwr.server.state import State
 from flwr.server.strategy import FedAvg, Strategy
+from flwr.server.task_manager import SimpleTaskManager, TaskManager
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
@@ -106,9 +108,16 @@ def start_server(  # pylint: disable=too-many-arguments
     )
 
     if use_rest:
+        client_manager: ClientManager = initialized_server.client_manager()
+        task_manager: TaskManager = SimpleTaskManager()
+
+        # Global state, oh no!
+        state = State.instance()
+        state.set_client_manager(client_manager=client_manager)
+        state.set_task_manager(task_manager=task_manager)
+
         # Start REST server
         _rest_server = start_rest_server(
-            client_manager=initialized_server.client_manager(),
             server_address=server_address,
         )
     else:
