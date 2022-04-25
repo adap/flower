@@ -137,20 +137,14 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                     yield ins_wrapper.server_message
 
                     # Wait for client message
-
-                    # Explicitly pass None as ProtoBuf defaults to 0 if
-                    # server_message.timeout was not set
-                    timeout = (
-                        server_message.timeout if server_message.timeout > 0 else None
-                    )
                     client_message = next_with_timeout(
                         iterator=client_message_iterator,
-                        timeout=timeout,
+                        timeout=ins_wrapper.timeout,
                     )
                     if client_message is None:
                         # Important: calling `context.abort` in gRPC always
                         # raises an exception so that all code after the call to
-                        # `context.abort` will not run. If susequent code should
+                        # `context.abort` will not run. If subsequent code should
                         # be executed, the `rpc_termination_callback` can be used
                         # (as shown in the `register_client` function).
                         context.abort(
