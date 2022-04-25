@@ -24,7 +24,7 @@ import grpc
 from flwr.proto import transport_pb2_grpc
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import ClientManager
-from flwr.server.grpc_server.grpc_bridge import GRPCBridge
+from flwr.server.grpc_server.grpc_bridge import GRPCBridge, InsWrapper, ResWrapper
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
 
 
@@ -94,16 +94,18 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         if is_success:
             # Get iterators
             client_message_iterator = request_iterator
-            server_message_iterator = bridge.server_message_iterator()
+            ins_wrapper_iterator = bridge.ins_wrapper_iterator()
 
             # All messages will be pushed to client bridge directly
             while True:
                 try:
-                    # Get server message from bridge and yield it
-                    server_message = next(server_message_iterator)
-                    yield server_message
+                    # Get ins_wrapper from bridge and yield server_message
+                    ins_wrapper: InsWrapper = next(ins_wrapper_iterator)
+                    yield ins_wrapper.server_message
                     # Wait for client message
                     client_message = next(client_message_iterator)
-                    bridge.set_client_message(client_message)
+                    bridge.set_res_wrapper(
+                        res_wrapper=ResWrapper(client_message=client_message)
+                    )
                 except StopIteration:
                     break
