@@ -39,14 +39,14 @@ def next_with_timeout(
 
     # Create two dicts which can be accessed by reference from worker threads
     msg: Dict[str, Optional[ClientMessage]] = {"msg": None}
-    stop_iteration: Dict[str, bool] = {"stop_iteration": False}
+    stop_iteration: Dict[str, Optional[StopIteration]] = {"stop_iteration": None}
 
     def get_next() -> None:
         try:
             msg["msg"] = next(iterator)
-        except StopIteration as stop_iteration:
+        except StopIteration as ex:
             # Remember exception to re-raise later
-            stop_iteration["stop_iteration"] = stop_iteration
+            stop_iteration["stop_iteration"] = ex
 
     worker_thread = Thread(target=get_next)
     worker_thread.start()
@@ -54,7 +54,7 @@ def next_with_timeout(
 
     # Raise the exception from the gRPC thread if present. This will ensure that
     # `StopIteration` is correctly raised.
-    if stop_iteration["stop_iteration"]:
+    if stop_iteration["stop_iteration"] is not None:
         raise stop_iteration["stop_iteration"]
 
     # Return `None` or actual `ClientMessage` value of iterator
@@ -149,7 +149,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                         # (as shown in the `register_client` function).
                         context.abort(
                             grpc.StatusCode.DEADLINE_EXCEEDED,
-                            f"Timeout of {server_message.timeout} "
+                            f"Timeout of {ins_wrapper.timeout} "
                             + "seconds was exceeded.",
                         )
                         # This return statement is only for the linter so it understands
