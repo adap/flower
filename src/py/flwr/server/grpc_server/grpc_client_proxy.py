@@ -44,7 +44,7 @@ class GrpcClientProxy(ClientProxy):
         res_wrapper: ResWrapper = self.bridge.request(
             ins_wrapper=InsWrapper(
                 server_message=ServerMessage(properties_ins=properties_msg),
-                timeout=None,
+                timeout=timeout,
             )
         )
         client_msg: ClientMessage = res_wrapper.client_message
@@ -60,7 +60,7 @@ class GrpcClientProxy(ClientProxy):
         res_wrapper: ResWrapper = self.bridge.request(
             ins_wrapper=InsWrapper(
                 server_message=ServerMessage(get_parameters=get_parameters_msg),
-                timeout=None,
+                timeout=timeout,
             )
         )
         client_msg: ClientMessage = res_wrapper.client_message
@@ -78,7 +78,7 @@ class GrpcClientProxy(ClientProxy):
         res_wrapper: ResWrapper = self.bridge.request(
             ins_wrapper=InsWrapper(
                 server_message=ServerMessage(fit_ins=fit_ins_msg),
-                timeout=None,
+                timeout=timeout,
             )
         )
         client_msg: ClientMessage = res_wrapper.client_message
@@ -95,7 +95,7 @@ class GrpcClientProxy(ClientProxy):
         res_wrapper: ResWrapper = self.bridge.request(
             ins_wrapper=InsWrapper(
                 server_message=ServerMessage(evaluate_ins=evaluate_msg),
-                timeout=None,
+                timeout=timeout,
             )
         )
         client_msg: ClientMessage = res_wrapper.client_message
@@ -112,7 +112,7 @@ class GrpcClientProxy(ClientProxy):
         res_wrapper: ResWrapper = self.bridge.request(
             ins_wrapper=InsWrapper(
                 server_message=ServerMessage(reconnect=reconnect_msg),
-                timeout=None,
+                timeout=timeout,
             )
         )
         client_msg: ClientMessage = res_wrapper.client_message

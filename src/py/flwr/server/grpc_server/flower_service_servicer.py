@@ -42,11 +42,7 @@ def next_with_timeout(
     stop_iteration: Dict[str, Optional[StopIteration]] = {"stop_iteration": None}
 
     def get_next() -> None:
-        try:
-            msg["msg"] = next(iterator)
-        except StopIteration as ex:
-            # Remember exception to re-raise later
-            stop_iteration["stop_iteration"] = ex
+        msg["msg"] = next(iterator)
 
     worker_thread = Thread(target=get_next)
     worker_thread.start()
