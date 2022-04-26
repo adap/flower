@@ -187,7 +187,6 @@ class ServerMessage(google.protobuf.message.Message):
     FIT_INS_FIELD_NUMBER: builtins.int
     EVALUATE_INS_FIELD_NUMBER: builtins.int
     PROPERTIES_INS_FIELD_NUMBER: builtins.int
-    TIMEOUT_FIELD_NUMBER: builtins.int
     @property
     def reconnect(self) -> global___ServerMessage.Reconnect: ...
     @property
@@ -198,11 +197,6 @@ class ServerMessage(google.protobuf.message.Message):
     def evaluate_ins(self) -> global___ServerMessage.EvaluateIns: ...
     @property
     def properties_ins(self) -> global___ServerMessage.PropertiesIns: ...
-    timeout: builtins.float
-    """When the field is not explicitly set it will default to zero in gRPC
-    therefore all implementations using it should treat 0 as no timeout
-    """
-
     def __init__(self,
         *,
         reconnect: typing.Optional[global___ServerMessage.Reconnect] = ...,
@@ -210,10 +204,9 @@ class ServerMessage(google.protobuf.message.Message):
         fit_ins: typing.Optional[global___ServerMessage.FitIns] = ...,
         evaluate_ins: typing.Optional[global___ServerMessage.EvaluateIns] = ...,
         properties_ins: typing.Optional[global___ServerMessage.PropertiesIns] = ...,
-        timeout: builtins.float = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters",b"get_parameters","msg",b"msg","properties_ins",b"properties_ins","reconnect",b"reconnect"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters",b"get_parameters","msg",b"msg","properties_ins",b"properties_ins","reconnect",b"reconnect","timeout",b"timeout"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters",b"get_parameters","msg",b"msg","properties_ins",b"properties_ins","reconnect",b"reconnect"]) -> None: ...
     def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["reconnect","get_parameters","fit_ins","evaluate_ins","properties_ins"]]: ...
 global___ServerMessage = ServerMessage
 
