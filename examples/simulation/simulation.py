@@ -20,7 +20,10 @@ def start_server(num_rounds: int, num_clients: int, fraction_fit: float):
     """Start the server with a slightly adjusted FedAvg strategy."""
     strategy = FedAvg(min_available_clients=num_clients, fraction_fit=fraction_fit)
     # Exposes the server by default on port 8080
-    fl.server.start_server(strategy=strategy, config={"num_rounds": num_rounds})
+    fl.server.start_server(
+        strategy=strategy,
+        config={"num_rounds": num_rounds},
+    )
 
 
 def start_client(dataset: DATASET) -> None:
