@@ -50,10 +50,9 @@ def next_with_timeout(
 
     # Raise the exception from the gRPC thread if present. This will ensure that
     # `StopIteration` is correctly raised.
-    if stop_iteration["stop_iteration"] is not None:
-        # TODO: this needs to raise stop_iteration["stop_iteration"] but we
-        #       got a typing error which I cant resolve.
-        raise StopIteration
+    stop_iteration_exception = stop_iteration["stop_iteration"]
+    if stop_iteration_exception is not None:
+        raise stop_iteration_exception
 
     # Return `None` or actual `ClientMessage` value of iterator
     return msg["msg"]
