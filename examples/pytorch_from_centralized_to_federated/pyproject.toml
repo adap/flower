@@ -11,7 +11,7 @@ description = "PyTorch: From Centralized To Federated with Flower"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = "^3.7"
 flwr = "^0.15.0"
 torch = "1.7.1"
 torchvision = "0.8.2"

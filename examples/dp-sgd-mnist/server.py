@@ -40,7 +40,10 @@ def main(args) -> None:
         eval_fn=get_eval_fn(model),
         initial_parameters=fl.common.weights_to_parameters(model.get_weights()),
     )
-    fl.server.start_server(strategy=strategy, config={"num_rounds": args.num_rounds})
+    fl.server.start_server(
+        strategy=strategy,
+        config={"num_rounds": args.num_rounds},
+    )
 
 
 if __name__ == "__main__":
