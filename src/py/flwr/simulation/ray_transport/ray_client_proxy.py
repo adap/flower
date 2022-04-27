@@ -16,12 +16,12 @@
 
 
 from typing import Callable, Dict, cast
-from flwr.client.app import ClientLike, to_client
 
 import ray
 
 from flwr import common
 from flwr.client import Client, ClientLike, to_client
+from flwr.client.app import ClientLike, to_client
 from flwr.server.client_proxy import ClientProxy
 
 ClientFn = Callable[[str], ClientLike]
