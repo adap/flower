@@ -10,7 +10,7 @@ sleep 3  # Sleep for 3s to give the server enough time to start
 # Ensure that the Keras dataset used in client.py is already cached.
 python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
 
-for i in `seq 0 10`; do
+for i in `seq 0 9`; do
     echo "Starting client $i"
     python client.py --partition=${i} &
 done
