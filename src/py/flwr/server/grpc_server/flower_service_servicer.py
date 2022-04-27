@@ -152,8 +152,8 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                         )
                         # This return statement is only for the linter so it understands
                         # that client_message in subsequent lines is not None
-                        # It does not understand that `context.abort` will terminate this
-                        # execution context by raising an exception.
+                        # It does not understand that `context.abort` will terminate
+                        # this execution context by raising an exception.
                         return
 
                     bridge.set_res_wrapper(
