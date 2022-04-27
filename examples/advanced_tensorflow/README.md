@@ -54,4 +54,4 @@ The `run.sh` script starts processes in the background so that you don't have to
 
 ## Important / Warning
 
-The approach how the SSL certificates are generated in this example can serve as an inspiration and starting point but should not be taken as complete for production environments. Please refer to other sources regarding the issue of correctly generating certificates for production environments.
+The approach used to generate SSL certificates can serve as an inspiration and starting point, but it should not be considered as viable for production environments. Please refer to other sources regarding the issue of correctly generating certificates for production environments.
