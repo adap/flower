@@ -15,16 +15,15 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
-from typing import Callable, Dict, Union, cast
+from typing import Callable, Dict, cast
 
 import ray
 
 from flwr import common
-from flwr.client import Client, NumPyClient
-from flwr.client.numpy_client import NumPyClientWrapper
+from flwr.client import Client, ClientLike, to_client
 from flwr.server.client_proxy import ClientProxy
 
-ClientFn = Callable[[str], Client]
+ClientFn = Callable[[str], ClientLike]
 
 
 class RayClientProxy(ClientProxy):
@@ -120,7 +119,5 @@ def launch_and_evaluate(
 
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
     """Create a client instance."""
-    client: Union[Client, NumPyClient] = client_fn(cid)
-    if isinstance(client, NumPyClient):
-        client = NumPyClientWrapper(numpy_client=client)
-    return client
+    client_like: ClientLike = client_fn(cid)
+    return to_client(client_like=client_like)
