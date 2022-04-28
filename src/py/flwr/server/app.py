@@ -64,7 +64,7 @@ def start_server(  # pylint: disable=too-many-arguments
             Currently supported values are `num_rounds` (int, default: 1) and
             `round_timeout` in seconds (float, default: None), so a full configuration
             object instructing the server to perform three rounds of federated
-            learning with a round_timeout of 10min looks like the following:
+            learning with a round timeout of 10min looks like the following:
             `{"num_rounds": 3, "round_timeout": 600.0}`.
         strategy: Optional[flwr.server.Strategy] (default: None). An
             implementation of the abstract base class `flwr.server.Strategy`.
