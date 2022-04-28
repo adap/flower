@@ -6,7 +6,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def load_data():
@@ -43,18 +43,18 @@ def load_partition(idx: int):
     return (train_parition, test_parition)
 
 
-def train(net, trainloader, valloader, epochs):
+def train(net, trainloader, valloader, epochs, device: str = "cpu"):
     """Train the network on the training set."""
     print("Starting training...")
-    net.to(DEVICE)  # move model to GPU if available
-    criterion = torch.nn.CrossEntropyLoss().to(DEVICE)
+    net.to(device)  # move model to GPU if available
+    criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(
         net.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4
     )
     net.train()
     for _ in range(epochs):
         for images, labels in trainloader:
-            images, labels = images.to(DEVICE), labels.to(DEVICE)
+            images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
             loss = criterion(net(images), labels)
             loss.backward()
@@ -74,16 +74,16 @@ def train(net, trainloader, valloader, epochs):
     return results
 
 
-def test(net, testloader, steps: int = None):
+def test(net, testloader, steps: int = None, device: str = "cpu"):
     """Validate the network on the entire test set."""
     print("Starting evalutation...")
-    net.to(DEVICE)  # move model to GPU if available
+    net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
     net.eval()
     with torch.no_grad():
         for batch_idx, (images, labels) in enumerate(testloader):
-            images, labels = images.to(DEVICE), labels.to(DEVICE)
+            images, labels = images.to(device), labels.to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)
