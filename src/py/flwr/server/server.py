@@ -119,7 +119,7 @@ class Server:
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
-        round_durations = []
+        
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
             if self.timed:
@@ -150,6 +150,9 @@ class Server:
                     metrics_cen["clip_norm"] = self.strategy.clip_norm
                 if self.timed:
                     metrics_cen["round_time"] = elapsed_time
+                if "time_client_fit_mean" in res_fit[1].keys():
+                    metrics_cen["time_client_fit_mean"] = res_fit[1]["time_client_fit_mean"]
+                    metrics_cen["time_client_fit_stddev"] = res_fit[1]["time_client_fit_stddev"]
                 history.add_loss_centralized(rnd=current_round, loss=loss_cen)
                 history.add_metrics_centralized(rnd=current_round, metrics=metrics_cen)
 
