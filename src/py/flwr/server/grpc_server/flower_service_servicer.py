@@ -17,7 +17,7 @@
 Relevant knowledge for reading this modules code:
     - https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
 """
-from typing import Callable, Dict, Iterator
+from typing import Callable, Iterator
 
 import grpc
 from iterators import TimeoutIterator
