@@ -16,6 +16,7 @@
 
 
 import concurrent.futures
+from time import perf_counter
 import timeit
 from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple
@@ -56,23 +57,27 @@ def save_metrics(hist, path_to_save_metrics):
     accs = np.array([])
     losses = np.array([])
     clip_norms = np.array([])
-
+    round_times = np.array([])
     for (_, acc) in hist.metrics_centralized['accuracy']:
         accs = np.append(accs, acc)
     for (_, loss) in hist.losses_centralized:
         losses = np.append(losses, loss)
-    for (_, clip_norm) in hist.clip_norms:
+    for (_, clip_norm) in hist.metrics_centralized['clip_norm']:
         clip_norms = np.append(clip_norms, clip_norm)
+    for (_, round_time) in hist.metrics_centralized['round_time']:
+        round_times = np.append(round_times, round_time)
 
     np.save(path_to_save_metrics / "accs.npy", accs)
     np.save(path_to_save_metrics / "losses.npy", losses)
     if len(clip_norms) > 0:
         np.save(path_to_save_metrics / "clip_norms.npy", clip_norms)
+    if len(round_times) > 0:
+        np.save(path_to_save_metrics / "round_times.npy", round_times)
 class Server:
     """Flower server."""
 
     def __init__(
-        self, client_manager: ClientManager, strategy: Optional[Strategy] = None, path_to_save_metrics = None
+        self, client_manager: ClientManager, strategy: Optional[Strategy] = None, path_to_save_metrics = None, timed=False
     ) -> None:
         self._client_manager: ClientManager = client_manager
         self.parameters: Parameters = Parameters(
@@ -81,6 +86,7 @@ class Server:
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
         self.max_workers: Optional[int] = None
         self.path_to_save_metrics = path_to_save_metrics
+        self.timed = timed
 
     def set_max_workers(self, max_workers: Optional[int]) -> None:
         """Set the max_workers used by ThreadPoolExecutor."""
@@ -119,14 +125,20 @@ class Server:
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
-
+        round_durations = []
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
+            if self.timed:
+                round_start_time = perf_counter()
             res_fit = self.fit_round(rnd=current_round)
             if res_fit:
                 parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
                     self.parameters = parameters_prime
+            if self.timed:
+                round_end_time = perf_counter()
+                elapsed_time = round_end_time - round_start_time
+
 
             # Evaluate model using strategy implementation
             res_cen = self.strategy.evaluate(parameters=self.parameters)
@@ -140,10 +152,12 @@ class Server:
                     metrics_cen,
                     timeit.default_timer() - start_time,
                 )
+                if isinstance(self.strategy, DPAdaptiveClipStrategy):
+                    metrics_cen["clip_norm"] = self.strategy.clip_norm
+                if self.timed:
+                    metrics_cen["round_time"] = elapsed_time
                 history.add_loss_centralized(rnd=current_round, loss=loss_cen)
                 history.add_metrics_centralized(rnd=current_round, metrics=metrics_cen)
-                if isinstance(self.strategy, DPAdaptiveClipStrategy):
-                    history.add_clip_norm(rnd=current_round, clip_norm=self.strategy.clip_norm)
 
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(rnd=current_round)

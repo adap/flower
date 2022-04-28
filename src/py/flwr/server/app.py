@@ -130,7 +130,7 @@ def _init_defaults(
         client_manager = SimpleClientManager()
         if strategy is None:
             strategy = FedAvg()
-        server = Server(client_manager=client_manager, strategy=strategy, path_to_save_metrics=config["path_to_save_metrics"])
+        server = Server(client_manager=client_manager, strategy=strategy, path_to_save_metrics=config["path_to_save_metrics"], timed=config["timed"])
 
     # Set default config values
     if config is None:
