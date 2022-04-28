@@ -117,10 +117,7 @@ class Server:
                 res[0],
                 res[1],
             )
-            history.add_loss_centralized(rnd=0, loss=res[0])
-            history.add_metrics_centralized(rnd=0, metrics=res[1])
-            if isinstance(self.strategy, DPAdaptiveClipStrategy):
-                history.add_clip_norm(rnd=0, clip_norm=self.strategy.clip_norm)
+            
 
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
