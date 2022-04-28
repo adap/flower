@@ -58,7 +58,7 @@ class CifarClient(fl.client.NumPyClient):
 
         results = utils.train(model, trainLoader, valLoader, epochs, self.device)
 
-        parameters_prime = [val.cpu().numpy() for _, val in model.state_dict().items()]
+        parameters_prime = utils.get_model_params(model)
         num_examples_train = len(trainset)
 
         return parameters_prime, num_examples_train, results
@@ -78,26 +78,20 @@ class CifarClient(fl.client.NumPyClient):
         return float(loss), len(self.testset), {"accuracy": float(accuracy)}
 
 
-def client_dry_run():
+def client_dry_run(device: str = "cpu"):
     """Weak tests to check whether all client methods are working as expected."""
 
-    def get_model_params(model):
-        return [val.cpu().numpy() for _, val in model.state_dict().items()]
-
     model = utils.load_efficientnet(classes=10)
-    device = torch.device(
-        "cuda:0" if torch.cuda.is_available() and args.use_cuda else "cpu"
-    )
     trainset, testset = utils.load_partition(0)
     trainset = torch.utils.data.Subset(trainset, range(10))
     testset = torch.utils.data.Subset(testset, range(10))
     client = CifarClient(trainset, testset, device)
     client.fit(
-        get_model_params(model),
+        utils.get_model_params(model),
         {"batch_size": 16, "local_epochs": 1},
     )
 
-    client.evaluate(get_model_params(model), {"val_steps": 32})
+    client.evaluate(utils.get_model_params(model), {"val_steps": 32})
 
     print("Dry Run Successful")
 
@@ -113,7 +107,13 @@ def main() -> None:
         help="Do a dry-run to check the client",
     )
     parser.add_argument(
-        "--partition", type=int, default=0, choices=range(0, 10), required=False
+        "--partition",
+        type=int,
+        default=0,
+        choices=range(0, 10),
+        required=False,
+        help="Specifies the artificial data partition of CIFAR10 to be used. \
+        Picks partition 0 by default",
     )
     parser.add_argument(
         "--toy",
@@ -133,8 +133,12 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    device = torch.device(
+        "cuda:0" if torch.cuda.is_available() and args.use_cuda else "cpu"
+    )
+
     if args.dry:
-        client_dry_run()
+        client_dry_run(device)
     else:
         # Load a subset of CIFAR-10 to simulate the local data partition
         trainset, testset = utils.load_partition(args.partition)
@@ -142,10 +146,6 @@ def main() -> None:
         if args.toy:
             trainset = torch.utils.data.Subset(trainset, range(10))
             testset = torch.utils.data.Subset(testset, range(10))
-
-        device = torch.device(
-            "cuda:0" if torch.cuda.is_available() and args.use_cuda else "cpu"
-        )
 
         # Start Flower client
         client = CifarClient(trainset, testset, device)

@@ -128,3 +128,8 @@ def load_efficientnet(entrypoint: str = "nvidia_efficientnet_b0", classes: int =
     if classes is not None:
         replace_classifying_layer(efficientnet, classes)
     return efficientnet
+
+
+def get_model_params(model: "PyTorch Model"):
+    """Returns a model's parameters."""
+    return [val.cpu().numpy() for _, val in model.state_dict().items()]
