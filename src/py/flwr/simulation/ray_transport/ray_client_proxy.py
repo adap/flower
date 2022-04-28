@@ -15,7 +15,7 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
-from typing import Callable, Dict, cast
+from typing import Callable, Dict, Optional, cast
 
 import ray
 
