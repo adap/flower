@@ -31,12 +31,12 @@ DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 @dataclass
 class Config:
-    """App config with defaults.
+    """Internal Flower server config.
 
-    Used internally only for now to simplify typing warnings.
+    All attributes have default values which allows users to provide
+    just the ones they care about.
     """
 
-    # Optional
     num_rounds: int = 1
     round_timeout: Optional[float] = None
 
