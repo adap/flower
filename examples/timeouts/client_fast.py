@@ -8,15 +8,15 @@ weights = [np.ones((3, 3))]
 # Define Flower client
 class TimeoutClient(fl.client.NumPyClient):
     def get_parameters(self):
-        time.sleep(1)
+        time.sleep(10)
         return weights
 
     def fit(self, parameters, config):
-        time.sleep(1)
+        time.sleep(20)
         return weights, 1, {}
 
     def evaluate(self, parameters, config):
-        time.sleep(1)
+        time.sleep(10)
         return 0.1, 1, {"accuracy": 1}
 
 

@@ -21,45 +21,13 @@ from threading import Thread
 from typing import Callable, Dict, Iterator, Optional
 
 import grpc
+from iterators import TimeoutIterator
 
 from flwr.proto import transport_pb2_grpc
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import ClientManager
 from flwr.server.grpc_server.grpc_bridge import GRPCBridge, InsWrapper, ResWrapper
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
-
-
-def next_with_timeout(
-    iterator: Iterator[ClientMessage],
-    timeout: Optional[float],
-) -> Optional[ClientMessage]:
-    """Return next in iterator or timeout before doing so."""
-    if timeout is None:
-        return next(iterator)
-
-    # Create two dicts which can be accessed by reference from worker threads
-    msg: Dict[str, Optional[ClientMessage]] = {"msg": None}
-    stop_iteration: Dict[str, Optional[StopIteration]] = {"stop_iteration": None}
-
-    def get_next() -> None:
-        try:
-            msg["msg"] = next(iterator)
-        except StopIteration as exc:
-            # Remember exception to re-raise later
-            stop_iteration["stop_iteration"] = exc
-
-    worker_thread = Thread(target=get_next)
-    worker_thread.start()
-    worker_thread.join(timeout=timeout)
-
-    # Raise the exception from the gRPC thread if present. This will ensure that
-    # `StopIteration` is correctly raised.
-    stop_iteration_exception = stop_iteration["stop_iteration"]
-    if stop_iteration_exception is not None:
-        raise stop_iteration_exception
-
-    # Return `None` or actual `ClientMessage` value of iterator
-    return msg["msg"]
 
 
 def default_bridge_factory() -> GRPCBridge:
@@ -127,7 +95,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
 
         if is_success:
             # Get iterators
-            client_message_iterator = request_iterator
+            client_message_iterator = TimeoutIterator(request_iterator)
             ins_wrapper_iterator = bridge.ins_wrapper_iterator()
 
             # All messages will be pushed to client bridge directly
@@ -137,12 +105,13 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                     ins_wrapper: InsWrapper = next(ins_wrapper_iterator)
                     yield ins_wrapper.server_message
 
+                    # Set current timeout, might be None
+                    client_message_iterator.set_timeout(ins_wrapper.timeout)
+
                     # Wait for client message
-                    client_message = next_with_timeout(
-                        iterator=client_message_iterator,
-                        timeout=ins_wrapper.timeout,
-                    )
-                    if client_message is None:
+                    client_message = next(client_message_iterator)
+
+                    if client_message is client_message_iterator.get_sentinel():
                         # Important: calling `context.abort` in gRPC always
                         # raises an exception so that all code after the call to
                         # `context.abort` will not run. If subsequent code should

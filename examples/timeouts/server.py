@@ -14,5 +14,5 @@ fl.server.start_server(
         fraction_eval=1,
     ),
     server_address="[::]:8080",
-    config={"num_rounds": 3, "round_timeout": 3.0},
+    config={"num_rounds": 3, "round_timeout": 30.0},
 )
