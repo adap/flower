@@ -94,7 +94,9 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
 
         if is_success:
             # Get iterators
-            client_message_iterator = TimeoutIterator(request_iterator)
+            client_message_iterator = TimeoutIterator(
+                request_iterator, reset_on_next=True
+            )
             ins_wrapper_iterator = bridge.ins_wrapper_iterator()
 
             # All messages will be pushed to client bridge directly
@@ -105,7 +107,8 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                     yield ins_wrapper.server_message
 
                     # Set current timeout, might be None
-                    client_message_iterator.set_timeout(ins_wrapper.timeout)
+                    if ins_wrapper.timeout is not None:
+                        client_message_iterator.set_timeout(ins_wrapper.timeout)
 
                     # Wait for client message
                     client_message = next(client_message_iterator)
