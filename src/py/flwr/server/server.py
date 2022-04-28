@@ -53,22 +53,19 @@ ReconnectResultsAndFailures = Tuple[
 ]
 
 def save_metrics(hist, path_to_save_metrics):
-    
-    accs = np.array([])
     losses = np.array([])
-    clip_norms = np.array([])
-    round_times = np.array([])
-    for (_, acc) in hist.metrics_centralized['accuracy']:
-        accs = np.append(accs, acc)
     for (_, loss) in hist.losses_centralized:
         losses = np.append(losses, loss)
-    for (_, clip_norm) in hist.metrics_centralized['clip_norm']:
-        clip_norms = np.append(clip_norms, clip_norm)
-    for (_, round_time) in hist.metrics_centralized['round_time']:
-        round_times = np.append(round_times, round_time)
-
-    np.save(path_to_save_metrics / "accs.npy", accs)
     np.save(path_to_save_metrics / "losses.npy", losses)
+    for metric in hist.metrics_centralized.keys():
+        metric_vals = []
+        for (_, m_val) in hist.metrics_centralized[metric]:
+            metric_vals = np.append(metric_vals, m_val)
+        np.save(path_to_save_metrics / "{}.npy".format(metric), metric_vals)
+
+
+    
+    
     if len(clip_norms) > 0:
         np.save(path_to_save_metrics / "clip_norms.npy", clip_norms)
     if len(round_times) > 0:
