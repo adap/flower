@@ -63,13 +63,6 @@ def save_metrics(hist, path_to_save_metrics):
             metric_vals = np.append(metric_vals, m_val)
         np.save(path_to_save_metrics / "{}.npy".format(metric), metric_vals)
 
-
-    
-    
-    if len(clip_norms) > 0:
-        np.save(path_to_save_metrics / "clip_norms.npy", clip_norms)
-    if len(round_times) > 0:
-        np.save(path_to_save_metrics / "round_times.npy", round_times)
 class Server:
     """Flower server."""
 
