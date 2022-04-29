@@ -76,7 +76,7 @@ class Server:
         return self._client_manager
 
     # pylint: disable=too-many-locals
-    def fit(self, num_rounds: int, timeout: Optional[float] = None) -> History:
+    def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
         """Run federated averaging for a number of rounds."""
         history = History()
 
@@ -271,7 +271,10 @@ def reconnect_clients(
             executor.submit(reconnect_client, client_proxy, ins, timeout)
             for client_proxy, ins in client_instructions
         }
-        finished_fs, _ = concurrent.futures.wait(fs=submitted_fs)
+        finished_fs, _ = concurrent.futures.wait(
+            fs=submitted_fs,
+            timeout=None,  # Handled in the respective communication stack
+        )
 
     # Gather results
     results: List[Tuple[ClientProxy, Disconnect]] = []
@@ -310,7 +313,10 @@ def fit_clients(
             executor.submit(fit_client, client_proxy, ins, timeout)
             for client_proxy, ins in client_instructions
         }
-        finished_fs, _ = concurrent.futures.wait(fs=submitted_fs)
+        finished_fs, _ = concurrent.futures.wait(
+            fs=submitted_fs,
+            timeout=None,  # Handled in the respective communication stack
+        )
 
     # Gather results
     results: List[Tuple[ClientProxy, FitRes]] = []
@@ -345,7 +351,10 @@ def evaluate_clients(
             executor.submit(evaluate_client, client_proxy, ins, timeout)
             for client_proxy, ins in client_instructions
         }
-        finished_fs, _ = concurrent.futures.wait(fs=submitted_fs)
+        finished_fs, _ = concurrent.futures.wait(
+            fs=submitted_fs,
+            timeout=None,  # Handled in the respective communication stack
+        )
 
     # Gather results
     results: List[Tuple[ClientProxy, EvaluateRes]] = []
