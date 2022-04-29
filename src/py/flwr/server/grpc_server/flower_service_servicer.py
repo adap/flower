@@ -95,7 +95,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         if is_success:
             # Get iterators
             client_message_iterator = TimeoutIterator(
-                request_iterator, reset_on_next=True
+                iterator=request_iterator, reset_on_next=True
             )
             ins_wrapper_iterator = bridge.ins_wrapper_iterator()
 
