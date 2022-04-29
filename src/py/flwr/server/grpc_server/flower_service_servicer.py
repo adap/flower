@@ -119,10 +119,10 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                         # `context.abort` will not run. If subsequent code should
                         # be executed, the `rpc_termination_callback` can be used
                         # (as shown in the `register_client` function).
+                        details = f"Timeout of {ins_wrapper.timeout}sec was exceeded."
                         context.abort(
-                            grpc.StatusCode.DEADLINE_EXCEEDED,
-                            f"Timeout of {ins_wrapper.timeout} "
-                            + "seconds was exceeded.",
+                            code=grpc.StatusCode.DEADLINE_EXCEEDED,
+                            details=details,
                         )
                         # This return statement is only for the linter so it understands
                         # that client_message in subsequent lines is not None
