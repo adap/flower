@@ -55,6 +55,7 @@ numpy = [
 grpcio = "^1.41.0"
 protobuf = "^3.19.0"
 importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
+iterators = "^0.0.2"
 # Optional dependencies
 ray = { extras = ["default"], version = "^1.9.2", optional = true }
 
