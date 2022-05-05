@@ -8,7 +8,7 @@ Unreleased
 
   Python 3.10 is the latest stable release of Python and Python 3.11 is due to be released in October. This Flower release adds experimental support for both Python versions.
 
-* **Adding support for custom** :code:`ClientManager` **as a** :code:`start_simulation` **parameter** (`#1171 <https://github.com/adap/flower/pull/1171>`_)
+* **Add support for custom** :code:`ClientManager` **as a** :code:`start_simulation` **parameter** (`#1171 <https://github.com/adap/flower/pull/1171>`_)
 
   The Virtual Client Engine (used via :code:`start_simulation`) can now be started with a custom :code:`ClientManager` instance.
 
@@ -24,9 +24,9 @@ Unreleased
 
   The new :code:`FedAvgM` strategy implements Federated Averaging with Server Momentum [Hsu et al., 2019].
 
-* **New advanced PyTorch code** (`#805 <https://github.com/adap/flower/pull/805>`_)
+* **New advanced PyTorch code example** (`#1007 <https://github.com/adap/flower/pull/1007>`_)
 
-  A new code example (:code:`advanced_pytorch`) demonstrates more advanced Flower features with PyTorch.
+  A new code example (:code:`advanced_pytorch`) demonstrates advanced Flower concepts with PyTorch.
 
 Incompatible changes:
 ~~~~~~~~~~~~~~~~~~~~~
