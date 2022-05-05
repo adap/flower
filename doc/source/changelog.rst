@@ -5,10 +5,28 @@ Unreleased
 ----------
 
 * **Add experimental support for Python 3.10 and Python 3.11** (`#1135 <https://github.com/adap/flower/pull/1135>`_)
-* **Adding support for custom ClientManager as a simulation parameter** (`#1171 <https://github.com/adap/flower/pull/1171>`_)
+
+  Python 3.10 is the latest stable release of Python and Python 3.11 is due to be released in October. This Flower release adds experimental support for both Python versions.
+
+* **Adding support for custom** :code:`ClientManager` **as a** :code:`start_simulation` **parameter** (`#1171 <https://github.com/adap/flower/pull/1171>`_)
+
+  The Virtual Client Engine (used via :code:`start_simulation`) can now be started with a custom :code:`ClientManager` instance.
+
 * **Aggregate custom metrics through user-provided functions** (`#1144 <https://github.com/adap/flower/pull/1144>`_)
+
+  Custom metrics (e.g., :code:`accuracy`) can now be aggregated without having to customize the strategy. Built-in strategies support two new arguments, :code:`fit_metrics_aggregation_fn` and :code:`evaluate_metrics_aggregation_fn`, that allow passing custom metric aggregation functions.
+
 * **Enable both federated evaluation and centralized evaluation to be used at the same time in all built-in strategies** (`#1091 <https://github.com/adap/flower/pull/1091>`_)
-* **New FedAvgM strategy (FedAvg with momentum)** (`#1076 <https://github.com/adap/flower/pull/1076>`_)
+
+  Built-in strategies can now perform both federated evaluation (i.e., client-side) and centralized evaluation (i.e., server-side) in the same round. Federated evaluation can be disabled by setting :code:`fraction_eval` to :code:`0.0`.
+
+* **New FedAvgM strategy (Federated Averaging with Server Momentum)** (`#1076 <https://github.com/adap/flower/pull/1076>`_)
+
+  The new :code:`FedAvgM` strategy implements Federated Averaging with Server Momentum [Hsu et al., 2019].
+
+* **New advanced PyTorch code** (`#805 <https://github.com/adap/flower/pull/805>`_)
+
+  A new code example (:code:`advanced_pytorch`) demonstrates more advanced Flower features with PyTorch.
 
 Incompatible changes:
 ~~~~~~~~~~~~~~~~~~~~~
