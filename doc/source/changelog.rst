@@ -4,7 +4,7 @@ Changelog
 Unreleased
 ----------
 
-* **Flower Baselines preview: FedOpt, FedBN, FedAvgM** (`#919 <https://github.com/adap/flower/pull/919>`_, `#1127 <https://github.com/adap/flower/pull/1127>`_, `#914 <https://github.com/adap/flower/pull/914>`_)
+* **Flower Baselines (preview): FedOpt, FedBN, FedAvgM** (`#919 <https://github.com/adap/flower/pull/919>`_, `#1127 <https://github.com/adap/flower/pull/1127>`_, `#914 <https://github.com/adap/flower/pull/914>`_)
 
   The first preview release of Flower Baselines has arrived! We're kickstarting Flower Baselines with implementations of FedOpt (FedYogi, FedAdam, FedAdagrad), FedBN, and FedAvgM. Check the documentation on how to use `Flower Baselines <https://flower.dev/docs/using-baselines.html>`_. With this first preview release we're also inviting the community to `contribute their own baselines <https://flower.dev/docs/contributing-baselines.html>`_.
 
@@ -30,7 +30,7 @@ Unreleased
 
 * **Two new Jupyter Notebook tutorials** (`#1141 <https://github.com/adap/flower/pull/1141>`_)
 
-  Two Jupyter Notebook tutorials explain the basic and intermediate Flower features. The notebooks are fully compatible with Google Colab.
+  Two Jupyter Notebook tutorials (compatible with Google Colab) explain basic and intermediate Flower features:
 
   *An Introduction to Federated Learning*: `Open in Colab <https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-1-Intro-to-FL-PyTorch.ipynb>`_
 
