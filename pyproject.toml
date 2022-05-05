@@ -27,6 +27,8 @@ classifiers = [
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -50,6 +52,7 @@ numpy = "^1.20.0"
 grpcio = "^1.41.0"
 protobuf = "^3.19.0"
 importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
+iterators = "^0.0.2"
 # Optional dependencies
 ray = { extras = ["default"], version = "^1.9.2", optional = true }
 
@@ -67,6 +70,7 @@ mypy = "==0.941"
 pylint = "==2.12.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
+pytest-cov = "==3.0.0"
 pytest-watch = "==4.2.0"
 grpcio-tools = "==1.41.0"
 mypy-protobuf = "==3.2.0"
@@ -78,6 +82,7 @@ sphinx-copybutton = "==0.5.0"
 sphinx-panels = "==0.6.0"
 sphinxcontrib-mermaid = "==0.7.1"
 furo = "==2022.3.4"
+sphinx-reredirects = "==0.0.1"
 
 [tool.isort]
 line_length = 88
@@ -90,7 +95,7 @@ known_first_party = ["flwr", "flwr_experimental", "flwr_tool"]
 
 [tool.black]
 line-length = 88
-target-version = ["py37", "py38", "py39"]
+target-version = ["py37", "py38", "py39", "py310"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
@@ -109,21 +114,17 @@ strict = true
 plugins = "numpy.typing.mypy_plugin"
 
 [[tool.mypy.overrides]]
-module = "flwr_example.*"
+module = [
+    "flwr_example.*",
+    "flwr_experimental.*",
+]
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = "flwr_experimental.*"
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = "importlib.metadata.*"
-follow_imports = "skip"
-follow_imports_for_stubs = true
-disallow_untyped_calls = false
-
-[[tool.mypy.overrides]]
-module = "importlib_metadata.*"
+module = [
+    "importlib.metadata.*",
+    "importlib_metadata.*",
+]
 follow_imports = "skip"
 follow_imports_for_stubs = true
 disallow_untyped_calls = false

@@ -70,10 +70,10 @@ Flower's goal is to make federated learning accessible to everyone. This series 
 
 [Flower Docs](https://flower.dev/docs):
 * [Installation](https://flower.dev/docs/installation.html)
-* [Quickstart (TensorFlow)](https://flower.dev/docs/quickstart_tensorflow.html)
-* [Quickstart (PyTorch)](https://flower.dev/docs/quickstart_pytorch.html)
-* [Quickstart (Hugging Face [code example])](https://flower.dev/docs/quickstart_huggingface.html)
-* [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/quickstart_pytorch_lightning.html)
+* [Quickstart (TensorFlow)](https://flower.dev/docs/quickstart-tensorflow.html)
+* [Quickstart (PyTorch)](https://flower.dev/docs/quickstart-pytorch.html)
+* [Quickstart (Hugging Face [code example])](https://flower.dev/docs/quickstart-huggingface.html)
+* [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/quickstart-pytorch-lightning.html)
 * [Quickstart (MXNet)](https://flower.dev/docs/example-mxnet-walk-through.html)
 * [Quickstart (JAX [code example])](https://github.com/adap/flower/tree/main/examples/jax_from_centralized_to_federated)
 * [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
@@ -118,6 +118,7 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 * [MXNet: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/mxnet_from_centralized_to_federated)
 * [JAX: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/jax_from_centralized_to_federated)
 * [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced_tensorflow)
+* [Advanced Flower with PyTorch](https://github.com/adap/flower/tree/main/examples/advanced_pytorch)
 * [Single-Machine Simulation of Federated Learning Systems](https://github.com/adap/flower/tree/main/examples/simulation)
 
 ## Community
