@@ -109,9 +109,11 @@ testpaths = [
 ]
 
 [tool.mypy]
+plugins = [
+    "numpy.typing.mypy_plugin",
+]
 ignore_missing_imports = true
 strict = true
-plugins = "numpy.typing.mypy_plugin"
 
 [[tool.mypy.overrides]]
 module = [
