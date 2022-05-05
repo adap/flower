@@ -53,6 +53,7 @@ Unreleased
     * Add support for custom :code:`ClientManager` as a :code:`start_simulation` parameter (`#1171 <https://github.com/adap/flower/pull/1171>`_)
     * New documentation for `implementing strategies <https://flower.dev/docs/implementing-strategies.html>`_ (`#1097 <https://github.com/adap/flower/pull/1097>`_, `#1175 <https://github.com/adap/flower/pull/1175>`_)
     * New mobile-friendly documentation theme (`#1174 <https://github.com/adap/flower/pull/1174>`_)
+    * Limit version range for (optional) :code:`ray` dependency to include only compatible releases (:code:`>=1.9.2,<1.12.0`) (`#1205 <https://github.com/adap/flower/pull/1205>`_)
 
 Incompatible changes:
 ~~~~~~~~~~~~~~~~~~~~~
