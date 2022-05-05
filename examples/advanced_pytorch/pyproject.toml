@@ -1,0 +1,21 @@
+[build-system]
+requires = [
+    "poetry==1.1.12",
+]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "advanced_flwr_pytorch"
+version = "0.1.0"
+description = "Advanced Flower/PyTorch Example"
+authors = [
+    "The Flower Authors <enquiries@flower.dev>",
+    "Kaushik Amar Das <kaushik.das@iiitg.ac.in>"
+]
+
+[tool.poetry.dependencies]
+python = "^3.6.2"
+flwr = "^0.17.0"  # For development: { path = "../../", develop = true }
+torch = "1.9.0"
+torchvision = "0.10.0"
+validators = "0.18.2"
