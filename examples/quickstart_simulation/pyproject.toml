@@ -11,7 +11,7 @@ description = "Federated Learning Simulation Quickstart with Flower"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = "^3.7"
 flwr = { extras = ["simulation"], version = "^0.17.0" }
 # flwr = { extras = ["simulation"], path = "../../", develop = true }  # Development
 tensorflow-cpu = "2.6.2"
