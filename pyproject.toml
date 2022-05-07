@@ -55,6 +55,7 @@ numpy = [
 grpcio = "^1.41.0"
 protobuf = "^3.19.0"
 importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
+iterators = "^0.0.2"
 # Optional dependencies
 ray = { extras = ["default"], version = "^1.9.2", optional = true }
 # REST-related (TODO: make optional)
@@ -76,6 +77,7 @@ mypy = "==0.941"
 pylint = "==2.12.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
+pytest-cov = "==3.0.0"
 pytest-watch = "==4.2.0"
 grpcio-tools = "==1.41.0"
 mypy-protobuf = "==3.2.0"

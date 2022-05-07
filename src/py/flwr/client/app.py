@@ -17,9 +17,8 @@
 
 import time
 from logging import INFO
-from typing import Optional
+from typing import Optional, Union
 from uuid import uuid4
-from xmlrpc.client import Server
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
@@ -30,6 +29,8 @@ from .grpc_client.message_handler import handle
 from .numpy_client import NumPyClient, NumPyClientWrapper
 from .numpy_client import has_get_properties as numpyclient_has_get_properties
 from .rest_client.connection import rest_not_a_connection
+
+ClientLike = Union[Client, NumPyClient]
 
 
 def start_client(
@@ -194,3 +195,10 @@ def start_numpy_client(
         root_certificates=root_certificates,
         use_rest=use_rest,
     )
+
+
+def to_client(client_like: ClientLike) -> Client:
+    """Take any Client-like object and return it as a Client."""
+    if isinstance(client_like, NumPyClient):
+        return NumPyClientWrapper(numpy_client=client_like)
+    return client_like

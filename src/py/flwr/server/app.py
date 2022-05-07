@@ -15,8 +15,9 @@
 """Flower server app."""
 
 
+from dataclasses import dataclass
 from logging import INFO
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
@@ -32,10 +33,22 @@ from flwr.server.task_manager import SimpleTaskManager, TaskManager
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 
+@dataclass
+class Config:
+    """Internal Flower server config.
+
+    All attributes have default values which allows users to provide
+    just the ones they care about.
+    """
+
+    num_rounds: int = 1
+    round_timeout: Optional[float] = None
+
+
 def start_server(  # pylint: disable=too-many-arguments
     server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,
-    config: Optional[Dict[str, int]] = None,
+    config: Optional[Dict[str, Union[int, Optional[float]]]] = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -52,10 +65,12 @@ def start_server(  # pylint: disable=too-many-arguments
         server: Optional[flwr.server.Server] (default: None). An implementation
             of the abstract base class `flwr.server.Server`. If no instance is
             provided, then `start_server` will create one.
-        config: Optional[Dict[str, int]] (default: None). The only currently
-            supported values is `num_rounds`, so a full configuration object
-            instructing the server to perform three rounds of federated
-            learning looks like the following: `{"num_rounds": 3}`.
+        config: Optional[Dict[str, Union[int, Optional[float]]]] (default: None).
+            Currently supported values are `num_rounds` (int, default: 1) and
+            `round_timeout` in seconds (float, default: None), so a full configuration
+            object instructing the server to perform three rounds of federated
+            learning with a round timeout of 10min looks like the following:
+            `{"num_rounds": 3, "round_timeout": 600.0}`.
         strategy: Optional[flwr.server.Strategy] (default: None). An
             implementation of the abstract base class `flwr.server.Strategy`.
             If no strategy is provided, then `start_server` will use
@@ -104,7 +119,10 @@ def start_server(  # pylint: disable=too-many-arguments
     >>> )
     """
     initialized_server, initialized_config = _init_defaults(
-        server, config, strategy, client_manager
+        server=server,
+        config=config,
+        strategy=strategy,
+        client_manager=client_manager,
     )
 
     if use_rest:
@@ -129,7 +147,8 @@ def start_server(  # pylint: disable=too-many-arguments
             certificates=certificates,
         )
 
-    num_rounds = initialized_config["num_rounds"]
+    num_rounds = initialized_config.num_rounds
+
     ssl_status = "enabled" if certificates is not None else "disabled"
     msg = f"Flower server running ({num_rounds} rounds), SSL is {ssl_status}"
     log(INFO, msg)
@@ -152,10 +171,10 @@ def start_server(  # pylint: disable=too-many-arguments
 
 def _init_defaults(
     server: Optional[Server],
-    config: Optional[Dict[str, int]],
+    config: Optional[Dict[str, Union[int, Optional[float]]]],
     strategy: Optional[Strategy],
     client_manager: Optional[ClientManager],
-) -> Tuple[Server, Dict[str, int]]:
+) -> Tuple[Server, Config]:
     # Create server instance if none was given
     if server is None:
         if client_manager is None:
@@ -167,17 +186,19 @@ def _init_defaults(
     # Set default config values
     if config is None:
         config = {}
-    if "num_rounds" not in config:
-        config["num_rounds"] = 1
 
-    return server, config
+    conf = Config(**config)  # type: ignore
+
+    return server, conf
 
 
 def _fl(
-    server: Server, config: Dict[str, int], force_final_distributed_eval: bool
+    server: Server,
+    config: Config,
+    force_final_distributed_eval: bool,
 ) -> History:
     # Fit model
-    hist = server.fit(num_rounds=config["num_rounds"])
+    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
     log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
     log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
@@ -188,7 +209,7 @@ def _fl(
         server.strategy.eval_fn = None  # type: ignore
 
         # Evaluate the final trained model
-        res = server.evaluate_round(rnd=-1)
+        res = server.evaluate_round(rnd=-1, timeout=config.round_timeout)
         if res is not None:
             loss, _, (results, failures) = res
             log(INFO, "app_evaluate: federated loss: %s", str(loss))
@@ -202,6 +223,6 @@ def _fl(
             log(INFO, "app_evaluate: no evaluation result")
 
     # Graceful shutdown
-    server.disconnect_all_clients()
+    server.disconnect_all_clients(timeout=config.round_timeout)
 
     return hist
