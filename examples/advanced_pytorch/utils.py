@@ -101,14 +101,14 @@ def test(net, testloader, steps: int = None, device: str = "cpu"):
 
 
 def replace_classifying_layer(efficientnet_model, num_classes: int = 10):
-    """Replaces the final layer of the classifier"""
+    """Replaces the final layer of the classifier."""
     num_features = efficientnet_model.classifier.fc.in_features
     efficientnet_model.classifier.fc = torch.nn.Linear(num_features, num_classes)
 
 
 def load_efficientnet(entrypoint: str = "nvidia_efficientnet_b0", classes: int = None):
-    """Loads pretrained efficientnet model from torch hub. Replaces final classifying layer
-    if classes is specified.
+    """Loads pretrained efficientnet model from torch hub. Replaces final
+    classifying layer if classes is specified.
 
     Args:
         entrypoint: EfficientNet model to download.
