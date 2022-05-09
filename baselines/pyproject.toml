@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "poetry==1.1.12",
+    "poetry==1.1.13",
 ]
 build-backend = "poetry.masonry.api"
 
@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: Implementation :: CPython",
@@ -37,23 +38,30 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8.3"
+python = "^3.7.12"
 # Mandatory dependencies
-flwr = "^0.18.0"
-# flwr = { path = "../", develop = true }  # For development
+flwr = { extras = ["simulation"], version = "^0.18.0" }
 torch = "^1.10.1"
 torchvision = "^0.11.2"
+omegaconf = "==2.2.0.dev1"
+hydra-core = "==1.2.0.dev2" 
 numpy = "^1.20.0"
+tqdm = "4.62.3"
+matplotlib = "^3.5.1"
+scikit-image = "^0.18.1"
+scikit-learn = "^0.24.2"
+wget = "^3.2"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.10.1"
-black = "==21.12b0"
+black = "==22.3.0"
 docformatter = "==1.4"
 mypy = "==0.931"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
+types-requests = "==2.27.7"
 
 [tool.isort]
 line_length = 88
@@ -91,3 +99,10 @@ ignore_errors = true
 module = "torch.*"
 follow_imports = "skip"
 follow_imports_for_stubs = true
+
+[tool.pylint.typecheck]
+generated-members="numpy.*, torch.*"
+
+[tool.pylint.messages_control]
+disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
+signature-mutators="hydra.main.main"

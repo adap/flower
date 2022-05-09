@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -30,6 +30,7 @@ Weights = List[np.ndarray]
 Scalar = Union[bool, bytes, float, int, str]
 
 Metrics = Dict[str, Scalar]
+MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]
 
 Config = Dict[str, Scalar]
 Properties = Dict[str, Scalar]
@@ -79,9 +80,7 @@ class FitRes:
 
     parameters: Parameters
     num_examples: int
-    num_examples_ceil: Optional[int] = None  # Deprecated
-    fit_duration: Optional[float] = None  # Deprecated
-    metrics: Optional[Metrics] = None
+    metrics: Dict[str, Scalar]
 
 
 @dataclass
@@ -98,8 +97,7 @@ class EvaluateRes:
 
     loss: float
     num_examples: int
-    accuracy: Optional[float] = None  # Deprecated
-    metrics: Optional[Metrics] = None
+    metrics: Dict[str, Scalar]
 
 
 @dataclass

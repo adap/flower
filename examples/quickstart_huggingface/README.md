@@ -1,6 +1,6 @@
 # Federated HuggingFace Transformers using Flower and PyTorch
 
-This introductory example to using [HuggingFace](https://huggingface.co) Transformers with Flower with PyTorch. This example has been extended from the [quickstart_pytorch](https://flower.dev/docs/quickstart_pytorch.html) example. The training script closely follows the [HuggingFace course](https://huggingface.co/course/chapter3?fw=pt), so you are encouraged to check that out for detailed explaination for the transformer pipeline. 
+This introductory example to using [HuggingFace](https://huggingface.co) Transformers with Flower with PyTorch. This example has been extended from the [quickstart_pytorch](https://flower.dev/docs/quickstart-pytorch.html) example. The training script closely follows the [HuggingFace course](https://huggingface.co/course/chapter3?fw=pt), so you are encouraged to check that out for detailed explaination for the transformer pipeline.
 
 Like `quickstart_pytorch`, running this example in itself is also meant to be quite easy.
 
@@ -9,10 +9,10 @@ Like `quickstart_pytorch`, running this example in itself is also meant to be qu
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/transformers-pytorch . && rm -rf flower && cd transformers-pytorch
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_huggingface . && rm -rf flower && cd quickstart_huggingface
 ```
 
-This will create a new directory called `transformers-pytorch` containing the following files:
+This will create a new directory called `quickstart_huggingface` containing the following files:
 
 ```shell
 -- pyproject.toml
@@ -58,4 +58,4 @@ Start client 2 in the second terminal:
 python3 client.py
 ```
 
-You will see that PyTorch is starting a federated training. 
+You will see that PyTorch is starting a federated training.

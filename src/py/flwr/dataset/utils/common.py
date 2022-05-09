@@ -16,9 +16,11 @@
 
 # pylint: disable=invalid-name
 
-from typing import List, Tuple, Union, cast
+
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
+from numpy.random import BitGenerator, Generator, SeedSequence
 
 XY = Tuple[np.ndarray, np.ndarray]
 XYList = List[XY]
@@ -198,13 +200,13 @@ def adjust_xy_shape(xy: XY) -> XY:
 def adjust_x_shape(nda: np.ndarray) -> np.ndarray:
     """Turn shape (x, y, z) into (x, y, z, 1)."""
     nda_adjusted = np.reshape(nda, (nda.shape[0], nda.shape[1], nda.shape[2], 1))
-    return cast(np.ndarray, nda_adjusted)
+    return nda_adjusted
 
 
 def adjust_y_shape(nda: np.ndarray) -> np.ndarray:
     """Turn shape (x, 1) into (x)."""
     nda_adjusted = np.reshape(nda, (nda.shape[0]))
-    return cast(np.ndarray, nda_adjusted)
+    return nda_adjusted
 
 
 def split_array_at_indices(
@@ -253,7 +255,7 @@ def split_array_at_indices(
 
 
 def exclude_classes_and_normalize(
-    distribution: np.array, exclude_dims: List[bool], eps: float = 1e-5
+    distribution: np.ndarray, exclude_dims: List[bool], eps: float = 1e-5
 ) -> np.ndarray:
     """Excludes classes from a distribution.
 
@@ -327,7 +329,7 @@ def sample_without_replacement(
     target: List[np.ndarray] = []
 
     for _ in range(num_samples):
-        sample_class: int = np.where(np.random.multinomial(1, distribution) == 1)[0][0]
+        sample_class = np.where(np.random.multinomial(1, distribution) == 1)[0][0]
         sample: np.ndarray = list_samples[sample_class].pop()
 
         data.append(sample)
@@ -375,10 +377,11 @@ def get_partitions_distributions(partitions: XYList) -> Tuple[np.ndarray, List[i
 
 def create_lda_partitions(
     dataset: XY,
-    dirichlet_dist: np.ndarray = None,
+    dirichlet_dist: Optional[np.ndarray] = None,
     num_partitions: int = 100,
     concentration: Union[float, np.ndarray, List[float]] = 0.5,
     accept_imbalanced: bool = False,
+    seed: Optional[Union[int, SeedSequence, BitGenerator, Generator]] = None,
 ) -> Tuple[XYList, np.ndarray]:
     """Create imbalanced non-iid partitions using Latent Dirichlet Allocation
     (LDA) without resampling.
@@ -390,17 +393,26 @@ def create_lda_partitions(
             validation sets.
         num_partitions (int, optional): Number of partitions to be created.
             Defaults to 100.
-        concentration (float, optional): Dirichlet Concentration (:math:`\\alpha`)
-            parameter. Set to float('inf') to get uniform partitions.
+        concentration (float, np.ndarray, List[float]): Dirichlet Concentration
+            (:math:`\\alpha`) parameter. Set to float('inf') to get uniform partitions.
             An :math:`\\alpha \\to \\Inf` generates uniform distributions over classes.
             An :math:`\\alpha \\to 0.0` generates one class per client. Defaults to 0.5.
         accept_imbalanced (bool): Whether or not to accept imbalanced output classes.
             Default False.
+        seed (None, int, SeedSequence, BitGenerator, Generator):
+            A seed to initialize the BitGenerator for generating the Dirichlet
+            distribution. This is defined in Numpy's official documentation as follows:
+            If None, then fresh, unpredictable entropy will be pulled from the OS.
+            One may also pass in a SeedSequence instance.
+            Additionally, when passed a BitGenerator, it will be wrapped by Generator.
+            If passed a Generator, it will be returned unaltered.
+            See official Numpy Documentation for further details.
 
     Returns:
         Tuple[XYList, numpy.ndarray]: List of XYList containing partitions
             for each dataset and the dirichlet probability density functions.
     """
+    # pylint: disable=too-many-arguments,too-many-locals
 
     x, y = dataset
     x, y = shuffle(x, y)
@@ -433,9 +445,9 @@ def create_lda_partitions(
             iid_fraction=1.0,
             num_partitions=num_partitions,
         )
-        dirichlet_dist = get_partitions_distributions(partitions)
+        dirichlet_dist = get_partitions_distributions(partitions)[0]
 
-        return partitions, dirichlet_dist[0]
+        return partitions, dirichlet_dist
 
     if concentration.size == 1:
         concentration = np.repeat(concentration, classes.size)
@@ -451,7 +463,7 @@ def create_lda_partitions(
     )
 
     if dirichlet_dist is None:
-        dirichlet_dist = np.random.default_rng().dirichlet(
+        dirichlet_dist = np.random.default_rng(seed).dirichlet(
             alpha=concentration, size=num_partitions
         )
 
