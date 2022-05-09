@@ -1,5 +1,6 @@
 import flwr as fl
 
+
 # Define metric aggregation function
 def agg(metrics):
     # Weigh accuracy of each client by number of examples used

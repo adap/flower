@@ -23,6 +23,7 @@ import numpy as np
 import flwr
 from flwr.common.typing import Config
 from flwr.proto.transport_pb2 import ClientMessage, Parameters, Scalar
+from flwr.server.grpc_server.grpc_bridge import ResWrapper
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
 
 MESSAGE_PARAMETERS = Parameters(tensors=[], tensor_type="np")
@@ -37,6 +38,9 @@ MESSAGE_PROPERTIES_RES = ClientMessage(
     properties_res=ClientMessage.PropertiesRes(properties=CLIENT_PROPERTIES)
 )
 
+RES_WRAPPER_FIT_RES = ResWrapper(client_message=MESSAGE_FIT_RES)
+RES_WRAPPER_PROPERTIES_RES = ResWrapper(client_message=MESSAGE_PROPERTIES_RES)
+
 
 class GrpcClientProxyTestCase(unittest.TestCase):
     """Tests for GrpcClientProxy."""
@@ -45,10 +49,12 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         """Setup mocks for tests."""
         self.bridge_mock = MagicMock()
         # Set return_value for usually blocking get_client_message method
-        self.bridge_mock.request.return_value = MESSAGE_FIT_RES
+        self.bridge_mock.request.return_value = RES_WRAPPER_FIT_RES
         # Set return_value for get_properties
         self.bridge_mock_get_proprieties = MagicMock()
-        self.bridge_mock_get_proprieties.request.return_value = MESSAGE_PROPERTIES_RES
+        self.bridge_mock_get_proprieties.request.return_value = (
+            RES_WRAPPER_PROPERTIES_RES
+        )
 
     def test_get_parameters(self) -> None:
         """This test is currently quite simple and should be improved."""
@@ -56,7 +62,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
 
         # Execute
-        value: flwr.common.ParametersRes = client.get_parameters()
+        value: flwr.common.ParametersRes = client.get_parameters(timeout=None)
 
         # Assert
         assert not value.parameters.tensors
@@ -69,7 +75,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
 
         # Execute
-        fit_res = client.fit(ins=ins)
+        fit_res = client.fit(ins=ins, timeout=None)
 
         # Assert
         assert fit_res.parameters.tensor_type == "np"
@@ -84,7 +90,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         evaluate_ins: flwr.common.EvaluateIns = flwr.common.EvaluateIns(parameters, {})
 
         # Execute
-        evaluate_res = client.evaluate(evaluate_ins)
+        evaluate_res = client.evaluate(evaluate_ins, timeout=None)
 
         # Assert
         assert (0, 0.0) == (
@@ -102,7 +108,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         )
 
         # Execute
-        value: flwr.common.PropertiesRes = client.get_properties(ins)
+        value: flwr.common.PropertiesRes = client.get_properties(ins, timeout=None)
 
         # Assert
         assert value.properties["tensor_type"] == "numpy.ndarray"
