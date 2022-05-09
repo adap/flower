@@ -4,11 +4,56 @@ Changelog
 Unreleased
 ----------
 
+* **Flower Baselines (preview): FedOpt, FedBN, FedAvgM** (`#919 <https://github.com/adap/flower/pull/919>`_, `#1127 <https://github.com/adap/flower/pull/1127>`_, `#914 <https://github.com/adap/flower/pull/914>`_)
+
+  The first preview release of Flower Baselines has arrived! We're kickstarting Flower Baselines with implementations of FedOpt (FedYogi, FedAdam, FedAdagrad), FedBN, and FedAvgM. Check the documentation on how to use `Flower Baselines <https://flower.dev/docs/using-baselines.html>`_. With this first preview release we're also inviting the community to `contribute their own baselines <https://flower.dev/docs/contributing-baselines.html>`_.
+
+* **C++ client SDK (preview) and code example** (`#1111 <https://github.com/adap/flower/pull/1111>`_)
+
+  Preview support for Flower clients written in C++. The C++ preview includes a Flower client SDK and a quickstart code example that demonstrates a simple C++ client using the SDK.
+
 * **Add experimental support for Python 3.10 and Python 3.11** (`#1135 <https://github.com/adap/flower/pull/1135>`_)
-* **Adding support for custom ClientManager as a simulation parameter** (`#1171 <https://github.com/adap/flower/pull/1171>`_)
+
+  Python 3.10 is the latest stable release of Python and Python 3.11 is due to be released in October. This Flower release adds experimental support for both Python versions.
+
 * **Aggregate custom metrics through user-provided functions** (`#1144 <https://github.com/adap/flower/pull/1144>`_)
+
+  Custom metrics (e.g., :code:`accuracy`) can now be aggregated without having to customize the strategy. Built-in strategies support two new arguments, :code:`fit_metrics_aggregation_fn` and :code:`evaluate_metrics_aggregation_fn`, that allow passing custom metric aggregation functions.
+
+* **User-configurable round timeout** (`#1162 <https://github.com/adap/flower/pull/1162>`_)
+
+  A new configuration value allows the round timeout to be set for :code:`start_server` and :code:`start_simulation`. If the :code:`config` dictionary contains a :code:`round_timeout` key (with a :code:`float` value in seconds), the server will wait *at least* :code:`round_timeout` seconds before it closes the connection.
+
 * **Enable both federated evaluation and centralized evaluation to be used at the same time in all built-in strategies** (`#1091 <https://github.com/adap/flower/pull/1091>`_)
-* **New FedAvgM strategy (FedAvg with momentum)** (`#1076 <https://github.com/adap/flower/pull/1076>`_)
+
+  Built-in strategies can now perform both federated evaluation (i.e., client-side) and centralized evaluation (i.e., server-side) in the same round. Federated evaluation can be disabled by setting :code:`fraction_eval` to :code:`0.0`.
+
+* **Two new Jupyter Notebook tutorials** (`#1141 <https://github.com/adap/flower/pull/1141>`_)
+
+  Two Jupyter Notebook tutorials (compatible with Google Colab) explain basic and intermediate Flower features:
+
+  *An Introduction to Federated Learning*: `Open in Colab <https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-1-Intro-to-FL-PyTorch.ipynb>`_
+
+  *Using Strategies in Federated Learning*: `Open in Colab <https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-2-Strategies-in-FL-PyTorch.ipynb>`_
+
+* **New FedAvgM strategy (Federated Averaging with Server Momentum)** (`#1076 <https://github.com/adap/flower/pull/1076>`_)
+
+  The new :code:`FedAvgM` strategy implements Federated Averaging with Server Momentum [Hsu et al., 2019].
+
+* **New advanced PyTorch code example** (`#1007 <https://github.com/adap/flower/pull/1007>`_)
+
+  A new code example (:code:`advanced_pytorch`) demonstrates advanced Flower concepts with PyTorch.
+
+* **New JAX code example** (`#906 <https://github.com/adap/flower/pull/906>`_, `#1143 <https://github.com/adap/flower/pull/1143>`_)
+
+  A new code example (:code:`jax_from_centralized_to_federated`) shows federated learning with JAX and Flower.
+
+* **Minor updates**
+    * New option to keep Ray running if Ray was already initialized in :code:`start_simulation` (`#1177 <https://github.com/adap/flower/pull/1177>`_)
+    * Add support for custom :code:`ClientManager` as a :code:`start_simulation` parameter (`#1171 <https://github.com/adap/flower/pull/1171>`_)
+    * New documentation for `implementing strategies <https://flower.dev/docs/implementing-strategies.html>`_ (`#1097 <https://github.com/adap/flower/pull/1097>`_, `#1175 <https://github.com/adap/flower/pull/1175>`_)
+    * New mobile-friendly documentation theme (`#1174 <https://github.com/adap/flower/pull/1174>`_)
+    * Limit version range for (optional) :code:`ray` dependency to include only compatible releases (:code:`>=1.9.2,<1.12.0`) (`#1205 <https://github.com/adap/flower/pull/1205>`_)
 
 Incompatible changes:
 ~~~~~~~~~~~~~~~~~~~~~
