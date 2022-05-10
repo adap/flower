@@ -57,7 +57,6 @@ class Parameters:
 
     tensors: List[bytes]
     tensor_type: str
-    tag: str
 
 
 @dataclass

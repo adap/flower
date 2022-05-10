@@ -80,7 +80,9 @@ class FedHeNN(FedAvg):
         if isinstance(initial_parameters, tuple):
 
             initial_parameters_ = (
-                weights_to_parameters(weights=initial_parameter, tag=f"model_{letter}")
+                weights_to_parameters(
+                    weights=initial_parameter, tensor_type=f"model_{letter}"
+                )
                 for initial_parameter, letter in zip(initial_parameters, list("abcd"))
             )
 
@@ -108,11 +110,7 @@ class FedHeNN(FedAvg):
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(rnd)
-        fit_ins = FitIns(parameters, config)
-
-        for param in parameters:
-            print(param.tag)
-            print("configure fig")
+        fit_ins = [FitIns(parameter, config) for parameter in parameters]
 
         # Sample clients
         sample_size, min_num_clients = self.num_fit_clients(
@@ -122,9 +120,8 @@ class FedHeNN(FedAvg):
             num_clients=sample_size, min_num_clients=min_num_clients
         )
 
-        print(f"inside fit config function:{clients}")
         # Return client/config pairs
-        return [(client, fit_ins) for client in clients]
+        return [(client, fit_in) for client, fit_in in zip(clients, fit_ins)]
 
     def configure_evaluate(
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
@@ -174,7 +171,13 @@ class FedHeNN(FedAvg):
         #     for _, fit_res in results
         # ]
         # parameters_aggregated = weights_to_parameters(aggregate(weights_results))
-        parameters_results = [(fit_res.parameters) for _, fit_res in results]
+        parameters_results = []
+
+        for _, fit_res in results:
+            fit_res.parameters.tensor_type = fit_res.metrics["tensor_type"]
+            parameters_results.append(fit_res.parameters)
+
+        # Aggregate custom metrics if aggregation fn was provided
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:

@@ -1,12 +1,26 @@
 from collections import OrderedDict
 import warnings
-
+from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    MetricsAggregationFn,
+    Parameters,
+    Scalar,
+    Weights,
+    parameters_to_weights,
+    weights_to_parameters,
+)
 import flwr as fl
 import torch
 import torch.nn.functional as F
 from model_mnist import Net0, Net1, Net2, Net3
 from dataset import load_mnist_data_partition
 import argparse
+from typing import Callable, Dict, List, Optional, Tuple, Union
+
+Scalar = Union[bool, bytes, float, int, str]
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -69,6 +83,7 @@ def main(part_idx):
     )[part_idx]
     # Model selection
     model_type = [Net0, Net1, Net2, Net3][part_idx]
+    tensor_type = list("abcd")[part_idx]
 
     class VirtualClient(fl.client.NumPyClient):
         def __init__(self):
@@ -77,18 +92,18 @@ def main(part_idx):
             # determine device
             self.device = torch.device("cpu")
             # self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            self.properties: Dict[str, Scalar] = {"tensor_type": f"model_{tensor_type}"}
 
         def get_parameters(self):
             return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
         def set_parameters(self, parameters):
-            for param in parameters:
-                print(len(param), param.shape)
             params_dict = zip(self.net.state_dict().keys(), parameters)
             state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             self.net.load_state_dict(state_dict, strict=True)
 
         def fit(self, parameters, config):
+
             self.set_parameters(parameters)
             optimizer = torch.optim.Adam(self.net.parameters())
 
@@ -104,7 +119,7 @@ def main(part_idx):
             return (
                 self.get_parameters(),
                 num_examples["trainset"],
-                {},
+                {"tensor_type": self.properties["tensor_type"]},
             )
 
         def evaluate(self, parameters, config):
