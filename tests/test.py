@@ -1,7 +1,10 @@
 import timeit
 import numpy as np
 import sys
-sys.path.append(r"C:\Users\MSI-NB\Source\Repos\FANTOME-PAN\flower\src\py")
+import os
+pth = os.path.abspath("./src/py")
+sys.path.append(pth)
+#r"C:\Users\MSI-NB\Source\Repos\FANTOME-PAN\flower\src\py"
 from flwr_crypto_cpp import create_shares, combine_shares
 from flwr.common.sec_agg import sec_agg_test, sec_agg_primitives_test
 import random
