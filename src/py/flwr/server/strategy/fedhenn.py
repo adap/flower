@@ -81,10 +81,10 @@ class FedHeNN(FedAvg):
 
             initial_parameters_ = (
                 weights_to_parameters(weights=initial_parameter, tag=f"model_{letter}")
-                for initial_parameter, letter in (initial_parameters, list("abcd"))
+                for initial_parameter, letter in zip(initial_parameters, list("abcd"))
             )
 
-        return
+        return initial_parameters_
 
     def evaluate(
         self, parameters: Parameters
@@ -112,7 +112,7 @@ class FedHeNN(FedAvg):
 
         for param in parameters:
             print(param.tag)
-            print('configure fig')
+            print("configure fig")
 
         # Sample clients
         sample_size, min_num_clients = self.num_fit_clients(
