@@ -23,10 +23,10 @@ import numpy as np
 from .typing import Parameters, Weights
 
 
-def weights_to_parameters(weights: Weights) -> Parameters:
+def weights_to_parameters(weights: Weights, tag: str = "") -> Parameters:
     """Convert NumPy weights to parameters object."""
     tensors = [ndarray_to_bytes(ndarray) for ndarray in weights]
-    return Parameters(tensors=tensors, tensor_type="numpy.ndarray")
+    return Parameters(tensors=tensors, tensor_type="numpy.ndarray", tag=tag)
 
 
 def parameters_to_weights(parameters: Parameters) -> Weights:

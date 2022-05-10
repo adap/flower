@@ -80,9 +80,10 @@ class FedHeNN(FedAvg):
         if isinstance(initial_parameters, tuple):
 
             initial_parameters_ = (
-                weights_to_parameters(weights=initial_parameter)
-                for initial_parameter in initial_parameters
+                weights_to_parameters(weights=initial_parameter, tag=f"model_{letter}")
+                for initial_parameter, letter in (initial_parameters, list("abcd"))
             )
+
         return
 
     def evaluate(
@@ -109,9 +110,9 @@ class FedHeNN(FedAvg):
             config = self.on_fit_config_fn(rnd)
         fit_ins = FitIns(parameters, config)
 
-        print(
-            f"inside fit config function keys and vals :{ (client_manager.all().keys()),(client_manager.all().values())}"
-        )
+        for param in parameters:
+            print(param.tag)
+            print('configure fig')
 
         # Sample clients
         sample_size, min_num_clients = self.num_fit_clients(
