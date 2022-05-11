@@ -1,7 +1,7 @@
 import flwr as fl
 from flwr.server.strategy.fedhenn import FedHeNN
 
-num_rounds = 2
+num_rounds = 3
 from model_mnist import Net0, Net1, Net2, Net3
 
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
         min_eval_clients=4,
         min_available_clients=4,
         on_fit_config_fn=fit_config,
-        initial_parameters=(Weights_init0, Weights_init1, Weights_init2, Weights_init3),
+        initial_parameters=[Weights_init0, Weights_init1, Weights_init2, Weights_init3],
     )
 
     # Start server

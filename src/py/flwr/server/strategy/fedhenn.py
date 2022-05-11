@@ -77,15 +77,17 @@ class FedHeNN(FedAvg):
         """Initialize global model parameters."""
         initial_parameters = self.initial_parameters
         self.initial_parameters = None  # Don't keep initial parameters in memory
-        if isinstance(initial_parameters, tuple):
+        if isinstance(initial_parameters, list):
 
-            initial_parameters_ = (
+            initial_parameters_ = [
                 weights_to_parameters(
                     weights=initial_parameter, tensor_type=f"model_{letter}"
                 )
                 for initial_parameter, letter in zip(initial_parameters, list("abcd"))
-            )
-
+            ]
+        # initial_parameters_ = weights_to_parameters(
+        #     weights=initial_parameters, tensor_type="model_a"
+        # )
         return initial_parameters_
 
     def evaluate(
@@ -106,21 +108,27 @@ class FedHeNN(FedAvg):
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        config = {}
-        if self.on_fit_config_fn is not None:
-            # Custom fit config function provided
-            config = self.on_fit_config_fn(rnd)
-        fit_ins = [FitIns(parameter, config) for parameter in parameters]
+
+        if isinstance(parameters, list):
+            fit_ins = []
+            for parameter in parameters:
+                config = {}
+                if self.on_fit_config_fn is not None:
+                    # Custom fit config function provided
+                    config = self.on_fit_config_fn(rnd)
+                config["tensor_type"] = parameter.tensor_type
+                fit_ins.append(FitIns(parameter, config))
 
         # Sample clients
         sample_size, min_num_clients = self.num_fit_clients(
             client_manager.num_available()
         )
+
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
-
         # Return client/config pairs
+
         return [(client, fit_in) for client, fit_in in zip(clients, fit_ins)]
 
     def configure_evaluate(
@@ -132,11 +140,16 @@ class FedHeNN(FedAvg):
             return []
 
         # Parameters and config
-        config = {}
-        if self.on_evaluate_config_fn is not None:
-            # Custom evaluation config function provided
-            config = self.on_evaluate_config_fn(rnd)
-        evaluate_ins = EvaluateIns(parameters, config)
+
+        if isinstance(parameters, list):
+            evaluate_ins = []
+            for parameter in parameters:
+                config = {}
+                if self.on_evaluate_config_fn is not None:
+                    # Custom evaluation config function provided
+                    config = self.on_evaluate_config_fn(rnd)
+                config["tensor_type"] = parameter.tensor_type
+                evaluate_ins.append(EvaluateIns(parameter, config))
 
         # Sample clients
         if rnd >= 0:
@@ -150,7 +163,9 @@ class FedHeNN(FedAvg):
             clients = list(client_manager.all().values())
 
         # Return client/config pairs
-        return [(client, evaluate_ins) for client in clients]
+        return [
+            (client, evaluate_in) for client, evaluate_in in zip(clients, evaluate_ins)
+        ]
 
     def aggregate_fit(
         self,
@@ -166,18 +181,15 @@ class FedHeNN(FedAvg):
             return None, {}
 
         # Convert results
-        # weights_results = [
-        #     (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
-        #     for _, fit_res in results
-        # ]
-        # parameters_aggregated = weights_to_parameters(aggregate(weights_results))
-        parameters_results = []
+        weights_results = [
+            (parameters_to_weights(fit_res.parameters), fit_res.metrics["tensor_type"])
+            for _, fit_res in results
+        ]
+        parameters_results = [
+            weights_to_parameters(weight, model_type)
+            for (weight, model_type) in weights_results
+        ]
 
-        for _, fit_res in results:
-            fit_res.parameters.tensor_type = fit_res.metrics["tensor_type"]
-            parameters_results.append(fit_res.parameters)
-
-        # Aggregate custom metrics if aggregation fn was provided
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:

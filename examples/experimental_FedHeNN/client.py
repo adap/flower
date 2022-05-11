@@ -88,7 +88,7 @@ def main(part_idx):
     class VirtualClient(fl.client.NumPyClient):
         def __init__(self):
             # instantiate model
-            self.net = model_type()
+            # self.net = model_type()
             # determine device
             self.device = torch.device("cpu")
             # self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -103,7 +103,17 @@ def main(part_idx):
             self.net.load_state_dict(state_dict, strict=True)
 
         def fit(self, parameters, config):
+            if config["tensor_type"] == "model_a":
+                self.net = Net0()
+            if config["tensor_type"] == "model_b":
+                self.net = Net1()
+            if config["tensor_type"] == "model_c":
+                self.net = Net2()
+            if config["tensor_type"] == "model_d":
+                self.net = Net3()
 
+            print(config)
+            print(f"name of net:{str(self.net)[:5]}")
             self.set_parameters(parameters)
             optimizer = torch.optim.Adam(self.net.parameters())
 
@@ -119,10 +129,18 @@ def main(part_idx):
             return (
                 self.get_parameters(),
                 num_examples["trainset"],
-                {"tensor_type": self.properties["tensor_type"]},
+                {"tensor_type": config["tensor_type"]},
             )
 
         def evaluate(self, parameters, config):
+            if config["tensor_type"] == "model_a":
+                self.net = Net0()
+            if config["tensor_type"] == "model_b":
+                self.net = Net1()
+            if config["tensor_type"] == "model_c":
+                self.net = Net2()
+            if config["tensor_type"] == "model_d":
+                self.net = Net3()
             self.set_parameters(parameters)
 
             self.net.to(self.device)
