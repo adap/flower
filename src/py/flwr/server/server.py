@@ -255,9 +255,9 @@ class Server:
         # Get initial parameters from one of the clients
         log(INFO, "Requesting initial parameters from one random client")
         random_client = self._client_manager.sample(1)[0]
-        parameters_res = random_client.get_parameters(timeout=timeout)
+        get_parameters_res = random_client.get_parameters(timeout=timeout)
         log(INFO, "Received initial parameters from one random client")
-        return parameters_res.parameters
+        return get_parameters_res.parameters
 
 
 def reconnect_clients(
