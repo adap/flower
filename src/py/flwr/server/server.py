@@ -44,6 +44,7 @@ from flwr.server.history import History
 from flwr.server.strategy import Strategy, FedAvg
 from flwr.common.typing import AskKeysIns, AskKeysRes, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
 from flwr.server.strategy.sec_agg_strategy import SecAggStrategy
+from flwr.common.light_sec_agg.protocol import SecureAggregationFitRound
 
 DEPRECATION_WARNING_EVALUATE = """
 DEPRECATION WARNING: Method
@@ -117,7 +118,7 @@ class Server:
         return self._client_manager
 
     # pylint: disable=too-many-locals
-    def fit(self, num_rounds: int, sec_agg: int) -> History:
+    def fit(self, num_rounds: int, sec_agg: Union[int, str]) -> History:
         """Run federated averaging for a number of rounds."""
         history = History()
 
@@ -140,26 +141,32 @@ class Server:
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
 
+        if isinstance(sec_agg, str):
+            sec_agg = {
+                'secagg': 1,
+                'lightsecagg': 2,
+            }[sec_agg.lower()]
+
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
             if sec_agg == 1:
                 # Check is strategy compatible with sec_agg
                 if not isinstance(self.strategy, SecAggStrategy):
-                    raise Exception("Strategy not compatible with secure aggregation")
+                    raise Exception("SecAgg+: Strategy not compatible with secure aggregation")
 
                 res_fit = sec_agg_server_logic.sec_agg_fit_round(
                     self, rnd=current_round)
-
-                if res_fit:
-                    parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
-                    if parameters_prime:
-                        self.parameters = parameters_prime
+            elif sec_agg == 2:
+                if not isinstance(self.strategy, SecureAggregationFitRound):
+                    raise Exception("LightSecAgg: Strategy not compatible with secure aggregation")
+                res_fit = self.strategy.fit_round(self, current_round)
             else:
                 res_fit = self.fit_round(rnd=current_round)
-                if res_fit:
-                    parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
-                    if parameters_prime:
-                        self.parameters = parameters_prime
+
+            if res_fit:
+                parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
+                if parameters_prime:
+                    self.parameters = parameters_prime
 
             # Evaluate model using strategy implementation
             res_cen = self.strategy.evaluate(parameters=self.parameters)

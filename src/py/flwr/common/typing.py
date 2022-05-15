@@ -157,3 +157,51 @@ class UnmaskVectorsIns:
 @dataclass
 class UnmaskVectorsRes:
     share_dict: Dict[int, bytes]
+
+
+@dataclass
+class LightSecAggSetupConfigIns:
+    sec_agg_cfg_dict: Dict[str, Scalar]
+
+
+@dataclass
+class LightSecAggSetupConfigRes:
+    pk: bytes
+
+
+@dataclass
+class AskEncryptedEncodedMasksIns:
+    public_keys_dict: Dict[int, LightSecAggSetupConfigRes]
+
+
+@dataclass
+class EncryptedEncodedMasksPacket:
+    source: int
+    destination: int
+    ciphertext: bytes
+
+
+@dataclass
+class AskEncryptedEncodedMasksRes:
+    packet_list: List[EncryptedEncodedMasksPacket]
+
+
+@dataclass
+class AskMaskedModelsIns:
+    packet_list: List[EncryptedEncodedMasksPacket]
+    fit_ins: FitIns
+
+
+@dataclass
+class AskMaskedModelsRes:
+    parameters: Parameters
+
+
+@dataclass
+class AskAggregatedEncodedMasksIns:
+    surviving_clients: List[int]
+
+
+@dataclass
+class AskAggregatedEncodedMasksRes:
+    aggregated_encoded_mask: Parameters

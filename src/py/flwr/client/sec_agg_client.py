@@ -22,8 +22,12 @@ from flwr.common import (
 
 )
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
-from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
+from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysRes, \
+    UnmaskVectorsIns, UnmaskVectorsRes, LightSecAggSetupConfigIns, LightSecAggSetupConfigRes, AskEncryptedEncodedMasksIns, \
+    AskEncryptedEncodedMasksRes, EncryptedEncodedMasksPacket, Parameters, AskMaskedModelsIns, AskMaskedModelsRes, \
+    AskAggregatedEncodedMasksIns, AskAggregatedEncodedMasksRes
 from flwr.common.sec_agg import sec_agg_client_logic
+from flwr.common.light_sec_agg import client_logic as lsa_proto
 from .client import Client
 import sys
 
@@ -58,3 +62,32 @@ class SecAggClient(Client):
 
     def unmask_vectors(self, unmask_vectors_ins: UnmaskVectorsIns) -> UnmaskVectorsRes:
         return sec_agg_client_logic.unmask_vectors(self, unmask_vectors_ins)
+
+
+class LightSecAggClient(Client):
+    """Wrapper which adds LightSecAgg methods."""
+
+    def __init__(self, c: Client) -> None:
+        self.client = c
+
+    def get_parameters(self) -> ParametersRes:
+        """Return the current local model parameters."""
+        return self.client.get_parameters()
+
+    def fit(self, ins: FitIns) -> FitRes:
+        return self.client.fit(ins)
+
+    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
+        return self.client.evaluate(ins)
+
+    def setup_config(self, ins: LightSecAggSetupConfigIns) -> LightSecAggSetupConfigRes:
+        return lsa_proto.setup_config(self, ins)
+
+    def ask_encrypted_encoded_masks(self, ins: AskEncryptedEncodedMasksIns) -> AskEncryptedEncodedMasksRes:
+        return lsa_proto.ask_encrypted_encoded_masks(self, ins)
+
+    def ask_masked_models(self, ins: AskMaskedModelsIns) -> AskMaskedModelsRes:
+        return lsa_proto.ask_masked_models(self, ins)
+
+    def ask_aggregated_encoded_masks(self, ins: AskAggregatedEncodedMasksIns) -> AskAggregatedEncodedMasksRes:
+        return lsa_proto.ask_aggregated_encoded_masks(self, ins)

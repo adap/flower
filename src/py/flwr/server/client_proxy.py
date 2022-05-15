@@ -54,3 +54,6 @@ class ClientProxy(ABC):
     @abstractmethod
     def ask_keys(self) -> AskKeysRes:
         """Ask for public keys"""
+
+    def __hash__(self):
+        return self.cid
