@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 import galois
-from mpc_functions import mask_encoding, compute_aggregate_encoded_mask, model_masking
+from .mpc_functions import mask_encoding, compute_aggregate_encoded_mask, model_masking
 import numpy as np
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.sec_agg.sec_agg_primitives import check_clipping_range

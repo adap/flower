@@ -18,6 +18,7 @@
 from typing import Tuple
 
 from flwr.client.client import Client
+from flwr.client.sec_agg_client import LightSecAggClient
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 import sys
@@ -82,6 +83,43 @@ def handle(
         elif server_msg.sec_agg_msg.HasField("unmask_vectors"):
             t = (_unmask_vectors(client, server_msg.sec_agg_msg), 0, True)
             if client.sec_agg_id == 3:
+                f = open("logclient.txt", "a")
+                f.write(
+                    f"{t[0].ByteSize()}\n")
+                f.close()
+            return t
+    if server_msg.HasField("light_sec_agg_ins"):
+        f = open("logserver.txt", "a")
+        f.write(
+            f"{server_msg.ByteSize()}\n")
+        f.close()
+        if server_msg.light_sec_agg_ins.HasField("setup_cfg_ins"):
+            t = (_light_sec_agg_setup_config(client, server_msg.light_sec_agg_ins), 0, True)
+            if client.id == 3:
+                f = open("logclient.txt", "a")
+                f.write(
+                    f"{t[0].ByteSize()}\n")
+                f.close()
+            return t
+        elif server_msg.light_sec_agg_ins.HasField("ask_en_msks_ins"):
+            t = (_ask_encrypted_encoded_masks(client, server_msg.light_sec_agg_ins), 0, True)
+            if client.id == 3:
+                f = open("logclient.txt", "a")
+                f.write(
+                    f"{t[0].ByteSize()}\n")
+                f.close()
+            return t
+        elif server_msg.light_sec_agg_ins.HasField("ask_models_ins"):
+            t = (_ask_masked_models(client, server_msg.light_sec_agg_ins), 0, True)
+            if client.id == 3:
+                f = open("logclient.txt", "a")
+                f.write(
+                    f"{t[0].ByteSize()}\n")
+                f.close()
+            return t
+        elif server_msg.light_sec_agg_ins.HasField("ask_agg_msks_ins"):
+            t = (_ask_aggregated_encoded_masks(client, server_msg.light_sec_agg_ins), 0, True)
+            if client.id == 3:
                 f = open("logclient.txt", "a")
                 f.write(
                     f"{t[0].ByteSize()}\n")
@@ -178,6 +216,46 @@ def _unmask_vectors(client: Client, unmask_vectors_msg: ServerMessage.SecAggMsg)
             unmask_vectors_ins)
         unmask_vectors_res_proto = serde.unmask_vectors_res_to_proto(unmask_vectors_res)
         return ClientMessage(sec_agg_res=unmask_vectors_res_proto)
+    except Exception as e:
+        return _error_res(e)
+
+
+def _light_sec_agg_setup_config(client: LightSecAggClient, ins_proto: ServerMessage.LightSecAggIns) -> ClientMessage:
+    try:
+        ins = serde.light_sec_agg_setup_cfg_ins_from_proto(ins_proto)
+        res = client.setup_config(ins)
+        res_proto = serde.light_sec_agg_setup_cfg_res_to_proto(res)
+        return ClientMessage(light_sec_agg_res=res_proto)
+    except Exception as e:
+        return _error_res(e)
+
+
+def _ask_encrypted_encoded_masks(client: LightSecAggClient, ins_proto: ServerMessage.LightSecAggIns) -> ClientMessage:
+    try:
+        ins = serde.ask_encrypted_encoded_masks_ins_from_proto(ins_proto)
+        res = client.ask_encrypted_encoded_masks(ins)
+        res_proto = serde.ask_encrypted_encoded_masks_res_to_proto(res)
+        return ClientMessage(light_sec_agg_res=res_proto)
+    except Exception as e:
+        return _error_res(e)
+
+
+def _ask_masked_models(client: LightSecAggClient, ins_proto: ServerMessage.LightSecAggIns) -> ClientMessage:
+    try:
+        ins = serde.ask_masked_models_ins_from_proto(ins_proto)
+        res = client.ask_masked_models(ins)
+        res_proto = serde.ask_masked_models_res_to_proto(res)
+        return ClientMessage(light_sec_agg_res=res_proto)
+    except Exception as e:
+        return _error_res(e)
+
+
+def _ask_aggregated_encoded_masks(client: LightSecAggClient, ins_proto: ServerMessage.LightSecAggIns) -> ClientMessage:
+    try:
+        ins = serde.ask_aggregated_encoded_masks_ins_from_proto(ins_proto)
+        res = client.ask_aggregated_encoded_masks(ins)
+        res_proto = serde.ask_aggregated_encoded_masks_res_to_proto(res)
+        return ClientMessage(light_sec_agg_res=res_proto)
     except Exception as e:
         return _error_res(e)
 

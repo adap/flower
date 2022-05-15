@@ -82,12 +82,44 @@ message ServerMessage {
     }
     
   }
+  message LightSecAggIns{
+    message LightSecAggSetupConfigIns{
+      map<string, Scalar> sec_agg_cfg_dict = 1;
+    }
+    message AskEncryptedEncodedMasksIns{
+      map<int64, bytes> public_keys_dict=1;
+    }
+    message AskMaskedModelsIns{
+      message Packet{
+        int64 source=1;
+        int64 destination=2;
+        bytes ciphertext=3;
+      }
+      message FitIns {
+        Parameters parameters = 1;
+        map<string, Scalar> config = 2;
+      }
+      repeated Packet packet_list=1;
+      FitIns fit_ins=2;
+    }
+    message AskAggregatedEncodedMasksIns{
+      repeated int64 surviving_clients=1;
+    }
+    oneof msg{
+      LightSecAggSetupConfigIns setup_cfg_ins=1;
+      AskEncryptedEncodedMasksIns ask_en_msks_ins=2;
+      AskMaskedModelsIns ask_models_ins=3;
+      AskAggregatedEncodedMasksIns ask_agg_msks_ins=4;
+    }
+
+  }
   oneof msg {
     Reconnect reconnect = 1;
     GetParameters get_parameters = 2;
     FitIns fit_ins = 3;
     EvaluateIns evaluate_ins = 4;
     SecAggMsg sec_agg_msg=5;
+    LightSecAggIns light_sec_agg_ins=6;
   }
 }
 
@@ -139,7 +171,35 @@ message ClientMessage {
       ErrorRes error_res=6;
     }
   }
-  
+  message LightSecAggRes{
+    message LightSecAggSetupConfigRes{
+        bytes pk=1;
+    }
+    message AskEncryptedEncodedMasksRes{
+      message Packet{
+        int64 source=1;
+        int64 destination=2;
+        bytes ciphertext=3;
+      }
+      repeated Packet packet_list=1;
+    }
+    message AskMaskedModelsRes{
+      Parameters parameters = 1;
+    }
+    message AskAggregatedEncodedMasksRes{
+      Parameters aggregated_encoded_mask = 1;
+    }
+    message ErrorRes{
+      string error=1;
+    }
+    oneof msg{
+      LightSecAggSetupConfigRes setup_cfg_res=1;
+      AskEncryptedEncodedMasksRes ask_en_msks_res=2;
+      AskMaskedModelsRes ask_models_res=3;
+      AskAggregatedEncodedMasksRes ask_agg_msks_res=4;
+      ErrorRes error_res=5;
+    }
+  }
 
 
   oneof msg {
@@ -147,7 +207,8 @@ message ClientMessage {
     ParametersRes parameters_res = 2;
     FitRes fit_res = 3;
     EvaluateRes evaluate_res = 4;
-    SecAggRes sec_agg_res =5 ;
+    SecAggRes sec_agg_res = 5;
+    LightSecAggRes light_sec_agg_res = 6;
   }
 }
 

@@ -15,7 +15,7 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, List, Tuple, cast
+from typing import Any, List, Tuple, cast, Union
 
 from flwr.proto.transport_pb2 import (
     ClientMessage,
@@ -178,7 +178,7 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
 
 # === SecAgg Messages ===
 # === Check if error ===
-def check_error(msg: ClientMessage.SecAggRes):
+def check_error(msg: Union[ClientMessage.SecAggRes, ClientMessage.LightSecAggRes]):
     if msg.HasField("error_res"):
         raise Exception(msg.error_res.error)
 
@@ -338,6 +338,159 @@ def unmask_vectors_res_to_proto(unmask_vectors_res: typing.UnmaskVectorsRes) -> 
 
 def unmask_vectors_res_from_proto(unmask_vectors_res: ClientMessage.SecAggRes) -> typing.UnmaskVectorsRes:
     return typing.UnmaskVectorsRes(share_dict=unmask_vectors_res.unmask_vectors_res.share_dict)
+
+
+# === Light Sec Agg messages ===
+def light_sec_agg_setup_cfg_ins_to_proto(ins: typing.LightSecAggSetupConfigIns)\
+        -> ServerMessage.LightSecAggIns:
+    return ServerMessage.LightSecAggIns(
+        setup_cfg_ins=ServerMessage.LightSecAggIns.LightSecAggSetupConfigIns(
+            sec_agg_cfg_dict=metrics_to_proto(ins.sec_agg_cfg_dict)
+        )
+    )
+
+
+def light_sec_agg_setup_cfg_ins_from_proto(proto: ServerMessage.LightSecAggIns)\
+        -> typing.LightSecAggSetupConfigIns:
+    return typing.LightSecAggSetupConfigIns(
+        sec_agg_cfg_dict=metrics_from_proto(proto.setup_cfg_ins.sec_agg_cfg_dict)
+    )
+
+
+def ask_encrypted_encoded_masks_ins_to_proto(ins: typing.AskEncryptedEncodedMasksIns)\
+        -> ServerMessage.LightSecAggIns:
+    ret_dict = dict([(k, v.pk) for k, v in ins.public_keys_dict.items()])
+    return ServerMessage.LightSecAggIns(
+        ask_en_msks_ins=ServerMessage.LightSecAggIns.AskEncryptedEncodedMasksIns(
+            public_keys_dict=ret_dict
+        )
+    )
+
+
+def ask_encrypted_encoded_masks_ins_from_proto(proto: ServerMessage.LightSecAggIns)\
+        -> typing.AskEncryptedEncodedMasksIns:
+    received = proto.ask_en_msks_ins.public_keys_dict
+    ret_dict = dict([(k, typing.LightSecAggSetupConfigRes(v)) for k, v in received.items()])
+    return typing.AskEncryptedEncodedMasksIns(ret_dict)
+
+
+def ask_masked_models_ins_to_proto(ins: typing.AskMaskedModelsIns)\
+        -> ServerMessage.LightSecAggIns:
+    packet_fn = ServerMessage.LightSecAggIns.AskMaskedModelsIns.Packet
+    fitins_fn = ServerMessage.LightSecAggIns.AskMaskedModelsIns.FitIns
+    packet_lst = [packet_fn(
+        source=p.source,
+        destination=p.destination,
+        ciphertext=p.ciphertext
+    ) for p in ins.packet_list]
+    if ins.fit_ins is None:
+        fitins = None
+    else:
+        fitins = fitins_fn(
+            parameters=parameters_to_proto(ins.fit_ins.parameters),
+            config=metrics_to_proto(ins.fit_ins.config)
+        )
+    return ServerMessage.LightSecAggIns(
+        ask_models_ins=ServerMessage.LightSecAggIns.AskMaskedModelsIns(
+            packet_list=packet_lst,
+            fit_ins=fitins
+        )
+    )
+
+
+def ask_masked_models_ins_from_proto(proto: ServerMessage.LightSecAggIns)\
+        -> typing.AskMaskedModelsIns:
+    packet_lst = [typing.EncryptedEncodedMasksPacket(
+        source=p.source,
+        destination=p.destination,
+        ciphertext=p.ciphertext
+    ) for p in proto.ask_models_ins.packet_list]
+    fitins = typing.FitIns(
+        parameters=parameters_from_proto(proto.ask_models_ins.fit_ins.parameters),
+        config=metrics_from_proto(proto.ask_models_ins.fit_ins.config)
+    )
+    return typing.AskMaskedModelsIns(packet_lst, fitins)
+
+
+def ask_aggregated_encoded_masks_ins_to_proto(ins: typing.AskAggregatedEncodedMasksIns)\
+        -> ServerMessage.LightSecAggIns:
+    return ServerMessage.LightSecAggIns(
+        ask_agg_msks_ins=ServerMessage.LightSecAggIns.AskAggregatedEncodedMasksIns(
+            surviving_clients=ins.surviving_clients
+        )
+    )
+
+
+def ask_aggregated_encoded_masks_ins_from_proto(proto: ServerMessage.LightSecAggIns)\
+        -> typing.AskAggregatedEncodedMasksIns:
+    return typing.AskAggregatedEncodedMasksIns(proto.ask_agg_msks_ins.surviving_clients)
+
+
+# Client side
+def light_sec_agg_setup_cfg_res_to_proto(res: typing.LightSecAggSetupConfigRes)\
+        -> ClientMessage.LightSecAggRes:
+    return ClientMessage.LightSecAggRes(
+        setup_cfg_res=ClientMessage.LightSecAggRes.LightSecAggSetupConfigRes(pk=res.pk)
+    )
+
+
+def light_sec_agg_setup_cfg_res_from_proto(proto: ClientMessage.LightSecAggRes)\
+        -> typing.LightSecAggSetupConfigRes:
+    return typing.LightSecAggSetupConfigRes(proto.setup_cfg_res.pk)
+
+
+def ask_encrypted_encoded_masks_res_to_proto(res: typing.AskEncryptedEncodedMasksRes)\
+        -> ClientMessage.LightSecAggRes:
+    return ClientMessage.LightSecAggRes(
+        ask_en_msks_res=ClientMessage.LightSecAggRes.AskEncryptedEncodedMasksRes(
+            packet_list=[ClientMessage.LightSecAggRes.AskEncryptedEncodedMasksRes.Packet(
+                source=p.source,
+                destination=p.destination,
+                ciphertext=p.ciphertext
+            ) for p in res.packet_list]
+        )
+    )
+
+
+def ask_encrypted_encoded_masks_res_from_proto(proto: ClientMessage.LightSecAggRes)\
+        -> typing.AskEncryptedEncodedMasksRes:
+    return typing.AskEncryptedEncodedMasksRes(
+        [typing.EncryptedEncodedMasksPacket(
+            source=p.source,
+            destination=p.destination,
+            ciphertext=p.ciphertext
+        ) for p in proto.ask_en_msks_res.packet_list]
+    )
+
+
+def ask_masked_models_res_to_proto(res: typing.AskMaskedModelsRes)\
+        -> ClientMessage.LightSecAggRes:
+    return ClientMessage.LightSecAggRes(
+        ask_models_res=ClientMessage.LightSecAggRes.AskMaskedModelsRes(
+            parameters=parameters_to_proto(res.parameters)
+        )
+    )
+
+
+def ask_masked_models_res_from_proto(proto: ClientMessage.LightSecAggRes)\
+        -> typing.AskMaskedModelsRes:
+    return typing.AskMaskedModelsRes(parameters_from_proto(proto.ask_models_res.parameters))
+
+
+def ask_aggregated_encoded_masks_res_to_proto(res: typing.AskAggregatedEncodedMasksRes)\
+        -> ClientMessage.LightSecAggRes:
+    return ClientMessage.LightSecAggRes(
+        ask_agg_msks_res=ClientMessage.LightSecAggRes.AskAggregatedEncodedMasksRes(
+            aggregated_encoded_mask=parameters_to_proto(res.aggregated_encoded_mask)
+        )
+    )
+
+
+def ask_aggregated_encoded_masks_res_from_proto(proto: ClientMessage.LightSecAggRes)\
+        -> typing.AskAggregatedEncodedMasksRes:
+    return typing.AskAggregatedEncodedMasksRes(
+        aggregated_encoded_mask=parameters_from_proto(proto.ask_agg_msks_res.aggregated_encoded_mask)
+    )
 # === Evaluate messages ===
 
 

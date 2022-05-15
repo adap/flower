@@ -33,7 +33,7 @@ import sys
 from protocol import LightSecAggProtocol, SecureAggregationFitRound, LightSecAggSetupConfigResultsAndFailures, \
     AskEncryptedEncodedMasksResultsAndFailures, AskMaskedModelsResultsAndFailures
 import concurrent.futures
-
+from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
 from flwr.common.logger import log
 
 from flwr.common import (
@@ -241,19 +241,19 @@ class LightSecAgg(LightSecAggProtocol, SecureAggregationFitRound, FedAvg):
         return parallel(client_ask_aggregated_encoded_masks, clients, ins_lst)
 
 
-def client_setup_config(client: LightSecAggClient, ins: LightSecAggSetupConfigIns):
-    return client, client.setup_config(ins)
+def client_setup_config(client: GrpcClientProxy, ins: LightSecAggSetupConfigIns):
+    return client, client.light_sec_agg_setup_config(ins)
 
 
-def client_ask_encrypted_encoded_masks(client: LightSecAggClient, ins: AskEncryptedEncodedMasksIns):
+def client_ask_encrypted_encoded_masks(client: GrpcClientProxy, ins: AskEncryptedEncodedMasksIns):
     return client, client.ask_encrypted_encoded_masks(ins)
 
 
-def client_ask_masked_models(client: LightSecAggClient, ins: AskMaskedModelsIns):
+def client_ask_masked_models(client: GrpcClientProxy, ins: AskMaskedModelsIns):
     return client, client.ask_masked_models(ins)
 
 
-def client_ask_aggregated_encoded_masks(client: LightSecAggClient, ins: AskAggregatedEncodedMasksIns):
+def client_ask_aggregated_encoded_masks(client: GrpcClientProxy, ins: AskAggregatedEncodedMasksIns):
     return client, client.ask_aggregated_encoded_masks(ins)
 
 

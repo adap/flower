@@ -10,579 +10,672 @@ import google.protobuf.message
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
+class _Reason:
+    ValueType = typing.NewType('ValueType', builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
+class _ReasonEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Reason.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    UNKNOWN: _Reason.ValueType  # 0
+    RECONNECT: _Reason.ValueType  # 1
+    POWER_DISCONNECTED: _Reason.ValueType  # 2
+    WIFI_UNAVAILABLE: _Reason.ValueType  # 3
+    ACK: _Reason.ValueType  # 4
+class Reason(_Reason, metaclass=_ReasonEnumTypeWrapper):
+    pass
+
+UNKNOWN: Reason.ValueType  # 0
+RECONNECT: Reason.ValueType  # 1
+POWER_DISCONNECTED: Reason.ValueType  # 2
+WIFI_UNAVAILABLE: Reason.ValueType  # 3
+ACK: Reason.ValueType  # 4
 global___Reason = Reason
-class _Reason(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[Reason.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    UNKNOWN = Reason.V(0)
-    RECONNECT = Reason.V(1)
-    POWER_DISCONNECTED = Reason.V(2)
-    WIFI_UNAVAILABLE = Reason.V(3)
-    ACK = Reason.V(4)
-class Reason(metaclass=_Reason):
-    V = typing.NewType('V', builtins.int)
-UNKNOWN = Reason.V(0)
-RECONNECT = Reason.V(1)
-POWER_DISCONNECTED = Reason.V(2)
-WIFI_UNAVAILABLE = Reason.V(3)
-ACK = Reason.V(4)
+
 
 class Parameters(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TENSORS_FIELD_NUMBER: builtins.int
     TENSOR_TYPE_FIELD_NUMBER: builtins.int
-    tensors: google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes] = ...
-    tensor_type: typing.Text = ...
-
+    @property
+    def tensors(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
+    tensor_type: typing.Text
     def __init__(self,
         *,
-        tensors : typing.Optional[typing.Iterable[builtins.bytes]] = ...,
-        tensor_type : typing.Text = ...,
+        tensors: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
+        tensor_type: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"tensor_type",b"tensor_type",u"tensors",b"tensors"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["tensor_type",b"tensor_type","tensors",b"tensors"]) -> None: ...
 global___Parameters = Parameters
 
 class ServerMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class Reconnect(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
         SECONDS_FIELD_NUMBER: builtins.int
-        seconds: builtins.int = ...
-
+        seconds: builtins.int
         def __init__(self,
             *,
-            seconds : builtins.int = ...,
+            seconds: builtins.int = ...,
             ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"seconds",b"seconds"]) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["seconds",b"seconds"]) -> None: ...
 
     class GetParameters(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
         def __init__(self,
             ) -> None: ...
 
     class FitIns(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
         class ConfigEntry(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             KEY_FIELD_NUMBER: builtins.int
             VALUE_FIELD_NUMBER: builtins.int
-            key: typing.Text = ...
-
+            key: typing.Text
             @property
             def value(self) -> global___Scalar: ...
-
             def __init__(self,
                 *,
-                key : typing.Text = ...,
-                value : typing.Optional[global___Scalar] = ...,
+                key: typing.Text = ...,
+                value: typing.Optional[global___Scalar] = ...,
                 ) -> None: ...
-            def HasField(self, field_name: typing_extensions.Literal[u"value",b"value"]) -> builtins.bool: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
         PARAMETERS_FIELD_NUMBER: builtins.int
         CONFIG_FIELD_NUMBER: builtins.int
-
         @property
         def parameters(self) -> global___Parameters: ...
-
         @property
         def config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
-
         def __init__(self,
             *,
-            parameters : typing.Optional[global___Parameters] = ...,
-            config : typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+            parameters: typing.Optional[global___Parameters] = ...,
+            config: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal[u"parameters",b"parameters"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"config",b"config",u"parameters",b"parameters"]) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["config",b"config","parameters",b"parameters"]) -> None: ...
 
     class EvaluateIns(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
         class ConfigEntry(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             KEY_FIELD_NUMBER: builtins.int
             VALUE_FIELD_NUMBER: builtins.int
-            key: typing.Text = ...
-
+            key: typing.Text
             @property
             def value(self) -> global___Scalar: ...
-
             def __init__(self,
                 *,
-                key : typing.Text = ...,
-                value : typing.Optional[global___Scalar] = ...,
+                key: typing.Text = ...,
+                value: typing.Optional[global___Scalar] = ...,
                 ) -> None: ...
-            def HasField(self, field_name: typing_extensions.Literal[u"value",b"value"]) -> builtins.bool: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
         PARAMETERS_FIELD_NUMBER: builtins.int
         CONFIG_FIELD_NUMBER: builtins.int
-
         @property
         def parameters(self) -> global___Parameters: ...
-
         @property
         def config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
-
         def __init__(self,
             *,
-            parameters : typing.Optional[global___Parameters] = ...,
-            config : typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+            parameters: typing.Optional[global___Parameters] = ...,
+            config: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal[u"parameters",b"parameters"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"config",b"config",u"parameters",b"parameters"]) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["config",b"config","parameters",b"parameters"]) -> None: ...
 
     class SecAggMsg(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
         class SetupParam(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             class SecAggParamDictEntry(google.protobuf.message.Message):
-                DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
                 KEY_FIELD_NUMBER: builtins.int
                 VALUE_FIELD_NUMBER: builtins.int
-                key: typing.Text = ...
-
+                key: typing.Text
                 @property
                 def value(self) -> global___Scalar: ...
-
                 def __init__(self,
                     *,
-                    key : typing.Text = ...,
-                    value : typing.Optional[global___Scalar] = ...,
+                    key: typing.Text = ...,
+                    value: typing.Optional[global___Scalar] = ...,
                     ) -> None: ...
-                def HasField(self, field_name: typing_extensions.Literal[u"value",b"value"]) -> builtins.bool: ...
-                def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+                def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+                def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
             SEC_AGG_PARAM_DICT_FIELD_NUMBER: builtins.int
-
             @property
             def sec_agg_param_dict(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
-
             def __init__(self,
                 *,
-                sec_agg_param_dict : typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+                sec_agg_param_dict: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
                 ) -> None: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"sec_agg_param_dict",b"sec_agg_param_dict"]) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["sec_agg_param_dict",b"sec_agg_param_dict"]) -> None: ...
 
         class AskKeys(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             def __init__(self,
                 ) -> None: ...
 
         class ShareKeys(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             class KeysPair(google.protobuf.message.Message):
-                DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
                 PK1_FIELD_NUMBER: builtins.int
                 PK2_FIELD_NUMBER: builtins.int
-                pk1: builtins.bytes = ...
-                pk2: builtins.bytes = ...
-
+                pk1: builtins.bytes
+                pk2: builtins.bytes
                 def __init__(self,
                     *,
-                    pk1 : builtins.bytes = ...,
-                    pk2 : builtins.bytes = ...,
+                    pk1: builtins.bytes = ...,
+                    pk2: builtins.bytes = ...,
                     ) -> None: ...
-                def ClearField(self, field_name: typing_extensions.Literal[u"pk1",b"pk1",u"pk2",b"pk2"]) -> None: ...
+                def ClearField(self, field_name: typing_extensions.Literal["pk1",b"pk1","pk2",b"pk2"]) -> None: ...
 
             class PublicKeysDictEntry(google.protobuf.message.Message):
-                DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
                 KEY_FIELD_NUMBER: builtins.int
                 VALUE_FIELD_NUMBER: builtins.int
-                key: builtins.int = ...
-
+                key: builtins.int
                 @property
                 def value(self) -> global___ServerMessage.SecAggMsg.ShareKeys.KeysPair: ...
-
                 def __init__(self,
                     *,
-                    key : builtins.int = ...,
-                    value : typing.Optional[global___ServerMessage.SecAggMsg.ShareKeys.KeysPair] = ...,
+                    key: builtins.int = ...,
+                    value: typing.Optional[global___ServerMessage.SecAggMsg.ShareKeys.KeysPair] = ...,
                     ) -> None: ...
-                def HasField(self, field_name: typing_extensions.Literal[u"value",b"value"]) -> builtins.bool: ...
-                def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+                def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+                def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
             PUBLIC_KEYS_DICT_FIELD_NUMBER: builtins.int
-
             @property
             def public_keys_dict(self) -> google.protobuf.internal.containers.MessageMap[builtins.int, global___ServerMessage.SecAggMsg.ShareKeys.KeysPair]: ...
-
             def __init__(self,
                 *,
-                public_keys_dict : typing.Optional[typing.Mapping[builtins.int, global___ServerMessage.SecAggMsg.ShareKeys.KeysPair]] = ...,
+                public_keys_dict: typing.Optional[typing.Mapping[builtins.int, global___ServerMessage.SecAggMsg.ShareKeys.KeysPair]] = ...,
                 ) -> None: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"public_keys_dict",b"public_keys_dict"]) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["public_keys_dict",b"public_keys_dict"]) -> None: ...
 
         class AskVectors(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             class Packet(google.protobuf.message.Message):
-                DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
                 SOURCE_FIELD_NUMBER: builtins.int
                 DESTINATION_FIELD_NUMBER: builtins.int
                 CIPHERTEXT_FIELD_NUMBER: builtins.int
-                source: builtins.int = ...
-                destination: builtins.int = ...
-                ciphertext: builtins.bytes = ...
-
+                source: builtins.int
+                destination: builtins.int
+                ciphertext: builtins.bytes
                 def __init__(self,
                     *,
-                    source : builtins.int = ...,
-                    destination : builtins.int = ...,
-                    ciphertext : builtins.bytes = ...,
+                    source: builtins.int = ...,
+                    destination: builtins.int = ...,
+                    ciphertext: builtins.bytes = ...,
                     ) -> None: ...
-                def ClearField(self, field_name: typing_extensions.Literal[u"ciphertext",b"ciphertext",u"destination",b"destination",u"source",b"source"]) -> None: ...
+                def ClearField(self, field_name: typing_extensions.Literal["ciphertext",b"ciphertext","destination",b"destination","source",b"source"]) -> None: ...
 
             class FitIns(google.protobuf.message.Message):
-                DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
                 class ConfigEntry(google.protobuf.message.Message):
-                    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+                    DESCRIPTOR: google.protobuf.descriptor.Descriptor
                     KEY_FIELD_NUMBER: builtins.int
                     VALUE_FIELD_NUMBER: builtins.int
-                    key: typing.Text = ...
-
+                    key: typing.Text
                     @property
                     def value(self) -> global___Scalar: ...
-
                     def __init__(self,
                         *,
-                        key : typing.Text = ...,
-                        value : typing.Optional[global___Scalar] = ...,
+                        key: typing.Text = ...,
+                        value: typing.Optional[global___Scalar] = ...,
                         ) -> None: ...
-                    def HasField(self, field_name: typing_extensions.Literal[u"value",b"value"]) -> builtins.bool: ...
-                    def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+                    def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+                    def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
                 PARAMETERS_FIELD_NUMBER: builtins.int
                 CONFIG_FIELD_NUMBER: builtins.int
-
                 @property
                 def parameters(self) -> global___Parameters: ...
-
                 @property
                 def config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
-
                 def __init__(self,
                     *,
-                    parameters : typing.Optional[global___Parameters] = ...,
-                    config : typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+                    parameters: typing.Optional[global___Parameters] = ...,
+                    config: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
                     ) -> None: ...
-                def HasField(self, field_name: typing_extensions.Literal[u"parameters",b"parameters"]) -> builtins.bool: ...
-                def ClearField(self, field_name: typing_extensions.Literal[u"config",b"config",u"parameters",b"parameters"]) -> None: ...
+                def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
+                def ClearField(self, field_name: typing_extensions.Literal["config",b"config","parameters",b"parameters"]) -> None: ...
 
             PACKET_LIST_FIELD_NUMBER: builtins.int
             FIT_INS_FIELD_NUMBER: builtins.int
-
             @property
             def packet_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ServerMessage.SecAggMsg.AskVectors.Packet]: ...
-
             @property
             def fit_ins(self) -> global___ServerMessage.SecAggMsg.AskVectors.FitIns: ...
-
             def __init__(self,
                 *,
-                packet_list : typing.Optional[typing.Iterable[global___ServerMessage.SecAggMsg.AskVectors.Packet]] = ...,
-                fit_ins : typing.Optional[global___ServerMessage.SecAggMsg.AskVectors.FitIns] = ...,
+                packet_list: typing.Optional[typing.Iterable[global___ServerMessage.SecAggMsg.AskVectors.Packet]] = ...,
+                fit_ins: typing.Optional[global___ServerMessage.SecAggMsg.AskVectors.FitIns] = ...,
                 ) -> None: ...
-            def HasField(self, field_name: typing_extensions.Literal[u"fit_ins",b"fit_ins"]) -> builtins.bool: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"fit_ins",b"fit_ins",u"packet_list",b"packet_list"]) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["fit_ins",b"fit_ins"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["fit_ins",b"fit_ins","packet_list",b"packet_list"]) -> None: ...
 
         class UnmaskVectors(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             AVAILABLE_CLIENTS_FIELD_NUMBER: builtins.int
             DROPOUT_CLIENTS_FIELD_NUMBER: builtins.int
-            available_clients: google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int] = ...
-            dropout_clients: google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int] = ...
-
+            @property
+            def available_clients(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
+            @property
+            def dropout_clients(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
             def __init__(self,
                 *,
-                available_clients : typing.Optional[typing.Iterable[builtins.int]] = ...,
-                dropout_clients : typing.Optional[typing.Iterable[builtins.int]] = ...,
+                available_clients: typing.Optional[typing.Iterable[builtins.int]] = ...,
+                dropout_clients: typing.Optional[typing.Iterable[builtins.int]] = ...,
                 ) -> None: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"available_clients",b"available_clients",u"dropout_clients",b"dropout_clients"]) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["available_clients",b"available_clients","dropout_clients",b"dropout_clients"]) -> None: ...
 
         SETUP_PARAM_FIELD_NUMBER: builtins.int
         ASK_KEYS_FIELD_NUMBER: builtins.int
         SHARE_KEYS_FIELD_NUMBER: builtins.int
         ASK_VECTORS_FIELD_NUMBER: builtins.int
         UNMASK_VECTORS_FIELD_NUMBER: builtins.int
-
         @property
         def setup_param(self) -> global___ServerMessage.SecAggMsg.SetupParam: ...
-
         @property
         def ask_keys(self) -> global___ServerMessage.SecAggMsg.AskKeys: ...
-
         @property
         def share_keys(self) -> global___ServerMessage.SecAggMsg.ShareKeys: ...
-
         @property
         def ask_vectors(self) -> global___ServerMessage.SecAggMsg.AskVectors: ...
-
         @property
         def unmask_vectors(self) -> global___ServerMessage.SecAggMsg.UnmaskVectors: ...
-
         def __init__(self,
             *,
-            setup_param : typing.Optional[global___ServerMessage.SecAggMsg.SetupParam] = ...,
-            ask_keys : typing.Optional[global___ServerMessage.SecAggMsg.AskKeys] = ...,
-            share_keys : typing.Optional[global___ServerMessage.SecAggMsg.ShareKeys] = ...,
-            ask_vectors : typing.Optional[global___ServerMessage.SecAggMsg.AskVectors] = ...,
-            unmask_vectors : typing.Optional[global___ServerMessage.SecAggMsg.UnmaskVectors] = ...,
+            setup_param: typing.Optional[global___ServerMessage.SecAggMsg.SetupParam] = ...,
+            ask_keys: typing.Optional[global___ServerMessage.SecAggMsg.AskKeys] = ...,
+            share_keys: typing.Optional[global___ServerMessage.SecAggMsg.ShareKeys] = ...,
+            ask_vectors: typing.Optional[global___ServerMessage.SecAggMsg.AskVectors] = ...,
+            unmask_vectors: typing.Optional[global___ServerMessage.SecAggMsg.UnmaskVectors] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal[u"ask_keys",b"ask_keys",u"ask_vectors",b"ask_vectors",u"msg",b"msg",u"setup_param",b"setup_param",u"share_keys",b"share_keys",u"unmask_vectors",b"unmask_vectors"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"ask_keys",b"ask_keys",u"ask_vectors",b"ask_vectors",u"msg",b"msg",u"setup_param",b"setup_param",u"share_keys",b"share_keys",u"unmask_vectors",b"unmask_vectors"]) -> None: ...
-        def WhichOneof(self, oneof_group: typing_extensions.Literal[u"msg",b"msg"]) -> typing_extensions.Literal["setup_param","ask_keys","share_keys","ask_vectors","unmask_vectors"]: ...
+        def HasField(self, field_name: typing_extensions.Literal["ask_keys",b"ask_keys","ask_vectors",b"ask_vectors","msg",b"msg","setup_param",b"setup_param","share_keys",b"share_keys","unmask_vectors",b"unmask_vectors"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["ask_keys",b"ask_keys","ask_vectors",b"ask_vectors","msg",b"msg","setup_param",b"setup_param","share_keys",b"share_keys","unmask_vectors",b"unmask_vectors"]) -> None: ...
+        def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["setup_param","ask_keys","share_keys","ask_vectors","unmask_vectors"]]: ...
+
+    class LightSecAggIns(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        class LightSecAggSetupConfigIns(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            class SecAggCfgDictEntry(google.protobuf.message.Message):
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
+                KEY_FIELD_NUMBER: builtins.int
+                VALUE_FIELD_NUMBER: builtins.int
+                key: typing.Text
+                @property
+                def value(self) -> global___Scalar: ...
+                def __init__(self,
+                    *,
+                    key: typing.Text = ...,
+                    value: typing.Optional[global___Scalar] = ...,
+                    ) -> None: ...
+                def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+                def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+            SEC_AGG_CFG_DICT_FIELD_NUMBER: builtins.int
+            @property
+            def sec_agg_cfg_dict(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
+            def __init__(self,
+                *,
+                sec_agg_cfg_dict: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+                ) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["sec_agg_cfg_dict",b"sec_agg_cfg_dict"]) -> None: ...
+
+        class AskEncryptedEncodedMasksIns(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            class PublicKeysDictEntry(google.protobuf.message.Message):
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
+                KEY_FIELD_NUMBER: builtins.int
+                VALUE_FIELD_NUMBER: builtins.int
+                key: builtins.int
+                value: builtins.bytes
+                def __init__(self,
+                    *,
+                    key: builtins.int = ...,
+                    value: builtins.bytes = ...,
+                    ) -> None: ...
+                def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+            PUBLIC_KEYS_DICT_FIELD_NUMBER: builtins.int
+            @property
+            def public_keys_dict(self) -> google.protobuf.internal.containers.ScalarMap[builtins.int, builtins.bytes]: ...
+            def __init__(self,
+                *,
+                public_keys_dict: typing.Optional[typing.Mapping[builtins.int, builtins.bytes]] = ...,
+                ) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["public_keys_dict",b"public_keys_dict"]) -> None: ...
+
+        class AskMaskedModelsIns(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            class Packet(google.protobuf.message.Message):
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
+                SOURCE_FIELD_NUMBER: builtins.int
+                DESTINATION_FIELD_NUMBER: builtins.int
+                CIPHERTEXT_FIELD_NUMBER: builtins.int
+                source: builtins.int
+                destination: builtins.int
+                ciphertext: builtins.bytes
+                def __init__(self,
+                    *,
+                    source: builtins.int = ...,
+                    destination: builtins.int = ...,
+                    ciphertext: builtins.bytes = ...,
+                    ) -> None: ...
+                def ClearField(self, field_name: typing_extensions.Literal["ciphertext",b"ciphertext","destination",b"destination","source",b"source"]) -> None: ...
+
+            class FitIns(google.protobuf.message.Message):
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
+                class ConfigEntry(google.protobuf.message.Message):
+                    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+                    KEY_FIELD_NUMBER: builtins.int
+                    VALUE_FIELD_NUMBER: builtins.int
+                    key: typing.Text
+                    @property
+                    def value(self) -> global___Scalar: ...
+                    def __init__(self,
+                        *,
+                        key: typing.Text = ...,
+                        value: typing.Optional[global___Scalar] = ...,
+                        ) -> None: ...
+                    def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+                    def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+                PARAMETERS_FIELD_NUMBER: builtins.int
+                CONFIG_FIELD_NUMBER: builtins.int
+                @property
+                def parameters(self) -> global___Parameters: ...
+                @property
+                def config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
+                def __init__(self,
+                    *,
+                    parameters: typing.Optional[global___Parameters] = ...,
+                    config: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+                    ) -> None: ...
+                def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
+                def ClearField(self, field_name: typing_extensions.Literal["config",b"config","parameters",b"parameters"]) -> None: ...
+
+            PACKET_LIST_FIELD_NUMBER: builtins.int
+            FIT_INS_FIELD_NUMBER: builtins.int
+            @property
+            def packet_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ServerMessage.LightSecAggIns.AskMaskedModelsIns.Packet]: ...
+            @property
+            def fit_ins(self) -> global___ServerMessage.LightSecAggIns.AskMaskedModelsIns.FitIns: ...
+            def __init__(self,
+                *,
+                packet_list: typing.Optional[typing.Iterable[global___ServerMessage.LightSecAggIns.AskMaskedModelsIns.Packet]] = ...,
+                fit_ins: typing.Optional[global___ServerMessage.LightSecAggIns.AskMaskedModelsIns.FitIns] = ...,
+                ) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["fit_ins",b"fit_ins"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["fit_ins",b"fit_ins","packet_list",b"packet_list"]) -> None: ...
+
+        class AskAggregatedEncodedMasksIns(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            SURVIVING_CLIENTS_FIELD_NUMBER: builtins.int
+            @property
+            def surviving_clients(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
+            def __init__(self,
+                *,
+                surviving_clients: typing.Optional[typing.Iterable[builtins.int]] = ...,
+                ) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["surviving_clients",b"surviving_clients"]) -> None: ...
+
+        SETUP_CFG_INS_FIELD_NUMBER: builtins.int
+        ASK_EN_MSKS_INS_FIELD_NUMBER: builtins.int
+        ASK_MODELS_INS_FIELD_NUMBER: builtins.int
+        ASK_AGG_MSKS_INS_FIELD_NUMBER: builtins.int
+        @property
+        def setup_cfg_ins(self) -> global___ServerMessage.LightSecAggIns.LightSecAggSetupConfigIns: ...
+        @property
+        def ask_en_msks_ins(self) -> global___ServerMessage.LightSecAggIns.AskEncryptedEncodedMasksIns: ...
+        @property
+        def ask_models_ins(self) -> global___ServerMessage.LightSecAggIns.AskMaskedModelsIns: ...
+        @property
+        def ask_agg_msks_ins(self) -> global___ServerMessage.LightSecAggIns.AskAggregatedEncodedMasksIns: ...
+        def __init__(self,
+            *,
+            setup_cfg_ins: typing.Optional[global___ServerMessage.LightSecAggIns.LightSecAggSetupConfigIns] = ...,
+            ask_en_msks_ins: typing.Optional[global___ServerMessage.LightSecAggIns.AskEncryptedEncodedMasksIns] = ...,
+            ask_models_ins: typing.Optional[global___ServerMessage.LightSecAggIns.AskMaskedModelsIns] = ...,
+            ask_agg_msks_ins: typing.Optional[global___ServerMessage.LightSecAggIns.AskAggregatedEncodedMasksIns] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["ask_agg_msks_ins",b"ask_agg_msks_ins","ask_en_msks_ins",b"ask_en_msks_ins","ask_models_ins",b"ask_models_ins","msg",b"msg","setup_cfg_ins",b"setup_cfg_ins"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["ask_agg_msks_ins",b"ask_agg_msks_ins","ask_en_msks_ins",b"ask_en_msks_ins","ask_models_ins",b"ask_models_ins","msg",b"msg","setup_cfg_ins",b"setup_cfg_ins"]) -> None: ...
+        def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["setup_cfg_ins","ask_en_msks_ins","ask_models_ins","ask_agg_msks_ins"]]: ...
 
     RECONNECT_FIELD_NUMBER: builtins.int
     GET_PARAMETERS_FIELD_NUMBER: builtins.int
     FIT_INS_FIELD_NUMBER: builtins.int
     EVALUATE_INS_FIELD_NUMBER: builtins.int
     SEC_AGG_MSG_FIELD_NUMBER: builtins.int
-
+    LIGHT_SEC_AGG_INS_FIELD_NUMBER: builtins.int
     @property
     def reconnect(self) -> global___ServerMessage.Reconnect: ...
-
     @property
     def get_parameters(self) -> global___ServerMessage.GetParameters: ...
-
     @property
     def fit_ins(self) -> global___ServerMessage.FitIns: ...
-
     @property
     def evaluate_ins(self) -> global___ServerMessage.EvaluateIns: ...
-
     @property
     def sec_agg_msg(self) -> global___ServerMessage.SecAggMsg: ...
-
+    @property
+    def light_sec_agg_ins(self) -> global___ServerMessage.LightSecAggIns: ...
     def __init__(self,
         *,
-        reconnect : typing.Optional[global___ServerMessage.Reconnect] = ...,
-        get_parameters : typing.Optional[global___ServerMessage.GetParameters] = ...,
-        fit_ins : typing.Optional[global___ServerMessage.FitIns] = ...,
-        evaluate_ins : typing.Optional[global___ServerMessage.EvaluateIns] = ...,
-        sec_agg_msg : typing.Optional[global___ServerMessage.SecAggMsg] = ...,
+        reconnect: typing.Optional[global___ServerMessage.Reconnect] = ...,
+        get_parameters: typing.Optional[global___ServerMessage.GetParameters] = ...,
+        fit_ins: typing.Optional[global___ServerMessage.FitIns] = ...,
+        evaluate_ins: typing.Optional[global___ServerMessage.EvaluateIns] = ...,
+        sec_agg_msg: typing.Optional[global___ServerMessage.SecAggMsg] = ...,
+        light_sec_agg_ins: typing.Optional[global___ServerMessage.LightSecAggIns] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"evaluate_ins",b"evaluate_ins",u"fit_ins",b"fit_ins",u"get_parameters",b"get_parameters",u"msg",b"msg",u"reconnect",b"reconnect",u"sec_agg_msg",b"sec_agg_msg"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"evaluate_ins",b"evaluate_ins",u"fit_ins",b"fit_ins",u"get_parameters",b"get_parameters",u"msg",b"msg",u"reconnect",b"reconnect",u"sec_agg_msg",b"sec_agg_msg"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"msg",b"msg"]) -> typing_extensions.Literal["reconnect","get_parameters","fit_ins","evaluate_ins","sec_agg_msg"]: ...
+    def HasField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters",b"get_parameters","light_sec_agg_ins",b"light_sec_agg_ins","msg",b"msg","reconnect",b"reconnect","sec_agg_msg",b"sec_agg_msg"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters",b"get_parameters","light_sec_agg_ins",b"light_sec_agg_ins","msg",b"msg","reconnect",b"reconnect","sec_agg_msg",b"sec_agg_msg"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["reconnect","get_parameters","fit_ins","evaluate_ins","sec_agg_msg","light_sec_agg_ins"]]: ...
 global___ServerMessage = ServerMessage
 
 class ClientMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class Disconnect(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
         REASON_FIELD_NUMBER: builtins.int
-        reason: global___Reason.V = ...
-
+        reason: global___Reason.ValueType
         def __init__(self,
             *,
-            reason : global___Reason.V = ...,
+            reason: global___Reason.ValueType = ...,
             ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"reason",b"reason"]) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["reason",b"reason"]) -> None: ...
 
     class ParametersRes(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
         PARAMETERS_FIELD_NUMBER: builtins.int
-
         @property
         def parameters(self) -> global___Parameters: ...
-
         def __init__(self,
             *,
-            parameters : typing.Optional[global___Parameters] = ...,
+            parameters: typing.Optional[global___Parameters] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal[u"parameters",b"parameters"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"parameters",b"parameters"]) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> None: ...
 
     class FitRes(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
         class MetricsEntry(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             KEY_FIELD_NUMBER: builtins.int
             VALUE_FIELD_NUMBER: builtins.int
-            key: typing.Text = ...
-
+            key: typing.Text
             @property
             def value(self) -> global___Scalar: ...
-
             def __init__(self,
                 *,
-                key : typing.Text = ...,
-                value : typing.Optional[global___Scalar] = ...,
+                key: typing.Text = ...,
+                value: typing.Optional[global___Scalar] = ...,
                 ) -> None: ...
-            def HasField(self, field_name: typing_extensions.Literal[u"value",b"value"]) -> builtins.bool: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
         PARAMETERS_FIELD_NUMBER: builtins.int
         NUM_EXAMPLES_FIELD_NUMBER: builtins.int
         NUM_EXAMPLES_CEIL_FIELD_NUMBER: builtins.int
         FIT_DURATION_FIELD_NUMBER: builtins.int
         METRICS_FIELD_NUMBER: builtins.int
-        num_examples: builtins.int = ...
-        num_examples_ceil: builtins.int = ...
-        fit_duration: builtins.float = ...
-
         @property
         def parameters(self) -> global___Parameters: ...
-
+        num_examples: builtins.int
+        num_examples_ceil: builtins.int
+        fit_duration: builtins.float
         @property
         def metrics(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
-
         def __init__(self,
             *,
-            parameters : typing.Optional[global___Parameters] = ...,
-            num_examples : builtins.int = ...,
-            num_examples_ceil : builtins.int = ...,
-            fit_duration : builtins.float = ...,
-            metrics : typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+            parameters: typing.Optional[global___Parameters] = ...,
+            num_examples: builtins.int = ...,
+            num_examples_ceil: builtins.int = ...,
+            fit_duration: builtins.float = ...,
+            metrics: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal[u"parameters",b"parameters"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"fit_duration",b"fit_duration",u"metrics",b"metrics",u"num_examples",b"num_examples",u"num_examples_ceil",b"num_examples_ceil",u"parameters",b"parameters"]) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["fit_duration",b"fit_duration","metrics",b"metrics","num_examples",b"num_examples","num_examples_ceil",b"num_examples_ceil","parameters",b"parameters"]) -> None: ...
 
     class EvaluateRes(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
         class MetricsEntry(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             KEY_FIELD_NUMBER: builtins.int
             VALUE_FIELD_NUMBER: builtins.int
-            key: typing.Text = ...
-
+            key: typing.Text
             @property
             def value(self) -> global___Scalar: ...
-
             def __init__(self,
                 *,
-                key : typing.Text = ...,
-                value : typing.Optional[global___Scalar] = ...,
+                key: typing.Text = ...,
+                value: typing.Optional[global___Scalar] = ...,
                 ) -> None: ...
-            def HasField(self, field_name: typing_extensions.Literal[u"value",b"value"]) -> builtins.bool: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
         NUM_EXAMPLES_FIELD_NUMBER: builtins.int
         LOSS_FIELD_NUMBER: builtins.int
         ACCURACY_FIELD_NUMBER: builtins.int
         METRICS_FIELD_NUMBER: builtins.int
-        num_examples: builtins.int = ...
-        loss: builtins.float = ...
-        accuracy: builtins.float = ...
-
+        num_examples: builtins.int
+        loss: builtins.float
+        accuracy: builtins.float
         @property
         def metrics(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
-
         def __init__(self,
             *,
-            num_examples : builtins.int = ...,
-            loss : builtins.float = ...,
-            accuracy : builtins.float = ...,
-            metrics : typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+            num_examples: builtins.int = ...,
+            loss: builtins.float = ...,
+            accuracy: builtins.float = ...,
+            metrics: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"accuracy",b"accuracy",u"loss",b"loss",u"metrics",b"metrics",u"num_examples",b"num_examples"]) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["accuracy",b"accuracy","loss",b"loss","metrics",b"metrics","num_examples",b"num_examples"]) -> None: ...
 
     class SecAggRes(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
         class SetupParamRes(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             def __init__(self,
                 ) -> None: ...
 
         class AskKeysRes(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             PK1_FIELD_NUMBER: builtins.int
             PK2_FIELD_NUMBER: builtins.int
-            pk1: builtins.bytes = ...
-            pk2: builtins.bytes = ...
-
+            pk1: builtins.bytes
+            pk2: builtins.bytes
             def __init__(self,
                 *,
-                pk1 : builtins.bytes = ...,
-                pk2 : builtins.bytes = ...,
+                pk1: builtins.bytes = ...,
+                pk2: builtins.bytes = ...,
                 ) -> None: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"pk1",b"pk1",u"pk2",b"pk2"]) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["pk1",b"pk1","pk2",b"pk2"]) -> None: ...
 
         class ShareKeysRes(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             class Packet(google.protobuf.message.Message):
-                DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
                 SOURCE_FIELD_NUMBER: builtins.int
                 DESTINATION_FIELD_NUMBER: builtins.int
                 CIPHERTEXT_FIELD_NUMBER: builtins.int
-                source: builtins.int = ...
-                destination: builtins.int = ...
-                ciphertext: builtins.bytes = ...
-
+                source: builtins.int
+                destination: builtins.int
+                ciphertext: builtins.bytes
                 def __init__(self,
                     *,
-                    source : builtins.int = ...,
-                    destination : builtins.int = ...,
-                    ciphertext : builtins.bytes = ...,
+                    source: builtins.int = ...,
+                    destination: builtins.int = ...,
+                    ciphertext: builtins.bytes = ...,
                     ) -> None: ...
-                def ClearField(self, field_name: typing_extensions.Literal[u"ciphertext",b"ciphertext",u"destination",b"destination",u"source",b"source"]) -> None: ...
+                def ClearField(self, field_name: typing_extensions.Literal["ciphertext",b"ciphertext","destination",b"destination","source",b"source"]) -> None: ...
 
             PACKET_LIST_FIELD_NUMBER: builtins.int
-
             @property
             def packet_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ClientMessage.SecAggRes.ShareKeysRes.Packet]: ...
-
             def __init__(self,
                 *,
-                packet_list : typing.Optional[typing.Iterable[global___ClientMessage.SecAggRes.ShareKeysRes.Packet]] = ...,
+                packet_list: typing.Optional[typing.Iterable[global___ClientMessage.SecAggRes.ShareKeysRes.Packet]] = ...,
                 ) -> None: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"packet_list",b"packet_list"]) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["packet_list",b"packet_list"]) -> None: ...
 
         class AskVectorsRes(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             PARAMETERS_FIELD_NUMBER: builtins.int
-
             @property
             def parameters(self) -> global___Parameters: ...
-
             def __init__(self,
                 *,
-                parameters : typing.Optional[global___Parameters] = ...,
+                parameters: typing.Optional[global___Parameters] = ...,
                 ) -> None: ...
-            def HasField(self, field_name: typing_extensions.Literal[u"parameters",b"parameters"]) -> builtins.bool: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"parameters",b"parameters"]) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> None: ...
 
         class UnmaskVectorsRes(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             class ShareDictEntry(google.protobuf.message.Message):
-                DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
                 KEY_FIELD_NUMBER: builtins.int
                 VALUE_FIELD_NUMBER: builtins.int
-                key: builtins.int = ...
-                value: builtins.bytes = ...
-
+                key: builtins.int
+                value: builtins.bytes
                 def __init__(self,
                     *,
-                    key : builtins.int = ...,
-                    value : builtins.bytes = ...,
+                    key: builtins.int = ...,
+                    value: builtins.bytes = ...,
                     ) -> None: ...
-                def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+                def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
             SHARE_DICT_FIELD_NUMBER: builtins.int
-
             @property
             def share_dict(self) -> google.protobuf.internal.containers.ScalarMap[builtins.int, builtins.bytes]: ...
-
             def __init__(self,
                 *,
-                share_dict : typing.Optional[typing.Mapping[builtins.int, builtins.bytes]] = ...,
+                share_dict: typing.Optional[typing.Mapping[builtins.int, builtins.bytes]] = ...,
                 ) -> None: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"share_dict",b"share_dict"]) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["share_dict",b"share_dict"]) -> None: ...
 
         class ErrorRes(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
             ERROR_FIELD_NUMBER: builtins.int
-            error: typing.Text = ...
-
+            error: typing.Text
             def __init__(self,
                 *,
-                error : typing.Text = ...,
+                error: typing.Text = ...,
                 ) -> None: ...
-            def ClearField(self, field_name: typing_extensions.Literal[u"error",b"error"]) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["error",b"error"]) -> None: ...
 
         SETUP_PARAM_RES_FIELD_NUMBER: builtins.int
         ASK_KEYS_RES_FIELD_NUMBER: builtins.int
@@ -590,94 +683,198 @@ class ClientMessage(google.protobuf.message.Message):
         ASK_VECTORS_RES_FIELD_NUMBER: builtins.int
         UNMASK_VECTORS_RES_FIELD_NUMBER: builtins.int
         ERROR_RES_FIELD_NUMBER: builtins.int
-
         @property
         def setup_param_res(self) -> global___ClientMessage.SecAggRes.SetupParamRes: ...
-
         @property
         def ask_keys_res(self) -> global___ClientMessage.SecAggRes.AskKeysRes: ...
-
         @property
         def share_keys_res(self) -> global___ClientMessage.SecAggRes.ShareKeysRes: ...
-
         @property
         def ask_vectors_res(self) -> global___ClientMessage.SecAggRes.AskVectorsRes: ...
-
         @property
         def unmask_vectors_res(self) -> global___ClientMessage.SecAggRes.UnmaskVectorsRes: ...
-
         @property
         def error_res(self) -> global___ClientMessage.SecAggRes.ErrorRes: ...
-
         def __init__(self,
             *,
-            setup_param_res : typing.Optional[global___ClientMessage.SecAggRes.SetupParamRes] = ...,
-            ask_keys_res : typing.Optional[global___ClientMessage.SecAggRes.AskKeysRes] = ...,
-            share_keys_res : typing.Optional[global___ClientMessage.SecAggRes.ShareKeysRes] = ...,
-            ask_vectors_res : typing.Optional[global___ClientMessage.SecAggRes.AskVectorsRes] = ...,
-            unmask_vectors_res : typing.Optional[global___ClientMessage.SecAggRes.UnmaskVectorsRes] = ...,
-            error_res : typing.Optional[global___ClientMessage.SecAggRes.ErrorRes] = ...,
+            setup_param_res: typing.Optional[global___ClientMessage.SecAggRes.SetupParamRes] = ...,
+            ask_keys_res: typing.Optional[global___ClientMessage.SecAggRes.AskKeysRes] = ...,
+            share_keys_res: typing.Optional[global___ClientMessage.SecAggRes.ShareKeysRes] = ...,
+            ask_vectors_res: typing.Optional[global___ClientMessage.SecAggRes.AskVectorsRes] = ...,
+            unmask_vectors_res: typing.Optional[global___ClientMessage.SecAggRes.UnmaskVectorsRes] = ...,
+            error_res: typing.Optional[global___ClientMessage.SecAggRes.ErrorRes] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal[u"ask_keys_res",b"ask_keys_res",u"ask_vectors_res",b"ask_vectors_res",u"error_res",b"error_res",u"msg",b"msg",u"setup_param_res",b"setup_param_res",u"share_keys_res",b"share_keys_res",u"unmask_vectors_res",b"unmask_vectors_res"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"ask_keys_res",b"ask_keys_res",u"ask_vectors_res",b"ask_vectors_res",u"error_res",b"error_res",u"msg",b"msg",u"setup_param_res",b"setup_param_res",u"share_keys_res",b"share_keys_res",u"unmask_vectors_res",b"unmask_vectors_res"]) -> None: ...
-        def WhichOneof(self, oneof_group: typing_extensions.Literal[u"msg",b"msg"]) -> typing_extensions.Literal["setup_param_res","ask_keys_res","share_keys_res","ask_vectors_res","unmask_vectors_res","error_res"]: ...
+        def HasField(self, field_name: typing_extensions.Literal["ask_keys_res",b"ask_keys_res","ask_vectors_res",b"ask_vectors_res","error_res",b"error_res","msg",b"msg","setup_param_res",b"setup_param_res","share_keys_res",b"share_keys_res","unmask_vectors_res",b"unmask_vectors_res"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["ask_keys_res",b"ask_keys_res","ask_vectors_res",b"ask_vectors_res","error_res",b"error_res","msg",b"msg","setup_param_res",b"setup_param_res","share_keys_res",b"share_keys_res","unmask_vectors_res",b"unmask_vectors_res"]) -> None: ...
+        def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["setup_param_res","ask_keys_res","share_keys_res","ask_vectors_res","unmask_vectors_res","error_res"]]: ...
+
+    class LightSecAggRes(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        class LightSecAggSetupConfigRes(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            PK_FIELD_NUMBER: builtins.int
+            pk: builtins.bytes
+            def __init__(self,
+                *,
+                pk: builtins.bytes = ...,
+                ) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["pk",b"pk"]) -> None: ...
+
+        class AskEncryptedEncodedMasksRes(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            class Packet(google.protobuf.message.Message):
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
+                SOURCE_FIELD_NUMBER: builtins.int
+                DESTINATION_FIELD_NUMBER: builtins.int
+                CIPHERTEXT_FIELD_NUMBER: builtins.int
+                source: builtins.int
+                destination: builtins.int
+                ciphertext: builtins.bytes
+                def __init__(self,
+                    *,
+                    source: builtins.int = ...,
+                    destination: builtins.int = ...,
+                    ciphertext: builtins.bytes = ...,
+                    ) -> None: ...
+                def ClearField(self, field_name: typing_extensions.Literal["ciphertext",b"ciphertext","destination",b"destination","source",b"source"]) -> None: ...
+
+            PACKET_LIST_FIELD_NUMBER: builtins.int
+            @property
+            def packet_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ClientMessage.LightSecAggRes.AskEncryptedEncodedMasksRes.Packet]: ...
+            def __init__(self,
+                *,
+                packet_list: typing.Optional[typing.Iterable[global___ClientMessage.LightSecAggRes.AskEncryptedEncodedMasksRes.Packet]] = ...,
+                ) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["packet_list",b"packet_list"]) -> None: ...
+
+        class AskMaskedModelsRes(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            PARAMETERS_FIELD_NUMBER: builtins.int
+            @property
+            def parameters(self) -> global___Parameters: ...
+            def __init__(self,
+                *,
+                parameters: typing.Optional[global___Parameters] = ...,
+                ) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> None: ...
+
+        class AskAggregatedEncodedMasksRes(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            AGGREGATED_ENCODED_MASK_FIELD_NUMBER: builtins.int
+            @property
+            def aggregated_encoded_mask(self) -> global___Parameters: ...
+            def __init__(self,
+                *,
+                aggregated_encoded_mask: typing.Optional[global___Parameters] = ...,
+                ) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["aggregated_encoded_mask",b"aggregated_encoded_mask"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["aggregated_encoded_mask",b"aggregated_encoded_mask"]) -> None: ...
+
+        class ErrorRes(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            ERROR_FIELD_NUMBER: builtins.int
+            error: typing.Text
+            def __init__(self,
+                *,
+                error: typing.Text = ...,
+                ) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["error",b"error"]) -> None: ...
+
+        SETUP_CFG_RES_FIELD_NUMBER: builtins.int
+        ASK_EN_MSKS_RES_FIELD_NUMBER: builtins.int
+        ASK_MODELS_RES_FIELD_NUMBER: builtins.int
+        ASK_AGG_MSKS_RES_FIELD_NUMBER: builtins.int
+        ERROR_RES_FIELD_NUMBER: builtins.int
+        @property
+        def setup_cfg_res(self) -> global___ClientMessage.LightSecAggRes.LightSecAggSetupConfigRes: ...
+        @property
+        def ask_en_msks_res(self) -> global___ClientMessage.LightSecAggRes.AskEncryptedEncodedMasksRes: ...
+        @property
+        def ask_models_res(self) -> global___ClientMessage.LightSecAggRes.AskMaskedModelsRes: ...
+        @property
+        def ask_agg_msks_res(self) -> global___ClientMessage.LightSecAggRes.AskAggregatedEncodedMasksRes: ...
+        @property
+        def error_res(self) -> global___ClientMessage.LightSecAggRes.ErrorRes: ...
+        def __init__(self,
+            *,
+            setup_cfg_res: typing.Optional[global___ClientMessage.LightSecAggRes.LightSecAggSetupConfigRes] = ...,
+            ask_en_msks_res: typing.Optional[global___ClientMessage.LightSecAggRes.AskEncryptedEncodedMasksRes] = ...,
+            ask_models_res: typing.Optional[global___ClientMessage.LightSecAggRes.AskMaskedModelsRes] = ...,
+            ask_agg_msks_res: typing.Optional[global___ClientMessage.LightSecAggRes.AskAggregatedEncodedMasksRes] = ...,
+            error_res: typing.Optional[global___ClientMessage.LightSecAggRes.ErrorRes] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["ask_agg_msks_res",b"ask_agg_msks_res","ask_en_msks_res",b"ask_en_msks_res","ask_models_res",b"ask_models_res","error_res",b"error_res","msg",b"msg","setup_cfg_res",b"setup_cfg_res"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["ask_agg_msks_res",b"ask_agg_msks_res","ask_en_msks_res",b"ask_en_msks_res","ask_models_res",b"ask_models_res","error_res",b"error_res","msg",b"msg","setup_cfg_res",b"setup_cfg_res"]) -> None: ...
+        def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["setup_cfg_res","ask_en_msks_res","ask_models_res","ask_agg_msks_res","error_res"]]: ...
 
     DISCONNECT_FIELD_NUMBER: builtins.int
     PARAMETERS_RES_FIELD_NUMBER: builtins.int
     FIT_RES_FIELD_NUMBER: builtins.int
     EVALUATE_RES_FIELD_NUMBER: builtins.int
     SEC_AGG_RES_FIELD_NUMBER: builtins.int
-
+    LIGHT_SEC_AGG_RES_FIELD_NUMBER: builtins.int
     @property
     def disconnect(self) -> global___ClientMessage.Disconnect: ...
-
     @property
     def parameters_res(self) -> global___ClientMessage.ParametersRes: ...
-
     @property
     def fit_res(self) -> global___ClientMessage.FitRes: ...
-
     @property
     def evaluate_res(self) -> global___ClientMessage.EvaluateRes: ...
-
     @property
     def sec_agg_res(self) -> global___ClientMessage.SecAggRes: ...
-
+    @property
+    def light_sec_agg_res(self) -> global___ClientMessage.LightSecAggRes: ...
     def __init__(self,
         *,
-        disconnect : typing.Optional[global___ClientMessage.Disconnect] = ...,
-        parameters_res : typing.Optional[global___ClientMessage.ParametersRes] = ...,
-        fit_res : typing.Optional[global___ClientMessage.FitRes] = ...,
-        evaluate_res : typing.Optional[global___ClientMessage.EvaluateRes] = ...,
-        sec_agg_res : typing.Optional[global___ClientMessage.SecAggRes] = ...,
+        disconnect: typing.Optional[global___ClientMessage.Disconnect] = ...,
+        parameters_res: typing.Optional[global___ClientMessage.ParametersRes] = ...,
+        fit_res: typing.Optional[global___ClientMessage.FitRes] = ...,
+        evaluate_res: typing.Optional[global___ClientMessage.EvaluateRes] = ...,
+        sec_agg_res: typing.Optional[global___ClientMessage.SecAggRes] = ...,
+        light_sec_agg_res: typing.Optional[global___ClientMessage.LightSecAggRes] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"disconnect",b"disconnect",u"evaluate_res",b"evaluate_res",u"fit_res",b"fit_res",u"msg",b"msg",u"parameters_res",b"parameters_res",u"sec_agg_res",b"sec_agg_res"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"disconnect",b"disconnect",u"evaluate_res",b"evaluate_res",u"fit_res",b"fit_res",u"msg",b"msg",u"parameters_res",b"parameters_res",u"sec_agg_res",b"sec_agg_res"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"msg",b"msg"]) -> typing_extensions.Literal["disconnect","parameters_res","fit_res","evaluate_res","sec_agg_res"]: ...
+    def HasField(self, field_name: typing_extensions.Literal["disconnect",b"disconnect","evaluate_res",b"evaluate_res","fit_res",b"fit_res","light_sec_agg_res",b"light_sec_agg_res","msg",b"msg","parameters_res",b"parameters_res","sec_agg_res",b"sec_agg_res"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["disconnect",b"disconnect","evaluate_res",b"evaluate_res","fit_res",b"fit_res","light_sec_agg_res",b"light_sec_agg_res","msg",b"msg","parameters_res",b"parameters_res","sec_agg_res",b"sec_agg_res"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["disconnect","parameters_res","fit_res","evaluate_res","sec_agg_res","light_sec_agg_res"]]: ...
 global___ClientMessage = ClientMessage
 
 class Scalar(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     DOUBLE_FIELD_NUMBER: builtins.int
     SINT64_FIELD_NUMBER: builtins.int
     BOOL_FIELD_NUMBER: builtins.int
     STRING_FIELD_NUMBER: builtins.int
     BYTES_FIELD_NUMBER: builtins.int
-    double: builtins.float = ...
-    sint64: builtins.int = ...
-    bool: builtins.bool = ...
-    string: typing.Text = ...
-    bytes: builtins.bytes = ...
+    double: builtins.float
+    sint64: builtins.int
+    """float float = 2;
+    int32 int32 = 3;
+    int64 int64 = 4;
+    uint32 uint32 = 5;
+    uint64 uint64 = 6;
+    sint32 sint32 = 7;
+    """
 
+    bool: builtins.bool
+    """fixed32 fixed32 = 9;
+    fixed64 fixed64 = 10;
+    sfixed32 sfixed32 = 11;
+    sfixed64 sfixed64 = 12;
+    """
+
+    string: typing.Text
+    bytes: builtins.bytes
     def __init__(self,
         *,
-        double : builtins.float = ...,
-        sint64 : builtins.int = ...,
-        bool : builtins.bool = ...,
-        string : typing.Text = ...,
-        bytes : builtins.bytes = ...,
+        double: builtins.float = ...,
+        sint64: builtins.int = ...,
+        bool: builtins.bool = ...,
+        string: typing.Text = ...,
+        bytes: builtins.bytes = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"bool",b"bool",u"bytes",b"bytes",u"double",b"double",u"scalar",b"scalar",u"sint64",b"sint64",u"string",b"string"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"bool",b"bool",u"bytes",b"bytes",u"double",b"double",u"scalar",b"scalar",u"sint64",b"sint64",u"string",b"string"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"scalar",b"scalar"]) -> typing_extensions.Literal["double","sint64","bool","string","bytes"]: ...
+    def HasField(self, field_name: typing_extensions.Literal["bool",b"bool","bytes",b"bytes","double",b"double","scalar",b"scalar","sint64",b"sint64","string",b"string"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["bool",b"bool","bytes",b"bytes","double",b"double","scalar",b"scalar","sint64",b"sint64","string",b"string"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["scalar",b"scalar"]) -> typing.Optional[typing_extensions.Literal["double","sint64","bool","string","bytes"]]: ...
 global___Scalar = Scalar

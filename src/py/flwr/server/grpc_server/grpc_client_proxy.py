@@ -20,6 +20,7 @@ from flwr import common
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
+import flwr.common.typing as ft
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_bridge import GRPCBridge
 
@@ -97,6 +98,42 @@ class GrpcClientProxy(ClientProxy):
         serde.check_error(client_msg.sec_agg_res)
         unmask_vectors_res = serde.unmask_vectors_res_from_proto(client_msg.sec_agg_res)
         return unmask_vectors_res
+
+    def light_sec_agg_setup_config(self, ins: ft.LightSecAggSetupConfigIns) -> ft.LightSecAggSetupConfigRes:
+        msg = serde.light_sec_agg_setup_cfg_ins_to_proto(ins)
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(light_sec_agg_ins=msg)
+        )
+        serde.check_error(client_msg.light_sec_agg_res)
+        res = serde.light_sec_agg_setup_cfg_res_from_proto(client_msg.light_sec_agg_res)
+        return res
+
+    def ask_encrypted_encoded_masks(self, ins: ft.LightSecAggSetupConfigIns) -> ft.LightSecAggSetupConfigRes:
+        msg = serde.ask_encrypted_encoded_masks_ins_to_proto(ins)
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(light_sec_agg_ins=msg)
+        )
+        serde.check_error(client_msg.light_sec_agg_res)
+        res = serde.ask_encrypted_encoded_masks_res_from_proto(client_msg.light_sec_agg_res)
+        return res
+
+    def ask_masked_models(self, ins: ft.LightSecAggSetupConfigIns) -> ft.LightSecAggSetupConfigRes:
+        msg = serde.ask_masked_models_ins_to_proto(ins)
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(light_sec_agg_ins=msg)
+        )
+        serde.check_error(client_msg.light_sec_agg_res)
+        res = serde.ask_masked_models_res_from_proto(client_msg.light_sec_agg_res)
+        return res
+
+    def ask_aggregated_encoded_masks(self, ins: ft.LightSecAggSetupConfigIns) -> ft.LightSecAggSetupConfigRes:
+        msg = serde.ask_aggregated_encoded_masks_ins_to_proto(ins)
+        client_msg: ClientMessage = self.bridge.request(
+            ServerMessage(light_sec_agg_ins=msg)
+        )
+        serde.check_error(client_msg.light_sec_agg_res)
+        res = serde.ask_aggregated_encoded_masks_res_from_proto(client_msg.light_sec_agg_res)
+        return res
 
     def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
