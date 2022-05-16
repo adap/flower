@@ -1,16 +1,7 @@
 from collections import OrderedDict
 import warnings
 from flwr.common import (
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    MetricsAggregationFn,
-    Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
 )
 import flwr as fl
 import torch
@@ -18,7 +9,11 @@ import torch.nn.functional as F
 from model_mnist import Net0, Net1, Net2, Net3
 from dataset import load_mnist_data_partition
 import argparse
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
+import json
+import numpy as np
+from similarity_utils import cka_torch, gram_linear_torch
+from torch.autograd import Variable
 
 Scalar = Union[bool, bytes, float, int, str]
 
@@ -28,6 +23,32 @@ warnings.filterwarnings("ignore", category=UserWarning)
 # #############################################################################
 # 1. PyTorch pipeline: model/train/test/dataloader
 # #############################################################################
+
+
+def proximal_term(cfg, local_model, device):
+    delta_list = []
+    global_prev_K_value = torch.tensor(
+        np.asarray(json.loads(cfg["K_final"])), requires_grad=True, dtype=torch.float32
+    )
+    trainloader_RAD, testloader_RAD, num_examples_RAD = load_mnist_data_partition(
+        batch_size=32,
+        partitions=5,
+        RAD=True,
+        subsample_RAD=True,
+        use_cuda=False,
+        input_seed=int(cfg["epoch_global"]),
+    )
+    for images_RAD, labels_RAD in trainloader_RAD:
+        images_RAD, labels_RAD = images_RAD.to(device), labels_RAD.to(device)
+        intermediate_activation_local, _ = local_model(images_RAD)
+        cka_from_examples = cka_torch(
+            global_prev_K_value,
+            gram_linear_torch(intermediate_activation_local),
+        )
+        delta_list.append(cka_from_examples)
+    print(gram_linear_torch(intermediate_activation_local).shape)
+    print(f"k_global:{global_prev_K_value.shape}")
+    return Variable(torch.mean(torch.FloatTensor(delta_list)), requires_grad=True)
 
 
 def train(net, device, trainloader, optimizer, cfg):
@@ -42,13 +63,15 @@ def train(net, device, trainloader, optimizer, cfg):
             optimizer.zero_grad()
             _, outputs = net(images)
             loss1 = F.nll_loss(outputs, labels) * (1 - eta)
-            loss3 = loss1
+            loss2 = proximal_term(cfg, net, device) * (eta)
+
+            loss3 = loss1 + loss2
 
             loss3.backward()
             optimizer.step()
 
-            break
-        break
+        #     break
+        # break
 
 
 def test(net, device, testloader):
@@ -62,7 +85,7 @@ def test(net, device, testloader):
             loss += F.nll_loss(outputs, labels, reduction="sum").item()
             total += labels.size(0)
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-            break
+            # break
 
     loss /= len(testloader.dataset)
     accuracy = correct / total
@@ -77,7 +100,7 @@ def test(net, device, testloader):
 def main(part_idx):
     """Create model, load data, define Flower client, start Flower client."""
 
-    # Load data
+    # Load data for clients
     trainloader, testloader, num_examples = load_mnist_data_partition(
         batch_size=32, partitions=5, RAD=False, subsample_RAD=True, use_cuda=False
     )[part_idx]
@@ -112,8 +135,7 @@ def main(part_idx):
             if config["tensor_type"] == "model_d":
                 self.net = Net3()
 
-            print(config)
-            print(f"name of net:{str(self.net)[:5]}")
+            print(f"name of net:{str(self.net)[:4]}")
             self.set_parameters(parameters)
             optimizer = torch.optim.Adam(self.net.parameters())
 

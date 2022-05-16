@@ -1,7 +1,7 @@
 import flwr as fl
-from flwr.server.strategy.fedhenn import FedHeNN
+from custom_strategy import custom_FedHeNN
 
-num_rounds = 3
+num_rounds = 5
 from model_mnist import Net0, Net1, Net2, Net3
 
 
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     Weights_init3 = [val.cpu().numpy() for _, val in Net3().state_dict().items()]
 
     # Define strategy
-    strategy = FedHeNN(
+    strategy = custom_FedHeNN(
         fraction_fit=1,
         fraction_eval=1,
         min_fit_clients=4,

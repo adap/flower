@@ -1,5 +1,6 @@
+import enum
 import flwr as fl
-from flwr.server.strategy import FedAvg
+from flwr.server.strategy.fedhenn import FedHeNN
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple
 
@@ -18,8 +19,15 @@ from flwr.common import (
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
+from dataset import load_mnist_data_partition
+from model_mnist import Net0, Net1, Net2, Net3
+from collections import OrderedDict
+import torch
+from similarity_utils import cka_torch, gram_linear_torch, gram_linear
+import numpy as np
+import json
+from json_utils import NumpyArrayEncoder
 
-from .aggregate import aggregate, weighted_loss_avg
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
@@ -27,9 +35,22 @@ Setting `min_available_clients` lower than `min_fit_clients` or
 connected to the server. `min_available_clients` must be set to a value larger
 than or equal to the values of `min_fit_clients` and `min_eval_clients`.
 """
+models_dict = {"model_a": Net0, "model_b": Net1, "model_c": Net2, "model_d": Net3}
 
 
-class FedHeNN(FedAvg):
+def compute_K_val(parameters: Parameters, model_type, dataloader):
+    Net = model_type()
+    params_dict = zip(Net.state_dict().keys(), parameters_to_weights(parameters))
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    Net.load_state_dict(state_dict, strict=True)
+    for images_RAD, _ in dataloader:
+        intermediate_activation, _ = Net(images_RAD)
+
+    final_array = np.array(gram_linear(intermediate_activation.detach().numpy()))
+    return final_array
+
+
+class custom_FedHeNN(FedHeNN):
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
@@ -106,14 +127,37 @@ class FedHeNN(FedAvg):
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-
+        trainloader_RAD, testloader_RAD, num_examples_RAD = load_mnist_data_partition(
+            batch_size=32,
+            partitions=5,
+            RAD=True,
+            subsample_RAD=True,
+            use_cuda=False,
+            input_seed=rnd,
+        )
         if isinstance(parameters, list):
+            # different model parameters for different clients
             fit_ins = []
+            K_final = np.sum(
+                np.array(
+                    [
+                        compute_K_val(
+                            parameter,
+                            models_dict[parameter.tensor_type],
+                            trainloader_RAD,
+                        )
+                        for parameter in parameters
+                    ]
+                ),
+                axis=0,
+            )
+
             for parameter in parameters:
                 config = {}
                 if self.on_fit_config_fn is not None:
                     # Custom fit config function provided
                     config = self.on_fit_config_fn(rnd)
+                config["K_final"] = json.dumps(K_final, cls=NumpyArrayEncoder)
                 config["tensor_type"] = parameter.tensor_type
                 fit_ins.append(FitIns(parameter, config))
 
@@ -126,7 +170,6 @@ class FedHeNN(FedAvg):
             num_clients=sample_size, min_num_clients=min_num_clients
         )
         # Return client/config pairs
-
         return [(client, fit_in) for client, fit_in in zip(clients, fit_ins)]
 
     def configure_evaluate(

@@ -1,12 +1,8 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
 from torchvision import datasets, transforms
-from typing import List, Tuple
-import numpy as np
 from torch.utils.data import random_split, RandomSampler, DataLoader
 import warnings
+
 
 use_cuda = torch.cuda.is_available()
 use_cuda = False
@@ -34,7 +30,7 @@ def load_mnist_data_entire(batch_size=32):
     return train_loader, test_loader, num_examples
 
 
-def generate_custom_datasplits(partitions):
+def generate_custom_datasplits(partitions, input_seed):
     """Last slice corresponds to RAD with more datapoints
     TODO : hardcoded with 5 partitions"""
     transform = transforms.Compose(
@@ -45,12 +41,12 @@ def generate_custom_datasplits(partitions):
     train_splits = random_split(
         dataset1,
         (10000, 10000, 10000, 10000, 20000),
-        generator=torch.Generator().manual_seed(42),
+        generator=torch.Generator().manual_seed(input_seed),
     )
     test_splits = random_split(
         dataset2,
         (1500, 1500, 1500, 1500, 4000),
-        generator=torch.Generator().manual_seed(42),
+        generator=torch.Generator().manual_seed(input_seed),
     )
     assert len(train_splits) == partitions, "Unequal train splits to partitions"
     assert len(test_splits) == partitions, "Unequal test splits to partitions"
@@ -58,11 +54,16 @@ def generate_custom_datasplits(partitions):
 
 
 def load_mnist_data_partition(
-    batch_size=32, partitions=5, RAD=False, use_cuda=False, subsample_RAD=True
+    batch_size=32,
+    partitions=5,
+    RAD=False,
+    use_cuda=False,
+    subsample_RAD=True,
+    input_seed=100,
 ):
     """Last slice corresponds to RAD with more datapoints
     TODO : hardcoded with 5 partitions"""
-    train_splits, test_splits = generate_custom_datasplits(partitions)
+    train_splits, test_splits = generate_custom_datasplits(partitions, input_seed)
     train_kwargs = {"batch_size": batch_size}
     test_kwargs = {"batch_size": batch_size}
 
@@ -80,14 +81,16 @@ def load_mnist_data_partition(
         train_splits_subsampler = RandomSampler(
             train_splits[-1],
             num_samples=int(len(train_splits[-1]) * sample_frac),
-            generator=torch.Generator().manual_seed(42),
+            generator=torch.Generator().manual_seed(input_seed),
         )
         test_splits_subsampler = RandomSampler(
             test_splits[-1],
             num_samples=int(len(test_splits[-1]) * sample_frac),
-            generator=torch.Generator().manual_seed(42),
+            generator=torch.Generator().manual_seed(input_seed),
         )
-
+        # batch size in RAD for entire dataset
+        train_kwargs = {"batch_size": len(train_splits[-1])}
+        test_kwargs = {"batch_size": len(test_splits[-1])}
         return (
             DataLoader(
                 train_splits[-1], sampler=train_splits_subsampler, **train_kwargs
