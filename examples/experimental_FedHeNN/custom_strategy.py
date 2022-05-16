@@ -1,7 +1,7 @@
 import enum
 import flwr as fl
 from flwr.server.strategy.fedhenn import FedHeNN
-from logging import WARNING
+from logging import WARNING, DEBUG
 from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.common import (
@@ -181,14 +181,35 @@ class custom_FedHeNN(FedHeNN):
             return []
 
         # Parameters and config
-
+        trainloader_RAD, testloader_RAD, num_examples_RAD = load_mnist_data_partition(
+            batch_size=32,
+            partitions=5,
+            RAD=True,
+            subsample_RAD=True,
+            use_cuda=False,
+            input_seed=rnd,
+        )
         if isinstance(parameters, list):
             evaluate_ins = []
+            K_final = np.sum(
+                np.array(
+                    [
+                        compute_K_val(
+                            parameter,
+                            models_dict[parameter.tensor_type],
+                            testloader_RAD,
+                        )
+                        for parameter in parameters
+                    ]
+                ),
+                axis=0,
+            )
             for parameter in parameters:
                 config = {}
                 if self.on_evaluate_config_fn is not None:
                     # Custom evaluation config function provided
                     config = self.on_evaluate_config_fn(rnd)
+                config["K_final"] = json.dumps(K_final, cls=NumpyArrayEncoder)
                 config["tensor_type"] = parameter.tensor_type
                 evaluate_ins.append(EvaluateIns(parameter, config))
 
@@ -232,12 +253,21 @@ class custom_FedHeNN(FedHeNN):
         ]
 
         # Aggregate custom metrics if aggregation fn was provided
-        metrics_aggregated = {}
-        if self.fit_metrics_aggregation_fn:
-            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
-            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif rnd == 1:
-            log(WARNING, "No fit_metrics_aggregation_fn provided")
+        metrics_aggregated = {
+            (
+                fit_res.metrics["tensor_type"],
+                fit_res.metrics["loss1"],
+                fit_res.metrics["loss2"],
+            )
+            for _, fit_res in results
+        }
+        # if self.fit_metrics_aggregation_fn:
+        #     fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+        #     metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
+        # elif rnd == 1:
+        #     log(WARNING, "No fit_metrics_aggregation_fn provided")
+        log(DEBUG, f"FIT: tensor_type, loss1, loss2")
+        log(DEBUG, f"aggregate fit logs: {metrics_aggregated}")
 
         return parameters_results, metrics_aggregated
 
@@ -263,13 +293,24 @@ class custom_FedHeNN(FedHeNN):
         # )
 
         loss_aggregated = [evaluate_res.loss for _, evaluate_res in results]
-
-        # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
-        if self.evaluate_metrics_aggregation_fn:
-            eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
-            metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-        elif rnd == 1:
-            log(WARNING, "No evaluate_metrics_aggregation_fn provided")
+        metrics = {
+            (
+                evaluate_res.metrics["tensor_type"],
+                evaluate_res.metrics["accuracy"],
+                evaluate_res.metrics["cka_score"],
+                evaluate_res.metrics["loss"],
+            )
+            for _, evaluate_res in results
+        }
+        # Aggregate custom metrics if aggregation fn was provided
+        # metrics_aggregated = {}
+        # if self.evaluate_metrics_aggregation_fn:
+        #     eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
+        #     metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
+        # elif rnd == 1:
+        #     log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
+        log(DEBUG, f"EVAL: tensor_type, accuracy, cka_score, loss")
+        log(DEBUG, f"aggregate eval logs: {metrics}")
         return loss_aggregated, metrics_aggregated

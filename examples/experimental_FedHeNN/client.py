@@ -25,7 +25,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 # #############################################################################
 
 
-def proximal_term(cfg, local_model, device):
+def proximal_term(cfg, local_model, device, train=True):
     delta_list = []
     global_prev_K_value = torch.tensor(
         np.asarray(json.loads(cfg["K_final"])), requires_grad=True, dtype=torch.float32
@@ -38,7 +38,11 @@ def proximal_term(cfg, local_model, device):
         use_cuda=False,
         input_seed=int(cfg["epoch_global"]),
     )
-    for images_RAD, labels_RAD in trainloader_RAD:
+    if train:
+        dataloader_RAD = trainloader_RAD
+    else:
+        dataloader_RAD = testloader_RAD
+    for images_RAD, labels_RAD in dataloader_RAD:
         images_RAD, labels_RAD = images_RAD.to(device), labels_RAD.to(device)
         intermediate_activation_local, _ = local_model(images_RAD)
         cka_from_examples = cka_torch(
@@ -46,8 +50,8 @@ def proximal_term(cfg, local_model, device):
             gram_linear_torch(intermediate_activation_local),
         )
         delta_list.append(cka_from_examples)
-    print(gram_linear_torch(intermediate_activation_local).shape)
-    print(f"k_global:{global_prev_K_value.shape}")
+    # print(gram_linear_torch(intermediate_activation_local).shape)
+    # print(f"k_global:{global_prev_K_value.shape}")
     return Variable(torch.mean(torch.FloatTensor(delta_list)), requires_grad=True)
 
 
@@ -72,24 +76,27 @@ def train(net, device, trainloader, optimizer, cfg):
 
         #     break
         # break
+    return torch.mean(loss1).item(), torch.mean(loss2).item()
 
 
-def test(net, device, testloader):
+def test(net, device, testloader, cfg):
     """Validate the network on the entire test set."""
-    correct, total, loss = 0, 0, 0.0
+    correct, total, loss, cka_score = 0, 0, 0.0, 0.0
     net.eval()
     with torch.no_grad():
-        for images, labels in testloader:
+        for idx, (images, labels) in enumerate(testloader):
             images, labels = images.to(device), labels.to(device)
             _, outputs = net(images)
             loss += F.nll_loss(outputs, labels, reduction="sum").item()
             total += labels.size(0)
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+            cka_score += proximal_term(cfg, net, device, train=False)
             # break
 
     loss /= len(testloader.dataset)
     accuracy = correct / total
-    return loss, accuracy
+    cka_score /= idx + 1
+    return loss, accuracy, cka_score
 
 
 # #############################################################################
@@ -105,13 +112,10 @@ def main(part_idx):
         batch_size=32, partitions=5, RAD=False, subsample_RAD=True, use_cuda=False
     )[part_idx]
     # Model selection
-    model_type = [Net0, Net1, Net2, Net3][part_idx]
     tensor_type = list("abcd")[part_idx]
 
     class VirtualClient(fl.client.NumPyClient):
         def __init__(self):
-            # instantiate model
-            # self.net = model_type()
             # determine device
             self.device = torch.device("cpu")
             # self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -135,13 +139,13 @@ def main(part_idx):
             if config["tensor_type"] == "model_d":
                 self.net = Net3()
 
-            print(f"name of net:{str(self.net)[:4]}")
+            # print(f"name of net:{str(self.net)[:4]}")
             self.set_parameters(parameters)
             optimizer = torch.optim.Adam(self.net.parameters())
 
             # send model to device
             self.net.to(self.device)
-            train(
+            loss1, loss2 = train(
                 self.net,
                 self.device,
                 trainloader,
@@ -151,7 +155,7 @@ def main(part_idx):
             return (
                 self.get_parameters(),
                 num_examples["trainset"],
-                {"tensor_type": config["tensor_type"]},
+                {"tensor_type": config["tensor_type"], "loss1": loss1, "loss2": loss2},
             )
 
         def evaluate(self, parameters, config):
@@ -166,11 +170,16 @@ def main(part_idx):
             self.set_parameters(parameters)
 
             self.net.to(self.device)
-            loss, accuracy = test(self.net, self.device, testloader)
+            loss, accuracy, cka_score = test(self.net, self.device, testloader, config)
             return (
                 float(loss),
                 num_examples["testset"],
-                {"accuracy": float(accuracy)},
+                {
+                    "tensor_type": config["tensor_type"],
+                    "accuracy": float(accuracy),
+                    "cka_score": float(cka_score),
+                    "loss": float(loss),
+                },
             )
 
     # Start client

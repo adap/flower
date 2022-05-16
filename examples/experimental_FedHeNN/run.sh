@@ -1,11 +1,12 @@
 #!/bin/bash
+rm -f logger.log
 echo "Starting server"
-python server.py  &
+nohup python server.py  >>logger.log &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 for i in `seq 0 3`; do
     echo "Starting client $i"
-    python client.py --part_idx $i  &
+    nohup python client.py --part_idx $i  >>logger.log &
 done
 
 # This will allow you to use CTRL+C to stop all background processes

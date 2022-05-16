@@ -16,6 +16,15 @@ def fit_config(rnd):
     return config
 
 
+def eval_config(rnd):
+    """Return a configuration with static batch size and (local) epochs."""
+    config = {
+        "epoch_global": str(rnd),
+        "num_rounds": str(num_rounds),  # number of rounds
+    }
+    return config
+
+
 if __name__ == "__main__":
 
     Weights_init0 = [val.cpu().numpy() for _, val in Net0().state_dict().items()]
@@ -31,7 +40,9 @@ if __name__ == "__main__":
         min_eval_clients=4,
         min_available_clients=4,
         on_fit_config_fn=fit_config,
+        on_evaluate_config_fn=eval_config,
         initial_parameters=[Weights_init0, Weights_init1, Weights_init2, Weights_init3],
+        fit_metrics_aggregation_fn=True
     )
 
     # Start server
