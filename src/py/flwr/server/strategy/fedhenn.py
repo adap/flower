@@ -73,20 +73,21 @@ class FedHeNN(FedAvg):
 
     def initialize_parameters(
         self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
+    ) -> Optional[List[Parameters]]:
         """Initialize global model parameters."""
         initial_parameters = self.initial_parameters
         self.initial_parameters = None  # Don't keep initial parameters in memory
         if isinstance(initial_parameters, list):
 
-            initial_parameters_ = [
+            initial_parameters_list = [
                 weights_to_parameters(
                     weights=initial_parameter, tensor_type=f"model_{letter}"
                 )
                 for initial_parameter, letter in zip(initial_parameters, list("abcd"))
             ]
 
-        return initial_parameters_
+            return initial_parameters_list
+        return [initial_parameters]
 
     def evaluate(
         self, parameters: Parameters
