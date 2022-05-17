@@ -19,13 +19,12 @@ from .fast_and_slow import FastAndSlow as FastAndSlow
 from .fault_tolerant_fedavg import FaultTolerantFedAvg as FaultTolerantFedAvg
 from .fedadagrad import FedAdagrad as FedAdagrad
 from .fedadam import FedAdam as FedAdam
-from .fedadam import FedAdam as FedAdam
 from .fedavg import FedAvg as FedAvg
-from .fedhenn import FedHeNN as FedHeNN
 from .fedavg_android import FedAvgAndroid as FedAvgAndroid
 from .fedavgm import FedAvgM as FedAvgM
 from .fedfs_v0 import FedFSv0 as FedFSv0
 from .fedfs_v1 import FedFSv1 as FedFSv1
+from .fedhenn import FedHeNN as FedHeNN
 from .fedyogi import FedYogi as FedYogi
 from .qfedavg import QFedAvg as QFedAvg
 from .strategy import Strategy as Strategy

@@ -58,6 +58,7 @@ importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
 iterators = "^0.0.2"
 # Optional dependencies
 ray = { extras = ["default"], version = ">=1.9.2,<1.12.0", optional = true }
+isort = "^5.10.1"
 
 [tool.poetry.extras]
 simulation = ["ray"]

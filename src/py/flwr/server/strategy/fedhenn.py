@@ -1,8 +1,7 @@
-import flwr as fl
-from flwr.server.strategy import FedAvg
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple
 
+import flwr as fl
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -18,6 +17,7 @@ from flwr.common import (
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
+from flwr.server.strategy import FedAvg
 
 from .aggregate import aggregate, weighted_loss_avg
 
