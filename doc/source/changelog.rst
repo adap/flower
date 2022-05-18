@@ -1,13 +1,90 @@
 Changelog
 =========
 
-Unreleased
-----------
+v0.19.0 (2022-05-18)
+--------------------
+
+* **Flower Baselines (preview): FedOpt, FedBN, FedAvgM** (`#919 <https://github.com/adap/flower/pull/919>`_, `#1127 <https://github.com/adap/flower/pull/1127>`_, `#914 <https://github.com/adap/flower/pull/914>`_)
+
+  The first preview release of Flower Baselines has arrived! We're kickstarting Flower Baselines with implementations of FedOpt (FedYogi, FedAdam, FedAdagrad), FedBN, and FedAvgM. Check the documentation on how to use `Flower Baselines <https://flower.dev/docs/using-baselines.html>`_. With this first preview release we're also inviting the community to `contribute their own baselines <https://flower.dev/docs/contributing-baselines.html>`_.
+
+* **C++ client SDK (preview) and code example** (`#1111 <https://github.com/adap/flower/pull/1111>`_)
+
+  Preview support for Flower clients written in C++. The C++ preview includes a Flower client SDK and a quickstart code example that demonstrates a simple C++ client using the SDK.
+
+* **Add experimental support for Python 3.10 and Python 3.11** (`#1135 <https://github.com/adap/flower/pull/1135>`_)
+
+  Python 3.10 is the latest stable release of Python and Python 3.11 is due to be released in October. This Flower release adds experimental support for both Python versions.
+
+* **Aggregate custom metrics through user-provided functions** (`#1144 <https://github.com/adap/flower/pull/1144>`_)
+
+  Custom metrics (e.g., :code:`accuracy`) can now be aggregated without having to customize the strategy. Built-in strategies support two new arguments, :code:`fit_metrics_aggregation_fn` and :code:`evaluate_metrics_aggregation_fn`, that allow passing custom metric aggregation functions.
+
+* **User-configurable round timeout** (`#1162 <https://github.com/adap/flower/pull/1162>`_)
+
+  A new configuration value allows the round timeout to be set for :code:`start_server` and :code:`start_simulation`. If the :code:`config` dictionary contains a :code:`round_timeout` key (with a :code:`float` value in seconds), the server will wait *at least* :code:`round_timeout` seconds before it closes the connection.
+
+* **Enable both federated evaluation and centralized evaluation to be used at the same time in all built-in strategies** (`#1091 <https://github.com/adap/flower/pull/1091>`_)
+
+  Built-in strategies can now perform both federated evaluation (i.e., client-side) and centralized evaluation (i.e., server-side) in the same round. Federated evaluation can be disabled by setting :code:`fraction_eval` to :code:`0.0`.
+
+* **Two new Jupyter Notebook tutorials** (`#1141 <https://github.com/adap/flower/pull/1141>`_)
+
+  Two Jupyter Notebook tutorials (compatible with Google Colab) explain basic and intermediate Flower features:
+
+  *An Introduction to Federated Learning*: `Open in Colab <https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-1-Intro-to-FL-PyTorch.ipynb>`_
+
+  *Using Strategies in Federated Learning*: `Open in Colab <https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-2-Strategies-in-FL-PyTorch.ipynb>`_
+
+* **New FedAvgM strategy (Federated Averaging with Server Momentum)** (`#1076 <https://github.com/adap/flower/pull/1076>`_)
+
+  The new :code:`FedAvgM` strategy implements Federated Averaging with Server Momentum [Hsu et al., 2019].
+
+* **New advanced PyTorch code example** (`#1007 <https://github.com/adap/flower/pull/1007>`_)
+
+  A new code example (:code:`advanced_pytorch`) demonstrates advanced Flower concepts with PyTorch.
+
+* **New JAX code example** (`#906 <https://github.com/adap/flower/pull/906>`_, `#1143 <https://github.com/adap/flower/pull/1143>`_)
+
+  A new code example (:code:`jax_from_centralized_to_federated`) shows federated learning with JAX and Flower.
+
+* **Minor updates**
+    * New option to keep Ray running if Ray was already initialized in :code:`start_simulation` (`#1177 <https://github.com/adap/flower/pull/1177>`_)
+    * Add support for custom :code:`ClientManager` as a :code:`start_simulation` parameter (`#1171 <https://github.com/adap/flower/pull/1171>`_)
+    * New documentation for `implementing strategies <https://flower.dev/docs/implementing-strategies.html>`_ (`#1097 <https://github.com/adap/flower/pull/1097>`_, `#1175 <https://github.com/adap/flower/pull/1175>`_)
+    * New mobile-friendly documentation theme (`#1174 <https://github.com/adap/flower/pull/1174>`_)
+    * Limit version range for (optional) :code:`ray` dependency to include only compatible releases (:code:`>=1.9.2,<1.12.0`) (`#1205 <https://github.com/adap/flower/pull/1205>`_)
+
+Incompatible changes:
+~~~~~~~~~~~~~~~~~~~~~
+
+* **Remove deprecated support for Python 3.6** (`#871 <https://github.com/adap/flower/pull/871>`_)
+* **Remove deprecated KerasClient** (`#857 <https://github.com/adap/flower/pull/857>`_)
+* **Remove deprecated no-op extra installs** (`#973 <https://github.com/adap/flower/pull/973>`_)
+* **Remove deprecated proto fields from** :code:`FitRes` **and** :code:`EvaluateRes` (`#869 <https://github.com/adap/flower/pull/869>`_)
+* **Remove deprecated QffedAvg strategy (replaced by QFedAvg)** (`#1107 <https://github.com/adap/flower/pull/1107>`_)
+* **Remove deprecated DefaultStrategy strategy** (`#1142 <https://github.com/adap/flower/pull/1142>`_)
+* **Remove deprecated support for eval_fn accuracy return value** (`#1142 <https://github.com/adap/flower/pull/1142>`_)
+* **Remove deprecated support for passing initial parameters as NumPy ndarrays** (`#1142 <https://github.com/adap/flower/pull/1142>`_)
+
+
+v0.18.0 (2022-02-28)
+--------------------
 
 What's new?
 ~~~~~~~~~~~
 
-* **Client properties** (`#795 <https://github.com/adap/flower/pull/795>`_)
+* **Improved Virtual Client Engine compatibility with Jupyter Notebook / Google Colab** (`#866 <https://github.com/adap/flower/pull/866>`_, `#872 <https://github.com/adap/flower/pull/872>`_, `#833 <https://github.com/adap/flower/pull/833>`_, `#1036 <https://github.com/adap/flower/pull/1036>`_)
+
+  Simulations (using the Virtual Client Engine through :code:`start_simulation`) now work more smoothly on Jupyter Notebooks (incl. Google Colab) after installing Flower with the :code:`simulation` extra (:code:`pip install flwr[simulation]`).
+
+* **New Jupyter Notebook code example** (`#833 <https://github.com/adap/flower/pull/833>`_)
+
+  A new code example (:code:`quickstart_simulation`) demonstrates Flower simulations using the Virtual Client Engine through Jupyter Notebook (incl. Google Colab).
+
+* **Client properties (feature preview)** (`#795 <https://github.com/adap/flower/pull/795>`_)
+
+  Clients can implement a new method :code:`get_properties` to enable server-side strategies to query client properties.
 
 * **Experimental Android support with TFLite** (`#865 <https://github.com/adap/flower/pull/865>`_)
 
@@ -15,15 +92,42 @@ What's new?
 
   The example uses TFLite on the client side, along with a new :code:`FedAvgAndroid` strategy. The Android client and :code:`FedAvgAndroid` are still experimental, but they are a first step towards a fully-fledged Android SDK and a unified :code:`FedAvg` implementation that integrated the new functionality from :code:`FedAvgAndroid`.
 
-* **SSL-enabled server and client** (`#842 <https://github.com/adap/flower/pull/842>`_,  `#844 <https://github.com/adap/flower/pull#84/844>`_,  `#845 <https://github.com/adap/flower/pull#84/845>`_, `#847 <https://github.com/adap/flower/pull#84/847>`_, `#993 <https://github.com/adap/flower/pull#84/993>`_, `#994 <https://github.com/adap/flower/pull#84/994>`_)
+* **Make gRPC keepalive time user-configurable and decrease default keepalive time** (`#1069 <https://github.com/adap/flower/pull/1069>`_)
+
+  The default gRPC keepalive time has been reduced to increase the compatibility of Flower with more cloud environments (for example, Microsoft Azure). Users can configure the keepalive time to customize the gRPC stack based on specific requirements.
+
+* **New differential privacy example using Opacus and PyTorch** (`#805 <https://github.com/adap/flower/pull/805>`_)
+
+  A new code example (:code:`opacus`) demonstrates differentially-private federated learning with Opacus, PyTorch, and Flower.
+
+* **New Hugging Face Transformers code example** (`#863 <https://github.com/adap/flower/pull/863>`_)
+
+  A new code example (:code:`quickstart_huggingface`) demonstrates usage of Hugging Face Transformers with Flower.
+
+* **New MLCube code example** (`#779 <https://github.com/adap/flower/pull/779>`_, `#1034 <https://github.com/adap/flower/pull/1034>`_, `#1065 <https://github.com/adap/flower/pull/1065>`_, `#1090 <https://github.com/adap/flower/pull/1090>`_)
+
+  A new code example (:code:`quickstart_mlcube`) demonstrates usage of MLCube with Flower.
+
+* **SSL-enabled server and client** (`#842 <https://github.com/adap/flower/pull/842>`_,  `#844 <https://github.com/adap/flower/pull/844>`_,  `#845 <https://github.com/adap/flower/pull/845>`_, `#847 <https://github.com/adap/flower/pull/847>`_, `#993 <https://github.com/adap/flower/pull/993>`_, `#994 <https://github.com/adap/flower/pull/994>`_)
 
   SSL enables secure encrypted connections between clients and servers. This release open-sources the Flower secure gRPC implementation to make encrypted communication channels accessible to all Flower users.
+
+* **Updated** :code:`FedAdam` **and** :code:`FedYogi` **strategies** (`#885 <https://github.com/adap/flower/pull/885>`_, `#895 <https://github.com/adap/flower/pull/895>`_)
+
+  :code:`FedAdam` and :code:`FedAdam` match the latest version of the Adaptive Federated Optimization paper.
+
+* **Initialize** :code:`start_simulation` **with a list of client IDs** (`#860 <https://github.com/adap/flower/pull/860>`_)
+
+  :code:`start_simulation` can now be called with a list of client IDs (:code:`clients_ids`, type: :code:`List[str]`). Those IDs will be passed to the :code:`client_fn` whenever a client needs to be initialized, which can make it easier to load data partitions that are not accessible through :code:`int` identifiers.
 
 * **Minor updates**
     * Update :code:`num_examples` calculation in PyTorch code examples in (`#909 <https://github.com/adap/flower/pull/909>`_)
     * Expose Flower version through :code:`flwr.__version__` (`#952 <https://github.com/adap/flower/pull/952>`_)
     * :code:`start_server` in :code:`app.py` now returns a :code:`History` object containing metrics from training (`#974 <https://github.com/adap/flower/pull/974>`_)
     * Make :code:`max_workers` (used by :code:`ThreadPoolExecutor`) configurable (`#978 <https://github.com/adap/flower/pull/978>`_)
+    * Increase sleep time after server start to three seconds in all code examples (`#1086 <https://github.com/adap/flower/pull/1086>`_)
+    * Added a new FAQ section to the documentation (`#948 <https://github.com/adap/flower/pull/948>`_)
+    * And many more under-the-hood changes, library updates, documentation changes, and tooling improvements!
 
 Incompatible changes:
 ~~~~~~~~~~~~~~~~~~~~~
