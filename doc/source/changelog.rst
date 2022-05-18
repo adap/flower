@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Unreleased
-----------
+v0.19.0 (2022-05-18)
+--------------------
 
 * **Flower Baselines (preview): FedOpt, FedBN, FedAvgM** (`#919 <https://github.com/adap/flower/pull/919>`_, `#1127 <https://github.com/adap/flower/pull/1127>`_, `#914 <https://github.com/adap/flower/pull/914>`_)
 
