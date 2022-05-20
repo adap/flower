@@ -27,26 +27,18 @@ class Strategy(ABC):
     """Abstract base class for server strategy implementations."""
 
     @abstractmethod
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
+    def initialize_parameters(self, client_manager: ClientManager) -> None:
         """Initialize the (global) model parameters.
 
         Parameters
         ----------
             client_manager: ClientManager. The client manager which holds all currently
                 connected clients.
-
-        Returns
-        -------
-        parameters: Parameters (optional)
-            If parameters are returned, then the server will treat these as the
-            initial global model parameters.
         """
 
     @abstractmethod
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, rnd: int, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training.
 
@@ -54,8 +46,6 @@ class Strategy(ABC):
         ----------
         rnd : int
             The current round of federated learning.
-        parameters : Parameters
-            The current (global) model parameters.
         client_manager : ClientManager
             The client manager which holds all currently connected clients.
 
@@ -73,7 +63,7 @@ class Strategy(ABC):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+    ) -> Dict[str, Scalar]:
         """Aggregate training results.
 
         Parameters
@@ -94,25 +84,18 @@ class Strategy(ABC):
 
         Returns
         -------
-        parameters: Parameters (optional)
-            If parameters are returned, then the server will treat these as the
-            new global model parameters (i.e., it will replace the previous
-            parameters with the ones returned from this method). If `None` is
-            returned (e.g., because there were only failures and no viable
-            results) then the server will no update the previous model
-            parameters, the updates received in this round are discarded, and
-            the global model parameters remain the same.
+        metrics: Metrics
+            Dictionary containing aggregated relevant metrics.
         """
 
     @abstractmethod
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, rnd: int, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation.
 
         Arguments:
             rnd: Integer. The current round of federated learning.
-            parameters: Parameters. The current (global) model parameters.
             client_manager: ClientManager. The client manager which holds all currently
                 connected clients.
 
@@ -151,16 +134,11 @@ class Strategy(ABC):
         """
 
     @abstractmethod
-    def evaluate(
-        self, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    def evaluate(self) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate the current model parameters.
 
         This function can be used to perform centralized (i.e., server-side) evaluation
         of model parameters.
-
-        Arguments:
-            parameters: Parameters. The current (global) model parameters.
 
         Returns:
             The evaluation result, usually a Tuple containing loss and a

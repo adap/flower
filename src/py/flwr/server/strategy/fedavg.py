@@ -54,6 +54,7 @@ class FedAvg(Strategy):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
+        *,
         fraction_fit: float = 0.1,
         fraction_eval: float = 0.1,
         min_fit_clients: int = 2,
@@ -65,7 +66,7 @@ class FedAvg(Strategy):
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
-        initial_parameters: Optional[Parameters] = None,
+        parameters: Parameters,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
@@ -93,8 +94,8 @@ class FedAvg(Strategy):
             Function used to configure validation. Defaults to None.
         accept_failures : bool, optional
             Whether or not accept rounds containing failures. Defaults to True.
-        initial_parameters : Parameters, optional
-            Initial global model parameters.
+        parameters : Parameters, optional
+            Model parameters.
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn]
             Metrics aggregation function, optional.
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
@@ -117,7 +118,7 @@ class FedAvg(Strategy):
         self.on_fit_config_fn = on_fit_config_fn
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
-        self.initial_parameters = initial_parameters
+        self.parameters = parameters
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
@@ -136,22 +137,16 @@ class FedAvg(Strategy):
         num_clients = int(num_available_clients * self.fraction_eval)
         return max(num_clients, self.min_eval_clients), self.min_available_clients
 
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
-        """Initialize global model parameters."""
-        initial_parameters = self.initial_parameters
-        self.initial_parameters = None  # Don't keep initial parameters in memory
-        return initial_parameters
+    def initialize_parameters(self, client_manager: ClientManager) -> None:
+        """Initialize model parameters."""
+        pass
 
-    def evaluate(
-        self, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    def evaluate(self) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
         if self.eval_fn is None:
             # No evaluation function provided
             return None
-        weights = parameters_to_weights(parameters)
+        weights = parameters_to_weights(self.parameters)
         eval_res = self.eval_fn(weights)
         if eval_res is None:
             return None
@@ -159,14 +154,14 @@ class FedAvg(Strategy):
         return loss, metrics
 
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, rnd: int, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(rnd)
-        fit_ins = FitIns(parameters, config)
+        fit_ins = FitIns(self.parameters, config)
 
         # Sample clients
         sample_size, min_num_clients = self.num_fit_clients(
@@ -180,7 +175,7 @@ class FedAvg(Strategy):
         return [(client, fit_ins) for client in clients]
 
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, rnd: int, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         # Do not configure federated evaluation if fraction eval is 0.
@@ -192,7 +187,7 @@ class FedAvg(Strategy):
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
             config = self.on_evaluate_config_fn(rnd)
-        evaluate_ins = EvaluateIns(parameters, config)
+        evaluate_ins = EvaluateIns(self.parameters, config)
 
         # Sample clients
         if rnd >= 0:
@@ -213,20 +208,20 @@ class FedAvg(Strategy):
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+    ) -> Dict[str, Scalar]:
         """Aggregate fit results using weighted average."""
         if not results:
-            return None, {}
+            return {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
-            return None, {}
+            return {}
 
         # Convert results
         weights_results = [
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        parameters_aggregated = weights_to_parameters(aggregate(weights_results))
+        self.parameters = weights_to_parameters(aggregate(weights_results))
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
@@ -236,7 +231,7 @@ class FedAvg(Strategy):
         elif rnd == 1:
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
-        return parameters_aggregated, metrics_aggregated
+        return metrics_aggregated
 
     def aggregate_evaluate(
         self,

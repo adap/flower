@@ -57,9 +57,6 @@ class Server:
         self, client_manager: ClientManager, strategy: Optional[Strategy] = None
     ) -> None:
         self._client_manager: ClientManager = client_manager
-        self.parameters: Parameters = Parameters(
-            tensors=[], tensor_type="numpy.ndarray"
-        )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
         self.max_workers: Optional[int] = None
 
@@ -81,10 +78,8 @@ class Server:
         history = History()
 
         # Initialize parameters
-        log(INFO, "Initializing global parameters")
-        self.parameters = self._get_initial_parameters(timeout=timeout)
         log(INFO, "Evaluating initial parameters")
-        res = self.strategy.evaluate(parameters=self.parameters)
+        res = self.strategy.evaluate()
         if res is not None:
             log(
                 INFO,
@@ -104,11 +99,9 @@ class Server:
             res_fit = self.fit_round(rnd=current_round, timeout=timeout)
             if res_fit:
                 parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
-                if parameters_prime:
-                    self.parameters = parameters_prime
 
             # Evaluate model using strategy implementation
-            res_cen = self.strategy.evaluate(parameters=self.parameters)
+            res_cen = self.strategy.evaluate()
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
                 log(
@@ -149,7 +142,7 @@ class Server:
 
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_evaluate(
-            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
+            rnd=rnd, client_manager=self._client_manager
         )
         if not client_instructions:
             log(INFO, "evaluate_round: no clients selected, cancel")
@@ -194,7 +187,7 @@ class Server:
 
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
-            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
+            rnd=rnd, client_manager=self._client_manager
         )
 
         if not client_instructions:
@@ -221,10 +214,9 @@ class Server:
         )
 
         # Aggregate training results
-        aggregated_result: Tuple[
-            Optional[Parameters],
-            Dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(rnd, results, failures)
+        aggregated_result: Dict[str, Scalar] = self.strategy.aggregate_fit(
+            rnd, results, failures
+        )
 
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
