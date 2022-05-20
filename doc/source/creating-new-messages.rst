@@ -138,10 +138,10 @@ And add a new function:
 
 .. code-block:: python
 
-    def _example_response(client:Client, msg:ServerMessage.example_ins)->ClientMessage:
-        question,l=serde.evaluate_ins_from_proto(msg)
-        response, answer=client.example_response(question,l)
-        example_res=serde.example_res_to_proto(response,answer)
+    def _example_response(client: Client, msg: ServerMessage.ExampleIns) -> ClientMessage:
+        question,l = serde.evaluate_ins_from_proto(msg)
+        response, answer = client.example_response(question,l)
+        example_res = serde.example_res_to_proto(response,answer)
         return ClientMessage(examples_res=example_res)
 
 Hopefully, when you run your program you will get the intended result!
