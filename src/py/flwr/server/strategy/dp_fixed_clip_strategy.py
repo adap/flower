@@ -24,19 +24,18 @@ from flwr.server.strategy.strategy import Strategy
 import math
 class DPFixedClipStrategy(Strategy):
     """Wrapper for configuring a Strategy for DP with Fixed Clipping."""
-
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         strategy: Strategy,
-        total_clients: int,
+        num_sampled_clients: int,
+        clip_norm:float,
         noise_multiplier: float = 1,
-        clip_norm:float = 0.1,
     ) -> None:
         super().__init__()
         self.strategy = strategy
         # Doing fixed-size subsampling as in https://arxiv.org/abs/1905.03871.
-        self.num_sampled_clients = math.ceil(strategy.fraction_fit*total_clients)
+        self.num_sampled_clients = num_sampled_clients
         self.clip_norm = clip_norm
         self.noise_multiplier = noise_multiplier
 

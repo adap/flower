@@ -27,7 +27,7 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
     def __init__(
         self,
         strategy: Strategy,
-        total_clients: int,
+        num_sampled_clients: int,
         noise_multiplier: float = 1,
         init_clip_norm: float = 0.1,
         clip_norm_lr = 0.2,
@@ -35,7 +35,7 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         clip_count_stddev = None
     ) -> None:
         
-        super().__init__(strategy, total_clients, noise_multiplier, init_clip_norm)
+        super().__init__(strategy, num_sampled_clients, noise_multiplier, init_clip_norm)
         self.clip_norm_lr = clip_norm_lr
         self.clip_norm_target_quantile = clip_norm_target_quantile
         if not clip_count_stddev:
