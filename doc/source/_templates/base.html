@@ -27,10 +27,6 @@
         {%- if prev -%}
           <link rel="prev" title="{{ prev.title|striptags|e }}" href="{{ prev.link|e }}" />
         {%- endif -%}
-        {#- rel="canonical" (set by html_baseurl) -#}
-        {%- if pageurl %}
-        <link rel="canonical" href="{{ pageurl|e }}" />
-        {%- endif %}
     {%- endblock linktags %}
 
     {# Favicon #}
@@ -81,11 +77,10 @@
     {%- block extrahead -%}{%- endblock -%}
   </head>
   <body>
-    {% block body %}
     <script>
       document.body.dataset.theme = localStorage.getItem("theme") || "auto";
     </script>
-    {% endblock %}
+    {% block body %}{% endblock %}
 
     {%- block scripts -%}
 
@@ -101,12 +96,6 @@
     {%- endblock -%}
 
     {%- endblock scripts -%}
-
-    <script
-      defer
-      data-domain="flower.dev"
-      data-api="/static/pla/api/event"
-      src="/static/pla/js/script.js"
-    />
+    <script defer data-domain="flower.dev" data-api="/static/pla/api/event" src="https://plausible.io/js/script.js"></script>
   </body>
 </html>
