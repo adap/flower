@@ -20,8 +20,11 @@ from flwr.common.typing import AskKeysIns, AskKeysRes, AskVectorsIns, AskVectors
     SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.common.sec_agg import sec_agg_primitives
+from flwr.common.secure_aggregation import SAClientMessageCarrier, SAServerMessageCarrier, SecureAggregationFitRound, \
+    SecureAggregationResultsAndFailures
 from flwr_crypto_cpp import combine_shares
 import timeit
+import numpy as np
 import sys
 import concurrent.futures
 
@@ -46,7 +49,7 @@ FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseExcepti
 
 
 # No type annotation for server because of cirular dependency!
-def sec_agg_fit_round(server, rnd: int
+def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
                       ) -> Optional[
     Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
 ]:
@@ -54,48 +57,47 @@ def sec_agg_fit_round(server, rnd: int
     total_time = total_time - timeit.default_timer()
     timer = []
     # Sample clients
-    client_instruction_list = server.strategy.configure_fit(
-        rnd=rnd, parameters=server.parameters, client_manager=server._client_manager)
+    client_instruction_list = strategy.configure_fit(
+        rnd=rnd, parameters=server.parameters, client_manager=server.client_manager())
+    proxy2id: Dict[ClientProxy, int] = {}
     setup_param_clients: Dict[int, ClientProxy] = {}
     client_instructions: Dict[int, FitIns] = {}
     for idx, value in enumerate(client_instruction_list):
+        proxy2id[value[0]] = idx
         setup_param_clients[idx] = value[0]
         client_instructions[idx] = value[1]
 
     # Get sec_agg parameters from strategy
     log(INFO, "Get sec_agg_param_dict from strategy")
-    sec_agg_param_dict = server.strategy.get_sec_agg_param()
+    sec_agg_param_dict = server.strategy.config
     sec_agg_param_dict["sample_num"] = len(client_instruction_list)
     sec_agg_param_dict = process_sec_agg_param_dict(sec_agg_param_dict)
+    graph: Dict[int, List[int]] = {}
+    sample_num = sec_agg_param_dict["sample_num"]
+    share_num = sec_agg_param_dict['share_num']
+    assert share_num == sample_num or share_num & 1 == 1
+    if share_num != sample_num:
+        t = share_num >> 1
+        for idx in setup_param_clients.keys():
+            lst = [(idx + i) % sample_num for i in range(-t, t + 1)]
+            graph[idx] = lst
+    else:
+        lst = [i for i in range(sample_num)]
+        for idx in setup_param_clients.keys():
+            graph[idx] = lst
 
     # === Stage 0: Setup ===
     # Give rnd, sample_num, share_num, threshold, client id
-    log(INFO, "SecAgg Stage 0: Setting up Params")
+    log(INFO, "SecAgg Stage 0: Setting up Params And Asking Keys")
     # do not count setup time
     total_time = total_time + timeit.default_timer()
-    setup_param_results_and_failures = setup_param(
+    ask_keys_results_and_failures = setup_param(
+        strategy,
         clients=setup_param_clients,
         sec_agg_param_dict=sec_agg_param_dict
     )
     total_time = total_time - timeit.default_timer()
     # time consumption of stage 1 on the server side
-    timer += [timeit.default_timer()]
-    setup_param_results = setup_param_results_and_failures[0]
-    ask_keys_clients: Dict[int, ClientProxy] = {}
-    if len(setup_param_results) < sec_agg_param_dict['min_num']:
-        raise Exception("Not enough available clients after setup param stage")
-    tmp_lst = [o[0] for o in setup_param_results]
-    for idx, client in setup_param_clients.items():
-        if client in tmp_lst:
-            ask_keys_clients[idx] = client
-    timer[-1] = timeit.default_timer() - timer[-1]
-
-    # === Stage 1: Ask Public Keys ===
-    log(INFO, "SecAgg Stage 1: Asking Keys")
-    # exclude ask_keys
-    total_time = total_time + timeit.default_timer()
-    ask_keys_results_and_failures = ask_keys(ask_keys_clients)
-    total_time = total_time - timeit.default_timer()
     timer += [timeit.default_timer()]
     public_keys_dict: Dict[int, AskKeysRes] = {}
     ask_keys_results = ask_keys_results_and_failures[0]
@@ -105,23 +107,27 @@ def sec_agg_fit_round(server, rnd: int
 
     # Build public keys dict
     # tmp_map = dict(ask_keys_results)
-    for idx, client in ask_keys_clients.items():
-        if client in [result[0] for result in ask_keys_results]:
-            pos = [result[0] for result in ask_keys_results].index(client)
-            public_keys_dict[idx] = ask_keys_results[pos][1]
-            share_keys_clients[idx] = client
-        # key = tmp_map.get(client, None)
-        # if key is not None:
-        #     public_keys_dict[idx] = key
-        #     share_keys_clients[idx] = client
+    for client, result in ask_keys_results:
+        idx = proxy2id[client]
+        public_keys_dict[idx] = result
+        share_keys_clients[idx] = client
+    # for idx, client in ask_keys_clients.items():
+    #     if client in [result[0] for result in ask_keys_results]:
+    #         pos = [result[0] for result in ask_keys_results].index(client)
+    #         public_keys_dict[idx] = ask_keys_results[pos][1]
+    #         share_keys_clients[idx] = client
+    # key = tmp_map.get(client, None)
+    # if key is not None:
+    #     public_keys_dict[idx] = key
+    #     share_keys_clients[idx] = client
     timer[-1] = timeit.default_timer() - timer[-1]
 
     # === Stage 2: Share Keys ===
-    log(INFO, "SecAgg Stage 2: Sharing Keys")
+    log(INFO, "SecAgg Stage 1: Sharing Keys")
     total_time = total_time + timeit.default_timer()
     share_keys_results_and_failures = share_keys(
-        share_keys_clients, public_keys_dict, sec_agg_param_dict[
-            'sample_num'], sec_agg_param_dict['share_num']
+        strategy, graph,
+        share_keys_clients, public_keys_dict
     )
     total_time = total_time - timeit.default_timer()
     timer += [timeit.default_timer()]
@@ -156,10 +162,10 @@ def sec_agg_fit_round(server, rnd: int
     timer[-1] = timeit.default_timer() - timer[-1]
 
     # === Stage 3: Ask Vectors ===
-    log(INFO, "SecAgg Stage 3: Asking Vectors")
+    log(INFO, "SecAgg Stage 2: Asking Vectors")
     total_time = total_time + timeit.default_timer()
     ask_vectors_results_and_failures = ask_vectors(
-        ask_vectors_clients, forward_packet_list_dict, client_instructions)
+        strategy, ask_vectors_clients, forward_packet_list_dict, client_instructions)
     total_time = total_time - timeit.default_timer()
     timer += [timeit.default_timer()]
     ask_vectors_results = ask_vectors_results_and_failures[0]
@@ -179,14 +185,15 @@ def sec_agg_fit_round(server, rnd: int
             client_parameters = ask_vectors_results[pos][1].parameters
             masked_vector = sec_agg_primitives.weights_addition(
                 masked_vector, parameters_to_weights(client_parameters))
+    masked_vector = sec_agg_primitives.weights_mod(masked_vector, sec_agg_param_dict['mod_range'])
     timer[-1] = timeit.default_timer() - timer[-1]
     # === Stage 4: Unmask Vectors ===
     shamir_reconstruction_time = 0
     prg_time = 0
-    log(INFO, "SecAgg Stage 4: Unmasking Vectors")
+    log(INFO, "SecAgg Stage 3: Unmasking Vectors")
     total_time = total_time + timeit.default_timer()
     unmask_vectors_results_and_failures = unmask_vectors(
-        unmask_vectors_clients, dropout_clients, sec_agg_param_dict['sample_num'], sec_agg_param_dict['share_num'])
+        strategy, unmask_vectors_clients, dropout_clients, graph)
     unmask_vectors_results = unmask_vectors_results_and_failures[0]
     total_time = total_time - timeit.default_timer()
     timer += [timeit.default_timer()]
@@ -345,7 +352,8 @@ def process_sec_agg_param_dict(sec_agg_param_dict: Dict[str, Scalar]) -> Dict[st
 
 
 def setup_param(
-    clients: List[ClientProxy],
+    strategy: SecureAggregationFitRound,
+    clients: Dict[int, ClientProxy],
     sec_agg_param_dict: Dict[str, Scalar]
 ) -> SetupParamResultsAndFailures:
     def sec_agg_param_dict_with_sec_agg_id(sec_agg_param_dict: Dict[str, Scalar], sec_agg_id: int):
@@ -354,166 +362,96 @@ def setup_param(
             'sec_agg_id'] = sec_agg_id
         return new_sec_agg_param_dict
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(
-                lambda p: setup_param_client(*p),
-                (
-                    c,
-                    SetupParamIns(
-                        sec_agg_param_dict=sec_agg_param_dict_with_sec_agg_id(
-                            sec_agg_param_dict, idx),
-                    ),
-                ),
+    results, failures = strategy.sa_request([
+        (
+            c,
+            SAServerMessageCarrier(
+                identifier='0',
+                str2scalar=sec_agg_param_dict_with_sec_agg_id(
+                    sec_agg_param_dict, idx),
             )
-            for idx, c in clients.items()
-        ]
-        concurrent.futures.wait(futures)
-    results: List[Tuple[ClientProxy, SetupParamRes]] = []
-    failures: List[BaseException] = []
-    for future in futures:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
+        ) for idx, c in clients.items()
+    ])
+    results = [(c, AskKeysRes(pk1=msg.bytes_list[0], pk2=msg.bytes_list[1])) for c, msg in results]
     return results, failures
 
 
-def setup_param_client(client: ClientProxy, setup_param_msg: SetupParamIns) -> Tuple[ClientProxy, SetupParamRes]:
-    setup_param_res = client.setup_param(setup_param_msg)
-    return client, setup_param_res
+# def ask_keys(strategy: SecureAggregationFitRound, clients: Dict[int, ClientProxy]) -> AskKeysResultsAndFailures:
+#     results, failures = strategy.sa_request([
+#         (c, SAServerMessageCarrier(identifier='1')) for c in clients.values()
+#     ])
+#     results = [(c, AskKeysRes(pk1=msg.bytes_list[0], pk2=msg.bytes_list[1])) for c, msg in results]
+#     return results, failures
 
 
-def ask_keys(clients: List[ClientProxy]) -> AskKeysResultsAndFailures:
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(ask_keys_client, c) for c in clients.values()]
-        concurrent.futures.wait(futures)
-    results: List[Tuple[ClientProxy, AskKeysRes]] = []
-    failures: List[BaseException] = []
-    for future in futures:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
-    return results, failures
+def share_keys(strategy: SecureAggregationFitRound, graph: Dict[int, List[int]], clients: Dict[int, ClientProxy],
+               public_keys_dict: Dict[int, AskKeysRes]) \
+    -> ShareKeysResultsAndFailures:
+    results, failures = strategy.sa_request([share_keys_client(c, idx, graph, public_keys_dict)
+                                             for idx, c in clients.items()])
+    new_results = []
+    for client, result in results:
+        lst = [ShareKeysPacket(source, destination, ciphertext)
+               for source, destination, ciphertext in zip(result.numpy_ndarray_list[0],
+                                                          result.numpy_ndarray_list[1],
+                                                          result.bytes_list)]
+        new_results.append((
+            client, ShareKeysRes(lst)
+        ))
+    return new_results, failures
 
 
-def ask_keys_client(client: ClientProxy) -> Tuple[ClientProxy, AskKeysRes]:
-    ask_keys_res = client.ask_keys(AskKeysIns())
-    return client, ask_keys_res
+def share_keys_client(client: ClientProxy, idx: int, graph: Dict[int, List[int]],
+                      public_keys_dict: Dict[int, AskKeysRes],
+                      ) -> Tuple[ClientProxy, SAServerMessageCarrier]:
+    local_dict: Dict[str, AskKeysRes] = {}
+    key_set = public_keys_dict.keys()
+    for k in graph[idx]:
+        if k in key_set:
+            v = public_keys_dict[k]
+            local_dict[str(k) + '_pk1'] = v.pk1
+            local_dict[str(k) + '_pk2'] = v.pk2
+
+    return client, SAServerMessageCarrier(identifier='1', str2scalar=local_dict)
 
 
-def share_keys(clients: List[ClientProxy], public_keys_dict: Dict[int, AskKeysRes], sample_num: int,
-               share_num: int) -> ShareKeysResultsAndFailures:
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(
-                lambda p: share_keys_client(*p),
-                (client, idx, public_keys_dict, sample_num, share_num),
-            )
-            for idx, client in clients.items()
-        ]
-        concurrent.futures.wait(futures)
-    results: List[Tuple[ClientProxy, ShareKeysRes]] = []
-    failures: List[BaseException] = []
-    for future in futures:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
-    return results, failures
-
-
-def share_keys_client(client: ClientProxy, idx: int, public_keys_dict: Dict[int, AskKeysRes], sample_num: int,
-                      share_num: int) -> Tuple[ClientProxy, ShareKeysRes]:
-    if share_num == sample_num:
-        # complete graph
-        return client, client.share_keys(ShareKeysIns(public_keys_dict=public_keys_dict))
-    local_dict: Dict[int, AskKeysRes] = {}
-    for i in range(-int(share_num / 2), int(share_num / 2) + 1):
-        if ((i + idx) % sample_num) in public_keys_dict.keys():
-            local_dict[(i + idx) % sample_num] = public_keys_dict[
-                (i + idx) % sample_num
-                ]
-
-    return client, client.share_keys(ShareKeysIns(public_keys_dict=local_dict))
-
-
-def ask_vectors(clients: List[ClientProxy], forward_packet_list_dict: Dict[int, List[ShareKeysPacket]],
+def ask_vectors(strategy: SecureAggregationFitRound, clients: Dict[int, ClientProxy],
+                forward_packet_list_dict: Dict[int, List[ShareKeysPacket]],
                 client_instructions: Dict[int, FitIns]) -> AskVectorsResultsAndFailures:
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(
-                lambda p: ask_vectors_client(*p),
-                (client, forward_packet_list_dict[idx], client_instructions[idx]),
-            )
-            for idx, client in clients.items()
-        ]
-        concurrent.futures.wait(futures)
-    results: List[Tuple[ClientProxy, AskVectorsRes]] = []
-    failures: List[BaseException] = []
-    for future in futures:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
+    results, failures = strategy.sa_request([ask_vectors_client(c, forward_packet_list_dict[idx],
+                                                                client_instructions[idx])
+                                             for idx, c in clients.items()])
+    results = [(c, AskVectorsRes(r.parameters)) for c, r in results]
     return results, failures
 
 
-def ask_vectors_client(client: ClientProxy, forward_packet_list: List[ShareKeysPacket], fit_ins: FitIns) -> Tuple[
-    ClientProxy, AskVectorsRes]:
-    return client, client.ask_vectors(AskVectorsIns(ask_vectors_in_list=forward_packet_list, fit_ins=fit_ins))
+def ask_vectors_client(client: ClientProxy, forward_packet_list: List[ShareKeysPacket], fit_ins: FitIns) \
+    -> Tuple[ClientProxy, SAServerMessageCarrier]:
+    source_lst = np.array([o.source for o in forward_packet_list])
+    destination_lst = np.array([o.destination for o in forward_packet_list])
+    ciphertext_lst = [o.ciphertext for o in forward_packet_list]
+    msg = SAServerMessageCarrier('2', numpy_ndarray_list=[source_lst, destination_lst],
+                                 bytes_list=ciphertext_lst, fit_ins=fit_ins)
+    return client, msg
 
 
-def unmask_vectors(clients: List[ClientProxy], dropout_clients: List[ClientProxy], sample_num: int,
-                   share_num: int) -> UnmaskVectorsResultsAndFailures:
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(
-                lambda p: unmask_vectors_client(*p),
-                (client, idx, list(clients.keys()), list(
-                    dropout_clients.keys()), sample_num, share_num),
-            )
-            for idx, client in clients.items()
-        ]
-        concurrent.futures.wait(futures)
-    results: List[Tuple[ClientProxy, UnmaskVectorsRes]] = []
-    failures: List[BaseException] = []
-    for future in futures:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
+def unmask_vectors(strategy: SecureAggregationFitRound, clients: Dict[int, ClientProxy],
+                   dropout_clients: Dict[int, ClientProxy], graph: Dict[int, List[int]]) \
+        -> UnmaskVectorsResultsAndFailures:
+    actives = set(clients.keys())
+    dropouts = set(dropout_clients.keys())
+
+    results, failures = strategy.sa_request([
+        (client, SAServerMessageCarrier(
+            identifier='3',
+            numpy_ndarray_list=[
+                np.array(list(actives.intersection(graph[idx]))),
+                np.array(list(dropouts.intersection(graph[idx])), dtype=np.int32),
+            ]
+        ))
+        for idx, client in clients.items()
+    ])
+    results = [(
+        c, UnmaskVectorsRes(dict([(int(k), v) for k, v in res.str2scalar.items()]))
+    ) for c, res in results]
     return results, failures
-
-
-def unmask_vectors_client(client: ClientProxy, idx: int, clients: List[ClientProxy], dropout_clients: List[ClientProxy],
-                          sample_num: int, share_num: int) -> Tuple[ClientProxy, UnmaskVectorsRes]:
-    if share_num == sample_num:
-        # complete graph
-        return client, client.unmask_vectors(
-            UnmaskVectorsIns(available_clients=clients, dropout_clients=dropout_clients))
-    local_clients: List[int] = []
-    local_dropout_clients: List[int] = []
-    for i in range(-int(share_num / 2), int(share_num / 2) + 1):
-        if ((i + idx) % sample_num) in clients:
-            local_clients.append((i + idx) % sample_num)
-        if ((i + idx) % sample_num) in dropout_clients:
-            local_dropout_clients.append((i + idx) % sample_num)
-    return client, client.unmask_vectors(
-        UnmaskVectorsIns(available_clients=local_clients, dropout_clients=local_dropout_clients))

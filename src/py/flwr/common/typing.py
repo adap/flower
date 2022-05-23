@@ -15,7 +15,7 @@
 """Flower type definitions."""
 
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Union
 
 import numpy as np
@@ -205,3 +205,23 @@ class AskAggregatedEncodedMasksIns:
 @dataclass
 class AskAggregatedEncodedMasksRes:
     aggregated_encoded_mask: Parameters
+
+
+@dataclass()
+class SAServerMessageCarrier:
+    identifier: str
+    numpy_ndarray_list: Optional[List[np.ndarray]] = None
+    str2scalar: Optional[Dict[str, Scalar]] = None
+    bytes_list: Optional[List[bytes]] = None
+    parameters: Optional[Parameters] = None
+    fit_ins: Optional[FitIns] = None
+
+
+@dataclass
+class SAClientMessageCarrier:
+    identifier: str
+    numpy_ndarray_list: Optional[np.ndarray] = None
+    str2scalar: Optional[Dict[str, Scalar]] = None
+    bytes_list: Optional[List[bytes]] = None
+    parameters: Optional[Parameters] = None
+    fit_res: Optional[FitRes] = None

@@ -37,6 +37,8 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.fedavg import FedAvg
 from flwr.server.strategy.sec_agg_strategy import SecAggStrategy
+from flwr.common.sec_agg.sec_agg_server_logic import sec_agg_fit_round
+from flwr.common.secure_aggregation import SecureAggregationFitRound
 
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
@@ -71,7 +73,7 @@ to easily transform `Weights` to `Parameters`.
 """
 
 
-class SecAggFedAvg(FedAvg, SecAggStrategy):
+class SecAggFedAvg(FedAvg, SecureAggregationFitRound):
     """Configurable FedAvg strategy implementation."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -102,24 +104,7 @@ class SecAggFedAvg(FedAvg, SecAggStrategy):
                         on_evaluate_config_fn=on_evaluate_config_fn,
                         accept_failures=accept_failures,
                         initial_parameters=initial_parameters)
-        self.sec_agg_param_dict = sec_agg_param_dict
+        self.config = sec_agg_param_dict
 
-    def get_sec_agg_param(self) -> Dict[str, int]:
-        return self.sec_agg_param_dict.copy()
-
-    '''def sec_agg_configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager, sample_num: int, min_num: int
-    ) -> List[Tuple[ClientProxy, FitIns]]:
-        #"""Configure the next round of training."""
-        config = {}
-        if self.on_fit_config_fn is not None:
-            # Custom fit config function provided
-            config = self.on_fit_config_fn(rnd)
-        fit_ins = FitIns(parameters, config)
-
-        clients = client_manager.sample(
-            num_clients=sample_num, min_num_clients=min_num
-        )
-
-        # Return client/config pairs
-        return [(client, fit_ins) for client in clients]'''
+    def fit_round(self, server, rnd: int):
+        return sec_agg_fit_round(self, server, rnd=rnd)

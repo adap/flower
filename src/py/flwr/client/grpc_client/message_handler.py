@@ -18,7 +18,7 @@
 from typing import Tuple
 
 from flwr.client.client import Client
-from flwr.client.sec_agg_client import LightSecAggClient
+from flwr.client.sa_client_wrapper import SAClient
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 import sys
@@ -43,6 +43,8 @@ def handle(
         return _fit(client, server_msg.fit_ins), 0, True
     if server_msg.HasField("evaluate_ins"):
         return _evaluate(client, server_msg.evaluate_ins), 0, True
+    if server_msg.HasField("sa_msg_carrier"):
+        return _sa_respond(client, server_msg.sa_msg_carrier), 0, True
     if server_msg.HasField("sec_agg_msg"):
         f = open("logserver.txt", "a")
         f.write(
@@ -169,6 +171,13 @@ def _reconnect(
     return ClientMessage(disconnect=disconnect), sleep_duration
 
 
+def _sa_respond(client: SAClient, msg: ServerMessage.SAMessageCarrier) -> ClientMessage:
+    request = serde.sa_server_msg_carrier_from_proto(msg)
+    response = client.sa_respond(request)
+    response_msg = serde.sa_client_msg_carrier_to_proto(response)
+    return ClientMessage(sa_msg_carrier=response_msg)
+
+
 def _setup_param(client: Client, setup_param_msg: ServerMessage.SecAggMsg) -> ClientMessage:
     try:
         setup_param_ins = serde.setup_param_ins_from_proto(setup_param_msg)
@@ -220,7 +229,7 @@ def _unmask_vectors(client: Client, unmask_vectors_msg: ServerMessage.SecAggMsg)
         return _error_res(e)
 
 
-def _light_sec_agg_setup_config(client: LightSecAggClient, ins_proto: ServerMessage.LightSecAggIns) -> ClientMessage:
+def _light_sec_agg_setup_config(client: Client, ins_proto: ServerMessage.LightSecAggIns) -> ClientMessage:
     try:
         ins = serde.light_sec_agg_setup_cfg_ins_from_proto(ins_proto)
         res = client.setup_config(ins)
@@ -230,7 +239,7 @@ def _light_sec_agg_setup_config(client: LightSecAggClient, ins_proto: ServerMess
         return _error_res(e)
 
 
-def _ask_encrypted_encoded_masks(client: LightSecAggClient, ins_proto: ServerMessage.LightSecAggIns) -> ClientMessage:
+def _ask_encrypted_encoded_masks(client: Client, ins_proto: ServerMessage.LightSecAggIns) -> ClientMessage:
     try:
         ins = serde.ask_encrypted_encoded_masks_ins_from_proto(ins_proto)
         res = client.ask_encrypted_encoded_masks(ins)
@@ -240,7 +249,7 @@ def _ask_encrypted_encoded_masks(client: LightSecAggClient, ins_proto: ServerMes
         return _error_res(e)
 
 
-def _ask_masked_models(client: LightSecAggClient, ins_proto: ServerMessage.LightSecAggIns) -> ClientMessage:
+def _ask_masked_models(client: Client, ins_proto: ServerMessage.LightSecAggIns) -> ClientMessage:
     try:
         ins = serde.ask_masked_models_ins_from_proto(ins_proto)
         res = client.ask_masked_models(ins)
@@ -250,7 +259,7 @@ def _ask_masked_models(client: LightSecAggClient, ins_proto: ServerMessage.Light
         return _error_res(e)
 
 
-def _ask_aggregated_encoded_masks(client: LightSecAggClient, ins_proto: ServerMessage.LightSecAggIns) -> ClientMessage:
+def _ask_aggregated_encoded_masks(client: Client, ins_proto: ServerMessage.LightSecAggIns) -> ClientMessage:
     try:
         ins = serde.ask_aggregated_encoded_masks_ins_from_proto(ins_proto)
         res = client.ask_aggregated_encoded_masks(ins)

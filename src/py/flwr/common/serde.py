@@ -25,6 +25,7 @@ from flwr.proto.transport_pb2 import (
     ServerMessage,
 )
 
+from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.server.server import Server
 from flwr_experimental.baseline import config
 
@@ -174,6 +175,80 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
         fit_duration=msg.fit_duration,  # Deprecated
         metrics=metrics,
     )
+
+
+# SA Message Carriers
+def sa_server_msg_carrier_to_proto(ins: typing.SAServerMessageCarrier)\
+        -> ServerMessage.SAMessageCarrier:
+    np_arr_lst = None if ins.numpy_ndarray_list is None else parameters_to_proto(
+        weights_to_parameters(ins.numpy_ndarray_list))
+    str2scalar = None if ins.str2scalar is None else metrics_to_proto(ins.str2scalar)
+    params = None if ins.parameters is None else parameters_to_proto(ins.parameters)
+    fit_ins = None if ins.fit_ins is None else fit_ins_to_proto(ins.fit_ins)
+    return ServerMessage.SAMessageCarrier(
+        identifier=ins.identifier,
+        ndarray_list=np_arr_lst,
+        str2scalar=str2scalar,
+        bytes_list=ins.bytes_list,
+        parameters=params,
+        fit_ins=fit_ins
+    )
+
+
+def sa_server_msg_carrier_from_proto(proto: ServerMessage.SAMessageCarrier)\
+        -> typing.SAServerMessageCarrier:
+    # np_arr_lst = None if proto.ndarray_list is None else parameters_to_weights(proto.ndarray_list)
+    # str2scalar = None if proto.str2scalar is None else metrics_from_proto(proto.str2scalar)
+    # params = None if proto.parameters is None else parameters_from_proto(proto.parameters)
+    # fit_ins = None if proto.fit_ins is None else fit_ins_from_proto(proto.fit_ins)
+    np_arr_lst = parameters_to_weights(proto.ndarray_list)
+    str2scalar = metrics_from_proto(proto.str2scalar)
+    params = parameters_from_proto(proto.parameters)
+    fit_ins = fit_ins_from_proto(proto.fit_ins)
+    return typing.SAServerMessageCarrier(
+        identifier=proto.identifier,
+        numpy_ndarray_list=np_arr_lst,
+        str2scalar=str2scalar,
+        bytes_list=proto.bytes_list,
+        parameters=params,
+        fit_ins=fit_ins
+    )
+
+
+def sa_client_msg_carrier_to_proto(ins: typing.SAClientMessageCarrier)\
+        -> ClientMessage.SAMessageCarrier:
+    np_arr_lst = None if ins.numpy_ndarray_list is None else parameters_to_proto(
+        weights_to_parameters(ins.numpy_ndarray_list))
+    str2scalar = None if ins.str2scalar is None else metrics_to_proto(ins.str2scalar)
+    params = None if ins.parameters is None else parameters_to_proto(ins.parameters)
+    fit_res = None if ins.fit_res is None else fit_res_to_proto(ins.fit_res)
+    return ClientMessage.SAMessageCarrier(
+        identifier=ins.identifier,
+        ndarray_list=np_arr_lst,
+        str2scalar=str2scalar,
+        bytes_list=ins.bytes_list,
+        parameters=params,
+        fit_res=fit_res
+    )
+
+
+def sa_client_msg_carrier_from_proto(proto: ClientMessage.SAMessageCarrier)\
+        -> typing.SAClientMessageCarrier:
+    np_arr_lst = parameters_to_weights(proto.ndarray_list)
+    str2scalar = metrics_from_proto(proto.str2scalar)
+    params = parameters_from_proto(proto.parameters)
+    fit_res = fit_res_from_proto(proto.fit_res)
+    return typing.SAClientMessageCarrier(
+        identifier=proto.identifier,
+        numpy_ndarray_list=np_arr_lst,
+        str2scalar=str2scalar,
+        bytes_list=proto.bytes_list,
+        parameters=params,
+        fit_res=fit_res
+    )
+
+
+
 
 
 # === SecAgg Messages ===

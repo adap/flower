@@ -1,2 +1,7 @@
 Starting real experiments
-This is secagg sampling 100 dropping out 0% with vector size 100000 try 0 
+This is secagg sampling 10 dropping out 0% with vector size 100000 try 0 
+Client without communication stage 0:0.00019800000000103068 
+Client without communication stage 1:0.09508519999999976 
+Client without communication stage 2:0.009212600000001459 
+Client without communication stage 3:0.05607219999999913 
+Client without communication stage 4:0.00018560000000178434 

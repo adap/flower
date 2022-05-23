@@ -45,7 +45,7 @@ def test_start_server(sample_num=2, min_num=2, share_num=2, threshold=2, vector_
 def test_start_client(server_address: str,
                       client,
                       grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,):
-    fl.client.start_numpy_client(server_address, client, grpc_max_message_length)
+    fl.client.start_numpy_client(server_address, client, grpc_max_message_length, 'secagg')
 
 
 def test_start_simulation(sample_num=2, min_num=2, share_num=2, threshold=2, vector_dimension=100000, dropout_value=0, num_rounds=1):

@@ -12,9 +12,9 @@ def LCC_encoding_with_points(X: np.ndarray, alpha_s, beta_s, GF) -> np.ndarray:
 
 def LCC_decoding_with_points(f_eval, alpha_s_eval, beta_s, GF):
     U_dec = gen_Lagrange_coeffs_galois(beta_s, alpha_s_eval, GF)
-    f_recon = U_dec.dot(f_eval)
+    f_recon = U_dec.dot(f_eval.view(GF))
 
-    return np.array(f_recon)
+    return f_recon.view(np.ndarray)
 
 
 def gen_Lagrange_coeffs_galois(alpha_s, beta_s, GF):
@@ -59,11 +59,12 @@ def model_unmasking(weights, aggregated_mask: np.ndarray, GF):
     pos = 0
     msk = aggregated_mask.view(GF)
     for i in range(len(weights)):
-        w = weights[i].view(GF)
+        w = weights[i]
         d = w.size
         cur_mask = msk[pos: pos + d]
         cur_mask = cur_mask.reshape(w.shape)
         w -= cur_mask
+        weights[i] = weights[i].view(np.ndarray)
         pos += d
     return weights
 

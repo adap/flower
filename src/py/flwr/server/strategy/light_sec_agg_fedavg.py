@@ -16,24 +16,16 @@
 import galois
 from logging import INFO, WARNING
 import math
-from mpc_functions import LCC_decoding_with_points, model_unmasking
+from flwr.common.light_sec_agg.mpc_functions import LCC_decoding_with_points, model_unmasking
 import numpy as np
 from typing import Callable, Dict, List, Tuple, Optional
 from flwr.server.strategy.fedavg import FedAvg
 from flwr.server.server import Server
 from flwr.common.light_sec_agg.protocol import AskAggregatedEncodedMasksResultsAndFailures, FitResultsAndFailures
-from flwr.common.typing import LightSecAggSetupConfigIns, AskEncryptedEncodedMasksIns, AskMaskedModelsIns, \
-    AskAggregatedEncodedMasksIns, LightSecAggSetupConfigRes, AskEncryptedEncodedMasksRes, AskMaskedModelsRes, \
-    AskAggregatedEncodedMasksRes, EncryptedEncodedMasksPacket
-from flwr.server.client_proxy import ClientProxy
-from flwr.client.sec_agg_client import LightSecAggClient
+from flwr.common.typing import SAServerMessageCarrier
 from flwr.common.sec_agg import sec_agg_primitives
 import timeit
-import sys
-from protocol import LightSecAggProtocol, SecureAggregationFitRound, LightSecAggSetupConfigResultsAndFailures, \
-    AskEncryptedEncodedMasksResultsAndFailures, AskMaskedModelsResultsAndFailures
-import concurrent.futures
-from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
+from flwr.common.secure_aggregation import SecureAggregationFitRound, SecureAggregationResultsAndFailures
 from flwr.common.logger import log
 
 from flwr.common import (
@@ -56,7 +48,7 @@ def padding(d, U, T):
     return d + ret
 
 
-class LightSecAgg(LightSecAggProtocol, SecureAggregationFitRound, FedAvg):
+class LightSecAggFedAvg(SecureAggregationFitRound, FedAvg):
     def __init__(
         self,
         fraction_fit: float = 0.1,
@@ -111,7 +103,7 @@ class LightSecAgg(LightSecAggProtocol, SecureAggregationFitRound, FedAvg):
         def toc():
             stopwatch[-1] += timeit.default_timer()
 
-        def check_and_update(_in, stage_num):
+        def check_and_update(_in: SecureAggregationResultsAndFailures, stage_num):
             ret1 = _in[0]
             if len(ret1) < self.U:
                 raise Exception(f"Insufficient active clients after Stage {stage_num}")
@@ -126,12 +118,11 @@ class LightSecAgg(LightSecAggProtocol, SecureAggregationFitRound, FedAvg):
         is_test = self.cfg_dict.setdefault('test', 0) == 1
         if is_test:
             vector_length = self.cfg_dict['test_vector_dimension']
-            d = padding(vector_length, self.U, self.T)
         # End =================================================================
         else:
             init_weights = parameters_to_weights(server.parameters)
             vector_length = sum([o.size for o in init_weights])
-            d = padding(vector_length, self.U, self.T)
+        d = padding(vector_length + 1, self.U, self.T)
 
         active_clients = []
         # map ClientProxy to Secure Aggregation ID
@@ -149,33 +140,48 @@ class LightSecAgg(LightSecAggProtocol, SecureAggregationFitRound, FedAvg):
         # STAGE 0: setup config
         log(INFO, "LightSecAgg Stage 0: Setting up config")
         # exclude communication time
-        results_and_failures = self.setup_config(active_clients, self.cfg_dict)
+        # results_and_failures = self.setup_config(active_clients, self.cfg_dict)
+
+        def new_dict(_in: dict, _id):
+            ret = _in.copy()
+            ret['id'] = _id
+            return ret
+
+        results_and_failures = self.sa_request([(k, SAServerMessageCarrier(
+            identifier='0',
+            str2scalar=new_dict(self.cfg_dict, v)
+        )) for k, v in proxy2id.items()])
+
         tic()
         res_lst, active_clients = check_and_update(results_and_failures, 0)
-        public_key_dict = dict([(proxy2id[c], res) for c, res in res_lst])
+        public_key_dict = dict([(str(proxy2id[c]), res.bytes_list[0]) for c, res in res_lst])
 
         toc()
 
         # STAGE 1: ask encrypted encoded sub-masks
         log(INFO, "LightSecAgg Stage 1: Ask encrypted encoded sub-masks")
-        results_and_failures = self.ask_encrypted_encoded_masks(active_clients, public_key_dict)
+        # results_and_failures = self.ask_encrypted_encoded_masks(active_clients, public_key_dict)
+        results_and_failures = self.sa_request([
+            (c, SAServerMessageCarrier('1', str2scalar=public_key_dict)) for c in active_clients])
+
         tic()
         res_lst, active_clients = check_and_update(results_and_failures, 1)
-        res_lst: List[Tuple[ClientProxy, AskEncryptedEncodedMasksRes]] = res_lst
         # forward packets to their destinations
-        fwd_packets_dict = dict([(proxy2id[c], []) for c in active_clients])
+        fwd_packets_dict = dict([(proxy2id[c], dict()) for c in active_clients])
         for c, res in res_lst:
-            for packet in res.packet_list:
-                if packet.destination in fwd_packets_dict.keys():
-                    fwd_packets_dict[packet.destination].append(packet)
+            for des, ctext in res.str2scalar.items():
+                des = int(des)
+                if des in fwd_packets_dict.keys():
+                    fwd_packets_dict[des][str(proxy2id[c])] = ctext
         toc()
 
         # STAGE 2: ask masked models
         log(INFO, "LightSecAgg Stage 2: Ask masked models")
-        results_and_failures = self.ask_masked_models(active_clients, fwd_packets_dict, fit_ins_dict)
+        # results_and_failures = self.ask_masked_models(active_clients, fwd_packets_dict, fit_ins_dict)
+        results_and_failures = self.sa_request([
+            (c, SAServerMessageCarrier('2', str2scalar=fwd_packets_dict[proxy2id[c]])) for c in active_clients])
         tic()
         res_lst, active_clients = check_and_update(results_and_failures, 2)
-        res_lst: List[Tuple[ClientProxy, AskMaskedModelsRes]] = res_lst
         # compute the aggregated masked model
         GF = self.GF
         agg_model = parameters_to_weights(res_lst[0][1].parameters)
@@ -188,93 +194,30 @@ class LightSecAgg(LightSecAggProtocol, SecureAggregationFitRound, FedAvg):
 
         # STAGE 3: ask aggregated encoded sub-masks
         log(INFO, "LightSecAgg Stage 3: Ask aggregated encoded sub-masks")
-        results_and_failures = self.ask_masked_models(active_clients, fwd_packets_dict, fit_ins_dict)
+        # results_and_failures = self.ask_aggregated_encoded_masks(active_clients)
+        active_lst = np.array([proxy2id[c] for c in active_clients])
+        results_and_failures = self.sa_request([
+            (c, SAServerMessageCarrier('3', numpy_ndarray_list=[active_lst])) for c in active_clients])
+
         tic()
         res_lst, active_clients = check_and_update(results_and_failures, 3)
-        res_lst: List[Tuple[ClientProxy, AskAggregatedEncodedMasksRes]] = res_lst
         # reconstruct mask
         alpha_s = np.arange(1, self.N + 1)
         beta_s = np.arange(self.N + 1, self.N + 1 + self.U)
         msk_buffer = np.zeros((self.U, d // (self.U - self.T)), dtype=np.int32).view(GF)
-        active_ids = np.array([proxy2id[c] for c in active_clients])
+        active_ids = np.array([proxy2id[c] for c in active_clients])[:self.U]
         for i in range(self.U):
-            tmp = parameters_to_weights(res_lst[i][1].aggregated_encoded_mask)[0]
+            tmp = parameters_to_weights(res_lst[i][1].parameters)[0]
             msk_buffer[i, :] = tmp
         agg_msk: np.ndarray = LCC_decoding_with_points(msk_buffer, alpha_s[active_ids], beta_s, GF)
         agg_msk = agg_msk.reshape(-1, 1)[:d]
         agg_model = model_unmasking(agg_model, agg_msk, GF)
+        factor, agg_model = sec_agg_primitives.factor_weights_extract(agg_model)
+        agg_model = sec_agg_primitives.weights_divide(agg_model, factor)
         # inverse quantize
         agg_model = sec_agg_primitives.reverse_quantize(agg_model, self.clipping_range, self.target_range)
         toc()
         return weights_to_parameters(agg_model), None, None
-
-    def setup_config(self, clients: List[ClientProxy],
-                     config_dict: Dict[str, Scalar]) -> LightSecAggSetupConfigResultsAndFailures:
-
-        def get_ins(idx):
-            ret = config_dict.copy()
-            ret['id'] = idx
-            return LightSecAggSetupConfigIns(ret)
-
-        ins_lst = [get_ins(self.proxy2id[c]) for c in clients]
-        return parallel(client_setup_config, clients, ins_lst)
-
-    def ask_encrypted_encoded_masks(self, clients: List[ClientProxy],
-                                    public_keys_dict: Dict[int, LightSecAggSetupConfigRes]
-                                    ) -> AskEncryptedEncodedMasksResultsAndFailures:
-        ins_lst = [AskEncryptedEncodedMasksIns(public_keys_dict)] * len(clients)
-        return parallel(client_ask_encrypted_encoded_masks, clients, ins_lst)
-
-    def ask_masked_models(self, clients: List[ClientProxy],
-                          forward_packet_list_dict: Dict[int, List[EncryptedEncodedMasksPacket]],
-                          client_instructions: Dict[int, FitIns] = None) -> AskMaskedModelsResultsAndFailures:
-        ids = [self.proxy2id[c] for c in clients]
-        ins_lst = [AskMaskedModelsIns(
-            packet_list=forward_packet_list_dict[idx],
-            fit_ins=client_instructions[idx] if client_instructions is not None else None
-        ) for idx in ids]
-        return parallel(client_ask_masked_models, clients, ins_lst)
-
-    def ask_aggregated_encoded_masks(self, clients: List[ClientProxy]) -> AskAggregatedEncodedMasksResultsAndFailures:
-        ids = [self.proxy2id[c] for c in clients]
-        ins_lst = [AskAggregatedEncodedMasksIns(ids)] * len(clients)
-        return parallel(client_ask_aggregated_encoded_masks, clients, ins_lst)
-
-
-def client_setup_config(client: GrpcClientProxy, ins: LightSecAggSetupConfigIns):
-    return client, client.light_sec_agg_setup_config(ins)
-
-
-def client_ask_encrypted_encoded_masks(client: GrpcClientProxy, ins: AskEncryptedEncodedMasksIns):
-    return client, client.ask_encrypted_encoded_masks(ins)
-
-
-def client_ask_masked_models(client: GrpcClientProxy, ins: AskMaskedModelsIns):
-    return client, client.ask_masked_models(ins)
-
-
-def client_ask_aggregated_encoded_masks(client: GrpcClientProxy, ins: AskAggregatedEncodedMasksIns):
-    return client, client.ask_aggregated_encoded_masks(ins)
-
-
-def parallel(fn, clients, ins_lst):
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [
-            executor.submit(lambda p: fn(*p), (client, ins))
-            for client, ins in zip(clients, ins_lst)
-        ]
-        concurrent.futures.wait(futures)
-    results = []
-    failures: List[BaseException] = []
-    for future in futures:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
-    return results, failures
 
 
 

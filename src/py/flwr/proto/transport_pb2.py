@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1a\x66lwr/proto/transport.proto\x12\x10\x66lower.transport\"2\n\nParameters\x12\x0f\n\x07tensors\x18\x01 \x03(\x0c\x12\x13\n\x0btensor_type\x18\x02 \x01(\t\"\x9f\x1d\n\rServerMessage\x12>\n\treconnect\x18\x01 \x01(\x0b\x32).flower.transport.ServerMessage.ReconnectH\x00\x12G\n\x0eget_parameters\x18\x02 \x01(\x0b\x32-.flower.transport.ServerMessage.GetParametersH\x00\x12\x39\n\x07\x66it_ins\x18\x03 \x01(\x0b\x32&.flower.transport.ServerMessage.FitInsH\x00\x12\x43\n\x0c\x65valuate_ins\x18\x04 \x01(\x0b\x32+.flower.transport.ServerMessage.EvaluateInsH\x00\x12@\n\x0bsec_agg_msg\x18\x05 \x01(\x0b\x32).flower.transport.ServerMessage.SecAggMsgH\x00\x12K\n\x11light_sec_agg_ins\x18\x06 \x01(\x0b\x32..flower.transport.ServerMessage.LightSecAggInsH\x00\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x0f\n\rGetParameters\x1a\xc7\x01\n\x06\x46itIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x42\n\x06\x63onfig\x18\x02 \x03(\x0b\x32\x32.flower.transport.ServerMessage.FitIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xd1\x01\n\x0b\x45valuateIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12G\n\x06\x63onfig\x18\x02 \x03(\x0b\x32\x37.flower.transport.ServerMessage.EvaluateIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\x86\x0b\n\tSecAggMsg\x12K\n\x0bsetup_param\x18\x01 \x01(\x0b\x32\x34.flower.transport.ServerMessage.SecAggMsg.SetupParamH\x00\x12\x45\n\x08\x61sk_keys\x18\x02 \x01(\x0b\x32\x31.flower.transport.ServerMessage.SecAggMsg.AskKeysH\x00\x12I\n\nshare_keys\x18\x03 \x01(\x0b\x32\x33.flower.transport.ServerMessage.SecAggMsg.ShareKeysH\x00\x12K\n\x0b\x61sk_vectors\x18\x04 \x01(\x0b\x32\x34.flower.transport.ServerMessage.SecAggMsg.AskVectorsH\x00\x12Q\n\x0eunmask_vectors\x18\x05 \x01(\x0b\x32\x37.flower.transport.ServerMessage.SecAggMsg.UnmaskVectorsH\x00\x1a\xc5\x01\n\nSetupParam\x12\x65\n\x12sec_agg_param_dict\x18\x01 \x03(\x0b\x32I.flower.transport.ServerMessage.SecAggMsg.SetupParam.SecAggParamDictEntry\x1aP\n\x14SecAggParamDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\t\n\x07\x41skKeys\x1a\x89\x02\n\tShareKeys\x12\x61\n\x10public_keys_dict\x18\x01 \x03(\x0b\x32G.flower.transport.ServerMessage.SecAggMsg.ShareKeys.PublicKeysDictEntry\x1a$\n\x08KeysPair\x12\x0b\n\x03pk1\x18\x01 \x01(\x0c\x12\x0b\n\x03pk2\x18\x02 \x01(\x0c\x1as\n\x13PublicKeysDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12K\n\x05value\x18\x02 \x01(\x0b\x32<.flower.transport.ServerMessage.SecAggMsg.ShareKeys.KeysPair:\x02\x38\x01\x1a\xce\x03\n\nAskVectors\x12P\n\x0bpacket_list\x18\x01 \x03(\x0b\x32;.flower.transport.ServerMessage.SecAggMsg.AskVectors.Packet\x12L\n\x07\x66it_ins\x18\x02 \x01(\x0b\x32;.flower.transport.ServerMessage.SecAggMsg.AskVectors.FitIns\x1a\x41\n\x06Packet\x12\x0e\n\x06source\x18\x01 \x01(\x03\x12\x13\n\x0b\x64\x65stination\x18\x02 \x01(\x03\x12\x12\n\nciphertext\x18\x03 \x01(\x0c\x1a\xdc\x01\n\x06\x46itIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12W\n\x06\x63onfig\x18\x02 \x03(\x0b\x32G.flower.transport.ServerMessage.SecAggMsg.AskVectors.FitIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\x43\n\rUnmaskVectors\x12\x19\n\x11\x61vailable_clients\x18\x01 \x03(\x03\x12\x17\n\x0f\x64ropout_clients\x18\x02 \x03(\x03\x42\x05\n\x03msg\x1a\x98\x0b\n\x0eLightSecAggIns\x12\x61\n\rsetup_cfg_ins\x18\x01 \x01(\x0b\x32H.flower.transport.ServerMessage.LightSecAggIns.LightSecAggSetupConfigInsH\x00\x12\x65\n\x0f\x61sk_en_msks_ins\x18\x02 \x01(\x0b\x32J.flower.transport.ServerMessage.LightSecAggIns.AskEncryptedEncodedMasksInsH\x00\x12[\n\x0e\x61sk_models_ins\x18\x03 \x01(\x0b\x32\x41.flower.transport.ServerMessage.LightSecAggIns.AskMaskedModelsInsH\x00\x12g\n\x10\x61sk_agg_msks_ins\x18\x04 \x01(\x0b\x32K.flower.transport.ServerMessage.LightSecAggIns.AskAggregatedEncodedMasksInsH\x00\x1a\xe2\x01\n\x19LightSecAggSetupConfigIns\x12u\n\x10sec_agg_cfg_dict\x18\x01 \x03(\x0b\x32[.flower.transport.ServerMessage.LightSecAggIns.LightSecAggSetupConfigIns.SecAggCfgDictEntry\x1aN\n\x12SecAggCfgDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xce\x01\n\x1b\x41skEncryptedEncodedMasksIns\x12x\n\x10public_keys_dict\x18\x01 \x03(\x0b\x32^.flower.transport.ServerMessage.LightSecAggIns.AskEncryptedEncodedMasksIns.PublicKeysDictEntry\x1a\x35\n\x13PublicKeysDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\xfd\x03\n\x12\x41skMaskedModelsIns\x12]\n\x0bpacket_list\x18\x01 \x03(\x0b\x32H.flower.transport.ServerMessage.LightSecAggIns.AskMaskedModelsIns.Packet\x12Y\n\x07\x66it_ins\x18\x02 \x01(\x0b\x32H.flower.transport.ServerMessage.LightSecAggIns.AskMaskedModelsIns.FitIns\x1a\x41\n\x06Packet\x12\x0e\n\x06source\x18\x01 \x01(\x03\x12\x13\n\x0b\x64\x65stination\x18\x02 \x01(\x03\x12\x12\n\nciphertext\x18\x03 \x01(\x0c\x1a\xe9\x01\n\x06\x46itIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x64\n\x06\x63onfig\x18\x02 \x03(\x0b\x32T.flower.transport.ServerMessage.LightSecAggIns.AskMaskedModelsIns.FitIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\x39\n\x1c\x41skAggregatedEncodedMasksIns\x12\x19\n\x11surviving_clients\x18\x01 \x03(\x03\x42\x05\n\x03msgB\x05\n\x03msg\"\xb9\x17\n\rClientMessage\x12@\n\ndisconnect\x18\x01 \x01(\x0b\x32*.flower.transport.ClientMessage.DisconnectH\x00\x12G\n\x0eparameters_res\x18\x02 \x01(\x0b\x32-.flower.transport.ClientMessage.ParametersResH\x00\x12\x39\n\x07\x66it_res\x18\x03 \x01(\x0b\x32&.flower.transport.ClientMessage.FitResH\x00\x12\x43\n\x0c\x65valuate_res\x18\x04 \x01(\x0b\x32+.flower.transport.ClientMessage.EvaluateResH\x00\x12@\n\x0bsec_agg_res\x18\x05 \x01(\x0b\x32).flower.transport.ClientMessage.SecAggResH\x00\x12K\n\x11light_sec_agg_res\x18\x06 \x01(\x0b\x32..flower.transport.ClientMessage.LightSecAggResH\x00\x1a\x36\n\nDisconnect\x12(\n\x06reason\x18\x01 \x01(\x0e\x32\x18.flower.transport.Reason\x1a\x41\n\rParametersRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x1a\x99\x02\n\x06\x46itRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x14\n\x0cnum_examples\x18\x02 \x01(\x03\x12\x1d\n\x11num_examples_ceil\x18\x03 \x01(\x03\x42\x02\x18\x01\x12\x18\n\x0c\x66it_duration\x18\x04 \x01(\x02\x42\x02\x18\x01\x12\x44\n\x07metrics\x18\x05 \x03(\x0b\x32\x33.flower.transport.ClientMessage.FitRes.MetricsEntry\x1aH\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xdc\x01\n\x0b\x45valuateRes\x12\x14\n\x0cnum_examples\x18\x01 \x01(\x03\x12\x0c\n\x04loss\x18\x02 \x01(\x02\x12\x14\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x02\x42\x02\x18\x01\x12I\n\x07metrics\x18\x04 \x03(\x0b\x32\x38.flower.transport.ClientMessage.EvaluateRes.MetricsEntry\x1aH\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xe2\x07\n\tSecAggRes\x12R\n\x0fsetup_param_res\x18\x01 \x01(\x0b\x32\x37.flower.transport.ClientMessage.SecAggRes.SetupParamResH\x00\x12L\n\x0c\x61sk_keys_res\x18\x02 \x01(\x0b\x32\x34.flower.transport.ClientMessage.SecAggRes.AskKeysResH\x00\x12P\n\x0eshare_keys_res\x18\x03 \x01(\x0b\x32\x36.flower.transport.ClientMessage.SecAggRes.ShareKeysResH\x00\x12R\n\x0f\x61sk_vectors_res\x18\x04 \x01(\x0b\x32\x37.flower.transport.ClientMessage.SecAggRes.AskVectorsResH\x00\x12X\n\x12unmask_vectors_res\x18\x05 \x01(\x0b\x32:.flower.transport.ClientMessage.SecAggRes.UnmaskVectorsResH\x00\x12G\n\terror_res\x18\x06 \x01(\x0b\x32\x32.flower.transport.ClientMessage.SecAggRes.ErrorResH\x00\x1a\x0f\n\rSetupParamRes\x1a&\n\nAskKeysRes\x12\x0b\n\x03pk1\x18\x01 \x01(\x0c\x12\x0b\n\x03pk2\x18\x02 \x01(\x0c\x1a\xa5\x01\n\x0cShareKeysRes\x12R\n\x0bpacket_list\x18\x01 \x03(\x0b\x32=.flower.transport.ClientMessage.SecAggRes.ShareKeysRes.Packet\x1a\x41\n\x06Packet\x12\x0e\n\x06source\x18\x01 \x01(\x03\x12\x13\n\x0b\x64\x65stination\x18\x02 \x01(\x03\x12\x12\n\nciphertext\x18\x03 \x01(\x0c\x1a\x41\n\rAskVectorsRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x1a\xa3\x01\n\x10UnmaskVectorsRes\x12]\n\nshare_dict\x18\x01 \x03(\x0b\x32I.flower.transport.ClientMessage.SecAggRes.UnmaskVectorsRes.ShareDictEntry\x1a\x30\n\x0eShareDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x19\n\x08\x45rrorRes\x12\r\n\x05\x65rror\x18\x01 \x01(\tB\x05\n\x03msg\x1a\xab\x07\n\x0eLightSecAggRes\x12\x61\n\rsetup_cfg_res\x18\x01 \x01(\x0b\x32H.flower.transport.ClientMessage.LightSecAggRes.LightSecAggSetupConfigResH\x00\x12\x65\n\x0f\x61sk_en_msks_res\x18\x02 \x01(\x0b\x32J.flower.transport.ClientMessage.LightSecAggRes.AskEncryptedEncodedMasksResH\x00\x12[\n\x0e\x61sk_models_res\x18\x03 \x01(\x0b\x32\x41.flower.transport.ClientMessage.LightSecAggRes.AskMaskedModelsResH\x00\x12g\n\x10\x61sk_agg_msks_res\x18\x04 \x01(\x0b\x32K.flower.transport.ClientMessage.LightSecAggRes.AskAggregatedEncodedMasksResH\x00\x12L\n\terror_res\x18\x05 \x01(\x0b\x32\x37.flower.transport.ClientMessage.LightSecAggRes.ErrorResH\x00\x1a\'\n\x19LightSecAggSetupConfigRes\x12\n\n\x02pk\x18\x01 \x01(\x0c\x1a\xc8\x01\n\x1b\x41skEncryptedEncodedMasksRes\x12\x66\n\x0bpacket_list\x18\x01 \x03(\x0b\x32Q.flower.transport.ClientMessage.LightSecAggRes.AskEncryptedEncodedMasksRes.Packet\x1a\x41\n\x06Packet\x12\x0e\n\x06source\x18\x01 \x01(\x03\x12\x13\n\x0b\x64\x65stination\x18\x02 \x01(\x03\x12\x12\n\nciphertext\x18\x03 \x01(\x0c\x1a\x46\n\x12\x41skMaskedModelsRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x1a]\n\x1c\x41skAggregatedEncodedMasksRes\x12=\n\x17\x61ggregated_encoded_mask\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x1a\x19\n\x08\x45rrorRes\x12\r\n\x05\x65rror\x18\x01 \x01(\tB\x05\n\x03msgB\x05\n\x03msg\"i\n\x06Scalar\x12\x10\n\x06\x64ouble\x18\x01 \x01(\x01H\x00\x12\x10\n\x06sint64\x18\x08 \x01(\x12H\x00\x12\x0e\n\x04\x62ool\x18\r \x01(\x08H\x00\x12\x10\n\x06string\x18\x0e \x01(\tH\x00\x12\x0f\n\x05\x62ytes\x18\x0f \x01(\x0cH\x00\x42\x08\n\x06scalar*[\n\x06Reason\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tRECONNECT\x10\x01\x12\x16\n\x12POWER_DISCONNECTED\x10\x02\x12\x14\n\x10WIFI_UNAVAILABLE\x10\x03\x12\x07\n\x03\x41\x43K\x10\x04\x32_\n\rFlowerService\x12N\n\x04Join\x12\x1f.flower.transport.ClientMessage\x1a\x1f.flower.transport.ServerMessage\"\x00(\x01\x30\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1a\x66lwr/proto/transport.proto\x12\x10\x66lower.transport\"2\n\nParameters\x12\x0f\n\x07tensors\x18\x01 \x03(\x0c\x12\x13\n\x0btensor_type\x18\x02 \x01(\t\"\xea \n\rServerMessage\x12>\n\treconnect\x18\x01 \x01(\x0b\x32).flower.transport.ServerMessage.ReconnectH\x00\x12G\n\x0eget_parameters\x18\x02 \x01(\x0b\x32-.flower.transport.ServerMessage.GetParametersH\x00\x12\x39\n\x07\x66it_ins\x18\x03 \x01(\x0b\x32&.flower.transport.ServerMessage.FitInsH\x00\x12\x43\n\x0c\x65valuate_ins\x18\x04 \x01(\x0b\x32+.flower.transport.ServerMessage.EvaluateInsH\x00\x12@\n\x0bsec_agg_msg\x18\x05 \x01(\x0b\x32).flower.transport.ServerMessage.SecAggMsgH\x00\x12K\n\x11light_sec_agg_ins\x18\x06 \x01(\x0b\x32..flower.transport.ServerMessage.LightSecAggInsH\x00\x12J\n\x0esa_msg_carrier\x18\x07 \x01(\x0b\x32\x30.flower.transport.ServerMessage.SAMessageCarrierH\x00\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x0f\n\rGetParameters\x1a\xc7\x01\n\x06\x46itIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x42\n\x06\x63onfig\x18\x02 \x03(\x0b\x32\x32.flower.transport.ServerMessage.FitIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xd1\x01\n\x0b\x45valuateIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12G\n\x06\x63onfig\x18\x02 \x03(\x0b\x32\x37.flower.transport.ServerMessage.EvaluateIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\x86\x0b\n\tSecAggMsg\x12K\n\x0bsetup_param\x18\x01 \x01(\x0b\x32\x34.flower.transport.ServerMessage.SecAggMsg.SetupParamH\x00\x12\x45\n\x08\x61sk_keys\x18\x02 \x01(\x0b\x32\x31.flower.transport.ServerMessage.SecAggMsg.AskKeysH\x00\x12I\n\nshare_keys\x18\x03 \x01(\x0b\x32\x33.flower.transport.ServerMessage.SecAggMsg.ShareKeysH\x00\x12K\n\x0b\x61sk_vectors\x18\x04 \x01(\x0b\x32\x34.flower.transport.ServerMessage.SecAggMsg.AskVectorsH\x00\x12Q\n\x0eunmask_vectors\x18\x05 \x01(\x0b\x32\x37.flower.transport.ServerMessage.SecAggMsg.UnmaskVectorsH\x00\x1a\xc5\x01\n\nSetupParam\x12\x65\n\x12sec_agg_param_dict\x18\x01 \x03(\x0b\x32I.flower.transport.ServerMessage.SecAggMsg.SetupParam.SecAggParamDictEntry\x1aP\n\x14SecAggParamDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\t\n\x07\x41skKeys\x1a\x89\x02\n\tShareKeys\x12\x61\n\x10public_keys_dict\x18\x01 \x03(\x0b\x32G.flower.transport.ServerMessage.SecAggMsg.ShareKeys.PublicKeysDictEntry\x1a$\n\x08KeysPair\x12\x0b\n\x03pk1\x18\x01 \x01(\x0c\x12\x0b\n\x03pk2\x18\x02 \x01(\x0c\x1as\n\x13PublicKeysDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12K\n\x05value\x18\x02 \x01(\x0b\x32<.flower.transport.ServerMessage.SecAggMsg.ShareKeys.KeysPair:\x02\x38\x01\x1a\xce\x03\n\nAskVectors\x12P\n\x0bpacket_list\x18\x01 \x03(\x0b\x32;.flower.transport.ServerMessage.SecAggMsg.AskVectors.Packet\x12L\n\x07\x66it_ins\x18\x02 \x01(\x0b\x32;.flower.transport.ServerMessage.SecAggMsg.AskVectors.FitIns\x1a\x41\n\x06Packet\x12\x0e\n\x06source\x18\x01 \x01(\x03\x12\x13\n\x0b\x64\x65stination\x18\x02 \x01(\x03\x12\x12\n\nciphertext\x18\x03 \x01(\x0c\x1a\xdc\x01\n\x06\x46itIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12W\n\x06\x63onfig\x18\x02 \x03(\x0b\x32G.flower.transport.ServerMessage.SecAggMsg.AskVectors.FitIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\x43\n\rUnmaskVectors\x12\x19\n\x11\x61vailable_clients\x18\x01 \x03(\x03\x12\x17\n\x0f\x64ropout_clients\x18\x02 \x03(\x03\x42\x05\n\x03msg\x1a\x98\x0b\n\x0eLightSecAggIns\x12\x61\n\rsetup_cfg_ins\x18\x01 \x01(\x0b\x32H.flower.transport.ServerMessage.LightSecAggIns.LightSecAggSetupConfigInsH\x00\x12\x65\n\x0f\x61sk_en_msks_ins\x18\x02 \x01(\x0b\x32J.flower.transport.ServerMessage.LightSecAggIns.AskEncryptedEncodedMasksInsH\x00\x12[\n\x0e\x61sk_models_ins\x18\x03 \x01(\x0b\x32\x41.flower.transport.ServerMessage.LightSecAggIns.AskMaskedModelsInsH\x00\x12g\n\x10\x61sk_agg_msks_ins\x18\x04 \x01(\x0b\x32K.flower.transport.ServerMessage.LightSecAggIns.AskAggregatedEncodedMasksInsH\x00\x1a\xe2\x01\n\x19LightSecAggSetupConfigIns\x12u\n\x10sec_agg_cfg_dict\x18\x01 \x03(\x0b\x32[.flower.transport.ServerMessage.LightSecAggIns.LightSecAggSetupConfigIns.SecAggCfgDictEntry\x1aN\n\x12SecAggCfgDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xce\x01\n\x1b\x41skEncryptedEncodedMasksIns\x12x\n\x10public_keys_dict\x18\x01 \x03(\x0b\x32^.flower.transport.ServerMessage.LightSecAggIns.AskEncryptedEncodedMasksIns.PublicKeysDictEntry\x1a\x35\n\x13PublicKeysDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\xfd\x03\n\x12\x41skMaskedModelsIns\x12]\n\x0bpacket_list\x18\x01 \x03(\x0b\x32H.flower.transport.ServerMessage.LightSecAggIns.AskMaskedModelsIns.Packet\x12Y\n\x07\x66it_ins\x18\x02 \x01(\x0b\x32H.flower.transport.ServerMessage.LightSecAggIns.AskMaskedModelsIns.FitIns\x1a\x41\n\x06Packet\x12\x0e\n\x06source\x18\x01 \x01(\x03\x12\x13\n\x0b\x64\x65stination\x18\x02 \x01(\x03\x12\x12\n\nciphertext\x18\x03 \x01(\x0c\x1a\xe9\x01\n\x06\x46itIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x64\n\x06\x63onfig\x18\x02 \x03(\x0b\x32T.flower.transport.ServerMessage.LightSecAggIns.AskMaskedModelsIns.FitIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\x39\n\x1c\x41skAggregatedEncodedMasksIns\x12\x19\n\x11surviving_clients\x18\x01 \x03(\x03\x42\x05\n\x03msg\x1a\xfc\x02\n\x10SAMessageCarrier\x12\x12\n\nidentifier\x18\x01 \x01(\t\x12\x32\n\x0cndarray_list\x18\x02 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12T\n\nstr2scalar\x18\x03 \x03(\x0b\x32@.flower.transport.ServerMessage.SAMessageCarrier.Str2scalarEntry\x12\x12\n\nbytes_list\x18\x04 \x03(\x0c\x12\x30\n\nparameters\x18\x05 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x37\n\x07\x66it_ins\x18\x06 \x01(\x0b\x32&.flower.transport.ServerMessage.FitIns\x1aK\n\x0fStr2scalarEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x42\x05\n\x03msg\"\x84\x1b\n\rClientMessage\x12@\n\ndisconnect\x18\x01 \x01(\x0b\x32*.flower.transport.ClientMessage.DisconnectH\x00\x12G\n\x0eparameters_res\x18\x02 \x01(\x0b\x32-.flower.transport.ClientMessage.ParametersResH\x00\x12\x39\n\x07\x66it_res\x18\x03 \x01(\x0b\x32&.flower.transport.ClientMessage.FitResH\x00\x12\x43\n\x0c\x65valuate_res\x18\x04 \x01(\x0b\x32+.flower.transport.ClientMessage.EvaluateResH\x00\x12@\n\x0bsec_agg_res\x18\x05 \x01(\x0b\x32).flower.transport.ClientMessage.SecAggResH\x00\x12K\n\x11light_sec_agg_res\x18\x06 \x01(\x0b\x32..flower.transport.ClientMessage.LightSecAggResH\x00\x12J\n\x0esa_msg_carrier\x18\x07 \x01(\x0b\x32\x30.flower.transport.ClientMessage.SAMessageCarrierH\x00\x1a\x36\n\nDisconnect\x12(\n\x06reason\x18\x01 \x01(\x0e\x32\x18.flower.transport.Reason\x1a\x41\n\rParametersRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x1a\x99\x02\n\x06\x46itRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x14\n\x0cnum_examples\x18\x02 \x01(\x03\x12\x1d\n\x11num_examples_ceil\x18\x03 \x01(\x03\x42\x02\x18\x01\x12\x18\n\x0c\x66it_duration\x18\x04 \x01(\x02\x42\x02\x18\x01\x12\x44\n\x07metrics\x18\x05 \x03(\x0b\x32\x33.flower.transport.ClientMessage.FitRes.MetricsEntry\x1aH\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xdc\x01\n\x0b\x45valuateRes\x12\x14\n\x0cnum_examples\x18\x01 \x01(\x03\x12\x0c\n\x04loss\x18\x02 \x01(\x02\x12\x14\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x02\x42\x02\x18\x01\x12I\n\x07metrics\x18\x04 \x03(\x0b\x32\x38.flower.transport.ClientMessage.EvaluateRes.MetricsEntry\x1aH\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xe2\x07\n\tSecAggRes\x12R\n\x0fsetup_param_res\x18\x01 \x01(\x0b\x32\x37.flower.transport.ClientMessage.SecAggRes.SetupParamResH\x00\x12L\n\x0c\x61sk_keys_res\x18\x02 \x01(\x0b\x32\x34.flower.transport.ClientMessage.SecAggRes.AskKeysResH\x00\x12P\n\x0eshare_keys_res\x18\x03 \x01(\x0b\x32\x36.flower.transport.ClientMessage.SecAggRes.ShareKeysResH\x00\x12R\n\x0f\x61sk_vectors_res\x18\x04 \x01(\x0b\x32\x37.flower.transport.ClientMessage.SecAggRes.AskVectorsResH\x00\x12X\n\x12unmask_vectors_res\x18\x05 \x01(\x0b\x32:.flower.transport.ClientMessage.SecAggRes.UnmaskVectorsResH\x00\x12G\n\terror_res\x18\x06 \x01(\x0b\x32\x32.flower.transport.ClientMessage.SecAggRes.ErrorResH\x00\x1a\x0f\n\rSetupParamRes\x1a&\n\nAskKeysRes\x12\x0b\n\x03pk1\x18\x01 \x01(\x0c\x12\x0b\n\x03pk2\x18\x02 \x01(\x0c\x1a\xa5\x01\n\x0cShareKeysRes\x12R\n\x0bpacket_list\x18\x01 \x03(\x0b\x32=.flower.transport.ClientMessage.SecAggRes.ShareKeysRes.Packet\x1a\x41\n\x06Packet\x12\x0e\n\x06source\x18\x01 \x01(\x03\x12\x13\n\x0b\x64\x65stination\x18\x02 \x01(\x03\x12\x12\n\nciphertext\x18\x03 \x01(\x0c\x1a\x41\n\rAskVectorsRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x1a\xa3\x01\n\x10UnmaskVectorsRes\x12]\n\nshare_dict\x18\x01 \x03(\x0b\x32I.flower.transport.ClientMessage.SecAggRes.UnmaskVectorsRes.ShareDictEntry\x1a\x30\n\x0eShareDictEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x19\n\x08\x45rrorRes\x12\r\n\x05\x65rror\x18\x01 \x01(\tB\x05\n\x03msg\x1a\xab\x07\n\x0eLightSecAggRes\x12\x61\n\rsetup_cfg_res\x18\x01 \x01(\x0b\x32H.flower.transport.ClientMessage.LightSecAggRes.LightSecAggSetupConfigResH\x00\x12\x65\n\x0f\x61sk_en_msks_res\x18\x02 \x01(\x0b\x32J.flower.transport.ClientMessage.LightSecAggRes.AskEncryptedEncodedMasksResH\x00\x12[\n\x0e\x61sk_models_res\x18\x03 \x01(\x0b\x32\x41.flower.transport.ClientMessage.LightSecAggRes.AskMaskedModelsResH\x00\x12g\n\x10\x61sk_agg_msks_res\x18\x04 \x01(\x0b\x32K.flower.transport.ClientMessage.LightSecAggRes.AskAggregatedEncodedMasksResH\x00\x12L\n\terror_res\x18\x05 \x01(\x0b\x32\x37.flower.transport.ClientMessage.LightSecAggRes.ErrorResH\x00\x1a\'\n\x19LightSecAggSetupConfigRes\x12\n\n\x02pk\x18\x01 \x01(\x0c\x1a\xc8\x01\n\x1b\x41skEncryptedEncodedMasksRes\x12\x66\n\x0bpacket_list\x18\x01 \x03(\x0b\x32Q.flower.transport.ClientMessage.LightSecAggRes.AskEncryptedEncodedMasksRes.Packet\x1a\x41\n\x06Packet\x12\x0e\n\x06source\x18\x01 \x01(\x03\x12\x13\n\x0b\x64\x65stination\x18\x02 \x01(\x03\x12\x12\n\nciphertext\x18\x03 \x01(\x0c\x1a\x46\n\x12\x41skMaskedModelsRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x1a]\n\x1c\x41skAggregatedEncodedMasksRes\x12=\n\x17\x61ggregated_encoded_mask\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x1a\x19\n\x08\x45rrorRes\x12\r\n\x05\x65rror\x18\x01 \x01(\tB\x05\n\x03msg\x1a\xfc\x02\n\x10SAMessageCarrier\x12\x12\n\nidentifier\x18\x01 \x01(\t\x12\x32\n\x0cndarray_list\x18\x02 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12T\n\nstr2scalar\x18\x03 \x03(\x0b\x32@.flower.transport.ClientMessage.SAMessageCarrier.Str2scalarEntry\x12\x12\n\nbytes_list\x18\x04 \x03(\x0c\x12\x30\n\nparameters\x18\x05 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x37\n\x07\x66it_res\x18\x06 \x01(\x0b\x32&.flower.transport.ClientMessage.FitRes\x1aK\n\x0fStr2scalarEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x42\x05\n\x03msg\"i\n\x06Scalar\x12\x10\n\x06\x64ouble\x18\x01 \x01(\x01H\x00\x12\x10\n\x06sint64\x18\x08 \x01(\x12H\x00\x12\x0e\n\x04\x62ool\x18\r \x01(\x08H\x00\x12\x10\n\x06string\x18\x0e \x01(\tH\x00\x12\x0f\n\x05\x62ytes\x18\x0f \x01(\x0cH\x00\x42\x08\n\x06scalar*[\n\x06Reason\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tRECONNECT\x10\x01\x12\x16\n\x12POWER_DISCONNECTED\x10\x02\x12\x14\n\x10WIFI_UNAVAILABLE\x10\x03\x12\x07\n\x03\x41\x43K\x10\x04\x32_\n\rFlowerService\x12N\n\x04Join\x12\x1f.flower.transport.ClientMessage\x1a\x1f.flower.transport.ServerMessage\"\x00(\x01\x30\x01\x62\x06proto3')
 
 _REASON = DESCRIPTOR.enum_types_by_name['Reason']
 Reason = enum_type_wrapper.EnumTypeWrapper(_REASON)
@@ -56,6 +56,8 @@ _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_PACKET = _SERVERMESSAGE_LIGHTSE
 _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS = _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS.nested_types_by_name['FitIns']
 _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS_CONFIGENTRY = _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS.nested_types_by_name['ConfigEntry']
 _SERVERMESSAGE_LIGHTSECAGGINS_ASKAGGREGATEDENCODEDMASKSINS = _SERVERMESSAGE_LIGHTSECAGGINS.nested_types_by_name['AskAggregatedEncodedMasksIns']
+_SERVERMESSAGE_SAMESSAGECARRIER = _SERVERMESSAGE.nested_types_by_name['SAMessageCarrier']
+_SERVERMESSAGE_SAMESSAGECARRIER_STR2SCALARENTRY = _SERVERMESSAGE_SAMESSAGECARRIER.nested_types_by_name['Str2scalarEntry']
 _CLIENTMESSAGE = DESCRIPTOR.message_types_by_name['ClientMessage']
 _CLIENTMESSAGE_DISCONNECT = _CLIENTMESSAGE.nested_types_by_name['Disconnect']
 _CLIENTMESSAGE_PARAMETERSRES = _CLIENTMESSAGE.nested_types_by_name['ParametersRes']
@@ -79,6 +81,8 @@ _CLIENTMESSAGE_LIGHTSECAGGRES_ASKENCRYPTEDENCODEDMASKSRES_PACKET = _CLIENTMESSAG
 _CLIENTMESSAGE_LIGHTSECAGGRES_ASKMASKEDMODELSRES = _CLIENTMESSAGE_LIGHTSECAGGRES.nested_types_by_name['AskMaskedModelsRes']
 _CLIENTMESSAGE_LIGHTSECAGGRES_ASKAGGREGATEDENCODEDMASKSRES = _CLIENTMESSAGE_LIGHTSECAGGRES.nested_types_by_name['AskAggregatedEncodedMasksRes']
 _CLIENTMESSAGE_LIGHTSECAGGRES_ERRORRES = _CLIENTMESSAGE_LIGHTSECAGGRES.nested_types_by_name['ErrorRes']
+_CLIENTMESSAGE_SAMESSAGECARRIER = _CLIENTMESSAGE.nested_types_by_name['SAMessageCarrier']
+_CLIENTMESSAGE_SAMESSAGECARRIER_STR2SCALARENTRY = _CLIENTMESSAGE_SAMESSAGECARRIER.nested_types_by_name['Str2scalarEntry']
 _SCALAR = DESCRIPTOR.message_types_by_name['Scalar']
 Parameters = _reflection.GeneratedProtocolMessageType('Parameters', (_message.Message,), {
   'DESCRIPTOR' : _PARAMETERS,
@@ -284,6 +288,20 @@ ServerMessage = _reflection.GeneratedProtocolMessageType('ServerMessage', (_mess
     # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.LightSecAggIns)
     })
   ,
+
+  'SAMessageCarrier' : _reflection.GeneratedProtocolMessageType('SAMessageCarrier', (_message.Message,), {
+
+    'Str2scalarEntry' : _reflection.GeneratedProtocolMessageType('Str2scalarEntry', (_message.Message,), {
+      'DESCRIPTOR' : _SERVERMESSAGE_SAMESSAGECARRIER_STR2SCALARENTRY,
+      '__module__' : 'flwr.proto.transport_pb2'
+      # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.SAMessageCarrier.Str2scalarEntry)
+      })
+    ,
+    'DESCRIPTOR' : _SERVERMESSAGE_SAMESSAGECARRIER,
+    '__module__' : 'flwr.proto.transport_pb2'
+    # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.SAMessageCarrier)
+    })
+  ,
   'DESCRIPTOR' : _SERVERMESSAGE,
   '__module__' : 'flwr.proto.transport_pb2'
   # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage)
@@ -317,6 +335,8 @@ _sym_db.RegisterMessage(ServerMessage.LightSecAggIns.AskMaskedModelsIns.Packet)
 _sym_db.RegisterMessage(ServerMessage.LightSecAggIns.AskMaskedModelsIns.FitIns)
 _sym_db.RegisterMessage(ServerMessage.LightSecAggIns.AskMaskedModelsIns.FitIns.ConfigEntry)
 _sym_db.RegisterMessage(ServerMessage.LightSecAggIns.AskAggregatedEncodedMasksIns)
+_sym_db.RegisterMessage(ServerMessage.SAMessageCarrier)
+_sym_db.RegisterMessage(ServerMessage.SAMessageCarrier.Str2scalarEntry)
 
 ClientMessage = _reflection.GeneratedProtocolMessageType('ClientMessage', (_message.Message,), {
 
@@ -473,6 +493,20 @@ ClientMessage = _reflection.GeneratedProtocolMessageType('ClientMessage', (_mess
     # @@protoc_insertion_point(class_scope:flower.transport.ClientMessage.LightSecAggRes)
     })
   ,
+
+  'SAMessageCarrier' : _reflection.GeneratedProtocolMessageType('SAMessageCarrier', (_message.Message,), {
+
+    'Str2scalarEntry' : _reflection.GeneratedProtocolMessageType('Str2scalarEntry', (_message.Message,), {
+      'DESCRIPTOR' : _CLIENTMESSAGE_SAMESSAGECARRIER_STR2SCALARENTRY,
+      '__module__' : 'flwr.proto.transport_pb2'
+      # @@protoc_insertion_point(class_scope:flower.transport.ClientMessage.SAMessageCarrier.Str2scalarEntry)
+      })
+    ,
+    'DESCRIPTOR' : _CLIENTMESSAGE_SAMESSAGECARRIER,
+    '__module__' : 'flwr.proto.transport_pb2'
+    # @@protoc_insertion_point(class_scope:flower.transport.ClientMessage.SAMessageCarrier)
+    })
+  ,
   'DESCRIPTOR' : _CLIENTMESSAGE,
   '__module__' : 'flwr.proto.transport_pb2'
   # @@protoc_insertion_point(class_scope:flower.transport.ClientMessage)
@@ -500,6 +534,8 @@ _sym_db.RegisterMessage(ClientMessage.LightSecAggRes.AskEncryptedEncodedMasksRes
 _sym_db.RegisterMessage(ClientMessage.LightSecAggRes.AskMaskedModelsRes)
 _sym_db.RegisterMessage(ClientMessage.LightSecAggRes.AskAggregatedEncodedMasksRes)
 _sym_db.RegisterMessage(ClientMessage.LightSecAggRes.ErrorRes)
+_sym_db.RegisterMessage(ClientMessage.SAMessageCarrier)
+_sym_db.RegisterMessage(ClientMessage.SAMessageCarrier.Str2scalarEntry)
 
 Scalar = _reflection.GeneratedProtocolMessageType('Scalar', (_message.Message,), {
   'DESCRIPTOR' : _SCALAR,
@@ -528,6 +564,8 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _SERVERMESSAGE_LIGHTSECAGGINS_ASKENCRYPTEDENCODEDMASKSINS_PUBLICKEYSDICTENTRY._serialized_options = b'8\001'
   _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS_CONFIGENTRY._options = None
   _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS_CONFIGENTRY._serialized_options = b'8\001'
+  _SERVERMESSAGE_SAMESSAGECARRIER_STR2SCALARENTRY._options = None
+  _SERVERMESSAGE_SAMESSAGECARRIER_STR2SCALARENTRY._serialized_options = b'8\001'
   _CLIENTMESSAGE_FITRES_METRICSENTRY._options = None
   _CLIENTMESSAGE_FITRES_METRICSENTRY._serialized_options = b'8\001'
   _CLIENTMESSAGE_FITRES.fields_by_name['num_examples_ceil']._options = None
@@ -540,116 +578,126 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _CLIENTMESSAGE_EVALUATERES.fields_by_name['accuracy']._serialized_options = b'\030\001'
   _CLIENTMESSAGE_SECAGGRES_UNMASKVECTORSRES_SHAREDICTENTRY._options = None
   _CLIENTMESSAGE_SECAGGRES_UNMASKVECTORSRES_SHAREDICTENTRY._serialized_options = b'8\001'
-  _REASON._serialized_start=6957
-  _REASON._serialized_end=7048
+  _CLIENTMESSAGE_SAMESSAGECARRIER_STR2SCALARENTRY._options = None
+  _CLIENTMESSAGE_SAMESSAGECARRIER_STR2SCALARENTRY._serialized_options = b'8\001'
+  _REASON._serialized_start=7875
+  _REASON._serialized_end=7966
   _PARAMETERS._serialized_start=48
   _PARAMETERS._serialized_end=98
   _SERVERMESSAGE._serialized_start=101
-  _SERVERMESSAGE._serialized_end=3844
-  _SERVERMESSAGE_RECONNECT._serialized_start=526
-  _SERVERMESSAGE_RECONNECT._serialized_end=554
-  _SERVERMESSAGE_GETPARAMETERS._serialized_start=556
-  _SERVERMESSAGE_GETPARAMETERS._serialized_end=571
-  _SERVERMESSAGE_FITINS._serialized_start=574
-  _SERVERMESSAGE_FITINS._serialized_end=773
-  _SERVERMESSAGE_FITINS_CONFIGENTRY._serialized_start=702
-  _SERVERMESSAGE_FITINS_CONFIGENTRY._serialized_end=773
-  _SERVERMESSAGE_EVALUATEINS._serialized_start=776
-  _SERVERMESSAGE_EVALUATEINS._serialized_end=985
-  _SERVERMESSAGE_EVALUATEINS_CONFIGENTRY._serialized_start=702
-  _SERVERMESSAGE_EVALUATEINS_CONFIGENTRY._serialized_end=773
-  _SERVERMESSAGE_SECAGGMSG._serialized_start=988
-  _SERVERMESSAGE_SECAGGMSG._serialized_end=2402
-  _SERVERMESSAGE_SECAGGMSG_SETUPPARAM._serialized_start=1385
-  _SERVERMESSAGE_SECAGGMSG_SETUPPARAM._serialized_end=1582
-  _SERVERMESSAGE_SECAGGMSG_SETUPPARAM_SECAGGPARAMDICTENTRY._serialized_start=1502
-  _SERVERMESSAGE_SECAGGMSG_SETUPPARAM_SECAGGPARAMDICTENTRY._serialized_end=1582
-  _SERVERMESSAGE_SECAGGMSG_ASKKEYS._serialized_start=1584
-  _SERVERMESSAGE_SECAGGMSG_ASKKEYS._serialized_end=1593
-  _SERVERMESSAGE_SECAGGMSG_SHAREKEYS._serialized_start=1596
-  _SERVERMESSAGE_SECAGGMSG_SHAREKEYS._serialized_end=1861
-  _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_KEYSPAIR._serialized_start=1708
-  _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_KEYSPAIR._serialized_end=1744
-  _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_PUBLICKEYSDICTENTRY._serialized_start=1746
-  _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_PUBLICKEYSDICTENTRY._serialized_end=1861
-  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS._serialized_start=1864
-  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS._serialized_end=2326
-  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS_PACKET._serialized_start=2038
-  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS_PACKET._serialized_end=2103
-  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS_FITINS._serialized_start=2106
-  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS_FITINS._serialized_end=2326
-  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS_FITINS_CONFIGENTRY._serialized_start=702
-  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS_FITINS_CONFIGENTRY._serialized_end=773
-  _SERVERMESSAGE_SECAGGMSG_UNMASKVECTORS._serialized_start=2328
-  _SERVERMESSAGE_SECAGGMSG_UNMASKVECTORS._serialized_end=2395
-  _SERVERMESSAGE_LIGHTSECAGGINS._serialized_start=2405
-  _SERVERMESSAGE_LIGHTSECAGGINS._serialized_end=3837
-  _SERVERMESSAGE_LIGHTSECAGGINS_LIGHTSECAGGSETUPCONFIGINS._serialized_start=2824
-  _SERVERMESSAGE_LIGHTSECAGGINS_LIGHTSECAGGSETUPCONFIGINS._serialized_end=3050
-  _SERVERMESSAGE_LIGHTSECAGGINS_LIGHTSECAGGSETUPCONFIGINS_SECAGGCFGDICTENTRY._serialized_start=2972
-  _SERVERMESSAGE_LIGHTSECAGGINS_LIGHTSECAGGSETUPCONFIGINS_SECAGGCFGDICTENTRY._serialized_end=3050
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKENCRYPTEDENCODEDMASKSINS._serialized_start=3053
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKENCRYPTEDENCODEDMASKSINS._serialized_end=3259
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKENCRYPTEDENCODEDMASKSINS_PUBLICKEYSDICTENTRY._serialized_start=3206
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKENCRYPTEDENCODEDMASKSINS_PUBLICKEYSDICTENTRY._serialized_end=3259
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS._serialized_start=3262
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS._serialized_end=3771
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_PACKET._serialized_start=2038
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_PACKET._serialized_end=2103
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS._serialized_start=3538
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS._serialized_end=3771
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS_CONFIGENTRY._serialized_start=702
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS_CONFIGENTRY._serialized_end=773
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKAGGREGATEDENCODEDMASKSINS._serialized_start=3773
-  _SERVERMESSAGE_LIGHTSECAGGINS_ASKAGGREGATEDENCODEDMASKSINS._serialized_end=3830
-  _CLIENTMESSAGE._serialized_start=3847
-  _CLIENTMESSAGE._serialized_end=6848
-  _CLIENTMESSAGE_DISCONNECT._serialized_start=4274
-  _CLIENTMESSAGE_DISCONNECT._serialized_end=4328
-  _CLIENTMESSAGE_PARAMETERSRES._serialized_start=4330
-  _CLIENTMESSAGE_PARAMETERSRES._serialized_end=4395
-  _CLIENTMESSAGE_FITRES._serialized_start=4398
-  _CLIENTMESSAGE_FITRES._serialized_end=4679
-  _CLIENTMESSAGE_FITRES_METRICSENTRY._serialized_start=4607
-  _CLIENTMESSAGE_FITRES_METRICSENTRY._serialized_end=4679
-  _CLIENTMESSAGE_EVALUATERES._serialized_start=4682
-  _CLIENTMESSAGE_EVALUATERES._serialized_end=4902
-  _CLIENTMESSAGE_EVALUATERES_METRICSENTRY._serialized_start=4607
-  _CLIENTMESSAGE_EVALUATERES_METRICSENTRY._serialized_end=4679
-  _CLIENTMESSAGE_SECAGGRES._serialized_start=4905
-  _CLIENTMESSAGE_SECAGGRES._serialized_end=5899
-  _CLIENTMESSAGE_SECAGGRES_SETUPPARAMRES._serialized_start=5409
-  _CLIENTMESSAGE_SECAGGRES_SETUPPARAMRES._serialized_end=5424
-  _CLIENTMESSAGE_SECAGGRES_ASKKEYSRES._serialized_start=5426
-  _CLIENTMESSAGE_SECAGGRES_ASKKEYSRES._serialized_end=5464
-  _CLIENTMESSAGE_SECAGGRES_SHAREKEYSRES._serialized_start=5467
-  _CLIENTMESSAGE_SECAGGRES_SHAREKEYSRES._serialized_end=5632
-  _CLIENTMESSAGE_SECAGGRES_SHAREKEYSRES_PACKET._serialized_start=2038
-  _CLIENTMESSAGE_SECAGGRES_SHAREKEYSRES_PACKET._serialized_end=2103
-  _CLIENTMESSAGE_SECAGGRES_ASKVECTORSRES._serialized_start=5634
-  _CLIENTMESSAGE_SECAGGRES_ASKVECTORSRES._serialized_end=5699
-  _CLIENTMESSAGE_SECAGGRES_UNMASKVECTORSRES._serialized_start=5702
-  _CLIENTMESSAGE_SECAGGRES_UNMASKVECTORSRES._serialized_end=5865
-  _CLIENTMESSAGE_SECAGGRES_UNMASKVECTORSRES_SHAREDICTENTRY._serialized_start=5817
-  _CLIENTMESSAGE_SECAGGRES_UNMASKVECTORSRES_SHAREDICTENTRY._serialized_end=5865
-  _CLIENTMESSAGE_SECAGGRES_ERRORRES._serialized_start=5867
-  _CLIENTMESSAGE_SECAGGRES_ERRORRES._serialized_end=5892
-  _CLIENTMESSAGE_LIGHTSECAGGRES._serialized_start=5902
-  _CLIENTMESSAGE_LIGHTSECAGGRES._serialized_end=6841
-  _CLIENTMESSAGE_LIGHTSECAGGRES_LIGHTSECAGGSETUPCONFIGRES._serialized_start=6398
-  _CLIENTMESSAGE_LIGHTSECAGGRES_LIGHTSECAGGSETUPCONFIGRES._serialized_end=6437
-  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKENCRYPTEDENCODEDMASKSRES._serialized_start=6440
-  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKENCRYPTEDENCODEDMASKSRES._serialized_end=6640
-  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKENCRYPTEDENCODEDMASKSRES_PACKET._serialized_start=2038
-  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKENCRYPTEDENCODEDMASKSRES_PACKET._serialized_end=2103
-  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKMASKEDMODELSRES._serialized_start=6642
-  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKMASKEDMODELSRES._serialized_end=6712
-  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKAGGREGATEDENCODEDMASKSRES._serialized_start=6714
-  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKAGGREGATEDENCODEDMASKSRES._serialized_end=6807
-  _CLIENTMESSAGE_LIGHTSECAGGRES_ERRORRES._serialized_start=5867
-  _CLIENTMESSAGE_LIGHTSECAGGRES_ERRORRES._serialized_end=5892
-  _SCALAR._serialized_start=6850
-  _SCALAR._serialized_end=6955
-  _FLOWERSERVICE._serialized_start=7050
-  _FLOWERSERVICE._serialized_end=7145
+  _SERVERMESSAGE._serialized_end=4303
+  _SERVERMESSAGE_RECONNECT._serialized_start=602
+  _SERVERMESSAGE_RECONNECT._serialized_end=630
+  _SERVERMESSAGE_GETPARAMETERS._serialized_start=632
+  _SERVERMESSAGE_GETPARAMETERS._serialized_end=647
+  _SERVERMESSAGE_FITINS._serialized_start=650
+  _SERVERMESSAGE_FITINS._serialized_end=849
+  _SERVERMESSAGE_FITINS_CONFIGENTRY._serialized_start=778
+  _SERVERMESSAGE_FITINS_CONFIGENTRY._serialized_end=849
+  _SERVERMESSAGE_EVALUATEINS._serialized_start=852
+  _SERVERMESSAGE_EVALUATEINS._serialized_end=1061
+  _SERVERMESSAGE_EVALUATEINS_CONFIGENTRY._serialized_start=778
+  _SERVERMESSAGE_EVALUATEINS_CONFIGENTRY._serialized_end=849
+  _SERVERMESSAGE_SECAGGMSG._serialized_start=1064
+  _SERVERMESSAGE_SECAGGMSG._serialized_end=2478
+  _SERVERMESSAGE_SECAGGMSG_SETUPPARAM._serialized_start=1461
+  _SERVERMESSAGE_SECAGGMSG_SETUPPARAM._serialized_end=1658
+  _SERVERMESSAGE_SECAGGMSG_SETUPPARAM_SECAGGPARAMDICTENTRY._serialized_start=1578
+  _SERVERMESSAGE_SECAGGMSG_SETUPPARAM_SECAGGPARAMDICTENTRY._serialized_end=1658
+  _SERVERMESSAGE_SECAGGMSG_ASKKEYS._serialized_start=1660
+  _SERVERMESSAGE_SECAGGMSG_ASKKEYS._serialized_end=1669
+  _SERVERMESSAGE_SECAGGMSG_SHAREKEYS._serialized_start=1672
+  _SERVERMESSAGE_SECAGGMSG_SHAREKEYS._serialized_end=1937
+  _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_KEYSPAIR._serialized_start=1784
+  _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_KEYSPAIR._serialized_end=1820
+  _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_PUBLICKEYSDICTENTRY._serialized_start=1822
+  _SERVERMESSAGE_SECAGGMSG_SHAREKEYS_PUBLICKEYSDICTENTRY._serialized_end=1937
+  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS._serialized_start=1940
+  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS._serialized_end=2402
+  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS_PACKET._serialized_start=2114
+  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS_PACKET._serialized_end=2179
+  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS_FITINS._serialized_start=2182
+  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS_FITINS._serialized_end=2402
+  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS_FITINS_CONFIGENTRY._serialized_start=778
+  _SERVERMESSAGE_SECAGGMSG_ASKVECTORS_FITINS_CONFIGENTRY._serialized_end=849
+  _SERVERMESSAGE_SECAGGMSG_UNMASKVECTORS._serialized_start=2404
+  _SERVERMESSAGE_SECAGGMSG_UNMASKVECTORS._serialized_end=2471
+  _SERVERMESSAGE_LIGHTSECAGGINS._serialized_start=2481
+  _SERVERMESSAGE_LIGHTSECAGGINS._serialized_end=3913
+  _SERVERMESSAGE_LIGHTSECAGGINS_LIGHTSECAGGSETUPCONFIGINS._serialized_start=2900
+  _SERVERMESSAGE_LIGHTSECAGGINS_LIGHTSECAGGSETUPCONFIGINS._serialized_end=3126
+  _SERVERMESSAGE_LIGHTSECAGGINS_LIGHTSECAGGSETUPCONFIGINS_SECAGGCFGDICTENTRY._serialized_start=3048
+  _SERVERMESSAGE_LIGHTSECAGGINS_LIGHTSECAGGSETUPCONFIGINS_SECAGGCFGDICTENTRY._serialized_end=3126
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKENCRYPTEDENCODEDMASKSINS._serialized_start=3129
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKENCRYPTEDENCODEDMASKSINS._serialized_end=3335
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKENCRYPTEDENCODEDMASKSINS_PUBLICKEYSDICTENTRY._serialized_start=3282
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKENCRYPTEDENCODEDMASKSINS_PUBLICKEYSDICTENTRY._serialized_end=3335
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS._serialized_start=3338
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS._serialized_end=3847
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_PACKET._serialized_start=2114
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_PACKET._serialized_end=2179
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS._serialized_start=3614
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS._serialized_end=3847
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS_CONFIGENTRY._serialized_start=778
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKMASKEDMODELSINS_FITINS_CONFIGENTRY._serialized_end=849
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKAGGREGATEDENCODEDMASKSINS._serialized_start=3849
+  _SERVERMESSAGE_LIGHTSECAGGINS_ASKAGGREGATEDENCODEDMASKSINS._serialized_end=3906
+  _SERVERMESSAGE_SAMESSAGECARRIER._serialized_start=3916
+  _SERVERMESSAGE_SAMESSAGECARRIER._serialized_end=4296
+  _SERVERMESSAGE_SAMESSAGECARRIER_STR2SCALARENTRY._serialized_start=4221
+  _SERVERMESSAGE_SAMESSAGECARRIER_STR2SCALARENTRY._serialized_end=4296
+  _CLIENTMESSAGE._serialized_start=4306
+  _CLIENTMESSAGE._serialized_end=7766
+  _CLIENTMESSAGE_DISCONNECT._serialized_start=4809
+  _CLIENTMESSAGE_DISCONNECT._serialized_end=4863
+  _CLIENTMESSAGE_PARAMETERSRES._serialized_start=4865
+  _CLIENTMESSAGE_PARAMETERSRES._serialized_end=4930
+  _CLIENTMESSAGE_FITRES._serialized_start=4933
+  _CLIENTMESSAGE_FITRES._serialized_end=5214
+  _CLIENTMESSAGE_FITRES_METRICSENTRY._serialized_start=5142
+  _CLIENTMESSAGE_FITRES_METRICSENTRY._serialized_end=5214
+  _CLIENTMESSAGE_EVALUATERES._serialized_start=5217
+  _CLIENTMESSAGE_EVALUATERES._serialized_end=5437
+  _CLIENTMESSAGE_EVALUATERES_METRICSENTRY._serialized_start=5142
+  _CLIENTMESSAGE_EVALUATERES_METRICSENTRY._serialized_end=5214
+  _CLIENTMESSAGE_SECAGGRES._serialized_start=5440
+  _CLIENTMESSAGE_SECAGGRES._serialized_end=6434
+  _CLIENTMESSAGE_SECAGGRES_SETUPPARAMRES._serialized_start=5944
+  _CLIENTMESSAGE_SECAGGRES_SETUPPARAMRES._serialized_end=5959
+  _CLIENTMESSAGE_SECAGGRES_ASKKEYSRES._serialized_start=5961
+  _CLIENTMESSAGE_SECAGGRES_ASKKEYSRES._serialized_end=5999
+  _CLIENTMESSAGE_SECAGGRES_SHAREKEYSRES._serialized_start=6002
+  _CLIENTMESSAGE_SECAGGRES_SHAREKEYSRES._serialized_end=6167
+  _CLIENTMESSAGE_SECAGGRES_SHAREKEYSRES_PACKET._serialized_start=2114
+  _CLIENTMESSAGE_SECAGGRES_SHAREKEYSRES_PACKET._serialized_end=2179
+  _CLIENTMESSAGE_SECAGGRES_ASKVECTORSRES._serialized_start=6169
+  _CLIENTMESSAGE_SECAGGRES_ASKVECTORSRES._serialized_end=6234
+  _CLIENTMESSAGE_SECAGGRES_UNMASKVECTORSRES._serialized_start=6237
+  _CLIENTMESSAGE_SECAGGRES_UNMASKVECTORSRES._serialized_end=6400
+  _CLIENTMESSAGE_SECAGGRES_UNMASKVECTORSRES_SHAREDICTENTRY._serialized_start=6352
+  _CLIENTMESSAGE_SECAGGRES_UNMASKVECTORSRES_SHAREDICTENTRY._serialized_end=6400
+  _CLIENTMESSAGE_SECAGGRES_ERRORRES._serialized_start=6402
+  _CLIENTMESSAGE_SECAGGRES_ERRORRES._serialized_end=6427
+  _CLIENTMESSAGE_LIGHTSECAGGRES._serialized_start=6437
+  _CLIENTMESSAGE_LIGHTSECAGGRES._serialized_end=7376
+  _CLIENTMESSAGE_LIGHTSECAGGRES_LIGHTSECAGGSETUPCONFIGRES._serialized_start=6933
+  _CLIENTMESSAGE_LIGHTSECAGGRES_LIGHTSECAGGSETUPCONFIGRES._serialized_end=6972
+  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKENCRYPTEDENCODEDMASKSRES._serialized_start=6975
+  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKENCRYPTEDENCODEDMASKSRES._serialized_end=7175
+  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKENCRYPTEDENCODEDMASKSRES_PACKET._serialized_start=2114
+  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKENCRYPTEDENCODEDMASKSRES_PACKET._serialized_end=2179
+  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKMASKEDMODELSRES._serialized_start=7177
+  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKMASKEDMODELSRES._serialized_end=7247
+  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKAGGREGATEDENCODEDMASKSRES._serialized_start=7249
+  _CLIENTMESSAGE_LIGHTSECAGGRES_ASKAGGREGATEDENCODEDMASKSRES._serialized_end=7342
+  _CLIENTMESSAGE_LIGHTSECAGGRES_ERRORRES._serialized_start=6402
+  _CLIENTMESSAGE_LIGHTSECAGGRES_ERRORRES._serialized_end=6427
+  _CLIENTMESSAGE_SAMESSAGECARRIER._serialized_start=7379
+  _CLIENTMESSAGE_SAMESSAGECARRIER._serialized_end=7759
+  _CLIENTMESSAGE_SAMESSAGECARRIER_STR2SCALARENTRY._serialized_start=4221
+  _CLIENTMESSAGE_SAMESSAGECARRIER_STR2SCALARENTRY._serialized_end=4296
+  _SCALAR._serialized_start=7768
+  _SCALAR._serialized_end=7873
+  _FLOWERSERVICE._serialized_start=7968
+  _FLOWERSERVICE._serialized_end=8063
 # @@protoc_insertion_point(module_scope)

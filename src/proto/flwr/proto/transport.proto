@@ -113,6 +113,16 @@ message ServerMessage {
     }
 
   }
+
+  message SAMessageCarrier {
+    string identifier = 1;
+    Parameters ndarray_list = 2;
+    map<string, Scalar> str2scalar = 3;
+    repeated bytes bytes_list = 4;
+    Parameters parameters = 5;
+    FitIns fit_ins = 6;
+  }
+
   oneof msg {
     Reconnect reconnect = 1;
     GetParameters get_parameters = 2;
@@ -120,6 +130,7 @@ message ServerMessage {
     EvaluateIns evaluate_ins = 4;
     SecAggMsg sec_agg_msg=5;
     LightSecAggIns light_sec_agg_ins=6;
+    SAMessageCarrier sa_msg_carrier=7;
   }
 }
 
@@ -192,6 +203,7 @@ message ClientMessage {
     message ErrorRes{
       string error=1;
     }
+
     oneof msg{
       LightSecAggSetupConfigRes setup_cfg_res=1;
       AskEncryptedEncodedMasksRes ask_en_msks_res=2;
@@ -201,6 +213,14 @@ message ClientMessage {
     }
   }
 
+  message SAMessageCarrier {
+    string identifier = 1;
+    Parameters ndarray_list = 2;
+    map<string, Scalar> str2scalar = 3;
+    repeated bytes bytes_list = 4;
+    Parameters parameters = 5;
+    FitRes fit_res = 6;
+  }
 
   oneof msg {
     Disconnect disconnect = 1;
@@ -209,6 +229,7 @@ message ClientMessage {
     EvaluateRes evaluate_res = 4;
     SecAggRes sec_agg_res = 5;
     LightSecAggRes light_sec_agg_res = 6;
+    SAMessageCarrier sa_msg_carrier = 7;
   }
 }
 

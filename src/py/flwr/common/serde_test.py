@@ -15,6 +15,7 @@
 """(De-)Serialization Tests."""
 
 from typing import Union, cast
+import numpy as np
 import flwr.common.typing as ft
 from .serde import scalar_from_proto, scalar_to_proto, light_sec_agg_setup_cfg_res_to_proto, \
     light_sec_agg_setup_cfg_res_from_proto, light_sec_agg_setup_cfg_ins_to_proto, light_sec_agg_setup_cfg_ins_from_proto \
@@ -22,7 +23,9 @@ from .serde import scalar_from_proto, scalar_to_proto, light_sec_agg_setup_cfg_r
     ask_masked_models_ins_from_proto, ask_masked_models_ins_to_proto, ask_aggregated_encoded_masks_ins_to_proto, \
     ask_aggregated_encoded_masks_ins_from_proto, ask_aggregated_encoded_masks_res_to_proto, \
     ask_encrypted_encoded_masks_res_to_proto, ask_masked_models_res_to_proto, ask_masked_models_res_from_proto, \
-    ask_encrypted_encoded_masks_res_from_proto, ask_aggregated_encoded_masks_res_from_proto
+    ask_encrypted_encoded_masks_res_from_proto, ask_aggregated_encoded_masks_res_from_proto, \
+    sa_server_msg_carrier_from_proto, sa_server_msg_carrier_to_proto, sa_client_msg_carrier_from_proto, \
+    sa_client_msg_carrier_to_proto
 
 
 def test_serialisation_deserialisation() -> None:
@@ -95,7 +98,7 @@ def test_light_sec_agg():
         assert o.fit_ins.parameters.tensor_type == actual.fit_ins.parameters.tensor_type
         assert o.fit_ins.config == actual.fit_ins.config
 
-    inputs = [ft.Parameters([b'1', b'2', b'3', b'acb'], 'tt1')]
+    inputs = [ft.Parameters([b'1', b'2', b'3', b'acb'], 'tt1'), ft.Parameters([], '')]
     for o in inputs:
         serialized = ask_masked_models_res_to_proto(ft.AskMaskedModelsRes(o))
         actual = ask_masked_models_res_from_proto(serialized)
@@ -115,3 +118,36 @@ def test_light_sec_agg():
         actual = ask_aggregated_encoded_masks_res_from_proto(serialized)
         assert o.tensors == actual.aggregated_encoded_mask.tensors
         assert o.tensor_type == actual.aggregated_encoded_mask.tensor_type
+
+
+def test_secure_aggregation():
+    inputs = [
+        ft.SAServerMessageCarrier('2'),
+        ft.SAServerMessageCarrier('2231', numpy_ndarray_list=[np.arange(100)]),
+        ft.SAServerMessageCarrier('sfas_', str2scalar={'dsa': b'safsqqq'}, bytes_list=[b'aaqq  a', b'test1123!~']),
+        ft.SAServerMessageCarrier('aa', parameters=ft.Parameters([b'parameters', b'params'], 'meters')),
+        ft.SAServerMessageCarrier('21dsva', fit_ins=ft.FitIns(ft.Parameters([b'a'], 'type'), dict())),
+    ]
+
+    def check_lst(lst1, lst2):
+        assert len(lst1) == len(lst2)
+        for o1, o2 in zip(lst1, lst2):
+            assert o1 == o2
+
+    for o in inputs:
+        serialized = sa_server_msg_carrier_to_proto(o)
+        actual = sa_server_msg_carrier_from_proto(serialized)
+        assert actual.identifier == o.identifier
+
+    inputs = [
+        ft.SAClientMessageCarrier('2'),
+        ft.SAClientMessageCarrier('2231', numpy_ndarray_list=[np.arange(100)]),
+        ft.SAClientMessageCarrier('sfas_', str2scalar={'dsa': b'safsqqq'}, bytes_list=[b'aaqq  a', b'test1123!~']),
+        ft.SAClientMessageCarrier('aa', parameters=ft.Parameters([b'parameters', b'params'], 'meters')),
+        ft.SAClientMessageCarrier('21dsva', fit_res=ft.FitRes(ft.Parameters([b'a'], 'type'), None)),
+    ]
+
+    for o in inputs:
+        serialized = sa_client_msg_carrier_to_proto(o)
+        actual = sa_client_msg_carrier_from_proto(serialized)
+        assert actual.identifier == o.identifier

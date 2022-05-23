@@ -73,22 +73,23 @@ def setup_config(client, ins: LightSecAggSetupConfigIns):
         client.test_vector_shape = [(cfg['test_vector_dimension'],)]
         client.test_dropout_value = cfg['test_dropout_value']
         client.vector_length = client.test_vector_shape[0][0]
-        client.d = padding(client.vector_length, client.U, client.T)
+        client.d = padding(client.vector_length + 1, client.U, client.T)
     # End =================================================================
     else:
         weights = parameters_to_weights(client.get_parameters())
         client.vector_length = sum([o.size for o in weights])
-        client.d = padding(client.vector_length, client.U, client.T)
-    # dict key is the sec_agg_id of another client (int)
+        client.d = padding(client.vector_length + 1, client.U, client.T)
+    # dict key is the ID of another client (int)
     # dict value is the shared key, generated from the secret key and a public key of another client
     client.shared_key_dict = {}
-    # dict key is the sec_agg_id of another client (int)
+    # dict key is the ID of another client (int)
     # dict value is the encoded sub-mask z_j,i where j is the key, i is the id of current client.
     client.encoded_mask_dict = {}
     client.sk, client.pk = sec_agg_primitives.generate_key_pairs()
     log(INFO, "LightSecAgg Stage 0 Completed: Config Set Up")
+    log(INFO, f"public key: {client.pk}")
     total_time = total_time+timeit.default_timer()
-    if client.sec_agg_id == 3:
+    if client.id == 3:
         f = open("log.txt", "a")
         f.write(f"Client without communication stage 0:{total_time} \n")
         f.close()
@@ -125,7 +126,7 @@ def ask_encrypted_encoded_masks(client, ins: AskEncryptedEncodedMasksIns):
         packets.append(packet)
     log(INFO, "SecAgg Stage 1 Completed: Sent Encrypted Sub-masks via Packets")
     total_time = total_time+timeit.default_timer()
-    if client.sec_agg_id == 3:
+    if client.id == 3:
         f = open("log.txt", "a")
         f.write(f"Client without communication stage 1:{total_time} \n")
         f.close()
@@ -157,7 +158,7 @@ def ask_masked_models(client, ins: AskMaskedModelsIns):
     '''
     # temporary code=========================================================
     if client.test == 1:
-        if client.sec_agg_id % 20 < client.test_dropout_value:
+        if client.id % 20 < client.test_dropout_value:
             log(ERROR, "Force dropout due to testing!!")
             raise Exception("Force dropout due to testing")
         weights = sec_agg_primitives.weights_zero_generate(
@@ -169,7 +170,6 @@ def ask_masked_models(client, ins: AskMaskedModelsIns):
     weights_factor = 1
 
     # END =================================================================
-
     quantized_weights = sec_agg_primitives.quantize(weights, client.clipping_range, client.target_range)
 
     # weights factor should not exceed maximum
@@ -185,7 +185,8 @@ def ask_masked_models(client, ins: AskMaskedModelsIns):
     quantized_weights = model_masking(quantized_weights, client.msk, client.GF)
     log(INFO, "LightSecAgg Stage 2 Completed: Sent Masked Models")
     total_time = total_time+timeit.default_timer()
-    if client.sec_agg_id == 3:
+    if client.id == 3:
+        print(weights)
         f = open("log.txt", "a")
         f.write(f"Client without communication stage 2:{total_time} \n")
         f.close()
@@ -200,7 +201,7 @@ def ask_aggregated_encoded_masks(client, ins: AskAggregatedEncodedMasksIns):
     log(INFO, "SecAgg Stage 3 Completed: Sent Aggregated Encoded Masks for Unmasking")
 
     total_time = total_time+timeit.default_timer()
-    if client.sec_agg_id == 3:
+    if client.id == 3:
         f = open("log.txt", "a")
         f.write(f"Client without communication stage 3:{total_time} \n")
         f.close()

@@ -320,7 +320,7 @@ def reverse_quantize(weight: Weights, clipping_range: float, target_range: int) 
     quantizer = (2 * clipping_range) / target_range
     shift = -clipping_range
     for arr in weight:
-        arr = arr.view(np.ndarray).astype(float) * quantizer - shift
+        arr = arr.view(np.ndarray).astype(float) * quantizer + shift
         reverse_quantized_list.append(arr)
     return reverse_quantized_list
 
@@ -347,8 +347,8 @@ def weights_shape(weights: Weights) -> List[Tuple]:
 # Generate zero weights based on dimensions list
 
 
-def weights_zero_generate(dimensions_list: List[Tuple]) -> Weights:
-    return [np.zeros(dimensions) for dimensions in dimensions_list]
+def weights_zero_generate(dimensions_list: List[Tuple], dtype=np.int64) -> Weights:
+    return [np.zeros(dimensions, dtype=dtype) for dimensions in dimensions_list]
 
 # Add two weights together
 

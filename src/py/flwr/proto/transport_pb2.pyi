@@ -453,12 +453,59 @@ class ServerMessage(google.protobuf.message.Message):
         def ClearField(self, field_name: typing_extensions.Literal["ask_agg_msks_ins",b"ask_agg_msks_ins","ask_en_msks_ins",b"ask_en_msks_ins","ask_models_ins",b"ask_models_ins","msg",b"msg","setup_cfg_ins",b"setup_cfg_ins"]) -> None: ...
         def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["setup_cfg_ins","ask_en_msks_ins","ask_models_ins","ask_agg_msks_ins"]]: ...
 
+    class SAMessageCarrier(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        class Str2scalarEntry(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            KEY_FIELD_NUMBER: builtins.int
+            VALUE_FIELD_NUMBER: builtins.int
+            key: typing.Text
+            @property
+            def value(self) -> global___Scalar: ...
+            def __init__(self,
+                *,
+                key: typing.Text = ...,
+                value: typing.Optional[global___Scalar] = ...,
+                ) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+        IDENTIFIER_FIELD_NUMBER: builtins.int
+        NDARRAY_LIST_FIELD_NUMBER: builtins.int
+        STR2SCALAR_FIELD_NUMBER: builtins.int
+        BYTES_LIST_FIELD_NUMBER: builtins.int
+        PARAMETERS_FIELD_NUMBER: builtins.int
+        FIT_INS_FIELD_NUMBER: builtins.int
+        identifier: typing.Text
+        @property
+        def ndarray_list(self) -> global___Parameters: ...
+        @property
+        def str2scalar(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
+        @property
+        def bytes_list(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
+        @property
+        def parameters(self) -> global___Parameters: ...
+        @property
+        def fit_ins(self) -> global___ServerMessage.FitIns: ...
+        def __init__(self,
+            *,
+            identifier: typing.Text = ...,
+            ndarray_list: typing.Optional[global___Parameters] = ...,
+            str2scalar: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+            bytes_list: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
+            parameters: typing.Optional[global___Parameters] = ...,
+            fit_ins: typing.Optional[global___ServerMessage.FitIns] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["fit_ins",b"fit_ins","ndarray_list",b"ndarray_list","parameters",b"parameters"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["bytes_list",b"bytes_list","fit_ins",b"fit_ins","identifier",b"identifier","ndarray_list",b"ndarray_list","parameters",b"parameters","str2scalar",b"str2scalar"]) -> None: ...
+
     RECONNECT_FIELD_NUMBER: builtins.int
     GET_PARAMETERS_FIELD_NUMBER: builtins.int
     FIT_INS_FIELD_NUMBER: builtins.int
     EVALUATE_INS_FIELD_NUMBER: builtins.int
     SEC_AGG_MSG_FIELD_NUMBER: builtins.int
     LIGHT_SEC_AGG_INS_FIELD_NUMBER: builtins.int
+    SA_MSG_CARRIER_FIELD_NUMBER: builtins.int
     @property
     def reconnect(self) -> global___ServerMessage.Reconnect: ...
     @property
@@ -471,6 +518,8 @@ class ServerMessage(google.protobuf.message.Message):
     def sec_agg_msg(self) -> global___ServerMessage.SecAggMsg: ...
     @property
     def light_sec_agg_ins(self) -> global___ServerMessage.LightSecAggIns: ...
+    @property
+    def sa_msg_carrier(self) -> global___ServerMessage.SAMessageCarrier: ...
     def __init__(self,
         *,
         reconnect: typing.Optional[global___ServerMessage.Reconnect] = ...,
@@ -479,10 +528,11 @@ class ServerMessage(google.protobuf.message.Message):
         evaluate_ins: typing.Optional[global___ServerMessage.EvaluateIns] = ...,
         sec_agg_msg: typing.Optional[global___ServerMessage.SecAggMsg] = ...,
         light_sec_agg_ins: typing.Optional[global___ServerMessage.LightSecAggIns] = ...,
+        sa_msg_carrier: typing.Optional[global___ServerMessage.SAMessageCarrier] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters",b"get_parameters","light_sec_agg_ins",b"light_sec_agg_ins","msg",b"msg","reconnect",b"reconnect","sec_agg_msg",b"sec_agg_msg"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters",b"get_parameters","light_sec_agg_ins",b"light_sec_agg_ins","msg",b"msg","reconnect",b"reconnect","sec_agg_msg",b"sec_agg_msg"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["reconnect","get_parameters","fit_ins","evaluate_ins","sec_agg_msg","light_sec_agg_ins"]]: ...
+    def HasField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters",b"get_parameters","light_sec_agg_ins",b"light_sec_agg_ins","msg",b"msg","reconnect",b"reconnect","sa_msg_carrier",b"sa_msg_carrier","sec_agg_msg",b"sec_agg_msg"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters",b"get_parameters","light_sec_agg_ins",b"light_sec_agg_ins","msg",b"msg","reconnect",b"reconnect","sa_msg_carrier",b"sa_msg_carrier","sec_agg_msg",b"sec_agg_msg"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["reconnect","get_parameters","fit_ins","evaluate_ins","sec_agg_msg","light_sec_agg_ins","sa_msg_carrier"]]: ...
 global___ServerMessage = ServerMessage
 
 class ClientMessage(google.protobuf.message.Message):
@@ -808,12 +858,59 @@ class ClientMessage(google.protobuf.message.Message):
         def ClearField(self, field_name: typing_extensions.Literal["ask_agg_msks_res",b"ask_agg_msks_res","ask_en_msks_res",b"ask_en_msks_res","ask_models_res",b"ask_models_res","error_res",b"error_res","msg",b"msg","setup_cfg_res",b"setup_cfg_res"]) -> None: ...
         def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["setup_cfg_res","ask_en_msks_res","ask_models_res","ask_agg_msks_res","error_res"]]: ...
 
+    class SAMessageCarrier(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        class Str2scalarEntry(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            KEY_FIELD_NUMBER: builtins.int
+            VALUE_FIELD_NUMBER: builtins.int
+            key: typing.Text
+            @property
+            def value(self) -> global___Scalar: ...
+            def __init__(self,
+                *,
+                key: typing.Text = ...,
+                value: typing.Optional[global___Scalar] = ...,
+                ) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+        IDENTIFIER_FIELD_NUMBER: builtins.int
+        NDARRAY_LIST_FIELD_NUMBER: builtins.int
+        STR2SCALAR_FIELD_NUMBER: builtins.int
+        BYTES_LIST_FIELD_NUMBER: builtins.int
+        PARAMETERS_FIELD_NUMBER: builtins.int
+        FIT_RES_FIELD_NUMBER: builtins.int
+        identifier: typing.Text
+        @property
+        def ndarray_list(self) -> global___Parameters: ...
+        @property
+        def str2scalar(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
+        @property
+        def bytes_list(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
+        @property
+        def parameters(self) -> global___Parameters: ...
+        @property
+        def fit_res(self) -> global___ClientMessage.FitRes: ...
+        def __init__(self,
+            *,
+            identifier: typing.Text = ...,
+            ndarray_list: typing.Optional[global___Parameters] = ...,
+            str2scalar: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+            bytes_list: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
+            parameters: typing.Optional[global___Parameters] = ...,
+            fit_res: typing.Optional[global___ClientMessage.FitRes] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["fit_res",b"fit_res","ndarray_list",b"ndarray_list","parameters",b"parameters"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["bytes_list",b"bytes_list","fit_res",b"fit_res","identifier",b"identifier","ndarray_list",b"ndarray_list","parameters",b"parameters","str2scalar",b"str2scalar"]) -> None: ...
+
     DISCONNECT_FIELD_NUMBER: builtins.int
     PARAMETERS_RES_FIELD_NUMBER: builtins.int
     FIT_RES_FIELD_NUMBER: builtins.int
     EVALUATE_RES_FIELD_NUMBER: builtins.int
     SEC_AGG_RES_FIELD_NUMBER: builtins.int
     LIGHT_SEC_AGG_RES_FIELD_NUMBER: builtins.int
+    SA_MSG_CARRIER_FIELD_NUMBER: builtins.int
     @property
     def disconnect(self) -> global___ClientMessage.Disconnect: ...
     @property
@@ -826,6 +923,8 @@ class ClientMessage(google.protobuf.message.Message):
     def sec_agg_res(self) -> global___ClientMessage.SecAggRes: ...
     @property
     def light_sec_agg_res(self) -> global___ClientMessage.LightSecAggRes: ...
+    @property
+    def sa_msg_carrier(self) -> global___ClientMessage.SAMessageCarrier: ...
     def __init__(self,
         *,
         disconnect: typing.Optional[global___ClientMessage.Disconnect] = ...,
@@ -834,10 +933,11 @@ class ClientMessage(google.protobuf.message.Message):
         evaluate_res: typing.Optional[global___ClientMessage.EvaluateRes] = ...,
         sec_agg_res: typing.Optional[global___ClientMessage.SecAggRes] = ...,
         light_sec_agg_res: typing.Optional[global___ClientMessage.LightSecAggRes] = ...,
+        sa_msg_carrier: typing.Optional[global___ClientMessage.SAMessageCarrier] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["disconnect",b"disconnect","evaluate_res",b"evaluate_res","fit_res",b"fit_res","light_sec_agg_res",b"light_sec_agg_res","msg",b"msg","parameters_res",b"parameters_res","sec_agg_res",b"sec_agg_res"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["disconnect",b"disconnect","evaluate_res",b"evaluate_res","fit_res",b"fit_res","light_sec_agg_res",b"light_sec_agg_res","msg",b"msg","parameters_res",b"parameters_res","sec_agg_res",b"sec_agg_res"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["disconnect","parameters_res","fit_res","evaluate_res","sec_agg_res","light_sec_agg_res"]]: ...
+    def HasField(self, field_name: typing_extensions.Literal["disconnect",b"disconnect","evaluate_res",b"evaluate_res","fit_res",b"fit_res","light_sec_agg_res",b"light_sec_agg_res","msg",b"msg","parameters_res",b"parameters_res","sa_msg_carrier",b"sa_msg_carrier","sec_agg_res",b"sec_agg_res"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["disconnect",b"disconnect","evaluate_res",b"evaluate_res","fit_res",b"fit_res","light_sec_agg_res",b"light_sec_agg_res","msg",b"msg","parameters_res",b"parameters_res","sa_msg_carrier",b"sa_msg_carrier","sec_agg_res",b"sec_agg_res"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["disconnect","parameters_res","fit_res","evaluate_res","sec_agg_res","light_sec_agg_res","sa_msg_carrier"]]: ...
 global___ClientMessage = ClientMessage
 
 class Scalar(google.protobuf.message.Message):

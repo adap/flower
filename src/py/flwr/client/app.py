@@ -18,7 +18,7 @@
 import time
 from logging import INFO
 
-
+from typing import Callable
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 
@@ -27,13 +27,15 @@ from .grpc_client.connection import insecure_grpc_connection
 from .grpc_client.message_handler import handle
 from .keras_client import KerasClient, KerasClientWrapper
 from .numpy_client import NumPyClient, NumPyClientWrapper
-from .sec_agg_client import SecAggClient
+from .sa_client_wrapper import SAClient, LightSecAggWrapper, SecAggPlusWrapper
 
 
 def start_client(
     server_address: str,
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    sa_protocol: str=None,
+    sa_wrapper: Callable[[Client], SAClient]=None,
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
@@ -55,7 +57,16 @@ def start_client(
         None.
     """
     # Automatically inherit sec_agg relevant functions regardless of strategy
-    client = SecAggClient(client)
+    if sa_protocol is not None and sa_wrapper is None:
+        sa_wrapper = {
+            'secagg': SecAggPlusWrapper,
+            'secagg+': SecAggPlusWrapper,
+            'lightsecagg': LightSecAggWrapper
+        }[sa_protocol]
+    if sa_wrapper is not None:
+        client = sa_wrapper(client)
+        if not isinstance(client, SAClient):
+            raise Exception("Given SA wrapper must be an implementation of SAClient")
 
     while True:
         sleep_duration: int = 0
@@ -89,6 +100,8 @@ def start_numpy_client(
     server_address: str,
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    sa_protocol: str=None,
+    sa_wrapper: Callable[[Client], SAClient]=None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -118,6 +131,8 @@ def start_numpy_client(
         server_address=server_address,
         client=flower_client,
         grpc_max_message_length=grpc_max_message_length,
+        sa_protocol=sa_protocol,
+        sa_wrapper=sa_wrapper
     )
 
 
@@ -125,6 +140,8 @@ def start_keras_client(
     server_address: str,
     client: KerasClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    sa_protocol: str=None,
+    sa_wrapper: Callable[[Client], SAClient]=None,
 ) -> None:
     """Start a Flower KerasClient which connects to a gRPC server.
 
@@ -164,4 +181,6 @@ def start_keras_client(
         server_address=server_address,
         client=flower_client,
         grpc_max_message_length=grpc_max_message_length,
+        sa_protocol=sa_protocol,
+        sa_wrapper=sa_wrapper
     )
