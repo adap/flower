@@ -38,7 +38,7 @@ ProtoScalar scalar_to_proto(flwr::Scalar scalar_msg) {
     s.set_bytes(scalar_msg.getBytes().value());
     return s;
   }
-   if (scalar_msg.getDouble() != std::nullopt) {
+  if (scalar_msg.getDouble() != std::nullopt) {
     s.set_double_(scalar_msg.getDouble().value());
     return s;
   }
