@@ -178,11 +178,11 @@ ClientMessage_EvaluateRes evaluate_res_to_proto(flwr::EvaluateRes res) {
   ClientMessage_EvaluateRes cres;
   google::protobuf::Map< ::std::string, ::flower::transport::Scalar>*
       metrics_msg;
+  google::protobuf::Map< ::std::string, ::flower::transport::Scalar> proto;
   if (res.getMetrics() == std::nullopt) {
     metrics_msg = NULL;
   } else {
-    google::protobuf::Map< ::std::string, ::flower::transport::Scalar> proto =
-        metrics_to_proto(res.getMetrics().value());
+    proto = metrics_to_proto(res.getMetrics().value());
     metrics_msg = &proto;
   }
 
@@ -190,7 +190,12 @@ ClientMessage_EvaluateRes evaluate_res_to_proto(flwr::EvaluateRes res) {
   cres.set_loss(res.getLoss());
   cres.set_num_examples(res.getNum_example());
   if (metrics_msg != NULL) {
-    *cres.mutable_metrics() = *metrics_msg;
+    auto& map = *cres.mutable_metrics();
+
+    for (auto& [key, value] : *metrics_msg) {
+      map[key] = value;
+    }
   }
+  
   return cres;
 }

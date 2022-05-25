@@ -94,7 +94,14 @@ class FedAvgCpp(FedAvg):
                 for _, evaluate_res in results
             ]
         )
-        return loss_aggregated, {}
+
+        num_total_evaluation_examples = sum([evaluate_res.num_examples for _, evaluate_res in results])
+        weighted_metric = [evaluate_res.num_examples * evaluate_res.metrics["loss"]  for _, evaluate_res in results]
+    
+        metrics_aggregated = {}
+        metrics_aggregated["loss"] = sum(weighted_metric) / num_total_evaluation_examples
+
+        return loss_aggregated, metrics_aggregated
 
 
 def weights_to_parameters(weights) -> Parameters:
