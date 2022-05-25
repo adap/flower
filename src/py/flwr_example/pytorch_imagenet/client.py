@@ -43,7 +43,7 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
     """Set model weights from a list of NumPy ndarrays."""
     state_dict = OrderedDict(
         {
-            k: torch.Tensor(np.atleast_1d(v))
+            k: torch.tensor(np.atleast_1d(v))
             for k, v in zip(model.state_dict().keys(), weights)
         }
     )
@@ -126,7 +126,7 @@ class ImageNetClient(fl.client.Client):
     def evaluate(self, ins: fl.common.EvaluateIns) -> fl.common.EvaluateRes:
 
         # Set the set so we are sure to generate the same batches
-        # accross all clients.
+        # across all clients.
         np.random.seed(123)
 
         print(f"Client {self.cid}: evaluate")

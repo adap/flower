@@ -1,6 +1,5 @@
 from collections import OrderedDict
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 import torchvision.transforms as transforms
@@ -79,7 +78,7 @@ def main():
 
         def set_parameters(self, parameters):
             params_dict = zip(net.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             net.load_state_dict(state_dict, strict=True)
 
         def fit(self, parameters, config):
@@ -90,7 +89,7 @@ def main():
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss = test(net, testloader)
-            return float(loss), len(testloader)
+            return float(loss), len(testloader), {}
 
     fl.client.start_numpy_client("[::]:8080", client=CifarClient())
 

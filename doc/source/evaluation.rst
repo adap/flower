@@ -9,7 +9,7 @@ Centralized Evaluation
 Built-In Strategies
 ~~~~~~~~~~~~~~~~~~~
 
-All built-in strategies support centalized evaluation by providing an evaluation function during initialization.
+All built-in strategies support centralized evaluation by providing an evaluation function during initialization.
 An evaluation function is any function that can take the current global model parameters as input and return evaluation results:
 
 .. code-block:: python
@@ -40,7 +40,7 @@ An evaluation function is any function that can take the current global model pa
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
-        # ... other FedAvg agruments 
+        # ... other FedAvg arguments 
         eval_fn=get_eval_fn(model),
     )
 
@@ -50,7 +50,7 @@ An evaluation function is any function that can take the current global model pa
 Custom Strategies
 ~~~~~~~~~~~~~~~~~
 
-The :code:`Strategy` abstraction provides a method called :code:`evaluate` that can direcly be used to evaluate the current global model parameters.
+The :code:`Strategy` abstraction provides a method called :code:`evaluate` that can directly be used to evaluate the current global model parameters.
 The current server implementation calls :code:`evaluate` after parameter aggregation and before federated evaluation (see next paragraph).
 
 
@@ -95,7 +95,7 @@ Configuring Federated Evaluation
 
 Federated evaluation can be configured from the server side. Built-in strategies support the following arguments:
 
-- :code:`fraction_eval`: a :code:`float` defining the fraction of clients that will be selected for evaluation. If :code:`fraction_eval` is set to :code:`0.1` and :code:`100` clients are connected to the server, then :code:`10` will be randomly selected for evaluation.
+- :code:`fraction_eval`: a :code:`float` defining the fraction of clients that will be selected for evaluation. If :code:`fraction_eval` is set to :code:`0.1` and :code:`100` clients are connected to the server, then :code:`10` will be randomly selected for evaluation. If :code:`fraction_eval` is set to :code:`0.0`, federated evaluation will be disabled. 
 - :code:`min_eval_clients`: an :code:`int`: the minimum number of clients to be selected for evaluation. If :code:`fraction_eval` is set to :code:`0.1`, :code:`min_eval_clients` is set to 20, and :code:`100` clients are connected to the server, then :code:`20` clients will be selected for evaluation.
 - :code:`min_available_clients`: an :code:`int` that defines the minimum number of clients which need to be connected to the server before a round of federated evaluation can start. If fewer than :code:`min_available_clients` are connected to the server, the server will wait until more clients are connected before it continues to sample clients for evaluation.
 - :code:`on_evaluate_config_fn`: a function that returns a configuration dictionary which will be sent to the selected clients. The function will be called during each round and provides a convenient way to customize client-side evaluation from the server side, for example, to configure the number of validation steps performed. 

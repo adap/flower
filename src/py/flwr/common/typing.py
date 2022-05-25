@@ -16,7 +16,8 @@
 
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
+from enum import Enum
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -29,6 +30,25 @@ Weights = List[np.ndarray]
 Scalar = Union[bool, bytes, float, int, str]
 
 Metrics = Dict[str, Scalar]
+MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]
+
+Config = Dict[str, Scalar]
+Properties = Dict[str, Scalar]
+
+
+class Code(Enum):
+    """Client status codes."""
+
+    OK = 0
+    GET_PARAMETERS_NOT_IMPLEMENTED = 1
+
+
+@dataclass
+class Status:
+    """Client status."""
+
+    code: Code
+    message: str
 
 
 @dataclass
@@ -60,9 +80,7 @@ class FitRes:
 
     parameters: Parameters
     num_examples: int
-    num_examples_ceil: Optional[int] = None  # Deprecated
-    fit_duration: Optional[float] = None  # Deprecated
-    metrics: Optional[Metrics] = None
+    metrics: Dict[str, Scalar]
 
 
 @dataclass
@@ -79,8 +97,22 @@ class EvaluateRes:
 
     loss: float
     num_examples: int
-    accuracy: Optional[float] = None  # Deprecated
-    metrics: Optional[Metrics] = None
+    metrics: Dict[str, Scalar]
+
+
+@dataclass
+class PropertiesIns:
+    """Properties requests for a client."""
+
+    config: Config
+
+
+@dataclass
+class PropertiesRes:
+    """Properties response from a client."""
+
+    status: Status
+    properties: Properties
 
 
 @dataclass

@@ -1,3 +1,9 @@
+[build-system]
+requires = [
+    "poetry==1.1.13",
+]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "mxnet_example"
 version = "0.1.0"
@@ -5,10 +11,7 @@ description = "MXNet example with MNIST and CNN"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
-flwr = "^0.15.0"  # For development: { path = "../../", develop = true }
+python = "^3.7"
+flwr = "^0.17.0"
+# flwr = { path = "../../", develop = true }  # Development
 mxnet = "^1.7.0"
-
-[build-system]
-requires = ["poetry-core==1.1.4"]
-build-backend = "poetry.core.masonry.api"

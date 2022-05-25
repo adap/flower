@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "poetry==1.1.8",
+    "poetry==1.1.13",
 ]
 build-backend = "poetry.core.masonry.api"
 
@@ -15,6 +15,7 @@ authors = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
+flwr = "^0.17.0"
+# flwr = { path = "../../", develop = true }  # Development
 tensorflow = "^2.5.0"
 tensorflow-privacy = {git = "https://github.com/tensorflow/privacy", rev = "aaf4c25"}
-flwr = "^0.16.0"

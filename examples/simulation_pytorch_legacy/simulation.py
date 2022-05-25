@@ -20,7 +20,10 @@ def start_server(num_rounds: int, num_clients: int, fraction_fit: float):
     """Start the server with a slightly adjusted FedAvg strategy."""
     strategy = FedAvg(min_available_clients=num_clients, fraction_fit=fraction_fit)
     # Exposes the server by default on port 8080
-    fl.server.start_server(strategy=strategy, config={"num_rounds": num_rounds})
+    fl.server.start_server(
+        strategy=strategy,
+        config={"num_rounds": num_rounds},
+    )
 
 
 def start_client(dataset: DATASET) -> None:
@@ -38,7 +41,7 @@ def start_client(dataset: DATASET) -> None:
 
         def set_parameters(self, parameters):
             params_dict = zip(net.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             net.load_state_dict(state_dict, strict=True)
 
         def fit(self, parameters, config):

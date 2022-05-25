@@ -16,6 +16,7 @@
 # pylint: disable=no-self-use, invalid-name, disable=R0904
 
 import unittest
+from typing import List
 
 import numpy as np
 from numpy.random import default_rng
@@ -217,7 +218,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
     def test_split_array_at_indices_not_increasing(self) -> None:
         """Tests if exception is thrown for split not having increasing
         values."""
-        # Prepae
+        # Prepare
         x = np.ones((100, 3, 32, 32), dtype=np.float32)
         split_idx = np.arange(start=0, stop=90, step=10, dtype=np.int64)
         split_idx[1] = 70
@@ -349,7 +350,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         # Prepare
         distribution = np.array([1.0 / 3, 1.0 / 3, 1.0 / 3], dtype=np.float32)
         empty_classes = [False, False, True]
-        list_samples = [
+        list_samples: List[List[np.ndarray]] = [
             [
                 np.zeros((3, 32, 32), dtype=np.float32),
                 np.zeros((3, 32, 32), dtype=np.float32),
@@ -464,7 +465,7 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         num_partitions = 5
         concentration = 1e5
         uniform = (
-            1.0 / (self.num_classes) * np.ones((self.num_classes,), dtype=np.float)
+            1.0 / (self.num_classes) * np.ones((self.num_classes,), dtype=np.float64)
         )
 
         # Execute

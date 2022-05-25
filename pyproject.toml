@@ -1,12 +1,12 @@
 [build-system]
 requires = [
-    "poetry==1.1.8",
+    "poetry==1.1.13",
 ]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "0.17.0"
+version = "1.0.0"
 description = "Flower - A Friendly Federated Learning Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
@@ -15,7 +15,7 @@ homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"
 documentation = "https://flower.dev"
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
@@ -24,10 +24,11 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -39,58 +40,52 @@ classifiers = [
 ]
 packages = [
     { include = "flwr", from = "src/py" },
-    { include = "flwr_example", from = "src/py" },
-    { include = "flwr_experimental", from = "src/py" },
 ]
 exclude = [
     "src/py/**/*_test.py",
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = "^3.7"
 # Mandatory dependencies
-numpy = "^1.19.0"
-grpcio = "^1.27.2"
-google = "^2.0.3"
-protobuf = "^3.12.1"
-dataclasses = { version = "==0.6", markers = "python_version < '3.7'"  }
+numpy = [
+    { version = ">=1.19.0,<1.21.0", python = "<3.10"},
+    { version = "^1.21", python = "^3.10"},
+]
+grpcio = "^1.41.0"
+protobuf = "^3.19.0"
+importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
+iterators = "^0.0.2"
 # Optional dependencies
-tensorflow-cpu = { version = "==2.4.0", optional = true }
-torch = { version = "^1.9.0", optional = true }
-torchvision = { version = "^0.10.0", optional = true }
-boto3 = { version = "^1.12.36", optional = true }
-boto3_type_annotations = { version = "^0.3.1", optional = true }
-paramiko = { version = "^2.7.1", optional = true }
-docker = { version = "^4.2.0", optional = true }
-matplotlib = { version = "^3.2.1", optional = true }
-tqdm = { version = "^4.48.2", optional = true }
-ray = { extras = ["default"], version = "^1.6.0", optional = true }
+ray = { extras = ["default"], version = ">=1.9.2,<1.12.0", optional = true }
 
 [tool.poetry.extras]
 simulation = ["ray"]
-baseline = ["tensorflow-cpu", "boto3", "boto3_type_annotations", "paramiko", "docker", "matplotlib"]
-examples-pytorch = ["torch", "torchvision", "tqdm"]
-examples-tensorflow = ["tensorflow-cpu"]
-http-logger = ["boto3", "boto3_type_annotations", "tensorflow-cpu", "boto3", "boto3_type_annotations", "paramiko", "docker", "matplotlib"]
-ops = ["boto3", "boto3_type_annotations", "paramiko", "docker"]
 
 [tool.poetry.dev-dependencies]
-types-protobuf = "^3.17.4"
-types-setuptools = "^57.0.2"
-types-dataclasses = "^0.1.7"
-isort = "==5.9.2"
-black = "==21.7b0"
+types-protobuf = "==3.19.18"
+types-setuptools = "==57.4.14"
+types-dataclasses = "==0.6.5"
+isort = "==5.10.1"
+black = "==22.3.0"
 docformatter = "==1.4"
-mypy = "==0.910"
-pylint = "==2.8.2"
+mypy = "==0.950"
+pylint = "==2.13.8"
 flake8 = "==3.9.2"
-pytest = "==6.2.4"
+pytest = "==7.1.2"
+pytest-cov = "==3.0.0"
 pytest-watch = "==4.2.0"
-grpcio-tools = "==1.32.0"
-mypy-protobuf = "==2.4"
+grpcio-tools = "==1.41.0"
+mypy-protobuf = "==3.2.0"
+jupyterlab = "==3.3.2"
 rope = "==0.19.0"
-sphinx = "==3.4.3"
-sphinx-book-theme = "==0.0.39"
+semver = "==2.13.0"
+sphinx = "==4.4.0"
+sphinx-copybutton = "==0.5.0"
+sphinx-panels = "==0.6.0"
+sphinxcontrib-mermaid = "==0.7.1"
+furo = "==2022.3.4"
+sphinx-reredirects = "==0.0.1"
 
 [tool.isort]
 line_length = 88
@@ -99,11 +94,11 @@ multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
-known_first_party = ["flwr", "flwr_example", "flwr_experimental", "flwr_tool"]
+known_first_party = ["flwr", "flwr_experimental", "flwr_tool"]
 
 [tool.black]
 line-length = 88
-target-version = ["py36", "py37", "py38"]
+target-version = ["py37", "py38", "py39", "py310"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
@@ -115,3 +110,28 @@ testpaths = [
     "src/py/flwr",
     "src/py/flwr_tool",
 ]
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = true
+
+[[tool.mypy.overrides]]
+module = [
+    "flwr_example.*",
+    "flwr_experimental.*",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "importlib.metadata.*",
+    "importlib_metadata.*",
+]
+follow_imports = "skip"
+follow_imports_for_stubs = true
+disallow_untyped_calls = false
+
+[[tool.mypy.overrides]]
+module = "torch.*"
+follow_imports = "skip"
+follow_imports_for_stubs = true

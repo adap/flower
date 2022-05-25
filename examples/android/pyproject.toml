@@ -1,0 +1,17 @@
+[build-system]
+requires = [
+    "poetry==1.1.13",
+]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "android_flwr_tensorflow"
+version = "0.1.0"
+description = "Android Example"
+authors = ["The Flower Authors <enquiries@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+flwr = "^0.17.0"
+# flwr = { path = "../../", develop = true }  # Development
+tensorflow-cpu = "^2.6.2"

@@ -1,69 +1,21 @@
+import argparse
 import flwr as fl
+from flwr.common.typing import Scalar
 import ray
 import torch
 import torchvision
-import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
 from collections import OrderedDict
 from pathlib import Path
 from typing import Dict, Callable, Optional, Tuple
 from dataset_utils import getCIFAR10, do_fl_partitioning, get_dataloader
+from utils import Net, train, test
 
 
-# Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
-# borrowed from Pytorch quickstart example
-class Net(nn.Module):
-    def __init__(self) -> None:
-        super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
+parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
-
-
-# borrowed from Pytorch quickstart example
-def train(net, trainloader, epochs, device: str):
-    """Train the network on the training set."""
-    criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
-    net.train()
-    for _ in range(epochs):
-        for images, labels in trainloader:
-            images, labels = images.to(device), labels.to(device)
-            optimizer.zero_grad()
-            loss = criterion(net(images), labels)
-            loss.backward()
-            optimizer.step()
-
-
-# borrowed from Pytorch quickstart example
-def test(net, testloader, device: str):
-    """Validate the network on the entire test set."""
-    criterion = torch.nn.CrossEntropyLoss()
-    correct, total, loss = 0, 0, 0.0
-    net.eval()
-    with torch.no_grad():
-        for data in testloader:
-            images, labels = data[0].to(device), data[1].to(device)
-            outputs = net(images)
-            loss += criterion(outputs, labels).item()
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-    accuracy = correct / total
-    return loss, accuracy
+parser.add_argument("--num_client_cpus", type=int, default=1)
+parser.add_argument("--num_rounds", type=int, default=10)
 
 
 # Flower client that will be spawned by Ray
@@ -72,6 +24,7 @@ class CifarRayClient(fl.client.NumPyClient):
     def __init__(self, cid: str, fed_dir_data: str):
         self.cid = cid
         self.fed_dir = Path(fed_dir_data)
+        self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
 
         # instantiate model
         self.net = Net()
@@ -81,6 +34,10 @@ class CifarRayClient(fl.client.NumPyClient):
 
     def get_parameters(self):
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+
+    # def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_properties(self, ins):
+        return self.properties
 
     def set_parameters(self, parameters):
         params_dict = zip(self.net.state_dict().keys(), parameters)
@@ -138,7 +95,7 @@ def fit_config(rnd: int) -> Dict[str, str]:
     """Return a configuration with static batch size and (local) epochs."""
     config = {
         "epoch_global": str(rnd),
-        "epochs": str(5),
+        "epochs": str(5),  # number of local epochs
         "batch_size": str(64),
     }
     return config
@@ -148,7 +105,7 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
     """Set model weights from a list of NumPy ndarrays."""
     state_dict = OrderedDict(
         {
-            k: torch.Tensor(np.atleast_1d(v))
+            k: torch.tensor(np.atleast_1d(v))
             for k, v in zip(model.state_dict().keys(), weights)
         }
     )
@@ -184,22 +141,27 @@ def get_eval_fn(
 # 1. Downloads CIFAR-10
 # 2. Partitions the dataset into N splits, where N is the total number of
 #    clients. We refere to this as `pool_size`. The partition can be IID or non-IID
-# 4. Starts a Ray-based simulation where a % of clients are sample each round.
-# 5. After the M rounds end, the global model is evaluated on the entire testset.
+# 3. Starts a Ray-based simulation where a % of clients are sample each round.
+# 4. After the M rounds end, the global model is evaluated on the entire testset.
 #    Also, the global model is evaluated on the valset partition residing in each
 #    client. This is useful to get a sense on how well the global model can generalise
 #    to each client's data.
 if __name__ == "__main__":
 
+    # parse input arguments
+    args = parser.parse_args()
+
     pool_size = 100  # number of dataset partions (= number of total clients)
-    client_resources = {"num_cpus": 1}  # each client will get allocated 1 CPUs
+    client_resources = {
+        "num_cpus": args.num_client_cpus
+    }  # each client will get allocated 1 CPUs
 
     # download CIFAR10 dataset
     train_path, testset = getCIFAR10()
 
     # partition dataset (use a large `alpha` to make it IID;
     # a small value (e.g. 1) will make it non-IID)
-    # This will create a new directory called "federated: in the directory where
+    # This will create a new directory called "federated": in the directory where
     # CIFAR-10 lives. Inside it, there will be N=pool_size sub-directories each with
     # its own train/set split.
     fed_dir = do_fl_partitioning(
@@ -227,7 +189,7 @@ if __name__ == "__main__":
         client_fn=client_fn,
         num_clients=pool_size,
         client_resources=client_resources,
-        num_rounds=5,
+        num_rounds=args.num_rounds,
         strategy=strategy,
         ray_init_args=ray_config,
     )

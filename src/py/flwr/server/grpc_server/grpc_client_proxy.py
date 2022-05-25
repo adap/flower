@@ -14,12 +14,13 @@
 # ==============================================================================
 """gRPC-based Flower ClientProxy implementation."""
 
+from typing import Optional
 
 from flwr import common
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.grpc_server.grpc_bridge import GRPCBridge
+from flwr.server.grpc_server.grpc_bridge import GRPCBridge, InsWrapper, ResWrapper
 
 
 class GrpcClientProxy(ClientProxy):
@@ -33,38 +34,87 @@ class GrpcClientProxy(ClientProxy):
         super().__init__(cid)
         self.bridge = bridge
 
-    def get_parameters(self) -> common.ParametersRes:
+    def get_properties(
+        self,
+        ins: common.PropertiesIns,
+        timeout: Optional[float],
+    ) -> common.PropertiesRes:
+        """Requests client's set of internal properties."""
+        properties_msg = serde.properties_ins_to_proto(ins)
+        res_wrapper: ResWrapper = self.bridge.request(
+            ins_wrapper=InsWrapper(
+                server_message=ServerMessage(properties_ins=properties_msg),
+                timeout=timeout,
+            )
+        )
+        client_msg: ClientMessage = res_wrapper.client_message
+        properties_res = serde.properties_res_from_proto(client_msg.properties_res)
+        return properties_res
+
+    def get_parameters(
+        self,
+        timeout: Optional[float],
+    ) -> common.ParametersRes:
         """Return the current local model parameters."""
         get_parameters_msg = serde.get_parameters_to_proto()
-        client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(get_parameters=get_parameters_msg)
+        res_wrapper: ResWrapper = self.bridge.request(
+            ins_wrapper=InsWrapper(
+                server_message=ServerMessage(get_parameters=get_parameters_msg),
+                timeout=timeout,
+            )
         )
+        client_msg: ClientMessage = res_wrapper.client_message
         parameters_res = serde.parameters_res_from_proto(client_msg.parameters_res)
         return parameters_res
 
-    def fit(self, ins: common.FitIns) -> common.FitRes:
+    def fit(
+        self,
+        ins: common.FitIns,
+        timeout: Optional[float],
+    ) -> common.FitRes:
         """Refine the provided weights using the locally held dataset."""
         fit_ins_msg = serde.fit_ins_to_proto(ins)
-        client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(fit_ins=fit_ins_msg)
+
+        res_wrapper: ResWrapper = self.bridge.request(
+            ins_wrapper=InsWrapper(
+                server_message=ServerMessage(fit_ins=fit_ins_msg),
+                timeout=timeout,
+            )
         )
+        client_msg: ClientMessage = res_wrapper.client_message
         fit_res = serde.fit_res_from_proto(client_msg.fit_res)
         return fit_res
 
-    def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
+    def evaluate(
+        self,
+        ins: common.EvaluateIns,
+        timeout: Optional[float],
+    ) -> common.EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
         evaluate_msg = serde.evaluate_ins_to_proto(ins)
-        client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(evaluate_ins=evaluate_msg)
+        res_wrapper: ResWrapper = self.bridge.request(
+            ins_wrapper=InsWrapper(
+                server_message=ServerMessage(evaluate_ins=evaluate_msg),
+                timeout=timeout,
+            )
         )
+        client_msg: ClientMessage = res_wrapper.client_message
         evaluate_res = serde.evaluate_res_from_proto(client_msg.evaluate_res)
         return evaluate_res
 
-    def reconnect(self, reconnect: common.Reconnect) -> common.Disconnect:
+    def reconnect(
+        self,
+        reconnect: common.Reconnect,
+        timeout: Optional[float],
+    ) -> common.Disconnect:
         """Disconnect and (optionally) reconnect later."""
         reconnect_msg = serde.reconnect_to_proto(reconnect)
-        client_msg: ClientMessage = self.bridge.request(
-            ServerMessage(reconnect=reconnect_msg)
+        res_wrapper: ResWrapper = self.bridge.request(
+            ins_wrapper=InsWrapper(
+                server_message=ServerMessage(reconnect=reconnect_msg),
+                timeout=timeout,
+            )
         )
+        client_msg: ClientMessage = res_wrapper.client_message
         disconnect = serde.disconnect_from_proto(client_msg.disconnect)
         return disconnect

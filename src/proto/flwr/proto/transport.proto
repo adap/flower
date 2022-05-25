@@ -21,6 +21,14 @@ service FlowerService {
   rpc Join(stream ClientMessage) returns (stream ServerMessage) {}
 }
 
+enum Code {
+  OK = 0;
+  GET_PARAMETERS_NOT_IMPLEMENTED = 1;
+}
+message Status {
+  Code code = 1;
+  string message = 2;
+}
 message Parameters {
   repeated bytes tensors = 1;
   string tensor_type = 2;
@@ -44,12 +52,13 @@ message ServerMessage {
     Parameters parameters = 1;
     map<string, Scalar> config = 2;
   }
-
+  message PropertiesIns { map<string, Scalar> config = 1; }
   oneof msg {
     Reconnect reconnect = 1;
     GetParameters get_parameters = 2;
     FitIns fit_ins = 3;
     EvaluateIns evaluate_ins = 4;
+    PropertiesIns properties_ins = 5;
   }
 }
 
@@ -59,22 +68,23 @@ message ClientMessage {
   message FitRes {
     Parameters parameters = 1;
     int64 num_examples = 2;
-    int64 num_examples_ceil = 3 [ deprecated = true ];
-    float fit_duration = 4 [ deprecated = true ];
     map<string, Scalar> metrics = 5;
   }
   message EvaluateRes {
     int64 num_examples = 1;
     float loss = 2;
-    float accuracy = 3 [ deprecated = true ];
     map<string, Scalar> metrics = 4;
   }
-
+  message PropertiesRes {
+    Status status = 1;
+    map<string, Scalar> properties = 2;
+  }
   oneof msg {
     Disconnect disconnect = 1;
     ParametersRes parameters_res = 2;
     FitRes fit_res = 3;
     EvaluateRes evaluate_res = 4;
+    PropertiesRes properties_res = 5;
   }
 }
 

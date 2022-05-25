@@ -17,11 +17,34 @@
 
 from abc import ABC, abstractmethod
 
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes
+from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    ParametersRes,
+    PropertiesIns,
+    PropertiesRes,
+)
 
 
 class Client(ABC):
     """Abstract base class for Flower clients."""
+
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        """Return set of client's properties.
+
+        Parameters
+        ----------
+        ins : PropertiesIns
+            The get properties instructions received from the server containing
+            a dictionary of configuration values used to configure.
+
+        Returns
+        -------
+        PropertiesRes
+            Client's properties.
+        """
 
     @abstractmethod
     def get_parameters(self) -> ParametersRes:
@@ -69,3 +92,8 @@ class Client(ABC):
             other details such as the number of local data examples used for
             evaluation.
         """
+
+
+def has_get_properties(client: Client) -> bool:
+    """Check if Client implements get_properties."""
+    return type(client).get_properties != Client.get_properties

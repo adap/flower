@@ -1,0 +1,20 @@
+[build-system]
+requires = [
+    "poetry==1.1.13",
+]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "quickstart_ml_cube"
+version = "0.1.0"
+description = "Keras Federated Learning Quickstart with Flower"
+authors = ["The Flower Authors <enquiries@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+flwr = "^0.17.0"  # For development: { path = "../../", develop = true }
+tensorflow-cpu = "^2.6.2"
+mlcube = "0.0.4"
+mlcube-docker = "0.0.4"
+cookiecutter = "1.7.*"
+tensorflow-estimator = "^2.6.0"

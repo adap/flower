@@ -18,6 +18,7 @@ Paper: https://openreview.net/pdf?id=ByexElSYDr
 """
 
 
+from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
@@ -27,12 +28,14 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    MetricsAggregationFn,
     Parameters,
     Scalar,
     Weights,
     parameters_to_weights,
     weights_to_parameters,
 )
+from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
@@ -40,6 +43,7 @@ from .aggregate import aggregate_qffl, weighted_loss_avg
 from .fedavg import FedAvg
 
 
+# pylint: disable=too-many-locals
 class QFedAvg(FedAvg):
     """Configurable QFedAvg strategy implementation."""
 
@@ -60,6 +64,8 @@ class QFedAvg(FedAvg):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
+        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -72,6 +78,8 @@ class QFedAvg(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
+            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
@@ -85,6 +93,8 @@ class QFedAvg(FedAvg):
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
+        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
+        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
         # pylint: disable=line-too-long
@@ -131,9 +141,8 @@ class QFedAvg(FedAvg):
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        # Do not configure federated evaluation if a centralized evaluation
-        # function is provided
-        if self.eval_fn is not None:
+        # Do not configure federated evaluation if fraction_eval is 0
+        if self.fraction_eval == 0.0:
             return []
 
         # Parameters and config
@@ -176,7 +185,9 @@ class QFedAvg(FedAvg):
                 client_grads = np.append(
                     client_grads, grad_list[i]
                 )  # output a flattened array
-            return float(np.sum(np.square(client_grads)))
+            squared = np.square(client_grads)  # type: ignore
+            summed = np.sum(squared)
+            return float(summed)
 
         deltas = []
         hs_ffl = []
@@ -209,7 +220,17 @@ class QFedAvg(FedAvg):
             )
 
         weights_aggregated: Weights = aggregate_qffl(weights_before, deltas, hs_ffl)
-        return weights_to_parameters(weights_aggregated), {}
+        parameters_aggregated = weights_to_parameters(weights_aggregated)
+
+        # Aggregate custom metrics if aggregation fn was provided
+        metrics_aggregated = {}
+        if self.fit_metrics_aggregation_fn:
+            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
+        elif rnd == 1:
+            log(WARNING, "No fit_metrics_aggregation_fn provided")
+
+        return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
         self,
@@ -223,67 +244,21 @@ class QFedAvg(FedAvg):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-        return (
-            weighted_loss_avg(
-                [
-                    (
-                        evaluate_res.num_examples,
-                        evaluate_res.loss,
-                        evaluate_res.accuracy,
-                    )
-                    for client, evaluate_res in results
-                ]
-            ),
-            {},
+
+        # Aggregate loss
+        loss_aggregated = weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss)
+                for _, evaluate_res in results
+            ]
         )
 
+        # Aggregate custom metrics if aggregation fn was provided
+        metrics_aggregated = {}
+        if self.evaluate_metrics_aggregation_fn:
+            eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
+        elif rnd == 1:
+            log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
-DEPRECATION_WARNING_QFFEDAVG = """
-DEPRECATION WARNING: Deprecated strategy
-
-    QffedAvg
-
-use
-
-    QFedAvg
-
-instead.
-"""
-
-
-class QffedAvg(QFedAvg):
-    """Configurable QFedAvg strategy implementation."""
-
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
-    def __init__(
-        self,
-        q_param: float = 0.2,
-        qffl_learning_rate: float = 0.1,
-        fraction_fit: float = 0.1,
-        fraction_eval: float = 0.1,
-        min_fit_clients: int = 1,
-        min_eval_clients: int = 1,
-        min_available_clients: int = 1,
-        eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
-        ] = None,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
-        accept_failures: bool = True,
-        initial_parameters: Optional[Parameters] = None,
-    ) -> None:
-        super().__init__(
-            q_param=q_param,
-            qffl_learning_rate=qffl_learning_rate,
-            fraction_fit=fraction_fit,
-            fraction_eval=fraction_eval,
-            min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
-            min_available_clients=min_available_clients,
-            eval_fn=eval_fn,
-            on_fit_config_fn=on_fit_config_fn,
-            on_evaluate_config_fn=on_evaluate_config_fn,
-            accept_failures=accept_failures,
-            initial_parameters=initial_parameters,
-        )
-        print(DEPRECATION_WARNING_QFFEDAVG)
+        return loss_aggregated, metrics_aggregated
