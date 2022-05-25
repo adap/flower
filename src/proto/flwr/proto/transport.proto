@@ -95,7 +95,7 @@ message Scalar {
   // https://developers.google.com/protocol-buffers/docs/proto3#scalar
   oneof scalar {
     double double = 1;
-    // float float = 2;
+    float float = 2;
     // int32 int32 = 3;
     // int64 int64 = 4;
     // uint32 uint32 = 5;

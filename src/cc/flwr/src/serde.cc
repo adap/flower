@@ -38,8 +38,12 @@ ProtoScalar scalar_to_proto(flwr::Scalar scalar_msg) {
     s.set_bytes(scalar_msg.getBytes().value());
     return s;
   }
+   if (scalar_msg.getDouble() != std::nullopt) {
+    s.set_double_(scalar_msg.getDouble().value());
+    return s;
+  }
   if (scalar_msg.getFloat() != std::nullopt) {
-    s.set_double_(scalar_msg.getFloat().value());
+    s.set_float_(scalar_msg.getFloat().value());
     return s;
   }
   if (scalar_msg.getInt() != std::nullopt) {
@@ -61,7 +65,10 @@ flwr::Scalar scalar_from_proto(ProtoScalar scalar_msg) {
   flwr::Scalar scalar;
   switch (scalar_msg.scalar_case()) {
     case 1:
-      scalar.setFloat(scalar_msg.double_());
+      scalar.setDouble(scalar_msg.double_());
+      return scalar;
+    case 2:
+      scalar.setFloat(scalar_msg.float_());
       return scalar;
     case 8:
       scalar.setInt(scalar_msg.sint64());
