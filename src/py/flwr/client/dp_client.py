@@ -82,6 +82,8 @@ class DPClient(NumPyClient):
         self.parameters = None
         self.config = None
         self.privacy_engine = privacy_engine
+        self.target_epsilon = target_epsilon
+        self.target_delta = target_delta
         self.test_loader = test_loader
         clipping = "flat" if clipping_flat else "per_layer"
         loss_reduction = "mean" if loss_reduction_mean else "sum"
@@ -142,8 +144,13 @@ class DPClient(NumPyClient):
         """
         self.parameters = parameters
         self.config = config
-        # TODO: train loop
-        return super().fit(parameters, config)
+        # TODO: write a train loop
+        # TODO: update self.parameters after fitting but only if target_epsilon not exceeded
+        # TODO: add any other metrics we need to report back to the server
+        epsilon = self.privacy_engine.get_epsilon(self.target_delta)
+        accept = epsilon <= self.target_epsilon
+        metrics = {"epsilon": epsilon, "accept": accept}
+        return self.parameters, len(self.train_loader), metrics
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
