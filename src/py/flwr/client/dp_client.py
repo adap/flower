@@ -8,9 +8,8 @@ from torch.nn import Module
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 
+from flwr.client.numpy_client import NumPyClient
 from flwr.common import Scalar
-
-from .numpy_client import NumPyClient
 
 
 class DPClient(NumPyClient):
