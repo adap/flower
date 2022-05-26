@@ -23,7 +23,9 @@ class DPClient(NumPyClient):
         privacy_engine: PrivacyEngine,
         train_loader: DataLoader,
         test_loader: DataLoader,
-        noise_multiplier: float,
+        target_epsilon: float,
+        target_delta: float,
+        epochs: int,
         max_grad_norm: float,
         batch_first: bool = True,
         loss_reduction_mean: bool = True,
@@ -44,35 +46,38 @@ class DPClient(NumPyClient):
             A PyTorch DataLoader instance for training data.
         test_loader: torch.utils.data.DataLoader
             A PyTorch DataLoader instance for test data.
-        noise_multiplier: float
-            The ratio of the standard deviation of the Gaussian noise to
-            the L2-sensitivity of the function to which the noise is added
-            (How much noise to add)
+        target_epsilon: float
+            The privacy budget's epsilon
+        target_delta: float
+            The privacy budget's delta (probability of privacy leak)
+        epochs: int
+            The number of training epochs, to calculate noise multiplier to reach
+            target epsilon and delta.
         max_grad_norm: float
             The maximum norm of the per-sample gradients. Any gradient with norm
             higher than this will be clipped to this value.
-        batch_first: bool
+        batch_first: bool, default True
             Flag to indicate if the input tensor to the corresponding module
             has the first dimension representing the batch. If set to True,
             dimensions on input tensor are expected be ``[batch_size, ...]``,
             otherwise ``[K, batch_size, ...]``
-        loss_reduction_mean: bool
+        loss_reduction_mean: bool, default True
             Indicates if the loss reduction (for aggregating the gradients)
             is a mean (True) or sum (False) operation.
-        poisson_sampling: bool
+        poisson_sampling: bool, default True
             ``True`` if you want to use standard sampling required
             for DP guarantees. Setting ``False`` will leave provided data_loader
             unchanged. Technically this doesn't fit the assumptions made by
             privacy accounting mechanism, but it can be a good approximation when
             using Poisson sampling is unfeasible.
-        clipping_flat: bool
+        clipping_flat: bool, default True
             Per sample gradient clipping mechanism ("flat" (True) or
             "per_layer" (False)). Flat clipping calculates the norm of the
             entire gradient over all parameters, while per layer clipping sets
             individual norms for every parameter tensor. Flat clipping is
             usually preferred, but using per layer clipping in combination with
             distributed training can provide notable performance gains.
-        noise_generator: torch.Generator()
+        noise_generator: torch.Generator(), default None
             PyTorch Generator instance used as a source of randomness for the noise.
         """
         self.parameters = None
@@ -81,11 +86,17 @@ class DPClient(NumPyClient):
         self.test_loader = test_loader
         clipping = "flat" if clipping_flat else "per_layer"
         loss_reduction = "mean" if loss_reduction_mean else "sum"
-        self.module, self.optimizer, self.train_loader = self.privacy_engine.make_private(
+        (
+            self.module,
+            self.optimizer,
+            self.train_loader,
+        ) = self.privacy_engine.make_private_with_epsilon(
             module,
             optimizer,
             train_loader,
-            noise_multiplier=noise_multiplier,
+            target_epsilon=target_epsilon,
+            target_delta=target_delta,
+            epochs=epochs,
             max_grad_norm=max_grad_norm,
             batch_first=batch_first,
             loss_reduction=loss_reduction,
