@@ -1,4 +1,5 @@
 """Differentially Private Client."""
+from collections import OrderedDict
 from typing import Callable, Dict, List, Tuple
 
 import numpy as np
@@ -74,7 +75,6 @@ class DPClient(NumPyClient):
         kwargs: Dict[str, Callable]
             A dictionary of metric functions to evaluate the model.
         """
-        self.parameters = None
         self.config = None
         self.criterion = criterion
         self.metric_functions = kwargs
@@ -102,6 +102,12 @@ class DPClient(NumPyClient):
             noise_generator=noise_generator,
         )
 
+    def set_parameters(self, parameters: List[np.ndarray]) -> None:
+        """Set the PyTorch module parameters from a list of NumPy arrays."""
+        params_dict = zip(self.module.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        self.module.load_state_dict(state_dict, strict=True)
+
     def get_parameters(self) -> List[np.ndarray]:
         """Return the current local model parameters.
 
@@ -110,7 +116,7 @@ class DPClient(NumPyClient):
         parameters : List[numpy.ndarray]
             The local model parameters as a list of NumPy ndarrays.
         """
-        return self.parameters
+        return [param.cpu().numpy() for _, param in self.module.state_dict().items()]
 
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
@@ -138,7 +144,7 @@ class DPClient(NumPyClient):
             bool, bytes, float, int, or str. It can be used to communicate
             arbitrary values back to the server.
         """
-        self.parameters = parameters
+        self.set_parameters(parameters)
         self.config = config
         # TODO: write a train loop
         # TODO: update self.parameters after fitting but only if target_epsilon not exceeded (accept is True)
@@ -146,7 +152,8 @@ class DPClient(NumPyClient):
         epsilon = self.privacy_engine.get_epsilon(self.target_delta)
         accept = epsilon <= self.target_epsilon
         metrics = {"epsilon": epsilon, "accept": accept}
-        return self.parameters, len(self.train_loader), metrics
+        parameters = self.get_parameters() if accept else parameters
+        return parameters, len(self.train_loader), metrics
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
@@ -191,8 +198,10 @@ class DPClient(NumPyClient):
                 labels = data[1].to(self.device)
                 outputs = self.module(examples)
                 loss += self.criterion(outputs, labels).item()
-                predictions.extend(outputs.data[1])
+                predictions.extend(outputs.data)
                 actuals.extend(labels)
                 num_examples += labels.size(0)
-        metrics = {name: f(predictions, actuals) for name, f in self.metric_functions}
+        predictions = torch.stack(predictions, 0)
+        actuals = torch.stack(actuals, 0)
+        metrics = {name: f(predictions, actuals) for name, f in self.metric_functions.items()}
         return loss, num_examples, metrics

@@ -18,7 +18,7 @@ class LogisticRegression(Module):
 
     def forward(self, x):
         """Forward pass."""
-        return sigmoid(self.linear(x))
+        return torch.sigmoid(self.linear(x))
 
 
 def get_dataloaders(batch_size):
@@ -51,7 +51,7 @@ def get_dataloaders(batch_size):
     )
     y = torch.from_numpy(
         np.array([0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0]).astype("float32")
-    )
+    ).unsqueeze(1)
     train_loader = DataLoader(TensorDataset(X, y), batch_size=batch_size)
     test_loader = DataLoader(TensorDataset(X, y), batch_size=batch_size)
     return train_loader, test_loader
@@ -80,3 +80,39 @@ def test_dp_client_init():
         max_grad_norm=1.0,
     )
     assert client.privacy_engine.get_epsilon(target_delta) == 0.0
+
+
+def test_dp_client_evaluate():
+    """DPClient.evaluate() works with an accuracy score function."""
+    module = LogisticRegression()
+    privacy_engine = PrivacyEngine()
+    batch_size = 4
+    train_loader, test_loader = get_dataloaders(batch_size)
+    optimizer = SGD(module.parameters(), lr=0.001)
+    criterion = BCELoss()
+    target_epsilon = 1.0
+    target_delta = 0.1
+
+    def accuracy(predictions, actuals):
+        """Binary classifier accuracy score function."""
+        total = actuals.size(0)
+        correct = (predictions.gt(0.5) == actuals).sum().item()
+        return correct / total
+
+    client = DPClient(
+        module,
+        optimizer,
+        criterion,
+        privacy_engine,
+        train_loader,
+        test_loader,
+        target_epsilon,
+        target_delta,
+        epochs=10,
+        max_grad_norm=1.0,
+        accuracy=accuracy,
+    )
+    loss, num_examples, metrics = client.evaluate(client.get_parameters(), {})
+    assert loss > 0
+    assert num_examples == 20
+    assert metrics["accuracy"] > 0.0 and metrics["accuracy"] < 1.0
