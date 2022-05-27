@@ -1,7 +1,8 @@
 """Differentially Private Client."""
-from typing import Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple
 
 import numpy as np
+import torch
 from opacus import PrivacyEngine
 from torch import Generator
 from torch.nn import Module
@@ -13,12 +14,13 @@ from flwr.common import Scalar
 
 
 class DPClient(NumPyClient):
-    """Differentially private version of NumPyClient."""
+    """Differentially private version of NumPyClient using Opacus and PyTorch."""
 
     def __init__(
         self,
         module: Module,
         optimizer: Optimizer,
+        criterion: Callable,
         privacy_engine: PrivacyEngine,
         train_loader: DataLoader,
         test_loader: DataLoader,
@@ -29,6 +31,8 @@ class DPClient(NumPyClient):
         batch_first: bool = True,
         loss_reduction_mean: bool = True,
         noise_generator: Generator = None,
+        device: str = "cpu",
+        **kwargs: Dict[str, Callable],
     ):
         """
         Parameters
@@ -37,6 +41,8 @@ class DPClient(NumPyClient):
             A PyTorch neural network module instance.
         optimizer: torch.optim.Optimizer
             A PyTorch optimizer instance.
+        criterion: Callable
+            A function that takes predicted and actual values and returns a loss.
         privacy_engine: opacus.PrivacyEngine
             An Opacus PrivacyEngine instance.
         train_loader: torch.utils.data.DataLoader
@@ -63,9 +69,16 @@ class DPClient(NumPyClient):
             is a mean (True) or sum (False) operation.
         noise_generator: torch.Generator(), default None
             PyTorch Generator instance used as a source of randomness for the noise.
+        device: str, default "cpu"
+            The device name to fit the model on.
+        kwargs: Dict[str, Callable]
+            A dictionary of metric functions to evaluate the model.
         """
         self.parameters = None
         self.config = None
+        self.criterion = criterion
+        self.metric_functions = kwargs
+        self.device = device
         self.privacy_engine = privacy_engine
         self.target_epsilon = target_epsilon
         self.target_delta = target_delta
@@ -167,5 +180,19 @@ class DPClient(NumPyClient):
         extended format (int, float, float, Dict[str, Scalar]) have been
         deprecated and removed since Flower 0.19.
         """
-        # TODO: test loop
-        return super().evaluate(parameters, config)
+        predictions = []
+        actuals = []
+        num_examples = 0
+        loss = 0.0
+        with torch.no_grad():
+            self.module.to(self.device)
+            for data in self.test_loader:
+                examples = data[0].to(self.device)
+                labels = data[1].to(self.device)
+                outputs = self.module(examples)
+                loss += self.criterion(outputs, labels).item()
+                predictions.extend(outputs.data[1])
+                actuals.extend(labels)
+                num_examples += labels.size(0)
+        metrics = {name: f(predictions, actuals) for name, f in self.metric_functions}
+        return loss, num_examples, metrics
