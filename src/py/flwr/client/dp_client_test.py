@@ -15,18 +15,13 @@ class LogisticRegression(Module):
     def __init__(self):
         super(LogisticRegression, self).__init__()
         self.linear = Linear(2, 1)
-        self.criterion = BCELoss()
 
     def forward(self, x):
         """Forward pass."""
         return sigmoid(self.linear(x))
 
 
-def test_dp_client_init():
-    """DPClient can be constructed correctly."""
-    module = LogisticRegression()
-    privacy_engine = PrivacyEngine()
-    batch_size = 4
+def get_dataloaders(batch_size):
     X = torch.from_numpy(
         np.array(
             [
@@ -56,15 +51,25 @@ def test_dp_client_init():
     y = torch.from_numpy(
         np.array([0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0]).astype("float32")
     )
-
     train_loader = DataLoader(TensorDataset(X, y), batch_size=batch_size)
     test_loader = DataLoader(TensorDataset(X, y), batch_size=batch_size)
+    return train_loader, test_loader
+
+
+def test_dp_client_init():
+    """DPClient can be constructed correctly."""
+    module = LogisticRegression()
+    privacy_engine = PrivacyEngine()
+    batch_size = 4
+    train_loader, test_loader = get_dataloaders(batch_size)
     optimizer = SGD(module.parameters(), lr=0.001)
+    criterion = BCELoss()
     target_epsilon = 1.0
     target_delta = 0.1
     client = DPClient(
         module,
         optimizer,
+        criterion,
         privacy_engine,
         train_loader,
         test_loader,
