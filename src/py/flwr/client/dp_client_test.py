@@ -22,6 +22,7 @@ class LogisticRegression(Module):
 
 
 def get_dataloaders(batch_size):
+    """Get dataloaders for unit testing."""
     X = torch.from_numpy(
         np.array(
             [
