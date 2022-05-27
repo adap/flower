@@ -28,8 +28,6 @@ class DPClient(NumPyClient):
         max_grad_norm: float,
         batch_first: bool = True,
         loss_reduction_mean: bool = True,
-        poisson_sampling: bool = True,
-        clipping_flat: bool = True,
         noise_generator: Generator = None,
     ):
         """
@@ -63,19 +61,6 @@ class DPClient(NumPyClient):
         loss_reduction_mean: bool, default True
             Indicates if the loss reduction (for aggregating the gradients)
             is a mean (True) or sum (False) operation.
-        poisson_sampling: bool, default True
-            ``True`` if you want to use standard sampling required
-            for DP guarantees. Setting ``False`` will leave provided data_loader
-            unchanged. Technically this doesn't fit the assumptions made by
-            privacy accounting mechanism, but it can be a good approximation when
-            using Poisson sampling is unfeasible.
-        clipping_flat: bool, default True
-            Per sample gradient clipping mechanism ("flat" (True) or
-            "per_layer" (False)). Flat clipping calculates the norm of the
-            entire gradient over all parameters, while per layer clipping sets
-            individual norms for every parameter tensor. Flat clipping is
-            usually preferred, but using per layer clipping in combination with
-            distributed training can provide notable performance gains.
         noise_generator: torch.Generator(), default None
             PyTorch Generator instance used as a source of randomness for the noise.
         """
@@ -86,24 +71,21 @@ class DPClient(NumPyClient):
         self.target_delta = target_delta
         self.epochs = epochs
         self.test_loader = test_loader
-        clipping = "flat" if clipping_flat else "per_layer"
         loss_reduction = "mean" if loss_reduction_mean else "sum"
         (
             self.module,
             self.optimizer,
             self.train_loader,
         ) = self.privacy_engine.make_private_with_epsilon(
-            module,
-            optimizer,
-            train_loader,
+            module=module,
+            optimizer=optimizer,
+            data_loader=train_loader,
             target_epsilon=target_epsilon,
             target_delta=target_delta,
             epochs=epochs,
             max_grad_norm=max_grad_norm,
             batch_first=batch_first,
             loss_reduction=loss_reduction,
-            poisson_sampling=poisson_sampling,
-            clipping=clipping,
             noise_generator=noise_generator,
         )
 
