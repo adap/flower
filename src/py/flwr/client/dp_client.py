@@ -146,13 +146,25 @@ class DPClient(NumPyClient):
         """
         self.set_parameters(parameters)
         self.config = config
-        # TODO: write a train loop
-        # TODO: update self.parameters after fitting but only if target_epsilon not exceeded (accept is True)
-        # TODO: add any other metrics we need to report back to the server
+        
+
+        for _ in range(self.epochs):
+            for X_train, Y_train in self.train_loader:
+                X_train = X_train.to(self.device)
+                Y_train = Y_train.to(self.device)
+                self.optimizer.zero_grad()
+                Predictions = self.module(X_train)
+                loss = self.criterion(Predictions, Y_train)
+                loss.backward()
+                self.optimizer.step()
+
         epsilon = self.privacy_engine.get_epsilon(self.target_delta)
         accept = epsilon <= self.target_epsilon
-        metrics = {"epsilon": epsilon, "accept": accept}
+        metrics = {name: f(Predictions, Y_train) for name, f in self.metric_functions.items()}
+        metrics["epsilon"] = epsilon
+        metrics["accept"] = accept
         parameters = self.get_parameters() if accept else parameters
+        
         return parameters, len(self.train_loader), metrics
 
     def evaluate(

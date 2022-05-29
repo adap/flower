@@ -6,7 +6,7 @@ from torch.nn import BCELoss, Linear, Module
 from torch.optim import SGD
 from torch.utils.data import DataLoader, TensorDataset
 
-from flwr.client.dp_client import DPClient
+from dp_client import DPClient
 
 
 class LogisticRegression(Module):
@@ -80,6 +80,34 @@ def test_dp_client_init():
         max_grad_norm=1.0,
     )
     assert client.privacy_engine.get_epsilon(target_delta) == 0.0
+
+def test_dp_client_fit():
+    module = LogisticRegression()
+    privacy_engine = PrivacyEngine()
+    batch_size = 4
+    train_loader, test_loader = get_dataloaders(batch_size)
+    optimizer = SGD(module.parameters(), lr=0.001)
+    criterion = BCELoss()
+    target_epsilon = 1.0
+    target_delta = 0.1
+
+    client = DPClient(
+        module,
+        optimizer,
+        criterion,
+        privacy_engine,
+        train_loader,
+        test_loader,
+        target_epsilon,
+        target_delta,
+        epochs=10,
+        max_grad_norm=1.0,
+    )
+    parameters, num_examples, metrics = client.fit(client.get_parameters(), {})
+    # assert parameters
+    # assert num_examples
+    # assert metrics["epsilon"]
+    # assert metrics["accept"] == True
 
 
 def test_dp_client_evaluate():
