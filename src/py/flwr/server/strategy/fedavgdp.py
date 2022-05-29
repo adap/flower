@@ -14,34 +14,12 @@
 # ==============================================================================
 """Federated Averaging DP strategy."""
 
+from typing import Callable, Dict, List, Optional, Tuple
 
-from logging import WARNING
 import flwr as fl
-from collections import OrderedDict
-from flwr.server.strategy import FedAvg
-from flwr.common import Weights, Parameters, Scalar, FitRes
+from flwr.common import FitRes, Parameters, Scalar, Weights
 from flwr.server.server import shutdown
-import numpy as np
-from typing import Dict, List, Tuple, Optional, Callable
-
-from flwr.common import (
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    MetricsAggregationFn,
-    Parameters,
-    Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
-)
-from flwr.common.logger import log
-from flwr.server.client_manager import ClientManager
-from flwr.server.client_proxy import ClientProxy
-
-from .aggregate import aggregate, weighted_loss_avg
-from .strategy import Strategy
+from flwr.server.strategy import FedAvg
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
@@ -55,8 +33,13 @@ class FedAvgDp(FedAvg):
     """This class implements the FedAvg strategy for Differential Privacy context."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
-    def __init__(self, fraction_fit: float = 0.1, fraction_eval: float = 0.1,
-        min_fit_clients: int = 2, min_eval_clients: int = 2, min_available_clients: int = 2,
+    def __init__(
+        self,
+        fraction_fit: float = 0.1,
+        fraction_eval: float = 0.1,
+        min_fit_clients: int = 2,
+        min_eval_clients: int = 2,
+        min_available_clients: int = 2,
         eval_fn: Optional[Callable[[Weights], Optional[Tuple[float, float]]]] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -80,8 +63,12 @@ class FedAvgDp(FedAvg):
         # Keep track of the maximum possible privacy budget
         self.max_epsilon = 0.0
 
-    def aggregate_fit(self, rnd: int, results: List[Tuple[fl.server.client_proxy.ClientProxy, FitRes]],
-        failures: List[BaseException]) -> Optional[Weights]:
+    def aggregate_fit(
+        self,
+        rnd: int,
+        results: List[Tuple[fl.server.client_proxy.ClientProxy, FitRes]],
+        failures: List[BaseException],
+    ) -> Optional[Weights]:
 
         if not results:
             return None
@@ -111,7 +98,6 @@ class FedAvgDp(FedAvg):
         # Call aggregate_evaluate from base class (FedAvg)
         return super().aggregate_fit(rnd, results, failures)
 
-
     def configure_evaluate(self, rnd, parameters, client_manager):
         """Configure the next round of evaluation. Returns None since evaluation is made server side."""
 
@@ -121,4 +107,3 @@ class FedAvgDp(FedAvg):
             )
         # rnd -1 is a special round for last evaluation when all rounds are over
         return None
-
