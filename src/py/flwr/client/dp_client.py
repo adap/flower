@@ -157,14 +157,12 @@ class DPClient(NumPyClient):
                 loss = self.criterion(Predictions, Y_train)
                 loss.backward()
                 self.optimizer.step()
-
         epsilon = self.privacy_engine.get_epsilon(self.target_delta)
         accept = epsilon <= self.target_epsilon
         metrics = {name: f(Predictions, Y_train) for name, f in self.metric_functions.items()}
         metrics["epsilon"] = epsilon
         metrics["accept"] = accept
         parameters = self.get_parameters() if accept else parameters
-        
         return parameters, len(self.train_loader), metrics
 
     def evaluate(

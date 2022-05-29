@@ -91,6 +91,11 @@ def test_dp_client_fit():
     target_epsilon = 1.0
     target_delta = 0.1
 
+    def accuracy(predictions, actuals):
+        total = actuals.size(0)
+        correct = (predictions.gt(0.5) == actuals).sum().item()
+        return correct / total
+
     client = DPClient(
         module,
         optimizer,
@@ -102,12 +107,15 @@ def test_dp_client_fit():
         target_delta,
         epochs=10,
         max_grad_norm=1.0,
+        accuracy=accuracy,
+
     )
     parameters, num_examples, metrics = client.fit(client.get_parameters(), {})
-    # assert parameters
-    # assert num_examples
-    # assert metrics["epsilon"]
-    # assert metrics["accept"] == True
+    assert parameters is not None
+    assert num_examples == 20
+    assert metrics["epsilon"] is not None
+    assert metrics["accept"] is not None
+    assert metrics["accuracy"] > 0.0 and metrics["accuracy"] < 1.0
 
 
 def test_dp_client_evaluate():
