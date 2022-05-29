@@ -93,7 +93,7 @@ def test_dp_client_fit():
 
     def accuracy(predictions, actuals):
         total = actuals.size(0)
-        correct = (predictions.gt(0.5) == actuals).sum().item()
+        correct = (predictions.eq(actuals)).sum().item()
         return correct / total
 
     client = DPClient(
@@ -108,8 +108,8 @@ def test_dp_client_fit():
         epochs=10,
         max_grad_norm=1.0,
         accuracy=accuracy,
-
     )
+    
     parameters, num_examples, metrics = client.fit(client.get_parameters(), {})
     assert parameters is not None
     assert num_examples == 20

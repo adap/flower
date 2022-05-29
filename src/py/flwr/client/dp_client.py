@@ -147,7 +147,6 @@ class DPClient(NumPyClient):
         self.set_parameters(parameters)
         self.config = config
         
-
         for _ in range(self.epochs):
             for X_train, Y_train in self.train_loader:
                 X_train = X_train.to(self.device)
