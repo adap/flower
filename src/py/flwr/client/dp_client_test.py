@@ -1,12 +1,10 @@
 import numpy as np
 import torch
+from dp_client import DPClient
 from opacus import PrivacyEngine
-from sklearn.datasets import make_moons
 from torch.nn import BCELoss, Linear, Module
 from torch.optim import SGD
 from torch.utils.data import DataLoader, TensorDataset
-
-from dp_client import DPClient
 
 
 class LogisticRegression(Module):
@@ -81,6 +79,7 @@ def test_dp_client_init():
     )
     assert client.privacy_engine.get_epsilon(target_delta) == 0.0
 
+
 def test_dp_client_fit():
     module = LogisticRegression()
     privacy_engine = PrivacyEngine()
@@ -109,7 +108,7 @@ def test_dp_client_fit():
         max_grad_norm=1.0,
         accuracy=accuracy,
     )
-    
+
     parameters, num_examples, metrics = client.fit(client.get_parameters(), {})
     assert parameters is not None
     assert num_examples == 20
