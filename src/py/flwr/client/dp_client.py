@@ -146,7 +146,7 @@ class DPClient(NumPyClient):
         """
         self.set_parameters(parameters)
         self.config = config
-        
+
         for _ in range(self.epochs):
             for X_train, Y_train in self.train_loader:
                 X_train = X_train.to(self.device)
@@ -196,21 +196,34 @@ class DPClient(NumPyClient):
         extended format (int, float, float, Dict[str, Scalar]) have been
         deprecated and removed since Flower 0.19.
         """
-        predictions = []
-        actuals = []
-        num_examples = 0
-        loss = 0.0
-        with torch.no_grad():
-            self.module.to(self.device)
-            for data in self.test_loader:
-                examples = data[0].to(self.device)
-                labels = data[1].to(self.device)
-                outputs = self.module(examples)
-                loss += self.criterion(outputs, labels).item()
-                predictions.extend(outputs.data)
-                actuals.extend(labels)
-                num_examples += labels.size(0)
-        predictions = torch.stack(predictions, 0)
-        actuals = torch.stack(actuals, 0)
-        metrics = {name: f(predictions, actuals) for name, f in self.metric_functions.items()}
-        return loss, num_examples, metrics
+        return test(
+            self.module, self.criterion, self.test_loader, self.device, self.metric_functions
+        )
+
+
+def test(
+    module: Module,
+    criterion: Callable,
+    dataloader: DataLoader,
+    device: str,
+    metric_functions: Dict[str, Callable],
+):
+    """Validate the network on the test set."""
+    predictions = []
+    actuals = []
+    num_examples = 0
+    loss = 0.0
+    with torch.no_grad():
+        module.to(device)
+        for data in dataloader:
+            examples = data[0].to(device)
+            labels = data[1].to(device)
+            outputs = module(examples)
+            loss += criterion(outputs, labels).item()
+            predictions.extend(outputs.data)
+            actuals.extend(labels)
+            num_examples += labels.size(0)
+    predictions = torch.stack(predictions, 0)
+    actuals = torch.stack(actuals, 0)
+    metrics = {name: f(predictions, actuals) for name, f in metric_functions.items()}
+    return loss, num_examples, metrics

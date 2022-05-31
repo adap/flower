@@ -16,10 +16,9 @@
 
 from typing import Callable, Dict, List, Optional, Tuple
 
-import flwr as fl
 from flwr.common import FitRes, Parameters, Scalar, Weights
-from flwr.server.server import shutdown
-from flwr.server.strategy import FedAvg
+
+from .fedavg import FedAvg
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
@@ -66,7 +65,7 @@ class FedAvgDp(FedAvg):
     def aggregate_fit(
         self,
         rnd: int,
-        results: List[Tuple[fl.server.client_proxy.ClientProxy, FitRes]],
+        results: List[Tuple["ClientProxy", FitRes]],
         failures: List[BaseException],
     ) -> Optional[Weights]:
 
@@ -75,19 +74,12 @@ class FedAvgDp(FedAvg):
 
         # Get the privacy budget of each client
         accepted_results = []
-        disconnect_clients = []
         epsilons = []
         for c, r in results:
             # Check if client can be accepted or not
             if r.metrics["accept"]:
                 accepted_results.append([c, r])
                 epsilons.append(r.metrics["epsilon"])
-            else:
-                disconnect_clients.append(c)
-
-        # Disconnect clients if needed
-        if disconnect_clients:
-            shutdown(disconnect_clients)
 
         results = accepted_results
         if epsilons:

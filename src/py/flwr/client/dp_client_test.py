@@ -1,10 +1,11 @@
 import numpy as np
 import torch
-from dp_client import DPClient
 from opacus import PrivacyEngine
 from torch.nn import BCELoss, Linear, Module
 from torch.optim import SGD
 from torch.utils.data import DataLoader, TensorDataset
+
+from flwr.client import DPClient
 
 
 class LogisticRegression(Module):
