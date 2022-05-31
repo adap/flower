@@ -1,6 +1,6 @@
 # Federated HuggingFace Transformers using Flower and PyTorch
 
-This introductory example to using [HuggingFace](https://huggingface.co) Transformers with Flower with PyTorch. This example has been extended from the [quickstart_pytorch](https://flower.dev/docs/quickstart_pytorch.html) example. The training script closely follows the [HuggingFace course](https://huggingface.co/course/chapter3?fw=pt), so you are encouraged to check that out for detailed explaination for the transformer pipeline. 
+This introductory example to using [HuggingFace](https://huggingface.co) Transformers with Flower with PyTorch. This example has been extended from the [quickstart_pytorch](https://flower.dev/docs/quickstart-pytorch.html) example. The training script closely follows the [HuggingFace course](https://huggingface.co/course/chapter3?fw=pt), so you are encouraged to check that out for detailed explaination for the transformer pipeline.
 
 Like `quickstart_pytorch`, running this example in itself is also meant to be quite easy.
 
@@ -58,4 +58,4 @@ Start client 2 in the second terminal:
 python3 client.py
 ```
 
-You will see that PyTorch is starting a federated training. 
+You will see that PyTorch is starting a federated training.

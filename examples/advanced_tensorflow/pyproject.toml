@@ -11,7 +11,7 @@ description = "Advanced Flower/TensorFlow Example"
 authors = ["The Flower Authors <enquiries@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
-flwr = "^0.17.0"
+python = ">=3.7,<3.11"
+flwr = "^0.19.0"
 # flwr = { path = "../../", develop = true }  # Development
-tensorflow-cpu = "^2.6.2"
+tensorflow-cpu = "^2.9.0"

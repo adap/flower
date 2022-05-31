@@ -15,7 +15,6 @@
 """Contains the strategy abstraction and different implementations."""
 
 
-from .default import DefaultStrategy as DefaultStrategy
 from .fast_and_slow import FastAndSlow as FastAndSlow
 from .fault_tolerant_fedavg import FaultTolerantFedAvg as FaultTolerantFedAvg
 from .fedadagrad import FedAdagrad as FedAdagrad
@@ -30,7 +29,6 @@ from .qfedavg import QFedAvg as QFedAvg
 from .strategy import Strategy as Strategy
 
 __all__ = [
-    "DefaultStrategy",
     "FastAndSlow",
     "FaultTolerantFedAvg",
     "FedAdagrad",
