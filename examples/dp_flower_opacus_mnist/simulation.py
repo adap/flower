@@ -1,10 +1,13 @@
+import multiprocessing as mp
 import sys
 from collections import OrderedDict
+from functools import partial
 from pkgutil import get_data
 from typing import Optional, Tuple
 
 import numpy as np
 import torch
+from loguru import logger
 from opacus import PrivacyEngine
 from torch import nn, optim
 from torch.utils.data import DataLoader
@@ -88,7 +91,7 @@ def get_client_fn(
     def client_fn(cid: str):
         module = Net()
         optimizer = optim.SGD(module.parameters(), lr=learning_rate)
-        criterion = nn.BCELoss()
+        criterion = nn.CrossEntropyLoss()
         privacy_engine = PrivacyEngine()
         # train_loader, test_loader = get_dataloaders(batch_size, num_clients, int(cid))
         train_loader, test_loader = load_data(batch_size, num_clients, int(cid))
@@ -116,6 +119,13 @@ def get_eval_fn(batch_size: int, device: str):
     def eval_fn(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
         """Server-side evaluation function."""
         model = Net()
+        criterion = nn.CrossEntropyLoss()
+
+        def accuracy(predictions, actuals):
+            total = actuals.size(0)
+            correct = (predictions.eq(actuals)).sum().item()
+            return correct / total
+
         # Set weights in model.
         state_dict = OrderedDict(
             {k: torch.tensor(np.atleast_1d(v)) for k, v in zip(model.state_dict().keys(), weights)}
@@ -123,15 +133,15 @@ def get_eval_fn(batch_size: int, device: str):
         model.load_state_dict(state_dict, strict=True)
         model.to(device)
         # testloader = get_dataloaders(batch_size, 1, 0)[1]
-        testloader = load_data(batch_size, 1, 0)
-        loss, _, accuracy = test(model, testloader)
+        _, test_loader = load_data(batch_size, 1, 0)
+        loss, _, accuracy = test(model, criterion, test_loader, device, accuracy=accuracy)
         # Return metrics.
         return loss, {"accuracy": accuracy}
 
     return eval_fn
 
 
-def main(
+def simulation_main(
     num_clients: int,
     num_rounds: int,
     fit_clients: int,
@@ -171,8 +181,98 @@ def main(
     )
 
 
+def start_client(
+    num_clients: int,
+    target_epsilon: float,
+    target_delta: float,
+    epochs: int,
+    max_grad_norm: float,
+    batch_size: int,
+    learning_rate: float,
+    device: str,
+    cid: int,
+):
+    client_fn = get_client_fn(
+        num_clients=num_clients,
+        target_epsilon=target_epsilon,
+        target_delta=target_delta,
+        epochs=epochs,
+        max_grad_norm=max_grad_norm,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        device=device,
+    )
+    logger.info("Starting client {}", cid)
+    return fl.client.start_numpy_client("[::]:8080", client=client_fn(cid))
+
+
+def main(
+    num_clients: int,
+    num_rounds: int,
+    fit_clients: int,
+    available_clients: int,
+    target_epsilon: float,
+    target_delta: float,
+    epochs: int,
+    max_grad_norm: float,
+    batch_size: int,
+    learning_rate: float,
+    client_device: str,
+    server_device: str,
+):
+    """Main."""
+    fraction_clients = fit_clients / available_clients
+    strategy = fl.server.strategy.FedAvgDp(
+        fraction_fit=fraction_clients,
+        fraction_eval=fraction_clients,
+        min_fit_clients=fit_clients,
+        min_available_clients=available_clients,
+        eval_fn=get_eval_fn(batch_size, server_device),
+    )
+    server_process = mp.Process(
+        target=fl.server.start_server,
+        args=["[::]:8080"],
+        kwargs=dict(config={"num_rounds": num_rounds}, strategy=strategy),
+    )
+    server_process.start()
+    with mp.Pool(num_clients) as pool:
+        start = partial(
+            start_client,
+            num_clients,
+            target_epsilon,
+            target_delta,
+            epochs,
+            max_grad_norm,
+            batch_size,
+            learning_rate,
+            client_device,
+        )
+
+        pool.map(start, range(num_clients))
+    server_process.kill()
+
+
+def main_test():
+    batch_size = 32
+    num_clients = 1
+    cid = 0
+    module = Net()
+    optimizer = optim.SGD(module.parameters(), lr=0.001)
+    criterion = nn.BCELoss()
+    privacy_engine = PrivacyEngine()
+    # train_loader, test_loader = get_dataloaders(batch_size, num_clients, int(cid))
+    train_loader, test_loader = load_data(batch_size, num_clients, int(cid))
+
+    def accuracy(predictions, actuals):
+        total = actuals.size(0)
+        correct = (predictions.eq(actuals)).sum().item()
+        return correct / total
+
+    test(module, criterion, test_loader, "cpu", accuracy=accuracy)
+
+
 if __name__ == "__main__":
-    NUM_CLIENTS = 5
+    NUM_CLIENTS = 1
     AVAILABLE_CLIENTS = 4
     FIT_CLIENTS = 3
     NUM_ROUNDS = 1
@@ -184,17 +284,18 @@ if __name__ == "__main__":
     EPOCHS = 2
     CLIENT_DEVICE = "cpu"
     SERVER_DEVICE = "cpu"
-    main(
-        num_clients=NUM_CLIENTS,
-        num_rounds=NUM_ROUNDS,
-        fit_clients=FIT_CLIENTS,
-        available_clients=AVAILABLE_CLIENTS,
-        target_epsilon=TARGET_EPSILON,
-        target_delta=TARGET_DELTA,
-        epochs=EPOCHS,
-        max_grad_norm=MAX_GRAD_NORM,
-        batch_size=BATCH_SIZE,
-        learning_rate=LEARNING_RATE,
-        client_device=CLIENT_DEVICE,
-        server_device=SERVER_DEVICE,
-    )
+    # main(
+    #     num_clients=NUM_CLIENTS,
+    #     num_rounds=NUM_ROUNDS,
+    #     fit_clients=FIT_CLIENTS,
+    #     available_clients=AVAILABLE_CLIENTS,
+    #     target_epsilon=TARGET_EPSILON,
+    #     target_delta=TARGET_DELTA,
+    #     epochs=EPOCHS,
+    #     max_grad_norm=MAX_GRAD_NORM,
+    #     batch_size=BATCH_SIZE,
+    #     learning_rate=LEARNING_RATE,
+    #     client_device=CLIENT_DEVICE,
+    #     server_device=SERVER_DEVICE,
+    # )
+    main_test()
