@@ -93,9 +93,10 @@ def test_dp_client_fit():
 
     def accuracy(predictions, actuals):
         total = actuals.size(0)
-        correct = (predictions.eq(actuals)).sum().item()
+        correct = (predictions.gt(0.5).eq(actuals)).sum().item()
         return correct / total
 
+    epochs = 10
     client = DPClient(
         module,
         optimizer,
@@ -105,7 +106,7 @@ def test_dp_client_fit():
         test_loader,
         target_epsilon,
         target_delta,
-        epochs=10,
+        epochs=epochs,
         max_grad_norm=1.0,
         accuracy=accuracy,
     )
@@ -115,7 +116,8 @@ def test_dp_client_fit():
     assert num_examples == 20
     assert metrics["epsilon"] is not None
     assert metrics["accept"] is not None
-    assert metrics["accuracy"] > 0.0 and metrics["accuracy"] < 1.0
+    assert len(metrics["accuracy"]) == epochs
+    assert metrics["accuracy"][0] > 0.0 and metrics["accuracy"][0] < 1.0
 
 
 def test_dp_client_evaluate():
@@ -132,7 +134,7 @@ def test_dp_client_evaluate():
     def accuracy(predictions, actuals):
         """Binary classifier accuracy score function."""
         total = actuals.size(0)
-        correct = (predictions.gt(0.5) == actuals).sum().item()
+        correct = (predictions.gt(0.5).eq(actuals)).sum().item()
         return correct / total
 
     client = DPClient(

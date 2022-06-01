@@ -146,23 +146,34 @@ class DPClient(NumPyClient):
         """
         self.set_parameters(parameters)
         self.config = config
-
-        for _ in range(self.epochs):
-            for X_train, Y_train in self.train_loader:
-                X_train = X_train.to(self.device)
-                Y_train = Y_train.to(self.device)
-                self.optimizer.zero_grad()
-                Predictions = self.module(X_train)
-                loss = self.criterion(Predictions, Y_train)
-                loss.backward()
-                self.optimizer.step()
+        metrics = {}
+        for i in range(self.epochs):
+            predictions = []
+            actuals = []
+            for x_train, y_train in self.train_loader:
+                num = y_train.size(0)
+                if num > 0:
+                    x_train = x_train.to(self.device)
+                    y_train = y_train.to(self.device)
+                    self.optimizer.zero_grad()
+                    outputs = self.module(x_train)
+                    loss = self.criterion(outputs, y_train)
+                    loss.backward()
+                    self.optimizer.step()
+                    predictions.extend(outputs.data)
+                    actuals.extend(y_train)
+            predictions = torch.stack(predictions, 0)
+            actuals = torch.stack(actuals, 0)
+            for name, fun in self.metric_functions.items():
+                metrics.setdefault(name, [])
+                metrics[name].append(fun(predictions, actuals))
         epsilon = self.privacy_engine.get_epsilon(self.target_delta)
         accept = epsilon <= self.target_epsilon
-        metrics = {name: f(Predictions, Y_train) for name, f in self.metric_functions.items()}
+        # metrics = {name: f(outputs, y_train) for name, f in self.metric_functions.items()}
         metrics["epsilon"] = epsilon
         metrics["accept"] = accept
         parameters = self.get_parameters() if accept else parameters
-        return parameters, len(self.train_loader), metrics
+        return parameters, len(self.train_loader.dataset), metrics
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
@@ -197,7 +208,7 @@ class DPClient(NumPyClient):
         deprecated and removed since Flower 0.19.
         """
         return test(
-            self.module, self.criterion, self.test_loader, self.device, self.metric_functions
+            self.module, self.criterion, self.test_loader, self.device, **self.metric_functions
         )
 
 
@@ -206,7 +217,7 @@ def test(
     criterion: Callable,
     dataloader: DataLoader,
     device: str,
-    metric_functions: Dict[str, Callable],
+    **kwargs: Dict[str, Callable],
 ):
     """Validate the network on the test set."""
     predictions = []
@@ -225,5 +236,5 @@ def test(
             num_examples += labels.size(0)
     predictions = torch.stack(predictions, 0)
     actuals = torch.stack(actuals, 0)
-    metrics = {name: f(predictions, actuals) for name, f in metric_functions.items()}
+    metrics = {name: f(predictions, actuals) for name, f in kwargs.items()}
     return loss, num_examples, metrics
