@@ -76,6 +76,7 @@ def test_dp_client_init():
         target_epsilon,
         target_delta,
         epochs=10,
+        rounds=1,
         max_grad_norm=1.0,
     )
     assert client.privacy_engine.get_epsilon(target_delta) == 0.0
@@ -108,6 +109,7 @@ def test_dp_client_fit():
         target_epsilon,
         target_delta,
         epochs=epochs,
+        rounds=1,
         max_grad_norm=1.0,
         accuracy=accuracy,
     )
@@ -148,6 +150,7 @@ def test_dp_client_evaluate():
         target_epsilon,
         target_delta,
         epochs=10,
+        rounds=1,
         max_grad_norm=1.0,
         accuracy=accuracy,
     )
