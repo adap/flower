@@ -119,14 +119,8 @@ def start_client(batch_size: int, epochs: int, rounds: int, cid: int) -> None:
     fl.client.start_numpy_client("[::]:8080", client=client)
 
 
-def set_parameters(self, parameters: List[np.ndarray]) -> None:
-    """Set the PyTorch module parameters from a list of NumPy arrays."""
-    params_dict = zip(self.module.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    self.module.load_state_dict(state_dict, strict=True)
-
-
 def accuracy(predictions, actuals):
+    """Multi-class classification accuracy function."""
     total = actuals.size(0)
     correct = (torch.max(predictions, 1)[1].eq(actuals)).sum().item()
     return correct / total
