@@ -1,13 +1,14 @@
 import argparse
 import multiprocessing as mp
 import sys
+from collections import OrderedDict
 from functools import partial
 
 from loguru import logger
 
 sys.path.insert(0, "../../src/py")
 
-from typing import List, Tuple
+from typing import Callable, List, Tuple
 
 import numpy as np
 import torch
@@ -80,6 +81,14 @@ def get_weights(model):
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
 
+def set_weights(module: nn.Module, parameters: List[np.ndarray]) -> None:
+    """Set the PyTorch module parameters from a list of NumPy arrays."""
+    params_dict = zip(module.state_dict().keys(), parameters)
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    module.load_state_dict(state_dict, strict=True)
+    return module
+
+
 # Main function to create DP client
 def start_client(batch_size, epochs, cid) -> None:
     """Start a client."""
@@ -109,55 +118,45 @@ def start_client(batch_size, epochs, cid) -> None:
     fl.client.start_numpy_client("[::]:8080", client=client)
 
 
-def get_eval_fn():
-    """Get the evaluation function for server side.
+def set_parameters(self, parameters: List[np.ndarray]) -> None:
+    """Set the PyTorch module parameters from a list of NumPy arrays."""
+    params_dict = zip(self.module.state_dict().keys(), parameters)
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    self.module.load_state_dict(state_dict, strict=True)
+
+
+def accuracy(predictions, actuals):
+    total = actuals.size(0)
+    correct = (torch.max(predictions, 1)[1].eq(actuals)).sum().item()
+    return correct / total
+
+
+def evaluate(
+    module: nn.Module,
+    criterion: Callable,
+    dataloader: DataLoader,
+    device: str,
+    weights: List[np.ndarray],
+):
+    """Evaluation function for server side.
+
+    Parameters
+    ----------
+    weights
+        Updated model weights to evaluate.
 
     Returns
     -------
-    evaluate
-        The evaluation function
+    loss
+        Loss on the test set.
+    accuracy
+        Accuracy on the test set.
     """
-
-    def evaluate(weights):
-        """Evaluation function for server side.
-
-        Parameters
-        ----------
-        weights
-            Updated model weights to evaluate.
-
-        Returns
-        -------
-        loss
-            Loss on the test set.
-        accuracy
-            Accuracy on the test set.
-        """
-        # Prepare multiprocess
-        manager = mp.Manager()
-        # We receive the results through a shared dictionary
-        return_dict = manager.dict()
-        # Create the process
-        # 0 is for the share and 1 total number of clients, here for server test
-        # we take the full test set
-        p = mp.Process(target=test, args=(weights, return_dict, 0, 1, batch_size))
-        # Start the process
-        p.start()
-        # Wait for it to end
-        p.join()
-        # Close it
-        try:
-            p.close()
-        except ValueError as e:
-            print(f"Couldn't close the evaluating process: {e}")
-        # Get the return values
-        loss = return_dict["loss"]
-        accuracy = return_dict["accuracy"]
-        # Del everything related to multiprocessing
-        del (manager, return_dict, p)
-        return float(loss), {"accuracy": float(accuracy)}
-
-    return evaluate
+    set_weights(module, weights)
+    loss, _, metrics = test(module, criterion, dataloader, device, accuracy=accuracy)
+    acc = metrics["accuracy"]
+    logger.info("Accuracy: {}", acc)
+    return float(loss), {"accuracy": float(acc)}
 
 
 if __name__ == "__main__":
@@ -204,14 +203,6 @@ if __name__ == "__main__":
         type=int,
         help="Number of microbatches " "(must evenly divide batch_size)",
     )
-    args = parser.parse_args()
-    epochs = args.local_epochs
-    num_clients = args.num_clients
-    # ----------------------------------------------------------------
-
-    # NOW THAT WE HAVE DONE CLIENT LETS START THE SERVER
-
-    parser = argparse.ArgumentParser()
 
     parser.add_argument(
         "-r", type=int, default=3, help="Number of rounds for the federated training"
@@ -239,8 +230,9 @@ if __name__ == "__main__":
         default=2,
         help="Min available clients, min number of clients that need to connect to the server before training round can start",
     )
-
     args = parser.parse_args()
+    epochs = int(args.local_epochs)
+    num_clients = int(args.num_clients)
     rounds = int(args.r)
     fc = int(args.fc)
     ac = int(args.ac)
@@ -253,16 +245,14 @@ if __name__ == "__main__":
     init_weights = get_weights(net)
     # Convert the weights (np.ndarray) to parameters
     init_param = fl.common.weights_to_parameters(init_weights)
-
-    # del the net as we don't need it anymore
-    del net
-
+    _, test_loader = load_data(batch_size)
+    eval_fn = partial(evaluate, net, CrossEntropyLoss(), test_loader, "cpu")
     # Define the strategy
     strategy = FedAvgDp(
         fraction_fit=float(fc / ac),
         min_fit_clients=fc,
         min_available_clients=ac,
-        # eval_fn=get_eval_fn(), # TODO: Pickle error because of the inner function
+        eval_fn=eval_fn,
         initial_parameters=init_param,
     )
     server_process = mp.Process(

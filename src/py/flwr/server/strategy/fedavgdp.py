@@ -89,13 +89,3 @@ class FedAvgDp(FedAvg):
 
         # Call aggregate_evaluate from base class (FedAvg)
         return super().aggregate_fit(rnd, results, failures)
-
-    def configure_evaluate(self, rnd, parameters, client_manager):
-        """Configure the next round of evaluation. Returns None since evaluation is made server side."""
-
-        if client_manager.num_available() < self.min_fit_clients:
-            print(
-                f"{client_manager.num_available()} client(s) available(s), waiting for {self.min_available_clients} availables to continue."
-            )
-        # rnd -1 is a special round for last evaluation when all rounds are over
-        return None

@@ -208,6 +208,8 @@ class DPClient(NumPyClient):
         extended format (int, float, float, Dict[str, Scalar]) have been
         deprecated and removed since Flower 0.19.
         """
+        self.set_parameters(parameters)
+        self.config = config
         return test(
             self.module, self.criterion, self.test_loader, self.device, **self.metric_functions
         )

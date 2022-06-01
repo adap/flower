@@ -82,6 +82,7 @@ def test_dp_client_init():
 
 
 def test_dp_client_fit():
+    """DPClient.fit() method works."""
     module = LogisticRegression()
     privacy_engine = PrivacyEngine()
     batch_size = 4
