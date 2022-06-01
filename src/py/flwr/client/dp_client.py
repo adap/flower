@@ -4,6 +4,7 @@ from typing import Callable, Dict, List, Tuple
 
 import numpy as np
 import torch
+from loguru import logger
 from opacus import PrivacyEngine
 from torch import Generator
 from torch.nn import Module
@@ -29,6 +30,7 @@ class DPClient(NumPyClient):
         target_epsilon: float,
         target_delta: float,
         epochs: int,
+        rounds: int,
         max_grad_norm: float,
         batch_first: bool = True,
         loss_reduction_mean: bool = True,
@@ -58,6 +60,9 @@ class DPClient(NumPyClient):
         epochs: int
             The number of training epochs, to calculate noise multiplier to reach
             target epsilon and delta.
+        rounds: int
+            The number of training rounds, to calculate noise multiplier to reach
+            target epsilon and delta.
         max_grad_norm: float
             The maximum norm of the per-sample gradients. Any gradient with norm
             higher than this will be clipped to this value.
@@ -84,6 +89,7 @@ class DPClient(NumPyClient):
         self.target_epsilon = target_epsilon
         self.target_delta = target_delta
         self.epochs = epochs
+        self.rounds = rounds
         self.test_loader = test_loader
         loss_reduction = "mean" if loss_reduction_mean else "sum"
         (
@@ -96,7 +102,7 @@ class DPClient(NumPyClient):
             data_loader=train_loader,
             target_epsilon=target_epsilon,
             target_delta=target_delta,
-            epochs=epochs,
+            epochs=epochs * rounds,
             max_grad_norm=max_grad_norm,
             batch_first=batch_first,
             loss_reduction=loss_reduction,
@@ -173,6 +179,8 @@ class DPClient(NumPyClient):
         # metrics = {name: f(outputs, y_train) for name, f in self.metric_functions.items()}
         metrics["epsilon"] = epsilon
         metrics["accept"] = accept
+        if not accept:
+            logger.warning("Client max privacy budget exceeded. Not updating parameters.")
         parameters = self.get_parameters() if accept else parameters
         return parameters, len(self.train_loader.dataset), metrics
 

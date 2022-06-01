@@ -90,7 +90,7 @@ def set_weights(module: nn.Module, parameters: List[np.ndarray]) -> None:
 
 
 # Main function to create DP client
-def start_client(batch_size, epochs, cid) -> None:
+def start_client(batch_size: int, epochs: int, rounds: int, cid: int) -> None:
     """Start a client."""
     module = Net()
 
@@ -112,6 +112,7 @@ def start_client(batch_size, epochs, cid) -> None:
         target_epsilon,
         target_delta,
         epochs=epochs,
+        rounds=rounds,
         max_grad_norm=1.0,
     )
     logger.info("Starting client # {}", cid)
@@ -155,7 +156,7 @@ def evaluate(
     set_weights(module, weights)
     loss, _, metrics = test(module, criterion, dataloader, device, accuracy=accuracy)
     acc = metrics["accuracy"]
-    logger.info("Accuracy: {}", acc)
+    logger.info("Global model accuracy: {}", acc)
     return float(loss), {"accuracy": float(acc)}
 
 
@@ -261,7 +262,7 @@ if __name__ == "__main__":
         kwargs=dict(config={"num_rounds": rounds}, strategy=strategy),
     )
     server_process.start()
-    client_fn = partial(start_client, batch_size, epochs)
+    client_fn = partial(start_client, batch_size, epochs, rounds)
     with mp.Pool(num_clients) as pool:
         pool.map(client_fn, range(num_clients))
     server_process.kill()

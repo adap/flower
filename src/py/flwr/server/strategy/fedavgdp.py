@@ -16,6 +16,7 @@
 
 from typing import Callable, Dict, List, Optional, Tuple
 
+import flwr.server.server as server
 from flwr.common import FitRes, Parameters, Scalar, Weights
 
 from .fedavg import FedAvg
@@ -80,6 +81,9 @@ class FedAvgDp(FedAvg):
             if r.metrics["accept"]:
                 accepted_results.append([c, r])
                 epsilons.append(r.metrics["epsilon"])
+            else:
+                # Disconnect any client whose privacy budget was exceeded.
+                server.reconnect_client(c, server.Reconnect(None))
 
         results = accepted_results
         if epsilons:
