@@ -16,6 +16,8 @@
 
 from typing import Callable, Dict, List, Optional, Tuple
 
+from loguru import logger
+
 import flwr.server.server as server
 from flwr.common import FitRes, Parameters, Scalar, Weights
 
@@ -89,7 +91,7 @@ class FedAvgDp(FedAvg):
         if epsilons:
             self.max_epsilon = max(self.max_epsilon, max(epsilons))
 
-        print(f"Privacy budget ε at round {rnd}: {self.max_epsilon}")
+        logger.info("Privacy budget ε at round {}: {:.3f}", rnd, self.max_epsilon)
 
         # Call aggregate_evaluate from base class (FedAvg)
         return super().aggregate_fit(rnd, results, failures)

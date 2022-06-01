@@ -36,6 +36,7 @@ class DPClient(NumPyClient):
         loss_reduction_mean: bool = True,
         noise_generator: Generator = None,
         device: str = "cpu",
+        cid: int = 0,
         **kwargs: Dict[str, Callable],
     ):
         """
@@ -78,9 +79,12 @@ class DPClient(NumPyClient):
             PyTorch Generator instance used as a source of randomness for the noise.
         device: str, default "cpu"
             The device name to fit the model on.
+        cid: int, default 0
+            The id of the current client instance.
         kwargs: Dict[str, Callable]
             A dictionary of metric functions to evaluate the model.
         """
+        self.cid = cid
         self.config = None
         self.criterion = criterion
         self.metric_functions = kwargs
@@ -172,15 +176,17 @@ class DPClient(NumPyClient):
             predictions = torch.stack(predictions, 0)
             actuals = torch.stack(actuals, 0)
             for name, fun in self.metric_functions.items():
-                metrics.setdefault(name, [])
-                metrics[name].append(fun(predictions, actuals))
+                metrics[name] = fun(predictions, actuals)
         epsilon = self.privacy_engine.get_epsilon(self.target_delta)
         accept = epsilon <= self.target_epsilon
         # metrics = {name: f(outputs, y_train) for name, f in self.metric_functions.items()}
         metrics["epsilon"] = epsilon
         metrics["accept"] = accept
+        logger.info("Client {} epsilon: {:.3f}", self.cid, epsilon)
         if not accept:
-            logger.warning("Client max privacy budget exceeded. Not updating parameters.")
+            logger.warning(
+                "Client {} max privacy budget exceeded. Not updating parameters.", self.cid
+            )
         parameters = self.get_parameters() if accept else parameters
         return parameters, len(self.train_loader.dataset), metrics
 
@@ -218,9 +224,11 @@ class DPClient(NumPyClient):
         """
         self.set_parameters(parameters)
         self.config = config
-        return test(
+        results = test(
             self.module, self.criterion, self.test_loader, self.device, **self.metric_functions
         )
+        logger.info("Client {} metrics: {}", self.cid, results[2])
+        return results
 
 
 def test(

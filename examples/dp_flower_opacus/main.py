@@ -1,6 +1,9 @@
 import argparse
 import multiprocessing as mp
 import sys
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning)
 from collections import OrderedDict
 from functools import partial
 
@@ -16,7 +19,7 @@ import torch.nn as nn
 from opacus import PrivacyEngine
 from torch.nn import CrossEntropyLoss
 from torch.optim import SGD
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 
@@ -25,9 +28,8 @@ from flwr.client.dp_client import DPClient, test
 from flwr.server.strategy import FedAvgDp
 
 
-# Training Model that is being used by the client
 class Net(nn.Module):
-    """"""
+    """An example convolutional neural network for fitting the CIFAR-10 dataset."""
 
     def __init__(self) -> None:
         super(Net, self).__init__()
@@ -41,6 +43,7 @@ class Net(nn.Module):
         self.fc3 = nn.Linear(84, 10)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Neural network forward pass."""
         x = self.pool(torch.tanh(self.conv1(x)))
         x = self.gn1(x)
         x = self.pool(torch.tanh(self.conv2(x)))
@@ -52,34 +55,22 @@ class Net(nn.Module):
         return x
 
 
-# function to load the MNIST dataset
-XY = Tuple[np.ndarray, np.ndarray]
-XYList = List[XY]
-PartitionedDataset = List[Tuple[XY, XY]]
-
-
-# def load(
-#     num_partitions: int,
-# ) -> PartitionedDataset:
-#     """Create partitioned version of MNIST."""
-#     xy_train, xy_test = tf.keras.datasets.mnist.load_data()
-#     xy_train_partitions = create_partitions(xy_train, num_partitions)
-#     xy_test_partitions = create_partitions(xy_test, num_partitions)
-#     return list(zip(xy_train_partitions, xy_test_partitions))
-
-
-def load_data(batch_size: int):
+def load_data(batch_size: int, num_clients: int = 1, cid: int = 0):
     """Load CIFAR-10 (training and test set)."""
     trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     trainset = CIFAR10("./data", train=True, download=True, transform=trf)
     testset = CIFAR10("./data", train=False, download=True, transform=trf)
-    return DataLoader(trainset, batch_size=batch_size, shuffle=True, drop_last=True), DataLoader(
-        testset
-    )
+    train_indices = np.array_split(np.arange(len(trainset.data)), num_clients)[cid]
+    test_indices = np.array_split(np.arange(len(testset.data)), num_clients)[cid]
+    train_subset = Subset(trainset, train_indices)
+    test_subset = Subset(testset, test_indices)
+    return DataLoader(
+        train_subset, batch_size=batch_size, shuffle=True, drop_last=True
+    ), DataLoader(test_subset)
 
 
-# Function to get the weights of the model
 def get_weights(model):
+    """Convert PyTorch module parameters to a numpy array."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
 
@@ -91,12 +82,21 @@ def set_weights(module: nn.Module, parameters: List[np.ndarray]) -> None:
     return module
 
 
+def accuracy(predictions, actuals):
+    """Multi-class classification accuracy function."""
+    total = actuals.size(0)
+    correct = (torch.max(predictions, 1)[1].eq(actuals)).sum().item()
+    return correct / total
+
+
 # Main function to create DP client
-def start_client(batch_size: int, epochs: int, rounds: int, cid: int) -> None:
+def start_client(
+    batch_size: int, epochs: int, rounds: int, num_clients: int, device: str, cid: int
+) -> None:
     """Start a client."""
     module = Net()
 
-    train_loader, test_loader = load_data(batch_size)
+    train_loader, test_loader = load_data(batch_size, num_clients, cid)
 
     optimizer = SGD(module.parameters(), lr=0.001)
     criterion = CrossEntropyLoss()
@@ -116,16 +116,12 @@ def start_client(batch_size: int, epochs: int, rounds: int, cid: int) -> None:
         epochs=epochs,
         rounds=rounds,
         max_grad_norm=1.0,
+        device=device,
+        cid=cid,
+        accuracy=accuracy,
     )
     logger.info("Starting client # {}", cid)
     fl.client.start_numpy_client("[::]:8080", client=client)
-
-
-def accuracy(predictions, actuals):
-    """Multi-class classification accuracy function."""
-    total = actuals.size(0)
-    correct = (torch.max(predictions, 1)[1].eq(actuals)).sum().item()
-    return correct / total
 
 
 def evaluate(
@@ -156,7 +152,8 @@ def evaluate(
     return float(loss), {"accuracy": float(acc)}
 
 
-if __name__ == "__main__":
+def make_arg_parser():
+    """Get a command line argument parser."""
     parser = argparse.ArgumentParser(description="Flower Client")
     parser.add_argument(
         "--num-clients",
@@ -227,7 +224,11 @@ if __name__ == "__main__":
         default=2,
         help="Min available clients, min number of clients that need to connect to the server before training round can start",
     )
-    args = parser.parse_args()
+    return parser
+
+
+if __name__ == "__main__":
+    args = make_arg_parser().parse_args()
     epochs = int(args.local_epochs)
     num_clients = int(args.num_clients)
     rounds = int(args.r)
@@ -258,7 +259,7 @@ if __name__ == "__main__":
         kwargs=dict(config={"num_rounds": rounds}, strategy=strategy),
     )
     server_process.start()
-    client_fn = partial(start_client, batch_size, epochs, rounds)
+    client_fn = partial(start_client, batch_size, epochs, rounds, num_clients, "cpu")
     with mp.Pool(num_clients) as pool:
         pool.map(client_fn, range(num_clients))
     server_process.kill()
