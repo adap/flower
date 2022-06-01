@@ -9,6 +9,7 @@ from torch import Generator
 from torch.nn import Module
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from flwr.client.numpy_client import NumPyClient
 from flwr.common import Scalar
@@ -147,10 +148,10 @@ class DPClient(NumPyClient):
         self.set_parameters(parameters)
         self.config = config
         metrics = {}
-        for i in range(self.epochs):
+        for _ in range(self.epochs):
             predictions = []
             actuals = []
-            for x_train, y_train in self.train_loader:
+            for x_train, y_train in tqdm(self.train_loader):
                 num = y_train.size(0)
                 if num > 0:
                     x_train = x_train.to(self.device)
@@ -222,19 +223,18 @@ def test(
     """Validate the network on the test set."""
     predictions = []
     actuals = []
-    num_examples = 0
+    num_examples = len(dataloader.dataset)
     loss = 0.0
     with torch.no_grad():
         module.to(device)
-        for data in dataloader:
+        for data in tqdm(dataloader):
             examples = data[0].to(device)
             labels = data[1].to(device)
             outputs = module(examples)
             loss += criterion(outputs, labels).item()
             predictions.extend(outputs.data)
             actuals.extend(labels)
-            num_examples += labels.size(0)
     predictions = torch.stack(predictions, 0)
     actuals = torch.stack(actuals, 0)
     metrics = {name: f(predictions, actuals) for name, f in kwargs.items()}
-    return loss, num_examples, metrics
+    return loss / num_examples, num_examples, metrics

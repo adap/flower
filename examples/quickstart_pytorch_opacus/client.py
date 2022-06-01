@@ -1,27 +1,19 @@
+import argparse
 import sys
-import warnings
-from collections import OrderedDict
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from loguru import logger
 from opacus import PrivacyEngine
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
-from tqdm import tqdm
 
 sys.path.insert(0, "../../src/py")
 
 import flwr as fl
-from flwr.client import DPClient  # , test
-
-# #############################################################################
-# 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
-# #############################################################################
-
-warnings.filterwarnings("ignore", category=UserWarning)
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+from flwr.client import DPClient
 
 
 class Net(nn.Module):
@@ -45,31 +37,6 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
-def train(net, trainloader, epochs):
-    """Train the model on the training set."""
-    criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-    for _ in range(epochs):
-        for images, labels in tqdm(trainloader):
-            optimizer.zero_grad()
-            criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
-            optimizer.step()
-
-
-def test(net, testloader):
-    """Validate the model on the test set."""
-    criterion = torch.nn.CrossEntropyLoss()
-    correct, total, loss = 0, 0, 0.0
-    with torch.no_grad():
-        for images, labels in tqdm(testloader):
-            outputs = net(images.to(DEVICE))
-            labels = labels.to(DEVICE)
-            loss += criterion(outputs, labels).item()
-            total += labels.size(0)
-            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-    return loss / len(testloader.dataset), correct / total
-
-
 def load_data():
     """Load CIFAR-10 (training and test set)."""
     trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
@@ -78,31 +45,37 @@ def load_data():
     return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
 
 
-# #############################################################################
-# 2. Federation of the pipeline with Flower
-# #############################################################################
+def start_client(cid: int):
+    device = "cpu"
+    module = Net().to(device)
+    optimizer = torch.optim.SGD(module.parameters(), lr=0.001, momentum=0.9)
+    criterion = torch.nn.CrossEntropyLoss()
+    privacy_engine = PrivacyEngine()
+    train_loader, test_loader = load_data()
+    dp_client = DPClient(
+        module=module,
+        optimizer=optimizer,
+        criterion=criterion,
+        privacy_engine=privacy_engine,
+        train_loader=train_loader,
+        test_loader=test_loader,
+        target_epsilon=0.9,
+        target_delta=0.1,
+        epochs=1,
+        max_grad_norm=1.0,
+        device=device,
+    )
+    logger.info("Starting client {}", cid)
+    fl.client.start_numpy_client("[::]:8080", client=dp_client)
 
-# Load model and data (simple CNN, CIFAR-10)
-net = Net().to(DEVICE)
-trainloader, testloader = load_data()
 
-
-# Start Flower client
-module = Net()
-optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-criterion = torch.nn.CrossEntropyLoss()
-privacy_engine = PrivacyEngine()
-train_loader, test_loader = load_data()
-dp_client = DPClient(
-    module=module,
-    optimizer=optimizer,
-    criterion=criterion,
-    privacy_engine=privacy_engine,
-    train_loader=train_loader,
-    test_loader=test_loader,
-    target_epsilon=1.0,
-    target_delta=0.1,
-    epochs=2,
-    max_grad_norm=1.0,
-)
-fl.client.start_numpy_client("[::]:8080", client=FlowerClient())
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "cid",
+        type=int,
+        default=0,
+        help="Client number.",
+    )
+    args = parser.parse_args()
+    start_client(args.cid)
