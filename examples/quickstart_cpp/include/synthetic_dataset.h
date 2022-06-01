@@ -10,10 +10,10 @@
 class SyntheticDataset {
  public:
   // Generates the synthetic dataset of size size around given vector m of size ms_size and given bias b.
-  SyntheticDataset(std::vector<double> ms, double b, size_t size);
+  SyntheticDataset(std::vector<double> ms, double b, std::size_t size);
 
   // Returns the size of the dataset.
-  size_t size();
+  std::size_t size();
 
   // Returns the dataset.
   std::vector<std::vector<double>> get_data_points();

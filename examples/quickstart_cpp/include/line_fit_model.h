@@ -10,15 +10,16 @@
 #include "synthetic_dataset.h"
 #include "linear_algebra_util.h"
 
-class LineFitModel {
- public:
+class LineFitModel
+{
+public:
   LineFitModel(int num_iterations, double learning_rate, int num_params);
 
   std::vector<double> predict(std::vector<std::vector<double>> X);
 
-  std::tuple<size_t, double, double> train_SGD(SyntheticDataset &dataset);
+  std::tuple<std::size_t, double, double> train_SGD(SyntheticDataset &dataset);
 
-  std::tuple<size_t, double, double> evaluate(SyntheticDataset &test_dataset);
+  std::tuple<std::size_t, double, double> evaluate(SyntheticDataset &test_dataset);
 
   std::vector<double> get_pred_weights();
 
@@ -28,9 +29,9 @@ class LineFitModel {
 
   void set_bias(double new_bias);
 
-  size_t get_model_size();
+  std::size_t get_model_size();
 
- private:
+private:
   int num_iterations;
   int batch_size;
   double learning_rate;
@@ -41,4 +42,4 @@ class LineFitModel {
   double compute_mse(std::vector<double> true_y, std::vector<double> pred);
 };
 
-#endif //FLOWER_CPP_LINE_FIT_MODEL_H
+#endif // FLOWER_CPP_LINE_FIT_MODEL_H
