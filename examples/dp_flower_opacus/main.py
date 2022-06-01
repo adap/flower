@@ -27,6 +27,8 @@ from flwr.server.strategy import FedAvgDp
 
 # Training Model that is being used by the client
 class Net(nn.Module):
+    """"""
+
     def __init__(self) -> None:
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
