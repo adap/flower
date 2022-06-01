@@ -106,7 +106,7 @@ flwr::EvaluateRes SimpleFlwrClient::evaluate(flwr::EvaluateIns ins) {
     resp.setLoss(std::get<1>(result));
 
     flwr::Scalar loss_metric = flwr::Scalar();
-    loss_metric.setFloat(std::get<2>(result));
+    loss_metric.setDouble(std::get<2>(result));
     std::map<std::string, flwr::Scalar> metric = {{"loss", loss_metric}};
     resp.setMetrics(metric);
 
