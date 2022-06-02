@@ -97,7 +97,7 @@ def test_start_server(sample_num=10, T=4, U=7, p=(1 << 31) - 1, vector_dimension
 def test_start_client(server_address: str,
                       client,
                       grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH, ):
-    fl.client.start_numpy_client(server_address, client, grpc_max_message_length, sa_wrapper=MyLightSecAggWrapper)
+    fl.client.start_numpy_client(server_address, client, grpc_max_message_length, sa_protocol='lightsecagg')
 
 
 def test_start_simulation(sample_num=10, T=4, U=7, p=(1 << 31) - 1, vector_dimension=100000, dropout_value=0,

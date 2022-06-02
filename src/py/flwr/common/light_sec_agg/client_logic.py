@@ -16,19 +16,16 @@ import galois
 from .mpc_functions import mask_encoding, compute_aggregate_encoded_mask, model_masking
 import numpy as np
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
-from flwr.common.sec_agg.sec_agg_primitives import check_clipping_range
 from flwr.common.typing import LightSecAggSetupConfigIns, LightSecAggSetupConfigRes, AskEncryptedEncodedMasksIns, \
     AskEncryptedEncodedMasksRes, EncryptedEncodedMasksPacket, Parameters, AskMaskedModelsIns, AskMaskedModelsRes, \
     AskAggregatedEncodedMasksIns, AskAggregatedEncodedMasksRes
 from flwr.common.sec_agg import sec_agg_primitives
-from flwr_crypto_cpp import create_shares
 from flwr.common.logger import log
 from logging import DEBUG, ERROR, INFO, WARNING
 from typing import Dict, List, Tuple
 from flwr.common import (
     AskKeysRes,
 )
-import timeit
 
 
 def padding(d, U, T):
@@ -54,7 +51,6 @@ def decrypt_sub_mask(key, ciphertext):
 
 
 def setup_config(client, ins: LightSecAggSetupConfigIns):
-    total_time = -timeit.default_timer()
     # Assigning parameter values to object fields
     cfg = ins.sec_agg_cfg_dict
     client.N = cfg['sample_num']
@@ -87,19 +83,12 @@ def setup_config(client, ins: LightSecAggSetupConfigIns):
     client.encoded_mask_dict = {}
     client.sk, client.pk = sec_agg_primitives.generate_key_pairs()
     log(INFO, "LightSecAgg Stage 0 Completed: Config Set Up")
-    log(INFO, f"public key: {client.pk}")
-    total_time = total_time+timeit.default_timer()
-    if client.id == 3:
-        f = open("log.txt", "a")
-        f.write(f"Client without communication stage 0:{total_time} \n")
-        f.close()
     return LightSecAggSetupConfigRes(
         pk=sec_agg_primitives.public_key_to_bytes(client.pk)
     )
 
 
 def ask_encrypted_encoded_masks(client, ins: AskEncryptedEncodedMasksIns):
-    total_time = -timeit.default_timer()
     # build key dict
     for other_id, res in ins.public_keys_dict.items():
         if other_id == client.id:
@@ -124,17 +113,10 @@ def ask_encrypted_encoded_masks(client, ins: AskEncryptedEncodedMasksIns):
             ciphertext=encrypt_sub_mask(client.shared_key_dict[i], encoded_msk_set[i])
         )
         packets.append(packet)
-    log(INFO, "SecAgg Stage 1 Completed: Sent Encrypted Sub-masks via Packets")
-    total_time = total_time+timeit.default_timer()
-    if client.id == 3:
-        f = open("log.txt", "a")
-        f.write(f"Client without communication stage 1:{total_time} \n")
-        f.close()
     return AskEncryptedEncodedMasksRes(packets)
 
 
 def ask_masked_models(client, ins: AskMaskedModelsIns):
-    total_time = -timeit.default_timer()
     packets = ins.packet_list
     fit_ins = ins.fit_ins
     active_clients: List[int] = []
@@ -184,26 +166,12 @@ def ask_masked_models(client, ins: AskMaskedModelsIns):
 
     quantized_weights = model_masking(quantized_weights, client.msk, client.GF)
     log(INFO, "LightSecAgg Stage 2 Completed: Sent Masked Models")
-    total_time = total_time+timeit.default_timer()
-    if client.id == 3:
-        print(weights)
-        f = open("log.txt", "a")
-        f.write(f"Client without communication stage 2:{total_time} \n")
-        f.close()
     return AskMaskedModelsRes(weights_to_parameters(quantized_weights))
 
 
 def ask_aggregated_encoded_masks(client, ins: AskAggregatedEncodedMasksIns):
-    total_time = -timeit.default_timer()
-
     active_clients = ins.surviving_clients
     agg_msk = compute_aggregate_encoded_mask(client.encoded_mask_dict, client.GF, active_clients)
     log(INFO, "SecAgg Stage 3 Completed: Sent Aggregated Encoded Masks for Unmasking")
-
-    total_time = total_time+timeit.default_timer()
-    if client.id == 3:
-        f = open("log.txt", "a")
-        f.write(f"Client without communication stage 3:{total_time} \n")
-        f.close()
     return AskAggregatedEncodedMasksRes(weights_to_parameters([agg_msk]))
 

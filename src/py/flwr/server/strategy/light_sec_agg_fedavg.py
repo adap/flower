@@ -23,7 +23,7 @@ from flwr.server.strategy.fedavg import FedAvg
 from flwr.server.server import Server, ClientProxy
 from flwr.common.typing import SAServerMessageCarrier
 from flwr.common.sec_agg import sec_agg_primitives
-import timeit
+from flwr.common.timer import Timer
 from flwr.common.secure_aggregation import SecureAggregationFitRound, SecureAggregationResultsAndFailures
 from flwr.common.logger import log
 
@@ -96,14 +96,6 @@ class LightSecAggFedAvg(SecureAggregationFitRound, FedAvg):
     def fit_round(self, server: Server, rnd: int) -> Optional[Tuple[Optional[Parameters],
                                                                     Dict[str, Scalar],
                                                                     FitResultsAndFailures]]:
-        stopwatch = []
-
-        def tic():
-            stopwatch.append(-timeit.default_timer())
-
-        def toc():
-            stopwatch[-1] += timeit.default_timer()
-
         def check_and_update(_in: SecureAggregationResultsAndFailures, stage_num):
             ret1 = _in[0]
             if len(ret1) < self.U:
@@ -111,8 +103,9 @@ class LightSecAggFedAvg(SecureAggregationFitRound, FedAvg):
             ret2 = [c for c, res in ret1]
             return ret1, ret2
 
+        tm = Timer()
         # sample clients
-        tic()
+        tm.tic()
         ins_lst = self.configure_fit(rnd, server.parameters, server.client_manager())
 
         # Testing , to be removed================================================
@@ -136,7 +129,6 @@ class LightSecAggFedAvg(SecureAggregationFitRound, FedAvg):
             fit_ins_dict[i] = o[1]
         assert self.N == len(ins_lst)
         self.proxy2id = proxy2id
-        toc()
 
         # STAGE 0: setup config
         log(INFO, "LightSecAgg Stage 0: Setting up config")
@@ -153,11 +145,10 @@ class LightSecAggFedAvg(SecureAggregationFitRound, FedAvg):
             str2scalar=new_dict(self.cfg_dict, v)
         )) for k, v in proxy2id.items()])
 
-        tic()
+        tm.tic('s0')
         res_lst, active_clients = check_and_update(results_and_failures, 0)
         public_key_dict = dict([(str(proxy2id[c]), res.bytes_list[0]) for c, res in res_lst])
-
-        toc()
+        tm.toc('s0')
 
         # STAGE 1: ask encrypted encoded sub-masks
         log(INFO, "LightSecAgg Stage 1: Ask encrypted encoded sub-masks")
@@ -165,7 +156,7 @@ class LightSecAggFedAvg(SecureAggregationFitRound, FedAvg):
         results_and_failures = self.sa_request([
             (c, SAServerMessageCarrier('1', str2scalar=public_key_dict)) for c in active_clients])
 
-        tic()
+        tm.tic('s1')
         res_lst, active_clients = check_and_update(results_and_failures, 1)
         # forward packets to their destinations
         fwd_packets_dict = dict([(proxy2id[c], dict()) for c in active_clients])
@@ -174,14 +165,14 @@ class LightSecAggFedAvg(SecureAggregationFitRound, FedAvg):
                 des = int(des)
                 if des in fwd_packets_dict.keys():
                     fwd_packets_dict[des][str(proxy2id[c])] = ctext
-        toc()
+        tm.toc('s1')
 
         # STAGE 2: ask masked models
         log(INFO, "LightSecAgg Stage 2: Ask masked models")
         # results_and_failures = self.ask_masked_models(active_clients, fwd_packets_dict, fit_ins_dict)
         results_and_failures = self.sa_request([
             (c, SAServerMessageCarrier('2', str2scalar=fwd_packets_dict[proxy2id[c]])) for c in active_clients])
-        tic()
+        tm.tic('s2')
         res_lst, active_clients = check_and_update(results_and_failures, 2)
         # compute the aggregated masked model
         GF = self.GF
@@ -191,7 +182,7 @@ class LightSecAggFedAvg(SecureAggregationFitRound, FedAvg):
             weights = parameters_to_weights(res_lst[i][1].parameters)
             weights = [o.view(GF) for o in weights]
             agg_model = sec_agg_primitives.weights_addition(agg_model, weights)
-        toc()
+        tm.toc('s2')
 
         # STAGE 3: ask aggregated encoded sub-masks
         log(INFO, "LightSecAgg Stage 3: Ask aggregated encoded sub-masks")
@@ -200,7 +191,7 @@ class LightSecAggFedAvg(SecureAggregationFitRound, FedAvg):
         results_and_failures = self.sa_request([
             (c, SAServerMessageCarrier('3', numpy_ndarray_list=[active_lst])) for c in active_clients])
 
-        tic()
+        tm.tic('s3')
         res_lst, active_clients = check_and_update(results_and_failures, 3)
         # reconstruct mask
         alpha_s = np.arange(1, self.N + 1)
@@ -217,7 +208,21 @@ class LightSecAggFedAvg(SecureAggregationFitRound, FedAvg):
         agg_model = sec_agg_primitives.weights_divide(agg_model, factor)
         # inverse quantize
         agg_model = sec_agg_primitives.reverse_quantize(agg_model, self.clipping_range, self.target_range)
-        toc()
+        tm.toc('s3')
+        tm.toc()
+        times = tm.get_all()
+        num_dropouts = self.N - len(active_clients)
+        f = open("log.txt", "a")
+        f.write(f"Server time with communication:{times['default']} \n")
+        f.write(f"Server time without communication:{sum([times['s0'], times['s1'], times['s2'], times['s3']])} \n")
+        f.write(f"first element {agg_model[0].flatten()[0]}\n\n\n")
+        f.write("server time (detail):\n%s\n" %
+                '\n'.join([f"round {i} = {times['s' + str(i)]} ({times['s' + str(i)] * 100. / times['default']:.2f} %)"
+                           for i in range(4)]))
+        f.write('shamir\'s key reconstruction time: %f (%.2f%%)\n' % (0.1, 0.1))
+        f.write('mask generation time: %f (%.2f%%)\n' % (0.1, 0.1))
+        f.write('num of dropouts: %d\n' % num_dropouts)
+        f.close()
         return weights_to_parameters(agg_model), None, None
 
 

@@ -85,7 +85,7 @@ class LightSecAggWrapper(SAClient):
             res = lsa_proto.ask_aggregated_encoded_masks(self, new_ins)
             ret_msg = SAClientMessageCarrier(identifier='3', parameters=res.aggregated_encoded_mask)
         self.tm.toc('s' + ins.identifier)
-        if self.sec_agg_id == 6:
+        if self.id == 6:
             f = open("log.txt", "a")
             f.write(f"Client without communication stage {ins.identifier}:{self.tm.get('s' + ins.identifier)} \n")
             f.close()
