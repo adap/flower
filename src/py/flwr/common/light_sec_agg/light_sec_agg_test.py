@@ -1,5 +1,5 @@
 import flwr as fl
-import tensorflow as tf
+import numpy as np
 import time
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from multiprocessing import Process
@@ -44,25 +44,37 @@ class MyLightSecAggWrapper(SAClient):
 # Testing
 # Define Flower client
 
-model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
-model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
-# Load CIFAR-10 dataset
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+model = [np.zeros(1000, dtype=float)]
 
 
 class CifarClient(fl.client.NumPyClient):
     def get_parameters(self):  # type: ignore
-        return model.get_weights()
+        return model
 
     def fit(self, parameters, config):  # type: ignore
-        model.set_weights(parameters)
-        model.fit(x_train, y_train, epochs=1, batch_size=32)
-        return model.get_weights(), len(x_train), {}
+        return model, 1, {}
 
     def evaluate(self, parameters, config):  # type: ignore
-        model.set_weights(parameters)
-        loss, accuracy = model.evaluate(x_test, y_test)
-        return loss, len(x_test), {"accuracy": accuracy}
+        return 0, 1, {"accuracy": 0}
+# model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+# model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+# # Load CIFAR-10 dataset
+# (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+#
+#
+# class CifarClient(fl.client.NumPyClient):
+#     def get_parameters(self):  # type: ignore
+#         return model.get_weights()
+#
+#     def fit(self, parameters, config):  # type: ignore
+#         model.set_weights(parameters)
+#         model.fit(x_train, y_train, epochs=1, batch_size=32)
+#         return model.get_weights(), len(x_train), {}
+#
+#     def evaluate(self, parameters, config):  # type: ignore
+#         model.set_weights(parameters)
+#         loss, accuracy = model.evaluate(x_test, y_test)
+#         return loss, len(x_test), {"accuracy": accuracy}
 
 
 def test_start_server(sample_num=10, T=4, U=7, p=(1 << 31) - 1, vector_dimension=100000, dropout_value=0,
