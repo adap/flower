@@ -26,15 +26,14 @@ from flwr.common import (
 
 
 )
-import timeit
 
 
 def setup_param(client, setup_param_ins: SetupParamIns):
-    total_time = -timeit.default_timer()
     # Assigning parameter values to object fields
     sec_agg_param_dict = setup_param_ins.sec_agg_param_dict
     client.sample_num = sec_agg_param_dict['sample_num']
     client.sec_agg_id = sec_agg_param_dict['sec_agg_id']
+    client.id = sec_agg_param_dict['sec_agg_id']
     client.share_num = sec_agg_param_dict['share_num']
     client.threshold = sec_agg_param_dict['threshold']
     client.clipping_range = sec_agg_param_dict['clipping_range']
@@ -56,27 +55,16 @@ def setup_param(client, setup_param_ins: SetupParamIns):
     client.sk1_share_dict = {}
     client.shared_key_2_dict = {}
     log(INFO, "SecAgg Stage 0 Completed: Parameters Set Up")
-    total_time = total_time+timeit.default_timer()
-    if client.sec_agg_id == 3:
-        f = open("log.txt", "a")
-        f.write(f"Client without communication stage 0:{total_time} \n")
-        f.close()
     return SetupParamRes()
 
 
 def ask_keys(client, ask_keys_ins: AskKeysIns) -> AskKeysRes:
-    total_time = -timeit.default_timer()
     # Create 2 sets private public key pairs
     # One for creating pairwise masks
     # One for encrypting message to distribute shares
     client.sk1, client.pk1 = sec_agg_primitives.generate_key_pairs()
     client.sk2, client.pk2 = sec_agg_primitives.generate_key_pairs()
     log(INFO, "SecAgg Stage 1 Completed: Created Key Pairs")
-    total_time = total_time+timeit.default_timer()
-    if client.sec_agg_id == 3:
-        f = open("log.txt", "a")
-        f.write(f"Client without communication stage 1:{total_time} \n")
-        f.close()
     return AskKeysRes(
         pk1=sec_agg_primitives.public_key_to_bytes(client.pk1),
         pk2=sec_agg_primitives.public_key_to_bytes(client.pk2),
@@ -84,7 +72,6 @@ def ask_keys(client, ask_keys_ins: AskKeysIns) -> AskKeysRes:
 
 
 def share_keys(client, share_keys_in: ShareKeysIns) -> ShareKeysRes:
-    total_time = -timeit.default_timer()
     # Distribute shares for private mask seed and first private key
 
     client.public_keys_dict = share_keys_in.public_keys_dict
@@ -136,16 +123,10 @@ def share_keys(client, share_keys_in: ShareKeysIns) -> ShareKeysRes:
             share_keys_res.share_keys_res_list.append(share_keys_packet)
 
     log(INFO, "SecAgg Stage 2 Completed: Sent Shares via Packets")
-    total_time = total_time+timeit.default_timer()
-    if client.sec_agg_id == 3:
-        f = open("log.txt", "a")
-        f.write(f"Client without communication stage 2:{total_time} \n")
-        f.close()
     return share_keys_res
 
 
 def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
-    total_time = -timeit.default_timer()
     # Receive shares and fit model
     packet_list = ask_vectors_ins.ask_vectors_in_list
     fit_ins = ask_vectors_ins.fit_ins
@@ -243,16 +224,10 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
     quantized_weights = sec_agg_primitives.weights_mod(
         quantized_weights, client.mod_range)
     log(INFO, "SecAgg Stage 3 Completed: Sent Vectors")
-    total_time = total_time+timeit.default_timer()
-    if client.sec_agg_id == 3:
-        f = open("log.txt", "a")
-        f.write(f"Client without communication stage 3:{total_time} \n")
-        f.close()
     return AskVectorsRes(parameters=weights_to_parameters(quantized_weights))
 
 
 def unmask_vectors(client, unmask_vectors_ins: UnmaskVectorsIns) -> UnmaskVectorsRes:
-    total_time = -timeit.default_timer()
     # Send private mask seed share for every avaliable client (including itclient)
     # Send first private key share for building pairwise mask for every dropped client
     available_clients = unmask_vectors_ins.available_clients
@@ -265,9 +240,4 @@ def unmask_vectors(client, unmask_vectors_ins: UnmaskVectorsIns) -> UnmaskVector
     for idx in dropout_clients:
         share_dict[idx] = client.sk1_share_dict[idx]
     log(INFO, "SecAgg Stage 4 Completed: Sent Shares for Unmasking")
-    total_time = total_time+timeit.default_timer()
-    if client.sec_agg_id == 3:
-        f = open("log.txt", "a")
-        f.write(f"Client without communication stage 4:{total_time} \n")
-        f.close()
     return UnmaskVectorsRes(share_dict=share_dict)

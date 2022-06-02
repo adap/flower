@@ -25,8 +25,7 @@ from flwr.common.secure_aggregation import SAClientMessageCarrier, SAServerMessa
 from flwr_crypto_cpp import combine_shares
 import timeit
 import numpy as np
-import sys
-import concurrent.futures
+from flwr.common.timer import Timer
 
 from flwr.common.logger import log
 
@@ -48,15 +47,14 @@ UnmaskVectorsResultsAndFailures = Tuple[
 FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
 
 
-# No type annotation for server because of cirular dependency!
+# No type annotation for server because of circular dependency!
 def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
                       ) -> Optional[
     Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
 ]:
-    total_time = 0
-    total_time = total_time - timeit.default_timer()
-    timer = []
+    tm = Timer()
     # Sample clients
+    tm.tic()
     client_instruction_list = strategy.configure_fit(
         rnd=rnd, parameters=server.parameters, client_manager=server.client_manager())
     proxy2id: Dict[ClientProxy, int] = {}
@@ -69,6 +67,7 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
 
     # Get sec_agg parameters from strategy
     log(INFO, "Get sec_agg_param_dict from strategy")
+    tm.tic('s0')
     sec_agg_param_dict = server.strategy.config
     sec_agg_param_dict["sample_num"] = len(client_instruction_list)
     sec_agg_param_dict = process_sec_agg_param_dict(sec_agg_param_dict)
@@ -89,16 +88,17 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
     # === Stage 0: Setup ===
     # Give rnd, sample_num, share_num, threshold, client id
     log(INFO, "SecAgg Stage 0: Setting up Params And Asking Keys")
+    tm.toc('s0')
     # do not count setup time
-    total_time = total_time + timeit.default_timer()
+    tm.tic('s0_com')
     ask_keys_results_and_failures = setup_param(
         strategy,
         clients=setup_param_clients,
         sec_agg_param_dict=sec_agg_param_dict
     )
-    total_time = total_time - timeit.default_timer()
+    tm.toc('s0_com')
+    tm.tic('s0')
     # time consumption of stage 1 on the server side
-    timer += [timeit.default_timer()]
     public_keys_dict: Dict[int, AskKeysRes] = {}
     ask_keys_results = ask_keys_results_and_failures[0]
     if len(ask_keys_results) < sec_agg_param_dict['min_num']:
@@ -120,17 +120,17 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
     # if key is not None:
     #     public_keys_dict[idx] = key
     #     share_keys_clients[idx] = client
-    timer[-1] = timeit.default_timer() - timer[-1]
+    tm.toc('s0')
 
-    # === Stage 2: Share Keys ===
+    # === Stage 1: Share Keys ===
     log(INFO, "SecAgg Stage 1: Sharing Keys")
-    total_time = total_time + timeit.default_timer()
+    tm.tic('s1_com')
     share_keys_results_and_failures = share_keys(
         strategy, graph,
         share_keys_clients, public_keys_dict
     )
-    total_time = total_time - timeit.default_timer()
-    timer += [timeit.default_timer()]
+    tm.toc('s1_com')
+    tm.tic('s1')
     share_keys_results = share_keys_results_and_failures[0]
     if len(share_keys_results) < sec_agg_param_dict['min_num']:
         raise Exception("Not enough available clients after share keys stage")
@@ -159,15 +159,16 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
         destination = packet.destination
         if destination in ask_vectors_clients.keys():
             forward_packet_list_dict[destination].append(packet)
-    timer[-1] = timeit.default_timer() - timer[-1]
 
-    # === Stage 3: Ask Vectors ===
+    tm.toc('s1')
+
+    # === Stage 2: Ask Vectors ===
     log(INFO, "SecAgg Stage 2: Asking Vectors")
-    total_time = total_time + timeit.default_timer()
+    tm.tic('s2_com')
     ask_vectors_results_and_failures = ask_vectors(
         strategy, ask_vectors_clients, forward_packet_list_dict, client_instructions)
-    total_time = total_time - timeit.default_timer()
-    timer += [timeit.default_timer()]
+    tm.toc('s2_com')
+    tm.tic('s2')
     ask_vectors_results = ask_vectors_results_and_failures[0]
     if len(ask_vectors_results) < sec_agg_param_dict['min_num']:
         raise Exception("Not enough available clients after ask vectors stage")
@@ -186,17 +187,18 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
             masked_vector = sec_agg_primitives.weights_addition(
                 masked_vector, parameters_to_weights(client_parameters))
     masked_vector = sec_agg_primitives.weights_mod(masked_vector, sec_agg_param_dict['mod_range'])
-    timer[-1] = timeit.default_timer() - timer[-1]
-    # === Stage 4: Unmask Vectors ===
+    tm.toc('s2')
+    # === Stage 3: Unmask Vectors ===
     shamir_reconstruction_time = 0
     prg_time = 0
     log(INFO, "SecAgg Stage 3: Unmasking Vectors")
-    total_time = total_time + timeit.default_timer()
+    tm.tic('s3_com')
     unmask_vectors_results_and_failures = unmask_vectors(
         strategy, unmask_vectors_clients, dropout_clients, graph)
     unmask_vectors_results = unmask_vectors_results_and_failures[0]
-    total_time = total_time - timeit.default_timer()
-    timer += [timeit.default_timer()]
+    tm.toc('s3_com')
+
+    tm.tic('s3')
     # Build collected shares dict
     collected_shares_dict: Dict[int, List[bytes]] = {}
     for idx in ask_vectors_clients.keys():
@@ -215,17 +217,17 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
         if len(share_list) < sec_agg_param_dict['threshold']:
             raise Exception(
                 "Not enough shares to recover secret in unmask vectors stage")
-        shamir_reconstruction_time -= timeit.default_timer()
+        tm.tic('combine_shares')
         secret = combine_shares(share_list)
-        shamir_reconstruction_time += timeit.default_timer()
+        tm.toc('combine_shares')
         if client_id in unmask_vectors_clients.keys():
             # seed is an available client's b
-            prg_time -= timeit.default_timer()
+            tm.tic('mask_gen')
             private_mask = sec_agg_primitives.pseudo_rand_gen(
                 secret, sec_agg_param_dict['mod_range'], sec_agg_primitives.weights_shape(masked_vector))
+            tm.toc('mask_gen')
             masked_vector = sec_agg_primitives.weights_subtraction(
                 masked_vector, private_mask)
-            prg_time += timeit.default_timer()
         else:
             # seed is a dropout client's sk1
             neighbor_list: List[int] = []
@@ -240,13 +242,13 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
                                              sec_agg_param_dict['sample_num'])
 
             for neighbor_id in neighbor_list:
-                prg_time -= timeit.default_timer()
                 shared_key = sec_agg_primitives.generate_shared_key(
                     sec_agg_primitives.bytes_to_private_key(secret),
                     sec_agg_primitives.bytes_to_public_key(public_keys_dict[neighbor_id].pk1))
+                tm.tic('mask_gen')
                 pairwise_mask = sec_agg_primitives.pseudo_rand_gen(
                     shared_key, sec_agg_param_dict['mod_range'], sec_agg_primitives.weights_shape(masked_vector))
-                prg_time += timeit.default_timer()
+                tm.toc('mask_gen')
                 if client_id > neighbor_id:
                     masked_vector = sec_agg_primitives.weights_addition(
                         masked_vector, pairwise_mask)
@@ -263,18 +265,21 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
         masked_vector, total_weights_factor)
     aggregated_vector = sec_agg_primitives.reverse_quantize(
         masked_vector, sec_agg_param_dict['clipping_range'], sec_agg_param_dict['target_range'])
+    print(aggregated_vector[:4])
     aggregated_parameters = weights_to_parameters(aggregated_vector)
-    timer[-1] = timeit.default_timer() - timer[-1]
-    total_time = total_time + timeit.default_timer()
+    tm.toc('s3')
+    tm.toc()
+    times = tm.get_all()
     f = open("log.txt", "a")
-    f.write(f"Server time without communication:{total_time} \n")
+    f.write(f"Server time with communication:{times['default']} \n")
+    f.write(f"Server time without communication:{sum([times['s0'], times['s1'], times['s2'], times['s3']])} \n")
     f.write(f"first element {aggregated_vector[0].flatten()[0]}\n\n\n")
-    total_time = sum(timer)
     f.write("server time (detail):\n%s\n" %
-            '\n'.join([f'stage {i} = {timer[i]} ({timer[i] * 100. / total_time:.2f} %)' for i in range(len(timer))]))
-    f.write('shamir\'s key reconstruction time: %f (%.2f%%)\n' % (shamir_reconstruction_time,
-                                                                  shamir_reconstruction_time * 100. / total_time))
-    f.write('mask generation time: %f (%.2f%%)\n' % (prg_time, prg_time * 100. / total_time))
+            '\n'.join([f"round {i} = {times['s' + str(i)]} ({times['s' + str(i)] * 100. / times['default']:.2f} %)"
+                       for i in range(4)]))
+    f.write('shamir\'s key reconstruction time: %f (%.2f%%)\n' % (times['combine_shares'],
+                                                                  times['combine_shares'] * 100. / times['default']))
+    f.write('mask generation time: %f (%.2f%%)\n' % (times['mask_gen'], times['mask_gen'] * 100. / times['default']))
     f.write('num of dropouts: %d\n' % len(dropout_clients))
     f.close()
     return aggregated_parameters, None, None

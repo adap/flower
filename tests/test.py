@@ -46,37 +46,14 @@ if __name__ == "__main__":
     f.write("Starting real experiments\n")
     f.close()
     # sample_num_list = [100, 200, 300, 400, 500]
-    sample_num_list = [10]
-    # dropout_value_list = [0, 1]
+    sample_num_list = [100]
     dropout_value_list = [0]
+    # dropout_value_list = [0]
     # vector_dimension_list = [100000, 200000, 300000, 400000, 500000]
     vector_dimension_list = [100000]
 
-    for vector_dimension in vector_dimension_list:
-        for sample_num in [10]:
-            for dropout_value in dropout_value_list:
-                for i in range(1):
-                    f = open("log.txt", "a")
-                    f.write(
-                        f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
-                    f.close()
-                    f = open("logserver.txt", "a")
-                    f.write(
-                        f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
-                    f.close()
-                    f = open("logclient.txt", "a")
-                    f.write(
-                        f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
-                    f.close()
-                    sec_agg_test.test_start_simulation(
-                        sample_num=sample_num, share_num=7, threshold=4, vector_dimension=vector_dimension, dropout_value=dropout_value, num_rounds=1)
-                    # light_sec_agg_test.test_start_simulation(
-                    #     sample_num=sample_num,
-                    #     T=4, U=7, vector_dimension=vector_dimension, dropout_value=dropout_value
-                    # )
-
-    # for vector_dimension in [100000]:
-    #     for sample_num in sample_num_list:
+    # for vector_dimension in vector_dimension_list:
+    #     for sample_num in [50]:
     #         for dropout_value in dropout_value_list:
     #             for i in range(1):
     #                 f = open("log.txt", "a")
@@ -92,7 +69,30 @@ if __name__ == "__main__":
     #                     f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
     #                 f.close()
     #                 sec_agg_test.test_start_simulation(
-    #                     sample_num=sample_num, share_num=51, threshold=26, vector_dimension=vector_dimension, dropout_value=dropout_value, num_rounds=1)
+    #                     sample_num=sample_num, share_num=7, threshold=4, vector_dimension=vector_dimension, dropout_value=dropout_value, num_rounds=1)
+    #                 # light_sec_agg_test.test_start_simulation(
+    #                 #     sample_num=sample_num,
+    #                 #     T=4, U=7, vector_dimension=vector_dimension, dropout_value=dropout_value
+    #                 # )
+
+    for vector_dimension in [100000]:
+        for sample_num in sample_num_list:
+            for dropout_value in dropout_value_list:
+                for i in range(1):
+                    f = open("log.txt", "a")
+                    f.write(
+                        f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
+                    f.close()
+                    f = open("logserver.txt", "a")
+                    f.write(
+                        f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
+                    f.close()
+                    f = open("logclient.txt", "a")
+                    f.write(
+                        f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
+                    f.close()
+                    sec_agg_test.test_start_simulation(
+                        sample_num=sample_num, share_num=61, threshold=31, vector_dimension=vector_dimension, dropout_value=dropout_value, num_rounds=1)
 
 
 '''# TESTING

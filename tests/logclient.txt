@@ -1,2 +1,6 @@
 Starting real experiments
-This is secagg sampling 10 dropping out 0% with vector size 100000 try 0 
+This is secagg sampling 100 dropping out 0% with vector size 100000 try 0 
+442
+63107
+400293
+4510

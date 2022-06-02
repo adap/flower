@@ -1,7 +1,20 @@
 Starting real experiments
-This is secagg sampling 10 dropping out 0% with vector size 100000 try 0 
-Client without communication stage 0:0.00019800000000103068 
-Client without communication stage 1:0.09508519999999976 
-Client without communication stage 2:0.009212600000001459 
-Client without communication stage 3:0.05607219999999913 
-Client without communication stage 4:0.00018560000000178434 
+This is secagg sampling 100 dropping out 0% with vector size 100000 try 0 
+Client without communication stage 0:1.0828469999999868 
+Client without communication stage 1:0.17834790000000567 
+Client without communication stage 2:0.28772290000000567 
+Client without communication stage 3:0.003204699999997729 
+Client without communication total: 1.5521224999999959 
+Server time with communication:185.3335995 
+Server time without communication:0.3095002999999963 
+first element 0.0
+
+
+server time (detail):
+round 0 = 0.011571199999991677 (0.01 %)
+round 1 = 0.004312299999980951 (0.00 %)
+round 2 = 0.10332510000000639 (0.06 %)
+round 3 = 0.19029170000001727 (0.10 %)
+shamir's key reconstruction time: 0.066904 (0.04%)
+mask generation time: 0.073254 (0.04%)
+num of dropouts: 0

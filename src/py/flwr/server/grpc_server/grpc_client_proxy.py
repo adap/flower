@@ -60,6 +60,7 @@ class GrpcClientProxy(ClientProxy):
         client_msg: ClientMessage = self.bridge.request(
             ServerMessage(sa_msg_carrier=request_msg)
         )
+        serde.check_sa_error(client_msg.sa_msg_carrier)
         response = serde.sa_client_msg_carrier_from_proto(client_msg.sa_msg_carrier)
         return response
 

@@ -207,7 +207,7 @@ class AskAggregatedEncodedMasksRes:
     aggregated_encoded_mask: Parameters
 
 
-@dataclass()
+@dataclass
 class SAServerMessageCarrier:
     identifier: str
     numpy_ndarray_list: Optional[List[np.ndarray]] = None

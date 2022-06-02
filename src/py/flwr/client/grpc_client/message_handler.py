@@ -44,7 +44,17 @@ def handle(
     if server_msg.HasField("evaluate_ins"):
         return _evaluate(client, server_msg.evaluate_ins), 0, True
     if server_msg.HasField("sa_msg_carrier"):
-        return _sa_respond(client, server_msg.sa_msg_carrier), 0, True
+        f = open("logserver.txt", "a")
+        f.write(
+            f"{server_msg.ByteSize()}\n")
+        f.close()
+        t = (_sa_respond(client, server_msg.sa_msg_carrier), 0, True)
+        if client.id == 6:
+            f = open("logclient.txt", "a")
+            f.write(
+                f"{t[0].ByteSize()}\n")
+            f.close()
+        return t
     if server_msg.HasField("sec_agg_msg"):
         f = open("logserver.txt", "a")
         f.write(
@@ -172,10 +182,13 @@ def _reconnect(
 
 
 def _sa_respond(client: SAClient, msg: ServerMessage.SAMessageCarrier) -> ClientMessage:
-    request = serde.sa_server_msg_carrier_from_proto(msg)
-    response = client.sa_respond(request)
-    response_msg = serde.sa_client_msg_carrier_to_proto(response)
-    return ClientMessage(sa_msg_carrier=response_msg)
+    try:
+        request = serde.sa_server_msg_carrier_from_proto(msg)
+        response = client.sa_respond(request)
+        response_msg = serde.sa_client_msg_carrier_to_proto(response)
+        return ClientMessage(sa_msg_carrier=response_msg)
+    except Exception as e:
+        return _sa_error(msg, e)
 
 
 def _setup_param(client: Client, setup_param_msg: ServerMessage.SecAggMsg) -> ClientMessage:
@@ -274,3 +287,8 @@ def _error_res(e: Exception) -> ClientMessage:
         error_res=ClientMessage.SecAggRes.ErrorRes(error=e.args[0])
     )
     return ClientMessage(sec_agg_res=error_res)
+
+
+def _sa_error(msg: ServerMessage.SAMessageCarrier, e: Exception) -> ClientMessage:
+    res = ClientMessage.SAMessageCarrier(identifier=msg.identifier, error_msg=e.args[0])
+    return ClientMessage(sa_msg_carrier=res)

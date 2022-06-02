@@ -1,6 +1,4 @@
-import galois
 import numpy as np
-import torch
 import copy
 
 

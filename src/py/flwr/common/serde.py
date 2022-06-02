@@ -248,8 +248,9 @@ def sa_client_msg_carrier_from_proto(proto: ClientMessage.SAMessageCarrier)\
     )
 
 
-
-
+def check_sa_error(msg: ClientMessage.SAMessageCarrier):
+    if msg.error_msg != '':
+        raise Exception(msg.error_msg)
 
 # === SecAgg Messages ===
 # === Check if error ===

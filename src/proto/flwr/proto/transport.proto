@@ -220,6 +220,7 @@ message ClientMessage {
     repeated bytes bytes_list = 4;
     Parameters parameters = 5;
     FitRes fit_res = 6;
+    string error_msg = 7;
   }
 
   oneof msg {

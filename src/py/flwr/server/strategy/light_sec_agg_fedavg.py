@@ -20,8 +20,7 @@ from flwr.common.light_sec_agg.mpc_functions import LCC_decoding_with_points, mo
 import numpy as np
 from typing import Callable, Dict, List, Tuple, Optional
 from flwr.server.strategy.fedavg import FedAvg
-from flwr.server.server import Server
-from flwr.common.light_sec_agg.protocol import AskAggregatedEncodedMasksResultsAndFailures, FitResultsAndFailures
+from flwr.server.server import Server, ClientProxy
 from flwr.common.typing import SAServerMessageCarrier
 from flwr.common.sec_agg import sec_agg_primitives
 import timeit
@@ -39,6 +38,8 @@ from flwr.common import (
     parameters_to_weights,
     weights_to_parameters,
 )
+
+FitResultsAndFailures = Tuple[List[Tuple[ClientProxy, FitRes]], List[BaseException]]
 
 
 def padding(d, U, T):
