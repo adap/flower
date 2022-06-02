@@ -179,8 +179,8 @@ def start_server(init_param: Parameters, fc: int, ac: int, rounds: int, eval_fn:
     return server_process
 
 
-def make_arg_parser() -> argparse.ArgumentParser:
-    """Get a command line argument parser."""
+def get_args() -> argparse.Namespace:
+    """Get command line args for the client and server."""
     parser = argparse.ArgumentParser(description="Flower Differential Privacy Demo")
     parser.add_argument(
         "--num-clients",
@@ -211,28 +211,28 @@ def make_arg_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "-fc",
+        "--min_fit_clients",
         type=int,
         default=2,
         help="Min fit clients, min number of clients to be sampled next round",
     )
 
     parser.add_argument(
-        "-ac",
+        "--available_clients",
         type=int,
         default=2,
         help="Min available clients, min number of clients that need to connect to the server before training round can start",
     )
-    return parser
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    args = make_arg_parser().parse_args()
+    args = get_args()
     epochs = int(args.epochs)
     num_clients = int(args.num_clients)
     rounds = int(args.rounds)
-    fc = int(args.fc)
-    ac = int(args.ac)
+    min_fit_clients = int(args.min_fit_clients)
+    available_clients = int(args.available_clients)
     target_epsilon = float(args.eps)
     batch_size = int(args.batch_size)
     max_grad_norm = float(args.max_grad_norm)
@@ -246,9 +246,17 @@ if __name__ == "__main__":
     init_param = fl.common.weights_to_parameters(init_weights)
     _, test_loader = load_data(batch_size)
     eval_fn = partial(evaluate, net, CrossEntropyLoss(), test_loader, "cpu")
-    server_process = start_server(init_param, fc, ac, rounds, eval_fn)
+    server_process = start_server(init_param, min_fit_clients, available_clients, rounds, eval_fn)
     client_fn = partial(
-        start_client, batch_size, epochs, rounds, num_clients, "cpu", target_epsilon, max_grad_norm, learning_rate
+        start_client,
+        batch_size,
+        epochs,
+        rounds,
+        num_clients,
+        "cpu",
+        target_epsilon,
+        max_grad_norm,
+        learning_rate,
     )
     with mp.Pool(num_clients) as pool:
         pool.map(client_fn, range(num_clients))
