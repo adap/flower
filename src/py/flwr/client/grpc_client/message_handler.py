@@ -79,7 +79,7 @@ def _reconnect(
 
 
 def _get_properties(
-    client: Client, properties_msg: ServerMessage.GetPropertiesIns
+    client: Client, get_properties_msg: ServerMessage.GetPropertiesIns
 ) -> ClientMessage:
     # Check if client overrides get_properties
     if not has_get_properties(client=client):
@@ -95,9 +95,9 @@ def _get_properties(
         return ClientMessage(get_properties_res=get_properties_res_proto)
 
     # Deserialize get_properties instruction
-    properties_ins = serde.get_properties_ins_from_proto(properties_msg)
-    # Request for properties
-    get_properties_res = client.get_properties(properties_ins)
+    get_properties_ins = serde.get_properties_ins_from_proto(get_properties_msg)
+    # Request properties
+    get_properties_res = client.get_properties(get_properties_ins)
     # Serialize response
     get_properties_res_proto = serde.get_properties_res_to_proto(get_properties_res)
     return ClientMessage(get_properties_res=get_properties_res_proto)
