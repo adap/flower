@@ -2,7 +2,6 @@ import numpy as np
 
 import flwr as fl
 import os
-import tensorflow as tf
 import time
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from multiprocessing import Process
@@ -11,10 +10,10 @@ from flwr.server.strategy.sec_agg_fedavg import SecAggFedAvg
 # Testing
 # Define Flower client
 
-model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
-model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
-# Load CIFAR-10 dataset
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+# model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+# model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+# # Load CIFAR-10 dataset
+# (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
 model = [np.zeros(1000, dtype=float)]
 
