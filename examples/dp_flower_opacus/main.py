@@ -1,21 +1,16 @@
 import argparse
 import multiprocessing as mp
-import sys
 import warnings
-
-warnings.filterwarnings("ignore", category=UserWarning)
 from collections import OrderedDict
 from functools import partial
-
-from loguru import logger
-
-sys.path.insert(0, "../../src/py")
-
 from typing import Callable, List
 
 import numpy as np
 import torch
 import torch.nn as nn
+from dp_client import DPClient, test
+from fedavgdp import FedAvgDp
+from loguru import logger
 from opacus import PrivacyEngine
 from torch.nn import CrossEntropyLoss
 from torch.optim import SGD
@@ -24,9 +19,9 @@ from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 
 import flwr as fl
-from flwr.client.dp_client import DPClient, test
 from flwr.common.typing import Parameters
-from flwr.server.strategy import FedAvgDp
+
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 class Net(nn.Module):
