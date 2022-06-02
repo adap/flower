@@ -1,3 +1,5 @@
+import numpy as np
+
 import flwr as fl
 import os
 import tensorflow as tf
@@ -14,20 +16,18 @@ model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 # Load CIFAR-10 dataset
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
+model = [np.zeros(1000, dtype=float)]
+
 
 class CifarClient(fl.client.NumPyClient):
     def get_parameters(self):  # type: ignore
-        return model.get_weights()
+        return model
 
     def fit(self, parameters, config):  # type: ignore
-        model.set_weights(parameters)
-        model.fit(x_train, y_train, epochs=1, batch_size=32)
-        return model.get_weights(), len(x_train), {}
+        return model, 1, {}
 
     def evaluate(self, parameters, config):  # type: ignore
-        model.set_weights(parameters)
-        loss, accuracy = model.evaluate(x_test, y_test)
-        return loss, len(x_test), {"accuracy": accuracy}
+        return 0, 1, {"accuracy": 0}
 
 
 def test_start_server(sample_num=2, min_num=2, share_num=2, threshold=2, vector_dimension=100000, dropout_value=0, num_rounds=1):
