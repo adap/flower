@@ -22,7 +22,8 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.common.sec_agg import sec_agg_primitives
 from flwr.common.secure_aggregation import SAClientMessageCarrier, SAServerMessageCarrier, SecureAggregationFitRound, \
     SecureAggregationResultsAndFailures
-from flwr_crypto_cpp import combine_shares
+# from flwr_crypto_cpp import combine_shares
+from flwr.common.sec_agg.sec_agg_primitives import combine_shares
 import timeit
 import numpy as np
 from flwr.common.timer import Timer

@@ -17,7 +17,8 @@ from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.sec_agg.sec_agg_primitives import check_clipping_range
 from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
 from flwr.common.sec_agg import sec_agg_primitives
-from flwr_crypto_cpp import create_shares
+# from flwr_crypto_cpp import create_shares
+from flwr.common.sec_agg.sec_agg_primitives import create_shares
 from flwr.common.logger import log
 from logging import DEBUG, ERROR, INFO, WARNING
 from typing import Dict, List, Tuple
