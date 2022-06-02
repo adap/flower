@@ -1,6 +1,8 @@
-import multiprocessing as mp
+"""Script to start a client from the command line.
+
+Author: Alex Kyllo
+"""
 from argparse import ArgumentParser, Namespace
-from functools import partial
 
 from main import start_client
 
@@ -21,7 +23,7 @@ def get_args() -> Namespace:
     )
     parser.add_argument(
         "--epochs",
-        default=1,
+        default=2,
         type=int,
         help="Number of local epochs to train per round.",
     )
@@ -42,6 +44,12 @@ def get_args() -> Namespace:
     parser.add_argument(
         "--device", type=str, default="cpu", help="Which client device to run training on."
     )
+    parser.add_argument(
+        "--tqdm",
+        type=bool,
+        default=False,
+        help="Use the tqdm package to show a progress bar during training.",
+    )
     return parser.parse_args()
 
 
@@ -55,6 +63,7 @@ if __name__ == "__main__":
     target_epsilon = float(args.eps)
     max_grad_norm = float(args.max_grad_norm)
     learning_rate = float(args.learning_rate)
+    use_tqdm = bool(args.tqdm)
     cid = int(args.cid)
     # start the client
     start_client(
@@ -66,5 +75,6 @@ if __name__ == "__main__":
         target_epsilon,
         max_grad_norm,
         learning_rate,
+        use_tqdm,
         cid,
     )

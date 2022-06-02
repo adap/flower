@@ -1,18 +1,7 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-"""Federated Averaging DP strategy."""
+"""Differentially Private Federated Averaging Strategy.
+
+Author: Pooja Nadagouda
+"""
 
 from typing import Callable, Dict, List, Optional, Tuple
 
@@ -20,18 +9,36 @@ from loguru import logger
 
 import flwr.server.server as server
 from flwr.common import FitRes, Parameters, Scalar, Weights
+from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
-
-WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
-Setting `min_available_clients` lower than `min_fit_clients` or
-`min_eval_clients` can cause the server to fail when there are too few clients
-connected to the server. `min_available_clients` must be set to a value larger
-than or equal to the values of `min_fit_clients` and `min_eval_clients`.
-"""
 
 
 class FedAvgDp(FedAvg):
-    """This class implements the FedAvg strategy for Differential Privacy context."""
+    """This class implements the FedAvg strategy for a Differential Privacy context.
+
+    Parameters
+    ----------
+    fraction_fit : float, optional
+        Fraction of clients used during training. Defaults to 0.1.
+    fraction_eval : float, optional
+        Fraction of clients used during validation. Defaults to 0.1.
+    min_fit_clients : int, optional
+        Minimum number of clients used during training. Defaults to 2.
+    min_eval_clients : int, optional
+        Minimum number of clients used during validation. Defaults to 2.
+    min_available_clients : int, optional
+        Minimum number of total clients in the system. Defaults to 2.
+    eval_fn : Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        Optional function used for validation. Defaults to None.
+    on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure training. Defaults to None.
+    on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure validation. Defaults to None.
+    accept_failures : bool, optional
+        Whether or not accept rounds containing failures. Defaults to True.
+    initial_parameters : Parameters, optional
+        Initial global model parameters.
+    """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
@@ -67,24 +74,52 @@ class FedAvgDp(FedAvg):
     def aggregate_fit(
         self,
         rnd: int,
-        results: List[Tuple["ClientProxy", FitRes]],
+        results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Optional[Weights]:
+        """Aggregate training results.
 
+        Parameters
+        ----------
+        rnd : int
+            The current round of federated learning.
+        results : List[Tuple[ClientProxy, FitRes]]
+            Successful updates from the previously selected and configured
+            clients. Each pair of `(ClientProxy, FitRes)` constitutes a
+            successful update from one of the previously selected clients. Not
+            that not all previously selected clients are necessarily included in
+            this list: a client might drop out and not submit a result. For each
+            client that did not submit an update, there should be an `Exception`
+            in `failures`.
+        failures : List[BaseException]
+            Exceptions that occurred while the server was waiting for client
+            updates.
+
+        Returns
+        -------
+        parameters: Parameters (optional)
+            If parameters are returned, then the server will treat these as the
+            new global model parameters (i.e., it will replace the previous
+            parameters with the ones returned from this method). If `None` is
+            returned (e.g., because there were only failures and no viable
+            results) then the server will no update the previous model
+            parameters, the updates received in this round are discarded, and
+            the global model parameters remain the same.
+        """
         if not results:
             return None
 
         # Get the privacy budget of each client
         accepted_results = []
         epsilons = []
-        for c, r in results:
+        for client, result in results:
             # Check if client can be accepted or not
-            if r.metrics["accept"]:
-                accepted_results.append([c, r])
-                epsilons.append(r.metrics["epsilon"])
+            if result.metrics["accept"]:
+                accepted_results.append([client, result])
+                epsilons.append(result.metrics["epsilon"])
             else:
                 # Disconnect any client whose privacy budget was exceeded.
-                server.reconnect_client(c, server.Reconnect(None))
+                server.reconnect_client(client, server.Reconnect(None))
 
         results = accepted_results
         if epsilons:

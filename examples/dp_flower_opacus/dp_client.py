@@ -1,4 +1,7 @@
-"""Differentially Private Client."""
+"""Differentially Private FL Client for PyTorch models using Opacus.
+
+Authors: Nayana Yeshlur, Alex Kyllo
+"""
 from collections import OrderedDict
 from typing import Callable, Dict, List, Tuple
 
@@ -37,6 +40,7 @@ class DPClient(NumPyClient):
         noise_generator: Generator = None,
         device: str = "cpu",
         cid: int = 0,
+        use_tqdm: bool = False,
         **kwargs: Dict[str, Callable],
     ):
         """
@@ -81,6 +85,8 @@ class DPClient(NumPyClient):
             The device name to fit the model on.
         cid: int, default 0
             The id of the current client instance.
+        use_tqdm: bool, default False
+            If True, show a progress bar during training.
         kwargs: Dict[str, Callable]
             A dictionary of metric functions to evaluate the model.
         """
@@ -95,6 +101,7 @@ class DPClient(NumPyClient):
         self.epochs = epochs
         self.rounds = rounds
         self.test_loader = test_loader
+        self.use_tqdm = use_tqdm
         loss_reduction = "mean" if loss_reduction_mean else "sum"
         (
             self.module,
@@ -114,7 +121,13 @@ class DPClient(NumPyClient):
         )
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
-        """Set the PyTorch module parameters from a list of NumPy arrays."""
+        """Set the PyTorch module parameters from a list of NumPy arrays.
+
+        Parameters
+        ----------
+        parameters: List[numpy.ndarray]
+            The desired local model parameters as a list of NumPy ndarrays.
+        """
         params_dict = zip(self.module.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         self.module.load_state_dict(state_dict, strict=True)
@@ -158,10 +171,12 @@ class DPClient(NumPyClient):
         self.set_parameters(parameters)
         self.config = config
         metrics = {}
-        for _ in range(self.epochs):
+        for e in range(self.epochs):
             predictions = []
             actuals = []
-            for x_train, y_train in tqdm(self.train_loader):
+            logger.info("Client {} starting training epoch # {}", self.cid, e)
+            train_loader = tqdm(self.train_loader) if self.use_tqdm else self.train_loader
+            for x_train, y_train in train_loader:
                 num = y_train.size(0)
                 if num > 0:
                     x_train = x_train.to(self.device)
@@ -225,7 +240,11 @@ class DPClient(NumPyClient):
         self.set_parameters(parameters)
         self.config = config
         results = test(
-            self.module, self.criterion, self.test_loader, self.device, **self.metric_functions
+            self.module,
+            criterion=self.criterion,
+            dataloader=self.test_loader,
+            device=self.device,
+            **self.metric_functions,
         )
         logger.info("Client {} metrics: {}", self.cid, results[2])
         return results
@@ -238,14 +257,28 @@ def test(
     device: str,
     **kwargs: Dict[str, Callable],
 ):
-    """Validate the network on the test set."""
+    """Validate the network on the test set.
+
+    Parameters
+    ----------
+    module: torch.nn.Module
+            A PyTorch neural network module instance.
+    criterion: Callable
+        A function that takes predicted and actual values and returns a loss.
+    dataloader: torch.utils.data.DataLoader
+        A PyTorch DataLoader instance for test data.
+    device: str, default "cpu"
+            The device name to fit the model on.
+    kwargs: Dict[str, Callable]
+        A dictionary of metric functions to evaluate the model.
+    """
     predictions = []
     actuals = []
     num_examples = len(dataloader.dataset)
     loss = 0.0
     with torch.no_grad():
         module.to(device)
-        for data in tqdm(dataloader):
+        for data in dataloader:
             examples = data[0].to(device)
             labels = data[1].to(device)
             outputs = module(examples)

@@ -1,4 +1,7 @@
-import multiprocessing as mp
+"""Script to start a server from the command line.
+
+Author: Alex Kyllo
+"""
 from argparse import ArgumentParser, Namespace
 from functools import partial
 

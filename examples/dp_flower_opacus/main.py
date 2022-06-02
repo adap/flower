@@ -1,3 +1,7 @@
+"""Differentially private federated learning demo.
+
+Authors: Raghav Naswa, Alex Kyllo
+"""
 import argparse
 import multiprocessing as mp
 import warnings
@@ -95,6 +99,7 @@ def start_client(
     target_epsilon: float,
     max_grad_norm: float,
     learning_rate: float,
+    use_tqdm: bool,
     cid: int,
 ) -> None:
     """Start a client."""
@@ -122,6 +127,7 @@ def start_client(
         max_grad_norm=max_grad_norm,
         device=device,
         cid=cid,
+        use_tqdm=use_tqdm,
         accuracy=accuracy,
     )
     logger.info("Starting client # {}", cid)
@@ -185,7 +191,7 @@ def get_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--epochs",
-        default=1,
+        default=2,
         type=int,
         help="Total number of local epochs to train",
     )
@@ -204,19 +210,23 @@ def get_args() -> argparse.Namespace:
     parser.add_argument(
         "--rounds", type=int, default=3, help="Number of rounds for the federated training"
     )
-
     parser.add_argument(
         "--min_fit_clients",
         type=int,
         default=2,
         help="Min fit clients, min number of clients to be sampled next round",
     )
-
     parser.add_argument(
         "--available_clients",
         type=int,
         default=2,
         help="Min available clients, min number of clients that need to connect to the server before training round can start",
+    )
+    parser.add_argument(
+        "--tqdm",
+        type=bool,
+        default=False,
+        help="Use the tqdm package to show a progress bar during training.",
     )
     return parser.parse_args()
 
@@ -232,6 +242,7 @@ if __name__ == "__main__":
     batch_size = int(args.batch_size)
     max_grad_norm = float(args.max_grad_norm)
     learning_rate = float(args.learning_rate)
+    use_tqdm = bool(args.tqdm)
     # Set the start method for multiprocessing in case Python version is under 3.8.1
     mp.set_start_method("spawn")
     # Create a new fresh model to initialize parameters
@@ -252,6 +263,7 @@ if __name__ == "__main__":
         target_epsilon,
         max_grad_norm,
         learning_rate,
+        use_tqdm,
     )
     with mp.Pool(num_clients) as pool:
         pool.map(client_fn, range(num_clients))

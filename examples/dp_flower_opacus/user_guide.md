@@ -6,18 +6,23 @@ by integrating with the Opacus package.
 
 ## Installing dependencies
 
-1. Install Python
-2. `pip install -r requirements.txt`
+1. Install Python (3.8 or higher) from [python.org](https://www.python.org/downloads/)
+2. Open a terminal window and type `pip install -r requirements.txt` to install
+   dependency packages.
 
 ## Running the code
 
 On Linux and Mac, you can run a server and two clients as subprocesses using:
 
-`python main.py`
+`python main.py` or `python3 main.py` depending on your system configuration.
 
-Or you can use the bash script: `./run.sh`
+This will run federated learning with one server and two clients with default
+arguments. To see all available command line arguments: `python main.py --help`.
 
-On Windows, you will need to open three terminal windows.
+Or you can run the demo using the provided bash script: `./run.sh`
+
+On Windows, you will need to open three terminal windows to start a server and
+two clients:
 
 - In the first, type: `python server.py`
 - In the second, type: `python client.py 0`
@@ -39,3 +44,15 @@ terminal.
   FedAvgDP.
 - server.py is a command-line interface for starting a Flower DP server for
   demonstration purposes.
+
+## Using this in your own project
+
+To use this functionality in your own federated learning project:
+
+1. Import the `FedAvgDp` class, construct an instance, and pass it as the
+  `strategy` argument to the `flwr.server.start_server` function.
+2. Import the `DPClient` class, construct an instance, providing the required
+   arguments (a PyTorch module, optimizer, and train and test data loaders, and
+   an Opacus `PrivacyEngine` instance, and the desired `target_epsilon` and
+   `target_delta` values), and then pass this instance as the `client` argument
+   to `flwr.client.start_numpy_client`.
