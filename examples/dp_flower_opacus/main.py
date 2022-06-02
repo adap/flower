@@ -11,7 +11,7 @@ from loguru import logger
 
 sys.path.insert(0, "../../src/py")
 
-from typing import Callable, List, Tuple
+from typing import Callable, List
 
 import numpy as np
 import torch
@@ -25,6 +25,7 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 
 import flwr as fl
 from flwr.client.dp_client import DPClient, test
+from flwr.common.typing import Parameters
 from flwr.server.strategy import FedAvgDp
 
 
@@ -66,7 +67,7 @@ def load_data(batch_size: int, num_clients: int = 1, cid: int = 0):
     test_subset = Subset(testset, test_indices)
     return DataLoader(
         train_subset, batch_size=batch_size, shuffle=True, drop_last=True
-    ), DataLoader(test_subset)
+    ), DataLoader(test_subset, batch_size=batch_size)
 
 
 def get_weights(model):
@@ -91,17 +92,25 @@ def accuracy(predictions, actuals):
 
 # Main function to create DP client
 def start_client(
-    batch_size: int, epochs: int, rounds: int, num_clients: int, device: str, cid: int
+    batch_size: int,
+    epochs: int,
+    rounds: int,
+    num_clients: int,
+    device: str,
+    target_epsilon: float,
+    max_grad_norm: float,
+    learning_rate: float,
+    cid: int,
 ) -> None:
     """Start a client."""
     module = Net()
 
     train_loader, test_loader = load_data(batch_size, num_clients, cid)
 
-    optimizer = SGD(module.parameters(), lr=0.001)
+    optimizer = SGD(module.parameters(), lr=learning_rate)
     criterion = CrossEntropyLoss()
     target_epsilon = 1.0
-    target_delta = 0.1
+    target_delta = 1 / len(train_loader.dataset)
     privacy_engine = PrivacyEngine()
 
     client = DPClient(
@@ -115,7 +124,7 @@ def start_client(
         target_delta,
         epochs=epochs,
         rounds=rounds,
-        max_grad_norm=1.0,
+        max_grad_norm=max_grad_norm,
         device=device,
         cid=cid,
         accuracy=accuracy,
@@ -152,64 +161,54 @@ def evaluate(
     return float(loss), {"accuracy": float(acc)}
 
 
-def make_arg_parser():
+def start_server(init_param: Parameters, fc: int, ac: int, rounds: int, eval_fn: Callable):
+    """Start the Flower server with the differential privacy strategy."""
+    strategy = FedAvgDp(
+        fraction_fit=float(fc / ac),
+        min_fit_clients=fc,
+        min_available_clients=ac,
+        eval_fn=eval_fn,
+        initial_parameters=init_param,
+    )
+    server_process = mp.Process(
+        target=fl.server.start_server,
+        args=["[::]:8080"],
+        kwargs=dict(config={"num_rounds": rounds}, strategy=strategy),
+    )
+    server_process.start()
+    return server_process
+
+
+def make_arg_parser() -> argparse.ArgumentParser:
     """Get a command line argument parser."""
-    parser = argparse.ArgumentParser(description="Flower Client")
+    parser = argparse.ArgumentParser(description="Flower Differential Privacy Demo")
     parser.add_argument(
         "--num-clients",
         default=2,
         type=int,
-        help="Total number of fl participants, requied to get correct partition",
+        help="Total number of clients",
     )
     parser.add_argument(
-        "--partition",
-        type=int,
-        default=0,
-        help="Data Partion to train on. Must be less than number of clients",
-    )
-    parser.add_argument(
-        "--local-epochs",
+        "--epochs",
         default=1,
         type=int,
         help="Total number of local epochs to train",
     )
     parser.add_argument("--batch-size", default=32, type=int, help="Batch size")
     parser.add_argument(
-        "--learning-rate", default=0.15, type=float, help="Learning rate for training"
+        "--learning-rate", default=0.01, type=float, help="Learning rate for training"
     )
-    # DPSGD specific arguments
     parser.add_argument(
-        "--dpsgd",
-        default=False,
-        type=bool,
-        help="If True, train with DP-SGD. If False, " "train with vanilla SGD.",
-    )
-    parser.add_argument("--l2-norm-clip", default=1.0, type=float, help="Clipping norm")
-    parser.add_argument(
-        "--noise-multiplier",
-        default=1.1,
+        "--eps",
         type=float,
-        help="Ratio of the standard deviation to the clipping norm",
+        default=1.0,
+        help="Target epsilon for the privacy budget.",
     )
-    parser.add_argument(
-        "--microbatches",
-        default=32,
-        type=int,
-        help="Number of microbatches " "(must evenly divide batch_size)",
-    )
+    parser.add_argument("--max-grad-norm", default=1.0, type=float, help="Gradient clipping norm")
 
     parser.add_argument(
-        "-r", type=int, default=3, help="Number of rounds for the federated training"
+        "--rounds", type=int, default=3, help="Number of rounds for the federated training"
     )
-
-    parser.add_argument(
-        "-nbc",
-        type=int,
-        default=2,
-        help="Number of clients to keep track of dataset share",
-    )
-
-    parser.add_argument("-b", type=int, default=256, help="Batch size")
 
     parser.add_argument(
         "-fc",
@@ -229,13 +228,15 @@ def make_arg_parser():
 
 if __name__ == "__main__":
     args = make_arg_parser().parse_args()
-    epochs = int(args.local_epochs)
+    epochs = int(args.epochs)
     num_clients = int(args.num_clients)
-    rounds = int(args.r)
+    rounds = int(args.rounds)
     fc = int(args.fc)
     ac = int(args.ac)
-    batch_size = int(args.b)
-
+    target_epsilon = float(args.eps)
+    batch_size = int(args.batch_size)
+    max_grad_norm = float(args.max_grad_norm)
+    learning_rate = float(args.learning_rate)
     # Set the start method for multiprocessing in case Python version is under 3.8.1
     mp.set_start_method("spawn")
     # Create a new fresh model to initialize parameters
@@ -245,21 +246,10 @@ if __name__ == "__main__":
     init_param = fl.common.weights_to_parameters(init_weights)
     _, test_loader = load_data(batch_size)
     eval_fn = partial(evaluate, net, CrossEntropyLoss(), test_loader, "cpu")
-    # Define the strategy
-    strategy = FedAvgDp(
-        fraction_fit=float(fc / ac),
-        min_fit_clients=fc,
-        min_available_clients=ac,
-        eval_fn=eval_fn,
-        initial_parameters=init_param,
+    server_process = start_server(init_param, fc, ac, rounds, eval_fn)
+    client_fn = partial(
+        start_client, batch_size, epochs, rounds, num_clients, "cpu", target_epsilon, max_grad_norm, learning_rate
     )
-    server_process = mp.Process(
-        target=fl.server.start_server,
-        args=["[::]:8080"],
-        kwargs=dict(config={"num_rounds": rounds}, strategy=strategy),
-    )
-    server_process.start()
-    client_fn = partial(start_client, batch_size, epochs, rounds, num_clients, "cpu")
     with mp.Pool(num_clients) as pool:
         pool.map(client_fn, range(num_clients))
     server_process.kill()
