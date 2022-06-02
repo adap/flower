@@ -190,15 +190,15 @@ def rand_bytes(num: int = 32) -> bytes:
 # Pseudo random generator for creating masks.
 
 # the original one
-def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -> Weights:
-   random.seed(seed)
-   output = []
-   for dimension in dimensions_list:
-       flat_arr = np.array([random.randrange(0, num_range)
-                            for i in range(np.prod(dimension))])
-       modified_arr = np.reshape(flat_arr, dimension)
-       output.append(modified_arr)
-   return output
+#def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -> Weights:
+#    random.seed(seed)
+#    output = []
+#    for dimension in dimensions_list:
+#        flat_arr = np.array([random.randrange(0, num_range)
+#                             for i in range(np.prod(dimension))])
+#        modified_arr = np.reshape(flat_arr, dimension)
+#        output.append(modified_arr)
+#    return output
 
 # the one avoid nested loop
 #def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -> Weights:
@@ -214,20 +214,20 @@ def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -
 #    return output
 
 # the one use numpy PRG
-# def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -> Weights:
-#     assert len(seed) & 0x3 == 0
-#     seed32 = 0
-#     for i in range(0, len(seed), 4):
-#         seed32 ^= int.from_bytes(seed[i:i+4], 'little')
-#     np.random.seed(seed32)
-#     output = []
-#     for dimension in dimensions_list:
-#         if len(dimension) == 0:
-#             arr = np.array(np.random.randint(0, num_range - 1), dtype=int)
-#         else:
-#             arr = np.random.randint(0, num_range - 1, dimension)
-#         output.append(arr)
-#     return output
+def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -> Weights:
+    assert len(seed) & 0x3 == 0
+    seed32 = 0
+    for i in range(0, len(seed), 4):
+        seed32 ^= int.from_bytes(seed[i:i+4], 'little')
+    np.random.seed(seed32)
+    output = []
+    for dimension in dimensions_list:
+        if len(dimension) == 0:
+            arr = np.array(np.random.randint(0, num_range - 1), dtype=int)
+        else:
+            arr = np.random.randint(0, num_range - 1, dimension)
+        output.append(arr)
+    return output
 
 
 
