@@ -158,7 +158,7 @@ def ask_masked_models(client, ins: AskMaskedModelsIns):
     '''
     # temporary code=========================================================
     if client.test == 1:
-        if client.id % 10 < client.test_dropout_value:
+        if client.id % 50 < client.test_dropout_value:
             log(ERROR, "Force dropout due to testing!!")
             raise Exception("Force dropout due to testing")
         weights = sec_agg_primitives.weights_zero_generate(
