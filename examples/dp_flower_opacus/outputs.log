@@ -1,0 +1,99 @@
+INFO flower 2022-06-02 10:23:15,617 | app.py:109 | Flower server running (3 rounds)
+SSL is disabled
+06/02/2022 10:23:15:INFO:Flower server running (3 rounds)
+SSL is disabled
+INFO flower 2022-06-02 10:23:15,618 | server.py:128 | Initializing global parameters
+06/02/2022 10:23:15:INFO:Initializing global parameters
+INFO flower 2022-06-02 10:23:15,618 | server.py:323 | Using initial parameters provided by strategy
+06/02/2022 10:23:15:INFO:Using initial parameters provided by strategy
+INFO flower 2022-06-02 10:23:15,618 | server.py:130 | Evaluating initial parameters
+06/02/2022 10:23:15:INFO:Evaluating initial parameters
+06/02/2022 10:23:18:WARNING:Ignoring drop_last as it is not compatible with DPDataLoader.
+2022-06-02 10:23:18.268 | INFO     | __mp_main__:start_client:129 - Starting client # 0
+06/02/2022 10:23:18:WARNING:Ignoring drop_last as it is not compatible with DPDataLoader.
+2022-06-02 10:23:18.269 | INFO     | __mp_main__:start_client:129 - Starting client # 1
+INFO flower 2022-06-02 10:23:18,269 | connection.py:102 | Opened insecure gRPC connection (no certificates were passed)
+06/02/2022 10:23:18:INFO:Opened insecure gRPC connection (no certificates were passed)
+INFO flower 2022-06-02 10:23:18,270 | connection.py:102 | Opened insecure gRPC connection (no certificates were passed)
+06/02/2022 10:23:18:INFO:Opened insecure gRPC connection (no certificates were passed)
+DEBUG flower 2022-06-02 10:23:18,271 | connection.py:39 | ChannelConnectivity.IDLE
+06/02/2022 10:23:18:DEBUG:ChannelConnectivity.IDLE
+DEBUG flower 2022-06-02 10:23:18,271 | connection.py:39 | ChannelConnectivity.IDLE
+06/02/2022 10:23:18:DEBUG:ChannelConnectivity.IDLE
+DEBUG flower 2022-06-02 10:23:18,272 | connection.py:39 | ChannelConnectivity.CONNECTING
+DEBUG flower 2022-06-02 10:23:18,272 | connection.py:39 | ChannelConnectivity.READY
+06/02/2022 10:23:18:DEBUG:ChannelConnectivity.CONNECTING
+DEBUG flower 2022-06-02 10:23:18,272 | connection.py:39 | ChannelConnectivity.READY
+06/02/2022 10:23:18:DEBUG:ChannelConnectivity.READY
+06/02/2022 10:23:18:DEBUG:ChannelConnectivity.READY
+2022-06-02 10:23:18.499 | INFO     | __mp_main__:evaluate:157 - Global model accuracy: 0.1337
+INFO flower 2022-06-02 10:23:18,499 | server.py:133 | initial parameters (loss, other metrics): 0.07160962734222412, {'accuracy': 0.1337}
+06/02/2022 10:23:18:INFO:initial parameters (loss, other metrics): 0.07160962734222412, {'accuracy': 0.1337}
+INFO flower 2022-06-02 10:23:18,499 | server.py:143 | FL starting
+06/02/2022 10:23:18:INFO:FL starting
+DEBUG flower 2022-06-02 10:23:18,499 | server.py:265 | fit_round: strategy sampled 2 clients (out of 2)
+06/02/2022 10:23:18:DEBUG:fit_round: strategy sampled 2 clients (out of 2)
+2022-06-02 10:23:18.505 | INFO     | dp_client:fit:168 - Client 0 starting training epoch # 0
+2022-06-02 10:23:18.505 | INFO     | dp_client:fit:168 - Client 1 starting training epoch # 0
+2022-06-02 10:23:37.236 | INFO     | dp_client:fit:168 - Client 1 starting training epoch # 1
+2022-06-02 10:23:37.264 | INFO     | dp_client:fit:168 - Client 0 starting training epoch # 1
+2022-06-02 10:23:54.943 | INFO     | dp_client:fit:191 - Client 1 epsilon: 0.898
+2022-06-02 10:23:55.137 | INFO     | dp_client:fit:191 - Client 0 epsilon: 0.898
+DEBUG flower 2022-06-02 10:23:55,139 | server.py:277 | fit_round received 2 results and 0 failures
+06/02/2022 10:23:55:DEBUG:fit_round received 2 results and 0 failures
+2022-06-02 10:23:55.139 | INFO     | fedavgdp:aggregate_fit:93 - Privacy budget ε at round 1: 0.898
+2022-06-02 10:23:57.313 | INFO     | __mp_main__:evaluate:157 - Global model accuracy: 0.2822
+INFO flower 2022-06-02 10:23:57,313 | server.py:158 | fit progress: (1, 0.06209503489732742, {'accuracy': 0.2822}, 38.813824699958786)
+06/02/2022 10:23:57:INFO:fit progress: (1, 0.06209503489732742, {'accuracy': 0.2822}, 38.813824699958786)
+INFO flower 2022-06-02 10:23:57,313 | server.py:209 | evaluate_round: no clients selected, cancel
+06/02/2022 10:23:57:INFO:evaluate_round: no clients selected, cancel
+DEBUG flower 2022-06-02 10:23:57,313 | server.py:265 | fit_round: strategy sampled 2 clients (out of 2)
+06/02/2022 10:23:57:DEBUG:fit_round: strategy sampled 2 clients (out of 2)
+2022-06-02 10:23:57.318 | INFO     | dp_client:fit:168 - Client 0 starting training epoch # 0
+2022-06-02 10:23:57.318 | INFO     | dp_client:fit:168 - Client 1 starting training epoch # 0
+2022-06-02 10:24:14.930 | INFO     | dp_client:fit:168 - Client 0 starting training epoch # 1
+2022-06-02 10:24:15.205 | INFO     | dp_client:fit:168 - Client 1 starting training epoch # 1
+2022-06-02 10:24:32.740 | INFO     | dp_client:fit:191 - Client 0 epsilon: 0.951
+2022-06-02 10:24:33.067 | INFO     | dp_client:fit:191 - Client 1 epsilon: 0.951
+DEBUG flower 2022-06-02 10:24:33,070 | server.py:277 | fit_round received 2 results and 0 failures
+06/02/2022 10:24:33:DEBUG:fit_round received 2 results and 0 failures
+2022-06-02 10:24:33.070 | INFO     | fedavgdp:aggregate_fit:93 - Privacy budget ε at round 2: 0.951
+2022-06-02 10:24:35.196 | INFO     | __mp_main__:evaluate:157 - Global model accuracy: 0.3231
+INFO flower 2022-06-02 10:24:35,196 | server.py:158 | fit progress: (2, 0.05975948259830475, {'accuracy': 0.3231}, 76.69665879994864)
+06/02/2022 10:24:35:INFO:fit progress: (2, 0.05975948259830475, {'accuracy': 0.3231}, 76.69665879994864)
+INFO flower 2022-06-02 10:24:35,196 | server.py:209 | evaluate_round: no clients selected, cancel
+06/02/2022 10:24:35:INFO:evaluate_round: no clients selected, cancel
+DEBUG flower 2022-06-02 10:24:35,196 | server.py:265 | fit_round: strategy sampled 2 clients (out of 2)
+06/02/2022 10:24:35:DEBUG:fit_round: strategy sampled 2 clients (out of 2)
+2022-06-02 10:24:35.201 | INFO     | dp_client:fit:168 - Client 0 starting training epoch # 0
+2022-06-02 10:24:35.202 | INFO     | dp_client:fit:168 - Client 1 starting training epoch # 0
+2022-06-02 10:24:52.781 | INFO     | dp_client:fit:168 - Client 1 starting training epoch # 1
+2022-06-02 10:24:52.788 | INFO     | dp_client:fit:168 - Client 0 starting training epoch # 1
+2022-06-02 10:25:11.862 | INFO     | dp_client:fit:191 - Client 1 epsilon: 0.996
+2022-06-02 10:25:11.933 | INFO     | dp_client:fit:191 - Client 0 epsilon: 0.996
+DEBUG flower 2022-06-02 10:25:11,936 | server.py:277 | fit_round received 2 results and 0 failures
+06/02/2022 10:25:11:DEBUG:fit_round received 2 results and 0 failures
+2022-06-02 10:25:11.936 | INFO     | fedavgdp:aggregate_fit:93 - Privacy budget ε at round 3: 0.996
+2022-06-02 10:25:14.090 | INFO     | __mp_main__:evaluate:157 - Global model accuracy: 0.3473
+INFO flower 2022-06-02 10:25:14,090 | server.py:158 | fit progress: (3, 0.058379855918884276, {'accuracy': 0.3473}, 115.59129089995986)
+06/02/2022 10:25:14:INFO:fit progress: (3, 0.058379855918884276, {'accuracy': 0.3473}, 115.59129089995986)
+INFO flower 2022-06-02 10:25:14,091 | server.py:209 | evaluate_round: no clients selected, cancel
+06/02/2022 10:25:14:INFO:evaluate_round: no clients selected, cancel
+INFO flower 2022-06-02 10:25:14,091 | server.py:182 | FL finished in 115.59148529998492
+06/02/2022 10:25:14:INFO:FL finished in 115.59148529998492
+INFO flower 2022-06-02 10:25:14,091 | app.py:149 | app_fit: losses_distributed []
+06/02/2022 10:25:14:INFO:app_fit: losses_distributed []
+INFO flower 2022-06-02 10:25:14,091 | app.py:150 | app_fit: metrics_distributed {}
+06/02/2022 10:25:14:INFO:app_fit: metrics_distributed {}
+INFO flower 2022-06-02 10:25:14,091 | app.py:151 | app_fit: losses_centralized [(0, 0.07160962734222412), (1, 0.06209503489732742), (2, 0.05975948259830475), (3, 0.058379855918884276)]
+06/02/2022 10:25:14:INFO:app_fit: losses_centralized [(0, 0.07160962734222412), (1, 0.06209503489732742), (2, 0.05975948259830475), (3, 0.058379855918884276)]
+INFO flower 2022-06-02 10:25:14,091 | app.py:152 | app_fit: metrics_centralized {'accuracy': [(0, 0.1337), (1, 0.2822), (2, 0.3231), (3, 0.3473)]}
+06/02/2022 10:25:14:INFO:app_fit: metrics_centralized {'accuracy': [(0, 0.1337), (1, 0.2822), (2, 0.3231), (3, 0.3473)]}
+DEBUG flower 2022-06-02 10:25:14,095 | connection.py:121 | gRPC channel closed
+06/02/2022 10:25:14:DEBUG:gRPC channel closed
+INFO flower 2022-06-02 10:25:14,095 | app.py:101 | Disconnect and shut down
+06/02/2022 10:25:14:INFO:Disconnect and shut down
+DEBUG flower 2022-06-02 10:25:14,095 | connection.py:121 | gRPC channel closed
+06/02/2022 10:25:14:DEBUG:gRPC channel closed
+INFO flower 2022-06-02 10:25:14,095 | app.py:101 | Disconnect and shut down
+06/02/2022 10:25:14:INFO:Disconnect and shut down
