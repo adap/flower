@@ -35,26 +35,26 @@ class RayClientProxy(ClientProxy):
         self.resources = resources
 
     def get_properties(
-        self, ins: common.PropertiesIns, timeout: Optional[float]
-    ) -> common.PropertiesRes:
+        self, ins: common.GetPropertiesIns, timeout: Optional[float]
+    ) -> common.GetPropertiesRes:
         """Returns client's properties."""
-        future_properties_res = launch_and_get_properties.options(  # type: ignore
+        future_get_properties_res = launch_and_get_properties.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.worker.get(future_properties_res, timeout=timeout)
+        res = ray.worker.get(future_get_properties_res, timeout=timeout)
         return cast(
-            common.PropertiesRes,
+            common.GetPropertiesRes,
             res,
         )
 
-    def get_parameters(self, timeout: Optional[float]) -> common.ParametersRes:
+    def get_parameters(self, timeout: Optional[float]) -> common.GetParametersRes:
         """Return the current local model parameters."""
         future_paramseters_res = launch_and_get_parameters.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid)
         res = ray.worker.get(future_paramseters_res, timeout=timeout)
         return cast(
-            common.ParametersRes,
+            common.GetParametersRes,
             res,
         )
 
@@ -91,15 +91,15 @@ class RayClientProxy(ClientProxy):
 
 @ray.remote
 def launch_and_get_properties(
-    client_fn: ClientFn, cid: str, properties_ins: common.PropertiesIns
-) -> common.PropertiesRes:
+    client_fn: ClientFn, cid: str, properties_ins: common.GetPropertiesIns
+) -> common.GetPropertiesRes:
     """Exectue get_properties remotely."""
     client: Client = _create_client(client_fn, cid)
     return client.get_properties(properties_ins)
 
 
 @ray.remote
-def launch_and_get_parameters(client_fn: ClientFn, cid: str) -> common.ParametersRes:
+def launch_and_get_parameters(client_fn: ClientFn, cid: str) -> common.GetParametersRes:
     """Exectue get_parameters remotely."""
     client: Client = _create_client(client_fn, cid)
     return client.get_parameters()

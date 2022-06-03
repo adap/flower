@@ -36,36 +36,40 @@ class GrpcClientProxy(ClientProxy):
 
     def get_properties(
         self,
-        ins: common.PropertiesIns,
+        ins: common.GetPropertiesIns,
         timeout: Optional[float],
-    ) -> common.PropertiesRes:
+    ) -> common.GetPropertiesRes:
         """Requests client's set of internal properties."""
-        properties_msg = serde.properties_ins_to_proto(ins)
+        get_properties_msg = serde.get_properties_ins_to_proto(ins)
         res_wrapper: ResWrapper = self.bridge.request(
             ins_wrapper=InsWrapper(
-                server_message=ServerMessage(properties_ins=properties_msg),
+                server_message=ServerMessage(get_properties_ins=get_properties_msg),
                 timeout=timeout,
             )
         )
         client_msg: ClientMessage = res_wrapper.client_message
-        properties_res = serde.properties_res_from_proto(client_msg.properties_res)
-        return properties_res
+        get_properties_res = serde.get_properties_res_from_proto(
+            client_msg.get_properties_res
+        )
+        return get_properties_res
 
     def get_parameters(
         self,
         timeout: Optional[float],
-    ) -> common.ParametersRes:
+    ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-        get_parameters_msg = serde.get_parameters_to_proto()
+        get_parameters_msg = serde.get_parameters_ins_to_proto()
         res_wrapper: ResWrapper = self.bridge.request(
             ins_wrapper=InsWrapper(
-                server_message=ServerMessage(get_parameters=get_parameters_msg),
+                server_message=ServerMessage(get_parameters_ins=get_parameters_msg),
                 timeout=timeout,
             )
         )
         client_msg: ClientMessage = res_wrapper.client_message
-        parameters_res = serde.parameters_res_from_proto(client_msg.parameters_res)
-        return parameters_res
+        get_parameters_res = serde.get_parameters_res_from_proto(
+            client_msg.get_parameters_res
+        )
+        return get_parameters_res
 
     def fit(
         self,
