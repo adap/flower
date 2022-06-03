@@ -34,21 +34,21 @@ class Scalar {
   // Getters
   std::optional<bool> getBool() { return b; }
   std::optional<std::string> getBytes() { return bytes; }
-  std::optional<float> getFloat() { return f; }
+  std::optional<double> getDouble() { return d; }
   std::optional<int> getInt() { return i; }
   std::optional<std::string> getString() { return string; }
 
   // Setters
   void setBool(bool b) { this->b = b; }
   void setBytes(std::string bytes) { this->bytes = bytes; }
-  void setFloat(float f) { this->f = f; }
+  void setDouble(double d) { this->d = d; }
   void setInt(int i) { this->i = i; }
   void setString(std::string string) { this->string = string; }
 
  private:
   std::optional<bool> b = std::nullopt;
   std::optional<std::string> bytes = std::nullopt;
-  std::optional<float> f = std::nullopt;
+  std::optional<double> d = std::nullopt;
   std::optional<int> i = std::nullopt;
   std::optional<std::string> string = std::nullopt;
 };

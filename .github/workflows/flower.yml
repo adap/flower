@@ -22,7 +22,7 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install build tools
         run: |
-          sudo apt-get install clang-format-10
+          sudo apt-get install clang-format
           python -m pip install -U pip==22.0.4
           python -m pip install -U setuptools==60.9.3
           python -m pip install -U poetry==1.1.13
