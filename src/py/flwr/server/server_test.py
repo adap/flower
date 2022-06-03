@@ -25,10 +25,10 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
     Parameters,
-    ParametersRes,
-    PropertiesIns,
-    PropertiesRes,
     Reconnect,
     ndarray_to_bytes,
 )
@@ -42,12 +42,12 @@ class SuccessClient(ClientProxy):
     """Test class."""
 
     def get_properties(
-        self, ins: PropertiesIns, timeout: Optional[float]
-    ) -> PropertiesRes:
+        self, ins: GetPropertiesIns, timeout: Optional[float]
+    ) -> GetPropertiesRes:
         # This method is not expected to be called
         raise Exception()
 
-    def get_parameters(self, timeout: Optional[float]) -> ParametersRes:
+    def get_parameters(self, timeout: Optional[float]) -> GetParametersRes:
         # This method is not expected to be called
         raise Exception()
 
@@ -71,11 +71,11 @@ class FailingClient(ClientProxy):
     """Test class."""
 
     def get_properties(
-        self, ins: PropertiesIns, timeout: Optional[float]
-    ) -> PropertiesRes:
+        self, ins: GetPropertiesIns, timeout: Optional[float]
+    ) -> GetPropertiesRes:
         raise Exception()
 
-    def get_parameters(self, timeout: Optional[float]) -> ParametersRes:
+    def get_parameters(self, timeout: Optional[float]) -> GetParametersRes:
         raise Exception()
 
     def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:

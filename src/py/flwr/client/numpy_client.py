@@ -27,10 +27,10 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
     Metrics,
-    ParametersRes,
-    PropertiesIns,
-    PropertiesRes,
     Scalar,
     Status,
     parameters_to_weights,
@@ -171,19 +171,19 @@ class NumPyClientWrapper(Client):
     def __init__(self, numpy_client: NumPyClient) -> None:
         self.numpy_client = numpy_client
 
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Return the current client properties."""
         properties = self.numpy_client.get_properties(ins.config)
-        return PropertiesRes(
+        return GetPropertiesRes(
             status=Status(code=Code.OK, message="Success"),
             properties=properties,
         )
 
-    def get_parameters(self) -> ParametersRes:
+    def get_parameters(self) -> GetParametersRes:
         """Return the current local model parameters."""
         parameters = self.numpy_client.get_parameters()
         parameters_proto = weights_to_parameters(parameters)
-        return ParametersRes(parameters=parameters_proto)
+        return GetParametersRes(parameters=parameters_proto)
 
     def fit(self, ins: FitIns) -> FitRes:
         """Refine the provided weights using the locally held dataset."""

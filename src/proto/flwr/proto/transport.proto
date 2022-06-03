@@ -15,7 +15,7 @@
 
 syntax = "proto3";
 
-package flower.transport;
+package flwr.proto;
 
 service FlowerService {
   rpc Join(stream ClientMessage) returns (stream ServerMessage) {}
@@ -43,7 +43,7 @@ enum Reason {
 
 message ServerMessage {
   message Reconnect { int64 seconds = 1; }
-  message GetParameters {}
+  message GetParametersIns {}
   message FitIns {
     Parameters parameters = 1;
     map<string, Scalar> config = 2;
@@ -52,19 +52,19 @@ message ServerMessage {
     Parameters parameters = 1;
     map<string, Scalar> config = 2;
   }
-  message PropertiesIns { map<string, Scalar> config = 1; }
+  message GetPropertiesIns { map<string, Scalar> config = 1; }
   oneof msg {
     Reconnect reconnect = 1;
-    GetParameters get_parameters = 2;
+    GetParametersIns get_parameters_ins = 2;
     FitIns fit_ins = 3;
     EvaluateIns evaluate_ins = 4;
-    PropertiesIns properties_ins = 5;
+    GetPropertiesIns get_properties_ins = 5;
   }
 }
 
 message ClientMessage {
   message Disconnect { Reason reason = 1; }
-  message ParametersRes { Parameters parameters = 1; }
+  message GetParametersRes { Parameters parameters = 1; }
   message FitRes {
     Parameters parameters = 1;
     int64 num_examples = 2;
@@ -75,21 +75,21 @@ message ClientMessage {
     float loss = 2;
     map<string, Scalar> metrics = 4;
   }
-  message PropertiesRes {
+  message GetPropertiesRes {
     Status status = 1;
     map<string, Scalar> properties = 2;
   }
   oneof msg {
     Disconnect disconnect = 1;
-    ParametersRes parameters_res = 2;
+    GetParametersRes get_parameters_res = 2;
     FitRes fit_res = 3;
     EvaluateRes evaluate_res = 4;
-    PropertiesRes properties_res = 5;
+    GetPropertiesRes get_properties_res = 5;
   }
 }
 
 message Scalar {
-  // The following oneof contains all types that ProtoBuf considers to be
+  // The following `oneof` contains all types that ProtoBuf considers to be
   // "Scalar Value Types". Commented-out types are listed for reference and
   // might be enabled in future releases. Source:
   // https://developers.google.com/protocol-buffers/docs/proto3#scalar

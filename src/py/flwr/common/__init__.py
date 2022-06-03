@@ -26,13 +26,13 @@ from .typing import EvaluateIns as EvaluateIns
 from .typing import EvaluateRes as EvaluateRes
 from .typing import FitIns as FitIns
 from .typing import FitRes as FitRes
+from .typing import GetParametersRes as GetParametersRes
+from .typing import GetPropertiesIns as GetPropertiesIns
+from .typing import GetPropertiesRes as GetPropertiesRes
 from .typing import Metrics as Metrics
 from .typing import MetricsAggregationFn as MetricsAggregationFn
 from .typing import Parameters as Parameters
-from .typing import ParametersRes as ParametersRes
 from .typing import Properties as Properties
-from .typing import PropertiesIns as PropertiesIns
-from .typing import PropertiesRes as PropertiesRes
 from .typing import Reconnect as Reconnect
 from .typing import Scalar as Scalar
 from .typing import Status as Status
@@ -49,16 +49,16 @@ __all__ = [
     "EvaluateRes",
     "FitIns",
     "FitRes",
+    "GetParametersRes",
+    "GetPropertiesIns",
+    "GetPropertiesRes",
     "GRPC_MAX_MESSAGE_LENGTH",
     "Metrics",
     "MetricsAggregationFn",
     "ndarray_to_bytes",
     "Parameters",
     "parameters_to_weights",
-    "ParametersRes",
     "Properties",
-    "PropertiesIns",
-    "PropertiesRes",
     "Reconnect",
     "Scalar",
     "Status",

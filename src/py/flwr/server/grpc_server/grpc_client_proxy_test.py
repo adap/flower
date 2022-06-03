@@ -35,7 +35,7 @@ MESSAGE_FIT_RES = ClientMessage(
 )
 CLIENT_PROPERTIES = {"tensor_type": Scalar(string="numpy.ndarray")}
 MESSAGE_PROPERTIES_RES = ClientMessage(
-    properties_res=ClientMessage.PropertiesRes(properties=CLIENT_PROPERTIES)
+    get_properties_res=ClientMessage.GetPropertiesRes(properties=CLIENT_PROPERTIES)
 )
 
 RES_WRAPPER_FIT_RES = ResWrapper(client_message=MESSAGE_FIT_RES)
@@ -62,7 +62,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
 
         # Execute
-        value: flwr.common.ParametersRes = client.get_parameters(timeout=None)
+        value: flwr.common.GetParametersRes = client.get_parameters(timeout=None)
 
         # Assert
         assert not value.parameters.tensors
@@ -103,12 +103,12 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock_get_proprieties)
         request_properties: Config = {"tensor_type": "str"}
-        ins: flwr.common.PropertiesIns = flwr.common.PropertiesIns(
+        ins: flwr.common.GetPropertiesIns = flwr.common.GetPropertiesIns(
             config=request_properties
         )
 
         # Execute
-        value: flwr.common.PropertiesRes = client.get_properties(ins, timeout=None)
+        value: flwr.common.GetPropertiesRes = client.get_properties(ins, timeout=None)
 
         # Assert
         assert value.properties["tensor_type"] == "numpy.ndarray"
