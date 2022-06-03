@@ -6,8 +6,8 @@ class BatteryCriterion(fl.server.criterion.Criterion):
     """We will not sample clients which have a low batter level."""
 
     def select(self, client):
-        ins = fl.common.PropertiesIns(config={})
-        result = client.get_properties(ins)
+        ins = fl.common.GetPropertiesIns(config={})
+        result = client.get_properties(ins, timeout=None)
         props = result.properties
 
         print(f"Received props res: {result}")

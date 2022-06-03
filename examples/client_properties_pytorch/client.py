@@ -8,9 +8,9 @@ from flwr.common.typing import (
     EvaluateRes,
     FitIns,
     FitRes,
-    ParametersRes,
-    PropertiesIns,
-    PropertiesRes,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
     Status,
 )
 import torch
@@ -146,17 +146,17 @@ def main_client():
 
     # Flower client
     class CifarClient(fl.client.Client):
-        def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+        def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
             properties = {"battery_level": 1.0}
-            return PropertiesRes(
+            return GetPropertiesRes(
                 status=Status(code=Code.OK, message="Success"),
                 properties=properties,
             )
 
-        def get_parameters(self) -> ParametersRes:
+        def get_parameters(self) -> GetParametersRes:
             parameters = [val.cpu().numpy() for _, val in net.state_dict().items()]
             parameters_proto = fl.common.weights_to_parameters(parameters)  # Serialize
-            return ParametersRes(parameters=parameters_proto)
+            return GetParametersRes(parameters=parameters_proto)
 
         def set_parameters(self, parameters):
             params_dict = zip(net.state_dict().keys(), parameters)
@@ -172,6 +172,7 @@ def main_client():
             return FitRes(
                 parameters=params,
                 num_examples=num_examples["trainset"],
+                metrics={}
             )
 
         def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
@@ -181,7 +182,6 @@ def main_client():
             return EvaluateRes(
                 loss=loss,
                 num_examples=num_examples["testset"],
-                accuracy=accuracy,
                 metrics={"accuracy": float(accuracy)},
             )
 
