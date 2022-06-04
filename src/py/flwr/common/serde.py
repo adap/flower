@@ -87,13 +87,20 @@ def disconnect_from_proto(msg: ClientMessage.Disconnect) -> typing.Disconnect:
 # === GetParameters messages ===
 
 
-def get_parameters_ins_to_proto() -> ServerMessage.GetParametersIns:
-    """."""
-    return ServerMessage.GetParametersIns()
+def get_parameters_ins_to_proto(
+    ins: typing.GetParametersIns,
+) -> ServerMessage.GetParametersIns:
+    """Serialize GetParametersIns to ProtoBuf message."""
+    config = properties_to_proto(ins.config)
+    return ServerMessage.GetParametersIns(config=config)
 
 
-# Not required:
-# def get_weights_from_proto(msg: ServerMessage.GetWeights) -> None:
+def get_parameters_ins_from_proto(
+    msg: ServerMessage.GetParametersIns,
+) -> typing.GetParametersIns:
+    """Deserialize GetParametersIns from ProtoBuf message."""
+    config = properties_from_proto(msg.config)
+    return typing.GetParametersIns(config=config)
 
 
 def get_parameters_res_to_proto(

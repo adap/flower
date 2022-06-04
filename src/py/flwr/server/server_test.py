@@ -25,6 +25,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    GetParametersIns,
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
@@ -47,7 +48,9 @@ class SuccessClient(ClientProxy):
         # This method is not expected to be called
         raise Exception()
 
-    def get_parameters(self, timeout: Optional[float]) -> GetParametersRes:
+    def get_parameters(
+        self, ins: GetParametersIns, timeout: Optional[float]
+    ) -> GetParametersRes:
         # This method is not expected to be called
         raise Exception()
 
@@ -75,7 +78,9 @@ class FailingClient(ClientProxy):
     ) -> GetPropertiesRes:
         raise Exception()
 
-    def get_parameters(self, timeout: Optional[float]) -> GetParametersRes:
+    def get_parameters(
+        self, ins: GetParametersIns, timeout: Optional[float]
+    ) -> GetParametersRes:
         raise Exception()
 
     def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:

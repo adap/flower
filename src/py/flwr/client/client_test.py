@@ -21,6 +21,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    GetParametersIns,
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
@@ -38,7 +39,7 @@ class OverridingClient(Client):
             status=Status(code=Code.OK, message="Success"), properties={}
         )
 
-    def get_parameters(self) -> GetParametersRes:
+    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         # This method is not expected to be called
         raise Exception()
 
@@ -54,7 +55,7 @@ class OverridingClient(Client):
 class NotOverridingClient(Client):
     """Client not overriding `get_properties`."""
 
-    def get_parameters(self) -> GetParametersRes:
+    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         # This method is not expected to be called
         raise Exception()
 

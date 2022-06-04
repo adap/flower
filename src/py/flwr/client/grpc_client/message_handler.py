@@ -56,7 +56,7 @@ def handle(
     if field == "get_properties_ins":
         return _get_properties(client, server_msg.get_properties_ins), 0, True
     if field == "get_parameters_ins":
-        return _get_parameters(client), 0, True
+        return _get_parameters(client, server_msg.get_parameters_ins), 0, True
     if field == "fit_ins":
         return _fit(client, server_msg.fit_ins), 0, True
     if field == "evaluate_ins":
@@ -103,9 +103,14 @@ def _get_properties(
     return ClientMessage(get_properties_res=get_properties_res_proto)
 
 
-def _get_parameters(client: Client) -> ClientMessage:
-    # No need to deserialize get_parameters_msg (it's empty)
-    get_parameters_res = client.get_parameters()
+def _get_parameters(
+    client: Client, get_parameters_msg: ServerMessage.GetParametersIns
+) -> ClientMessage:
+    # Deserialize get_properties instruction
+    get_parameters_ins = serde.get_parameters_ins_from_proto(get_parameters_msg)
+    # Request parameters
+    get_parameters_res = client.get_parameters(get_parameters_ins)
+    # Serialize response
     get_parameters_res_proto = serde.get_parameters_res_to_proto(get_parameters_res)
     return ClientMessage(get_parameters_res=get_parameters_res_proto)
 

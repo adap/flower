@@ -47,11 +47,13 @@ class RayClientProxy(ClientProxy):
             res,
         )
 
-    def get_parameters(self, timeout: Optional[float]) -> common.GetParametersRes:
+    def get_parameters(
+        self, ins: common.GetParametersIns, timeout: Optional[float]
+    ) -> common.GetParametersRes:
         """Return the current local model parameters."""
         future_paramseters_res = launch_and_get_parameters.options(  # type: ignore
             **self.resources,
-        ).remote(self.client_fn, self.cid)
+        ).remote(self.client_fn, self.cid, ins)
         res = ray.worker.get(future_paramseters_res, timeout=timeout)
         return cast(
             common.GetParametersRes,
@@ -91,18 +93,20 @@ class RayClientProxy(ClientProxy):
 
 @ray.remote
 def launch_and_get_properties(
-    client_fn: ClientFn, cid: str, properties_ins: common.GetPropertiesIns
+    client_fn: ClientFn, cid: str, get_properties_ins: common.GetPropertiesIns
 ) -> common.GetPropertiesRes:
     """Exectue get_properties remotely."""
     client: Client = _create_client(client_fn, cid)
-    return client.get_properties(properties_ins)
+    return client.get_properties(get_properties_ins)
 
 
 @ray.remote
-def launch_and_get_parameters(client_fn: ClientFn, cid: str) -> common.GetParametersRes:
+def launch_and_get_parameters(
+    client_fn: ClientFn, cid: str, get_parameters_ins: common.GetParametersIns
+) -> common.GetParametersRes:
     """Exectue get_parameters remotely."""
     client: Client = _create_client(client_fn, cid)
-    return client.get_parameters()
+    return client.get_parameters(get_parameters_ins)
 
 
 @ray.remote

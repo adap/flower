@@ -25,6 +25,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    GetParametersIns,
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
@@ -43,7 +44,7 @@ class PlainClient(Client):
         # This method is not expected to be called
         raise Exception()
 
-    def get_parameters(self) -> GetParametersRes:
+    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         # This method is not expected to be called
         raise Exception()
 
@@ -63,7 +64,7 @@ class NeedsWrappingClient(NumPyClient):
         # This method is not expected to be called
         raise Exception()
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config: Config) -> List[np.ndarray]:
         # This method is not expected to be called
         raise Exception()
 

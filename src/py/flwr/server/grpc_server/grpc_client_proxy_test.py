@@ -21,7 +21,7 @@ from unittest.mock import MagicMock
 import numpy as np
 
 import flwr
-from flwr.common.typing import Config
+from flwr.common.typing import Config, GetParametersIns
 from flwr.proto.transport_pb2 import ClientMessage, Parameters, Scalar
 from flwr.server.grpc_server.grpc_bridge import ResWrapper
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
@@ -60,9 +60,12 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         """This test is currently quite simple and should be improved."""
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
+        get_parameters_ins = GetParametersIns(config={})
 
         # Execute
-        value: flwr.common.GetParametersRes = client.get_parameters(timeout=None)
+        value: flwr.common.GetParametersRes = client.get_parameters(
+            ins=get_parameters_ins, timeout=None
+        )
 
         # Assert
         assert not value.parameters.tensors
