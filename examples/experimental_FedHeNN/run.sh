@@ -4,7 +4,7 @@ echo "Starting server"
 nohup python server.py  >>logger.log &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
-for i in `seq 0 3`; do
+for i in `seq 0 2`; do
     echo "Starting client $i"
     nohup python client.py --part_idx $i  >>logger.log &
 done
