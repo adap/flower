@@ -1,5 +1,5 @@
-Quickstart (TensorFlow)
-=======================
+Quickstart TensorFlow
+=====================
 
 Let's build a federated learning system in less than 20 lines of code!
 
