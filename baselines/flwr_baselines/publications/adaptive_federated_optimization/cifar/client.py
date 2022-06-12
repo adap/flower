@@ -42,7 +42,7 @@ class RayClient(fl.client.NumPyClient):
         # pylint: disable=unused-argument
         return self.properties
 
-    def get_parameters(self, config: Dict[str, Scalar]) -> Weights:
+    def get_parameters(self) -> Weights:
         """Returns weight from a given model. If no model is passed, then a
         local model is created. This can be used to initialize a model in the
         server.
