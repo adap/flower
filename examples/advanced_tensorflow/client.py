@@ -17,9 +17,9 @@ class CifarClient(fl.client.NumPyClient):
         self.x_train, self.y_train = x_train, y_train
         self.x_test, self.y_test = x_test, y_test
 
-    def get_properties(self):
+    def get_properties(self, config):
         """Get properties of client."""
-        return {}
+        raise Exception("Not implemented")
 
     def get_parameters(self):
         """Get parameters of the local model."""
