@@ -1,5 +1,5 @@
-Quickstart (scikit-learn)
-=========================
+Quickstart scikit-learn
+=======================
 
 In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit-learn. 
 
