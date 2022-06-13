@@ -7,8 +7,9 @@
 
 #include <vector>
 
-class SyntheticDataset {
- public:
+class SyntheticDataset
+{
+public:
   // Generates the synthetic dataset of size size around given vector m of size ms_size and given bias b.
   SyntheticDataset(std::vector<double> ms, double b, std::size_t size);
 
@@ -20,7 +21,7 @@ class SyntheticDataset {
 
   int get_features_count();
 
- private:
+private:
   std::vector<double> ms;
   double b;
 
@@ -30,4 +31,4 @@ class SyntheticDataset {
   std::vector<std::vector<double>> data_points;
 };
 
-#endif //FLOWER_CPP_SYNTHETIC_DATASET_H
+#endif // FLOWER_CPP_SYNTHETIC_DATASET_H

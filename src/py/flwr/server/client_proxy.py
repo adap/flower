@@ -16,7 +16,6 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from flwr.common import (
     Disconnect,
@@ -40,40 +39,21 @@ class ClientProxy(ABC):
         self.properties: Properties = {}
 
     @abstractmethod
-    def get_properties(
-        self,
-        ins: PropertiesIns,
-        timeout: Optional[float],
-    ) -> PropertiesRes:
+    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
         """Returns the client's properties."""
 
     @abstractmethod
-    def get_parameters(
-        self,
-        timeout: Optional[float],
-    ) -> ParametersRes:
+    def get_parameters(self) -> ParametersRes:
         """Return the current local model parameters."""
 
     @abstractmethod
-    def fit(
-        self,
-        ins: FitIns,
-        timeout: Optional[float],
-    ) -> FitRes:
+    def fit(self, ins: FitIns) -> FitRes:
         """Refine the provided weights using the locally held dataset."""
 
     @abstractmethod
-    def evaluate(
-        self,
-        ins: EvaluateIns,
-        timeout: Optional[float],
-    ) -> EvaluateRes:
+    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
 
     @abstractmethod
-    def reconnect(
-        self,
-        reconnect: Reconnect,
-        timeout: Optional[float],
-    ) -> Disconnect:
+    def reconnect(self, reconnect: Reconnect) -> Disconnect:
         """Disconnect and (optionally) reconnect later."""

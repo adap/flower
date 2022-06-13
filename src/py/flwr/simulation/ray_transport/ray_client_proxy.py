@@ -15,15 +15,16 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
-from typing import Callable, Dict, Optional, cast
+from typing import Callable, Dict, Union, cast
 
 import ray
 
 from flwr import common
-from flwr.client import Client, ClientLike, to_client
+from flwr.client import Client, NumPyClient
+from flwr.client.numpy_client import NumPyClientWrapper
 from flwr.server.client_proxy import ClientProxy
 
-ClientFn = Callable[[str], ClientLike]
+ClientFn = Callable[[str], Client]
 
 
 class RayClientProxy(ClientProxy):
@@ -34,57 +35,51 @@ class RayClientProxy(ClientProxy):
         self.client_fn = client_fn
         self.resources = resources
 
-    def get_properties(
-        self, ins: common.PropertiesIns, timeout: Optional[float]
-    ) -> common.PropertiesRes:
+    def get_properties(self, ins: common.PropertiesIns) -> common.PropertiesRes:
         """Returns client's properties."""
         future_properties_res = launch_and_get_properties.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.worker.get(future_properties_res, timeout=timeout)
+        res = ray.worker.get(future_properties_res)
         return cast(
             common.PropertiesRes,
             res,
         )
 
-    def get_parameters(self, timeout: Optional[float]) -> common.ParametersRes:
+    def get_parameters(self) -> common.ParametersRes:
         """Return the current local model parameters."""
         future_paramseters_res = launch_and_get_parameters.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid)
-        res = ray.worker.get(future_paramseters_res, timeout=timeout)
+        res = ray.worker.get(future_paramseters_res)
         return cast(
             common.ParametersRes,
             res,
         )
 
-    def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
+    def fit(self, ins: common.FitIns) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         future_fit_res = launch_and_fit.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.worker.get(future_fit_res, timeout=timeout)
+        res = ray.worker.get(future_fit_res)
         return cast(
             common.FitRes,
             res,
         )
 
-    def evaluate(
-        self, ins: common.EvaluateIns, timeout: Optional[float]
-    ) -> common.EvaluateRes:
+    def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
         future_evaluate_res = launch_and_evaluate.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.worker.get(future_evaluate_res, timeout=timeout)
+        res = ray.worker.get(future_evaluate_res)
         return cast(
             common.EvaluateRes,
             res,
         )
 
-    def reconnect(
-        self, reconnect: common.Reconnect, timeout: Optional[float]
-    ) -> common.Disconnect:
+    def reconnect(self, reconnect: common.Reconnect) -> common.Disconnect:
         """Disconnect and (optionally) reconnect later."""
         return common.Disconnect(reason="")  # Nothing to do here (yet)
 
@@ -125,5 +120,7 @@ def launch_and_evaluate(
 
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
     """Create a client instance."""
-    client_like: ClientLike = client_fn(cid)
-    return to_client(client_like=client_like)
+    client: Union[Client, NumPyClient] = client_fn(cid)
+    if isinstance(client, NumPyClient):
+        client = NumPyClientWrapper(numpy_client=client)
+    return client
