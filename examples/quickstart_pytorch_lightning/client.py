@@ -19,7 +19,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.val_loader = val_loader
         self.test_loader = test_loader
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         encoder_params = _get_parameters(self.model.encoder)
         decoder_params = _get_parameters(self.model.decoder)
         return encoder_params + decoder_params

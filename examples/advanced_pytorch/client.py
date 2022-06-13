@@ -23,7 +23,7 @@ class CifarClient(fl.client.NumPyClient):
         self.testset = testset
         self.validation_split = validation_split
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         """Get parameters of the local model."""
         raise Exception("Not implemented (server-side parameter initialization)")
 

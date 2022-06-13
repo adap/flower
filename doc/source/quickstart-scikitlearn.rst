@@ -116,7 +116,7 @@ The methods can be implemented in the following way:
 .. code-block:: python
 
     class MnistClient(fl.client.NumPyClient):
-        def get_parameters(self):  # type: ignore
+        def get_parameters(self, config):  # type: ignore
             return utils.get_model_parameters(model)
 
         def fit(self, parameters, config):  # type: ignore

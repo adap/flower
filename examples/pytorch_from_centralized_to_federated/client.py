@@ -36,7 +36,7 @@ class CifarClient(fl.client.NumPyClient):
         self.testloader = testloader
         self.num_examples = num_examples
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config) -> List[np.ndarray]:
         self.model.train()
         if USE_FEDBN:
             # Return model parameters as a list of NumPy ndarrays, excluding parameters of BN layers when using FedBN
@@ -63,7 +63,7 @@ class CifarClient(fl.client.NumPyClient):
             self.model.load_state_dict(state_dict, strict=True)
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
@@ -71,7 +71,7 @@ class CifarClient(fl.client.NumPyClient):
         return self.get_parameters(), self.num_examples["trainset"], {}
 
     def evaluate(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict
     ) -> Tuple[float, int, Dict]:
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)

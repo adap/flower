@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     # Define Flower client
     class MnistClient(fl.client.NumPyClient):
-        def get_parameters(self):  # type: ignore
+        def get_parameters(self, config):  # type: ignore
             return utils.get_model_parameters(model)
 
         def fit(self, parameters, config):  # type: ignore

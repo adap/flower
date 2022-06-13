@@ -275,7 +275,7 @@ We included type annotations to give you a better understanding of the data type
             self.val_data = val_data
             self.device = device
 
-        def get_parameters(self) -> List[np.ndarray]:
+        def get_parameters(self, config: Dict) -> List[np.ndarray]:
             # Return model parameters as a list of NumPy Arrays
             param = []
             for val in self.model.collect_params(".*weight").values():
@@ -291,7 +291,7 @@ We included type annotations to give you a better understanding of the data type
                 self.model.collect_params().setattr(key, value)
 
         def fit(
-            self, parameters: List[np.ndarray], config: Dict[str, str]
+            self, parameters: List[np.ndarray], config: Dict
         ) -> Tuple[List[np.ndarray], int]:
             # Set model parameters, train model, return updated model parameters
             self.set_parameters(parameters)
@@ -302,7 +302,7 @@ We included type annotations to give you a better understanding of the data type
             return self.get_parameters(), num_examples, results
 
         def evaluate(
-            self, parameters: List[np.ndarray], config: Dict[str, str]
+            self, parameters: List[np.ndarray], config: Dict
         ) -> Tuple[int, float, float]:
             # Set model parameters, evaluate model on local test dataset, return result
             self.set_parameters(parameters)

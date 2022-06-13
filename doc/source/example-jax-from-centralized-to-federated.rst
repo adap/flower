@@ -199,7 +199,7 @@ We included type annotations to give you a better understanding of the data type
             self.test_x = test_x
             self.test_y = test_y
 
-        def get_parameters(self) -> Dict:
+        def get_parameters(self, config: Dict) -> Dict:
             # Return model parameters as a list of NumPy ndarrays
             parameter_value = []
             for _, val in self.params.items():

@@ -38,7 +38,7 @@ def start_client(dataset: DATASET) -> None:
 
     # Define a Flower client
     class CifarClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             """Return current weights."""
             return model.get_weights()
 

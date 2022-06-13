@@ -251,7 +251,7 @@ We included type annotations to give you a better understanding of the data type
             self.testloader = testloader
             self.num_examples = num_examples
 
-        def get_parameters(self) -> List[np.ndarray]:
+        def get_parameters(self, config: Dict) -> List[np.ndarray]:
             # Return model parameters as a list of NumPy ndarrays
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
@@ -262,7 +262,7 @@ We included type annotations to give you a better understanding of the data type
             self.model.load_state_dict(state_dict, strict=True)
 
         def fit(
-            self, parameters: List[np.ndarray], config: Dict[str, str]
+            self, parameters: List[np.ndarray], config: Dict
         ) -> Tuple[List[np.ndarray], int, Dict]:
             # Set model parameters, train model, return updated model parameters
             self.set_parameters(parameters)
@@ -270,7 +270,7 @@ We included type annotations to give you a better understanding of the data type
             return self.get_parameters(), self.num_examples["trainset"], {}
 
         def evaluate(
-            self, parameters: List[np.ndarray], config: Dict[str, str]
+            self, parameters: List[np.ndarray], config: Dict
         ) -> Tuple[float, int, Dict]:
             # Set model parameters, evaluate model on local test dataset, return result
             self.set_parameters(parameters)

@@ -38,7 +38,7 @@ def main():
 
     # Flower Client
     class MNISTClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             param = []
             for val in model.collect_params(".*weight").values():
                 p = val.data()

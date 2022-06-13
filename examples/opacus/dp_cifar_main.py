@@ -94,7 +94,7 @@ class DPCifarClient(fl.client.NumPyClient):
             noise_multiplier=PRIVACY_PARAMS["noise_multiplier"],
         )
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_parameters(self, parameters):

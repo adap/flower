@@ -159,7 +159,7 @@ which can be implemented in the following way:
 .. code-block:: python
 
     class CifarClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
         def set_parameters(self, parameters):

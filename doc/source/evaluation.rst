@@ -70,7 +70,7 @@ Client-side evaluation happens in the :code:`Client.evaluate` method and can be 
             self.x_train, self.y_train = x_train, y_train
             self.x_test, self.y_test = x_test, y_test
 
-        def get_parameters(self):
+        def get_parameters(self, config):
             # ...
 
         def fit(self, parameters, config):
@@ -137,7 +137,7 @@ Model parameters can also be evaluated during training. :code:`Client.fit` can r
             self.x_train, self.y_train = x_train, y_train
             self.x_test, self.y_test = x_test, y_test
 
-        def get_parameters(self):
+        def get_parameters(self, config):
             # ...
 
         def fit(self, parameters, config):

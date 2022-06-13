@@ -176,7 +176,7 @@ They can be implemented in the following way:
 .. code-block:: python
 
     class MNISTClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             param = []
             for val in model.collect_params(".*weight").values():
                 p = val.data()

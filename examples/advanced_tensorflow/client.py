@@ -21,7 +21,7 @@ class CifarClient(fl.client.NumPyClient):
         """Get properties of client."""
         raise Exception("Not implemented")
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         """Get parameters of the local model."""
         raise Exception("Not implemented (server-side parameter initialization)")
 

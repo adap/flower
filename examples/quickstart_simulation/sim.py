@@ -19,7 +19,7 @@ class FlwrClient(fl.client.NumPyClient):
         self.x_train, self.y_train = x_train[:split_idx], y_train[:split_idx]
         self.x_val, self.y_val = x_train[split_idx:], y_train[split_idx:]
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         return self.model.get_weights()
 
     def fit(self, parameters, config):

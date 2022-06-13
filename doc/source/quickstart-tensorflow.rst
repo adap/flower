@@ -56,7 +56,7 @@ implemented in the following way:
 .. code-block:: python
 
     class CifarClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             return model.get_weights()
 
         def fit(self, parameters, config):

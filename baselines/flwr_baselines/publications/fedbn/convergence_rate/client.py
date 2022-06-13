@@ -40,7 +40,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.num_examples = num_examples
         self.mode = mode
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config: Dict) -> List[np.ndarray]:
         """
         Return model parameters as a list of NumPy ndarrays w or w/o using BN layers
         """
@@ -76,7 +76,7 @@ class FlowerClient(fl.client.NumPyClient):
         # pylint: enable=not-callable
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict
     ) -> Tuple[List[np.ndarray], int, Dict]:
         """
         Set model parameters, train model, return updated model parameters
@@ -107,7 +107,7 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
     def evaluate(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict
     ) -> Tuple[float, int, Dict]:
         """
         Set model parameters, evaluate model on local test dataset, return result

@@ -26,7 +26,7 @@ class MNISTClient(fl.client.NumPyClient):
         self.val_data = val_data
         self.device = device
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config: Dict) -> List[np.ndarray]:
         # Return model parameters as a list of NumPy Arrays
         param = []
         for val in self.model.collect_params(".*weight").values():
