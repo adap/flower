@@ -30,7 +30,7 @@ class OverridingClient(NumPyClient):
     def get_properties(self, config: Config) -> Properties:
         return Properties()
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config: Config) -> List[np.ndarray]:
         # This method is not expected to be called
         raise Exception()
 
@@ -50,7 +50,7 @@ class OverridingClient(NumPyClient):
 class NotOverridingClient(NumPyClient):
     """Client not overriding `get_properties`."""
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config: Config) -> List[np.ndarray]:
         # This method is not expected to be called
         raise Exception()
 

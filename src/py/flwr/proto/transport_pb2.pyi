@@ -91,8 +91,29 @@ class ServerMessage(google.protobuf.message.Message):
 
     class GetParametersIns(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        class ConfigEntry(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            KEY_FIELD_NUMBER: builtins.int
+            VALUE_FIELD_NUMBER: builtins.int
+            key: typing.Text
+            @property
+            def value(self) -> global___Scalar: ...
+            def __init__(self,
+                *,
+                key: typing.Text = ...,
+                value: typing.Optional[global___Scalar] = ...,
+                ) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+        CONFIG_FIELD_NUMBER: builtins.int
+        @property
+        def config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
         def __init__(self,
+            *,
+            config: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["config",b"config"]) -> None: ...
 
     class FitIns(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor

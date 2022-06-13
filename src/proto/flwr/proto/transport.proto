@@ -43,7 +43,7 @@ enum Reason {
 
 message ServerMessage {
   message Reconnect { int64 seconds = 1; }
-  message GetParametersIns {}
+  message GetParametersIns { map<string, Scalar> config = 1; }
   message FitIns {
     Parameters parameters = 1;
     map<string, Scalar> config = 2;

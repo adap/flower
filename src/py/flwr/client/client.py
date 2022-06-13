@@ -22,6 +22,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    GetParametersIns,
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
@@ -38,17 +39,23 @@ class Client(ABC):
         ----------
         ins : GetPropertiesIns
             The get properties instructions received from the server containing
-            a dictionary of configuration values used to configure.
+            a dictionary of configuration values.
 
         Returns
         -------
         GetPropertiesRes
-            Client's properties.
+            The current client properties.
         """
 
     @abstractmethod
-    def get_parameters(self) -> GetParametersRes:
+    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         """Return the current local model parameters.
+
+        Parameters
+        ----------
+        ins : GetParametersIns
+            The get parameters instructions received from the server containing
+            a dictionary of configuration values.
 
         Returns
         -------

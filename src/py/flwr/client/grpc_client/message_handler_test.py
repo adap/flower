@@ -21,6 +21,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    GetParametersIns,
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
@@ -32,10 +33,10 @@ from flwr.proto.transport_pb2 import ClientMessage, Code, ServerMessage, Status
 from .message_handler import handle
 
 
-class FlowerClientWithoutProps(Client):
-    """Flower client not implementing get_properties."""
+class ClientWithoutProps(Client):
+    """Client not implementing get_properties."""
 
-    def get_parameters(self) -> GetParametersRes:
+    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         pass
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -45,8 +46,8 @@ class FlowerClientWithoutProps(Client):
         pass
 
 
-class FlowerClientWithProps(Client):
-    """Flower client implementing get_properties."""
+class ClientWithProps(Client):
+    """Client implementing get_properties."""
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         return GetPropertiesRes(
@@ -54,7 +55,7 @@ class FlowerClientWithProps(Client):
             properties={"str_prop": "val", "int_prop": 1},
         )
 
-    def get_parameters(self) -> GetParametersRes:
+    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         pass
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -67,7 +68,7 @@ class FlowerClientWithProps(Client):
 def test_client_without_get_properties() -> None:
     """Test client implementing get_properties."""
     # Prepare
-    client = FlowerClientWithoutProps()
+    client = ClientWithoutProps()
     ins = ServerMessage.GetPropertiesIns()
     msg = ServerMessage(get_properties_ins=ins)
 
@@ -93,7 +94,7 @@ def test_client_without_get_properties() -> None:
 def test_client_with_get_properties() -> None:
     """Test client not implementing get_properties."""
     # Prepare
-    client = FlowerClientWithProps()
+    client = ClientWithProps()
     ins = ServerMessage.GetPropertiesIns()
     msg = ServerMessage(get_properties_ins=ins)
 

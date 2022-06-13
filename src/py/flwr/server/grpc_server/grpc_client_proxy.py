@@ -55,10 +55,11 @@ class GrpcClientProxy(ClientProxy):
 
     def get_parameters(
         self,
+        ins: common.GetParametersIns,
         timeout: Optional[float],
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-        get_parameters_msg = serde.get_parameters_ins_to_proto()
+        get_parameters_msg = serde.get_parameters_ins_to_proto(ins)
         res_wrapper: ResWrapper = self.bridge.request(
             ins_wrapper=InsWrapper(
                 server_message=ServerMessage(get_parameters_ins=get_parameters_msg),

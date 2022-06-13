@@ -31,6 +31,7 @@ from flwr.common import (
     Scalar,
 )
 from flwr.common.logger import log
+from flwr.common.typing import GetParametersIns
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
@@ -255,7 +256,8 @@ class Server:
         # Get initial parameters from one of the clients
         log(INFO, "Requesting initial parameters from one random client")
         random_client = self._client_manager.sample(1)[0]
-        get_parameters_res = random_client.get_parameters(timeout=timeout)
+        ins = GetParametersIns(config={})
+        get_parameters_res = random_client.get_parameters(ins=ins, timeout=timeout)
         log(INFO, "Received initial parameters from one random client")
         return get_parameters_res.parameters
 

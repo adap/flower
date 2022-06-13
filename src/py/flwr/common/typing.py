@@ -60,6 +60,13 @@ class Parameters:
 
 
 @dataclass
+class GetParametersIns:
+    """Parameters request for a client."""
+
+    config: Config
+
+
+@dataclass
 class GetParametersRes:
     """Response when asked to return parameters."""
 
@@ -102,7 +109,7 @@ class EvaluateRes:
 
 @dataclass
 class GetPropertiesIns:
-    """Properties requests for a client."""
+    """Properties request for a client."""
 
     config: Config
 

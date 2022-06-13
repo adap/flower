@@ -4,6 +4,18 @@ Changelog
 Unreleased
 ----------
 
+Incompatible changes
+~~~~~~~~~~~~~~~~~~~~
+
+* **Configurable** ``get_parameters`` (`#1242 <https://github.com/adap/flower/pull/1242>`_)
+
+  The ``get_parameters`` method now accepts a configuration dictionary, just like ``get_properties``, ``fit``, and ``evaluate``.
+
+Minor updates
+~~~~~~~~~~~~~
+
+* Add secure gRPC connection to the ``advanced_tensorflow`` code example (`#847 <https://github.com/adap/flower/pull/847>`_)
+
 
 v0.19.0 (2022-05-18)
 --------------------

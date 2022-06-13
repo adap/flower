@@ -26,6 +26,7 @@ from .typing import EvaluateIns as EvaluateIns
 from .typing import EvaluateRes as EvaluateRes
 from .typing import FitIns as FitIns
 from .typing import FitRes as FitRes
+from .typing import GetParametersIns as GetParametersIns
 from .typing import GetParametersRes as GetParametersRes
 from .typing import GetPropertiesIns as GetPropertiesIns
 from .typing import GetPropertiesRes as GetPropertiesRes
@@ -49,6 +50,7 @@ __all__ = [
     "EvaluateRes",
     "FitIns",
     "FitRes",
+    "GetParametersIns",
     "GetParametersRes",
     "GetPropertiesIns",
     "GetPropertiesRes",

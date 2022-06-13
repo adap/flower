@@ -24,6 +24,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    GetParametersIns,
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
@@ -50,6 +51,7 @@ class ClientProxy(ABC):
     @abstractmethod
     def get_parameters(
         self,
+        ins: GetParametersIns,
         timeout: Optional[float],
     ) -> GetParametersRes:
         """Return the current local model parameters."""
