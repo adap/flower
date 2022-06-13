@@ -12,11 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Client tests."""
+"""Flower Client app tests."""
 
+
+from typing import Dict, List, Tuple
+
+import numpy as np
 
 from flwr.common import (
-    Code,
+    Config,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -24,19 +28,20 @@ from flwr.common import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
-    Status,
+    Scalar,
 )
 
-from .client import Client, has_get_properties
+from .app import ClientLike, to_client
+from .client import Client
+from .numpy_client import NumPyClient
 
 
-class OverridingClient(Client):
-    """Client overriding `get_properties`."""
+class PlainClient(Client):
+    """Client implementation extending the low-level Client."""
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
-        return GetPropertiesRes(
-            status=Status(code=Code.OK, message="Success"), properties={}
-        )
+        # This method is not expected to be called
+        raise Exception()
 
     def get_parameters(self) -> GetParametersRes:
         # This method is not expected to be called
@@ -51,43 +56,49 @@ class OverridingClient(Client):
         raise Exception()
 
 
-class NotOverridingClient(Client):
-    """Client not overriding `get_properties`."""
+class NeedsWrappingClient(NumPyClient):
+    """Client implementation extending the high-level NumPyClient."""
 
-    def get_parameters(self) -> GetParametersRes:
+    def get_properties(self, config: Config) -> Dict[str, Scalar]:
         # This method is not expected to be called
         raise Exception()
 
-    def fit(self, ins: FitIns) -> FitRes:
+    def get_parameters(self) -> List[np.ndarray]:
         # This method is not expected to be called
         raise Exception()
 
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
+    def fit(
+        self, parameters: List[np.ndarray], config: Config
+    ) -> Tuple[List[np.ndarray], int, Dict[str, Scalar]]:
+        # This method is not expected to be called
+        raise Exception()
+
+    def evaluate(
+        self, parameters: List[np.ndarray], config: Config
+    ) -> Tuple[float, int, Dict[str, Scalar]]:
         # This method is not expected to be called
         raise Exception()
 
 
-def test_has_get_properties_true() -> None:
-    """Test fit_clients."""
+def test_to_client_with_client() -> None:
+    """Test to_client."""
     # Prepare
-    client = OverridingClient()
-    expected = True
+    client_like: ClientLike = PlainClient()
 
     # Execute
-    actual = has_get_properties(client=client)
+    actual = to_client(client_like=client_like)
 
     # Assert
-    assert actual == expected
+    assert isinstance(actual, Client)
 
 
-def test_has_get_properties_false() -> None:
+def test_to_client_with_numpyclient() -> None:
     """Test fit_clients."""
     # Prepare
-    client = NotOverridingClient()
-    expected = False
+    client_like: ClientLike = NeedsWrappingClient()
 
     # Execute
-    actual = has_get_properties(client=client)
+    actual = to_client(client_like=client_like)
 
     # Assert
-    assert actual == expected
+    assert isinstance(actual, Client)

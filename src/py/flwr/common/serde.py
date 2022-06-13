@@ -87,25 +87,29 @@ def disconnect_from_proto(msg: ClientMessage.Disconnect) -> typing.Disconnect:
 # === GetParameters messages ===
 
 
-def get_parameters_to_proto() -> ServerMessage.GetParameters:
+def get_parameters_ins_to_proto() -> ServerMessage.GetParametersIns:
     """."""
-    return ServerMessage.GetParameters()
+    return ServerMessage.GetParametersIns()
 
 
 # Not required:
 # def get_weights_from_proto(msg: ServerMessage.GetWeights) -> None:
 
 
-def parameters_res_to_proto(res: typing.ParametersRes) -> ClientMessage.ParametersRes:
+def get_parameters_res_to_proto(
+    res: typing.GetParametersRes,
+) -> ClientMessage.GetParametersRes:
     """."""
     parameters_proto = parameters_to_proto(res.parameters)
-    return ClientMessage.ParametersRes(parameters=parameters_proto)
+    return ClientMessage.GetParametersRes(parameters=parameters_proto)
 
 
-def parameters_res_from_proto(msg: ClientMessage.ParametersRes) -> typing.ParametersRes:
+def get_parameters_res_from_proto(
+    msg: ClientMessage.GetParametersRes,
+) -> typing.GetParametersRes:
     """."""
     parameters = parameters_from_proto(msg.parameters)
-    return typing.ParametersRes(parameters=parameters)
+    return typing.GetParametersRes(parameters=parameters)
 
 
 # === Fit messages ===
@@ -150,30 +154,38 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
 # === Properties messages ===
 
 
-def properties_ins_to_proto(ins: typing.PropertiesIns) -> ServerMessage.PropertiesIns:
-    """Serialize PropertiesIns to ProtoBuf message."""
+def get_properties_ins_to_proto(
+    ins: typing.GetPropertiesIns,
+) -> ServerMessage.GetPropertiesIns:
+    """Serialize GetPropertiesIns to ProtoBuf message."""
     config = properties_to_proto(ins.config)
-    return ServerMessage.PropertiesIns(config=config)
+    return ServerMessage.GetPropertiesIns(config=config)
 
 
-def properties_ins_from_proto(msg: ServerMessage.PropertiesIns) -> typing.PropertiesIns:
-    """Deserialize PropertiesIns from ProtoBuf message."""
+def get_properties_ins_from_proto(
+    msg: ServerMessage.GetPropertiesIns,
+) -> typing.GetPropertiesIns:
+    """Deserialize GetPropertiesIns from ProtoBuf message."""
     config = properties_from_proto(msg.config)
-    return typing.PropertiesIns(config=config)
+    return typing.GetPropertiesIns(config=config)
 
 
-def properties_res_to_proto(res: typing.PropertiesRes) -> ClientMessage.PropertiesRes:
-    """Serialize PropertiesIns to ProtoBuf message."""
+def get_properties_res_to_proto(
+    res: typing.GetPropertiesRes,
+) -> ClientMessage.GetPropertiesRes:
+    """Serialize GetPropertiesIns to ProtoBuf message."""
     status_msg = status_to_proto(res.status)
     properties_msg = properties_to_proto(res.properties)
-    return ClientMessage.PropertiesRes(status=status_msg, properties=properties_msg)
+    return ClientMessage.GetPropertiesRes(status=status_msg, properties=properties_msg)
 
 
-def properties_res_from_proto(msg: ClientMessage.PropertiesRes) -> typing.PropertiesRes:
-    """Deserialize PropertiesRes from ProtoBuf message."""
+def get_properties_res_from_proto(
+    msg: ClientMessage.GetPropertiesRes,
+) -> typing.GetPropertiesRes:
+    """Deserialize GetPropertiesRes from ProtoBuf message."""
     status = status_from_proto(msg=msg.status)
     properties = properties_from_proto(msg.properties)
-    return typing.PropertiesRes(status=status, properties=properties)
+    return typing.GetPropertiesRes(status=status, properties=properties)
 
 
 def status_to_proto(status: typing.Status) -> Status:

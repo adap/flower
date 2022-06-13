@@ -20,6 +20,7 @@ Relevant knowledge for reading this modules code:
 from typing import Callable, Iterator
 
 import grpc
+from iterators import TimeoutIterator
 
 from flwr.proto import transport_pb2_grpc
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
@@ -93,7 +94,9 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
 
         if is_success:
             # Get iterators
-            client_message_iterator = request_iterator
+            client_message_iterator = TimeoutIterator(
+                iterator=request_iterator, reset_on_next=True
+            )
             ins_wrapper_iterator = bridge.ins_wrapper_iterator()
 
             # All messages will be pushed to client bridge directly
@@ -102,8 +105,31 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                     # Get ins_wrapper from bridge and yield server_message
                     ins_wrapper: InsWrapper = next(ins_wrapper_iterator)
                     yield ins_wrapper.server_message
+
+                    # Set current timeout, might be None
+                    if ins_wrapper.timeout is not None:
+                        client_message_iterator.set_timeout(ins_wrapper.timeout)
+
                     # Wait for client message
                     client_message = next(client_message_iterator)
+
+                    if client_message is client_message_iterator.get_sentinel():
+                        # Important: calling `context.abort` in gRPC always
+                        # raises an exception so that all code after the call to
+                        # `context.abort` will not run. If subsequent code should
+                        # be executed, the `rpc_termination_callback` can be used
+                        # (as shown in the `register_client` function).
+                        details = f"Timeout of {ins_wrapper.timeout}sec was exceeded."
+                        context.abort(
+                            code=grpc.StatusCode.DEADLINE_EXCEEDED,
+                            details=details,
+                        )
+                        # This return statement is only for the linter so it understands
+                        # that client_message in subsequent lines is not None
+                        # It does not understand that `context.abort` will terminate
+                        # this execution context by raising an exception.
+                        return
+
                     bridge.set_res_wrapper(
                         res_wrapper=ResWrapper(client_message=client_message)
                     )

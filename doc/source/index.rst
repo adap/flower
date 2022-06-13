@@ -16,8 +16,8 @@ Flower's design goals was to make this simple. Read on to learn more.
    :caption: User Guide
 
    installation
-   quickstart-tensorflow
    quickstart-pytorch
+   quickstart-tensorflow
    quickstart-huggingface
    quickstart-pytorch-lightning
    quickstart-mxnet
@@ -73,6 +73,7 @@ intended to help along the way.
    getting-started-for-contributors
    good-first-contributions
    architecture
+   secagg
    release-process
    creating-new-messages
    devcontainer

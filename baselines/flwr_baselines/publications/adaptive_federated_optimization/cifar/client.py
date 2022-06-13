@@ -29,19 +29,6 @@ class RayClient(fl.client.NumPyClient):
         self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    def get_parameters(self) -> Weights:
-        """Returns weight from a given model. If no model is passed, then a
-        local model is created. This can be used to initialize a model in the
-        server.
-
-        Returns:
-            Weights: weights from the model.
-        """
-        net = get_cifar_model(self.num_classes)
-        weights = [val.cpu().numpy() for _, val in net.state_dict().items()]
-        # parameters = weights_to_parameters(weights)
-        return weights
-
     def get_properties(self, config: Dict[str, Scalar]) -> Dict[str, Scalar]:
         """Returns properties for this client.
 
@@ -54,6 +41,19 @@ class RayClient(fl.client.NumPyClient):
         """
         # pylint: disable=unused-argument
         return self.properties
+
+    def get_parameters(self) -> Weights:
+        """Returns weight from a given model. If no model is passed, then a
+        local model is created. This can be used to initialize a model in the
+        server.
+
+        Returns:
+            Weights: weights from the model.
+        """
+        net = get_cifar_model(self.num_classes)
+        weights = [val.cpu().numpy() for _, val in net.state_dict().items()]
+        # parameters = weights_to_parameters(weights)
+        return weights
 
     def fit(
         self, parameters: Weights, config: Dict[str, Scalar]

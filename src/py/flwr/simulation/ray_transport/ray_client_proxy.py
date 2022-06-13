@@ -15,16 +15,15 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
-from typing import Callable, Dict, Union, cast
+from typing import Callable, Dict, Optional, cast
 
 import ray
 
 from flwr import common
-from flwr.client import Client, NumPyClient
-from flwr.client.numpy_client import NumPyClientWrapper
+from flwr.client import Client, ClientLike, to_client
 from flwr.server.client_proxy import ClientProxy
 
-ClientFn = Callable[[str], Client]
+ClientFn = Callable[[str], ClientLike]
 
 
 class RayClientProxy(ClientProxy):
@@ -35,66 +34,72 @@ class RayClientProxy(ClientProxy):
         self.client_fn = client_fn
         self.resources = resources
 
-    def get_properties(self, ins: common.PropertiesIns) -> common.PropertiesRes:
+    def get_properties(
+        self, ins: common.GetPropertiesIns, timeout: Optional[float]
+    ) -> common.GetPropertiesRes:
         """Returns client's properties."""
-        future_properties_res = launch_and_get_properties.options(  # type: ignore
+        future_get_properties_res = launch_and_get_properties.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.worker.get(future_properties_res)
+        res = ray.worker.get(future_get_properties_res, timeout=timeout)
         return cast(
-            common.PropertiesRes,
+            common.GetPropertiesRes,
             res,
         )
 
-    def get_parameters(self) -> common.ParametersRes:
+    def get_parameters(self, timeout: Optional[float]) -> common.GetParametersRes:
         """Return the current local model parameters."""
         future_paramseters_res = launch_and_get_parameters.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid)
-        res = ray.worker.get(future_paramseters_res)
+        res = ray.worker.get(future_paramseters_res, timeout=timeout)
         return cast(
-            common.ParametersRes,
+            common.GetParametersRes,
             res,
         )
 
-    def fit(self, ins: common.FitIns) -> common.FitRes:
+    def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         future_fit_res = launch_and_fit.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.worker.get(future_fit_res)
+        res = ray.worker.get(future_fit_res, timeout=timeout)
         return cast(
             common.FitRes,
             res,
         )
 
-    def evaluate(self, ins: common.EvaluateIns) -> common.EvaluateRes:
+    def evaluate(
+        self, ins: common.EvaluateIns, timeout: Optional[float]
+    ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
         future_evaluate_res = launch_and_evaluate.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.worker.get(future_evaluate_res)
+        res = ray.worker.get(future_evaluate_res, timeout=timeout)
         return cast(
             common.EvaluateRes,
             res,
         )
 
-    def reconnect(self, reconnect: common.Reconnect) -> common.Disconnect:
+    def reconnect(
+        self, reconnect: common.Reconnect, timeout: Optional[float]
+    ) -> common.Disconnect:
         """Disconnect and (optionally) reconnect later."""
         return common.Disconnect(reason="")  # Nothing to do here (yet)
 
 
 @ray.remote
 def launch_and_get_properties(
-    client_fn: ClientFn, cid: str, properties_ins: common.PropertiesIns
-) -> common.PropertiesRes:
+    client_fn: ClientFn, cid: str, properties_ins: common.GetPropertiesIns
+) -> common.GetPropertiesRes:
     """Exectue get_properties remotely."""
     client: Client = _create_client(client_fn, cid)
     return client.get_properties(properties_ins)
 
 
 @ray.remote
-def launch_and_get_parameters(client_fn: ClientFn, cid: str) -> common.ParametersRes:
+def launch_and_get_parameters(client_fn: ClientFn, cid: str) -> common.GetParametersRes:
     """Exectue get_parameters remotely."""
     client: Client = _create_client(client_fn, cid)
     return client.get_parameters()
@@ -120,7 +125,5 @@ def launch_and_evaluate(
 
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
     """Create a client instance."""
-    client: Union[Client, NumPyClient] = client_fn(cid)
-    if isinstance(client, NumPyClient):
-        client = NumPyClientWrapper(numpy_client=client)
-    return client
+    client_like: ClientLike = client_fn(cid)
+    return to_client(client_like=client_like)

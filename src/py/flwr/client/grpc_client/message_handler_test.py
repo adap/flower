@@ -21,9 +21,9 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
-    ParametersRes,
-    PropertiesIns,
-    PropertiesRes,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
     serde,
     typing,
 )
@@ -35,7 +35,7 @@ from .message_handler import handle
 class FlowerClientWithoutProps(Client):
     """Flower client not implementing get_properties."""
 
-    def get_parameters(self) -> ParametersRes:
+    def get_parameters(self) -> GetParametersRes:
         pass
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -48,13 +48,13 @@ class FlowerClientWithoutProps(Client):
 class FlowerClientWithProps(Client):
     """Flower client implementing get_properties."""
 
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
-        return PropertiesRes(
+    def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
+        return GetPropertiesRes(
             status=typing.Status(code=typing.Code.OK, message="Success"),
             properties={"str_prop": "val", "int_prop": 1},
         )
 
-    def get_parameters(self) -> ParametersRes:
+    def get_parameters(self) -> GetParametersRes:
         pass
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -68,8 +68,8 @@ def test_client_without_get_properties() -> None:
     """Test client implementing get_properties."""
     # Prepare
     client = FlowerClientWithoutProps()
-    ins = ServerMessage.PropertiesIns()
-    msg = ServerMessage(properties_ins=ins)
+    ins = ServerMessage.GetPropertiesIns()
+    msg = ServerMessage(get_properties_ins=ins)
 
     # Execute
     actual_msg, actual_sleep_duration, actual_keep_going = handle(
@@ -77,13 +77,13 @@ def test_client_without_get_properties() -> None:
     )
 
     # Assert
-    expected_properties_res = ClientMessage.PropertiesRes(
+    expected_get_properties_res = ClientMessage.GetPropertiesRes(
         status=Status(
             code=Code.GET_PARAMETERS_NOT_IMPLEMENTED,
             message="Client does not implement get_properties",
         )
     )
-    expected_msg = ClientMessage(properties_res=expected_properties_res)
+    expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
 
     assert actual_msg == expected_msg
     assert actual_sleep_duration == 0
@@ -94,8 +94,8 @@ def test_client_with_get_properties() -> None:
     """Test client not implementing get_properties."""
     # Prepare
     client = FlowerClientWithProps()
-    ins = ServerMessage.PropertiesIns()
-    msg = ServerMessage(properties_ins=ins)
+    ins = ServerMessage.GetPropertiesIns()
+    msg = ServerMessage(get_properties_ins=ins)
 
     # Execute
     actual_msg, actual_sleep_duration, actual_keep_going = handle(
@@ -103,7 +103,7 @@ def test_client_with_get_properties() -> None:
     )
 
     # Assert
-    expected_properties_res = ClientMessage.PropertiesRes(
+    expected_get_properties_res = ClientMessage.GetPropertiesRes(
         status=Status(
             code=Code.OK,
             message="Success",
@@ -112,7 +112,7 @@ def test_client_with_get_properties() -> None:
             properties={"str_prop": "val", "int_prop": 1}
         ),
     )
-    expected_msg = ClientMessage(properties_res=expected_properties_res)
+    expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
 
     assert actual_msg == expected_msg
     assert actual_sleep_duration == 0
