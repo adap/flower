@@ -1,5 +1,5 @@
-Quickstart (PyTorch)
-====================
+Quickstart PyTorch
+==================
 
 In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using Flower and PyTorch. 
 

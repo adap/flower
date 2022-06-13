@@ -1,5 +1,5 @@
-Quickstart (MXNet)
-==================
+Quickstart MXNet
+================
 
 In this tutorial, we will learn how to train a :code:`Sequential` model on MNIST using Flower and MXNet. 
 
