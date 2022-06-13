@@ -27,7 +27,7 @@ def main() -> None:
         initial_parameters=fl.common.weights_to_parameters(model.get_weights()),
     )
 
-    # Start Flower SSL-enabled server for three rounds of federated learning
+    # Start Flower server (SSL-enabled) for four rounds of federated learning
     fl.server.start_server(
         server_address="0.0.0.0:8080",
         config={"num_rounds": 4},
