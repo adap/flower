@@ -337,17 +337,17 @@ class ClientMessage(google.protobuf.message.Message):
             def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
             def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
-        NUM_EXAMPLES_FIELD_NUMBER: builtins.int
         LOSS_FIELD_NUMBER: builtins.int
+        NUM_EXAMPLES_FIELD_NUMBER: builtins.int
         METRICS_FIELD_NUMBER: builtins.int
-        num_examples: builtins.int
         loss: builtins.float
+        num_examples: builtins.int
         @property
         def metrics(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
         def __init__(self,
             *,
-            num_examples: builtins.int = ...,
             loss: builtins.float = ...,
+            num_examples: builtins.int = ...,
             metrics: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
         def ClearField(self, field_name: typing_extensions.Literal["loss",b"loss","metrics",b"metrics","num_examples",b"num_examples"]) -> None: ...

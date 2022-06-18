@@ -70,13 +70,13 @@ message ClientMessage {
   }
   message GetParametersRes { Parameters parameters = 1; }
   message FitRes {
-    Parameters parameters = 1;
-    int64 num_examples = 2;
-    map<string, Scalar> metrics = 5;
+    Parameters parameters = 2;
+    int64 num_examples = 3;
+    map<string, Scalar> metrics = 4;
   }
   message EvaluateRes {
-    int64 num_examples = 1;
     float loss = 2;
+    int64 num_examples = 3;
     map<string, Scalar> metrics = 4;
   }
   oneof msg {
