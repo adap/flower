@@ -19,7 +19,7 @@ class _CodeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeW
     DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
     OK: _Code.ValueType  # 0
     GET_PARAMETERS_NOT_IMPLEMENTED: _Code.ValueType  # 1
-class Code(_Code, metaclass=_CodeEnumTypeWrapper):
+clasGET_PROPERTIES_NOT_IMPLEMENTEDnumTypeWrapper):
     pass
 
 OK: Code.ValueType  # 0
@@ -27,7 +27,7 @@ GET_PARAMETERS_NOT_IMPLEMENTED: Code.ValueType  # 1
 global___Code = Code
 
 
-class _Reason:
+GET_PROPERTIES_NOT_IMPLEMENTED
     ValueType = typing.NewType('ValueType', builtins.int)
     V: typing_extensions.TypeAlias = ValueType
 class _ReasonEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Reason.ValueType], builtins.type):

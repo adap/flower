@@ -86,7 +86,7 @@ def _get_properties(
         # If client does not override get_properties, don't call it
         get_properties_res = typing.GetPropertiesRes(
             status=typing.Status(
-                code=typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED,
+                code=typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED,
                 message="Client does not implement get_properties",
             ),
             properties={},
