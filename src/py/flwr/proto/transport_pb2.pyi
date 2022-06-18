@@ -19,11 +19,17 @@ class _CodeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeW
     DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
     OK: _Code.ValueType  # 0
     GET_PROPERTIES_NOT_IMPLEMENTED: _Code.ValueType  # 1
+    GET_PARAMETERS_NOT_IMPLEMENTED: _Code.ValueType  # 2
+    FIT_NOT_IMPLEMENTED: _Code.ValueType  # 3
+    EVALUATE_NOT_IMPLEMENTED: _Code.ValueType  # 4
 class Code(_Code, metaclass=_CodeEnumTypeWrapper):
     pass
 
 OK: Code.ValueType  # 0
 GET_PROPERTIES_NOT_IMPLEMENTED: Code.ValueType  # 1
+GET_PARAMETERS_NOT_IMPLEMENTED: Code.ValueType  # 2
+FIT_NOT_IMPLEMENTED: Code.ValueType  # 3
+EVALUATE_NOT_IMPLEMENTED: Code.ValueType  # 4
 global___Code = Code
 
 
@@ -276,15 +282,19 @@ class ClientMessage(google.protobuf.message.Message):
 
     class GetParametersRes(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        STATUS_FIELD_NUMBER: builtins.int
         PARAMETERS_FIELD_NUMBER: builtins.int
+        @property
+        def status(self) -> global___Status: ...
         @property
         def parameters(self) -> global___Parameters: ...
         def __init__(self,
             *,
+            status: typing.Optional[global___Status] = ...,
             parameters: typing.Optional[global___Parameters] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters","status",b"status"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["parameters",b"parameters","status",b"status"]) -> None: ...
 
     class FitRes(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -303,9 +313,12 @@ class ClientMessage(google.protobuf.message.Message):
             def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
             def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
+        STATUS_FIELD_NUMBER: builtins.int
         PARAMETERS_FIELD_NUMBER: builtins.int
         NUM_EXAMPLES_FIELD_NUMBER: builtins.int
         METRICS_FIELD_NUMBER: builtins.int
+        @property
+        def status(self) -> global___Status: ...
         @property
         def parameters(self) -> global___Parameters: ...
         num_examples: builtins.int
@@ -313,12 +326,13 @@ class ClientMessage(google.protobuf.message.Message):
         def metrics(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
         def __init__(self,
             *,
+            status: typing.Optional[global___Status] = ...,
             parameters: typing.Optional[global___Parameters] = ...,
             num_examples: builtins.int = ...,
             metrics: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["metrics",b"metrics","num_examples",b"num_examples","parameters",b"parameters"]) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters","status",b"status"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["metrics",b"metrics","num_examples",b"num_examples","parameters",b"parameters","status",b"status"]) -> None: ...
 
     class EvaluateRes(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -337,20 +351,25 @@ class ClientMessage(google.protobuf.message.Message):
             def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
             def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
+        STATUS_FIELD_NUMBER: builtins.int
         LOSS_FIELD_NUMBER: builtins.int
         NUM_EXAMPLES_FIELD_NUMBER: builtins.int
         METRICS_FIELD_NUMBER: builtins.int
+        @property
+        def status(self) -> global___Status: ...
         loss: builtins.float
         num_examples: builtins.int
         @property
         def metrics(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
         def __init__(self,
             *,
+            status: typing.Optional[global___Status] = ...,
             loss: builtins.float = ...,
             num_examples: builtins.int = ...,
             metrics: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal["loss",b"loss","metrics",b"metrics","num_examples",b"num_examples"]) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["status",b"status"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["loss",b"loss","metrics",b"metrics","num_examples",b"num_examples","status",b"status"]) -> None: ...
 
     DISCONNECT_RES_FIELD_NUMBER: builtins.int
     GET_PROPERTIES_RES_FIELD_NUMBER: builtins.int
