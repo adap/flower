@@ -85,10 +85,10 @@ class RayClientProxy(ClientProxy):
         )
 
     def reconnect(
-        self, reconnect: common.Reconnect, timeout: Optional[float]
-    ) -> common.Disconnect:
+        self, ins: common.ReconnectIns, timeout: Optional[float]
+    ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
-        return common.Disconnect(reason="")  # Nothing to do here (yet)
+        return common.DisconnectRes(reason="")  # Nothing to do here (yet)
 
 
 @ray.remote

@@ -21,13 +21,13 @@ from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple
 
 from flwr.common import (
-    Disconnect,
+    DisconnectRes,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
     Parameters,
-    Reconnect,
+    ReconnectIns,
     Scalar,
 )
 from flwr.common.logger import log
@@ -46,7 +46,7 @@ EvaluateResultsAndFailures = Tuple[
     List[BaseException],
 ]
 ReconnectResultsAndFailures = Tuple[
-    List[Tuple[ClientProxy, Disconnect]],
+    List[Tuple[ClientProxy, DisconnectRes]],
     List[BaseException],
 ]
 
@@ -234,7 +234,7 @@ class Server:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
         clients = [all_clients[k] for k in all_clients.keys()]
-        instruction = Reconnect(seconds=None)
+        instruction = ReconnectIns(seconds=None)
         client_instructions = [(client_proxy, instruction) for client_proxy in clients]
         _ = reconnect_clients(
             client_instructions=client_instructions,
@@ -263,7 +263,7 @@ class Server:
 
 
 def reconnect_clients(
-    client_instructions: List[Tuple[ClientProxy, Reconnect]],
+    client_instructions: List[Tuple[ClientProxy, ReconnectIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
 ) -> ReconnectResultsAndFailures:
@@ -279,7 +279,7 @@ def reconnect_clients(
         )
 
     # Gather results
-    results: List[Tuple[ClientProxy, Disconnect]] = []
+    results: List[Tuple[ClientProxy, DisconnectRes]] = []
     failures: List[BaseException] = []
     for future in finished_fs:
         failure = future.exception()
@@ -293,9 +293,9 @@ def reconnect_clients(
 
 def reconnect_client(
     client: ClientProxy,
-    reconnect: Reconnect,
+    reconnect: ReconnectIns,
     timeout: Optional[float],
-) -> Tuple[ClientProxy, Disconnect]:
+) -> Tuple[ClientProxy, DisconnectRes]:
     """Instruct client to disconnect and (optionally) reconnect later."""
     disconnect = client.reconnect(
         reconnect,

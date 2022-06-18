@@ -50,8 +50,8 @@ def handle(
         reconnect later (False).
     """
     field = server_msg.WhichOneof("msg")
-    if field == "reconnect":
-        disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect)
+    if field == "reconnect_ins":
+        disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect_ins)
         return disconnect_msg, sleep_duration, False
     if field == "get_properties_ins":
         return _get_properties(client, server_msg.get_properties_ins), 0, True
@@ -65,17 +65,17 @@ def handle(
 
 
 def _reconnect(
-    reconnect_msg: ServerMessage.Reconnect,
+    reconnect_msg: ServerMessage.ReconnectIns,
 ) -> Tuple[ClientMessage, int]:
-    # Determine the reason for sending Disconnect message
+    # Determine the reason for sending DisconnectRes message
     reason = Reason.ACK
     sleep_duration = None
     if reconnect_msg.seconds is not None:
         reason = Reason.RECONNECT
         sleep_duration = reconnect_msg.seconds
-    # Build Disconnect message
-    disconnect = ClientMessage.Disconnect(reason=reason)
-    return ClientMessage(disconnect=disconnect), sleep_duration
+    # Build DisconnectRes message
+    disconnect_res = ClientMessage.DisconnectRes(reason=reason)
+    return ClientMessage(disconnect_res=disconnect_res), sleep_duration
 
 
 def _get_properties(

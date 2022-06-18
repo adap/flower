@@ -109,17 +109,17 @@ class GrpcClientProxy(ClientProxy):
 
     def reconnect(
         self,
-        reconnect: common.Reconnect,
+        ins: common.ReconnectIns,
         timeout: Optional[float],
-    ) -> common.Disconnect:
+    ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
-        reconnect_msg = serde.reconnect_to_proto(reconnect)
+        reconnect_ins_msg = serde.reconnect_ins_to_proto(ins)
         res_wrapper: ResWrapper = self.bridge.request(
             ins_wrapper=InsWrapper(
-                server_message=ServerMessage(reconnect=reconnect_msg),
+                server_message=ServerMessage(reconnect_ins=reconnect_ins_msg),
                 timeout=timeout,
             )
         )
         client_msg: ClientMessage = res_wrapper.client_message
-        disconnect = serde.disconnect_from_proto(client_msg.disconnect)
+        disconnect = serde.disconnect_res_from_proto(client_msg.disconnect_res)
         return disconnect
