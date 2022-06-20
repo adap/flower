@@ -16,7 +16,7 @@ def main() -> None:
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
-        fraction_fit=0.3,
+        fraction_fit=1.0,
         fraction_eval=0.2,
         min_fit_clients=3,
         min_eval_clients=2,
