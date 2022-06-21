@@ -41,11 +41,12 @@ Within the :code:`ServerMessage` block:
         repeated int64 l=2;
     }
     oneof msg {
-        Reconnect reconnect = 1;
-        GetParameters get_parameters = 2;
-        FitIns fit_ins = 3;
-        EvaluateIns evaluate_ins = 4;
-        ExampleIns example_ins = 5;
+        ReconnectIns reconnect_ins = 1;
+        GetPropertiesIns get_properties_ins = 2;
+        GetParametersIns get_parameters_ins = 3;
+        FitIns fit_ins = 4;
+        EvaluateIns evaluate_ins = 5;
+        ExampleIns example_ins = 6;
     }
 
 Within the ClientMessage block:
@@ -58,11 +59,12 @@ Within the ClientMessage block:
     }
 
     oneof msg {
-        Disconnect disconnect = 1;
-        ParametersRes parameters_res = 2;
-        FitRes fit_res = 3;
-        EvaluateRes evaluate_res = 4;
-        ExampleRes examples_res = 5;
+        DisconnectRes disconnect_res = 1;
+        GetPropertiesRes get_properties_res = 2;
+        GetParametersRes get_parameters_res = 3;
+        FitRes fit_res = 4;
+        EvaluateRes evaluate_res = 5;
+        ExampleRes examples_res = 6;
     }
 
 Make sure to also add a field of the newly created message type in :code:`oneof msg`.

@@ -20,7 +20,7 @@ from typing import List, Optional
 import numpy as np
 
 from flwr.common import (
-    Disconnect,
+    DisconnectRes,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -30,7 +30,7 @@ from flwr.common import (
     GetPropertiesIns,
     GetPropertiesRes,
     Parameters,
-    Reconnect,
+    ReconnectIns,
     ndarray_to_bytes,
 )
 from flwr.server.client_manager import SimpleClientManager
@@ -66,8 +66,8 @@ class SuccessClient(ClientProxy):
     def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
         return EvaluateRes(loss=1.0, num_examples=1, metrics={})
 
-    def reconnect(self, reconnect: Reconnect, timeout: Optional[float]) -> Disconnect:
-        return Disconnect(reason="UNKNOWN")
+    def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
+        return DisconnectRes(reason="UNKNOWN")
 
 
 class FailingClient(ClientProxy):
@@ -89,7 +89,7 @@ class FailingClient(ClientProxy):
     def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
         raise Exception()
 
-    def reconnect(self, reconnect: Reconnect, timeout: Optional[float]) -> Disconnect:
+    def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
         raise Exception()
 
 
