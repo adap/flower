@@ -269,19 +269,19 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
     aggregated_parameters = weights_to_parameters(aggregated_vector)
     tm.toc('s3')
     tm.toc()
-    times = tm.get_all()
-    f = open("log.txt", "a")
-    f.write(f"Server time with communication:{times['default'] - times['s2_com']} \n")
-    f.write(f"Server time without communication:{sum([times['s0'], times['s1'], times['s1'], times['s3']])} \n")
-    f.write(f"first element {aggregated_vector[0].flatten()[0]}\n\n\n")
-    f.write("server time (detail):\n%s\n" %
-            '\n'.join([f"round {i} = {times['s' + str(i)]} ({times['s' + str(i)] * 100. / times['default']:.2f} %)"
-                       for i in range(4)]))
-    f.write('shamir\'s key reconstruction time: %f (%.2f%%)\n' % (times['combine_shares'],
-                                                                  times['combine_shares'] * 100. / times['default']))
-    f.write('mask generation time: %f (%.2f%%)\n' % (times['mask_gen'], times['mask_gen'] * 100. / times['default']))
-    f.write('num of dropouts: %d\n' % len(dropout_clients))
-    f.close()
+    # times = tm.get_all()
+    # f = open("log.txt", "a")
+    # f.write(f"Server time with communication:{times['default'] - times['s2_com']} \n")
+    # f.write(f"Server time without communication:{sum([times['s0'], times['s1'], times['s1'], times['s3']])} \n")
+    # f.write(f"first element {aggregated_vector[0].flatten()[0]}\n\n\n")
+    # f.write("server time (detail):\n%s\n" %
+    #         '\n'.join([f"round {i} = {times['s' + str(i)]} ({times['s' + str(i)] * 100. / times['default']:.2f} %)"
+    #                    for i in range(4)]))
+    # f.write('shamir\'s key reconstruction time: %f (%.2f%%)\n' % (times['combine_shares'],
+    #                                                               times['combine_shares'] * 100. / times['default']))
+    # f.write('mask generation time: %f (%.2f%%)\n' % (times['mask_gen'], times['mask_gen'] * 100. / times['default']))
+    # f.write('num of dropouts: %d\n' % len(dropout_clients))
+    # f.close()
     return aggregated_parameters, None, None
 
 
