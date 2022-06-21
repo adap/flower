@@ -138,13 +138,13 @@ class SecAggPlusWrapper(SAClient):
             res = sec_agg_client_logic.unmask_vectors(self, UnmaskVectorsIns(actives, dropouts))
             ret_msg = SAClientMessageCarrier('3', str2scalar=dict([(str(k), v) for k, v in res.share_dict.items()]))
         self.tm.toc('s' + ins.identifier)
-        # if self.sec_agg_id == 6:
-        #     f = open("log.txt", "a")
-        #     f.write(f"Client without communication stage {ins.identifier}:{self.tm.get('s' + ins.identifier)} \n")
-        #     if ins.identifier == '3':
-        #         times = self.tm.get_all()
-        #         f.write(f"Client without communication total: {sum([times['s0'], times['s1'], times['s2'], times['s3']])} \n")
-        #     f.close()
+        if self.sec_agg_id == 6:
+            f = open("log.txt", "a")
+            f.write(f"Client without communication stage {ins.identifier}:{self.tm.get('s' + ins.identifier)} \n")
+            if ins.identifier == '3':
+                times = self.tm.get_all()
+                f.write(f"Client without communication total: {sum([times['s0'], times['s1'], times['s2'], times['s3']])} \n")
+            f.close()
 
         return ret_msg
 
