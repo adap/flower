@@ -80,7 +80,7 @@ def test_client_without_get_properties() -> None:
     # Assert
     expected_get_properties_res = ClientMessage.GetPropertiesRes(
         status=Status(
-            code=Code.GET_PARAMETERS_NOT_IMPLEMENTED,
+            code=Code.GET_PROPERTIES_NOT_IMPLEMENTED,
             message="Client does not implement get_properties",
         )
     )

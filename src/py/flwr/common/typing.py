@@ -40,7 +40,7 @@ class Code(Enum):
     """Client status codes."""
 
     OK = 0
-    GET_PARAMETERS_NOT_IMPLEMENTED = 1
+    GET_PROPERTIES_NOT_IMPLEMENTED = 1
 
 
 @dataclass

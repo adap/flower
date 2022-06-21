@@ -18,12 +18,12 @@ class _Code:
 class _CodeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Code.ValueType], builtins.type):
     DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
     OK: _Code.ValueType  # 0
-    GET_PARAMETERS_NOT_IMPLEMENTED: _Code.ValueType  # 1
+    GET_PROPERTIES_NOT_IMPLEMENTED: _Code.ValueType  # 1
 class Code(_Code, metaclass=_CodeEnumTypeWrapper):
     pass
 
 OK: Code.ValueType  # 0
-GET_PARAMETERS_NOT_IMPLEMENTED: Code.ValueType  # 1
+GET_PROPERTIES_NOT_IMPLEMENTED: Code.ValueType  # 1
 global___Code = Code
 
 
@@ -88,6 +88,32 @@ class ServerMessage(google.protobuf.message.Message):
             seconds: builtins.int = ...,
             ) -> None: ...
         def ClearField(self, field_name: typing_extensions.Literal["seconds",b"seconds"]) -> None: ...
+
+    class GetPropertiesIns(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        class ConfigEntry(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            KEY_FIELD_NUMBER: builtins.int
+            VALUE_FIELD_NUMBER: builtins.int
+            key: typing.Text
+            @property
+            def value(self) -> global___Scalar: ...
+            def __init__(self,
+                *,
+                key: typing.Text = ...,
+                value: typing.Optional[global___Scalar] = ...,
+                ) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+        CONFIG_FIELD_NUMBER: builtins.int
+        @property
+        def config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
+        def __init__(self,
+            *,
+            config: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+            ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["config",b"config"]) -> None: ...
 
     class GetParametersIns(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -177,9 +203,49 @@ class ServerMessage(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["config",b"config","parameters",b"parameters"]) -> None: ...
 
-    class GetPropertiesIns(google.protobuf.message.Message):
+    RECONNECT_FIELD_NUMBER: builtins.int
+    GET_PROPERTIES_INS_FIELD_NUMBER: builtins.int
+    GET_PARAMETERS_INS_FIELD_NUMBER: builtins.int
+    FIT_INS_FIELD_NUMBER: builtins.int
+    EVALUATE_INS_FIELD_NUMBER: builtins.int
+    @property
+    def reconnect(self) -> global___ServerMessage.Reconnect: ...
+    @property
+    def get_properties_ins(self) -> global___ServerMessage.GetPropertiesIns: ...
+    @property
+    def get_parameters_ins(self) -> global___ServerMessage.GetParametersIns: ...
+    @property
+    def fit_ins(self) -> global___ServerMessage.FitIns: ...
+    @property
+    def evaluate_ins(self) -> global___ServerMessage.EvaluateIns: ...
+    def __init__(self,
+        *,
+        reconnect: typing.Optional[global___ServerMessage.Reconnect] = ...,
+        get_properties_ins: typing.Optional[global___ServerMessage.GetPropertiesIns] = ...,
+        get_parameters_ins: typing.Optional[global___ServerMessage.GetParametersIns] = ...,
+        fit_ins: typing.Optional[global___ServerMessage.FitIns] = ...,
+        evaluate_ins: typing.Optional[global___ServerMessage.EvaluateIns] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters_ins",b"get_parameters_ins","get_properties_ins",b"get_properties_ins","msg",b"msg","reconnect",b"reconnect"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters_ins",b"get_parameters_ins","get_properties_ins",b"get_properties_ins","msg",b"msg","reconnect",b"reconnect"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["reconnect","get_properties_ins","get_parameters_ins","fit_ins","evaluate_ins"]]: ...
+global___ServerMessage = ServerMessage
+
+class ClientMessage(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class Disconnect(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        class ConfigEntry(google.protobuf.message.Message):
+        REASON_FIELD_NUMBER: builtins.int
+        reason: global___Reason.ValueType
+        def __init__(self,
+            *,
+            reason: global___Reason.ValueType = ...,
+            ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["reason",b"reason"]) -> None: ...
+
+    class GetPropertiesRes(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        class PropertiesEntry(google.protobuf.message.Message):
             DESCRIPTOR: google.protobuf.descriptor.Descriptor
             KEY_FIELD_NUMBER: builtins.int
             VALUE_FIELD_NUMBER: builtins.int
@@ -194,54 +260,19 @@ class ServerMessage(google.protobuf.message.Message):
             def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
             def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
-        CONFIG_FIELD_NUMBER: builtins.int
+        STATUS_FIELD_NUMBER: builtins.int
+        PROPERTIES_FIELD_NUMBER: builtins.int
         @property
-        def config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
+        def status(self) -> global___Status: ...
+        @property
+        def properties(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
         def __init__(self,
             *,
-            config: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+            status: typing.Optional[global___Status] = ...,
+            properties: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
             ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal["config",b"config"]) -> None: ...
-
-    RECONNECT_FIELD_NUMBER: builtins.int
-    GET_PARAMETERS_INS_FIELD_NUMBER: builtins.int
-    FIT_INS_FIELD_NUMBER: builtins.int
-    EVALUATE_INS_FIELD_NUMBER: builtins.int
-    GET_PROPERTIES_INS_FIELD_NUMBER: builtins.int
-    @property
-    def reconnect(self) -> global___ServerMessage.Reconnect: ...
-    @property
-    def get_parameters_ins(self) -> global___ServerMessage.GetParametersIns: ...
-    @property
-    def fit_ins(self) -> global___ServerMessage.FitIns: ...
-    @property
-    def evaluate_ins(self) -> global___ServerMessage.EvaluateIns: ...
-    @property
-    def get_properties_ins(self) -> global___ServerMessage.GetPropertiesIns: ...
-    def __init__(self,
-        *,
-        reconnect: typing.Optional[global___ServerMessage.Reconnect] = ...,
-        get_parameters_ins: typing.Optional[global___ServerMessage.GetParametersIns] = ...,
-        fit_ins: typing.Optional[global___ServerMessage.FitIns] = ...,
-        evaluate_ins: typing.Optional[global___ServerMessage.EvaluateIns] = ...,
-        get_properties_ins: typing.Optional[global___ServerMessage.GetPropertiesIns] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters_ins",b"get_parameters_ins","get_properties_ins",b"get_properties_ins","msg",b"msg","reconnect",b"reconnect"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters_ins",b"get_parameters_ins","get_properties_ins",b"get_properties_ins","msg",b"msg","reconnect",b"reconnect"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["reconnect","get_parameters_ins","fit_ins","evaluate_ins","get_properties_ins"]]: ...
-global___ServerMessage = ServerMessage
-
-class ClientMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    class Disconnect(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        REASON_FIELD_NUMBER: builtins.int
-        reason: global___Reason.ValueType
-        def __init__(self,
-            *,
-            reason: global___Reason.ValueType = ...,
-            ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal["reason",b"reason"]) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["status",b"status"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["properties",b"properties","status",b"status"]) -> None: ...
 
     class GetParametersRes(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -321,63 +352,32 @@ class ClientMessage(google.protobuf.message.Message):
             ) -> None: ...
         def ClearField(self, field_name: typing_extensions.Literal["loss",b"loss","metrics",b"metrics","num_examples",b"num_examples"]) -> None: ...
 
-    class GetPropertiesRes(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        class PropertiesEntry(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor
-            KEY_FIELD_NUMBER: builtins.int
-            VALUE_FIELD_NUMBER: builtins.int
-            key: typing.Text
-            @property
-            def value(self) -> global___Scalar: ...
-            def __init__(self,
-                *,
-                key: typing.Text = ...,
-                value: typing.Optional[global___Scalar] = ...,
-                ) -> None: ...
-            def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-            def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
-
-        STATUS_FIELD_NUMBER: builtins.int
-        PROPERTIES_FIELD_NUMBER: builtins.int
-        @property
-        def status(self) -> global___Status: ...
-        @property
-        def properties(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
-        def __init__(self,
-            *,
-            status: typing.Optional[global___Status] = ...,
-            properties: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
-            ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["status",b"status"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["properties",b"properties","status",b"status"]) -> None: ...
-
     DISCONNECT_FIELD_NUMBER: builtins.int
+    GET_PROPERTIES_RES_FIELD_NUMBER: builtins.int
     GET_PARAMETERS_RES_FIELD_NUMBER: builtins.int
     FIT_RES_FIELD_NUMBER: builtins.int
     EVALUATE_RES_FIELD_NUMBER: builtins.int
-    GET_PROPERTIES_RES_FIELD_NUMBER: builtins.int
     @property
     def disconnect(self) -> global___ClientMessage.Disconnect: ...
+    @property
+    def get_properties_res(self) -> global___ClientMessage.GetPropertiesRes: ...
     @property
     def get_parameters_res(self) -> global___ClientMessage.GetParametersRes: ...
     @property
     def fit_res(self) -> global___ClientMessage.FitRes: ...
     @property
     def evaluate_res(self) -> global___ClientMessage.EvaluateRes: ...
-    @property
-    def get_properties_res(self) -> global___ClientMessage.GetPropertiesRes: ...
     def __init__(self,
         *,
         disconnect: typing.Optional[global___ClientMessage.Disconnect] = ...,
+        get_properties_res: typing.Optional[global___ClientMessage.GetPropertiesRes] = ...,
         get_parameters_res: typing.Optional[global___ClientMessage.GetParametersRes] = ...,
         fit_res: typing.Optional[global___ClientMessage.FitRes] = ...,
         evaluate_res: typing.Optional[global___ClientMessage.EvaluateRes] = ...,
-        get_properties_res: typing.Optional[global___ClientMessage.GetPropertiesRes] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["disconnect",b"disconnect","evaluate_res",b"evaluate_res","fit_res",b"fit_res","get_parameters_res",b"get_parameters_res","get_properties_res",b"get_properties_res","msg",b"msg"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["disconnect",b"disconnect","evaluate_res",b"evaluate_res","fit_res",b"fit_res","get_parameters_res",b"get_parameters_res","get_properties_res",b"get_properties_res","msg",b"msg"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["disconnect","get_parameters_res","fit_res","evaluate_res","get_properties_res"]]: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["disconnect","get_properties_res","get_parameters_res","fit_res","evaluate_res"]]: ...
 global___ClientMessage = ClientMessage
 
 class Scalar(google.protobuf.message.Message):

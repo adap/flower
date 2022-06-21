@@ -198,16 +198,16 @@ def get_properties_res_from_proto(
 def status_to_proto(status: typing.Status) -> Status:
     """Serialize Code to ProtoBuf message."""
     code = Code.OK
-    if status.code == typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED:
-        code = Code.GET_PARAMETERS_NOT_IMPLEMENTED
+    if status.code == typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED:
+        code = Code.GET_PROPERTIES_NOT_IMPLEMENTED
     return Status(code=code, message=status.message)
 
 
 def status_from_proto(msg: Status) -> typing.Status:
     """Deserialize Code from ProtoBuf message."""
     code = typing.Code.OK
-    if msg.code == Code.GET_PARAMETERS_NOT_IMPLEMENTED:
-        code = typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED
+    if msg.code == Code.GET_PROPERTIES_NOT_IMPLEMENTED:
+        code = typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED
     return typing.Status(code=code, message=msg.message)
 
 

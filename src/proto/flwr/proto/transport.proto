@@ -23,7 +23,7 @@ service FlowerService {
 
 enum Code {
   OK = 0;
-  GET_PARAMETERS_NOT_IMPLEMENTED = 1;
+  GET_PROPERTIES_NOT_IMPLEMENTED = 1;
 }
 message Status {
   Code code = 1;
@@ -43,6 +43,7 @@ enum Reason {
 
 message ServerMessage {
   message Reconnect { int64 seconds = 1; }
+  message GetPropertiesIns { map<string, Scalar> config = 1; }
   message GetParametersIns { map<string, Scalar> config = 1; }
   message FitIns {
     Parameters parameters = 1;
@@ -52,18 +53,21 @@ message ServerMessage {
     Parameters parameters = 1;
     map<string, Scalar> config = 2;
   }
-  message GetPropertiesIns { map<string, Scalar> config = 1; }
   oneof msg {
     Reconnect reconnect = 1;
-    GetParametersIns get_parameters_ins = 2;
-    FitIns fit_ins = 3;
-    EvaluateIns evaluate_ins = 4;
-    GetPropertiesIns get_properties_ins = 5;
+    GetPropertiesIns get_properties_ins = 2;
+    GetParametersIns get_parameters_ins = 3;
+    FitIns fit_ins = 4;
+    EvaluateIns evaluate_ins = 5;
   }
 }
 
 message ClientMessage {
   message Disconnect { Reason reason = 1; }
+  message GetPropertiesRes {
+    Status status = 1;
+    map<string, Scalar> properties = 2;
+  }
   message GetParametersRes { Parameters parameters = 1; }
   message FitRes {
     Parameters parameters = 1;
@@ -75,16 +79,12 @@ message ClientMessage {
     float loss = 2;
     map<string, Scalar> metrics = 4;
   }
-  message GetPropertiesRes {
-    Status status = 1;
-    map<string, Scalar> properties = 2;
-  }
   oneof msg {
     Disconnect disconnect = 1;
-    GetParametersRes get_parameters_res = 2;
-    FitRes fit_res = 3;
-    EvaluateRes evaluate_res = 4;
-    GetPropertiesRes get_properties_res = 5;
+    GetPropertiesRes get_properties_res = 2;
+    GetParametersRes get_parameters_res = 3;
+    FitRes fit_res = 4;
+    EvaluateRes evaluate_res = 5;
   }
 }
 
