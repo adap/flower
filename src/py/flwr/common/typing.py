@@ -123,14 +123,14 @@ class GetPropertiesRes:
 
 
 @dataclass
-class Reconnect:
-    """Reconnect message from server to client."""
+class ReconnectIns:
+    """ReconnectIns message from server to client."""
 
     seconds: Optional[int]
 
 
 @dataclass
-class Disconnect:
-    """Disconnect message from client to server."""
+class DisconnectRes:
+    """DisconnectRes message from client to server."""
 
     reason: str

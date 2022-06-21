@@ -43,45 +43,45 @@ def parameters_from_proto(msg: Parameters) -> typing.Parameters:
     return typing.Parameters(tensors=tensors, tensor_type=msg.tensor_type)
 
 
-#  === Reconnect message ===
+#  === ReconnectIns message ===
 
 
-def reconnect_to_proto(reconnect: typing.Reconnect) -> ServerMessage.Reconnect:
-    """Serialize Reconnect to ProtoBuf message."""
-    if reconnect.seconds is not None:
-        return ServerMessage.Reconnect(seconds=reconnect.seconds)
-    return ServerMessage.Reconnect()
+def reconnect_ins_to_proto(ins: typing.ReconnectIns) -> ServerMessage.ReconnectIns:
+    """Serialize ReconnectIns to ProtoBuf message."""
+    if ins.seconds is not None:
+        return ServerMessage.ReconnectIns(seconds=ins.seconds)
+    return ServerMessage.ReconnectIns()
 
 
-def reconnect_from_proto(msg: ServerMessage.Reconnect) -> typing.Reconnect:
-    """Deserialize Reconnect from ProtoBuf message."""
-    return typing.Reconnect(seconds=msg.seconds)
+def reconnect_ins_from_proto(msg: ServerMessage.ReconnectIns) -> typing.ReconnectIns:
+    """Deserialize ReconnectIns from ProtoBuf message."""
+    return typing.ReconnectIns(seconds=msg.seconds)
 
 
-# === Disconnect message ===
+# === DisconnectRes message ===
 
 
-def disconnect_to_proto(disconnect: typing.Disconnect) -> ClientMessage.Disconnect:
-    """Serialize Disconnect to ProtoBuf message."""
+def disconnect_res_to_proto(res: typing.DisconnectRes) -> ClientMessage.DisconnectRes:
+    """Serialize DisconnectRes to ProtoBuf message."""
     reason_proto = Reason.UNKNOWN
-    if disconnect.reason == "RECONNECT":
+    if res.reason == "RECONNECT":
         reason_proto = Reason.RECONNECT
-    elif disconnect.reason == "POWER_DISCONNECTED":
+    elif res.reason == "POWER_DISCONNECTED":
         reason_proto = Reason.POWER_DISCONNECTED
-    elif disconnect.reason == "WIFI_UNAVAILABLE":
+    elif res.reason == "WIFI_UNAVAILABLE":
         reason_proto = Reason.WIFI_UNAVAILABLE
-    return ClientMessage.Disconnect(reason=reason_proto)
+    return ClientMessage.DisconnectRes(reason=reason_proto)
 
 
-def disconnect_from_proto(msg: ClientMessage.Disconnect) -> typing.Disconnect:
-    """Deserialize Disconnect from ProtoBuf message."""
+def disconnect_res_from_proto(msg: ClientMessage.DisconnectRes) -> typing.DisconnectRes:
+    """Deserialize DisconnectRes from ProtoBuf message."""
     if msg.reason == Reason.RECONNECT:
-        return typing.Disconnect(reason="RECONNECT")
+        return typing.DisconnectRes(reason="RECONNECT")
     if msg.reason == Reason.POWER_DISCONNECTED:
-        return typing.Disconnect(reason="POWER_DISCONNECTED")
+        return typing.DisconnectRes(reason="POWER_DISCONNECTED")
     if msg.reason == Reason.WIFI_UNAVAILABLE:
-        return typing.Disconnect(reason="WIFI_UNAVAILABLE")
-    return typing.Disconnect(reason="UNKNOWN")
+        return typing.DisconnectRes(reason="WIFI_UNAVAILABLE")
+    return typing.DisconnectRes(reason="UNKNOWN")
 
 
 # === GetParameters messages ===

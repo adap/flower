@@ -21,7 +21,7 @@ from .parameter import parameters_to_weights as parameters_to_weights
 from .parameter import weights_to_parameters as weights_to_parameters
 from .typing import Code as Code
 from .typing import Config as Config
-from .typing import Disconnect as Disconnect
+from .typing import DisconnectRes as DisconnectRes
 from .typing import EvaluateIns as EvaluateIns
 from .typing import EvaluateRes as EvaluateRes
 from .typing import FitIns as FitIns
@@ -34,7 +34,7 @@ from .typing import Metrics as Metrics
 from .typing import MetricsAggregationFn as MetricsAggregationFn
 from .typing import Parameters as Parameters
 from .typing import Properties as Properties
-from .typing import Reconnect as Reconnect
+from .typing import ReconnectIns as ReconnectIns
 from .typing import Scalar as Scalar
 from .typing import Status as Status
 from .typing import Weights as Weights
@@ -45,7 +45,7 @@ __all__ = [
     "bytes_to_ndarray",
     "Code",
     "Config",
-    "Disconnect",
+    "DisconnectRes",
     "EvaluateIns",
     "EvaluateRes",
     "FitIns",
@@ -61,7 +61,7 @@ __all__ = [
     "Parameters",
     "parameters_to_weights",
     "Properties",
-    "Reconnect",
+    "ReconnectIns",
     "Scalar",
     "Status",
     "Weights",
