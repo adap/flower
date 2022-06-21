@@ -271,7 +271,7 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
     tm.toc()
     times = tm.get_all()
     f = open("log.txt", "a")
-    f.write(f"Server time with communication:{times['default'] - times['s2_com']} \n")
+    f.write(f"\n\nServer time with communication:{times['default'] - times['s2_com']} \n")
     f.write(f"Server time without communication:{sum([times['s0'], times['s1'], times['s1'], times['s3']])} \n")
     f.write(f"server comm time: {times['s0_com']} {times['s1_com']} {times['s2_com']} {times['s3_com']} \n")
     f.write(f"first element {aggregated_vector[0].flatten()[0]}\n\n\n")
