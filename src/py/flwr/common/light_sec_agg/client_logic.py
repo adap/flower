@@ -133,11 +133,11 @@ def ask_masked_models(client, ins: AskMaskedModelsIns):
         client.encoded_mask_dict[source] = sub_mask
     # fit client
     # IMPORTANT ASSUMPTION: ASSUME ALL CLIENTS FIT SAME AMOUNT OF DATA
-
+    '''
     fit_res = client.fit(fit_ins)
     weights = parameters_to_weights(fit_res.parameters)
     weights_factor = fit_res.num_examples
-
+    '''
     # temporary code=========================================================
     if client.test == 1:
         if client.id % 20 < client.test_dropout_value:
@@ -147,9 +147,9 @@ def ask_masked_models(client, ins: AskMaskedModelsIns):
             client.test_vector_shape)
      # IMPORTANT NEED SOME FUNCTION TO GET CORRECT WEIGHT FACTOR
     # NOW WE HARD CODE IT AS 1
-        weights_factor = 1
     # Generally, should be fit_res.num_examples
 
+    weights_factor = 1
 
     # END =================================================================
     quantized_weights = sec_agg_primitives.quantize(weights, client.clipping_range, client.target_range)
