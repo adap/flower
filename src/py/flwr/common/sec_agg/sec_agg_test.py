@@ -15,7 +15,7 @@ from flwr.server.strategy.sec_agg_fedavg import SecAggFedAvg
 # # Load CIFAR-10 dataset
 # (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
-model = [np.zeros(1000, dtype=float)]
+model = [np.zeros(1, dtype=float)]
 
 
 class CifarClient(fl.client.NumPyClient):
@@ -76,4 +76,4 @@ def test_start_simulation(sample_num=2, min_num=2, share_num=2, threshold=2, vec
 
 
 if __name__ == '__main__':
-    test_start_simulation(sample_num=10, dropout_value=1, num_rounds=1)
+    test_start_simulation(sample_num=10, dropout_value=1, num_rounds=10)

@@ -286,16 +286,14 @@ def quantize_unbounded(weight: Weights, clipping_range: float, target_range: int
     quantized_list = []
     check_clipping_range(weight, clipping_range)
     quantizer = target_range/(2*clipping_range)
+    flag = bin(mod_range).count("1") == 1
+    msk = mod_range - 1
     for arr in weight:
         # stochastic quantization
         quantized = (arr + clipping_range) * quantizer
         quantized = stochastic_round(quantized)
         # mod k
-        if bin(mod_range).count("1") == 1:  # fast mod
-            msk = mod_range - 1
-            quantized = quantized & msk
-        else:
-            quantized = np.mod(quantized, mod_range)
+        quantized = quantized & msk if flag else np.mod(quantized, mod_range)
         quantized_list.append(quantized)
     return quantized_list
 
@@ -366,6 +364,9 @@ def weights_subtraction(a: Weights, b: Weights) -> Weights:
 
 
 def weights_mod(a: Weights, b: int) -> Weights:
+    if bin(b).count("1") == 1:
+        msk = b - 1
+        return [a[idx] & msk for idx in range(len(a))]
     return [a[idx] % b for idx in range(len(a))]
 
 

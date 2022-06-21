@@ -44,16 +44,16 @@ def handle(
     if server_msg.HasField("evaluate_ins"):
         return _evaluate(client, server_msg.evaluate_ins), 0, True
     if server_msg.HasField("sa_msg_carrier"):
-        f = open("logserver.txt", "a")
-        f.write(
-            f"{server_msg.ByteSize()}\n")
-        f.close()
+        # f = open("logserver.txt", "a")
+        # f.write(
+        #     f"{server_msg.ByteSize()}\n")
+        # f.close()
         t = (_sa_respond(client, server_msg.sa_msg_carrier), 0, True)
-        if client.id == 6:
-            f = open("logclient.txt", "a")
-            f.write(
-                f"{t[0].ByteSize()}\n")
-            f.close()
+        # if client.id == 6:
+        #     f = open("logclient.txt", "a")
+        #     f.write(
+        #         f"{t[0].ByteSize()}\n")
+        #     f.close()
         return t
     if server_msg.HasField("sec_agg_msg"):
         f = open("logserver.txt", "a")

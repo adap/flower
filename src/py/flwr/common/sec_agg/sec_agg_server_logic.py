@@ -54,7 +54,6 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
 ]:
     tm = Timer()
     # Sample clients
-    tm.tic()
     client_instruction_list = strategy.configure_fit(
         rnd=rnd, parameters=server.parameters, client_manager=server.client_manager())
     proxy2id: Dict[ClientProxy, int] = {}
@@ -66,6 +65,7 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
         client_instructions[idx] = value[1]
 
     # Get sec_agg parameters from strategy
+    tm.tic()
     log(INFO, "Get sec_agg_param_dict from strategy")
     tm.tic('s0')
     sec_agg_param_dict = server.strategy.config
@@ -272,7 +272,7 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
     times = tm.get_all()
     f = open("log.txt", "a")
     f.write(f"Server time with communication:{times['default']} \n")
-    f.write(f"Server time without communication:{sum([times['s0'], times['s1'], times['s2'], times['s3']])} \n")
+    f.write(f"Server time without communication:{sum([times['s0'], times['s1'], times['s3']])} \n")
     f.write(f"first element {aggregated_vector[0].flatten()[0]}\n\n\n")
     f.write("server time (detail):\n%s\n" %
             '\n'.join([f"round {i} = {times['s' + str(i)]} ({times['s' + str(i)] * 100. / times['default']:.2f} %)"
