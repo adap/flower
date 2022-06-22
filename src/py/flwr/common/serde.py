@@ -107,16 +107,20 @@ def get_parameters_res_to_proto(
     res: typing.GetParametersRes,
 ) -> ClientMessage.GetParametersRes:
     """."""
+    status_msg = status_to_proto(res.status)
     parameters_proto = parameters_to_proto(res.parameters)
-    return ClientMessage.GetParametersRes(parameters=parameters_proto)
+    return ClientMessage.GetParametersRes(
+        status=status_msg, parameters=parameters_proto
+    )
 
 
 def get_parameters_res_from_proto(
     msg: ClientMessage.GetParametersRes,
 ) -> typing.GetParametersRes:
     """."""
+    status = status_from_proto(msg=msg.status)
     parameters = parameters_from_proto(msg.parameters)
-    return typing.GetParametersRes(parameters=parameters)
+    return typing.GetParametersRes(status=status, parameters=parameters)
 
 
 # === Fit messages ===
@@ -138,9 +142,11 @@ def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
 
 def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
     """Serialize FitIns to ProtoBuf message."""
+    status_msg = status_to_proto(res.status)
     parameters_proto = parameters_to_proto(res.parameters)
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     return ClientMessage.FitRes(
+        status=status_msg,
         parameters=parameters_proto,
         num_examples=res.num_examples,
         metrics=metrics_msg,
@@ -149,9 +155,11 @@ def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
 
 def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     """Deserialize FitRes from ProtoBuf message."""
+    status = status_from_proto(msg=msg.status)
     parameters = parameters_from_proto(msg.parameters)
     metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
     return typing.FitRes(
+        status=status,
         parameters=parameters,
         num_examples=msg.num_examples,
         metrics=metrics,
@@ -200,6 +208,12 @@ def status_to_proto(status: typing.Status) -> Status:
     code = Code.OK
     if status.code == typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED:
         code = Code.GET_PROPERTIES_NOT_IMPLEMENTED
+    if status.code == typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED:
+        code = Code.GET_PARAMETERS_NOT_IMPLEMENTED
+    if status.code == typing.Code.FIT_NOT_IMPLEMENTED:
+        code = Code.FIT_NOT_IMPLEMENTED
+    if status.code == typing.Code.EVALUATE_NOT_IMPLEMENTED:
+        code = Code.EVALUATE_NOT_IMPLEMENTED
     return Status(code=code, message=status.message)
 
 
@@ -208,6 +222,12 @@ def status_from_proto(msg: Status) -> typing.Status:
     code = typing.Code.OK
     if msg.code == Code.GET_PROPERTIES_NOT_IMPLEMENTED:
         code = typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED
+    if msg.code == Code.GET_PARAMETERS_NOT_IMPLEMENTED:
+        code = typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED
+    if msg.code == Code.FIT_NOT_IMPLEMENTED:
+        code = typing.Code.FIT_NOT_IMPLEMENTED
+    if msg.code == Code.EVALUATE_NOT_IMPLEMENTED:
+        code = typing.Code.EVALUATE_NOT_IMPLEMENTED
     return typing.Status(code=code, message=msg.message)
 
 
@@ -230,8 +250,10 @@ def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIn
 
 def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
     """Serialize EvaluateIns to ProtoBuf message."""
+    status_msg = status_to_proto(res.status)
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     return ClientMessage.EvaluateRes(
+        status=status_msg,
         loss=res.loss,
         num_examples=res.num_examples,
         metrics=metrics_msg,
@@ -240,8 +262,10 @@ def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
 
 def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRes:
     """Deserialize EvaluateRes from ProtoBuf message."""
+    status = status_from_proto(msg=msg.status)
     metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
     return typing.EvaluateRes(
+        status=status,
         loss=msg.loss,
         num_examples=msg.num_examples,
         metrics=metrics,

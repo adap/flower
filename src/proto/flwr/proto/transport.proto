@@ -24,6 +24,9 @@ service FlowerService {
 enum Code {
   OK = 0;
   GET_PROPERTIES_NOT_IMPLEMENTED = 1;
+  GET_PARAMETERS_NOT_IMPLEMENTED = 2;
+  FIT_NOT_IMPLEMENTED = 3;
+  EVALUATE_NOT_IMPLEMENTED = 4;
 }
 message Status {
   Code code = 1;
@@ -68,13 +71,18 @@ message ClientMessage {
     Status status = 1;
     map<string, Scalar> properties = 2;
   }
-  message GetParametersRes { Parameters parameters = 1; }
+  message GetParametersRes {
+    Status status = 1;
+    Parameters parameters = 2;
+  }
   message FitRes {
+    Status status = 1;
     Parameters parameters = 2;
     int64 num_examples = 3;
     map<string, Scalar> metrics = 4;
   }
   message EvaluateRes {
+    Status status = 1;
     float loss = 2;
     int64 num_examples = 3;
     map<string, Scalar> metrics = 4;

@@ -20,6 +20,7 @@ from typing import List, Optional
 import numpy as np
 
 from flwr.common import (
+    Code,
     DisconnectRes,
     EvaluateIns,
     EvaluateRes,
@@ -31,6 +32,7 @@ from flwr.common import (
     GetPropertiesRes,
     Parameters,
     ReconnectIns,
+    Status,
     ndarray_to_bytes,
 )
 from flwr.server.client_manager import SimpleClientManager
@@ -58,13 +60,19 @@ class SuccessClient(ClientProxy):
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
         return FitRes(
+            status=Status(code=Code.OK, message="Success"),
             parameters=Parameters(tensors=[arr_serialized], tensor_type=""),
             num_examples=1,
             metrics={},
         )
 
     def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
-        return EvaluateRes(loss=1.0, num_examples=1, metrics={})
+        return EvaluateRes(
+            status=Status(code=Code.OK, message="Success"),
+            loss=1.0,
+            num_examples=1,
+            metrics={},
+        )
 
     def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
         return DisconnectRes(reason="UNKNOWN")

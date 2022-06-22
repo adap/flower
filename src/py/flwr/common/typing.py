@@ -41,6 +41,9 @@ class Code(Enum):
 
     OK = 0
     GET_PROPERTIES_NOT_IMPLEMENTED = 1
+    GET_PARAMETERS_NOT_IMPLEMENTED = 2
+    FIT_NOT_IMPLEMENTED = 3
+    EVALUATE_NOT_IMPLEMENTED = 4
 
 
 @dataclass
@@ -70,6 +73,7 @@ class GetParametersIns:
 class GetParametersRes:
     """Response when asked to return parameters."""
 
+    status: Status
     parameters: Parameters
 
 
@@ -85,6 +89,7 @@ class FitIns:
 class FitRes:
     """Fit response from a client."""
 
+    status: Status
     parameters: Parameters
     num_examples: int
     metrics: Dict[str, Scalar]
@@ -102,6 +107,7 @@ class EvaluateIns:
 class EvaluateRes:
     """Evaluate response from a client."""
 
+    status: Status
     loss: float
     num_examples: int
     metrics: Dict[str, Scalar]

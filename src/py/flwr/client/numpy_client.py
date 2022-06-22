@@ -191,7 +191,9 @@ class NumPyClientWrapper(Client):
         """Return the current local model parameters."""
         parameters = self.numpy_client.get_parameters(config=ins.config)
         parameters_proto = weights_to_parameters(parameters)
-        return GetParametersRes(parameters=parameters_proto)
+        return GetParametersRes(
+            status=Status(code=Code.OK, message="Success"), parameters=parameters_proto
+        )
 
     def fit(self, ins: FitIns) -> FitRes:
         """Refine the provided weights using the locally held dataset."""
@@ -214,6 +216,7 @@ class NumPyClientWrapper(Client):
         parameters_prime, num_examples, metrics = results
         parameters_prime_proto = weights_to_parameters(parameters_prime)
         return FitRes(
+            status=Status(code=Code.OK, message="Success"),
             parameters=parameters_prime_proto,
             num_examples=num_examples,
             metrics=metrics,
@@ -237,6 +240,7 @@ class NumPyClientWrapper(Client):
         # Return EvaluateRes
         loss, num_examples, metrics = results
         return EvaluateRes(
+            status=Status(code=Code.OK, message="Success"),
             loss=loss,
             num_examples=num_examples,
             metrics=metrics,
