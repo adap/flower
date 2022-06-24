@@ -153,11 +153,12 @@ class Server:
             rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
         )
         if not client_instructions:
-            log(INFO, "evaluate_round: no clients selected, cancel")
+            log(INFO, "evaluate_round %s: no clients selected, cancel", rnd)
             return None
         log(
             DEBUG,
-            "evaluate_round: strategy sampled %s clients (out of %s)",
+            "evaluate_round %s: strategy sampled %s clients (out of %s)",
+            rnd,
             len(client_instructions),
             self._client_manager.num_available(),
         )
@@ -170,7 +171,8 @@ class Server:
         )
         log(
             DEBUG,
-            "evaluate_round received %s results and %s failures",
+            "evaluate_round %s received %s results and %s failures",
+            rnd,
             len(results),
             len(failures),
         )
@@ -199,11 +201,12 @@ class Server:
         )
 
         if not client_instructions:
-            log(INFO, "fit_round: no clients selected, cancel")
+            log(INFO, "fit_round %s: no clients selected, cancel", rnd)
             return None
         log(
             DEBUG,
-            "fit_round: strategy sampled %s clients (out of %s)",
+            "fit_round %s: strategy sampled %s clients (out of %s)",
+            rnd,
             len(client_instructions),
             self._client_manager.num_available(),
         )
@@ -216,7 +219,8 @@ class Server:
         )
         log(
             DEBUG,
-            "fit_round received %s results and %s failures",
+            "fit_round %s received %s results and %s failures",
+            rnd,
             len(results),
             len(failures),
         )
