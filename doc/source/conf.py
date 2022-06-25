@@ -49,6 +49,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
     "sphinx_copybutton",
+    "sphinx_panels",
     "sphinxcontrib.mermaid",
     "sphinx_reredirects",
 ]
