@@ -49,9 +49,8 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
     "sphinx_copybutton",
-    "sphinx_panels",
     "sphinxcontrib.mermaid",
-    "sphinx_reredirects"
+    "sphinx_reredirects",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
