@@ -7,7 +7,7 @@ Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly 
 Join the Flower Community
 -------------------------
 
-The Flower Community is growing quickly - we're engineers, researchers, contributors, students, professionals, academics, and more.
+The Flower Community is growing quickly - we're a friendly group of researchers, engineers, students, professionals, academics, and other enthusiasts.
 
 .. button-link:: https://flower.dev/join-slack
     :color: primary
