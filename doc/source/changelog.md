@@ -231,22 +231,22 @@ What's new?
 
   Built-in strategies support a new constructor argument called `initial_parameters` to set the initial parameters. Built-in strategies will provide these initial parameters to the server on startup and then delete them to free the memory afterwards.
 
-  .. code-block:: python
+  ```python
+  # Create model
+  model = tf.keras.applications.EfficientNetB0(
+      input_shape=(32, 32, 3), weights=None, classes=10
+  )
+  model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
-    # Create model
-    model = tf.keras.applications.EfficientNetB0(
-        input_shape=(32, 32, 3), weights=None, classes=10
-    )
-    model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+  # Create strategy and initilize parameters on the server-side
+  strategy = fl.server.strategy.FedAvg(
+      # ... (other constructor arguments)
+      initial_parameters=model.get_weights(),
+  )
 
-    # Create strategy and initilize parameters on the server-side
-    strategy = fl.server.strategy.FedAvg(
-        # ... (other constructor arguments)
-        initial_parameters=model.get_weights(),
-    )
-
-    # Start Flower server with the strategy
-    fl.server.start_server("[::]:8080", config={"num_rounds": 3}, strategy=strategy)
+  # Start Flower server with the strategy
+  fl.server.start_server("[::]:8080", config={"num_rounds": 3}, strategy=strategy)
+  ```
 
   If no initial parameters are provided to the strategy, the server will continue to use the current behaviour (namely, it will ask one of the connected clients for its parameters and use these as the initial global parameters).
 
@@ -268,19 +268,18 @@ What's new?
 
   *Code example:* note the additional dictionary return values in both `FlwrClient.fit` and `FlwrClient.evaluate`: 
 
-  .. code-block:: python
+  ```python
+  class FlwrClient(fl.client.NumPyClient):
+      def fit(self, parameters, config):
+          net.set_parameters(parameters)
+          train_loss = train(net, trainloader)
+          return net.get_weights(), len(trainloader), {"train_loss": train_loss}
 
-    class FlwrClient(fl.client.NumPyClient):
-        def fit(self, parameters, config):
-            net.set_parameters(parameters)
-            train_loss = train(net, trainloader)
-            return net.get_weights(), len(trainloader), {"train_loss": train_loss}
-
-        def evaluate(self, parameters, config):
-            net.set_parameters(parameters)
-            loss, accuracy, custom_metric = test(net, testloader)
-            return loss, len(testloader), {"accuracy": accuracy, "custom_metric": custom_metric}
-
+      def evaluate(self, parameters, config):
+          net.set_parameters(parameters)
+          loss, accuracy, custom_metric = test(net, testloader)
+          return loss, len(testloader), {"accuracy": accuracy, "custom_metric": custom_metric}
+  ```
 - **Generalized** `config` **argument in** `Client.fit` **and** `Client.evaluate` ([#595](https://github.com/adap/flower/pull/595))
 
   The `config` argument used to be of type `Dict[str, str]`, which means that dictionary values were expected to be strings. The new release generalizes this to enable values of the following types: `bool`, `bytes`, `float`, `int`, `str`.
@@ -289,21 +288,20 @@ What's new?
 
   *Code example:* note that the `config` dictionary now contains non-`str` values in both `Client.fit` and `Client.evaluate`: 
 
-  .. code-block:: python
-  
-    class FlwrClient(fl.client.NumPyClient):
-        def fit(self, parameters, config):
-            net.set_parameters(parameters)
-            epochs: int = config["epochs"]
-            train_loss = train(net, trainloader, epochs)
-            return net.get_weights(), len(trainloader), {"train_loss": train_loss}
+  ```python
+  class FlwrClient(fl.client.NumPyClient):
+      def fit(self, parameters, config):
+          net.set_parameters(parameters)
+          epochs: int = config["epochs"]
+          train_loss = train(net, trainloader, epochs)
+          return net.get_weights(), len(trainloader), {"train_loss": train_loss}
 
-        def evaluate(self, parameters, config):
-            net.set_parameters(parameters)
-            batch_size: int = config["batch_size"]
-            loss, accuracy = test(net, testloader, batch_size)
-            return loss, len(testloader), {"accuracy": accuracy}
-
+      def evaluate(self, parameters, config):
+          net.set_parameters(parameters)
+          batch_size: int = config["batch_size"]
+          loss, accuracy = test(net, testloader, batch_size)
+          return loss, len(testloader), {"accuracy": accuracy}
+  ```
 ## v0.13.0 (2021-01-08)
 
 What's new?
