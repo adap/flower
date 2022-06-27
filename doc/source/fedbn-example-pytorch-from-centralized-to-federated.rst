@@ -1,5 +1,5 @@
-FedBN Example: PyTorch - From Centralized To Federated
-======================================================
+Example: FedBN in PyTorch - From Centralized To Federated
+=========================================================
 
 This tutorial will show you how to use Flower to build a federated version of an existing machine learning workload with `FedBN <https://github.com/med-air/FedBN>`_, a federated training strategy designed for non-iid data.
 We are using PyTorch to train a Convolutional Neural Network(with Batch Normalization layers) on the CIFAR-10 dataset.

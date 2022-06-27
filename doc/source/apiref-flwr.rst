@@ -153,8 +153,7 @@ server.strategy.FedYogi
 
     .. automethod:: __init__
 
-
-typing
+common
 ------
-.. automodule:: flwr.common.typing
+.. automodule:: flwr.common
   :members:

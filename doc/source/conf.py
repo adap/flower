@@ -48,10 +48,11 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
+    "myst_parser",
     "sphinx_copybutton",
-    "sphinx_panels",
+    "sphinx_design",
     "sphinxcontrib.mermaid",
-    "sphinx_reredirects"
+    "sphinx_reredirects",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
