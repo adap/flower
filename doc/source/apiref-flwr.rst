@@ -152,3 +152,8 @@ server.strategy.FedYogi
     :members:
 
     .. automethod:: __init__
+
+common
+------
+.. automodule:: flwr.common
+  :members:
