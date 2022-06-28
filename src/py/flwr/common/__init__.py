@@ -21,18 +21,20 @@ from .parameter import parameters_to_weights as parameters_to_weights
 from .parameter import weights_to_parameters as weights_to_parameters
 from .typing import Code as Code
 from .typing import Config as Config
-from .typing import Disconnect as Disconnect
+from .typing import DisconnectRes as DisconnectRes
 from .typing import EvaluateIns as EvaluateIns
 from .typing import EvaluateRes as EvaluateRes
 from .typing import FitIns as FitIns
 from .typing import FitRes as FitRes
+from .typing import GetParametersIns as GetParametersIns
+from .typing import GetParametersRes as GetParametersRes
+from .typing import GetPropertiesIns as GetPropertiesIns
+from .typing import GetPropertiesRes as GetPropertiesRes
 from .typing import Metrics as Metrics
+from .typing import MetricsAggregationFn as MetricsAggregationFn
 from .typing import Parameters as Parameters
-from .typing import ParametersRes as ParametersRes
 from .typing import Properties as Properties
-from .typing import PropertiesIns as PropertiesIns
-from .typing import PropertiesRes as PropertiesRes
-from .typing import Reconnect as Reconnect
+from .typing import ReconnectIns as ReconnectIns
 from .typing import Scalar as Scalar
 from .typing import Status as Status
 from .typing import Weights as Weights
@@ -43,21 +45,23 @@ __all__ = [
     "bytes_to_ndarray",
     "Code",
     "Config",
-    "Disconnect",
+    "DisconnectRes",
     "EvaluateIns",
     "EvaluateRes",
     "FitIns",
     "FitRes",
+    "GetParametersIns",
+    "GetParametersRes",
+    "GetPropertiesIns",
+    "GetPropertiesRes",
     "GRPC_MAX_MESSAGE_LENGTH",
     "Metrics",
+    "MetricsAggregationFn",
     "ndarray_to_bytes",
     "Parameters",
     "parameters_to_weights",
-    "ParametersRes",
     "Properties",
-    "PropertiesIns",
-    "PropertiesRes",
-    "Reconnect",
+    "ReconnectIns",
     "Scalar",
     "Status",
     "Weights",

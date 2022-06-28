@@ -15,21 +15,24 @@
 """Flower server tests."""
 
 
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 
 from flwr.common import (
-    Disconnect,
+    Code,
+    DisconnectRes,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
+    GetParametersIns,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
     Parameters,
-    ParametersRes,
-    PropertiesIns,
-    PropertiesRes,
-    Reconnect,
+    ReconnectIns,
+    Status,
     ndarray_to_bytes,
 )
 from flwr.server.client_manager import SimpleClientManager
@@ -41,46 +44,60 @@ from .server import Server, evaluate_clients, fit_clients
 class SuccessClient(ClientProxy):
     """Test class."""
 
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_properties(
+        self, ins: GetPropertiesIns, timeout: Optional[float]
+    ) -> GetPropertiesRes:
         # This method is not expected to be called
         raise Exception()
 
-    def get_parameters(self) -> ParametersRes:
+    def get_parameters(
+        self, ins: GetParametersIns, timeout: Optional[float]
+    ) -> GetParametersRes:
         # This method is not expected to be called
         raise Exception()
 
-    def fit(self, ins: FitIns) -> FitRes:
+    def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
         return FitRes(
+            status=Status(code=Code.OK, message="Success"),
             parameters=Parameters(tensors=[arr_serialized], tensor_type=""),
             num_examples=1,
             metrics={},
         )
 
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        return EvaluateRes(loss=1.0, num_examples=1, metrics={})
+    def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
+        return EvaluateRes(
+            status=Status(code=Code.OK, message="Success"),
+            loss=1.0,
+            num_examples=1,
+            metrics={},
+        )
 
-    def reconnect(self, reconnect: Reconnect) -> Disconnect:
-        return Disconnect(reason="UNKNOWN")
+    def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
+        return DisconnectRes(reason="UNKNOWN")
 
 
 class FailingClient(ClientProxy):
     """Test class."""
 
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_properties(
+        self, ins: GetPropertiesIns, timeout: Optional[float]
+    ) -> GetPropertiesRes:
         raise Exception()
 
-    def get_parameters(self) -> ParametersRes:
+    def get_parameters(
+        self, ins: GetParametersIns, timeout: Optional[float]
+    ) -> GetParametersRes:
         raise Exception()
 
-    def fit(self, ins: FitIns) -> FitRes:
+    def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
         raise Exception()
 
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
+    def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
         raise Exception()
 
-    def reconnect(self, reconnect: Reconnect) -> Disconnect:
+    def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
         raise Exception()
 
 
@@ -97,7 +114,7 @@ def test_fit_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = fit_clients(client_instructions, None)
+    results, failures = fit_clients(client_instructions, None, None)
 
     # Assert
     assert len(results) == 1
@@ -121,7 +138,11 @@ def test_eval_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = evaluate_clients(client_instructions, None)
+    results, failures = evaluate_clients(
+        client_instructions=client_instructions,
+        max_workers=None,
+        timeout=None,
+    )
 
     # Assert
     assert len(results) == 1

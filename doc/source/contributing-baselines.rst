@@ -7,6 +7,29 @@ The goal of Flower Baselines is to reproduce experiments from popular papers to 
 
 Before you start to work on a new baseline or experiment please check the `Flower Issues <https://github.com/adap/flower/issues>`_ or `Flower Pull Requests <https://github.com/adap/flower/pulls>`_ to see if someone else is already working on it. Please open a new issue if you are planning to work on a new baseline or experiment with a short description of the corresponding paper and the experiment you want to contribute.
 
+TL;DR: Adding a new Flower Baseline
+-----------------------------------
+
+Let's say you want to contribute the code of your most recent Federated Learning publication, *FedAweseome*. There are only three steps necessary to create a new *FedAweseome* Flower Baseline:
+
+#. **Get the Flower source code on your machine**
+    #. Fork the Flower codebase: got to the `Flower GitHub repo <https://github.com/adap/flower>`_ and fork the code (click the *Fork* button in the top-right corner and follow the instructions)
+    #. Clone the (forked) Flower source code: :code:`git clone git@github.com:[your_github_username]/flower.git`
+    #. Open the code in your favorite editor (e.g., using VSCode: ``cd flower ; code .``)
+#. **Add the FedAwesome code**
+    #. Add your :code:`FedAwesome` code under :code:`baselines/flwr_baselines/publications/[fedawesome]`
+    #. Add a `pyproject.toml` with all necessary dependencies
+    #. Add a `README.md` describing how to use your baseline
+#. **Open a pull request**
+    #. Stage your changes: :code:`git add .`
+    #. Commit & push: :code:`git commit -m "Create new FedAweseome baseline" ; git push`
+    #. Open a pull request: go to *your* fork of the Flower codebase and create a pull request that targets the Flower ``main``` branch
+
+Further reading:
+
+* `GitHub docs: About forks <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/about-forks>`_
+* `GitHub docs: Creating a pull request <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`_
+* `GitHub docs: Creating a pull request from a fork <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork>`_
 
 Requirements
 ------------

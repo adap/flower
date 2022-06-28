@@ -1,0 +1,8 @@
+---
+name: FedAvgM
+expected_accuracy: 52.4
+init:
+  _target_: flwr.server.strategy.FedAvgM
+  server_learning_rate: 1.0
+  server_momentum: 0.9
+eta_l: 0.03162 # client's learning rate

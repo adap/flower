@@ -18,7 +18,15 @@
 from typing import List, Optional, Tuple
 from unittest.mock import MagicMock
 
-from flwr.common import EvaluateRes, FitRes, Parameters, Weights, parameters_to_weights
+from flwr.common import (
+    Code,
+    EvaluateRes,
+    FitRes,
+    Parameters,
+    Status,
+    Weights,
+    parameters_to_weights,
+)
 from flwr.server.client_proxy import ClientProxy
 
 from .fault_tolerant_fedavg import FaultTolerantFedAvg
@@ -59,7 +67,15 @@ def test_aggregate_fit_not_enough_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.5)
     results: List[Tuple[ClientProxy, FitRes]] = [
-        (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, {}))
+        (
+            MagicMock(),
+            FitRes(
+                Status(code=Code.OK, message="Success"),
+                Parameters(tensors=[], tensor_type=""),
+                1,
+                {},
+            ),
+        )
     ]
     failures: List[BaseException] = [Exception(), Exception()]
     expected: Optional[Parameters] = None
@@ -76,7 +92,15 @@ def test_aggregate_fit_just_enough_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.5)
     results: List[Tuple[ClientProxy, FitRes]] = [
-        (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, {}))
+        (
+            MagicMock(),
+            FitRes(
+                Status(code=Code.OK, message="Success"),
+                Parameters(tensors=[], tensor_type=""),
+                1,
+                {},
+            ),
+        )
     ]
     failures: List[BaseException] = [Exception()]
     expected: Optional[Weights] = []
@@ -94,7 +118,15 @@ def test_aggregate_fit_no_failures() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_fit=0.99)
     results: List[Tuple[ClientProxy, FitRes]] = [
-        (MagicMock(), FitRes(Parameters(tensors=[], tensor_type=""), 1, {}))
+        (
+            MagicMock(),
+            FitRes(
+                Status(code=Code.OK, message="Success"),
+                Parameters(tensors=[], tensor_type=""),
+                1,
+                {},
+            ),
+        )
     ]
     failures: List[BaseException] = []
     expected: Optional[Weights] = []
@@ -142,7 +174,15 @@ def test_aggregate_evaluate_not_enough_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.5)
     results: List[Tuple[ClientProxy, EvaluateRes]] = [
-        (MagicMock(), EvaluateRes(loss=2.3, num_examples=1, metrics={}))
+        (
+            MagicMock(),
+            EvaluateRes(
+                status=Status(code=Code.OK, message="Success"),
+                loss=2.3,
+                num_examples=1,
+                metrics={},
+            ),
+        )
     ]
     failures: List[BaseException] = [Exception(), Exception()]
     expected: Optional[float] = None
@@ -159,7 +199,15 @@ def test_aggregate_evaluate_just_enough_results() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.5)
     results: List[Tuple[ClientProxy, EvaluateRes]] = [
-        (MagicMock(), EvaluateRes(loss=2.3, num_examples=1, metrics={}))
+        (
+            MagicMock(),
+            EvaluateRes(
+                Status(code=Code.OK, message="Success"),
+                loss=2.3,
+                num_examples=1,
+                metrics={},
+            ),
+        )
     ]
     failures: List[BaseException] = [Exception()]
     expected: Optional[float] = 2.3
@@ -176,7 +224,15 @@ def test_aggregate_evaluate_no_failures() -> None:
     # Prepare
     strategy = FaultTolerantFedAvg(min_completion_rate_evaluate=0.99)
     results: List[Tuple[ClientProxy, EvaluateRes]] = [
-        (MagicMock(), EvaluateRes(loss=2.3, num_examples=1, metrics={}))
+        (
+            MagicMock(),
+            EvaluateRes(
+                Status(code=Code.OK, message="Success"),
+                loss=2.3,
+                num_examples=1,
+                metrics={},
+            ),
+        )
     ]
     failures: List[BaseException] = []
     expected: Optional[float] = 2.3

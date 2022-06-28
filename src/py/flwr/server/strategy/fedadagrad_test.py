@@ -21,8 +21,10 @@ from unittest.mock import MagicMock
 from numpy import array, float32
 
 from flwr.common import (
+    Code,
     FitRes,
     Parameters,
+    Status,
     Weights,
     parameters_to_weights,
     weights_to_parameters,
@@ -53,8 +55,24 @@ def test_aggregate_fit() -> None:
     client_0 = GrpcClientProxy(cid="0", bridge=bridge)
     client_1 = GrpcClientProxy(cid="1", bridge=bridge)
     results: List[Tuple[ClientProxy, FitRes]] = [
-        (client_0, FitRes(param_0, num_examples=5, metrics={})),
-        (client_1, FitRes(param_1, num_examples=5, metrics={})),
+        (
+            client_0,
+            FitRes(
+                status=Status(code=Code.OK, message="Success"),
+                parameters=param_0,
+                num_examples=5,
+                metrics={},
+            ),
+        ),
+        (
+            client_1,
+            FitRes(
+                status=Status(code=Code.OK, message="Success"),
+                parameters=param_1,
+                num_examples=5,
+                metrics={},
+            ),
+        ),
     ]
     expected: Weights = [array([0.15, 0.15, 0.15, 0.15], dtype=float32)]
 
