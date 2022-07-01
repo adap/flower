@@ -1,16 +1,57 @@
 Contributing Baselines
 ======================
 
+
 Do you have a new federated learning paper and want to add a new baseline to Flower? Or do you want to add a new experiment to an already existing baseline paper? Great, we really appreciate your contribution.
 
 The goal of Flower Baselines is to reproduce experiments from popular papers to accelerate researchers by enabling faster comparisons to new strategies, datasets, models, and federated pipelines in general. 
 
 Before you start to work on a new baseline or experiment please check the `Flower Issues <https://github.com/adap/flower/issues>`_ or `Flower Pull Requests <https://github.com/adap/flower/pulls>`_ to see if someone else is already working on it. Please open a new issue if you are planning to work on a new baseline or experiment with a short description of the corresponding paper and the experiment you want to contribute.
 
-TL;DR: Adding a new Flower Baseline
+Planning your Baseline structure
+--------------------------------
+
+Before you submit your code, we suggest you think about how it is organized and how it could be modified so that other users can build upon it.
+
+One great way to make your code reproducible and reusable, is to organize it into different sets of *experiments*. In general, papers will contain several independent experiments, each focusing on a specific sub-problem. We suggest you organize your code around those sets of experiments and think of each set separately.
+
+For example, let's say you want to contribute with code for your most recent Federated Learning publication, *FedAwesome*. It is possible that this work will have a few sets of experiments e.g., a set that measures accuracy as a function of *training rounds* for a fixed number of participating clients, and a set that measures accuracy as a function of *participating clients* for a fixed number of rounds. Within each one of these, you might also want to compare your approach to existing SOTA aggregation strategies each having their own set of parameters.
+
+At this point, you could be considering creating various scripts and configuration files to run all possible comparisons between *FedAweseome* and other strategies for each set of experiment.
+However, to keep you sane, we suggest you take a look at `Hydra <https://hydra.cc/>`_ and maybe consider using it. 
+
+Hydra allows you to create one single *main* script for each set of experiments and build hierarchical configuration files. This allows you to create one code-skeleton for your experiment and swap blocks of code with a single command-line option.
+
+The figure below shows how this can be implemented in practice. Common parameters used across a given experiment such as `num_clients`, and `num_rounds` can be defined inside a `config.yaml` file.
+
+
+
+.. image:: _static/hydra_sidemenu.png
+  :width: 150
+  :alt: Hierarchical structure.
+  :align: center
+
+Whilst elements having different numbers of parameters, such as different strategies, can be defined in separate `yaml` files and referenced by the main config file.
+
+.. image:: _static/hydra_default_fedavg.png
+  :width: 150
+  :alt: Default strategy inside config.yaml
+  :align: center
+
+All parameters can be easily modified via command-line arguments.
+
+We recommend the `Getting started <https://hydra.cc/docs/intro/>`_ and the `Tutorials <https://hydra.cc/docs/tutorials/intro/>`_ to get a better feel of how operates. For a full Flower+Hydra example, please refer to the `Adaptive Federated Learning Baseline <https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/adaptive_federated_optimization>`_
+
+Please note that re-organizing your code is not a requirement, but it will help us verify/approve it, and your work will definitely get more visibility.
+
+Also, notice that you don't have to have implemented all existing experiments before you can submit your contribution. In fact, we highly recommend you deploy new set of experiments as soon as possible, following the steps below:  
+
+
+Deploying a new Flower Baseline
 -----------------------------------
 
-Let's say you want to contribute the code of your most recent Federated Learning publication, *FedAweseome*. There are only three steps necessary to create a new *FedAweseome* Flower Baseline:
+There are only three steps necessary to deploy your new *FedAweseome* Flower Baseline:
+
 
 #. **Get the Flower source code on your machine**
     #. Fork the Flower codebase: got to the `Flower GitHub repo <https://github.com/adap/flower>`_ and fork the code (click the *Fork* button in the top-right corner and follow the instructions)
