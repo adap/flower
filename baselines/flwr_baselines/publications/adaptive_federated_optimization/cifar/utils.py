@@ -9,7 +9,7 @@ import numpy.typing as npt
 import torch
 from flwr.common.parameter import weights_to_parameters
 from flwr.common.typing import Parameters, Scalar, Weights
-from flwr.dataset.utils.common import (
+from flwr_baselines.dataset.utils.common import (
     XY,
     create_lda_partitions,
     shuffle,
