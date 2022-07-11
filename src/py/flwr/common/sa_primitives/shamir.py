@@ -1,6 +1,6 @@
 from flwr.common.sa_primitives.gf_2_16 import Operand, interpolate_gf, exps, logs, slow_multiply
-import numpy as np
 import os
+from flwr.common.timer import Timer
 from typing import List, Tuple
 
 MAX_VALUE = 65535
@@ -39,9 +39,8 @@ def create_shares(secret: bytes, threshold: int, num_shares: int) -> List[bytes]
         coeff = [Operand(data)]
         # sample other coefficients randomly
         for i in range(1, threshold):
-            # coeff.append(Operand(int.from_bytes(os.urandom(2), 'little', signed=False)))
-            coeff.append(Operand(i + 1))
-        # evaluate the polynomial at num_shares points
+            coeff.append(Operand(int.from_bytes(os.urandom(2), 'little', signed=False)))
+        # evaluate the polynomial at num_shares points; BOTTLENECK !
         for i in range(num_shares):
             x = Operand(i + 1)
             y = coeff[0]
@@ -63,6 +62,7 @@ def combine_shares(shares: List[bytes]) -> bytes:
         share = []
         for i in range(k):
             share.append(shares[i][di])
+        # interpolation is the bottleneck
         data = interpolate_gf(share)
         data = int.to_bytes(int(data), 2, 'little')
         secret.extend(data)
@@ -71,8 +71,8 @@ def combine_shares(shares: List[bytes]) -> bytes:
 
 if __name__ == '__main__':
     secret = b'01234567890123456789012345678912'
-    shares = create_shares(secret, 4, 7)
-    rec2 = combine_shares(shares[:4])
+    shares = create_shares(secret, 100, 200)
+    rec2 = combine_shares(shares[:100])
     print(rec2)
 
 

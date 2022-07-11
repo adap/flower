@@ -18,12 +18,9 @@ import os
 import random
 from typing import List
 
-from cryptography.fernet import Fernet
 import numpy as np
-from numpy.core.numerictypes import issubdtype
-from numpy.testing._private.utils import assert_almost_equal
-from flwr.common.sec_agg.sec_agg_primitives import bytes_to_private_key, bytes_to_public_key, combine_shares, create_shares, decrypt, encrypt, factor_weights_combine, factor_weights_extract, generate_key_pairs, generate_shared_key, private_key_to_bytes, pseudo_rand_gen, public_key_to_bytes, quantize, rand_bytes, reverse_quantize, share_keys_plaintext_concat, share_keys_plaintext_separate, weights_addition, weights_divide, weights_mod, weights_multiply, weights_shape, weights_subtraction, weights_zero_generate
-from flwr.common.typing import Weights
+from flwr.common.sa_primitives.sec_agg_primitives import bytes_to_private_key, bytes_to_public_key, combine_shares, create_shares, decrypt, encrypt, factor_weights_combine, factor_weights_extract, generate_key_pairs, generate_shared_key, private_key_to_bytes, pseudo_rand_gen, public_key_to_bytes, quantize, rand_bytes, reverse_quantize, share_keys_plaintext_concat, share_keys_plaintext_separate, weights_addition, weights_divide, weights_mod, weights_multiply, weights_shape, weights_subtraction, weights_zero_generate
+
 
 # Test if generated shared key is identical
 

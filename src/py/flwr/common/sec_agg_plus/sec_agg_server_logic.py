@@ -16,14 +16,12 @@ from logging import INFO, WARNING
 import math
 from typing import Dict, List, Optional, Tuple
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
-from flwr.common.typing import AskKeysIns, AskKeysRes, AskVectorsIns, AskVectorsRes, FitIns, FitRes, Parameters, Scalar, \
-    SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
+from flwr.common.typing import AskKeysRes, AskVectorsRes, FitIns, FitRes, Parameters, Scalar, \
+    SetupParamRes, ShareKeysPacket, ShareKeysRes, UnmaskVectorsRes
 from flwr.server.client_proxy import ClientProxy
-from flwr.common.sec_agg import sec_agg_primitives
-from flwr.common.secure_aggregation import SAClientMessageCarrier, SAServerMessageCarrier, SecureAggregationFitRound, \
-    SecureAggregationResultsAndFailures
+from flwr.common.sa_primitives import sec_agg_primitives
+from flwr.common.secure_aggregation import SAServerMessageCarrier, SecureAggregationFitRound
 from flwr_crypto_cpp import combine_shares
-import timeit
 import numpy as np
 from flwr.common.timer import Timer
 
@@ -380,14 +378,6 @@ def setup_param(
     ])
     results = [(c, AskKeysRes(pk1=msg.bytes_list[0], pk2=msg.bytes_list[1])) for c, msg in results]
     return results, failures
-
-
-# def ask_keys(strategy: SecureAggregationFitRound, clients: Dict[int, ClientProxy]) -> AskKeysResultsAndFailures:
-#     results, failures = strategy.sa_request([
-#         (c, SAServerMessageCarrier(identifier='1')) for c in clients.values()
-#     ])
-#     results = [(c, AskKeysRes(pk1=msg.bytes_list[0], pk2=msg.bytes_list[1])) for c, msg in results]
-#     return results, failures
 
 
 def share_keys(strategy: SecureAggregationFitRound, graph: Dict[int, List[int]], clients: Dict[int, ClientProxy],

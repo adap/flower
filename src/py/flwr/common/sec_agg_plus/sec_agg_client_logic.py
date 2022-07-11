@@ -12,14 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-import numpy as np
-from flwr.common.parameter import parameters_to_weights, weights_to_parameters
-from flwr.common.sec_agg.sec_agg_primitives import check_clipping_range
+from flwr.common.parameter import weights_to_parameters
 from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
-from flwr.common.sec_agg import sec_agg_primitives
+from flwr.common.sa_primitives import sec_agg_primitives
 from flwr_crypto_cpp import create_shares
 from flwr.common.logger import log
-from logging import DEBUG, ERROR, INFO, WARNING
+from logging import ERROR, INFO, WARNING
 from typing import Dict, List, Tuple
 from flwr.common import (
     AskKeysRes,

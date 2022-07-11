@@ -28,7 +28,7 @@ from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupPa
     AskEncryptedEncodedMasksRes, EncryptedEncodedMasksPacket, Parameters, AskMaskedModelsIns, AskMaskedModelsRes, \
     AskAggregatedEncodedMasksIns, AskAggregatedEncodedMasksRes, SAServerMessageCarrier, SAClientMessageCarrier, \
     ShareKeysPacket
-from flwr.common.sec_agg import sec_agg_client_logic
+from flwr.common.sec_agg_plus import sec_agg_client_logic
 from flwr.common.light_sec_agg import client_logic as lsa_proto
 import numpy as np
 from .client import Client

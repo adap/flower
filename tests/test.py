@@ -1,15 +1,13 @@
 import timeit
-import numpy as np
 import sys
 import os
 pth = os.path.abspath("./src/py")
 sys.path.append(pth)
 #r"C:\Users\MSI-NB\Source\Repos\FANTOME-PAN\flower\src\py"
 from flwr_crypto_cpp import create_shares, combine_shares
-from flwr.common.sec_agg import sec_agg_test, sec_agg_primitives_test
-from flwr.common.light_sec_agg import light_sec_agg_test
+from flwr.common.sec_agg import sec_agg_test
 import random
-from flwr.common import weights_to_parameters
+
 #from flwr.common.sec_agg.sec_agg_primitives import combine_shares, create_shares
 '''weights: Weights = [np.array([[-0.2, -0.5, 1.9], [0.0, 2.4, -1.9]]),
                     np.array([[0.2, 0.5, -1.9], [0.0, -2.4, 1.9]])]

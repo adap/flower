@@ -13,19 +13,16 @@
 # limitations under the License.
 # ==============================================================================
 import galois
-from .mpc_functions import mask_encoding, compute_aggregate_encoded_mask, model_masking
+from flwr.common.sa_primitives.mpc_functions import mask_encoding, compute_aggregate_encoded_mask, model_masking
 import numpy as np
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.typing import LightSecAggSetupConfigIns, LightSecAggSetupConfigRes, AskEncryptedEncodedMasksIns, \
     AskEncryptedEncodedMasksRes, EncryptedEncodedMasksPacket, Parameters, AskMaskedModelsIns, AskMaskedModelsRes, \
     AskAggregatedEncodedMasksIns, AskAggregatedEncodedMasksRes
-from flwr.common.sec_agg import sec_agg_primitives
+from flwr.common.sa_primitives import sec_agg_primitives
 from flwr.common.logger import log
-from logging import DEBUG, ERROR, INFO, WARNING
-from typing import Dict, List, Tuple
-from flwr.common import (
-    AskKeysRes,
-)
+from logging import ERROR, INFO, WARNING
+from typing import List
 
 
 def padding(d, U, T):
@@ -70,8 +67,8 @@ def setup_config(client, ins: LightSecAggSetupConfigIns):
         client.test_dropout_value = cfg['test_dropout_value']
         client.vector_length = client.test_vector_shape[0][0]
         client.d = padding(client.vector_length + 1, client.U, client.T)
-    # End =================================================================
     else:
+    # End =================================================================
         weights = parameters_to_weights(client.get_parameters())
         client.vector_length = sum([o.size for o in weights])
         client.d = padding(client.vector_length + 1, client.U, client.T)

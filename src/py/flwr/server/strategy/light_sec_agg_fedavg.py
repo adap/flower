@@ -14,23 +14,19 @@
 # ==============================================================================
 
 import galois
-from logging import INFO, WARNING
-import math
-from flwr.common.light_sec_agg.mpc_functions import LCC_decoding_with_points, model_unmasking
+from logging import INFO
+from flwr.common.sa_primitives.mpc_functions import LCC_decoding_with_points, model_unmasking
 import numpy as np
 from typing import Callable, Dict, List, Tuple, Optional
 from flwr.server.strategy.fedavg import FedAvg
 from flwr.server.server import Server, ClientProxy
 from flwr.common.typing import SAServerMessageCarrier
-from flwr.common.sec_agg import sec_agg_primitives
+from flwr.common.sa_primitives import sec_agg_primitives
 from flwr.common.timer import Timer
 from flwr.common.secure_aggregation import SecureAggregationFitRound, SecureAggregationResultsAndFailures
 from flwr.common.logger import log
 
 from flwr.common import (
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
     FitRes,
     Parameters,
     Scalar,
