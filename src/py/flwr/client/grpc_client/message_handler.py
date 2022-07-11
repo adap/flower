@@ -25,6 +25,7 @@ from flwr.client.client import (
     has_get_properties,
 )
 from flwr.common import serde, typing
+from flwr.common.typing import Parameters
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 # pylint: disable=missing-function-docstring
@@ -120,7 +121,7 @@ def _get_parameters(
                 code=typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED,
                 message="Client does not implement `get_parameters`",
             ),
-            parameters=None,
+            parameters=Parameters(tensor_type="", tensors=[]),
         )
         get_parameters_res_proto = serde.get_parameters_res_to_proto(get_parameters_res)
         return ClientMessage(get_parameters_res=get_parameters_res_proto)
@@ -143,7 +144,7 @@ def _fit(client: Client, fit_msg: ServerMessage.FitIns) -> ClientMessage:
                 code=typing.Code.FIT_NOT_IMPLEMENTED,
                 message="Client does not implement `fit`",
             ),
-            parameters=None,
+            parameters=Parameters(tensor_type="", tensors=[]),
             num_examples=0,
             metrics={},
         )
