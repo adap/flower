@@ -7,6 +7,16 @@
 
   The `get_parameters` method now accepts a configuration dictionary, just like `get_properties`, `fit`, and `evaluate`.
 
+- **Replace** `num_rounds` **in** `start_simulation` **by** `config` ([#111111](https://github.com/adap/flower/pull/111111))
+  
+  The `start_simulation` function now accepts a configuration dictionary `config` instead of the `num_rounds` integer. This improves the consistency between `start_simulation` and `start_server` and makes transitioning between the two easier.
+
+### New features
+
+- **Enable passing a** `Server` **instance to** `start_simulation` ([#111111](https://github.com/adap/flower/pull/111111))
+
+  Similar to `start_server`, `start_simulation` now accepts a full `Server` instance. This enables users to heavily customize the execution of eperiments and opens the door to running, for example, async FL using the Virtual Client Engine.
+
 ### Minor updates
 
 - Add secure gRPC connection to the `advanced_tensorflow` code example ([#847](https://github.com/adap/flower/pull/847))
