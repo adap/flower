@@ -18,6 +18,7 @@
 import time
 from logging import INFO
 from typing import Callable, Dict, List, Optional, Union
+from uuid import uuid4
 
 import numpy as np
 
@@ -313,8 +314,9 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
     if numpyclient_has_evaluate(client=client):
         member_dict["evaluate"] = _evaluate
 
-    # Create wrapper class
-    wrapper_class = type("NumPyClientWrapper", (Client,), member_dict)
+    # Create wrapper class with a random class name
+    wrapper_class_name = "NumPyClientWrapper" + uuid4().hex[:8]
+    wrapper_class = type(wrapper_class_name, (Client,), member_dict)
 
     # Create and return an instance of the newly created class
     return wrapper_class(numpy_client=client)  # type: ignore
