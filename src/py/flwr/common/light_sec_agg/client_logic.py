@@ -13,16 +13,18 @@
 # limitations under the License.
 # ==============================================================================
 import galois
-from flwr.common.sa_primitives.mpc_functions import mask_encoding, compute_aggregate_encoded_mask, model_masking
+from flwr.common.sa_primitives.lightsecagg_primitives import mask_encoding, compute_aggregate_encoded_mask, model_masking
 import numpy as np
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.typing import LightSecAggSetupConfigIns, LightSecAggSetupConfigRes, AskEncryptedEncodedMasksIns, \
     AskEncryptedEncodedMasksRes, EncryptedEncodedMasksPacket, Parameters, AskMaskedModelsIns, AskMaskedModelsRes, \
     AskAggregatedEncodedMasksIns, AskAggregatedEncodedMasksRes
-from flwr.common.sa_primitives import sec_agg_primitives
+from flwr.common.sa_primitives import secaggplus_primitives
+from flwr.common.sa_primitives import quantize
 from flwr.common.logger import log
 from logging import ERROR, INFO, WARNING
-from typing import List
+from typing import List, Dict, Tuple
+from flwr.common.typing import Scalar
 
 
 def padding(d, U, T):
@@ -35,11 +37,11 @@ def padding(d, U, T):
 def encrypt_sub_mask(key, sub_mask):
     ret = weights_to_parameters([sub_mask])
     plaintext = ret.tensors[0]
-    return sec_agg_primitives.encrypt(key, plaintext)
+    return secaggplus_primitives.encrypt(key, plaintext)
 
 
 def decrypt_sub_mask(key, ciphertext):
-    plaintext = sec_agg_primitives.decrypt(key, ciphertext)
+    plaintext = secaggplus_primitives.decrypt(key, ciphertext)
     ret = parameters_to_weights(Parameters(
         tensors=[plaintext],
         tensor_type="numpy.ndarray"
@@ -47,9 +49,10 @@ def decrypt_sub_mask(key, ciphertext):
     return ret[0]
 
 
-def setup_config(client, ins: LightSecAggSetupConfigIns):
+# set up configurations and return the public key
+def setup_config(client, config_dict: Dict[str, Scalar]) -> bytes:
     # Assigning parameter values to object fields
-    cfg = ins.sec_agg_cfg_dict
+    cfg = config_dict
     client.N = cfg['sample_num']
     client.id = cfg['id']
     client.T = cfg['privacy_guarantee']
@@ -78,10 +81,10 @@ def setup_config(client, ins: LightSecAggSetupConfigIns):
     # dict key is the ID of another client (int)
     # dict value is the encoded sub-mask z_j,i where j is the key, i is the id of current client.
     client.encoded_mask_dict = {}
-    client.sk, client.pk = sec_agg_primitives.generate_key_pairs()
+    client.sk, client.pk = secaggplus_primitives.generate_key_pairs()
     log(INFO, "LightSecAgg Stage 0 Completed: Config Set Up")
     return LightSecAggSetupConfigRes(
-        pk=sec_agg_primitives.public_key_to_bytes(client.pk)
+        pk=secaggplus_primitives.public_key_to_bytes(client.pk)
     )
 
 
@@ -90,8 +93,8 @@ def ask_encrypted_encoded_masks(client, ins: AskEncryptedEncodedMasksIns):
     for other_id, res in ins.public_keys_dict.items():
         if other_id == client.id:
             continue
-        pk = sec_agg_primitives.bytes_to_public_key(res.pk)
-        client.shared_key_dict[other_id] = sec_agg_primitives.generate_shared_key(client.sk, pk)
+        pk = secaggplus_primitives.bytes_to_public_key(res.pk)
+        client.shared_key_dict[other_id] = secaggplus_primitives.generate_shared_key(client.sk, pk)
 
     # gen masks
     client.GF = galois.GF(client.p)
@@ -140,7 +143,7 @@ def ask_masked_models(client, ins: AskMaskedModelsIns):
         if client.id % 20 < client.test_dropout_value:
             log(ERROR, "Force dropout due to testing!!")
             raise Exception("Force dropout due to testing")
-        weights = sec_agg_primitives.weights_zero_generate(
+        weights = secaggplus_primitives.weights_zero_generate(
             client.test_vector_shape)
      # IMPORTANT NEED SOME FUNCTION TO GET CORRECT WEIGHT FACTOR
     # NOW WE HARD CODE IT AS 1
@@ -149,16 +152,16 @@ def ask_masked_models(client, ins: AskMaskedModelsIns):
     weights_factor = 1
 
     # END =================================================================
-    quantized_weights = sec_agg_primitives.quantize(weights, client.clipping_range, client.target_range)
+    quantized_weights = quantize(weights, client.clipping_range, client.target_range)
 
     # weights factor should not exceed maximum
     if weights_factor > client.max_weights_factor:
         weights_factor = client.max_weights_factor
         log(WARNING, "weights_factor exceeds allowed range and has been clipped. Either increase max_weights_factor, or train with fewer data. (Or server is performing unweighted aggregation)")
 
-    quantized_weights = sec_agg_primitives.weights_multiply(
+    quantized_weights = secaggplus_primitives.weights_multiply(
         quantized_weights, weights_factor)
-    quantized_weights = sec_agg_primitives.factor_weights_combine(
+    quantized_weights = secaggplus_primitives.factor_weights_combine(
         weights_factor, quantized_weights)
 
     quantized_weights = model_masking(quantized_weights, client.msk, client.GF)

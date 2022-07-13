@@ -14,8 +14,9 @@
 # ==============================================================================
 from flwr.common.parameter import weights_to_parameters
 from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
-from flwr.common.sa_primitives import sec_agg_primitives
+from flwr.common.sa_primitives import secaggplus_primitives
 from flwr_crypto_cpp import create_shares
+from flwr.common.sa_primitives import quantize
 from flwr.common.logger import log
 from logging import ERROR, INFO, WARNING
 from typing import Dict, List, Tuple
@@ -60,12 +61,12 @@ def ask_keys(client, ask_keys_ins: AskKeysIns) -> AskKeysRes:
     # Create 2 sets private public key pairs
     # One for creating pairwise masks
     # One for encrypting message to distribute shares
-    client.sk1, client.pk1 = sec_agg_primitives.generate_key_pairs()
-    client.sk2, client.pk2 = sec_agg_primitives.generate_key_pairs()
+    client.sk1, client.pk1 = secaggplus_primitives.generate_key_pairs()
+    client.sk2, client.pk2 = secaggplus_primitives.generate_key_pairs()
     log(INFO, "SecAgg Stage 1 Completed: Created Key Pairs")
     return AskKeysRes(
-        pk1=sec_agg_primitives.public_key_to_bytes(client.pk1),
-        pk2=sec_agg_primitives.public_key_to_bytes(client.pk2),
+        pk1=secaggplus_primitives.public_key_to_bytes(client.pk1),
+        pk2=secaggplus_primitives.public_key_to_bytes(client.pk2),
     )
 
 
@@ -86,19 +87,19 @@ def share_keys(client, share_keys_in: ShareKeysIns) -> ShareKeysRes:
         raise Exception("Some public keys are identical")
 
     # sanity check that own public keys are correct in dict
-    if client.public_keys_dict[client.sec_agg_id].pk1 != sec_agg_primitives.public_key_to_bytes(client.pk1) or client.public_keys_dict[client.sec_agg_id].pk2 != sec_agg_primitives.public_key_to_bytes(client.pk2):
+    if client.public_keys_dict[client.sec_agg_id].pk1 != secaggplus_primitives.public_key_to_bytes(client.pk1) or client.public_keys_dict[client.sec_agg_id].pk2 != secaggplus_primitives.public_key_to_bytes(client.pk2):
         raise Exception(
             "Own public keys are displayed in dict incorrectly, should not happen!")
 
     # Generate private mask seed
-    client.b = sec_agg_primitives.rand_bytes(32)
+    client.b = secaggplus_primitives.rand_bytes(32)
 
     # Create shares
     b_shares = create_shares(
         client.b, client.threshold, client.share_num
     )
     sk1_shares = create_shares(
-        sec_agg_primitives.private_key_to_bytes(
+        secaggplus_primitives.private_key_to_bytes(
             client.sk1), client.threshold, client.share_num
     )
 
@@ -110,12 +111,12 @@ def share_keys(client, share_keys_in: ShareKeysIns) -> ShareKeysRes:
             client.b_share_dict[client.sec_agg_id] = b_shares[idx]
             client.sk1_share_dict[client.sec_agg_id] = sk1_shares[idx]
         else:
-            shared_key = sec_agg_primitives.generate_shared_key(
-                client.sk2, sec_agg_primitives.bytes_to_public_key(client_public_keys.pk2))
+            shared_key = secaggplus_primitives.generate_shared_key(
+                client.sk2, secaggplus_primitives.bytes_to_public_key(client_public_keys.pk2))
             client.shared_key_2_dict[client_sec_agg_id] = shared_key
-            plaintext = sec_agg_primitives.share_keys_plaintext_concat(
+            plaintext = secaggplus_primitives.share_keys_plaintext_concat(
                 client.sec_agg_id, client_sec_agg_id, b_shares[idx], sk1_shares[idx])
-            ciphertext = sec_agg_primitives.encrypt(shared_key, plaintext)
+            ciphertext = secaggplus_primitives.encrypt(shared_key, plaintext)
             share_keys_packet = ShareKeysPacket(
                 source=client.sec_agg_id, destination=client_sec_agg_id, ciphertext=ciphertext)
             share_keys_res.share_keys_res_list.append(share_keys_packet)
@@ -143,9 +144,9 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
             raise Exception(
                 "Received packet meant for another user. Not supposed to happen")
         shared_key = client.shared_key_2_dict[source]
-        plaintext = sec_agg_primitives.decrypt(shared_key, ciphertext)
+        plaintext = secaggplus_primitives.decrypt(shared_key, ciphertext)
         try:
-            plaintext_source, plaintext_destination, plaintext_b_share, plaintext_sk1_share = sec_agg_primitives.share_keys_plaintext_separate(
+            plaintext_source, plaintext_destination, plaintext_b_share, plaintext_sk1_share = secaggplus_primitives.share_keys_plaintext_separate(
                 plaintext)
         except:
             raise Exception(
@@ -172,7 +173,7 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
         if client.sec_agg_id % 20 < client.test_dropout_value:
             log(ERROR, "Force dropout due to testing!!")
             raise Exception("Force dropout due to testing")
-        weights: Weights = sec_agg_primitives.weights_zero_generate(
+        weights: Weights = secaggplus_primitives.weights_zero_generate(
             client.test_vector_shape)
      # IMPORTANT NEED SOME FUNCTION TO GET CORRECT WEIGHT FACTOR
     # NOW WE HARD CODE IT AS 1
@@ -183,7 +184,7 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
     # END =================================================================
 
     # Quantize weight update vector
-    quantized_weights = sec_agg_primitives.quantize(
+    quantized_weights = quantize(
         weights, client.clipping_range, client.target_range)
 
     # weights factor cannoot exceed maximum
@@ -191,35 +192,35 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
         weights_factor = client.max_weights_factor
         log(WARNING, "weights_factor exceeds allowed range and has been clipped. Either increase max_weights_factor, or train with fewer data. (Or server is performing unweighted aggregation)")
 
-    quantized_weights = sec_agg_primitives.weights_multiply(
+    quantized_weights = secaggplus_primitives.weights_multiply(
         quantized_weights, weights_factor)
-    quantized_weights = sec_agg_primitives.factor_weights_combine(
+    quantized_weights = secaggplus_primitives.factor_weights_combine(
         weights_factor, quantized_weights)
 
     dimensions_list: List[Tuple] = [a.shape for a in quantized_weights]
 
     # add private mask
-    private_mask = sec_agg_primitives.pseudo_rand_gen(
+    private_mask = secaggplus_primitives.pseudo_rand_gen(
         client.b, client.mod_range, dimensions_list)
-    quantized_weights = sec_agg_primitives.weights_addition(
+    quantized_weights = secaggplus_primitives.weights_addition(
         quantized_weights, private_mask)
 
     for client_id in available_clients:
         # add pairwise mask
-        shared_key = sec_agg_primitives.generate_shared_key(
-            client.sk1, sec_agg_primitives.bytes_to_public_key(client.public_keys_dict[client_id].pk1))
+        shared_key = secaggplus_primitives.generate_shared_key(
+            client.sk1, secaggplus_primitives.bytes_to_public_key(client.public_keys_dict[client_id].pk1))
         #print('shared key length: %d' % len(shared_key))
-        pairwise_mask = sec_agg_primitives.pseudo_rand_gen(
+        pairwise_mask = secaggplus_primitives.pseudo_rand_gen(
             shared_key, client.mod_range, dimensions_list)
         if client.sec_agg_id > client_id:
-            quantized_weights = sec_agg_primitives.weights_addition(
+            quantized_weights = secaggplus_primitives.weights_addition(
                 quantized_weights, pairwise_mask)
         else:
-            quantized_weights = sec_agg_primitives.weights_subtraction(
+            quantized_weights = secaggplus_primitives.weights_subtraction(
                 quantized_weights, pairwise_mask)
 
     # Take mod of final weight update vector and return to server
-    quantized_weights = sec_agg_primitives.weights_mod(
+    quantized_weights = secaggplus_primitives.weights_mod(
         quantized_weights, client.mod_range)
     log(INFO, "SecAgg Stage 3 Completed: Sent Vectors")
     return AskVectorsRes(parameters=weights_to_parameters(quantized_weights))

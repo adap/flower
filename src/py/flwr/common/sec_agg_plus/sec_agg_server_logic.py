@@ -19,8 +19,9 @@ from flwr.common.parameter import parameters_to_weights, weights_to_parameters
 from flwr.common.typing import AskKeysRes, AskVectorsRes, FitIns, FitRes, Parameters, Scalar, \
     SetupParamRes, ShareKeysPacket, ShareKeysRes, UnmaskVectorsRes
 from flwr.server.client_proxy import ClientProxy
-from flwr.common.sa_primitives import sec_agg_primitives
+from flwr.common.sa_primitives import secaggplus_primitives
 from flwr.common.secure_aggregation import SAServerMessageCarrier, SecureAggregationFitRound
+from flwr.common.sa_primitives import reverse_quantize
 from flwr_crypto_cpp import combine_shares
 import numpy as np
 from flwr.common.timer import Timer
@@ -171,7 +172,7 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
     if len(ask_vectors_results) < sec_agg_param_dict['min_num']:
         raise Exception("Not enough available clients after ask vectors stage")
     # Get shape of vector sent by first client
-    masked_vector = sec_agg_primitives.weights_zero_generate(
+    masked_vector = secaggplus_primitives.weights_zero_generate(
         [i.shape for i in parameters_to_weights(ask_vectors_results[0][1].parameters)])
     # Add all collected masked vectors and compuute available and dropout clients set
     unmask_vectors_clients: Dict[int, ClientProxy] = {}
@@ -182,9 +183,9 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
             unmask_vectors_clients[idx] = client
             dropout_clients.pop(idx)
             client_parameters = ask_vectors_results[pos][1].parameters
-            masked_vector = sec_agg_primitives.weights_addition(
+            masked_vector = secaggplus_primitives.weights_addition(
                 masked_vector, parameters_to_weights(client_parameters))
-    masked_vector = sec_agg_primitives.weights_mod(masked_vector, sec_agg_param_dict['mod_range'])
+    masked_vector = secaggplus_primitives.weights_mod(masked_vector, sec_agg_param_dict['mod_range'])
     tm.toc('s2')
     # === Stage 3: Unmask Vectors ===
     shamir_reconstruction_time = 0
@@ -221,10 +222,10 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
         if client_id in unmask_vectors_clients.keys():
             # seed is an available client's b
             tm.tic('mask_gen')
-            private_mask = sec_agg_primitives.pseudo_rand_gen(
-                secret, sec_agg_param_dict['mod_range'], sec_agg_primitives.weights_shape(masked_vector))
+            private_mask = secaggplus_primitives.pseudo_rand_gen(
+                secret, sec_agg_param_dict['mod_range'], secaggplus_primitives.weights_shape(masked_vector))
             tm.toc('mask_gen')
-            masked_vector = sec_agg_primitives.weights_subtraction(
+            masked_vector = secaggplus_primitives.weights_subtraction(
                 masked_vector, private_mask)
         else:
             # seed is a dropout client's sk1
@@ -240,28 +241,28 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
                                              sec_agg_param_dict['sample_num'])
 
             for neighbor_id in neighbor_list:
-                shared_key = sec_agg_primitives.generate_shared_key(
-                    sec_agg_primitives.bytes_to_private_key(secret),
-                    sec_agg_primitives.bytes_to_public_key(public_keys_dict[neighbor_id].pk1))
+                shared_key = secaggplus_primitives.generate_shared_key(
+                    secaggplus_primitives.bytes_to_private_key(secret),
+                    secaggplus_primitives.bytes_to_public_key(public_keys_dict[neighbor_id].pk1))
                 tm.tic('mask_gen')
-                pairwise_mask = sec_agg_primitives.pseudo_rand_gen(
-                    shared_key, sec_agg_param_dict['mod_range'], sec_agg_primitives.weights_shape(masked_vector))
+                pairwise_mask = secaggplus_primitives.pseudo_rand_gen(
+                    shared_key, sec_agg_param_dict['mod_range'], secaggplus_primitives.weights_shape(masked_vector))
                 tm.toc('mask_gen')
                 if client_id > neighbor_id:
-                    masked_vector = sec_agg_primitives.weights_addition(
+                    masked_vector = secaggplus_primitives.weights_addition(
                         masked_vector, pairwise_mask)
                 else:
-                    masked_vector = sec_agg_primitives.weights_subtraction(
+                    masked_vector = secaggplus_primitives.weights_subtraction(
                         masked_vector, pairwise_mask)
-    masked_vector = sec_agg_primitives.weights_mod(
+    masked_vector = secaggplus_primitives.weights_mod(
         masked_vector, sec_agg_param_dict['mod_range'])
     # Divide vector by number of clients who have given us their masked vector
     # i.e. those participating in final unmask vectors stage
-    total_weights_factor, masked_vector = sec_agg_primitives.factor_weights_extract(
+    total_weights_factor, masked_vector = secaggplus_primitives.factor_weights_extract(
         masked_vector)
-    masked_vector = sec_agg_primitives.weights_divide(
+    masked_vector = secaggplus_primitives.weights_divide(
         masked_vector, total_weights_factor)
-    aggregated_vector = sec_agg_primitives.reverse_quantize(
+    aggregated_vector = reverse_quantize(
         masked_vector, sec_agg_param_dict['clipping_range'], sec_agg_param_dict['target_range'])
     print(aggregated_vector[:4])
     aggregated_parameters = weights_to_parameters(aggregated_vector)

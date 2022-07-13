@@ -92,19 +92,3 @@ def compute_aggregate_encoded_mask(encoded_mask_dict, GF, active_clients):
     for client_id in active_clients:
         aggregate_encoded_mask += encoded_mask_dict[client_id].view(GF)
     return aggregate_encoded_mask
-
-
-def aggregate_models_in_finite(weights_finite, prime_number):
-    '''
-    weights_finite : array of state_dict()
-    prime_number   : size of the finite field
-    '''
-    w_sum = copy.deepcopy(weights_finite[0])
-
-    for key in w_sum.keys():
-
-        for i in range(1, len(weights_finite)):
-            w_sum[key] += weights_finite[i][key]
-            w_sum[key] = np.mod(w_sum[key], prime_number)
-
-    return w_sum
