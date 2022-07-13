@@ -319,7 +319,7 @@ def sample_without_replacement(
     # Make sure empty classes are not sampled
     # and solves for rare cases where
     if not empty_classes:
-        empty_classes = distribution.shape * [False]
+        empty_classes = len(distribution) * [False]
 
     distribution = exclude_classes_and_normalize(
         distribution=distribution, exclude_dims=empty_classes
