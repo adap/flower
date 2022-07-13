@@ -1,12 +1,13 @@
-from flwr.client.sa_client_wrappers.abc_sa_client_wrapper import SAClientWrapper, SAClientMessageCarrier, SAServerMessageCarrier
+from flwr.client.sa_client_wrappers import SAClientWrapper
+from flwr.common.typing import SAServerMessageCarrier, SAClientMessageCarrier
 from flwr.common.timer import Timer
-from flwr.client import Client
+# from flwr.client import Client
 import flwr.common.light_sec_agg.client_logic as cl
 
 
 class LightSecAggWrapper(SAClientWrapper):
     """Wrapper which adds LightSecAgg methods."""
-    def __init__(self, c: Client):
+    def __init__(self, c):
         super().__init__(c)
         self.tm = Timer()
 
