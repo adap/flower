@@ -23,20 +23,16 @@ from flwr.common import (
 
 )
 from typing import Dict
-from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, ShareKeysIns, ShareKeysRes, \
-    UnmaskVectorsIns, UnmaskVectorsRes, LightSecAggSetupConfigIns, LightSecAggSetupConfigRes, AskEncryptedEncodedMasksIns, \
-    AskEncryptedEncodedMasksRes, EncryptedEncodedMasksPacket, Parameters, AskMaskedModelsIns, AskMaskedModelsRes, \
-    AskAggregatedEncodedMasksIns, AskAggregatedEncodedMasksRes, SAServerMessageCarrier, SAClientMessageCarrier, \
+from flwr.common.typing import AskKeysIns, AskVectorsIns, SetupParamIns, ShareKeysIns, UnmaskVectorsIns, \
+    SAServerMessageCarrier, SAClientMessageCarrier, \
     ShareKeysPacket
 from flwr.common.sec_agg_plus import sec_agg_client_logic
-from flwr.common.light_sec_agg import client_logic as lsa_proto
 import numpy as np
-from .client import Client
-import sys
+from flwr.client.client import Client
 from flwr.common.timer import Timer
 
 
-class SAClient(Client, ABC):
+class SAClientWrapper(Client, ABC):
     """Wrapper which adds SecAgg methods."""
 
     def __init__(self, c: Client) -> None:
@@ -57,7 +53,7 @@ class SAClient(Client, ABC):
         """response to the server for Secure Aggregation"""
 
 
-class SecAggPlusWrapper(SAClient):
+class SecAggPlusWrapper(SAClientWrapper):
 
     def __init__(self, c: Client):
         super().__init__(c)

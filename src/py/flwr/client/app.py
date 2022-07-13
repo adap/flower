@@ -27,7 +27,7 @@ from .grpc_client.connection import insecure_grpc_connection
 from .grpc_client.message_handler import handle
 from .keras_client import KerasClient, KerasClientWrapper
 from .numpy_client import NumPyClient, NumPyClientWrapper
-from .sa_client_wrapper import SAClient, LightSecAggWrapper, SecAggPlusWrapper
+from flwr.client.sa_client_wrappers.abc_sa_client_wrapper import SAClientWrapper, LightSecAggWrapper, SecAggPlusWrapper
 
 
 def start_client(
@@ -35,7 +35,7 @@ def start_client(
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     sa_protocol: str=None,
-    sa_wrapper: Callable[[Client], SAClient]=None,
+    sa_wrapper: Callable[[Client], SAClientWrapper]=None,
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
@@ -65,7 +65,7 @@ def start_client(
         }[sa_protocol]
     if sa_wrapper is not None:
         client = sa_wrapper(client)
-        if not isinstance(client, SAClient):
+        if not isinstance(client, SAClientWrapper):
             raise Exception("Given SA wrapper must be an implementation of SAClient")
 
     while True:
@@ -101,7 +101,7 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     sa_protocol: str=None,
-    sa_wrapper: Callable[[Client], SAClient]=None,
+    sa_wrapper: Callable[[Client], SAClientWrapper]=None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -141,7 +141,7 @@ def start_keras_client(
     client: KerasClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     sa_protocol: str=None,
-    sa_wrapper: Callable[[Client], SAClient]=None,
+    sa_wrapper: Callable[[Client], SAClientWrapper]=None,
 ) -> None:
     """Start a Flower KerasClient which connects to a gRPC server.
 

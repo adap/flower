@@ -1,5 +1,6 @@
 from typing import List, Tuple
 from flwr.common.typing import Weights
+import numpy as np
 
 
 # Weight Manipulation =============================================================

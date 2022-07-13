@@ -4,7 +4,7 @@ import time
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from multiprocessing import Process
 from flwr.server.strategy.light_sec_agg_fedavg import LightSecAggFedAvg
-from flwr.client.sa_client_wrapper import SAClient
+from flwr.client.sa_client_wrappers.abc_sa_client_wrapper import SAClientWrapper
 from flwr.common.typing import LightSecAggSetupConfigIns, LightSecAggSetupConfigRes, AskEncryptedEncodedMasksIns, \
     EncryptedEncodedMasksPacket, AskMaskedModelsIns, \
     AskAggregatedEncodedMasksIns, SAServerMessageCarrier, SAClientMessageCarrier
@@ -16,7 +16,7 @@ quantized_weights = sec_agg_primitives.weights_divide(quantized_weights, 4)
 print(quantized_weights)'''
 
 
-class MyLightSecAggWrapper(SAClient):
+class MyLightSecAggWrapper(SAClientWrapper):
     """Wrapper which adds LightSecAgg methods."""
 
     def sa_respond(self, ins: SAServerMessageCarrier) -> SAClientMessageCarrier:

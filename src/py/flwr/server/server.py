@@ -36,14 +36,10 @@ from flwr.common import (
     weights_to_parameters,
 )
 from flwr.common.logger import log
-from flwr.common.parameter import parameters_to_weights
-from flwr.common.sec_agg import sec_agg_server_logic
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import Strategy, FedAvg
-from flwr.common.typing import AskKeysIns, AskKeysRes, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes
-from flwr.server.strategy.sec_agg_strategy import SecAggStrategy
 from flwr.common.secure_aggregation import SecureAggregationFitRound
 
 DEPRECATION_WARNING_EVALUATE = """

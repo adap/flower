@@ -16,14 +16,12 @@ import galois
 from flwr.common.sa_primitives.lightsecagg_primitives import mask_encoding, compute_aggregate_encoded_mask, model_masking
 import numpy as np
 from flwr.common.parameter import parameters_to_weights, weights_to_parameters
-from flwr.common.typing import LightSecAggSetupConfigIns, LightSecAggSetupConfigRes, AskEncryptedEncodedMasksIns, \
-    AskEncryptedEncodedMasksRes, EncryptedEncodedMasksPacket, Parameters, AskMaskedModelsIns, AskMaskedModelsRes, \
-    AskAggregatedEncodedMasksIns, AskAggregatedEncodedMasksRes
-from flwr.common.sa_primitives import secaggplus_primitives
-from flwr.common.sa_primitives import quantize
+from flwr.common.typing import Parameters
+from flwr.common.sa_primitives import quantize, encrypt, decrypt, generate_shared_key, generate_key_pairs, \
+    public_key_to_bytes, bytes_to_public_key, weights_multiply, factor_weights_combine, weights_zero_generate
 from flwr.common.logger import log
 from logging import ERROR, INFO, WARNING
-from typing import List, Dict, Tuple
+from typing import List, Dict
 from flwr.common.typing import Scalar
 
 
@@ -37,11 +35,11 @@ def padding(d, U, T):
 def encrypt_sub_mask(key, sub_mask):
     ret = weights_to_parameters([sub_mask])
     plaintext = ret.tensors[0]
-    return secaggplus_primitives.encrypt(key, plaintext)
+    return encrypt(key, plaintext)
 
 
 def decrypt_sub_mask(key, ciphertext):
-    plaintext = secaggplus_primitives.decrypt(key, ciphertext)
+    plaintext = decrypt(key, ciphertext)
     ret = parameters_to_weights(Parameters(
         tensors=[plaintext],
         tensor_type="numpy.ndarray"
@@ -81,20 +79,18 @@ def setup_config(client, config_dict: Dict[str, Scalar]) -> bytes:
     # dict key is the ID of another client (int)
     # dict value is the encoded sub-mask z_j,i where j is the key, i is the id of current client.
     client.encoded_mask_dict = {}
-    client.sk, client.pk = secaggplus_primitives.generate_key_pairs()
+    client.sk, client.pk = generate_key_pairs()
     log(INFO, "LightSecAgg Stage 0 Completed: Config Set Up")
-    return LightSecAggSetupConfigRes(
-        pk=secaggplus_primitives.public_key_to_bytes(client.pk)
-    )
+    return public_key_to_bytes(client.pk)
 
 
-def ask_encrypted_encoded_masks(client, ins: AskEncryptedEncodedMasksIns):
+def ask_encrypted_encoded_masks(client, public_keys_dict: Dict[int, bytes]):
     # build key dict
-    for other_id, res in ins.public_keys_dict.items():
+    for other_id, pk_bytes in public_keys_dict.items():
         if other_id == client.id:
             continue
-        pk = secaggplus_primitives.bytes_to_public_key(res.pk)
-        client.shared_key_dict[other_id] = secaggplus_primitives.generate_shared_key(client.sk, pk)
+        pk = bytes_to_public_key(pk_bytes)
+        client.shared_key_dict[other_id] = generate_shared_key(client.sk, pk)
 
     # gen masks
     client.GF = galois.GF(client.p)
@@ -103,22 +99,18 @@ def ask_encrypted_encoded_masks(client, ins: AskEncryptedEncodedMasksIns):
 
     # create packets
     packets = []
-    for i in ins.public_keys_dict.keys():
+    for i in public_keys_dict.keys():
         if i == client.id:
             client.encoded_mask_dict[i] = encoded_msk_set[i]
             continue
-        packet = EncryptedEncodedMasksPacket(
-            source=client.id,
-            destination=i,
-            ciphertext=encrypt_sub_mask(client.shared_key_dict[i], encoded_msk_set[i])
+        packet = (
+            client.id, i, encrypt_sub_mask(client.shared_key_dict[i], encoded_msk_set[i])
         )
         packets.append(packet)
-    return AskEncryptedEncodedMasksRes(packets)
+    return packets
 
 
-def ask_masked_models(client, ins: AskMaskedModelsIns):
-    packets = ins.packet_list
-    fit_ins = ins.fit_ins
+def ask_masked_models(client, packets, fit_ins):
     active_clients: List[int] = []
 
     if len(packets) + 1 < client.U:
@@ -126,11 +118,11 @@ def ask_masked_models(client, ins: AskMaskedModelsIns):
 
     # receive and decrypt sub-masks
     for packet in packets:
-        source = packet.source
-        active_clients.append(source)
-        assert packet.destination == client.id
-        sub_mask = decrypt_sub_mask(client.shared_key_dict[source], packet.ciphertext)
-        client.encoded_mask_dict[source] = sub_mask
+        src, dst, ciphertext = packet
+        active_clients.append(src)
+        assert dst == client.id
+        sub_mask = decrypt_sub_mask(client.shared_key_dict[src], ciphertext)
+        client.encoded_mask_dict[src] = sub_mask
     # fit client
     # IMPORTANT ASSUMPTION: ASSUME ALL CLIENTS FIT SAME AMOUNT OF DATA
     '''
@@ -143,7 +135,7 @@ def ask_masked_models(client, ins: AskMaskedModelsIns):
         if client.id % 20 < client.test_dropout_value:
             log(ERROR, "Force dropout due to testing!!")
             raise Exception("Force dropout due to testing")
-        weights = secaggplus_primitives.weights_zero_generate(
+        weights = weights_zero_generate(
             client.test_vector_shape)
      # IMPORTANT NEED SOME FUNCTION TO GET CORRECT WEIGHT FACTOR
     # NOW WE HARD CODE IT AS 1
@@ -159,19 +151,18 @@ def ask_masked_models(client, ins: AskMaskedModelsIns):
         weights_factor = client.max_weights_factor
         log(WARNING, "weights_factor exceeds allowed range and has been clipped. Either increase max_weights_factor, or train with fewer data. (Or server is performing unweighted aggregation)")
 
-    quantized_weights = secaggplus_primitives.weights_multiply(
+    quantized_weights = weights_multiply(
         quantized_weights, weights_factor)
-    quantized_weights = secaggplus_primitives.factor_weights_combine(
+    quantized_weights = factor_weights_combine(
         weights_factor, quantized_weights)
 
     quantized_weights = model_masking(quantized_weights, client.msk, client.GF)
     log(INFO, "LightSecAgg Stage 2 Completed: Sent Masked Models")
-    return AskMaskedModelsRes(weights_to_parameters(quantized_weights))
+    return weights_to_parameters(quantized_weights)
 
 
-def ask_aggregated_encoded_masks(client, ins: AskAggregatedEncodedMasksIns):
-    active_clients = ins.surviving_clients
+def ask_aggregated_encoded_masks(client, active_clients):
     agg_msk = compute_aggregate_encoded_mask(client.encoded_mask_dict, client.GF, active_clients)
     log(INFO, "SecAgg Stage 3 Completed: Sent Aggregated Encoded Masks for Unmasking")
-    return AskAggregatedEncodedMasksRes(weights_to_parameters([agg_msk]))
+    return weights_to_parameters([agg_msk])
 

@@ -18,11 +18,10 @@
 from typing import Tuple
 
 from flwr.client.client import Client
-from flwr.client.sa_client_wrapper import SAClient
+from flwr.client.sa_client_wrappers.abc_sa_client_wrapper import SAClientWrapper
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
-import sys
-from flwr.server.server import Server
+
 
 # pylint: disable=missing-function-docstring
 
@@ -181,7 +180,7 @@ def _reconnect(
     return ClientMessage(disconnect=disconnect), sleep_duration
 
 
-def _sa_respond(client: SAClient, msg: ServerMessage.SAMessageCarrier) -> ClientMessage:
+def _sa_respond(client: SAClientWrapper, msg: ServerMessage.SAMessageCarrier) -> ClientMessage:
     try:
         request = serde.sa_server_msg_carrier_from_proto(msg)
         response = client.sa_respond(request)

@@ -68,7 +68,8 @@ def model_unmasking(weights, aggregated_mask: np.ndarray, GF):
 
 
 def mask_encoding(
-    total_dimension, num_clients, targeted_number_active_clients, privacy_guarantee, galois_field, local_mask: np.ndarray
+    total_dimension, num_clients, targeted_number_active_clients,
+    privacy_guarantee, galois_field, local_mask: np.ndarray
 ) -> np.ndarray:
     d = total_dimension
     N = num_clients
