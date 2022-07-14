@@ -28,7 +28,13 @@ from flwr.common import (
     Status,
 )
 
-from .client import Client, has_get_properties
+from .client import (
+    Client,
+    has_evaluate,
+    has_fit,
+    has_get_parameters,
+    has_get_properties,
+)
 
 
 class OverridingClient(Client):
@@ -53,19 +59,7 @@ class OverridingClient(Client):
 
 
 class NotOverridingClient(Client):
-    """Client not overriding `get_properties`."""
-
-    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        # This method is not expected to be called
-        raise Exception()
-
-    def fit(self, ins: FitIns) -> FitRes:
-        # This method is not expected to be called
-        raise Exception()
-
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        # This method is not expected to be called
-        raise Exception()
+    """Client not overriding any Client method."""
 
 
 def test_has_get_properties_true() -> None:
@@ -89,6 +83,84 @@ def test_has_get_properties_false() -> None:
 
     # Execute
     actual = has_get_properties(client=client)
+
+    # Assert
+    assert actual == expected
+
+
+def test_has_get_parameters_true() -> None:
+    """Test fit_clients."""
+    # Prepare
+    client = OverridingClient()
+    expected = True
+
+    # Execute
+    actual = has_get_parameters(client=client)
+
+    # Assert
+    assert actual == expected
+
+
+def test_has_get_parameters_false() -> None:
+    """Test fit_clients."""
+    # Prepare
+    client = NotOverridingClient()
+    expected = False
+
+    # Execute
+    actual = has_get_parameters(client=client)
+
+    # Assert
+    assert actual == expected
+
+
+def test_has_fit_true() -> None:
+    """Test fit_clients."""
+    # Prepare
+    client = OverridingClient()
+    expected = True
+
+    # Execute
+    actual = has_fit(client=client)
+
+    # Assert
+    assert actual == expected
+
+
+def test_has_fit_false() -> None:
+    """Test fit_clients."""
+    # Prepare
+    client = NotOverridingClient()
+    expected = False
+
+    # Execute
+    actual = has_fit(client=client)
+
+    # Assert
+    assert actual == expected
+
+
+def test_has_evaluate_true() -> None:
+    """Test fit_clients."""
+    # Prepare
+    client = OverridingClient()
+    expected = True
+
+    # Execute
+    actual = has_evaluate(client=client)
+
+    # Assert
+    assert actual == expected
+
+
+def test_has_evaluate_false() -> None:
+    """Test fit_clients."""
+    # Prepare
+    client = NotOverridingClient()
+    expected = False
+
+    # Execute
+    actual = has_evaluate(client=client)
 
     # Assert
     assert actual == expected

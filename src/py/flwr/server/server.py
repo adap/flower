@@ -21,6 +21,7 @@ from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple
 
 from flwr.common import (
+    Code,
     DisconnectRes,
     EvaluateIns,
     EvaluateRes,
@@ -328,13 +329,9 @@ def fit_clients(
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = []
     for future in finished_fs:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
+        _handle_finished_future_after_fit(
+            future=future, results=results, failures=failures
+        )
     return results, failures
 
 
@@ -344,6 +341,33 @@ def fit_client(
     """Refine parameters on a single client."""
     fit_res = client.fit(ins, timeout=timeout)
     return client, fit_res
+
+
+def _handle_finished_future_after_fit(
+    future: concurrent.futures.Future,  # type: ignore
+    results: List[Tuple[ClientProxy, FitRes]],
+    failures: List[BaseException],
+) -> None:
+    """Convert finished future into either a result or a failure."""
+
+    # Check if there was an exception
+    failure = future.exception()
+    if failure is not None:
+        failures.append(failure)
+        return
+
+    # Successfully received a result from a client
+    result: Tuple[ClientProxy, FitRes] = future.result()
+    _, res = result
+
+    # Check result status code
+    if res.status.code == Code.OK:
+        results.append(result)
+        return
+
+    # Not successful, client returned a result where the status code is not OK
+    failure = Exception(f"Client returned status code {res.status.code}")
+    failures.append(failure)
 
 
 def evaluate_clients(
@@ -366,13 +390,9 @@ def evaluate_clients(
     results: List[Tuple[ClientProxy, EvaluateRes]] = []
     failures: List[BaseException] = []
     for future in finished_fs:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
+        _handle_finished_future_after_evaluate(
+            future=future, results=results, failures=failures
+        )
     return results, failures
 
 
@@ -384,3 +404,30 @@ def evaluate_client(
     """Evaluate parameters on a single client."""
     evaluate_res = client.evaluate(ins, timeout=timeout)
     return client, evaluate_res
+
+
+def _handle_finished_future_after_evaluate(
+    future: concurrent.futures.Future,  # type: ignore
+    results: List[Tuple[ClientProxy, EvaluateRes]],
+    failures: List[BaseException],
+) -> None:
+    """Convert finished future into either a result or a failure."""
+
+    # Check if there was an exception
+    failure = future.exception()
+    if failure is not None:
+        failures.append(failure)
+        return
+
+    # Successfully received a result from a client
+    result: Tuple[ClientProxy, EvaluateRes] = future.result()
+    _, res = result
+
+    # Check result status code
+    if res.status.code == Code.OK:
+        results.append(result)
+        return
+
+    # Not successful, client returned a result where the status code is not OK
+    failure = Exception(f"Client returned status code {res.status.code}")
+    failures.append(failure)
