@@ -1,4 +1,6 @@
 """FedBN client."""
+
+
 import argparse
 import json
 from collections import OrderedDict
@@ -41,9 +43,8 @@ class FlowerClient(fl.client.NumPyClient):
         self.mode = mode
 
     def get_parameters(self) -> List[np.ndarray]:
-        """
-        Return model parameters as a list of NumPy ndarrays w or w/o using BN layers
-        """
+        """Return model parameters as a list of NumPy ndarrays w or w/o using
+        BN layers."""
         self.model.train()
         # pylint: disable = no-else-return
         if self.mode == "fedbn":
@@ -58,10 +59,8 @@ class FlowerClient(fl.client.NumPyClient):
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
-        """
-        Set model parameters from a list of NumPy ndarrays
-        Exclude the bn layer if available
-        """
+        """Set model parameters from a list of NumPy ndarrays Exclude the bn
+        layer if available."""
         self.model.train()
         # pylint: disable=not-callable
         if self.mode == "fedbn":
@@ -78,9 +77,8 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[List[np.ndarray], int, Dict]:
-        """
-        Set model parameters, train model, return updated model parameters
-        """
+        """Set model parameters, train model, return updated model
+        parameters."""
         self.set_parameters(parameters)
         test_loss, test_accuracy = test(
             self.model, self.num_examples["dataset"], self.trainloader, device=DEVICE
@@ -109,9 +107,8 @@ class FlowerClient(fl.client.NumPyClient):
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[float, int, Dict]:
-        """
-        Set model parameters, evaluate model on local test dataset, return result
-        """
+        """Set model parameters, evaluate model on local test dataset, return
+        result."""
         self.set_parameters(parameters)
         global FL_ROUND
         print(f"FL Round:{FL_ROUND}")
@@ -137,10 +134,8 @@ class FlowerClient(fl.client.NumPyClient):
 def load_partition(
     dataset: str,
 ) -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader, Dict]:
-    """
-    Load 'MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST-M' for the training
-    and test data to simulate a partition.
-    """
+    """Load 'MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST-M' for the training
+    and test data to simulate a partition."""
 
     if dataset == "MNIST":
         print(f"Load {dataset} dataset")
@@ -290,9 +285,7 @@ def load_partition(
 
 
 def train(model, traindata, dataset, epochs, device) -> Tuple[float, float]:
-    """
-    Train the network.
-    """
+    """Train the network."""
     # Define loss and optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-2)
@@ -340,9 +333,7 @@ def train(model, traindata, dataset, epochs, device) -> Tuple[float, float]:
 
 
 def test(model, dataset, testdata, device) -> Tuple[float, float]:
-    """
-    Validate the network on the entire test set.
-    """
+    """Validate the network on the entire test set."""
     # Define loss and metrics
     criterion = nn.CrossEntropyLoss()
     correct = 0
