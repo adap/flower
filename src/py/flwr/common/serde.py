@@ -108,6 +108,8 @@ def get_parameters_res_to_proto(
 ) -> ClientMessage.GetParametersRes:
     """."""
     status_msg = status_to_proto(res.status)
+    if res.status.code == typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED:
+        return ClientMessage.GetParametersRes(status=status_msg)
     parameters_proto = parameters_to_proto(res.parameters)
     return ClientMessage.GetParametersRes(
         status=status_msg, parameters=parameters_proto
@@ -143,6 +145,8 @@ def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
 def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
     """Serialize FitIns to ProtoBuf message."""
     status_msg = status_to_proto(res.status)
+    if res.status.code == typing.Code.FIT_NOT_IMPLEMENTED:
+        return ClientMessage.FitRes(status=status_msg)
     parameters_proto = parameters_to_proto(res.parameters)
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     return ClientMessage.FitRes(
@@ -190,6 +194,8 @@ def get_properties_res_to_proto(
 ) -> ClientMessage.GetPropertiesRes:
     """Serialize GetPropertiesIns to ProtoBuf message."""
     status_msg = status_to_proto(res.status)
+    if res.status.code == typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED:
+        return ClientMessage.GetPropertiesRes(status=status_msg)
     properties_msg = properties_to_proto(res.properties)
     return ClientMessage.GetPropertiesRes(status=status_msg, properties=properties_msg)
 
@@ -251,6 +257,8 @@ def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIn
 def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
     """Serialize EvaluateIns to ProtoBuf message."""
     status_msg = status_to_proto(res.status)
+    if res.status.code == typing.Code.EVALUATE_NOT_IMPLEMENTED:
+        return ClientMessage.EvaluateRes(status=status_msg)
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     return ClientMessage.EvaluateRes(
         status=status_msg,

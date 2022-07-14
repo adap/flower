@@ -9,13 +9,6 @@ import numpy.typing as npt
 import torch
 from flwr.common.parameter import weights_to_parameters
 from flwr.common.typing import Parameters, Scalar, Weights
-from flwr.dataset.utils.common import (
-    XY,
-    create_lda_partitions,
-    shuffle,
-    sort_by_label,
-    split_array_at_indices,
-)
 from flwr.server.history import History
 from PIL import Image
 from torch import Tensor, load
@@ -30,6 +23,14 @@ from torchvision.transforms import (
     RandomCrop,
     RandomHorizontalFlip,
     ToTensor,
+)
+
+from flwr_baselines.dataset.utils.common import (
+    XY,
+    create_lda_partitions,
+    shuffle,
+    sort_by_label,
+    split_array_at_indices,
 )
 
 CIFAR100_NUM_COARSE_CLASSES = 20

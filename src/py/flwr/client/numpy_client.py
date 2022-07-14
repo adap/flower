@@ -15,56 +15,12 @@
 """Flower client app."""
 
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Dict, List, Tuple
 
 import numpy as np
 
-from flwr.common import (
-    Code,
-    Config,
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    GetParametersIns,
-    GetParametersRes,
-    GetPropertiesIns,
-    GetPropertiesRes,
-    Metrics,
-    Scalar,
-    Status,
-    parameters_to_weights,
-    weights_to_parameters,
-)
-
-from .client import Client
-
-EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT = """
-NumPyClient.fit did not return a tuple with 3 elements.
-The returned values should have the following type signature:
-
-    Tuple[List[np.ndarray], int, Dict[str, Scalar]]
-
-Example
--------
-
-    model.get_weights(), 10, {"accuracy": 0.95}
-
-"""
-
-EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE = """
-NumPyClient.evaluate did not return a tuple with 3 elements.
-The returned values should have the following type signature:
-
-    Tuple[float, int, Dict[str, Scalar]]
-
-Example
--------
-
-    0.5, 10, {"accuracy": 0.95}
-
-"""
+from flwr.common import Config, Scalar
 
 
 class NumPyClient(ABC):
@@ -88,7 +44,6 @@ class NumPyClient(ABC):
             arbitrary property values back to the server.
         """
 
-    @abstractmethod
     def get_parameters(self, config: Dict[str, Scalar]) -> List[np.ndarray]:
         """Return the current local model parameters.
 
@@ -105,7 +60,6 @@ class NumPyClient(ABC):
             The local model parameters as a list of NumPy ndarrays.
         """
 
-    @abstractmethod
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
     ) -> Tuple[List[np.ndarray], int, Dict[str, Scalar]]:
@@ -133,7 +87,6 @@ class NumPyClient(ABC):
             arbitrary values back to the server.
         """
 
-    @abstractmethod
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict[str, Scalar]]:
@@ -173,75 +126,16 @@ def has_get_properties(client: NumPyClient) -> bool:
     return type(client).get_properties != NumPyClient.get_properties
 
 
-class NumPyClientWrapper(Client):
-    """Wrapper which translates between Client and NumPyClient."""
+def has_get_parameters(client: NumPyClient) -> bool:
+    """Check if NumPyClient implements get_parameters."""
+    return type(client).get_parameters != NumPyClient.get_parameters
 
-    def __init__(self, numpy_client: NumPyClient) -> None:
-        self.numpy_client = numpy_client
 
-    def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
-        """Return the current client properties."""
-        properties = self.numpy_client.get_properties(config=ins.config)
-        return GetPropertiesRes(
-            status=Status(code=Code.OK, message="Success"),
-            properties=properties,
-        )
+def has_fit(client: NumPyClient) -> bool:
+    """Check if NumPyClient implements fit."""
+    return type(client).fit != NumPyClient.fit
 
-    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        """Return the current local model parameters."""
-        parameters = self.numpy_client.get_parameters(config=ins.config)
-        parameters_proto = weights_to_parameters(parameters)
-        return GetParametersRes(
-            status=Status(code=Code.OK, message="Success"), parameters=parameters_proto
-        )
 
-    def fit(self, ins: FitIns) -> FitRes:
-        """Refine the provided weights using the locally held dataset."""
-        # Deconstruct FitIns
-        parameters: List[np.ndarray] = parameters_to_weights(ins.parameters)
-
-        # Train
-        results: Tuple[List[np.ndarray], int, Metrics] = self.numpy_client.fit(
-            parameters, ins.config
-        )
-        if not (
-            len(results) == 3
-            and isinstance(results[0], list)
-            and isinstance(results[1], int)
-            and isinstance(results[2], dict)
-        ):
-            raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
-
-        # Return FitRes
-        parameters_prime, num_examples, metrics = results
-        parameters_prime_proto = weights_to_parameters(parameters_prime)
-        return FitRes(
-            status=Status(code=Code.OK, message="Success"),
-            parameters=parameters_prime_proto,
-            num_examples=num_examples,
-            metrics=metrics,
-        )
-
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        """Evaluate the provided parameters using the locally held dataset."""
-        parameters: List[np.ndarray] = parameters_to_weights(ins.parameters)
-
-        results: Tuple[float, int, Metrics] = self.numpy_client.evaluate(
-            parameters, ins.config
-        )
-        if not (
-            len(results) == 3
-            and isinstance(results[0], float)
-            and isinstance(results[1], int)
-            and isinstance(results[2], dict)
-        ):
-            raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE)
-
-        # Return EvaluateRes
-        loss, num_examples, metrics = results
-        return EvaluateRes(
-            status=Status(code=Code.OK, message="Success"),
-            loss=loss,
-            num_examples=num_examples,
-            metrics=metrics,
-        )
+def has_evaluate(client: NumPyClient) -> bool:
+    """Check if NumPyClient implements evaluate."""
+    return type(client).evaluate != NumPyClient.evaluate
