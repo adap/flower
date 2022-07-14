@@ -18,7 +18,6 @@
 import time
 from logging import INFO
 from typing import Callable, Dict, List, Optional, Union
-from uuid import uuid4
 
 import numpy as np
 
