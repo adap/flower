@@ -3,6 +3,10 @@
 
 ### Incompatible changes
 
+- **Make all** `Client` **and** `NumPyClient` **methods optional** ([#1260](https://github.com/adap/flower/pull/1260), [#1277](https://github.com/adap/flower/pull/1277))
+
+  The `Client`/`NumPyClient` methods `get_properties`, `get_parameters`, `fit`, and `evaluate` are all optional. This enables writing clients that implement, for example, only `fit`, but no other method. No need to implement `evaluate` when using centralized evaluation!
+
 - **Configurable** `get_parameters` ([#1242](https://github.com/adap/flower/pull/1242))
 
   The `get_parameters` method now accepts a configuration dictionary, just like `get_properties`, `fit`, and `evaluate`.
