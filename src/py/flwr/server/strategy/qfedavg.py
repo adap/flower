@@ -182,10 +182,10 @@ class QFedAvg(FedAvg):
             # output: square of the L-2 norm
             client_grads = grad_list[0]
             for i in range(1, len(grad_list)):
-                client_grads = np.append(
+                client_grads = np.append(  # type: ignore
                     client_grads, grad_list[i]
                 )  # output a flattened array
-            squared = np.square(client_grads)  # type: ignore
+            squared = np.square(client_grads)
             summed = np.sum(squared)
             return float(summed)
 

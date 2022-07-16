@@ -17,11 +17,12 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-import numpy as np
+import numpy.typing as npt
 
-NDArrays = List[np.ndarray]
+NDArray = npt.NDArray[Any]
+NDArrays = List[NDArray]
 
 # The following union type contains Python types corresponding to ProtoBuf types that
 # ProtoBuf considers to be "Scalar Value Types", even though some of them arguably do

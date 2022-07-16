@@ -32,6 +32,7 @@ from .typing import GetPropertiesIns as GetPropertiesIns
 from .typing import GetPropertiesRes as GetPropertiesRes
 from .typing import Metrics as Metrics
 from .typing import MetricsAggregationFn as MetricsAggregationFn
+from .typing import NDArray as NDArray
 from .typing import NDArrays as NDArrays
 from .typing import Parameters as Parameters
 from .typing import Properties as Properties
@@ -58,6 +59,7 @@ __all__ = [
     "Metrics",
     "MetricsAggregationFn",
     "ndarray_to_bytes",
+    "NDArray",
     "NDArrays",
     "ndarrays_to_parameters",
     "Parameters",
