@@ -119,7 +119,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
     keep_initialised: Optional[bool] (default: False)
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
 
-    Returns:
+    Returns
+    -------
         hist: flwr.server.history.History. Object containing metrics from training.
     """
     # pylint: disable-msg=too-many-locals

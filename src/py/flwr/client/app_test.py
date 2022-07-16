@@ -25,9 +25,10 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
-    ParametersRes,
-    PropertiesIns,
-    PropertiesRes,
+    GetParametersIns,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
     Scalar,
 )
 
@@ -39,11 +40,11 @@ from .numpy_client import NumPyClient
 class PlainClient(Client):
     """Client implementation extending the low-level Client."""
 
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         # This method is not expected to be called
         raise Exception()
 
-    def get_parameters(self) -> ParametersRes:
+    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         # This method is not expected to be called
         raise Exception()
 
@@ -63,7 +64,7 @@ class NeedsWrappingClient(NumPyClient):
         # This method is not expected to be called
         raise Exception()
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config: Config) -> List[np.ndarray]:
         # This method is not expected to be called
         raise Exception()
 

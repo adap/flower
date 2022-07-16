@@ -21,16 +21,18 @@ from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple
 
 from flwr.common import (
-    Disconnect,
+    Code,
+    DisconnectRes,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
     Parameters,
-    Reconnect,
+    ReconnectIns,
     Scalar,
 )
 from flwr.common.logger import log
+from flwr.common.typing import GetParametersIns
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
@@ -45,7 +47,7 @@ EvaluateResultsAndFailures = Tuple[
     List[BaseException],
 ]
 ReconnectResultsAndFailures = Tuple[
-    List[Tuple[ClientProxy, Disconnect]],
+    List[Tuple[ClientProxy, DisconnectRes]],
     List[BaseException],
 ]
 
@@ -152,11 +154,12 @@ class Server:
             rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
         )
         if not client_instructions:
-            log(INFO, "evaluate_round: no clients selected, cancel")
+            log(INFO, "evaluate_round %s: no clients selected, cancel", rnd)
             return None
         log(
             DEBUG,
-            "evaluate_round: strategy sampled %s clients (out of %s)",
+            "evaluate_round %s: strategy sampled %s clients (out of %s)",
+            rnd,
             len(client_instructions),
             self._client_manager.num_available(),
         )
@@ -169,7 +172,8 @@ class Server:
         )
         log(
             DEBUG,
-            "evaluate_round received %s results and %s failures",
+            "evaluate_round %s received %s results and %s failures",
+            rnd,
             len(results),
             len(failures),
         )
@@ -198,11 +202,12 @@ class Server:
         )
 
         if not client_instructions:
-            log(INFO, "fit_round: no clients selected, cancel")
+            log(INFO, "fit_round %s: no clients selected, cancel", rnd)
             return None
         log(
             DEBUG,
-            "fit_round: strategy sampled %s clients (out of %s)",
+            "fit_round %s: strategy sampled %s clients (out of %s)",
+            rnd,
             len(client_instructions),
             self._client_manager.num_available(),
         )
@@ -215,7 +220,8 @@ class Server:
         )
         log(
             DEBUG,
-            "fit_round received %s results and %s failures",
+            "fit_round %s received %s results and %s failures",
+            rnd,
             len(results),
             len(failures),
         )
@@ -233,7 +239,7 @@ class Server:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
         clients = [all_clients[k] for k in all_clients.keys()]
-        instruction = Reconnect(seconds=None)
+        instruction = ReconnectIns(seconds=None)
         client_instructions = [(client_proxy, instruction) for client_proxy in clients]
         _ = reconnect_clients(
             client_instructions=client_instructions,
@@ -255,13 +261,14 @@ class Server:
         # Get initial parameters from one of the clients
         log(INFO, "Requesting initial parameters from one random client")
         random_client = self._client_manager.sample(1)[0]
-        parameters_res = random_client.get_parameters(timeout=timeout)
+        ins = GetParametersIns(config={})
+        get_parameters_res = random_client.get_parameters(ins=ins, timeout=timeout)
         log(INFO, "Received initial parameters from one random client")
-        return parameters_res.parameters
+        return get_parameters_res.parameters
 
 
 def reconnect_clients(
-    client_instructions: List[Tuple[ClientProxy, Reconnect]],
+    client_instructions: List[Tuple[ClientProxy, ReconnectIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
 ) -> ReconnectResultsAndFailures:
@@ -277,7 +284,7 @@ def reconnect_clients(
         )
 
     # Gather results
-    results: List[Tuple[ClientProxy, Disconnect]] = []
+    results: List[Tuple[ClientProxy, DisconnectRes]] = []
     failures: List[BaseException] = []
     for future in finished_fs:
         failure = future.exception()
@@ -291,9 +298,9 @@ def reconnect_clients(
 
 def reconnect_client(
     client: ClientProxy,
-    reconnect: Reconnect,
+    reconnect: ReconnectIns,
     timeout: Optional[float],
-) -> Tuple[ClientProxy, Disconnect]:
+) -> Tuple[ClientProxy, DisconnectRes]:
     """Instruct client to disconnect and (optionally) reconnect later."""
     disconnect = client.reconnect(
         reconnect,
@@ -322,13 +329,9 @@ def fit_clients(
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[BaseException] = []
     for future in finished_fs:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
+        _handle_finished_future_after_fit(
+            future=future, results=results, failures=failures
+        )
     return results, failures
 
 
@@ -338,6 +341,33 @@ def fit_client(
     """Refine parameters on a single client."""
     fit_res = client.fit(ins, timeout=timeout)
     return client, fit_res
+
+
+def _handle_finished_future_after_fit(
+    future: concurrent.futures.Future,  # type: ignore
+    results: List[Tuple[ClientProxy, FitRes]],
+    failures: List[BaseException],
+) -> None:
+    """Convert finished future into either a result or a failure."""
+
+    # Check if there was an exception
+    failure = future.exception()
+    if failure is not None:
+        failures.append(failure)
+        return
+
+    # Successfully received a result from a client
+    result: Tuple[ClientProxy, FitRes] = future.result()
+    _, res = result
+
+    # Check result status code
+    if res.status.code == Code.OK:
+        results.append(result)
+        return
+
+    # Not successful, client returned a result where the status code is not OK
+    failure = Exception(f"Client returned status code {res.status.code}")
+    failures.append(failure)
 
 
 def evaluate_clients(
@@ -360,13 +390,9 @@ def evaluate_clients(
     results: List[Tuple[ClientProxy, EvaluateRes]] = []
     failures: List[BaseException] = []
     for future in finished_fs:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
+        _handle_finished_future_after_evaluate(
+            future=future, results=results, failures=failures
+        )
     return results, failures
 
 
@@ -378,3 +404,30 @@ def evaluate_client(
     """Evaluate parameters on a single client."""
     evaluate_res = client.evaluate(ins, timeout=timeout)
     return client, evaluate_res
+
+
+def _handle_finished_future_after_evaluate(
+    future: concurrent.futures.Future,  # type: ignore
+    results: List[Tuple[ClientProxy, EvaluateRes]],
+    failures: List[BaseException],
+) -> None:
+    """Convert finished future into either a result or a failure."""
+
+    # Check if there was an exception
+    failure = future.exception()
+    if failure is not None:
+        failures.append(failure)
+        return
+
+    # Successfully received a result from a client
+    result: Tuple[ClientProxy, EvaluateRes] = future.result()
+    _, res = result
+
+    # Check result status code
+    if res.status.code == Code.OK:
+        results.append(result)
+        return
+
+    # Not successful, client returned a result where the status code is not OK
+    failure = Exception(f"Client returned status code {res.status.code}")
+    failures.append(failure)

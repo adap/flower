@@ -1,7 +1,7 @@
 import argparse
 import os
+from pathlib import Path
 
-import numpy as np
 import tensorflow as tf
 
 import flwr as fl
@@ -16,6 +16,10 @@ class CifarClient(fl.client.NumPyClient):
         self.model = model
         self.x_train, self.y_train = x_train, y_train
         self.x_test, self.y_test = x_test, y_test
+
+    def get_properties(self, config):
+        """Get properties of client."""
+        raise Exception("Not implemented")
 
     def get_parameters(self):
         """Get parameters of the local model."""
@@ -83,7 +87,12 @@ def main() -> None:
 
     # Start Flower client
     client = CifarClient(model, x_train, y_train, x_test, y_test)
-    fl.client.start_numpy_client("[::]:8080", client=client)
+
+    fl.client.start_numpy_client(
+        server_address="localhost:8080",
+        client=client,
+        root_certificates=Path(".cache/certificates/ca.crt").read_bytes(),
+    )
 
 
 def load_partition(idx: int):

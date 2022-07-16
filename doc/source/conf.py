@@ -48,10 +48,11 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
+    "myst_parser",
     "sphinx_copybutton",
-    "sphinx_panels",
+    "sphinx_design",
     "sphinxcontrib.mermaid",
-    "sphinx_reredirects"
+    "sphinx_reredirects",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -105,7 +106,7 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",  
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": "Flower Summit 2022 <a href=\"https://flower.dev/conf/flower-summit-2022/\">register now</a>",
+    "announcement": "Flower Summit 2022 <a href=\"https://flower.dev/conf/flower-summit-2022/\">watch now</a>",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
