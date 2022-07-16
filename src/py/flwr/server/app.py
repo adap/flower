@@ -16,7 +16,7 @@
 
 
 from dataclasses import dataclass
-from logging import INFO
+from logging import INFO, WARN
 from typing import Dict, Optional, Tuple, Union
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
@@ -168,6 +168,8 @@ def _init_defaults(
         if strategy is None:
             strategy = FedAvg()
         server = Server(client_manager=client_manager, strategy=strategy)
+    elif strategy is not None:
+        log(WARN, "Both server and strategy were provided, ignoring strategy")
 
     # Set default config values
     if config is None:
