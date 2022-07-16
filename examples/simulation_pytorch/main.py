@@ -18,9 +18,8 @@ parser.add_argument("--num_client_cpus", type=int, default=1)
 parser.add_argument("--num_rounds", type=int, default=10)
 
 
-# Flower client that will be spawned by Ray
-# Adapted from Pytorch quickstart example
-class CifarRayClient(fl.client.NumPyClient):
+# Flower client, adapted from Pytorch quickstart example
+class FlowerClient(fl.client.NumPyClient):
     def __init__(self, cid: str, fed_dir_data: str):
         self.cid = cid
         self.fed_dir = Path(fed_dir_data)
@@ -136,12 +135,12 @@ def get_eval_fn(
     return evaluate
 
 
-# Start Ray simulation (a _default server_ will be created)
+# Start simulation (a _default server_ will be created)
 # This example does:
 # 1. Downloads CIFAR-10
 # 2. Partitions the dataset into N splits, where N is the total number of
 #    clients. We refere to this as `pool_size`. The partition can be IID or non-IID
-# 3. Starts a Ray-based simulation where a % of clients are sample each round.
+# 3. Starts a simulation where a % of clients are sample each round.
 # 4. After the M rounds end, the global model is evaluated on the entire testset.
 #    Also, the global model is evaluated on the valset partition residing in each
 #    client. This is useful to get a sense on how well the global model can generalise
@@ -156,7 +155,7 @@ if __name__ == "__main__":
         "num_cpus": args.num_client_cpus
     }  # each client will get allocated 1 CPUs
 
-    # download CIFAR10 dataset
+    # Download CIFAR-10 dataset
     train_path, testset = getCIFAR10()
 
     # partition dataset (use a large `alpha` to make it IID;
@@ -179,10 +178,10 @@ if __name__ == "__main__":
 
     def client_fn(cid: str):
         # create a single client instance
-        return CifarRayClient(cid, fed_dir)
+        return FlowerClient(cid, fed_dir)
 
-    # (optional) specify ray config
-    ray_config = {"include_dashboard": False}
+    # (optional) specify Ray config
+    ray_init_args = {"include_dashboard": False}
 
     # start simulation
     fl.simulation.start_simulation(
@@ -191,5 +190,5 @@ if __name__ == "__main__":
         client_resources=client_resources,
         num_rounds=args.num_rounds,
         strategy=strategy,
-        ray_init_args=ray_config,
+        ray_init_args=ray_init_args,
     )
