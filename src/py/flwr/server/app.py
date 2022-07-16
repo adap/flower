@@ -114,11 +114,18 @@ def start_server(  # pylint: disable=too-many-arguments
     >>>     )
     >>> )
     """
+
+    # Initialize server and server config
     initialized_server, initialized_config = _init_defaults(
         server=server,
         config=config,
         strategy=strategy,
         client_manager=client_manager,
+    )
+    log(
+        INFO,
+        "Starting Flower server, config: %s",
+        initialized_config,
     )
 
     # Start gRPC server
@@ -128,11 +135,14 @@ def start_server(  # pylint: disable=too-many-arguments
         max_message_length=grpc_max_message_length,
         certificates=certificates,
     )
-    num_rounds = initialized_config.num_rounds
-    ssl_status = "enabled" if certificates is not None else "disabled"
-    msg = f"Flower server running ({num_rounds} rounds), SSL is {ssl_status}"
-    log(INFO, msg)
+    log(
+        INFO,
+        "Flower ECE: gRPC server running (%s rounds), SSL is %s",
+        initialized_config.num_rounds,
+        "enabled" if certificates is not None else "disabled",
+    )
 
+    # Start training
     hist = _fl(
         server=initialized_server,
         config=initialized_config,

@@ -134,9 +134,22 @@ def start_simulation(  # pylint: disable=too-many-arguments
         hist: flwr.server.history.History. Object containing metrics from training.
     """
     # pylint: disable-msg=too-many-locals
-    cids: List[str]
+
+    # Initialize server and server config
+    initialized_server, initialized_config = _init_defaults(
+        server=server,
+        config=config,
+        strategy=strategy,
+        client_manager=client_manager,
+    )
+    log(
+        INFO,
+        "Starting Flower simulation, config: %s",
+        initialized_config,
+    )
 
     # clients_ids takes precedence
+    cids: List[str]
     if clients_ids is not None:
         if (num_clients is not None) and (len(clients_ids) != num_clients):
             log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
@@ -165,21 +178,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
     ray.init(**ray_init_args)
     log(
         INFO,
-        "Ray initialized with resources: %s",
+        "Flower VCE: Ray initialized with resources: %s",
         ray.cluster_resources(),
-    )
-
-    # Initialize server and server config
-    initialized_server, initialized_config = _init_defaults(
-        server=server,
-        config=config,
-        strategy=strategy,
-        client_manager=client_manager,
-    )
-    log(
-        INFO,
-        "Starting Flower simulation running: %s",
-        initialized_config,
     )
 
     # Register one RayClientProxy object for each client with the ClientManager
