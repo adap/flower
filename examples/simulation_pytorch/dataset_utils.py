@@ -7,7 +7,7 @@ import shutil
 from PIL import Image
 from torchvision.datasets import VisionDataset
 from typing import Callable, Optional, Tuple, Any
-from flwr.dataset.utils.common import create_lda_partitions
+from common import create_lda_partitions
 
 
 def get_dataset(path_to_data: Path, cid: str, partition: str):
