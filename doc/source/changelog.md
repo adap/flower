@@ -2,8 +2,32 @@
 
 ## Unreleased
 
+### Highlights
+
+- Optional client methods
+- Configurable `get_parameters`
+- Stable Virtual Client Engine
+- More powerful `start_simulation`
+
+### Contributors
+
+We thank all contributors who made Flower 1.0 possible: TODO
+
 ### Incompatible changes
 
+- **Update default arguments of built-in strategies**  ([#1278](https://github.com/adap/flower/pull/1278))
+
+  All built-in strategies now use `fraction_fit=1.0` and `fraction_eval=1.0`, which means they select *all* currently available clients for training and evaluation. Projects that relied on the previous default values can get the previous behaviour by initializing the strategy in the following way:
+
+  `strategy = FedAvg(fraction_fit=1.0, fraction_eval=1.0)`
+
+- **Move** `flwr.dataset` **to** `flwr_baselines` ([#1273](https://github.com/adap/flower/pull/1273))
+
+  The experimental package `flwr.dataset` was migrated to Flower Baselines.
+
+- **Remove experimental strategies** ([#1280](https://github.com/adap/flower/pull/1280))
+
+  Remove unmaintained experimental strategies (`FastAndSlow`, `FedFSv0`, `FedFSv1`).
 
 - **Configurable** `get_parameters` ([#1242](https://github.com/adap/flower/pull/1242))
 
@@ -23,6 +47,17 @@
 
   Similar to `start_server`, `start_simulation` now accepts a full `Server` instance. This enables users to heavily customize the execution of eperiments and opens the door to running, for example, async FL using the Virtual Client Engine.
 
+- **Update code examples** ([#1291](https://github.com/adap/flower/pull/1291), [#1286](https://github.com/adap/flower/pull/1286), [#1282](https://github.com/adap/flower/pull/1282))
+
+  Many code examples received small or even large maintenance updates, among them are
+  - `scikit-learn`
+  - `simulation_pytorch`
+  - `quickstart_pytorch`.
+
+- **Updated documentation** ([#1267](https://github.com/adap/flower/pull/1267))
+
+  One substantial documentation update fixes multiple smaller rendering issues, makes titles more succinct to improve navigation, removes a deprecated library, updates documentation dependencies, includes the `flwr.common` module in the API reference, includes support for markdown-based documentation, migrates the changelog from `.rst` to `.md`, and fixes a number of smaller details!
+
 ### Minor updates
 
 - Add secure gRPC connection to the `advanced_tensorflow` code example ([#847](https://github.com/adap/flower/pull/847))
@@ -31,7 +66,7 @@
 
 - **Flower Baselines (preview): FedOpt, FedBN, FedAvgM** ([#919](https://github.com/adap/flower/pull/919), [#1127](https://github.com/adap/flower/pull/1127), [#914](https://github.com/adap/flower/pull/914))
 
-  The first preview release of Flower Baselines has arrived! We're kickstarting Flower Baselines with implementations of FedOpt (FedYogi, FedAdam, FedAdagrad), FedBN, and FedAvgM. Check the documentation on how to use `Flower Baselines <https://flower.dev/docs/using-baselines.html>`_. With this first preview release we're also inviting the community to `contribute their own baselines <https://flower.dev/docs/contributing-baselines.html>`_.
+  The first preview release of Flower Baselines has arrived! We're kickstarting Flower Baselines with implementations of FedOpt (FedYogi, FedAdam, FedAdagrad), FedBN, and FedAvgM. Check the documentation on how to use [Flower Baselines](https://flower.dev/docs/using-baselines.html). With this first preview release we're also inviting the community to [contribute their own baselines](https://flower.dev/docs/contributing-baselines.html).
 
 - **C++ client SDK (preview) and code example** ([#1111](https://github.com/adap/flower/pull/1111))
 
@@ -57,9 +92,9 @@
 
   Two Jupyter Notebook tutorials (compatible with Google Colab) explain basic and intermediate Flower features:
 
-  *An Introduction to Federated Learning*: `Open in Colab <https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-1-Intro-to-FL-PyTorch.ipynb>`_
+  *An Introduction to Federated Learning*: [Open in Colab](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-1-Intro-to-FL-PyTorch.ipynb)
 
-  *Using Strategies in Federated Learning*: `Open in Colab <https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-2-Strategies-in-FL-PyTorch.ipynb>`_
+  *Using Strategies in Federated Learning*: [Open in Colab](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-2-Strategies-in-FL-PyTorch.ipynb)
 
 - **New FedAvgM strategy (Federated Averaging with Server Momentum)** ([#1076](https://github.com/adap/flower/pull/1076))
 
@@ -76,7 +111,7 @@
 - **Minor updates**
     - New option to keep Ray running if Ray was already initialized in `start_simulation` ([#1177](https://github.com/adap/flower/pull/1177))
     - Add support for custom `ClientManager` as a `start_simulation` parameter ([#1171](https://github.com/adap/flower/pull/1171))
-    - New documentation for `implementing strategies <https://flower.dev/docs/implementing-strategies.html>`_ ([#1097](https://github.com/adap/flower/pull/1097), [#1175](https://github.com/adap/flower/pull/1175))
+    - New documentation for [implementing strategies](https://flower.dev/docs/implementing-strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), [#1175](https://github.com/adap/flower/pull/1175))
     - New mobile-friendly documentation theme ([#1174](https://github.com/adap/flower/pull/1174))
     - Limit version range for (optional) `ray` dependency to include only compatible releases (`>=1.9.2,<1.12.0`) ([#1205](https://github.com/adap/flower/pull/1205))
 
@@ -331,7 +366,7 @@ What's new?
 
 Bugfix:
 
-- `Server.fit` does not disconnect clients when finished, disconnecting the clients is now handled in `flwr.server.start_server` ([#553](https://github.com/adap/flower/pull/553) [#540](https://github.com/adap/flower/issues)0>`_).
+- `Server.fit` does not disconnect clients when finished, disconnecting the clients is now handled in `flwr.server.start_server` ([#553](https://github.com/adap/flower/pull/553) [#540](https://github.com/adap/flower/issues/540)).
 
 ## v0.12.0 (2020-12-07)
 
