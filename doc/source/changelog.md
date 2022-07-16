@@ -7,7 +7,7 @@
 
   The `get_parameters` method now accepts a configuration dictionary, just like `get_properties`, `fit`, and `evaluate`.
 
-- **Replace** `num_rounds` **in** `start_simulation` **by** `config` ([#1281](https://github.com/adap/flower/pull/1281))
+- **Replace** `num_rounds` **in** `start_simulation` **with** `config` ([#1281](https://github.com/adap/flower/pull/1281))
   
   The `start_simulation` function now accepts a configuration dictionary `config` instead of the `num_rounds` integer. This improves the consistency between `start_simulation` and `start_server` and makes transitioning between the two easier.
 
