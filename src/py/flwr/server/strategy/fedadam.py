@@ -26,9 +26,9 @@ import numpy as np
 from flwr.common import (
     FitRes,
     MetricsAggregationFn,
+    NDArrays,
     Parameters,
     Scalar,
-    Weights,
     parameters_to_weights,
     weights_to_parameters,
 )
@@ -54,7 +54,7 @@ class FedAdam(FedOpt):
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
         eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -83,7 +83,7 @@ class FedAdam(FedOpt):
                 during validation. Defaults to 2.
             min_available_clients (int, optional): Minimum number of total
                 clients in the system. Defaults to 2.
-            eval_fn (Callable[[Weights], Optional[Tuple[float, float]]], optional):
+            eval_fn (Callable[[NDArrays], Optional[Tuple[float, float]]], optional):
                 Function used for validation. Defaults to None.
             on_fit_config_fn (Callable[[int], Dict[str, str]], optional):
                 Function used to configure training. Defaults to None.

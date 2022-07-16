@@ -32,12 +32,12 @@ from .typing import GetPropertiesIns as GetPropertiesIns
 from .typing import GetPropertiesRes as GetPropertiesRes
 from .typing import Metrics as Metrics
 from .typing import MetricsAggregationFn as MetricsAggregationFn
+from .typing import NDArrays as NDArrays
 from .typing import Parameters as Parameters
 from .typing import Properties as Properties
 from .typing import ReconnectIns as ReconnectIns
 from .typing import Scalar as Scalar
 from .typing import Status as Status
-from .typing import Weights as Weights
 
 GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912  # == 512 * 1024 * 1024
 
@@ -57,6 +57,7 @@ __all__ = [
     "GRPC_MAX_MESSAGE_LENGTH",
     "Metrics",
     "MetricsAggregationFn",
+    "NDArrays",
     "ndarray_to_bytes",
     "Parameters",
     "parameters_to_weights",
@@ -64,6 +65,5 @@ __all__ = [
     "ReconnectIns",
     "Scalar",
     "Status",
-    "Weights",
     "weights_to_parameters",
 ]

@@ -28,9 +28,9 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    NDArrays,
     Parameters,
     Scalar,
-    Weights,
 )
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
@@ -51,7 +51,7 @@ class FedAvgAndroid(Strategy):
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
         eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -73,7 +73,7 @@ class FedAvgAndroid(Strategy):
                 during validation. Defaults to 2.
             min_available_clients (int, optional): Minimum number of total
                 clients in the system. Defaults to 2.
-            eval_fn : Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            eval_fn : Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
                 Optional function used for validation. Defaults to None.
             on_fit_config_fn (Callable[[int], Dict[str, Scalar]], optional):
                 Function used to configure training. Defaults to None.
@@ -221,12 +221,12 @@ class FedAvgAndroid(Strategy):
         )
         return loss_aggregated, {}
 
-    def weights_to_parameters(self, weights: Weights) -> Parameters:
+    def weights_to_parameters(self, weights: NDArrays) -> Parameters:
         """Convert NumPy weights to parameters object."""
         tensors = [self.ndarray_to_bytes(ndarray) for ndarray in weights]
         return Parameters(tensors=tensors, tensor_type="numpy.nda")
 
-    def parameters_to_weights(self, parameters: Parameters) -> Weights:
+    def parameters_to_weights(self, parameters: Parameters) -> NDArrays:
         """Convert parameters object to NumPy weights."""
         return [self.bytes_to_ndarray(tensor) for tensor in parameters.tensors]
 

@@ -20,10 +20,10 @@ from typing import List, Tuple
 
 import numpy as np
 
-from flwr.common import Weights
+from flwr.common import NDArrays
 
 
-def aggregate(results: List[Tuple[Weights, int]]) -> Weights:
+def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
     """Compute weighted average."""
     # Calculate the total number of examples used during training
     num_examples_total = sum([num_examples for _, num_examples in results])
@@ -34,7 +34,7 @@ def aggregate(results: List[Tuple[Weights, int]]) -> Weights:
     ]
 
     # Compute average weights of each layer
-    weights_prime: Weights = [
+    weights_prime: NDArrays = [
         reduce(np.add, layer_updates) / num_examples_total
         for layer_updates in zip(*weighted_weights)
     ]
@@ -49,8 +49,8 @@ def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
 
 
 def aggregate_qffl(
-    weights: Weights, deltas: List[Weights], hs_fll: List[Weights]
-) -> Weights:
+    weights: NDArrays, deltas: List[NDArrays], hs_fll: List[NDArrays]
+) -> NDArrays:
     """Compute weighted average based on  Q-FFL paper."""
     demominator = np.sum(np.asarray(hs_fll))
     scaled_deltas = []

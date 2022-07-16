@@ -29,9 +29,9 @@ from flwr.common import (
     FitIns,
     FitRes,
     MetricsAggregationFn,
+    NDArrays,
     Parameters,
     Scalar,
-    Weights,
     parameters_to_weights,
     weights_to_parameters,
 )
@@ -58,7 +58,7 @@ class QFedAvg(FedAvg):
         min_eval_clients: int = 1,
         min_available_clients: int = 1,
         eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -92,7 +92,7 @@ class QFedAvg(FedAvg):
         self.accept_failures = accept_failures
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
-        self.pre_weights: Optional[Weights] = None
+        self.pre_weights: Optional[NDArrays] = None
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
@@ -177,7 +177,7 @@ class QFedAvg(FedAvg):
             return None, {}
         # Convert results
 
-        def norm_grad(grad_list: List[Weights]) -> float:
+        def norm_grad(grad_list: List[NDArrays]) -> float:
             # input: nested gradients
             # output: square of the L-2 norm
             client_grads = grad_list[0]
@@ -219,7 +219,7 @@ class QFedAvg(FedAvg):
                 * np.float_power(loss + 1e-10, self.q_param)
             )
 
-        weights_aggregated: Weights = aggregate_qffl(weights_before, deltas, hs_ffl)
+        weights_aggregated: NDArrays = aggregate_qffl(weights_before, deltas, hs_ffl)
         parameters_aggregated = weights_to_parameters(weights_aggregated)
 
         # Aggregate custom metrics if aggregation fn was provided

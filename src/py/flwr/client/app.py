@@ -17,9 +17,7 @@
 
 import time
 from logging import INFO
-from typing import Callable, Dict, List, Optional, Union
-
-import numpy as np
+from typing import Callable, Dict, Optional, Union
 
 from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
@@ -37,6 +35,7 @@ from flwr.common.typing import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
+    NDArrays,
     Status,
 )
 
@@ -53,7 +52,7 @@ EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT = """
 NumPyClient.fit did not return a tuple with 3 elements.
 The returned values should have the following type signature:
 
-    Tuple[List[np.ndarray], int, Dict[str, Scalar]]
+    Tuple[NDArrays, int, Dict[str, Scalar]]
 
 Example
 -------
@@ -248,7 +247,7 @@ def _get_parameters(self: Client, ins: GetParametersIns) -> GetParametersRes:
 def _fit(self: Client, ins: FitIns) -> FitRes:
     """Refine the provided weights using the locally held dataset."""
     # Deconstruct FitIns
-    parameters: List[np.ndarray] = parameters_to_weights(ins.parameters)
+    parameters: NDArrays = parameters_to_weights(ins.parameters)
 
     # Train
     results = self.numpy_client.fit(parameters, ins.config)  # type: ignore
@@ -273,7 +272,7 @@ def _fit(self: Client, ins: FitIns) -> FitRes:
 
 def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
     """Evaluate the provided parameters using the locally held dataset."""
-    parameters: List[np.ndarray] = parameters_to_weights(ins.parameters)
+    parameters: NDArrays = parameters_to_weights(ins.parameters)
 
     results = self.numpy_client.evaluate(parameters, ins.config)  # type: ignore
     if not (

@@ -20,7 +20,7 @@ from unittest.mock import MagicMock
 from numpy import array, float32
 from numpy.testing import assert_almost_equal
 
-from flwr.common import Code, FitRes, Status, Weights, parameters_to_weights
+from flwr.common import Code, FitRes, NDArrays, Status, parameters_to_weights
 from flwr.common.parameter import weights_to_parameters
 from flwr.server.client_proxy import ClientProxy
 
@@ -35,7 +35,7 @@ def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
     weights1_0 = array([[1, 2, 3], [4, 5, 6]], dtype=float32)
     weights1_1 = array([7, 8, 9, 10], dtype=float32)
 
-    initial_weights: Weights = [
+    initial_weights: NDArrays = [
         array([[0, 0, 0], [0, 0, 0]], dtype=float32),
         array([0, 0, 0, 0], dtype=float32),
     ]
@@ -61,7 +61,7 @@ def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
         ),
     ]
     failures: List[BaseException] = []
-    expected: Weights = [
+    expected: NDArrays = [
         array([[1, 2, 3], [4, 5, 6]], dtype=float32),
         array([7, 8, 9, 10], dtype=float32),
     ]
@@ -88,7 +88,7 @@ def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
     weights1_0 = array([[1, 2, 3], [4, 5, 6]], dtype=float32)
     weights1_1 = array([7, 8, 9, 10], dtype=float32)
 
-    initial_weights: Weights = [
+    initial_weights: NDArrays = [
         array([[0, 0, 0], [0, 0, 0]], dtype=float32),
         array([0, 0, 0, 0], dtype=float32),
     ]
@@ -114,7 +114,7 @@ def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
         ),
     ]
     failures: List[BaseException] = []
-    expected: Weights = [
+    expected: NDArrays = [
         array([[1, 2, 3], [4, 5, 6]], dtype=float32),
         array([7, 8, 9, 10], dtype=float32),
     ]
