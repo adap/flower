@@ -31,12 +31,8 @@ class FlowerClient(fl.client.NumPyClient):
         # determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
-
-    # def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
-    def get_properties(self, ins):
-        return self.properties
 
     def set_parameters(self, parameters):
         params_dict = zip(self.net.state_dict().keys(), parameters)
@@ -188,7 +184,7 @@ if __name__ == "__main__":
         client_fn=client_fn,
         num_clients=pool_size,
         client_resources=client_resources,
-        num_rounds=args.num_rounds,
+        config={"num_rounds": args.num_rounds},
         strategy=strategy,
         ray_init_args=ray_init_args,
     )
