@@ -29,8 +29,8 @@ from flwr.common import (
     NDArrays,
     Parameters,
     Scalar,
-    parameters_to_weights,
-    weights_to_parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.server.client_proxy import ClientProxy
 
@@ -137,7 +137,7 @@ class FedAdagrad(FedOpt):
         if fedavg_parameters_aggregated is None:
             return None, {}
 
-        fedavg_weights_aggregate = parameters_to_weights(fedavg_parameters_aggregated)
+        fedavg_weights_aggregate = parameters_to_ndarrays(fedavg_parameters_aggregated)
 
         # Adagrad
         delta_t = [
@@ -163,4 +163,4 @@ class FedAdagrad(FedOpt):
 
         self.current_weights = new_weights
 
-        return weights_to_parameters(self.current_weights), metrics_aggregated
+        return ndarrays_to_parameters(self.current_weights), metrics_aggregated

@@ -17,8 +17,8 @@
 
 from .parameter import bytes_to_ndarray as bytes_to_ndarray
 from .parameter import ndarray_to_bytes as ndarray_to_bytes
-from .parameter import parameters_to_weights as parameters_to_weights
-from .parameter import weights_to_parameters as weights_to_parameters
+from .parameter import ndarrays_to_parameters as ndarrays_to_parameters
+from .parameter import parameters_to_ndarrays as parameters_to_ndarrays
 from .typing import Code as Code
 from .typing import Config as Config
 from .typing import DisconnectRes as DisconnectRes
@@ -57,13 +57,13 @@ __all__ = [
     "GRPC_MAX_MESSAGE_LENGTH",
     "Metrics",
     "MetricsAggregationFn",
-    "NDArrays",
     "ndarray_to_bytes",
+    "NDArrays",
+    "ndarrays_to_parameters",
     "Parameters",
-    "parameters_to_weights",
+    "parameters_to_ndarrays",
     "Properties",
     "ReconnectIns",
     "Scalar",
     "Status",
-    "weights_to_parameters",
 ]

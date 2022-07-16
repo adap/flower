@@ -25,8 +25,8 @@ from flwr.common import (
     NDArrays,
     Parameters,
     Scalar,
-    parameters_to_weights,
-    weights_to_parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
@@ -96,10 +96,10 @@ class FaultTolerantFedAvg(FedAvg):
 
         # Convert results
         weights_results = [
-            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
-        parameters_aggregated = weights_to_parameters(aggregate(weights_results))
+        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}

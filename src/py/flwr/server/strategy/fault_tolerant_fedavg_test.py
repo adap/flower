@@ -25,7 +25,7 @@ from flwr.common import (
     NDArrays,
     Parameters,
     Status,
-    parameters_to_weights,
+    parameters_to_ndarrays,
 )
 from flwr.server.client_proxy import ClientProxy
 
@@ -110,7 +110,7 @@ def test_aggregate_fit_just_enough_results() -> None:
 
     # Assert
     assert actual
-    assert parameters_to_weights(actual) == expected
+    assert parameters_to_ndarrays(actual) == expected
 
 
 def test_aggregate_fit_no_failures() -> None:
@@ -136,7 +136,7 @@ def test_aggregate_fit_no_failures() -> None:
 
     # Assert
     assert actual
-    assert parameters_to_weights(actual) == expected
+    assert parameters_to_ndarrays(actual) == expected
 
 
 def test_aggregate_evaluate_no_results_no_failures() -> None:

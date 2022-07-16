@@ -26,8 +26,8 @@ from flwr.common import (
     NDArrays,
     Parameters,
     Status,
-    parameters_to_weights,
-    weights_to_parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
@@ -43,12 +43,12 @@ def test_aggregate_fit() -> None:
         eta=0.1,
         eta_l=0.316,
         tau=0.5,
-        initial_parameters=weights_to_parameters(previous_weights),
+        initial_parameters=ndarrays_to_parameters(previous_weights),
     )
-    param_0: Parameters = weights_to_parameters(
+    param_0: Parameters = ndarrays_to_parameters(
         [array([0.2, 0.2, 0.2, 0.2], dtype=float32)]
     )
-    param_1: Parameters = weights_to_parameters(
+    param_1: Parameters = ndarrays_to_parameters(
         [array([1.0, 1.0, 1.0, 1.0], dtype=float32)]
     )
     bridge = MagicMock()
@@ -79,6 +79,6 @@ def test_aggregate_fit() -> None:
     # Execute
     actual_aggregated, _ = strategy.aggregate_fit(rnd=1, results=results, failures=[])
     if actual_aggregated:
-        actual_list = parameters_to_weights(actual_aggregated)
+        actual_list = parameters_to_ndarrays(actual_aggregated)
         actual = actual_list[0]
     assert (actual == expected[0]).all()

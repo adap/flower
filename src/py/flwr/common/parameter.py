@@ -23,14 +23,14 @@ import numpy as np
 from .typing import NDArrays, Parameters
 
 
-def weights_to_parameters(weights: NDArrays) -> Parameters:
-    """Convert NumPy weights to parameters object."""
-    tensors = [ndarray_to_bytes(ndarray) for ndarray in weights]
+def ndarrays_to_parameters(ndarrays: NDArrays) -> Parameters:
+    """Convert NumPy ndarrays to parameters object."""
+    tensors = [ndarray_to_bytes(ndarray) for ndarray in ndarrays]
     return Parameters(tensors=tensors, tensor_type="numpy.ndarray")
 
 
-def parameters_to_weights(parameters: Parameters) -> NDArrays:
-    """Convert parameters object to NumPy weights."""
+def parameters_to_ndarrays(parameters: Parameters) -> NDArrays:
+    """Convert parameters object to NumPy ndarrays."""
     return [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
 
 

@@ -26,7 +26,7 @@ from flwr.common import (
     NDArrays,
     Parameters,
     Scalar,
-    parameters_to_weights,
+    parameters_to_ndarrays,
 )
 
 from .fedavg import FedAvg
@@ -109,7 +109,7 @@ class FedOpt(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.current_weights = parameters_to_weights(initial_parameters)
+        self.current_weights = parameters_to_ndarrays(initial_parameters)
         self.eta = eta
         self.eta_l = eta_l
         self.tau = tau

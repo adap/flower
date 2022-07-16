@@ -49,7 +49,7 @@ def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
 
 
 def aggregate_qffl(
-    weights: NDArrays, deltas: List[NDArrays], hs_fll: List[NDArrays]
+    parameters: NDArrays, deltas: List[NDArrays], hs_fll: List[NDArrays]
 ) -> NDArrays:
     """Compute weighted average based on  Q-FFL paper."""
     demominator = np.sum(np.asarray(hs_fll))
@@ -62,5 +62,5 @@ def aggregate_qffl(
         for j in range(1, len(deltas)):
             tmp += scaled_deltas[j][i]
         updates.append(tmp)
-    new_weights = [(u - v) * 1.0 for u, v in zip(weights, updates)]
-    return new_weights
+    new_parameters = [(u - v) * 1.0 for u, v in zip(parameters, updates)]
+    return new_parameters

@@ -125,7 +125,7 @@ class FedAvgAndroid(Strategy):
         if self.eval_fn is None:
             # No evaluation function provided
             return None
-        weights = self.parameters_to_weights(parameters)
+        weights = self.parameters_to_ndarrays(parameters)
         eval_res = self.eval_fn(weights)
         if eval_res is None:
             return None
@@ -196,10 +196,10 @@ class FedAvgAndroid(Strategy):
             return None, {}
         # Convert results
         weights_results = [
-            (self.parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            (self.parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
-        return self.weights_to_parameters(aggregate(weights_results)), {}
+        return self.ndarrays_to_parameters(aggregate(weights_results)), {}
 
     def aggregate_evaluate(
         self,
@@ -221,12 +221,12 @@ class FedAvgAndroid(Strategy):
         )
         return loss_aggregated, {}
 
-    def weights_to_parameters(self, weights: NDArrays) -> Parameters:
-        """Convert NumPy weights to parameters object."""
-        tensors = [self.ndarray_to_bytes(ndarray) for ndarray in weights]
+    def ndarrays_to_parameters(self, ndarrays: NDArrays) -> Parameters:
+        """Convert NumPy ndarrays to parameters object."""
+        tensors = [self.ndarray_to_bytes(ndarray) for ndarray in ndarrays]
         return Parameters(tensors=tensors, tensor_type="numpy.nda")
 
-    def parameters_to_weights(self, parameters: Parameters) -> NDArrays:
+    def parameters_to_ndarrays(self, parameters: Parameters) -> NDArrays:
         """Convert parameters object to NumPy weights."""
         return [self.bytes_to_ndarray(tensor) for tensor in parameters.tensors]
 
