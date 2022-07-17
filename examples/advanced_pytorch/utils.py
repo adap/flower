@@ -20,8 +20,8 @@ def load_data():
         ]
     )
 
-    trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
-    testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
+    trainset = CIFAR10("./data", train=True, download=True, transform=transform)
+    testset = CIFAR10("./data", train=False, download=True, transform=transform)
 
     num_examples = {"trainset": len(trainset), "testset": len(testset)}
     return trainset, testset, num_examples
@@ -130,6 +130,6 @@ def load_efficientnet(entrypoint: str = "nvidia_efficientnet_b0", classes: int =
     return efficientnet
 
 
-def get_model_params(model: "PyTorch Model"):
+def get_model_params(model):
     """Returns a model's parameters."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
