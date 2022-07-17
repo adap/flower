@@ -35,6 +35,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    quickstart-mxnet
    quickstart-scikitlearn
    evaluation
+   configuring-clients
    strategies
    implementing-strategies
    saving-progress
