@@ -47,6 +47,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    example-jax-from-centralized-to-federated
    fedbn-example-pytorch-from-centralized-to-federated
    recommended-env-setup
+   upgrade-to-flower-1.0
    changelog
    faq
 
