@@ -162,7 +162,7 @@ class TorchVision_FL(VisionDataset):
         return len(self.data)
 
 
-def getCIFAR10(path_to_data="./data"):
+def get_cifar_10(path_to_data="./data"):
     """Downloads CIFAR10 dataset and generates a unified training set (it will
     be partitioned later using the LDA partitioning mechanism."""
 
