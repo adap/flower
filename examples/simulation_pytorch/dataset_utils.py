@@ -7,7 +7,7 @@ import shutil
 from PIL import Image
 from torchvision.datasets import VisionDataset
 from typing import Callable, Optional, Tuple, Any
-from flwr.dataset.utils.common import create_lda_partitions
+from common import create_lda_partitions
 
 
 def get_dataset(path_to_data: Path, cid: str, partition: str):
@@ -162,7 +162,7 @@ class TorchVision_FL(VisionDataset):
         return len(self.data)
 
 
-def getCIFAR10(path_to_data="./data"):
+def get_cifar_10(path_to_data="./data"):
     """Downloads CIFAR10 dataset and generates a unified training set (it will
     be partitioned later using the LDA partitioning mechanism."""
 
