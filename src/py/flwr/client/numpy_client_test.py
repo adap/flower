@@ -15,11 +15,9 @@
 """Flower NumPyClient tests."""
 
 
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
-import numpy as np
-
-from flwr.common import Config, Properties, Scalar
+from flwr.common import Config, NDArrays, Properties, Scalar
 
 from .numpy_client import (
     NumPyClient,
@@ -36,16 +34,16 @@ class OverridingClient(NumPyClient):
     def get_properties(self, config: Config) -> Properties:
         return Properties()
 
-    def get_parameters(self, config: Config) -> List[np.ndarray]:
+    def get_parameters(self, config: Config) -> NDArrays:
         return []
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, Scalar]
-    ) -> Tuple[List[np.ndarray], int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
         return [], 0, {}
 
     def evaluate(
-        self, parameters: List[np.ndarray], config: Dict[str, Scalar]
+        self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict[str, Scalar]]:
         return 0.0, 0, {}
 

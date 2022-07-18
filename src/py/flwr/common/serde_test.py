@@ -29,8 +29,7 @@ from .serde import (
 
 
 def test_serialisation_deserialisation() -> None:
-    """Test if after serialization/deserialisation the np.ndarray is
-    identical."""
+    """Test if the np.ndarray is identical after (de-)serialization."""
 
     # Prepare
     scalars = [True, b"bytestr", 3.14, 9000, "Hello"]

@@ -69,7 +69,7 @@ class ImageNetClient(fl.client.Client):
     def get_parameters(self) -> fl.common.ParametersRes:
         print(f"Client {self.cid}: get_parameters")
         weights: fl.common.Weights = get_weights(self.model)
-        parameters = fl.common.weights_to_parameters(weights)
+        parameters = fl.common.ndarrays_to_parameters(weights)
         return fl.common.ParametersRes(parameters=parameters)
 
     def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
@@ -80,7 +80,7 @@ class ImageNetClient(fl.client.Client):
 
         print(f"Client {self.cid}: fit")
 
-        weights: fl.common.Weights = fl.common.parameters_to_weights(ins.parameters)
+        weights: fl.common.Weights = fl.common.parameters_to_ndarrays(ins.parameters)
         config = ins.config
         fit_begin = timeit.default_timer()
 
@@ -113,7 +113,7 @@ class ImageNetClient(fl.client.Client):
 
         # Return the refined weights and the number of examples used for training
         weights_prime: fl.common.Weights = get_weights(self.model)
-        params_prime = fl.common.weights_to_parameters(weights_prime)
+        params_prime = fl.common.ndarrays_to_parameters(weights_prime)
         num_examples_train = len(self.trainset)
         fit_duration = timeit.default_timer() - fit_begin
         return fl.common.FitRes(
@@ -134,7 +134,7 @@ class ImageNetClient(fl.client.Client):
         config = ins.config
         batch_size = int(config["batch_size"])
 
-        weights = fl.common.parameters_to_weights(ins.parameters)
+        weights = fl.common.parameters_to_ndarrays(ins.parameters)
 
         # Use provided weights to update the local model
         set_weights(self.model, weights)
