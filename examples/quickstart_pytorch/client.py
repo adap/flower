@@ -83,7 +83,7 @@ trainloader, testloader = load_data()
 
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
-    def get_parameters(self):
+    def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
     def set_parameters(self, parameters):
