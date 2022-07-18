@@ -6,7 +6,17 @@ Flower 1.0 is finally here! Along with new features, Flower 1.0 provides a stabl
 Install update
 --------------
 
-Install the latest version of Flower using `python -m pip install -U flwr` (or `python -m pip install -U flwr[simulation]`).
+Installing Flower ``1.0.0a0`` requires you to tell the dependency management tool (pip, Poetry, ...) to install pre-releases. Here's how that works for pip and Poetry:
+
+- pip: add ``-U --pre`` when installing.
+
+  - ``python -m pip install -U --pre flwr`` (when using ``start_server`` and ``start_client``)
+  - ``python -m pip install -U --pre flwr[simulation]`` (when using ``start_simulation``)
+
+- Poetry: update the ``flwr`` dependency in ``pyproject.toml`` and then reinstall (don't forget to delete ``poetry.lock`` (``rm poetry.lock``) before running ``poetry install``).
+
+  - ``flwr = { version = "1.0.0a0", allow-prereleases = true }`` (when using ``start_server`` and ``start_client``)
+  - ``flwr = { version = "1.0.0a0", allow-prereleases = true, extras = ["simulation"] }`` (when using ``start_simulation``)
 
 Required changes
 ----------------
