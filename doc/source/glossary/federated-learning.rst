@@ -15,4 +15,4 @@ How Federate Learning works is the next thing we are going to describe. When tra
 Instead of aggregating the data, a coordinator, in our case, the Flower Server, sends a global model to all locations where data resides. Each of our data silos or Flower clients (e.g. a smartphone) has to be able to train an AI model for a fraction of the time an AI model is usually training to refine and improve it. After producing an update, the Flower client sends the refined model back to the server.
 
 *Step 2*
-After receiving at least two updates, the Flower server will aggregate all model updates into a new global model. There are various strategies how to do that available in Flower. After the new global model is available, the process starts new with Step 1 until a satisfying training performance is achieved.
+After receiving at least two updates, the Flower server will aggregate all model updates into a new global model. There are various strategies how to do that available in Flower. After the new global model is available, the process starts anew with Steps 1 and 2 repeated until the training performance is satisfying.
