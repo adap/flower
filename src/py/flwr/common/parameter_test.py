@@ -25,8 +25,7 @@ from .parameter import bytes_to_ndarray, ndarray_to_bytes
 
 
 def test_serialisation_deserialisation() -> None:
-    """Test if after serialization/deserialisation the np.ndarray is
-    identical."""
+    """Test if the np.ndarray is identical after (de-)serialization."""
     arr = np.array([[1, 2], [3, 4], [5, 6]])
 
     arr_serialized = ndarray_to_bytes(arr)

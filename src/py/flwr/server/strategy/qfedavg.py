@@ -29,11 +29,11 @@ from flwr.common import (
     FitIns,
     FitRes,
     MetricsAggregationFn,
+    NDArrays,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
@@ -58,7 +58,7 @@ class QFedAvg(FedAvg):
         min_eval_clients: int = 1,
         min_available_clients: int = 1,
         eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -92,7 +92,7 @@ class QFedAvg(FedAvg):
         self.accept_failures = accept_failures
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
-        self.pre_weights: Optional[Weights] = None
+        self.pre_weights: Optional[NDArrays] = None
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
@@ -117,9 +117,9 @@ class QFedAvg(FedAvg):
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        weights = parameters_to_weights(parameters)
+        weights = parameters_to_ndarrays(parameters)
         self.pre_weights = weights
-        parameters = weights_to_parameters(weights)
+        parameters = ndarrays_to_parameters(weights)
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
@@ -177,7 +177,7 @@ class QFedAvg(FedAvg):
             return None, {}
         # Convert results
 
-        def norm_grad(grad_list: List[Weights]) -> float:
+        def norm_grad(grad_list: List[NDArrays]) -> float:
             # input: nested gradients
             # output: square of the L-2 norm
             client_grads = grad_list[0]
@@ -196,12 +196,12 @@ class QFedAvg(FedAvg):
             raise Exception("QffedAvg pre_weights are None in aggregate_fit")
 
         weights_before = self.pre_weights
-        eval_result = self.evaluate(weights_to_parameters(weights_before))
+        eval_result = self.evaluate(ndarrays_to_parameters(weights_before))
         if eval_result is not None:
             loss, _ = eval_result
 
         for _, fit_res in results:
-            new_weights = parameters_to_weights(fit_res.parameters)
+            new_weights = parameters_to_ndarrays(fit_res.parameters)
             # plug in the weight updates into the gradient
             grads = [
                 (u - v) * 1.0 / self.learning_rate
@@ -219,8 +219,8 @@ class QFedAvg(FedAvg):
                 * np.float_power(loss + 1e-10, self.q_param)
             )
 
-        weights_aggregated: Weights = aggregate_qffl(weights_before, deltas, hs_ffl)
-        parameters_aggregated = weights_to_parameters(weights_aggregated)
+        weights_aggregated: NDArrays = aggregate_qffl(weights_before, deltas, hs_ffl)
+        parameters_aggregated = ndarrays_to_parameters(weights_aggregated)
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}

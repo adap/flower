@@ -20,8 +20,8 @@ from unittest.mock import MagicMock
 from numpy import array, float32
 from numpy.testing import assert_almost_equal
 
-from flwr.common import Code, FitRes, Status, Weights, parameters_to_weights
-from flwr.common.parameter import weights_to_parameters
+from flwr.common import Code, FitRes, NDArrays, Status, parameters_to_ndarrays
+from flwr.common.parameter import ndarrays_to_parameters
 from flwr.server.client_proxy import ClientProxy
 
 from .fedavgm import FedAvgM
@@ -35,7 +35,7 @@ def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
     weights1_0 = array([[1, 2, 3], [4, 5, 6]], dtype=float32)
     weights1_1 = array([7, 8, 9, 10], dtype=float32)
 
-    initial_weights: Weights = [
+    initial_weights: NDArrays = [
         array([[0, 0, 0], [0, 0, 0]], dtype=float32),
         array([0, 0, 0, 0], dtype=float32),
     ]
@@ -45,7 +45,7 @@ def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
             MagicMock(),
             FitRes(
                 status=Status(code=Code.OK, message="Success"),
-                parameters=weights_to_parameters([weights0_0, weights0_1]),
+                parameters=ndarrays_to_parameters([weights0_0, weights0_1]),
                 num_examples=1,
                 metrics={},
             ),
@@ -54,20 +54,20 @@ def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
             MagicMock(),
             FitRes(
                 status=Status(code=Code.OK, message="Success"),
-                parameters=weights_to_parameters([weights1_0, weights1_1]),
+                parameters=ndarrays_to_parameters([weights1_0, weights1_1]),
                 num_examples=2,
                 metrics={},
             ),
         ),
     ]
     failures: List[BaseException] = []
-    expected: Weights = [
+    expected: NDArrays = [
         array([[1, 2, 3], [4, 5, 6]], dtype=float32),
         array([7, 8, 9, 10], dtype=float32),
     ]
 
     strategy = FedAvgM(
-        initial_parameters=weights_to_parameters(initial_weights),
+        initial_parameters=ndarrays_to_parameters(initial_weights),
         server_learning_rate=1.0 + 1e-9,
     )
 
@@ -76,7 +76,7 @@ def test_aggregate_fit_using_near_one_server_lr_and_no_momentum() -> None:
 
     # Assert
     assert actual
-    for w_act, w_exp in zip(parameters_to_weights(actual), expected):
+    for w_act, w_exp in zip(parameters_to_ndarrays(actual), expected):
         assert_almost_equal(w_act, w_exp)
 
 
@@ -88,7 +88,7 @@ def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
     weights1_0 = array([[1, 2, 3], [4, 5, 6]], dtype=float32)
     weights1_1 = array([7, 8, 9, 10], dtype=float32)
 
-    initial_weights: Weights = [
+    initial_weights: NDArrays = [
         array([[0, 0, 0], [0, 0, 0]], dtype=float32),
         array([0, 0, 0, 0], dtype=float32),
     ]
@@ -98,7 +98,7 @@ def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
             MagicMock(),
             FitRes(
                 status=Status(code=Code.OK, message="Success"),
-                parameters=weights_to_parameters([weights0_0, weights0_1]),
+                parameters=ndarrays_to_parameters([weights0_0, weights0_1]),
                 num_examples=1,
                 metrics={},
             ),
@@ -107,20 +107,20 @@ def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
             MagicMock(),
             FitRes(
                 status=Status(code=Code.OK, message="Success"),
-                parameters=weights_to_parameters([weights1_0, weights1_1]),
+                parameters=ndarrays_to_parameters([weights1_0, weights1_1]),
                 num_examples=2,
                 metrics={},
             ),
         ),
     ]
     failures: List[BaseException] = []
-    expected: Weights = [
+    expected: NDArrays = [
         array([[1, 2, 3], [4, 5, 6]], dtype=float32),
         array([7, 8, 9, 10], dtype=float32),
     ]
 
     strategy = FedAvgM(
-        initial_parameters=weights_to_parameters(initial_weights),
+        initial_parameters=ndarrays_to_parameters(initial_weights),
         server_learning_rate=1.0 + 1e-9,
         server_momentum=1.0e-9,
     )
@@ -134,5 +134,5 @@ def test_aggregate_fit_server_learning_rate_and_momentum() -> None:
 
     # Assert
     assert actual
-    for w_act, w_exp in zip(parameters_to_weights(actual), expected):
+    for w_act, w_exp in zip(parameters_to_ndarrays(actual), expected):
         assert_almost_equal(w_act, w_exp)

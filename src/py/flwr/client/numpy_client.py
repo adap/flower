@@ -16,11 +16,9 @@
 
 
 from abc import ABC
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
-import numpy as np
-
-from flwr.common import Config, Scalar
+from flwr.common import Config, NDArrays, Scalar
 
 
 class NumPyClient(ABC):
@@ -44,7 +42,7 @@ class NumPyClient(ABC):
             arbitrary property values back to the server.
         """
 
-    def get_parameters(self, config: Dict[str, Scalar]) -> List[np.ndarray]:
+    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the current local model parameters.
 
         Parameters
@@ -56,18 +54,18 @@ class NumPyClient(ABC):
 
         Returns
         -------
-        parameters : List[numpy.ndarray]
+        parameters : NDArrays
             The local model parameters as a list of NumPy ndarrays.
         """
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, Scalar]
-    ) -> Tuple[List[np.ndarray], int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
         """Train the provided parameters using the locally held dataset.
 
         Parameters
         ----------
-        parameters : List[numpy.ndarray]
+        parameters : NDArrays
             The current (global) model parameters.
         config : Dict[str, Scalar]
             Configuration parameters which allow the
@@ -77,7 +75,7 @@ class NumPyClient(ABC):
 
         Returns
         -------
-        parameters : List[numpy.ndarray]
+        parameters : NDArrays
             The locally updated model parameters.
         num_examples : int
             The number of examples used for training.
@@ -88,13 +86,13 @@ class NumPyClient(ABC):
         """
 
     def evaluate(
-        self, parameters: List[np.ndarray], config: Dict[str, Scalar]
+        self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict[str, Scalar]]:
-        """Evaluate the provided weights using the locally held dataset.
+        """Evaluate the provided parameters using the locally held dataset.
 
         Parameters
         ----------
-        parameters : List[np.ndarray]
+        parameters : NDArrays
             The current (global) model parameters.
         config : Dict[str, Scalar]
             Configuration parameters which allow the server to influence

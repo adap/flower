@@ -357,7 +357,7 @@ class PytorchMNISTClient(fl.client.Client):
     def get_parameters(self) -> fl.common.ParametersRes:
         """Encapsulates the weights into Flower Parameters."""
         weights: fl.common.Weights = self.get_weights()
-        parameters = fl.common.weights_to_parameters(weights)
+        parameters = fl.common.ndarrays_to_parameters(weights)
         return fl.common.ParametersRes(parameters=parameters)
 
     def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
@@ -378,7 +378,7 @@ class PytorchMNISTClient(fl.client.Client):
         # indices across all clients
         np.random.seed(123)
 
-        weights: fl.common.Weights = fl.common.parameters_to_weights(ins.parameters)
+        weights: fl.common.Weights = fl.common.parameters_to_ndarrays(ins.parameters)
         fit_begin = timeit.default_timer()
 
         # Set model parameters/weights
@@ -391,7 +391,7 @@ class PytorchMNISTClient(fl.client.Client):
 
         # Return the refined weights and the number of examples used for training
         weights_prime: fl.common.Weights = self.get_weights()
-        params_prime = fl.common.weights_to_parameters(weights_prime)
+        params_prime = fl.common.ndarrays_to_parameters(weights_prime)
         fit_duration = timeit.default_timer() - fit_begin
         return fl.common.FitRes(
             parameters=params_prime,
@@ -414,7 +414,7 @@ class PytorchMNISTClient(fl.client.Client):
             Information the clients testing results.
 
         """
-        weights = fl.common.parameters_to_weights(ins.parameters)
+        weights = fl.common.parameters_to_ndarrays(ins.parameters)
 
         # Use provided weights to update the local model
         self.set_weights(weights)

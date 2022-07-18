@@ -21,7 +21,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
-Weights = List[np.ndarray]
+NDArrays = List[np.ndarray]
 
 # The following union type contains Python types corresponding to ProtoBuf types that
 # ProtoBuf considers to be "Scalar Value Types", even though some of them arguably do
