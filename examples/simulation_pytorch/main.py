@@ -31,7 +31,7 @@ class FlowerClient(fl.client.NumPyClient):
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         return get_params(self.net)
 
     def fit(self, parameters, config):
