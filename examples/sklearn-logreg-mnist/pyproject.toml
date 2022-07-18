@@ -9,7 +9,7 @@ name = "sklearn-mnist"
 version = "0.1.0"
 description = "Federated learning with scikit-learn and Flower"
 authors = [
-    "The Flower Authors <enquiries@flower.dev>",
+    "The Flower Authors <hello@flower.dev>",
     "Kaushik Amar Das <kaushik.das@iiitg.ac.in>"
 ]
 
