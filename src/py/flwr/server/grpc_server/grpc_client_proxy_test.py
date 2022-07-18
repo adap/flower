@@ -74,7 +74,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         """This test is currently quite simple and should be improved."""
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
-        parameters = flwr.common.weights_to_parameters([np.ones((2, 2))])
+        parameters = flwr.common.ndarrays_to_parameters([np.ones((2, 2))])
         ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
 
         # Execute
@@ -82,7 +82,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
 
         # Assert
         assert fit_res.parameters.tensor_type == "np"
-        assert flwr.common.parameters_to_weights(fit_res.parameters) == []
+        assert flwr.common.parameters_to_ndarrays(fit_res.parameters) == []
         assert fit_res.num_examples == 10
 
     def test_evaluate(self) -> None:

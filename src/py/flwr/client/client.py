@@ -63,7 +63,7 @@ class Client(ABC):
         """
 
     def fit(self, ins: FitIns) -> FitRes:
-        """Refine the provided weights using the locally held dataset.
+        """Refine the provided parameters using the locally held dataset.
 
         Parameters
         ----------
@@ -80,7 +80,7 @@ class Client(ABC):
         """
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        """Evaluate the provided weights using the locally held dataset.
+        """Evaluate the provided parameters using the locally held dataset.
 
         Parameters
         ----------
