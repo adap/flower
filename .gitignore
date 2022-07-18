@@ -1,4 +1,4 @@
-# Flower files
+# Flower
 .flower_ops
 data/
 doc/source/api_documentation
@@ -6,9 +6,12 @@ doc/source/_build
 flwr_logs
 .cache
 
-# Datasets
-cifar-10-python.tar.gz
-cifar-10-batches-py
+# Flower Examples
+examples/**/dataset/**
+examples/**/dev/*.sh
+
+# Flower Baselines
+baselines/datasets/leaf
 
 # macOS
 .DS_Store
@@ -154,9 +157,3 @@ dmypy.json
 # Poetry
 poetry.lock
 *.pkl
-
-# Examples
-examples/**/dataset/**
-
-# Datasets
-baselines/datasets/leaf
