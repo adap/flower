@@ -55,7 +55,7 @@ We use PyTorch to load CIFAR10, a popular colored image classification dataset f
 .. code-block:: python
 
     def load_data():
-    """Load CIFAR-10 (training and test set)."""
+        """Load CIFAR-10 (training and test set)."""
         transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
         )
@@ -71,7 +71,7 @@ Define the loss and optimizer with PyTorch. The training of the dataset is done 
 .. code-block:: python
 
     def train(net, trainloader, epochs):
-    """Train the network on the training set."""
+        """Train the network on the training set."""
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
         for _ in range(epochs):
