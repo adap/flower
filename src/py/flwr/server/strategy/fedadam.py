@@ -143,7 +143,7 @@ class FedAdam(FedOpt):
         fedavg_weights_aggregate = parameters_to_ndarrays(fedavg_parameters_aggregated)
 
         # Adam
-        delta_t = [
+        delta_t: NDArrays = [
             x - y for x, y in zip(fedavg_weights_aggregate, self.current_weights)
         ]
 
@@ -151,7 +151,8 @@ class FedAdam(FedOpt):
         if not self.m_t:
             self.m_t = [np.zeros_like(x) for x in delta_t]
         self.m_t = [
-            self.beta_1 * x + (1 - self.beta_1) * y for x, y in zip(self.m_t, delta_t)
+            np.multiply(self.beta_1, x) + (1 - self.beta_1) * y
+            for x, y in zip(self.m_t, delta_t)
         ]
 
         # v_t
