@@ -28,17 +28,15 @@ class CoreMLClient: Client {
     // need cleanup
     private let defaultModelURL: URL
     /// The permanent location of the updated model.
-    private var updatedModelURL = appDirectory.appendingPathComponent("CatDogUpdatable.mlmodelc")
+    private var updatedModelURL = appDirectory.appendingPathComponent("MNIST_Model.mlmodelc")
     /// The temporary location of the updated model.
-    private var tempUpdatedModelURL = appDirectory.appendingPathComponent("CatDogUpdatable_tmp.mlmodelc")
+    private var tempUpdatedModelURL = appDirectory.appendingPathComponent("MNIST_Model_tmp.mlmodelc")
     
     init(modelUrl url: URL, dataLoader: DataLoader) {
         self.dataLoader = dataLoader
         let compiledModelUrl = try! MLModel.compileModel(at: url)
         let modelFileName = url.deletingPathExtension().lastPathComponent
         updatedModelURL = CoreMLClient.appDirectory.appendingPathComponent("\(modelFileName).mlmodelc")
-        print("hello")
-        print(updatedModelURL)
         self.defaultModelURL = compiledModelUrl
         self.updatedModelURL = compiledModelUrl
         self.model = loadModel(url: compiledModelUrl)
@@ -149,10 +147,8 @@ class CoreMLClient: Client {
             forEvents: [.epochEnd],
             /// check progress after epoch
             progressHandler: { contextProgress in
-                print("param \(contextProgress.parameters)")
                 print(contextProgress.metrics)
                 print(contextProgress.metrics[.lossValue])
-                print(contextProgress.debugDescription)
                 loss = contextProgress.metrics[.lossValue] as! Double
             
          }) { (finalContext) in
@@ -189,8 +185,6 @@ class CoreMLClient: Client {
              
              self.model = self.loadModel(url: self.updatedModelURL)
          }
-        
-        //let trainingData = batchProvider(imageLabelDictionary: self.imageLabelDictionary)
         
         do {
             let updateTask = try MLUpdateTask(forModelAt: currentModelURL,
@@ -245,37 +239,12 @@ class CoreMLClient: Client {
         }
     }
     
-    /*func predict() {
-        do {
-            let prediction = try model?.prediction(from: dataLoader.testBatchProvider().features(at: 0))
-            let output = (prediction?.featureValue(for: "outputVector")?.multiArrayValue)!
-            let outputPointer = try! UnsafeBufferPointer<Float>(output)
-            let outputArray = outputPointer.compactMap{$0}
-            let input = (dataLoader.testBatchProvider().features(at: 0).featureValue(for: "inputVector")?.multiArrayValue)!
-            let inputPointer = try! UnsafeBufferPointer<Float>(input)
-            let inputArray = inputPointer.compactMap{$0}
-            
-            let diff = zip(inputArray, outputArray).compactMap{ $0.0-$0.1 }
-            let loss = diff.reduce(0) {$0 + pow($1, 2)}
-            print(diff.count)
-            print(loss)
-            print(loss/Float(diff.count))
-            
-            
-            
-        } catch {
-            print(error)
-        }
-        
-    }*/
-    
     func test(modelConfig: MLModelConfiguration, result: @escaping(MLResult) -> Void) {
         /// The URL of the currently active Model
         let usingUpdatedModel = model != nil
         let currentModelURL = usingUpdatedModel ? updatedModelURL : defaultModelURL
         let epochs = MLParameterKey.epochs
         modelConfig.parameters = [epochs:1]
-        print(modelConfig.parameters)
         var loss = 0.0
         let trainingData = dataLoader.testBatchProvider
         let progressHandlers = MLUpdateProgressHandlers(
@@ -292,8 +261,6 @@ class CoreMLClient: Client {
             print(evaluateResult)
             result(evaluateResult)
         }
-        
-        //let trainingData = batchProvider(imageLabelDictionary: self.imageLabelDictionary)
         
         do {
             let updateTask = try MLUpdateTask(forModelAt: currentModelURL,
@@ -346,28 +313,5 @@ class CoreMLClient: Client {
         } catch {
             return nil
         }
-    }
-    
-    private func batchProvider(imageLabelDictionary: [UIImage : String]) -> MLArrayBatchProvider {
-        var batchInputs: [MLFeatureProvider] = []
-        let imageConstraint = model!.modelDescription.inputDescriptionsByName["image"]!.imageConstraint!
-        let imageOptions: [MLFeatureValue.ImageOption: Any] = [
-          .cropAndScale: VNImageCropAndScaleOption.scaleFill.rawValue
-        ]
-        for (image,label) in imageLabelDictionary {
-            
-            do{
-                let featureValue = try MLFeatureValue(cgImage: image.cgImage!, constraint: imageConstraint, options: imageOptions)
-              
-                if let pixelBuffer = featureValue.imageBufferValue{
-                   // let x = CatDogUpdatableTrainingInput(image: pixelBuffer, classLabel: label)
-                    //batchInputs.append(x)
-                }
-            }
-            catch(let error){
-                print("error description is \(error.localizedDescription)")
-            }
-        }
-     return MLArrayBatchProvider(array: batchInputs)
     }
 }

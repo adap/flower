@@ -12,8 +12,7 @@ import NIOPosix
 import Combine
 
 let GRPCMaxMessageLength: Int = 536870912
-@available(iOS 13.0, *)
-var cancellables = Set<AnyCancellable>()
+
 @available(iOS 13.0, *)
 public func startClient(serverHost: String, serverPort: Int, client: Client) {
     let maxMessageLength: Int = GRPCMaxMessageLength
@@ -67,56 +66,16 @@ public func startClient(serverHost: String, serverPort: Int, client: Client) {
         serverMessage = sm
     })
     
-    /*messagePublisher
-        .sink(receiveValue: { serverMessage in
-            print(serverMessage)
-            print("receiving message")
-            if let msg = serverMessage {
-                print("msg not null")
-               
-                    let receive = try! handle(client: client, serverMsg: msg)
-                    bidirectional.sendMessage(receive.0)
-                    sleepDuration = receive.1
-                    if !receive.2 {
-                        try! channel.close().wait()
-                    }
-                }
-            
-        })
-        .store(in: &cancellables)*/
-    
-    print(bidirectional.eventLoop)
     while true {
         if let msg = serverMessage {
-            print("msg not null")
             let receive = try! handle(client: client, serverMsg: msg)
-            print("sending msg")
             let result = bidirectional.sendMessage(receive.0)
-            print(result)
             sleepDuration = receive.1
-            print(receive.2)
             if !receive.2 {
                 print("closing")
                 try! channel.close().wait()
             }
             serverMessage = nil
-            print(serverMessage)
         }
     }
-    //print(status.code)
 }
-
-private func handleServerMessage(
-    serverMessage: Flower_Transport_ServerMessage,
-    stream: BidirectionalStreamingCall<Flower_Transport_ClientMessage, Flower_Transport_ServerMessage>,
-    client: Client
-) {
-    let receive = try! handle(client: client, serverMsg: serverMessage)
-    stream.sendMessage(receive.0)
-}
-
-/*public func exit(error: FlowerException) {
-    let closed = channel.close()
-    try? closed.wait()
-}
-*/
