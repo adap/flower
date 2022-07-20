@@ -177,7 +177,7 @@ class QFedAvg(FedAvg):
             return None, {}
         # Convert results
 
-        def norm_grad(grad_list: List[NDArrays]) -> float:
+        def norm_grad(grad_list: NDArrays) -> float:
             # input: nested gradients
             # output: square of the L-2 norm
             client_grads = grad_list[0]
@@ -204,7 +204,7 @@ class QFedAvg(FedAvg):
             new_weights = parameters_to_ndarrays(fit_res.parameters)
             # plug in the weight updates into the gradient
             grads = [
-                (u - v) * 1.0 / self.learning_rate
+                np.multiply((u - v), 1.0 / self.learning_rate)
                 for u, v in zip(weights_before, new_weights)
             ]
             deltas.append(
