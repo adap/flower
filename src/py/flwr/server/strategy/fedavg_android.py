@@ -28,6 +28,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    NDArray,
     NDArrays,
     Parameters,
     Scalar,
@@ -231,12 +232,12 @@ class FedAvgAndroid(Strategy):
         return [self.bytes_to_ndarray(tensor) for tensor in parameters.tensors]
 
     # pylint: disable=R0201
-    def ndarray_to_bytes(self, ndarray: np.ndarray) -> bytes:
+    def ndarray_to_bytes(self, ndarray: NDArray) -> bytes:
         """Serialize NumPy array to bytes."""
         return ndarray.tobytes()
 
     # pylint: disable=R0201
-    def bytes_to_ndarray(self, tensor: bytes) -> np.ndarray:
+    def bytes_to_ndarray(self, tensor: bytes) -> NDArray:
         """Deserialize NumPy array from bytes."""
         ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)
-        return cast(np.ndarray, ndarray_deserialized)
+        return cast(NDArray, ndarray_deserialized)

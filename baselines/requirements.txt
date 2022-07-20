@@ -1,6 +1,6 @@
 ##### Flower Baseline Dependencies
 # Under Apache-2.0 license
-# Authors: The Flower Authors <enquiries@flower.dev>
+# Authors: The Flower Authors <hello@flower.dev>
 # Website: https://flower.dev
 # Repository: https://github.com/adap/flower
 # Documentation: https://flower.dev
