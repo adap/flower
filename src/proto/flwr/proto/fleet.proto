@@ -19,26 +19,18 @@ package flwr.fleet.proto;
 
 service FleetAPI {
   // Get one or more tasks
-  rpc GetTasks (GetTasksRequest) returns (GetTasksResponse) {}
+  rpc GetTasks(GetTasksRequest) returns (GetTasksResponse) {}
 
   // Get results
-  rpc CreateResults (CreateResultsRequest) returns (CreateResultsResponse) {}
+  rpc CreateResults(CreateResultsRequest) returns (CreateResultsResponse) {}
 }
 
 // GetTasks messages
-message Task {
-  string id = 1;
-}
+message Task { string id = 1; }
 message GetTasksRequest {}
-message GetTasksResponse {
-    repeated Task task = 1;
-}
+message GetTasksResponse { repeated Task task = 1; }
 
 // CreateResults messages
-message Result {
-  string task_id = 1;
-}
-message CreateResultsRequest {
-  repeated Result results = 1;
-}
+message Result { string task_id = 1; }
+message CreateResultsRequest { repeated Result results = 1; }
 message CreateResultsResponse {}

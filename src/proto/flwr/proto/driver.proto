@@ -19,13 +19,13 @@ package flwr.driver.proto;
 
 service DriverAPI {
   // Returns a list of clients.
-  rpc GetClients (GetClientsRequest) returns (GetClientsResponse) {}
+  rpc GetClients(GetClientsRequest) returns (GetClientsResponse) {}
 
   // Create one or more tasks
-  rpc CreateTasks (CreateTasksRequest) returns (CreateTasksResponse) {}
+  rpc CreateTasks(CreateTasksRequest) returns (CreateTasksResponse) {}
 
   // Get results
-  rpc GetResults (GetResultsRequest) returns (GetResultsResponse) {}
+  rpc GetResults(GetResultsRequest) returns (GetResultsResponse) {}
 }
 
 // GetClients messages
@@ -33,23 +33,11 @@ message GetClientsRequest {}
 message GetClientsResponse {}
 
 // CreateTasks messages
-message Task {
-  string id = 1;
-}
-message CreateTasksRequest {
-  repeated Task task = 1;
-}
-message CreateTasksResponse {
-  repeated string task_ids = 1;
-}
+message Task { string id = 1; }
+message CreateTasksRequest { repeated Task task = 1; }
+message CreateTasksResponse { repeated string task_ids = 1; }
 
 // GetResults messages
-message Result {
-  string task_id = 1;
-}
-message GetResultsRequest {
-  repeated Result task_ids = 1;
-}
-message GetResultsResponse {
-  repeated Result results = 1;
-}
+message Result { string task_id = 1; }
+message GetResultsRequest { repeated Result task_ids = 1; }
+message GetResultsResponse { repeated Result results = 1; }
