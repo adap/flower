@@ -38,7 +38,7 @@ def test_aggregate() -> None:
     actual = aggregate(results)
 
     # Assert
-    np.testing.assert_equal(expected, actual)
+    np.testing.assert_equal(expected, actual)  # type: ignore
 
 
 def test_weighted_loss_avg_single_value() -> None:
