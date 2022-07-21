@@ -170,7 +170,7 @@ class FedAvgM(FedAvg):
             initial_weights = parameters_to_ndarrays(self.initial_parameters)
 
             # remember that updates are the opposite of gradients
-            pseudo_gradient = [
+            pseudo_gradient: NDArrays = [
                 x - y
                 for x, y in zip(
                     parameters_to_ndarrays(self.initial_parameters), fedavg_result
