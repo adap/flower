@@ -24,7 +24,7 @@ import ray
 from flwr.client.client import Client
 from flwr.common.logger import log
 from flwr.server import Server
-from flwr.server.app import _fl, _init_defaults
+from flwr.server.app import _fl, _init_defaults, Config
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
@@ -65,7 +65,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, int]] = None,
     server: Optional[Server] = None,
-    config: Optional[Dict[str, Union[int, Optional[float]]]] = None,
+    config: Config = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
@@ -100,12 +100,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
     server: Optional[flwr.server.Server] (default: None). An implementation
         of the abstract base class `flwr.server.Server`. If no instance is
         provided, then `start_server` will create one.
-    config: Optional[Dict[str, Union[int, Optional[float]]]] (default: None).
+    config: Config (default: None).
         Currently supported values are `num_rounds` (int, default: 1) and
-        `round_timeout` in seconds (float, default: None), so a full configuration
-        object instructing the server to perform three rounds of federated
-        learning with a round timeout of 10min looks like the following:
-        `{"num_rounds": 3, "round_timeout": 600.0}`.
+        `round_timeout` in seconds (float, default: None).
     strategy : Optional[flwr.server.Strategy] (default: None)
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use

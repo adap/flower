@@ -32,7 +32,7 @@ DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 @dataclass
 class Config:
-    """Internal Flower server config.
+    """Flower server config.
 
     All attributes have default values which allows users to configure
     just the ones they care about.
@@ -45,7 +45,7 @@ class Config:
 def start_server(  # pylint: disable=too-many-arguments
     server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,
-    config: Optional[Dict[str, Union[int, Optional[float]]]] = None,
+    config: Config = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -60,12 +60,9 @@ def start_server(  # pylint: disable=too-many-arguments
         server: Optional[flwr.server.Server] (default: None). An implementation
             of the abstract base class `flwr.server.Server`. If no instance is
             provided, then `start_server` will create one.
-        config: Optional[Dict[str, Union[int, Optional[float]]]] (default: None).
+        config: Config (default: None).
             Currently supported values are `num_rounds` (int, default: 1) and
-            `round_timeout` in seconds (float, default: None), so a full configuration
-            object instructing the server to perform three rounds of federated
-            learning with a round timeout of 10min looks like the following:
-            `{"num_rounds": 3, "round_timeout": 600.0}`.
+            `round_timeout` in seconds (float, default: None).
         strategy: Optional[flwr.server.Strategy] (default: None). An
             implementation of the abstract base class `flwr.server.Strategy`.
             If no strategy is provided, then `start_server` will use
@@ -152,7 +149,7 @@ def start_server(  # pylint: disable=too-many-arguments
 
 def _init_defaults(
     server: Optional[Server],
-    config: Optional[Dict[str, Union[int, Optional[float]]]],
+    config: Optional[Config],
     strategy: Optional[Strategy],
     client_manager: Optional[ClientManager],
 ) -> Tuple[Server, Config]:
@@ -168,11 +165,9 @@ def _init_defaults(
 
     # Set default config values
     if config is None:
-        config = {}
+        config = Config()
 
-    conf = Config(**config)  # type: ignore
-
-    return server, conf
+    return server, config
 
 
 def _fl(
