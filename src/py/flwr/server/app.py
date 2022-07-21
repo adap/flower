@@ -34,8 +34,8 @@ DEFAULT_SERVER_ADDRESS = "[::]:8080"
 class Config:
     """Internal Flower server config.
 
-    All attributes have default values which allows users to configure just the ones
-    they care about.
+    All attributes have default values which allows users to configure
+    just the ones they care about.
     """
 
     num_rounds: int = 1
