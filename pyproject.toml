@@ -52,7 +52,7 @@ numpy = [
     { version = ">=1.19.0,<1.21.0", python = "<3.10"},
     { version = "^1.21", python = "^3.10"},
 ]
-grpcio = "^1.41.0"
+grpcio = "^1.43.0"
 protobuf = "^3.19.0"
 importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
 iterators = "^0.0.2"
@@ -75,7 +75,7 @@ flake8 = "==3.9.2"
 pytest = "==7.1.2"
 pytest-cov = "==3.0.0"
 pytest-watch = "==4.2.0"
-grpcio-tools = "==1.41.0"
+grpcio-tools = "==1.43.0"
 mypy-protobuf = "==3.2.0"
 jupyterlab = "==3.3.2"
 rope = "==0.19.0"
