@@ -18,7 +18,7 @@
 import concurrent.futures
 import timeit
 from logging import DEBUG, INFO
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
     Code,
@@ -40,11 +40,11 @@ from flwr.server.strategy import FedAvg, Strategy
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
-    List[BaseException],
+    List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 ]
 EvaluateResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, EvaluateRes]],
-    List[BaseException],
+    List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
 ]
 ReconnectResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, DisconnectRes]],
@@ -327,7 +327,7 @@ def fit_clients(
 
     # Gather results
     results: List[Tuple[ClientProxy, FitRes]] = []
-    failures: List[BaseException] = []
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
     for future in finished_fs:
         _handle_finished_future_after_fit(
             future=future, results=results, failures=failures
@@ -346,7 +346,7 @@ def fit_client(
 def _handle_finished_future_after_fit(
     future: concurrent.futures.Future,  # type: ignore
     results: List[Tuple[ClientProxy, FitRes]],
-    failures: List[BaseException],
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 ) -> None:
     """Convert finished future into either a result or a failure."""
 
@@ -366,8 +366,7 @@ def _handle_finished_future_after_fit(
         return
 
     # Not successful, client returned a result where the status code is not OK
-    failure = Exception(f"Client returned status code {res.status.code}")
-    failures.append(failure)
+    failures.append(result)
 
 
 def evaluate_clients(
@@ -388,7 +387,7 @@ def evaluate_clients(
 
     # Gather results
     results: List[Tuple[ClientProxy, EvaluateRes]] = []
-    failures: List[BaseException] = []
+    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]] = []
     for future in finished_fs:
         _handle_finished_future_after_evaluate(
             future=future, results=results, failures=failures
@@ -409,7 +408,7 @@ def evaluate_client(
 def _handle_finished_future_after_evaluate(
     future: concurrent.futures.Future,  # type: ignore
     results: List[Tuple[ClientProxy, EvaluateRes]],
-    failures: List[BaseException],
+    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
 ) -> None:
     """Convert finished future into either a result or a failure."""
 
@@ -429,5 +428,4 @@ def _handle_finished_future_after_evaluate(
         return
 
     # Not successful, client returned a result where the status code is not OK
-    failure = Exception(f"Client returned status code {res.status.code}")
-    failures.append(failure)
+    failures.append(result)
