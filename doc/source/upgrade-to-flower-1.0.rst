@@ -28,6 +28,7 @@ A few breaking changes require small manual updates:
 - Rename ``parameters_to_weights`` to ``parameters_to_ndarrays`` and ``weights_to_parameters`` to ``ndarrays_to_parameters``
 - ``start_simulation``: change ``num_rounds=1`` to ``config={"num_rounds": 1}``
 - Strategy initialization: if the strategy relies on the default values for ``fraction_fit`` and ``fraction_eval``, set ``fraction_fit`` and ``fraction_eval`` manually to ``0.1``. Projects that do not manually create a strategy (by calling ``start_server`` or ``start_simulation`` without passing a strategy instance) should now initialize FedAvg with ``fraction_fit`` and ``fraction_eval`` set to ``0.1``.
+- Custom strategies: the type of parameter ``failures`` has changed from ``List[BaseException]`` to ``List[Union[Tuple[ClientProxy, FitRes], BaseException]]`` (in ``aggregate_fit``) and ``List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]`` (in ``aggregate_evaluate``)
 
 Optional improvements
 ---------------------
