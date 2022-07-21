@@ -93,11 +93,6 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                     failures,
                 )
 
-                if rnd < 0:
-                    # rnd < 0 is currently planned to be removed and should not be
-                    # used but rather with backwards compatibility in mind ignored
-                    return loss_aggregated, config
-
                 # Server logs
                 writer = tf.summary.create_file_writer(
                     os.path.join(logdir_run, "server")
