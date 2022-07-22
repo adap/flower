@@ -11,7 +11,47 @@
 
 ### Contributors
 
-We thank all contributors who made Flower 1.0 possible: TODO
+We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contributors](https://github.com/adap/flower/graphs/contributors) order):
+
+[@rtaiello](https://github.com/rtaiello),
+[@g-pichler](https://github.com/g-pichler),
+[@rob-luke](https://github.com/rob-luke),
+[@andreea-zaharia](https://github.com/andreea-zaharia),
+[@kinshukdua](https://github.com/kinshukdua),
+[@nfnt](https://github.com/nfnt),
+[@tatiana-s](https://github.com/tatiana-s),
+[@TParcollet](https://github.com/TParcollet),
+[@vballoli](https://github.com/vballoli),
+[@negedng](https://github.com/negedng),
+[@RISHIKESHAVAN](https://github.com/RISHIKESHAVAN),
+[@hei411](https://github.com/hei411),
+[@SebastianSpeitel](https://github.com/SebastianSpeitel),
+[@AmitChaulwar](https://github.com/AmitChaulwar),
+[@Rubiel1](https://github.com/Rubiel1),
+[@FANTOME-PAN](https://github.com/FANTOME-PAN),
+[@Rono-BC](https://github.com/Rono-BC),
+[@lbhm](https://github.com/lbhm),
+[@sishtiaq](https://github.com/sishtiaq),
+[@remde](https://github.com/remde),
+[@Jueun-Park](https://github.com/Jueun-Park),
+[@architjen](https://github.com/architjen),
+[@PratikGarai](https://github.com/PratikGarai),
+[@mrinaald](https://github.com/mrinaald),
+[@zliel](https://github.com/zliel),
+[@MeiruiJiang](https://github.com/MeiruiJiang),
+[@sandracl72](https://github.com/sandracl72),
+[@gubertoli](https://github.com/gubertoli),
+[@Vingt100](https://github.com/Vingt100),
+[@MakGulati](https://github.com/MakGulati),
+[@cozek](https://github.com/cozek),
+[@jafermarq](https://github.com/jafermarq),
+[@sisco0](https://github.com/sisco0),
+[@akhilmathurs](https://github.com/akhilmathurs),
+[@CanTuerk](https://github.com/CanTuerk),
+[@mariaboerner1987](https://github.com/mariaboerner1987),
+[@pedropgusmao](https://github.com/pedropgusmao),
+[@tanertopal](https://github.com/tanertopal),
+[@danieljanes](https://github.com/danieljanes).
 
 ### Incompatible changes
 
@@ -28,6 +68,14 @@ We thank all contributors who made Flower 1.0 possible: TODO
 - **Remove experimental strategies** ([#1280](https://github.com/adap/flower/pull/1280))
 
   Remove unmaintained experimental strategies (`FastAndSlow`, `FedFSv0`, `FedFSv1`).
+
+- **Renamed** ``Weights`` **to** ``NDArrays`` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
+
+  ``flwr.common.Weights`` was renamed to ``flwr.common.NDArrays`` to better capture what this type is all about.
+
+- **Removed antiquated** ``force_final_distributed_eval`` **from** ``start_server`` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
+
+  The ``start_server`` parameter ``force_final_distributed_eval`` has long been a historic artefact, in this release it is finally gone for good.
 
 - **Configurable** `get_parameters` ([#1242](https://github.com/adap/flower/pull/1242))
 
@@ -52,15 +100,20 @@ We thank all contributors who made Flower 1.0 possible: TODO
   Many code examples received small or even large maintenance updates, among them are
   - `scikit-learn`
   - `simulation_pytorch`
-  - `quickstart_pytorch`.
+  - `quickstart_pytorch`
+  - `quickstart_simulation`
+  - `quickstart_tensorflow`
+  - `advanced_tensorflow`.
 
-- **Updated documentation** ([#1267](https://github.com/adap/flower/pull/1267))
+- **Updated documentation** ([#1223](https://github.com/adap/flower/pull/1223), [#1209](https://github.com/adap/flower/pull/1209), [#1251](https://github.com/adap/flower/pull/1251), [#1257](https://github.com/adap/flower/pull/1257), [#1267](https://github.com/adap/flower/pull/1267), [#1268](https://github.com/adap/flower/pull/1268), [#1300](https://github.com/adap/flower/pull/1300), [#1304](https://github.com/adap/flower/pull/1304), [#1305](https://github.com/adap/flower/pull/1305), [#1307](https://github.com/adap/flower/pull/1307))
 
   One substantial documentation update fixes multiple smaller rendering issues, makes titles more succinct to improve navigation, removes a deprecated library, updates documentation dependencies, includes the `flwr.common` module in the API reference, includes support for markdown-based documentation, migrates the changelog from `.rst` to `.md`, and fixes a number of smaller details!
 
-### Minor updates
-
-- Add secure gRPC connection to the `advanced_tensorflow` code example ([#847](https://github.com/adap/flower/pull/847))
+- **Minor updates**
+  - Add round number to fit and evaluate log messages ([#1266](https://github.com/adap/flower/pull/1266))
+  - Add secure gRPC connection to the `advanced_tensorflow` code example ([#847](https://github.com/adap/flower/pull/847))
+  - Updated developer tooling ([#1231](https://github.com/adap/flower/pull/1231), [#1276](https://github.com/adap/flower/pull/1276), [#1301](https://github.com/adap/flower/pull/1301), [#1310](https://github.com/adap/flower/pull/1310))
+  - Renamed ProtoBuf messages to improve consistency ([#1214](https://github.com/adap/flower/pull/1214), [#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
 
 ## v0.19.0 (2022-05-18)
 
