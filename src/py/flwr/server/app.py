@@ -34,7 +34,7 @@ DEFAULT_SERVER_ADDRESS = "[::]:8080"
 class Config:
     """Internal Flower server config.
 
-    All attributes have default values which allows users to provide
+    All attributes have default values which allows users to configure
     just the ones they care about.
     """
 
@@ -49,7 +49,6 @@ def start_server(  # pylint: disable=too-many-arguments
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    force_final_distributed_eval: bool = False,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
@@ -82,9 +81,6 @@ def start_server(  # pylint: disable=too-many-arguments
             value. Note that the Flower clients need to be started with the
             same value (see `flwr.client.start_client`), otherwise clients will
             not know about the increased limit and block larger messages.
-        force_final_distributed_eval: bool (default: False).
-            Forces a distributed evaluation to occur after the last training
-            epoch when enabled.
         certificates : Tuple[bytes, bytes, bytes] (default: None)
             Tuple containing root certificate, server certificate, and private key to
             start a secure SSL-enabled server. The tuple is expected to have three bytes
@@ -146,7 +142,6 @@ def start_server(  # pylint: disable=too-many-arguments
     hist = _fl(
         server=initialized_server,
         config=initialized_config,
-        force_final_distributed_eval=force_final_distributed_eval,
     )
 
     # Stop the gRPC server
@@ -183,7 +178,6 @@ def _init_defaults(
 def _fl(
     server: Server,
     config: Config,
-    force_final_distributed_eval: bool,
 ) -> History:
     # Fit model
     hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
@@ -191,24 +185,6 @@ def _fl(
     log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
     log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
     log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
-
-    if force_final_distributed_eval:
-        # Temporary workaround to force distributed evaluation
-        server.strategy.eval_fn = None  # type: ignore
-
-        # Evaluate the final trained model
-        res = server.evaluate_round(rnd=-1, timeout=config.round_timeout)
-        if res is not None:
-            loss, _, (results, failures) = res
-            log(INFO, "app_evaluate: federated loss: %s", str(loss))
-            log(
-                INFO,
-                "app_evaluate: results %s",
-                str([(res[0].cid, res[1]) for res in results]),
-            )
-            log(INFO, "app_evaluate: failures %s", str(failures))
-        else:
-            log(INFO, "app_evaluate: no evaluation result")
 
     # Graceful shutdown
     server.disconnect_all_clients(timeout=config.round_timeout)

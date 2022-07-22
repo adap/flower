@@ -9,7 +9,7 @@ name = "advanced_flwr_pytorch"
 version = "0.1.0"
 description = "Advanced Flower/PyTorch Example"
 authors = [
-    "The Flower Authors <enquiries@flower.dev>",
+    "The Flower Authors <hello@flower.dev>",
     "Kaushik Amar Das <kaushik.das@iiitg.ac.in>"
 ]
 
