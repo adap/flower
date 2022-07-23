@@ -45,7 +45,7 @@ class Config:
 def start_server(  # pylint: disable=too-many-arguments
     server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,
-    config: Config = None,
+    config: Optional[Config] = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
