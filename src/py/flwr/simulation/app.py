@@ -24,7 +24,7 @@ import ray
 from flwr.client.client import Client
 from flwr.common.logger import log
 from flwr.server import Server
-from flwr.server.app import _fl, _init_defaults, Config
+from flwr.server.app import Config, _fl, _init_defaults
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
