@@ -28,9 +28,10 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    NDArray,
+    NDArrays,
     Parameters,
     Scalar,
-    Weights,
 )
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
@@ -45,13 +46,13 @@ class FedAvgAndroid(Strategy):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
-        fraction_fit: float = 0.1,
-        fraction_eval: float = 0.1,
+        fraction_fit: float = 1.0,
+        fraction_eval: float = 1.0,
         min_fit_clients: int = 2,
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
         eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -73,7 +74,7 @@ class FedAvgAndroid(Strategy):
                 during validation. Defaults to 2.
             min_available_clients (int, optional): Minimum number of total
                 clients in the system. Defaults to 2.
-            eval_fn : Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            eval_fn : Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
                 Optional function used for validation. Defaults to None.
             on_fit_config_fn (Callable[[int], Dict[str, Scalar]], optional):
                 Function used to configure training. Defaults to None.
@@ -125,7 +126,7 @@ class FedAvgAndroid(Strategy):
         if self.eval_fn is None:
             # No evaluation function provided
             return None
-        weights = self.parameters_to_weights(parameters)
+        weights = self.parameters_to_ndarrays(parameters)
         eval_res = self.eval_fn(weights)
         if eval_res is None:
             return None
@@ -169,15 +170,12 @@ class FedAvgAndroid(Strategy):
         evaluate_ins = EvaluateIns(parameters, config)
 
         # Sample clients
-        if rnd >= 0:
-            sample_size, min_num_clients = self.num_evaluation_clients(
-                client_manager.num_available()
-            )
-            clients = client_manager.sample(
-                num_clients=sample_size, min_num_clients=min_num_clients
-            )
-        else:
-            clients = list(client_manager.all().values())
+        sample_size, min_num_clients = self.num_evaluation_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
 
         # Return client/config pairs
         return [(client, evaluate_ins) for client in clients]
@@ -196,10 +194,10 @@ class FedAvgAndroid(Strategy):
             return None, {}
         # Convert results
         weights_results = [
-            (self.parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            (self.parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
-        return self.weights_to_parameters(aggregate(weights_results)), {}
+        return self.ndarrays_to_parameters(aggregate(weights_results)), {}
 
     def aggregate_evaluate(
         self,
@@ -221,22 +219,22 @@ class FedAvgAndroid(Strategy):
         )
         return loss_aggregated, {}
 
-    def weights_to_parameters(self, weights: Weights) -> Parameters:
-        """Convert NumPy weights to parameters object."""
-        tensors = [self.ndarray_to_bytes(ndarray) for ndarray in weights]
+    def ndarrays_to_parameters(self, ndarrays: NDArrays) -> Parameters:
+        """Convert NumPy ndarrays to parameters object."""
+        tensors = [self.ndarray_to_bytes(ndarray) for ndarray in ndarrays]
         return Parameters(tensors=tensors, tensor_type="numpy.nda")
 
-    def parameters_to_weights(self, parameters: Parameters) -> Weights:
+    def parameters_to_ndarrays(self, parameters: Parameters) -> NDArrays:
         """Convert parameters object to NumPy weights."""
         return [self.bytes_to_ndarray(tensor) for tensor in parameters.tensors]
 
     # pylint: disable=R0201
-    def ndarray_to_bytes(self, ndarray: np.ndarray) -> bytes:
+    def ndarray_to_bytes(self, ndarray: NDArray) -> bytes:
         """Serialize NumPy array to bytes."""
         return ndarray.tobytes()
 
     # pylint: disable=R0201
-    def bytes_to_ndarray(self, tensor: bytes) -> np.ndarray:
+    def bytes_to_ndarray(self, tensor: bytes) -> NDArray:
         """Deserialize NumPy array from bytes."""
-        ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)
-        return cast(np.ndarray, ndarray_deserialized)
+        ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)  # type: ignore
+        return cast(NDArray, ndarray_deserialized)

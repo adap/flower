@@ -22,11 +22,11 @@ from flwr.common import (
     EvaluateRes,
     FitRes,
     MetricsAggregationFn,
+    NDArrays,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
@@ -41,13 +41,13 @@ class FaultTolerantFedAvg(FedAvg):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
-        fraction_fit: float = 0.1,
-        fraction_eval: float = 0.1,
+        fraction_fit: float = 1.0,
+        fraction_eval: float = 1.0,
         min_fit_clients: int = 1,
         min_eval_clients: int = 1,
         min_available_clients: int = 1,
         eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -96,17 +96,17 @@ class FaultTolerantFedAvg(FedAvg):
 
         # Convert results
         weights_results = [
-            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
-        parameters_aggregated = weights_to_parameters(aggregate(weights_results))
+        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
             fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif rnd == 1:
+        elif rnd == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
@@ -139,7 +139,7 @@ class FaultTolerantFedAvg(FedAvg):
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-        elif rnd == 1:
+        elif rnd == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
         return loss_aggregated, metrics_aggregated

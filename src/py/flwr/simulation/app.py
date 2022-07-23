@@ -17,13 +17,15 @@
 
 import sys
 from logging import ERROR, INFO
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import ray
 
 from flwr.client.client import Client
 from flwr.common.logger import log
+from flwr.server import Server
 from flwr.server.app import _fl, _init_defaults
+from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
@@ -39,8 +41,10 @@ Invalid Arguments in method:
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, int]] = None,
-    num_rounds: int = 1,
+    server: Optional[Server] = None,
+    config: Optional[Dict[str, Union[int, Optional[float]]]] = None,
     strategy: Optional[Strategy] = None,
+    client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
 ) -> None:`
 
@@ -60,11 +64,12 @@ def start_simulation(  # pylint: disable=too-many-arguments
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, int]] = None,
-    num_rounds: int = 1,
+    server: Optional[Server] = None,
+    config: Optional[Dict[str, Union[int, Optional[float]]]] = None,
     strategy: Optional[Strategy] = None,
+    client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
-    path_to_save_metrics = None,
-    timed = False
+    keep_initialised: Optional[bool] = False,
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -92,12 +97,23 @@ def start_simulation(  # pylint: disable=too-many-arguments
         `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`.
         To understand the GPU utilization caused by `num_gpus`, consult the Ray
         documentation on GPU support.
-    num_rounds : int (default: 1)
-        The number of rounds to train.
+    server: Optional[flwr.server.Server] (default: None). An implementation
+        of the abstract base class `flwr.server.Server`. If no instance is
+        provided, then `start_server` will create one.
+    config: Optional[Dict[str, Union[int, Optional[float]]]] (default: None).
+        Currently supported values are `num_rounds` (int, default: 1) and
+        `round_timeout` in seconds (float, default: None), so a full configuration
+        object instructing the server to perform three rounds of federated
+        learning with a round timeout of 10min looks like the following:
+        `{"num_rounds": 3, "round_timeout": 600.0}`.
     strategy : Optional[flwr.server.Strategy] (default: None)
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use
         `flwr.server.strategy.FedAvg`.
+    client_manager: Optional[flwr.server.ClientManager] (default: None)
+        An implementation of the abstract base class `flwr.server.ClientManager`.
+        If no implementation is provided, then `start_simulation` will use
+        `flwr.server.client_manager.SimpleClientManager`.
     ray_init_args : Optional[Dict[str, Any]] (default: None)
         Optional dictionary containing arguments for the call to `ray.init`.
         If ray_init_args is None (the default), Ray will be initialized with
@@ -110,13 +126,30 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
         An empty dictionary can be used (ray_init_args={}) to prevent any
         arguments from being passed to ray.init.
+    keep_initialised: Optional[bool] (default: False)
+        Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
 
-    Returns:
+    Returns
+    -------
         hist: flwr.server.history.History. Object containing metrics from training.
     """
-    cids: List[str]
+    # pylint: disable-msg=too-many-locals
+
+    # Initialize server and server config
+    initialized_server, initialized_config = _init_defaults(
+        server=server,
+        config=config,
+        strategy=strategy,
+        client_manager=client_manager,
+    )
+    log(
+        INFO,
+        "Starting Flower simulation, config: %s",
+        initialized_config,
+    )
 
     # clients_ids takes precedence
+    cids: List[str]
     if clients_ids is not None:
         if (num_clients is not None) and (len(clients_ids) != num_clients):
             log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
@@ -137,25 +170,16 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "include_dashboard": False,
         }
 
-    # Shut down Ray if it has already been initialized
-    if ray.is_initialized():
+    # Shut down Ray if it has already been initialized (unless asked not to)
+    if ray.is_initialized() and not keep_initialised:
         ray.shutdown()
 
     # Initialize Ray
     ray.init(**ray_init_args)
     log(
         INFO,
-        "Ray initialized with resources: %s",
+        "Flower VCE: Ray initialized with resources: %s",
         ray.cluster_resources(),
-    )
-
-    # Initialize server and server config
-    config = {"num_rounds": num_rounds , "path_to_save_metrics": path_to_save_metrics, "timed": timed}
-    initialized_server, initialized_config = _init_defaults(None, config, strategy)
-    log(
-        INFO,
-        "Starting Flower simulation running: %s",
-        initialized_config,
     )
 
     # Register one RayClientProxy object for each client with the ClientManager
@@ -172,7 +196,6 @@ def start_simulation(  # pylint: disable=too-many-arguments
     hist = _fl(
         server=initialized_server,
         config=initialized_config,
-        force_final_distributed_eval=False,
     )
 
     return hist

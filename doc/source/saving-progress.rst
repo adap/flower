@@ -1,5 +1,5 @@
-Saving Progress
-===============
+Guide: Saving Progress
+======================
 
 The Flower server does not prescribe a way to persist model updates or evaluation results.
 Flower does not (yet) automatically save model updates on the server-side.

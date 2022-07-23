@@ -27,11 +27,11 @@ from flwr.common import (
     FitIns,
     FitRes,
     MetricsAggregationFn,
+    NDArrays,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
@@ -54,13 +54,13 @@ class FedAvg(Strategy):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
-        fraction_fit: float = 0.1,
-        fraction_eval: float = 0.1,
+        fraction_fit: float = 1.0,
+        fraction_eval: float = 1.0,
         min_fit_clients: int = 2,
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
         eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -85,7 +85,7 @@ class FedAvg(Strategy):
             Minimum number of clients used during validation. Defaults to 2.
         min_available_clients : int, optional
             Minimum number of total clients in the system. Defaults to 2.
-        eval_fn : Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        eval_fn : Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
             Function used to configure training. Defaults to None.
@@ -151,7 +151,7 @@ class FedAvg(Strategy):
         if self.eval_fn is None:
             # No evaluation function provided
             return None
-        weights = parameters_to_weights(parameters)
+        weights = parameters_to_ndarrays(parameters)
         eval_res = self.eval_fn(weights)
         if eval_res is None:
             return None
@@ -195,15 +195,12 @@ class FedAvg(Strategy):
         evaluate_ins = EvaluateIns(parameters, config)
 
         # Sample clients
-        if rnd >= 0:
-            sample_size, min_num_clients = self.num_evaluation_clients(
-                client_manager.num_available()
-            )
-            clients = client_manager.sample(
-                num_clients=sample_size, min_num_clients=min_num_clients
-            )
-        else:
-            clients = list(client_manager.all().values())
+        sample_size, min_num_clients = self.num_evaluation_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
 
         # Return client/config pairs
         return [(client, evaluate_ins) for client in clients]
@@ -223,17 +220,17 @@ class FedAvg(Strategy):
 
         # Convert results
         weights_results = [
-            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        parameters_aggregated = weights_to_parameters(aggregate(weights_results))
+        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
             fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif rnd == 1:
+        elif rnd == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
@@ -264,7 +261,7 @@ class FedAvg(Strategy):
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-        elif rnd == 1:
+        elif rnd == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
         return loss_aggregated, metrics_aggregated

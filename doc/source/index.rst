@@ -4,6 +4,18 @@ Flower Documentation
 Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
 
 
+Join the Flower Community
+-------------------------
+
+The Flower Community is growing quickly - we're a friendly group of researchers, engineers, students, professionals, academics, and other enthusiasts.
+
+.. button-link:: https://flower.dev/join-slack
+    :color: primary
+    :shadow:
+
+    Join us on Slack
+
+
 User Guide
 ----------
 
@@ -16,24 +28,26 @@ Flower's design goals was to make this simple. Read on to learn more.
    :caption: User Guide
 
    installation
-   quickstart_tensorflow
-   quickstart_pytorch
-   quickstart_huggingface
-   quickstart_pytorch_lightning
-   quickstart_mxnet
-   quickstart_scikitlearn
+   quickstart-pytorch
+   quickstart-tensorflow
+   quickstart-huggingface
+   quickstart-pytorch-lightning
+   quickstart-mxnet
+   quickstart-scikitlearn
    evaluation
+   configuring-clients
    strategies
    implementing-strategies
    saving-progress
    ssl-enabled-connections
    examples
-   example_walkthrough_pytorch_mnist
+   example-walkthrough-pytorch-mnist
    example-pytorch-from-centralized-to-federated
    example-mxnet-walk-through
    example-jax-from-centralized-to-federated
    fedbn-example-pytorch-from-centralized-to-federated
    recommended-env-setup
+   upgrade-to-flower-1.0
    changelog
    faq
 
@@ -73,7 +87,8 @@ intended to help along the way.
    getting-started-for-contributors
    good-first-contributions
    architecture
-   release_process
+   secagg
+   release-process
    creating-new-messages
    devcontainer
 

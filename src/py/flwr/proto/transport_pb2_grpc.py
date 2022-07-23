@@ -15,7 +15,7 @@ class FlowerServiceStub(object):
             channel: A grpc.Channel.
         """
         self.Join = channel.stream_stream(
-                '/flower.transport.FlowerService/Join',
+                '/flwr.proto.FlowerService/Join',
                 request_serializer=flwr_dot_proto_dot_transport__pb2.ClientMessage.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_transport__pb2.ServerMessage.FromString,
                 )
@@ -40,7 +40,7 @@ def add_FlowerServiceServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'flower.transport.FlowerService', rpc_method_handlers)
+            'flwr.proto.FlowerService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
@@ -59,7 +59,7 @@ class FlowerService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_stream(request_iterator, target, '/flower.transport.FlowerService/Join',
+        return grpc.experimental.stream_stream(request_iterator, target, '/flwr.proto.FlowerService/Join',
             flwr_dot_proto_dot_transport__pb2.ClientMessage.SerializeToString,
             flwr_dot_proto_dot_transport__pb2.ServerMessage.FromString,
             options, channel_credentials,

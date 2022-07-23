@@ -34,7 +34,7 @@ copyright = u"2022 Adap GmbH"
 author = u"The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = u"0.19.0"
+release = u"1.0.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -48,9 +48,11 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
+    "myst_parser",
     "sphinx_copybutton",
-    "sphinx_panels",
+    "sphinx_design",
     "sphinxcontrib.mermaid",
+    "sphinx_reredirects",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -60,6 +62,19 @@ templates_path = ["_templates"]
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+# Sphinx redirects, implemented after the doc filename changes.
+# To prevent 404 errors and redirect to the new pages.
+redirects = {
+    "quickstart_mxnet": "quickstart-mxnet.html",
+    "quickstart_pytorch_lightning": "quickstart-pytorch-lightning.html",
+    "example_walkthrough_pytorch_mnist": "example-walkthrough-pytorch-mnist.html",
+    "quickstart_huggingface": "quickstart-huggingface.html",
+    "quickstart_pytorch": "quickstart-pytorch.html",
+    "quickstart_tensorflow": "quickstart-tensorflow.html",
+    "release_process": "release-process.html",
+    "quickstart_scikitlearn": "quickstart-scikitlearn.html"
+}
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -91,7 +106,7 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",  
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": "Flower Summit 2022 <a href=\"https://flower.dev/conf/flower-summit-2022/\">register now</a>",
+    "announcement": "Flower Summit 2022 <a href=\"https://flower.dev/conf/flower-summit-2022/\">watch now</a>",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

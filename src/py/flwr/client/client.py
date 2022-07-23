@@ -15,50 +15,55 @@
 """Flower client (abstract base class)."""
 
 
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
-    ParametersRes,
-    PropertiesIns,
-    PropertiesRes,
+    GetParametersIns,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
 )
 
 
 class Client(ABC):
     """Abstract base class for Flower clients."""
 
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Return set of client's properties.
 
         Parameters
         ----------
-        ins : PropertiesIns
+        ins : GetPropertiesIns
             The get properties instructions received from the server containing
-            a dictionary of configuration values used to configure.
+            a dictionary of configuration values.
 
         Returns
         -------
-        PropertiesRes
-            Client's properties.
+        GetPropertiesRes
+            The current client properties.
         """
 
-    @abstractmethod
-    def get_parameters(self) -> ParametersRes:
+    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         """Return the current local model parameters.
+
+        Parameters
+        ----------
+        ins : GetParametersIns
+            The get parameters instructions received from the server containing
+            a dictionary of configuration values.
 
         Returns
         -------
-        ParametersRes
+        GetParametersRes
             The current local model parameters.
         """
 
-    @abstractmethod
     def fit(self, ins: FitIns) -> FitRes:
-        """Refine the provided weights using the locally held dataset.
+        """Refine the provided parameters using the locally held dataset.
 
         Parameters
         ----------
@@ -74,9 +79,8 @@ class Client(ABC):
             such as the number of local training examples used for training.
         """
 
-    @abstractmethod
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        """Evaluate the provided weights using the locally held dataset.
+        """Evaluate the provided parameters using the locally held dataset.
 
         Parameters
         ----------
@@ -97,3 +101,18 @@ class Client(ABC):
 def has_get_properties(client: Client) -> bool:
     """Check if Client implements get_properties."""
     return type(client).get_properties != Client.get_properties
+
+
+def has_get_parameters(client: Client) -> bool:
+    """Check if Client implements get_parameters."""
+    return type(client).get_parameters != Client.get_parameters
+
+
+def has_fit(client: Client) -> bool:
+    """Check if Client implements fit."""
+    return type(client).fit != Client.fit
+
+
+def has_evaluate(client: Client) -> bool:
+    """Check if Client implements evaluate."""
+    return type(client).evaluate != Client.evaluate
