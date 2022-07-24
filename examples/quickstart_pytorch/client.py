@@ -103,4 +103,7 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 # Start Flower client
-fl.client.start_numpy_client("[::]:8080", client=FlowerClient())
+fl.client.start_numpy_client(
+    server_address="[::]:8080",
+    client=FlowerClient(),
+)
