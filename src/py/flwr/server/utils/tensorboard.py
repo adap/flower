@@ -78,7 +78,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
 
             def aggregate_evaluate(
                 self,
-                rnd: int,
+                server_round: int,
                 results: List[Tuple[ClientProxy, EvaluateRes]],
                 failures: List[BaseException],
             ) -> Tuple[Optional[float], Dict[str, Scalar]]:
@@ -88,7 +88,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                 # They will be returned at the end of this function but also
                 # used for logging
                 loss_aggregated, config = super().aggregate_evaluate(
-                    rnd,
+                    server_round,
                     results,
                     failures,
                 )
@@ -99,9 +99,11 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                 )
 
                 # Write aggregated loss
-                with writer.as_default(step=rnd):  # pylint: disable=not-context-manager
+                with writer.as_default(
+                    step=server_round
+                ):  # pylint: disable=not-context-manager
                     tf.summary.scalar(
-                        "server/loss_aggregated", loss_aggregated, step=rnd
+                        "server/loss_aggregated", loss_aggregated, step=server_round
                     )
                     writer.flush()
 
@@ -120,7 +122,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                         os.path.join(logdir_run, "clients", client.cid)
                     )
                     with writer.as_default(  # pylint: disable=not-context-manager
-                        step=rnd
+                        step=server_round
                     ):
                         tf.summary.scalar("clients/loss", loss)
                         tf.summary.scalar("clients/num_examples", num_examples)

@@ -159,13 +159,13 @@ class FedAvg(Strategy):
         return loss, metrics
 
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
-            config = self.on_fit_config_fn(rnd)
+            config = self.on_fit_config_fn(server_round)
         fit_ins = FitIns(parameters, config)
 
         # Sample clients
@@ -180,7 +180,7 @@ class FedAvg(Strategy):
         return [(client, fit_ins) for client in clients]
 
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         # Do not configure federated evaluation if fraction eval is 0.
@@ -191,7 +191,7 @@ class FedAvg(Strategy):
         config = {}
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
-            config = self.on_evaluate_config_fn(rnd)
+            config = self.on_evaluate_config_fn(server_round)
         evaluate_ins = EvaluateIns(parameters, config)
 
         # Sample clients
@@ -207,7 +207,7 @@ class FedAvg(Strategy):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -230,14 +230,14 @@ class FedAvg(Strategy):
         if self.fit_metrics_aggregation_fn:
             fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif rnd == 1:  # Only log this warning once
+        elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
@@ -261,7 +261,7 @@ class FedAvg(Strategy):
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-        elif rnd == 1:  # Only log this warning once
+        elif server_round == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
         return loss_aggregated, metrics_aggregated
