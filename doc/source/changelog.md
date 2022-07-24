@@ -95,6 +95,10 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
 ### New features
 
+- **Official support for Python 3.10** ([#1320](https://github.com/adap/flower/pull/1320))
+
+  The previous Flower release introduced experimental support for Python 3.10, this release declares Python 3.10 support as stable.
+
 - **Make all** `Client` **and** `NumPyClient` **methods optional** ([#1260](https://github.com/adap/flower/pull/1260), [#1277](https://github.com/adap/flower/pull/1277))
 
   The `Client`/`NumPyClient` methods `get_properties`, `get_parameters`, `fit`, and `evaluate` are all optional. This enables writing clients that implement, for example, only `fit`, but no other method. No need to implement `evaluate` when using centralized evaluation!
