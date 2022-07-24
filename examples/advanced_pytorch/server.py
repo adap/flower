@@ -104,7 +104,11 @@ def main():
     )
 
     # Start Flower server for four rounds of federated learning
-    fl.server.start_server("0.0.0.0:8080", config={"num_rounds": 4}, strategy=strategy)
+    fl.server.start_server(
+        server_address="0.0.0.0:8080",
+        config={"num_rounds": 4},
+        strategy=strategy,
+    )
 
 
 if __name__ == "__main__":
