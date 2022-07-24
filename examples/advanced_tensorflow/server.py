@@ -24,13 +24,13 @@ def main() -> None:
         eval_fn=get_eval_fn(model),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
-        initial_parameters=fl.common.weights_to_parameters(model.get_weights()),
+        initial_parameters=fl.common.ndarrays_to_parameters(model.get_weights()),
     )
 
     # Start Flower server (SSL-enabled) for four rounds of federated learning
     fl.server.start_server(
         server_address="0.0.0.0:8080",
-        config={"num_rounds": 4},
+        config=fl.server.ServerConfig(num_rounds=4),
         strategy=strategy,
         certificates=(
             Path(".cache/certificates/ca.crt").read_bytes(),
@@ -51,7 +51,7 @@ def get_eval_fn(model):
 
     # The `evaluate` function will be called after every round
     def evaluate(
-        weights: fl.common.Weights,
+        weights: fl.common.Parameters,
     ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
         model.set_weights(weights)  # Update model with the latest parameters
         loss, accuracy = model.evaluate(x_val, y_val)
