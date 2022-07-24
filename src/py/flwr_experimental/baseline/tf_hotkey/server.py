@@ -151,10 +151,10 @@ def get_on_fit_config_fn(
 ) -> Callable[[int], Dict[str, fl.common.Scalar]]:
     """Return a function which returns training configurations."""
 
-    def fit_config(rnd: int) -> Dict[str, fl.common.Scalar]:
+    def fit_config(server_round: int) -> Dict[str, fl.common.Scalar]:
         """Return a configuration with static batch size and (local) epochs."""
         config: Dict[str, fl.common.Scalar] = {
-            "epoch_global": str(rnd),
+            "epoch_global": str(server_round),
             "epochs": str(5),
             "batch_size": str(32),
             "lr_initial": str(lr_initial),
