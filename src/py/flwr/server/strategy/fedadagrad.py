@@ -126,13 +126,13 @@ class FedAdagrad(FedOpt):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         fedavg_parameters_aggregated, metrics_aggregated = super().aggregate_fit(
-            rnd=rnd, results=results, failures=failures
+            server_round=server_round, results=results, failures=failures
         )
         if fedavg_parameters_aggregated is None:
             return None, {}
