@@ -22,10 +22,10 @@ from flwr.common import (
     Code,
     EvaluateRes,
     FitRes,
+    NDArrays,
     Parameters,
     Status,
-    Weights,
-    parameters_to_weights,
+    parameters_to_ndarrays,
 )
 from flwr.server.client_proxy import ClientProxy
 
@@ -103,14 +103,14 @@ def test_aggregate_fit_just_enough_results() -> None:
         )
     ]
     failures: List[BaseException] = [Exception()]
-    expected: Optional[Weights] = []
+    expected: Optional[NDArrays] = []
 
     # Execute
     actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual
-    assert parameters_to_weights(actual) == expected
+    assert parameters_to_ndarrays(actual) == expected
 
 
 def test_aggregate_fit_no_failures() -> None:
@@ -129,14 +129,14 @@ def test_aggregate_fit_no_failures() -> None:
         )
     ]
     failures: List[BaseException] = []
-    expected: Optional[Weights] = []
+    expected: Optional[NDArrays] = []
 
     # Execute
     actual, _ = strategy.aggregate_fit(1, results, failures)
 
     # Assert
     assert actual
-    assert parameters_to_weights(actual) == expected
+    assert parameters_to_ndarrays(actual) == expected
 
 
 def test_aggregate_evaluate_no_results_no_failures() -> None:
