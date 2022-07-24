@@ -15,7 +15,7 @@
 """Flower server."""
 
 
-from .app import Config as Config
+from .app import ServerConfig as ServerConfig
 from .app import start_server as start_server
 from .client_manager import ClientManager as ClientManager
 from .client_manager import SimpleClientManager as SimpleClientManager
@@ -24,7 +24,7 @@ from .server import Server as Server
 
 __all__ = [
     "ClientManager",
-    "Config",
+    "ServerConfig",
     "History",
     "Server",
     "SimpleClientManager",
