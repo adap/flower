@@ -3,7 +3,7 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/
 
 # Download the CIFAR-10 dataset
-python -c "from torchvision.datasets import CIFAR10; CIFAR10('./data', download=True)"
+python -c "from torchvision.datasets import CIFAR10; CIFAR10('./dataset', download=True)"
 
 # Download the EfficientNetB0 model
 python -c "import torch; torch.hub.load( \
