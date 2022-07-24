@@ -98,17 +98,17 @@ def set_params(model: torch.nn.ModuleList, params: List[np.ndarray]):
 
 def get_eval_fn(
     testset: torchvision.datasets.CIFAR10,
-) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
+) -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
-    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(parameters: fl.common.NDArrays) -> Optional[Tuple[float, float]]:
         """Use the entire CIFAR-10 test set for evaluation."""
 
         # determine device
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         model = Net()
-        set_params(model, weights)
+        set_params(model, parameters)
         model.to(device)
 
         testloader = torch.utils.data.DataLoader(testset, batch_size=50)
