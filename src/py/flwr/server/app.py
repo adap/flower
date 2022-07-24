@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 from logging import INFO, WARN
-from typing import Dict, Optional, Tuple, Union
+from typing import Optional, Tuple
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log

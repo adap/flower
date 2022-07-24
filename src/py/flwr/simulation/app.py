@@ -17,7 +17,7 @@
 
 import sys
 from logging import ERROR, INFO
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 import ray
 
@@ -42,7 +42,7 @@ Invalid Arguments in method:
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, int]] = None,
     server: Optional[Server] = None,
-    config: Optional[Dict[str, Union[int, Optional[float]]]] = None,
+    config: ServerConfig = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
