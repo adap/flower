@@ -25,7 +25,7 @@ def main() -> None:
     )
 
 
-def fit_config(rnd: int):
+def fit_config(server_round: int):
     """Return training configuration dict for each round.
 
     Keep batch size fixed at 32, perform two rounds of training with one

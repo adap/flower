@@ -18,7 +18,7 @@ you resolved.
 
 <!--
 Explain why this PR is needed and what kind of changes have you done.
-Example: the variable rnd was not clear and therefore renamed to fl_round. 
+Example: the variable `rnd` could be interpreted as an abbreviation of *random*, to improve clarity it was renamed to `server_round`. 
 -->
 
 #### Any other comments?

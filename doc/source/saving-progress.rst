@@ -19,15 +19,15 @@ It then continues to save returned (aggregated) weights before it returns those 
     class SaveModelStrategy(fl.server.strategy.FedAvg):
         def aggregate_fit(
             self,
-            rnd: int,
+            server_round: int,
             results: List[Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
             failures: List[BaseException],
         ) -> Optional[fl.common.Weights]:
-            aggregated_weights = super().aggregate_fit(rnd, results, failures)
+            aggregated_weights = super().aggregate_fit(server_round, results, failures)
             if aggregated_weights is not None:
                 # Save aggregated_weights
-                print(f"Saving round {rnd} aggregated_weights...")
-                np.savez(f"round-{rnd}-weights.npz", *aggregated_weights)
+                print(f"Saving round {server_round} aggregated_weights...")
+                np.savez(f"round-{server_round}-weights.npz", *aggregated_weights)
             return aggregated_weights
 
     # Create strategy and run server
@@ -72,7 +72,7 @@ The server can then use a customized strategy to aggregate the metrics provided 
     class AggregateCustomMetricStrategy(fl.server.strategy.FedAvg):
         def aggregate_evaluate(
             self,
-            rnd: int,
+            server_round: int,
             results: List[Tuple[ClientProxy, EvaluateRes]],
             failures: List[BaseException],
         ) -> Optional[float]:
@@ -86,10 +86,10 @@ The server can then use a customized strategy to aggregate the metrics provided 
             
             # Aggregate and print custom metric
             accuracy_aggregated = sum(accuracies) / sum(examples)
-            print(f"Round {rnd} accuracy aggregated from client results: {accuracy_aggregated}")
+            print(f"Round {server_round} accuracy aggregated from client results: {accuracy_aggregated}")
 
             # Call aggregate_evaluate from base class (FedAvg)
-            return super().aggregate_evaluate(rnd, results, failures)
+            return super().aggregate_evaluate(server_round, results, failures)
 
     # Create strategy and run server
     strategy = AggregateCustomMetricStrategy(
