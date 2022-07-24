@@ -5,9 +5,9 @@ from sklearn.linear_model import LogisticRegression
 from typing import Dict
 
 
-def fit_round(rnd: int) -> Dict:
+def fit_round(server_round: int) -> Dict:
     """Send round number to client."""
-    return {"rnd": rnd}
+    return {"server_round": server_round}
 
 
 def get_eval_fn(model: LogisticRegression):
