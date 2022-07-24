@@ -34,6 +34,7 @@ A few breaking changes require small manual updates:
 - Rename ``parameters_to_weights`` to ``parameters_to_ndarrays`` and ``weights_to_parameters`` to ``ndarrays_to_parameters``
 - Strategy initialization: if the strategy relies on the default values for ``fraction_fit`` and ``fraction_eval``, set ``fraction_fit`` and ``fraction_eval`` manually to ``0.1``. Projects that do not manually create a strategy (by calling ``start_server`` or ``start_simulation`` without passing a strategy instance) should now initialize FedAvg with ``fraction_fit`` and ``fraction_eval`` set to ``0.1``.
 - Remove ``force_final_distributed_eval`` parameter from calls to ``start_server``. Distributed evaluation on all clients can be enabled by configuring the strategy to sample all clients for evaluation after the last round of training.
+- Rename ``rnd`` to ``server_round`` (``evaluate_fn``, ``configure_fit``, ``aggregate_fit``, ``configure_evaluate``, ``aggregate_evaluate``)
 
 Optional improvements
 ---------------------

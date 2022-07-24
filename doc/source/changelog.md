@@ -55,15 +55,19 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
 ### Incompatible changes
 
-- **Introduce configuration object** `ServerConfig` **in** ``start_server`` **and** ``start_simulation`` ([#1317](https://github.com/adap/flower/pull/1317))
+- **Introduce configuration object** `ServerConfig` **in** `start_server` **and** `start_simulation` ([#1317](https://github.com/adap/flower/pull/1317))
 
-  Instead of a config dictionary ``{"num_rounds": 3, "round_timeout": 600.0}``, ``start_server`` and ``start_simulation`` now expect a configuration object of type ``flwr.server.ServerConfig``. ``ServerConfig`` takes the same arguments that as the previous config dict, but it makes writing type-safe code easier and the default parameters values more transparent.
+  Instead of a config dictionary `{"num_rounds": 3, "round_timeout": 600.0}`, `start_server` and `start_simulation` now expect a configuration object of type `flwr.server.ServerConfig`. `ServerConfig` takes the same arguments that as the previous config dict, but it makes writing type-safe code easier and the default parameters values more transparent.
 
 - **Update default arguments of built-in strategies** ([#1278](https://github.com/adap/flower/pull/1278))
 
   All built-in strategies now use `fraction_fit=1.0` and `fraction_eval=1.0`, which means they select *all* currently available clients for training and evaluation. Projects that relied on the previous default values can get the previous behaviour by initializing the strategy in the following way:
 
   `strategy = FedAvg(fraction_fit=1.0, fraction_eval=1.0)`
+
+- **Rename** `rnd` **to** `server_round` ([#1321](https://github.com/adap/flower/pull/1321))
+
+  Several Flower methods and functions (`evaluate_fn`, `configure_fit`, `aggregate_fit`, `configure_evaluate`, `aggregate_evaluate`) receive the current round of federated learning/evaluation as their first parameter. To improve reaability and avoid confusion with *random*, this parameter has been renamed from `rnd` to `server_round`.
 
 - **Move** `flwr.dataset` **to** `flwr_baselines` ([#1273](https://github.com/adap/flower/pull/1273))
 
@@ -73,13 +77,13 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
   Remove unmaintained experimental strategies (`FastAndSlow`, `FedFSv0`, `FedFSv1`).
 
-- **Renamed** ``Weights`` **to** ``NDArrays`` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
+- **Renamed** `Weights` **to** `NDArrays` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
 
-  ``flwr.common.Weights`` was renamed to ``flwr.common.NDArrays`` to better capture what this type is all about.
+  `flwr.common.Weights` was renamed to `flwr.common.NDArrays` to better capture what this type is all about.
 
-- **Removed antiquated** ``force_final_distributed_eval`` **from** ``start_server`` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
+- **Removed antiquated** `force_final_distributed_eval` **from** `start_server` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
 
-  The ``start_server`` parameter ``force_final_distributed_eval`` has long been a historic artefact, in this release it is finally gone for good.
+  The `start_server` parameter `force_final_distributed_eval` has long been a historic artefact, in this release it is finally gone for good.
 
 - **Configurable** `get_parameters` ([#1242](https://github.com/adap/flower/pull/1242))
 
@@ -388,6 +392,7 @@ What's new?
           loss, accuracy, custom_metric = test(net, testloader)
           return loss, len(testloader), {"accuracy": accuracy, "custom_metric": custom_metric}
   ```
+
 - **Generalized** `config` **argument in** `Client.fit` **and** `Client.evaluate` ([#595](https://github.com/adap/flower/pull/595))
 
   The `config` argument used to be of type `Dict[str, str]`, which means that dictionary values were expected to be strings. The new release generalizes this to enable values of the following types: `bool`, `bytes`, `float`, `int`, `str`.
@@ -410,6 +415,7 @@ What's new?
           loss, accuracy = test(net, testloader, batch_size)
           return loss, len(testloader), {"accuracy": accuracy}
   ```
+
 ## v0.13.0 (2021-01-08)
 
 What's new?
