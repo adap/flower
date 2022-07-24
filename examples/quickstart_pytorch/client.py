@@ -94,7 +94,7 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         self.set_parameters(parameters)
         train(net, trainloader, epochs=1)
-        return self.get_parameters(), len(trainloader.dataset), {}
+        return self.get_parameters(config={}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
