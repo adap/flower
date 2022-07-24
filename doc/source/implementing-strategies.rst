@@ -31,14 +31,17 @@ implemented:
 
         @abstractmethod
         def configure_fit(
-            self, rnd: int, parameters: Parameters, client_manager: ClientManager
+            self,
+            server_round: int,
+            parameters: Parameters,
+            client_manager: ClientManager
         ) -> List[Tuple[ClientProxy, FitIns]]:
             """Configure the next round of training."""
 
         @abstractmethod
         def aggregate_fit(
             self,
-            rnd: int,
+            server_round: int,
             results: List[Tuple[ClientProxy, FitRes]],
             failures: List[BaseException],
         ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -46,14 +49,17 @@ implemented:
 
         @abstractmethod
         def configure_evaluate(
-            self, rnd: int, parameters: Parameters, client_manager: ClientManager
+            self,
+            server_round: int,
+            parameters: Parameters,
+            client_manager: ClientManager
         ) -> List[Tuple[ClientProxy, EvaluateIns]]:
             """Configure the next round of evaluation."""
 
         @abstractmethod
         def aggregate_evaluate(
             self,
-            rnd: int,
+            server_round: int,
             results: List[Tuple[ClientProxy, EvaluateRes]],
             failures: List[BaseException],
         ) -> Tuple[Optional[float], Dict[str, Scalar]]:
@@ -76,16 +82,16 @@ abstract methods:
         def initialize_parameters(self, client_manager):
             # Your implementation here
 
-        def configure_fit(self, rnd, parameters, client_manager):
+        def configure_fit(self, server_round, parameters, client_manager):
             # Your implementation here
 
-        def aggregate_fit(self, rnd, results, failures):
+        def aggregate_fit(self, server_round, results, failures):
             # Your implementation here
 
-        def configure_evaluate(self, rnd, parameters, client_manager):
+        def configure_evaluate(self, server_round, parameters, client_manager):
             # Your implementation here
 
-        def aggregate_evaluate(self, rnd, results, failures):
+        def aggregate_evaluate(self, server_round, results, failures):
             # Your implementation here
 
         def evaluate(self, parameters):
@@ -215,7 +221,10 @@ The :code:`configure_fit` method
 
     @abstractmethod
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
 
@@ -240,7 +249,7 @@ The :code:`aggregate_fit` method
     @abstractmethod
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -259,7 +268,10 @@ The :code:`configure_evaluate` method
 
     @abstractmethod
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
 
@@ -285,7 +297,7 @@ The :code:`aggregate_evaluate` method
     @abstractmethod
     def aggregate_evaluate(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
