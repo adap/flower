@@ -35,11 +35,11 @@ Let's start with a simple example. Imagine we want to send (a) the batch size th
 
 .. code-block:: python
 
-    def fit_config(rnd: int):
+    def fit_config(server_round: int):
         """Return training configuration dict for each round."""
         config = {
             "batch_size": 32,
-            "current_round": rnd,
+            "current_round": server_round,
             "local_epochs": 2,
         }
         return config
@@ -70,12 +70,12 @@ The built-in strategies call this function every round (that is, every time `Str
 
 .. code-block:: python
 
-    def fit_config(rnd: int):
+    def fit_config(server_round: int):
         """Return training configuration dict for each round."""
         config = {
             "batch_size": 32,
-            "current_round": rnd,
-            "local_epochs": 1 if rnd < 2 else 2,
+            "current_round": server_round,
+            "local_epochs": 1 if server_round < 2 else 2,
         }
         return config
 
@@ -92,9 +92,9 @@ This can be achieved by customizing an existing strategy or by [implementing a c
 
     class CustomClientConfigStrategy(fl.server.strategy.FedAvg):
         def configure_fit(
-            self, rnd: int, parameters: Parameters, client_manager: ClientManager
+            self, server_round: int, parameters: Parameters, client_manager: ClientManager
         ) -> List[Tuple[ClientProxy, FitIns]]:
-            client_instructions = super().configure_fit(rnd, parameters, client_manager)
+            client_instructions = super().configure_fit(server_round, parameters, client_manager)
 
             # Add special "hello": "world" config key/value pair,
             # but only to the first client in the list

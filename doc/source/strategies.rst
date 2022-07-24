@@ -53,7 +53,7 @@ It must return a dictionary of arbitraty configuration values  :code:`client.fit
     def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
         """Return a function which returns training configurations."""
 
-        def fit_config(rnd: int) -> Dict[str, str]:
+        def fit_config(server_round: int) -> Dict[str, str]:
             """Return a configuration with static batch size and (local) epochs."""
             config = {
                 "learning_rate": str(0.001),

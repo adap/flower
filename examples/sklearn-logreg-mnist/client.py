@@ -36,7 +36,7 @@ if __name__ == "__main__":
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 model.fit(X_train, y_train)
-            print(f"Training finished for round {config['rnd']}")
+            print(f"Training finished for round {config['server_round']}")
             return utils.get_model_parameters(model), len(X_train), {}
 
         def evaluate(self, parameters, config):  # type: ignore
