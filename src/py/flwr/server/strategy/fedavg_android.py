@@ -170,15 +170,12 @@ class FedAvgAndroid(Strategy):
         evaluate_ins = EvaluateIns(parameters, config)
 
         # Sample clients
-        if rnd >= 0:
-            sample_size, min_num_clients = self.num_evaluation_clients(
-                client_manager.num_available()
-            )
-            clients = client_manager.sample(
-                num_clients=sample_size, min_num_clients=min_num_clients
-            )
-        else:
-            clients = list(client_manager.all().values())
+        sample_size, min_num_clients = self.num_evaluation_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
 
         # Return client/config pairs
         return [(client, evaluate_ins) for client in clients]
@@ -239,5 +236,5 @@ class FedAvgAndroid(Strategy):
     # pylint: disable=R0201
     def bytes_to_ndarray(self, tensor: bytes) -> NDArray:
         """Deserialize NumPy array from bytes."""
-        ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)
+        ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)  # type: ignore
         return cast(NDArray, ndarray_deserialized)

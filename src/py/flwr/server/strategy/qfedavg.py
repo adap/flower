@@ -177,15 +177,15 @@ class QFedAvg(FedAvg):
             return None, {}
         # Convert results
 
-        def norm_grad(grad_list: List[NDArrays]) -> float:
+        def norm_grad(grad_list: NDArrays) -> float:
             # input: nested gradients
             # output: square of the L-2 norm
             client_grads = grad_list[0]
             for i in range(1, len(grad_list)):
-                client_grads = np.append(
+                client_grads = np.append(  # type: ignore
                     client_grads, grad_list[i]
                 )  # output a flattened array
-            squared = np.square(client_grads)  # type: ignore
+            squared = np.square(client_grads)
             summed = np.sum(squared)
             return float(summed)
 
@@ -204,7 +204,7 @@ class QFedAvg(FedAvg):
             new_weights = parameters_to_ndarrays(fit_res.parameters)
             # plug in the weight updates into the gradient
             grads = [
-                (u - v) * 1.0 / self.learning_rate
+                np.multiply((u - v), 1.0 / self.learning_rate)
                 for u, v in zip(weights_before, new_weights)
             ]
             deltas.append(
@@ -227,7 +227,7 @@ class QFedAvg(FedAvg):
         if self.fit_metrics_aggregation_fn:
             fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif rnd == 1:
+        elif rnd == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
@@ -258,7 +258,7 @@ class QFedAvg(FedAvg):
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-        elif rnd == 1:
+        elif rnd == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
         return loss_aggregated, metrics_aggregated
