@@ -151,8 +151,8 @@ class FedAvg(Strategy):
         if self.eval_fn is None:
             # No evaluation function provided
             return None
-        weights = parameters_to_ndarrays(parameters)
-        eval_res = self.eval_fn(weights)
+        parameters_ndarrays = parameters_to_ndarrays(parameters)
+        eval_res = self.eval_fn(parameters_ndarrays)
         if eval_res is None:
             return None
         loss, metrics = eval_res
