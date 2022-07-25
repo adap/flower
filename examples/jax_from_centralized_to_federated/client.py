@@ -57,7 +57,7 @@ class FlowerClient(fl.client.NumPyClient):
         )
         results = {"loss": float(loss)}
         print("Training results", results)
-        return self.get_parameters({}), num_examples, results
+        return self.get_parameters(config={}), num_examples, results
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict
