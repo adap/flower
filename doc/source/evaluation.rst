@@ -1,7 +1,7 @@
 Evaluation
 ==========
 
-There are two main approaches to evaluate models in federated learning systems: centralized (or server-side) evaluation and federated (or client-side) evaluation.
+There are two main approaches to evaluating models in federated learning systems: centralized (or server-side) evaluation and federated (or client-side) evaluation.
 
 Centralized Evaluation
 ----------------------
@@ -105,7 +105,7 @@ Federated evaluation can be configured from the server side. Built-in strategies
     def evaluate_config(server_round: int):
         """Return evaluation configuration dict for each round.
         Perform five local evaluation steps on each client (i.e., use five
-        batches) during rounds one to three, then increase to ten local
+        batches) during rounds, one to three, then increase to ten local
         evaluation steps.
         """
         val_steps = 5 if server_round < 4 else 10
