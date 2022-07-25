@@ -44,6 +44,7 @@ def grpc_connection(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    wait_for_ready: bool = False,
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish an insecure gRPC connection to a gRPC server.
 
@@ -64,6 +65,8 @@ def grpc_connection(
         The PEM-encoded root certificates as a byte string. If provided, a secure
         connection using the certificates will be established to a SSL-enabled
         Flower server.
+    wait_for_ready: bool (default: False). If set to True, the client does not
+        fail fast, but waits until a connection to the server can be established.
 
     Returns
     -------
@@ -108,7 +111,9 @@ def grpc_connection(
     )
     stub = FlowerServiceStub(channel)
 
-    server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
+    server_message_iterator: Iterator[ServerMessage] = stub.Join(
+        iter(queue.get, None), wait_for_ready=wait_for_ready
+    )
 
     receive: Callable[[], ServerMessage] = lambda: next(server_message_iterator)
     send: Callable[[ClientMessage], None] = lambda msg: queue.put(msg, block=False)

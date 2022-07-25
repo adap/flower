@@ -83,6 +83,7 @@ def start_client(
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    wait_for_ready: bool = False,
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
@@ -104,6 +105,8 @@ def start_client(
             The PEM-encoded root certificates as a byte string. If provided, a secure
             connection using the certificates will be established to a
             SSL-enabled Flower server.
+        wait_for_ready: bool (default: False). If set to True, the client does not
+            fail fast, but waits until a connection to the server can be established.
 
     Returns
     -------
@@ -133,6 +136,7 @@ def start_client(
             server_address,
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
+            wait_for_ready=wait_for_ready,
         ) as conn:
             receive, send = conn
 
@@ -161,6 +165,7 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    wait_for_ready: bool = False,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -182,6 +187,8 @@ def start_numpy_client(
             The PEM-encoded root certificates a byte string. If provided, a secure
             connection using the certificates will be established to a
             SSL-enabled Flower server.
+        wait_for_ready: bool (default: False). If set to True, the client does not
+            fail fast, but waits until a connection to the server can be established.
 
     Returns
     -------
@@ -212,6 +219,7 @@ def start_numpy_client(
         client=_wrap_numpy_client(client=client),
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
+        wait_for_ready=wait_for_ready,
     )
 
 
