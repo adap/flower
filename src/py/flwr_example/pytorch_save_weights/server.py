@@ -16,7 +16,7 @@
 
 
 import argparse
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -30,15 +30,20 @@ from . import cifar
 class SaveModelStrategy(fl.server.strategy.FedAvg):
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
-        failures: List[BaseException],
+        failures: List[
+            Union[
+                Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes],
+                BaseException,
+            ]
+        ],
     ) -> Optional[fl.common.Weights]:
-        weights = super().aggregate_fit(rnd, results, failures)
+        weights = super().aggregate_fit(server_round, results, failures)
         if weights is not None:
             # Save weights
-            print(f"Saving round {rnd} weights...")
-            np.savez(f"round-{rnd}-weights.npz", *weights)
+            print(f"Saving round {server_round} weights...")
+            np.savez(f"round-{server_round}-weights.npz", *weights)
         return weights
 
 
@@ -63,10 +68,10 @@ def main() -> None:
     )
 
 
-def fit_config(rnd: int) -> Dict[str, fl.common.Scalar]:
+def fit_config(server_round: int) -> Dict[str, fl.common.Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
     config: Dict[str, fl.common.Scalar] = {
-        "epoch_global": str(rnd),
+        "epoch_global": str(server_round),
         "epochs": str(1),
         "batch_size": str(32),
     }

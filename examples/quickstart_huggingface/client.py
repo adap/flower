@@ -117,7 +117,7 @@ def main():
             return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
     # Start client
-    fl.client.start_numpy_client("[::]:9999", client=IMDBClient())
+    fl.client.start_numpy_client("127.0.0.1:8080", client=IMDBClient())
 
 
 if __name__ == "__main__":
