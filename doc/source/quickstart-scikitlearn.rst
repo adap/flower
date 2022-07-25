@@ -186,7 +186,7 @@ The evaluation function is called after each federated learning round and gives 
 
         return evaluate
 
-The :code:`main` contains the server-side parameter initialization :code:`utils.set_initial_params()` as well as the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federated averaging (or FedAvg), with two clients and evaluation after each federated learning round. The server can be started with the command :code:`fl.server.start_server("0.0.0.0:8080", strategy=strategy, config={"num_rounds": 3})`.
+The :code:`main` contains the server-side parameter initialization :code:`utils.set_initial_params()` as well as the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federated averaging (or FedAvg), with two clients and evaluation after each federated learning round. The server can be started with the command :code:`fl.server.start_server("0.0.0.0:8080", strategy=strategy, config=fl.server.ServerConfig(num_rounds=3))`.
 
 .. code-block:: python
 
@@ -199,7 +199,7 @@ The :code:`main` contains the server-side parameter initialization :code:`utils.
             eval_fn=get_eval_fn(model),
             on_fit_config_fn=fit_round,
         )
-        fl.server.start_server("0.0.0.0:8080", strategy=strategy, config={"num_rounds": 3})
+        fl.server.start_server("0.0.0.0:8080", strategy=strategy, config=fl.server.ServerConfig(num_rounds=3))
 
 
 Train the model, federated!
