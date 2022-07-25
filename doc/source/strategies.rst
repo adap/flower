@@ -19,7 +19,7 @@ Flower comes with a number of popular federated learning strategies built-in. A 
     import flwr as fl
 
     strategy = fl.server.strategy.FedAvg()
-    fl.server.start_server(config={"num_rounds": 3}, strategy=strategy)
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3), strategy=strategy)
 
 This creates a strategy with all parameters left at their default values and passes it to the :code:`start_server` function. It is usually recommended to adjust a few parameters during instantiation:
 
@@ -32,7 +32,7 @@ This creates a strategy with all parameters left at their default values and pas
         min_fit_clients=10,  # Minimum number of clients to be sampled for the next round
         min_available_clients=80,  # Minimum number of clients that need to be connected to the server before a training round can start
     )
-    fl.server.start_server(config={"num_rounds": 3}, strategy=strategy)
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3), strategy=strategy)
 
 
 Customize an existing strategy with callback functions
@@ -69,7 +69,7 @@ It must return a dictionary of arbitraty configuration values  :code:`client.fit
         min_available_clients=80,
         on_fit_config_fn=get_on_fit_config_fn(),
     )
-    fl.server.start_server(config={"num_rounds": 3}, strategy=strategy)
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3), strategy=strategy)
 
 The :code:`on_fit_config_fn` can be used to pass arbitrary configuration values from server to client, and poetentially change these values each round, for example, to adjust the learning rate.
 The client will receive the dictionary returned by the :code:`on_fit_config_fn` in its own :code:`client.fit()` function.
