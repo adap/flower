@@ -171,7 +171,7 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
         def get_parameters(self) -> fl.common.ParametersRes:
             """Encapsulates the weight into Flower Parameters """
             weights: fl.common.Weights = self.get_weights()
-            parameters = fl.common.weights_to_parameters(weights)
+            parameters = fl.common.ndarrays_to_parameters(weights)
             return fl.common.ParametersRes(parameters=parameters)
 
         def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
@@ -187,7 +187,7 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
                 Set of variables containing the new set of weights and information the client.
 
             """
-            weights: fl.common.Weights = fl.common.parameters_to_weights(ins.parameters)
+            weights: fl.common.Weights = fl.common.parameters_to_ndarrays(ins.parameters)
             fit_begin = timeit.default_timer()
 
             # Set model parameters/weights
@@ -200,7 +200,7 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
 
             # Return the refined weights and the number of examples used for training
             weights_prime: fl.common.Weights = self.get_weights()
-            params_prime = fl.common.weights_to_parameters(weights_prime)
+            params_prime = fl.common.ndarrays_to_parameters(weights_prime)
             fit_duration = timeit.default_timer() - fit_begin
             return fl.common.FitRes(
                 parameters=params_prime,
