@@ -43,7 +43,7 @@ implemented:
             self,
             server_round: int,
             results: List[Tuple[ClientProxy, FitRes]],
-            failures: List[BaseException],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
         ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
             """Aggregate training results."""
 
@@ -61,7 +61,7 @@ implemented:
             self,
             server_round: int,
             results: List[Tuple[ClientProxy, EvaluateRes]],
-            failures: List[BaseException],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
         ) -> Tuple[Optional[float], Dict[str, Scalar]]:
             """Aggregate evaluation results."""
 
@@ -251,7 +251,7 @@ The :code:`aggregate_fit` method
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results."""
 
@@ -299,7 +299,7 @@ The :code:`aggregate_evaluate` method
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation results."""
 

@@ -16,7 +16,7 @@
 
 
 import argparse
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -32,7 +32,12 @@ class SaveModelStrategy(fl.server.strategy.FedAvg):
         self,
         server_round: int,
         results: List[Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
-        failures: List[BaseException],
+        failures: List[
+            Union[
+                Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes],
+                BaseException,
+            ]
+        ],
     ) -> Optional[fl.common.Weights]:
         weights = super().aggregate_fit(server_round, results, failures)
         if weights is not None:
