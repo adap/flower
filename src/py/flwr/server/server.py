@@ -94,8 +94,8 @@ class Server:
                 res[0],
                 res[1],
             )
-            history.add_loss_centralized(rnd=0, loss=res[0])
-            history.add_metrics_centralized(rnd=0, metrics=res[1])
+            history.add_loss_centralized(server_round=0, loss=res[0])
+            history.add_metrics_centralized(server_round=0, metrics=res[1])
 
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
@@ -103,7 +103,7 @@ class Server:
 
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
-            res_fit = self.fit_round(rnd=current_round, timeout=timeout)
+            res_fit = self.fit_round(server_round=current_round, timeout=timeout)
             if res_fit:
                 parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
@@ -121,17 +121,21 @@ class Server:
                     metrics_cen,
                     timeit.default_timer() - start_time,
                 )
-                history.add_loss_centralized(rnd=current_round, loss=loss_cen)
-                history.add_metrics_centralized(rnd=current_round, metrics=metrics_cen)
+                history.add_loss_centralized(server_round=current_round, loss=loss_cen)
+                history.add_metrics_centralized(
+                    server_round=current_round, metrics=metrics_cen
+                )
 
             # Evaluate model on a sample of available clients
-            res_fed = self.evaluate_round(rnd=current_round, timeout=timeout)
+            res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
             if res_fed:
                 loss_fed, evaluate_metrics_fed, _ = res_fed
                 if loss_fed:
-                    history.add_loss_distributed(rnd=current_round, loss=loss_fed)
+                    history.add_loss_distributed(
+                        server_round=current_round, loss=loss_fed
+                    )
                     history.add_metrics_distributed(
-                        rnd=current_round, metrics=evaluate_metrics_fed
+                        server_round=current_round, metrics=evaluate_metrics_fed
                     )
 
         # Bookkeeping
@@ -142,7 +146,7 @@ class Server:
 
     def evaluate_round(
         self,
-        rnd: int,
+        server_round: int,
         timeout: Optional[float],
     ) -> Optional[
         Tuple[Optional[float], Dict[str, Scalar], EvaluateResultsAndFailures]
@@ -151,15 +155,17 @@ class Server:
 
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_evaluate(
-            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
+            server_round=server_round,
+            parameters=self.parameters,
+            client_manager=self._client_manager,
         )
         if not client_instructions:
-            log(INFO, "evaluate_round %s: no clients selected, cancel", rnd)
+            log(INFO, "evaluate_round %s: no clients selected, cancel", server_round)
             return None
         log(
             DEBUG,
             "evaluate_round %s: strategy sampled %s clients (out of %s)",
-            rnd,
+            server_round,
             len(client_instructions),
             self._client_manager.num_available(),
         )
@@ -173,7 +179,7 @@ class Server:
         log(
             DEBUG,
             "evaluate_round %s received %s results and %s failures",
-            rnd,
+            server_round,
             len(results),
             len(failures),
         )
@@ -182,14 +188,14 @@ class Server:
         aggregated_result: Tuple[
             Optional[float],
             Dict[str, Scalar],
-        ] = self.strategy.aggregate_evaluate(rnd, results, failures)
+        ] = self.strategy.aggregate_evaluate(server_round, results, failures)
 
         loss_aggregated, metrics_aggregated = aggregated_result
         return loss_aggregated, metrics_aggregated, (results, failures)
 
     def fit_round(
         self,
-        rnd: int,
+        server_round: int,
         timeout: Optional[float],
     ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
@@ -198,16 +204,18 @@ class Server:
 
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
-            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
+            server_round=server_round,
+            parameters=self.parameters,
+            client_manager=self._client_manager,
         )
 
         if not client_instructions:
-            log(INFO, "fit_round %s: no clients selected, cancel", rnd)
+            log(INFO, "fit_round %s: no clients selected, cancel", server_round)
             return None
         log(
             DEBUG,
             "fit_round %s: strategy sampled %s clients (out of %s)",
-            rnd,
+            server_round,
             len(client_instructions),
             self._client_manager.num_available(),
         )
@@ -221,7 +229,7 @@ class Server:
         log(
             DEBUG,
             "fit_round %s received %s results and %s failures",
-            rnd,
+            server_round,
             len(results),
             len(failures),
         )
@@ -230,7 +238,7 @@ class Server:
         aggregated_result: Tuple[
             Optional[Parameters],
             Dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(rnd, results, failures)
+        ] = self.strategy.aggregate_fit(server_round, results, failures)
 
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
