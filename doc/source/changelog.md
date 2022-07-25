@@ -115,7 +115,11 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
   - `quickstart_pytorch`
   - `quickstart_simulation`
   - `quickstart_tensorflow`
-  - `advanced_tensorflow`.
+  - `advanced_tensorflow`
+
+- **Remove the obsolete simulation example** ([#1328](https://github.com/adap/flower/pull/1328))
+
+  Removes the obsolete `simulation` example and renames `quickstart_simulation` to `simulation_tensorflow` so it fits withs the naming of `simulation_pytorch`
 
 - **Updated documentation** ([#1223](https://github.com/adap/flower/pull/1223), [#1209](https://github.com/adap/flower/pull/1209), [#1251](https://github.com/adap/flower/pull/1251), [#1257](https://github.com/adap/flower/pull/1257), [#1267](https://github.com/adap/flower/pull/1267), [#1268](https://github.com/adap/flower/pull/1268), [#1300](https://github.com/adap/flower/pull/1300), [#1304](https://github.com/adap/flower/pull/1304), [#1305](https://github.com/adap/flower/pull/1305), [#1307](https://github.com/adap/flower/pull/1307))
 
