@@ -143,7 +143,7 @@ class FedAvgM(FedAvg):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -177,7 +177,7 @@ class FedAvgM(FedAvg):
                 )
             ]
             if self.server_momentum > 0.0:
-                if rnd > 1:
+                if server_round > 1:
                     assert (
                         self.momentum_vector
                     ), "Momentum should have been created on round 1."
@@ -206,7 +206,7 @@ class FedAvgM(FedAvg):
         if self.fit_metrics_aggregation_fn:
             fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif rnd == 1:  # Only log this warning once
+        elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
