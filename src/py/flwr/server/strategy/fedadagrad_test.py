@@ -77,7 +77,9 @@ def test_aggregate_fit() -> None:
     expected: NDArrays = [array([0.15, 0.15, 0.15, 0.15], dtype=float32)]
 
     # Execute
-    actual_aggregated, _ = strategy.aggregate_fit(rnd=1, results=results, failures=[])
+    actual_aggregated, _ = strategy.aggregate_fit(
+        server_round=1, results=results, failures=[]
+    )
     if actual_aggregated:
         actual_list = parameters_to_ndarrays(actual_aggregated)
         actual = actual_list[0]

@@ -75,7 +75,7 @@ class FlowerClient(fl.client.NumPyClient):
         return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
 
 
-def fit_config(rnd: int) -> Dict[str, Scalar]:
+def fit_config(server_round: int) -> Dict[str, Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
     config = {
         "epochs": 5,  # number of local epochs

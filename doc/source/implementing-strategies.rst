@@ -31,31 +31,37 @@ implemented:
 
         @abstractmethod
         def configure_fit(
-            self, rnd: int, parameters: Parameters, client_manager: ClientManager
+            self,
+            server_round: int,
+            parameters: Parameters,
+            client_manager: ClientManager
         ) -> List[Tuple[ClientProxy, FitIns]]:
             """Configure the next round of training."""
 
         @abstractmethod
         def aggregate_fit(
             self,
-            rnd: int,
+            server_round: int,
             results: List[Tuple[ClientProxy, FitRes]],
-            failures: List[BaseException],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
         ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
             """Aggregate training results."""
 
         @abstractmethod
         def configure_evaluate(
-            self, rnd: int, parameters: Parameters, client_manager: ClientManager
+            self,
+            server_round: int,
+            parameters: Parameters,
+            client_manager: ClientManager
         ) -> List[Tuple[ClientProxy, EvaluateIns]]:
             """Configure the next round of evaluation."""
 
         @abstractmethod
         def aggregate_evaluate(
             self,
-            rnd: int,
+            server_round: int,
             results: List[Tuple[ClientProxy, EvaluateRes]],
-            failures: List[BaseException],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
         ) -> Tuple[Optional[float], Dict[str, Scalar]]:
             """Aggregate evaluation results."""
 
@@ -76,16 +82,16 @@ abstract methods:
         def initialize_parameters(self, client_manager):
             # Your implementation here
 
-        def configure_fit(self, rnd, parameters, client_manager):
+        def configure_fit(self, server_round, parameters, client_manager):
             # Your implementation here
 
-        def aggregate_fit(self, rnd, results, failures):
+        def aggregate_fit(self, server_round, results, failures):
             # Your implementation here
 
-        def configure_evaluate(self, rnd, parameters, client_manager):
+        def configure_evaluate(self, server_round, parameters, client_manager):
             # Your implementation here
 
-        def aggregate_evaluate(self, rnd, results, failures):
+        def aggregate_evaluate(self, server_round, results, failures):
             # Your implementation here
 
         def evaluate(self, parameters):
@@ -198,7 +204,7 @@ Built-in strategies return user-provided initial parameters. The following examp
     strategy = fl.server.strategy.FedAvg(
         initial_parameters=parameters,
     )
-    fl.server.start_server(config={"num_rounds": 3}, strategy=strategy)
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3), strategy=strategy)
 
 The Flower server will call :code:`initialize_parameters`, which either returns the parameters that were passed to :code:`initial_parameters`, or :code:`None`. If no parameters are returned from :code:`initialize_parameters` (i.e., :code:`None`), the server will randomly select one client and ask it to provide its parameters. This is a convenience feature and not recommended in practice, but it can be useful for prototyping. In practice, it is recommended to always use server-side parameter initialization.
 
@@ -215,7 +221,10 @@ The :code:`configure_fit` method
 
     @abstractmethod
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
 
@@ -240,9 +249,9 @@ The :code:`aggregate_fit` method
     @abstractmethod
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results."""
 
@@ -259,7 +268,10 @@ The :code:`configure_evaluate` method
 
     @abstractmethod
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
 
@@ -285,9 +297,9 @@ The :code:`aggregate_evaluate` method
     @abstractmethod
     def aggregate_evaluate(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation results."""
 
