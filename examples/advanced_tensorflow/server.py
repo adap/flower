@@ -51,7 +51,7 @@ def get_eval_fn(model):
 
     # The `evaluate` function will be called after every round
     def evaluate(
-        weights: fl.common.Parameters,
+        weights: fl.common.NDArrays,
     ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
         model.set_weights(weights)  # Update model with the latest parameters
         loss, accuracy = model.evaluate(x_val, y_val)
