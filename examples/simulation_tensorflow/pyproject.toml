@@ -5,7 +5,7 @@ requires = [
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "quickstart_simulation"
+name = "simulation_tensorflow"
 version = "0.1.0"
 description = "Federated Learning Simulation Quickstart with Flower"
 authors = ["The Flower Authors <hello@flower.dev>"]
