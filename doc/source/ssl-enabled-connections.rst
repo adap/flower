@@ -48,7 +48,7 @@ We are now going to show how to write a sever which uses the previously generate
   # Start server
   fl.server.start_server(
       server_address="0.0.0.0:8080",
-      config={"num_rounds": 4},
+      config=fl.server.ServerConfig(num_rounds=4),
       certificates=(
           Path(".cache/certificates/ca.crt").read_bytes(),
           Path(".cache/certificates/server.pem").read_bytes(),

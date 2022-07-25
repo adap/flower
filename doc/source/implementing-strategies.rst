@@ -204,7 +204,7 @@ Built-in strategies return user-provided initial parameters. The following examp
     strategy = fl.server.strategy.FedAvg(
         initial_parameters=parameters,
     )
-    fl.server.start_server(config={"num_rounds": 3}, strategy=strategy)
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3), strategy=strategy)
 
 The Flower server will call :code:`initialize_parameters`, which either returns the parameters that were passed to :code:`initial_parameters`, or :code:`None`. If no parameters are returned from :code:`initialize_parameters` (i.e., :code:`None`), the server will randomly select one client and ask it to provide its parameters. This is a convenience feature and not recommended in practice, but it can be useful for prototyping. In practice, it is recommended to always use server-side parameter initialization.
 
