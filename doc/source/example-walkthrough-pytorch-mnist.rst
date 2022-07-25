@@ -82,7 +82,7 @@ Flower Servers are very customizable, but for simple workloads we can start a se
 
     import flwr as fl
 
-    fl.server.start_server(config={"num_rounds": 3})
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3))
 
 
 Flower Client

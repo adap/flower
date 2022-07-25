@@ -19,7 +19,7 @@ Paper: https://arxiv.org/abs/1602.05629
 """
 
 
-from typing import Callable, Dict, List, Optional, Tuple, cast
+from typing import Callable, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 
@@ -134,13 +134,13 @@ class FedAvgAndroid(Strategy):
         return loss, metrics
 
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
-            config = self.on_fit_config_fn(rnd)
+            config = self.on_fit_config_fn(server_round)
         fit_ins = FitIns(parameters, config)
 
         # Sample clients
@@ -155,7 +155,7 @@ class FedAvgAndroid(Strategy):
         return [(client, fit_ins) for client in clients]
 
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         # Do not configure federated evaluation if fraction_eval is 0
@@ -166,7 +166,7 @@ class FedAvgAndroid(Strategy):
         config = {}
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
-            config = self.on_evaluate_config_fn(rnd)
+            config = self.on_evaluate_config_fn(server_round)
         evaluate_ins = EvaluateIns(parameters, config)
 
         # Sample clients
@@ -182,9 +182,9 @@ class FedAvgAndroid(Strategy):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
@@ -201,9 +201,9 @@ class FedAvgAndroid(Strategy):
 
     def aggregate_evaluate(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
         if not results:

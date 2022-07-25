@@ -123,10 +123,10 @@ def main() -> None:
     )
 
 
-def fit_config(rnd: int) -> Dict[str, fl.common.Scalar]:
+def fit_config(server_round: int) -> Dict[str, fl.common.Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
     config = {
-        "epoch_global": str(rnd),
+        "epoch_global": str(server_round),
         "epochs": str(1),
         "batch_size": str(args.batch_size),
         "num_workers": str(args.num_workers),

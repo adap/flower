@@ -41,6 +41,7 @@ def main(args) -> None:
         initial_parameters=fl.common.weights_to_parameters(model.get_weights()),
     )
     fl.server.start_server(
+        server_address="0.0.0.0:8080",
         strategy=strategy,
         config={"num_rounds": args.num_rounds},
     )

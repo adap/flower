@@ -19,7 +19,7 @@ Paper: https://arxiv.org/pdf/1909.06335.pdf
 
 
 from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
     FitRes,
@@ -143,9 +143,9 @@ class FedAvgM(FedAvg):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
@@ -177,7 +177,7 @@ class FedAvgM(FedAvg):
                 )
             ]
             if self.server_momentum > 0.0:
-                if rnd > 1:
+                if server_round > 1:
                     assert (
                         self.momentum_vector
                     ), "Momentum should have been created on round 1."
@@ -206,7 +206,7 @@ class FedAvgM(FedAvg):
         if self.fit_metrics_aggregation_fn:
             fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif rnd == 1:  # Only log this warning once
+        elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated

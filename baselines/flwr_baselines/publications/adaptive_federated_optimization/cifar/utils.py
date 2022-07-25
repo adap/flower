@@ -452,10 +452,10 @@ def gen_on_fit_config_fn(
         Callable[[int], Dict[str, Scalar]]: Function to be called at the beginnig of each rounds.
     """
 
-    def on_fit_config(rnd: int) -> Dict[str, Scalar]:
+    def on_fit_config(server_round: int) -> Dict[str, Scalar]:
         """Return a configuration with specific client learning rate."""
         local_config = {
-            "epoch_global": rnd,
+            "epoch_global": server_round,
             "epochs": epochs_per_round,
             "batch_size": batch_size,
             "client_learning_rate": client_learning_rate,
