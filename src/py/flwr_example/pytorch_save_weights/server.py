@@ -63,7 +63,7 @@ def main() -> None:
 
     # Run server
     fl.server.start_server(
-        config={"num_rounds": 3},
+        config=fl.server.ServerConfig(num_rounds=3),
         strategy=strategy,
     )
 
