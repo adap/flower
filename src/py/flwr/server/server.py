@@ -48,7 +48,7 @@ EvaluateResultsAndFailures = Tuple[
 ]
 ReconnectResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, DisconnectRes]],
-    List[BaseException],
+    List[Union[Tuple[ClientProxy, DisconnectRes], BaseException]],
 ]
 
 
@@ -293,7 +293,7 @@ def reconnect_clients(
 
     # Gather results
     results: List[Tuple[ClientProxy, DisconnectRes]] = []
-    failures: List[BaseException] = []
+    failures: List[Union[Tuple[ClientProxy, DisconnectRes], BaseException]] = []
     for future in finished_fs:
         failure = future.exception()
         if failure is not None:

@@ -19,7 +19,7 @@ Paper: https://arxiv.org/abs/2003.00295
 """
 
 
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -131,7 +131,7 @@ class FedYogi(FedOpt):
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         fedavg_parameters_aggregated, metrics_aggregated = super().aggregate_fit(

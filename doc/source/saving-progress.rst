@@ -21,7 +21,7 @@ It then continues to save returned (aggregated) weights before it returns those 
             self,
             server_round: int,
             results: List[Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
-            failures: List[BaseException],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
         ) -> Optional[fl.common.Weights]:
             aggregated_weights = super().aggregate_fit(server_round, results, failures)
             if aggregated_weights is not None:
@@ -74,7 +74,7 @@ The server can then use a customized strategy to aggregate the metrics provided 
             self,
             server_round: int,
             results: List[Tuple[ClientProxy, EvaluateRes]],
-            failures: List[BaseException],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
         ) -> Optional[float]:
             """Aggregate evaluation losses using weighted average."""
             if not results:

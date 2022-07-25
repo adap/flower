@@ -19,7 +19,7 @@ Paper: https://arxiv.org/pdf/1909.06335.pdf
 
 
 from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
     FitRes,
@@ -145,7 +145,7 @@ class FedAvgM(FedAvg):
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
