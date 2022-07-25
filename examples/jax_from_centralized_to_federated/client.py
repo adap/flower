@@ -29,7 +29,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.test_x = test_x
         self.test_y = test_y
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         # Return model parameters as a list of NumPy ndarrays
         parameter_value = []
         for _, val in self.params.items():
@@ -57,7 +57,7 @@ class FlowerClient(fl.client.NumPyClient):
         )
         results = {"loss": float(loss)}
         print("Training results", results)
-        return self.get_parameters(), num_examples, results
+        return self.get_parameters({}), num_examples, results
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict
