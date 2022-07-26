@@ -59,11 +59,22 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
   Instead of a config dictionary `{"num_rounds": 3, "round_timeout": 600.0}`, `start_server` and `start_simulation` now expect a configuration object of type `flwr.server.ServerConfig`. `ServerConfig` takes the same arguments that as the previous config dict, but it makes writing type-safe code easier and the default parameters values more transparent.
 
+- **Rename built-in strategy parameters for clarity** ([#1334](https://github.com/adap/flower/pull/1334))
+
+  The following built-in strategy parameters were renamed to improve readability and consistency with other API's:
+  - `fraction_eval` --> `fraction_evaluate`
+  - `min_eval_clients` --> `min_evaluate_clients`
+  - `eval_fn` --> `evaluate_fn`
+
 - **Update default arguments of built-in strategies** ([#1278](https://github.com/adap/flower/pull/1278))
 
   All built-in strategies now use `fraction_fit=1.0` and `fraction_evaluate=1.0`, which means they select *all* currently available clients for training and evaluation. Projects that relied on the previous default values can get the previous behaviour by initializing the strategy in the following way:
 
   `strategy = FedAvg(fraction_fit=1.0, fraction_evaluate=1.0)`
+
+- **Add** `server_round` **to** `Strategy.evaluate` ([#1334](https://github.com/adap/flower/pull/1334))
+
+  The `Strategy` method `evaluate` now receives the current round of federated learning/evaluation as the first parameter.
 
 - **Rename** `rnd` **to** `server_round` ([#1321](https://github.com/adap/flower/pull/1321))
 
