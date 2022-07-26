@@ -22,7 +22,7 @@ from typing import Callable, Dict, Optional
 
 import flwr as fl
 from flwr.common.logger import configure, log
-from flwr_experimental.baseline.common import get_eval_fn
+from flwr_experimental.baseline.common import get_evaluate_fn
 from flwr_experimental.baseline.dataset import tf_cifar_partitioned
 from flwr_experimental.baseline.model import resnet50v2
 from flwr_experimental.baseline.tf_cifar.settings import SETTINGS, get_setting
@@ -70,7 +70,7 @@ def main() -> None:
     model = resnet50v2(input_shape=(32, 32, 3), num_classes=NUM_CLASSES, seed=SEED)
 
     # Strategy
-    eval_fn = get_eval_fn(
+    evaluate_fn = get_evaluate_fn(
         model=model, num_classes=NUM_CLASSES, xy_test=(x_test, y_test)
     )
     fit_config_fn = get_on_fit_config_fn(
@@ -84,7 +84,7 @@ def main() -> None:
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=fit_config_fn,
         )
 
@@ -97,7 +97,7 @@ def main() -> None:
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=fit_config_fn,
             importance_sampling=server_setting.importance_sampling,
             dynamic_timeout=server_setting.dynamic_timeout,

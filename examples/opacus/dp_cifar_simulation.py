@@ -51,7 +51,7 @@ def client_fn(cid: str) -> fl.client.Client:
 
 
 # Define an evaluation function for centralized evaluation (using whole CIFAR10 testset).
-def get_eval_fn() -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
+def get_evaluate_fn() -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
     def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
         transform = transforms.Compose(
             [
@@ -86,7 +86,7 @@ def main() -> None:
         client_resources={"num_cpus": 1},
         num_rounds=3,
         strategy=fl.server.strategy.FedAvg(
-            fraction_fit=0.1, fraction_eval=0.1, eval_fn=get_eval_fn()
+            fraction_fit=0.1, fraction_evaluate=0.1, evaluate_fn=get_evaluate_fn()
         ),
     )
 

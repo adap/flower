@@ -61,9 +61,9 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
 - **Update default arguments of built-in strategies** ([#1278](https://github.com/adap/flower/pull/1278))
 
-  All built-in strategies now use `fraction_fit=1.0` and `fraction_eval=1.0`, which means they select *all* currently available clients for training and evaluation. Projects that relied on the previous default values can get the previous behaviour by initializing the strategy in the following way:
+  All built-in strategies now use `fraction_fit=1.0` and `fraction_evaluate=1.0`, which means they select *all* currently available clients for training and evaluation. Projects that relied on the previous default values can get the previous behaviour by initializing the strategy in the following way:
 
-  `strategy = FedAvg(fraction_fit=1.0, fraction_eval=1.0)`
+  `strategy = FedAvg(fraction_fit=1.0, fraction_evaluate=1.0)`
 
 - **Rename** `rnd` **to** `server_round` ([#1321](https://github.com/adap/flower/pull/1321))
 

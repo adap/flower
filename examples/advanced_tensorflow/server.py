@@ -17,11 +17,11 @@ def main() -> None:
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.3,
-        fraction_eval=0.2,
+        fraction_evaluate=0.2,
         min_fit_clients=3,
-        min_eval_clients=2,
+        min_evaluate_clients=2,
         min_available_clients=10,
-        eval_fn=get_eval_fn(model),
+        evaluate_fn=get_evaluate_fn(model),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
         initial_parameters=fl.common.weights_to_parameters(model.get_weights()),
@@ -40,7 +40,7 @@ def main() -> None:
     )
 
 
-def get_eval_fn(model):
+def get_evaluate_fn(model):
     """Return an evaluation function for server-side evaluation."""
 
     # Load data and model here to avoid the overhead of doing it in `evaluate` itself
