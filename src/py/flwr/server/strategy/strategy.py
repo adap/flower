@@ -163,7 +163,7 @@ class Strategy(ABC):
 
     @abstractmethod
     def evaluate(
-        self, parameters: Parameters
+        self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate the current model parameters.
 
@@ -172,6 +172,8 @@ class Strategy(ABC):
 
         Parameters
         ----------
+        server_round : int
+            The current round of federated learning.
         parameters: Parameters
             The current (global) model parameters.
 

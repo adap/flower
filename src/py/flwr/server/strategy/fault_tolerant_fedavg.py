@@ -42,12 +42,15 @@ class FaultTolerantFedAvg(FedAvg):
     def __init__(
         self,
         fraction_fit: float = 1.0,
-        fraction_eval: float = 1.0,
+        fraction_evaluate: float = 1.0,
         min_fit_clients: int = 1,
-        min_eval_clients: int = 1,
+        min_evaluate_clients: int = 1,
         min_available_clients: int = 1,
-        eval_fn: Optional[
-            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn: Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -59,11 +62,11 @@ class FaultTolerantFedAvg(FedAvg):
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
-            fraction_eval=fraction_eval,
+            fraction_evaluate=fraction_evaluate,
             min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
+            min_evaluate_clients=min_evaluate_clients,
             min_available_clients=min_available_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=True,
