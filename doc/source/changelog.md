@@ -76,6 +76,10 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
   The `Strategy` method `evaluate` now receives the current round of federated learning/evaluation as the first parameter.
 
+- **Add** `server_round` **and** `config` **parameters to** `evaluate_fn` ([#1334](https://github.com/adap/flower/pull/1334))
+
+  The `evaluate_fn` passed to built-in strategies like `FedAvg` now takes three parameters: (1) The current round of federated learning/evaluation (`server_round`), (2) the model parameters to evaluate (`parameters`), and (3) a config dictionary (`config`).
+
 - **Rename** `rnd` **to** `server_round` ([#1321](https://github.com/adap/flower/pull/1321))
 
   Several Flower methods and functions (`evaluate_fn`, `configure_fit`, `aggregate_fit`, `configure_evaluate`, `aggregate_evaluate`) receive the current round of federated learning/evaluation as their first parameter. To improve reaability and avoid confusion with *random*, this parameter has been renamed from `rnd` to `server_round`.

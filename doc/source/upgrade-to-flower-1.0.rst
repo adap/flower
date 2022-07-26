@@ -48,6 +48,11 @@ Strategies / ``start_server`` / ``start_simulation``
   - ``min_eval_clients`` --> ``min_evaluate_clients``
   - ``eval_fn`` --> ``evaluate_fn``
 
+- Add ``server_round`` and ``config`` to ``evaluate_fn``:
+
+  - Flower 0.19: ``def evaluate(parameters: NDArrays) -> Optional[Tuple[float, Dict[str, Scalar]]]:``
+  - Flower 1.0: ``def evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]) -> Optional[Tuple[float, Dict[str, Scalar]]]:``
+
 Custom strategies
 ~~~~~~~~~~~~~~~~~
 
