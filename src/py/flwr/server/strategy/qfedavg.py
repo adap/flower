@@ -53,12 +53,15 @@ class QFedAvg(FedAvg):
         q_param: float = 0.2,
         qffl_learning_rate: float = 0.1,
         fraction_fit: float = 1.0,
-        fraction_eval: float = 1.0,
+        fraction_evaluate: float = 1.0,
         min_fit_clients: int = 1,
-        min_eval_clients: int = 1,
+        min_evaluate_clients: int = 1,
         min_available_clients: int = 1,
-        eval_fn: Optional[
-            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn: Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -69,11 +72,11 @@ class QFedAvg(FedAvg):
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
-            fraction_eval=fraction_eval,
+            fraction_evaluate=fraction_evaluate,
             min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
+            min_evaluate_clients=min_evaluate_clients,
             min_available_clients=min_available_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
@@ -82,11 +85,11 @@ class QFedAvg(FedAvg):
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
         self.min_fit_clients = min_fit_clients
-        self.min_eval_clients = min_eval_clients
+        self.min_evaluate_clients = min_evaluate_clients
         self.fraction_fit = fraction_fit
-        self.fraction_eval = fraction_eval
+        self.fraction_evaluate = fraction_evaluate
         self.min_available_clients = min_available_clients
-        self.eval_fn = eval_fn
+        self.evaluate_fn = evaluate_fn
         self.on_fit_config_fn = on_fit_config_fn
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
@@ -110,8 +113,8 @@ class QFedAvg(FedAvg):
 
     def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
-        num_clients = int(num_available_clients * self.fraction_eval)
-        return max(num_clients, self.min_eval_clients), self.min_available_clients
+        num_clients = int(num_available_clients * self.fraction_evaluate)
+        return max(num_clients, self.min_evaluate_clients), self.min_available_clients
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -141,8 +144,8 @@ class QFedAvg(FedAvg):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        # Do not configure federated evaluation if fraction_eval is 0
-        if self.fraction_eval == 0.0:
+        # Do not configure federated evaluation if fraction_evaluate is 0
+        if self.fraction_evaluate == 0.0:
             return []
 
         # Parameters and config
@@ -196,7 +199,9 @@ class QFedAvg(FedAvg):
             raise Exception("QffedAvg pre_weights are None in aggregate_fit")
 
         weights_before = self.pre_weights
-        eval_result = self.evaluate(ndarrays_to_parameters(weights_before))
+        eval_result = self.evaluate(
+            server_round, ndarrays_to_parameters(weights_before)
+        )
         if eval_result is not None:
             loss, _ = eval_result
 

@@ -198,7 +198,7 @@ Built-in strategies return user-provided initial parameters. The following examp
     weights = model.get_weights()
 
     # Serialize ndarrays to `Parameters`
-    parameters = fl.common.weights_to_parameters(weights)
+    parameters = fl.common.ndarrays_to_parameters(weights)
 
     # Use the serialized parameters as the initial global parameters 
     strategy = fl.server.strategy.FedAvg(
