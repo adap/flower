@@ -86,7 +86,7 @@ class Server:
         log(INFO, "Initializing global parameters")
         self.parameters = self._get_initial_parameters(timeout=timeout)
         log(INFO, "Evaluating initial parameters")
-        res = self.strategy.evaluate(parameters=self.parameters)
+        res = self.strategy.evaluate(0, parameters=self.parameters)
         if res is not None:
             log(
                 INFO,
@@ -110,7 +110,7 @@ class Server:
                     self.parameters = parameters_prime
 
             # Evaluate model using strategy implementation
-            res_cen = self.strategy.evaluate(parameters=self.parameters)
+            res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
                 log(
