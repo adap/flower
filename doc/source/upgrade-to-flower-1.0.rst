@@ -23,19 +23,44 @@ Required changes
 
 A few breaking changes require small manual updates:
 
+Client
+~~~~~~
+
 - Subclasses of ``NumPyClient``: change ``def get_parameters(self):``` to ``def get_parameters(self, config):``
 - Subclasses of ``Client``: change ``def get_parameters(self):``` to ``def get_parameters(self, ins: GetParametersIns):``
-- Replate ``num_rounds=1`` in ``start_simulation`` with the new ``config=ServerConfig(...)`` (see next item)
+
+Strategies / ``start_server`` / ``start_simulation``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 - Pass ``ServerConfig`` (instead of a dictionary) to ``start_server`` and ``start_simulation``. Here's an example:
 
   - Flower 0.19: ``start_server(..., config={"num_rounds": 3, "round_timeout": 600.0}, ...)``
   - Flower 1.0: ``start_server(..., config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), ...)``
 
-- Rename ``parameters_to_weights`` to ``parameters_to_ndarrays`` and ``weights_to_parameters`` to ``ndarrays_to_parameters``
-- Strategy initialization: if the strategy relies on the default values for ``fraction_fit`` and ``fraction_eval``, set ``fraction_fit`` and ``fraction_eval`` manually to ``0.1``. Projects that do not manually create a strategy (by calling ``start_server`` or ``start_simulation`` without passing a strategy instance) should now initialize FedAvg with ``fraction_fit`` and ``fraction_eval`` set to ``0.1``.
+- Replate ``num_rounds=1`` in ``start_simulation`` with the new ``config=ServerConfig(...)`` (see next item)
 - Remove ``force_final_distributed_eval`` parameter from calls to ``start_server``. Distributed evaluation on all clients can be enabled by configuring the strategy to sample all clients for evaluation after the last round of training.
+- Rename ``parameters_to_weights`` to ``parameters_to_ndarrays`` and ``weights_to_parameters`` to ``ndarrays_to_parameters``
+- Strategy initialization: if the strategy relies on the default values for ``fraction_fit`` and ``fraction_evaluate``, set ``fraction_fit`` and ``fraction_evaluate`` manually to ``0.1``. Projects that do not manually create a strategy (by calling ``start_server`` or ``start_simulation`` without passing a strategy instance) should now initialize FedAvg with ``fraction_fit`` and ``fraction_evaluate`` set to ``0.1``.
 - Rename ``rnd`` to ``server_round`` (``evaluate_fn``, ``configure_fit``, ``aggregate_fit``, ``configure_evaluate``, ``aggregate_evaluate``)
-- Custom strategies: the type of parameter ``failures`` has changed from ``List[BaseException]`` to ``List[Union[Tuple[ClientProxy, FitRes], BaseException]]`` (in ``aggregate_fit``) and ``List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]`` (in ``aggregate_evaluate``)
+- Rename built-in strategy parameters (e.g., ``FedAvg``):
+
+  - ``fraction_eval`` --> ``fraction_evaluate``
+  - ``min_eval_clients`` --> ``min_evaluate_clients``
+  - ``eval_fn`` --> ``evaluate_fn``
+
+- Add ``server_round`` and ``config`` to ``evaluate_fn``:
+
+  - Flower 0.19: ``def evaluate(parameters: NDArrays) -> Optional[Tuple[float, Dict[str, Scalar]]]:``
+  - Flower 1.0: ``def evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]) -> Optional[Tuple[float, Dict[str, Scalar]]]:``
+
+Custom strategies
+~~~~~~~~~~~~~~~~~
+
+- The type of parameter ``failures`` has changed from ``List[BaseException]`` to ``List[Union[Tuple[ClientProxy, FitRes], BaseException]]`` (in ``aggregate_fit``) and ``List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]`` (in ``aggregate_evaluate``)
+- The ``Strategy`` method ``evaluate`` now receives the current round of federated learning/evaluation as the first parameter:
+
+  - Flower 0.19: ``def evaluate(self, parameters: Parameters) -> Optional[Tuple[float, Dict[str, Scalar]]]:``
+  - Flower 1.0: ``def evaluate(self, server_round: int, parameters: Parameters) -> Optional[Tuple[float, Dict[str, Scalar]]]:``
 
 Optional improvements
 ---------------------

@@ -47,12 +47,15 @@ class FedAvgAndroid(Strategy):
     def __init__(
         self,
         fraction_fit: float = 1.0,
-        fraction_eval: float = 1.0,
+        fraction_evaluate: float = 1.0,
         min_fit_clients: int = 2,
-        min_eval_clients: int = 2,
+        min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        eval_fn: Optional[
-            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn: Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -63,34 +66,42 @@ class FedAvgAndroid(Strategy):
 
         Implementation based on https://arxiv.org/abs/1602.05629
 
-        Args:
-            fraction_fit (float, optional): Fraction of clients used during
-                training. Defaults to 0.1.
-            fraction_eval (float, optional): Fraction of clients used during
-                validation. Defaults to 0.1.
-            min_fit_clients (int, optional): Minimum number of clients used
-                during training. Defaults to 2.
-            min_eval_clients (int, optional): Minimum number of clients used
-                during validation. Defaults to 2.
-            min_available_clients (int, optional): Minimum number of total
-                clients in the system. Defaults to 2.
-            eval_fn : Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
-                Optional function used for validation. Defaults to None.
-            on_fit_config_fn (Callable[[int], Dict[str, Scalar]], optional):
-                Function used to configure training. Defaults to None.
-            on_evaluate_config_fn (Callable[[int], Dict[str, Scalar]], optional):
-                Function used to configure validation. Defaults to None.
-            accept_failures (bool, optional): Whether or not accept rounds
-                containing failures. Defaults to True.
-            initial_parameters (Parameters, optional): Initial global model parameters.
+        Parameters
+        ----------
+        fraction_fit : Optional[float]
+            Fraction of clients used during training. Defaults to 0.1.
+        fraction_evaluate : Optional[float]
+            Fraction of clients used during validation. Defaults to 0.1.
+        min_fit_clients : Optional[int]
+            Minimum number of clients used during training. Defaults to 2.
+        min_evaluate_clients : Optional[int]
+            Minimum number of clients used during validation. Defaults to 2.
+        min_available_clients : Optional[int]
+            Minimum number of total clients in the system. Defaults to 2.
+        evaluate_fn : Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]]
+            ]
+        ]
+            Optional function used for validation. Defaults to None.
+        on_fit_config_fn : Optional[Callable[[int], Dict[str, Scalar]]]
+            Function used to configure training. Defaults to None.
+        on_evaluate_config_fn : Optional[Callable[[int], Dict[str, Scalar]]]
+            Function used to configure validation. Defaults to None.
+        accept_failures : Optional[bool]
+            Whether or not accept rounds
+            containing failures. Defaults to True.
+        initial_parameters : Optional[Parameters]
+            Initial global model parameters.
         """
         super().__init__()
         self.min_fit_clients = min_fit_clients
-        self.min_eval_clients = min_eval_clients
+        self.min_evaluate_clients = min_evaluate_clients
         self.fraction_fit = fraction_fit
-        self.fraction_eval = fraction_eval
+        self.fraction_evaluate = fraction_evaluate
         self.min_available_clients = min_available_clients
-        self.eval_fn = eval_fn
+        self.evaluate_fn = evaluate_fn
         self.on_fit_config_fn = on_fit_config_fn
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
@@ -108,8 +119,8 @@ class FedAvgAndroid(Strategy):
 
     def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
-        num_clients = int(num_available_clients * self.fraction_eval)
-        return max(num_clients, self.min_eval_clients), self.min_available_clients
+        num_clients = int(num_available_clients * self.fraction_evaluate)
+        return max(num_clients, self.min_evaluate_clients), self.min_available_clients
 
     def initialize_parameters(
         self, client_manager: ClientManager
@@ -120,14 +131,14 @@ class FedAvgAndroid(Strategy):
         return initial_parameters
 
     def evaluate(
-        self, parameters: Parameters
+        self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
-        if self.eval_fn is None:
+        if self.evaluate_fn is None:
             # No evaluation function provided
             return None
         weights = self.parameters_to_ndarrays(parameters)
-        eval_res = self.eval_fn(weights)
+        eval_res = self.evaluate_fn(server_round, weights, {})
         if eval_res is None:
             return None
         loss, metrics = eval_res
@@ -158,8 +169,8 @@ class FedAvgAndroid(Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        # Do not configure federated evaluation if fraction_eval is 0
-        if self.fraction_eval == 0.0:
+        # Do not configure federated evaluation if fraction_evaluate is 0
+        if self.fraction_evaluate == 0.0:
             return []
 
         # Parameters and config

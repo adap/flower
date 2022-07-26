@@ -96,7 +96,7 @@ def set_params(model: torch.nn.ModuleList, params: List[np.ndarray]):
     model.load_state_dict(state_dict, strict=True)
 
 
-def get_eval_fn(
+def get_evaluate_fn(
     testset: torchvision.datasets.CIFAR10,
 ) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
@@ -155,12 +155,12 @@ if __name__ == "__main__":
     # configure the strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.1,
-        fraction_eval=0.1,
+        fraction_evaluate=0.1,
         min_fit_clients=10,
-        min_eval_clients=10,
+        min_evaluate_clients=10,
         min_available_clients=pool_size,  # All clients should be available
         on_fit_config_fn=fit_config,
-        eval_fn=get_eval_fn(testset),  # centralised testset evaluation of global model
+        evaluate_fn=get_evaluate_fn(testset),  # centralised evaluation of global model
     )
 
     def client_fn(cid: str):
