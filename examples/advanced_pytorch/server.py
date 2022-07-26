@@ -37,7 +37,7 @@ def evaluate_config(server_round: int):
     return {"val_steps": val_steps}
 
 
-def get_eval_fn(model: torch.nn.Module, toy: bool):
+def get_evaluate_fn(model: torch.nn.Module, toy: bool):
     """Return an evaluation function for server-side evaluation."""
 
     # Load data and model here to avoid the overhead of doing it in `evaluate` itself
@@ -93,11 +93,11 @@ def main():
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.2,
-        fraction_eval=0.2,
+        fraction_evaluate=0.2,
         min_fit_clients=2,
-        min_eval_clients=2,
+        min_evaluate_clients=2,
         min_available_clients=10,
-        eval_fn=get_eval_fn(model, args.toy),
+        evaluate_fn=get_evaluate_fn(model, args.toy),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
         initial_parameters=fl.common.weights_to_parameters(model_weights),

@@ -42,9 +42,9 @@ from .strategy import Strategy
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
-`min_eval_clients` can cause the server to fail when there are too few clients
+`min_evaluate_clients` can cause the server to fail when there are too few clients
 connected to the server. `min_available_clients` must be set to a value larger
-than or equal to the values of `min_fit_clients` and `min_eval_clients`.
+than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 """
 
 
@@ -55,12 +55,15 @@ class FedAvg(Strategy):
     def __init__(
         self,
         fraction_fit: float = 1.0,
-        fraction_eval: float = 1.0,
+        fraction_evaluate: float = 1.0,
         min_fit_clients: int = 2,
-        min_eval_clients: int = 2,
+        min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        eval_fn: Optional[
-            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn: Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -77,15 +80,20 @@ class FedAvg(Strategy):
         ----------
         fraction_fit : float, optional
             Fraction of clients used during training. Defaults to 0.1.
-        fraction_eval : float, optional
+        fraction_evaluate : float, optional
             Fraction of clients used during validation. Defaults to 0.1.
         min_fit_clients : int, optional
             Minimum number of clients used during training. Defaults to 2.
-        min_eval_clients : int, optional
+        min_evaluate_clients : int, optional
             Minimum number of clients used during validation. Defaults to 2.
         min_available_clients : int, optional
             Minimum number of total clients in the system. Defaults to 2.
-        eval_fn : Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn : Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]]
+            ]
+        ]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
             Function used to configure training. Defaults to None.
@@ -104,16 +112,16 @@ class FedAvg(Strategy):
 
         if (
             min_fit_clients > min_available_clients
-            or min_eval_clients > min_available_clients
+            or min_evaluate_clients > min_available_clients
         ):
             log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
         self.fraction_fit = fraction_fit
-        self.fraction_eval = fraction_eval
+        self.fraction_evaluate = fraction_evaluate
         self.min_fit_clients = min_fit_clients
-        self.min_eval_clients = min_eval_clients
+        self.min_evaluate_clients = min_evaluate_clients
         self.min_available_clients = min_available_clients
-        self.eval_fn = eval_fn
+        self.evaluate_fn = evaluate_fn
         self.on_fit_config_fn = on_fit_config_fn
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
@@ -133,8 +141,8 @@ class FedAvg(Strategy):
 
     def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
-        num_clients = int(num_available_clients * self.fraction_eval)
-        return max(num_clients, self.min_eval_clients), self.min_available_clients
+        num_clients = int(num_available_clients * self.fraction_evaluate)
+        return max(num_clients, self.min_evaluate_clients), self.min_available_clients
 
     def initialize_parameters(
         self, client_manager: ClientManager
@@ -145,14 +153,14 @@ class FedAvg(Strategy):
         return initial_parameters
 
     def evaluate(
-        self, parameters: Parameters
+        self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
-        if self.eval_fn is None:
+        if self.evaluate_fn is None:
             # No evaluation function provided
             return None
         parameters_ndarrays = parameters_to_ndarrays(parameters)
-        eval_res = self.eval_fn(parameters_ndarrays)
+        eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {})
         if eval_res is None:
             return None
         loss, metrics = eval_res
@@ -184,7 +192,7 @@ class FedAvg(Strategy):
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         # Do not configure federated evaluation if fraction eval is 0.
-        if self.fraction_eval == 0.0:
+        if self.fraction_evaluate == 0.0:
             return []
 
         # Parameters and config
