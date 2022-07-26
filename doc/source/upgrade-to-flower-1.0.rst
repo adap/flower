@@ -1,22 +1,22 @@
 Upgrade to Flower 1.0
 =====================
 
-Flower 1.0 is finally here! Along with new features, Flower 1.0 provides a stable foundation for future growth. Compared to Flower 0.19 (and other 0.x series releases), there are a few breaking changes that might make it necessary to change the code of existing 0.x-series projects.
+Flower 1.0 is here! Along with new features, Flower 1.0 provides a stable foundation for future growth. Compared to Flower 0.19 (and other 0.x series releases), there are a few breaking changes that might make it necessary to change the code of existing 0.x-series projects.
 
 Install update
 --------------
 
-Installing Flower ``1.0.0a0`` requires you to tell the dependency management tool (pip, Poetry, ...) to install pre-releases. Here's how that works for pip and Poetry:
+Here's how to update to Flower 1.0 using either pip or Poetry:
 
-- pip: add ``-U --pre`` when installing.
+- pip: add ``-U`` when installing.
 
-  - ``python -m pip install -U --pre flwr`` (when using ``start_server`` and ``start_client``)
-  - ``python -m pip install -U --pre flwr[simulation]`` (when using ``start_simulation``)
+  - ``python -m pip install -U flwr`` (when using ``start_server`` and ``start_client``)
+  - ``python -m pip install -U flwr[simulation]`` (when using ``start_simulation``)
 
 - Poetry: update the ``flwr`` dependency in ``pyproject.toml`` and then reinstall (don't forget to delete ``poetry.lock`` (``rm poetry.lock``) before running ``poetry install``).
 
-  - ``flwr = { version = "1.0.0a0", allow-prereleases = true }`` (when using ``start_server`` and ``start_client``)
-  - ``flwr = { version = "1.0.0a0", allow-prereleases = true, extras = ["simulation"] }`` (when using ``start_simulation``)
+  - ``flwr = "^1.0.0"`` (when using ``start_server`` and ``start_client``)
+  - ``flwr = { version = "^1.0.0", extras = ["simulation"] }`` (when using ``start_simulation``)
 
 Required changes
 ----------------

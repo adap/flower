@@ -29,9 +29,9 @@ RUN apt install -y curl wget gnupg python3 python-is-python3 python3-pip git \
     build-essential clang-format tmux vim
 
 RUN python -m pip install \
-    pip==22.0.4 \
-    setuptools==60.9.3 \
-    poetry==1.1.13
+    pip==22.2 \
+    setuptools==63.2.0 \
+    poetry==1.1.14
 
 USER $USERNAME
 ENV PATH="/home/$USERNAME/.local/bin:${PATH}"
