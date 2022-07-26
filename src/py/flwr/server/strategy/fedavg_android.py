@@ -52,7 +52,10 @@ class FedAvgAndroid(Strategy):
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
         evaluate_fn: Optional[
-            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -75,7 +78,12 @@ class FedAvgAndroid(Strategy):
             Minimum number of clients used during validation. Defaults to 2.
         min_available_clients : Optional[int]
             Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn : Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]]
+            ]
+        ]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Optional[Callable[[int], Dict[str, Scalar]]]
             Function used to configure training. Defaults to None.
@@ -130,7 +138,7 @@ class FedAvgAndroid(Strategy):
             # No evaluation function provided
             return None
         weights = self.parameters_to_ndarrays(parameters)
-        eval_res = self.evaluate_fn(weights)
+        eval_res = self.evaluate_fn(server_round, weights, {})
         if eval_res is None:
             return None
         loss, metrics = eval_res

@@ -47,7 +47,10 @@ class FaultTolerantFedAvg(FedAvg):
         min_evaluate_clients: int = 1,
         min_available_clients: int = 1,
         evaluate_fn: Optional[
-            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
