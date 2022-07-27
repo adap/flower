@@ -55,6 +55,10 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
 ### Incompatible changes
 
+- **All arguments must be passed as keyword arguments** ([#1338](https://github.com/adap/flower/pull/1338))
+
+  Pass all arguments as keyword arguments, positional arguments are not longer supported. Code that uses positional arguments (e.g., ``start_client("127.0.0.1:8080", FlowerClient())``) must add the keyword for each positional argument (e.g., ``start_client(server_address="127.0.0.1:8080", client=FlowerClient())``).
+
 - **Introduce configuration object** `ServerConfig` **in** `start_server` **and** `start_simulation` ([#1317](https://github.com/adap/flower/pull/1317))
 
   Instead of a config dictionary `{"num_rounds": 3, "round_timeout": 600.0}`, `start_server` and `start_simulation` now expect a configuration object of type `flwr.server.ServerConfig`. `ServerConfig` takes the same arguments that as the previous config dict, but it makes writing type-safe code easier and the default parameters values more transparent.
