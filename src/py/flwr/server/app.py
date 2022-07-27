@@ -43,6 +43,7 @@ class ServerConfig:
 
 
 def start_server(  # pylint: disable=too-many-arguments
+    *,
     server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,

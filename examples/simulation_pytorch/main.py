@@ -31,7 +31,7 @@ class FlowerClient(fl.client.NumPyClient):
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         return get_params(self.net)
 
     def fit(self, parameters, config):
@@ -98,17 +98,19 @@ def set_params(model: torch.nn.ModuleList, params: List[np.ndarray]):
 
 def get_evaluate_fn(
     testset: torchvision.datasets.CIFAR10,
-) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
+) -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
-    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(
+        server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]
+    ) -> Optional[Tuple[float, float]]:
         """Use the entire CIFAR-10 test set for evaluation."""
 
         # determine device
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         model = Net()
-        set_params(model, weights)
+        set_params(model, parameters)
         model.to(device)
 
         testloader = torch.utils.data.DataLoader(testset, batch_size=50)
@@ -175,7 +177,7 @@ if __name__ == "__main__":
         client_fn=client_fn,
         num_clients=pool_size,
         client_resources=client_resources,
-        num_rounds=args.num_rounds,
+        config=fl.server.ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
         ray_init_args=ray_init_args,
     )
