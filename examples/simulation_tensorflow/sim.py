@@ -65,9 +65,9 @@ def main() -> None:
         num_rounds=5,
         strategy=fl.server.strategy.FedAvg(
             fraction_fit=0.1,
-            fraction_eval=0.1,
+            fraction_evaluate=0.1,
             min_fit_clients=10,
-            min_eval_clients=10,
+            min_evaluate_clients=10,
             min_available_clients=NUM_CLIENTS,
         ),
     )

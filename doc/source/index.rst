@@ -86,6 +86,7 @@ intended to help along the way.
 
    getting-started-for-contributors
    good-first-contributions
+   contributor-setup
    architecture
    secagg
    release-process

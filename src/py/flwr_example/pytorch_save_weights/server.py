@@ -57,7 +57,7 @@ def main() -> None:
         fraction_fit=1.0,
         min_fit_clients=2,
         min_available_clients=2,
-        eval_fn=get_eval_fn(testloader),
+        evaluate_fn=get_evaluate_fn(testloader),
         on_fit_config_fn=fit_config,
     )
 
@@ -78,7 +78,7 @@ def fit_config(server_round: int) -> Dict[str, fl.common.Scalar]:
     return config
 
 
-def get_eval_fn(
+def get_evaluate_fn(
     testloader: torch.utils.data.DataLoader,
 ) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
