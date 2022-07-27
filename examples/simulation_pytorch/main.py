@@ -101,7 +101,9 @@ def get_evaluate_fn(
 ) -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
-    def evaluate(parameters: fl.common.NDArrays) -> Optional[Tuple[float, float]]:
+    def evaluate(
+        server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]
+    ) -> Optional[Tuple[float, float]]:
         """Use the entire CIFAR-10 test set for evaluation."""
 
         # determine device
