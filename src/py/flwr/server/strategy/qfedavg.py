@@ -50,6 +50,7 @@ class QFedAvg(FedAvg):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
+        *,
         q_param: float = 0.2,
         qffl_learning_rate: float = 0.1,
         fraction_fit: float = 1.0,
