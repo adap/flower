@@ -57,7 +57,7 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
 - **All arguments must be passed as keyword arguments** ([#1338](https://github.com/adap/flower/pull/1338))
 
-  Pass all arguments as keyword arguments, positional arguments are not longer supported. Code that uses positional argumetns (e.g., ``start_client("127.0.0.1:8080", FlowerClient())``) must add the the keyword for each positional argument (e.g., ``start_client(server_address="127.0.0.1:8080", client=FlowerClient())``).
+  Pass all arguments as keyword arguments, positional arguments are not longer supported. Code that uses positional arguments (e.g., ``start_client("127.0.0.1:8080", FlowerClient())``) must add the keyword for each positional argument (e.g., ``start_client(server_address="127.0.0.1:8080", client=FlowerClient())``).
 
 - **Introduce configuration object** `ServerConfig` **in** `start_server` **and** `start_simulation` ([#1317](https://github.com/adap/flower/pull/1317))
 
