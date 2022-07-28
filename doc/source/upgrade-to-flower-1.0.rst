@@ -1,19 +1,19 @@
 Upgrade to Flower 1.0
 =====================
 
-Flower 1.0 is here! Along with new features, Flower 1.0 provides a stable foundation for future growth. Compared to Flower 0.19 (and other 0.x series releases), there are a few breaking changes that might make it necessary to change the code of existing 0.x-series projects.
+Flower 1.0 is here. Along with new features, Flower 1.0 provides a stable foundation for future growth. Compared to Flower 0.19 (and other 0.x series releases), there are a few breaking changes that make it necessary to change the code of existing 0.x-series projects.
 
 Install update
 --------------
 
-Here's how to update to Flower 1.0 using either pip or Poetry:
+Here's how to update an existing installation to Flower 1.0 using either pip or Poetry:
 
 - pip: add ``-U`` when installing.
 
   - ``python -m pip install -U flwr`` (when using ``start_server`` and ``start_client``)
   - ``python -m pip install -U flwr[simulation]`` (when using ``start_simulation``)
 
-- Poetry: update the ``flwr`` dependency in ``pyproject.toml`` and then reinstall (don't forget to delete ``poetry.lock`` (``rm poetry.lock``) before running ``poetry install``).
+- Poetry: update the ``flwr`` dependency in ``pyproject.toml`` and then reinstall (don't forget to delete ``poetry.lock`` via ``rm poetry.lock`` before running ``poetry install``).
 
   - ``flwr = "^1.0.0"`` (when using ``start_server`` and ``start_client``)
   - ``flwr = { version = "^1.0.0", extras = ["simulation"] }`` (when using ``start_simulation``)
@@ -21,7 +21,7 @@ Here's how to update to Flower 1.0 using either pip or Poetry:
 Required changes
 ----------------
 
-A few breaking changes require small manual updates:
+The following breaking changes require manual updates.
 
 General
 ~~~~~~~
@@ -45,17 +45,21 @@ Strategies / ``start_server`` / ``start_simulation``
   - Flower 0.19: ``start_server(..., config={"num_rounds": 3, "round_timeout": 600.0}, ...)``
   - Flower 1.0: ``start_server(..., config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), ...)``
 
-- Replate ``num_rounds=1`` in ``start_simulation`` with the new ``config=ServerConfig(...)`` (see next item)
+- Replace ``num_rounds=1`` in ``start_simulation`` with the new ``config=ServerConfig(...)`` (see previous item)
 - Remove ``force_final_distributed_eval`` parameter from calls to ``start_server``. Distributed evaluation on all clients can be enabled by configuring the strategy to sample all clients for evaluation after the last round of training.
-- Rename ``parameters_to_weights`` to ``parameters_to_ndarrays`` and ``weights_to_parameters`` to ``ndarrays_to_parameters``
-- Strategy initialization: if the strategy relies on the default values for ``fraction_fit`` and ``fraction_evaluate``, set ``fraction_fit`` and ``fraction_evaluate`` manually to ``0.1``. Projects that do not manually create a strategy (by calling ``start_server`` or ``start_simulation`` without passing a strategy instance) should now initialize FedAvg with ``fraction_fit`` and ``fraction_evaluate`` set to ``0.1``.
-- Rename ``rnd`` to ``server_round`` (``evaluate_fn``, ``configure_fit``, ``aggregate_fit``, ``configure_evaluate``, ``aggregate_evaluate``)
+- Rename parameter/ndarray conversion functions:
+  
+  - ``parameters_to_weights`` --> ``parameters_to_ndarrays``
+  - ``weights_to_parameters`` --> ``ndarrays_to_parameters``
+
+- Strategy initialization: if the strategy relies on the default values for ``fraction_fit`` and ``fraction_evaluate``, set ``fraction_fit`` and ``fraction_evaluate`` manually to ``0.1``. Projects that do not manually create a strategy (by calling ``start_server`` or ``start_simulation`` without passing a strategy instance) should now manually initialize FedAvg with ``fraction_fit`` and ``fraction_evaluate`` set to ``0.1``.
 - Rename built-in strategy parameters (e.g., ``FedAvg``):
 
   - ``fraction_eval`` --> ``fraction_evaluate``
   - ``min_eval_clients`` --> ``min_evaluate_clients``
   - ``eval_fn`` --> ``evaluate_fn``
 
+- Rename ``rnd`` to ``server_round``. This impacts multiple methods and functions, for example, ``configure_fit``, ``aggregate_fit``, ``configure_evaluate``, ``aggregate_evaluate``, and ``evaluate_fn``.
 - Add ``server_round`` and ``config`` to ``evaluate_fn``:
 
   - Flower 0.19: ``def evaluate(parameters: NDArrays) -> Optional[Tuple[float, Dict[str, Scalar]]]:``
@@ -77,3 +81,8 @@ Along with the necessary changes above, there are a number of potential improvem
 
 - Remove "placeholder" methods from subclasses of ``Client`` or ``NumPyClient``. If you, for example, use server-side evaluation, then empy placeholder implementations of ``evaluate`` are no longer necessary.
 - Configure the round timeout via ``start_simulation``: ``start_simulation(..., config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), ...)``
+
+Further help
+------------
+
+Most official `Flower code examples <https://github.com/adap/flower/tree/main/examples>`_ are already updated to Flower 1.0, they can serve as a reference for using the Flower 1.0 API. If there are further questionsm, `join the Flower Slack <https://flower.dev/join-slack/>`_ and use the channgel ``#questions``.

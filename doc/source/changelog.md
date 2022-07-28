@@ -1,17 +1,17 @@
 # Changelog
 
-## Unreleased
+## v1.0.0 (2022-07-28)
 
 ### Highlights
 
-- Optional client methods
+- Stable **Virtual Client Engine** (accessible via `start_simulation`)
+- All `Client`/`NumPyClient` methods are now optional
 - Configurable `get_parameters`
-- Stable Virtual Client Engine
-- More powerful `start_simulation`
+- Tons of small API cleanups resulting in a more coherent developer experience
 
-### Contributors
+### Thanks to our Contributors
 
-We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contributors](https://github.com/adap/flower/graphs/contributors) order):
+We would like to give our **special thanks** to all the contributors who made Flower 1.0 possible (in reverse [GitHub Contributors](https://github.com/adap/flower/graphs/contributors) order):
 
 [@rtaiello](https://github.com/rtaiello),
 [@g-pichler](https://github.com/g-pichler),
@@ -96,15 +96,15 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
   Remove unmaintained experimental strategies (`FastAndSlow`, `FedFSv0`, `FedFSv1`).
 
-- **Renamed** `Weights` **to** `NDArrays` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
+- **Rename** `Weights` **to** `NDArrays` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
 
   `flwr.common.Weights` was renamed to `flwr.common.NDArrays` to better capture what this type is all about.
 
-- **Removed antiquated** `force_final_distributed_eval` **from** `start_server` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
+- **Remove antiquated** `force_final_distributed_eval` **from** `start_server` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
 
   The `start_server` parameter `force_final_distributed_eval` has long been a historic artefact, in this release it is finally gone for good.
 
-- **Configurable** `get_parameters` ([#1242](https://github.com/adap/flower/pull/1242))
+- **Make** `get_parameters` **configurable** ([#1242](https://github.com/adap/flower/pull/1242))
 
   The `get_parameters` method now accepts a configuration dictionary, just like `get_properties`, `fit`, and `evaluate`.
 
@@ -114,7 +114,7 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
 ### New features
 
-- **Official support for Python 3.10** ([#1320](https://github.com/adap/flower/pull/1320))
+- **Support Python 3.10** ([#1320](https://github.com/adap/flower/pull/1320))
 
   The previous Flower release introduced experimental support for Python 3.10, this release declares Python 3.10 support as stable.
 
@@ -140,15 +140,15 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
   Removes the obsolete `simulation` example and renames `quickstart_simulation` to `simulation_tensorflow` so it fits withs the naming of `simulation_pytorch`
 
-- **Updated documentation** ([#1223](https://github.com/adap/flower/pull/1223), [#1209](https://github.com/adap/flower/pull/1209), [#1251](https://github.com/adap/flower/pull/1251), [#1257](https://github.com/adap/flower/pull/1257), [#1267](https://github.com/adap/flower/pull/1267), [#1268](https://github.com/adap/flower/pull/1268), [#1300](https://github.com/adap/flower/pull/1300), [#1304](https://github.com/adap/flower/pull/1304), [#1305](https://github.com/adap/flower/pull/1305), [#1307](https://github.com/adap/flower/pull/1307))
+- **Update documentation** ([#1223](https://github.com/adap/flower/pull/1223), [#1209](https://github.com/adap/flower/pull/1209), [#1251](https://github.com/adap/flower/pull/1251), [#1257](https://github.com/adap/flower/pull/1257), [#1267](https://github.com/adap/flower/pull/1267), [#1268](https://github.com/adap/flower/pull/1268), [#1300](https://github.com/adap/flower/pull/1300), [#1304](https://github.com/adap/flower/pull/1304), [#1305](https://github.com/adap/flower/pull/1305), [#1307](https://github.com/adap/flower/pull/1307))
 
   One substantial documentation update fixes multiple smaller rendering issues, makes titles more succinct to improve navigation, removes a deprecated library, updates documentation dependencies, includes the `flwr.common` module in the API reference, includes support for markdown-based documentation, migrates the changelog from `.rst` to `.md`, and fixes a number of smaller details!
 
 - **Minor updates**
   - Add round number to fit and evaluate log messages ([#1266](https://github.com/adap/flower/pull/1266))
   - Add secure gRPC connection to the `advanced_tensorflow` code example ([#847](https://github.com/adap/flower/pull/847))
-  - Updated developer tooling ([#1231](https://github.com/adap/flower/pull/1231), [#1276](https://github.com/adap/flower/pull/1276), [#1301](https://github.com/adap/flower/pull/1301), [#1310](https://github.com/adap/flower/pull/1310))
-  - Renamed ProtoBuf messages to improve consistency ([#1214](https://github.com/adap/flower/pull/1214), [#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
+  - Update developer tooling ([#1231](https://github.com/adap/flower/pull/1231), [#1276](https://github.com/adap/flower/pull/1276), [#1301](https://github.com/adap/flower/pull/1301), [#1310](https://github.com/adap/flower/pull/1310))
+  - Rename ProtoBuf messages to improve consistency ([#1214](https://github.com/adap/flower/pull/1214), [#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
 
 ## v0.19.0 (2022-05-18)
 
