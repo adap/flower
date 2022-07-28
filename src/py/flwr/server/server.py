@@ -16,7 +16,6 @@
 
 
 import concurrent.futures
-from time import perf_counter
 import timeit
 from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple
@@ -38,8 +37,6 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import FedAvg, Strategy
-from flwr.server.strategy.dp_adaptive_clip_strategy import DPAdaptiveClipStrategy
-import numpy as np
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -54,22 +51,12 @@ ReconnectResultsAndFailures = Tuple[
     List[BaseException],
 ]
 
-def save_metrics(hist, path_to_save_metrics):
-    losses = np.array([])
-    for (_, loss) in hist.losses_centralized:
-        losses = np.append(losses, loss)
-    np.save(path_to_save_metrics / "losses.npy", losses)
-    for metric in hist.metrics_centralized.keys():
-        metric_vals = []
-        for (_, m_val) in hist.metrics_centralized[metric]:
-            metric_vals = np.append(metric_vals, m_val)
-        np.save(path_to_save_metrics / "{}.npy".format(metric), metric_vals)
 
 class Server:
     """Flower server."""
 
     def __init__(
-        self, client_manager: ClientManager, strategy: Optional[Strategy] = None, path_to_save_metrics = None, timed=False
+        self, client_manager: ClientManager, strategy: Optional[Strategy] = None
     ) -> None:
         self._client_manager: ClientManager = client_manager
         self.parameters: Parameters = Parameters(
@@ -77,8 +64,6 @@ class Server:
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
         self.max_workers: Optional[int] = None
-        self.path_to_save_metrics = path_to_save_metrics
-        self.timed = timed
 
     def set_max_workers(self, max_workers: Optional[int]) -> None:
         """Set the max_workers used by ThreadPoolExecutor."""
@@ -109,12 +94,13 @@ class Server:
                 res[0],
                 res[1],
             )
-            
+            history.add_loss_centralized(rnd=0, loss=res[0])
+            history.add_metrics_centralized(rnd=0, metrics=res[1])
 
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
-        
+
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
             res_fit = self.fit_round(rnd=current_round, timeout=timeout)
@@ -122,10 +108,6 @@ class Server:
                 parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
                     self.parameters = parameters_prime
-            if self.timed:
-                round_end_time = perf_counter()
-                elapsed_time = round_end_time - round_start_time
-
 
             # Evaluate model using strategy implementation
             res_cen = self.strategy.evaluate(parameters=self.parameters)
@@ -139,13 +121,6 @@ class Server:
                     metrics_cen,
                     timeit.default_timer() - start_time,
                 )
-                if isinstance(self.strategy, DPAdaptiveClipStrategy):
-                    metrics_cen["clip_norm"] = self.strategy.clip_norm
-                if self.timed:
-                    metrics_cen["round_time"] = elapsed_time
-                if "time_client_fit_mean" in res_fit[1].keys():
-                    metrics_cen["time_client_fit_mean"] = res_fit[1]["time_client_fit_mean"]
-                    metrics_cen["time_client_fit_stddev"] = res_fit[1]["time_client_fit_stddev"]
                 history.add_loss_centralized(rnd=current_round, loss=loss_cen)
                 history.add_metrics_centralized(rnd=current_round, metrics=metrics_cen)
 
@@ -158,7 +133,7 @@ class Server:
                     history.add_metrics_distributed(
                         rnd=current_round, metrics=evaluate_metrics_fed
                     )
-        save_metrics(history, self.path_to_save_metrics)
+
         # Bookkeeping
         end_time = timeit.default_timer()
         elapsed = end_time - start_time

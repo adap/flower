@@ -15,71 +15,77 @@
 """Wrapper for configuring a Flower client for DP."""
 
 
-from abc import ABC, abstractmethod
-from flwr.common.typing import Weights
-
-import numpy as np
 import copy
 
+import numpy as np
+
+from flwr.client.client import Client
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
-    ParametersRes,
-    PropertiesIns,
-    PropertiesRes,
-    parameters_to_weights,
-    weights_to_parameters
+    GetParametersIns,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
-from flwr.client.client import Client
+
+
+# Calculates the L2-norm of a potentially ragged array
+def __get_update_norm(update):
+    flattened_update = []
+    for layer in update:
+        flattened_update.append(layer.ravel())
+    return np.linalg.norm(np.concatenate(flattened_update))
 
 
 class DPClient(Client):
     """Wrapper for configuring a Flower client for DP."""
-    def __init__(self, client:Client, adaptive_clip_enabled:bool = False) -> None:
+
+    def __init__(self, client: Client, adaptive_clip_enabled: bool = False) -> None:
         super().__init__()
         self.client = client
         self.adaptive_clip_enabled = adaptive_clip_enabled
 
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         return self.client.get_properties(ins)
-    
-    def get_parameters(self) -> ParametersRes:
-        return self.client.get_parameters()
-    
-    # Calculates the L2-norm of a potentially ragged array 
-    def __get_update_norm(self, update:Weights):
-        flattened_update= []
-        for layer in update:
-            flattened_update.append(layer.ravel())
-        return np.linalg.norm(np.concatenate(flattened_update))
+
+    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
+        return self.client.get_parameters(ins)
 
     def fit(self, ins: FitIns) -> FitRes:
         # Global model received by the wrapped client at the beginning of the round
-        original_weights = copy.deepcopy(parameters_to_weights(ins.parameters))
+        original_ndarrays = copy.deepcopy(parameters_to_ndarrays(ins.parameters))
 
         # Getting the updated model from the wrapped client
         res = self.client.fit(ins)
-        updated_weights = parameters_to_weights(res.parameters)
+        updated_ndarrays = parameters_to_ndarrays(res.parameters)
 
         # Update = updated model - original model
-        update = [x-y for (x,y) in zip(updated_weights, original_weights)]
-        
+        update = [x - y for (x, y) in zip(updated_ndarrays, original_ndarrays)]
+
         # Calculating the factor to scale the update by
-        update_norm = self.__get_update_norm(update)
-        scaling_factor = min(1,ins.config["clip_norm"]/update_norm)
+        update_norm = __get_update_norm(update)
+        scaling_factor = min(1, ins.config["clip_norm"] / update_norm)
 
         # Clipping update to bound sensitivity of aggregate at server
-        update_clipped = [layer*scaling_factor for layer in update]
-       
+        update_clipped = [layer * scaling_factor for layer in update]
+
         # Adding noise to the clipped update
-        update_clipped_noised = [layer + np.random.normal(0, ins.config["noise_stddev"], layer.shape) for layer in update_clipped]
-        res.parameters = weights_to_parameters([x+y for (x,y) in zip(original_weights, update_clipped_noised)])
-        
-        # Calculating the value of the norm indicator bit, required for adaptive clipping
+        # update_clipped_noised = [
+        #     layer + np.random.normal(0, ins.config["noise_stddev"], layer.shape)
+        #     for layer in update_clipped
+        # ]
+        res.parameters = ndarrays_to_parameters(
+            [x + y for (x, y) in zip(original_ndarrays, update_clipped_noised)]
+        )
+
+        # Calculating value of norm indicator bit, required for adaptive clipping
         if self.adaptive_clip_enabled:
-             res.metrics["norm_bit"] = False if scaling_factor < 1 else True
+            res.metrics["norm_bit"] = not scaling_factor < 1
         return res
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
