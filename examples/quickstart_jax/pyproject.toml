@@ -5,11 +5,11 @@ description = "JAX example training a linear regression model with federated lea
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
+flwr = "^1.0.0rc0"
 jax = "^0.2.25"
 jaxlib = "^0.1.74"
-sklearn = "^1.0.1"
-flwr = "^0.18.0"
+scikit-learn = "^1.1.1"
 numpy = "^1.21.4"
 
 [build-system]
