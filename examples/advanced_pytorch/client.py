@@ -23,10 +23,6 @@ class CifarClient(fl.client.NumPyClient):
         self.testset = testset
         self.validation_split = validation_split
 
-    def get_parameters(self):
-        """Get parameters of the local model."""
-        raise Exception("Not implemented (server-side parameter initialization)")
-
     def set_parameters(self, parameters):
         """Loads a efficientnet model and replaces it parameters with the ones
         given."""
@@ -151,7 +147,7 @@ def main() -> None:
         # Start Flower client
         client = CifarClient(trainset, testset, device)
 
-        fl.client.start_numpy_client("0.0.0.0:8080", client=client)
+        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=client)
 
 
 if __name__ == "__main__":
