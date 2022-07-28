@@ -23,6 +23,14 @@ Required changes
 
 A few breaking changes require small manual updates:
 
+General
+~~~~~~~
+
+Pass all arguments as keyword arguments (not as positional arguments). Here's an example:
+
+- Flower 0.19 (positional arguments): ``start_client("127.0.0.1:8080", FlowerClient())``
+- Flower 1.0 (keyword arguments): ``start_client(server_address="127.0.0.1:8080", client=FlowerClient())``
+
 Client
 ~~~~~~
 
