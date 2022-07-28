@@ -15,7 +15,7 @@
 """Flower TensorBoard utilities."""
 import os
 from datetime import datetime
-from typing import Callable, Dict, List, Optional, Tuple, TypeVar, cast
+from typing import Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
 
 try:
     import tensorflow as tf
@@ -80,7 +80,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                 self,
                 server_round: int,
                 results: List[Tuple[ClientProxy, EvaluateRes]],
-                failures: List[BaseException],
+                failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
             ) -> Tuple[Optional[float], Dict[str, Scalar]]:
                 """Hooks into aggregate_evaluate for TensorBoard logging
                 purpose."""

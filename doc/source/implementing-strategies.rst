@@ -43,7 +43,7 @@ implemented:
             self,
             server_round: int,
             results: List[Tuple[ClientProxy, FitRes]],
-            failures: List[BaseException],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
         ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
             """Aggregate training results."""
 
@@ -61,7 +61,7 @@ implemented:
             self,
             server_round: int,
             results: List[Tuple[ClientProxy, EvaluateRes]],
-            failures: List[BaseException],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
         ) -> Tuple[Optional[float], Dict[str, Scalar]]:
             """Aggregate evaluation results."""
 
@@ -198,13 +198,13 @@ Built-in strategies return user-provided initial parameters. The following examp
     weights = model.get_weights()
 
     # Serialize ndarrays to `Parameters`
-    parameters = fl.common.weights_to_parameters(weights)
+    parameters = fl.common.ndarrays_to_parameters(weights)
 
     # Use the serialized parameters as the initial global parameters 
     strategy = fl.server.strategy.FedAvg(
         initial_parameters=parameters,
     )
-    fl.server.start_server(config={"num_rounds": 3}, strategy=strategy)
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3), strategy=strategy)
 
 The Flower server will call :code:`initialize_parameters`, which either returns the parameters that were passed to :code:`initial_parameters`, or :code:`None`. If no parameters are returned from :code:`initialize_parameters` (i.e., :code:`None`), the server will randomly select one client and ask it to provide its parameters. This is a convenience feature and not recommended in practice, but it can be useful for prototyping. In practice, it is recommended to always use server-side parameter initialization.
 
@@ -251,7 +251,7 @@ The :code:`aggregate_fit` method
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results."""
 
@@ -299,7 +299,7 @@ The :code:`aggregate_evaluate` method
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation results."""
 
