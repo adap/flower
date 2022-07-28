@@ -164,7 +164,7 @@ def get_lr_schedule(
     return lr_schedule
 
 
-def get_eval_fn(
+def get_evaluate_fn(
     model: tf.keras.Model, num_classes: int, xy_test: Tuple[np.ndarray, np.ndarray]
 ) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""

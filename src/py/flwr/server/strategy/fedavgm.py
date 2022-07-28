@@ -39,9 +39,9 @@ from .fedavg import FedAvg
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
-`min_eval_clients` can cause the server to fail when there are too few clients
+`min_evaluate_clients` can cause the server to fail when there are too few clients
 connected to the server. `min_available_clients` must be set to a value larger
-than or equal to the values of `min_fit_clients` and `min_eval_clients`.
+than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 """
 
 
@@ -53,12 +53,15 @@ class FedAvgM(FedAvg):
         self,
         *,
         fraction_fit: float = 1.0,
-        fraction_eval: float = 1.0,
+        fraction_evaluate: float = 1.0,
         min_fit_clients: int = 2,
-        min_eval_clients: int = 2,
+        min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        eval_fn: Optional[
-            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn: Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -77,15 +80,20 @@ class FedAvgM(FedAvg):
         ----------
         fraction_fit : float, optional
             Fraction of clients used during training. Defaults to 0.1.
-        fraction_eval : float, optional
+        fraction_evaluate : float, optional
             Fraction of clients used during validation. Defaults to 0.1.
         min_fit_clients : int, optional
             Minimum number of clients used during training. Defaults to 2.
-        min_eval_clients : int, optional
+        min_evaluate_clients : int, optional
             Minimum number of clients used during validation. Defaults to 2.
         min_available_clients : int, optional
             Minimum number of total clients in the system. Defaults to 2.
-        eval_fn : Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn : Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]]
+            ]
+        ]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
             Function used to configure training. Defaults to None.
@@ -104,17 +112,17 @@ class FedAvgM(FedAvg):
 
         if (
             min_fit_clients > min_available_clients
-            or min_eval_clients > min_available_clients
+            or min_evaluate_clients > min_available_clients
         ):
             log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
         super().__init__(
             fraction_fit=fraction_fit,
-            fraction_eval=fraction_eval,
+            fraction_evaluate=fraction_evaluate,
             min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
+            min_evaluate_clients=min_evaluate_clients,
             min_available_clients=min_available_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,

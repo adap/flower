@@ -5,7 +5,7 @@ def main() -> None:
     # Define strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.5,
-        fraction_eval=0.5,
+        fraction_evaluate=0.5,
     )
 
     # Start Flower server for three rounds of federated learning
