@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## v1.0.0 (2022-07-28)
 
 ### Highlights
@@ -9,49 +11,11 @@
 - Configurable `get_parameters`
 - Tons of small API cleanups resulting in a more coherent developer experience
 
-### Thanks to our Contributors
+### Thanks to our contributors
 
 We would like to give our **special thanks** to all the contributors who made Flower 1.0 possible (in reverse [GitHub Contributors](https://github.com/adap/flower/graphs/contributors) order):
 
-[@rtaiello](https://github.com/rtaiello),
-[@g-pichler](https://github.com/g-pichler),
-[@rob-luke](https://github.com/rob-luke),
-[@andreea-zaharia](https://github.com/andreea-zaharia),
-[@kinshukdua](https://github.com/kinshukdua),
-[@nfnt](https://github.com/nfnt),
-[@tatiana-s](https://github.com/tatiana-s),
-[@TParcollet](https://github.com/TParcollet),
-[@vballoli](https://github.com/vballoli),
-[@negedng](https://github.com/negedng),
-[@RISHIKESHAVAN](https://github.com/RISHIKESHAVAN),
-[@hei411](https://github.com/hei411),
-[@SebastianSpeitel](https://github.com/SebastianSpeitel),
-[@AmitChaulwar](https://github.com/AmitChaulwar),
-[@Rubiel1](https://github.com/Rubiel1),
-[@FANTOME-PAN](https://github.com/FANTOME-PAN),
-[@Rono-BC](https://github.com/Rono-BC),
-[@lbhm](https://github.com/lbhm),
-[@sishtiaq](https://github.com/sishtiaq),
-[@remde](https://github.com/remde),
-[@Jueun-Park](https://github.com/Jueun-Park),
-[@architjen](https://github.com/architjen),
-[@PratikGarai](https://github.com/PratikGarai),
-[@mrinaald](https://github.com/mrinaald),
-[@zliel](https://github.com/zliel),
-[@MeiruiJiang](https://github.com/MeiruiJiang),
-[@sandracl72](https://github.com/sandracl72),
-[@gubertoli](https://github.com/gubertoli),
-[@Vingt100](https://github.com/Vingt100),
-[@MakGulati](https://github.com/MakGulati),
-[@cozek](https://github.com/cozek),
-[@jafermarq](https://github.com/jafermarq),
-[@sisco0](https://github.com/sisco0),
-[@akhilmathurs](https://github.com/akhilmathurs),
-[@CanTuerk](https://github.com/CanTuerk),
-[@mariaboerner1987](https://github.com/mariaboerner1987),
-[@pedropgusmao](https://github.com/pedropgusmao),
-[@tanertopal](https://github.com/tanertopal),
-[@danieljanes](https://github.com/danieljanes).
+[@rtaiello](https://github.com/rtaiello), [@g-pichler](https://github.com/g-pichler), [@rob-luke](https://github.com/rob-luke), [@andreea-zaharia](https://github.com/andreea-zaharia), [@kinshukdua](https://github.com/kinshukdua), [@nfnt](https://github.com/nfnt), [@tatiana-s](https://github.com/tatiana-s), [@TParcollet](https://github.com/TParcollet), [@vballoli](https://github.com/vballoli), [@negedng](https://github.com/negedng), [@RISHIKESHAVAN](https://github.com/RISHIKESHAVAN), [@hei411](https://github.com/hei411), [@SebastianSpeitel](https://github.com/SebastianSpeitel), [@AmitChaulwar](https://github.com/AmitChaulwar), [@Rubiel1](https://github.com/Rubiel1), [@FANTOME-PAN](https://github.com/FANTOME-PAN), [@Rono-BC](https://github.com/Rono-BC), [@lbhm](https://github.com/lbhm), [@sishtiaq](https://github.com/sishtiaq), [@remde](https://github.com/remde), [@Jueun-Park](https://github.com/Jueun-Park), [@architjen](https://github.com/architjen), [@PratikGarai](https://github.com/PratikGarai), [@mrinaald](https://github.com/mrinaald), [@zliel](https://github.com/zliel), [@MeiruiJiang](https://github.com/MeiruiJiang), [@sandracl72](https://github.com/sandracl72), [@gubertoli](https://github.com/gubertoli), [@Vingt100](https://github.com/Vingt100), [@MakGulati](https://github.com/MakGulati), [@cozek](https://github.com/cozek), [@jafermarq](https://github.com/jafermarq), [@sisco0](https://github.com/sisco0), [@akhilmathurs](https://github.com/akhilmathurs), [@CanTuerk](https://github.com/CanTuerk), [@mariaboerner1987](https://github.com/mariaboerner1987), [@pedropgusmao](https://github.com/pedropgusmao), [@tanertopal](https://github.com/tanertopal), [@danieljanes](https://github.com/danieljanes).
 
 ### Incompatible changes
 
