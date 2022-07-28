@@ -12,7 +12,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.val_loader = val_loader
         self.test_loader = test_loader
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         encoder_params = _get_parameters(self.model.encoder)
         decoder_params = _get_parameters(self.model.decoder)
         return encoder_params + decoder_params
@@ -27,7 +27,7 @@ class FlowerClient(fl.client.NumPyClient):
         trainer = pl.Trainer(max_epochs=1, progress_bar_refresh_rate=0)
         trainer.fit(self.model, self.train_loader, self.val_loader)
 
-        return self.get_parameters(), 55000, {}
+        return self.get_parameters(config={}), 55000, {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
@@ -56,7 +56,7 @@ def main() -> None:
 
     # Flower client
     client = FlowerClient(model, train_loader, val_loader, test_loader)
-    fl.client.start_numpy_client("127.0.0.1:8080", client)
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
 
 
 if __name__ == "__main__":
