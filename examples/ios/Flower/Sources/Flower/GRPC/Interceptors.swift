@@ -22,7 +22,8 @@ class FlowerClientInterceptors: ClientInterceptor<Flower_Transport_ClientMessage
             // one message. For server-streaming and bidirectional-streaming we expect any number of
             // messages (including zero).
             case let .message(response):
-            print("< Received response with text '\(String(describing: response.msg).count)'")
+            print("< Received response '\(decipherServerMessage(response.msg!))' with text size '\(String(describing: response.msg).count)'")
+            
 
             // The end of the response stream (and by extension, request stream). We expect one 'end' part,
             // after which no more response parts may be received and no more request parts will be sent.
@@ -45,7 +46,7 @@ class FlowerClientInterceptors: ClientInterceptor<Flower_Transport_ClientMessage
             // expect exactly one message, for client-streaming and bidirectional streaming RPCs any number
             // of messages is permitted.
             case let .message(request, _):
-            print("> Sending request with text")
+            print("> Sending request \(decipherClientMessage(request.msg!)) with text size \(String(describing: request.msg).count)")
 
             // The end of the request stream: must be sent exactly once, after which no more messages may
             // be sent.
@@ -64,6 +65,37 @@ func prettify(_ headers: HPACKHeaders) -> String {
   return "[" + headers.map { name, value, _ in
     "'\(name)': '\(value)'"
   }.joined(separator: ", ") + "]"
+}
+
+func decipherServerMessage(_ msg: Flower_Transport_ServerMessage.OneOf_Msg) -> String {
+    switch msg {
+    case .reconnect:
+        return "Reconnect"
+    case .getParameters:
+        return "GetParameters"
+    case .fitIns:
+        return "FitIns"
+    case .evaluateIns:
+        return "EvaluateIns"
+    case .propertiesIns:
+        return "PropertiesIns"
+    }
+
+}
+
+func decipherClientMessage(_ msg: Flower_Transport_ClientMessage.OneOf_Msg) -> String {
+    switch msg {
+    case .disconnect:
+        return "Disconnect"
+    case .evaluateRes:
+        return "EvaluateRes"
+    case .fitRes:
+        return "FitRes"
+    case .parametersRes:
+        return "ParametersRes"
+    case .propertiesRes:
+        return "PropertiesRes"
+    }
 }
 
 class FlowerInterceptorsFactory: Flower_Transport_FlowerServiceClientInterceptorFactoryProtocol {

@@ -75,21 +75,16 @@ public class ParameterConverter {
             return nil
         }
         
-        if let shape = Array<Int16>(numpy: numpy.shape) {
-            let shapeNSNumber = shape.map { NSNumber(value: $0) }
-            
-            if let swiftArray = numpyToArray(numpy: numpy),
-               let multiArray = try? MLMultiArray(shape: shapeNSNumber, dataType: .float) {
-                for (index, element) in swiftArray.enumerated() {
-                    multiArray[index] = NSNumber(value: element)
-                }
-                
-                //let pointer = try! UnsafeBufferPointer<Float>(multiArray)
-                //let array = pointer.compactMap{$0}
-                //print(array)
-                
-                return multiArray
+        let pyShape = numpy.__array_interface__["shape"]
+        guard let shape = Array<Int>(pyShape) else { return nil }
+        let shapeNSNumber = shape.map { NSNumber(value: $0) }
+        
+        if let swiftArray = numpyToArray(numpy: numpy),
+           let multiArray = try? MLMultiArray(shape: shapeNSNumber, dataType: .float) {
+            for (index, element) in swiftArray.enumerated() {
+                multiArray[index] = NSNumber(value: element)
             }
+            return multiArray
         }
         return nil
     }

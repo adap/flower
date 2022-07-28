@@ -51,19 +51,20 @@ class CoreMLClient: Client {
     }
     
     func getParameters() -> ParametersRes {
-        print(layerWrappers.map{ $0.shape })
+//        print(layerWrappers.map{ $0.shape })
         let parameters = weightsToParameters()
         return ParametersRes(parameters: parameters)
     }
     
     func fit(ins: FitIns) -> FitRes {
+        parametersToWeights(parameters: ins.parameters)
         var trainingResult: MLResult? = nil
+        print("Starting local training")
         train(modelConfig: parametersToWeights(parameters: ins.parameters)) { result in
             trainingResult = result
         }
         while true {
             if let result = trainingResult {
-                print("result received")
                 let parameters = weightsToParameters()
                 return FitRes(parameters: parameters, numExamples: result.numSamples)
             }
@@ -77,7 +78,6 @@ class CoreMLClient: Client {
         }
         while true {
             if let result = evaluateResult {
-                print("result received")
                 return EvaluateRes(loss: Float(result.loss), numExamples: result.numSamples)
             }
         }
@@ -93,9 +93,7 @@ class CoreMLClient: Client {
         }
         
         for (index, data) in parameters.tensors.enumerated() {
-            print(layerWrappers[index].shape)
             let expectedNumberOfElements = layerWrappers[index].shape.map({Int($0)}).reduce(1, *)
-                        print(expectedNumberOfElements)
             if let weightsArray = parameterConverter.dataToArray(data: data) {
                 guard weightsArray.count == expectedNumberOfElements else {
                     print("array received has wrong number of elements")
@@ -103,11 +101,9 @@ class CoreMLClient: Client {
                 }
                 
                 layerWrappers[index].weights = weightsArray
-                
                 if layerWrappers[index].isUpdatable {
                     if let weightsMultiArray = parameterConverter.dataToMultiArray(data: data) {
-                        print(weightsMultiArray.shape)
-                        let weightsShape = weightsMultiArray.shape.map({ Int16(truncating: $0) }).filter { $0 > 1 }
+                        let weightsShape = weightsMultiArray.shape.map { Int16(truncating: $0) }
                         guard weightsShape == layerWrappers[index].shape else {
                             print("shape not the same")
                             continue
@@ -137,9 +133,9 @@ class CoreMLClient: Client {
         let currentModelURL = usingUpdatedModel ? updatedModelURL : defaultModelURL
         
         let fileManager = FileManager.default
-        if fileManager.fileExists(atPath: currentModelURL.path) {
-            print(currentModelURL)
-        }
+//        if fileManager.fileExists(atPath: currentModelURL.path) {
+//            print(currentModelURL)
+//        }
         
         var loss = 0.0
         let trainingData = dataLoader.trainBatchProvider
@@ -147,28 +143,27 @@ class CoreMLClient: Client {
             forEvents: [.epochEnd],
             /// check progress after epoch
             progressHandler: { contextProgress in
-                print(contextProgress.metrics)
-                print(contextProgress.metrics[.lossValue])
                 loss = contextProgress.metrics[.lossValue] as! Double
+                print("Epoch \(contextProgress.metrics[.epochIndex] as! Int + 1) finished with loss \(loss)")
             
          }) { (finalContext) in
              for (index, layer) in self.layerWrappers.enumerated() {
-                 print("checking if layer \(layer.name) updatable")
+                 //print("checking if layer \(layer.name) updatable")
                  if layer.isUpdatable {
                      let paramKey = MLParameterKey.weights.scoped(to: layer.name)
-                     print("retrieving parameters for layer \(layer.name)")
+                     //print("retrieving parameters for layer \(layer.name)")
                      if let weightsMultiArray = try? finalContext.model.parameterValue(for: paramKey) as? MLMultiArray {
-                         let weightsShape = weightsMultiArray.shape.map({ Int16(truncating: $0) }).filter({ $0 > 1 })
+                         let weightsShape = Array(weightsMultiArray.shape.map({ Int16(truncating: $0) }).drop(while: { $0 < 2 }))
                          guard weightsShape == layer.shape else {
-                             print("shape is not the same")
+                             print("shape \(weightsShape) is not the same as \(layer.shape)")
                              continue
                          }
                          
                          if let pointer = try? UnsafeBufferPointer<Float>(weightsMultiArray) {
-                             print("updating weights for layer \(layer.name)")
+                             //print("updating weights for layer \(layer.name)")
                              let array = pointer.compactMap{$0}
-                             print("layer weight array size = \(layer.weights.count)")
-                             print("array size = \(array.count)")
+                             //print("layer weight array size = \(layer.weights.count)")
+                             //print("array size = \(array.count)")
                              self.layerWrappers[index].weights = array
                          }
                          
@@ -177,8 +172,8 @@ class CoreMLClient: Client {
                  }
              }
              
-             let trainingResult = MLResult(loss: finalContext.metrics[.lossValue] as! Double, numSamples: trainingData.count, accuracy: loss / Double(trainingData.count))
-             print(trainingResult)
+             let trainingResult = MLResult(loss: finalContext.metrics[.lossValue] as! Double, numSamples: trainingData.count, accuracy: (1.0 - loss) * 100)
+             
              result(trainingResult)
              
              self.saveModel(finalContext)
@@ -251,14 +246,12 @@ class CoreMLClient: Client {
             forEvents: [.epochEnd],
             /// check progress after epoch
             progressHandler: { (contextProgress) in
-                print(contextProgress.parameters)
-                print(contextProgress.metrics)
                 loss = contextProgress.metrics[.lossValue] as! Double
+                print("Evaluate finished with loss \(loss)")
                 
             }
         ) { finalContext in
-            let evaluateResult = MLResult(loss: finalContext.metrics[.lossValue] as! Double, numSamples: trainingData.count, accuracy: loss / Double(trainingData.count))
-            print(evaluateResult)
+            let evaluateResult = MLResult(loss: finalContext.metrics[.lossValue] as! Double, numSamples: trainingData.count, accuracy: (1.0 - loss) * 100)
             result(evaluateResult)
         }
         
@@ -293,7 +286,7 @@ class CoreMLClient: Client {
             _ = try fileManager.replaceItemAt(updatedModelURL,
                                               withItemAt: tempUpdatedModelURL)
             
-            print("Updated model saved to:\n\t\(updatedModelURL)")
+            //print("Updated model saved to:\n\t\(updatedModelURL)")
         } catch let error {
             print("Could not save updated model to the file system: \(error.localizedDescription)")
             return

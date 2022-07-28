@@ -52,7 +52,7 @@ public func startClient(serverHost: String, serverPort: Int, client: Client) {
     
     // Close the connection when we're done with it.
     defer {
-        print("closing")
+        print("Closing gRPC bidirectional stream channel")
         try! channel.close().wait()
     }
     
@@ -72,8 +72,7 @@ public func startClient(serverHost: String, serverPort: Int, client: Client) {
             let result = bidirectional.sendMessage(receive.0)
             sleepDuration = receive.1
             if !receive.2 {
-                print("closing")
-                try! channel.close().wait()
+                break
             }
             serverMessage = nil
         }
