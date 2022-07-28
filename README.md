@@ -93,7 +93,7 @@ Check the Flower documentation to learn more: [Using Baselines](https://flower.d
 The Flower community loves contributions! Make your work more visible and enable others to build on it by contributing it as a baseline: [Contributing Baselines](https://flower.dev/docs/contributing-baselines.html)
 
 ## Flower Usage Examples
-Several examples show different usage scenarios of Flower (in combination
+A number of examples show different usage scenarios of Flower (in combination
 with popular machine learning frameworks such as PyTorch or TensorFlow). To run
 an example, first install the necessary extras:
 
