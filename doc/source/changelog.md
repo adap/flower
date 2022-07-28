@@ -1,13 +1,6 @@
 # Changelog
 
-## Unreleased
-
-### Highlights
-
-- Optional client methods
-- Configurable `get_parameters`
-- Stable Virtual Client Engine
-- More powerful `start_simulation`
+## v1.0.0 (2022-07-28)
 
 ### Contributors
 
@@ -52,6 +45,13 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 [@pedropgusmao](https://github.com/pedropgusmao),
 [@tanertopal](https://github.com/tanertopal),
 [@danieljanes](https://github.com/danieljanes).
+
+### Highlights
+
+- Stable **Virtual Client Engine** (accessible via `start_simulation`)
+- All `Client`/`NumPyClient` methods are now optional
+- Configurable `get_parameters`
+- Tons of small API cleanups resulting in a more coherent developer experience
 
 ### Incompatible changes
 
