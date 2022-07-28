@@ -10,7 +10,6 @@ flwr = "^1.0.0rc0"
 jax = "^0.2.25"
 jaxlib = "^0.1.74"
 scikit-learn = "^1.1.1"
-
 numpy = "^1.21.4"
 
 [build-system]
