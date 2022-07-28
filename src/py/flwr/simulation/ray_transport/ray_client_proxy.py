@@ -15,7 +15,7 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
-from typing import Callable, Dict, Optional, cast
+from typing import Any, Callable, Dict, Optional, cast
 
 import ray
 
@@ -29,7 +29,7 @@ ClientFn = Callable[[str], ClientLike]
 class RayClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(self, client_fn: ClientFn, cid: str, resources: Dict[str, int]):
+    def __init__(self, client_fn: ClientFn, cid: str, resources: Dict[str, Any]):
         super().__init__(cid)
         self.client_fn = client_fn
         self.resources = resources
