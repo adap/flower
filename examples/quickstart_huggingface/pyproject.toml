@@ -13,7 +13,7 @@ authors = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-flwr = "^1.0.0rc0"
+flwr = "^1.0.0"
 torch = "1.12.0"
 transformers = "4.11.3"
 datasets = "1.12.1"
