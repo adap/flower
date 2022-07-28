@@ -21,10 +21,10 @@ class FlowerClient(fl.client.NumPyClient):
         self.params = jax_training.load_model(model_shape)
 
     def get_parameters(self, config):
-        parameter_value = []
+        parameters = []
         for _, val in self.params.items():
-            parameter_value.append(np.array(val))
-        return parameter_value
+            parameters.append(np.array(val))
+        return parameters
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
         for key, value in list(zip(self.params.keys(), parameters)):
@@ -37,7 +37,8 @@ class FlowerClient(fl.client.NumPyClient):
         self.params, loss, num_examples = jax_training.train(
             self.params, grad_fn, train_x, train_y
         )
-        return self.get_parameters(config={}), num_examples, {"loss": float(loss)}
+        parameters = self.get_parameters(config={})
+        return parameters, num_examples, {"loss": float(loss)}
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict
@@ -46,11 +47,7 @@ class FlowerClient(fl.client.NumPyClient):
         loss, num_examples = jax_training.evaluation(
             self.params, grad_fn, test_x, test_y
         )
-        return (
-            float(loss),
-            num_examples,
-            {"loss": float(loss)},
-        )
+        return float(loss), num_examples, {"loss": float(loss)}
 
 
 # Start Flower client
