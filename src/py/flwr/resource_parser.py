@@ -11,10 +11,10 @@ def parse_ray_resources(cpus: int, vram: int):
 
     gpu_ratio = 0.0
     if torch.cuda.is_available():
-        # use that figure to get a good estimate of the VRAM needed per experiment
-        # (taking into account ~600MB of just CUDA init stuff)
 
         # Get VRAM of first GPU
+        # run a single training batch and monitor the real memory usage.
+        # This remove user's input an no longer requiring the user to specify VRAM (which often takes a few rounds of trial-error)
         total_vram = torch.cuda.get_device_properties(0).total_memory
 
         # convert to MB (since the user inputs VRAM in MB)
@@ -31,7 +31,6 @@ def parse_ray_resources(cpus: int, vram: int):
         # ! Limitation: this won't work well if multiple GPUs with different VRAMs are detected by Ray
         # The code above asumes therefore all GPUs have the same amount of VRAM. The same `gpu_ratio` will
         # be used in GPUs #1, #2, etc (even though there won't be 1GB taken by CUDA runtime)
-        # TODO: probably we can do something smarter: run a single training batch and monitor the real memory usage. This remove user's input an no longer requiring the user to specify VRAM (which often takes a few rounds of trial-error)
     else:
         print("No CUDA device found. Disabling GPU usage for Flower clients.")
 

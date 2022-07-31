@@ -84,11 +84,6 @@ class ResourceAwareFedAvg(FedAvg):
         rep = f"ResourceAwareFedAvg(accept_failures={self.accept_failures})"
         return rep
 
-    # resources = {'cpus': 1, 'vram': 1500}
-
-    # parse gpu resources, conver from VRAM to VRAM ratio
-    # client_resources = parse_ray_resources(resources['cpus'], resources['vram'])
-
     def configure_fit(
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
@@ -129,20 +124,10 @@ class ResourceAwareFedAvg(FedAvg):
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
 
-        # print("aggregate_fit!!", results)
-
         # Set resources
         for client, fit_res in results:
-            # resources = {'cpus': 1, 'vram': 1500}
-            # parse gpu resources, conver from VRAM to VRAM ratio
-            # client_resources = parse_ray_resources(resources['cpus'], resources['vram'])
-            # print("client:", client.cid)
-            # print("fit_res", fit_res.metrics['stats_generic'])
             gpu_ratio = fit_res.metrics['stats_generic'] # value.properties['stats_generic']# ['vram_util_percent0']
-            # print("gpu_ratio:", gpu_ratio)
-            # client.resources = {'num_gpus': gpu_ratio}
 
-            # TO UPDATE THE LINE BELOW
             self.updated_resources_for_clients.append({'cid': client.cid, 'resources': {'num_cpus': 1, 'num_gpus': gpu_ratio*1.5}})
 
         if not results:

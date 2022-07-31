@@ -139,7 +139,8 @@ if __name__ == "__main__":
 
     pool_size = 100  # number of dataset partions (= number of total clients)
     client_resources = {
-        "num_cpus": args.num_client_cpus
+        # "num_cpus": args.num_client_cpus
+        "num_cpus": 1, "num_gpus": 1
     }  # each client will get allocated 1 CPUs
 
     # Download CIFAR-10 dataset
