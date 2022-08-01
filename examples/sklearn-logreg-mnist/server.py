@@ -17,7 +17,7 @@ def get_evaluate_fn(model: LogisticRegression):
     _, (X_test, y_test) = utils.load_mnist()
 
     # The `evaluate` function will be called after every round
-    def evaluate(parameters: fl.common.Weights):
+    def evaluate(server_round, parameters: fl.common.NDArrays, config):
         # Update model with the latest parameters
         utils.set_model_params(model, parameters)
         loss = log_loss(y_test, model.predict_proba(X_test))
@@ -39,5 +39,5 @@ if __name__ == "__main__":
     fl.server.start_server(
         server_address="0.0.0.0:8080",
         strategy=strategy,
-        config={"num_rounds": 5},
+        config=fl.server.ServerConfig(num_rounds=5),
     )
