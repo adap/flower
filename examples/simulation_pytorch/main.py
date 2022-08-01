@@ -11,6 +11,8 @@ from typing import Dict, Callable, Optional, Tuple, List
 from dataset_utils import get_cifar_10, do_fl_partitioning, get_dataloader
 from utils import Net, train, test
 
+import os
+from src.ProfilingThread import UtilMonitor
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -50,11 +52,25 @@ class FlowerClient(fl.client.NumPyClient):
         # Send model to device
         self.net.to(self.device)
 
+        # profile
+        pid = os.getpid()
+        _monitor = UtilMonitor(pid=pid)
+
         # Train
         train(self.net, trainloader, epochs=config["epochs"], device=self.device)
 
+        if _monitor.is_alive():
+            monitor_data = _monitor.get_data()
+            self.properties['stats_generic'] = monitor_data['vram_util_percent0']
+            print(self.cid, monitor_data)
+            # print(self.get_properties())
+            _monitor.stop()
+            _monitor.join()
+
+        metrics = {"stats_generic": self.properties['stats_generic']} # "fed_train_acc": acc, "fed_train_loss": loss
+
         # Return local model and statistics
-        return get_params(self.net), len(trainloader.dataset), {}
+        return get_params(self.net), len(trainloader.dataset), metrics
 
     def evaluate(self, parameters, config):
         set_params(self.net, parameters)

@@ -14,23 +14,21 @@
 # ==============================================================================
 
 from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple, Any
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
-    PropertiesIns,
-    PropertiesRes,
     FitIns,
     FitRes,
     MetricsAggregationFn,
+    NDArrays,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
@@ -49,12 +47,15 @@ class ResourceAwareFedAvg(FedAvg):
     def __init__(
         self,
         fraction_fit: float = 0.1,
-        fraction_eval: float = 0.1,
+        fraction_evaluate: float = 0.1,
         min_fit_clients: int = 2,
-        min_eval_clients: int = 2,
+        min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn: Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -65,11 +66,11 @@ class ResourceAwareFedAvg(FedAvg):
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
-            fraction_eval=fraction_eval,
+            fraction_evaluate=fraction_evaluate,
             min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
+            min_evaluate_clients=min_evaluate_clients,
             min_available_clients=min_available_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
@@ -85,13 +86,13 @@ class ResourceAwareFedAvg(FedAvg):
         return rep
 
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
-            config = self.on_fit_config_fn(rnd)
+            config = self.on_fit_config_fn(server_round)
         fit_ins = FitIns(parameters, config)
 
 
@@ -110,7 +111,6 @@ class ResourceAwareFedAvg(FedAvg):
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
-        print("!!!configure_fit")
         print([client.cid for client in clients])
 
         # Return client/config pairs
@@ -118,9 +118,9 @@ class ResourceAwareFedAvg(FedAvg):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
 
@@ -138,17 +138,17 @@ class ResourceAwareFedAvg(FedAvg):
 
         # Convert results
         weights_results = [
-            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        parameters_aggregated = weights_to_parameters(aggregate(weights_results))
+        parameters_aggregated = parameters_to_ndarrays(aggregate(weights_results))
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
             fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif rnd == 1:
+        elif server_round == 1:
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
