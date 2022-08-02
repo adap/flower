@@ -54,7 +54,9 @@ def get_evaluate_fn(model: torch.nn.Module, toy: bool):
     valLoader = DataLoader(valset, batch_size=16)
     # The `evaluate` function will be called after every round
     def evaluate(
-        server_round: int, parameters: fl.common.NDArrays, config: Dict[str, fl.common.Scalar]
+        server_round: int,
+        parameters: fl.common.NDArrays,
+        config: Dict[str, fl.common.Scalar],
     ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
         # Update model with the latest parameters
         params_dict = zip(model.state_dict().keys(), parameters)
