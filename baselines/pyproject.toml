@@ -6,7 +6,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "flwr_baselines"
-version = "0.18.0"
+version = "1.0.0"
 description = "Flower Baselines"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
@@ -40,7 +40,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.7.12"
 # Mandatory dependencies
-flwr = { extras = ["simulation"], version = "^0.18.0" }
+flwr = { extras = ["simulation"], version = "^1.0.0" }
 torch = "^1.10.1"
 torchvision = "^0.11.2"
 hydra-core = "^1.2.0" 
