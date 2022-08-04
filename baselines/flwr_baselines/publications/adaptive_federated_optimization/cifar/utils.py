@@ -483,7 +483,7 @@ def get_cifar_eval_fn(
 
     def evaluate(
         server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
-    ) -> Optional[Tuple[float, Dict[str, float]]]:
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         # pylint: disable=unused-argument
         """Use the entire CIFAR-10 test set for evaluation."""
         # determine device
