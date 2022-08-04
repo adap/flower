@@ -68,8 +68,7 @@ def main(cfg: DictConfig) -> None:
         hist = fl.server.app.start_server(
             server_address=cfg.server_address,
             server=cfg.server,
-            config_server=ServerConfig(num_rounds=cfg.num_rounds),
-            config={"num_rounds": cfg.num_rounds},
+            config=ServerConfig(num_rounds=cfg.num_rounds),
             strategy=strategy,
         )
 

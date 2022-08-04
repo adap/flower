@@ -467,7 +467,9 @@ def gen_on_fit_config_fn(
 
 def get_cifar_eval_fn(
     path_original_dataset: Path, num_classes: int = 10
-) -> Callable[[NDArrays], Optional[Tuple[float, Dict[str, float]]]]:
+) -> Callable[
+    [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, float]]]
+]:
     """Returns an evaluation function for centralized evaluation."""
     CIFAR = CIFAR10 if num_classes == 10 else CIFAR100
     transforms = get_transforms(num_classes=num_classes)

@@ -6,7 +6,7 @@ from typing import Callable, Dict, Tuple
 import flwr as fl
 import numpy as np
 import torch
-from flwr.common.typing import Scalar, NDArrays
+from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import DataLoader
 
 from .utils import ClientDataset, get_cifar_model, get_transforms, test, train

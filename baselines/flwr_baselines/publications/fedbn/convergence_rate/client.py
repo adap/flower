@@ -12,8 +12,8 @@ import torch
 from torch import nn
 from torchvision import transforms
 
-from utils.cnn_model import CNNModel
-from utils.data_utils import DigitsDataset
+from .utils.cnn_model import CNNModel
+from .utils.data_utils import DigitsDataset
 
 FL_ROUND = 0
 
