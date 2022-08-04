@@ -9,10 +9,10 @@ This introductory example for Flower uses JAX, but you're not required to be a J
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/jax_from_centralized_to_federated . && rm -rf flower && cd jax_from_centralized_to_federated
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_jax . && rm -rf flower && cd quickstart_jax
 ```
 
-This will create a new directory called `jax_from_centralized_to_federated` containing the following files:
+This will create a new directory called `quickstart_jax`, containing the following files:
 
 ```shell
 -- pyproject.toml

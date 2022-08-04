@@ -12,7 +12,7 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-flwr = "^0.17.0"
+flwr = "^1.0.0"
 # flwr = { path = "../../", develop = true }  # Development
 pytorch-lightning = "^1.4.7"
 torchvision = "^0.10.0"
