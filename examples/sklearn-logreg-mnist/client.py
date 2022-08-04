@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     # Define Flower client
     class MnistClient(fl.client.NumPyClient):
-        def get_parameters(self):  # type: ignore
+        def get_parameters(self, config):  # type: ignore
             return utils.get_model_parameters(model)
 
         def fit(self, parameters, config):  # type: ignore
@@ -46,4 +46,4 @@ if __name__ == "__main__":
             return loss, len(X_test), {"accuracy": accuracy}
 
     # Start Flower client
-    fl.client.start_numpy_client("0.0.0.0:8080", client=MnistClient())
+    fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=MnistClient())

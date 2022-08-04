@@ -20,21 +20,22 @@ key = jax.random.PRNGKey(0)
 def load_data() -> Tuple[
     List[np.ndarray], List[np.ndarray], List[np.ndarray], List[np.ndarray]
 ]:
-    # create our dataset
+    # Load dataset
     X, y = make_regression(n_features=3, random_state=0)
     X, X_test, y, y_test = train_test_split(X, y)
     return X, y, X_test, y_test
 
 
 def load_model(model_shape) -> Dict:
-    # model weights
+    # Extract model parameters
     params = {"b": jax.random.uniform(key), "w": jax.random.uniform(key, model_shape)}
     return params
 
 
 def loss_fn(params, X, y) -> Callable:
+    # Return MSE as loss
     err = jnp.dot(X, params["w"]) + params["b"] - y
-    return jnp.mean(jnp.square(err))  # mse
+    return jnp.mean(jnp.square(err))
 
 
 def train(params, grad_fn, X, y) -> Tuple[np.array, float, int]:
@@ -52,7 +53,6 @@ def evaluation(params, grad_fn, X_test, y_test) -> Tuple[float, int]:
     num_examples = X_test.shape[0]
     err_test = loss_fn(params, X_test, y_test)
     loss_test = jnp.mean(jnp.square(err_test))
-    # print(f'Test loss {loss_test}')
     return loss_test, num_examples
 
 
