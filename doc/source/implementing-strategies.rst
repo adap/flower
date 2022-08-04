@@ -284,7 +284,7 @@ More sophisticated implementations can use :code:`configure_evaluate` to impleme
 
 .. note::
 
-    The structure of this return value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to evaluate, for example, different models on different clients, or use differnt hyperparameters on different clients (via the :code:`config` dict).
+    The structure of this return value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to evaluate, for example, different models on different clients, or use different hyperparameters on different clients (via the :code:`config` dict).
 
 
 The :code:`aggregate_evaluate` method
