@@ -9,10 +9,10 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Scalar
+from flwr.common.parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
-from py.flwr.common.parameter import ndarrays_to_parameters, parameters_to_ndarrays
 
 
 class DPFixedClipStrategy(Strategy):

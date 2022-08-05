@@ -35,11 +35,12 @@ from flwr.common import (
 
 
 # Calculates the L2-norm of a potentially ragged array
-def __get_update_norm(update):
-    flattened_update = []
+def _get_update_norm(update):
+    flattened_layers = []
     for layer in update:
-        flattened_update.append(layer.ravel())
-    return np.linalg.norm(np.concatenate(flattened_update))
+        flattened_layers.append(layer.ravel())
+    flattened_update = np.concatenate(flattened_layers)
+    return np.linalg.norm(flattened_update)
 
 
 class DPClient(Client):
@@ -57,6 +58,7 @@ class DPClient(Client):
         return self.client.get_parameters(ins)
 
     def fit(self, ins: FitIns) -> FitRes:
+
         # Global model received by the wrapped client at the beginning of the round
         original_ndarrays = copy.deepcopy(parameters_to_ndarrays(ins.parameters))
 
@@ -68,24 +70,20 @@ class DPClient(Client):
         update = [x - y for (x, y) in zip(updated_ndarrays, original_ndarrays)]
 
         # Calculating the factor to scale the update by
-        update_norm = __get_update_norm(update)
+        update_norm = _get_update_norm(update)
         scaling_factor = min(1, ins.config["clip_norm"] / update_norm)
 
         # Clipping update to bound sensitivity of aggregate at server
         update_clipped = [layer * scaling_factor for layer in update]
 
-        # Adding noise to the clipped update
-        # update_clipped_noised = [
-        #     layer + np.random.normal(0, ins.config["noise_stddev"], layer.shape)
-        #     for layer in update_clipped
-        # ]
         res.parameters = ndarrays_to_parameters(
-            [x + y for (x, y) in zip(original_ndarrays, update_clipped_noised)]
+            [x + y for (x, y) in zip(original_ndarrays, update_clipped)]
         )
 
         # Calculating value of norm indicator bit, required for adaptive clipping
         if self.adaptive_clip_enabled:
             res.metrics["norm_bit"] = not scaling_factor < 1
+
         return res
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
