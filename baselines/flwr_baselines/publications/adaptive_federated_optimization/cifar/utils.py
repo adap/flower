@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import torch
-from flwr.common.parameter import weights_to_parameters
-from flwr.common.typing import Parameters, Scalar, Weights
+from flwr.common.parameter import ndarrays_to_parameters
+from flwr.common.typing import NDArrays, Parameters, Scalar
 from flwr.server.history import History
 from PIL import Image
 from torch import Tensor, load
@@ -467,7 +467,9 @@ def gen_on_fit_config_fn(
 
 def get_cifar_eval_fn(
     path_original_dataset: Path, num_classes: int = 10
-) -> Callable[[Weights], Optional[Tuple[float, Dict[str, float]]]]:
+) -> Callable[
+    [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
+]:
     """Returns an evaluation function for centralized evaluation."""
     CIFAR = CIFAR10 if num_classes == 10 else CIFAR100
     transforms = get_transforms(num_classes=num_classes)
@@ -479,7 +481,10 @@ def get_cifar_eval_fn(
         transform=transforms["test"],
     )
 
-    def evaluate(weights: Weights) -> Optional[Tuple[float, Dict[str, float]]]:
+    def evaluate(
+        server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        # pylint: disable=unused-argument
         """Use the entire CIFAR-10 test set for evaluation."""
         # determine device
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -487,7 +492,7 @@ def get_cifar_eval_fn(
         state_dict = OrderedDict(
             {
                 k: torch.tensor(np.atleast_1d(v))
-                for k, v in zip(net.state_dict().keys(), weights)
+                for k, v in zip(net.state_dict().keys(), parameters_ndarrays)
             }
         )
         net.load_state_dict(state_dict, strict=True)
@@ -512,7 +517,7 @@ def get_initial_parameters(num_classes: int = 10) -> Parameters:
     """
     model = get_cifar_model(num_classes)
     weights = [val.cpu().numpy() for _, val in model.state_dict().items()]
-    parameters = weights_to_parameters(weights)
+    parameters = ndarrays_to_parameters(weights)
 
     return parameters
 
