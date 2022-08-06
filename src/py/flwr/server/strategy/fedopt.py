@@ -23,10 +23,10 @@ from typing import Callable, Dict, Optional, Tuple
 
 from flwr.common import (
     MetricsAggregationFn,
+    NDArrays,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
+    parameters_to_ndarrays,
 )
 
 from .fedavg import FedAvg
@@ -40,12 +40,15 @@ class FedOpt(FedAvg):
         self,
         *,
         fraction_fit: float = 1.0,
-        fraction_eval: float = 1.0,
+        fraction_evaluate: float = 1.0,
         min_fit_clients: int = 2,
-        min_eval_clients: int = 2,
+        min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn: Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -67,16 +70,20 @@ class FedOpt(FedAvg):
         ----------
         fraction_fit (float, optional): Fraction of clients used during
             training. Defaults to 0.1.
-        fraction_eval (float, optional): Fraction of clients used during
+        fraction_evaluate (float, optional): Fraction of clients used during
             validation. Defaults to 0.1.
         min_fit_clients (int, optional): Minimum number of clients used
             during training. Defaults to 2.
-        min_eval_clients (int, optional): Minimum number of clients used
+        min_evaluate_clients (int, optional): Minimum number of clients used
             during validation. Defaults to 2.
         min_available_clients (int, optional): Minimum number of total
             clients in the system. Defaults to 2.
-        eval_fn (Callable[[Weights], Optional[Tuple[float, float]]], optional):
-            Function used for validation. Defaults to None.
+        evaluate_fn : Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]]
+            ]
+        ]: Function used for validation. Defaults to None.
         on_fit_config_fn (Callable[[int], Dict[str, str]], optional):
             Function used to configure training. Defaults to None.
         on_evaluate_config_fn (Callable[[int], Dict[str, str]], optional):
@@ -97,11 +104,11 @@ class FedOpt(FedAvg):
         """
         super().__init__(
             fraction_fit=fraction_fit,
-            fraction_eval=fraction_eval,
+            fraction_evaluate=fraction_evaluate,
             min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
+            min_evaluate_clients=min_evaluate_clients,
             min_available_clients=min_available_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
@@ -109,14 +116,14 @@ class FedOpt(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.current_weights = parameters_to_weights(initial_parameters)
+        self.current_weights = parameters_to_ndarrays(initial_parameters)
         self.eta = eta
         self.eta_l = eta_l
         self.tau = tau
         self.beta_1 = beta_1
         self.beta_2 = beta_2
-        self.m_t: Optional[Weights] = None
-        self.v_t: Optional[Weights] = None
+        self.m_t: Optional[NDArrays] = None
+        self.v_t: Optional[NDArrays] = None
 
     def __repr__(self) -> str:
         rep = f"FedOpt(accept_failures={self.accept_failures})"

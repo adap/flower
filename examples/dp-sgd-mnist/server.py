@@ -11,7 +11,7 @@ import common
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
-def get_eval_fn(model):
+def get_evaluate_fn(model):
     """Return an evaluation function for server-side evaluation."""
 
     # Load test data here to avoid the overhead of doing it in `evaluate` itself
@@ -37,10 +37,11 @@ def main(args) -> None:
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=args.fraction_fit,
         min_available_clients=args.num_clients,
-        eval_fn=get_eval_fn(model),
+        evaluate_fn=get_evaluate_fn(model),
         initial_parameters=fl.common.weights_to_parameters(model.get_weights()),
     )
     fl.server.start_server(
+        server_address="0.0.0.0:8080",
         strategy=strategy,
         config={"num_rounds": args.num_rounds},
     )

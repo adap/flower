@@ -17,14 +17,12 @@
 
 import time
 from logging import INFO
-from typing import Callable, Dict, List, Optional, Union
-
-import numpy as np
+from typing import Callable, Dict, Optional, Union
 
 from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
-    parameters_to_weights,
-    weights_to_parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.common.logger import log
 from flwr.common.typing import (
@@ -37,6 +35,7 @@ from flwr.common.typing import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
+    NDArrays,
     Status,
 )
 
@@ -53,7 +52,7 @@ EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT = """
 NumPyClient.fit did not return a tuple with 3 elements.
 The returned values should have the following type signature:
 
-    Tuple[List[np.ndarray], int, Dict[str, Scalar]]
+    Tuple[NDArrays, int, Dict[str, Scalar]]
 
 Example
 -------
@@ -80,6 +79,7 @@ ClientLike = Union[Client, NumPyClient]
 
 
 def start_client(
+    *,
     server_address: str,
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -158,6 +158,7 @@ def start_client(
 
 
 def start_numpy_client(
+    *,
     server_address: str,
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -167,26 +168,22 @@ def start_numpy_client(
 
     Parameters
     ----------
-        server_address: str. The IPv6 address of the server. If the Flower
-            server runs on the same machine on port 8080, then `server_address`
-            would be `"[::]:8080"`.
-        client: flwr.client.NumPyClient. An implementation of the abstract base
-            class `flwr.client.NumPyClient`.
-        grpc_max_message_length: int (default: 536_870_912, this equals 512MB).
-            The maximum length of gRPC messages that can be exchanged with the
-            Flower server. The default should be sufficient for most models.
-            Users who train very large models might need to increase this
-            value. Note that the Flower server needs to be started with the
-            same value (see `flwr.server.start_server`), otherwise it will not
-            know about the increased limit and block larger messages.
-        root_certificates: bytes (default: None)
-            The PEM-encoded root certificates a byte string. If provided, a secure
-            connection using the certificates will be established to a
-            SSL-enabled Flower server.
-
-    Returns
-    -------
-        None
+    server_address : str
+        The IPv6 address of the server. If the Flower server runs on the same
+        machine on port 8080, then `server_address` would be `"[::]:8080"`.
+    client : flwr.client.NumPyClient
+        An implementation of the abstract base class `flwr.client.NumPyClient`.
+    grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
+        The maximum length of gRPC messages that can be exchanged with the
+        Flower server. The default should be sufficient for most models.
+        Users who train very large models might need to increase this
+        value. Note that the Flower server needs to be started with the
+        same value (see `flwr.server.start_server`), otherwise it will not
+        know about the increased limit and block larger messages.
+    root_certificates : bytes (default: None)
+        The PEM-encoded root certificates a byte string. If provided, a secure
+        connection using the certificates will be established to a
+        SSL-enabled Flower server.
 
     Examples
     --------
@@ -239,16 +236,17 @@ def _get_properties(self: Client, ins: GetPropertiesIns) -> GetPropertiesRes:
 def _get_parameters(self: Client, ins: GetParametersIns) -> GetParametersRes:
     """Return the current local model parameters."""
     parameters = self.numpy_client.get_parameters(config=ins.config)  # type: ignore
-    parameters_proto = weights_to_parameters(parameters)
+    parameters_proto = ndarrays_to_parameters(parameters)
     return GetParametersRes(
         status=Status(code=Code.OK, message="Success"), parameters=parameters_proto
     )
 
 
 def _fit(self: Client, ins: FitIns) -> FitRes:
-    """Refine the provided weights using the locally held dataset."""
+    """Refine the provided parameters using the locally held dataset."""
+
     # Deconstruct FitIns
-    parameters: List[np.ndarray] = parameters_to_weights(ins.parameters)
+    parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
 
     # Train
     results = self.numpy_client.fit(parameters, ins.config)  # type: ignore
@@ -262,7 +260,7 @@ def _fit(self: Client, ins: FitIns) -> FitRes:
 
     # Return FitRes
     parameters_prime, num_examples, metrics = results
-    parameters_prime_proto = weights_to_parameters(parameters_prime)
+    parameters_prime_proto = ndarrays_to_parameters(parameters_prime)
     return FitRes(
         status=Status(code=Code.OK, message="Success"),
         parameters=parameters_prime_proto,
@@ -273,7 +271,7 @@ def _fit(self: Client, ins: FitIns) -> FitRes:
 
 def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
     """Evaluate the provided parameters using the locally held dataset."""
-    parameters: List[np.ndarray] = parameters_to_weights(ins.parameters)
+    parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
 
     results = self.numpy_client.evaluate(parameters, ins.config)  # type: ignore
     if not (

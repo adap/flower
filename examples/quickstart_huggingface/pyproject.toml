@@ -1,23 +1,20 @@
 [build-system]
-requires = [
-    "poetry==1.1.13",
-]
-build-backend = "poetry.masonry.api"
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "quickstart_huggingface"
 version = "0.1.0"
 description = "Hugging Face Transformers Federated Learning Quickstart with Flower"
 authors = [
-    "The Flower Authors <enquiries@flower.dev>",
+    "The Flower Authors <hello@flower.dev>",
     "Kaushik Amar Das <kaushik.das@iiitg.ac.in>"
 ]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-flwr = "^0.17.0"
-# flwr = { path = "../../", develop = true }  # Development
-torch = "1.9.0"
+flwr = "^1.0.0"
+torch = "1.12.0"
 transformers = "4.11.3"
 datasets = "1.12.1"
 scikit-learn = "1.0"

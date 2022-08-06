@@ -14,7 +14,7 @@ An evaluation function is any function that can take the current global model pa
 
 .. code-block:: python
 
-    def get_eval_fn(model):
+    def get_evaluate_fn(model):
         """Return an evaluation function for server-side evaluation."""
 
         # Load data and model here to avoid the overhead of doing it in `evaluate` itself
@@ -41,7 +41,7 @@ An evaluation function is any function that can take the current global model pa
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
         # ... other FedAvg arguments 
-        eval_fn=get_eval_fn(model),
+        evaluate_fn=get_evaluate_fn(model),
     )
 
     # Start Flower server for four rounds of federated learning
@@ -95,27 +95,27 @@ Configuring Federated Evaluation
 
 Federated evaluation can be configured from the server side. Built-in strategies support the following arguments:
 
-- :code:`fraction_eval`: a :code:`float` defining the fraction of clients that will be selected for evaluation. If :code:`fraction_eval` is set to :code:`0.1` and :code:`100` clients are connected to the server, then :code:`10` will be randomly selected for evaluation. If :code:`fraction_eval` is set to :code:`0.0`, federated evaluation will be disabled. 
-- :code:`min_eval_clients`: an :code:`int`: the minimum number of clients to be selected for evaluation. If :code:`fraction_eval` is set to :code:`0.1`, :code:`min_eval_clients` is set to 20, and :code:`100` clients are connected to the server, then :code:`20` clients will be selected for evaluation.
+- :code:`fraction_evaluate`: a :code:`float` defining the fraction of clients that will be selected for evaluation. If :code:`fraction_evaluate` is set to :code:`0.1` and :code:`100` clients are connected to the server, then :code:`10` will be randomly selected for evaluation. If :code:`fraction_evaluate` is set to :code:`0.0`, federated evaluation will be disabled. 
+- :code:`min_evaluate_clients`: an :code:`int`: the minimum number of clients to be selected for evaluation. If :code:`fraction_evaluate` is set to :code:`0.1`, :code:`min_evaluate_clients` is set to 20, and :code:`100` clients are connected to the server, then :code:`20` clients will be selected for evaluation.
 - :code:`min_available_clients`: an :code:`int` that defines the minimum number of clients which need to be connected to the server before a round of federated evaluation can start. If fewer than :code:`min_available_clients` are connected to the server, the server will wait until more clients are connected before it continues to sample clients for evaluation.
 - :code:`on_evaluate_config_fn`: a function that returns a configuration dictionary which will be sent to the selected clients. The function will be called during each round and provides a convenient way to customize client-side evaluation from the server side, for example, to configure the number of validation steps performed. 
 
 .. code-block:: python
 
-    def evaluate_config(rnd: int):
+    def evaluate_config(server_round: int):
         """Return evaluation configuration dict for each round.
         Perform five local evaluation steps on each client (i.e., use five
         batches) during rounds one to three, then increase to ten local
         evaluation steps.
         """
-        val_steps = 5 if rnd < 4 else 10
+        val_steps = 5 if server_round < 4 else 10
         return {"val_steps": val_steps}
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
         # ... other FedAvg agruments
-        fraction_eval=0.2,
-        min_eval_clients=2,
+        fraction_evaluate=0.2,
+        min_evaluate_clients=2,
         min_available_clients=10,
         on_evaluate_config_fn=evaluate_config,
     )

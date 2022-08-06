@@ -16,7 +16,7 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Scalar
 from flwr.server.client_manager import ClientManager
@@ -34,25 +34,25 @@ class Strategy(ABC):
 
         Parameters
         ----------
-            client_manager: ClientManager. The client manager which holds all currently
-                connected clients.
+        client_manager : ClientManager
+            The client manager which holds all currently connected clients.
 
         Returns
         -------
-        parameters: Parameters (optional)
+        parameters : Optional[Parameters]
             If parameters are returned, then the server will treat these as the
             initial global model parameters.
         """
 
     @abstractmethod
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training.
 
         Parameters
         ----------
-        rnd : int
+        server_round : int
             The current round of federated learning.
         parameters : Parameters
             The current (global) model parameters.
@@ -61,24 +61,25 @@ class Strategy(ABC):
 
         Returns
         -------
-        A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
-        `FitIns` for this particular `ClientProxy`. If a particular `ClientProxy`
-        is not included in this list, it means that this `ClientProxy`
-        will not participate in the next round of federated learning.
+        fit_configuration : List[Tuple[ClientProxy, FitIns]]
+            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
+            `FitIns` for this particular `ClientProxy`. If a particular `ClientProxy`
+            is not included in this list, it means that this `ClientProxy`
+            will not participate in the next round of federated learning.
         """
 
     @abstractmethod
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results.
 
         Parameters
         ----------
-        rnd : int
+        server_round : int
             The current round of federated learning.
         results : List[Tuple[ClientProxy, FitRes]]
             Successful updates from the previously selected and configured
@@ -88,13 +89,13 @@ class Strategy(ABC):
             this list: a client might drop out and not submit a result. For each
             client that did not submit an update, there should be an `Exception`
             in `failures`.
-        failures : List[BaseException]
+        failures : List[Union[Tuple[ClientProxy, FitRes], BaseException]]
             Exceptions that occurred while the server was waiting for client
             updates.
 
         Returns
         -------
-        parameters: Parameters (optional)
+        parameters : Optional[Parameters]
             If parameters are returned, then the server will treat these as the
             new global model parameters (i.e., it will replace the previous
             parameters with the ones returned from this method). If `None` is
@@ -106,17 +107,22 @@ class Strategy(ABC):
 
     @abstractmethod
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation.
 
-        Arguments:
-            rnd: Integer. The current round of federated learning.
-            parameters: Parameters. The current (global) model parameters.
-            client_manager: ClientManager. The client manager which holds all currently
-                connected clients.
+        Parameters
+        ----------
+        server_round : int
+            The current round of federated learning.
+        parameters : Parameters
+            The current (global) model parameters.
+        client_manager : ClientManager
+            The client manager which holds all currently connected clients.
 
-        Returns:
+        Returns
+        -------
+        evaluate_configuration : List[Tuple[ClientProxy, EvaluateIns]]
             A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
             `EvaluateIns` for this particular `ClientProxy`. If a particular
             `ClientProxy` is not included in this list, it means that this
@@ -127,42 +133,53 @@ class Strategy(ABC):
     @abstractmethod
     def aggregate_evaluate(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation results.
 
-        Arguments:
-            rnd: int. The current round of federated learning.
-            results: List[Tuple[ClientProxy, FitRes]]. Successful updates from the
-                previously selected and configured clients. Each pair of
-                `(ClientProxy, FitRes` constitutes a successful update from one of the
-                previously selected clients. Not that not all previously selected
-                clients are necessarily included in this list: a client might drop out
-                and not submit a result. For each client that did not submit an update,
-                there should be an `Exception` in `failures`.
-            failures: List[BaseException]. Exceptions that occurred while the server
-                was waiting for client updates.
+        Parameters
+        ----------
+        server_round : int
+            The current round of federated learning.
+        results : List[Tuple[ClientProxy, FitRes]]
+            Successful updates from the
+            previously selected and configured clients. Each pair of
+            `(ClientProxy, FitRes` constitutes a successful update from one of the
+            previously selected clients. Not that not all previously selected
+            clients are necessarily included in this list: a client might drop out
+            and not submit a result. For each client that did not submit an update,
+            there should be an `Exception` in `failures`.
+        failures : List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]
+            Exceptions that occurred while the server was waiting for client updates.
 
-        Returns:
-            Optional `float` representing the aggregated evaluation result. Aggregation
-            typically uses some variant of a weighted average.
+        Returns
+        -------
+        aggregation_result : Optional[float]
+            The aggregated evaluation result. Aggregation typically uses some variant
+            of a weighted average.
         """
 
     @abstractmethod
     def evaluate(
-        self, parameters: Parameters
+        self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate the current model parameters.
 
         This function can be used to perform centralized (i.e., server-side) evaluation
         of model parameters.
 
-        Arguments:
-            parameters: Parameters. The current (global) model parameters.
+        Parameters
+        ----------
+        server_round : int
+            The current round of federated learning.
+        parameters: Parameters
+            The current (global) model parameters.
 
-        Returns:
+        Returns
+        -------
+        evaluation_result : Optional[Tuple[float, Dict[str, Scalar]]]
             The evaluation result, usually a Tuple containing loss and a
             dictionary containing task-specific metrics (e.g., accuracy).
         """

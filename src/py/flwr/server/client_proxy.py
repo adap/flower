@@ -62,7 +62,7 @@ class ClientProxy(ABC):
         ins: FitIns,
         timeout: Optional[float],
     ) -> FitRes:
-        """Refine the provided weights using the locally held dataset."""
+        """Refine the provided parameters using the locally held dataset."""
 
     @abstractmethod
     def evaluate(
@@ -70,7 +70,7 @@ class ClientProxy(ABC):
         ins: EvaluateIns,
         timeout: Optional[float],
     ) -> EvaluateRes:
-        """Evaluate the provided weights using the locally held dataset."""
+        """Evaluate the provided parameters using the locally held dataset."""
 
     @abstractmethod
     def reconnect(

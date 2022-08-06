@@ -15,7 +15,7 @@
 """Flower TensorBoard utilities."""
 import os
 from datetime import datetime
-from typing import Callable, Dict, List, Optional, Tuple, TypeVar, cast
+from typing import Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
 
 try:
     import tensorflow as tf
@@ -78,9 +78,9 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
 
             def aggregate_evaluate(
                 self,
-                rnd: int,
+                server_round: int,
                 results: List[Tuple[ClientProxy, EvaluateRes]],
-                failures: List[BaseException],
+                failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
             ) -> Tuple[Optional[float], Dict[str, Scalar]]:
                 """Hooks into aggregate_evaluate for TensorBoard logging
                 purpose."""
@@ -88,15 +88,10 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                 # They will be returned at the end of this function but also
                 # used for logging
                 loss_aggregated, config = super().aggregate_evaluate(
-                    rnd,
+                    server_round,
                     results,
                     failures,
                 )
-
-                if rnd < 0:
-                    # rnd < 0 is currently planned to be removed and should not be
-                    # used but rather with backwards compatibility in mind ignored
-                    return loss_aggregated, config
 
                 # Server logs
                 writer = tf.summary.create_file_writer(
@@ -104,9 +99,11 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                 )
 
                 # Write aggregated loss
-                with writer.as_default(step=rnd):  # pylint: disable=not-context-manager
+                with writer.as_default(
+                    step=server_round
+                ):  # pylint: disable=not-context-manager
                     tf.summary.scalar(
-                        "server/loss_aggregated", loss_aggregated, step=rnd
+                        "server/loss_aggregated", loss_aggregated, step=server_round
                     )
                     writer.flush()
 
@@ -125,7 +122,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                         os.path.join(logdir_run, "clients", client.cid)
                     )
                     with writer.as_default(  # pylint: disable=not-context-manager
-                        step=rnd
+                        step=server_round
                     ):
                         tf.summary.scalar("clients/loss", loss)
                         tf.summary.scalar("clients/num_examples", num_examples)
