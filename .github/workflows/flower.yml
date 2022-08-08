@@ -15,9 +15,9 @@ jobs:
       matrix:
         python: [3.7.12, 3.8.12, 3.9.10, 3.10.5]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
       - name: Install build tools
