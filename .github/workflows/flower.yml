@@ -20,7 +20,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
-          cache: 'poetry'
       - name: Install build tools
         run: |
           sudo apt-get install clang-format
