@@ -4,7 +4,7 @@ Paper: https://arxiv.org/pdf/1710.06963.pdf
 """
 
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -65,7 +65,7 @@ class DPFixedClipStrategy(Strategy):
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         if failures:
             return None, {}
@@ -76,6 +76,10 @@ class DPFixedClipStrategy(Strategy):
         aggregate_params, aggregate_metrics = self.strategy.aggregate_fit(
             rnd, results, failures
         )
+
+        if aggregate_params is None:
+            return None, {}
+
         aggregate_weights = parameters_to_ndarrays(aggregate_params)
         noised_weights = [
             layer
@@ -92,11 +96,11 @@ class DPFixedClipStrategy(Strategy):
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         return self.strategy.aggregate_evaluate(rnd, results, failures)
 
     def evaluate(
-        self, parameters: Parameters
+        self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        return self.strategy.evaluate(parameters)
+        return self.strategy.evaluate(server_round, parameters)

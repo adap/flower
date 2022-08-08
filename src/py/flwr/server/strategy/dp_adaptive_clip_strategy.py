@@ -5,7 +5,7 @@ Paper: https://arxiv.org/pdf/1710.06963.pdf
 
 
 import math
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -27,7 +27,7 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         init_clip_norm: float = 0.1,
         clip_norm_lr: float = 0.2,
         clip_norm_target_quantile: float = 0.5,
-        clip_count_stddev: float = None,
+        clip_count_stddev: Optional[float] = None,
     ) -> None:
 
         super().__init__(
@@ -71,7 +71,7 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         self,
         rnd: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         if failures:
             return None, {}
