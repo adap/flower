@@ -13,19 +13,19 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python: [3.7.12, 3.8.12, 3.9.10]
+        python: [3.7.12, 3.8.12, 3.9.10, 3.10.5]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
       - name: Install build tools
         run: |
           sudo apt-get install clang-format
-          python -m pip install -U pip==22.0.4
-          python -m pip install -U setuptools==60.9.3
-          python -m pip install -U poetry==1.1.13
+          python -m pip install -U pip==22.2
+          python -m pip install -U setuptools==63.2.0
+          python -m pip install -U poetry==1.1.14
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"

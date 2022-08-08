@@ -8,16 +8,16 @@ jobs:
   nightly_release:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.7.12
       - name: Install build tools
         run: |
-          python -m pip install -U pip==22.0.4
-          python -m pip install -U setuptools==60.9.3
-          python -m pip install -U poetry==1.1.13
+          python -m pip install -U pip==22.2
+          python -m pip install -U setuptools==63.2.0
+          python -m pip install -U poetry==1.1.14
       - name: Release nightly
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}

@@ -1,8 +1,8 @@
 #!/bin/bash
 mode=${1:-"fedavg"}
 
-echo "Start Trainign with $mode"
-mkdir results
+echo "Start Training with $mode"
+mkdir -p results
 
 python3 server.py &
 sleep 5 # Sleep for 5s to give the server enough time to start

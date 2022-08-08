@@ -9,7 +9,7 @@ num_total_clients: 500
 num_rounds: 4000
 root_dir: "./data"
 cpus_per_client: 1
-gpus_per_client: 0.33
+gpus_per_client: 0
 hydra.job.chdir: False
 is_simulation: True
 

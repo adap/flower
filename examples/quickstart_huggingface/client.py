@@ -96,7 +96,7 @@ def main():
 
     # Flower client
     class IMDBClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
         def set_parameters(self, parameters):
@@ -109,7 +109,7 @@ def main():
             print("Training Started...")
             train(net, trainloader, epochs=1)
             print("Training Finished.")
-            return self.get_parameters(), len(trainloader), {}
+            return self.get_parameters(config={}), len(trainloader), {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
@@ -117,7 +117,7 @@ def main():
             return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
     # Start client
-    fl.client.start_numpy_client("[::]:9999", client=IMDBClient())
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=IMDBClient())
 
 
 if __name__ == "__main__":

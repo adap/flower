@@ -73,7 +73,7 @@ def main() -> None:
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
-        eval_fn=get_eval_fn(xy_test=xy_test),
+        evaluate_fn=get_evaluate_fn(xy_test=xy_test),
         on_fit_config_fn=fit_config,
     )
 
@@ -86,17 +86,17 @@ def main() -> None:
     )
 
 
-def fit_config(rnd: int) -> Dict[str, fl.common.Scalar]:
+def fit_config(server_round: int) -> Dict[str, fl.common.Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
     config: Dict[str, fl.common.Scalar] = {
-        "epoch_global": str(rnd),
+        "epoch_global": str(server_round),
         "epochs": str(1),
         "batch_size": str(64),
     }
     return config
 
 
-def get_eval_fn(
+def get_evaluate_fn(
     xy_test: Tuple[np.ndarray, np.ndarray]
 ) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
