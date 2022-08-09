@@ -15,6 +15,7 @@
 """Flower server app."""
 
 
+import time
 from dataclasses import dataclass
 from logging import INFO, WARN
 from typing import Optional, Tuple
@@ -186,3 +187,9 @@ def _fl(
     server.disconnect_all_clients(timeout=config.round_timeout)
 
     return hist
+
+
+def run_server() -> None:
+    """Run Flower server."""
+    print("Running Flower server...")
+    time.sleep(3)
