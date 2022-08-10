@@ -316,3 +316,9 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
 
     # Create and return an instance of the newly created class
     return wrapper_class(numpy_client=client)  # type: ignore
+
+
+def run_client() -> None:
+    """Run Flower client."""
+    print("Running Flower client...")
+    time.sleep(3)
