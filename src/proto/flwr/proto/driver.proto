@@ -15,7 +15,7 @@
 
 syntax = "proto3";
 
-package flwr.driver.proto;
+package flwr.server.driver.proto;
 
 service DriverAPI {
   // Return a list of clients.
