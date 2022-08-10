@@ -50,7 +50,7 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         rep = "Strategy with DP with Adaptive Clipping enabled."
         return rep
 
-    def __update_clip_norm(self, results):
+    def __update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
         # Calculating number of clients which set the norm indicator bit
         norm_bit_set_count = 0
         for _, fit_res in results:
@@ -69,12 +69,12 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         if failures:
             return None, {}
-        new_global_model = super().aggregate_fit(rnd, results, failures)
+        new_global_model = super().aggregate_fit(server_round, results, failures)
         self.__update_clip_norm(results)
         return new_global_model

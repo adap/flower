@@ -35,12 +35,12 @@ from flwr.common import (
 
 
 # Calculates the L2-norm of a potentially ragged array
-def _get_update_norm(update):
+def _get_update_norm(update):  # type: ignore
     flattened_layers = []
     for layer in update:
         flattened_layers.append(layer.ravel())
-    flattened_update = np.concatenate(flattened_layers)
-    return np.linalg.norm(flattened_update)
+    flattened_update = np.concatenate(flattened_layers)  # type: ignore
+    return np.linalg.norm(flattened_update)  # type: ignore
 
 
 class DPClient(Client):
@@ -70,11 +70,11 @@ class DPClient(Client):
         update = [x - y for (x, y) in zip(updated_ndarrays, original_ndarrays)]
 
         # Calculating the factor to scale the update by
-        update_norm = _get_update_norm(update)
+        update_norm = _get_update_norm(update)  # type: ignore
         scaling_factor = min(1, ins.config["clip_norm"] / update_norm)
 
         # Clipping update to bound sensitivity of aggregate at server
-        update_clipped = [layer * scaling_factor for layer in update]
+        update_clipped = [layer * scaling_factor for layer in update]  # type: ignore
 
         update_clipped_noised = [
             layer + np.random.normal(0, ins.config["noise_stddev"], layer.shape)

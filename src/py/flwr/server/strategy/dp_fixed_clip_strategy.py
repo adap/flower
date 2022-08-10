@@ -37,7 +37,7 @@ class DPFixedClipStrategy(Strategy):
     # Instead of adding noise with std dev sigma = z*clip_norm at server,
     # add noise with std dev sigma_dash = z*clip_norm/sqrt(m) at
     # each of the m chosen clients.
-    def __calc_client_noise_stddev(self):
+    def __calc_client_noise_stddev(self):  # type: ignore
         return (
             self.noise_multiplier * self.clip_norm / (self.num_sampled_clients ** (0.5))
         )
@@ -48,28 +48,32 @@ class DPFixedClipStrategy(Strategy):
         return self.strategy.initialize_parameters(client_manager)
 
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
 
         client_instructions = self.strategy.configure_fit(
-            rnd, parameters, client_manager
+            server_round, parameters, client_manager
         )
+
+        noise_stddev = self.__calc_client_noise_stddev()  # type: ignore
 
         for _, fit_ins in client_instructions:
             fit_ins.config["clip_norm"] = self.clip_norm
-            fit_ins.config["noise_stddev"] = self.__calc_client_noise_stddev()
+            fit_ins.config["noise_stddev"] = noise_stddev
 
         return client_instructions
 
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        return self.strategy.configure_evaluate(rnd, parameters, client_manager)
+        return self.strategy.configure_evaluate(
+            server_round, parameters, client_manager
+        )
 
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -79,15 +83,15 @@ class DPFixedClipStrategy(Strategy):
         for _, fit_res in results:
             fit_res.num_examples = 1
 
-        return self.strategy.aggregate_fit(rnd, results, failures)
+        return self.strategy.aggregate_fit(server_round, results, failures)
 
     def aggregate_evaluate(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-        return self.strategy.aggregate_evaluate(rnd, results, failures)
+        return self.strategy.aggregate_evaluate(server_round, results, failures)
 
     def evaluate(
         self, server_round: int, parameters: Parameters
