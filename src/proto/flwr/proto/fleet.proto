@@ -15,7 +15,7 @@
 
 syntax = "proto3";
 
-package flwr.fleet.proto;
+package flwr.server.fleet.proto;
 
 service Fleet {
   // Get tasks
