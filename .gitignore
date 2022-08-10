@@ -15,6 +15,7 @@ baselines/datasets/leaf
 
 # macOS
 .DS_Store
+.idea/
 
 # Editor
 .vscode
