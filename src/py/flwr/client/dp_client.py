@@ -76,8 +76,12 @@ class DPClient(Client):
         # Clipping update to bound sensitivity of aggregate at server
         update_clipped = [layer * scaling_factor for layer in update]
 
+        update_clipped_noised = [
+            layer + np.random.normal(0, ins.config["noise_stddev"], layer.shape)
+            for layer in update_clipped
+        ]
         res.parameters = ndarrays_to_parameters(
-            [x + y for (x, y) in zip(original_ndarrays, update_clipped)]
+            [x + y for (x, y) in zip(original_ndarrays, update_clipped_noised)]
         )
 
         # Calculating value of norm indicator bit, required for adaptive clipping
