@@ -6,12 +6,12 @@ import abc
 import flwr.proto.fleet_pb2
 import grpc
 
-class FleetAPIStub:
+class FleetStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
     GetTasks: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.GetTasksRequest,
         flwr.proto.fleet_pb2.GetTasksResponse]
-    """Get one or more tasks"""
+    """Get tasks"""
 
     CreateResults: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.CreateResultsRequest,
@@ -19,13 +19,13 @@ class FleetAPIStub:
     """Get results"""
 
 
-class FleetAPIServicer(metaclass=abc.ABCMeta):
+class FleetServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def GetTasks(self,
         request: flwr.proto.fleet_pb2.GetTasksRequest,
         context: grpc.ServicerContext,
     ) -> flwr.proto.fleet_pb2.GetTasksResponse:
-        """Get one or more tasks"""
+        """Get tasks"""
         pass
 
     @abc.abstractmethod
@@ -37,4 +37,4 @@ class FleetAPIServicer(metaclass=abc.ABCMeta):
         pass
 
 
-def add_FleetAPIServicer_to_server(servicer: FleetAPIServicer, server: grpc.Server) -> None: ...
+def add_FleetServicer_to_server(servicer: FleetServicer, server: grpc.Server) -> None: ...

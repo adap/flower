@@ -15,11 +15,11 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='flwr/proto/driver.proto',
-  package='flwr.driver.proto',
+  package='flwr.server.driver.proto',
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x17\x66lwr/proto/driver.proto\x12\x11\x66lwr.driver.proto\"\x13\n\x11GetClientsRequest\"\x14\n\x12GetClientsResponse\"\x12\n\x04Task\x12\n\n\x02id\x18\x01 \x01(\t\";\n\x12\x43reateTasksRequest\x12%\n\x04task\x18\x01 \x03(\x0b\x32\x17.flwr.driver.proto.Task\"\'\n\x13\x43reateTasksResponse\x12\x10\n\x08task_ids\x18\x01 \x03(\t\"\x19\n\x06Result\x12\x0f\n\x07task_id\x18\x01 \x01(\t\"@\n\x11GetResultsRequest\x12+\n\x08task_ids\x18\x01 \x03(\x0b\x32\x19.flwr.driver.proto.Result\"@\n\x12GetResultsResponse\x12*\n\x07results\x18\x01 \x03(\x0b\x32\x19.flwr.driver.proto.Result2\xa5\x02\n\tDriverAPI\x12[\n\nGetClients\x12$.flwr.driver.proto.GetClientsRequest\x1a%.flwr.driver.proto.GetClientsResponse\"\x00\x12^\n\x0b\x43reateTasks\x12%.flwr.driver.proto.CreateTasksRequest\x1a&.flwr.driver.proto.CreateTasksResponse\"\x00\x12[\n\nGetResults\x12$.flwr.driver.proto.GetResultsRequest\x1a%.flwr.driver.proto.GetResultsResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x17\x66lwr/proto/driver.proto\x12\x18\x66lwr.server.driver.proto\"\x13\n\x11GetClientsRequest\"\x14\n\x12GetClientsResponse\"\x12\n\x04Task\x12\n\n\x02id\x18\x01 \x01(\t\"B\n\x12\x43reateTasksRequest\x12,\n\x04task\x18\x01 \x03(\x0b\x32\x1e.flwr.server.driver.proto.Task\"\'\n\x13\x43reateTasksResponse\x12\x10\n\x08task_ids\x18\x01 \x03(\t\"\x19\n\x06Result\x12\x0f\n\x07task_id\x18\x01 \x01(\t\"G\n\x11GetResultsRequest\x12\x32\n\x08task_ids\x18\x01 \x03(\x0b\x32 .flwr.server.driver.proto.Result\"G\n\x12GetResultsResponse\x12\x31\n\x07results\x18\x01 \x03(\x0b\x32 .flwr.server.driver.proto.Result2\xcc\x02\n\x06\x44river\x12i\n\nGetClients\x12+.flwr.server.driver.proto.GetClientsRequest\x1a,.flwr.server.driver.proto.GetClientsResponse\"\x00\x12l\n\x0b\x43reateTasks\x12,.flwr.server.driver.proto.CreateTasksRequest\x1a-.flwr.server.driver.proto.CreateTasksResponse\"\x00\x12i\n\nGetResults\x12+.flwr.server.driver.proto.GetResultsRequest\x1a,.flwr.server.driver.proto.GetResultsResponse\"\x00\x62\x06proto3'
 )
 
 
@@ -27,7 +27,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _GETCLIENTSREQUEST = _descriptor.Descriptor(
   name='GetClientsRequest',
-  full_name='flwr.driver.proto.GetClientsRequest',
+  full_name='flwr.server.driver.proto.GetClientsRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -45,14 +45,14 @@ _GETCLIENTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=46,
-  serialized_end=65,
+  serialized_start=53,
+  serialized_end=72,
 )
 
 
 _GETCLIENTSRESPONSE = _descriptor.Descriptor(
   name='GetClientsResponse',
-  full_name='flwr.driver.proto.GetClientsResponse',
+  full_name='flwr.server.driver.proto.GetClientsResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -70,21 +70,21 @@ _GETCLIENTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=67,
-  serialized_end=87,
+  serialized_start=74,
+  serialized_end=94,
 )
 
 
 _TASK = _descriptor.Descriptor(
   name='Task',
-  full_name='flwr.driver.proto.Task',
+  full_name='flwr.server.driver.proto.Task',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='flwr.driver.proto.Task.id', index=0,
+      name='id', full_name='flwr.server.driver.proto.Task.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -102,21 +102,21 @@ _TASK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=89,
-  serialized_end=107,
+  serialized_start=96,
+  serialized_end=114,
 )
 
 
 _CREATETASKSREQUEST = _descriptor.Descriptor(
   name='CreateTasksRequest',
-  full_name='flwr.driver.proto.CreateTasksRequest',
+  full_name='flwr.server.driver.proto.CreateTasksRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='task', full_name='flwr.driver.proto.CreateTasksRequest.task', index=0,
+      name='task', full_name='flwr.server.driver.proto.CreateTasksRequest.task', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -134,21 +134,21 @@ _CREATETASKSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=109,
-  serialized_end=168,
+  serialized_start=116,
+  serialized_end=182,
 )
 
 
 _CREATETASKSRESPONSE = _descriptor.Descriptor(
   name='CreateTasksResponse',
-  full_name='flwr.driver.proto.CreateTasksResponse',
+  full_name='flwr.server.driver.proto.CreateTasksResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='task_ids', full_name='flwr.driver.proto.CreateTasksResponse.task_ids', index=0,
+      name='task_ids', full_name='flwr.server.driver.proto.CreateTasksResponse.task_ids', index=0,
       number=1, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -166,21 +166,21 @@ _CREATETASKSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=170,
-  serialized_end=209,
+  serialized_start=184,
+  serialized_end=223,
 )
 
 
 _RESULT = _descriptor.Descriptor(
   name='Result',
-  full_name='flwr.driver.proto.Result',
+  full_name='flwr.server.driver.proto.Result',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='task_id', full_name='flwr.driver.proto.Result.task_id', index=0,
+      name='task_id', full_name='flwr.server.driver.proto.Result.task_id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -198,21 +198,21 @@ _RESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=211,
-  serialized_end=236,
+  serialized_start=225,
+  serialized_end=250,
 )
 
 
 _GETRESULTSREQUEST = _descriptor.Descriptor(
   name='GetResultsRequest',
-  full_name='flwr.driver.proto.GetResultsRequest',
+  full_name='flwr.server.driver.proto.GetResultsRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='task_ids', full_name='flwr.driver.proto.GetResultsRequest.task_ids', index=0,
+      name='task_ids', full_name='flwr.server.driver.proto.GetResultsRequest.task_ids', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -230,21 +230,21 @@ _GETRESULTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=238,
-  serialized_end=302,
+  serialized_start=252,
+  serialized_end=323,
 )
 
 
 _GETRESULTSRESPONSE = _descriptor.Descriptor(
   name='GetResultsResponse',
-  full_name='flwr.driver.proto.GetResultsResponse',
+  full_name='flwr.server.driver.proto.GetResultsResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='results', full_name='flwr.driver.proto.GetResultsResponse.results', index=0,
+      name='results', full_name='flwr.server.driver.proto.GetResultsResponse.results', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -262,8 +262,8 @@ _GETRESULTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=304,
-  serialized_end=368,
+  serialized_start=325,
+  serialized_end=396,
 )
 
 _CREATETASKSREQUEST.fields_by_name['task'].message_type = _TASK
@@ -282,74 +282,74 @@ _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 GetClientsRequest = _reflection.GeneratedProtocolMessageType('GetClientsRequest', (_message.Message,), {
   'DESCRIPTOR' : _GETCLIENTSREQUEST,
   '__module__' : 'flwr.proto.driver_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.driver.proto.GetClientsRequest)
+  # @@protoc_insertion_point(class_scope:flwr.server.driver.proto.GetClientsRequest)
   })
 _sym_db.RegisterMessage(GetClientsRequest)
 
 GetClientsResponse = _reflection.GeneratedProtocolMessageType('GetClientsResponse', (_message.Message,), {
   'DESCRIPTOR' : _GETCLIENTSRESPONSE,
   '__module__' : 'flwr.proto.driver_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.driver.proto.GetClientsResponse)
+  # @@protoc_insertion_point(class_scope:flwr.server.driver.proto.GetClientsResponse)
   })
 _sym_db.RegisterMessage(GetClientsResponse)
 
 Task = _reflection.GeneratedProtocolMessageType('Task', (_message.Message,), {
   'DESCRIPTOR' : _TASK,
   '__module__' : 'flwr.proto.driver_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.driver.proto.Task)
+  # @@protoc_insertion_point(class_scope:flwr.server.driver.proto.Task)
   })
 _sym_db.RegisterMessage(Task)
 
 CreateTasksRequest = _reflection.GeneratedProtocolMessageType('CreateTasksRequest', (_message.Message,), {
   'DESCRIPTOR' : _CREATETASKSREQUEST,
   '__module__' : 'flwr.proto.driver_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.driver.proto.CreateTasksRequest)
+  # @@protoc_insertion_point(class_scope:flwr.server.driver.proto.CreateTasksRequest)
   })
 _sym_db.RegisterMessage(CreateTasksRequest)
 
 CreateTasksResponse = _reflection.GeneratedProtocolMessageType('CreateTasksResponse', (_message.Message,), {
   'DESCRIPTOR' : _CREATETASKSRESPONSE,
   '__module__' : 'flwr.proto.driver_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.driver.proto.CreateTasksResponse)
+  # @@protoc_insertion_point(class_scope:flwr.server.driver.proto.CreateTasksResponse)
   })
 _sym_db.RegisterMessage(CreateTasksResponse)
 
 Result = _reflection.GeneratedProtocolMessageType('Result', (_message.Message,), {
   'DESCRIPTOR' : _RESULT,
   '__module__' : 'flwr.proto.driver_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.driver.proto.Result)
+  # @@protoc_insertion_point(class_scope:flwr.server.driver.proto.Result)
   })
 _sym_db.RegisterMessage(Result)
 
 GetResultsRequest = _reflection.GeneratedProtocolMessageType('GetResultsRequest', (_message.Message,), {
   'DESCRIPTOR' : _GETRESULTSREQUEST,
   '__module__' : 'flwr.proto.driver_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.driver.proto.GetResultsRequest)
+  # @@protoc_insertion_point(class_scope:flwr.server.driver.proto.GetResultsRequest)
   })
 _sym_db.RegisterMessage(GetResultsRequest)
 
 GetResultsResponse = _reflection.GeneratedProtocolMessageType('GetResultsResponse', (_message.Message,), {
   'DESCRIPTOR' : _GETRESULTSRESPONSE,
   '__module__' : 'flwr.proto.driver_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.driver.proto.GetResultsResponse)
+  # @@protoc_insertion_point(class_scope:flwr.server.driver.proto.GetResultsResponse)
   })
 _sym_db.RegisterMessage(GetResultsResponse)
 
 
 
-_DRIVERAPI = _descriptor.ServiceDescriptor(
-  name='DriverAPI',
-  full_name='flwr.driver.proto.DriverAPI',
+_DRIVER = _descriptor.ServiceDescriptor(
+  name='Driver',
+  full_name='flwr.server.driver.proto.Driver',
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=371,
-  serialized_end=664,
+  serialized_start=399,
+  serialized_end=731,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetClients',
-    full_name='flwr.driver.proto.DriverAPI.GetClients',
+    full_name='flwr.server.driver.proto.Driver.GetClients',
     index=0,
     containing_service=None,
     input_type=_GETCLIENTSREQUEST,
@@ -359,7 +359,7 @@ _DRIVERAPI = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='CreateTasks',
-    full_name='flwr.driver.proto.DriverAPI.CreateTasks',
+    full_name='flwr.server.driver.proto.Driver.CreateTasks',
     index=1,
     containing_service=None,
     input_type=_CREATETASKSREQUEST,
@@ -369,7 +369,7 @@ _DRIVERAPI = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='GetResults',
-    full_name='flwr.driver.proto.DriverAPI.GetResults',
+    full_name='flwr.server.driver.proto.Driver.GetResults',
     index=2,
     containing_service=None,
     input_type=_GETRESULTSREQUEST,
@@ -378,8 +378,8 @@ _DRIVERAPI = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
 ])
-_sym_db.RegisterServiceDescriptor(_DRIVERAPI)
+_sym_db.RegisterServiceDescriptor(_DRIVER)
 
-DESCRIPTOR.services_by_name['DriverAPI'] = _DRIVERAPI
+DESCRIPTOR.services_by_name['Driver'] = _DRIVER
 
 # @@protoc_insertion_point(module_scope)

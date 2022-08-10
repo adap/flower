@@ -5,7 +5,7 @@ import grpc
 from flwr.proto import driver_pb2 as flwr_dot_proto_dot_driver__pb2
 
 
-class DriverAPIStub(object):
+class DriverStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -15,27 +15,27 @@ class DriverAPIStub(object):
             channel: A grpc.Channel.
         """
         self.GetClients = channel.unary_unary(
-                '/flwr.driver.proto.DriverAPI/GetClients',
+                '/flwr.server.driver.proto.Driver/GetClients',
                 request_serializer=flwr_dot_proto_dot_driver__pb2.GetClientsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_driver__pb2.GetClientsResponse.FromString,
                 )
         self.CreateTasks = channel.unary_unary(
-                '/flwr.driver.proto.DriverAPI/CreateTasks',
+                '/flwr.server.driver.proto.Driver/CreateTasks',
                 request_serializer=flwr_dot_proto_dot_driver__pb2.CreateTasksRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_driver__pb2.CreateTasksResponse.FromString,
                 )
         self.GetResults = channel.unary_unary(
-                '/flwr.driver.proto.DriverAPI/GetResults',
+                '/flwr.server.driver.proto.Driver/GetResults',
                 request_serializer=flwr_dot_proto_dot_driver__pb2.GetResultsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_driver__pb2.GetResultsResponse.FromString,
                 )
 
 
-class DriverAPIServicer(object):
+class DriverServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def GetClients(self, request, context):
-        """Returns a list of clients.
+        """Return a list of clients.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -49,14 +49,14 @@ class DriverAPIServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def GetResults(self, request, context):
-        """Get results
+        """Get task results
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_DriverAPIServicer_to_server(servicer, server):
+def add_DriverServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'GetClients': grpc.unary_unary_rpc_method_handler(
                     servicer.GetClients,
@@ -75,12 +75,12 @@ def add_DriverAPIServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'flwr.driver.proto.DriverAPI', rpc_method_handlers)
+            'flwr.server.driver.proto.Driver', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class DriverAPI(object):
+class Driver(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -94,7 +94,7 @@ class DriverAPI(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.driver.proto.DriverAPI/GetClients',
+        return grpc.experimental.unary_unary(request, target, '/flwr.server.driver.proto.Driver/GetClients',
             flwr_dot_proto_dot_driver__pb2.GetClientsRequest.SerializeToString,
             flwr_dot_proto_dot_driver__pb2.GetClientsResponse.FromString,
             options, channel_credentials,
@@ -111,7 +111,7 @@ class DriverAPI(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.driver.proto.DriverAPI/CreateTasks',
+        return grpc.experimental.unary_unary(request, target, '/flwr.server.driver.proto.Driver/CreateTasks',
             flwr_dot_proto_dot_driver__pb2.CreateTasksRequest.SerializeToString,
             flwr_dot_proto_dot_driver__pb2.CreateTasksResponse.FromString,
             options, channel_credentials,
@@ -128,7 +128,7 @@ class DriverAPI(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.driver.proto.DriverAPI/GetResults',
+        return grpc.experimental.unary_unary(request, target, '/flwr.server.driver.proto.Driver/GetResults',
             flwr_dot_proto_dot_driver__pb2.GetResultsRequest.SerializeToString,
             flwr_dot_proto_dot_driver__pb2.GetResultsResponse.FromString,
             options, channel_credentials,

@@ -6,12 +6,12 @@ import abc
 import flwr.proto.driver_pb2
 import grpc
 
-class DriverAPIStub:
+class DriverStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
     GetClients: grpc.UnaryUnaryMultiCallable[
         flwr.proto.driver_pb2.GetClientsRequest,
         flwr.proto.driver_pb2.GetClientsResponse]
-    """Returns a list of clients."""
+    """Return a list of clients."""
 
     CreateTasks: grpc.UnaryUnaryMultiCallable[
         flwr.proto.driver_pb2.CreateTasksRequest,
@@ -21,16 +21,16 @@ class DriverAPIStub:
     GetResults: grpc.UnaryUnaryMultiCallable[
         flwr.proto.driver_pb2.GetResultsRequest,
         flwr.proto.driver_pb2.GetResultsResponse]
-    """Get results"""
+    """Get task results"""
 
 
-class DriverAPIServicer(metaclass=abc.ABCMeta):
+class DriverServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def GetClients(self,
         request: flwr.proto.driver_pb2.GetClientsRequest,
         context: grpc.ServicerContext,
     ) -> flwr.proto.driver_pb2.GetClientsResponse:
-        """Returns a list of clients."""
+        """Return a list of clients."""
         pass
 
     @abc.abstractmethod
@@ -46,8 +46,8 @@ class DriverAPIServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.driver_pb2.GetResultsRequest,
         context: grpc.ServicerContext,
     ) -> flwr.proto.driver_pb2.GetResultsResponse:
-        """Get results"""
+        """Get task results"""
         pass
 
 
-def add_DriverAPIServicer_to_server(servicer: DriverAPIServicer, server: grpc.Server) -> None: ...
+def add_DriverServicer_to_server(servicer: DriverServicer, server: grpc.Server) -> None: ...
