@@ -237,7 +237,7 @@ More sophisticated implementations can use :code:`configure_fit` to implement cu
 
 .. note::
 
-    The structure of this retun value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to train, for example, different models on different clients, or use different hyperparameters on different clients (via the :code:`config` dict).
+    The structure of this return value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to train, for example, different models on different clients, or use different hyperparameters on different clients (via the :code:`config` dict).
 
 The :code:`aggregate_fit` method
 --------------------------------
@@ -255,7 +255,7 @@ The :code:`aggregate_fit` method
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results."""
 
-Of course, failures can happen, so there is no guarantee that the server will get results from all the clients it sent instructions to (via :code:`configure_fit`). :code:`aggregate_fit` therefore receives a list of :code:`results`, but also a list of :code:`failues`.
+Of course, failures can happen, so there is no guarantee that the server will get results from all the clients it sent instructions to (via :code:`configure_fit`). :code:`aggregate_fit` therefore receives a list of :code:`results`, but also a list of :code:`failures`.
 
 :code:`aggregate_fit` returns an optional :code:`Parameters` object and a dictionary of aggregated metrics. The :code:`Parameters` return value is optional because :code:`aggregate_fit` might decide that the results provided are not sufficient for aggregation (e.g., too many failures).
 
@@ -284,7 +284,7 @@ More sophisticated implementations can use :code:`configure_evaluate` to impleme
 
 .. note::
 
-    The structure of this retun value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to evaluate, for example, different models on different clients, or use differnt hyperparameters on different clients (via the :code:`config` dict).
+    The structure of this return value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to evaluate, for example, different models on different clients, or use different hyperparameters on different clients (via the :code:`config` dict).
 
 
 The :code:`aggregate_evaluate` method
@@ -303,7 +303,7 @@ The :code:`aggregate_evaluate` method
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation results."""
 
-Of course, failures can happen, so there is no guarantee that the server will get results from all the clients it sent instructions to (via :code:`configure_evaluate`). :code:`aggregate_evaluate` therefore receives a list of :code:`results`, but also a list of :code:`failues`.
+Of course, failures can happen, so there is no guarantee that the server will get results from all the clients it sent instructions to (via :code:`configure_evaluate`). :code:`aggregate_evaluate` therefore receives a list of :code:`results`, but also a list of :code:`failures`.
 
 :code:`aggregate_evaluate` returns an optional :code:`float` (loss) and a dictionary of aggregated metrics. The :code:`float` return value is optional because :code:`aggregate_evaluate` might decide that the results provided are not sufficient for aggregation (e.g., too many failures).
 

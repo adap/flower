@@ -6,7 +6,7 @@ from typing import Callable, Dict, Tuple
 import flwr as fl
 import numpy as np
 import torch
-from flwr.common.typing import Scalar, Weights
+from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import DataLoader
 
 from .utils import ClientDataset, get_cifar_model, get_transforms, test, train
@@ -42,54 +42,53 @@ class RayClient(fl.client.NumPyClient):
         # pylint: disable=unused-argument
         return self.properties
 
-    def get_parameters(self) -> Weights:
+    def get_parameters(self, config) -> NDArrays:
         """Returns weight from a given model. If no model is passed, then a
         local model is created. This can be used to initialize a model in the
         server.
 
         Returns:
-            Weights: weights from the model.
+            NDArrays: weights from the model.
         """
         net = get_cifar_model(self.num_classes)
         weights = [val.cpu().numpy() for _, val in net.state_dict().items()]
-        # parameters = weights_to_parameters(weights)
         return weights
 
     def fit(
-        self, parameters: Weights, config: Dict[str, Scalar]
-    ) -> Tuple[Weights, int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
         """Usual fit function that performs training locally.
 
         Args:
-            parameters (Weights): Initial set of weights sent by the server.
-            config (Dict[str, Scalar]): coonfig file containing num_epochs,etc...
+            parameters (NDArrays): Initial set of weights sent by the server.
+            config (Dict[str, Scalar]): config file containing num_epochs,etc...
 
         Returns:
-            Tuple[Weights, int, Dict[str, Scalar]]: New set of weights,
+            Tuple[NDArrays, int, Dict[str, Scalar]]: New set of weights,
             number of samples and dictionary of metrics.
         """
         net = self.set_parameters(parameters)
         net.to(self.device)
+
+        # train
         trainset = ClientDataset(
             path_to_data=Path(self.fed_dir) / f"{self.cid}" / "train.pt",
             transform=get_transforms(self.num_classes)["train"],
         )
-
         trainloader = DataLoader(trainset, batch_size=int(config["batch_size"]))
-        # train
         train(net, trainloader, epochs=int(config["epochs"]), device=self.device)
 
         # return local model and statistics
         weights = [val.cpu().numpy() for _, val in net.state_dict().items()]
-        return weights, len(trainloader.dataset), {}
+        return weights, len(trainset), {}
 
     def evaluate(
-        self, parameters: Weights, config: Dict[str, Scalar]
+        self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict[str, float]]:
         """Implements distributed evaluation for a given client.
 
         Args:
-            parameters (Weights): Set of weights being used for evaluation
+            parameters (NDArrays): Set of weights being used for evaluation
             config (Dict[str, Scalar]): Dictionary containing possible options for
             evaluations.
 
@@ -98,10 +97,10 @@ class RayClient(fl.client.NumPyClient):
             of metrics.
         """
         net = self.set_parameters(parameters)
-        # load data for this client and get trainloader
+        # load data for this client and get valloader
         validationset = ClientDataset(
             path_to_data=Path(self.fed_dir) / self.cid / "test.pt",
-            transform=get_transforms()["test"],
+            transform=get_transforms(self.num_classes)["test"],
         )
         valloader = DataLoader(validationset, batch_size=50)
 
@@ -114,11 +113,11 @@ class RayClient(fl.client.NumPyClient):
         # return statistics
         return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
 
-    def set_parameters(self, parameters: Weights):
+    def set_parameters(self, parameters: NDArrays):
         """Loads weights inside the network.
 
         Args:
-            parameters (Weights): set of weights to be loaded.
+            parameters (NDArrays): set of weights to be loaded.
 
         Returns:
             [type]: Network with new set of weights.
