@@ -16,6 +16,7 @@
 
 
 from .app import ServerConfig as ServerConfig
+from .app import run_server as run_server
 from .app import start_server as start_server
 from .client_manager import ClientManager as ClientManager
 from .client_manager import SimpleClientManager as SimpleClientManager
@@ -26,6 +27,7 @@ __all__ = [
     "ClientManager",
     "ServerConfig",
     "History",
+    "run_server",
     "Server",
     "SimpleClientManager",
     "start_server",
