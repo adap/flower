@@ -18,7 +18,7 @@ syntax = "proto3";
 package flwr.fleet.proto;
 
 service Fleet {
-  // Get one or more tasks
+  // Get tasks
   rpc GetTasks(GetTasksRequest) returns (GetTasksResponse) {}
 
   // Get results
