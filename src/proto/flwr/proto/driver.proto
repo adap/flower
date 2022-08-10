@@ -18,7 +18,7 @@ syntax = "proto3";
 package flwr.driver.proto;
 
 service DriverAPI {
-  // Returns a list of clients.
+  // Return a list of clients.
   rpc GetClients(GetClientsRequest) returns (GetClientsResponse) {}
 
   // Create one or more tasks
