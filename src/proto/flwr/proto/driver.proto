@@ -24,7 +24,7 @@ service DriverAPI {
   // Create one or more tasks
   rpc CreateTasks(CreateTasksRequest) returns (CreateTasksResponse) {}
 
-  // Get results
+  // Get task results
   rpc GetResults(GetResultsRequest) returns (GetResultsResponse) {}
 }
 
