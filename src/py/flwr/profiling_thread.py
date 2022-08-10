@@ -67,10 +67,13 @@ class UtilMonitor(Thread):
                 # )
             if nvsmi is not None:
                 pros = nvsmi.get_gpu_processes()
+                gpus = GPUtil.getGPUs()
+                for g in gpus:
+                    total_memory = g.memoryTotal
                 for pro in pros:
                     if pro.pid == self.pid:
                         self.values["vram_util_percent" + str(pro.gpu_id)].append(
-                            float(float(pro.used_memory)/(11019-1024)) #(11019-1024))
+                            float(float(pro.used_memory)/(total_memory-1024)) #(11019-1024))
                         )
 
     def get_data(self):
