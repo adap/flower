@@ -15,7 +15,9 @@
 
 syntax = "proto3";
 
-package flwr.server.driver.proto;
+package flwr.proto;
+
+import "flwr/proto/task.proto";
 
 service Driver {
   // Return a list of clients.
@@ -33,11 +35,9 @@ message GetClientsRequest {}
 message GetClientsResponse {}
 
 // CreateTasks messages
-message Task { string id = 1; }
 message CreateTasksRequest { repeated Task task = 1; }
 message CreateTasksResponse { repeated string task_ids = 1; }
 
 // GetResults messages
-message Result { string task_id = 1; }
 message GetResultsRequest { repeated Result task_ids = 1; }
 message GetResultsResponse { repeated Result results = 1; }

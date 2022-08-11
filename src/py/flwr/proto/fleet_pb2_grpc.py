@@ -15,12 +15,12 @@ class FleetStub(object):
             channel: A grpc.Channel.
         """
         self.GetTasks = channel.unary_unary(
-                '/flwr.server.fleet.proto.Fleet/GetTasks',
+                '/flwr.proto.Fleet/GetTasks',
                 request_serializer=flwr_dot_proto_dot_fleet__pb2.GetTasksRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_fleet__pb2.GetTasksResponse.FromString,
                 )
         self.CreateResults = channel.unary_unary(
-                '/flwr.server.fleet.proto.Fleet/CreateResults',
+                '/flwr.proto.Fleet/CreateResults',
                 request_serializer=flwr_dot_proto_dot_fleet__pb2.CreateResultsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_fleet__pb2.CreateResultsResponse.FromString,
                 )
@@ -58,7 +58,7 @@ def add_FleetServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'flwr.server.fleet.proto.Fleet', rpc_method_handlers)
+            'flwr.proto.Fleet', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
@@ -77,7 +77,7 @@ class Fleet(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.server.fleet.proto.Fleet/GetTasks',
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/GetTasks',
             flwr_dot_proto_dot_fleet__pb2.GetTasksRequest.SerializeToString,
             flwr_dot_proto_dot_fleet__pb2.GetTasksResponse.FromString,
             options, channel_credentials,
@@ -94,7 +94,7 @@ class Fleet(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.server.fleet.proto.Fleet/CreateResults',
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/CreateResults',
             flwr_dot_proto_dot_fleet__pb2.CreateResultsRequest.SerializeToString,
             flwr_dot_proto_dot_fleet__pb2.CreateResultsResponse.FromString,
             options, channel_credentials,
