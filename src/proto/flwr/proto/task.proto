@@ -17,20 +17,6 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/task.proto";
+message Task { string id = 1; }
 
-service Fleet {
-  // Get tasks
-  rpc GetTasks(GetTasksRequest) returns (GetTasksResponse) {}
-
-  // Get results
-  rpc CreateResults(CreateResultsRequest) returns (CreateResultsResponse) {}
-}
-
-// GetTasks messages
-message GetTasksRequest {}
-message GetTasksResponse { repeated Task task = 1; }
-
-// CreateResults messages
-message CreateResultsRequest { repeated Result results = 1; }
-message CreateResultsResponse {}
+message Result { string task_id = 1; }
