@@ -16,22 +16,12 @@
 
 
 import copy
+from typing import Dict, Tuple
 
 import numpy as np
 
-from flwr.client.client import Client
-from flwr.common import (
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    GetParametersIns,
-    GetParametersRes,
-    GetPropertiesIns,
-    GetPropertiesRes,
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
-)
+from flwr.client.numpy_client import NumPyClient
+from flwr.common.typing import Config, NDArrays, Scalar
 
 
 # Calculates the L2-norm of a potentially ragged array
@@ -43,52 +33,56 @@ def _get_update_norm(update):  # type: ignore
     return np.linalg.norm(flattened_update)  # type: ignore
 
 
-class DPClient(Client):
+class DPNumPyClient(NumPyClient):
     """Wrapper for configuring a Flower client for DP."""
 
-    def __init__(self, client: Client, adaptive_clip_enabled: bool = False) -> None:
+    def __init__(
+        self, client: NumPyClient, adaptive_clip_enabled: bool = False
+    ) -> None:
         super().__init__()
         self.client = client
         self.adaptive_clip_enabled = adaptive_clip_enabled
 
-    def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
-        return self.client.get_properties(ins)
+    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+        return self.client.get_properties(config)
 
-    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        return self.client.get_parameters(ins)
+    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
+        return self.client.get_parameters(config)
 
-    def fit(self, ins: FitIns) -> FitRes:
+    def fit(
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
 
-        # Global model received by the wrapped client at the beginning of the round
-        original_ndarrays = copy.deepcopy(parameters_to_ndarrays(ins.parameters))
-
+        original_params = copy.deepcopy(parameters)
         # Getting the updated model from the wrapped client
-        res = self.client.fit(ins)
-        updated_ndarrays = parameters_to_ndarrays(res.parameters)
+        res = self.client.fit(parameters, config)
+        updated_params = res[0]
 
         # Update = updated model - original model
-        update = [x - y for (x, y) in zip(updated_ndarrays, original_ndarrays)]
+        update = [x - y for (x, y) in zip(updated_params, original_params)]
 
         # Calculating the factor to scale the update by
         update_norm = _get_update_norm(update)  # type: ignore
-        scaling_factor = min(1, ins.config["clip_norm"] / update_norm)
+        scaling_factor = min(1, config["clip_norm"] / update_norm)
 
         # Clipping update to bound sensitivity of aggregate at server
         update_clipped = [layer * scaling_factor for layer in update]  # type: ignore
 
         update_clipped_noised = [
-            layer + np.random.normal(0, ins.config["noise_stddev"], layer.shape)
+            layer + np.random.normal(0, config["noise_stddev"], layer.shape)
             for layer in update_clipped
         ]
-        res.parameters = ndarrays_to_parameters(
-            [x + y for (x, y) in zip(original_ndarrays, update_clipped_noised)]
-        )
+
+        for i, _ in enumerate(original_params):
+            res[0][i] = original_params[i] + update_clipped_noised[i]
 
         # Calculating value of norm indicator bit, required for adaptive clipping
         if self.adaptive_clip_enabled:
-            res.metrics["norm_bit"] = not scaling_factor < 1
+            res[2]["norm_bit"] = not scaling_factor < 1
 
         return res
 
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        return self.client.evaluate(ins)
+    def evaluate(
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[float, int, Dict[str, Scalar]]:
+        return self.client.evaluate(parameters, config)
