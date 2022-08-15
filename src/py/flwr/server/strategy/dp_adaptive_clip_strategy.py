@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""DP-FedAvg [McMahan et al., 2018] strategy.
+"""DP-FedAvg [Andrew et al., 2019] with adaptive clipping.
 
-Paper: https://arxiv.org/pdf/1710.06963.pdf
+Paper: https://arxiv.org/pdf/1905.03871.pdf
 """
 
 
