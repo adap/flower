@@ -1,3 +1,17 @@
+# Copyright 2020 Adap GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
 """DP-FedAvg [McMahan et al., 2018] strategy.
 
 Paper: https://arxiv.org/pdf/1710.06963.pdf
@@ -37,8 +51,8 @@ class DPFixedClipStrategy(Strategy):
     # Instead of adding noise with std dev sigma = z*clip_norm at server,
     # add noise with std dev sigma_dash = z*clip_norm/sqrt(m) at
     # each of the m chosen clients.
-    def __calc_client_noise_stddev(self):  # type: ignore
-        return (
+    def _calc_client_noise_stddev(self) -> float:
+        return float(
             self.noise_multiplier * self.clip_norm / (self.num_sampled_clients ** (0.5))
         )
 
@@ -56,8 +70,7 @@ class DPFixedClipStrategy(Strategy):
             server_round, parameters, client_manager
         )
 
-        noise_stddev = self.__calc_client_noise_stddev()  # type: ignore
-
+        noise_stddev = self._calc_client_noise_stddev()
         for _, fit_ins in client_instructions:
             fit_ins.config["clip_norm"] = self.clip_norm
             fit_ins.config["noise_stddev"] = noise_stddev

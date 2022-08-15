@@ -25,12 +25,11 @@ from flwr.common.typing import Config, NDArrays, Scalar
 
 
 # Calculates the L2-norm of a potentially ragged array
-def _get_update_norm(update):  # type: ignore
-    flattened_layers = []
-    for layer in update:
-        flattened_layers.append(layer.ravel())
-    flattened_update = np.concatenate(flattened_layers)  # type: ignore
-    return np.linalg.norm(flattened_update)  # type: ignore
+def _get_update_norm(update: NDArrays) -> float:
+    flattened_update = update[0]
+    for i in range(1, len(update)):
+        flattened_update = np.append(flattened_update, update[i])  # type: ignore
+    return float(np.sqrt(np.sum(np.square(flattened_update))))
 
 
 class DPNumPyClient(NumPyClient):
@@ -55,32 +54,43 @@ class DPNumPyClient(NumPyClient):
 
         original_params = copy.deepcopy(parameters)
         # Getting the updated model from the wrapped client
-        res = self.client.fit(parameters, config)
-        updated_params = res[0]
+        updated_params, num_examples, metrics = self.client.fit(parameters, config)
 
         # Update = updated model - original model
-        update = [x - y for (x, y) in zip(updated_params, original_params)]
+        update = [np.subtract(x, y) for (x, y) in zip(updated_params, original_params)]
 
         # Calculating the factor to scale the update by
-        update_norm = _get_update_norm(update)  # type: ignore
+        update_norm = _get_update_norm(update)
+
+        if "clip_norm" not in config:
+            raise Exception("Clipping threshold not supplied by the server.")
+        if not isinstance(config["clip_norm"], float):
+            raise Exception("Clipping threshold should be a floating point value.")
+
         scaling_factor = min(1, config["clip_norm"] / update_norm)
 
         # Clipping update to bound sensitivity of aggregate at server
-        update_clipped = [layer * scaling_factor for layer in update]  # type: ignore
+        update_clipped = [layer * scaling_factor for layer in update]
 
+        if "noise_stddev" not in config:
+            raise Exception("Scale of noise to be added not supplied by the server.")
+        if not isinstance(config["noise_stddev"], float):
+            raise Exception(
+                "Scale of noise to be added should be a floating point value."
+            )
         update_clipped_noised = [
             layer + np.random.normal(0, config["noise_stddev"], layer.shape)
             for layer in update_clipped
         ]
 
         for i, _ in enumerate(original_params):
-            res[0][i] = original_params[i] + update_clipped_noised[i]
+            updated_params[i] = original_params[i] + update_clipped_noised[i]
 
         # Calculating value of norm indicator bit, required for adaptive clipping
         if self.adaptive_clip_enabled:
-            res[2]["norm_bit"] = not scaling_factor < 1
+            metrics["norm_bit"] = not scaling_factor < 1
 
-        return res
+        return updated_params, num_examples, metrics
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]

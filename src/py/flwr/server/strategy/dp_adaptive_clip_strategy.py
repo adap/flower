@@ -1,3 +1,17 @@
+# Copyright 2020 Adap GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
 """DP-FedAvg [McMahan et al., 2018] strategy.
 
 Paper: https://arxiv.org/pdf/1710.06963.pdf
@@ -29,18 +43,20 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         clip_norm_target_quantile: float = 0.5,
         clip_count_stddev: Optional[float] = None,
     ) -> None:
-
         super().__init__(
-            strategy, num_sampled_clients, noise_multiplier, init_clip_norm
+            strategy=strategy,
+            num_sampled_clients=num_sampled_clients,
+            clip_norm=init_clip_norm,
+            noise_multiplier=noise_multiplier,
         )
         self.clip_norm_lr = clip_norm_lr
         self.clip_norm_target_quantile = clip_norm_target_quantile
-        if not clip_count_stddev:
-            self.clip_count_stddev = (
-                self.num_sampled_clients / 20.0 if noise_multiplier else 0
-            )
-        else:
-            self.clip_count_stddev = clip_count_stddev
+        self.clip_count_stddev = clip_count_stddev
+        if self.clip_count_stddev is None:
+            self.clip_count_stddev = 0
+            if noise_multiplier > 0:
+                self.clip_count_stddev = self.num_sampled_clients / 20.0
+
         if noise_multiplier:
             self.noise_multiplier = (
                 self.noise_multiplier ** (-2) - (2 * self.clip_count_stddev) ** (-2)
@@ -50,16 +66,21 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         rep = "Strategy with DP with Adaptive Clipping enabled."
         return rep
 
-    def __update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
+    def _update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
         # Calculating number of clients which set the norm indicator bit
         norm_bit_set_count = 0
-        for _, fit_res in results:
+        for client_proxy, fit_res in results:
+            if "norm_bit" not in fit_res.metrics:
+                raise Exception(
+                    f"Indicator bit not returned by client with id {client_proxy.cid}."
+                )
             if fit_res.metrics["norm_bit"]:
                 norm_bit_set_count += 1
         # Noising the count
-        noised_norm_bit_set_count = norm_bit_set_count + np.random.normal(
-            0, self.clip_count_stddev
+        noised_norm_bit_set_count = float(
+            np.random.normal(norm_bit_set_count, self.clip_count_stddev)
         )
+
         noised_norm_bit_set_fraction = noised_norm_bit_set_count / len(results)
         # Geometric update
         self.clip_norm *= math.exp(
@@ -76,5 +97,5 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         if failures:
             return None, {}
         new_global_model = super().aggregate_fit(server_round, results, failures)
-        self.__update_clip_norm(results)
+        self._update_clip_norm(results)
         return new_global_model
