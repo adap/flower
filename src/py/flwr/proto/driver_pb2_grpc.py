@@ -15,17 +15,17 @@ class DriverStub(object):
             channel: A grpc.Channel.
         """
         self.GetClients = channel.unary_unary(
-                '/flwr.server.driver.proto.Driver/GetClients',
+                '/flwr.proto.Driver/GetClients',
                 request_serializer=flwr_dot_proto_dot_driver__pb2.GetClientsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_driver__pb2.GetClientsResponse.FromString,
                 )
         self.CreateTasks = channel.unary_unary(
-                '/flwr.server.driver.proto.Driver/CreateTasks',
+                '/flwr.proto.Driver/CreateTasks',
                 request_serializer=flwr_dot_proto_dot_driver__pb2.CreateTasksRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_driver__pb2.CreateTasksResponse.FromString,
                 )
         self.GetResults = channel.unary_unary(
-                '/flwr.server.driver.proto.Driver/GetResults',
+                '/flwr.proto.Driver/GetResults',
                 request_serializer=flwr_dot_proto_dot_driver__pb2.GetResultsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_driver__pb2.GetResultsResponse.FromString,
                 )
@@ -75,7 +75,7 @@ def add_DriverServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'flwr.server.driver.proto.Driver', rpc_method_handlers)
+            'flwr.proto.Driver', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
@@ -94,7 +94,7 @@ class Driver(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.server.driver.proto.Driver/GetClients',
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/GetClients',
             flwr_dot_proto_dot_driver__pb2.GetClientsRequest.SerializeToString,
             flwr_dot_proto_dot_driver__pb2.GetClientsResponse.FromString,
             options, channel_credentials,
@@ -111,7 +111,7 @@ class Driver(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.server.driver.proto.Driver/CreateTasks',
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/CreateTasks',
             flwr_dot_proto_dot_driver__pb2.CreateTasksRequest.SerializeToString,
             flwr_dot_proto_dot_driver__pb2.CreateTasksResponse.FromString,
             options, channel_credentials,
@@ -128,7 +128,7 @@ class Driver(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.server.driver.proto.Driver/GetResults',
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/GetResults',
             flwr_dot_proto_dot_driver__pb2.GetResultsRequest.SerializeToString,
             flwr_dot_proto_dot_driver__pb2.GetResultsResponse.FromString,
             options, channel_credentials,
