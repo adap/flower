@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2022 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server example."""
-
-
-import flwr as fl
-
-if __name__ == "__main__":
-    fl.server.start_server(
-        server_address="[::]:8080", config=fl.server.ServerConfig(num_rounds=3)
-    )
+"""Flower driver service."""
