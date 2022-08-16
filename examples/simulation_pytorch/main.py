@@ -12,7 +12,7 @@ from dataset_utils import get_cifar_10, do_fl_partitioning, get_dataloader
 from utils import Net, train, test
 
 import os
-from src.ProfilingThread import UtilMonitor
+from src.profiling_thread import SystemMonitor
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -54,7 +54,7 @@ class FlowerClient(fl.client.NumPyClient):
 
         # profile
         pid = os.getpid()
-        _monitor = UtilMonitor(pid=pid)
+        _monitor = SystemMonitor(pid=pid)
 
         # Train
         train(self.net, trainloader, epochs=config["epochs"], device=self.device)

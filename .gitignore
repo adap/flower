@@ -15,10 +15,10 @@ baselines/datasets/leaf
 
 # macOS
 .DS_Store
-.idea/
 
 # Editor
 .vscode
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

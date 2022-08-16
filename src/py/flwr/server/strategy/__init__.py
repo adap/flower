@@ -24,7 +24,7 @@ from .fedavgm import FedAvgM as FedAvgM
 from .fedopt import FedOpt as FedOpt
 from .fedyogi import FedYogi as FedYogi
 from .qfedavg import QFedAvg as QFedAvg
-from .ResourceAwareFedAvg import ResourceAwareFedAvg as ResourceAwareFedAvg
+from .resource_aware_fedavg import ResourceAwareFedAvg as ResourceAwareFedAvg
 from .strategy import Strategy as Strategy
 
 __all__ = [

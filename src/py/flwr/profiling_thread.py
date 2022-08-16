@@ -11,46 +11,27 @@ from datetime import datetime
 from threading import Thread
 from typing import Dict, List, Union, Type, Callable, Any
 from typing import Optional
-
-import nvsmi
-
 import numpy as np
+import nvsmi
 import psutil
+import GPUtil
 
 logger = logging.getLogger(__name__)
 
 
-def _import_gputil():
-    try:
-        import GPUtil
-    except ImportError:
-        GPUtil = None
-    return GPUtil
-
-
-class UtilMonitor(Thread):
+class SystemMonitor(Thread):
     """Class for system usage utilization monitoring.
     It keeps track of CPU, RAM, GPU, VRAM usage (each gpu separately) by
     pinging for information every x seconds in a separate thread.
     """
 
-    def __init__(self, pid, start=True, delay=0.7):
+    def __init__(self, pid, start=True, interval=0.7):
         self.stopped = True
         self.pid = pid
-        GPUtil = _import_gputil()
-        self.GPUtil = GPUtil
-        if GPUtil is None and start:
-            logger.warning("Install gputil for GPU system monitoring.")
 
-        if psutil is None and start:
-            logger.warning("Install psutil to monitor system performance.")
-
-        if GPUtil is None and psutil is None:
-            return
-
-        super(UtilMonitor, self).__init__()
-        self.delay = delay  # Time between calls to GPUtil
-        self.values = defaultdict(list)
+        super(SystemMonitor, self).__init__()
+        self.interval = interval
+        self.values = defaultdict(list) # Create a dictionary with an empty list as the default value when accessing non-existing keys
         self.lock = threading.Lock()
         self.daemon = True
         if start:
@@ -62,9 +43,6 @@ class UtilMonitor(Thread):
                 self.values["cpu_util_percent"].append(
                     float(psutil.Process(self.pid).cpu_percent(interval=None))
                 )
-                # self.values["ram_util_percent"].append(
-                #     float(getattr(psutil.Process(self.pid).virtual_memory(), "percent"))
-                # )
             if nvsmi is not None:
                 pros = nvsmi.get_gpu_processes()
                 gpus = GPUtil.getGPUs()
@@ -73,7 +51,7 @@ class UtilMonitor(Thread):
                 for pro in pros:
                     if pro.pid == self.pid:
                         self.values["vram_util_percent" + str(pro.gpu_id)].append(
-                            float(float(pro.used_memory)/(total_memory-1024)) #(11019-1024))
+                            float(float(pro.used_memory)/(total_memory-1024))
                         )
 
     def get_data(self):
@@ -84,8 +62,7 @@ class UtilMonitor(Thread):
             ret_values = copy.deepcopy(self.values)
             for key, val in self.values.items():
                 del val[:]
-        # print("ret_values.items:", {k: np.mean(v) for k, v in ret_values.items() if len(v) > 0})
-        # res = {self.pid: {k: np.max(v) for k, v in ret_values.items() if len(v) > 0}}
+
         res = {k: np.max(v) for k, v in ret_values.items() if len(v) > 0}
         return res
 
@@ -93,7 +70,7 @@ class UtilMonitor(Thread):
         self.stopped = False
         while not self.stopped:
             self._read_utilization()
-            time.sleep(self.delay)
+            time.sleep(self.interval)
 
     def stop(self):
         self.stopped = True
