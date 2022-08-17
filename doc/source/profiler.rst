@@ -12,7 +12,7 @@ To fetch statistics about GPUs for a specific process, we use gputil, a Python p
 
 Once the information from Profiler is obtained, we can calculate using the following formula:
 
-$$ num_gpus = vram_measured_for_single_worker / total_vram_in_system $$
+$$ num\_gpus = vram\_measured\_for\_single\_worker / total\_vram\_in\_system $$
 
 Then, it can be passed to simulation and set as the GPU resource for each worker along with other client-specific resources.
 
