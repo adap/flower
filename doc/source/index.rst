@@ -89,6 +89,7 @@ intended to help along the way.
    contributor-setup
    architecture
    secagg
+   profiler
    release-process
    creating-new-messages
    devcontainer
