@@ -96,18 +96,6 @@ intended to help along the way.
    devcontainer
 
 
-About
------
-
-.. toctree::
-   :maxdepth: 1
-   :caption: About
-
-   people
-   organizations
-   publications
-
-
 .. Indices and tables
 .. ------------------
 
