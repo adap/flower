@@ -3,6 +3,7 @@ Upgrade to Flower 1.0
 
 Flower 1.0 is here. Along with new features, Flower 1.0 provides a stable foundation for future growth. Compared to Flower 0.19 (and other 0.x series releases), there are a few breaking changes that make it necessary to change the code of existing 0.x-series projects.
 
+
 Install update
 --------------
 
@@ -17,6 +18,7 @@ Here's how to update an existing installation to Flower 1.0 using either pip or 
 
   - ``flwr = "^1.0.0"`` (when using ``start_server`` and ``start_client``)
   - ``flwr = { version = "^1.0.0", extras = ["simulation"] }`` (when using ``start_simulation``)
+
 
 Required changes
 ----------------
@@ -81,6 +83,7 @@ Along with the necessary changes above, there are a number of potential improvem
 
 - Remove "placeholder" methods from subclasses of ``Client`` or ``NumPyClient``. If you, for example, use server-side evaluation, then empy placeholder implementations of ``evaluate`` are no longer necessary.
 - Configure the round timeout via ``start_simulation``: ``start_simulation(..., config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), ...)``
+
 
 Further help
 ------------
