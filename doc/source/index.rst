@@ -51,6 +51,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    changelog
    faq
 
+
 Flower Baselines
 ----------------
 
@@ -87,6 +88,7 @@ intended to help along the way.
    getting-started-for-contributors
    good-first-contributions
    contributor-setup
+   writing-documentation
    architecture
    secagg
    release-process
