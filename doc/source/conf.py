@@ -66,6 +66,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # Sphinx redirects, implemented after the doc filename changes.
 # To prevent 404 errors and redirect to the new pages.
 redirects = {
+    # Renamed pages
     "quickstart_mxnet": "quickstart-mxnet.html",
     "quickstart_pytorch_lightning": "quickstart-pytorch-lightning.html",
     "example_walkthrough_pytorch_mnist": "example-walkthrough-pytorch-mnist.html",
@@ -73,7 +74,11 @@ redirects = {
     "quickstart_pytorch": "quickstart-pytorch.html",
     "quickstart_tensorflow": "quickstart-tensorflow.html",
     "release_process": "release-process.html",
-    "quickstart_scikitlearn": "quickstart-scikitlearn.html"
+    "quickstart_scikitlearn": "quickstart-scikitlearn.html",
+    # Deleted pages
+    "people": "index.html",
+    "organizations": "index.html",
+    "publications": "index.html",
 }
 
 
