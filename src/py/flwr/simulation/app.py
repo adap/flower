@@ -63,7 +63,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     client_fn: Callable[[str], Client],
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
-    client_resources: Optional[Dict[str, float]] = None,
+    client_resources: Optional[Dict[str, Union[float, int]]] = None,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
