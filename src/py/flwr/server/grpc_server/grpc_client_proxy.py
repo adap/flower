@@ -77,7 +77,7 @@ class GrpcClientProxy(ClientProxy):
         ins: common.FitIns,
         timeout: Optional[float],
     ) -> common.FitRes:
-        """Refine the provided weights using the locally held dataset."""
+        """Refine the provided parameters using the locally held dataset."""
         fit_ins_msg = serde.fit_ins_to_proto(ins)
 
         res_wrapper: ResWrapper = self.bridge.request(
@@ -95,7 +95,7 @@ class GrpcClientProxy(ClientProxy):
         ins: common.EvaluateIns,
         timeout: Optional[float],
     ) -> common.EvaluateRes:
-        """Evaluate the provided weights using the locally held dataset."""
+        """Evaluate the provided parameters using the locally held dataset."""
         evaluate_msg = serde.evaluate_ins_to_proto(ins)
         res_wrapper: ResWrapper = self.bridge.request(
             ins_wrapper=InsWrapper(

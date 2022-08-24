@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "poetry==1.1.13",
+    "poetry==1.1.14",
 ]
 build-backend = "poetry.masonry.api"
 
@@ -8,7 +8,7 @@ build-backend = "poetry.masonry.api"
 name = "quickstart_pytorch"
 version = "0.1.0"
 description = "PyTorch: From Centralized To Federated with Flower"
-authors = ["The Flower Authors <enquiries@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"

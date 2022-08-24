@@ -1,4 +1,6 @@
 """FedBN client."""
+
+
 import argparse
 import json
 from collections import OrderedDict
@@ -10,7 +12,8 @@ import torch
 from torch import nn
 from torchvision import transforms
 
-from .utils import cnn_model, data_utils
+from .utils.cnn_model import CNNModel
+from .utils.data_utils import DigitsDataset
 
 FL_ROUND = 0
 
@@ -28,7 +31,7 @@ class FlowerClient(fl.client.NumPyClient):
 
     def __init__(
         self,
-        model: cnn_model.CNNModel,
+        model: CNNModel,
         trainloader: torch.utils.data.DataLoader,
         testloader: torch.utils.data.DataLoader,
         num_examples: Dict,
@@ -40,10 +43,9 @@ class FlowerClient(fl.client.NumPyClient):
         self.num_examples = num_examples
         self.mode = mode
 
-    def get_parameters(self) -> List[np.ndarray]:
-        """
-        Return model parameters as a list of NumPy ndarrays w or w/o using BN layers
-        """
+    def get_parameters(self, config) -> List[np.ndarray]:
+        """Return model parameters as a list of NumPy ndarrays w or w/o using
+        BN layers."""
         self.model.train()
         # pylint: disable = no-else-return
         if self.mode == "fedbn":
@@ -58,10 +60,8 @@ class FlowerClient(fl.client.NumPyClient):
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
-        """
-        Set model parameters from a list of NumPy ndarrays
-        Exclude the bn layer if available
-        """
+        """Set model parameters from a list of NumPy ndarrays Exclude the bn
+        layer if available."""
         self.model.train()
         # pylint: disable=not-callable
         if self.mode == "fedbn":
@@ -78,9 +78,8 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[List[np.ndarray], int, Dict]:
-        """
-        Set model parameters, train model, return updated model parameters
-        """
+        """Set model parameters, train model, return updated model
+        parameters."""
         self.set_parameters(parameters)
         test_loss, test_accuracy = test(
             self.model, self.num_examples["dataset"], self.trainloader, device=DEVICE
@@ -101,7 +100,7 @@ class FlowerClient(fl.client.NumPyClient):
         )
         eval_list.append(test_dict)
         return (
-            self.get_parameters(),
+            self.get_parameters({}),
             self.num_examples["trainset"],
             {"loss": loss, "accuracy": accuracy},
         )
@@ -109,12 +108,10 @@ class FlowerClient(fl.client.NumPyClient):
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[float, int, Dict]:
-        """
-        Set model parameters, evaluate model on local test dataset, return result
-        """
+        """Set model parameters, evaluate model on local test dataset, return
+        result."""
         self.set_parameters(parameters)
         global FL_ROUND
-        print(f"FL Round:{FL_ROUND}")
         loss, accuracy = test(
             self.model, self.num_examples["dataset"], self.testloader, device=DEVICE
         )
@@ -137,10 +134,8 @@ class FlowerClient(fl.client.NumPyClient):
 def load_partition(
     dataset: str,
 ) -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader, Dict]:
-    """
-    Load 'MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST-M' for the training
-    and test data to simulate a partition.
-    """
+    """Load 'MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST-M' for the training
+    and test data to simulate a partition."""
 
     if dataset == "MNIST":
         print(f"Load {dataset} dataset")
@@ -153,14 +148,14 @@ def load_partition(
             ]
         )
 
-        trainset = data_utils.DigitsDataset(
+        trainset = DigitsDataset(
             data_path="data/MNIST",
             channels=1,
             percent=0.1,
             train=True,
             transform=transform,
         )
-        testset = data_utils.DigitsDataset(
+        testset = DigitsDataset(
             data_path="data/MNIST",
             channels=1,
             percent=0.1,
@@ -179,14 +174,14 @@ def load_partition(
             ]
         )
 
-        trainset = data_utils.DigitsDataset(
+        trainset = DigitsDataset(
             data_path="data/SVHN",
             channels=3,
             percent=0.1,
             train=True,
             transform=transform,
         )
-        testset = data_utils.DigitsDataset(
+        testset = DigitsDataset(
             data_path="data/SVHN",
             channels=3,
             percent=0.1,
@@ -206,14 +201,14 @@ def load_partition(
             ]
         )
 
-        trainset = data_utils.DigitsDataset(
+        trainset = DigitsDataset(
             data_path="data/USPS",
             channels=1,
             percent=0.1,
             train=True,
             transform=transform,
         )
-        testset = data_utils.DigitsDataset(
+        testset = DigitsDataset(
             data_path="data/USPS",
             channels=1,
             percent=0.1,
@@ -232,14 +227,14 @@ def load_partition(
             ]
         )
 
-        trainset = data_utils.DigitsDataset(
+        trainset = DigitsDataset(
             data_path="data/SynthDigits/",
             channels=3,
             percent=0.1,
             train=True,
             transform=transform,
         )
-        testset = data_utils.DigitsDataset(
+        testset = DigitsDataset(
             data_path="data/SynthDigits/",
             channels=3,
             percent=0.1,
@@ -257,14 +252,14 @@ def load_partition(
             ]
         )
 
-        trainset = data_utils.DigitsDataset(
+        trainset = DigitsDataset(
             data_path="data/MNIST_M/",
             channels=3,
             percent=0.1,
             train=True,
             transform=transform,
         )
-        testset = data_utils.DigitsDataset(
+        testset = DigitsDataset(
             data_path="data/MNIST_M/",
             channels=3,
             percent=0.1,
@@ -290,9 +285,7 @@ def load_partition(
 
 
 def train(model, traindata, dataset, epochs, device) -> Tuple[float, float]:
-    """
-    Train the network.
-    """
+    """Train the network."""
     # Define loss and optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-2)
@@ -340,9 +333,7 @@ def train(model, traindata, dataset, epochs, device) -> Tuple[float, float]:
 
 
 def test(model, dataset, testdata, device) -> Tuple[float, float]:
-    """
-    Validate the network on the entire test set.
-    """
+    """Validate the network on the entire test set."""
     # Define loss and metrics
     criterion = nn.CrossEntropyLoss()
     correct = 0
@@ -387,7 +378,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Load model
-    model = cnn_model.CNNModel().to(DEVICE).train()
+    model = CNNModel().to(DEVICE).train()
 
     # Load data
     trainloader, testloader, num_examples = load_partition(args.partition)

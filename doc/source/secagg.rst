@@ -4,6 +4,7 @@ Secure Aggregation Protocols
 Include SecAgg, SecAgg+, and LightSecAgg protocol. The LightSecAgg protocol has not been implemented yet, so its diagram and abstraction may not be accurate in practice.
 The SecAgg protocol can be considered as a special case of the SecAgg+ protocol.
 
+
 The :code:`SecAgg+` abstraction
 -------------------------------
 
@@ -61,8 +62,6 @@ In this implementation, each client will be assigned with a unique index (int) f
             graph: ClientGraph
         ) -> UnmaskVectorsResultsAndFailures:
             """Unmask and compute the aggregated model. UnmaskVectorRes contains shares of keys needed to generate masks."""
-
-
 
 The Flower server will execute and process received results in the following order:
 
@@ -156,6 +155,7 @@ The Flower server will execute and process received results in the following ord
       deactivate P
       end
 
+
 The :code:`LightSecAgg` abstraction
 -----------------------------------
 
@@ -195,7 +195,6 @@ In this implementation, each client will be assigned with a unique index (int) f
             clients: List[ClientProxy]
         ) -> AskAggregatedEncodedMasksResultsAndFailures:
             """Ask aggregated encoded masks"""
-
 
 The Flower server will execute and process received results in the following order:
 
@@ -267,6 +266,7 @@ The Flower server will execute and process received results in the following ord
       P-->>S: the aggregated model
       deactivate P
       end
+
 
 Types
 -----
@@ -428,4 +428,3 @@ Types
         @dataclass
         class AskAggregatedEncodedMasksRes:
             aggregated_encoded_mask: Parameters
-

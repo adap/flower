@@ -25,7 +25,6 @@ Flower's design goals was to make this simple. Read on to learn more.
 
 .. toctree::
    :maxdepth: 1
-   :caption: User Guide
 
    installation
    quickstart-pytorch
@@ -35,6 +34,7 @@ Flower's design goals was to make this simple. Read on to learn more.
    quickstart-mxnet
    quickstart-scikitlearn
    evaluation
+   configuring-clients
    strategies
    implementing-strategies
    saving-progress
@@ -46,8 +46,10 @@ Flower's design goals was to make this simple. Read on to learn more.
    example-jax-from-centralized-to-federated
    fedbn-example-pytorch-from-centralized-to-federated
    recommended-env-setup
+   upgrade-to-flower-1.0
    changelog
    faq
+
 
 Flower Baselines
 ----------------
@@ -56,7 +58,6 @@ Flower Baselines are a collection of organised scripts used to reproduce results
 
 .. toctree::
    :maxdepth: 1
-   :caption: Baselines
    
    using-baselines
    contributing-baselines
@@ -67,7 +68,6 @@ API Reference
 
 .. toctree::
    :maxdepth: 3
-   :caption: API Reference
 
    flwr <apiref-flwr>
 
@@ -80,27 +80,16 @@ intended to help along the way.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contributor Guide
 
    getting-started-for-contributors
    good-first-contributions
+   contributor-setup
+   writing-documentation
    architecture
    secagg
    release-process
    creating-new-messages
    devcontainer
-
-
-About
------
-
-.. toctree::
-   :maxdepth: 1
-   :caption: About
-
-   people
-   organizations
-   publications
 
 
 .. Indices and tables

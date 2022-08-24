@@ -128,7 +128,7 @@ Next, we use the :code:`start_server` function to start a server and tell it to 
     import flwr as fl
 
     if __name__ == "__main__":
-        fl.server.start_server("0.0.0.0:8080", config={"num_rounds": 3})
+        fl.server.start_server("0.0.0.0:8080", config=fl.server.ServerConfig(num_rounds=3))
 
 We can already start the *server*:
 
@@ -276,6 +276,6 @@ in each window (make sure that the server is still running before you do so) and
 Next Steps
 ----------
 
-The full source code for this example: `Jax: From Centralized To Federated (Code) <https://github.com/adap/flower/blob/main/examples/jax_from_centralized_to_federated>`_.
-Our example is of course somewhat over-simplified because both clients load the same dataset. 
+The source code of this example was improved over time and can be found here: `Quickstart JAX <https://github.com/adap/flower/blob/main/examples/quickstart_jax>`_.
+Our example is somewhat over-simplified because both clients load the same dataset.
 You're now prepared to explore this topic further. How about using a more sophisticated model or using a different dataset? How about adding more clients?

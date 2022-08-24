@@ -22,7 +22,7 @@ def test_fedavg_num_fit_clients_20_available() -> None:
     """Test num_fit_clients function."""
     # Prepare
     strategy = FedAvg()
-    expected = 2
+    expected = 20
 
     # Execute
     actual, _ = strategy.num_fit_clients(num_available_clients=20)
@@ -35,7 +35,7 @@ def test_fedavg_num_fit_clients_19_available() -> None:
     """Test num_fit_clients function."""
     # Prepare
     strategy = FedAvg()
-    expected = 2
+    expected = 19
 
     # Execute
     actual, _ = strategy.num_fit_clients(num_available_clients=19)
@@ -48,7 +48,7 @@ def test_fedavg_num_fit_clients_10_available() -> None:
     """Test num_fit_clients function."""
     # Prepare
     strategy = FedAvg()
-    expected = 2
+    expected = 10
 
     # Execute
     actual, _ = strategy.num_fit_clients(num_available_clients=10)
@@ -61,7 +61,7 @@ def test_fedavg_num_fit_clients_minimum() -> None:
     """Test num_fit_clients function."""
     # Prepare
     strategy = FedAvg()
-    expected = 2
+    expected = 9
 
     # Execute
     actual, _ = strategy.num_fit_clients(num_available_clients=9)
@@ -73,7 +73,7 @@ def test_fedavg_num_fit_clients_minimum() -> None:
 def test_fedavg_num_evaluation_clients_40_available() -> None:
     """Test num_evaluation_clients function."""
     # Prepare
-    strategy = FedAvg(fraction_eval=0.05)
+    strategy = FedAvg(fraction_evaluate=0.05)
     expected = 2
 
     # Execute
@@ -86,7 +86,7 @@ def test_fedavg_num_evaluation_clients_40_available() -> None:
 def test_fedavg_num_evaluation_clients_39_available() -> None:
     """Test num_evaluation_clients function."""
     # Prepare
-    strategy = FedAvg(fraction_eval=0.05)
+    strategy = FedAvg(fraction_evaluate=0.05)
     expected = 2
 
     # Execute
@@ -99,7 +99,7 @@ def test_fedavg_num_evaluation_clients_39_available() -> None:
 def test_fedavg_num_evaluation_clients_20_available() -> None:
     """Test num_evaluation_clients function."""
     # Prepare
-    strategy = FedAvg(fraction_eval=0.05)
+    strategy = FedAvg(fraction_evaluate=0.05)
     expected = 2
 
     # Execute
@@ -112,7 +112,7 @@ def test_fedavg_num_evaluation_clients_20_available() -> None:
 def test_fedavg_num_evaluation_clients_minimum() -> None:
     """Test num_evaluation_clients function."""
     # Prepare
-    strategy = FedAvg(fraction_eval=0.05)
+    strategy = FedAvg(fraction_evaluate=0.05)
     expected = 2
 
     # Execute

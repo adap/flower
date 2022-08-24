@@ -73,11 +73,11 @@ class VisionClassificationClient(fl.client.Client):
         self.delay_factor = delay_factor
 
     def get_parameters(self) -> fl.common.ParametersRes:
-        parameters = fl.common.weights_to_parameters(self.model.get_weights())
+        parameters = fl.common.ndarrays_to_parameters(self.model.get_weights())
         return fl.common.ParametersRes(parameters=parameters)
 
     def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
-        weights: fl.common.Weights = fl.common.parameters_to_weights(ins.parameters)
+        weights: fl.common.Weights = fl.common.parameters_to_ndarrays(ins.parameters)
         config = ins.config
         log(
             DEBUG,
@@ -116,10 +116,10 @@ class VisionClassificationClient(fl.client.Client):
 
         if not completed and not partial_updates:
             # Return empty update if local update could not be completed in time
-            parameters = fl.common.weights_to_parameters([])
+            parameters = fl.common.ndarrays_to_parameters([])
         else:
             # Return the refined weights and the number of examples used for training
-            parameters = fl.common.weights_to_parameters(self.model.get_weights())
+            parameters = fl.common.ndarrays_to_parameters(self.model.get_weights())
         return fl.common.FitRes(
             parameters=parameters,
             num_examples=num_examples,
@@ -128,7 +128,7 @@ class VisionClassificationClient(fl.client.Client):
         )
 
     def evaluate(self, ins: fl.common.EvaluateIns) -> fl.common.EvaluateRes:
-        weights = fl.common.parameters_to_weights(ins.parameters)
+        weights = fl.common.parameters_to_ndarrays(ins.parameters)
         config = ins.config
         log(
             DEBUG,

@@ -1,6 +1,7 @@
 Using Baselines
 ===============
 
+
 Structure
 ---------
 
@@ -23,6 +24,7 @@ Go to the baseline that you want to execute. The directories and files are struc
     |---|---experiment2/
 
 The experiment area contains a :code:`README.md` covering the corresponding paper, its abstract, and goal as well as a detailed description of how to run the baseline. Please use the :code:`README.md` to see how to execute each individual baseline.
+
 
 Available Baselines
 -------------------

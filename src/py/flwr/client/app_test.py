@@ -15,9 +15,7 @@
 """Flower Client app tests."""
 
 
-from typing import Dict, List, Tuple
-
-import numpy as np
+from typing import Dict, Tuple
 
 from flwr.common import (
     Config,
@@ -29,6 +27,7 @@ from flwr.common import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
+    NDArrays,
     Scalar,
 )
 
@@ -64,18 +63,18 @@ class NeedsWrappingClient(NumPyClient):
         # This method is not expected to be called
         raise Exception()
 
-    def get_parameters(self, config: Config) -> List[np.ndarray]:
+    def get_parameters(self, config: Config) -> NDArrays:
         # This method is not expected to be called
         raise Exception()
 
     def fit(
-        self, parameters: List[np.ndarray], config: Config
-    ) -> Tuple[List[np.ndarray], int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: Config
+    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
         # This method is not expected to be called
         raise Exception()
 
     def evaluate(
-        self, parameters: List[np.ndarray], config: Config
+        self, parameters: NDArrays, config: Config
     ) -> Tuple[float, int, Dict[str, Scalar]]:
         # This method is not expected to be called
         raise Exception()

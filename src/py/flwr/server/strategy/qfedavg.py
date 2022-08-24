@@ -19,7 +19,7 @@ Paper: https://openreview.net/pdf?id=ByexElSYDr
 
 
 from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -29,11 +29,11 @@ from flwr.common import (
     FitIns,
     FitRes,
     MetricsAggregationFn,
+    NDArrays,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
@@ -50,15 +50,19 @@ class QFedAvg(FedAvg):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
+        *,
         q_param: float = 0.2,
         qffl_learning_rate: float = 0.1,
-        fraction_fit: float = 0.1,
-        fraction_eval: float = 0.1,
+        fraction_fit: float = 1.0,
+        fraction_evaluate: float = 1.0,
         min_fit_clients: int = 1,
-        min_eval_clients: int = 1,
+        min_evaluate_clients: int = 1,
         min_available_clients: int = 1,
-        eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn: Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -69,11 +73,11 @@ class QFedAvg(FedAvg):
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
-            fraction_eval=fraction_eval,
+            fraction_evaluate=fraction_evaluate,
             min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
+            min_evaluate_clients=min_evaluate_clients,
             min_available_clients=min_available_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
@@ -82,17 +86,17 @@ class QFedAvg(FedAvg):
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
         self.min_fit_clients = min_fit_clients
-        self.min_eval_clients = min_eval_clients
+        self.min_evaluate_clients = min_evaluate_clients
         self.fraction_fit = fraction_fit
-        self.fraction_eval = fraction_eval
+        self.fraction_evaluate = fraction_evaluate
         self.min_available_clients = min_available_clients
-        self.eval_fn = eval_fn
+        self.evaluate_fn = evaluate_fn
         self.on_fit_config_fn = on_fit_config_fn
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
-        self.pre_weights: Optional[Weights] = None
+        self.pre_weights: Optional[NDArrays] = None
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
@@ -110,20 +114,20 @@ class QFedAvg(FedAvg):
 
     def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
-        num_clients = int(num_available_clients * self.fraction_eval)
-        return max(num_clients, self.min_eval_clients), self.min_available_clients
+        num_clients = int(num_available_clients * self.fraction_evaluate)
+        return max(num_clients, self.min_evaluate_clients), self.min_available_clients
 
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        weights = parameters_to_weights(parameters)
+        weights = parameters_to_ndarrays(parameters)
         self.pre_weights = weights
-        parameters = weights_to_parameters(weights)
+        parameters = ndarrays_to_parameters(weights)
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
-            config = self.on_fit_config_fn(rnd)
+            config = self.on_fit_config_fn(server_round)
         fit_ins = FitIns(parameters, config)
 
         # Sample clients
@@ -138,18 +142,18 @@ class QFedAvg(FedAvg):
         return [(client, fit_ins) for client in clients]
 
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        # Do not configure federated evaluation if fraction_eval is 0
-        if self.fraction_eval == 0.0:
+        # Do not configure federated evaluation if fraction_evaluate is 0
+        if self.fraction_evaluate == 0.0:
             return []
 
         # Parameters and config
         config = {}
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
-            config = self.on_evaluate_config_fn(rnd)
+            config = self.on_evaluate_config_fn(server_round)
         evaluate_ins = EvaluateIns(parameters, config)
 
         # Sample clients
@@ -165,9 +169,9 @@ class QFedAvg(FedAvg):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
@@ -177,15 +181,15 @@ class QFedAvg(FedAvg):
             return None, {}
         # Convert results
 
-        def norm_grad(grad_list: List[Weights]) -> float:
+        def norm_grad(grad_list: NDArrays) -> float:
             # input: nested gradients
             # output: square of the L-2 norm
             client_grads = grad_list[0]
             for i in range(1, len(grad_list)):
-                client_grads = np.append(
+                client_grads = np.append(  # type: ignore
                     client_grads, grad_list[i]
                 )  # output a flattened array
-            squared = np.square(client_grads)  # type: ignore
+            squared = np.square(client_grads)
             summed = np.sum(squared)
             return float(summed)
 
@@ -196,15 +200,17 @@ class QFedAvg(FedAvg):
             raise Exception("QffedAvg pre_weights are None in aggregate_fit")
 
         weights_before = self.pre_weights
-        eval_result = self.evaluate(weights_to_parameters(weights_before))
+        eval_result = self.evaluate(
+            server_round, ndarrays_to_parameters(weights_before)
+        )
         if eval_result is not None:
             loss, _ = eval_result
 
         for _, fit_res in results:
-            new_weights = parameters_to_weights(fit_res.parameters)
+            new_weights = parameters_to_ndarrays(fit_res.parameters)
             # plug in the weight updates into the gradient
             grads = [
-                (u - v) * 1.0 / self.learning_rate
+                np.multiply((u - v), 1.0 / self.learning_rate)
                 for u, v in zip(weights_before, new_weights)
             ]
             deltas.append(
@@ -219,24 +225,24 @@ class QFedAvg(FedAvg):
                 * np.float_power(loss + 1e-10, self.q_param)
             )
 
-        weights_aggregated: Weights = aggregate_qffl(weights_before, deltas, hs_ffl)
-        parameters_aggregated = weights_to_parameters(weights_aggregated)
+        weights_aggregated: NDArrays = aggregate_qffl(weights_before, deltas, hs_ffl)
+        parameters_aggregated = ndarrays_to_parameters(weights_aggregated)
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
             fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif rnd == 1:
+        elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
@@ -258,7 +264,7 @@ class QFedAvg(FedAvg):
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-        elif rnd == 1:
+        elif server_round == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
         return loss_aggregated, metrics_aggregated

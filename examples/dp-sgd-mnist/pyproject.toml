@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "poetry==1.1.13",
+    "poetry==1.1.14",
 ]
 build-backend = "poetry.core.masonry.api"
 
@@ -9,7 +9,7 @@ name = "dp-sgd-mnist"
 version = "0.1.0"
 description = "Federated training with Tensorflow Privacy"
 authors = [
-    "The Flower Authors <enquiries@flower.dev>",
+    "The Flower Authors <hello@flower.dev>",
     "Kaushik Amar Das <kaushik.das@iiitg.ac.in>"
 ]
 

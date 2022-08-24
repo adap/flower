@@ -24,7 +24,7 @@ def test_add_loss_distributed() -> None:
     history = History()
 
     # Execute
-    history.add_loss_distributed(rnd=0, loss=2.0)
+    history.add_loss_distributed(server_round=0, loss=2.0)
 
     # Assert
     assert len(history.losses_distributed) == 1
@@ -40,7 +40,7 @@ def test_add_loss_centralized() -> None:
     history = History()
 
     # Execute
-    history.add_loss_centralized(rnd=0, loss=2.0)
+    history.add_loss_centralized(server_round=0, loss=2.0)
 
     # Assert
     assert len(history.losses_distributed) == 0
@@ -56,7 +56,7 @@ def test_add_metrics_distributed() -> None:
     history = History()
 
     # Execute
-    history.add_metrics_distributed(rnd=0, metrics={"acc": 0.9})
+    history.add_metrics_distributed(server_round=0, metrics={"acc": 0.9})
 
     # Assert
     assert len(history.losses_distributed) == 0
@@ -72,7 +72,7 @@ def test_add_metrics_centralized() -> None:
     history = History()
 
     # Execute
-    history.add_metrics_centralized(rnd=0, metrics={"acc": 0.9})
+    history.add_metrics_centralized(server_round=0, metrics={"acc": 0.9})
 
     # Assert
     assert len(history.losses_distributed) == 0
