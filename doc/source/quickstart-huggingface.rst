@@ -1,3 +1,6 @@
+.. _quickstart-huggingface:
+
+
 Quickstart 🤗 Transformers
 ==========================
 

@@ -1,3 +1,6 @@
+.. _quickstart-scikitlearn:
+
+
 Quickstart scikit-learn
 =======================
 

@@ -1,3 +1,6 @@
+.. _quickstart-mxnet:
+
+
 Quickstart MXNet
 ================
 
