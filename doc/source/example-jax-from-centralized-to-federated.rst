@@ -56,7 +56,7 @@ The model architecture (a very simple :code:`Linear Regression` model) is define
         }
         return params
 
-We now need to define the training (function :code:`train()`) which loops over the training set and measures the loss (function :code:`loss_fn()`) for each batch of training examples. The loss function is separate since JAX takes derivatives with a :code:`grad()` function (defined in the :code:`main()` function and called in :code:`train()`). 
+We now need to define the training (function :code:`train()`), which loops over the training set and measures the loss (function :code:`loss_fn()`) for each batch of training examples. The loss function is separate since JAX takes derivatives with a :code:`grad()` function (defined in the :code:`main()` function and called in :code:`train()`). 
 
 .. code-block:: python
 
@@ -117,8 +117,8 @@ JAX meets Flower
 The concept of federating an existing workload is always the same and easy to understand.
 We have to start a *server* and then use the code in :code:`jax_training.py` for the *clients* that are connected to the *server*.
 The *server* sends model parameters to the clients. The *clients* run the training and update the parameters.
-The updated parameters are sent back to the *server* which averages all received parameter updates.
-This describes one round of the federated learning process and we repeat this for multiple rounds.
+The updated parameters are sent back to the *server*, which averages all received parameter updates.
+This describes one round of the federated learning process, and we repeat this for multiple rounds.
 
 Our example consists of one *server* and two *clients*. Let's set up :code:`server.py` first. The *server* needs to import the Flower package :code:`flwr`.
 Next, we use the :code:`start_server` function to start a server and tell it to perform three rounds of federated learning.
@@ -231,7 +231,7 @@ We included type annotations to give you a better understanding of the data type
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict
         ) -> Tuple[float, int, Dict]:
-            # Set model parameters, evaluate model on local test dataset, return result
+            # Set model parameters, evaluate the model on a local test dataset, return result
             print("Start evaluation")
             self.params = self.set_parameters(parameters)
             loss, num_examples = jax_training.evaluation(self.params,self.grad_fn, self.test_x, self.test_y)
@@ -278,4 +278,5 @@ Next Steps
 
 The source code of this example was improved over time and can be found here: `Quickstart JAX <https://github.com/adap/flower/blob/main/examples/quickstart_jax>`_.
 Our example is somewhat over-simplified because both clients load the same dataset.
+
 You're now prepared to explore this topic further. How about using a more sophisticated model or using a different dataset? How about adding more clients?

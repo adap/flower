@@ -7,7 +7,7 @@ We will structure the example similar to our `PyTorch - From Centralized To Fede
 First, we build a centralized training approach based on the `Handwritten Digit Recognition <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_ tutorial.
 Then, we build upon the centralized training code to run the training in a federated fashion.
 
-Before we start setting up our MXNet example we install the :code:`mxnet` and :code:`flwr` packages:
+Before we start setting up our MXNet example, we install the :code:`mxnet` and :code:`flwr` packages:
 
 .. code-block:: shell
 
