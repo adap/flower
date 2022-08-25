@@ -1,3 +1,6 @@
+.. _quickstart-tensorflow:
+
+
 Quickstart TensorFlow
 =====================
 
