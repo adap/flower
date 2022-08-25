@@ -40,13 +40,13 @@ It is recommended (but not required) to use `Hydra <https://hydra.cc/>`_ to exec
 
 Please make sure to add your baseline or experiment to the corresponding directory as explained in `Executing Baseline <https://flower.dev/docs/using-baselines.html>`_. Give your baseline the unique identifier. For example, :code:`fedbn` refers to the paper "FedBN: Federated Learning on non-IID Features via Local Batch Normalization" and creates the corresponding directory :code:`flower/baselines/flwr_baselines/publications/fedbn`. Then you create the experiment directory with the experiment name. For example, the experiment that measures the convergence has the directory :code:`flower/baselines/flwr_baselines/publications/fedbn/convergence_rate`. This directory contains all your code and a :code:`README.md` with a link to the paper, the paper's abstract, and a detailed description of how to execute the experiments.
 
-Please also check if the :code:`pyproject.toml` and/or :code:`requirements.txt` (all in the directory `baselines <https://github.com/adap/flower/blob/main/baselines>`_contains all required Python packages (libraries, frameworks, ...). If the required Python package is not yet listed, please add it to :code:`pyproject.toml`. If you need a different version of a package already listed, please try to ensure your experiment runs with the existing version listed in the :code:`pyproject.toml` (or :code:`requirements.txt`). If that doesn't work, open a GitHub Issue and request the version change.
+Please also check if :code:`pyproject.toml` and :code:`requirements.txt` (all in the directory `baselines <https://github.com/adap/flower/blob/main/baselines>`_ contain all required Python packages (libraries, frameworks, ...). If the required Python package is not yet listed, please add it to :code:`pyproject.toml`. If you need a different version of a package already listed, please try to ensure your experiment runs with the existing version listed in :code:`pyproject.toml` (or :code:`requirements.txt`). If that doesn't work, open a GitHub Issue and request the version change.
 
 The experiment also needs to contain a file with a downloader for the dataset - if possible automatic. This can be included in one of the files or as an extra file.
 
-Finally, please add plots for all experimental results your code is running to the :code:`experiment` directory and include them in the :code:`README.md`. Doing this helps others and enables them to recognize your contributions quickly.
+Finally, please add plots for all experimental results your code is running to the :code:`experiment` directory and include them in :code:`README.md`. Doing this helps others and enables them to recognize your contributions quickly.
 
-We know that a few libraries are available only via Conda. However, we want to encourage you to ensure that your code also runs well outside of Conda to make it more accessible to the broader research community.
+We are aware that a few libraries are available only via Conda. However, we want to encourage you to ensure that your code also runs well outside of Conda to make it more accessible to the broader research community.
 
 Here is a checklist for adding a new baseline:
 

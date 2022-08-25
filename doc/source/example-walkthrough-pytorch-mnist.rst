@@ -435,7 +435,7 @@ These functions can both be found inside the same :code:`quickstart_pytorch.mnis
 
 
 Observe that these functions encapsulate regular training and test loops and provide :code:`fit` and :code:`evaluate` with final statistics for each round.
-You could substitute them with your train and test loops and change the network architecture, and the entire example would still work flawlessly. 
+You could substitute them with your custom train and test loops and change the network architecture, and the entire example would still work flawlessly. 
 As a matter of fact, why not try and modify the code to an example of your liking? 
 
 

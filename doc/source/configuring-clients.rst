@@ -6,7 +6,7 @@ Along with model parameters, Flower can send configuration values to clients. Us
 Configuration values
 --------------------
 
-Pass configuration values as a dictionary with ``str`` keys and values of type ``bool``, ``bytes``, ``double`` (64-bit precision float), ``int``, or ``str`` (or equivalent types in different languages). Here is an example of a configuration dictionary in Python:
+Configuration values are represented as a dictionary with ``str`` keys and values of type ``bool``, ``bytes``, ``double`` (64-bit precision float), ``int``, or ``str`` (or equivalent types in different languages). Here is an example of a configuration dictionary in Python:
 
 .. code-block:: python
 

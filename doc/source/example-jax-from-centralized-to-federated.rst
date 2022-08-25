@@ -117,7 +117,7 @@ JAX meets Flower
 The concept of federating an existing workload is always the same and easy to understand.
 We have to start a *server* and then use the code in :code:`jax_training.py` for the *clients* that are connected to the *server*.
 The *server* sends model parameters to the clients. The *clients* run the training and update the parameters.
-The updated parameters are returned to the *server*, which averages all received parameter updates.
+The updated parameters are sent back to the *server*, which averages all received parameter updates.
 This describes one round of the federated learning process, and we repeat this for multiple rounds.
 
 Our example consists of one *server* and two *clients*. Let's set up :code:`server.py` first. The *server* needs to import the Flower package :code:`flwr`.
