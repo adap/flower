@@ -121,6 +121,17 @@ html_theme_options = {
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
-# -- Options for HTML output -------------------------------------------------
+# -- Options for nbsphinx -------------------------------------------------
 
 nbsphinx_execute = 'never'
+
+_open_in_colab_button = """
+.. raw:: html
+
+    <br/>
+    <a href="https://colab.research.google.com/github/adap/flower/blob/main/doc/source/{{ env.doc2path(env.docname, base=None) }}">
+        <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"/>
+    </a>
+"""
+nbsphinx_prolog = _open_in_colab_button
+nbsphinx_epilog = _open_in_colab_button
