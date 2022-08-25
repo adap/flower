@@ -2,68 +2,51 @@
 
 ## Unreleased
 
+## v1.0.0 (2022-07-28)
+
 ### Highlights
 
-- Optional client methods
+- Stable **Virtual Client Engine** (accessible via `start_simulation`)
+- All `Client`/`NumPyClient` methods are now optional
 - Configurable `get_parameters`
-- Stable Virtual Client Engine
-- More powerful `start_simulation`
+- Tons of small API cleanups resulting in a more coherent developer experience
 
-### Contributors
+### Thanks to our contributors
 
-We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contributors](https://github.com/adap/flower/graphs/contributors) order):
+We would like to give our **special thanks** to all the contributors who made Flower 1.0 possible (in reverse [GitHub Contributors](https://github.com/adap/flower/graphs/contributors) order):
 
-[@rtaiello](https://github.com/rtaiello),
-[@g-pichler](https://github.com/g-pichler),
-[@rob-luke](https://github.com/rob-luke),
-[@andreea-zaharia](https://github.com/andreea-zaharia),
-[@kinshukdua](https://github.com/kinshukdua),
-[@nfnt](https://github.com/nfnt),
-[@tatiana-s](https://github.com/tatiana-s),
-[@TParcollet](https://github.com/TParcollet),
-[@vballoli](https://github.com/vballoli),
-[@negedng](https://github.com/negedng),
-[@RISHIKESHAVAN](https://github.com/RISHIKESHAVAN),
-[@hei411](https://github.com/hei411),
-[@SebastianSpeitel](https://github.com/SebastianSpeitel),
-[@AmitChaulwar](https://github.com/AmitChaulwar),
-[@Rubiel1](https://github.com/Rubiel1),
-[@FANTOME-PAN](https://github.com/FANTOME-PAN),
-[@Rono-BC](https://github.com/Rono-BC),
-[@lbhm](https://github.com/lbhm),
-[@sishtiaq](https://github.com/sishtiaq),
-[@remde](https://github.com/remde),
-[@Jueun-Park](https://github.com/Jueun-Park),
-[@architjen](https://github.com/architjen),
-[@PratikGarai](https://github.com/PratikGarai),
-[@mrinaald](https://github.com/mrinaald),
-[@zliel](https://github.com/zliel),
-[@MeiruiJiang](https://github.com/MeiruiJiang),
-[@sandracl72](https://github.com/sandracl72),
-[@gubertoli](https://github.com/gubertoli),
-[@Vingt100](https://github.com/Vingt100),
-[@MakGulati](https://github.com/MakGulati),
-[@cozek](https://github.com/cozek),
-[@jafermarq](https://github.com/jafermarq),
-[@sisco0](https://github.com/sisco0),
-[@akhilmathurs](https://github.com/akhilmathurs),
-[@CanTuerk](https://github.com/CanTuerk),
-[@mariaboerner1987](https://github.com/mariaboerner1987),
-[@pedropgusmao](https://github.com/pedropgusmao),
-[@tanertopal](https://github.com/tanertopal),
-[@danieljanes](https://github.com/danieljanes).
+[@rtaiello](https://github.com/rtaiello), [@g-pichler](https://github.com/g-pichler), [@rob-luke](https://github.com/rob-luke), [@andreea-zaharia](https://github.com/andreea-zaharia), [@kinshukdua](https://github.com/kinshukdua), [@nfnt](https://github.com/nfnt), [@tatiana-s](https://github.com/tatiana-s), [@TParcollet](https://github.com/TParcollet), [@vballoli](https://github.com/vballoli), [@negedng](https://github.com/negedng), [@RISHIKESHAVAN](https://github.com/RISHIKESHAVAN), [@hei411](https://github.com/hei411), [@SebastianSpeitel](https://github.com/SebastianSpeitel), [@AmitChaulwar](https://github.com/AmitChaulwar), [@Rubiel1](https://github.com/Rubiel1), [@FANTOME-PAN](https://github.com/FANTOME-PAN), [@Rono-BC](https://github.com/Rono-BC), [@lbhm](https://github.com/lbhm), [@sishtiaq](https://github.com/sishtiaq), [@remde](https://github.com/remde), [@Jueun-Park](https://github.com/Jueun-Park), [@architjen](https://github.com/architjen), [@PratikGarai](https://github.com/PratikGarai), [@mrinaald](https://github.com/mrinaald), [@zliel](https://github.com/zliel), [@MeiruiJiang](https://github.com/MeiruiJiang), [@sandracl72](https://github.com/sandracl72), [@gubertoli](https://github.com/gubertoli), [@Vingt100](https://github.com/Vingt100), [@MakGulati](https://github.com/MakGulati), [@cozek](https://github.com/cozek), [@jafermarq](https://github.com/jafermarq), [@sisco0](https://github.com/sisco0), [@akhilmathurs](https://github.com/akhilmathurs), [@CanTuerk](https://github.com/CanTuerk), [@mariaboerner1987](https://github.com/mariaboerner1987), [@pedropgusmao](https://github.com/pedropgusmao), [@tanertopal](https://github.com/tanertopal), [@danieljanes](https://github.com/danieljanes).
 
 ### Incompatible changes
+
+- **All arguments must be passed as keyword arguments** ([#1338](https://github.com/adap/flower/pull/1338))
+
+  Pass all arguments as keyword arguments, positional arguments are not longer supported. Code that uses positional arguments (e.g., ``start_client("127.0.0.1:8080", FlowerClient())``) must add the keyword for each positional argument (e.g., ``start_client(server_address="127.0.0.1:8080", client=FlowerClient())``).
 
 - **Introduce configuration object** `ServerConfig` **in** `start_server` **and** `start_simulation` ([#1317](https://github.com/adap/flower/pull/1317))
 
   Instead of a config dictionary `{"num_rounds": 3, "round_timeout": 600.0}`, `start_server` and `start_simulation` now expect a configuration object of type `flwr.server.ServerConfig`. `ServerConfig` takes the same arguments that as the previous config dict, but it makes writing type-safe code easier and the default parameters values more transparent.
 
+- **Rename built-in strategy parameters for clarity** ([#1334](https://github.com/adap/flower/pull/1334))
+
+  The following built-in strategy parameters were renamed to improve readability and consistency with other API's:
+  - `fraction_eval` --> `fraction_evaluate`
+  - `min_eval_clients` --> `min_evaluate_clients`
+  - `eval_fn` --> `evaluate_fn`
+
 - **Update default arguments of built-in strategies** ([#1278](https://github.com/adap/flower/pull/1278))
 
-  All built-in strategies now use `fraction_fit=1.0` and `fraction_eval=1.0`, which means they select *all* currently available clients for training and evaluation. Projects that relied on the previous default values can get the previous behaviour by initializing the strategy in the following way:
+  All built-in strategies now use `fraction_fit=1.0` and `fraction_evaluate=1.0`, which means they select *all* currently available clients for training and evaluation. Projects that relied on the previous default values can get the previous behaviour by initializing the strategy in the following way:
 
-  `strategy = FedAvg(fraction_fit=1.0, fraction_eval=1.0)`
+  `strategy = FedAvg(fraction_fit=0.1, fraction_evaluate=0.1)`
+
+- **Add** `server_round` **to** `Strategy.evaluate` ([#1334](https://github.com/adap/flower/pull/1334))
+
+  The `Strategy` method `evaluate` now receives the current round of federated learning/evaluation as the first parameter.
+
+- **Add** `server_round` **and** `config` **parameters to** `evaluate_fn` ([#1334](https://github.com/adap/flower/pull/1334))
+
+  The `evaluate_fn` passed to built-in strategies like `FedAvg` now takes three parameters: (1) The current round of federated learning/evaluation (`server_round`), (2) the model parameters to evaluate (`parameters`), and (3) a config dictionary (`config`).
 
 - **Rename** `rnd` **to** `server_round` ([#1321](https://github.com/adap/flower/pull/1321))
 
@@ -77,15 +60,15 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
   Remove unmaintained experimental strategies (`FastAndSlow`, `FedFSv0`, `FedFSv1`).
 
-- **Renamed** `Weights` **to** `NDArrays` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
+- **Rename** `Weights` **to** `NDArrays` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
 
   `flwr.common.Weights` was renamed to `flwr.common.NDArrays` to better capture what this type is all about.
 
-- **Removed antiquated** `force_final_distributed_eval` **from** `start_server` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
+- **Remove antiquated** `force_final_distributed_eval` **from** `start_server` ([#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
 
   The `start_server` parameter `force_final_distributed_eval` has long been a historic artefact, in this release it is finally gone for good.
 
-- **Configurable** `get_parameters` ([#1242](https://github.com/adap/flower/pull/1242))
+- **Make** `get_parameters` **configurable** ([#1242](https://github.com/adap/flower/pull/1242))
 
   The `get_parameters` method now accepts a configuration dictionary, just like `get_properties`, `fit`, and `evaluate`.
 
@@ -95,7 +78,7 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
 ### New features
 
-- **Official support for Python 3.10** ([#1320](https://github.com/adap/flower/pull/1320))
+- **Support Python 3.10** ([#1320](https://github.com/adap/flower/pull/1320))
 
   The previous Flower release introduced experimental support for Python 3.10, this release declares Python 3.10 support as stable.
 
@@ -121,15 +104,15 @@ We thank all contributors who made Flower 1.0 possible (in reverse [GitHub Contr
 
   Removes the obsolete `simulation` example and renames `quickstart_simulation` to `simulation_tensorflow` so it fits withs the naming of `simulation_pytorch`
 
-- **Updated documentation** ([#1223](https://github.com/adap/flower/pull/1223), [#1209](https://github.com/adap/flower/pull/1209), [#1251](https://github.com/adap/flower/pull/1251), [#1257](https://github.com/adap/flower/pull/1257), [#1267](https://github.com/adap/flower/pull/1267), [#1268](https://github.com/adap/flower/pull/1268), [#1300](https://github.com/adap/flower/pull/1300), [#1304](https://github.com/adap/flower/pull/1304), [#1305](https://github.com/adap/flower/pull/1305), [#1307](https://github.com/adap/flower/pull/1307))
+- **Update documentation** ([#1223](https://github.com/adap/flower/pull/1223), [#1209](https://github.com/adap/flower/pull/1209), [#1251](https://github.com/adap/flower/pull/1251), [#1257](https://github.com/adap/flower/pull/1257), [#1267](https://github.com/adap/flower/pull/1267), [#1268](https://github.com/adap/flower/pull/1268), [#1300](https://github.com/adap/flower/pull/1300), [#1304](https://github.com/adap/flower/pull/1304), [#1305](https://github.com/adap/flower/pull/1305), [#1307](https://github.com/adap/flower/pull/1307))
 
   One substantial documentation update fixes multiple smaller rendering issues, makes titles more succinct to improve navigation, removes a deprecated library, updates documentation dependencies, includes the `flwr.common` module in the API reference, includes support for markdown-based documentation, migrates the changelog from `.rst` to `.md`, and fixes a number of smaller details!
 
 - **Minor updates**
   - Add round number to fit and evaluate log messages ([#1266](https://github.com/adap/flower/pull/1266))
   - Add secure gRPC connection to the `advanced_tensorflow` code example ([#847](https://github.com/adap/flower/pull/847))
-  - Updated developer tooling ([#1231](https://github.com/adap/flower/pull/1231), [#1276](https://github.com/adap/flower/pull/1276), [#1301](https://github.com/adap/flower/pull/1301), [#1310](https://github.com/adap/flower/pull/1310))
-  - Renamed ProtoBuf messages to improve consistency ([#1214](https://github.com/adap/flower/pull/1214), [#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
+  - Update developer tooling ([#1231](https://github.com/adap/flower/pull/1231), [#1276](https://github.com/adap/flower/pull/1276), [#1301](https://github.com/adap/flower/pull/1301), [#1310](https://github.com/adap/flower/pull/1310))
+  - Rename ProtoBuf messages to improve consistency ([#1214](https://github.com/adap/flower/pull/1214), [#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
 
 ## v0.19.0 (2022-05-18)
 

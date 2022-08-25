@@ -15,6 +15,7 @@
 """Flower server app."""
 
 
+import time
 from dataclasses import dataclass
 from logging import INFO, WARN
 from typing import Optional, Tuple
@@ -43,6 +44,7 @@ class ServerConfig:
 
 
 def start_server(  # pylint: disable=too-many-arguments
+    *,
     server_address: str = DEFAULT_SERVER_ADDRESS,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
@@ -185,3 +187,9 @@ def _fl(
     server.disconnect_all_clients(timeout=config.round_timeout)
 
     return hist
+
+
+def run_server() -> None:
+    """Run Flower server."""
+    print("Running Flower server...")
+    time.sleep(3)

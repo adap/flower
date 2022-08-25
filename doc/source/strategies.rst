@@ -9,6 +9,7 @@ There are three ways to customize the way Flower orchestrates the learning proce
 * Customize an existing strategy with callback functions
 * Implement a novel strategy
 
+
 Use an existing strategy
 ------------------------
 
@@ -79,7 +80,8 @@ Similar to :code:`on_fit_config_fn`, there is also :code:`on_evaluate_config_fn`
 Configuring server-side evaluation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Server-side evaluation can be enabled by passing an evaluation function to :code:`eval_fn`.
+Server-side evaluation can be enabled by passing an evaluation function to :code:`evaluate_fn`.
+
 
 Implement a novel strategy
 --------------------------

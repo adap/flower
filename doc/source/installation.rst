@@ -8,38 +8,48 @@ Python Version
 Flower requires `Python 3.7 <https://docs.python.org/3.7/>`_ or above.
 
 
-Install Stable Release
+Install stable release
 ----------------------
 
-Stable releases are available on `PyPI <https://pypi.org/>`_::
+Stable releases are available on `PyPI <https://pypi.org/project/flwr/>`_::
 
-  pip install flwr
+  python -m pip install flwr
 
 For simulations that use the Virtual Client Engine, ``flwr`` should be installed with the ``simulation`` extra::
 
-  pip install flwr[simulation]
+  python -m pip install flwr[simulation]
 
 
-Install Nightly Release
------------------------
+Verify installation
+-------------------
+
+The following command can be used to verfiy if Flower was successfully installed. If everything worked, it should print the version of Flower to the command line::
+
+  python -c "import flwr;print(flwr.__version__)"
+  1.1.0
+
+
+Advanced installation options
+-----------------------------
+
+Install pre-release
+~~~~~~~~~~~~~~~~~~~
+
+New (possibly unstable) versions of Flower are sometimes available as pre-release versions (alpha, beta, release candidate) before the stable release happens::
+
+  python -m pip install -U --pre flwr
+
+For simulations that use the Virtual Client Engine, ``flwr`` pre-releases should be installed with the ``simulation`` extra::
+
+  python -m pip install -U --pre flwr[simulation]
+
+Install nightly release
+~~~~~~~~~~~~~~~~~~~~~~~
 
 The latest (potentially unstable) changes in Flower are available as nightly releases::
 
-  pip install flwr-nightly
+  python -m pip install -U flwr-nightly
 
 For simulations that use the Virtual Client Engine, ``flwr-nightly`` should be installed with the ``simulation`` extra::
 
-  pip install flwr-nightly[simulation]
-
-
-Install from GitHub
--------------------
-
-Python packages can be installed from git repositories. Use the following
-command to install the latest version of Flower directly from GitHub::
-
-  pip install git+https://github.com/adap/flower.git
-
-One can also install a specific commit::
-
-  pip install git+https://github.com/adap/flower.git@9cc383cddb7dcb0cc41b5a3559106887ba1c34f8
+  python -m pip install -U flwr-nightly[simulation]

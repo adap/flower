@@ -17,20 +17,20 @@ def main() -> None:
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.3,
-        fraction_eval=0.2,
+        fraction_evaluate=0.2,
         min_fit_clients=3,
-        min_eval_clients=2,
+        min_evaluate_clients=2,
         min_available_clients=10,
-        eval_fn=get_eval_fn(model),
+        evaluate_fn=get_evaluate_fn(model),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
-        initial_parameters=fl.common.weights_to_parameters(model.get_weights()),
+        initial_parameters=fl.common.ndarrays_to_parameters(model.get_weights()),
     )
 
     # Start Flower server (SSL-enabled) for four rounds of federated learning
     fl.server.start_server(
         server_address="0.0.0.0:8080",
-        config={"num_rounds": 4},
+        config=fl.server.ServerConfig(num_rounds=4),
         strategy=strategy,
         certificates=(
             Path(".cache/certificates/ca.crt").read_bytes(),
@@ -40,7 +40,7 @@ def main() -> None:
     )
 
 
-def get_eval_fn(model):
+def get_evaluate_fn(model):
     """Return an evaluation function for server-side evaluation."""
 
     # Load data and model here to avoid the overhead of doing it in `evaluate` itself
@@ -51,9 +51,11 @@ def get_eval_fn(model):
 
     # The `evaluate` function will be called after every round
     def evaluate(
-        weights: fl.common.Weights,
+        server_round: int,
+        parameters: fl.common.NDArrays,
+        config: Dict[str, fl.common.Scalar],
     ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
-        model.set_weights(weights)  # Update model with the latest parameters
+        model.set_weights(parameters)  # Update model with the latest parameters
         loss, accuracy = model.evaluate(x_val, y_val)
         return loss, {"accuracy": accuracy}
 
