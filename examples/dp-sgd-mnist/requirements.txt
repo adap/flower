@@ -1,0 +1,3 @@
+flwr==0.17.0
+tensorflow==2.5.0
+tensorflow-privacy @ git+https://github.com/tensorflow/privacy@aaf4c25

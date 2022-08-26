@@ -1,0 +1,3 @@
+flwr==1.0.0
+scikit-learn==1.1.1
+openml==0.12.2
