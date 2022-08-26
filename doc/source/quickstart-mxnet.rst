@@ -179,7 +179,7 @@ They can be implemented in the following way:
 .. code-block:: python
 
     class MNISTClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             param = []
             for val in model.collect_params(".*weight").values():
                 p = val.data()
@@ -209,7 +209,7 @@ to actually run this client:
 
 .. code-block:: python
 
-     fl.client.start_numpy_client("0.0.0.0:8080", client=MNISTClient())
+     fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=MNISTClient())
 
 That's it for the client. We only have to implement :code:`Client` or
 :code:`NumPyClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"0.0.0.0:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
