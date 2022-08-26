@@ -46,7 +46,7 @@ Clients can return custom metrics to the server by returning a dictionary:
 
     class CifarClient(fl.client.NumPyClient):
 
-        def get_parameters(self):
+        def get_parameters(self, config):
             # ...
 
         def fit(self, parameters, config):

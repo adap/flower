@@ -168,7 +168,7 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
             )
             self.model.load_state_dict(state_dict, strict=True)
 
-        def get_parameters(self) -> fl.common.ParametersRes:
+        def get_parameters(self, config) -> fl.common.ParametersRes:
             """Encapsulates the weight into Flower Parameters """
             weights: fl.common.Weights = self.get_weights()
             parameters = fl.common.ndarrays_to_parameters(weights)
@@ -300,7 +300,7 @@ The second thing to notice is that :code:`PytorchMNISTClient` class inherits fro
         """Abstract base class for Flower clients."""
 
         @abstractmethod
-        def get_parameters(self) -> ParametersRes:
+        def get_parameters(self, config) -> ParametersRes:
             """Return the current local model parameters."""
 
         @abstractmethod

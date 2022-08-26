@@ -275,7 +275,7 @@ We included type annotations to give you a better understanding of the data type
             self.val_data = val_data
             self.device = device
 
-        def get_parameters(self) -> List[np.ndarray]:
+        def get_parameters(self, config) -> List[np.ndarray]:
             # Return model parameters as a list of NumPy Arrays
             param = []
             for val in self.model.collect_params(".*weight").values():
@@ -338,7 +338,7 @@ Having defined data loading, model architecture, training, and evaluation we can
 
         # Start Flower client
         client = MNISTClient(model, train_data, val_data, DEVICE)
-        fl.client.start_numpy_client("0.0.0.0:8080", client)
+        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client)
 
 
     if __name__ == "__main__":

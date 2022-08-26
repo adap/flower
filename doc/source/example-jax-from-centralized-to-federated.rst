@@ -199,7 +199,7 @@ We included type annotations to give you a better understanding of the data type
             self.test_x = test_x
             self.test_y = test_y
 
-        def get_parameters(self) -> Dict:
+        def get_parameters(self, config) -> Dict:
             # Return model parameters as a list of NumPy ndarrays
             parameter_value = []
             for _, val in self.params.items():
@@ -259,7 +259,7 @@ Having defined the federation process, we can run it.
 
         # Start Flower client
         client = FlowerClient(params, grad_fn, train_x, train_y, test_x, test_y)
-        fl.client.start_numpy_client("0.0.0.0:8080", client)
+        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client)
 
     if __name__ == "__main__":
         main()

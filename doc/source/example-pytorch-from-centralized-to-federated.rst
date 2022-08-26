@@ -251,7 +251,7 @@ We included type annotations to give you a better understanding of the data type
             self.testloader = testloader
             self.num_examples = num_examples
 
-        def get_parameters(self) -> List[np.ndarray]:
+        def get_parameters(self, config) -> List[np.ndarray]:
             # Return model parameters as a list of NumPy ndarrays
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
@@ -292,7 +292,7 @@ You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient
 
         # Start client
         client = CifarClient(model, trainloader, testloader, num_examples)
-        fl.client.start_numpy_client("0.0.0.0:8080", client)
+        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client)
 
 
     if __name__ == "__main__":

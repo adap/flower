@@ -119,7 +119,7 @@ The methods can be implemented in the following way:
 .. code-block:: python
 
     class MnistClient(fl.client.NumPyClient):
-        def get_parameters(self):  # type: ignore
+        def get_parameters(self, config):  # type: ignore
             return utils.get_model_parameters(model)
 
         def fit(self, parameters, config):  # type: ignore
@@ -189,7 +189,7 @@ The evaluation function is called after each federated learning round and gives 
 
         return evaluate
 
-The :code:`main` contains the server-side parameter initialization :code:`utils.set_initial_params()` as well as the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federated averaging (or FedAvg), with two clients and evaluation after each federated learning round. The server can be started with the command :code:`fl.server.start_server("0.0.0.0:8080", strategy=strategy, config=fl.server.ServerConfig(num_rounds=3))`.
+The :code:`main` contains the server-side parameter initialization :code:`utils.set_initial_params()` as well as the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federated averaging (or FedAvg), with two clients and evaluation after each federated learning round. The server can be started with the command :code:`fl.server.start_server(server_address="0.0.0.0:8080", strategy=strategy, config=fl.server.ServerConfig(num_rounds=3))`.
 
 .. code-block:: python
 
@@ -202,7 +202,7 @@ The :code:`main` contains the server-side parameter initialization :code:`utils.
             evaluate_fn=get_evaluate_fn(model),
             on_fit_config_fn=fit_round,
         )
-        fl.server.start_server("0.0.0.0:8080", strategy=strategy, config=fl.server.ServerConfig(num_rounds=3))
+        fl.server.start_server(server_address="0.0.0.0:8080", strategy=strategy, config=fl.server.ServerConfig(num_rounds=3))
 
 
 Train the model, federated!
