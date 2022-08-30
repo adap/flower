@@ -21,26 +21,16 @@ from typing import Dict, Tuple
 import numpy as np
 
 from flwr.client.numpy_client import NumPyClient
+from flwr.common.dp import add_gaussian_noise, clip_by_l2
 from flwr.common.typing import Config, NDArrays, Scalar
 
 
-# Calculates the L2-norm of a potentially ragged array
-def _get_update_norm(update: NDArrays) -> float:
-    flattened_update = update[0]
-    for i in range(1, len(update)):
-        flattened_update = np.append(flattened_update, update[i])  # type: ignore
-    return float(np.sqrt(np.sum(np.square(flattened_update))))
-
-
-class DPNumPyClient(NumPyClient):
+class DPFedAvgNumPyClient(NumPyClient):
     """Wrapper for configuring a Flower client for DP."""
 
-    def __init__(
-        self, client: NumPyClient, adaptive_clip_enabled: bool = False
-    ) -> None:
+    def __init__(self, client: NumPyClient) -> None:
         super().__init__()
         self.client = client
-        self.adaptive_clip_enabled = adaptive_clip_enabled
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         return self.client.get_properties(config)
@@ -59,36 +49,32 @@ class DPNumPyClient(NumPyClient):
         # Update = updated model - original model
         update = [np.subtract(x, y) for (x, y) in zip(updated_params, original_params)]
 
-        # Calculating the factor to scale the update by
-        update_norm = _get_update_norm(update)
-
-        if "clip_norm" not in config:
+        if "dpfedavg_clip_norm" not in config:
             raise Exception("Clipping threshold not supplied by the server.")
-        if not isinstance(config["clip_norm"], float):
+        if not isinstance(config["dpfedavg_clip_norm"], float):
             raise Exception("Clipping threshold should be a floating point value.")
 
-        scaling_factor = min(1, config["clip_norm"] / update_norm)
+        # Clipping
+        update, clipped = clip_by_l2(update, config["dpfedavg_clip_norm"])
 
-        # Clipping update to bound sensitivity of aggregate at server
-        update_clipped = [layer * scaling_factor for layer in update]
-
-        if "noise_stddev" not in config:
-            raise Exception("Scale of noise to be added not supplied by the server.")
-        if not isinstance(config["noise_stddev"], float):
-            raise Exception(
-                "Scale of noise to be added should be a floating point value."
-            )
-        update_clipped_noised = [
-            layer + np.random.normal(0, config["noise_stddev"], layer.shape)
-            for layer in update_clipped
-        ]
+        if "dpfedavg_noise_stddev" in config:
+            if not isinstance(config["dpfedavg_noise_stddev"], float):
+                raise Exception(
+                    "Scale of noise to be added should be a floating point value."
+                )
+            # Noising
+            update = add_gaussian_noise(update, config["dpfedavg_noise_stddev"])
 
         for i, _ in enumerate(original_params):
-            updated_params[i] = original_params[i] + update_clipped_noised[i]
+            updated_params[i] = original_params[i] + update[i]
 
         # Calculating value of norm indicator bit, required for adaptive clipping
-        if self.adaptive_clip_enabled:
-            metrics["norm_bit"] = not scaling_factor < 1
+        if "dpfedavg_adaptive_clip_enabled" in config:
+            if not isinstance(config["dpfedavg_adaptive_clip_enabled"], bool):
+                raise Exception(
+                    "dpfedavg_adaptive_clip_enabled should be a boolean-valued flag."
+                )
+            metrics["dpfedavg_norm_bit"] = not clipped
 
         return updated_params, num_examples, metrics
 

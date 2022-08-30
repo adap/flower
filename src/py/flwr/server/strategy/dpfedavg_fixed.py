@@ -17,16 +17,17 @@
 Paper: https://arxiv.org/pdf/1710.06963.pdf
 """
 
-
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Scalar
+from flwr.common.dp import add_gaussian_noise
+from flwr.common.parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
 
 
-class DPFixedClipStrategy(Strategy):
+class DPFedAvgFixed(Strategy):
     """Wrapper for configuring a Strategy for DP with Fixed Clipping."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -36,21 +37,27 @@ class DPFixedClipStrategy(Strategy):
         num_sampled_clients: int,
         clip_norm: float,
         noise_multiplier: float = 1,
+        server_side_noising: bool = True,
     ) -> None:
         super().__init__()
         self.strategy = strategy
         # Doing fixed-size subsampling as in https://arxiv.org/abs/1905.03871.
         self.num_sampled_clients = num_sampled_clients
+
+        if clip_norm <= 0:
+            raise Exception("The clipping threshold should be a positive value.")
         self.clip_norm = clip_norm
+
+        if noise_multiplier < 0:
+            raise Exception("The noise multiplier should be a non-negative value.")
         self.noise_multiplier = noise_multiplier
+
+        self.server_side_noising = server_side_noising
 
     def __repr__(self) -> str:
         rep = "Strategy with DP with Fixed Clipping enabled."
         return rep
 
-    # Instead of adding noise with std dev sigma = z*clip_norm at server,
-    # add noise with std dev sigma_dash = z*clip_norm/sqrt(m) at
-    # each of the m chosen clients.
     def _calc_client_noise_stddev(self) -> float:
         return float(
             self.noise_multiplier * self.clip_norm / (self.num_sampled_clients ** (0.5))
@@ -66,14 +73,16 @@ class DPFixedClipStrategy(Strategy):
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
 
+        additional_config = {"dpfedavg_clip_norm": self.clip_norm}
+        if not self.server_side_noising:
+            additional_config["dpfedavg_noise_stddev"] = self._calc_client_noise_stddev()
+
         client_instructions = self.strategy.configure_fit(
             server_round, parameters, client_manager
         )
 
-        noise_stddev = self._calc_client_noise_stddev()
         for _, fit_ins in client_instructions:
-            fit_ins.config["clip_norm"] = self.clip_norm
-            fit_ins.config["noise_stddev"] = noise_stddev
+            fit_ins.config.update(additional_config)
 
         return client_instructions
 
@@ -95,6 +104,12 @@ class DPFixedClipStrategy(Strategy):
         # Forcing unweighted aggregation, as in https://arxiv.org/abs/1905.03871.
         for _, fit_res in results:
             fit_res.num_examples = 1
+            fit_res.parameters = ndarrays_to_parameters(
+                add_gaussian_noise(
+                    parameters_to_ndarrays(fit_res.parameters),
+                    self._calc_client_noise_stddev(),
+                )
+            )
 
         return self.strategy.aggregate_fit(server_round, results, failures)
 

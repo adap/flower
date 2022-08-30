@@ -23,13 +23,14 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
-from flwr.common import FitRes, Parameters, Scalar
+from flwr.common import FitIns, FitRes, Parameters, Scalar
+from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.strategy.dp_fixed_clip_strategy import DPFixedClipStrategy
+from flwr.server.strategy.dpfedavg_fixed import DPFedAvgFixed
 from flwr.server.strategy.strategy import Strategy
 
 
-class DPAdaptiveClipStrategy(DPFixedClipStrategy):
+class DPFedAvgAdaptive(DPFedAvgFixed):
     """Wrapper for configuring a Strategy for DP with Adaptive Clipping."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -37,8 +38,9 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         self,
         strategy: Strategy,
         num_sampled_clients: int,
-        noise_multiplier: float = 1,
         init_clip_norm: float = 0.1,
+        noise_multiplier: float = 1,
+        server_side_noising: bool = True,
         clip_norm_lr: float = 0.2,
         clip_norm_target_quantile: float = 0.5,
         clip_count_stddev: Optional[float] = None,
@@ -48,6 +50,7 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
             num_sampled_clients=num_sampled_clients,
             clip_norm=init_clip_norm,
             noise_multiplier=noise_multiplier,
+            server_side_noising=server_side_noising,
         )
         self.clip_norm_lr = clip_norm_lr
         self.clip_norm_target_quantile = clip_norm_target_quantile
@@ -66,15 +69,31 @@ class DPAdaptiveClipStrategy(DPFixedClipStrategy):
         rep = "Strategy with DP with Adaptive Clipping enabled."
         return rep
 
+    def configure_fit(
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
+
+        additional_config = {"dpfedavg_adaptive_clip_enabled": True}
+
+        client_instructions = super().configure_fit(
+            server_round, parameters, client_manager
+        )
+
+        for _, fit_ins in client_instructions:
+            fit_ins.config.update(additional_config)
+
+        return client_instructions
+
     def _update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
         # Calculating number of clients which set the norm indicator bit
         norm_bit_set_count = 0
         for client_proxy, fit_res in results:
-            if "norm_bit" not in fit_res.metrics:
+            if "dpfedavg_norm_bit" not in fit_res.metrics:
                 raise Exception(
                     f"Indicator bit not returned by client with id {client_proxy.cid}."
                 )
-            if fit_res.metrics["norm_bit"]:
+            if fit_res.metrics["dpfedavg_norm_bit"]:
                 norm_bit_set_count += 1
         # Noising the count
         noised_norm_bit_set_count = float(
