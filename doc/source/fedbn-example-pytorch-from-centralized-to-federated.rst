@@ -69,7 +69,7 @@ Finally, we will revise our *client* logic by changing :code:`get_parameters` an
         
         ...
 
-        def get_parameters(self) -> List[np.ndarray]:
+        def get_parameters(self, config) -> List[np.ndarray]:
             # Return model parameters as a list of NumPy ndarrays, excluding parameters of BN layers when using FedBN
             return [val.cpu().numpy() for name, val in self.model.state_dict().items() if 'bn' not in name]
 
