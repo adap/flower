@@ -14,7 +14,7 @@ then those are transformed into the PyTorch state_dict following the OrderedDict
             rnd: int,
             results: List[Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
             failures: List[BaseException],
-        ) -> Optional[fl.common.Weights]:
+        ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
 
             """Aggregate model weights using weighted average and store checkpoint"""
             aggregated_parameters_tuple = super().aggregate_fit(rnd, results, failures)
