@@ -19,7 +19,6 @@ then those are transformed into the PyTorch state_dict following the OrderedDict
             """Aggregate model weights using weighted average and store checkpoint"""
             aggregated_parameters_tuple = super().aggregate_fit(rnd, results, failures)
             aggregated_parameters, _ = aggregated_parameters_tuple
-            # log_dict['aggregated_parameters']=aggregated_parameters
         
             if aggregated_parameters is not None:
                 print(f"Saving round {rnd} aggregated_parameters...")
