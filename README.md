@@ -48,23 +48,13 @@ Flower's goal is to make federated learning accessible to everyone. This series 
 
 1. **An Introduction to Federated Learning**
 
-   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-1-Intro-to-FL-PyTorch.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/tutorials/Flower-1-Intro-to-FL-PyTorch.ipynb))
+   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/doc/source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb))
 
 1. **Using Strategies in Federated Learning**
 
-   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/tutorials/Flower-2-Strategies-in-FL-PyTorch.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/tutorials/Flower-2-Strategies-in-FL-PyTorch.ipynb))
+   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/doc/source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb))
 
-1. **Building Strategies for Federated Learning**
-
-   *--- coming soon ---*
-
-1. **Privacy and Security in Federated Learning**
-
-   *--- coming soon ---*
-
-1. **Scaling Federated Learning**
-
-   *--- coming soon ---*
+Stay tuned, more tutorials are coming soon. Topics include **Building Strategies for Federated Learning**, **Privacy and Security in Federated Learning**, and **Scaling Federated Learning**.
 
 ## Documentation
 

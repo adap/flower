@@ -63,7 +63,7 @@ def main():
             return float(loss[1]), num_examples, {"accuracy": float(accuracy[1])}
 
     # Start Flower client
-    fl.client.start_numpy_client("0.0.0.0:8080", client=MNISTClient())
+    fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=MNISTClient())
 
 
 def load_data():

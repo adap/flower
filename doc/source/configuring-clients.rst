@@ -1,12 +1,12 @@
 Configuring Clients
 ===================
 
-Along with model parameters, Flower can send configuration values to clients. Configuration values can be used for many purposes. They are, for example, a popular way to control client-side hyperparameters from the server.
+Along with model parameters, Flower can send configuration values to clients. Configuration values can be used for various purposes. They are, for example, a popular way to control client-side hyperparameters from the server.
 
 Configuration values
 --------------------
 
-Configuration values are represented as a dictionary mapping ``str`` keys to values of type ``bool``, ``bytes``, ``double`` (64-bit precision float), ``int``, or ``str`` (or equivalent types in different languages). Here's an example of a configuration dictionary in Python:
+Configuration values are represented as a dictionary with ``str`` keys and values of type ``bool``, ``bytes``, ``double`` (64-bit precision float), ``int``, or ``str`` (or equivalent types in different languages). Here is an example of a configuration dictionary in Python:
 
 .. code-block:: python
 
@@ -21,7 +21,7 @@ Flower serializes these configuration dictionaries (or *config dict* for short) 
 
 .. note::
 
-  Currently, there is no support for directly sending collection types (e.g., ``Set``, ``List``, ``Map``) as values in configuration dictionaries. There are several workarounds to send collections as values by first converting them to one of the supported value types (and converting them back on the client-side).
+  Currently, there is no support for directly sending collection types (e.g., ``Set``, ``List``, ``Map``) as values in configuration dictionaries. There are several workarounds to send collections as values by converting them to one of the supported value types (and converting them back on the client-side).
 
   One can, for example, convert a list of floating-point numbers to a JSON string, then send the JSON string using the configuration dictionary, and then convert the JSON string back to a list of floating-point numbers on the client.
 
@@ -64,9 +64,9 @@ One the client side, we receive the configuration dictionary in ``fit``:
             print(config["batch_size"])  # Prints `2`
             # ... (rest of `fit` method)
 
-There is also an `on_evaluate_config_fn` to configure evaluation, which works in exactly the same way. The reason for them being separate functions is that one might want to send different configuration values to `evaluate` (for example, to use a different batch size).
+There is also an `on_evaluate_config_fn` to configure evaluation, which works the same way. They are separate functions because one might want to send different configuration values to `evaluate` (for example, to use a different batch size).
 
-The built-in strategies call this function every round (that is, every time `Strategy.configure_fit` or `Strategy.configure_evaluate` runs). This allows us to vary/change the config dict over consecutive rounds. If we wanted to implement a hyperparameter schedule, for example, to increase the number of local epochs during later rounds, we could do the following:
+The built-in strategies call this function every round (that is, every time `Strategy.configure_fit` or `Strategy.configure_evaluate` runs). Calling `on_evaluate_config_fn` every round allows us to vary/change the config dict over consecutive rounds. If we wanted to implement a hyperparameter schedule, for example, to increase the number of local epochs during later rounds, we could do the following:
 
 .. code-block:: python
 
@@ -86,7 +86,7 @@ Configuring individual clients
 
 In some cases, it is necessary to send different configuration values to different clients.
 
-This can be achieved by customizing an existing strategy or by [implementing a custom strategy from scratch](https://flower.dev/docs/implementing-strategies.html). Here's an nonsensical example that customizes :code:`FedAvg` by adding a custom ``"hello": "world"`` configuration key/value pair to the config dict of a *single client* (only the first client in the list, the other clients in this round to not receive this "special" config value):
+This can be achieved by customizing an existing strategy or by [implementing a custom strategy from scratch](https://flower.dev/docs/implementing-strategies.html). Here's a nonsensical example that customizes :code:`FedAvg` by adding a custom ``"hello": "world"`` configuration key/value pair to the config dict of a *single client* (only the first client in the list, the other clients in this round to not receive this "special" config value):
 
 .. code-block:: python
 

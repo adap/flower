@@ -16,6 +16,7 @@
 
 
 from .app import ClientLike as ClientLike
+from .app import run_client as run_client
 from .app import start_client as start_client
 from .app import start_numpy_client as start_numpy_client
 from .app import to_client as to_client
@@ -26,6 +27,7 @@ __all__ = [
     "Client",
     "ClientLike",
     "NumPyClient",
+    "run_client",
     "start_client",
     "start_numpy_client",
     "to_client",
