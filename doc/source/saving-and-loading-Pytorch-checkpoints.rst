@@ -36,7 +36,9 @@ then those are transformed into the PyTorch state_dict following the OrderedDict
             return aggregated_parameters_tuple
 
 To load your progress, you simply append the following lines to your code. Note that this will iterate over all saved checkpoints and load the latest one:
+
 .. code-block:: python
+
     list_of_files = [fname for fname in glob.glob("./model_round_*")]
     latest_round_file = max(list_of_files, key=os.path.getctime)
     print("Loading pre-trained model from: ", latest_round_file)
