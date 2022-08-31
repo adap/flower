@@ -29,6 +29,7 @@ then those are transformed into the PyTorch state_dict following the OrderedDict
                 params_dict = zip(net.state_dict().keys(), aggregated_weights)
                 state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
                 net.load_state_dict(state_dict, strict=True)
+
                 # Save the model
                 torch.save(net.state_dict(), f"model_round_{rnd}.pth")
 
