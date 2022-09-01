@@ -5,7 +5,7 @@ pth = os.path.abspath("./src/py")
 sys.path.append(pth)
 #r"C:\Users\MSI-NB\Source\Repos\FANTOME-PAN\flower\src\py"
 from flwr_crypto_cpp import create_shares, combine_shares
-# from flwr.common.sec_agg import sec_agg_test
+from flwr.common.sec_agg_plus import sec_agg_test
 from flwr.common.light_sec_agg import light_sec_agg_test
 import random
 
@@ -45,12 +45,11 @@ if __name__ == "__main__":
     f.write("Starting real experiments\n")
     f.close()
     # sample_num_list = [100, 200, 300, 400, 500]
-    sample_num_list = [100]
+    sample_num_list = [50]
     dropout_value_list = [1]
     # dropout_value_list = [0]
     # vector_dimension_list = [100000, 200000, 300000, 400000, 500000]
     vector_dimension_list = [100000]
-
     # for vector_dimension in vector_dimension_list:
     #     for sample_num in [50]:
     #         for dropout_value in dropout_value_list:
@@ -90,12 +89,12 @@ if __name__ == "__main__":
                     f.write(
                         f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
                     f.close()
-                    # sec_agg_test.test_start_simulation(
-                    #     sample_num=sample_num, share_num=sample_num, threshold=10, vector_dimension=vector_dimension, dropout_value=dropout_value, num_rounds=1)
-                    light_sec_agg_test.test_start_simulation(
-                         sample_num=sample_num,
-                         T=int(sample_num * 0.1), U=int(sample_num * 0.7), vector_dimension=vector_dimension, dropout_value=dropout_value
-                    )
+                    sec_agg_test.test_start_simulation(
+                        sample_num=sample_num, share_num=sample_num, threshold=10, vector_dimension=vector_dimension, dropout_value=dropout_value, num_rounds=1)
+                    # light_sec_agg_test.test_start_simulation(
+                    #      sample_num=sample_num,
+                    #      T=int(sample_num * 0.1), U=int(sample_num * 0.7), vector_dimension=vector_dimension, dropout_value=dropout_value
+                    # )
 
 
 '''# TESTING

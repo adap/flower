@@ -64,7 +64,7 @@ class SecAggPlusWrapper(SAClientWrapper):
         if ins.identifier == '0':
             sec_agg_client_logic.setup_param(self, SetupParamIns(ins.str2scalar))
             res = sec_agg_client_logic.ask_keys(self, AskKeysIns())
-            ret_msg = SAClientMessageCarrier('1', bytes_list=[res.pk1, res.pk2])
+            ret_msg = SAClientMessageCarrier('0', bytes_list=[res.pk1, res.pk2])
         # if ins.identifier == '1':
         #     res = sec_agg_client_logic.ask_keys(self, AskKeysIns())
         #     return SAClientMessageCarrier('1', bytes_list=[res.pk1, res.pk2])

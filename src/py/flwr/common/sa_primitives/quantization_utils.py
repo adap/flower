@@ -1,6 +1,6 @@
 from flwr.common.typing import Weights
 import numpy as np
-from logging import log
+from logging import log, WARNING
 
 # Weight Quantization ======================================================================
 

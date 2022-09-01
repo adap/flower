@@ -70,10 +70,17 @@ def combine_shares(shares: List[bytes]) -> bytes:
 
 
 if __name__ == '__main__':
+    tm = Timer()
     secret = b'01234567890123456789012345678912'
+    tm.tic('creation')
     shares = create_shares(secret, 100, 200)
+    tm.toc('creation')
+    tm.tic('recon')
     rec2 = combine_shares(shares[:100])
+    tm.toc('recon')
     print(rec2)
+    print(tm.get('creation'))
+    print(tm.get('recon'))
 
 
 

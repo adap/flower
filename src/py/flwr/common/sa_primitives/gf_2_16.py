@@ -1,7 +1,6 @@
 from typing import List, Tuple
 import os
 import numpy as np
-from pickle import dump, load
 
 IRR_POLY = 0o210013
 MAX_VALUE = (1 << 16) - 1
@@ -26,8 +25,8 @@ class Operand:
     def __mul__(self, other):
         if self.num == 0 or other.num == 0:
             return 0
-        t = logs[self.num].to_int() + logs[other.num].to_int()
-        return exps[t if t <= MAX_VALUE else t - MAX_VALUE]
+        t = (int(logs[self.num]) + logs[other.num])
+        return Operand(exps[t])
 
     def __ne__(self, other):
         return self.num != other.num
@@ -36,7 +35,7 @@ class Operand:
         return self.num == other.num
 
     def __invert__(self):
-        return exps[MAX_VALUE - logs[self.num].num]
+        return Operand(exps[MAX_VALUE - logs[self.num]])
 
     def __truediv__(self, other):
         return self * ~other
@@ -73,21 +72,22 @@ def build_tables():
     if os.path.exists(save_pth):
         arr = np.load(save_pth)
         _exps, _logs = arr[0], arr[1]
-        _exps = [Operand(o) for o in _exps]
-        _logs = [Operand(o) for o in _logs]
         return _exps, _logs
 
-    _exps, _logs = [Operand() for _ in range(MAX_VALUE + 1)], [Operand() for _ in range(MAX_VALUE + 1)]
+    _exps, _logs = [0 for _ in range(MAX_VALUE + 1)], [0 for _ in range(MAX_VALUE + 1)]
     gen = Operand(3)
-    _exps[0] = Operand(1)
+    _exps[0] = 1
+    it = Operand(1)
     for i in range(1, MAX_VALUE + 1):
-        _exps[i] = slow_multiply(gen, _exps[i - 1])
+        it = slow_multiply(gen, it)
+        _exps[i] = it.to_int()
     for i in range(MAX_VALUE + 1):
-        _logs[_exps[i].num] = Operand(i)
-    _logs[1] = Operand(0)
-
+        _logs[_exps[i]] = i
+    _logs[1] = 0
+    _exps = np.array(_exps, dtype=np.uint16)
+    _logs = np.array(_logs, dtype=np.uint16)
     ret = (_exps, _logs)
-    arr = np.array([[o.num for o in _exps], [o.num for o in _logs]], dtype=np.uint16)
+    arr = np.vstack(ret)
     np.save(save_pth, arr)
     return ret
 
