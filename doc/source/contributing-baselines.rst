@@ -1,11 +1,11 @@
 Contributing Baselines
 ======================
 
-Do you have a new federated learning paper and want to add a new baseline to Flower? Or do you want to add a new experiment to an already existing baseline paper? Great, we really appreciate your contribution.
+Do you have a new federated learning paper and want to add a new baseline to Flower? Or do you want to add an experiment to an existing baseline paper? Great, we really appreciate your contribution.
 
 The goal of Flower Baselines is to reproduce experiments from popular papers to accelerate researchers by enabling faster comparisons to new strategies, datasets, models, and federated pipelines in general. 
 
-Before you start to work on a new baseline or experiment please check the `Flower Issues <https://github.com/adap/flower/issues>`_ or `Flower Pull Requests <https://github.com/adap/flower/pulls>`_ to see if someone else is already working on it. Please open a new issue if you are planning to work on a new baseline or experiment with a short description of the corresponding paper and the experiment you want to contribute.
+Before you start to work on a new baseline or experiment, please check the `Flower Issues <https://github.com/adap/flower/issues>`_ or `Flower Pull Requests <https://github.com/adap/flower/pulls>`_ to see if someone else is already working on it. Please open a new issue if you are planning to work on a new baseline or experiment with a short description of the corresponding paper and the experiment you want to contribute.
 
 TL;DR: Adding a new Flower Baseline
 -----------------------------------
@@ -38,15 +38,15 @@ Contributing a new baseline is really easy. You only have to make sure that your
 
 It is recommended (but not required) to use `Hydra <https://hydra.cc/>`_ to execute the experiment. 
 
-Please make sure to add your baseline or experiment to the corresponding directory as explained in `Executing Baseline <https://flower.dev/docs/using-baselines.html>`_. Give your baseline the unique identifier, for example, :code:`fedbn` refers to the paper "FedBN: Federated Learning on non-IID Features via Local Batch Normalization" and create the corresponding directory :code:`flower/baselines/flwr_baselines/publications/fedbn`. Then you create the experiment directory with the experiment name, for example the epxeriment that measures the convergence has the directory :code:`flower/baselines/flwr_baselines/publications/fedbn/convergence_rate`. This directory contains all your code and a :code:`README.md` with a link to the paper, the abstract of the paper, and a detailed description of how to execute the experiments.
+Please make sure to add your baseline or experiment to the corresponding directory as explained in `Executing Baseline <https://flower.dev/docs/using-baselines.html>`_. Give your baseline the unique identifier. For example, :code:`fedbn` refers to the paper "FedBN: Federated Learning on non-IID Features via Local Batch Normalization" and creates the corresponding directory :code:`flower/baselines/flwr_baselines/publications/fedbn`. Then you create the experiment directory with the experiment name. For example, the experiment that measures the convergence has the directory :code:`flower/baselines/flwr_baselines/publications/fedbn/convergence_rate`. This directory contains all your code and a :code:`README.md` with a link to the paper, the paper's abstract, and a detailed description of how to execute the experiments.
 
-Please also check if all required Python packages (libraries, frameworks, ...) are listed in :code:`pyproject.toml` and/or :code:`requirements.txt` (all in the directory `baselines <https://github.com/adap/flower/blob/main/baselines>`_. If the required Python package is not yet listed, please add it to :code:`pyproject.toml`. If you need a different version of a package that is already listed, please try to make your experiment running with the already existing version listed in :code:`pyproject.toml` (or :code:`requirements.txt`) or - if that does not work - open a GitHub Issue and request the version change.
+Please also check if :code:`pyproject.toml` and :code:`requirements.txt` (all in the directory `baselines <https://github.com/adap/flower/blob/main/baselines>`_ contain all required Python packages (libraries, frameworks, ...). If the required Python package is not yet listed, please add it to :code:`pyproject.toml`. If you need a different version of a package already listed, please try to ensure your experiment runs with the existing version listed in :code:`pyproject.toml` (or :code:`requirements.txt`). If that doesn't work, open a GitHub Issue and request the version change.
 
-The experiment also needs to contain a file with a (if possible automatic) downloader of the dataset. This can be included in one of the files or as an extra file.
+The experiment also needs to contain a file with a downloader for the dataset - if possible automatic. This can be included in one of the files or as an extra file.
 
-Finally, please also add plots of the results of the experiments that are performed by your code to the experiment directory and include them in :code:`README.md`. This will help others to better understand the experiment and allow them to quickly recognise your contributions.
+Finally, please add plots for all experimental results your code is running to the :code:`experiment` directory and include them in :code:`README.md`. Doing this helps others and enables them to recognize your contributions quickly.
 
-We are aware that a small number of libraries are only available via Conda. However, we want to encourage you to make sure that your code also runs well outside of Conda in order to make it more accessible to the wider research community.
+We are aware that a few libraries are available only via Conda. However, we want to encourage you to ensure that your code also runs well outside of Conda to make it more accessible to the broader research community.
 
 Here is a checklist for adding a new baseline:
 
@@ -59,6 +59,6 @@ Here is a checklist for adding a new baseline:
 Usability
 ---------
 
-Flower is known and loved for its usability. Therefore, make sure that your baseline or experiment can be executed with a single command such as :code:`./run.sh` or :code:`python3 main.py`. How you organise the experiments and the related code structure is up to you as an author, but please keep in mind to make sure that other users can easily understand and execute your baseline.
+Flower is known and loved for its usability. Therefore, make sure that your baseline or experiment can be executed with a single command such as :code:`./run.sh` or :code:`python3 main.py`. How you organize the experiments and the related code structure is up to you as an author, but please keep in mind to make sure that other users can easily understand and execute your baseline.
 
 We look forward to your contribution!

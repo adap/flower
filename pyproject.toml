@@ -79,13 +79,14 @@ mypy-protobuf = "==3.2.0"
 jupyterlab = "==3.3.2"
 rope = "==0.19.0"
 semver = "==2.13.0"
-sphinx = "==5.0.2"
+sphinx = "==5.1.1"
 myst-parser = "==0.18.0"
-sphinx-design = "==0.2.0"
+sphinx-design = "==0.3.0"
 sphinx-copybutton = "==0.5.0"
 sphinxcontrib-mermaid = "==0.7.1"
 furo = "==2022.6.21"
 sphinx-reredirects = "==0.1.1"
+nbsphinx = "==0.8.9"
 
 [tool.isort]
 line_length = 88
