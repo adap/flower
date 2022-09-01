@@ -38,7 +38,7 @@ class FlowerClient(fl.client.NumPyClient):
         set_params(self.net, parameters)
 
         # Load data for this client and get trainloader
-        num_workers = len(ray.worker.get_resource_ids()["CPU"])
+        num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
         trainloader = get_dataloader(
             self.fed_dir,
             self.cid,
@@ -60,7 +60,7 @@ class FlowerClient(fl.client.NumPyClient):
         set_params(self.net, parameters)
 
         # Load data for this client and get trainloader
-        num_workers = len(ray.worker.get_resource_ids()["CPU"])
+        num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
         valloader = get_dataloader(
             self.fed_dir, self.cid, is_train=False, batch_size=50, workers=num_workers
         )

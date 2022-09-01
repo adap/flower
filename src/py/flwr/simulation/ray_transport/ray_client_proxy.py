@@ -41,7 +41,7 @@ class RayClientProxy(ClientProxy):
         future_get_properties_res = launch_and_get_properties.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.worker.get(future_get_properties_res, timeout=timeout)
+        res = ray.get(future_get_properties_res, timeout=timeout)
         return cast(
             common.GetPropertiesRes,
             res,
@@ -54,7 +54,7 @@ class RayClientProxy(ClientProxy):
         future_paramseters_res = launch_and_get_parameters.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.worker.get(future_paramseters_res, timeout=timeout)
+        res = ray.get(future_paramseters_res, timeout=timeout)
         return cast(
             common.GetParametersRes,
             res,
