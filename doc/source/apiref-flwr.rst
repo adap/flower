@@ -6,12 +6,14 @@ API Reference - flwr
 
 client
 ------
+
 .. automodule:: flwr.client
 
 .. _flwr-client-Client-apiref:
 
 Client
 ~~~~~~
+
 .. autoclass:: flwr.client.Client
     :members:
 
@@ -20,6 +22,7 @@ Client
 
 start_client
 ~~~~~~~~~~~~
+
 .. autofunction:: flwr.client.start_client
 
 
@@ -27,6 +30,7 @@ start_client
 
 NumPyClient
 ~~~~~~~~~~~
+
 .. autoclass:: flwr.client.NumPyClient
     :members:
 
@@ -35,6 +39,7 @@ NumPyClient
 
 start_numpy_client
 ~~~~~~~~~~~~~~~~~~
+
 .. autofunction:: flwr.client.start_numpy_client
 
 
@@ -42,6 +47,7 @@ start_numpy_client
 
 start_simulation
 ~~~~~~~~~~~~~~~~~~
+
 .. autofunction:: flwr.simulation.start_simulation
 
 
@@ -49,6 +55,7 @@ start_simulation
 
 server
 ------
+
 .. automodule:: flwr.server
 
 
@@ -56,20 +63,23 @@ server
 
 server.start_server
 ~~~~~~~~~~~~~~~~~~~
+
 .. autofunction:: flwr.server.start_server
 
 
 .. _flwr-server-strategy-apiref:
 
 server.strategy
----------------
+~~~~~~~~~~~~~~~
+
 .. automodule:: flwr.server.strategy
 
 
 .. _flwr-server-strategy-Strategy-apiref:
 
 server.strategy.Strategy
-~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. autoclass:: flwr.server.strategy.Strategy
     :members:
 
@@ -77,7 +87,8 @@ server.strategy.Strategy
 .. _flwr-server-strategy-FedAvg-apiref:
 
 server.strategy.FedAvg
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
+
 .. autoclass:: flwr.server.strategy.FedAvg
     :members:
 
@@ -87,7 +98,8 @@ server.strategy.FedAvg
 .. _flwr-server-strategy-FedAvgM-apiref:
 
 server.strategy.FedAvgM
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
+
 .. autoclass:: flwr.server.strategy.FedAvgM
     :members:
 
@@ -97,7 +109,8 @@ server.strategy.FedAvgM
 .. _flwr-server-strategy-QFedAvg-apiref:
 
 server.strategy.QFedAvg
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
+
 .. autoclass:: flwr.server.strategy.QFedAvg
     :members:
 
@@ -107,7 +120,8 @@ server.strategy.QFedAvg
 .. _flwr-server-strategy-FaultTolerantFedAvg-apiref:
 
 server.strategy.FaultTolerantFedAvg
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. autoclass:: flwr.server.strategy.FaultTolerantFedAvg
     :members:
 
@@ -117,7 +131,8 @@ server.strategy.FaultTolerantFedAvg
 .. _flwr-server-strategy-FedOpt-apiref:
 
 server.strategy.FedOpt
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
+
 .. autoclass:: flwr.server.strategy.FedOpt
     :members:
 
@@ -127,7 +142,8 @@ server.strategy.FedOpt
 .. _flwr-server-strategy-FedAdagrad-apiref:
 
 server.strategy.FedAdagrad
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. autoclass:: flwr.server.strategy.FedAdagrad
     :members:
 
@@ -137,7 +153,8 @@ server.strategy.FedAdagrad
 .. _flwr-server-strategy-FedAdam-apiref:
 
 server.strategy.FedAdam
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
+
 .. autoclass:: flwr.server.strategy.FedAdam
     :members:
 
@@ -147,7 +164,8 @@ server.strategy.FedAdam
 .. _flwr-server-strategy-FedYogi-apiref:
 
 server.strategy.FedYogi
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
+
 .. autoclass:: flwr.server.strategy.FedYogi
     :members:
 
@@ -155,5 +173,6 @@ server.strategy.FedYogi
 
 common
 ------
+
 .. automodule:: flwr.common
   :members:

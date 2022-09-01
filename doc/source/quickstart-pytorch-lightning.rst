@@ -1,3 +1,6 @@
+.. _quickstart-pytorch-lightning:
+
+
 Quickstart PyTorch Lightning
 ============================
 

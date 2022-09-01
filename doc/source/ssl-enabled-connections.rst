@@ -1,5 +1,5 @@
-Guide: SSL-enabled Server and Client
-====================================
+SSL-enabled Server and Client
+=============================
 
 This guide describes how to a SSL-enabled secure Flower server can be started and
 how a Flower client can establish a secure connections to it.
