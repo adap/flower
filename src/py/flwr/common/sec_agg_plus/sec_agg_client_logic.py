@@ -13,10 +13,13 @@
 # limitations under the License.
 # ==============================================================================
 from flwr.common.parameter import weights_to_parameters
-from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights
+from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, \
+    ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights, Scalar, Parameters
 from flwr.common.sa_primitives import secaggplus_primitives
 from flwr_crypto_cpp import create_shares
-from flwr.common.sa_primitives import quantize
+from flwr.common.sa_primitives import quantize, public_key_to_bytes, generate_key_pairs, private_key_to_bytes, \
+    bytes_to_private_key, bytes_to_public_key, generate_shared_key, encrypt, decrypt
+from flwr.common.sa_primitives.weight_arithmetics import *
 from flwr.common.logger import log
 from logging import ERROR, INFO, WARNING
 from typing import Dict, List, Tuple
@@ -27,9 +30,9 @@ from flwr.common import (
 )
 
 
-def setup_param(client, setup_param_ins: SetupParamIns):
+def setup_param(client, setup_param_dict: Dict[str, Scalar]) -> Tuple[bytes, bytes]:
     # Assigning parameter values to object fields
-    sec_agg_param_dict = setup_param_ins.sec_agg_param_dict
+    sec_agg_param_dict = setup_param_dict
     client.sample_num = sec_agg_param_dict['sample_num']
     client.sec_agg_id = sec_agg_param_dict['sec_agg_id']
     client.id = sec_agg_param_dict['sec_agg_id']
@@ -54,26 +57,23 @@ def setup_param(client, setup_param_ins: SetupParamIns):
     client.sk1_share_dict = {}
     client.shared_key_2_dict = {}
     log(INFO, "SecAgg Stage 0 Completed: Parameters Set Up")
-    return SetupParamRes()
+    return ask_keys(client)
 
 
-def ask_keys(client, ask_keys_ins: AskKeysIns) -> AskKeysRes:
+def ask_keys(client) -> Tuple[bytes, bytes]:
     # Create 2 sets private public key pairs
     # One for creating pairwise masks
     # One for encrypting message to distribute shares
-    client.sk1, client.pk1 = secaggplus_primitives.generate_key_pairs()
-    client.sk2, client.pk2 = secaggplus_primitives.generate_key_pairs()
+    client.sk1, client.pk1 = generate_key_pairs()
+    client.sk2, client.pk2 = generate_key_pairs()
     log(INFO, "SecAgg Stage 1 Completed: Created Key Pairs")
-    return AskKeysRes(
-        pk1=secaggplus_primitives.public_key_to_bytes(client.pk1),
-        pk2=secaggplus_primitives.public_key_to_bytes(client.pk2),
-    )
+    return public_key_to_bytes(client.pk1), public_key_to_bytes(client.pk2)
 
 
-def share_keys(client, share_keys_in: ShareKeysIns) -> ShareKeysRes:
+def share_keys(client, share_keys_dict: Dict[int, AskKeysRes]) -> List[ShareKeysPacket]:
     # Distribute shares for private mask seed and first private key
-
-    client.public_keys_dict = share_keys_in.public_keys_dict
+    # share_keys_dict:
+    client.public_keys_dict = share_keys_dict
     # check size is larger than threshold
     if len(client.public_keys_dict) < client.threshold:
         raise Exception("Available neighbours number smaller than threshold")
@@ -87,7 +87,8 @@ def share_keys(client, share_keys_in: ShareKeysIns) -> ShareKeysRes:
         raise Exception("Some public keys are identical")
 
     # sanity check that own public keys are correct in dict
-    if client.public_keys_dict[client.sec_agg_id].pk1 != secaggplus_primitives.public_key_to_bytes(client.pk1) or client.public_keys_dict[client.sec_agg_id].pk2 != secaggplus_primitives.public_key_to_bytes(client.pk2):
+    if client.public_keys_dict[client.sec_agg_id].pk1 != public_key_to_bytes(client.pk1) or \
+       client.public_keys_dict[client.sec_agg_id].pk2 != public_key_to_bytes(client.pk2):
         raise Exception(
             "Own public keys are displayed in dict incorrectly, should not happen!")
 
@@ -99,11 +100,10 @@ def share_keys(client, share_keys_in: ShareKeysIns) -> ShareKeysRes:
         client.b, client.threshold, client.share_num
     )
     sk1_shares = create_shares(
-        secaggplus_primitives.private_key_to_bytes(
-            client.sk1), client.threshold, client.share_num
+        private_key_to_bytes(client.sk1), client.threshold, client.share_num
     )
 
-    share_keys_res = ShareKeysRes(share_keys_res_list=[])
+    share_keys_res_list = []
 
     for idx, p in enumerate(client.public_keys_dict.items()):
         client_sec_agg_id, client_public_keys = p
@@ -111,24 +111,22 @@ def share_keys(client, share_keys_in: ShareKeysIns) -> ShareKeysRes:
             client.b_share_dict[client.sec_agg_id] = b_shares[idx]
             client.sk1_share_dict[client.sec_agg_id] = sk1_shares[idx]
         else:
-            shared_key = secaggplus_primitives.generate_shared_key(
-                client.sk2, secaggplus_primitives.bytes_to_public_key(client_public_keys.pk2))
+            shared_key = generate_shared_key(
+                client.sk2, bytes_to_public_key(client_public_keys.pk2))
             client.shared_key_2_dict[client_sec_agg_id] = shared_key
             plaintext = secaggplus_primitives.share_keys_plaintext_concat(
                 client.sec_agg_id, client_sec_agg_id, b_shares[idx], sk1_shares[idx])
-            ciphertext = secaggplus_primitives.encrypt(shared_key, plaintext)
+            ciphertext = encrypt(shared_key, plaintext)
             share_keys_packet = ShareKeysPacket(
                 source=client.sec_agg_id, destination=client_sec_agg_id, ciphertext=ciphertext)
-            share_keys_res.share_keys_res_list.append(share_keys_packet)
+            share_keys_res_list.append(share_keys_packet)
 
     log(INFO, "SecAgg Stage 2 Completed: Sent Shares via Packets")
-    return share_keys_res
+    return share_keys_res_list
 
 
-def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
+def ask_vectors(client, packet_list, fit_ins) -> Parameters:
     # Receive shares and fit model
-    packet_list = ask_vectors_ins.ask_vectors_in_list
-    fit_ins = ask_vectors_ins.fit_ins
     available_clients: List[int] = []
 
     if len(packet_list)+1 < client.threshold:
@@ -144,10 +142,10 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
             raise Exception(
                 "Received packet meant for another user. Not supposed to happen")
         shared_key = client.shared_key_2_dict[source]
-        plaintext = secaggplus_primitives.decrypt(shared_key, ciphertext)
+        plaintext = decrypt(shared_key, ciphertext)
         try:
-            plaintext_source, plaintext_destination, plaintext_b_share, plaintext_sk1_share = secaggplus_primitives.share_keys_plaintext_separate(
-                plaintext)
+            plaintext_source, plaintext_destination, plaintext_b_share, plaintext_sk1_share = \
+                secaggplus_primitives.share_keys_plaintext_separate(plaintext)
         except:
             raise Exception(
                 "Decryption of ciphertext failed. Not supposed to happen")
@@ -173,8 +171,7 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
         if client.sec_agg_id % 20 < client.test_dropout_value:
             log(ERROR, "Force dropout due to testing!!")
             raise Exception("Force dropout due to testing")
-        weights: Weights = secaggplus_primitives.weights_zero_generate(
-            client.test_vector_shape)
+        weights: Weights = weights_zero_generate(client.test_vector_shape)
      # IMPORTANT NEED SOME FUNCTION TO GET CORRECT WEIGHT FACTOR
     # NOW WE HARD CODE IT AS 1
     # Generally, should be fit_res.num_examples
@@ -192,9 +189,9 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
         weights_factor = client.max_weights_factor
         log(WARNING, "weights_factor exceeds allowed range and has been clipped. Either increase max_weights_factor, or train with fewer data. (Or server is performing unweighted aggregation)")
 
-    quantized_weights = secaggplus_primitives.weights_multiply(
+    quantized_weights = weights_multiply(
         quantized_weights, weights_factor)
-    quantized_weights = secaggplus_primitives.factor_weights_combine(
+    quantized_weights = factor_weights_combine(
         weights_factor, quantized_weights)
 
     dimensions_list: List[Tuple] = [a.shape for a in quantized_weights]
@@ -202,41 +199,34 @@ def ask_vectors(client, ask_vectors_ins: AskVectorsIns) -> AskVectorsRes:
     # add private mask
     private_mask = secaggplus_primitives.pseudo_rand_gen(
         client.b, client.mod_range, dimensions_list)
-    quantized_weights = secaggplus_primitives.weights_addition(
-        quantized_weights, private_mask)
+    quantized_weights = weights_addition(quantized_weights, private_mask)
 
     for client_id in available_clients:
         # add pairwise mask
-        shared_key = secaggplus_primitives.generate_shared_key(
-            client.sk1, secaggplus_primitives.bytes_to_public_key(client.public_keys_dict[client_id].pk1))
-        #print('shared key length: %d' % len(shared_key))
-        pairwise_mask = secaggplus_primitives.pseudo_rand_gen(
-            shared_key, client.mod_range, dimensions_list)
+        shared_key = generate_shared_key(
+            client.sk1, bytes_to_public_key(client.public_keys_dict[client_id].pk1))
+        # print('shared key length: %d' % len(shared_key))
+        pairwise_mask = secaggplus_primitives.pseudo_rand_gen(shared_key, client.mod_range, dimensions_list)
         if client.sec_agg_id > client_id:
-            quantized_weights = secaggplus_primitives.weights_addition(
-                quantized_weights, pairwise_mask)
+            quantized_weights = weights_addition(quantized_weights, pairwise_mask)
         else:
-            quantized_weights = secaggplus_primitives.weights_subtraction(
-                quantized_weights, pairwise_mask)
+            quantized_weights = weights_subtraction(quantized_weights, pairwise_mask)
 
     # Take mod of final weight update vector and return to server
-    quantized_weights = secaggplus_primitives.weights_mod(
-        quantized_weights, client.mod_range)
+    quantized_weights = weights_mod(quantized_weights, client.mod_range)
     log(INFO, "SecAgg Stage 3 Completed: Sent Vectors")
-    return AskVectorsRes(parameters=weights_to_parameters(quantized_weights))
+    return weights_to_parameters(quantized_weights)
 
 
-def unmask_vectors(client, unmask_vectors_ins: UnmaskVectorsIns) -> UnmaskVectorsRes:
+def unmask_vectors(client, available_clients, dropout_clients) -> Dict[int, bytes]:
     # Send private mask seed share for every avaliable client (including itclient)
     # Send first private key share for building pairwise mask for every dropped client
-    available_clients = unmask_vectors_ins.available_clients
     if len(available_clients) < client.threshold:
         raise Exception("Available neighbours number smaller than threshold")
-    dropout_clients = unmask_vectors_ins.dropout_clients
     share_dict: Dict[int, bytes] = {}
     for idx in available_clients:
         share_dict[idx] = client.b_share_dict[idx]
     for idx in dropout_clients:
         share_dict[idx] = client.sk1_share_dict[idx]
     log(INFO, "SecAgg Stage 4 Completed: Sent Shares for Unmasking")
-    return UnmaskVectorsRes(share_dict=share_dict)
+    return share_dict

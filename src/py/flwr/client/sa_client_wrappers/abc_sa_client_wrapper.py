@@ -62,12 +62,8 @@ class SecAggPlusWrapper(SAClientWrapper):
     def sa_respond(self, ins: SAServerMessageCarrier) -> SAClientMessageCarrier:
         self.tm.tic('s' + ins.identifier)
         if ins.identifier == '0':
-            sec_agg_client_logic.setup_param(self, SetupParamIns(ins.str2scalar))
-            res = sec_agg_client_logic.ask_keys(self, AskKeysIns())
-            ret_msg = SAClientMessageCarrier('0', bytes_list=[res.pk1, res.pk2])
-        # if ins.identifier == '1':
-        #     res = sec_agg_client_logic.ask_keys(self, AskKeysIns())
-        #     return SAClientMessageCarrier('1', bytes_list=[res.pk1, res.pk2])
+            pk1, pk2 = sec_agg_client_logic.setup_param(self, ins.str2scalar)
+            ret_msg = SAClientMessageCarrier('0', bytes_list=[pk1, pk2])
         elif ins.identifier == '1':
             new_dict: Dict[int, AskKeysRes] = {}
             # key of received dict is like 'idx_pk1' or 'idx_pk2'
@@ -79,24 +75,24 @@ class SecAggPlusWrapper(SAClientWrapper):
                     t.pk1 = pk
                 else:
                     t.pk2 = pk
-            res = sec_agg_client_logic.share_keys(self, ShareKeysIns(new_dict))
-            source_lst = np.array([o.source for o in res.share_keys_res_list])
-            destination_lst = np.array([o.destination for o in res.share_keys_res_list])
-            ciphertext_lst = [o.ciphertext for o in res.share_keys_res_list]
+            share_keys_res_list = sec_agg_client_logic.share_keys(self, new_dict)
+            source_lst = np.array([o.source for o in share_keys_res_list])
+            destination_lst = np.array([o.destination for o in share_keys_res_list])
+            ciphertext_lst = [o.ciphertext for o in share_keys_res_list]
             ret_msg = SAClientMessageCarrier('1', numpy_ndarray_list=[source_lst, destination_lst],
-                                          bytes_list=ciphertext_lst)
+                                             bytes_list=ciphertext_lst)
         elif ins.identifier == '2':
             src_lst = ins.numpy_ndarray_list[0]
             des_lst = ins.numpy_ndarray_list[1]
             txt_lst = ins.bytes_list
             packet_lst = [ShareKeysPacket(s, d, t) for s, d, t in zip(src_lst, des_lst, txt_lst)]
-            res = sec_agg_client_logic.ask_vectors(self, AskVectorsIns(packet_lst, ins.fit_ins))
-            ret_msg = SAClientMessageCarrier('2', parameters=res.parameters)
+            res = sec_agg_client_logic.ask_vectors(self, packet_lst, ins.fit_ins)
+            ret_msg = SAClientMessageCarrier('2', parameters=res)
         elif ins.identifier == '3':
             actives, dropouts = ins.numpy_ndarray_list[0], ins.numpy_ndarray_list[1]
             actives, dropouts = actives.tolist(), dropouts.tolist()
-            res = sec_agg_client_logic.unmask_vectors(self, UnmaskVectorsIns(actives, dropouts))
-            ret_msg = SAClientMessageCarrier('3', str2scalar=dict([(str(k), v) for k, v in res.share_dict.items()]))
+            share_dict = sec_agg_client_logic.unmask_vectors(self, actives, dropouts)
+            ret_msg = SAClientMessageCarrier('3', str2scalar=dict([(str(k), v) for k, v in share_dict.items()]))
         self.tm.toc('s' + ins.identifier)
         if self.sec_agg_id == 6:
             f = open("log.txt", "a")

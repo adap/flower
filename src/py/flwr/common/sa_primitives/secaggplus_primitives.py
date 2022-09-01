@@ -31,86 +31,116 @@ import os
 import random
 import pickle
 import numpy as np
-
-from numpy.core.fromnumeric import clip
+import json
 
 from flwr.common.typing import Weights
 
-# Key Generation  ====================================================================
-
-# Generate private and public key pairs with Cryptography
+# String Concatenation ===================================================================
 
 
-def generate_key_pairs() -> Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]:
-    sk = ec.generate_private_key(ec.SECP384R1())
-    pk = sk.public_key()
-    return sk, pk
+# Unambiguous string concatenation of source, destination, and two secret shares.
+# We assume they do not contain the 'abcdef' string
+def share_keys_plaintext_concat(source: int, destination: int, b_share: bytes, sk_share: bytes) -> bytes:
+    # return pickle.dumps([source, destination, b_share, sk_share])
+    # concat = b'abcdefg'
+    # return b'abcdefg'.join([str(source).encode(), str(destination).encode(), b_share, sk_share])
+    source, destination = int.to_bytes(source, 4, 'little'), int.to_bytes(destination, 4, 'little')
+    return b''.join([source, destination, int.to_bytes(len(b_share), 4, 'little'), b_share, sk_share])
 
-# Serialize private key
-
-
-def private_key_to_bytes(sk: ec.EllipticCurvePrivateKey) -> bytes:
-    return sk.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption(),
-    )
-
-# Deserialize private key
+# Unambiguous string splitting to obtain source, destination and two secret shares.
 
 
-def bytes_to_private_key(b: bytes) -> ec.EllipticCurvePrivateKey:
-    return serialization.load_pem_private_key(data=b, password=None)
-
-# Serialize public key
-
-
-def public_key_to_bytes(pk: ec.EllipticCurvePublicKey) -> bytes:
-    return pk.public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo,
-    )
-
-# Deserialize public key
-
-
-def bytes_to_public_key(b: bytes) -> ec.EllipticCurvePublicKey:
-    return serialization.load_pem_public_key(data=b)
-
-# Generate shared key by exchange function and key derivation function
-# Key derivation function is needed to obtain final shared key of exactly 32 bytes
+def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, bytes]:
+    # l = pickle.loads(plaintext)
+    # return tuple(l)
+    # plaintext_list = plaintext.split(b"abcdefg")
+    # return (
+    #     int(plaintext_list[0].decode("utf-8", "strict")),
+    #     int(plaintext_list[1].decode("utf-8", "strict")),
+    #     plaintext_list[2],
+    #     plaintext_list[3],
+    # )
+    src, dst, mark = int.from_bytes(plaintext[:4], 'little'), int.from_bytes(plaintext[4:8], 'little'), \
+        int.from_bytes(plaintext[8:12], 'little')
+    ret = [src, dst, plaintext[12:12 + mark], plaintext[12 + mark:]]
+    return ret
 
 
-def generate_shared_key(
-    sk: ec.EllipticCurvePrivateKey, pk: ec.EllipticCurvePublicKey
-) -> bytes:
-    # Generate a 32 byte urlsafe(for fernet) shared key from own private key and another public key
-    sharedk = sk.exchange(ec.ECDH(), pk)
-    derivedk = HKDF(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=None,
-        info=None,
-    ).derive(sharedk)
-    return base64.urlsafe_b64encode(derivedk)
+# # Key Generation  ====================================================================
+#
+# # Generate private and public key pairs with Cryptography
+#
+#
+# def generate_key_pairs() -> Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]:
+#     sk = ec.generate_private_key(ec.SECP384R1())
+#     pk = sk.public_key()
+#     return sk, pk
+#
+# # Serialize private key
+#
+#
+# def private_key_to_bytes(sk: ec.EllipticCurvePrivateKey) -> bytes:
+#     return sk.private_bytes(
+#         encoding=serialization.Encoding.PEM,
+#         format=serialization.PrivateFormat.PKCS8,
+#         encryption_algorithm=serialization.NoEncryption(),
+#     )
+#
+# # Deserialize private key
+#
+#
+# def bytes_to_private_key(b: bytes) -> ec.EllipticCurvePrivateKey:
+#     return serialization.load_pem_private_key(data=b, password=None)
+#
+# # Serialize public key
+#
+#
+# def public_key_to_bytes(pk: ec.EllipticCurvePublicKey) -> bytes:
+#     return pk.public_bytes(
+#         encoding=serialization.Encoding.PEM,
+#         format=serialization.PublicFormat.SubjectPublicKeyInfo,
+#     )
+#
+# # Deserialize public key
+#
+#
+# def bytes_to_public_key(b: bytes) -> ec.EllipticCurvePublicKey:
+#     return serialization.load_pem_public_key(data=b)
+#
+# # Generate shared key by exchange function and key derivation function
+# # Key derivation function is needed to obtain final shared key of exactly 32 bytes
+#
+#
+# def generate_shared_key(
+#     sk: ec.EllipticCurvePrivateKey, pk: ec.EllipticCurvePublicKey
+# ) -> bytes:
+#     # Generate a 32 byte urlsafe(for fernet) shared key from own private key and another public key
+#     sharedk = sk.exchange(ec.ECDH(), pk)
+#     derivedk = HKDF(
+#         algorithm=hashes.SHA256(),
+#         length=32,
+#         salt=None,
+#         info=None,
+#     ).derive(sharedk)
+#     return base64.urlsafe_b64encode(derivedk)
 
-# Authenticated Encryption ================================================================
-
-# Encrypt plaintext with Fernet. Key must be 32 bytes.
-
-
-def encrypt(key: bytes, plaintext: bytes) -> bytes:
-    # key must be url safe
-    f = Fernet(key)
-    return f.encrypt(plaintext)
-
-# Decrypt ciphertext with Fernet. Key must be 32 bytes.
-
-
-def decrypt(key: bytes, token: bytes):
-    # key must be url safe
-    f = Fernet(key)
-    return f.decrypt(token)
+# # Authenticated Encryption ================================================================
+#
+# # Encrypt plaintext with Fernet. Key must be 32 bytes.
+#
+#
+# def encrypt(key: bytes, plaintext: bytes) -> bytes:
+#     # key must be url safe
+#     f = Fernet(key)
+#     return f.encrypt(plaintext)
+#
+# # Decrypt ciphertext with Fernet. Key must be 32 bytes.
+#
+#
+# def decrypt(key: bytes, token: bytes):
+#     # key must be url safe
+#     f = Fernet(key)
+#     return f.decrypt(token)
 
 # Shamir's Secret Sharing Scheme ============================================================
 
@@ -206,62 +236,62 @@ def pseudo_rand_gen(seed: bytes, num_range: int, dimensions_list: List[Tuple]) -
     return output
 
 
-# Weight Manipulation =============================================================
-
-# Combine factor with weights
-
-
-def factor_weights_combine(weights_factor: int, weights: Weights) -> Weights:
-    return [np.array([weights_factor])]+weights
-
-# Extract factor from weights
-
-
-def factor_weights_extract(weights: Weights) -> Tuple[int, Weights]:
-    return weights[0][0], weights[1:]
-
-# Create dimensions list of each element in weights
-
-
-def weights_shape(weights: Weights) -> List[Tuple]:
-    return [arr.shape for arr in weights]
-
-# Generate zero weights based on dimensions list
-
-
-def weights_zero_generate(dimensions_list: List[Tuple], dtype=np.int64) -> Weights:
-    return [np.zeros(dimensions, dtype=dtype) for dimensions in dimensions_list]
-
-# Add two weights together
-
-
-def weights_addition(a: Weights, b: Weights) -> Weights:
-    return [a[idx]+b[idx] for idx in range(len(a))]
-
-# Subtract one weight from the other
-
-
-def weights_subtraction(a: Weights, b: Weights) -> Weights:
-    return [a[idx]-b[idx] for idx in range(len(a))]
-
-# Take mod of a weights with an integer
-
-
-def weights_mod(a: Weights, b: int) -> Weights:
-    if bin(b).count("1") == 1:
-        msk = b - 1
-        return [a[idx] & msk for idx in range(len(a))]
-    return [a[idx] % b for idx in range(len(a))]
-
-
-# Multiply weight by an integer
-
-
-def weights_multiply(a: Weights, b: int) -> Weights:
-    return [a[idx] * b for idx in range(len(a))]
-
-# Divide weight by an integer
-
-
-def weights_divide(a: Weights, b: int) -> Weights:
-    return [a[idx] / b for idx in range(len(a))]
+# # Weight Manipulation =============================================================
+#
+# # Combine factor with weights
+#
+#
+# def factor_weights_combine(weights_factor: int, weights: Weights) -> Weights:
+#     return [np.array([weights_factor])]+weights
+#
+# # Extract factor from weights
+#
+#
+# def factor_weights_extract(weights: Weights) -> Tuple[int, Weights]:
+#     return weights[0][0], weights[1:]
+#
+# # Create dimensions list of each element in weights
+#
+#
+# def weights_shape(weights: Weights) -> List[Tuple]:
+#     return [arr.shape for arr in weights]
+#
+# # Generate zero weights based on dimensions list
+#
+#
+# def weights_zero_generate(dimensions_list: List[Tuple], dtype=np.int64) -> Weights:
+#     return [np.zeros(dimensions, dtype=dtype) for dimensions in dimensions_list]
+#
+# # Add two weights together
+#
+#
+# def weights_addition(a: Weights, b: Weights) -> Weights:
+#     return [a[idx]+b[idx] for idx in range(len(a))]
+#
+# # Subtract one weight from the other
+#
+#
+# def weights_subtraction(a: Weights, b: Weights) -> Weights:
+#     return [a[idx]-b[idx] for idx in range(len(a))]
+#
+# # Take mod of a weights with an integer
+#
+#
+# def weights_mod(a: Weights, b: int) -> Weights:
+#     if bin(b).count("1") == 1:
+#         msk = b - 1
+#         return [a[idx] & msk for idx in range(len(a))]
+#     return [a[idx] % b for idx in range(len(a))]
+#
+#
+# # Multiply weight by an integer
+#
+#
+# def weights_multiply(a: Weights, b: int) -> Weights:
+#     return [a[idx] * b for idx in range(len(a))]
+#
+# # Divide weight by an integer
+#
+#
+# def weights_divide(a: Weights, b: int) -> Weights:
+#     return [a[idx] / b for idx in range(len(a))]

@@ -21,7 +21,8 @@ from flwr.common.typing import AskKeysRes, AskVectorsRes, FitIns, FitRes, Parame
 from flwr.server.client_proxy import ClientProxy
 from flwr.common.sa_primitives import secaggplus_primitives
 from flwr.common.secure_aggregation import SAServerMessageCarrier, SecureAggregationFitRound
-from flwr.common.sa_primitives import reverse_quantize
+from flwr.common.sa_primitives import reverse_quantize, generate_shared_key, bytes_to_private_key, bytes_to_public_key
+from flwr.common.sa_primitives.weight_arithmetics import *
 from flwr_crypto_cpp import combine_shares
 import numpy as np
 from flwr.common.timer import Timer
@@ -172,7 +173,7 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
     if len(ask_vectors_results) < sec_agg_param_dict['min_num']:
         raise Exception("Not enough available clients after ask vectors stage")
     # Get shape of vector sent by first client
-    masked_vector = secaggplus_primitives.weights_zero_generate(
+    masked_vector = weights_zero_generate(
         [i.shape for i in parameters_to_weights(ask_vectors_results[0][1].parameters)])
     # Add all collected masked vectors and compuute available and dropout clients set
     unmask_vectors_clients: Dict[int, ClientProxy] = {}
@@ -183,9 +184,8 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
             unmask_vectors_clients[idx] = client
             dropout_clients.pop(idx)
             client_parameters = ask_vectors_results[pos][1].parameters
-            masked_vector = secaggplus_primitives.weights_addition(
-                masked_vector, parameters_to_weights(client_parameters))
-    masked_vector = secaggplus_primitives.weights_mod(masked_vector, sec_agg_param_dict['mod_range'])
+            masked_vector = weights_addition(masked_vector, parameters_to_weights(client_parameters))
+    masked_vector = weights_mod(masked_vector, sec_agg_param_dict['mod_range'])
     tm.toc('s2')
     # === Stage 3: Unmask Vectors ===
     shamir_reconstruction_time = 0
@@ -223,10 +223,9 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
             # seed is an available client's b
             tm.tic('mask_gen')
             private_mask = secaggplus_primitives.pseudo_rand_gen(
-                secret, sec_agg_param_dict['mod_range'], secaggplus_primitives.weights_shape(masked_vector))
+                secret, sec_agg_param_dict['mod_range'], weights_shape(masked_vector))
             tm.toc('mask_gen')
-            masked_vector = secaggplus_primitives.weights_subtraction(
-                masked_vector, private_mask)
+            masked_vector = weights_subtraction(masked_vector, private_mask)
         else:
             # seed is a dropout client's sk1
             neighbor_list: List[int] = []
@@ -241,27 +240,24 @@ def sec_agg_fit_round(strategy: SecureAggregationFitRound, server, rnd: int
                                              sec_agg_param_dict['sample_num'])
 
             for neighbor_id in neighbor_list:
-                shared_key = secaggplus_primitives.generate_shared_key(
-                    secaggplus_primitives.bytes_to_private_key(secret),
-                    secaggplus_primitives.bytes_to_public_key(public_keys_dict[neighbor_id].pk1))
+                shared_key = generate_shared_key(
+                    bytes_to_private_key(secret),
+                    bytes_to_public_key(public_keys_dict[neighbor_id].pk1))
                 tm.tic('mask_gen')
                 pairwise_mask = secaggplus_primitives.pseudo_rand_gen(
-                    shared_key, sec_agg_param_dict['mod_range'], secaggplus_primitives.weights_shape(masked_vector))
+                    shared_key, sec_agg_param_dict['mod_range'], weights_shape(masked_vector))
                 tm.toc('mask_gen')
                 if client_id > neighbor_id:
-                    masked_vector = secaggplus_primitives.weights_addition(
+                    masked_vector = weights_addition(
                         masked_vector, pairwise_mask)
                 else:
-                    masked_vector = secaggplus_primitives.weights_subtraction(
+                    masked_vector = weights_subtraction(
                         masked_vector, pairwise_mask)
-    masked_vector = secaggplus_primitives.weights_mod(
-        masked_vector, sec_agg_param_dict['mod_range'])
+    masked_vector = weights_mod(masked_vector, sec_agg_param_dict['mod_range'])
     # Divide vector by number of clients who have given us their masked vector
     # i.e. those participating in final unmask vectors stage
-    total_weights_factor, masked_vector = secaggplus_primitives.factor_weights_extract(
-        masked_vector)
-    masked_vector = secaggplus_primitives.weights_divide(
-        masked_vector, total_weights_factor)
+    total_weights_factor, masked_vector = factor_weights_extract(masked_vector)
+    masked_vector = weights_divide(masked_vector, total_weights_factor)
     aggregated_vector = reverse_quantize(
         masked_vector, sec_agg_param_dict['clipping_range'], sec_agg_param_dict['target_range'])
     print(aggregated_vector[:4])
@@ -306,8 +302,8 @@ def process_sec_agg_param_dict(sec_agg_param_dict: Dict[str, Scalar]) -> Dict[st
     if 'share_num' not in sec_agg_param_dict:
         # Complete graph
         sec_agg_param_dict['share_num'] = sec_agg_param_dict['sample_num']
-    elif sec_agg_param_dict['share_num'] % 2 == 0 and sec_agg_param_dict['share_num'] != sec_agg_param_dict[
-        'sample_num']:
+    elif sec_agg_param_dict['share_num'] % 2 == 0 \
+            and sec_agg_param_dict['share_num'] != sec_agg_param_dict['sample_num']:
         # we want share_num of each node to be either odd or sample_num
         log(WARNING,
             "share_num value changed due to sample num and share_num constraints! See documentation for reason")
@@ -382,8 +378,7 @@ def setup_param(
 
 
 def share_keys(strategy: SecureAggregationFitRound, graph: Dict[int, List[int]], clients: Dict[int, ClientProxy],
-               public_keys_dict: Dict[int, AskKeysRes]) \
-    -> ShareKeysResultsAndFailures:
+               public_keys_dict: Dict[int, AskKeysRes]) -> ShareKeysResultsAndFailures:
     results, failures = strategy.sa_request([share_keys_client(c, idx, graph, public_keys_dict)
                                              for idx, c in clients.items()])
     new_results = []

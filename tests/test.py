@@ -45,7 +45,7 @@ if __name__ == "__main__":
     f.write("Starting real experiments\n")
     f.close()
     # sample_num_list = [100, 200, 300, 400, 500]
-    sample_num_list = [50]
+    sample_num_list = [10]
     dropout_value_list = [1]
     # dropout_value_list = [0]
     # vector_dimension_list = [100000, 200000, 300000, 400000, 500000]
@@ -90,7 +90,7 @@ if __name__ == "__main__":
                         f"This is secagg sampling {sample_num} dropping out {dropout_value*5}% with vector size {vector_dimension} try {i} \n")
                     f.close()
                     sec_agg_test.test_start_simulation(
-                        sample_num=sample_num, share_num=sample_num, threshold=10, vector_dimension=vector_dimension, dropout_value=dropout_value, num_rounds=1)
+                        sample_num=sample_num, share_num=sample_num, threshold=5, vector_dimension=vector_dimension, dropout_value=dropout_value, num_rounds=1)
                     # light_sec_agg_test.test_start_simulation(
                     #      sample_num=sample_num,
                     #      T=int(sample_num * 0.1), U=int(sample_num * 0.7), vector_dimension=vector_dimension, dropout_value=dropout_value
