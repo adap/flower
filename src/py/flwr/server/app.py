@@ -57,41 +57,44 @@ def start_server(  # pylint: disable=too-many-arguments
 
     Arguments
     ---------
-        server_address: Optional[str] (default: `"[::]:8080"`). The IPv6
-            address of the server.
-        server: Optional[flwr.server.Server] (default: None). An implementation
-            of the abstract base class `flwr.server.Server`. If no instance is
-            provided, then `start_server` will create one.
-        config: ServerConfig (default: None).
-            Currently supported values are `num_rounds` (int, default: 1) and
-            `round_timeout` in seconds (float, default: None).
-        strategy: Optional[flwr.server.Strategy] (default: None). An
-            implementation of the abstract base class `flwr.server.Strategy`.
-            If no strategy is provided, then `start_server` will use
-            `flwr.server.strategy.FedAvg`.
-        client_manager: Optional[flwr.server.ClientManager] (default: None)
-            An implementation of the abstract base class `flwr.server.ClientManager`.
-            If no implementation is provided, then `start_server` will use
-            `flwr.server.client_manager.SimpleClientManager`.
-        grpc_max_message_length: int (default: 536_870_912, this equals 512MB).
-            The maximum length of gRPC messages that can be exchanged with the
-            Flower clients. The default should be sufficient for most models.
-            Users who train very large models might need to increase this
-            value. Note that the Flower clients need to be started with the
-            same value (see `flwr.client.start_client`), otherwise clients will
-            not know about the increased limit and block larger messages.
-        certificates : Tuple[bytes, bytes, bytes] (default: None)
-            Tuple containing root certificate, server certificate, and private key to
-            start a secure SSL-enabled server. The tuple is expected to have three bytes
-            elements in the following order:
+    server_address : Optional[str]
+        The IPv4 or IPv6 address of the server. Defaults to `"[::]:8080"`.
+    server : Optional[flwr.server.Server] (default: None)
+        A server implementation, either `flwr.server.Server` or a subclass
+        thereof. If no instance is provided, then `start_server` will create
+        one.
+    config : ServerConfig (default: None)
+        Currently supported values are `num_rounds` (int, default: 1) and
+        `round_timeout` in seconds (float, default: None).
+    strategy : Optional[flwr.server.Strategy] (default: None).
+        An implementation of the abstract base class
+        `flwr.server.strategy.Strategy`. If no strategy is provided, then
+        `start_server` will use `flwr.server.strategy.FedAvg`.
+    client_manager : Optional[flwr.server.ClientManager] (default: None)
+        An implementation of the abstract base class
+        `flwr.server.ClientManager`. If no implementation is provided, then
+        `start_server` will use
+        `flwr.server.client_manager.SimpleClientManager`.
+    grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
+        The maximum length of gRPC messages that can be exchanged with the
+        Flower clients. The default should be sufficient for most models.
+        Users who train very large models might need to increase this
+        value. Note that the Flower clients need to be started with the
+        same value (see `flwr.client.start_client`), otherwise clients will
+        not know about the increased limit and block larger messages.
+    certificates : Tuple[bytes, bytes, bytes] (default: None)
+        Tuple containing root certificate, server certificate, and private key
+        to start a secure SSL-enabled server. The tuple is expected to have
+        three bytes elements in the following order:
 
-                * CA certificate.
-                * server certificate.
-                * server private key.
+            * CA certificate.
+            * server certificate.
+            * server private key.
 
     Returns
     -------
-        hist: flwr.server.history.History. Object containing metrics from training.
+    hist : flwr.server.history.History
+        Object containing training and evaluation metrics.
 
     Examples
     --------
@@ -99,7 +102,7 @@ def start_server(  # pylint: disable=too-many-arguments
 
     >>> start_server()
 
-    Starting a SSL-enabled server:
+    Starting an SSL-enabled server:
 
     >>> start_server(
     >>>     certificates=(
