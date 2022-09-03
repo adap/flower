@@ -30,6 +30,8 @@ from flwr.proto.fleet_pb2 import (
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
+    """Fleet API servicer."""
+
     def GetTasks(
         self, request: GetTasksRequest, context: grpc.ServicerContext
     ) -> GetTasksResponse:
