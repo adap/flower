@@ -13,29 +13,25 @@
 # limitations under the License.
 # ==============================================================================
 from flwr.common.parameter import weights_to_parameters
-from flwr.common.typing import AskKeysIns, AskVectorsIns, AskVectorsRes, SetupParamIns, SetupParamRes, ShareKeysIns, \
-    ShareKeysPacket, ShareKeysRes, UnmaskVectorsIns, UnmaskVectorsRes, Weights, Scalar, Parameters
+from flwr.common.typing import ShareKeysPacket, Scalar, Parameters, AskKeysRes
 from flwr.common.sa_primitives import secaggplus_primitives
 from flwr_crypto_cpp import create_shares
 from flwr.common.sa_primitives import quantize, public_key_to_bytes, generate_key_pairs, private_key_to_bytes, \
-    bytes_to_private_key, bytes_to_public_key, generate_shared_key, encrypt, decrypt
+    bytes_to_public_key, generate_shared_key, encrypt, decrypt
 from flwr.common.sa_primitives.weight_arithmetics import *
+from flwr.client.abc_sa_client_wrapper import SAClientWrapper
 from flwr.common.logger import log
 from logging import ERROR, INFO, WARNING
 from typing import Dict, List, Tuple
-from flwr.common import (
-    AskKeysRes,
 
 
-)
-
-
-def setup_param(client, setup_param_dict: Dict[str, Scalar]) -> Tuple[bytes, bytes]:
+def setup_param(client: SAClientWrapper, setup_param_dict: Dict[str, Scalar]) -> Tuple[bytes, bytes]:
     # Assigning parameter values to object fields
     sec_agg_param_dict = setup_param_dict
     client.sample_num = sec_agg_param_dict['sample_num']
     client.sec_agg_id = sec_agg_param_dict['sec_agg_id']
-    client.id = sec_agg_param_dict['sec_agg_id']
+    # client.id = sec_agg_param_dict['sec_agg_id']
+    client.set_sec_id(sec_agg_param_dict['sec_agg_id'])
     client.share_num = sec_agg_param_dict['share_num']
     client.threshold = sec_agg_param_dict['threshold']
     client.clipping_range = sec_agg_param_dict['clipping_range']

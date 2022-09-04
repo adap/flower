@@ -1,2 +1,2 @@
-from .abc_sa_client_wrapper import SAClientWrapper, SecAggPlusWrapper
-# from flwr.common.light_sec_agg.sa_wrapper import LightSecAggWrapper
+from .light_sec_agg_sa_wrapper import LightSecAggWrapper
+from .sec_agg_plus_sa_wrapper import SecAggPlusWrapper

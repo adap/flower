@@ -23,6 +23,7 @@ from flwr.common.logger import log
 from logging import ERROR, INFO, WARNING
 from typing import List, Dict
 from flwr.common.typing import Scalar
+from flwr.client.abc_sa_client_wrapper import SAClientWrapper
 
 
 def padding(d, U, T):
@@ -48,11 +49,12 @@ def decrypt_sub_mask(key, ciphertext):
 
 
 # set up configurations and return the public key
-def setup_config(client, config_dict: Dict[str, Scalar]) -> bytes:
+def setup_config(client: SAClientWrapper, config_dict: Dict[str, Scalar]) -> bytes:
     # Assigning parameter values to object fields
     cfg = config_dict
     client.N = cfg['sample_num']
     client.id = cfg['id']
+    client.set_sec_id(cfg['id'])
     client.T = cfg['privacy_guarantee']
     client.U = cfg['min_clients']
     client.p = cfg['prime_number']

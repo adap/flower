@@ -18,7 +18,7 @@
 from typing import Tuple
 
 from flwr.client.client import Client
-from flwr.client.sa_client_wrappers.abc_sa_client_wrapper import SAClientWrapper
+from flwr.client.abc_sa_client_wrapper import SAClientWrapper
 from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 

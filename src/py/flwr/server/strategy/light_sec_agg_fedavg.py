@@ -21,8 +21,7 @@ from typing import Callable, Dict, List, Tuple, Optional
 from flwr.server.strategy.fedavg import FedAvg
 from flwr.server.server import Server, ClientProxy
 from flwr.common.typing import SAServerMessageCarrier
-from flwr.common.sa_primitives import secaggplus_primitives
-from flwr.common.sa_primitives import reverse_quantize
+from flwr.common.sa_primitives import reverse_quantize, weights_addition, weights_divide, factor_weights_extract
 from flwr.common.timer import Timer
 from flwr.common.secure_aggregation import SecureAggregationFitRound, SecureAggregationResultsAndFailures
 from flwr.common.logger import log
@@ -178,7 +177,7 @@ class LightSecAggFedAvg(SecureAggregationFitRound, FedAvg):
         for i in range(1, len(res_lst)):
             weights = parameters_to_weights(res_lst[i][1].parameters)
             weights = [o.view(GF) for o in weights]
-            agg_model = secaggplus_primitives.weights_addition(agg_model, weights)
+            agg_model = weights_addition(agg_model, weights)
         tm.toc('s2')
 
         # STAGE 3: ask aggregated encoded sub-masks
@@ -201,14 +200,15 @@ class LightSecAggFedAvg(SecureAggregationFitRound, FedAvg):
         agg_msk: np.ndarray = LCC_decoding_with_points(msk_buffer, alpha_s[active_ids], beta_s, GF)
         agg_msk = agg_msk.reshape(-1, 1)[:d]
         agg_model = model_unmasking(agg_model, agg_msk, GF)
-        factor, agg_model = secaggplus_primitives.factor_weights_extract(agg_model)
-        agg_model = secaggplus_primitives.weights_divide(agg_model, factor)
+        factor, agg_model = factor_weights_extract(agg_model)
+        agg_model = weights_divide(agg_model, factor)
         # inverse quantize
         agg_model = reverse_quantize(agg_model, self.clipping_range, self.target_range)
         tm.toc('s3')
         tm.toc()
         times = tm.get_all()
         num_dropouts = self.N - len(active_clients)
+        print(agg_model)
         f = open("log.txt", "a")
         f.write(f"Server time with communication:{times['default']} \n")
         f.write(f"Server time without communication:{sum([times['s0'], times['s1'], times['s2'], times['s3']])} \n")
