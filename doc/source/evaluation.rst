@@ -1,7 +1,7 @@
 Evaluation
 ==========
 
-There are two main approaches to evaluate models in federated learning systems: centralized (or server-side) evaluation and federated (or client-side) evaluation.
+There are two main approaches to evaluating models in federated learning systems: centralized (or server-side) evaluation and federated (or client-side) evaluation.
 
 Centralized Evaluation
 ----------------------
@@ -45,7 +45,7 @@ An evaluation function is any function that can take the current global model pa
     )
 
     # Start Flower server for four rounds of federated learning
-    fl.server.start_server("[::]:8080", strategy=strategy)
+    fl.server.start_server(server_address="[::]:8080", strategy=strategy)
 
 Custom Strategies
 ~~~~~~~~~~~~~~~~~
@@ -70,7 +70,7 @@ Client-side evaluation happens in the :code:`Client.evaluate` method and can be 
             self.x_train, self.y_train = x_train, y_train
             self.x_test, self.y_test = x_test, y_test
 
-        def get_parameters(self):
+        def get_parameters(self, config):
             # ...
 
         def fit(self, parameters, config):
@@ -105,7 +105,7 @@ Federated evaluation can be configured from the server side. Built-in strategies
     def evaluate_config(server_round: int):
         """Return evaluation configuration dict for each round.
         Perform five local evaluation steps on each client (i.e., use five
-        batches) during rounds one to three, then increase to ten local
+        batches) during rounds, one to three, then increase to ten local
         evaluation steps.
         """
         val_steps = 5 if server_round < 4 else 10
@@ -121,7 +121,7 @@ Federated evaluation can be configured from the server side. Built-in strategies
     )
 
     # Start Flower server for four rounds of federated learning
-    fl.server.start_server("[::]:8080", strategy=strategy)
+    fl.server.start_server(server_address="[::]:8080", strategy=strategy)
 
 
 Evaluating Local Model Updates During Training
@@ -137,7 +137,7 @@ Model parameters can also be evaluated during training. :code:`Client.fit` can r
             self.x_train, self.y_train = x_train, y_train
             self.x_test, self.y_test = x_test, y_test
 
-        def get_parameters(self):
+        def get_parameters(self, config):
             # ...
 
         def fit(self, parameters, config):
