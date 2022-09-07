@@ -63,6 +63,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    strategies
    implementing-strategies
    saving-progress
+   saving-and-loading-pytorch-checkpoints
    ssl-enabled-connections
    example-walkthrough-pytorch-mnist
    example-pytorch-from-centralized-to-federated
