@@ -80,7 +80,9 @@ class FedAvg(Strategy):
         Parameters
         ----------
         fraction_fit : float, optional
-            Fraction of clients used during training. Defaults to 1.0.
+            Fraction of clients used during training. In case `min_fit_clients`
+            is larger `fraction_fit * available_clients` than `min_fit_clients`
+            will still be sampled. Defaults to 1.0.
         fraction_evaluate : float, optional
             Fraction of clients used during validation. Defaults to 1.0.
         min_fit_clients : int, optional
