@@ -194,5 +194,5 @@ def _fl(
 
 def run_server() -> None:
     """Run Flower server."""
-    print("Running Flower server...")
+    log(INFO, "Running Flower server...")
     time.sleep(3)

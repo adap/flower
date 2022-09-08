@@ -320,5 +320,5 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
 
 def run_client() -> None:
     """Run Flower client."""
-    print("Running Flower client...")
+    log(INFO, "Running Flower client...")
     time.sleep(3)
