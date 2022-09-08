@@ -24,7 +24,8 @@ DIR_PATH = path.dirname(path.realpath(__file__))
 EXAMPLES_PATH = path.normpath(f"{DIR_PATH}/../../../examples")
 
 
-def clean_version(version):
+def clean_version(version: str):
+    """Replace '^' with '>=' in string"""
     return version.replace("^", "")
 
 
