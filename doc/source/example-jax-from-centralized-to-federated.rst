@@ -226,7 +226,7 @@ We included type annotations to give you a better understanding of the data type
             self.params, loss, num_examples = jax_training.train(self.params, self.grad_fn, self.train_x, self.train_y)
             results = {"loss": float(loss)}
             print("Training results", results)
-            return self.get_parameters(), num_examples, results
+            return self.get_parameters(config={}), num_examples, results
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict
