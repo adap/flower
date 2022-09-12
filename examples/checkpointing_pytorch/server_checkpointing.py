@@ -11,14 +11,14 @@ import cifar
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Load PyTorch model
 net = cifar.Net().to(DEVICE)
-continue_from_checkpoint = True 
+continue_from_checkpoint = False 
 class SaveModelStrategy(fl.server.strategy.FedAvg):
     def aggregate_fit(
         self,
         rnd: int,
         results: List[Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
         failures: List[BaseException],
-    ) -> Optional[fl.common.Weights]:
+    ):
 
         """Aggregate model weights using weighted average and store checkpoint"""
         aggregated_parameters_tuple = super().aggregate_fit(rnd, results, failures)
@@ -28,7 +28,7 @@ class SaveModelStrategy(fl.server.strategy.FedAvg):
         if aggregated_parameters is not None:
             print(f"Saving round {rnd} aggregated_parameters...")
             # Convert `Parameters` to `List[np.ndarray]`
-            aggregated_weights: List[np.ndarray] = fl.common.parameters_to_weights(aggregated_parameters)
+            aggregated_weights: List[np.ndarray] = fl.common.parameters_to_ndarrays(aggregated_parameters)
             
             # Convert `List[np.ndarray]` to PyTorch`state_dict`
             params_dict = zip(net.state_dict().keys(), aggregated_weights)
@@ -48,6 +48,6 @@ if continue_from_checkpoint:
     net.load_state_dict(state_dict)
 
 if __name__ == "__main__":
-    fl.server.start_server("0.0.0.0:8080", 
+    fl.server.start_server(server_address="0.0.0.0:8080", 
     strategy=SaveModelStrategy(),
-    config={"num_rounds":3})
+    config=fl.server.ServerConfig(num_rounds=3))
