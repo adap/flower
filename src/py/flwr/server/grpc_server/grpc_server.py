@@ -59,7 +59,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     keepalive_time_ms: int = 210000,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
 ) -> grpc.Server:
-    """Create gRPC server and return instance of grpc.Server.
+    """Create and start a gRPC server running FlowerServiceServicer.
 
     If used in a main function server.wait_for_termination(timeout=None)
     should be called as otherwise the server will immediately stop.
@@ -143,9 +143,9 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
         keepalive_time_ms=keepalive_time_ms,
         certificates=certificates,
     )
-    
+
     server.start()
-    
+
     return server
 
 
@@ -161,21 +161,13 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     keepalive_time_ms: int = 210000,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
 ) -> grpc.Server:
-    """Create gRPC server and return instance of grpc.Server.
-
-    If used in a main function server.wait_for_termination(timeout=None)
-    should be called as otherwise the server will immediately stop.
-
-    **SSL**
-    To enable SSL you have to pass all of root_certificate, certificate,
-    and private_key. Setting only some will make the process exit with code 1.
+    """Generic function to create a gRPC server with a single servicer.
 
     Parameters
     ----------
-    servicer : Any
-        TODO
-    add_servicer_to_server_fn : Callable
-        TODO
+    servicer_and_add_fn : Tuple
+        A tuple holding a servicer implementation and a matching
+        add_Servicer_to_server function.
     server_address : str
         Server address in the form of HOST:PORT e.g. "[::]:8080"
     max_concurrent_workers : int
@@ -217,23 +209,7 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     Returns
     -------
     server : grpc.Server
-        An instance of a gRPC server which is already started
-
-    Examples
-    --------
-    Starting a SSL-enabled server.
-
-    >>> from pathlib import Path
-    >>> generic_create_grpc_server(
-    >>>     servicer=servicer,
-    >>>     add_servicer_to_server_fn=add_servicer_to_server_fn,
-    >>>     server_address="localhost:8080",
-    >>>     certificates=(
-    >>>         Path("/crts/root.pem").read_bytes(),
-    >>>         Path("/crts/localhost.crt").read_bytes(),
-    >>>         Path("/crts/localhost.key").read_bytes(),
-    >>>     ),
-    >>> )
+        A non-running instance of a gRPC server.
     """
 
     # Deconstruct tuple into servicer and function
