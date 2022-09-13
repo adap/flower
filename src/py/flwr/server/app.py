@@ -15,7 +15,6 @@
 """Flower server app."""
 
 
-import time
 from dataclasses import dataclass
 from logging import INFO, WARN
 from typing import Optional, Tuple
