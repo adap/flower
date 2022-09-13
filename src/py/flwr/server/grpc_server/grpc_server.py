@@ -18,14 +18,12 @@
 import concurrent.futures
 import sys
 from logging import ERROR
-from typing import Optional, Tuple, Union
+from typing import Any, Callable, Optional, Tuple, Union
 
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
-from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
-from flwr.proto.fleet_pb2_grpc import add_FleetServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
 from flwr.server.client_manager import ClientManager
 from flwr.server.driver.driver_servicer import DriverServicer
@@ -36,6 +34,8 @@ INVALID_CERTIFICATES_ERR_MSG = """
     When setting any of root_certificate, certificate, or private_key,
     all of them need to be set.
 """
+
+AddServicerToServerFn = Callable[..., Any]
 
 
 def valid_certificates(certificates: Tuple[bytes, bytes, bytes]) -> bool:
@@ -135,8 +135,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
 
     server = generic_create_grpc_server(
-        servicer=servicer,
-        add_servicer_to_server_fn=add_servicer_to_server_fn,
+        servicer_and_add_fn=(servicer, add_servicer_to_server_fn),
         server_address=server_address,
         max_concurrent_workers=max_concurrent_workers,
         max_message_length=max_message_length,
@@ -151,9 +150,9 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
 
 def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     servicer_and_add_fn: Union[
-        Tuple[FleetServicer, add_FleetServicer_to_server],
-        Tuple[FlowerServiceServicer, add_FlowerServiceServicer_to_server],
-        Tuple[DriverServicer, add_DriverServicer_to_server],
+        Tuple[FleetServicer, AddServicerToServerFn],
+        Tuple[FlowerServiceServicer, AddServicerToServerFn],
+        Tuple[DriverServicer, AddServicerToServerFn],
     ],
     server_address: str,
     max_concurrent_workers: int = 1000,
