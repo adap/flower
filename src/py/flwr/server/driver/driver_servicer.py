@@ -29,10 +29,14 @@ from flwr.proto.driver_pb2 import (
     GetResultsRequest,
     GetResultsResponse,
 )
+from flwr.server.client_manager import ClientManager
 
 
 class DriverServicer(driver_pb2_grpc.DriverServicer):
     """Driver API servicer."""
+
+    def __init__(self, client_manager: ClientManager) -> None:
+        self.client_manager = client_manager
 
     def GetClients(
         self, request: GetClientsRequest, context: grpc.ServicerContext
