@@ -217,14 +217,6 @@ def run_server() -> None:
         certificates=None,
     )
 
-    # Start Driver API gRPC server
-    driver_grpc_server.start()
-    log(
-        INFO,
-        "Flower ECE: driver gRPC server running on %s",
-        driver_server_address,
-    )
-
     # Create (legacy) Fleet API gRPC server
     fleet_server_address: str = DEFAULT_SERVER_ADDRESS_FLEET
     fleet_servicer = FlowerServiceServicer(client_manager=client_manager)
@@ -234,6 +226,14 @@ def run_server() -> None:
         server_address=fleet_server_address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=None,
+    )
+
+    # Start Driver API gRPC server
+    driver_grpc_server.start()
+    log(
+        INFO,
+        "Flower ECE: driver gRPC server running on %s",
+        driver_server_address,
     )
 
     # Start (legacy) Fleet API gRPC server
