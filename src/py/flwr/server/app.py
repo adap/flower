@@ -15,20 +15,28 @@
 """Flower server app."""
 
 
-import time
 from dataclasses import dataclass
 from logging import INFO, WARN
 from typing import Optional, Tuple
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
+from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
+from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
 from flwr.server.client_manager import ClientManager, SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_grpc_server
+from flwr.server.driver.driver_servicer import DriverServicer
+from flwr.server.grpc_server.flower_service_servicer import FlowerServiceServicer
+from flwr.server.grpc_server.grpc_server import (
+    generic_create_grpc_server,
+    start_grpc_server,
+)
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
+DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
+DEFAULT_SERVER_ADDRESS_FLEET = "[::]:9092"
 
 
 @dataclass
@@ -194,5 +202,48 @@ def _fl(
 
 def run_server() -> None:
     """Run Flower server."""
-    log(INFO, "Running Flower server...")
-    time.sleep(3)
+    log(INFO, "Starting Flower server")
+
+    client_manager: ClientManager = SimpleClientManager()
+
+    # Create Driver API gRPC server
+    driver_server_address: str = DEFAULT_SERVER_ADDRESS_DRIVER
+    driver_servicer = DriverServicer(client_manager=client_manager)
+    driver_add_servicer_to_server_fn = add_DriverServicer_to_server
+    driver_grpc_server = generic_create_grpc_server(
+        servicer_and_add_fn=(driver_servicer, driver_add_servicer_to_server_fn),
+        server_address=driver_server_address,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        certificates=None,
+    )
+
+    # Create (legacy) Fleet API gRPC server
+    fleet_server_address: str = DEFAULT_SERVER_ADDRESS_FLEET
+    fleet_servicer = FlowerServiceServicer(client_manager=client_manager)
+    fleet_add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
+    fleet_grpc_server = generic_create_grpc_server(
+        servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
+        server_address=fleet_server_address,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        certificates=None,
+    )
+
+    # Start Driver API gRPC server
+    driver_grpc_server.start()
+    log(
+        INFO,
+        "Flower ECE: driver gRPC server running on %s",
+        driver_server_address,
+    )
+
+    # Start (legacy) Fleet API gRPC server
+    fleet_grpc_server.start()
+    log(
+        INFO,
+        "Flower ECE: fleet gRPC server running on %s",
+        fleet_server_address,
+    )
+
+    # Wait for termination of both servers
+    driver_grpc_server.wait_for_termination()
+    fleet_grpc_server.wait_for_termination()
