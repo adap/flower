@@ -39,7 +39,7 @@ enum Reason {
 }
 
 message ServerMessage {
-    message Reconnect { int64 seconds = 1; }
+    message ReconnectIns { int64 seconds = 1; }
     message GetParameters {}
     message FitIns {
         Parameters parameters = 1;
@@ -51,7 +51,7 @@ message ServerMessage {
     }
     message PropertiesIns { map<string, Scalar> config = 1; }
     oneof msg {
-        Reconnect reconnect = 1;
+        ReconnectIns reconnect = 1;
         GetParameters get_parameters = 2;
         FitIns fit_ins = 3;
         EvaluateIns evaluate_ins = 4;
@@ -60,7 +60,7 @@ message ServerMessage {
 }
 
 message ClientMessage {
-    message Disconnect { Reason reason = 1; }
+    message DisconnectRes { Reason reason = 1; }
     message ParametersRes { Parameters parameters = 1; }
     message FitRes {
         Parameters parameters = 1;
@@ -77,7 +77,7 @@ message ClientMessage {
     }
     message PropertiesRes { map<string, Scalar> properties = 1; }
     oneof msg {
-        Disconnect disconnect = 1;
+        DisconnectRes disconnect = 1;
         ParametersRes parameters_res = 2;
         FitRes fit_res = 3;
         EvaluateRes evaluate_res = 4;

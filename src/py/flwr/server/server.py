@@ -18,19 +18,21 @@
 import concurrent.futures
 import timeit
 from logging import DEBUG, INFO
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
-    Disconnect,
+    Code,
+    DisconnectRes,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
     Parameters,
-    Reconnect,
+    ReconnectIns,
     Scalar,
 )
 from flwr.common.logger import log
+from flwr.common.typing import GetParametersIns
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
@@ -38,15 +40,15 @@ from flwr.server.strategy import FedAvg, Strategy
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
-    List[BaseException],
+    List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 ]
 EvaluateResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, EvaluateRes]],
-    List[BaseException],
+    List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
 ]
 ReconnectResultsAndFailures = Tuple[
-    List[Tuple[ClientProxy, Disconnect]],
-    List[BaseException],
+    List[Tuple[ClientProxy, DisconnectRes]],
+    List[Union[Tuple[ClientProxy, DisconnectRes], BaseException]],
 ]
 
 
@@ -54,7 +56,7 @@ class Server:
     """Flower server."""
 
     def __init__(
-        self, client_manager: ClientManager, strategy: Optional[Strategy] = None
+        self, *, client_manager: ClientManager, strategy: Optional[Strategy] = None
     ) -> None:
         self._client_manager: ClientManager = client_manager
         self.parameters: Parameters = Parameters(
@@ -84,7 +86,7 @@ class Server:
         log(INFO, "Initializing global parameters")
         self.parameters = self._get_initial_parameters(timeout=timeout)
         log(INFO, "Evaluating initial parameters")
-        res = self.strategy.evaluate(parameters=self.parameters)
+        res = self.strategy.evaluate(0, parameters=self.parameters)
         if res is not None:
             log(
                 INFO,
@@ -92,8 +94,8 @@ class Server:
                 res[0],
                 res[1],
             )
-            history.add_loss_centralized(rnd=0, loss=res[0])
-            history.add_metrics_centralized(rnd=0, metrics=res[1])
+            history.add_loss_centralized(server_round=0, loss=res[0])
+            history.add_metrics_centralized(server_round=0, metrics=res[1])
 
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
@@ -101,14 +103,14 @@ class Server:
 
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
-            res_fit = self.fit_round(rnd=current_round, timeout=timeout)
+            res_fit = self.fit_round(server_round=current_round, timeout=timeout)
             if res_fit:
                 parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
                     self.parameters = parameters_prime
 
             # Evaluate model using strategy implementation
-            res_cen = self.strategy.evaluate(parameters=self.parameters)
+            res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
                 log(
@@ -119,17 +121,21 @@ class Server:
                     metrics_cen,
                     timeit.default_timer() - start_time,
                 )
-                history.add_loss_centralized(rnd=current_round, loss=loss_cen)
-                history.add_metrics_centralized(rnd=current_round, metrics=metrics_cen)
+                history.add_loss_centralized(server_round=current_round, loss=loss_cen)
+                history.add_metrics_centralized(
+                    server_round=current_round, metrics=metrics_cen
+                )
 
             # Evaluate model on a sample of available clients
-            res_fed = self.evaluate_round(rnd=current_round, timeout=timeout)
+            res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
             if res_fed:
                 loss_fed, evaluate_metrics_fed, _ = res_fed
                 if loss_fed:
-                    history.add_loss_distributed(rnd=current_round, loss=loss_fed)
+                    history.add_loss_distributed(
+                        server_round=current_round, loss=loss_fed
+                    )
                     history.add_metrics_distributed(
-                        rnd=current_round, metrics=evaluate_metrics_fed
+                        server_round=current_round, metrics=evaluate_metrics_fed
                     )
 
         # Bookkeeping
@@ -140,7 +146,7 @@ class Server:
 
     def evaluate_round(
         self,
-        rnd: int,
+        server_round: int,
         timeout: Optional[float],
     ) -> Optional[
         Tuple[Optional[float], Dict[str, Scalar], EvaluateResultsAndFailures]
@@ -149,14 +155,17 @@ class Server:
 
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_evaluate(
-            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
+            server_round=server_round,
+            parameters=self.parameters,
+            client_manager=self._client_manager,
         )
         if not client_instructions:
-            log(INFO, "evaluate_round: no clients selected, cancel")
+            log(INFO, "evaluate_round %s: no clients selected, cancel", server_round)
             return None
         log(
             DEBUG,
-            "evaluate_round: strategy sampled %s clients (out of %s)",
+            "evaluate_round %s: strategy sampled %s clients (out of %s)",
+            server_round,
             len(client_instructions),
             self._client_manager.num_available(),
         )
@@ -169,7 +178,8 @@ class Server:
         )
         log(
             DEBUG,
-            "evaluate_round received %s results and %s failures",
+            "evaluate_round %s received %s results and %s failures",
+            server_round,
             len(results),
             len(failures),
         )
@@ -178,14 +188,14 @@ class Server:
         aggregated_result: Tuple[
             Optional[float],
             Dict[str, Scalar],
-        ] = self.strategy.aggregate_evaluate(rnd, results, failures)
+        ] = self.strategy.aggregate_evaluate(server_round, results, failures)
 
         loss_aggregated, metrics_aggregated = aggregated_result
         return loss_aggregated, metrics_aggregated, (results, failures)
 
     def fit_round(
         self,
-        rnd: int,
+        server_round: int,
         timeout: Optional[float],
     ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
@@ -194,15 +204,18 @@ class Server:
 
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
-            rnd=rnd, parameters=self.parameters, client_manager=self._client_manager
+            server_round=server_round,
+            parameters=self.parameters,
+            client_manager=self._client_manager,
         )
 
         if not client_instructions:
-            log(INFO, "fit_round: no clients selected, cancel")
+            log(INFO, "fit_round %s: no clients selected, cancel", server_round)
             return None
         log(
             DEBUG,
-            "fit_round: strategy sampled %s clients (out of %s)",
+            "fit_round %s: strategy sampled %s clients (out of %s)",
+            server_round,
             len(client_instructions),
             self._client_manager.num_available(),
         )
@@ -215,7 +228,8 @@ class Server:
         )
         log(
             DEBUG,
-            "fit_round received %s results and %s failures",
+            "fit_round %s received %s results and %s failures",
+            server_round,
             len(results),
             len(failures),
         )
@@ -224,7 +238,7 @@ class Server:
         aggregated_result: Tuple[
             Optional[Parameters],
             Dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(rnd, results, failures)
+        ] = self.strategy.aggregate_fit(server_round, results, failures)
 
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
@@ -233,7 +247,7 @@ class Server:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
         clients = [all_clients[k] for k in all_clients.keys()]
-        instruction = Reconnect(seconds=None)
+        instruction = ReconnectIns(seconds=None)
         client_instructions = [(client_proxy, instruction) for client_proxy in clients]
         _ = reconnect_clients(
             client_instructions=client_instructions,
@@ -255,13 +269,14 @@ class Server:
         # Get initial parameters from one of the clients
         log(INFO, "Requesting initial parameters from one random client")
         random_client = self._client_manager.sample(1)[0]
-        parameters_res = random_client.get_parameters(timeout=timeout)
+        ins = GetParametersIns(config={})
+        get_parameters_res = random_client.get_parameters(ins=ins, timeout=timeout)
         log(INFO, "Received initial parameters from one random client")
-        return parameters_res.parameters
+        return get_parameters_res.parameters
 
 
 def reconnect_clients(
-    client_instructions: List[Tuple[ClientProxy, Reconnect]],
+    client_instructions: List[Tuple[ClientProxy, ReconnectIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
 ) -> ReconnectResultsAndFailures:
@@ -277,8 +292,8 @@ def reconnect_clients(
         )
 
     # Gather results
-    results: List[Tuple[ClientProxy, Disconnect]] = []
-    failures: List[BaseException] = []
+    results: List[Tuple[ClientProxy, DisconnectRes]] = []
+    failures: List[Union[Tuple[ClientProxy, DisconnectRes], BaseException]] = []
     for future in finished_fs:
         failure = future.exception()
         if failure is not None:
@@ -291,9 +306,9 @@ def reconnect_clients(
 
 def reconnect_client(
     client: ClientProxy,
-    reconnect: Reconnect,
+    reconnect: ReconnectIns,
     timeout: Optional[float],
-) -> Tuple[ClientProxy, Disconnect]:
+) -> Tuple[ClientProxy, DisconnectRes]:
     """Instruct client to disconnect and (optionally) reconnect later."""
     disconnect = client.reconnect(
         reconnect,
@@ -320,15 +335,11 @@ def fit_clients(
 
     # Gather results
     results: List[Tuple[ClientProxy, FitRes]] = []
-    failures: List[BaseException] = []
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
     for future in finished_fs:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
+        _handle_finished_future_after_fit(
+            future=future, results=results, failures=failures
+        )
     return results, failures
 
 
@@ -338,6 +349,32 @@ def fit_client(
     """Refine parameters on a single client."""
     fit_res = client.fit(ins, timeout=timeout)
     return client, fit_res
+
+
+def _handle_finished_future_after_fit(
+    future: concurrent.futures.Future,  # type: ignore
+    results: List[Tuple[ClientProxy, FitRes]],
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+) -> None:
+    """Convert finished future into either a result or a failure."""
+
+    # Check if there was an exception
+    failure = future.exception()
+    if failure is not None:
+        failures.append(failure)
+        return
+
+    # Successfully received a result from a client
+    result: Tuple[ClientProxy, FitRes] = future.result()
+    _, res = result
+
+    # Check result status code
+    if res.status.code == Code.OK:
+        results.append(result)
+        return
+
+    # Not successful, client returned a result where the status code is not OK
+    failures.append(result)
 
 
 def evaluate_clients(
@@ -358,15 +395,11 @@ def evaluate_clients(
 
     # Gather results
     results: List[Tuple[ClientProxy, EvaluateRes]] = []
-    failures: List[BaseException] = []
+    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]] = []
     for future in finished_fs:
-        failure = future.exception()
-        if failure is not None:
-            failures.append(failure)
-        else:
-            # Success case
-            result = future.result()
-            results.append(result)
+        _handle_finished_future_after_evaluate(
+            future=future, results=results, failures=failures
+        )
     return results, failures
 
 
@@ -378,3 +411,29 @@ def evaluate_client(
     """Evaluate parameters on a single client."""
     evaluate_res = client.evaluate(ins, timeout=timeout)
     return client, evaluate_res
+
+
+def _handle_finished_future_after_evaluate(
+    future: concurrent.futures.Future,  # type: ignore
+    results: List[Tuple[ClientProxy, EvaluateRes]],
+    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
+) -> None:
+    """Convert finished future into either a result or a failure."""
+
+    # Check if there was an exception
+    failure = future.exception()
+    if failure is not None:
+        failures.append(failure)
+        return
+
+    # Successfully received a result from a client
+    result: Tuple[ClientProxy, EvaluateRes] = future.result()
+    _, res = result
+
+    # Check result status code
+    if res.status.code == Code.OK:
+        results.append(result)
+        return
+
+    # Not successful, client returned a result where the status code is not OK
+    failures.append(result)

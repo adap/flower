@@ -1,5 +1,8 @@
-Quickstart (scikit-learn)
-=========================
+.. _quickstart-scikitlearn:
+
+
+Quickstart scikit-learn
+=======================
 
 In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit-learn. 
 
@@ -116,7 +119,7 @@ The methods can be implemented in the following way:
 .. code-block:: python
 
     class MnistClient(fl.client.NumPyClient):
-        def get_parameters(self):  # type: ignore
+        def get_parameters(self, config):  # type: ignore
             return utils.get_model_parameters(model)
 
         def fit(self, parameters, config):  # type: ignore
@@ -124,7 +127,7 @@ The methods can be implemented in the following way:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 model.fit(X_train, y_train)
-            print(f"Training finished for round {config['rnd']}")
+            print(f"Training finished for round {config['server_round']}")
             return utils.get_model_parameters(model), len(X_train), {}
 
         def evaluate(self, parameters, config):  # type: ignore
@@ -163,17 +166,17 @@ First, we import again all required libraries such as Flower and scikit-learn.
     from sklearn.linear_model import LogisticRegression
     from typing import Dict
 
-The number of federated learning rounds is set in :code:`fit_round()` and the evaluation is defined in :code:`get_eval_fn()`.
+The number of federated learning rounds is set in :code:`fit_round()` and the evaluation is defined in :code:`get_evaluate_fn()`.
 The evaluation function is called after each federated learning round and gives you information about loss and accuracy.
 
 .. code-block:: python
 
-    def fit_round(rnd: int) -> Dict:
+    def fit_round(server_round: int) -> Dict:
         """Send round number to client."""
-        return {"rnd": rnd}
+        return {"server_round": server_round}
 
 
-    def get_eval_fn(model: LogisticRegression):
+    def get_evaluate_fn(model: LogisticRegression):
         """Return an evaluation function for server-side evaluation."""
 
         _, (X_test, y_test) = utils.load_mnist()
@@ -186,7 +189,7 @@ The evaluation function is called after each federated learning round and gives 
 
         return evaluate
 
-The :code:`main` contains the server-side parameter initialization :code:`utils.set_initial_params()` as well as the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federated averaging (or FedAvg), with two clients and evaluation after each federated learning round. The server can be started with the command :code:`fl.server.start_server("0.0.0.0:8080", strategy=strategy, config={"num_rounds": 3})`.
+The :code:`main` contains the server-side parameter initialization :code:`utils.set_initial_params()` as well as the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federated averaging (or FedAvg), with two clients and evaluation after each federated learning round. The server can be started with the command :code:`fl.server.start_server(server_address="0.0.0.0:8080", strategy=strategy, config=fl.server.ServerConfig(num_rounds=3))`.
 
 .. code-block:: python
 
@@ -196,10 +199,10 @@ The :code:`main` contains the server-side parameter initialization :code:`utils.
         utils.set_initial_params(model)
         strategy = fl.server.strategy.FedAvg(
             min_available_clients=2,
-            eval_fn=get_eval_fn(model),
+            evaluate_fn=get_evaluate_fn(model),
             on_fit_config_fn=fit_round,
         )
-        fl.server.start_server("0.0.0.0:8080", strategy=strategy, config={"num_rounds": 3})
+        fl.server.start_server(server_address="0.0.0.0:8080", strategy=strategy, config=fl.server.ServerConfig(num_rounds=3))
 
 
 Train the model, federated!

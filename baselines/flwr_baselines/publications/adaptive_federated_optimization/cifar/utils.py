@@ -7,15 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import torch
-from flwr.common.parameter import weights_to_parameters
-from flwr.common.typing import Parameters, Scalar, Weights
-from flwr.dataset.utils.common import (
-    XY,
-    create_lda_partitions,
-    shuffle,
-    sort_by_label,
-    split_array_at_indices,
-)
+from flwr.common.parameter import ndarrays_to_parameters
+from flwr.common.typing import NDArrays, Parameters, Scalar
 from flwr.server.history import History
 from PIL import Image
 from torch import Tensor, load
@@ -30,6 +23,14 @@ from torchvision.transforms import (
     RandomCrop,
     RandomHorizontalFlip,
     ToTensor,
+)
+
+from flwr_baselines.dataset.utils.common import (
+    XY,
+    create_lda_partitions,
+    shuffle,
+    sort_by_label,
+    split_array_at_indices,
 )
 
 CIFAR100_NUM_COARSE_CLASSES = 20
@@ -451,10 +452,10 @@ def gen_on_fit_config_fn(
         Callable[[int], Dict[str, Scalar]]: Function to be called at the beginnig of each rounds.
     """
 
-    def on_fit_config(rnd: int) -> Dict[str, Scalar]:
+    def on_fit_config(server_round: int) -> Dict[str, Scalar]:
         """Return a configuration with specific client learning rate."""
         local_config = {
-            "epoch_global": rnd,
+            "epoch_global": server_round,
             "epochs": epochs_per_round,
             "batch_size": batch_size,
             "client_learning_rate": client_learning_rate,
@@ -466,7 +467,9 @@ def gen_on_fit_config_fn(
 
 def get_cifar_eval_fn(
     path_original_dataset: Path, num_classes: int = 10
-) -> Callable[[Weights], Optional[Tuple[float, Dict[str, float]]]]:
+) -> Callable[
+    [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
+]:
     """Returns an evaluation function for centralized evaluation."""
     CIFAR = CIFAR10 if num_classes == 10 else CIFAR100
     transforms = get_transforms(num_classes=num_classes)
@@ -478,7 +481,10 @@ def get_cifar_eval_fn(
         transform=transforms["test"],
     )
 
-    def evaluate(weights: Weights) -> Optional[Tuple[float, Dict[str, float]]]:
+    def evaluate(
+        server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        # pylint: disable=unused-argument
         """Use the entire CIFAR-10 test set for evaluation."""
         # determine device
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -486,7 +492,7 @@ def get_cifar_eval_fn(
         state_dict = OrderedDict(
             {
                 k: torch.tensor(np.atleast_1d(v))
-                for k, v in zip(net.state_dict().keys(), weights)
+                for k, v in zip(net.state_dict().keys(), parameters_ndarrays)
             }
         )
         net.load_state_dict(state_dict, strict=True)
@@ -511,7 +517,7 @@ def get_initial_parameters(num_classes: int = 10) -> Parameters:
     """
     model = get_cifar_model(num_classes)
     weights = [val.cpu().numpy() for _, val in model.state_dict().items()]
-    parameters = weights_to_parameters(weights)
+    parameters = ndarrays_to_parameters(weights)
 
     return parameters
 

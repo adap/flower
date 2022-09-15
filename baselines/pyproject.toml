@@ -1,15 +1,15 @@
 [build-system]
 requires = [
-    "poetry==1.1.13",
+    "poetry==1.1.14",
 ]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "flwr_baselines"
-version = "0.18.0"
+version = "1.0.0"
 description = "Flower Baselines"
 license = "Apache-2.0"
-authors = ["The Flower Authors <enquiries@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.dev>"]
 readme = "README.md"
 homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"
@@ -40,7 +40,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.7.12"
 # Mandatory dependencies
-flwr = { extras = ["simulation"], version = "^0.18.0" }
+flwr = { extras = ["simulation"], version = "^1.0.0" }
 torch = "^1.10.1"
 torchvision = "^0.11.2"
 hydra-core = "^1.2.0" 
@@ -53,9 +53,9 @@ wget = "^3.2"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.10.1"
-black = "==22.3.0"
-docformatter = "==1.4"
-mypy = "==0.931"
+black = "==22.8.0"
+docformatter = "==1.5.0"
+mypy = "==0.961"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"

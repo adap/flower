@@ -1,18 +1,15 @@
 [build-system]
-requires = [
-    "poetry==1.1.13",
-]
-build-backend = "poetry.masonry.api"
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "simulation_pytorch"
 version = "0.1.0"
 description = "Federated Learning Simulation with Flower and PyTorch"
-authors = ["The Flower Authors <enquiries@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-flwr = {extras = ["simulation"], version = "^0.17.0"}
-# flwr = {extras = ["simulation"], path = "../../", develop = true }  # Development
-torch = "1.7.1"
-torchvision = "0.8.2"
+flwr = { extras = ["simulation"], version = "^1.0.0" }
+torch = "^1.12.0"
+torchvision = "^0.13.0"

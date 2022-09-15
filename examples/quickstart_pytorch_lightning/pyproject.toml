@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "poetry==1.1.13",
+    "poetry==1.1.14",
 ]
 build-backend = "poetry.masonry.api"
 
@@ -8,11 +8,11 @@ build-backend = "poetry.masonry.api"
 name = "quickstart_pytorch_lightning"
 version = "0.1.0"
 description = "Federated Learning Quickstart with Flower and PyTorch Lightning"
-authors = ["The Flower Authors <enquiries@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-flwr = "^0.17.0"
+flwr = "^1.0.0"
 # flwr = { path = "../../", develop = true }  # Development
 pytorch-lightning = "^1.4.7"
 torchvision = "^0.10.0"

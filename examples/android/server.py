@@ -19,13 +19,13 @@ def main() -> None:
 
     # Start Flower server for 10 rounds of federated learning
     fl.server.start_server(
-        server_address="[::]:8999",
+        server_address="0.0.0.0:8080",
         config={"num_rounds": 10},
         strategy=strategy,
     )
 
 
-def fit_config(rnd: int):
+def fit_config(server_round: int):
     """Return training configuration dict for each round.
 
     Keep batch size fixed at 32, perform two rounds of training with one

@@ -15,9 +15,7 @@
 """Flower Client app tests."""
 
 
-from typing import Dict, List, Tuple
-
-import numpy as np
+from typing import Dict, Tuple
 
 from flwr.common import (
     Config,
@@ -25,9 +23,11 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
-    ParametersRes,
-    PropertiesIns,
-    PropertiesRes,
+    GetParametersIns,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
+    NDArrays,
     Scalar,
 )
 
@@ -39,11 +39,11 @@ from .numpy_client import NumPyClient
 class PlainClient(Client):
     """Client implementation extending the low-level Client."""
 
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         # This method is not expected to be called
         raise Exception()
 
-    def get_parameters(self) -> ParametersRes:
+    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         # This method is not expected to be called
         raise Exception()
 
@@ -63,18 +63,18 @@ class NeedsWrappingClient(NumPyClient):
         # This method is not expected to be called
         raise Exception()
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config: Config) -> NDArrays:
         # This method is not expected to be called
         raise Exception()
 
     def fit(
-        self, parameters: List[np.ndarray], config: Config
-    ) -> Tuple[List[np.ndarray], int, Dict[str, Scalar]]:
+        self, parameters: NDArrays, config: Config
+    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
         # This method is not expected to be called
         raise Exception()
 
     def evaluate(
-        self, parameters: List[np.ndarray], config: Config
+        self, parameters: NDArrays, config: Config
     ) -> Tuple[float, int, Dict[str, Scalar]]:
         # This method is not expected to be called
         raise Exception()

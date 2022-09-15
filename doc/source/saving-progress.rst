@@ -19,16 +19,23 @@ It then continues to save returned (aggregated) weights before it returns those 
     class SaveModelStrategy(fl.server.strategy.FedAvg):
         def aggregate_fit(
             self,
-            rnd: int,
+            server_round: int,
             results: List[Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
-            failures: List[BaseException],
-        ) -> Optional[fl.common.Weights]:
-            aggregated_weights = super().aggregate_fit(rnd, results, failures)
-            if aggregated_weights is not None:
-                # Save aggregated_weights
-                print(f"Saving round {rnd} aggregated_weights...")
-                np.savez(f"round-{rnd}-weights.npz", *aggregated_weights)
-            return aggregated_weights
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+
+            # Call aggregate_fit from base class (FedAvg) to aggregate parameters and metrics
+            aggregated_parameters, aggregated_metrics = super().aggregate_fit(server_round, results, failures)
+        
+            if aggregated_parameters is not None:
+                # Convert `Parameters` to `List[np.ndarray]`
+                aggregated_ndarrays: List[np.ndarray] = fl.common.parameters_to_ndarrays(aggregated_parameters)
+
+                # Save aggregated_ndarrays
+                print(f"Saving round {server_round} aggregated_ndarrays...")
+                np.savez(f"round-{server_round}-weights.npz", *aggregated_ndarrays)
+
+            return aggregated_parameters, aggregated_metrics
 
     # Create strategy and run server
     strategy = SaveModelStrategy(
@@ -46,7 +53,7 @@ Clients can return custom metrics to the server by returning a dictionary:
 
     class CifarClient(fl.client.NumPyClient):
 
-        def get_parameters(self):
+        def get_parameters(self, config):
             # ...
 
         def fit(self, parameters, config):
@@ -72,24 +79,28 @@ The server can then use a customized strategy to aggregate the metrics provided 
     class AggregateCustomMetricStrategy(fl.server.strategy.FedAvg):
         def aggregate_evaluate(
             self,
-            rnd: int,
+            server_round: int,
             results: List[Tuple[ClientProxy, EvaluateRes]],
-            failures: List[BaseException],
-        ) -> Optional[float]:
-            """Aggregate evaluation losses using weighted average."""
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+            """Aggregate evaluation accuracy using weighted average."""
+
             if not results:
-                return None
-            
+                return None, {}
+
+            # Call aggregate_evaluate from base class (FedAvg) to aggregate loss and metrics
+            aggregated_loss, aggregated_metrics = super().aggregate_evaluate(server_round, results, failures)
+
             # Weigh accuracy of each client by number of examples used
             accuracies = [r.metrics["accuracy"] * r.num_examples for _, r in results]
             examples = [r.num_examples for _, r in results]
-            
-            # Aggregate and print custom metric
-            accuracy_aggregated = sum(accuracies) / sum(examples)
-            print(f"Round {rnd} accuracy aggregated from client results: {accuracy_aggregated}")
 
-            # Call aggregate_evaluate from base class (FedAvg)
-            return super().aggregate_evaluate(rnd, results, failures)
+            # Aggregate and print custom metric
+            aggregated_accuracy = sum(accuracies) / sum(examples)
+            print(f"Round {server_round} accuracy aggregated from client results: {aggregated_accuracy}")
+
+            # Return aggregated loss and metrics (i.e., aggregated accuracy)
+            return aggregated_loss, {"accuracy": aggregated_accuracy}
 
     # Create strategy and run server
     strategy = AggregateCustomMetricStrategy(

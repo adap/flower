@@ -108,7 +108,7 @@ def main(args) -> None:
 
     # Start Flower client
     client = MnistClient(model, x_train, y_train, x_test, y_test, args)
-    fl.client.start_numpy_client("[::]:8080", client=client)
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
     if args.dpsgd:
         print("Privacy Loss: ", PRIVACY_LOSS)
 

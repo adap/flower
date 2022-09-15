@@ -12,7 +12,7 @@ if __name__ == "__main__":
     initial_parameters = weights_to_parameters(initial_weights)
     strategy = FedAvgCpp(initial_parameters=initial_parameters)
     fl.server.start_server(
-        server_address="127.0.0.1:8888",
+        server_address="0.0.0.0:8080",
         config={"num_rounds": 5},
         strategy=strategy,
     )

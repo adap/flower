@@ -17,11 +17,12 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-import numpy as np
+import numpy.typing as npt
 
-Weights = List[np.ndarray]
+NDArray = npt.NDArray[Any]
+NDArrays = List[NDArray]
 
 # The following union type contains Python types corresponding to ProtoBuf types that
 # ProtoBuf considers to be "Scalar Value Types", even though some of them arguably do
@@ -40,7 +41,10 @@ class Code(Enum):
     """Client status codes."""
 
     OK = 0
-    GET_PARAMETERS_NOT_IMPLEMENTED = 1
+    GET_PROPERTIES_NOT_IMPLEMENTED = 1
+    GET_PARAMETERS_NOT_IMPLEMENTED = 2
+    FIT_NOT_IMPLEMENTED = 3
+    EVALUATE_NOT_IMPLEMENTED = 4
 
 
 @dataclass
@@ -60,9 +64,17 @@ class Parameters:
 
 
 @dataclass
-class ParametersRes:
+class GetParametersIns:
+    """Parameters request for a client."""
+
+    config: Config
+
+
+@dataclass
+class GetParametersRes:
     """Response when asked to return parameters."""
 
+    status: Status
     parameters: Parameters
 
 
@@ -78,6 +90,7 @@ class FitIns:
 class FitRes:
     """Fit response from a client."""
 
+    status: Status
     parameters: Parameters
     num_examples: int
     metrics: Dict[str, Scalar]
@@ -95,20 +108,21 @@ class EvaluateIns:
 class EvaluateRes:
     """Evaluate response from a client."""
 
+    status: Status
     loss: float
     num_examples: int
     metrics: Dict[str, Scalar]
 
 
 @dataclass
-class PropertiesIns:
-    """Properties requests for a client."""
+class GetPropertiesIns:
+    """Properties request for a client."""
 
     config: Config
 
 
 @dataclass
-class PropertiesRes:
+class GetPropertiesRes:
     """Properties response from a client."""
 
     status: Status
@@ -116,14 +130,14 @@ class PropertiesRes:
 
 
 @dataclass
-class Reconnect:
-    """Reconnect message from server to client."""
+class ReconnectIns:
+    """ReconnectIns message from server to client."""
 
     seconds: Optional[int]
 
 
 @dataclass
-class Disconnect:
-    """Disconnect message from client to server."""
+class DisconnectRes:
+    """DisconnectRes message from client to server."""
 
     reason: str

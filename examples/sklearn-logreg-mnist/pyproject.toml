@@ -1,21 +1,21 @@
 [build-system]
 requires = [
-    "poetry==1.1.13",
+    "poetry==1.1.14",
 ]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "sklearn-mnist"
 version = "0.1.0"
-description = "Federated training with scikit-learn"
+description = "Federated learning with scikit-learn and Flower"
 authors = [
-    "The Flower Authors <enquiries@flower.dev>",
+    "The Flower Authors <hello@flower.dev>",
     "Kaushik Amar Das <kaushik.das@iiitg.ac.in>"
 ]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-flwr = "^0.17.0"
+flwr = "^1.0.0"
 # flwr = { path = "../../", develop = true }  # Development
-scikit-learn = "^0.24.2"
+scikit-learn = "^1.1.1"
 openml = "^0.12.2"

@@ -31,10 +31,10 @@ from .connection import grpc_connection
 EXPECTED_NUM_SERVER_MESSAGE = 10
 
 SERVER_MESSAGE = ServerMessage()
-SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect=ServerMessage.Reconnect())
+SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect_ins=ServerMessage.ReconnectIns())
 
 CLIENT_MESSAGE = ClientMessage()
-CLIENT_MESSAGE_DISCONNECT = ClientMessage(disconnect=ClientMessage.Disconnect())
+CLIENT_MESSAGE_DISCONNECT = ClientMessage(disconnect_res=ClientMessage.DisconnectRes())
 
 
 def unused_tcp_port() -> int:
@@ -63,7 +63,7 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
 
         try:
             client_message = next(request_iterator)
-            if client_message.HasField("disconnect"):
+            if client_message.HasField("disconnect_res"):
                 break
         except StopIteration:
             break
@@ -100,7 +100,7 @@ def test_integration_connection() -> None:
                 server_message = receive()
 
                 messages_received += 1
-                if server_message.HasField("reconnect"):
+                if server_message.HasField("reconnect_ins"):
                     send(CLIENT_MESSAGE_DISCONNECT)
                     break
 

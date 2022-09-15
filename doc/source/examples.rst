@@ -1,5 +1,5 @@
-Usage Examples
-==============
+Code examples
+=============
 
 Flower comes with a number of usage examples. The examples demonstrate how
 Flower can be used to federate different kinds of existing machine learning
@@ -9,7 +9,7 @@ pipelines, usually leveraging popular machine learning frameworks such as
 
 .. note::
    Flower usage examples used to be bundled with Flower in a package called
-   `flwr_example`. We are migrating those examples to standalone projects to
+   ``flwr_example``. We are migrating those examples to standalone projects to
    make them easier to use. All new examples are based in the directory
    `examples <https://github.com/adap/flower/tree/main/examples>`_.
 
@@ -57,7 +57,7 @@ This example shows how Flower can be used to build a federated learning system t
 
 
 Legacy Examples (`flwr_example`)
-================================
+--------------------------------
 
 .. warning::
    The useage examples in `flwr_example` are deprecated and will be removed in
@@ -66,7 +66,7 @@ Legacy Examples (`flwr_example`)
 
 
 Extra Dependencies
-------------------
+~~~~~~~~~~~~~~~~~~
 
 The core Flower framework keeps a minimal set of dependencies. The examples
 demonstrate Flower in the context of different machine learning frameworks, so
@@ -89,7 +89,7 @@ Please consult :code:`pyproject.toml` for a full list of possible extras
 
 
 PyTorch Examples
-----------------
+~~~~~~~~~~~~~~~~
 
 Our PyTorch examples are based on PyTorch 1.7. They should work with other
 releases as well. So far, we provide the following examples.
@@ -130,7 +130,7 @@ For more details, see :code:`src/py/flwr_example/pytorch_imagenet`.
 
 
 TensorFlow Examples
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 Our TensorFlow examples are based on TensorFlow 2.0 or newer. So far, we
 provide the following examples.

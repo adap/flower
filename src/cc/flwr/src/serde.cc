@@ -38,8 +38,8 @@ ProtoScalar scalar_to_proto(flwr::Scalar scalar_msg) {
     s.set_bytes(scalar_msg.getBytes().value());
     return s;
   }
-  if (scalar_msg.getFloat() != std::nullopt) {
-    s.set_double_(scalar_msg.getFloat().value());
+  if (scalar_msg.getDouble() != std::nullopt) {
+    s.set_double_(scalar_msg.getDouble().value());
     return s;
   }
   if (scalar_msg.getInt() != std::nullopt) {
@@ -61,7 +61,7 @@ flwr::Scalar scalar_from_proto(ProtoScalar scalar_msg) {
   flwr::Scalar scalar;
   switch (scalar_msg.scalar_case()) {
     case 1:
-      scalar.setFloat(scalar_msg.double_());
+      scalar.setDouble(scalar_msg.double_());
       return scalar;
     case 8:
       scalar.setInt(scalar_msg.sint64());
@@ -171,11 +171,11 @@ ClientMessage_EvaluateRes evaluate_res_to_proto(flwr::EvaluateRes res) {
   ClientMessage_EvaluateRes cres;
   google::protobuf::Map< ::std::string, ::flower::transport::Scalar>*
       metrics_msg;
+  google::protobuf::Map< ::std::string, ::flower::transport::Scalar> proto;
   if (res.getMetrics() == std::nullopt) {
     metrics_msg = NULL;
   } else {
-    google::protobuf::Map< ::std::string, ::flower::transport::Scalar> proto =
-        metrics_to_proto(res.getMetrics().value());
+    proto = metrics_to_proto(res.getMetrics().value());
     metrics_msg = &proto;
   }
 
@@ -183,7 +183,12 @@ ClientMessage_EvaluateRes evaluate_res_to_proto(flwr::EvaluateRes res) {
   cres.set_loss(res.getLoss());
   cres.set_num_examples(res.getNum_example());
   if (metrics_msg != NULL) {
-    *cres.mutable_metrics() = *metrics_msg;
+    auto& map = *cres.mutable_metrics();
+
+    for (auto& [key, value] : *metrics_msg) {
+      map[key] = value;
+    }
   }
+  
   return cres;
 }

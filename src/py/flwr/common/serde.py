@@ -43,69 +43,86 @@ def parameters_from_proto(msg: Parameters) -> typing.Parameters:
     return typing.Parameters(tensors=tensors, tensor_type=msg.tensor_type)
 
 
-#  === Reconnect message ===
+#  === ReconnectIns message ===
 
 
-def reconnect_to_proto(reconnect: typing.Reconnect) -> ServerMessage.Reconnect:
-    """Serialize Reconnect to ProtoBuf message."""
-    if reconnect.seconds is not None:
-        return ServerMessage.Reconnect(seconds=reconnect.seconds)
-    return ServerMessage.Reconnect()
+def reconnect_ins_to_proto(ins: typing.ReconnectIns) -> ServerMessage.ReconnectIns:
+    """Serialize ReconnectIns to ProtoBuf message."""
+    if ins.seconds is not None:
+        return ServerMessage.ReconnectIns(seconds=ins.seconds)
+    return ServerMessage.ReconnectIns()
 
 
-def reconnect_from_proto(msg: ServerMessage.Reconnect) -> typing.Reconnect:
-    """Deserialize Reconnect from ProtoBuf message."""
-    return typing.Reconnect(seconds=msg.seconds)
+def reconnect_ins_from_proto(msg: ServerMessage.ReconnectIns) -> typing.ReconnectIns:
+    """Deserialize ReconnectIns from ProtoBuf message."""
+    return typing.ReconnectIns(seconds=msg.seconds)
 
 
-# === Disconnect message ===
+# === DisconnectRes message ===
 
 
-def disconnect_to_proto(disconnect: typing.Disconnect) -> ClientMessage.Disconnect:
-    """Serialize Disconnect to ProtoBuf message."""
+def disconnect_res_to_proto(res: typing.DisconnectRes) -> ClientMessage.DisconnectRes:
+    """Serialize DisconnectRes to ProtoBuf message."""
     reason_proto = Reason.UNKNOWN
-    if disconnect.reason == "RECONNECT":
+    if res.reason == "RECONNECT":
         reason_proto = Reason.RECONNECT
-    elif disconnect.reason == "POWER_DISCONNECTED":
+    elif res.reason == "POWER_DISCONNECTED":
         reason_proto = Reason.POWER_DISCONNECTED
-    elif disconnect.reason == "WIFI_UNAVAILABLE":
+    elif res.reason == "WIFI_UNAVAILABLE":
         reason_proto = Reason.WIFI_UNAVAILABLE
-    return ClientMessage.Disconnect(reason=reason_proto)
+    return ClientMessage.DisconnectRes(reason=reason_proto)
 
 
-def disconnect_from_proto(msg: ClientMessage.Disconnect) -> typing.Disconnect:
-    """Deserialize Disconnect from ProtoBuf message."""
+def disconnect_res_from_proto(msg: ClientMessage.DisconnectRes) -> typing.DisconnectRes:
+    """Deserialize DisconnectRes from ProtoBuf message."""
     if msg.reason == Reason.RECONNECT:
-        return typing.Disconnect(reason="RECONNECT")
+        return typing.DisconnectRes(reason="RECONNECT")
     if msg.reason == Reason.POWER_DISCONNECTED:
-        return typing.Disconnect(reason="POWER_DISCONNECTED")
+        return typing.DisconnectRes(reason="POWER_DISCONNECTED")
     if msg.reason == Reason.WIFI_UNAVAILABLE:
-        return typing.Disconnect(reason="WIFI_UNAVAILABLE")
-    return typing.Disconnect(reason="UNKNOWN")
+        return typing.DisconnectRes(reason="WIFI_UNAVAILABLE")
+    return typing.DisconnectRes(reason="UNKNOWN")
 
 
 # === GetParameters messages ===
 
 
-def get_parameters_to_proto() -> ServerMessage.GetParameters:
+def get_parameters_ins_to_proto(
+    ins: typing.GetParametersIns,
+) -> ServerMessage.GetParametersIns:
+    """Serialize GetParametersIns to ProtoBuf message."""
+    config = properties_to_proto(ins.config)
+    return ServerMessage.GetParametersIns(config=config)
+
+
+def get_parameters_ins_from_proto(
+    msg: ServerMessage.GetParametersIns,
+) -> typing.GetParametersIns:
+    """Deserialize GetParametersIns from ProtoBuf message."""
+    config = properties_from_proto(msg.config)
+    return typing.GetParametersIns(config=config)
+
+
+def get_parameters_res_to_proto(
+    res: typing.GetParametersRes,
+) -> ClientMessage.GetParametersRes:
     """."""
-    return ServerMessage.GetParameters()
-
-
-# Not required:
-# def get_weights_from_proto(msg: ServerMessage.GetWeights) -> None:
-
-
-def parameters_res_to_proto(res: typing.ParametersRes) -> ClientMessage.ParametersRes:
-    """."""
+    status_msg = status_to_proto(res.status)
+    if res.status.code == typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED:
+        return ClientMessage.GetParametersRes(status=status_msg)
     parameters_proto = parameters_to_proto(res.parameters)
-    return ClientMessage.ParametersRes(parameters=parameters_proto)
+    return ClientMessage.GetParametersRes(
+        status=status_msg, parameters=parameters_proto
+    )
 
 
-def parameters_res_from_proto(msg: ClientMessage.ParametersRes) -> typing.ParametersRes:
+def get_parameters_res_from_proto(
+    msg: ClientMessage.GetParametersRes,
+) -> typing.GetParametersRes:
     """."""
+    status = status_from_proto(msg=msg.status)
     parameters = parameters_from_proto(msg.parameters)
-    return typing.ParametersRes(parameters=parameters)
+    return typing.GetParametersRes(status=status, parameters=parameters)
 
 
 # === Fit messages ===
@@ -127,9 +144,13 @@ def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
 
 def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
     """Serialize FitIns to ProtoBuf message."""
+    status_msg = status_to_proto(res.status)
+    if res.status.code == typing.Code.FIT_NOT_IMPLEMENTED:
+        return ClientMessage.FitRes(status=status_msg)
     parameters_proto = parameters_to_proto(res.parameters)
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     return ClientMessage.FitRes(
+        status=status_msg,
         parameters=parameters_proto,
         num_examples=res.num_examples,
         metrics=metrics_msg,
@@ -138,9 +159,11 @@ def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
 
 def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     """Deserialize FitRes from ProtoBuf message."""
+    status = status_from_proto(msg=msg.status)
     parameters = parameters_from_proto(msg.parameters)
     metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
     return typing.FitRes(
+        status=status,
         parameters=parameters,
         num_examples=msg.num_examples,
         metrics=metrics,
@@ -150,45 +173,67 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
 # === Properties messages ===
 
 
-def properties_ins_to_proto(ins: typing.PropertiesIns) -> ServerMessage.PropertiesIns:
-    """Serialize PropertiesIns to ProtoBuf message."""
+def get_properties_ins_to_proto(
+    ins: typing.GetPropertiesIns,
+) -> ServerMessage.GetPropertiesIns:
+    """Serialize GetPropertiesIns to ProtoBuf message."""
     config = properties_to_proto(ins.config)
-    return ServerMessage.PropertiesIns(config=config)
+    return ServerMessage.GetPropertiesIns(config=config)
 
 
-def properties_ins_from_proto(msg: ServerMessage.PropertiesIns) -> typing.PropertiesIns:
-    """Deserialize PropertiesIns from ProtoBuf message."""
+def get_properties_ins_from_proto(
+    msg: ServerMessage.GetPropertiesIns,
+) -> typing.GetPropertiesIns:
+    """Deserialize GetPropertiesIns from ProtoBuf message."""
     config = properties_from_proto(msg.config)
-    return typing.PropertiesIns(config=config)
+    return typing.GetPropertiesIns(config=config)
 
 
-def properties_res_to_proto(res: typing.PropertiesRes) -> ClientMessage.PropertiesRes:
-    """Serialize PropertiesIns to ProtoBuf message."""
+def get_properties_res_to_proto(
+    res: typing.GetPropertiesRes,
+) -> ClientMessage.GetPropertiesRes:
+    """Serialize GetPropertiesIns to ProtoBuf message."""
     status_msg = status_to_proto(res.status)
+    if res.status.code == typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED:
+        return ClientMessage.GetPropertiesRes(status=status_msg)
     properties_msg = properties_to_proto(res.properties)
-    return ClientMessage.PropertiesRes(status=status_msg, properties=properties_msg)
+    return ClientMessage.GetPropertiesRes(status=status_msg, properties=properties_msg)
 
 
-def properties_res_from_proto(msg: ClientMessage.PropertiesRes) -> typing.PropertiesRes:
-    """Deserialize PropertiesRes from ProtoBuf message."""
+def get_properties_res_from_proto(
+    msg: ClientMessage.GetPropertiesRes,
+) -> typing.GetPropertiesRes:
+    """Deserialize GetPropertiesRes from ProtoBuf message."""
     status = status_from_proto(msg=msg.status)
     properties = properties_from_proto(msg.properties)
-    return typing.PropertiesRes(status=status, properties=properties)
+    return typing.GetPropertiesRes(status=status, properties=properties)
 
 
 def status_to_proto(status: typing.Status) -> Status:
     """Serialize Code to ProtoBuf message."""
     code = Code.OK
+    if status.code == typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED:
+        code = Code.GET_PROPERTIES_NOT_IMPLEMENTED
     if status.code == typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED:
         code = Code.GET_PARAMETERS_NOT_IMPLEMENTED
+    if status.code == typing.Code.FIT_NOT_IMPLEMENTED:
+        code = Code.FIT_NOT_IMPLEMENTED
+    if status.code == typing.Code.EVALUATE_NOT_IMPLEMENTED:
+        code = Code.EVALUATE_NOT_IMPLEMENTED
     return Status(code=code, message=status.message)
 
 
 def status_from_proto(msg: Status) -> typing.Status:
     """Deserialize Code from ProtoBuf message."""
     code = typing.Code.OK
+    if msg.code == Code.GET_PROPERTIES_NOT_IMPLEMENTED:
+        code = typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED
     if msg.code == Code.GET_PARAMETERS_NOT_IMPLEMENTED:
         code = typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED
+    if msg.code == Code.FIT_NOT_IMPLEMENTED:
+        code = typing.Code.FIT_NOT_IMPLEMENTED
+    if msg.code == Code.EVALUATE_NOT_IMPLEMENTED:
+        code = typing.Code.EVALUATE_NOT_IMPLEMENTED
     return typing.Status(code=code, message=msg.message)
 
 
@@ -211,8 +256,12 @@ def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIn
 
 def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
     """Serialize EvaluateIns to ProtoBuf message."""
+    status_msg = status_to_proto(res.status)
+    if res.status.code == typing.Code.EVALUATE_NOT_IMPLEMENTED:
+        return ClientMessage.EvaluateRes(status=status_msg)
     metrics_msg = None if res.metrics is None else metrics_to_proto(res.metrics)
     return ClientMessage.EvaluateRes(
+        status=status_msg,
         loss=res.loss,
         num_examples=res.num_examples,
         metrics=metrics_msg,
@@ -221,8 +270,10 @@ def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
 
 def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRes:
     """Deserialize EvaluateRes from ProtoBuf message."""
+    status = status_from_proto(msg=msg.status)
     metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
     return typing.EvaluateRes(
+        status=status,
         loss=msg.loss,
         num_examples=msg.num_examples,
         metrics=metrics,

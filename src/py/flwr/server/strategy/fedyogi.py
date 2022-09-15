@@ -19,18 +19,18 @@ Paper: https://arxiv.org/abs/2003.00295
 """
 
 
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
 from flwr.common import (
     FitRes,
     MetricsAggregationFn,
+    NDArrays,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.server.client_proxy import ClientProxy
 
@@ -48,13 +48,16 @@ class FedYogi(FedOpt):
     def __init__(
         self,
         *,
-        fraction_fit: float = 0.1,
-        fraction_eval: float = 0.1,
+        fraction_fit: float = 1.0,
+        fraction_evaluate: float = 1.0,
         min_fit_clients: int = 2,
-        min_eval_clients: int = 2,
+        min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn: Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -75,16 +78,20 @@ class FedYogi(FedOpt):
         Args:
             fraction_fit (float, optional): Fraction of clients used during
                 training. Defaults to 0.1.
-            fraction_eval (float, optional): Fraction of clients used during
+            fraction_evaluate (float, optional): Fraction of clients used during
                 validation. Defaults to 0.1.
             min_fit_clients (int, optional): Minimum number of clients used
                 during training. Defaults to 2.
-            min_eval_clients (int, optional): Minimum number of clients used
+            min_evaluate_clients (int, optional): Minimum number of clients used
                 during validation. Defaults to 2.
             min_available_clients (int, optional): Minimum number of total
                 clients in the system. Defaults to 2.
-            eval_fn (Callable[[Weights], Optional[Tuple[float, float]]], optional):
-                Function used for validation. Defaults to None.
+            evaluate_fn : Optional[
+                Callable[
+                    [int, NDArrays, Dict[str, Scalar]],
+                    Optional[Tuple[float, Dict[str, Scalar]]]
+                ]
+            ]: Function used for validation. Defaults to None.
             on_fit_config_fn (Callable[[int], Dict[str, str]], optional):
                 Function used to configure training. Defaults to None.
             on_evaluate_config_fn (Callable[[int], Dict[str, str]], optional):
@@ -105,11 +112,11 @@ class FedYogi(FedOpt):
         """
         super().__init__(
             fraction_fit=fraction_fit,
-            fraction_eval=fraction_eval,
+            fraction_evaluate=fraction_evaluate,
             min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
+            min_evaluate_clients=min_evaluate_clients,
             min_available_clients=min_available_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
@@ -129,21 +136,21 @@ class FedYogi(FedOpt):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         fedavg_parameters_aggregated, metrics_aggregated = super().aggregate_fit(
-            rnd=rnd, results=results, failures=failures
+            server_round=server_round, results=results, failures=failures
         )
         if fedavg_parameters_aggregated is None:
             return None, {}
 
-        fedavg_weights_aggregate = parameters_to_weights(fedavg_parameters_aggregated)
+        fedavg_weights_aggregate = parameters_to_ndarrays(fedavg_parameters_aggregated)
 
         # Yogi
-        delta_t = [
+        delta_t: NDArrays = [
             x - y for x, y in zip(fedavg_weights_aggregate, self.current_weights)
         ]
 
@@ -151,7 +158,8 @@ class FedYogi(FedOpt):
         if not self.m_t:
             self.m_t = [np.zeros_like(x) for x in delta_t]
         self.m_t = [
-            self.beta_1 * x + (1 - self.beta_1) * y for x, y in zip(self.m_t, delta_t)
+            np.multiply(self.beta_1, x) + (1 - self.beta_1) * y
+            for x, y in zip(self.m_t, delta_t)
         ]
 
         # v_t
@@ -169,4 +177,4 @@ class FedYogi(FedOpt):
 
         self.current_weights = new_weights
 
-        return weights_to_parameters(self.current_weights), metrics_aggregated
+        return ndarrays_to_parameters(self.current_weights), metrics_aggregated

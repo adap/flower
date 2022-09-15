@@ -18,8 +18,9 @@ std::vector<double>
 LinearAlgebraUtil::multiply_matrix_vector(std::vector<std::vector<double>> mat, std::vector<double> v) {
     std::vector<double> result(mat.size(), 0.0);
     for (int i = 0; i < mat.size(); i++) {
+        result[i] = 0;
         for (int j = 0; j < mat[0].size(); j++) {
-            result[i] = mat[i][j] * v[j];
+            result[i] += mat[i][j] * v[j];
         }
     }
     return result;

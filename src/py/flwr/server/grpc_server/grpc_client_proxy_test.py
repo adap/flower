@@ -21,7 +21,7 @@ from unittest.mock import MagicMock
 import numpy as np
 
 import flwr
-from flwr.common.typing import Config
+from flwr.common.typing import Config, GetParametersIns
 from flwr.proto.transport_pb2 import ClientMessage, Parameters, Scalar
 from flwr.server.grpc_server.grpc_bridge import ResWrapper
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
@@ -35,7 +35,7 @@ MESSAGE_FIT_RES = ClientMessage(
 )
 CLIENT_PROPERTIES = {"tensor_type": Scalar(string="numpy.ndarray")}
 MESSAGE_PROPERTIES_RES = ClientMessage(
-    properties_res=ClientMessage.PropertiesRes(properties=CLIENT_PROPERTIES)
+    get_properties_res=ClientMessage.GetPropertiesRes(properties=CLIENT_PROPERTIES)
 )
 
 RES_WRAPPER_FIT_RES = ResWrapper(client_message=MESSAGE_FIT_RES)
@@ -60,9 +60,12 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         """This test is currently quite simple and should be improved."""
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
+        get_parameters_ins = GetParametersIns(config={})
 
         # Execute
-        value: flwr.common.ParametersRes = client.get_parameters(timeout=None)
+        value: flwr.common.GetParametersRes = client.get_parameters(
+            ins=get_parameters_ins, timeout=None
+        )
 
         # Assert
         assert not value.parameters.tensors
@@ -71,7 +74,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         """This test is currently quite simple and should be improved."""
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
-        parameters = flwr.common.weights_to_parameters([np.ones((2, 2))])
+        parameters = flwr.common.ndarrays_to_parameters([np.ones((2, 2))])
         ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
 
         # Execute
@@ -79,7 +82,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
 
         # Assert
         assert fit_res.parameters.tensor_type == "np"
-        assert flwr.common.parameters_to_weights(fit_res.parameters) == []
+        assert flwr.common.parameters_to_ndarrays(fit_res.parameters) == []
         assert fit_res.num_examples == 10
 
     def test_evaluate(self) -> None:
@@ -103,12 +106,12 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock_get_proprieties)
         request_properties: Config = {"tensor_type": "str"}
-        ins: flwr.common.PropertiesIns = flwr.common.PropertiesIns(
+        ins: flwr.common.GetPropertiesIns = flwr.common.GetPropertiesIns(
             config=request_properties
         )
 
         # Execute
-        value: flwr.common.PropertiesRes = client.get_properties(ins, timeout=None)
+        value: flwr.common.GetPropertiesRes = client.get_properties(ins, timeout=None)
 
         # Assert
         assert value.properties["tensor_type"] == "numpy.ndarray"

@@ -62,8 +62,6 @@ In this implementation, each client will be assigned with a unique index (int) f
         ) -> UnmaskVectorsResultsAndFailures:
             """Unmask and compute the aggregated model. UnmaskVectorRes contains shares of keys needed to generate masks."""
 
-
-
 The Flower server will execute and process received results in the following order:
 
 .. mermaid::
@@ -195,7 +193,6 @@ In this implementation, each client will be assigned with a unique index (int) f
             clients: List[ClientProxy]
         ) -> AskAggregatedEncodedMasksResultsAndFailures:
             """Ask aggregated encoded masks"""
-
 
 The Flower server will execute and process received results in the following order:
 
@@ -428,4 +425,3 @@ Types
         @dataclass
         class AskAggregatedEncodedMasksRes:
             aggregated_encoded_mask: Parameters
-

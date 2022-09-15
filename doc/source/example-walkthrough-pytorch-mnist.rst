@@ -1,4 +1,4 @@
-Example Walk-Through: PyTorch & MNIST
+Example: Walk-Through PyTorch & MNIST
 =====================================
 
 In this tutorial we will learn, how to train a Convolutional Neural Network on MNIST using Flower and PyTorch. 
@@ -26,7 +26,7 @@ Ready... Set... Train!
 ----------------------
 
 Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on PyTorch's `Basic MNIST Example <https://github.com/pytorch/examples/tree/master/mnist>`_. This will allow you see how easy it is to wrap your code with Flower and begin training in a federated way.
-We provide you with two helper scripts namely *run-server.sh* and *run-clients.sh*. Don't be afraid to look inside, they are simple enough =).
+We provide you with two helper scripts, namely *run-server.sh*, and *run-clients.sh*. Don't be afraid to look inside, they are simple enough =).
 
 Go ahead and launch on a terminal the *run-server.sh* script first as follows:
 
@@ -76,19 +76,19 @@ Inside the server helper script *run-server.sh* you will find the following code
 
 
 We can go a bit deeper and see that :code:`server.py` simply launches a server that will coordinate three rounds of training.
-Flower Servers are very customizable, but for simple workloads we can start a server using the :ref:`start_server <flwr-server-start_server-apiref>` function and leave all the configuration possibilities at their default values as seen below.
+Flower Servers are very customizable, but for simple workloads, we can start a server using the :ref:`start_server <flwr-server-start_server-apiref>` function and leave all the configuration possibilities at their default values, as seen below.
 
 .. code-block:: python
 
     import flwr as fl
 
-    fl.server.start_server(config={"num_rounds": 3})
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3))
 
 
 Flower Client
 -------------
 
-Next, let's take a look at the *run-clients.sh* file. You will see that it contains a main loop that starts a set of *clients*.
+Next, let's take a look at the *run-clients.sh* file. You will see that it contains the main loop that starts a set of *clients*.
 
 .. code-block:: bash 
 
@@ -103,7 +103,7 @@ Next, let's take a look at the *run-clients.sh* file. You will see that it conta
 
 Again, we can go deeper and look inside :code:`flwr_example/quickstart_pytorch/client.py`. 
 After going through the argument parsing code at the beginning of our :code:`main` function, you will find a call to :code:`mnist.load_data`. This function is responsible for partitioning the original MNIST datasets (*training* and *test*) and returning a :code:`torch.utils.data.DataLoader` s for each of them.
-We then instantiate a :code:`PytorchMNISTClient` object with our client ID, our DataLoaders, the number of epochs in each round, and which device we want to use for training (cpu or gpu).
+We then instantiate a :code:`PytorchMNISTClient` object with our client ID, our DataLoaders, the number of epochs in each round, and which device we want to use for training (CPU or GPU).
 
 
 .. code-block:: python
@@ -116,7 +116,7 @@ We then instantiate a :code:`PytorchMNISTClient` object with our client ID, our 
         device=device,
         )
 
-The :code:`PytorchMNISTClient` object if finally passed to :code:`fl.client.start_client` along with the server's address as the training process begins.
+The :code:`PytorchMNISTClient` object when finally passed to :code:`fl.client.start_client` along with the server's address as the training process begins.
 
 
 A Closer Look
@@ -168,10 +168,10 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
             )
             self.model.load_state_dict(state_dict, strict=True)
 
-        def get_parameters(self) -> fl.common.ParametersRes:
+        def get_parameters(self, config) -> fl.common.ParametersRes:
             """Encapsulates the weight into Flower Parameters """
             weights: fl.common.Weights = self.get_weights()
-            parameters = fl.common.weights_to_parameters(weights)
+            parameters = fl.common.ndarrays_to_parameters(weights)
             return fl.common.ParametersRes(parameters=parameters)
 
         def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
@@ -187,7 +187,7 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
                 Set of variables containing the new set of weights and information the client.
 
             """
-            weights: fl.common.Weights = fl.common.parameters_to_weights(ins.parameters)
+            weights: fl.common.Weights = fl.common.parameters_to_ndarrays(ins.parameters)
             fit_begin = timeit.default_timer()
 
             # Set model parameters/weights
@@ -200,7 +200,7 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
 
             # Return the refined weights and the number of examples used for training
             weights_prime: fl.common.Weights = self.get_weights()
-            params_prime = fl.common.weights_to_parameters(weights_prime)
+            params_prime = fl.common.ndarrays_to_parameters(weights_prime)
             fit_duration = timeit.default_timer() - fit_begin
             return fl.common.FitRes(
                 parameters=params_prime,
@@ -287,7 +287,7 @@ The code for the CNN is available under :code:`quickstart_pytorch.mnist` and it 
             return output
 
 
-The second thing to notice is that :code:`PytorchMNISTClient` class inherits from the :code:`fl.client.Client` and hence it must implement the following methods:  
+The second thing to notice is that :code:`PytorchMNISTClient` class inherits from the :code:`fl.client.Client`, and hence it must implement the following methods:  
 
 .. code-block:: python
 
@@ -300,7 +300,7 @@ The second thing to notice is that :code:`PytorchMNISTClient` class inherits fro
         """Abstract base class for Flower clients."""
 
         @abstractmethod
-        def get_parameters(self) -> ParametersRes:
+        def get_parameters(self, config) -> ParametersRes:
             """Return the current local model parameters."""
 
         @abstractmethod
@@ -434,20 +434,20 @@ These functions can both be found inside the same :code:`quickstart_pytorch.mnis
         return (num_test_samples, test_loss, correct / num_test_samples)
 
 
-Observe that these functions basically encapsulate regular training and test loops and provide :code:`fit` and :code:`evaluate` with final statistics for each round.
-You could substitute them with your own train and test loops, and also change the network architecture and the entire example would still work flawlessly. 
+Observe that these functions encapsulate regular training and test loops and provide :code:`fit` and :code:`evaluate` with final statistics for each round.
+You could substitute them with your custom train and test loops and change the network architecture, and the entire example would still work flawlessly. 
 As a matter of fact, why not try and modify the code to an example of your liking? 
 
 
 
 Give It a Try
 -------------
-Looking through the quickstart code description above will have given a good understanding on how *clients* and *servers* work in Flower, how to run a simple experiment and the internals of a client wrapper. 
-Here are a few things you could try on your own and want get more experience with Flower:
+Looking through the quickstart code description above will have given a good understanding of how *clients* and *servers* work in Flower, how to run a simple experiment, and the internals of a client wrapper. 
+Here are a few things you could try on your own and get more experience with Flower:
 
 - Try and change :code:`PytorchMNISTClient` so it can accept different architectures.
 - Modify the :code:`train` function so that it accepts different optimizers
-- Modify the :code:`test` function so that it proves not only the top-1 (regular accuracy), but also the top-5 accuracy?
+- Modify the :code:`test` function so that it proves not only the top-1 (regular accuracy) but also the top-5 accuracy?
 - Go larger! Try to adapt the code to larger images and datasets. Why not try training on ImageNet with a ResNet-50? 
 
 You are ready now. Enjoy learning in a federated way!

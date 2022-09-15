@@ -12,7 +12,7 @@ Centralized Training
 We begin with a brief description of the centralized CNN training code.
 If you want a more in-depth explanation of what's going on then have a look at the official `PyTorch tutorial <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_.
 
-Let's create an new file called :code:`cifar.py` with all the components required for a traditional (centralized) training on CIFAR-10. 
+Let's create a new file called :code:`cifar.py` with all the components required for a traditional (centralized) training on CIFAR-10. 
 First, all required packages (such as :code:`torch` and :code:`torchvision`) need to be imported.
 You can see that we do not import any package for federated learning.
 You can keep all these imports as they are even when we add the federated learning components at a later point.
@@ -160,15 +160,15 @@ You can now run your machine learning workload:
 
     python3 cifar.py
 
-So far this should all look fairly familiar if you've used PyTorch before.
+So far, this should all look fairly familiar if you've used PyTorch before.
 Let's take the next step and use what we've built to create a simple federated learning system consisting of one server and two clients.
 
 Federated Training
 ------------------
 
 The simple machine learning project discussed in the previous section trains the model on a single dataset (CIFAR-10), we call this centralized learning.
-This concept of centralized learning as shown in the previous section is probably known to most of you and many of you have used it previously.
-Normally, if you'd want to run machine learning workloads in a federated fashion then you'd have to change most of your code and set everything up from scratch. This can be a huge effort. 
+This concept of centralized learning, as shown in the previous section, is probably known to most of you, and many of you have used it previously.
+Normally, if you'd want to run machine learning workloads in a federated fashion, then you'd have to change most of your code and set everything up from scratch. This can be a considerable effort. 
 
 However, with Flower you can evolve your pre-existing code into a federated learning setup without the need for a major rewrite.
 
@@ -186,7 +186,7 @@ Next, we use the :code:`start_server` function to start a server and tell it to 
     import flwr as fl
 
     if __name__ == "__main__":
-        fl.server.start_server("0.0.0.0:8080", config={"num_rounds": 3})
+        fl.server.start_server(server_address="0.0.0.0:8080", config=fl.server.ServerConfig(num_rounds=3))
 
 We can already start the *server*:
 
@@ -251,7 +251,7 @@ We included type annotations to give you a better understanding of the data type
             self.testloader = testloader
             self.num_examples = num_examples
 
-        def get_parameters(self) -> List[np.ndarray]:
+        def get_parameters(self, config) -> List[np.ndarray]:
             # Return model parameters as a list of NumPy ndarrays
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
@@ -267,7 +267,7 @@ We included type annotations to give you a better understanding of the data type
             # Set model parameters, train model, return updated model parameters
             self.set_parameters(parameters)
             cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
-            return self.get_parameters(), self.num_examples["trainset"], {}
+            return self.get_parameters(config={}), self.num_examples["trainset"], {}
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict[str, str]
@@ -292,7 +292,7 @@ You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient
 
         # Start client
         client = CifarClient(model, trainloader, testloader, num_examples)
-        fl.client.start_numpy_client("0.0.0.0:8080", client)
+        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client)
 
 
     if __name__ == "__main__":
@@ -304,11 +304,11 @@ And that's it. You can now open two additional terminal windows and run
 
     python3 client.py
 
-in each window (make sure that the server is still running before you do so) and see your (previously centralized) PyTorch project run federated learning across two clients. Congratulations!
+in each window (make sure that the server is running before you do so) and see your (previously centralized) PyTorch project run federated learning across two clients. Congratulations!
 
 Next Steps
 ----------
 
 The full source code for this example: `PyTorch: From Centralized To Federated (Code) <https://github.com/adap/flower/blob/main/examples/pytorch_from_centralized_to_federated>`_.
-Our example is of course somewhat over-simplified because both clients load the exact same dataset, which isn't realistic.
+Our example is, of course, somewhat over-simplified because both clients load the exact same dataset, which isn't realistic.
 You're now prepared to explore this topic further. How about using different subsets of CIFAR-10 on each client? How about adding more clients?

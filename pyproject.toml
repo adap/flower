@@ -1,15 +1,13 @@
 [build-system]
-requires = [
-    "poetry==1.1.13",
-]
-build-backend = "poetry.masonry.api"
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.0.0"
+version = "1.1.0"
 description = "Flower - A Friendly Federated Learning Framework"
 license = "Apache-2.0"
-authors = ["The Flower Authors <enquiries@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.dev>"]
 readme = "README.md"
 homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"
@@ -45,19 +43,20 @@ exclude = [
     "src/py/**/*_test.py",
 ]
 
+[tool.poetry.scripts]
+flower-server = "flwr.server:run_server"
+flower-client = "flwr.client:run_client"
+
 [tool.poetry.dependencies]
 python = "^3.7"
 # Mandatory dependencies
-numpy = [
-    { version = ">=1.19.0,<1.21.0", python = "<3.10"},
-    { version = "^1.21", python = "^3.10"},
-]
-grpcio = "^1.41.0"
+numpy = "^1.21.0"
+grpcio = "^1.43.0"
 protobuf = "^3.19.0"
 importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
 iterators = "^0.0.2"
 # Optional dependencies
-ray = { extras = ["default"], version = ">=1.9.2,<1.12.0", optional = true }
+ray = { extras = ["default"], version = "~2.0.0", optional = true }
 
 [tool.poetry.extras]
 simulation = ["ray"]
@@ -67,25 +66,27 @@ types-protobuf = "==3.19.18"
 types-setuptools = "==57.4.14"
 types-dataclasses = "==0.6.5"
 isort = "==5.10.1"
-black = "==22.3.0"
-docformatter = "==1.4"
-mypy = "==0.950"
+black = "==22.8.0"
+docformatter = "==1.5.0"
+mypy = "==0.961"
 pylint = "==2.13.8"
 flake8 = "==3.9.2"
 pytest = "==7.1.2"
 pytest-cov = "==3.0.0"
 pytest-watch = "==4.2.0"
-grpcio-tools = "==1.41.0"
+grpcio-tools = "==1.43.0"
 mypy-protobuf = "==3.2.0"
 jupyterlab = "==3.3.2"
 rope = "==0.19.0"
 semver = "==2.13.0"
-sphinx = "==4.4.0"
+sphinx = "==5.1.1"
+myst-parser = "==0.18.0"
+sphinx-design = "==0.3.0"
 sphinx-copybutton = "==0.5.0"
-sphinx-panels = "==0.6.0"
 sphinxcontrib-mermaid = "==0.7.1"
-furo = "==2022.3.4"
-sphinx-reredirects = "==0.0.1"
+furo = "==2022.6.21"
+sphinx-reredirects = "==0.1.1"
+nbsphinx = "==0.8.9"
 
 [tool.isort]
 line_length = 88
@@ -112,6 +113,9 @@ testpaths = [
 ]
 
 [tool.mypy]
+plugins = [
+    "numpy.typing.mypy_plugin",
+]
 ignore_missing_imports = true
 strict = true
 

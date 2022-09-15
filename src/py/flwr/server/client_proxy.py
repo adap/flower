@@ -19,16 +19,17 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from flwr.common import (
-    Disconnect,
+    DisconnectRes,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
-    ParametersRes,
+    GetParametersIns,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
     Properties,
-    PropertiesIns,
-    PropertiesRes,
-    Reconnect,
+    ReconnectIns,
 )
 
 
@@ -42,16 +43,17 @@ class ClientProxy(ABC):
     @abstractmethod
     def get_properties(
         self,
-        ins: PropertiesIns,
+        ins: GetPropertiesIns,
         timeout: Optional[float],
-    ) -> PropertiesRes:
+    ) -> GetPropertiesRes:
         """Returns the client's properties."""
 
     @abstractmethod
     def get_parameters(
         self,
+        ins: GetParametersIns,
         timeout: Optional[float],
-    ) -> ParametersRes:
+    ) -> GetParametersRes:
         """Return the current local model parameters."""
 
     @abstractmethod
@@ -60,7 +62,7 @@ class ClientProxy(ABC):
         ins: FitIns,
         timeout: Optional[float],
     ) -> FitRes:
-        """Refine the provided weights using the locally held dataset."""
+        """Refine the provided parameters using the locally held dataset."""
 
     @abstractmethod
     def evaluate(
@@ -68,12 +70,12 @@ class ClientProxy(ABC):
         ins: EvaluateIns,
         timeout: Optional[float],
     ) -> EvaluateRes:
-        """Evaluate the provided weights using the locally held dataset."""
+        """Evaluate the provided parameters using the locally held dataset."""
 
     @abstractmethod
     def reconnect(
         self,
-        reconnect: Reconnect,
+        ins: ReconnectIns,
         timeout: Optional[float],
-    ) -> Disconnect:
+    ) -> DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
