@@ -93,7 +93,6 @@ def ResNet18():
 
 
 def load_model(model_name: str) -> nn.Module:
-
     if model_name == "Net":
         return Net()
     elif model_name == "ResNet18":
