@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15\x66lwr/proto/task.proto\x12\nflwr.proto\x1a\x1a\x66lwr/proto/transport.proto\"L\n\x04Task\x12\n\n\x02id\x18\x01 \x01(\t\x12\x38\n\x15legacy_server_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ServerMessage\"S\n\x06Result\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x38\n\x15legacy_client_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ClientMessageb\x06proto3'
+  serialized_pb=b'\n\x15\x66lwr/proto/task.proto\x12\nflwr.proto\x1a\x1a\x66lwr/proto/transport.proto\"Q\n\x04Task\x12\x0f\n\x07task_id\x18\x01 \x01(\x03\x12\x38\n\x15legacy_server_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ServerMessage\"S\n\x06Result\x12\x0f\n\x07task_id\x18\x01 \x01(\x03\x12\x38\n\x15legacy_client_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ClientMessageb\x06proto3'
   ,
   dependencies=[flwr_dot_proto_dot_transport__pb2.DESCRIPTOR,])
 
@@ -36,9 +36,9 @@ _TASK = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='flwr.proto.Task.id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      name='task_id', full_name='flwr.proto.Task.task_id', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -62,7 +62,7 @@ _TASK = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=65,
-  serialized_end=141,
+  serialized_end=146,
 )
 
 
@@ -76,8 +76,8 @@ _RESULT = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='task_id', full_name='flwr.proto.Result.task_id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -100,8 +100,8 @@ _RESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=143,
-  serialized_end=226,
+  serialized_start=148,
+  serialized_end=231,
 )
 
 _TASK.fields_by_name['legacy_server_message'].message_type = flwr_dot_proto_dot_transport__pb2._SERVERMESSAGE

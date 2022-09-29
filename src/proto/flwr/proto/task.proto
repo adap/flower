@@ -20,13 +20,13 @@ package flwr.proto;
 import "flwr/proto/transport.proto";
 
 message Task {
-  string id = 1;
+  int64 task_id = 1;
 
   ServerMessage legacy_server_message = 101;
 }
 
 message Result {
-  string task_id = 1;
+  int64 task_id = 1;
 
   ClientMessage legacy_client_message = 101;
 }
