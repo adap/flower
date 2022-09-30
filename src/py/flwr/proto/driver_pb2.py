@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x17\x66lwr/proto/driver.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/task.proto\"\x13\n\x11GetClientsRequest\"(\n\x12GetClientsResponse\x12\x12\n\nclient_ids\x18\x01 \x03(\x03\"4\n\x12\x43reateTasksRequest\x12\x1e\n\x04task\x18\x01 \x03(\x0b\x32\x10.flwr.proto.Task\"\'\n\x13\x43reateTasksResponse\x12\x10\n\x08task_ids\x18\x01 \x03(\x03\"9\n\x11GetResultsRequest\x12$\n\x08task_ids\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result\"9\n\x12GetResultsResponse\x12#\n\x07results\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result2\xf8\x01\n\x06\x44river\x12M\n\nGetClients\x12\x1d.flwr.proto.GetClientsRequest\x1a\x1e.flwr.proto.GetClientsResponse\"\x00\x12P\n\x0b\x43reateTasks\x12\x1e.flwr.proto.CreateTasksRequest\x1a\x1f.flwr.proto.CreateTasksResponse\"\x00\x12M\n\nGetResults\x12\x1d.flwr.proto.GetResultsRequest\x1a\x1e.flwr.proto.GetResultsResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x17\x66lwr/proto/driver.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/task.proto\"\x13\n\x11GetClientsRequest\"(\n\x12GetClientsResponse\x12\x12\n\nclient_ids\x18\x01 \x03(\x03\"J\n\x12\x43reateTasksRequest\x12\x34\n\x10task_assignments\x18\x01 \x03(\x0b\x32\x1a.flwr.proto.TaskAssignment\"\'\n\x13\x43reateTasksResponse\x12\x10\n\x08task_ids\x18\x01 \x03(\x03\"9\n\x11GetResultsRequest\x12$\n\x08task_ids\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result\"9\n\x12GetResultsResponse\x12#\n\x07results\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result2\xf8\x01\n\x06\x44river\x12M\n\nGetClients\x12\x1d.flwr.proto.GetClientsRequest\x1a\x1e.flwr.proto.GetClientsResponse\"\x00\x12P\n\x0b\x43reateTasks\x12\x1e.flwr.proto.CreateTasksRequest\x1a\x1f.flwr.proto.CreateTasksResponse\"\x00\x12M\n\nGetResults\x12\x1d.flwr.proto.GetResultsRequest\x1a\x1e.flwr.proto.GetResultsResponse\"\x00\x62\x06proto3'
   ,
   dependencies=[flwr_dot_proto_dot_task__pb2.DESCRIPTOR,])
 
@@ -93,7 +93,7 @@ _CREATETASKSREQUEST = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='task', full_name='flwr.proto.CreateTasksRequest.task', index=0,
+      name='task_assignments', full_name='flwr.proto.CreateTasksRequest.task_assignments', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -112,7 +112,7 @@ _CREATETASKSREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=125,
-  serialized_end=177,
+  serialized_end=199,
 )
 
 
@@ -143,8 +143,8 @@ _CREATETASKSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=179,
-  serialized_end=218,
+  serialized_start=201,
+  serialized_end=240,
 )
 
 
@@ -175,8 +175,8 @@ _GETRESULTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=220,
-  serialized_end=277,
+  serialized_start=242,
+  serialized_end=299,
 )
 
 
@@ -207,11 +207,11 @@ _GETRESULTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=279,
-  serialized_end=336,
+  serialized_start=301,
+  serialized_end=358,
 )
 
-_CREATETASKSREQUEST.fields_by_name['task'].message_type = flwr_dot_proto_dot_task__pb2._TASK
+_CREATETASKSREQUEST.fields_by_name['task_assignments'].message_type = flwr_dot_proto_dot_task__pb2._TASKASSIGNMENT
 _GETRESULTSREQUEST.fields_by_name['task_ids'].message_type = flwr_dot_proto_dot_task__pb2._RESULT
 _GETRESULTSRESPONSE.fields_by_name['results'].message_type = flwr_dot_proto_dot_task__pb2._RESULT
 DESCRIPTOR.message_types_by_name['GetClientsRequest'] = _GETCLIENTSREQUEST
@@ -273,8 +273,8 @@ _DRIVER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=339,
-  serialized_end=587,
+  serialized_start=361,
+  serialized_end=609,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetClients',

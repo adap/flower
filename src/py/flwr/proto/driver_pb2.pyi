@@ -34,14 +34,14 @@ global___GetClientsResponse = GetClientsResponse
 class CreateTasksRequest(google.protobuf.message.Message):
     """CreateTasks messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    TASK_FIELD_NUMBER: builtins.int
+    TASK_ASSIGNMENTS_FIELD_NUMBER: builtins.int
     @property
-    def task(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.Task]: ...
+    def task_assignments(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.TaskAssignment]: ...
     def __init__(self,
         *,
-        task: typing.Optional[typing.Iterable[flwr.proto.task_pb2.Task]] = ...,
+        task_assignments: typing.Optional[typing.Iterable[flwr.proto.task_pb2.TaskAssignment]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["task",b"task"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["task_assignments",b"task_assignments"]) -> None: ...
 global___CreateTasksRequest = CreateTasksRequest
 
 class CreateTasksResponse(google.protobuf.message.Message):
