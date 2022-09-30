@@ -21,8 +21,14 @@ global___GetClientsRequest = GetClientsRequest
 
 class GetClientsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    CLIENT_IDS_FIELD_NUMBER: builtins.int
+    @property
+    def client_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
     def __init__(self,
+        *,
+        client_ids: typing.Optional[typing.Iterable[builtins.int]] = ...,
         ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["client_ids",b"client_ids"]) -> None: ...
 global___GetClientsResponse = GetClientsResponse
 
 class CreateTasksRequest(google.protobuf.message.Message):
@@ -42,10 +48,10 @@ class CreateTasksResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TASK_IDS_FIELD_NUMBER: builtins.int
     @property
-    def task_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    def task_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
     def __init__(self,
         *,
-        task_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        task_ids: typing.Optional[typing.Iterable[builtins.int]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["task_ids",b"task_ids"]) -> None: ...
 global___CreateTasksResponse = CreateTasksResponse

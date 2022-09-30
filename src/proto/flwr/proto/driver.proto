@@ -32,11 +32,11 @@ service Driver {
 
 // GetClients messages
 message GetClientsRequest {}
-message GetClientsResponse {}
+message GetClientsResponse { repeated int64 client_ids = 1; }
 
 // CreateTasks messages
 message CreateTasksRequest { repeated Task task = 1; }
-message CreateTasksResponse { repeated string task_ids = 1; }
+message CreateTasksResponse { repeated int64 task_ids = 1; }
 
 // GetResults messages
 message GetResultsRequest { repeated Result task_ids = 1; }

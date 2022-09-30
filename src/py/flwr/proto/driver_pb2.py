@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x17\x66lwr/proto/driver.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/task.proto\"\x13\n\x11GetClientsRequest\"\x14\n\x12GetClientsResponse\"4\n\x12\x43reateTasksRequest\x12\x1e\n\x04task\x18\x01 \x03(\x0b\x32\x10.flwr.proto.Task\"\'\n\x13\x43reateTasksResponse\x12\x10\n\x08task_ids\x18\x01 \x03(\t\"9\n\x11GetResultsRequest\x12$\n\x08task_ids\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result\"9\n\x12GetResultsResponse\x12#\n\x07results\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result2\xf8\x01\n\x06\x44river\x12M\n\nGetClients\x12\x1d.flwr.proto.GetClientsRequest\x1a\x1e.flwr.proto.GetClientsResponse\"\x00\x12P\n\x0b\x43reateTasks\x12\x1e.flwr.proto.CreateTasksRequest\x1a\x1f.flwr.proto.CreateTasksResponse\"\x00\x12M\n\nGetResults\x12\x1d.flwr.proto.GetResultsRequest\x1a\x1e.flwr.proto.GetResultsResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x17\x66lwr/proto/driver.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/task.proto\"\x13\n\x11GetClientsRequest\"(\n\x12GetClientsResponse\x12\x12\n\nclient_ids\x18\x01 \x03(\x03\"4\n\x12\x43reateTasksRequest\x12\x1e\n\x04task\x18\x01 \x03(\x0b\x32\x10.flwr.proto.Task\"\'\n\x13\x43reateTasksResponse\x12\x10\n\x08task_ids\x18\x01 \x03(\x03\"9\n\x11GetResultsRequest\x12$\n\x08task_ids\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result\"9\n\x12GetResultsResponse\x12#\n\x07results\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result2\xf8\x01\n\x06\x44river\x12M\n\nGetClients\x12\x1d.flwr.proto.GetClientsRequest\x1a\x1e.flwr.proto.GetClientsResponse\"\x00\x12P\n\x0b\x43reateTasks\x12\x1e.flwr.proto.CreateTasksRequest\x1a\x1f.flwr.proto.CreateTasksResponse\"\x00\x12M\n\nGetResults\x12\x1d.flwr.proto.GetResultsRequest\x1a\x1e.flwr.proto.GetResultsResponse\"\x00\x62\x06proto3'
   ,
   dependencies=[flwr_dot_proto_dot_task__pb2.DESCRIPTOR,])
 
@@ -60,6 +60,13 @@ _GETCLIENTSRESPONSE = _descriptor.Descriptor(
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
+    _descriptor.FieldDescriptor(
+      name='client_ids', full_name='flwr.proto.GetClientsResponse.client_ids', index=0,
+      number=1, type=3, cpp_type=2, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -73,7 +80,7 @@ _GETCLIENTSRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=83,
-  serialized_end=103,
+  serialized_end=123,
 )
 
 
@@ -104,8 +111,8 @@ _CREATETASKSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=105,
-  serialized_end=157,
+  serialized_start=125,
+  serialized_end=177,
 )
 
 
@@ -119,7 +126,7 @@ _CREATETASKSRESPONSE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='task_ids', full_name='flwr.proto.CreateTasksResponse.task_ids', index=0,
-      number=1, type=9, cpp_type=9, label=3,
+      number=1, type=3, cpp_type=2, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -136,8 +143,8 @@ _CREATETASKSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=159,
-  serialized_end=198,
+  serialized_start=179,
+  serialized_end=218,
 )
 
 
@@ -168,8 +175,8 @@ _GETRESULTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=200,
-  serialized_end=257,
+  serialized_start=220,
+  serialized_end=277,
 )
 
 
@@ -200,8 +207,8 @@ _GETRESULTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=259,
-  serialized_end=316,
+  serialized_start=279,
+  serialized_end=336,
 )
 
 _CREATETASKSREQUEST.fields_by_name['task'].message_type = flwr_dot_proto_dot_task__pb2._TASK
@@ -266,8 +273,8 @@ _DRIVER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=319,
-  serialized_end=567,
+  serialized_start=339,
+  serialized_end=587,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetClients',
