@@ -15,7 +15,7 @@
 """Flower driver service client."""
 
 
-from typing import List
+from typing import Optional, Tuple
 
 from flwr.common.typing import ClientMessage
 
@@ -38,7 +38,7 @@ class Driver:
     def __init__(
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        certificates=None,
+        certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
     ) -> None:
         self.driver_service_address = driver_service_address
         self.certificates = certificates
@@ -62,7 +62,7 @@ class Driver:
         """."""
         # [...] call DriverAPI
         num_tasks: int = sum([len(ta.client_ids) for ta in req.task_assignments])
-        return CreateTasksResponse(task_ids=[i for i in range(num_tasks)])
+        return CreateTasksResponse(task_ids=list(range(num_tasks)))
 
     def get_results(self, req: GetResultsRequest) -> GetResultsResponse:
         """."""

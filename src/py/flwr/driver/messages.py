@@ -66,7 +66,7 @@ class GetClientsResponse:
 class CreateTasksRequest:
     """."""
 
-    task_assignments: List[Task]
+    task_assignments: List[TaskAssignment]
 
 
 @dataclass
