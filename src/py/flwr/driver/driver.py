@@ -45,27 +45,32 @@ class Driver:
 
     def connect(self) -> None:
         """."""
+        # pylint: disable=no-self-use
         # [...] connect to DriverAPI
         print("[Driver] Connected")
 
     def disconnect(self) -> None:
         """."""
+        # pylint: disable=no-self-use
         # [...] disconnect from DriverAPI
         print("[Driver] Disconnected")
 
     def get_clients(self, req: GetClientsRequest) -> GetClientsResponse:
         """."""
+        # pylint: disable=no-self-use,unused-argument
         # [...] call DriverAPI
         return GetClientsResponse(client_ids=list(range(5)))
 
     def create_tasks(self, req: CreateTasksRequest) -> CreateTasksResponse:
         """."""
+        # pylint: disable=no-self-use
         # [...] call DriverAPI
         num_tasks: int = sum([len(ta.client_ids) for ta in req.task_assignments])
         return CreateTasksResponse(task_ids=list(range(num_tasks)))
 
     def get_results(self, req: GetResultsRequest) -> GetResultsResponse:
         """."""
+        # pylint: disable=no-self-use
         # [...] call DriverAPI
         return GetResultsResponse(
             results=[
