@@ -22,11 +22,16 @@ import "flwr/proto/transport.proto";
 message Task {
   int64 task_id = 1;
 
-  ServerMessage legacy_server_message = 101;
+  ServerMessage legacy_server_message = 101 [ deprecated = true ];
+}
+
+message TaskAssignment {
+  Task task = 1;
+  repeated int64 client_ids = 2;
 }
 
 message Result {
   int64 task_id = 1;
 
-  ClientMessage legacy_client_message = 101;
+  ClientMessage legacy_client_message = 101 [ deprecated = true ];
 }

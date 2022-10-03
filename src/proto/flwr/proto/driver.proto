@@ -35,7 +35,7 @@ message GetClientsRequest {}
 message GetClientsResponse { repeated int64 client_ids = 1; }
 
 // CreateTasks messages
-message CreateTasksRequest { repeated Task task = 1; }
+message CreateTasksRequest { repeated TaskAssignment task_assignments = 1; }
 message CreateTasksResponse { repeated int64 task_ids = 1; }
 
 // GetResults messages
