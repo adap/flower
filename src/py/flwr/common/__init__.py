@@ -43,8 +43,6 @@ from .typing import Scalar as Scalar
 from .typing import ServerMessage as ServerMessage
 from .typing import Status as Status
 
-GRPC_MAX_MESSAGE_LENGTH: int = GRPC_MAX_MESSAGE_LENGTH
-
 __all__ = [
     "bytes_to_ndarray",
     "ClientMessage",
