@@ -7,6 +7,7 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
+BUILDVERSIONS = main v1.0.0
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -20,9 +21,14 @@ docs:
 
 serve:
 	make docs
-	python -m http.server --directory build/html
+	python -m http.server --directory build
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	for version in $(BUILDVERSIONS); do \
+		git stash --include-untracked; \
+		git checkout $$version; \
+		$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)/$$version" $(SPHINXOPTS) $(O); \
+	done;
+	git stash pop

@@ -34,7 +34,7 @@ copyright = u"2022 Adap GmbH"
 author = u"The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = u"1.1.0"
+release = u"v1.1.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -55,6 +55,18 @@ extensions = [
     "sphinx_reredirects",
     "nbsphinx",
 ]
+
+html_sidebars = {
+    "**": [
+        "sidebar/scroll-start.html",
+        "sidebar/brand.html",
+        "sidebar/versions.html",
+        "sidebar/search.html",
+        "sidebar/navigation.html",
+        "sidebar/ethical-ads.html",
+        "sidebar/scroll-end.html",
+    ]
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -89,7 +101,7 @@ redirects = {
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_title = f"Flower {release}"
+html_title = f"Flower"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.dev/docs/"
