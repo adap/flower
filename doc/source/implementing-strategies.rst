@@ -100,7 +100,6 @@ abstract methods:
 The Flower server calls these methods in the following order:
 
 .. mermaid::
-
    sequenceDiagram
       participant Strategy
       participant S as Flower Server<br/>start_server
