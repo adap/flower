@@ -15,16 +15,15 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
+from logging import DEBUG
 from typing import Callable, Dict, Optional, cast
 
 import ray
 
 from flwr import common
 from flwr.client import Client, ClientLike, to_client
-from flwr.server.client_proxy import ClientProxy
 from flwr.common.logger import log
-
-from logging import DEBUG
+from flwr.server.client_proxy import ClientProxy
 
 ClientFn = Callable[[str], ClientLike]
 
