@@ -28,9 +28,7 @@ serve:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	for version in $(BUILDVERSIONS); do \
-		git stash --include-untracked; \
 		git checkout $$version; \
 		VERSION="$$version" $(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)/$$version" $(SPHINXOPTS) $(O); \
 	done;
 	git checkout $(GITBRANCH)
-	git stash pop
