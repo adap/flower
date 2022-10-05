@@ -16,14 +16,13 @@
 
 
 from logging import INFO, WARNING
-from typing import Optional, Tuple
+from typing import Optional
 
 import grpc
 
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.typing import ClientMessage
-from flwr.driver import serde
 from flwr.proto import driver_pb2_grpc
 
 from .messages import (
