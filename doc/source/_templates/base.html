@@ -84,16 +84,18 @@
 
     {%- block scripts -%}
 
-    {# Custom JS #}
-    {%- block regular_scripts -%}
-    {% for path in script_files -%}
-      {{ js_tag(path) }}
-    {% endfor -%}
-    {%- endblock regular_scripts -%}
+      {# Custom JS #}
+      <script src="https://unpkg.com/mermaid@9.1.7/dist/mermaid.min.js"></script>
+    
+      {%- block regular_scripts -%}
+      {% for path in script_files -%}
+        {{ js_tag(path) }}
+      {% endfor -%}
+      {%- endblock regular_scripts -%}
 
-    {# Theme-related JavaScript code #}
-    {%- block theme_scripts -%}
-    {%- endblock -%}
+      {# Theme-related JavaScript code #}
+      {%- block theme_scripts -%}
+      {%- endblock -%}
 
     {%- endblock scripts -%}
     <script defer data-domain="flower.dev" data-api="/static/pla/api/event" src="/static/pla/js/script.js"></script>

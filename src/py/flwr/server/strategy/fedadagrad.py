@@ -85,12 +85,8 @@ class FedAdagrad(FedOpt):
                 during validation. Defaults to 2.
             min_available_clients (int, optional): Minimum number of total
                 clients in the system. Defaults to 2.
-            evaluate_fn : Optional[
-                Callable[
-                    [int, NDArrays, Dict[str, Scalar]],
-                    Optional[Tuple[float, Dict[str, Scalar]]]
-                ]
-            ]: Function used for validation. Defaults to None.
+            evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
+                Function used for validation. Defaults to None.
             on_fit_config_fn (Callable[[int], Dict[str, str]], optional):
                 Function used to configure training. Defaults to None.
             on_evaluate_config_fn (Callable[[int], Dict[str, str]], optional):
