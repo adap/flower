@@ -101,7 +101,7 @@ class FedAvg(Strategy):
             Initial global model parameters.
         fit_metrics_aggregation_fn : Optional[MetricsAggregationFn]
             Metrics aggregation function, optional.
-        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
+        evaluate_metrics_aggregation_fn : Optional[MetricsAggregationFn]
             Metrics aggregation function, optional.
         """
         super().__init__()
