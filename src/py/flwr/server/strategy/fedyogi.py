@@ -37,6 +37,7 @@ from flwr.server.client_proxy import ClientProxy
 from .fedopt import FedOpt
 
 
+# flake8: noqa: E501
 class FedYogi(FedOpt):
     """Adaptive Federated Optimization using Yogi (FedYogi) [Reddi et al.,
     2020] strategy.
@@ -44,7 +45,7 @@ class FedYogi(FedOpt):
     Paper: https://arxiv.org/abs/2003.00295
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals,line-too-long
     def __init__(
         self,
         *,

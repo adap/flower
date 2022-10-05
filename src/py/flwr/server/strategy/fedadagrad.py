@@ -37,7 +37,7 @@ from flwr.server.client_proxy import ClientProxy
 from .fedopt import FedOpt
 
 
-# pylint: disable=too-many-locals
+# flake8: noqa: E501
 class FedAdagrad(FedOpt):
     """Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et
     al., 2020] strategy.
@@ -45,7 +45,7 @@ class FedAdagrad(FedOpt):
     Paper: https://arxiv.org/abs/2003.00295
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-locals,too-many-instance-attributes,line-too-long
     def __init__(
         self,
         *,
