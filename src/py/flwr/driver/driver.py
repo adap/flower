@@ -45,7 +45,7 @@ class Driver:
     def __init__(
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+        certificates: Optional[bytes] = None,
     ) -> None:
         self.driver_service_address = driver_service_address
         self.certificates = certificates
