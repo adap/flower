@@ -14,6 +14,6 @@
 # ==============================================================================
 """Flower monitoring."""
 
-from .profiler import basic_profiler, SystemMonitor
+from .profiler import SystemMonitor, basic_profiler
 
 __all__ = ["SystemMonitor", "basic_profiler"]

@@ -61,8 +61,7 @@ nvsmi = { version = "^0.4.2", optional = true }
 psutil = { version = "^5.9.2", optional = true } 
 
 [tool.poetry.extras]
-simulation = ["ray"]
-simulation-profiler = ["ray", "nvsmi", "psutil"]
+simulation = ["ray", "nvsmi", "psutil"]
 
 [tool.poetry.dev-dependencies]
 types-protobuf = "==3.19.18"
