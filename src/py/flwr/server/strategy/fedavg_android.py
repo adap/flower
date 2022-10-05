@@ -39,11 +39,11 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
-
+# flake8: noqa: E501
 class FedAvgAndroid(Strategy):
     """Configurable FedAvg strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
     def __init__(
         self,
         *,
