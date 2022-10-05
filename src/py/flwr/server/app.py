@@ -71,7 +71,7 @@ def start_server(  # pylint: disable=too-many-arguments
         A server implementation, either `flwr.server.Server` or a subclass
         thereof. If no instance is provided, then `start_server` will create
         one.
-    config : ServerConfig (default: None)
+    config : Optional[ServerConfig] (default: None)
         Currently supported values are `num_rounds` (int, default: 1) and
         `round_timeout` in seconds (float, default: None).
     strategy : Optional[flwr.server.Strategy] (default: None).
