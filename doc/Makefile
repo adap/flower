@@ -8,6 +8,7 @@ SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
 BUILDVERSIONS = main v1.0.0
+GITBRANCH     = `git branch --show-current`
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -29,6 +30,7 @@ serve:
 	for version in $(BUILDVERSIONS); do \
 		git stash --include-untracked; \
 		git checkout $$version; \
-		$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)/$$version" $(SPHINXOPTS) $(O); \
+		VERSION="$$version" $(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)/$$version" $(SPHINXOPTS) $(O); \
 	done;
+	git checkout $(GITBRANCH)
 	git stash pop
