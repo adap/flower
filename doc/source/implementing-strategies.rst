@@ -137,6 +137,16 @@ The Flower server calls these methods in the following order:
 
         end
 
+        Note left of S: Centralized<br/>Evaluation
+        rect rgb(249, 219, 130)
+
+        S->>Strategy: evaluate
+        activate Strategy
+        Strategy-->>S: Centralized evaluation result
+        deactivate Strategy
+
+        end
+
         Note left of S: Federated<br/>Evaluation
         rect rgb(249, 219, 130)
 
@@ -158,16 +168,6 @@ The Flower server calls these methods in the following order:
         S->>Strategy: aggregate_evaluate<br/>List[EvaluateRes]
         activate Strategy
         Strategy-->>S: Aggregated evaluation results
-        deactivate Strategy
-
-        end
-
-        Note left of S: Centralized<br/>Evaluation
-        rect rgb(249, 219, 130)
-
-        S->>Strategy: evaluate
-        activate Strategy
-        Strategy-->>S: Centralized evaluation result
         deactivate Strategy
 
         end
