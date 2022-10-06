@@ -115,9 +115,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
         Optional dictionary containing arguments for the call to `ray.init`.
         If ray_init_args is None (the default), Ray will be initialized with
         the following default args:
-        
+
         { "ignore_reinit_error": True, "include_dashboard": False }
-        
+
         An empty dictionary can be used (ray_init_args={}) to prevent any
         arguments from being passed to ray.init.
     keep_initialised: Optional[bool] (default: False)
@@ -127,7 +127,6 @@ def start_simulation(  # pylint: disable=too-many-arguments
     -------
         hist : flwr.server.history.History.
             Object containing metrics from training.
-
     """
     # pylint: disable-msg=too-many-locals
 
