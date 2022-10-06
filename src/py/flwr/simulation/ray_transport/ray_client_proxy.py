@@ -15,12 +15,14 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
+from logging import DEBUG
 from typing import Callable, Dict, Optional, cast
 
 import ray
 
 from flwr import common
 from flwr.client import Client, ClientLike, to_client
+from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 
 ClientFn = Callable[[str], ClientLike]
@@ -41,7 +43,11 @@ class RayClientProxy(ClientProxy):
         future_get_properties_res = launch_and_get_properties.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.get(future_get_properties_res, timeout=timeout)
+        try:
+            res = ray.get(future_get_properties_res, timeout=timeout)
+        except Exception as ex:
+            log(DEBUG, ex)
+            raise ex
         return cast(
             common.GetPropertiesRes,
             res,
@@ -54,7 +60,11 @@ class RayClientProxy(ClientProxy):
         future_paramseters_res = launch_and_get_parameters.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.get(future_paramseters_res, timeout=timeout)
+        try:
+            res = ray.get(future_paramseters_res, timeout=timeout)
+        except Exception as ex:
+            log(DEBUG, ex)
+            raise ex
         return cast(
             common.GetParametersRes,
             res,
@@ -65,7 +75,11 @@ class RayClientProxy(ClientProxy):
         future_fit_res = launch_and_fit.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.get(future_fit_res, timeout=timeout)
+        try:
+            res = ray.get(future_fit_res, timeout=timeout)
+        except Exception as ex:
+            log(DEBUG, ex)
+            raise ex
         return cast(
             common.FitRes,
             res,
@@ -78,7 +92,11 @@ class RayClientProxy(ClientProxy):
         future_evaluate_res = launch_and_evaluate.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.get(future_evaluate_res, timeout=timeout)
+        try:
+            res = ray.get(future_evaluate_res, timeout=timeout)
+        except Exception as ex:
+            log(DEBUG, ex)
+            raise ex
         return cast(
             common.EvaluateRes,
             res,

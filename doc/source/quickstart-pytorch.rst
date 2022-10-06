@@ -173,7 +173,7 @@ which can be implemented in the following way:
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             train(net, trainloader, epochs=1)
-            return self.get_parameters(), num_examples["trainset"], {}
+            return self.get_parameters(config={}), num_examples["trainset"], {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)

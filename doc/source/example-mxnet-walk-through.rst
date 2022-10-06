@@ -299,7 +299,7 @@ We included type annotations to give you a better understanding of the data type
             self.model, self.train_data, epoch=2, device=self.device
             )
             results = {"accuracy": accuracy[1], "loss": loss[1]}
-            return self.get_parameters(), num_examples, results
+            return self.get_parameters(config={}), num_examples, results
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict[str, str]

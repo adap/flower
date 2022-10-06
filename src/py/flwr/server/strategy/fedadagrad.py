@@ -37,7 +37,7 @@ from flwr.server.client_proxy import ClientProxy
 from .fedopt import FedOpt
 
 
-# pylint: disable=too-many-locals
+# flake8: noqa: E501
 class FedAdagrad(FedOpt):
     """Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et
     al., 2020] strategy.
@@ -45,7 +45,7 @@ class FedAdagrad(FedOpt):
     Paper: https://arxiv.org/abs/2003.00295
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-locals,too-many-instance-attributes,line-too-long
     def __init__(
         self,
         *,
@@ -74,38 +74,38 @@ class FedAdagrad(FedOpt):
 
         Implementation based on https://arxiv.org/abs/2003.00295v5
 
-        Args:
-            fraction_fit (float, optional): Fraction of clients used during
-                training. Defaults to 0.1.
-            fraction_evaluate (float, optional): Fraction of clients used during
-                validation. Defaults to 0.1.
-            min_fit_clients (int, optional): Minimum number of clients used
-                during training. Defaults to 2.
-            min_evaluate_clients (int, optional): Minimum number of clients used
-                during validation. Defaults to 2.
-            min_available_clients (int, optional): Minimum number of total
-                clients in the system. Defaults to 2.
-            evaluate_fn : Optional[
-                Callable[
-                    [int, NDArrays, Dict[str, Scalar]],
-                    Optional[Tuple[float, Dict[str, Scalar]]]
-                ]
-            ]: Function used for validation. Defaults to None.
-            on_fit_config_fn (Callable[[int], Dict[str, str]], optional):
-                Function used to configure training. Defaults to None.
-            on_evaluate_config_fn (Callable[[int], Dict[str, str]], optional):
-                Function used to configure validation. Defaults to None.
-            accept_failures (bool, optional): Whether or not accept rounds
-                containing failures. Defaults to True.
-            initial_parameters (Parameters): Initial set of parameters from the server.
-            fit_metrics_aggregation_fn: Optional[MetricsAggregationFn]
-                Metrics aggregation function, optional.
-            evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
-                Metrics aggregation function, optional.
-            eta (float, optional): Server-side learning rate. Defaults to 1e-1.
-            eta_l (float, optional): Client-side learning rate. Defaults to 1e-1.
-            tau (float, optional): Controls the algorithm's degree of adaptability.
-                Defaults to 1e-9.
+        Parameters
+        ----------
+        fraction_fit : float, optional
+            Fraction of clients used during training. Defaults to 1.0.
+        fraction_evaluate : float, optional
+            Fraction of clients used during validation. Defaults to 1.0.
+        min_fit_clients : int, optional
+            Minimum number of clients used during training. Defaults to 2.
+        min_evaluate_clients : int, optional
+            Minimum number of clients used during validation. Defaults to 2.
+        min_available_clients : int, optional
+            Minimum number of total clients in the system. Defaults to 2.
+        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
+            Optional function used for validation. Defaults to None.
+        on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
+            Function used to configure training. Defaults to None.
+        on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
+            Function used to configure validation. Defaults to None.
+        fit_metrics_aggregation_fn : Optional[MetricsAggregationFn]
+            Metrics aggregation function, optional.
+        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
+            Metrics aggregation function, optional.
+        accept_failures : bool, optional
+            Whether or not accept rounds containing failures. Defaults to True.
+        initial_parameters : Parameters, optional
+            Initial global model parameters.
+        eta : float, optional
+            Server-side learning rate. Defaults to 1e-1.
+        eta_l : float, optional
+            Client-side learning rate. Defaults to 1e-1.
+        tau : float, optional
+            Controls the algorithm's degree of adaptability. Defaults to 1e-9.
         """
         super().__init__(
             fraction_fit=fraction_fit,
