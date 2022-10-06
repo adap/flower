@@ -15,7 +15,7 @@
 """Flower driver service client."""
 
 
-from logging import INFO, WARNING
+from logging import ERROR, INFO, WARNING
 from typing import Optional
 
 import grpc
@@ -23,7 +23,8 @@ import grpc
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.typing import ClientMessage
-from flwr.proto import driver_pb2_grpc
+from flwr.driver import serde
+from flwr.proto import driver_pb2, driver_pb2_grpc
 
 from .messages import (
     CreateTasksRequest,
@@ -36,6 +37,13 @@ from .messages import (
 )
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
+
+ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
+[Driver] Error: Not connected.
+
+Call `connect()` on the `Driver` instance before calling any of the other `Driver`
+methods.
+"""
 
 
 class Driver:
@@ -53,7 +61,7 @@ class Driver:
 
     def connect(self) -> None:
         """Connect to the Driver API."""
-        if self.channel is None or self.stub is None:
+        if self.channel is not None or self.stub is not None:
             log(WARNING, "Already connected")
             return
         self.channel = create_channel(
@@ -75,10 +83,14 @@ class Driver:
         log(INFO, "[Driver] Disconnected")
 
     def get_clients(self, req: GetClientsRequest) -> GetClientsResponse:
-        """."""
-        # pylint: disable=no-self-use,unused-argument
-        # [...] call DriverAPI
-        return GetClientsResponse(client_ids=list(range(5)))
+        """Get client ID's."""
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise Exception("`Driver` instance not connected")
+
+        req_proto = serde.get_clients_request_to_proto(req)
+        res: driver_pb2.GetClientsResponse = self.stub.GetClients(request=req_proto)
+        return serde.get_clients_response_from_proto(res)
 
     def create_tasks(self, req: CreateTasksRequest) -> CreateTasksResponse:
         """."""
