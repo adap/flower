@@ -15,6 +15,7 @@
 """Flower utilities shared between server and client."""
 
 
+from .grpc import GRPC_MAX_MESSAGE_LENGTH
 from .parameter import bytes_to_ndarray as bytes_to_ndarray
 from .parameter import ndarray_to_bytes as ndarray_to_bytes
 from .parameter import ndarrays_to_parameters as ndarrays_to_parameters
@@ -41,8 +42,6 @@ from .typing import ReconnectIns as ReconnectIns
 from .typing import Scalar as Scalar
 from .typing import ServerMessage as ServerMessage
 from .typing import Status as Status
-
-GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912  # == 512 * 1024 * 1024
 
 __all__ = [
     "bytes_to_ndarray",
