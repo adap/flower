@@ -87,7 +87,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                 wrapping the actual message
             - The Join method is (pretty much) protocol unaware
         """
-        peer = context.peer()
+        peer: str = context.peer()
         bridge = self.grpc_bridge_factory()
         client = self.client_factory(peer, bridge)
         is_success = register_client(self.client_manager, client, context)
