@@ -11,7 +11,7 @@ import cifar
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Load PyTorch model
 net = cifar.Net().to(DEVICE)
-continue_from_checkpoint = False 
+continue_from_checkpoint = True 
 class SaveModelStrategy(fl.server.strategy.FedAvg):
     def aggregate_fit(
         self,
@@ -40,14 +40,20 @@ class SaveModelStrategy(fl.server.strategy.FedAvg):
         return aggregated_parameters_tuple
 
 if continue_from_checkpoint:
-    # import Net
-    list_of_files = [fname for fname in glob.glob("./model_round_*")]
-    latest_round_file = max(list_of_files, key=os.path.getctime)
-    print("Loading pre-trained model from: ", latest_round_file)
-    state_dict = torch.load(latest_round_file)
-    net.load_state_dict(state_dict)
+    def load_parameters_from_disk():
+        # import Net
+        list_of_files = [fname for fname in glob.glob("./model_round_*")]
+        latest_round_file = max(list_of_files, key=os.path.getctime)
+        print("Loading pre-trained model from: ", latest_round_file)
+        state_dict = torch.load(latest_round_file)
+        net.load_state_dict(state_dict)
+
+strategy = SaveModelStrategy(
+    initial_parameters=load_parameters_from_disk() if continue_from_checkpoint else None
+)
+
 
 if __name__ == "__main__":
     fl.server.start_server(server_address="0.0.0.0:8080", 
-    strategy=SaveModelStrategy(),
+    strategy=strategy,
     config=fl.server.ServerConfig(num_rounds=3))
