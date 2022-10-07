@@ -22,6 +22,12 @@ import ray
 
 from flwr import common
 from flwr.client import Client, ClientLike, to_client
+from flwr.client.client import (
+    maybe_call_evaluate,
+    maybe_call_fit,
+    maybe_call_get_parameters,
+    maybe_call_get_properties,
+)
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 
@@ -115,7 +121,10 @@ def launch_and_get_properties(
 ) -> common.GetPropertiesRes:
     """Exectue get_properties remotely."""
     client: Client = _create_client(client_fn, cid)
-    return client.get_properties(get_properties_ins)
+    return maybe_call_get_properties(
+        client=client,
+        get_properties_ins=get_properties_ins,
+    )
 
 
 @ray.remote
@@ -124,7 +133,10 @@ def launch_and_get_parameters(
 ) -> common.GetParametersRes:
     """Exectue get_parameters remotely."""
     client: Client = _create_client(client_fn, cid)
-    return client.get_parameters(get_parameters_ins)
+    return maybe_call_get_parameters(
+        client=client,
+        get_parameters_ins=get_parameters_ins,
+    )
 
 
 @ray.remote
@@ -133,7 +145,10 @@ def launch_and_fit(
 ) -> common.FitRes:
     """Exectue fit remotely."""
     client: Client = _create_client(client_fn, cid)
-    return client.fit(fit_ins)
+    return maybe_call_fit(
+        client=client,
+        fit_ins=fit_ins,
+    )
 
 
 @ray.remote
@@ -142,7 +157,10 @@ def launch_and_evaluate(
 ) -> common.EvaluateRes:
     """Exectue evaluate remotely."""
     client: Client = _create_client(client_fn, cid)
-    return client.evaluate(evaluate_ins)
+    return maybe_call_evaluate(
+        client=client,
+        evaluate_ins=evaluate_ins,
+    )
 
 
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
