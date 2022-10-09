@@ -10,6 +10,14 @@ This example contains highly experimental code. Please consult the regular PyTor
 
 ## Exec
 
+Terminal 1: start Driver API server
+
+```bash
+flower-server
+```
+
+Terminal 2: run driver script
+
 ```bash
 python driver.py
 ```
