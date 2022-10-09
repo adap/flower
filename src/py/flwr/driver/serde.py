@@ -15,14 +15,34 @@
 """Flower driver serialization."""
 
 
-from flwr.driver.messages import GetClientsRequest, GetClientsResponse
-from flwr.proto import driver_pb2
+from typing import List
+
+from flwr.common.serde import (
+    client_message_from_proto,
+    client_message_to_proto,
+    server_message_from_proto,
+    server_message_to_proto,
+)
+from flwr.driver.messages import (
+    CreateTasksRequest,
+    CreateTasksResponse,
+    GetClientsRequest,
+    GetClientsResponse,
+    GetResultsRequest,
+    GetResultsResponse,
+    Result,
+    Task,
+    TaskAssignment,
+)
+from flwr.proto import driver_pb2, task_pb2
+
+# === GetClients messages ===
 
 
 def get_clients_request_to_proto(
     req: GetClientsRequest,
 ) -> driver_pb2.GetClientsRequest:
-    """."""
+    """Serialize `GetClientsRequest` to ProtoBuf."""
     # pylint: disable=W0613
     return driver_pb2.GetClientsRequest()
 
@@ -30,7 +50,7 @@ def get_clients_request_to_proto(
 def get_clients_request_from_proto(
     msg: driver_pb2.GetClientsRequest,
 ) -> GetClientsRequest:
-    """."""
+    """Deserialize `GetClientsRequest` from ProtoBuf."""
     # pylint: disable=W0613
     return GetClientsRequest()
 
@@ -38,12 +58,118 @@ def get_clients_request_from_proto(
 def get_clients_response_to_proto(
     res: GetClientsResponse,
 ) -> driver_pb2.GetClientsResponse:
-    """."""
+    """Serialize `GetClientsResponse` to ProtoBuf."""
     return driver_pb2.GetClientsResponse(client_ids=res.client_ids)
 
 
 def get_clients_response_from_proto(
     msg: driver_pb2.GetClientsResponse,
 ) -> GetClientsResponse:
-    """."""
+    """Deserialize `GetClientsResponse` from ProtoBuf."""
     return GetClientsResponse(client_ids=list(msg.client_ids))
+
+
+# === CreateTasks messages ===
+
+
+def create_tasks_request_to_proto(
+    req: CreateTasksRequest,
+) -> driver_pb2.CreateTasksRequest:
+    """Serialize `CreateTasksRequest` to ProtoBuf."""
+    task_assignments_proto: List[task_pb2.TaskAssignment] = []
+    for task_assignment in req.task_assignments:
+        task_assignment_proto = task_pb2.TaskAssignment(
+            task=task_pb2.Task(
+                task_id=task_assignment.task.task_id,
+                legacy_server_message=server_message_to_proto(
+                    task_assignment.task.legacy_server_message
+                ),
+            ),
+            client_ids=task_assignment.client_ids,
+        )
+        task_assignments_proto.append(task_assignment_proto)
+    return driver_pb2.CreateTasksRequest(task_assignments=task_assignments_proto)
+
+
+def create_tasks_request_from_proto(
+    msg: driver_pb2.CreateTasksRequest,
+) -> CreateTasksRequest:
+    """Deserialize `CreateTasksRequest` from ProtoBuf."""
+    task_assignments: List[TaskAssignment] = []
+    for task_assignment_proto in msg.task_assignments:
+        task_assignment_proto = task_pb2.TaskAssignment(
+            task=Task(
+                task_id=task_assignment_proto.task.task_id,
+                legacy_server_message=server_message_from_proto(
+                    task_assignment_proto.task.legacy_server_message
+                ),
+            ),
+            client_ids=list(task_assignment_proto.client_ids),
+        )
+        task_assignments.append(task_assignment_proto)
+    return CreateTasksRequest(task_assignments=task_assignments)
+
+
+def create_tasks_response_to_proto(
+    res: CreateTasksResponse,
+) -> driver_pb2.CreateTasksResponse:
+    """Serialize `CreateTasksResponse` to ProtoBuf."""
+    return driver_pb2.CreateTasksResponse(task_ids=res.task_ids)
+
+
+def create_tasks_response_from_proto(
+    msg: driver_pb2.CreateTasksResponse,
+) -> CreateTasksResponse:
+    """Deserialize `CreateTasksResponse` from ProtoBuf."""
+    return CreateTasksResponse(task_ids=list(msg.task_ids))
+
+
+# === GetResults messages ===
+
+
+def get_results_request_to_proto(
+    req: GetResultsRequest,
+) -> driver_pb2.GetResultsRequest:
+    """Serialize `GetResultsRequest` to ProtoBuf."""
+    return driver_pb2.GetResultsRequest(task_ids=req.task_ids)
+
+
+def get_results_request_from_proto(
+    msg: driver_pb2.GetResultsRequest,
+) -> GetResultsRequest:
+    """Deserialize `GetResultsRequest` from ProtoBuf."""
+    return GetResultsRequest(task_ids=list(msg.task_ids))
+
+
+def get_results_response_to_proto(
+    res: GetResultsResponse,
+) -> driver_pb2.GetResultsResponse:
+    """Serialize `GetResultsResponse` to ProtoBuf."""
+    results_proto: List[task_pb2.Result] = []
+    for result in res.results:
+        results_proto.append(
+            task_pb2.Result(
+                task_id=result.task_id,
+                legacy_client_message=client_message_to_proto(
+                    result.legacy_client_message,
+                ),
+            )
+        )
+    return driver_pb2.GetResultsResponse(results=results_proto)
+
+
+def get_results_response_from_proto(
+    msg: driver_pb2.GetResultsResponse,
+) -> GetResultsResponse:
+    """Deserialize `GetResultsResponse` from ProtoBuf."""
+    results: List[Result] = []
+    for result_proto in msg.results:
+        results.append(
+            Result(
+                task_id=result_proto.task_id,
+                legacy_client_message=client_message_from_proto(
+                    result_proto.legacy_client_message,
+                ),
+            )
+        )
+    return GetResultsResponse(results=results)

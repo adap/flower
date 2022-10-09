@@ -39,5 +39,5 @@ message CreateTasksRequest { repeated TaskAssignment task_assignments = 1; }
 message CreateTasksResponse { repeated int64 task_ids = 1; }
 
 // GetResults messages
-message GetResultsRequest { repeated Result task_ids = 1; }
+message GetResultsRequest { repeated int64 task_ids = 1; }
 message GetResultsResponse { repeated Result results = 1; }
