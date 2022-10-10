@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- All Client exceptions happening in the VCE will now be logged by default and not just exposed through the strategies.
+
 ## v1.0.0 (2022-07-28)
 
 ### Highlights

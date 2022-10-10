@@ -40,7 +40,7 @@ Invalid Arguments in method:
     client_fn: Callable[[str], Client],
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
-    client_resources: Optional[Dict[str, int]] = None,
+    client_resources: Optional[Dict[str, float]] = None,
     server: Optional[Server] = None,
     config: ServerConfig = None,
     strategy: Optional[Strategy] = None,
@@ -63,7 +63,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     client_fn: Callable[[str], Client],
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
-    client_resources: Optional[Dict[str, Union[float, int]]] = None,
+    client_resources: Optional[Dict[str, float]] = None,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
@@ -92,14 +92,14 @@ def start_simulation(  # pylint: disable=too-many-arguments
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
-    client_resources : Optional[Dict[str, float]] (default: None)
+    client_resources : Optional[Dict[str, int]] (default: None)
         CPU and GPU resources for a single client. Supported keys are
         `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`.
         To understand the GPU utilization caused by `num_gpus`, consult the Ray
         documentation on GPU support.
-    server: Optional[flwr.server.Server] (default: None). An implementation
-        of the abstract base class `flwr.server.Server`. If no instance is
-        provided, then `start_server` will create one.
+    server : Optional[flwr.server.Server] (default: None).
+        An implementation of the abstract base class `flwr.server.Server`. If no
+        instance is provided, then `start_server` will create one.
     config: ServerConfig (default: None).
         Currently supported values are `num_rounds` (int, default: 1) and
         `round_timeout` in seconds (float, default: None).
@@ -107,7 +107,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use
         `flwr.server.strategy.FedAvg`.
-    client_manager: Optional[flwr.server.ClientManager] (default: None)
+    client_manager : Optional[flwr.server.ClientManager] (default: None)
         An implementation of the abstract base class `flwr.server.ClientManager`.
         If no implementation is provided, then `start_simulation` will use
         `flwr.server.client_manager.SimpleClientManager`.
@@ -116,10 +116,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         If ray_init_args is None (the default), Ray will be initialized with
         the following default args:
 
-            {
-                "ignore_reinit_error": True,
-                "include_dashboard": False,
-            }
+        { "ignore_reinit_error": True, "include_dashboard": False }
 
         An empty dictionary can be used (ray_init_args={}) to prevent any
         arguments from being passed to ray.init.
@@ -128,7 +125,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     Returns
     -------
-        hist: flwr.server.history.History. Object containing metrics from training.
+        hist : flwr.server.history.History.
+            Object containing metrics from training.
     """
     # pylint: disable-msg=too-many-locals
 

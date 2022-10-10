@@ -3,14 +3,15 @@ import os
 import platform
 import socket
 import time
-from collections import defaultdict
 from dataclasses import dataclass, field
+from functools import wraps
 from threading import Thread
-from typing import Callable, Dict, List, Tuple, TypeVar, cast
+from typing import Callable, Dict, List, Tuple, TypeVar, Union, cast
 
 import numpy as np
 import nvsmi
 import psutil
+from importlib_metadata import SelectableGroups
 
 from flwr.common import NDArrays, Scalar
 
@@ -20,10 +21,14 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
 FloatSample = Tuple[int, float]
 
-ProfFitFunDec = TypeVar(
-    "ProfFitFunDec",
+ProfFunDec = TypeVar(
+    "ProfFunDec",
     bound=Callable[
-        [NDArrays, Dict[str, Scalar]], Tuple[NDArrays, int, Dict[str, Scalar]]
+        [NDArrays, Dict[str, Scalar]],  # parameters, config
+        Union[
+            Tuple[NDArrays, int, Dict[str, Scalar]],  # parameters, num_samples, metrics
+            Tuple[float, int, Dict[str, Scalar]],  # loss, num_samples, metrics
+        ],
     ],
 )
 
@@ -31,9 +36,9 @@ ProfFitFunDec = TypeVar(
 @dataclass
 class SimpleGPUProcess:
     uuid: str
+    mem_proc_used: Dict[int, List[FloatSample]] = field(default_factory=dict)
     mem_total: float = 0.0
     mem_total_used: List[FloatSample] = field(default_factory=list)
-    mem_proc_used: List[FloatSample] = field(default_factory=list)
     utilization: List[FloatSample] = field(default_factory=list)
 
 
@@ -45,18 +50,17 @@ class SystemMonitor(Thread):
     `interval` seconds in a separate thread.
     """
 
-    def __init__(self, interval: float = 0.7):
+    def __init__(self, pids: List[int], interval: float = 0.7):
         super(SystemMonitor, self).__init__()
         self.fqdn = socket.getfqdn().replace(".", "|")
-        self.pid: int = os.getpid()
+        self.pids: List[int] = pids
         self.gpus: Dict[str, SimpleGPUProcess] = dict()
         self.cpu_name: str = platform.processor()
-        self.cpu_samples: List[FloatSample] = []
+        self.cpu_samples: Dict[int, List[FloatSample]] = dict()
         self.start_time_ns: int = 0
         self.stop_time_ns: int = 0
         self.stopped: bool = False
         self.interval = interval
-        self.values = defaultdict(list)
 
     def run(self):
         self.start_time_ns = time.time_ns()
@@ -74,11 +78,15 @@ class SystemMonitor(Thread):
             pros = nvsmi.get_gpu_processes()
             timestamp = time.time_ns()
             for pro in pros:
-                if pro.pid == self.pid:
+                if pro.pid in self.pids:
                     uuid = pro.gpu_uuid
                     if uuid not in self.gpus:
                         self.gpus[uuid] = SimpleGPUProcess(uuid)
-                    self.gpus[uuid].mem_proc_used.append((timestamp, pro.used_memory))
+                    if pro.pid not in self.gpus[uuid].mem_proc_used:
+                        self.gpus[uuid].mem_proc_used[pro.pid] = []
+                    self.gpus[uuid].mem_proc_used[pro.pid].append(
+                        (timestamp, pro.used_memory)
+                    )
 
             # Retrieve GPU general info
             gpus_all = nvsmi.get_gpus()
@@ -93,8 +101,11 @@ class SystemMonitor(Thread):
     def _get_cpu_stats(self):
         if psutil is not None:
             timestamp = time.time_ns()
-            cpu_percent = psutil.Process(self.pid).cpu_percent(interval=None)
-            self.cpu_samples.append((timestamp, cpu_percent))
+            for pid in self.pids:
+                cpu_percent = psutil.Process(pid).cpu_percent(interval=self.interval)
+                if pid not in self.cpu_samples:
+                    self.cpu_samples[pid] = []
+                self.cpu_samples[pid].append((timestamp, cpu_percent))
 
     def _read_utilization(self):
         self._get_cpu_stats()
@@ -112,7 +123,7 @@ class SystemMonitor(Thread):
     def aggregate_statistics(self) -> Dict[str, Scalar]:
         stats: Dict[str, Scalar] = {}
         basename = f"_flwr.sys_monitor.{self.fqdn}"
-        stats[f"{basename}.duration"] = self.stop_time_ns - self.start_time_ns
+        stats[f"{basename}.duration_ns"] = self.stop_time_ns - self.start_time_ns
         # GPUs
         for gpu_uuid, gpu in self.gpus.items():
             for att_name in gpu.__dict__.keys():
@@ -124,27 +135,41 @@ class SystemMonitor(Thread):
                         **stats,
                         **self._get_basic_stats_from_list(base_gpu_att, values),
                     }
+                if isinstance(att, dict):
+                    for pid, l in att.items():
+                        base_gpu_att_pid = (
+                            f"{basename}.gpu_info.{gpu_uuid}.{att_name}.{pid}"
+                        )
+                        values = [v for _, v in l]
+                        stats = {
+                            **stats,
+                            **self._get_basic_stats_from_list(base_gpu_att_pid, values),
+                        }
+
                 elif isinstance(att, float):
                     stats[f"{basename}.{att_name}."] = att
         # CPU
-        base_cpu_util = f"{basename}.cpu_info.{self.cpu_name}.utilization"
-        values = [v for _, v in self.cpu_samples]
-        stats = {**stats, **self._get_basic_stats_from_list(base_cpu_util, values)}
+        for pid, samples in self.cpu_samples.items():
+            base_cpu_util = f"{basename}.cpu_info.{self.cpu_name}.utilization.{pid}"
+            values = [v for _, v in samples]
+            stats = {**stats, **self._get_basic_stats_from_list(base_cpu_util, values)}
 
         return stats
 
 
 def basic_profiler(interval: float = 0.1):
-    def basic_profiler(_fit: ProfFitFunDec) -> ProfFitFunDec:
+    def basic_profiler(_func: ProfFunDec) -> ProfFunDec:
+        @wraps(_func)
         def wrapper(*args, **kwargs):
-            system_monitor = SystemMonitor(interval=interval)
+            list_pids = [os.getpid()]
+            system_monitor = SystemMonitor(pids=list_pids, interval=interval)
             system_monitor.start()
-            parameters, num_examples, metrics = _fit(*args, **kwargs)
+            output, num_examples, metrics = _func(*args, **kwargs)
             system_monitor.stop()
             stats_dict = system_monitor.aggregate_statistics()
             metrics = {**metrics, **stats_dict}
-            return parameters, num_examples, metrics
+            return output, num_examples, metrics
 
-        return cast(ProfFitFunDec, wrapper)
+        return cast(ProfFunDec, wrapper)
 
     return basic_profiler
