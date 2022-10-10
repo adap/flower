@@ -16,13 +16,12 @@
 
 
 from contextlib import contextmanager
-from logging import DEBUG, INFO
+from logging import DEBUG
 from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple
 
-import grpc
-
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub
@@ -45,13 +44,14 @@ def grpc_connection(
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
-    """Establish an insecure gRPC connection to a gRPC server.
+    """Establish a gRPC connection to a gRPC server.
 
     Parameters
     ----------
     server_address : str
-        The IPv6 address of the server. If the Flower server runs on the same machine
-        on port 8080, then `server_address` would be `"[::]:8080"`.
+        The IPv4 or IPv6 address of the server. If the Flower server runs on the same
+        machine on port 8080, then `server_address` would be `"0.0.0.0:8080"` or
+        `"[::]:8080"`.
     max_message_length : int
         The maximum length of gRPC messages that can be exchanged with the Flower
         server. The default should be sufficient for most models. Users who train
@@ -84,23 +84,11 @@ def grpc_connection(
     >>>     # do something here
     >>>     send(client_message)
     """
-    # Possible options:
-    # https://github.com/grpc/grpc/blob/v1.43.x/include/grpc/impl/codegen/grpc_types.h
-    channel_options = [
-        ("grpc.max_send_message_length", max_message_length),
-        ("grpc.max_receive_message_length", max_message_length),
-    ]
-
-    if root_certificates is not None:
-        ssl_channel_credentials = grpc.ssl_channel_credentials(root_certificates)
-        channel = grpc.secure_channel(
-            server_address, ssl_channel_credentials, options=channel_options
-        )
-        log(INFO, "Opened secure gRPC connection using certificates")
-    else:
-        channel = grpc.insecure_channel(server_address, options=channel_options)
-        log(INFO, "Opened insecure gRPC connection (no certificates were passed)")
-
+    channel = create_channel(
+        server_address=server_address,
+        root_certificates=root_certificates,
+        max_message_length=max_message_length,
+    )
     channel.subscribe(on_channel_state_change)
 
     queue: Queue[ClientMessage] = Queue(  # pylint: disable=unsubscriptable-object
