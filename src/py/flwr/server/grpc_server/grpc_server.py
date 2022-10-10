@@ -18,20 +18,24 @@
 import concurrent.futures
 import sys
 from logging import ERROR
-from typing import Optional, Tuple
+from typing import Any, Callable, Optional, Tuple, Union
 
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
-from flwr.proto import transport_pb2_grpc
+from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
 from flwr.server.client_manager import ClientManager
-from flwr.server.grpc_server import flower_service_servicer as fss
+from flwr.server.driver.driver_servicer import DriverServicer
+from flwr.server.fleet.fleet_servicer import FleetServicer
+from flwr.server.grpc_server.flower_service_servicer import FlowerServiceServicer
 
 INVALID_CERTIFICATES_ERR_MSG = """
     When setting any of root_certificate, certificate, or private_key,
     all of them need to be set.
 """
+
+AddServicerToServerFn = Callable[..., Any]
 
 
 def valid_certificates(certificates: Tuple[bytes, bytes, bytes]) -> bool:
@@ -55,7 +59,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     keepalive_time_ms: int = 210000,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
 ) -> grpc.Server:
-    """Create gRPC server and return instance of grpc.Server.
+    """Create and start a gRPC server running FlowerServiceServicer.
 
     If used in a main function server.wait_for_termination(timeout=None)
     should be called as otherwise the server will immediately stop.
@@ -126,6 +130,90 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     >>>     ),
     >>> )
     """
+
+    servicer = FlowerServiceServicer(client_manager)
+    add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
+
+    server = generic_create_grpc_server(
+        servicer_and_add_fn=(servicer, add_servicer_to_server_fn),
+        server_address=server_address,
+        max_concurrent_workers=max_concurrent_workers,
+        max_message_length=max_message_length,
+        keepalive_time_ms=keepalive_time_ms,
+        certificates=certificates,
+    )
+
+    server.start()
+
+    return server
+
+
+def generic_create_grpc_server(  # pylint: disable=too-many-arguments
+    servicer_and_add_fn: Union[
+        Tuple[FleetServicer, AddServicerToServerFn],
+        Tuple[FlowerServiceServicer, AddServicerToServerFn],
+        Tuple[DriverServicer, AddServicerToServerFn],
+    ],
+    server_address: str,
+    max_concurrent_workers: int = 1000,
+    max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    keepalive_time_ms: int = 210000,
+    certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+) -> grpc.Server:
+    """Generic function to create a gRPC server with a single servicer.
+
+    Parameters
+    ----------
+    servicer_and_add_fn : Tuple
+        A tuple holding a servicer implementation and a matching
+        add_Servicer_to_server function.
+    server_address : str
+        Server address in the form of HOST:PORT e.g. "[::]:8080"
+    max_concurrent_workers : int
+        Maximum number of clients the server can process before returning
+        RESOURCE_EXHAUSTED status (default: 1000)
+    max_message_length : int
+        Maximum message length that the server can send or receive.
+        Int valued in bytes. -1 means unlimited. (default: GRPC_MAX_MESSAGE_LENGTH)
+    keepalive_time_ms : int
+        Flower uses a default gRPC keepalive time of 210000ms (3 minutes 30 seconds)
+        because some cloud providers (for example, Azure) agressively clean up idle
+        TCP connections by terminating them after some time (4 minutes in the case
+        of Azure). Flower does not use application-level keepalive signals and relies
+        on the assumption that the transport layer will fail in cases where the
+        connection is no longer active. `keepalive_time_ms` can be used to customize
+        the keepalive interval for specific environments. The default Flower gRPC
+        keepalive of 210000 ms (3 minutes 30 seconds) ensures that Flower can keep
+        the long running streaming connection alive in most environments. The actual
+        gRPC default of this setting is 7200000 (2 hours), which results in dropped
+        connections in some cloud environments.
+
+        These settings are related to the issue described here:
+        - https://github.com/grpc/proposal/blob/master/A8-client-side-keepalive.md
+        - https://github.com/grpc/grpc/blob/master/doc/keepalive.md
+        - https://grpc.io/docs/guides/performance/
+
+        Mobile Flower clients may choose to increase this value if their server
+        environment allows long-running idle TCP connections.
+        (default: 210000)
+    certificates : Tuple[bytes, bytes, bytes] (default: None)
+        Tuple containing root certificate, server certificate, and private key to
+        start a secure SSL-enabled server. The tuple is expected to have three bytes
+        elements in the following order:
+
+            * CA certificate.
+            * server certificate.
+            * server private key.
+
+    Returns
+    -------
+    server : grpc.Server
+        A non-running instance of a gRPC server.
+    """
+
+    # Deconstruct tuple into servicer and function
+    servicer, add_servicer_to_server_fn = servicer_and_add_fn
+
     # Possible options:
     # https://github.com/grpc/grpc/blob/v1.43.x/include/grpc/impl/codegen/grpc_types.h
     options = [
@@ -156,9 +244,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
         maximum_concurrent_rpcs=max_concurrent_workers,
         options=options,
     )
-
-    servicer = fss.FlowerServiceServicer(client_manager)
-    transport_pb2_grpc.add_FlowerServiceServicer_to_server(servicer, server)
+    add_servicer_to_server_fn(servicer, server)
 
     if certificates is not None:
         if not valid_certificates(certificates):
@@ -179,7 +265,5 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
         server.add_secure_port(server_address, server_credentials)
     else:
         server.add_insecure_port(server_address)
-
-    server.start()
 
     return server

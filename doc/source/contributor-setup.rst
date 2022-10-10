@@ -32,7 +32,7 @@ Install a ``flwr`` pre-release from PyPI:
 - ``pip install -U --pre flwr`` (without extras)
 - ``pip install -U --pre flwr[simulation]`` (with extras)
 
-Python packages can be installed from git repositories. Use the following command to install the latest version of Flower directly from GitHub::
+Python packages can be installed from git repositories. Use one of the following commands to install the Flower directly from GitHub.
 
 Install ``flwr`` from the default GitHub branch (``main``):
 
