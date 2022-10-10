@@ -97,9 +97,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
         `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`.
         To understand the GPU utilization caused by `num_gpus`, consult the Ray
         documentation on GPU support.
-    server: Optional[flwr.server.Server] (default: None). An implementation
-        of the abstract base class `flwr.server.Server`. If no instance is
-        provided, then `start_server` will create one.
+    server : Optional[flwr.server.Server] (default: None).
+        An implementation of the abstract base class `flwr.server.Server`. If no
+        instance is provided, then `start_server` will create one.
     config: ServerConfig (default: None).
         Currently supported values are `num_rounds` (int, default: 1) and
         `round_timeout` in seconds (float, default: None).
@@ -107,7 +107,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use
         `flwr.server.strategy.FedAvg`.
-    client_manager: Optional[flwr.server.ClientManager] (default: None)
+    client_manager : Optional[flwr.server.ClientManager] (default: None)
         An implementation of the abstract base class `flwr.server.ClientManager`.
         If no implementation is provided, then `start_simulation` will use
         `flwr.server.client_manager.SimpleClientManager`.
@@ -116,10 +116,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         If ray_init_args is None (the default), Ray will be initialized with
         the following default args:
 
-            {
-                "ignore_reinit_error": True,
-                "include_dashboard": False,
-            }
+        { "ignore_reinit_error": True, "include_dashboard": False }
 
         An empty dictionary can be used (ray_init_args={}) to prevent any
         arguments from being passed to ray.init.
@@ -128,7 +125,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     Returns
     -------
-        hist: flwr.server.history.History. Object containing metrics from training.
+        hist : flwr.server.history.History.
+            Object containing metrics from training.
     """
     # pylint: disable-msg=too-many-locals
 

@@ -24,7 +24,7 @@ from sphinx.application import ConfigError
 
 
 # Fixing path issue for autodoc
-sys.path.insert(0, os.path.abspath('../../src/py'))
+sys.path.insert(0, os.path.abspath("../../src/py"))
 
 
 # -- Project information -----------------------------------------------------
@@ -135,3 +135,11 @@ _open_in_colab_button = """
 """
 nbsphinx_prolog = _open_in_colab_button
 nbsphinx_epilog = _open_in_colab_button
+
+# -- Options for sphinxcontrib-mermaid -------------------------------------
+# Don't load it automatically through the extension as we are loading it through the
+# theme (see base.html) as the inclusion of require.js by the extension `nbsphinx`
+# breaks the way mermaid is loaded. The solution is to load mermaid before the
+# require.js script added by `nbsphinx`. We can only enforce this in the theme
+# itself.
+mermaid_version = ""
