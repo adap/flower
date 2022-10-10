@@ -47,7 +47,9 @@ if continue_from_checkpoint:
         print("Loading pre-trained model from: ", latest_round_file)
         state_dict = torch.load(latest_round_file)
         net.load_state_dict(state_dict)
-
+        weights = [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+        return fl.common.ndarrays_to_parameters(weights)
+        
 strategy = SaveModelStrategy(
     initial_parameters=load_parameters_from_disk() if continue_from_checkpoint else None
 )
