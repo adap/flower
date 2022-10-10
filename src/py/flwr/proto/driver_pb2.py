@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x17\x66lwr/proto/driver.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/task.proto\"\x13\n\x11GetClientsRequest\"(\n\x12GetClientsResponse\x12\x12\n\nclient_ids\x18\x01 \x03(\x03\"J\n\x12\x43reateTasksRequest\x12\x34\n\x10task_assignments\x18\x01 \x03(\x0b\x32\x1a.flwr.proto.TaskAssignment\"\'\n\x13\x43reateTasksResponse\x12\x10\n\x08task_ids\x18\x01 \x03(\x03\"%\n\x11GetResultsRequest\x12\x10\n\x08task_ids\x18\x01 \x03(\x03\"9\n\x12GetResultsResponse\x12#\n\x07results\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result2\xf8\x01\n\x06\x44river\x12M\n\nGetClients\x12\x1d.flwr.proto.GetClientsRequest\x1a\x1e.flwr.proto.GetClientsResponse\"\x00\x12P\n\x0b\x43reateTasks\x12\x1e.flwr.proto.CreateTasksRequest\x1a\x1f.flwr.proto.CreateTasksResponse\"\x00\x12M\n\nGetResults\x12\x1d.flwr.proto.GetResultsRequest\x1a\x1e.flwr.proto.GetResultsResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x17\x66lwr/proto/driver.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/task.proto\"\x13\n\x11GetClientsRequest\"(\n\x12GetClientsResponse\x12\x12\n\nclient_ids\x18\x01 \x03(\x04\"J\n\x12\x43reateTasksRequest\x12\x34\n\x10task_assignments\x18\x01 \x03(\x0b\x32\x1a.flwr.proto.TaskAssignment\"\'\n\x13\x43reateTasksResponse\x12\x10\n\x08task_ids\x18\x01 \x03(\x04\"%\n\x11GetResultsRequest\x12\x10\n\x08task_ids\x18\x01 \x03(\x04\"9\n\x12GetResultsResponse\x12#\n\x07results\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result2\xf8\x01\n\x06\x44river\x12M\n\nGetClients\x12\x1d.flwr.proto.GetClientsRequest\x1a\x1e.flwr.proto.GetClientsResponse\"\x00\x12P\n\x0b\x43reateTasks\x12\x1e.flwr.proto.CreateTasksRequest\x1a\x1f.flwr.proto.CreateTasksResponse\"\x00\x12M\n\nGetResults\x12\x1d.flwr.proto.GetResultsRequest\x1a\x1e.flwr.proto.GetResultsResponse\"\x00\x62\x06proto3'
   ,
   dependencies=[flwr_dot_proto_dot_task__pb2.DESCRIPTOR,])
 
@@ -62,7 +62,7 @@ _GETCLIENTSRESPONSE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='client_ids', full_name='flwr.proto.GetClientsResponse.client_ids', index=0,
-      number=1, type=3, cpp_type=2, label=3,
+      number=1, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -126,7 +126,7 @@ _CREATETASKSRESPONSE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='task_ids', full_name='flwr.proto.CreateTasksResponse.task_ids', index=0,
-      number=1, type=3, cpp_type=2, label=3,
+      number=1, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -158,7 +158,7 @@ _GETRESULTSREQUEST = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='task_ids', full_name='flwr.proto.GetResultsRequest.task_ids', index=0,
-      number=1, type=3, cpp_type=2, label=3,
+      number=1, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
