@@ -11,6 +11,8 @@ from typing import Dict, Callable, Optional, Tuple, List
 from dataset_utils import get_cifar_10, do_fl_partitioning, get_dataloader
 from utils import Net, train, test
 
+import os
+from flwr.monitoring.profiler import basic_profiler
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -34,6 +36,7 @@ class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
         return get_params(self.net)
 
+    @basic_profiler
     def fit(self, parameters, config):
         set_params(self.net, parameters)
 
@@ -53,8 +56,10 @@ class FlowerClient(fl.client.NumPyClient):
         # Train
         train(self.net, trainloader, epochs=config["epochs"], device=self.device)
 
+        metrics = {}  # "fed_train_acc": acc, "fed_train_loss": loss
+
         # Return local model and statistics
-        return get_params(self.net), len(trainloader.dataset), {}
+        return get_params(self.net), len(trainloader.dataset), metrics
 
     def evaluate(self, parameters, config):
         set_params(self.net, parameters)
@@ -139,7 +144,9 @@ if __name__ == "__main__":
 
     pool_size = 100  # number of dataset partions (= number of total clients)
     client_resources = {
-        "num_cpus": args.num_client_cpus
+        # "num_cpus": args.num_client_cpus
+        "num_cpus": 1,
+        "num_gpus": 1,
     }  # each client will get allocated 1 CPUs
 
     # Download CIFAR-10 dataset
