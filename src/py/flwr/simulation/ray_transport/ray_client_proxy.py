@@ -31,7 +31,7 @@ ClientFn = Callable[[str], ClientLike]
 class RayClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(self, client_fn: ClientFn, cid: str, resources: Dict[str, int]):
+    def __init__(self, client_fn: ClientFn, cid: str, resources: Dict[str, float]):
         super().__init__(cid)
         self.client_fn = client_fn
         self.resources = resources
