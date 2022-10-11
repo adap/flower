@@ -58,9 +58,7 @@ def server_message_to_proto(server_message: typing.ServerMessage) -> ServerMessa
                 server_message.evaluate_ins,
             )
         )
-    raise Exception(
-        f"No instruction set in ServerMessage, cannot serialize to ProtoBuf"
-    )
+    raise Exception("No instruction set in ServerMessage, cannot serialize to ProtoBuf")
 
 
 def server_message_from_proto(
@@ -93,7 +91,7 @@ def server_message_from_proto(
             )
         )
     raise Exception(
-        f"Unsupported instruction in ServerMessage, cannot deserialize from ProtoBuf"
+        "Unsupported instruction in ServerMessage, cannot deserialize from ProtoBuf"
     )
 
 
@@ -126,9 +124,7 @@ def client_message_to_proto(client_message: typing.ClientMessage) -> ClientMessa
                 client_message.evaluate_res,
             )
         )
-    raise Exception(
-        f"No instruction set in ClientMessage, cannot serialize to ProtoBuf"
-    )
+    raise Exception("No instruction set in ClientMessage, cannot serialize to ProtoBuf")
 
 
 def client_message_from_proto(
@@ -161,7 +157,7 @@ def client_message_from_proto(
             )
         )
     raise Exception(
-        f"Unsupported instruction in ClientMessage, cannot deserialize from ProtoBuf"
+        "Unsupported instruction in ClientMessage, cannot deserialize from ProtoBuf"
     )
 
 

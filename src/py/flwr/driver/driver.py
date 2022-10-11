@@ -22,7 +22,6 @@ import grpc
 
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.typing import ClientMessage
 from flwr.driver import serde
 from flwr.proto import driver_pb2, driver_pb2_grpc
 
@@ -33,7 +32,6 @@ from .messages import (
     GetClientsResponse,
     GetResultsRequest,
     GetResultsResponse,
-    Result,
 )
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
