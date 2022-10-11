@@ -97,7 +97,7 @@ def create_tasks_request_from_proto(
     """Deserialize `CreateTasksRequest` from ProtoBuf."""
     task_assignments: List[TaskAssignment] = []
     for task_assignment_proto in msg.task_assignments:
-        task_assignment_proto = task_pb2.TaskAssignment(
+        task_assignment = TaskAssignment(
             task=Task(
                 task_id=task_assignment_proto.task.task_id,
                 legacy_server_message=server_message_from_proto(
@@ -106,7 +106,7 @@ def create_tasks_request_from_proto(
             ),
             client_ids=list(task_assignment_proto.client_ids),
         )
-        task_assignments.append(task_assignment_proto)
+        task_assignments.append(task_assignment)
     return CreateTasksRequest(task_assignments=task_assignments)
 
 

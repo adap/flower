@@ -59,8 +59,8 @@ def test_create_tasks_request_serde() -> None:
     res = CreateTasksRequest(task_assignments=[])
 
     # Execute
-    msg = serde.create_tasks_response_to_proto(res)
-    res_actual = serde.create_tasks_response_from_proto(msg)
+    msg = serde.create_tasks_request_to_proto(res)
+    res_actual = serde.create_tasks_request_from_proto(msg)
 
     # Assert
     assert res_actual == res
