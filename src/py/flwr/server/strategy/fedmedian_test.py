@@ -19,7 +19,6 @@ from unittest.mock import MagicMock
 
 from numpy import array, float32
 
-from .fedmedian import FedMedian
 from flwr.common import (
     Code,
     FitRes,
@@ -31,6 +30,8 @@ from flwr.common import (
 )
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
+
+from .fedmedian import FedMedian
 
 
 def test_fedmedian_num_fit_clients_20_available() -> None:
@@ -135,6 +136,7 @@ def test_fedmedian_num_evaluation_clients_minimum() -> None:
 
     # Assert
     assert expected == actual
+
 
 def test_aggregate_fit() -> None:
     """Tests if FedMedian is aggregating correctly."""

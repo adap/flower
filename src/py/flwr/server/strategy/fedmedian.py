@@ -142,7 +142,9 @@ class FedMedian(FedAvg):
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        parameters_aggregated = ndarrays_to_parameters(aggregate_median(weights_results))
+        parameters_aggregated = ndarrays_to_parameters(
+            aggregate_median(weights_results)
+        )
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
@@ -151,6 +153,5 @@ class FedMedian(FedAvg):
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
-
 
         return parameters_aggregated, metrics_aggregated
