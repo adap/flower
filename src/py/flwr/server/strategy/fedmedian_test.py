@@ -179,7 +179,7 @@ def test_aggregate_fit() -> None:
             client_2,
             FitRes(
                 status=Status(code=Code.OK, message="Success"),
-                parameters=param_1,
+                parameters=param_2,
                 num_examples=5,
                 metrics={},
             ),
