@@ -267,7 +267,7 @@ We included type annotations to give you a better understanding of the data type
             # Set model parameters, train model, return updated model parameters
             self.set_parameters(parameters)
             cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
-            return self.get_parameters(), self.num_examples["trainset"], {}
+            return self.get_parameters(config={}), self.num_examples["trainset"], {}
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict[str, str]

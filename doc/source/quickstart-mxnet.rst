@@ -195,7 +195,7 @@ They can be implemented in the following way:
             self.set_parameters(parameters)
             [accuracy, loss], num_examples = train(model, train_data, epoch=2)
             results = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
-            return self.get_parameters(), num_examples, results
+            return self.get_parameters(config={}), num_examples, results
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)

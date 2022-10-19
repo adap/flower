@@ -40,10 +40,11 @@ from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
 
+# flake8: noqa: E501
 class FedAvgAndroid(Strategy):
     """Configurable FedAvg strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
     def __init__(
         self,
         *,
@@ -79,12 +80,7 @@ class FedAvgAndroid(Strategy):
             Minimum number of clients used during validation. Defaults to 2.
         min_available_clients : Optional[int]
             Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Optional[
-            Callable[
-                [int, NDArrays, Dict[str, Scalar]],
-                Optional[Tuple[float, Dict[str, Scalar]]]
-            ]
-        ]
+        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Optional[Callable[[int], Dict[str, Scalar]]]
             Function used to configure training. Defaults to None.
