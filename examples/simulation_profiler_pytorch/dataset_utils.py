@@ -7,7 +7,8 @@ import shutil
 from PIL import Image
 from torchvision.datasets import VisionDataset
 from typing import Callable, Optional, Tuple, Any
-from common import create_lda_partitions
+from common import XY, create_lda_partitions
+from flwr.common.typing import NDArray, NDArrays
 
 
 def get_dataset(path_to_data: Path, cid: str, partition: str):
@@ -18,12 +19,12 @@ def get_dataset(path_to_data: Path, cid: str, partition: str):
 
 
 def get_dataloader(
-    path_to_data: str, cid: str, is_train: bool, batch_size: int, workers: int
-):
+    path_to_data: Path, cid: str, is_train: bool, batch_size: int, workers: int
+) -> DataLoader:
     """Generates trainset/valset object and returns appropiate dataloader."""
 
     partition = "train" if is_train else "val"
-    dataset = get_dataset(Path(path_to_data), cid, partition)
+    dataset = get_dataset(Path(path_to_data).absolute(), cid, partition)
 
     # we use as number of workers all the cpu cores assigned to this actor
     kwargs = {"num_workers": workers, "pin_memory": True, "drop_last": False}
@@ -50,12 +51,18 @@ def get_random_id_splits(total: int, val_ratio: float, shuffle: bool = True):
     return indices[split:], indices[:split]
 
 
-def do_fl_partitioning(path_to_dataset, pool_size, alpha, num_classes, val_ratio=0.0):
+def do_fl_partitioning(
+    path_to_dataset: Path,
+    pool_size: int,
+    alpha: float,
+    num_classes: int,
+    val_ratio: float = 0.0,
+):
     """Torchvision (e.g. CIFAR-10) datasets using LDA."""
 
     images, labels = torch.load(path_to_dataset)
-    idx = np.array(range(len(images)))
-    dataset = [idx, labels]
+    idx: NDArray = np.arange(len(images))
+    dataset = (idx, labels)
     partitions, _ = create_lda_partitions(
         dataset, num_partitions=pool_size, concentration=alpha, accept_imbalanced=True
     )
@@ -121,13 +128,14 @@ class TorchVision_FL(VisionDataset):
 
     def __init__(
         self,
-        path_to_data=None,
+        path_to_data: Path,
         data=None,
         targets=None,
         transform: Optional[Callable] = None,
     ) -> None:
-        path = path_to_data.parent if path_to_data else None
-        super(TorchVision_FL, self).__init__(path, transform=transform)
+        super(TorchVision_FL, self).__init__(
+            str(path_to_data.absolute()), transform=transform
+        )
         self.transform = transform
 
         if path_to_data:

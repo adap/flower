@@ -1,6 +1,4 @@
 import argparse
-import flwr as fl
-from flwr.common.typing import Scalar
 import ray
 import torch
 import torchvision
@@ -10,18 +8,22 @@ from pathlib import Path
 from typing import Dict, Callable, Optional, Tuple, List
 from dataset_utils import get_cifar_10, do_fl_partitioning, get_dataloader
 from utils import Net, train, test
+from flwr.common.typing import Scalar, NDArrays
+from flwr.client import NumPyClient
+from flwr.simulation import start_simulation
+from flwr.server import ServerConfig
+from flwr.server.strategy import FedAvg
 
-import os
-from flwr.monitoring.profiler import basic_profiler
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
-parser.add_argument("--num_client_cpus", type=int, default=1)
+parser.add_argument("--num_client_cpus", type=float, default=1)
+parser.add_argument("--num_client_gpus", type=float, default=0.25)
 parser.add_argument("--num_rounds", type=int, default=5)
 
 
 # Flower client, adapted from Pytorch quickstart example
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def __init__(self, cid: str, fed_dir_data: str):
         self.cid = cid
         self.fed_dir = Path(fed_dir_data)
@@ -36,7 +38,6 @@ class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
         return get_params(self.net)
 
-    @basic_profiler
     def fit(self, parameters, config):
         set_params(self.net, parameters)
 
@@ -46,7 +47,7 @@ class FlowerClient(fl.client.NumPyClient):
             self.fed_dir,
             self.cid,
             is_train=True,
-            batch_size=config["batch_size"],
+            batch_size=int(config["batch_size"]),
             workers=num_workers,
         )
 
@@ -56,10 +57,8 @@ class FlowerClient(fl.client.NumPyClient):
         # Train
         train(self.net, trainloader, epochs=config["epochs"], device=self.device)
 
-        metrics = {}  # "fed_train_acc": acc, "fed_train_loss": loss
-
         # Return local model and statistics
-        return get_params(self.net), len(trainloader.dataset), metrics
+        return get_params(self.net), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
         set_params(self.net, parameters)
@@ -67,7 +66,7 @@ class FlowerClient(fl.client.NumPyClient):
         # Load data for this client and get trainloader
         num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
         valloader = get_dataloader(
-            self.fed_dir, self.cid, is_train=False, batch_size=50, workers=num_workers
+            self.fed_dir, self.cid, is_train=False, batch_size=8, workers=num_workers
         )
 
         # Send model to device
@@ -84,17 +83,17 @@ def fit_config(server_round: int) -> Dict[str, Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
     config = {
         "epochs": 5,  # number of local epochs
-        "batch_size": 64,
+        "batch_size": 8,
     }
     return config
 
 
-def get_params(model: torch.nn.ModuleList) -> List[np.ndarray]:
+def get_params(model: torch.nn.Module) -> List[np.ndarray]:
     """Get model weights as a list of NumPy ndarrays."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
 
-def set_params(model: torch.nn.ModuleList, params: List[np.ndarray]):
+def set_params(model: torch.nn.Module, params: List[np.ndarray]):
     """Set model weights from a list of NumPy ndarrays."""
     params_dict = zip(model.state_dict().keys(), params)
     state_dict = OrderedDict({k: torch.from_numpy(np.copy(v)) for k, v in params_dict})
@@ -103,11 +102,11 @@ def set_params(model: torch.nn.ModuleList, params: List[np.ndarray]):
 
 def get_evaluate_fn(
     testset: torchvision.datasets.CIFAR10,
-) -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
+) -> Callable[[NDArrays], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
     def evaluate(
-        server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]
+        server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Optional[Tuple[float, float]]:
         """Use the entire CIFAR-10 test set for evaluation."""
 
@@ -144,9 +143,8 @@ if __name__ == "__main__":
 
     pool_size = 100  # number of dataset partions (= number of total clients)
     client_resources = {
-        # "num_cpus": args.num_client_cpus
-        "num_cpus": 1,
-        "num_gpus": 1,
+        "num_cpus": args.num_client_cpus,
+        "num_gpus": args.num_client_gpus,
     }  # each client will get allocated 1 CPUs
 
     # Download CIFAR-10 dataset
@@ -162,11 +160,11 @@ if __name__ == "__main__":
     )
 
     # configure the strategy
-    strategy = fl.server.strategy.FedAvg(
+    strategy = FedAvg(
         fraction_fit=0.1,
-        fraction_evaluate=0.1,
-        min_fit_clients=10,
-        min_evaluate_clients=10,
+        min_fit_clients=2,
+        fraction_evaluate=0.02,
+        min_evaluate_clients=2,
         min_available_clients=pool_size,  # All clients should be available
         on_fit_config_fn=fit_config,
         evaluate_fn=get_evaluate_fn(testset),  # centralised evaluation of global model
@@ -177,14 +175,15 @@ if __name__ == "__main__":
         return FlowerClient(cid, fed_dir)
 
     # (optional) specify Ray config
-    ray_init_args = {"include_dashboard": False}
+    ray_init_args = {"include_dashboard": False, "num_cpus": 3}
 
     # start simulation
-    fl.simulation.start_simulation(
+    start_simulation(
         client_fn=client_fn,
         num_clients=pool_size,
         client_resources=client_resources,
-        config=fl.server.ServerConfig(num_rounds=args.num_rounds),
+        config=ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
         ray_init_args=ray_init_args,
+        use_profiler=False,
     )

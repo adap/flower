@@ -26,7 +26,7 @@ class Net(nn.Module):
 
 
 # borrowed from Pytorch quickstart example
-def train(net, trainloader, epochs, device: str):
+def train(net, trainloader, epochs, device: torch.device):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
@@ -41,7 +41,7 @@ def train(net, trainloader, epochs, device: str):
 
 
 # borrowed from Pytorch quickstart example
-def test(net, testloader, device: str):
+def test(net, testloader, device: torch.device):
     """Validate the network on the entire test set."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0

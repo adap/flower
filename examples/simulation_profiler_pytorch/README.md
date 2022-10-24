@@ -1,4 +1,4 @@
-# example_simulation_ray
+# Simulation Profiler
 
 This code splits CIFAR-10 dataset into `pool_size` partitions (user defined) and does a few rounds of CIFAR-10 training. In this example, we leverage [`Ray`](https://docs.ray.io/en/latest/index.html) to simulate Flower Clients participating in FL rounds in an resource-aware fashion. This is possible via the [`RayClientProxy`](https://github.com/adap/flower/blob/main/src/py/flwr/simulation/ray_transport/ray_client_proxy.py) which bridges a standard Flower server with standard Flower clients while excluding the gRPC communication protocol and the Client Manager in favour of Ray's scheduling and communication layers.
 
@@ -8,7 +8,7 @@ This code splits CIFAR-10 dataset into `pool_size` partitions (user defined) and
 *    A recent version of PyTorch. This example has been tested with Pytorch 1.7.1, 1.8.2 (LTS) and 1.10.2.
 *    A recent version of Ray. This example has been tested with Ray 1.4.1, 1.6 and 1.9.2.
 
-From a clean virtualenv or Conda environment with Python 3.7+, the following command will isntall all the dependencies needed:
+From a clean virtualenv or Conda environment with Python 3.7+, the following command will install all the dependencies needed:
 ```bash
 $ pip install -r requirements.txt
 ```
@@ -30,5 +30,18 @@ This example:
 The command below will assign each client 2 CPU threads. If your system does not have 2xN(=10) = 20 threads to run all 10 clients in parallel, they will be queued but eventually run. The server will wait until all N clients have completed their local training stage before aggregating the results. After that, a new round will begin.
 
 ```bash
-$ python main.py --num_client_cpus 2 # note that `num_client_cpus` should be <= the number of threads in your system.
+python main.py --num_client_cpus 2 # note that `num_client_cpus` should be <= the number of threads in your system.
 ```
+
+# Run multi-node simulation
+
+First start the nodes 
+```bash
+ray start --head
+```
+
+On the other nodes, start the 
+```bash
+ray start  && python launch_monitor.py
+```
+
