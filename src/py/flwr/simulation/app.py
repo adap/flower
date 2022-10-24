@@ -28,7 +28,10 @@ from flwr.server.app import ServerConfig, _fl, _init_defaults
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
+
+# from flwr.simulation.ray_monitoring import RayClientProfilerProxy
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
+from flwr.simulation.ray_monitoring.profiler import RayClientProfilerProxy
 
 INVALID_ARGUMENTS_START_SIMULATION = """
 INVALID ARGUMENTS ERROR
@@ -70,6 +73,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
     keep_initialised: Optional[bool] = False,
+    use_profiler: Optional[bool] = False,
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -122,6 +126,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
         arguments from being passed to ray.init.
     keep_initialised: Optional[bool] (default: False)
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
+    use_profiler: Optional[bool] (default: False)
+        Set to True if RayClients are being profiled. This requires
+        launching a RaySystemMonitor separately.
 
     Returns
     -------
@@ -179,8 +186,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # Register one RayClientProxy object for each client with the ClientManager
     resources = client_resources if client_resources is not None else {}
+    Proxy = RayClientProfilerProxy if use_profiler else RayClientProxy
     for cid in cids:
-        client_proxy = RayClientProxy(
+        client_proxy = Proxy(
             client_fn=client_fn,
             cid=cid,
             resources=resources,

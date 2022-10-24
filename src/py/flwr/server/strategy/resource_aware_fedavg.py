@@ -14,9 +14,12 @@
 # ==============================================================================
 
 from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import ray
+from ray.experimental.state.api import list_actors
+from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
 from flwr.common import (
     EvaluateIns,
@@ -30,16 +33,22 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from flwr.common.logger import log
-from flwr.server.client_manager import ClientManager
-from flwr.server.client_proxy import ClientProxy
-from flwr.common.typing import Config
 
-from flwr.server.strategy.aggregate import aggregate, aggregate_qffl, weighted_loss_avg
+# from flwr.common.logger import log
+# from flwr.common.typing import Config
+from flwr.monitoring.profiler import SimpleGPUProcess
+
+from flwr.server.client_manager import ClientManager
+
+from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
+
+# from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 
 
 # pylint: disable=too-many-locals
+
+
 class ResourceAwareFedAvg(FedAvg):
     """Configurable ResourceAwareFedAvg strategy implementation."""
 
@@ -63,6 +72,7 @@ class ResourceAwareFedAvg(FedAvg):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        monitor_namespace: str = "raysysmon",
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -78,44 +88,104 @@ class ResourceAwareFedAvg(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-
-        self.updated_resources_for_clients = [] # will store the updated resources for clients in the round
+        # will store the updated resources for clients in the round
+        self.updated_resources_for_clients = []
+        self.namespace: str = monitor_namespace
+        self.available_gpus: Dict[str, Dict[str, SimpleGPUProcess]] = {}
 
     def __repr__(self) -> str:
         rep = f"ResourceAwareFedAvg(accept_failures={self.accept_failures})"
         return rep
 
     def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager,
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
+
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(server_round)
-        fit_ins = FitIns(parameters, config)
+
+        client_fit_list: List[Tuple[ClientProxy, FitIns]] = []
+
+        # first round serves to collect data
+        if server_round == 1:
+            actors = list_actors(
+                filters=[
+                    ("state", "=", "ALIVE"),
+                    ("class_name", "=", "RaySystemMonitor"),
+                ]
+            )
+            num_gpus = 0
+            for actor in actors:
+                node_id = actor["name"]
+                this_actor = ray.get_actor(actor[node_id], namespace=self.namespace)
+                obj_ref = this_actor.get_resources.remote()
+                gpus_in_this_node = obj_ref.get()
+                self.available_gpus[node_id] = gpus_in_this_node
+                num_gpus = num_gpus + len(gpus_in_this_node)
+
+            # Sample one client per GPU. This is an first approximation.
+            # We need to understand how the GPUs behave using more than
+            # one client at a time
+            clients: List[ClientProxy] = client_manager.sample(
+                num_clients=num_gpus, min_num_clients=num_gpus
+            )
+
+            # Create individual configs that will be sent to each client
+            list_fitins: List[FitIns] = []
+            list_resources: List[Dict[str, Any]] = []
+            for node_id in self.available_gpus.keys():
+                for gpu in self.available_gpus[node_id].values():
+                    list_fitins.append(
+                        FitIns(
+                            parameters,
+                            {
+                                **config,
+                                "_flwr.gpu_id": gpu.id,
+                            },
+                        )
+                    )
+                    node_aff = NodeAffinitySchedulingStrategy(
+                        node_id=node_id, soft=False
+                    )
+                    list_resources.append({"scheduling_strategy": node_aff})
+
+            for idx, resource in enumerate(list_resources):
+                clients[idx].resources = resource
+
+            client_fit_list = list(zip(clients, list_fitins))
+
+        else:
+            # continue as usual
+            fit_ins = FitIns(parameters, config)
+
+            # Based on existing statistics, choose right amount of resources
+            # This could begin with an initial guess.
+
+            # Sample clients
+            sample_size, min_num_clients = self.num_fit_clients(
+                client_manager.num_available()
+            )
+            clients = client_manager.sample(
+                num_clients=sample_size, min_num_clients=min_num_clients
+            )
+
+            # update resources for clients
+            # iterate over data from clients in the previous round
+            for idx, resource in enumerate(list_resources):
+                clients[idx].resources = {"num_gpu": 0.5}  # resource
+
+            # Return client/config pairs
+            client_fit_list = [(client, fit_ins) for client in clients]
+        return client_fit_list
 
 
-        # update resources for clients
-        # iterate over data from clients in the previous round
-        for res_update in self.updated_resources_for_clients:
-            old_res = client_manager.clients[res_update['cid']].resources
-            # find the client and update the resources assigned to it
-            client_manager.clients[res_update['cid']].resources = res_update['resources']
-            print(f"Updated {old_res} -> {client_manager.clients[res_update['cid']].resources} for client {res_update['cid']}")
-
-        # Sample clients
-        sample_size, min_num_clients = self.num_fit_clients(
-            client_manager.num_available()
-        )
-        clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
-        )
-        print([client.cid for client in clients])
-
-        # Return client/config pairs
-        return [(client, fit_ins) for client in clients]
-
+'''
     def aggregate_fit(
         self,
         server_round: int,
@@ -124,11 +194,19 @@ class ResourceAwareFedAvg(FedAvg):
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
 
-        # Set resources
-        for client, fit_res in results:
-            gpu_ratio = fit_res.metrics['stats_generic'] # value.properties['stats_generic']# ['vram_util_percent0']
-
-            self.updated_resources_for_clients.append({'cid': client.cid, 'resources': {'num_cpus': 1, 'num_gpus': gpu_ratio*1.5}})
+        # Collect Statistics
+        actors = list_actors(
+            filters=[("state", "=", "ALIVE"), ("class_name", "=", "RaySystemMonitor")]
+        )
+        collected_stats = {}
+        for actor in actors:
+            ray_sysmon = ray.get_actor(actor["name"])
+            obj_ref = ray_sysmon.aggregate_statistics.remote()
+            collected_stats = {
+                **collected_stats,
+                **obj_ref.get(),
+            }
+        print(collected_stats)
 
         if not results:
             return None, {}
@@ -141,7 +219,7 @@ class ResourceAwareFedAvg(FedAvg):
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        parameters_aggregated = parameters_to_ndarrays(aggregate(weights_results))
+        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
@@ -152,3 +230,4 @@ class ResourceAwareFedAvg(FedAvg):
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
+'''

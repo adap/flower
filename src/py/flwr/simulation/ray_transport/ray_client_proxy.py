@@ -14,9 +14,10 @@
 # ==============================================================================
 """Ray-based Flower ClientProxy implementation."""
 
+import os
 
 from logging import DEBUG
-from typing import Callable, Dict, Optional, cast
+from typing import Any, Callable, Dict, Optional, cast
 
 import ray
 
@@ -24,6 +25,7 @@ from flwr import common
 from flwr.client import Client, ClientLike, to_client
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
+from flwr.monitoring.profiler import SystemMonitor
 
 ClientFn = Callable[[str], ClientLike]
 
@@ -31,7 +33,7 @@ ClientFn = Callable[[str], ClientLike]
 class RayClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(self, client_fn: ClientFn, cid: str, resources: Dict[str, float]):
+    def __init__(self, client_fn: ClientFn, cid: str, resources: Dict[str, Any]):
         super().__init__(cid)
         self.client_fn = client_fn
         self.resources = resources
@@ -57,11 +59,11 @@ class RayClientProxy(ClientProxy):
         self, ins: common.GetParametersIns, timeout: Optional[float]
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-        future_paramseters_res = launch_and_get_parameters.options(  # type: ignore
+        future_parameters_res = launch_and_get_parameters.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
         try:
-            res = ray.get(future_paramseters_res, timeout=timeout)
+            res = ray.get(future_parameters_res, timeout=timeout)
         except Exception as ex:
             log(DEBUG, ex)
             raise ex
@@ -122,7 +124,7 @@ def launch_and_get_properties(
 def launch_and_get_parameters(
     client_fn: ClientFn, cid: str, get_parameters_ins: common.GetParametersIns
 ) -> common.GetParametersRes:
-    """Exectue get_parameters remotely."""
+    """Execute get_parameters remotely."""
     client: Client = _create_client(client_fn, cid)
     return client.get_parameters(get_parameters_ins)
 
@@ -131,7 +133,7 @@ def launch_and_get_parameters(
 def launch_and_fit(
     client_fn: ClientFn, cid: str, fit_ins: common.FitIns
 ) -> common.FitRes:
-    """Exectue fit remotely."""
+    """Execute fit remotely."""
     client: Client = _create_client(client_fn, cid)
     return client.fit(fit_ins)
 

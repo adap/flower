@@ -59,6 +59,8 @@ iterators = "^0.0.2"
 ray = { extras = ["default"], version = "~2.0.0", optional = true }
 nvsmi = { version = "^0.4.2", optional = true } 
 psutil = { version = "^5.9.2", optional = true } 
+torch = "^1.12.1"
+torchvision = "^0.13.1"
 
 [tool.poetry.extras]
 simulation = ["ray", "nvsmi", "psutil"]

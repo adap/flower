@@ -16,10 +16,11 @@
 
 import sys
 
-from . import client, server, simulation
+from . import client, monitoring, server, simulation
 
 __all__ = [
     "client",
+    "monitoring",
     "server",
     "simulation",
 ]
