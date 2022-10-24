@@ -21,6 +21,8 @@ from flwr.driver.messages import (
     CreateTasksResponse,
     GetClientsRequest,
     GetClientsResponse,
+    GetResultsRequest,
+    GetResultsResponse,
 )
 
 
@@ -75,6 +77,34 @@ def test_create_tasks_response_serde() -> None:
     # Execute
     msg = serde.create_tasks_response_to_proto(res)
     res_actual = serde.create_tasks_response_from_proto(msg)
+
+    # Assert
+    assert res_actual == res
+
+
+def test_get_results_request_serde() -> None:
+    """Test `GetResultsRequest` (de-)serialization."""
+
+    # Prepare
+    res = GetResultsRequest(task_ids=[])
+
+    # Execute
+    msg = serde.get_results_request_to_proto(res)
+    res_actual = serde.get_results_request_from_proto(msg)
+
+    # Assert
+    assert res_actual == res
+
+
+def test_get_results_response_serde() -> None:
+    """Test `GetResultsResponse` (de-)serialization."""
+
+    # Prepare
+    res = GetResultsResponse(results=[])
+
+    # Execute
+    msg = serde.get_results_response_to_proto(res)
+    res_actual = serde.get_results_response_from_proto(msg)
 
     # Assert
     assert res_actual == res

@@ -81,7 +81,7 @@ class Driver:
         log(INFO, "[Driver] Disconnected")
 
     def get_clients(self, req: GetClientsRequest) -> GetClientsResponse:
-        """Get client."""
+        """Get client IDs."""
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise Exception("`Driver` instance not connected")
@@ -107,7 +107,7 @@ class Driver:
         return serde.create_tasks_response_from_proto(res_proto)
 
     def get_results(self, req: GetResultsRequest) -> GetResultsResponse:
-        """Get results."""
+        """Get task results."""
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise Exception("`Driver` instance not connected")
