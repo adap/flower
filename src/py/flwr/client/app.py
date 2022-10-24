@@ -41,7 +41,7 @@ from flwr.common.typing import (
 
 from .client import Client
 from .grpc_client.connection import grpc_connection
-from .grpc_client.message_handler import handle
+from .message_handler.message_handler import handle
 from .numpy_client import NumPyClient
 from .numpy_client import has_evaluate as numpyclient_has_evaluate
 from .numpy_client import has_fit as numpyclient_has_fit

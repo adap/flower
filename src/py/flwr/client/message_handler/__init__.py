@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Client-side part of the gRPC transport layer."""
+"""Client-side message handling."""
