@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15\x66lwr/proto/task.proto\x12\nflwr.proto\x1a\x1a\x66lwr/proto/transport.proto\"U\n\x04Task\x12\x0f\n\x07task_id\x18\x01 \x01(\x03\x12<\n\x15legacy_server_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ServerMessageB\x02\x18\x01\"D\n\x0eTaskAssignment\x12\x1e\n\x04task\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Task\x12\x12\n\nclient_ids\x18\x02 \x03(\x03\"W\n\x06Result\x12\x0f\n\x07task_id\x18\x01 \x01(\x03\x12<\n\x15legacy_client_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ClientMessageB\x02\x18\x01\x62\x06proto3'
+  serialized_pb=b'\n\x15\x66lwr/proto/task.proto\x12\nflwr.proto\x1a\x1a\x66lwr/proto/transport.proto\"U\n\x04Task\x12\x0f\n\x07task_id\x18\x01 \x01(\x04\x12<\n\x15legacy_server_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ServerMessageB\x02\x18\x01\"D\n\x0eTaskAssignment\x12\x1e\n\x04task\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Task\x12\x12\n\nclient_ids\x18\x02 \x03(\x04\"W\n\x06Result\x12\x0f\n\x07task_id\x18\x01 \x01(\x04\x12<\n\x15legacy_client_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ClientMessageB\x02\x18\x01\x62\x06proto3'
   ,
   dependencies=[flwr_dot_proto_dot_transport__pb2.DESCRIPTOR,])
 
@@ -37,7 +37,7 @@ _TASK = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='task_id', full_name='flwr.proto.Task.task_id', index=0,
-      number=1, type=3, cpp_type=2, label=1,
+      number=1, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -83,7 +83,7 @@ _TASKASSIGNMENT = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='client_ids', full_name='flwr.proto.TaskAssignment.client_ids', index=1,
-      number=2, type=3, cpp_type=2, label=3,
+      number=2, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -115,7 +115,7 @@ _RESULT = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='task_id', full_name='flwr.proto.Result.task_id', index=0,
-      number=1, type=3, cpp_type=2, label=1,
+      number=1, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
