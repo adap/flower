@@ -23,6 +23,7 @@ from flwr.common.serde import (
     server_message_from_proto,
     server_message_to_proto,
 )
+from flwr.common.typing import ClientMessage, ServerMessage
 from flwr.driver.messages import (
     CreateTasksRequest,
     CreateTasksResponse,
@@ -78,13 +79,19 @@ def create_tasks_request_to_proto(
     """Serialize `CreateTasksRequest` to ProtoBuf."""
     task_assignments_proto: List[task_pb2.TaskAssignment] = []
     for task_assignment in req.task_assignments:
+        legacy_server_message_proto = (
+            None
+            if not task_assignment.task.legacy_server_message
+            else server_message_to_proto(
+                task_assignment.task.legacy_server_message,
+            )
+        )
+        task_proto = task_pb2.Task(
+            task_id=task_assignment.task.task_id,
+            legacy_server_message=legacy_server_message_proto,
+        )
         task_assignment_proto = task_pb2.TaskAssignment(
-            task=task_pb2.Task(
-                task_id=task_assignment.task.task_id,
-                legacy_server_message=server_message_to_proto(
-                    task_assignment.task.legacy_server_message
-                ),
-            ),
+            task=task_proto,
             client_ids=task_assignment.client_ids,
         )
         task_assignments_proto.append(task_assignment_proto)
@@ -97,13 +104,19 @@ def create_tasks_request_from_proto(
     """Deserialize `CreateTasksRequest` from ProtoBuf."""
     task_assignments: List[TaskAssignment] = []
     for task_assignment_proto in msg.task_assignments:
+        legacy_server_message = (
+            ServerMessage()  # Empty ServerMessage
+            if not task_assignment_proto.task.legacy_server_message
+            else server_message_from_proto(
+                task_assignment_proto.task.legacy_server_message,
+            )
+        )
+        task = Task(
+            task_id=task_assignment_proto.task.task_id,
+            legacy_server_message=legacy_server_message,
+        )
         task_assignment = TaskAssignment(
-            task=Task(
-                task_id=task_assignment_proto.task.task_id,
-                legacy_server_message=server_message_from_proto(
-                    task_assignment_proto.task.legacy_server_message
-                ),
-            ),
+            task=task,
             client_ids=list(task_assignment_proto.client_ids),
         )
         task_assignments.append(task_assignment)
@@ -147,14 +160,16 @@ def get_results_response_to_proto(
     """Serialize `GetResultsResponse` to ProtoBuf."""
     results_proto: List[task_pb2.Result] = []
     for result in res.results:
-        results_proto.append(
-            task_pb2.Result(
-                task_id=result.task_id,
-                legacy_client_message=client_message_to_proto(
-                    result.legacy_client_message,
-                ),
-            )
+        legacy_client_message_proto = (
+            None
+            if not result.legacy_client_message
+            else client_message_to_proto(result.legacy_client_message)
         )
+        result_proto = task_pb2.Result(
+            task_id=result.task_id,
+            legacy_client_message=legacy_client_message_proto,
+        )
+        results_proto.append(result_proto)
     return driver_pb2.GetResultsResponse(results=results_proto)
 
 
@@ -164,12 +179,14 @@ def get_results_response_from_proto(
     """Deserialize `GetResultsResponse` from ProtoBuf."""
     results: List[Result] = []
     for result_proto in msg.results:
-        results.append(
-            Result(
-                task_id=result_proto.task_id,
-                legacy_client_message=client_message_from_proto(
-                    result_proto.legacy_client_message,
-                ),
-            )
+        legacy_client_message = (
+            ClientMessage()  # Empty ServerMessage
+            if not result_proto.legacy_client_message
+            else client_message_from_proto(result_proto.legacy_client_message)
         )
+        result = Result(
+            task_id=result_proto.task_id,
+            legacy_client_message=legacy_client_message,
+        )
+        results.append(result)
     return GetResultsResponse(results=results)
