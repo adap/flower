@@ -42,16 +42,16 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: GetClientsRequest, context: grpc.ServicerContext
     ) -> GetClientsResponse:
         log(INFO, "DriverServicer.GetClients")
-        return super().GetClients(request, context)
+        return GetClientsResponse(client_ids=[])
 
     def CreateTasks(
         self, request: CreateTasksRequest, context: grpc.ServicerContext
     ) -> CreateTasksResponse:
         log(INFO, "DriverServicer.CreateTasks")
-        return super().CreateTasks(request, context)
+        return CreateTasksResponse(task_ids=[])
 
     def GetResults(
         self, request: GetResultsRequest, context: grpc.ServicerContext
     ) -> GetResultsResponse:
         log(INFO, "DriverServicer.GetResults")
-        return super().GetResults(request, context)
+        return GetResultsResponse(results=[])
