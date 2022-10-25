@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Handle server messages by calling appropriate client methods."""
+"""Client-side message handler."""
 
 
 from typing import Tuple
@@ -28,11 +28,9 @@ from flwr.common import serde, typing
 from flwr.common.typing import Parameters
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
-# pylint: disable=missing-function-docstring
-
 
 class UnknownServerMessage(Exception):
-    """Signifies that the received message is unknown."""
+    """Exception indicating that the received message is unknown."""
 
 
 def handle(
@@ -44,11 +42,13 @@ def handle(
     ----------
     client : Client
         The Client instance provided by the user.
+    server_msg: ServerMessage
+        The message coming from the server, to be processed by the client.
 
     Returns
     -------
-    client_message: ClientMessage
-        The message comming from the server, to be processed by the client.
+    client_msg: ClientMessage
+        The result message that should be returned to the server.
     sleep_duration : int
         Number of seconds that the client should disconnect from the server.
     keep_going : bool
