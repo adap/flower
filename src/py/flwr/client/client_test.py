@@ -63,7 +63,7 @@ class NotOverridingClient(Client):
 
 
 def test_has_get_properties_true() -> None:
-    """Test fit_clients."""
+    """Test has_get_properties."""
     # Prepare
     client = OverridingClient()
     expected = True
@@ -76,7 +76,7 @@ def test_has_get_properties_true() -> None:
 
 
 def test_has_get_properties_false() -> None:
-    """Test fit_clients."""
+    """Test has_get_properties."""
     # Prepare
     client = NotOverridingClient()
     expected = False
@@ -89,7 +89,7 @@ def test_has_get_properties_false() -> None:
 
 
 def test_has_get_parameters_true() -> None:
-    """Test fit_clients."""
+    """Test has_get_parameters."""
     # Prepare
     client = OverridingClient()
     expected = True
@@ -102,7 +102,7 @@ def test_has_get_parameters_true() -> None:
 
 
 def test_has_get_parameters_false() -> None:
-    """Test fit_clients."""
+    """Test has_get_parameters."""
     # Prepare
     client = NotOverridingClient()
     expected = False
@@ -115,7 +115,7 @@ def test_has_get_parameters_false() -> None:
 
 
 def test_has_fit_true() -> None:
-    """Test fit_clients."""
+    """Test has_fit."""
     # Prepare
     client = OverridingClient()
     expected = True
@@ -128,7 +128,7 @@ def test_has_fit_true() -> None:
 
 
 def test_has_fit_false() -> None:
-    """Test fit_clients."""
+    """Test has_fit."""
     # Prepare
     client = NotOverridingClient()
     expected = False
@@ -141,7 +141,7 @@ def test_has_fit_false() -> None:
 
 
 def test_has_evaluate_true() -> None:
-    """Test fit_clients."""
+    """Test has_evaluate."""
     # Prepare
     client = OverridingClient()
     expected = True
@@ -154,7 +154,7 @@ def test_has_evaluate_true() -> None:
 
 
 def test_has_evaluate_false() -> None:
-    """Test fit_clients."""
+    """Test has_evaluate."""
     # Prepare
     client = NotOverridingClient()
     expected = False
