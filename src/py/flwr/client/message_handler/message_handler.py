@@ -19,13 +19,12 @@ from typing import Tuple
 
 from flwr.client.client import (
     Client,
-    has_evaluate,
-    has_fit,
-    has_get_parameters,
-    has_get_properties,
+    maybe_call_evaluate,
+    maybe_call_fit,
+    maybe_call_get_parameters,
+    maybe_call_get_properties,
 )
-from flwr.common import serde, typing
-from flwr.common.typing import Parameters
+from flwr.common import serde
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 
@@ -88,23 +87,15 @@ def _reconnect(
 def _get_properties(
     client: Client, get_properties_msg: ServerMessage.GetPropertiesIns
 ) -> ClientMessage:
-    # Check if client overrides get_properties
-    if not has_get_properties(client=client):
-        # If client does not override get_properties, don't call it
-        get_properties_res = typing.GetPropertiesRes(
-            status=typing.Status(
-                code=typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED,
-                message="Client does not implement `get_properties`",
-            ),
-            properties={},
-        )
-        get_properties_res_proto = serde.get_properties_res_to_proto(get_properties_res)
-        return ClientMessage(get_properties_res=get_properties_res_proto)
-
-    # Deserialize get_properties instruction
+    # Deserialize `get_properties` instruction
     get_properties_ins = serde.get_properties_ins_from_proto(get_properties_msg)
+
     # Request properties
-    get_properties_res = client.get_properties(get_properties_ins)
+    get_properties_res = maybe_call_get_properties(
+        client=client,
+        get_properties_ins=get_properties_ins,
+    )
+
     # Serialize response
     get_properties_res_proto = serde.get_properties_res_to_proto(get_properties_res)
     return ClientMessage(get_properties_res=get_properties_res_proto)
@@ -113,73 +104,45 @@ def _get_properties(
 def _get_parameters(
     client: Client, get_parameters_msg: ServerMessage.GetParametersIns
 ) -> ClientMessage:
-    # Check if client overrides get_parameters
-    if not has_get_parameters(client=client):
-        # If client does not override get_parameters, don't call it
-        get_parameters_res = typing.GetParametersRes(
-            status=typing.Status(
-                code=typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED,
-                message="Client does not implement `get_parameters`",
-            ),
-            parameters=Parameters(tensor_type="", tensors=[]),
-        )
-        get_parameters_res_proto = serde.get_parameters_res_to_proto(get_parameters_res)
-        return ClientMessage(get_parameters_res=get_parameters_res_proto)
-
-    # Deserialize get_properties instruction
+    # Deserialize `get_parameters` instruction
     get_parameters_ins = serde.get_parameters_ins_from_proto(get_parameters_msg)
+
     # Request parameters
-    get_parameters_res = client.get_parameters(get_parameters_ins)
+    get_parameters_res = maybe_call_get_parameters(
+        client=client,
+        get_parameters_ins=get_parameters_ins,
+    )
+
     # Serialize response
     get_parameters_res_proto = serde.get_parameters_res_to_proto(get_parameters_res)
     return ClientMessage(get_parameters_res=get_parameters_res_proto)
 
 
 def _fit(client: Client, fit_msg: ServerMessage.FitIns) -> ClientMessage:
-    # Check if client overrides fit
-    if not has_fit(client=client):
-        # If client does not override fit, don't call it
-        fit_res = typing.FitRes(
-            status=typing.Status(
-                code=typing.Code.FIT_NOT_IMPLEMENTED,
-                message="Client does not implement `fit`",
-            ),
-            parameters=Parameters(tensor_type="", tensors=[]),
-            num_examples=0,
-            metrics={},
-        )
-        fit_res_proto = serde.fit_res_to_proto(fit_res)
-        return ClientMessage(fit_res=fit_res_proto)
-
     # Deserialize fit instruction
     fit_ins = serde.fit_ins_from_proto(fit_msg)
+
     # Perform fit
-    fit_res = client.fit(fit_ins)
+    fit_res = maybe_call_fit(
+        client=client,
+        fit_ins=fit_ins,
+    )
+
     # Serialize fit result
     fit_res_proto = serde.fit_res_to_proto(fit_res)
     return ClientMessage(fit_res=fit_res_proto)
 
 
 def _evaluate(client: Client, evaluate_msg: ServerMessage.EvaluateIns) -> ClientMessage:
-    # Check if client overrides evaluate
-    if not has_evaluate(client=client):
-        # If client does not override evaluate, don't call it
-        evaluate_res = typing.EvaluateRes(
-            status=typing.Status(
-                code=typing.Code.EVALUATE_NOT_IMPLEMENTED,
-                message="Client does not implement `evaluate`",
-            ),
-            loss=0.0,
-            num_examples=0,
-            metrics={},
-        )
-        evaluate_res_proto = serde.evaluate_res_to_proto(evaluate_res)
-        return ClientMessage(evaluate_res=evaluate_res_proto)
-
     # Deserialize evaluate instruction
     evaluate_ins = serde.evaluate_ins_from_proto(evaluate_msg)
+
     # Perform evaluation
-    evaluate_res = client.evaluate(evaluate_ins)
+    evaluate_res = maybe_call_evaluate(
+        client=client,
+        evaluate_ins=evaluate_ins,
+    )
+
     # Serialize evaluate result
     evaluate_res_proto = serde.evaluate_res_to_proto(evaluate_res)
     return ClientMessage(evaluate_res=evaluate_res_proto)
