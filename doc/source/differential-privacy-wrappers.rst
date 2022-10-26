@@ -1,7 +1,7 @@
-DP-FedAvg Wrappers in Flower
+Differential Privacy Wrappers in Flower
 =======================================
 
-Flower provides wrapper classes for the easy integration of the central DP guarantees provided by DP-FedAvg into training pipelines defined in any of the various ML frameworks that Flower is compatible with. 
+Flower provides differential privacy (DP) wrapper classes for the easy integration of the central DP guarantees provided by DP-FedAvg into training pipelines defined in any of the various ML frameworks that Flower is compatible with. 
 
 .. note::
   The name DP-FedAvg is misleading since it can be applied on top of any FL algorithm that conforms to the general structure prescribed by the FedOpt family of algorithms.
@@ -94,7 +94,3 @@ Assume you have trained for :math:`n` rounds with sampling fraction :math:`q` an
 .. [mcmahan] McMahan, H. Brendan, et al. "Learning differentially private recurrent language models." arXiv preprint arXiv:1710.06963 (2017).
 
 .. [andrew] Andrew, Galen, et al. "Differentially private learning with adaptive clipping." Advances in Neural Information Processing Systems 34 (2021): 17455-17466.
-
-
-
-
