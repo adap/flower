@@ -83,6 +83,7 @@ Understanding-oriented concept guides explain and discuss key topics and underly
    :caption: Explanations
 
    evaluation
+   differential-privacy-wrappers
 
 Reference
 ~~~~~~~~~

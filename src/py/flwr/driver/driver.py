@@ -22,7 +22,6 @@ import grpc
 
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.typing import ClientMessage
 from flwr.driver import serde
 from flwr.proto import driver_pb2, driver_pb2_grpc
 
@@ -33,7 +32,6 @@ from .messages import (
     GetClientsResponse,
     GetResultsRequest,
     GetResultsResponse,
-    Result,
 )
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
@@ -83,29 +81,40 @@ class Driver:
         log(INFO, "[Driver] Disconnected")
 
     def get_clients(self, req: GetClientsRequest) -> GetClientsResponse:
-        """Get client ID's."""
+        """Get client IDs."""
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise Exception("`Driver` instance not connected")
 
+        # Serialize, call Driver API, deserialize
         req_proto = serde.get_clients_request_to_proto(req)
-        res: driver_pb2.GetClientsResponse = self.stub.GetClients(request=req_proto)
-        return serde.get_clients_response_from_proto(res)
+        res_proto: driver_pb2.GetClientsResponse = self.stub.GetClients(
+            request=req_proto
+        )
+        return serde.get_clients_response_from_proto(res_proto)
 
     def create_tasks(self, req: CreateTasksRequest) -> CreateTasksResponse:
-        """."""
-        # pylint: disable=no-self-use
-        # [...] call DriverAPI
-        num_tasks: int = sum([len(ta.client_ids) for ta in req.task_assignments])
-        return CreateTasksResponse(task_ids=list(range(num_tasks)))
+        """Schedule tasks."""
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise Exception("`Driver` instance not connected")
+
+        # Serialize, call Driver API, deserialize
+        req_proto = serde.create_tasks_request_to_proto(req)
+        res_proto: driver_pb2.CreateTasksResponse = self.stub.CreateTasks(
+            request=req_proto
+        )
+        return serde.create_tasks_response_from_proto(res_proto)
 
     def get_results(self, req: GetResultsRequest) -> GetResultsResponse:
-        """."""
-        # pylint: disable=no-self-use
-        # [...] call DriverAPI
-        return GetResultsResponse(
-            results=[
-                Result(task_id=task_id, legacy_client_message=ClientMessage())
-                for task_id in req.task_ids
-            ]
+        """Get task results."""
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise Exception("`Driver` instance not connected")
+
+        # Serialize, call Driver API, deserialize
+        req_proto = serde.get_results_request_to_proto(req)
+        res_proto: driver_pb2.GetResultsResponse = self.stub.GetResults(
+            request=req_proto
         )
+        return serde.get_results_response_from_proto(res_proto)
