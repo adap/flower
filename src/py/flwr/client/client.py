@@ -18,6 +18,7 @@
 from abc import ABC
 
 from flwr.common import (
+    Code,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -26,6 +27,8 @@ from flwr.common import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
+    Parameters,
+    Status,
 )
 
 
@@ -116,3 +119,87 @@ def has_fit(client: Client) -> bool:
 def has_evaluate(client: Client) -> bool:
     """Check if Client implements evaluate."""
     return type(client).evaluate != Client.evaluate
+
+
+def maybe_call_get_properties(
+    client: Client, get_properties_ins: GetPropertiesIns
+) -> GetPropertiesRes:
+    """Call `get_properties` if the client overrides it."""
+
+    # Check if client overrides `get_properties`
+    if not has_get_properties(client=client):
+        # If client does not override `get_properties`, don't call it
+        status = Status(
+            code=Code.GET_PROPERTIES_NOT_IMPLEMENTED,
+            message="Client does not implement `get_properties`",
+        )
+        return GetPropertiesRes(
+            status=status,
+            properties={},
+        )
+
+    # If the client implements `get_properties`, call it
+    return client.get_properties(get_properties_ins)
+
+
+def maybe_call_get_parameters(
+    client: Client, get_parameters_ins: GetParametersIns
+) -> GetParametersRes:
+    """Call `get_parameters` if the client overrides it."""
+
+    # Check if client overrides `get_parameters`
+    if not has_get_parameters(client=client):
+        # If client does not override `get_parameters`, don't call it
+        status = Status(
+            code=Code.GET_PARAMETERS_NOT_IMPLEMENTED,
+            message="Client does not implement `get_parameters`",
+        )
+        return GetParametersRes(
+            status=status,
+            parameters=Parameters(tensor_type="", tensors=[]),
+        )
+
+    # If the client implements `get_parameters`, call it
+    return client.get_parameters(get_parameters_ins)
+
+
+def maybe_call_fit(client: Client, fit_ins: FitIns) -> FitRes:
+    """Call `fit` if the client overrides it."""
+
+    # Check if client overrides `fit`
+    if not has_fit(client=client):
+        # If client does not override `fit`, don't call it
+        status = Status(
+            code=Code.FIT_NOT_IMPLEMENTED,
+            message="Client does not implement `fit`",
+        )
+        return FitRes(
+            status=status,
+            parameters=Parameters(tensor_type="", tensors=[]),
+            num_examples=0,
+            metrics={},
+        )
+
+    # If the client implements `fit`, call it
+    return client.fit(fit_ins)
+
+
+def maybe_call_evaluate(client: Client, evaluate_ins: EvaluateIns) -> EvaluateRes:
+    """Call `evaluate` if the client overrides it."""
+
+    # Check if client overrides `evaluate`
+    if not has_evaluate(client=client):
+        # If client does not override `evaluate`, don't call it
+        status = Status(
+            code=Code.EVALUATE_NOT_IMPLEMENTED,
+            message="Client does not implement `evaluate`",
+        )
+        return EvaluateRes(
+            status=status,
+            loss=0.0,
+            num_examples=0,
+            metrics={},
+        )
+
+    # If the client implements `evaluate`, call it
+    return client.evaluate(evaluate_ins)
