@@ -7,11 +7,7 @@ import numpy as np
 def load_data():
     df = pd.read_csv('./example_data/client.csv') 
     return df
-# #############################################################################
-# 2. Federation of the pipeline with Flower
-# #############################################################################
 
-# Load model and data (simple CNN, CIFAR-10)
 df = load_data()
 
 column_names = ['width','length']
@@ -57,8 +53,6 @@ class FlowerClient(fl.client.Client):
             metrics_dict[str(index)] = key 
             values_arr.append(inputs[key])
         return values_arr, metrics_dict 
-
- 
 
 # Start Flower client
 fl.client.start_numpy_client(
