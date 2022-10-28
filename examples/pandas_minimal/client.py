@@ -5,12 +5,12 @@ import numpy as np
 
 
 def load_data():
-    df = pd.read_csv('./example_data/client.csv') 
+    df = pd.read_csv('./data/client.csv') 
     return df
 
 df = load_data()
 
-column_names = ['width','length']
+column_names = ['sepal length (cm)','sepal width (cm)']
 
 def compute_hist(df, col_name):
     _, vals = np.histogram(df[col_name])  
