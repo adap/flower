@@ -5,7 +5,7 @@ import numpy as np
 
 
 def load_data():
-    df = pd.read_csv('./data/client.csv') 
+    df = pd.read_csv('./example_data/client.csv') 
     return df
 # #############################################################################
 # 2. Federation of the pipeline with Flower
