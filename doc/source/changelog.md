@@ -2,7 +2,15 @@
 
 ## Unreleased
 
-- All Client exceptions happening in the VCE will now be logged by default and not just exposed through the strategies.
+- **Log** `Client` **exceptions in Virtual Client Engine**
+
+  All `Client` exceptions happening in the VCE will now be logged by default and not just exposed through the strategies.
+
+- **Support optional** `Client`**/**`NumPyClient` **methods in Virtual Client Engine**
+
+- **Provide type information to packages using** `flwr` ([#1377](https://github.com/adap/flower/pull/1377))
+
+  The package `flwr` is now bundled with a `py.typed` file indicating that the package is typed. This enables typing support for projects or packages that use `flwr` by enabling them to type-check their code using tool like `mypy`.
 
 ## v1.0.0 (2022-07-28)
 

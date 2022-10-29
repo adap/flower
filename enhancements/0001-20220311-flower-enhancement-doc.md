@@ -3,7 +3,7 @@ fed-number: 0001
 title: Flower Enhancement Doc
 authors: ["@nfnt", "@orlandohohmeier"]
 creation-data: 2022-03-11
-last-updated: 2022-03-29
+last-updated: 2022-10-24
 status: provisional
 ---
 
@@ -17,7 +17,7 @@ status: provisional
   - [Goals](#goals)
   - [Non-Goals](#non-goals)
 - [Proposal](#proposal)
-  - [Enhancement Proposal Template](#enhancement-proposal-template)
+  - [Enhancement Doc Template](#enhancement-doc-template)
   - [Metadata](#metadata)
   - [Workflow](#workflow)
 - [Drawbacks](#drawbacks)
@@ -46,13 +46,13 @@ into one file, which is created incrementally in collaboration with the communit
 
 ## Motivation
 
-For far-fetching changes or features proposed to Flower, an abstraction beyond a single GitHub issue or pull request is required in order to understand and communicate upcoming changes to the project.
+For far-fetching changes or features proposed to Flower, an abstraction beyond a single GitHub issue or pull request is required to understand and communicate upcoming changes to the project.
 
-The purpose of this process is to reduce the amount of "tribal knowledge" in our community. By moving decisions from Slack threads, video calls, and hallway conversations into a well tracked artifact, this process aims to enhance communication and discoverability.
+The purpose of this process is to reduce the amount of "tribal knowledge" in our community. By moving decisions from Slack threads, video calls, and hallway conversations into a well-tracked artifact, this process aims to enhance communication and discoverability.
 
 ### Goals
 
-Roughly any larger, user facing enhancement should follow the Enhancement process. If an enhancement would be described in either written or verbal communication to anyone besides the author or developer, then consider creating an Enhancement Doc.
+Roughly any larger, user-facing enhancement should follow the Enhancement process. If an enhancement would be described in either written or verbal communication to anyone besides the author or developer, then consider creating an Enhancement Doc.
 
 Similarly, any technical effort (refactoring, major architectural change) that will impact a large section of the development community should also be communicated widely. The Enhancement process is suited for this even if it will have zero impact on the typical user or operator.
 
@@ -60,18 +60,18 @@ Similarly, any technical effort (refactoring, major architectural change) that w
 
 For small changes and additions, going through the Enhancement process would be time-consuming and unnecessary. This includes, for example, adding new Federated Learning algorithms, as these only add features without changing how Flower works or is used.
 
-Enhancements are different from feature requests, as they are already providing a laid-out path for an implementation and are championed by members of the community.
+Enhancements are different from feature requests, as they are already providing a laid-out path for implementation and are championed by members of the community.
 
 ## Proposal
 
-An Enhancement is captured in a Markdown file that follows a defined template and a workflow to review and store enhancement proposals for reference — the Enhancement Doc.
+An Enhancement is captured in a Markdown file that follows a defined template and a workflow to review and store enhancement docs for reference — the Enhancement Doc.
 
 ### Enhancement Doc Template
 
-Each enhancement proposal is provided as a Markdown file having the following structure
+Each enhancement doc is provided as a Markdown file having the following structure
 
-- Metadata
-  Metadata as [described below](#metadata) in form of a YAML preamble
+- Metadata (as [described below](#metadata) in form of a YAML preamble)
+- Title (same as in metadata)
 - Table of Contents (if needed)
 - Summary
 - Motivation
@@ -85,7 +85,7 @@ Each enhancement proposal is provided as a Markdown file having the following st
 - Drawbacks
 - Alternatives Considered
 
-As reference, this document follows the above structure.
+As a reference, this document follows the above structure.
 
 ### Metadata
 
