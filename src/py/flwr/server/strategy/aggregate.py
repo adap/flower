@@ -47,7 +47,9 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
     weights = [weights for weights, _ in results]
 
     # Compute median weight of each layer
-    median_w: NDArrays = [np.median(np.asarray(l), axis=0) for l in zip(*weights)]  # type: ignore
+    median_w: NDArrays = [
+        np.median(np.asarray(layer), axis=0) for layer in zip(*weights)  # type: ignore
+    ]
     return median_w
 
 
