@@ -15,9 +15,15 @@
 """Flower driver service client."""
 
 
-from typing import Optional, Tuple
+from logging import ERROR, INFO, WARNING
+from typing import Optional
 
-from flwr.common.typing import ClientMessage
+import grpc
+
+from flwr.common.grpc import create_channel
+from flwr.common.logger import log
+from flwr.driver import serde
+from flwr.proto import driver_pb2, driver_pb2_grpc
 
 from .messages import (
     CreateTasksRequest,
@@ -26,10 +32,16 @@ from .messages import (
     GetClientsResponse,
     GetResultsRequest,
     GetResultsResponse,
-    Result,
 )
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
+
+ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
+[Driver] Error: Not connected.
+
+Call `connect()` on the `Driver` instance before calling any of the other `Driver`
+methods.
+"""
 
 
 class Driver:
@@ -38,43 +50,71 @@ class Driver:
     def __init__(
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+        certificates: Optional[bytes] = None,
     ) -> None:
         self.driver_service_address = driver_service_address
         self.certificates = certificates
+        self.channel: Optional[grpc.Channel] = None
+        self.stub: Optional[driver_pb2_grpc.DriverStub] = None
 
     def connect(self) -> None:
-        """."""
-        # pylint: disable=no-self-use
-        # [...] connect to DriverAPI
-        print("[Driver] Connected")
+        """Connect to the Driver API."""
+        if self.channel is not None or self.stub is not None:
+            log(WARNING, "Already connected")
+            return
+        self.channel = create_channel(
+            server_address=self.driver_service_address,
+            root_certificates=self.certificates,
+        )
+        self.stub = driver_pb2_grpc.DriverStub(self.channel)
+        log(INFO, "[Driver] Connected")
 
     def disconnect(self) -> None:
-        """."""
-        # pylint: disable=no-self-use
-        # [...] disconnect from DriverAPI
-        print("[Driver] Disconnected")
+        """Disconnect from the Driver API."""
+        if self.channel is None or self.stub is None:
+            log(WARNING, "Already disconnected")
+            return
+        channel = self.channel
+        self.channel = None
+        self.stub = None
+        channel.close()
+        log(INFO, "[Driver] Disconnected")
 
     def get_clients(self, req: GetClientsRequest) -> GetClientsResponse:
-        """."""
-        # pylint: disable=no-self-use,unused-argument
-        # [...] call DriverAPI
-        return GetClientsResponse(client_ids=list(range(5)))
+        """Get client IDs."""
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise Exception("`Driver` instance not connected")
+
+        # Serialize, call Driver API, deserialize
+        req_proto = serde.get_clients_request_to_proto(req)
+        res_proto: driver_pb2.GetClientsResponse = self.stub.GetClients(
+            request=req_proto
+        )
+        return serde.get_clients_response_from_proto(res_proto)
 
     def create_tasks(self, req: CreateTasksRequest) -> CreateTasksResponse:
-        """."""
-        # pylint: disable=no-self-use
-        # [...] call DriverAPI
-        num_tasks: int = sum([len(ta.client_ids) for ta in req.task_assignments])
-        return CreateTasksResponse(task_ids=list(range(num_tasks)))
+        """Schedule tasks."""
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise Exception("`Driver` instance not connected")
+
+        # Serialize, call Driver API, deserialize
+        req_proto = serde.create_tasks_request_to_proto(req)
+        res_proto: driver_pb2.CreateTasksResponse = self.stub.CreateTasks(
+            request=req_proto
+        )
+        return serde.create_tasks_response_from_proto(res_proto)
 
     def get_results(self, req: GetResultsRequest) -> GetResultsResponse:
-        """."""
-        # pylint: disable=no-self-use
-        # [...] call DriverAPI
-        return GetResultsResponse(
-            results=[
-                Result(task_id=task_id, legacy_client_message=ClientMessage())
-                for task_id in req.task_ids
-            ]
+        """Get task results."""
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise Exception("`Driver` instance not connected")
+
+        # Serialize, call Driver API, deserialize
+        req_proto = serde.get_results_request_to_proto(req)
+        res_proto: driver_pb2.GetResultsResponse = self.stub.GetResults(
+            request=req_proto
         )
+        return serde.get_results_response_from_proto(res_proto)
