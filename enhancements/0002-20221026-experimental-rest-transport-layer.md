@@ -34,9 +34,13 @@ The motivation for this FED is, therefore, to make it easier for users to integr
 ### Goals
 
 - *Increase infrastructure compatibility.* default configurations of common cloud infrastructure stacks.
+  - *Be compatible with caching infrastructure.*
+  - *Support CORS.*
 - *Increase client platform compatibility.* Flower clients should be able to run on platforms that are not well-supported by gRPC.
 - *Support proxy servers.* Enable client/server connections to go through proxy servers that may or may not alter the request, for example, to conceal the client's IP address from the server.
-- *Optional client identity.* Clients should be able to remain anonymous, client identity should be an optional component that users of the framework can opt for depending on the needs of their workload.
+- *Keep client identity optional.* Clients should be able to remain anonymous, client identity should be an optional component that users of the framework can opt for depending on the needs of their workload.
+- *Prevent clients from poisoning the model.*
+- *Limit server-side knowledge about individual clients.*
 
 ### Non-Goals
 
@@ -44,16 +48,39 @@ The motivation for this FED is, therefore, to make it easier for users to integr
 - *API stability.* The proposed REST API is not intended to be final.
 - *Client authentication.* There should be a forward-compatible path for adding client authentication, but client authentication does not need to be implemented in the first version.
 - *Compatibility with `start_server`.*
+- *Build a "RESTful" API.* The goal is to have a REST-inspired API, but not to build a fully idiomatic RESTful API.
 
 ## Proposal
 
-Introduce a request/response REST transport layer. The REST transport layer would consist of REST API server (integrated with the Flower server) and a REST client 
+Introduce a request/response REST transport layer. The REST transport layer would consist of a REST API server (integrated with the Flower server) and a REST client.
 
 ## Design Details
 
+### Definition(s)
+
+Task: User-defined specification of what a client has to do, with the expectation that the client returns a result.
+
+### Protocol
+
+General idea:
+- Client always initiates conversation
+- Server responds in one of two ways:
+  - Reconnect at a later time.
+  - Execute a task and send the result.
+- Server has a (mild) form of control over the conversation by suggesting to the client when it should connect again.
+
+Example:
+- Client connects to the server: "I'm available"
+- Server doesn't have any tasks: "reconnect in 5min"
+- Client sleeps for 5min, then connects again
+- Server say: here's a TASK and a TOKEN, work on it and send me your RESULT
+- Client receives the TASK, executes it locally, and returns the RESULT
+- Server says thanks, please reconnect in 10min
+- [the process repeats]
+
 ### Server-side REST API
 
-TODO
+TODO define methods incl. req/res body types
 
 ### Message serialization
 
@@ -75,6 +102,14 @@ Messages types should stay identical to the existing ones, particularly the ones
 **HTTPS-only:** Clients are expected to connect to the server only via HTTPS, never via plain HTTP.
 
 **Poisoning attacks:** [TODO, which mechanisms do we want to support/enforce here?]
+
+### Caching
+
+TODO
+
+### Basic model poisoning prevention
+
+TODO
 
 ## Drawbacks
 
