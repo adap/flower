@@ -4,9 +4,7 @@
 
 - **Introduce Differential Privacy wrappers (preview)** ([#1357](https://github.com/adap/flower/pull/1357), [#1460](https://github.com/adap/flower/pull/1460))
 
-  The first (experimental) preview of pluggable Differential Privacy wrappers enables easy configuration and useage of differential privacy (DP). The pluggbale DP wrappers enable framework-agnostic **and** strategy-agnostic usage of both client-side DP and server-side DP. Head over to the Flower docs, a new explainer goes into more detail.
-  
-  *Please note that these components are still experimental, the correct configuration of DP for a specific task is still an unsolved problem.*
+  The first (experimental) preview of pluggable Differential Privacy wrappers enables easy configuration and usage of differential privacy (DP). The pluggbale DP wrappers enable framework-agnostic **and** strategy-agnostic usage of both client-side DP and server-side DP. Head over to the Flower docs, a new explainer goes into more detail.
 
 - **New iOS CoreML code example** ([#1289](https://github.com/adap/flower/pull/1289))
 
