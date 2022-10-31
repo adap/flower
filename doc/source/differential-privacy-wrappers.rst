@@ -56,18 +56,18 @@ The server-side capabilities required for the original version of DP-FedAvg, i.e
 #. :code:`aggregate_fit()`: We check whether any of the sampled clients dropped out or failed to upload an update before the round timed out. In that case, we need to abort the current round, discarding any successful updates that were received, and move on to the next one. On the other hand, if all clients responded successfully, we must force the averaging of the updates to happen in an unweighted manner by intercepting the :code:`parameters` field of :code:`FitRes` for each received update and setting it to 1. Furthermore, if :code:`server_side_noising=true`, each update is perturbed with an amount of noise equal to what it would have been subjected to had client-side noising being enabled.  This entails *pre*-processing of the arguments to this method before passing them on to the wrappee's implementation of :code:`aggregate_fit()`.
 
 .. note::
-  We can't directly change the aggregation function of the wrapped strategy to force it to add noise to the aggregate, hence we simulate client-side noising to implement server-side noising.
+  We can't directly change the aggregation function of the wrapped strategy to force it to add noise to the aggregate, hence we simulate client-side noising to implement server-side noising. 
 
-These changes have been put together into a class called :code:`DPFedAvgFixed`, whose constructor accepts the strategy being decorated, the clipping threshold and the number of clients sampled every round as compulsory arguments. The user is expected to specify the clipping threshold since the order of magnitude of the update norms is highly dependent on the model being trained and providing a default value would be misleading. The number of clients sampled at every round is required to calculate the amount of noise that must be added to each individual update, either by the server or the clients.
+These changes have been put together into a class called :code:`DPFedAvgFixed`, whose constructor accepts the strategy being decorated, the clipping threshold and the number of clients sampled every round as compulsory arguments. The user is expected to specify the clipping threshold since the order of magnitude of the update norms is highly dependent on the model being trained and providing a default value would be misleading. The number of clients sampled at every round is required to calculate the amount of noise that must be added to each individual update, either by the server or the clients. 
 
 DPFedAvgAdaptive
 ::::::::::::::::
 
-The additional functionality required to facilitate adaptive clipping has been provided in :code:`DPFedAvgAdaptive`, a subclass of :code:`DPFedAvgFixed`. It overrides the above-mentioned methods to do the following.
+The additional functionality required to facilitate adaptive clipping has been provided in :code:`DPFedAvgAdaptive`, a subclass of :code:`DPFedAvgFixed`. It overrides the above-mentioned methods to do the following. 
 
-#. :code:`configure_fit()` : It intercepts the config dict returned by :code:`super.configure_fit()` to add the key-value pair :code:`dpfedavg_adaptive_clip_enabled:True` to it, which the client interprets as an instruction to include an indicator bit (1 if update norm <= clipping threshold, 0 otherwise) in the results returned by it.
+#. :code:`configure_fit()` : It intercepts the config dict returned by :code:`super.configure_fit()` to add the key-value pair :code:`dpfedavg_adaptive_clip_enabled:True`to it, which the client interprets as an instruction to include an indicator bit (1 if update norm <= clipping threshold, 0 otherwise) in the results returned by it. 
 
-#. :code:`aggregate_fit()` : It follows a call to :code:`super.aggregate_fit()` with one to :code:`__update_clip_norm__()`, a procedure which adjusts the clipping threshold on the basis of the indicator bits received from the sampled clients.
+#. :code:`aggregate_fit()` : It follows a call to :code:`super.aggregate_fit()` with one to :code:`__update_clip_norm__()`, a procedure which adjusts the clipping threshold on the basis of the indicator bits received from the sampled clients. 
 
 
 Client-side logic
@@ -82,7 +82,7 @@ The client-side capabilities required can be completely captured through wrapper
 Performing the :math:`(\epsilon, \delta)` analysis
 --------------------------------------------------
 
-Assume you have trained for :math:`n` rounds with sampling fraction :math:`q` and noise multiplier :math:`z`. In order to calculate the :math:`\epsilon` value this would result in for a particular :math:`\delta`, the following script may be used.
+Assume you have trained for :math:`n` rounds with sampling fraction :math:`q` and noise multiplier :math:`z`. In order to calculate the :math:`\epsilon` value this would result in for a particular :math:`\delta`, the following script may be used. 
 
 .. code-block:: python
 

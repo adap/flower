@@ -7,7 +7,6 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
-GITBRANCHORTAG = `git symbolic-ref -q --short HEAD || git describe --tags --exact-match`
 
 # Put it first so that "make" without argument is like "make help".
 help:
