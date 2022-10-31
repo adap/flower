@@ -3,6 +3,9 @@ Differential Privacy Wrappers in Flower
 
 Flower provides differential privacy (DP) wrapper classes for the easy integration of the central DP guarantees provided by DP-FedAvg into training pipelines defined in any of the various ML frameworks that Flower is compatible with. 
 
+.. warning::
+  Please note that these components are still experimental, the correct configuration of DP for a specific task is still an unsolved problem.
+
 .. note::
   The name DP-FedAvg is misleading since it can be applied on top of any FL algorithm that conforms to the general structure prescribed by the FedOpt family of algorithms.
 
