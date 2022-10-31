@@ -85,6 +85,7 @@ Performing the :math:`(\epsilon, \delta)` analysis
 Assume you have trained for :math:`n` rounds with sampling fraction :math:`q` and noise multiplier :math:`z`. In order to calculate the :math:`\epsilon` value this would result in for a particular :math:`\delta`, the following script may be used. 
 
 .. code-block:: python
+
    import tensorflow_privacy as tfp
    max_order = 32
    orders = range(2, max_order + 1)
