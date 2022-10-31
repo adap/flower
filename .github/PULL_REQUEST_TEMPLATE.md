@@ -9,6 +9,13 @@ Does the changelog need to be updated?
 See: https://github.com/adap/flower/blob/main/doc/source/changelog.rst
 -->
 
+#### Checklist
+
+- [ ] All CI checks pass
+- [ ] Updated all related documentation
+- [ ] Updated changelog
+- [ ] Test written
+
 #### Reference Issues/PRs
 
 <!--
