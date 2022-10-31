@@ -41,6 +41,18 @@ def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
     return weights_prime
 
 
+def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
+    """Compute median."""
+    # Create a list of weights and ignore the number of examples
+    weights = [weights for weights, _ in results]
+
+    # Compute median weight of each layer
+    median_w: NDArrays = [
+        np.median(np.asarray(layer), axis=0) for layer in zip(*weights)  # type: ignore
+    ]
+    return median_w
+
+
 def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
     """Aggregate evaluation results obtained from multiple clients."""
     num_total_evaluation_examples = sum([num_examples for num_examples, _ in results])
