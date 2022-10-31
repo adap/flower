@@ -100,21 +100,6 @@ abstract methods:
 The Flower server calls these methods in the following order:
 
 .. mermaid::
-<<<<<<< HEAD
-   sequenceDiagram
-      participant Strategy
-      participant S as Flower Server<br/>start_server
-      participant C1 as Flower Client
-      participant C2 as Flower Client
-      Note left of S: Get initial <br/>model parameters
-      S->>Strategy: initialize_parameters
-      activate Strategy
-      Strategy-->>S: Parameters
-      deactivate Strategy
-      
-      Note left of S: Federated<br/>Training
-      rect rgb(249, 219, 130)
-=======
 
     sequenceDiagram
         participant Strategy
@@ -126,7 +111,6 @@ The Flower server calls these methods in the following order:
         activate Strategy
         Strategy-->>S: Parameters
         deactivate Strategy
->>>>>>> main
 
         Note left of S: Federated<br/>Training
         rect rgb(249, 219, 130)

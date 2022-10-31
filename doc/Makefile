@@ -7,8 +7,7 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
-BUILDVERSIONS = main v1.0.0
-GITBRANCH     = `git branch --show-current`
+GITBRANCHORTAG = `git symbolic-ref -q --short HEAD || git describe --tags --exact-match`
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -22,13 +21,9 @@ docs:
 
 serve:
 	make docs
-	python -m http.server --directory build
+	python -m http.server --directory build/html
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
-	for version in $(BUILDVERSIONS); do \
-		git checkout $$version; \
-		VERSION="$$version" $(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)/$$version" $(SPHINXOPTS) $(O); \
-	done;
-	git checkout $(GITBRANCH)
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
