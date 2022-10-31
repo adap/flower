@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.1.0 (2022-10-31)
 
 - **Introduce Differential Privacy wrappers (preview)** ([#1357](https://github.com/adap/flower/pull/1357), [#1460](https://github.com/adap/flower/pull/1460))
 
@@ -36,7 +36,7 @@
 
 - **Updated documentation** ([#1355](https://github.com/adap/flower/pull/1355), [#1558](https://github.com/adap/flower/pull/1558), [#1379](https://github.com/adap/flower/pull/1379), [#1380](https://github.com/adap/flower/pull/1380), [#1381](https://github.com/adap/flower/pull/1381), [#1332](https://github.com/adap/flower/pull/1332), [#1391](https://github.com/adap/flower/pull/1391), [#1403](https://github.com/adap/flower/pull/1403), [#1364](https://github.com/adap/flower/pull/1364), [#1409](https://github.com/adap/flower/pull/1409), [#1419](https://github.com/adap/flower/pull/1419), [#1444](https://github.com/adap/flower/pull/1444), [#1448](https://github.com/adap/flower/pull/1448), [#1417](https://github.com/adap/flower/pull/1417), [#1449](https://github.com/adap/flower/pull/1449), [#1465](https://github.com/adap/flower/pull/1465), [#1467](https://github.com/adap/flower/pull/1467))
 
-  There have been so many documentation updates, it doesn't even make sense to list them individually.
+  There have been so many documentation updates that it doesn't even make sense to list them individually.
 
 - **Restructured documentation** ([#1387](https://github.com/adap/flower/pull/1387))
 
