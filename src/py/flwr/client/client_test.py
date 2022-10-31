@@ -15,6 +15,8 @@
 """Flower Client tests."""
 
 
+from unittest.mock import MagicMock
+
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -27,6 +29,7 @@ from flwr.common import (
     GetPropertiesRes,
     Status,
 )
+from flwr.common.typing import Parameters
 
 from .client import (
     Client,
@@ -34,6 +37,10 @@ from .client import (
     has_fit,
     has_get_parameters,
     has_get_properties,
+    maybe_call_evaluate,
+    maybe_call_fit,
+    maybe_call_get_parameters,
+    maybe_call_get_properties,
 )
 
 
@@ -42,20 +49,31 @@ class OverridingClient(Client):
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         return GetPropertiesRes(
-            status=Status(code=Code.OK, message="Success"), properties={}
+            status=Status(code=Code.OK, message="Success"),
+            properties={},
         )
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        # This method is not expected to be called
-        raise Exception()
+        return GetParametersRes(
+            status=Status(code=Code.OK, message="Success"),
+            parameters=Parameters(tensors=[], tensor_type=""),
+        )
 
     def fit(self, ins: FitIns) -> FitRes:
-        # This method is not expected to be called
-        raise Exception()
+        return FitRes(
+            status=Status(code=Code.OK, message="Success"),
+            parameters=Parameters(tensors=[], tensor_type=""),
+            num_examples=1,
+            metrics={},
+        )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        # This method is not expected to be called
-        raise Exception()
+        return EvaluateRes(
+            status=Status(code=Code.OK, message="Success"),
+            loss=1.0,
+            num_examples=1,
+            metrics={},
+        )
 
 
 class NotOverridingClient(Client):
@@ -63,7 +81,7 @@ class NotOverridingClient(Client):
 
 
 def test_has_get_properties_true() -> None:
-    """Test fit_clients."""
+    """Test has_get_properties."""
     # Prepare
     client = OverridingClient()
     expected = True
@@ -76,7 +94,7 @@ def test_has_get_properties_true() -> None:
 
 
 def test_has_get_properties_false() -> None:
-    """Test fit_clients."""
+    """Test has_get_properties."""
     # Prepare
     client = NotOverridingClient()
     expected = False
@@ -89,7 +107,7 @@ def test_has_get_properties_false() -> None:
 
 
 def test_has_get_parameters_true() -> None:
-    """Test fit_clients."""
+    """Test has_get_parameters."""
     # Prepare
     client = OverridingClient()
     expected = True
@@ -102,7 +120,7 @@ def test_has_get_parameters_true() -> None:
 
 
 def test_has_get_parameters_false() -> None:
-    """Test fit_clients."""
+    """Test has_get_parameters."""
     # Prepare
     client = NotOverridingClient()
     expected = False
@@ -115,7 +133,7 @@ def test_has_get_parameters_false() -> None:
 
 
 def test_has_fit_true() -> None:
-    """Test fit_clients."""
+    """Test has_fit."""
     # Prepare
     client = OverridingClient()
     expected = True
@@ -128,7 +146,7 @@ def test_has_fit_true() -> None:
 
 
 def test_has_fit_false() -> None:
-    """Test fit_clients."""
+    """Test has_fit."""
     # Prepare
     client = NotOverridingClient()
     expected = False
@@ -141,7 +159,7 @@ def test_has_fit_false() -> None:
 
 
 def test_has_evaluate_true() -> None:
-    """Test fit_clients."""
+    """Test has_evaluate."""
     # Prepare
     client = OverridingClient()
     expected = True
@@ -154,7 +172,7 @@ def test_has_evaluate_true() -> None:
 
 
 def test_has_evaluate_false() -> None:
-    """Test fit_clients."""
+    """Test has_evaluate."""
     # Prepare
     client = NotOverridingClient()
     expected = False
@@ -164,3 +182,99 @@ def test_has_evaluate_false() -> None:
 
     # Assert
     assert actual == expected
+
+
+def test_maybe_call_get_properties_true() -> None:
+    """Test maybe_call_get_properties."""
+    # Prepare
+    client = OverridingClient()
+
+    # Execute
+    actual = maybe_call_get_properties(client, MagicMock())
+
+    # Assert
+    assert actual.status.code == Code.OK
+
+
+def test_maybe_call_get_properties_false() -> None:
+    """Test maybe_call_get_properties."""
+    # Prepare
+    client = NotOverridingClient()
+
+    # Execute
+    actual = maybe_call_get_properties(client, MagicMock())
+
+    # Assert
+    assert actual.status.code == Code.GET_PROPERTIES_NOT_IMPLEMENTED
+
+
+def test_maybe_call_get_parameters_true() -> None:
+    """Test maybe_call_get_parameters."""
+    # Prepare
+    client = OverridingClient()
+
+    # Execute
+    actual = maybe_call_get_parameters(client, MagicMock())
+
+    # Assert
+    assert actual.status.code == Code.OK
+
+
+def test_maybe_call_get_parameters_false() -> None:
+    """Test maybe_call_get_parameters."""
+    # Prepare
+    client = NotOverridingClient()
+
+    # Execute
+    actual = maybe_call_get_parameters(client, MagicMock())
+
+    # Assert
+    assert actual.status.code == Code.GET_PARAMETERS_NOT_IMPLEMENTED
+
+
+def test_maybe_call_fit_true() -> None:
+    """Test maybe_call_fit."""
+    # Prepare
+    client = OverridingClient()
+
+    # Execute
+    actual = maybe_call_fit(client, MagicMock())
+
+    # Assert
+    assert actual.status.code == Code.OK
+
+
+def test_maybe_call_fit_false() -> None:
+    """Test maybe_call_fit."""
+    # Prepare
+    client = NotOverridingClient()
+
+    # Execute
+    actual = maybe_call_fit(client, MagicMock())
+
+    # Assert
+    assert actual.status.code == Code.FIT_NOT_IMPLEMENTED
+
+
+def test_maybe_call_evaluate_true() -> None:
+    """Test maybe_call_evaluate."""
+    # Prepare
+    client = OverridingClient()
+
+    # Execute
+    actual = maybe_call_evaluate(client, MagicMock())
+
+    # Assert
+    assert actual.status.code == Code.OK
+
+
+def test_maybe_call_evaluate_false() -> None:
+    """Test maybe_call_evaluate."""
+    # Prepare
+    client = NotOverridingClient()
+
+    # Execute
+    actual = maybe_call_evaluate(client, MagicMock())
+
+    # Assert
+    assert actual.status.code == Code.EVALUATE_NOT_IMPLEMENTED

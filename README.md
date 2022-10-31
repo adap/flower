@@ -9,7 +9,7 @@
     <a href="https://flower.dev/">Website</a> |
     <a href="https://flower.dev/blog">Blog</a> |
     <a href="https://flower.dev/docs/">Docs</a> |
-    <a href="https://flower.dev/conf/flower-summit-2021">Conference</a> |
+    <a href="https://flower.dev/conf/flower-summit-2022">Conference</a> |
     <a href="https://flower.dev/join-slack">Slack</a>
     <br /><br />
 </p>
@@ -83,11 +83,8 @@ Check the Flower documentation to learn more: [Using Baselines](https://flower.d
 The Flower community loves contributions! Make your work more visible and enable others to build on it by contributing it as a baseline: [Contributing Baselines](https://flower.dev/docs/contributing-baselines.html)
 
 ## Flower Usage Examples
-A number of examples show different usage scenarios of Flower (in combination
-with popular machine learning frameworks such as PyTorch or TensorFlow). To run
-an example, first install the necessary extras:
 
-[Usage Examples Documentation](https://flower.dev/docs/examples.html)
+Several code examples show different usage scenarios of Flower (in combination with popular machine learning frameworks such as PyTorch or TensorFlow).
 
 Quickstart examples:
 
@@ -135,5 +132,4 @@ Please also consider adding your publication to the list of Flower-based publica
 
 ## Contributing to Flower
 
-We welcome contributions. Please see [CONTRIBUTING.md](CONTRIBUTING.md) to get
-started!
+We welcome contributions. Please see [CONTRIBUTING.md](CONTRIBUTING.md) to get started!
