@@ -52,6 +52,27 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
     ]
     return median_w
 
+def aggregate_krum(results: List[Tuple[NDArrays, int]], num_malicious: int) -> NDArrays:
+    "Choose the parameter vector according to the Krum fucntion."
+    # Create a list of weights and ignore the number of examples
+    weights = [weights for weights, _ in results]
+
+    # Compute distances between vectors
+    M = _compute_distances(weights)
+
+    # For each client, take the n-f-2 closest parameters vectors
+    num_closest = len(weights) - num_malicious - 2
+    closest_indices = []
+    for i in range(len(M)):
+        closest_indices.append(np.argsort(M[i])[1:num_closest+1].tolist())
+    
+    # Compute the score for each client, that is the sum of the distances
+    # of the n-f-2 closest parameters vectors
+    scores = [np.sum(M[i,closest_indices[i]]) for i in range(len(M))]
+    
+    # Get the index of the client which minimizes the score
+    best_index = np.argmin(scores)
+    return weights[best_index]
 
 def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
     """Aggregate evaluation results obtained from multiple clients."""
@@ -76,3 +97,18 @@ def aggregate_qffl(
         updates.append(tmp)
     new_parameters = [(u - v) * 1.0 for u, v in zip(parameters, updates)]
     return new_parameters
+
+def _compute_distances(weights: NDArrays) -> NDArrays:
+    """
+    Compute distances between vectors.
+    Input: weights - list of weights vectors
+    Output: distances - matrix M of squared distances between the vectors
+    """
+    w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])
+    M = np.zeros((len(weights), len(weights)))
+    for i in range(len(w)):
+        for j in range(len(w)):
+            d = w[i] - w[j]
+            norm = np.linalg.norm(d)
+            M[i, j] = norm**2
+    return M
