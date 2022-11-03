@@ -215,7 +215,7 @@ def test_aggregate_fit() -> None:
         ),
     ]
     expected: NDArrays = [array([0.5, 0.5, 0.5, 0.5], dtype=float32)]
-    
+
     # Execute
     actual_aggregated, _ = strategy.aggregate_fit(
         server_round=1, results=results, failures=[]

@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Machine Learning with Adversaries: Byzantine Tolerant Gradient Descent 
+"""Machine Learning with Adversaries: Byzantine Tolerant Gradient Descent.
+
 [Blanchard et al., 2017].
 
 Paper: https://proceedings.neurips.cc/paper/2017/file/f4b9ec30ad9f68f89b29639786cb62ef-Paper.pdf
