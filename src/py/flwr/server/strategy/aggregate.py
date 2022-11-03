@@ -56,7 +56,7 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
 def aggregate_krum(results: List[Tuple[NDArrays, int]], num_malicious: int) -> NDArrays:
     "Choose the parameter vector according to the Krum fucntion."
     # Create a list of weights and ignore the number of examples
-    weights = [weights for weights, _ in results]
+    weights: NDArrays = [weights for weights, _ in results]
 
     # Compute distances between vectors
     M = _compute_distances(weights)
@@ -72,7 +72,8 @@ def aggregate_krum(results: List[Tuple[NDArrays, int]], num_malicious: int) -> N
     scores = [np.sum(M[i, closest_indices[i]]) for i in range(len(M))]
 
     # Return the index of the client which minimizes the score
-    return weights[np.argmin(scores)]
+    weights_prime: NDArrays = weights[np.argmin(scores)]
+    return weights_prime
 
 
 def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
@@ -106,11 +107,11 @@ def _compute_distances(weights: NDArrays) -> NDArrays:
     Input: weights - list of weights vectors
     Output: distances - matrix M of squared distances between the vectors
     """
-    w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])
+    w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])  # type: ignore
     M = np.zeros((len(weights), len(weights)))
     for i in range(len(w)):
         for j in range(len(w)):
             d = w[i] - w[j]
-            norm = np.linalg.norm(d)
+            norm = np.linalg.norm(d)  # type: ignore
             M[i, j] = norm**2
     return M

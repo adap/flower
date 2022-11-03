@@ -58,7 +58,7 @@ class Krum(FedAvg):
         min_fit_clients: int = 2,
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        num_malicious_clients: Optional[int] = 0,
+        num_malicious_clients: int = 0,
         evaluate_fn: Optional[
             Callable[
                 [int, NDArrays, Dict[str, Scalar]],
