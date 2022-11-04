@@ -20,7 +20,7 @@ from typing import List, Tuple
 
 import numpy as np
 
-from flwr.common import NDArrays
+from flwr.common import NDArray, NDArrays
 
 
 def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
@@ -56,7 +56,7 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
 def aggregate_krum(results: List[Tuple[NDArrays, int]], num_malicious: int) -> NDArrays:
     "Choose the parameter vector according to the Krum fucntion."
     # Create a list of weights and ignore the number of examples
-    weights: NDArrays = [weights for weights, _ in results]
+    weights = [weights for weights, _ in results]
 
     # Compute distances between vectors
     M = _compute_distances(weights)
@@ -101,17 +101,17 @@ def aggregate_qffl(
     return new_parameters
 
 
-def _compute_distances(weights: NDArrays) -> NDArrays:
+def _compute_distances(weights: List[NDArrays]) -> List[NDArray]:
     """Compute distances between vectors.
 
     Input: weights - list of weights vectors
     Output: distances - matrix M of squared distances between the vectors
     """
-    w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])  # type: ignore
+    falt_w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])  # type: ignore
     M = np.zeros((len(weights), len(weights)))
-    for i in range(len(w)):
-        for j in range(len(w)):
-            d = w[i] - w[j]
+    for i in range(len(falt_w)):
+        for j in range(len(falt_w)):
+            d = falt_w[i] - falt_w[j]
             norm = np.linalg.norm(d)  # type: ignore
             M[i, j] = norm**2
     return M
