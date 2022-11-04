@@ -80,7 +80,25 @@ Example:
 
 ### Server-side REST API
 
-TODO define methods incl. req/res body types
+Situation: a `Task`/`TaskAssignment` scheduled for `N` anonymous clients
+
+**GET /tasks**
+Request body: `None`
+Response body: `GetTasksResponse` containing either `Task` + `token` or `Reconnect`
+
+Implementation:
+1. Is there any task scheduled? Yes, one for `N` anonymous clients
+2. Generate the first `token`, store it with the `Task`/`TaskAssignment` in the `State`
+3. Return `Task` + `token` to the client in the `GetTasksResponse`
+
+**POST /results**
+
+Request body: `SubmitResultRequest` containing `Result` + `token`
+Response body: `None`
+
+Implementation:
+1. Check if the `token` is known
+2. Save `Result` if true, else return error
 
 ### Message serialization
 
