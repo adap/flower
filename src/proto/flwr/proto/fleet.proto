@@ -27,10 +27,32 @@ service Fleet {
   rpc CreateResults(CreateResultsRequest) returns (CreateResultsResponse) {}
 }
 
+// ClientID messages
+message ClientID {
+  oneof msg {
+    uint64 id = 1;
+    bool anonymous = 2;
+  }
+}
+
+// TokenizedTasks messages
+message TokenizedTasks {
+  repeated Task tasks = 1;
+  repeated string tokens = 2;
+}
+
 // GetTasks messages
-message GetTasksRequest {}
-message GetTasksResponse { repeated Task task = 1; }
+message GetTasksRequest { repeated ClientID cid = 1; }
+message GetTasksResponse {
+  oneof msg {
+    TokenizedTasks tokenizedtasks = 1;
+    Reconnect reconnect = 2;
+  }
+}
 
 // CreateResults messages
-message CreateResultsRequest { repeated Result results = 1; }
-message CreateResultsResponse {}
+message CreateResultsRequest {
+  repeated Result results = 1;
+  repeated string token = 2;
+}
+message CreateResultsResponse { Reconnect reconnect = 1; }
