@@ -37,6 +37,7 @@ app = FastAPI()
 
 @app.get("/api/1.1/tasks/", response_class=Response)
 def tasks(client_id: Optional[int], response: Response):
+    # task_resp_msg = tm.get_tasks(client_id)
     # Create mock response and fill with something
     task_resp_msg = GetTasksResponse()
 
@@ -49,8 +50,8 @@ def tasks(client_id: Optional[int], response: Response):
     )
 
 
-@app.post("/api/1.1/results")
-async def results(client_id: str, request: Request):
+@app.post("/api/1.1/result/")
+async def result(request: Request):  # Check if token is needed here
     # This is required to get the request body as raw bytes
     create_results_req_msg_bytes: bytes = await request.body()
 

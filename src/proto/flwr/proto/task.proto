@@ -19,6 +19,14 @@ package flwr.proto;
 
 import "flwr/proto/transport.proto";
 
+// ClientID messages
+message ClientID {
+  oneof msg {
+    uint64 id = 1;
+    bool anonymous = 2;
+  }
+}
+
 message Task {
   uint64 task_id = 1;
 
@@ -27,7 +35,7 @@ message Task {
 
 message TaskAssignment {
   Task task = 1;
-  repeated uint64 client_ids = 2;
+  repeated ClientID client_ids = 2;
 }
 
 message Result {
