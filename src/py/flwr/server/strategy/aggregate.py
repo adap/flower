@@ -59,17 +59,17 @@ def aggregate_krum(results: List[Tuple[NDArrays, int]], num_malicious: int) -> N
     weights = [weights for weights, _ in results]
 
     # Compute distances between vectors
-    M = _compute_distances(weights)
+    distance_matrix = _compute_distances(weights)
 
     # For each client, take the n-f-2 closest parameters vectors
     num_closest = len(weights) - num_malicious - 2
     closest_indices = []
-    for i in range(len(M)):
-        closest_indices.append(np.argsort(M[i])[1 : num_closest + 1].tolist())
+    for i in range(len(distance_matrix)):
+        closest_indices.append(np.argsort(distance_matrix[i])[1 : num_closest + 1].tolist())
 
     # Compute the score for each client, that is the sum of the distances
     # of the n-f-2 closest parameters vectors
-    scores = [np.sum(M[i, closest_indices[i]]) for i in range(len(M))]
+    scores = [np.sum(distance_matrix[i, closest_indices[i]]) for i in range(len(distance_matrix))]
 
     # Return the index of the client which minimizes the score
     weights_prime: NDArrays = weights[np.argmin(scores)]
@@ -105,13 +105,13 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
     """Compute distances between vectors.
 
     Input: weights - list of weights vectors
-    Output: distances - matrix M of squared distances between the vectors
+    Output: distances - matrix distance_matrix of squared distances between the vectors
     """
-    falt_w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])  # type: ignore
-    M = np.zeros((len(weights), len(weights)))
-    for i in range(len(falt_w)):
-        for j in range(len(falt_w)):
-            d = falt_w[i] - falt_w[j]
-            norm = np.linalg.norm(d)  # type: ignore
-            M[i, j] = norm**2
-    return M
+    flat_w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])  # type: ignore
+    distance_matrix = np.zeros((len(weights), len(weights)))
+    for i in range(len(flat_w)):
+        for j in range(len(flat_w)):
+            delta = flat_w[i] - flat_w[j]
+            norm = np.linalg.norm(delta)  # type: ignore
+            distance_matrix[i, j] = norm**2
+    return distance_matrix
