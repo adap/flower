@@ -150,23 +150,15 @@ def test_aggregate_fit() -> None:
         [array([0.2, 0.2, 0.2, 0.2], dtype=float32)]
     )
     param_1: Parameters = ndarrays_to_parameters(
-        [array([0.5, 0.5, 0.5, 0.5], dtype=float32)]
+        [array([0.7, 0.7, 0.7, 0.7], dtype=float32)]
     )
     param_2: Parameters = ndarrays_to_parameters(
         [array([1.0, 1.0, 1.0, 1.0], dtype=float32)]
-    )
-    param_3: Parameters = ndarrays_to_parameters(
-        [array([2.5, 2.5, 2.5, 2.5], dtype=float32)]
-    )
-    param_4: Parameters = ndarrays_to_parameters(
-        [array([2.0, 2.0, 2.0, 2.0], dtype=float32)]
     )
     bridge = MagicMock()
     client_0 = GrpcClientProxy(cid="0", bridge=bridge)
     client_1 = GrpcClientProxy(cid="1", bridge=bridge)
     client_2 = GrpcClientProxy(cid="2", bridge=bridge)
-    client_3 = GrpcClientProxy(cid="3", bridge=bridge)
-    client_4 = GrpcClientProxy(cid="4", bridge=bridge)
     results: List[Tuple[ClientProxy, FitRes]] = [
         (
             client_0,
@@ -194,27 +186,9 @@ def test_aggregate_fit() -> None:
                 num_examples=5,
                 metrics={},
             ),
-        ),
-        (
-            client_3,
-            FitRes(
-                status=Status(code=Code.OK, message="Success"),
-                parameters=param_3,
-                num_examples=5,
-                metrics={},
-            ),
-        ),
-        (
-            client_4,
-            FitRes(
-                status=Status(code=Code.OK, message="Success"),
-                parameters=param_4,
-                num_examples=5,
-                metrics={},
-            ),
-        ),
+        )
     ]
-    expected: NDArrays = [array([0.5, 0.5, 0.5, 0.5], dtype=float32)]
+    expected: NDArrays = [array([0.7, 0.7, 0.7, 0.7], dtype=float32)]
 
     # Execute
     actual_aggregated, _ = strategy.aggregate_fit(
