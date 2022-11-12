@@ -54,7 +54,7 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
 
 
 def aggregate_krum(results: List[Tuple[NDArrays, int]], num_malicious: int) -> NDArrays:
-    "Choose the parameter vector according to the Krum fucntion."
+    "Choose one parameter vector according to the Krum fucntion."
     # Create a list of weights and ignore the number of examples
     weights = [weights for weights, _ in results]
 
@@ -101,7 +101,7 @@ def aggregate_qffl(
     return new_parameters
 
 
-def _compute_distances(weights: List[NDArrays]) -> List[NDArray]:
+def _compute_distances(weights: List[NDArrays]) -> NDArray:
     """Compute distances between vectors.
 
     Input: weights - list of weights vectors
