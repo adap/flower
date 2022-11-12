@@ -64,7 +64,7 @@ def aggregate_krum(results: List[Tuple[NDArrays, int]], num_malicious: int) -> N
     # For each client, take the n-f-2 closest parameters vectors
     num_closest = len(weights) - num_malicious - 2
     closest_indices = []
-    for i in range(len(distance_matrix)):
+    for i, _ in enumerate(distance_matrix):
         closest_indices.append(
             np.argsort(distance_matrix[i])[1 : num_closest + 1].tolist()
         )
@@ -114,8 +114,8 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
     """
     flat_w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])  # type: ignore
     distance_matrix = np.zeros((len(weights), len(weights)))
-    for i in range(len(flat_w)):
-        for j in range(len(flat_w)):
+    for i, _ in enumerate(flat_w):
+        for j, _ in enumerate(flat_w):
             delta = flat_w[i] - flat_w[j]
             norm = np.linalg.norm(delta)  # type: ignore
             distance_matrix[i, j] = norm**2
