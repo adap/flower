@@ -86,9 +86,9 @@ def aggregate_krum(
         best_indices = np.argsort(scores)[::-1][len(scores) - to_keep :]
         best_results = [results[i] for i in best_indices]
         return aggregate(best_results)
-    else:
-        # Return the index of the client which minimizes the score (Krum)
-        return weights[np.argmin(scores)]
+
+    # Return the index of the client which minimizes the score (Krum)
+    return weights[np.argmin(scores)]
 
 
 def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
