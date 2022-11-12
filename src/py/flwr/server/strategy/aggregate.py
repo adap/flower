@@ -75,7 +75,7 @@ def aggregate_krum(results: List[Tuple[NDArrays, int]], num_malicious: int) -> N
         np.sum(distance_matrix[i, closest_indices[i]])
         for i in range(len(distance_matrix))
     ]
-    
+
     # Return the index of the client which minimizes the score
     weights_prime: NDArrays = weights[np.argmin(scores)]
     return weights_prime

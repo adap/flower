@@ -186,7 +186,7 @@ def test_aggregate_fit() -> None:
                 num_examples=5,
                 metrics={},
             ),
-        )
+        ),
     ]
     expected: NDArrays = [array([0.7, 0.7, 0.7, 0.7], dtype=float32)]
 
