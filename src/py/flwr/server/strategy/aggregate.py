@@ -65,11 +65,16 @@ def aggregate_krum(results: List[Tuple[NDArrays, int]], num_malicious: int) -> N
     num_closest = len(weights) - num_malicious - 2
     closest_indices = []
     for i in range(len(distance_matrix)):
-        closest_indices.append(np.argsort(distance_matrix[i])[1 : num_closest + 1].tolist())
+        closest_indices.append(
+            np.argsort(distance_matrix[i])[1 : num_closest + 1].tolist()
+        )
 
     # Compute the score for each client, that is the sum of the distances
     # of the n-f-2 closest parameters vectors
-    scores = [np.sum(distance_matrix[i, closest_indices[i]]) for i in range(len(distance_matrix))]
+    scores = [
+        np.sum(distance_matrix[i, closest_indices[i]])
+        for i in range(len(distance_matrix))
+    ]
 
     # Return the index of the client which minimizes the score
     weights_prime: NDArrays = weights[np.argmin(scores)]
