@@ -54,7 +54,7 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
 
 
 def aggregate_krum(
-    results: List[Tuple[NDArrays, int]], num_malicious: int, to_keep: int = None
+    results: List[Tuple[NDArrays, int]], num_malicious: int, to_keep: int
 ) -> NDArrays:
     """Choose one parameter vector according to the Krum fucntion.
 
@@ -81,16 +81,14 @@ def aggregate_krum(
         for i in range(len(distance_matrix))
     ]
 
-    if to_keep:
+    if to_keep > 0:
         # Choose to_keep clients and return their average (MultiKrum)
         best_indices = np.argsort(scores)[::-1][len(scores) - to_keep :]
         best_results = [results[i] for i in best_indices]
-        weights_prime: NDArrays = aggregate(best_results)
+        return aggregate(best_results)
     else:
         # Return the index of the client which minimizes the score (Krum)
-        weights_prime: NDArrays = weights[np.argmin(scores)]
-
-    return weights_prime
+        return weights[np.argmin(scores)]
 
 
 def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:

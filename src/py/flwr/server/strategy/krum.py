@@ -59,7 +59,7 @@ class Krum(FedAvg):
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
         num_malicious_clients: int = 0,
-        num_clients_to_keep: int = None,
+        num_clients_to_keep: int = 0,
         evaluate_fn: Optional[
             Callable[
                 [int, NDArrays, Dict[str, Scalar]],
@@ -88,9 +88,9 @@ class Krum(FedAvg):
         min_available_clients : int, optional
             Minimum number of total clients in the system. Defaults to 2.
         num_malicious_clients : int, optional
-            Number of malicious clients in the system (Krum). Defaults to 0.
+            Number of malicious clients in the system. Defaults to 0.
         num_clients_to_keep : int, optional
-            Number of clients to keep before averaging (MultiKrum). Defaults to None.
+            Number of clients to keep before averaging (MultiKrum). Defaults to 0, in that case classical Krum is applied.
         evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
