@@ -59,6 +59,7 @@ class Krum(FedAvg):
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
         num_malicious_clients: int = 0,
+        num_clients_to_keep: int = None,
         evaluate_fn: Optional[
             Callable[
                 [int, NDArrays, Dict[str, Scalar]],
@@ -87,7 +88,9 @@ class Krum(FedAvg):
         min_available_clients : int, optional
             Minimum number of total clients in the system. Defaults to 2.
         num_malicious_clients : int, optional
-            Number of malicious clients in the system. Defaults to 0.
+            Number of malicious clients in the system (Krum). Defaults to 0.
+        num_clients_to_keep : int, optional
+            Number of clients to keep before averaging (MultiKrum). Defaults to None.
         evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
@@ -123,6 +126,7 @@ class Krum(FedAvg):
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
         self.num_malicious_clients = num_malicious_clients
+        self.num_clients_to_keep = num_clients_to_keep
 
     def __repr__(self) -> str:
         rep = f"Krum(accept_failures={self.accept_failures})"
@@ -147,7 +151,9 @@ class Krum(FedAvg):
             for _, fit_res in results
         ]
         parameters_aggregated = ndarrays_to_parameters(
-            aggregate_krum(weights_results, self.num_malicious_clients)
+            aggregate_krum(
+                weights_results, self.num_malicious_clients, self.num_clients_to_keep
+            )
         )
 
         # Aggregate custom metrics if aggregation fn was provided
