@@ -66,7 +66,7 @@ def aggregate_krum(results: List[Tuple[NDArrays, int]], num_malicious: int) -> N
     closest_indices = []
     for i, _ in enumerate(distance_matrix):
         closest_indices.append(
-            np.argsort(distance_matrix[i])[1:num_closest + 1].tolist()
+            np.argsort(distance_matrix[i])[1 : num_closest + 1].tolist()  # noqa: E203
         )
 
     # Compute the score for each client, that is the sum of the distances
