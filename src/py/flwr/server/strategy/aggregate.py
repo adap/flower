@@ -83,7 +83,7 @@ def aggregate_krum(
 
     if to_keep > 0:
         # Choose to_keep clients and return their average (MultiKrum)
-        best_indices = np.argsort(scores)[::-1][len(scores) - to_keep:]
+        best_indices = np.argsort(scores)[::-1][len(scores) - to_keep :]  # noqa: E203
         best_results = [results[i] for i in best_indices]
         return aggregate(best_results)
 
