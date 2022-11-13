@@ -56,7 +56,7 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
 def aggregate_krum(
     results: List[Tuple[NDArrays, int]], num_malicious: int, to_keep: int
 ) -> NDArrays:
-    """Choose one parameter vector according to the Krum fucntion.
+    """Choose one parameter vector according to Krum fucntion.
 
     If to_keep is not None, then MultiKrum is applied.
     """
