@@ -73,8 +73,12 @@ Example:
 - Client connects to the server: "I'm available"
 - Server doesn't have any tasks: "reconnect in 5min"
 - Client sleeps for 5min, then connects again
-- Server say: here's a set of TASK-TOKEN-PAIRS, work on them and send me the RESULTS
-- Client receives the set of TASK-TOKEN-PAIRS, executes them locally (concurrently or sequentially, up to the client), and returns the RESULT (one after another or multiple results together, up to the client)
+- Server say: here's a set of TASK-TOKEN-PAIRS, please work on them and send me the RESULTS
+- Client receives the set of TASK-TOKEN-PAIRS, decides which ones to opt-in to, executes the chosen ones locally, and returns the RESULT
+  - Client opt-in provides a possibility for local task rejection, including plausible deniability because it is not certain that a client will work on a task
+  - Opt-in criteria are up to the client, examples include connectivity status, charging status, availability of local training/evaluation data, and manual approval (e.g., in a cross-silo setting)
+  - Local task execution can happen sequentially or concurrently (or any mix of the two), depending on what the client chooses to do
+  - Result submission is also up to the client, the client can submit one result after another or batch multiple results together
 - Server says thanks, please reconnect in 10min
 - [the process repeats]
 
