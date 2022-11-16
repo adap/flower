@@ -67,18 +67,20 @@ General idea:
 - Server responds in one of two ways:
   - Reconnect at a later time.
   - Execute a task and send the result.
-- Server has a (mild) form of control over the conversation by suggesting to the client when it should connect again.
+- Server has a (mild) form of control over the conversation by suggesting to the client when it should connect again. This can be used, among other things, to implement pace steering.
 
 Example:
 - Client connects to the server: "I'm available"
 - Server doesn't have any tasks: "reconnect in 5min"
 - Client sleeps for 5min, then connects again
-- Server say: here's a TASK and a TOKEN, work on it and send me your RESULT
-- Client receives the TASK, executes it locally, and returns the RESULT
+- Server say: here's a set of TASK-TOKEN-PAIRS, work on them and send me the RESULTS
+- Client receives the set of TASK-TOKEN-PAIRS, executes them locally (concurrently or sequentially, up to the client), and returns the RESULT (one after another or multiple results together, up to the client)
 - Server says thanks, please reconnect in 10min
 - [the process repeats]
 
 ### Server-side REST API
+
+#### Task/result calls
 
 Situation: a `Task`/`TaskAssignment` scheduled for `N` anonymous clients
 
@@ -99,6 +101,11 @@ Response body: `None`
 Implementation:
 1. Check if the `token` is known
 2. Save `Result` if true, else return error
+
+#### Client availability calls
+
+**POST /available**
+
 
 ### Message serialization
 
