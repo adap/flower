@@ -13,16 +13,19 @@
 # limitations under the License.
 # ==============================================================================
 """REST API server."""
-
-
+from random import random
 from typing import Optional
 
 from fastapi import FastAPI, Request, Response
+from numpy import array
 
+from flwr.common.parameter import ndarrays_to_parameters
+from flwr.common.serde import parameters_to_proto
 from flwr.proto.fleet_pb2 import (
     CreateResultsRequest,
     CreateResultsResponse,
     GetTasksResponse,
+    TokenizedTask,
 )
 
 # tm = TaskManagerDB()
@@ -39,7 +42,20 @@ app = FastAPI()
 def tasks(client_id: Optional[int], response: Response):
     # task_resp_msg = tm.get_tasks(client_id)
     # Create mock response and fill with something
+    tokenized_task = TokenizedTask()
+    tokenized_task.token = "abc"
+    tokenized_task.task.task_id = 42
+    if random() < 0.3:  # Tell client to check back 30% of the time
+        tokenized_task.task.legacy_server_message.reconnect_ins.seconds = 5
+    else:  # Send a fit_ins, missing config
+        flwr_parameters = ndarrays_to_parameters([array([1, 2, 3]), array([4, 5, 6])])
+        proto_parameters = parameters_to_proto(flwr_parameters)
+        tokenized_task.task.legacy_server_message.fit_ins.parameters.CopyFrom(
+            proto_parameters
+        )
+
     task_resp_msg = GetTasksResponse()
+    task_resp_msg.tokenized_tasks.tokenized_tasks.append(tokenized_task)
 
     # Return serialized ProtoBuf
     task_resp_bytes = task_resp_msg.SerializeToString()

@@ -18,6 +18,7 @@
 import time
 from logging import INFO
 from typing import Callable, Dict, Optional, Union
+from uuid import uuid4
 
 from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
@@ -47,6 +48,7 @@ from .numpy_client import has_evaluate as numpyclient_has_evaluate
 from .numpy_client import has_fit as numpyclient_has_fit
 from .numpy_client import has_get_parameters as numpyclient_has_get_parameters
 from .numpy_client import has_get_properties as numpyclient_has_get_properties
+from .rest_client.connection import rest_not_a_connection
 
 EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT = """
 NumPyClient.fit did not return a tuple with 3 elements.
@@ -84,6 +86,7 @@ def start_client(
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    use_rest: bool = False,
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
@@ -128,9 +131,13 @@ def start_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
+
+    # Use either gRPC bidirectional streaming or REST request/response
+    connection = rest_not_a_connection if use_rest else grpc_connection
+
     while True:
         sleep_duration: int = 0
-        with grpc_connection(
+        with connection(
             server_address,
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
@@ -139,6 +146,9 @@ def start_client(
 
             while True:
                 server_message = receive()
+                if server_message is None:
+                    time.sleep(2)  # Wait for 2s before asking again
+                    continue
                 client_message, sleep_duration, keep_going = handle(
                     client, server_message
                 )

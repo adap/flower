@@ -29,20 +29,27 @@ service Fleet {
 
 // TokenizedTasks messages
 message TokenizedTask {
-  Task tasks = 1;
-  string tokens = 2;
+  Task task = 1;
+  string token = 2;
 }
+
+// GetTasks messages
+message TokenizedTasks { repeated TokenizedTask tokenized_tasks = 1; }
 
 // GetTasks messages
 message GetTasksRequest { repeated ClientID cid = 1; }
 message GetTasksResponse {
-  repeated TokenizedTasks tokenizedtasks = 1;
-  Reconnect reconnect = 2;
+  oneof msg {
+    TokenizedTasks tokenized_tasks = 1;
+    uint64 reconnect = 2;
+  }
 }
 
-// CreateResults messages
-message CreateResultsRequest {
-  repeated Result results = 1;
-  repeated string token = 2;
+// TokenizedResult message
+message TokenizedResult {
+  Result result = 1;
+  string token = 2;
 }
-message CreateResultsResponse { Reconnect reconnect = 1; }
+// CreateResults messages
+message CreateResultsRequest { repeated TokenizedResult tokenized_results = 1; }
+message CreateResultsResponse { uint64 reconnect = 1; }
