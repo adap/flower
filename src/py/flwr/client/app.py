@@ -108,6 +108,9 @@ def start_client(
             The PEM-encoded root certificates as a byte string. If provided, a secure
             connection using the certificates will be established to a
             SSL-enabled Flower server.
+        use_rest: bool (default: False)
+            Defines whether or not client is interacting with the server using the
+            REST API.
 
     Returns
     -------
@@ -173,6 +176,7 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    use_rest: bool = False,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -194,6 +198,9 @@ def start_numpy_client(
         The PEM-encoded root certificates a byte string. If provided, a secure
         connection using the certificates will be established to a
         SSL-enabled Flower server.
+    use_rest: bool (default: False)
+        Defines whether or not client is interacting with the server using the
+        REST API.
 
     Examples
     --------
@@ -220,6 +227,7 @@ def start_numpy_client(
         client=_wrap_numpy_client(client=client),
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
+        use_rest=use_rest,
     )
 
 

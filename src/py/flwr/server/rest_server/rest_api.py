@@ -39,7 +39,7 @@ app = FastAPI()
 
 
 @app.get("/api/1.1/tasks/", response_class=Response)
-def tasks(client_id: Optional[int], response: Response):
+def tasks(response: Response, client_id: Optional[int] = None):
     # task_resp_msg = tm.get_tasks(client_id)
     # Create mock response and fill with something
     tokenized_task = TokenizedTask()
@@ -59,6 +59,7 @@ def tasks(client_id: Optional[int], response: Response):
 
     # Return serialized ProtoBuf
     task_resp_bytes = task_resp_msg.SerializeToString()
+    print(task_resp_msg)
     return Response(
         status_code=200,
         content=task_resp_bytes,
