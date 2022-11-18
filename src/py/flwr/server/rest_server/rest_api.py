@@ -43,7 +43,7 @@ mock_messages: Dict[str, TokenizedTask] = gen_mock_messages()
 
 
 @app.get("/api/1.1/tasks/", response_class=Response)
-def tasks(response: Response, client_id: Optional[int] = None):
+def tasks(response: Response, client_id: Optional[int] = None) -> Response:
     # Create a mock message. See mock_msgs.py for more details.
     message_being_sent = choice(list(mock_messages.keys()))
     tokenized_task = mock_messages[message_being_sent]
@@ -62,7 +62,7 @@ def tasks(response: Response, client_id: Optional[int] = None):
 
 
 @app.post("/api/1.1/result/")
-async def result(request: Request):  # Check if token is needed here
+async def result(request: Request) -> Response:  # Check if token is needed here
     # This is required to get the request body as raw bytes
     create_results_req_msg_bytes: bytes = await request.body()
 
