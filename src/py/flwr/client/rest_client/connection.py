@@ -21,7 +21,7 @@ from typing import Callable, Iterator, Optional, Tuple
 import requests
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.proto.fleet_pb2 import CreateResultsRequest, GetTasksResponse
+from flwr.proto.fleet_pb2 import CreateResultsRequest, GetTasksResponse, TokenizedResult
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
@@ -65,10 +65,10 @@ def rest_not_a_connection(
 
         # Request instructions (task) from server
         r = requests.get(
-            f"{base_url}/api/1.1/tasks",
+            f"{base_url}/api/1.1/tasks/",
             params={"client_id": client_id},
         )
-        print(f"[C-{client_id}] GET /api/1.1/tasks:", r.status_code, r.headers)
+        print(f"[C-{client_id}] GET /api/1.1/tasks/:", r.status_code, r.headers)
         if r.status_code != 200:
             return None
 
@@ -90,22 +90,23 @@ def rest_not_a_connection(
 
         # Serialize ProtoBuf to bytes
         results_req_msg = CreateResultsRequest()
-        results_req_msg.tokenized_results[0].result.legacy_client_message.CopyFrom(
-            client_message
-        )
+        tokenized_result = TokenizedResult()
+
+        tokenized_result.result.legacy_client_message.CopyFrom(client_message)
+        results_req_msg.tokenized_results.append(tokenized_result)
 
         results_req_msg_bytes = results_req_msg.SerializeToString()
 
         # Send ClientMessage to server
         r = requests.post(
-            f"{base_url}/api/1.1/result/{client_id}",
+            f"{base_url}/api/1.1/result/",
             headers={"Content-Type": "application/protobuf"},
             data=results_req_msg_bytes,
         )
-        print(f"[C-{client_id}] POST /api/1.1/{client_id}:", r.status_code, r.headers)
+        print(f"[C-{client_id}] POST /api/1.1/result/:", r.status_code, r.headers)
 
     # yield methods
     try:
         yield (receive, send)
-    except:
-        print("Error yielding (receive, send)")
+    except Exception as e:
+        print(e)

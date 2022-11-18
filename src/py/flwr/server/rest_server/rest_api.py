@@ -13,14 +13,11 @@
 # limitations under the License.
 # ==============================================================================
 """REST API server."""
-from random import random
-from typing import Optional
+from random import choice
+from typing import Dict, Optional
 
 from fastapi import FastAPI, Request, Response
-from numpy import array
-
-from flwr.common.parameter import ndarrays_to_parameters
-from flwr.common.serde import parameters_to_proto
+from flwr.server.rest_server.mock_msgs import gen_mock_messages
 from flwr.proto.fleet_pb2 import (
     CreateResultsRequest,
     CreateResultsResponse,
@@ -34,31 +31,27 @@ from flwr.proto.fleet_pb2 import (
 app = FastAPI()
 
 ###############################################################################
+# Dummy messages
+###############################################################################
+mock_messages: Dict[str, TokenizedTask] = gen_mock_messages()
+
+
+###############################################################################
 # Tasks and results
 ###############################################################################
 
 
 @app.get("/api/1.1/tasks/", response_class=Response)
 def tasks(response: Response, client_id: Optional[int] = None):
-    # task_resp_msg = tm.get_tasks(client_id)
-    # Create mock response and fill with something
-    tokenized_task = TokenizedTask()
-    tokenized_task.token = "abc"
-    tokenized_task.task.task_id = 42
-    if random() < 0.3:  # Tell client to check back 30% of the time
-        tokenized_task.task.legacy_server_message.reconnect_ins.seconds = 5
-    else:  # Send a fit_ins, missing config
-        flwr_parameters = ndarrays_to_parameters([array([1, 2, 3]), array([4, 5, 6])])
-        proto_parameters = parameters_to_proto(flwr_parameters)
-        tokenized_task.task.legacy_server_message.fit_ins.parameters.CopyFrom(
-            proto_parameters
-        )
-
-    task_resp_msg = GetTasksResponse()
-    task_resp_msg.tokenized_tasks.tokenized_tasks.append(tokenized_task)
+    # Create a mock message. See mock_msgs.py for more details.
+    message_being_sent = choice(list(mock_messages.keys()))
+    tokenized_task = mock_messages[message_being_sent]
 
     # Return serialized ProtoBuf
+    task_resp_msg = GetTasksResponse()
+    task_resp_msg.tokenized_tasks.tokenized_tasks.append(tokenized_task)
     task_resp_bytes = task_resp_msg.SerializeToString()
+    print(f"GET - Sending Task {message_being_sent}:")
     print(task_resp_msg)
     return Response(
         status_code=200,
@@ -77,6 +70,7 @@ async def result(request: Request):  # Check if token is needed here
     create_results_req_msg.ParseFromString(create_results_req_msg_bytes)
 
     # Print received message
+    print(f"POST - Receiving Result:")
     print(create_results_req_msg)
 
     # Create response
