@@ -12,6 +12,23 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
+class ClientID(google.protobuf.message.Message):
+    """ClientID messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    ID_FIELD_NUMBER: builtins.int
+    ANONYMOUS_FIELD_NUMBER: builtins.int
+    id: builtins.int
+    anonymous: builtins.bool
+    def __init__(self,
+        *,
+        id: builtins.int = ...,
+        anonymous: builtins.bool = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["anonymous",b"anonymous","id",b"id","msg",b"msg"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["anonymous",b"anonymous","id",b"id","msg",b"msg"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["id","anonymous"]]: ...
+global___ClientID = ClientID
+
 class Task(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TASK_ID_FIELD_NUMBER: builtins.int
@@ -35,11 +52,11 @@ class TaskAssignment(google.protobuf.message.Message):
     @property
     def task(self) -> global___Task: ...
     @property
-    def client_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
+    def client_ids(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ClientID]: ...
     def __init__(self,
         *,
         task: typing.Optional[global___Task] = ...,
-        client_ids: typing.Optional[typing.Iterable[builtins.int]] = ...,
+        client_ids: typing.Optional[typing.Iterable[global___ClientID]] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["task",b"task"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["client_ids",b"client_ids","task",b"task"]) -> None: ...

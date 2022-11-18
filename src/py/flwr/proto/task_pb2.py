@@ -20,11 +20,55 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15\x66lwr/proto/task.proto\x12\nflwr.proto\x1a\x1a\x66lwr/proto/transport.proto\"U\n\x04Task\x12\x0f\n\x07task_id\x18\x01 \x01(\x04\x12<\n\x15legacy_server_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ServerMessageB\x02\x18\x01\"D\n\x0eTaskAssignment\x12\x1e\n\x04task\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Task\x12\x12\n\nclient_ids\x18\x02 \x03(\x04\"W\n\x06Result\x12\x0f\n\x07task_id\x18\x01 \x01(\x04\x12<\n\x15legacy_client_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ClientMessageB\x02\x18\x01\x62\x06proto3'
+  serialized_pb=b'\n\x15\x66lwr/proto/task.proto\x12\nflwr.proto\x1a\x1a\x66lwr/proto/transport.proto\"4\n\x08\x43lientID\x12\x0c\n\x02id\x18\x01 \x01(\x04H\x00\x12\x13\n\tanonymous\x18\x02 \x01(\x08H\x00\x42\x05\n\x03msg\"U\n\x04Task\x12\x0f\n\x07task_id\x18\x01 \x01(\x04\x12<\n\x15legacy_server_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ServerMessageB\x02\x18\x01\"Z\n\x0eTaskAssignment\x12\x1e\n\x04task\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Task\x12(\n\nclient_ids\x18\x02 \x03(\x0b\x32\x14.flwr.proto.ClientID\"W\n\x06Result\x12\x0f\n\x07task_id\x18\x01 \x01(\x04\x12<\n\x15legacy_client_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ClientMessageB\x02\x18\x01\x62\x06proto3'
   ,
   dependencies=[flwr_dot_proto_dot_transport__pb2.DESCRIPTOR,])
 
 
+
+
+_CLIENTID = _descriptor.Descriptor(
+  name='ClientID',
+  full_name='flwr.proto.ClientID',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='flwr.proto.ClientID.id', index=0,
+      number=1, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='anonymous', full_name='flwr.proto.ClientID.anonymous', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='msg', full_name='flwr.proto.ClientID.msg',
+      index=0, containing_type=None,
+      create_key=_descriptor._internal_create_key,
+    fields=[]),
+  ],
+  serialized_start=65,
+  serialized_end=117,
+)
 
 
 _TASK = _descriptor.Descriptor(
@@ -61,8 +105,8 @@ _TASK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=65,
-  serialized_end=150,
+  serialized_start=119,
+  serialized_end=204,
 )
 
 
@@ -83,7 +127,7 @@ _TASKASSIGNMENT = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='client_ids', full_name='flwr.proto.TaskAssignment.client_ids', index=1,
-      number=2, type=4, cpp_type=4, label=3,
+      number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -100,8 +144,8 @@ _TASKASSIGNMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=152,
-  serialized_end=220,
+  serialized_start=206,
+  serialized_end=296,
 )
 
 
@@ -139,17 +183,32 @@ _RESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=222,
-  serialized_end=309,
+  serialized_start=298,
+  serialized_end=385,
 )
 
+_CLIENTID.oneofs_by_name['msg'].fields.append(
+  _CLIENTID.fields_by_name['id'])
+_CLIENTID.fields_by_name['id'].containing_oneof = _CLIENTID.oneofs_by_name['msg']
+_CLIENTID.oneofs_by_name['msg'].fields.append(
+  _CLIENTID.fields_by_name['anonymous'])
+_CLIENTID.fields_by_name['anonymous'].containing_oneof = _CLIENTID.oneofs_by_name['msg']
 _TASK.fields_by_name['legacy_server_message'].message_type = flwr_dot_proto_dot_transport__pb2._SERVERMESSAGE
 _TASKASSIGNMENT.fields_by_name['task'].message_type = _TASK
+_TASKASSIGNMENT.fields_by_name['client_ids'].message_type = _CLIENTID
 _RESULT.fields_by_name['legacy_client_message'].message_type = flwr_dot_proto_dot_transport__pb2._CLIENTMESSAGE
+DESCRIPTOR.message_types_by_name['ClientID'] = _CLIENTID
 DESCRIPTOR.message_types_by_name['Task'] = _TASK
 DESCRIPTOR.message_types_by_name['TaskAssignment'] = _TASKASSIGNMENT
 DESCRIPTOR.message_types_by_name['Result'] = _RESULT
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+ClientID = _reflection.GeneratedProtocolMessageType('ClientID', (_message.Message,), {
+  'DESCRIPTOR' : _CLIENTID,
+  '__module__' : 'flwr.proto.task_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.ClientID)
+  })
+_sym_db.RegisterMessage(ClientID)
 
 Task = _reflection.GeneratedProtocolMessageType('Task', (_message.Message,), {
   'DESCRIPTOR' : _TASK,

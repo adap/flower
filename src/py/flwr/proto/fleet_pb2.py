@@ -20,21 +20,35 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x16\x66lwr/proto/fleet.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/task.proto\"\x11\n\x0fGetTasksRequest\"2\n\x10GetTasksResponse\x12\x1e\n\x04task\x18\x01 \x03(\x0b\x32\x10.flwr.proto.Task\";\n\x14\x43reateResultsRequest\x12#\n\x07results\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result\"\x17\n\x15\x43reateResultsResponse2\xa8\x01\n\x05\x46leet\x12G\n\x08GetTasks\x12\x1b.flwr.proto.GetTasksRequest\x1a\x1c.flwr.proto.GetTasksResponse\"\x00\x12V\n\rCreateResults\x12 .flwr.proto.CreateResultsRequest\x1a!.flwr.proto.CreateResultsResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x16\x66lwr/proto/fleet.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/task.proto\">\n\rTokenizedTask\x12\x1e\n\x04task\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Task\x12\r\n\x05token\x18\x02 \x01(\t\"D\n\x0eTokenizedTasks\x12\x32\n\x0ftokenized_tasks\x18\x01 \x03(\x0b\x32\x19.flwr.proto.TokenizedTask\"4\n\x0fGetTasksRequest\x12!\n\x03\x63id\x18\x01 \x03(\x0b\x32\x14.flwr.proto.ClientID\"e\n\x10GetTasksResponse\x12\x35\n\x0ftokenized_tasks\x18\x01 \x01(\x0b\x32\x1a.flwr.proto.TokenizedTasksH\x00\x12\x13\n\treconnect\x18\x02 \x01(\x04H\x00\x42\x05\n\x03msg\"D\n\x0fTokenizedResult\x12\"\n\x06result\x18\x01 \x01(\x0b\x32\x12.flwr.proto.Result\x12\r\n\x05token\x18\x02 \x01(\t\"N\n\x14\x43reateResultsRequest\x12\x36\n\x11tokenized_results\x18\x01 \x03(\x0b\x32\x1b.flwr.proto.TokenizedResult\"*\n\x15\x43reateResultsResponse\x12\x11\n\treconnect\x18\x01 \x01(\x04\x32\xa8\x01\n\x05\x46leet\x12G\n\x08GetTasks\x12\x1b.flwr.proto.GetTasksRequest\x1a\x1c.flwr.proto.GetTasksResponse\"\x00\x12V\n\rCreateResults\x12 .flwr.proto.CreateResultsRequest\x1a!.flwr.proto.CreateResultsResponse\"\x00\x62\x06proto3'
   ,
   dependencies=[flwr_dot_proto_dot_task__pb2.DESCRIPTOR,])
 
 
 
 
-_GETTASKSREQUEST = _descriptor.Descriptor(
-  name='GetTasksRequest',
-  full_name='flwr.proto.GetTasksRequest',
+_TOKENIZEDTASK = _descriptor.Descriptor(
+  name='TokenizedTask',
+  full_name='flwr.proto.TokenizedTask',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
+    _descriptor.FieldDescriptor(
+      name='task', full_name='flwr.proto.TokenizedTask.task', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='token', full_name='flwr.proto.TokenizedTask.token', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -48,7 +62,71 @@ _GETTASKSREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=61,
-  serialized_end=78,
+  serialized_end=123,
+)
+
+
+_TOKENIZEDTASKS = _descriptor.Descriptor(
+  name='TokenizedTasks',
+  full_name='flwr.proto.TokenizedTasks',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='tokenized_tasks', full_name='flwr.proto.TokenizedTasks.tokenized_tasks', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=125,
+  serialized_end=193,
+)
+
+
+_GETTASKSREQUEST = _descriptor.Descriptor(
+  name='GetTasksRequest',
+  full_name='flwr.proto.GetTasksRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='cid', full_name='flwr.proto.GetTasksRequest.cid', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=195,
+  serialized_end=247,
 )
 
 
@@ -61,9 +139,60 @@ _GETTASKSRESPONSE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='task', full_name='flwr.proto.GetTasksResponse.task', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      name='tokenized_tasks', full_name='flwr.proto.GetTasksResponse.tokenized_tasks', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='reconnect', full_name='flwr.proto.GetTasksResponse.reconnect', index=1,
+      number=2, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='msg', full_name='flwr.proto.GetTasksResponse.msg',
+      index=0, containing_type=None,
+      create_key=_descriptor._internal_create_key,
+    fields=[]),
+  ],
+  serialized_start=249,
+  serialized_end=350,
+)
+
+
+_TOKENIZEDRESULT = _descriptor.Descriptor(
+  name='TokenizedResult',
+  full_name='flwr.proto.TokenizedResult',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='result', full_name='flwr.proto.TokenizedResult.result', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='token', full_name='flwr.proto.TokenizedResult.token', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -79,8 +208,8 @@ _GETTASKSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=80,
-  serialized_end=130,
+  serialized_start=352,
+  serialized_end=420,
 )
 
 
@@ -93,7 +222,7 @@ _CREATERESULTSREQUEST = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='results', full_name='flwr.proto.CreateResultsRequest.results', index=0,
+      name='tokenized_results', full_name='flwr.proto.CreateResultsRequest.tokenized_results', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -111,8 +240,8 @@ _CREATERESULTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=132,
-  serialized_end=191,
+  serialized_start=422,
+  serialized_end=500,
 )
 
 
@@ -124,6 +253,13 @@ _CREATERESULTSRESPONSE = _descriptor.Descriptor(
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
+    _descriptor.FieldDescriptor(
+      name='reconnect', full_name='flwr.proto.CreateResultsResponse.reconnect', index=0,
+      number=1, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -136,17 +272,44 @@ _CREATERESULTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=193,
-  serialized_end=216,
+  serialized_start=502,
+  serialized_end=544,
 )
 
-_GETTASKSRESPONSE.fields_by_name['task'].message_type = flwr_dot_proto_dot_task__pb2._TASK
-_CREATERESULTSREQUEST.fields_by_name['results'].message_type = flwr_dot_proto_dot_task__pb2._RESULT
+_TOKENIZEDTASK.fields_by_name['task'].message_type = flwr_dot_proto_dot_task__pb2._TASK
+_TOKENIZEDTASKS.fields_by_name['tokenized_tasks'].message_type = _TOKENIZEDTASK
+_GETTASKSREQUEST.fields_by_name['cid'].message_type = flwr_dot_proto_dot_task__pb2._CLIENTID
+_GETTASKSRESPONSE.fields_by_name['tokenized_tasks'].message_type = _TOKENIZEDTASKS
+_GETTASKSRESPONSE.oneofs_by_name['msg'].fields.append(
+  _GETTASKSRESPONSE.fields_by_name['tokenized_tasks'])
+_GETTASKSRESPONSE.fields_by_name['tokenized_tasks'].containing_oneof = _GETTASKSRESPONSE.oneofs_by_name['msg']
+_GETTASKSRESPONSE.oneofs_by_name['msg'].fields.append(
+  _GETTASKSRESPONSE.fields_by_name['reconnect'])
+_GETTASKSRESPONSE.fields_by_name['reconnect'].containing_oneof = _GETTASKSRESPONSE.oneofs_by_name['msg']
+_TOKENIZEDRESULT.fields_by_name['result'].message_type = flwr_dot_proto_dot_task__pb2._RESULT
+_CREATERESULTSREQUEST.fields_by_name['tokenized_results'].message_type = _TOKENIZEDRESULT
+DESCRIPTOR.message_types_by_name['TokenizedTask'] = _TOKENIZEDTASK
+DESCRIPTOR.message_types_by_name['TokenizedTasks'] = _TOKENIZEDTASKS
 DESCRIPTOR.message_types_by_name['GetTasksRequest'] = _GETTASKSREQUEST
 DESCRIPTOR.message_types_by_name['GetTasksResponse'] = _GETTASKSRESPONSE
+DESCRIPTOR.message_types_by_name['TokenizedResult'] = _TOKENIZEDRESULT
 DESCRIPTOR.message_types_by_name['CreateResultsRequest'] = _CREATERESULTSREQUEST
 DESCRIPTOR.message_types_by_name['CreateResultsResponse'] = _CREATERESULTSRESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+TokenizedTask = _reflection.GeneratedProtocolMessageType('TokenizedTask', (_message.Message,), {
+  'DESCRIPTOR' : _TOKENIZEDTASK,
+  '__module__' : 'flwr.proto.fleet_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.TokenizedTask)
+  })
+_sym_db.RegisterMessage(TokenizedTask)
+
+TokenizedTasks = _reflection.GeneratedProtocolMessageType('TokenizedTasks', (_message.Message,), {
+  'DESCRIPTOR' : _TOKENIZEDTASKS,
+  '__module__' : 'flwr.proto.fleet_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.TokenizedTasks)
+  })
+_sym_db.RegisterMessage(TokenizedTasks)
 
 GetTasksRequest = _reflection.GeneratedProtocolMessageType('GetTasksRequest', (_message.Message,), {
   'DESCRIPTOR' : _GETTASKSREQUEST,
@@ -161,6 +324,13 @@ GetTasksResponse = _reflection.GeneratedProtocolMessageType('GetTasksResponse', 
   # @@protoc_insertion_point(class_scope:flwr.proto.GetTasksResponse)
   })
 _sym_db.RegisterMessage(GetTasksResponse)
+
+TokenizedResult = _reflection.GeneratedProtocolMessageType('TokenizedResult', (_message.Message,), {
+  'DESCRIPTOR' : _TOKENIZEDRESULT,
+  '__module__' : 'flwr.proto.fleet_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.TokenizedResult)
+  })
+_sym_db.RegisterMessage(TokenizedResult)
 
 CreateResultsRequest = _reflection.GeneratedProtocolMessageType('CreateResultsRequest', (_message.Message,), {
   'DESCRIPTOR' : _CREATERESULTSREQUEST,
@@ -185,8 +355,8 @@ _FLEET = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=219,
-  serialized_end=387,
+  serialized_start=547,
+  serialized_end=715,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetTasks',

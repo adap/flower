@@ -12,40 +12,103 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
+class TokenizedTask(google.protobuf.message.Message):
+    """TokenizedTasks messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    TASK_FIELD_NUMBER: builtins.int
+    TOKEN_FIELD_NUMBER: builtins.int
+    @property
+    def task(self) -> flwr.proto.task_pb2.Task: ...
+    token: typing.Text
+    def __init__(self,
+        *,
+        task: typing.Optional[flwr.proto.task_pb2.Task] = ...,
+        token: typing.Text = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["task",b"task"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["task",b"task","token",b"token"]) -> None: ...
+global___TokenizedTask = TokenizedTask
+
+class TokenizedTasks(google.protobuf.message.Message):
+    """GetTasks messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    TOKENIZED_TASKS_FIELD_NUMBER: builtins.int
+    @property
+    def tokenized_tasks(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___TokenizedTask]: ...
+    def __init__(self,
+        *,
+        tokenized_tasks: typing.Optional[typing.Iterable[global___TokenizedTask]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["tokenized_tasks",b"tokenized_tasks"]) -> None: ...
+global___TokenizedTasks = TokenizedTasks
+
 class GetTasksRequest(google.protobuf.message.Message):
     """GetTasks messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    CID_FIELD_NUMBER: builtins.int
+    @property
+    def cid(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.ClientID]: ...
     def __init__(self,
+        *,
+        cid: typing.Optional[typing.Iterable[flwr.proto.task_pb2.ClientID]] = ...,
         ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cid",b"cid"]) -> None: ...
 global___GetTasksRequest = GetTasksRequest
 
 class GetTasksResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    TASK_FIELD_NUMBER: builtins.int
+    TOKENIZED_TASKS_FIELD_NUMBER: builtins.int
+    RECONNECT_FIELD_NUMBER: builtins.int
     @property
-    def task(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.Task]: ...
+    def tokenized_tasks(self) -> global___TokenizedTasks: ...
+    reconnect: builtins.int
     def __init__(self,
         *,
-        task: typing.Optional[typing.Iterable[flwr.proto.task_pb2.Task]] = ...,
+        tokenized_tasks: typing.Optional[global___TokenizedTasks] = ...,
+        reconnect: builtins.int = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["task",b"task"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["msg",b"msg","reconnect",b"reconnect","tokenized_tasks",b"tokenized_tasks"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["msg",b"msg","reconnect",b"reconnect","tokenized_tasks",b"tokenized_tasks"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["tokenized_tasks","reconnect"]]: ...
 global___GetTasksResponse = GetTasksResponse
+
+class TokenizedResult(google.protobuf.message.Message):
+    """TokenizedResult message"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RESULT_FIELD_NUMBER: builtins.int
+    TOKEN_FIELD_NUMBER: builtins.int
+    @property
+    def result(self) -> flwr.proto.task_pb2.Result: ...
+    token: typing.Text
+    def __init__(self,
+        *,
+        result: typing.Optional[flwr.proto.task_pb2.Result] = ...,
+        token: typing.Text = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["result",b"result"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["result",b"result","token",b"token"]) -> None: ...
+global___TokenizedResult = TokenizedResult
 
 class CreateResultsRequest(google.protobuf.message.Message):
     """CreateResults messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    RESULTS_FIELD_NUMBER: builtins.int
+    TOKENIZED_RESULTS_FIELD_NUMBER: builtins.int
     @property
-    def results(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.Result]: ...
+    def tokenized_results(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___TokenizedResult]: ...
     def __init__(self,
         *,
-        results: typing.Optional[typing.Iterable[flwr.proto.task_pb2.Result]] = ...,
+        tokenized_results: typing.Optional[typing.Iterable[global___TokenizedResult]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["results",b"results"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["tokenized_results",b"tokenized_results"]) -> None: ...
 global___CreateResultsRequest = CreateResultsRequest
 
 class CreateResultsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RECONNECT_FIELD_NUMBER: builtins.int
+    reconnect: builtins.int
     def __init__(self,
+        *,
+        reconnect: builtins.int = ...,
         ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["reconnect",b"reconnect"]) -> None: ...
 global___CreateResultsResponse = CreateResultsResponse
