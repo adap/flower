@@ -17,13 +17,14 @@ from random import choice
 from typing import Dict, Optional
 
 from fastapi import FastAPI, Request, Response
-from flwr.server.rest_server.mock_msgs import gen_mock_messages
+
 from flwr.proto.fleet_pb2 import (
     CreateResultsRequest,
     CreateResultsResponse,
     GetTasksResponse,
     TokenizedTask,
 )
+from flwr.server.rest_server.mock_msgs import gen_mock_messages
 
 # tm = TaskManagerDB()
 # cm = ClientManagerDB()

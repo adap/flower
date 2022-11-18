@@ -14,15 +14,13 @@
 # ==============================================================================
 """Mock Messages for API server."""
 import uuid
-from typing import Dict, List
+from typing import Dict
 
 from numpy import array
 
 from flwr.common.parameter import ndarrays_to_parameters
 from flwr.common.serde import parameters_to_proto
-from flwr.proto.fleet_pb2 import (
-    TokenizedTask,
-)
+from flwr.proto.fleet_pb2 import TokenizedTask
 
 flwr_parameters = ndarrays_to_parameters([array([1, 2, 3]), array([4, 5, 6])])
 proto_parameters = parameters_to_proto(flwr_parameters)
