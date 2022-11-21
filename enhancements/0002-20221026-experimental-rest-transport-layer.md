@@ -158,9 +158,9 @@ We propose to use REST because REST increases compatibility with platforms that 
 
 REST APIs often use JSON as their preferred serialization format. We propose to continue to use ProtoBuf for serialization, at least for the initial version of the REST transport layer. Using ProtoBuf comes with several advantages:
 
-- Consistency with the existing gRPC transport layer: no risk of introducing inconsistencied between ProtoBuf messages and JSON messages.
+- Consistency with the existing gRPC transport layer: no risk of introducing inconsistencies between ProtoBuf messages and JSON messages.
 - No duplication: no need to maintain two serialization formats.
 - Reduced effort: no need to implement JSON serialization.
 - Smaller request/response body size: ProtoBuf messages are substantially smaller compared to JSON messages.
 
-Setting the `Accept` and `Content-Type` headers also provides a forward-compatible path to use other serialization formats (like JSON) in the future, if required.
+Setting the [`Accept`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept) and [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type) headers also provides a forward-compatible path to use other serialization formats (like JSON) in the future, if required.
