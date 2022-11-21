@@ -74,7 +74,10 @@ def rest_not_a_connection(
         # Request instructions (task) from server
         r = requests.post(
             f"{base_url}/api/1.1/tasks",
-            headers={"Content-Type": "application/protobuf"},
+            headers={
+                "Accept": "application/protobuf",
+                "Content-Type": "application/protobuf",
+            },
             data=get_tasks_req_msg_bytes,
         )
         print(f"[C-{client_id}] POST /api/1.1/tasks:", r.status_code, r.headers)
@@ -109,7 +112,10 @@ def rest_not_a_connection(
         # Send ClientMessage to server
         r = requests.post(
             f"{base_url}/api/1.1/results",
-            headers={"Content-Type": "application/protobuf"},
+            headers={
+                "Accept": "application/protobuf",
+                "Content-Type": "application/protobuf",
+            },
             data=results_req_msg_bytes,
         )
         print(f"[C-{client_id}] POST /api/1.1/results:", r.status_code, r.headers)
