@@ -21,6 +21,7 @@ from fastapi import FastAPI, Request, Response
 from flwr.proto.fleet_pb2 import (
     CreateResultsRequest,
     CreateResultsResponse,
+    GetTasksRequest,
     GetTasksResponse,
     TokenizedTask,
 )
@@ -48,7 +49,7 @@ async def tasks(request: Request) -> Response:
     get_tasks_req_msg_bytes: bytes = await request.body()
 
     # Deserialize ProtoBuf
-    get_tasks_req_msg = CreateResultsRequest()
+    get_tasks_req_msg = GetTasksRequest()
     get_tasks_req_msg.ParseFromString(get_tasks_req_msg_bytes)
 
     # Print received message
