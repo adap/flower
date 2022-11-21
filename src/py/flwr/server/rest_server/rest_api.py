@@ -13,10 +13,12 @@
 # limitations under the License.
 # ==============================================================================
 """REST API server."""
-from random import choice
-from typing import Dict, Optional
 
-from fastapi import FastAPI, Request, Response
+
+from random import choice
+from typing import Dict, Optional, Union
+
+from fastapi import FastAPI, HTTPException, Request, Response
 
 from flwr.proto.fleet_pb2 import (
     CreateResultsRequest,
@@ -45,7 +47,10 @@ mock_messages: Dict[str, TokenizedTask] = gen_mock_messages()
 
 @app.post("/api/1.1/tasks", response_class=Response)
 async def tasks(request: Request) -> Response:
-    # This is required to get the request body as raw bytes
+    """."""
+    _check_headers(request.headers)
+
+    # Get the request body as raw bytes
     get_tasks_req_msg_bytes: bytes = await request.body()
 
     # Deserialize ProtoBuf
@@ -75,7 +80,10 @@ async def tasks(request: Request) -> Response:
 
 @app.post("/api/1.1/results")
 async def results(request: Request) -> Response:  # Check if token is needed here
-    # This is required to get the request body as raw bytes
+    """."""
+    _check_headers(request.headers)
+
+    # Get the request body as raw bytes
     create_results_req_msg_bytes: bytes = await request.body()
 
     # Deserialize ProtoBuf
@@ -97,21 +105,13 @@ async def results(request: Request) -> Response:  # Check if token is needed her
     )
 
 
-###############################################################################
-# Client availability
-###############################################################################
-
-
-# @app.post("/api/1.1/client/register/{client_id}")
-# def register(client_id: str, token: str):
-#    pass
-
-
-# @app.delete("/api/1.1/client/unregister/{client_id}")
-# def unregister(client_id: str):
-#    pass
-
-
-# @app.put("/api/1.1/client/heartbeat/{client_id}")
-# def client_heartbeat(client_id: str):
-#    pass
+def _check_headers(headers: Dict[str, Union[str, bytes]]) -> None:
+    """Check if expected headers are set."""
+    if not "content-type" in headers:
+        raise HTTPException(status_code=400, detail="Missing header Content-Type")
+    if headers["content-type"] != "application/protobuf":
+        raise HTTPException(status_code=400, detail="Unsupportet Content-Type")
+    if not "accept" in headers:
+        raise HTTPException(status_code=400, detail="Missing header Accept")
+    if headers["accept"] != "application/protobuf":
+        raise HTTPException(status_code=400, detail="Unsupportet Accept")

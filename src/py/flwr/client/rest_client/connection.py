@@ -21,7 +21,12 @@ from typing import Callable, Iterator, Optional, Tuple
 import requests
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.proto.fleet_pb2 import GetTasksRequest, CreateResultsRequest, GetTasksResponse, TokenizedResult
+from flwr.proto.fleet_pb2 import (
+    CreateResultsRequest,
+    GetTasksRequest,
+    GetTasksResponse,
+    TokenizedResult,
+)
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
@@ -64,7 +69,7 @@ def rest_not_a_connection(
         """Receive next task from server."""
         # Serialize ProtoBuf to bytes
         get_tasks_req_msg = GetTasksRequest()
-        get_tasks_req_msg_bytes = get_tasks_req_msg.SerializeToString()
+        get_tasks_req_msg_bytes: bytes = get_tasks_req_msg.SerializeToString()
 
         # Request instructions (task) from server
         r = requests.post(
@@ -99,7 +104,7 @@ def rest_not_a_connection(
         tokenized_result.result.legacy_client_message.CopyFrom(client_message)
         results_req_msg.tokenized_results.append(tokenized_result)
 
-        results_req_msg_bytes = results_req_msg.SerializeToString()
+        results_req_msg_bytes: bytes = results_req_msg.SerializeToString()
 
         # Send ClientMessage to server
         r = requests.post(
