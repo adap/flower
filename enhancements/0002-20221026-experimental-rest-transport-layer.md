@@ -88,8 +88,8 @@ Example:
 
 Situation: a `Task`/`TaskAssignment` scheduled for `N` anonymous clients
 
-**GET /tasks**
-Request body: `None`
+**POST /tasks**
+Request body: `GetTasksRequest`
 Response body: `GetTasksResponse` containing either `Task` + `token` or `Reconnect`
 
 Implementation:
@@ -99,8 +99,8 @@ Implementation:
 
 **POST /results**
 
-Request body: `SubmitResultRequest` containing `Result` + `token`
-Response body: `None`
+Request body: `CreateResultsRequest` containing `Result` + `token`
+Response body: `CreateResultsResponse`
 
 Implementation:
 1. Check if the `token` is known
@@ -108,8 +108,7 @@ Implementation:
 
 #### Client availability calls
 
-**POST /available**
-
+None
 
 ### Message serialization
 
