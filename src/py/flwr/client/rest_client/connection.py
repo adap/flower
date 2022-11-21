@@ -62,7 +62,7 @@ def rest_not_a_connection(
 
     def receive() -> Optional[ServerMessage]:
         """Receive next task from server."""
-       # Serialize ProtoBuf to bytes
+        # Serialize ProtoBuf to bytes
         get_tasks_req_msg = GetTasksRequest()
         get_tasks_req_msg_bytes = get_tasks_req_msg.SerializeToString()
 
