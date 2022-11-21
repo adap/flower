@@ -42,8 +42,19 @@ mock_messages: Dict[str, TokenizedTask] = gen_mock_messages()
 ###############################################################################
 
 
-@app.get("/api/1.1/tasks/", response_class=Response)
-def tasks(response: Response, client_id: Optional[int] = None) -> Response:
+@app.post("/api/1.1/tasks", response_class=Response)
+async def tasks(request: Request) -> Response:
+    # This is required to get the request body as raw bytes
+    get_tasks_req_msg_bytes: bytes = await request.body()
+
+    # Deserialize ProtoBuf
+    get_tasks_req_msg = CreateResultsRequest()
+    get_tasks_req_msg.ParseFromString(get_tasks_req_msg_bytes)
+
+    # Print received message
+    print(f"POST - Receiving GetTaskRequest:")
+    print(get_tasks_req_msg)
+
     # Create a mock message. See mock_msgs.py for more details.
     message_being_sent = choice(list(mock_messages.keys()))
     tokenized_task = mock_messages[message_being_sent]
@@ -52,7 +63,7 @@ def tasks(response: Response, client_id: Optional[int] = None) -> Response:
     task_resp_msg = GetTasksResponse()
     task_resp_msg.tokenized_tasks.tokenized_tasks.append(tokenized_task)
     task_resp_bytes = task_resp_msg.SerializeToString()
-    print(f"GET - Sending Task {message_being_sent}:")
+    print(f"POST - Sending GetTaskResponse {message_being_sent}:")
     print(task_resp_msg)
     return Response(
         status_code=200,
@@ -61,7 +72,7 @@ def tasks(response: Response, client_id: Optional[int] = None) -> Response:
     )
 
 
-@app.post("/api/1.1/result/")
+@app.post("/api/1.1/result")
 async def result(request: Request) -> Response:  # Check if token is needed here
     # This is required to get the request body as raw bytes
     create_results_req_msg_bytes: bytes = await request.body()
@@ -71,12 +82,13 @@ async def result(request: Request) -> Response:  # Check if token is needed here
     create_results_req_msg.ParseFromString(create_results_req_msg_bytes)
 
     # Print received message
-    print(f"POST - Receiving Result:")
+    print(f"POST - Receiving CreateResultsRequest:")
     print(create_results_req_msg)
 
     # Create response
     create_results_resp_msg = CreateResultsResponse()
     create_results_resp_msg_bytes = create_results_resp_msg.SerializeToString()
+    print(f"POST - Sending CreateResultsResponse {create_results_resp_msg}:")
     return Response(
         status_code=200,
         content=create_results_resp_msg_bytes,
