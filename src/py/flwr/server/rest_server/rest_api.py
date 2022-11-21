@@ -73,7 +73,7 @@ async def tasks(request: Request) -> Response:
 
 
 @app.post("/api/1.1/result")
-async def result(request: Request) -> Response:  # Check if token is needed here
+async def results(request: Request) -> Response:  # Check if token is needed here
     # This is required to get the request body as raw bytes
     create_results_req_msg_bytes: bytes = await request.body()
 
