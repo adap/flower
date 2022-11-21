@@ -103,7 +103,7 @@ def rest_not_a_connection(
 
         # Send ClientMessage to server
         r = requests.post(
-            f"{base_url}/api/1.1/result",
+            f"{base_url}/api/1.1/results",
             headers={"Content-Type": "application/protobuf"},
             data=results_req_msg_bytes,
         )
