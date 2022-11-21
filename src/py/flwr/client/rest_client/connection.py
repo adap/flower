@@ -21,7 +21,7 @@ from typing import Callable, Iterator, Optional, Tuple
 import requests
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.proto.fleet_pb2 import CreateResultsRequest, GetTasksResponse, TokenizedResult
+from flwr.proto.fleet_pb2 import GetTasksRequest, CreateResultsRequest, GetTasksResponse, TokenizedResult
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
@@ -62,13 +62,17 @@ def rest_not_a_connection(
 
     def receive() -> Optional[ServerMessage]:
         """Receive next task from server."""
+        # Serialize ProtoBuf to bytes
+        get_tasks_req_msg = GetTasksRequest()
+        get_tasks_req_msg_bytes = get_tasks_req_msg.SerializeToString()
 
         # Request instructions (task) from server
-        r = requests.get(
-            f"{base_url}/api/1.1/tasks/",
-            params={"client_id": client_id},
+        r = requests.post(
+            f"{base_url}/api/1.1/tasks",
+            headers={"Content-Type": "application/protobuf"},
+            data=get_tasks_req_msg_bytes,
         )
-        print(f"[C-{client_id}] GET /api/1.1/tasks/:", r.status_code, r.headers)
+        print(f"[C-{client_id}] POST /api/1.1/tasks:", r.status_code, r.headers)
         if r.status_code != 200:
             return None
 
@@ -99,11 +103,11 @@ def rest_not_a_connection(
 
         # Send ClientMessage to server
         r = requests.post(
-            f"{base_url}/api/1.1/result/",
+            f"{base_url}/api/1.1/results",
             headers={"Content-Type": "application/protobuf"},
             data=results_req_msg_bytes,
         )
-        print(f"[C-{client_id}] POST /api/1.1/result/:", r.status_code, r.headers)
+        print(f"[C-{client_id}] POST /api/1.1/results:", r.status_code, r.headers)
 
     # yield methods
     try:
