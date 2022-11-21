@@ -107,7 +107,7 @@ def rest_not_a_connection(
             headers={"Content-Type": "application/protobuf"},
             data=results_req_msg_bytes,
         )
-        print(f"[C-{client_id}] POST /api/1.1/result:", r.status_code, r.headers)
+        print(f"[C-{client_id}] POST /api/1.1/results:", r.status_code, r.headers)
 
     # yield methods
     try:
