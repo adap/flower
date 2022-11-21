@@ -63,7 +63,7 @@ async def tasks(request: Request) -> Response:
     task_resp_msg = GetTasksResponse()
     task_resp_msg.tokenized_tasks.tokenized_tasks.append(tokenized_task)
     task_resp_bytes = task_resp_msg.SerializeToString()
-    print(f"POST - Sending GetTaskResponse {message_being_sent}:")
+    print(f"POST - Sending GetTasksResponse {message_being_sent}:")
     print(task_resp_msg)
     return Response(
         status_code=200,
