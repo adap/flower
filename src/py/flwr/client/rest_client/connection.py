@@ -67,6 +67,7 @@ def rest_not_a_connection(
 
     def receive() -> Optional[ServerMessage]:
         """Receive next task from server."""
+
         # Serialize ProtoBuf to bytes
         get_tasks_req_msg = GetTasksRequest()
         get_tasks_req_msg_bytes: bytes = get_tasks_req_msg.SerializeToString()
@@ -84,6 +85,15 @@ def rest_not_a_connection(
         if r.status_code != 200:
             return None
 
+
+        # Check headers
+        if not "content-type" in r.headers:
+            print(f"[C-{client_id}] POST /api/1.1/tasks: missing header `Content-Type`")
+            return None
+        if r.headers["content-type"] != "application/protobuf":
+            print(f"[C-{client_id}] POST /api/1.1/tasks: header `Content-Type` has wrong value")
+            return None
+
         # Deserialize ProtoBuf from bytes
         get_tasks_response_msg = GetTasksResponse()
         get_tasks_response_msg.ParseFromString(r.content)
@@ -95,6 +105,8 @@ def rest_not_a_connection(
             ].task.legacy_server_message
         )
 
+        print(f"[C-{client_id}] POST /api/1.1/tasks: success")
+        
         return server_msg
 
     def send(client_message: ClientMessage) -> None:
