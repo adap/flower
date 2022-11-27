@@ -1,10 +1,24 @@
 # Changelog
 
+## Unreleased
+
+### What's new?
+
+### Incompatible changes
+
 ## v1.1.0 (2022-10-31)
+
+### Thanks to our contributors
+
+We would like to give our **special thanks** to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Akis Linardos`, `Christopher S`, `Daniel J. Beutel`, `George`, `Jan Schlicht`, `Mohammad Fares`, `Pedro Porto Buarque de Gusmão`, `Philipp Wiesner`, `Rob Luke`, `Taner Topal`, `VasundharaAgarwal`, `danielnugraha`, `edogab33`
+
+### What's new?
 
 - **Introduce Differential Privacy wrappers (preview)** ([#1357](https://github.com/adap/flower/pull/1357), [#1460](https://github.com/adap/flower/pull/1460))
 
-  The first (experimental) preview of pluggable Differential Privacy wrappers enables easy configuration and usage of differential privacy (DP). The pluggbale DP wrappers enable framework-agnostic **and** strategy-agnostic usage of both client-side DP and server-side DP. Head over to the Flower docs, a new explainer goes into more detail.
+  The first (experimental) preview of pluggable Differential Privacy wrappers enables easy configuration and usage of differential privacy (DP). The pluggable DP wrappers enable framework-agnostic **and** strategy-agnostic usage of both client-side DP and server-side DP. Head over to the Flower docs, a new explainer goes into more detail.
 
 - **New iOS CoreML code example** ([#1289](https://github.com/adap/flower/pull/1289))
 
@@ -49,6 +63,10 @@
 - **Improved tutorial** ([#1468](https://github.com/adap/flower/pull/1468), [#1470](https://github.com/adap/flower/pull/1470), [#1472](https://github.com/adap/flower/pull/1472), [#1473](https://github.com/adap/flower/pull/1473), [#1474](https://github.com/adap/flower/pull/1474), [#1475](https://github.com/adap/flower/pull/1475))
 
   The Flower Federated Learning Tutorial has two brand-new parts covering custom strategies (still WIP) and the distinction between `Client` and `NumPyClient`. The existing parts one and two have also been improved (many small changes and fixes).
+
+### Incompatible changes
+
+None
 
 ## v1.0.0 (2022-07-28)
 
@@ -124,7 +142,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
   
   The `start_simulation` function now accepts a configuration dictionary `config` instead of the `num_rounds` integer. This improves the consistency between `start_simulation` and `start_server` and makes transitioning between the two easier.
 
-### New features
+### What's new?
 
 - **Support Python 3.10** ([#1320](https://github.com/adap/flower/pull/1320))
 
@@ -163,6 +181,8 @@ We would like to give our **special thanks** to all the contributors who made Fl
   - Rename ProtoBuf messages to improve consistency ([#1214](https://github.com/adap/flower/pull/1214), [#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
 
 ## v0.19.0 (2022-05-18)
+
+### What's new?
 
 - **Flower Baselines (preview): FedOpt, FedBN, FedAvgM** ([#919](https://github.com/adap/flower/pull/919), [#1127](https://github.com/adap/flower/pull/1127), [#914](https://github.com/adap/flower/pull/914))
 
@@ -285,7 +305,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
     - Added a new FAQ section to the documentation ([#948](https://github.com/adap/flower/pull/948))
     - And many more under-the-hood changes, library updates, documentation changes, and tooling improvements!
 
-### Incompatible changes:
+### Incompatible changes
 
 - **Removed** `flwr_example` **and** `flwr_experimental` **from release build** ([#869](https://github.com/adap/flower/pull/869))
   
@@ -320,7 +340,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
     - Improved error message in `NumPyClient` ([#851](https://github.com/adap/flower/pull/851))
     - Improved PyTorch quickstart code example ([#852](https://github.com/adap/flower/pull/852))
 
-### Incompatible changes:
+### Incompatible changes
 
 - **Disabled final distributed evaluation** ([#800](https://github.com/adap/flower/pull/800))
 
@@ -336,7 +356,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
 ## v0.16.0 (2021-05-11)
 
-What's new?
+### What's new?
 
 - **New built-in strategies** ([#549](https://github.com/adap/flower/pull/549))
     - (abstract) FedOpt
@@ -362,7 +382,7 @@ What's new?
 
 - FedBN implementation in example PyTorch: From Centralized To Federated ([#696](https://github.com/adap/flower/pull/696) [#702](https://github.com/adap/flower/pull/702) [#705](https://github.com/adap/flower/pull/705))
 
-Incompatible changes:
+### Incompatible changes
 
 - **Serialization-agnostic server** ([#721](https://github.com/adap/flower/pull/721))
 
