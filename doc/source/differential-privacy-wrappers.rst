@@ -3,6 +3,9 @@ Differential Privacy Wrappers in Flower
 
 Flower provides differential privacy (DP) wrapper classes for the easy integration of the central DP guarantees provided by DP-FedAvg into training pipelines defined in any of the various ML frameworks that Flower is compatible with. 
 
+.. warning::
+  Please note that these components are still experimental, the correct configuration of DP for a specific task is still an unsolved problem.
+
 .. note::
   The name DP-FedAvg is misleading since it can be applied on top of any FL algorithm that conforms to the general structure prescribed by the FedOpt family of algorithms.
 
@@ -85,6 +88,7 @@ Performing the :math:`(\epsilon, \delta)` analysis
 Assume you have trained for :math:`n` rounds with sampling fraction :math:`q` and noise multiplier :math:`z`. In order to calculate the :math:`\epsilon` value this would result in for a particular :math:`\delta`, the following script may be used. 
 
 .. code-block:: python
+
    import tensorflow_privacy as tfp
    max_order = 32
    orders = range(2, max_order + 1)
