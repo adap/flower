@@ -62,10 +62,11 @@ requests = "^2.28.1"
 types-requests = "^2.28.1"
 fastapi = "^0.85.1"
 uvicorn = {extras = ["standard"], version = "^0.19.0"}
+asgiref = "^3.5.2"
 
 [tool.poetry.extras]
 simulation = ["ray"]
-rest = ["requests", "types-requests", "fastapi", "uvicorn"]
+rest = ["requests", "types-requests", "fastapi", "uvicorn", "asgiref"]
 
 [tool.poetry.dev-dependencies]
 types-protobuf = "==3.19.18"

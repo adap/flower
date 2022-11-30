@@ -16,9 +16,11 @@
 
 
 from random import choice
-from typing import Dict, Optional, Union
+from typing import Dict
 
+from asgiref.sync import async_to_sync
 from fastapi import FastAPI, HTTPException, Request, Response
+from starlette.datastructures import Headers
 
 from flwr.proto.fleet_pb2 import (
     CreateResultsRequest,
@@ -46,12 +48,12 @@ mock_messages: Dict[str, TokenizedTask] = gen_mock_messages()
 
 
 @app.post("/api/1.1/tasks", response_class=Response)
-async def tasks(request: Request) -> Response:
+def tasks(request: Request) -> Response:
     """."""
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
-    get_tasks_req_msg_bytes: bytes = await request.body()
+    get_tasks_req_msg_bytes: bytes = async_to_sync(request.body)()
 
     # Deserialize ProtoBuf
     get_tasks_req_msg = GetTasksRequest()
@@ -79,12 +81,12 @@ async def tasks(request: Request) -> Response:
 
 
 @app.post("/api/1.1/results")
-async def results(request: Request) -> Response:  # Check if token is needed here
+def results(request: Request) -> Response:  # Check if token is needed here
     """."""
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
-    create_results_req_msg_bytes: bytes = await request.body()
+    create_results_req_msg_bytes: bytes = async_to_sync(request.body)()
 
     # Deserialize ProtoBuf
     create_results_req_msg = CreateResultsRequest()
@@ -105,13 +107,14 @@ async def results(request: Request) -> Response:  # Check if token is needed her
     )
 
 
-def _check_headers(headers: Dict[str, Union[str, bytes]]) -> None:
+# def _check_headers(headers: Dict[str, Union[str, bytes]]) -> None:
+def _check_headers(headers: Headers) -> None:
     """Check if expected headers are set."""
     if not "content-type" in headers:
         raise HTTPException(status_code=400, detail="Missing header Content-Type")
     if headers["content-type"] != "application/protobuf":
-        raise HTTPException(status_code=400, detail="Unsupportet Content-Type")
+        raise HTTPException(status_code=400, detail="Unsupported Content-Type")
     if not "accept" in headers:
         raise HTTPException(status_code=400, detail="Missing header Accept")
     if headers["accept"] != "application/protobuf":
-        raise HTTPException(status_code=400, detail="Unsupportet Accept")
+        raise HTTPException(status_code=400, detail="Unsupported Accept")
