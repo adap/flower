@@ -12,7 +12,7 @@ from flwr.common import (
     FitRes,
     Parameters,
     Scalar,
-    Weights,
+    NDArrays,
 )
 from typing import Optional
 from flwr.server.client_manager import ClientManager
@@ -30,7 +30,11 @@ class FedAvgCpp(FedAvg):
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
         evaluate_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
+            #Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -116,7 +120,7 @@ def weights_to_parameters(weights) -> Parameters:
     return Parameters(tensors=tensors, tensor_type="cpp_double")
 
 
-def parameters_to_weights(parameters: Parameters) -> Weights:
+def parameters_to_weights(parameters: Parameters) -> NDArrays:
     """Convert parameters object to NumPy weights."""
     weights = [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
     return weights
