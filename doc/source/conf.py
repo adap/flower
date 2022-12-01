@@ -68,6 +68,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # To prevent 404 errors and redirect to the new pages.
 redirects = {
     # Renamed pages
+    "configuring-clients.html": "configure-clients.html",
     "quickstart_mxnet": "quickstart-mxnet.html",
     "quickstart_pytorch_lightning": "quickstart-pytorch-lightning.html",
     "example_walkthrough_pytorch_mnist": "example-walkthrough-pytorch-mnist.html",
