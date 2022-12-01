@@ -53,7 +53,7 @@ def tasks(request: Request) -> Response:
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
-    get_tasks_req_msg_bytes: bytes = async_to_sync(request.body)()
+    get_tasks_req_msg_bytes: bytes = async_to_sync(request.body)()  # type: ignore
 
     # Deserialize ProtoBuf
     get_tasks_req_msg = GetTasksRequest()
@@ -86,7 +86,7 @@ def results(request: Request) -> Response:  # Check if token is needed here
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
-    create_results_req_msg_bytes: bytes = async_to_sync(request.body)()
+    create_results_req_msg_bytes: bytes = async_to_sync(request.body)()  # type: ignore
 
     # Deserialize ProtoBuf
     create_results_req_msg = CreateResultsRequest()
@@ -107,7 +107,6 @@ def results(request: Request) -> Response:  # Check if token is needed here
     )
 
 
-# def _check_headers(headers: Dict[str, Union[str, bytes]]) -> None:
 def _check_headers(headers: Headers) -> None:
     """Check if expected headers are set."""
     if not "content-type" in headers:
