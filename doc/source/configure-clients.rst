@@ -1,5 +1,5 @@
-Configuring Clients
-===================
+Configure Clients
+=================
 
 Along with model parameters, Flower can send configuration values to clients. Configuration values can be used for various purposes. They are, for example, a popular way to control client-side hyperparameters from the server.
 
