@@ -63,6 +63,30 @@ def get_clients_response_to_proto(
     return driver_pb2.GetClientsResponse(client_ids=res.client_ids)
 
 
+def get_client_id_from_proto(msg: task_pb2.ClientID) -> int:
+    """Deserialize `ClientId` from ProtoBuf.
+
+    Anonymous clients receive id:int =-1
+    """
+    client_id: int = -1  # Anonymous
+    if msg.HasField("id"):
+        client_id = msg.id
+
+    return client_id
+
+
+def create_client_id_to_proto(id: int) -> task_pb2.ClientID:
+    """Serialize `ClientId` to ProtoBuf.
+
+    Anonymous clients (id==-1) are kept anonymous
+    """
+
+    client_id = task_pb2.ClientID(anonymous=True)
+    if client_id != -1:  # Not anonymous
+        client_id = task_pb2.ClientID(id=id)
+    return client_id
+
+
 def get_clients_response_from_proto(
     msg: driver_pb2.GetClientsResponse,
 ) -> GetClientsResponse:
@@ -92,7 +116,9 @@ def create_tasks_request_to_proto(
         )
         task_assignment_proto = task_pb2.TaskAssignment(
             task=task_proto,
-            client_ids=task_assignment.client_ids,
+            client_ids=[
+                create_client_id_to_proto(id) for id in task_assignment.client_ids
+            ],
         )
         task_assignments_proto.append(task_assignment_proto)
     return driver_pb2.CreateTasksRequest(task_assignments=task_assignments_proto)
@@ -115,9 +141,12 @@ def create_tasks_request_from_proto(
             task_id=task_assignment_proto.task.task_id,
             legacy_server_message=legacy_server_message,
         )
+        client_ids_proto = [  # mapping anonymous field to -1
+            get_client_id_from_proto(id) for id in task_assignment_proto.client_ids
+        ]
         task_assignment = TaskAssignment(
             task=task,
-            client_ids=list(task_assignment_proto.client_ids),
+            client_ids=client_ids_proto,
         )
         task_assignments.append(task_assignment)
     return CreateTasksRequest(task_assignments=task_assignments)
