@@ -38,6 +38,8 @@ To mimic the paper, fl.server.strategy.FedAvg will be used.
 
 ### Structure
 
+Not sure about folders...
+
 datasets.py -> will probably contain a function that returns DataLoaders
 
 model.py -> defines the model architecture, the train and test functions
