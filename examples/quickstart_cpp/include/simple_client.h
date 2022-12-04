@@ -10,7 +10,7 @@
  *
  * ********************************************************************************************************/
 #pragma once
-#include "client.h"
+#include "flwr_lib/client.h"
 #include "synthetic_dataset.h"
 #include "line_fit_model.h"
 #include <ctime>

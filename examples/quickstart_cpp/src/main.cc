@@ -1,5 +1,5 @@
 #include "simple_client.h"
-#include "start.h"
+#include "flwr_lib/start.h"
 
 int main(int argc, char **argv) {
     if (argc != 3) {
