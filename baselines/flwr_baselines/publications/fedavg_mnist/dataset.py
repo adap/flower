@@ -1,9 +1,10 @@
-from typing import Tuple, Optional
+"""MNIST dataset utilities for federated learning"""
+from typing import Optional, Tuple
 
 import numpy as np
 import torch
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, random_split, Subset, ConcatDataset, Dataset
+from torch.utils.data import ConcatDataset, DataLoader, Dataset, Subset, random_split
 from torchvision.datasets import MNIST
 
 
