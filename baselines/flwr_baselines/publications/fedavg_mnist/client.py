@@ -1,6 +1,6 @@
 """Defines the MNIST Flower Client and a function to instantiate it."""
 from collections import OrderedDict
-from typing import List
+from typing import List, Tuple
 
 import dataset
 import flwr as fl

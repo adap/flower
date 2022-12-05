@@ -1,5 +1,5 @@
 """MNIST dataset utilities for federated learning"""
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -25,7 +25,7 @@ def _download_data() -> Tuple[Dataset, Dataset]:
 
 
 def _partition_data(
-    num_clients: Optional[int] = 10,
+    num_clients: int = 10,
     idd: Optional[bool] = True,
     seed: Optional[int] = 42,
 ) -> Tuple[List[Dataset], Dataset]:
@@ -72,9 +72,9 @@ def _partition_data(
 
 
 def load_datasets(
-    num_clients: Optional[int] = 10,
+    num_clients: int = 10,
     idd: Optional[bool] = True,
-    val_ratio: Optional[float] = 0.1,
+    val_ratio: float = 0.1,
     batch_size: Optional[int] = 32,
     seed: Optional[int] = 42,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
