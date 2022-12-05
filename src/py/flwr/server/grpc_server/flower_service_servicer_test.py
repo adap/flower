@@ -13,13 +13,15 @@
 # limitations under the License.
 # ==============================================================================
 """Tests for FlowerServiceServicer."""
+
+
 import unittest
 from unittest.mock import MagicMock, call
 
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.grpc_server.flower_service_servicer import (
     FlowerServiceServicer,
-    register_client,
+    register_client_proxy,
 )
 from flwr.server.grpc_server.grpc_bridge import InsWrapper, ResWrapper
 
@@ -53,7 +55,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         ]
         self.ins_wrapper_iterator = iter(self.ins_wrappers)
 
-        # Mock for GRPCBridge
+        # Mock for GrpcBridge
         self.grpc_bridge_mock = MagicMock()
         self.grpc_bridge_mock.ins_wrapper_iterator.return_value = (
             self.ins_wrapper_iterator
@@ -67,20 +69,20 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         self.grpc_client_proxy_mock = MagicMock()
         self.grpc_client_proxy_mock.cid = CLIENT_CID
 
-        self.client_factory_mock = MagicMock()
-        self.client_factory_mock.return_value = self.grpc_client_proxy_mock
+        self.client_proxy_factory_mock = MagicMock()
+        self.client_proxy_factory_mock.return_value = self.grpc_client_proxy_mock
 
         self.client_manager_mock = MagicMock()
 
-    def test_register_client(self) -> None:
-        """Test register_client function."""
+    def test_register_client_proxy(self) -> None:
+        """Test register_client_proxy function."""
         # Prepare
         self.client_manager_mock.register.return_value = True
 
         # Execute
-        register_client(
+        register_client_proxy(
             client_manager=self.client_manager_mock,
-            client=self.grpc_client_proxy_mock,
+            client_proxy=self.grpc_client_proxy_mock,
             context=self.context_mock,
         )
 
@@ -107,7 +109,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         servicer = FlowerServiceServicer(
             client_manager=self.client_manager_mock,
             grpc_bridge_factory=self.grpc_bridge_factory_mock,
-            grpc_client_factory=self.client_factory_mock,
+            grpc_client_proxy_factory=self.client_proxy_factory_mock,
         )
 
         # Execute
@@ -124,7 +126,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         assert len(self.client_messages) == num_server_messages
         assert self.grpc_client_proxy_mock.cid == CLIENT_CID
 
-        self.client_factory_mock.assert_called_once_with(
+        self.client_proxy_factory_mock.assert_called_once_with(
             CLIENT_CID, self.grpc_bridge_mock
         )
 

@@ -26,19 +26,19 @@
  *
  */
 
-class SimpleFlwrClient : public flwr::Client {
+class SimpleFlwrClient : public flwr_local::Client {
  public:
   SimpleFlwrClient(std::string client_id,
                    LineFitModel &model,
                    SyntheticDataset &training_dataset,
                    SyntheticDataset &validation_dataset,
                    SyntheticDataset &test_dataset);
-  void set_parameters(flwr::Parameters params);
+  void set_parameters(flwr_local::Parameters params);
 
-  virtual flwr::ParametersRes get_parameters() override;
-  virtual flwr::PropertiesRes get_properties(flwr::PropertiesIns ins) override;
-  virtual flwr::EvaluateRes evaluate(flwr::EvaluateIns ins) override;
-  virtual flwr::FitRes fit(flwr::FitIns ins) override;
+  virtual flwr_local::ParametersRes get_parameters() override;
+  virtual flwr_local::PropertiesRes get_properties(flwr_local::PropertiesIns ins) override;
+  virtual flwr_local::EvaluateRes evaluate(flwr_local::EvaluateIns ins) override;
+  virtual flwr_local::FitRes fit(flwr_local::FitIns ins) override;
 
  private:
   int64_t client_id;
