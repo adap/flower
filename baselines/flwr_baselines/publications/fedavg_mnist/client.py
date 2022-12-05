@@ -6,7 +6,7 @@ import flwr as fl
 import model
 import numpy as np
 import torch
-from dataset import load_datasets
+from dataset import load_datasets as load_datasets
 from torch.utils.data import DataLoader
 
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

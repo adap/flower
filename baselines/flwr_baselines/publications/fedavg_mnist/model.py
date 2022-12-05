@@ -1,4 +1,4 @@
-"""CNN model architecutre, training and testing functions for MNIST"""
+"""CNN model architecutre, training and testing functions for MNIST."""
 from typing import Optional, Tuple
 
 import torch
@@ -21,7 +21,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(512, 10)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Forward pass of the CNN
+        """Forward pass of the CNN.
 
         Parameters
         ----------

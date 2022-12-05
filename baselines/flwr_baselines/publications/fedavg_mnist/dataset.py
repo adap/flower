@@ -1,4 +1,4 @@
-"""MNIST dataset utilities for federated learning"""
+"""MNIST dataset utilities for federated learning."""
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -29,7 +29,8 @@ def _partition_data(
     idd: Optional[bool] = True,
     seed: Optional[int] = 42,
 ) -> Tuple[List[Dataset], Dataset]:
-    """Split training set into idd or non idd partitions to simulate the federated setting.
+    """Split training set into idd or non idd partitions to simulate the
+    federated setting.
 
     Parameters
     ----------
@@ -78,7 +79,7 @@ def load_datasets(
     batch_size: Optional[int] = 32,
     seed: Optional[int] = 42,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
-    """Creates the dataloaders to be fed into the model
+    """Creates the dataloaders to be fed into the model.
 
     Parameters
     ----------
