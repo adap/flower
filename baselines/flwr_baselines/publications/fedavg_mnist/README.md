@@ -1,49 +1,46 @@
-### Dataset
+# Federated Averaging MNIST
 
-The dataset used will be the one provided by torchvision.datasets.MNIST
+The following baseline replicates the experiments in *Communication-Efficient Learning of Deep Networks from Decentralized Data*, which was the first paper to propose a federated approach to machine learning and demonstrated the FederatedAveraging algorthim on the MNIST dataset.
 
-### Partitioning
+**Paper Abstract:** 
 
-Two methods of partitioning will be used, mimicking what is described in the paper.
+<center>
+<i>Modern mobile devices have access to a wealth
+of data suitable for learning models, which in turn
+can greatly improve the user experience on the
+device. For example, language models can improve speech recognition and text entry, and image models can automatically select good photos.
+However, this rich data is often privacy sensitive,
+large in quantity, or both, which may preclude
+logging to the data center and training there using
+conventional approaches. We advocate an alternative that leaves the training data distributed on
+the mobile devices, and learns a shared model by
+aggregating locally-computed updates. We term
+this decentralized approach Federated Learning.
+We present a practical method for the federated
+learning of deep networks based on iterative
+model averaging, and conduct an extensive empirical evaluation, considering five different model architectures and four datasets. These experiments
+demonstrate the approach is robust to the unbalanced and non-IID data distributions that are a
+defining characteristic of this setting. Communication costs are the principal constraint, and
+we show a reduction in required communication
+rounds by 10–100× as compared to synchronized
+stochastic gradient descent</i>
+</center>
 
-The IID method will just create a random split of the data amongst the clients.
+**Paper Authors:** 
 
-The non-IID method will first sort the data using the labels and distribute the data to each client by chunks of a given size.
+H. Brendan McMahan, Eider Moore, Daniel Ramage, Seth Hampson, and Blaise Aguera y Arcas.
 
-### Model
 
-The model used will be the one as described by the paper : *“A CNN with two 5x5 convolution layers (the first with
-32 channels, the second with 64, each followed with 2x2
-max pooling), a fully connected layer with 512 units and
-ReLu activation, and a final softmax output layer (1,663,370
-total parameters).”*
+Note: If you use this implementation in your work, please remember to cite the original authors of the paper. 
 
-### Client number
+**[Link to paper.](https://arxiv.org/pdf/1602.05629.pdf)**
 
-In the paper, the number of clients used is 100. For the moment, 10 clients will be used in order to speed up the tests.
+## Running experiments
 
-### Hyperparameters
+WIP 
 
-The hyperparameters used will be the following :
+For the moment the experiment can be ran using the `playground.ipynb` notebook.
 
-* Batch size (32)
-* Validation set percentage (10% of training set)
-* The fraction of available clients for training (fraction_fit) will probably be varied between 0.1 and 1.
-* For evaluation, the fraction of available clients (fraction_evaluate) will be arbitrarily set to 0.5 (same as the Flower tutorial).
-* The number of rounds will also be arbitrarily set to 5 (same as the Flower tutorial).
+### Example outputs
 
-### FL Algorithm
-
-To mimic the paper, fl.server.strategy.FedAvg will be used.
-
-### Structure
-
-Not sure about folders...
-
-datasets.py -> will probably contain a function that returns DataLoaders
-
-model.py -> defines the model architecture, the train and test functions
-
-client.py -> defines the FlowerClient and a function to instantiate it
-
-main.py -> where the server logic is defined and everything is ran
+WIP

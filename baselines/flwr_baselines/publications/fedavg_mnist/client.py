@@ -2,11 +2,11 @@
 from collections import OrderedDict
 from typing import List, Tuple
 
-import dataset
 import flwr as fl
 import model
 import numpy as np
 import torch
+from dataset import load_datasets
 from torch.utils.data import DataLoader
 
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -51,7 +51,7 @@ def client_fn(cid: str) -> FlowerClient:
 
     # Note: each client gets a different trainloader/valloader, so each client
     # will train and evaluate on their own unique data
-    trainloaders, valloaders, _ = dataset.load_datasets(idd=False)
+    trainloaders, valloaders, _ = load_datasets(idd=False)
     trainloader = trainloaders[int(cid)]
     valloader = valloaders[int(cid)]
 
