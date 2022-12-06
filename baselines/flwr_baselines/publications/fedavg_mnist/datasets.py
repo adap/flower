@@ -22,10 +22,12 @@ def load_datasets(
     num_clients : int, optional
         The number of clients that hold a part of the data, by default 10
     idd : bool, optional
-        Whether the data should be independent and identically distributed between the clients or if the data should first be sorted
-        by labels and distributed by chunks to each client (used to test the convergence in a worst case scenario), by default True
+        Whether the data should be independent and identically distributed between the
+        clients or if the data should first be sorted by labels and distributed by chunks
+        to each client (used to test the convergence in a worst case scenario), by default True
     val_ratio : float, optional
-        The ratio of training data that will be used for validation (between 0 and 1), by default 0.1
+        The ratio of training data that will be used for validation (between 0 and 1),
+        by default 0.1
     batch_size : int, optional
         The size of the batches to be fed into the model, by default 32
     seed : int, optional
@@ -40,17 +42,16 @@ def load_datasets(
     # Split each partition into train/val and create DataLoader
     trainloaders = []
     valloaders = []
-    for ds in datasets:
-        len_val = len(ds) // (1 / val_ratio)
-        len_train = len(ds) - len_val
+    for dataset in datasets:
+        len_val = int(len(dataset) // (1 / val_ratio))
+        len_train = len(dataset) - len_val
         lengths = [len_train, len_val]
         ds_train, ds_val = random_split(
-            ds, lengths, torch.Generator().manual_seed(seed)
+            dataset, lengths, torch.Generator().manual_seed(seed)
         )
         trainloaders.append(DataLoader(ds_train, batch_size=batch_size, shuffle=True))
         valloaders.append(DataLoader(ds_val, batch_size=batch_size))
-    testloader = DataLoader(testset, batch_size=batch_size)
-    return trainloaders, valloaders, testloader
+    return trainloaders, valloaders, DataLoader(testset, batch_size=batch_size)
 
 
 def _download_data() -> Tuple[Dataset, Dataset]:
@@ -82,8 +83,9 @@ def _partition_data(
     num_clients : int, optional
         The number of clients that hold a part of the data, by default 10
     idd : bool, optional
-        Whether the data should be independent and identically distributed between the clients or if the data should first be sorted
-        by labels and distributed by chunks to each client (used to test the convergence in a worst case scenario), by default True
+        Whether the data should be independent and identically distributed between
+        the clients or if the data should first be sorted by labels and distributed by chunks
+        to each client (used to test the convergence in a worst case scenario), by default True
     seed : int, optional
         Used to set a fix seed to replicate experiments, by default 42
 
@@ -102,9 +104,9 @@ def _partition_data(
         idxs = trainset.targets.argsort()
         sorted_data = Subset(trainset, idxs)
         tmp = []
-        for n in range(num_clients * 2):
+        for idx in range(num_clients * 2):
             tmp.append(
-                Subset(sorted_data, np.arange(shard_size * n, shard_size * (n + 1)))
+                Subset(sorted_data, np.arange(shard_size * idx, shard_size * (idx + 1)))
             )
         idxs_list = torch.randperm(
             num_clients * 2, generator=torch.Generator().manual_seed(seed)

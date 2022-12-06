@@ -13,6 +13,8 @@ DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class FlowerClient(fl.client.NumPyClient):
+    """Standard Flower client for CNN training."""
+
     def __init__(
         self, net: torch.nn.Module, trainloader: DataLoader, valloader: DataLoader
     ):
@@ -21,9 +23,11 @@ class FlowerClient(fl.client.NumPyClient):
         self.valloader = valloader
 
     def get_parameters(self, config) -> List[np.ndarray]:
+        """Returns the parameters of the current net."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
+        """Changes the parameters of the model using the given ones."""
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
