@@ -88,7 +88,7 @@ def _training_loop(
     device: torch.device,
     criterion: torch.nn.CrossEntropyLoss,
     optimizer: torch.optim.Adam,
-) -> Tuple[int, int, int]:
+) -> Tuple[int, int, float]:
     """Train for one epoch.
 
     Parameters
