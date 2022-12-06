@@ -3,11 +3,12 @@ from collections import OrderedDict
 from typing import List, Tuple
 
 import flwr as fl
-import model
 import numpy as np
 import torch
-from datasets import load_datasets
 from torch.utils.data import DataLoader
+
+from flwr_baselines.publications.fedavg_mnist import model
+from flwr_baselines.publications.fedavg_mnist.dataset import load_datasets
 
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

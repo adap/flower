@@ -8,9 +8,11 @@ from torch.utils.data import DataLoader
 
 
 class Net(nn.Module):
-    """Convolutional Neural Network architecture as described in McMahan 2017 paper :
-    [Communication-Efficient Learning of Deep Networks from Decentralized Data]
-    (https://arxiv.org/pdf/1602.05629.pdf)
+    """Convolutional Neural Network architecture as described in McMahan 2017
+    paper :
+
+    [Communication-Efficient Learning of Deep Networks from
+    Decentralized Data] (https://arxiv.org/pdf/1602.05629.pdf)
     """
 
     def __init__(self) -> None:
