@@ -35,12 +35,46 @@ Note: If you use this implementation in your work, please remember to cite the o
 
 **[Link to paper.](https://arxiv.org/pdf/1602.05629.pdf)**
 
+## Training Setup
+
+### CNN Architecture
+
+The CNN architecture is detailed in the paper and used to create the **Federated Averaging MNIST** baseline.
+
+| Layer | Details|
+| ----- | ------ |
+| 1 | Conv2D(1, 32, 5, 1, 1) <br/> ReLU, MaxPool2D(2, 2, 1)  |
+| 2 | Conv2D(32, 64, 5, 1, 1) <br/> ReLU, MaxPool2D(2, 2, 1) |
+| 3 | FC(64 * 7 * 7, 512) <br/> ReLU |
+| 5 | FC(512, 10) |
+
+### Training Paramaters
+
+| Description | Value |
+| ----------- | ----- |
+| loss | cross entropy loss |
+| optimizer | SGD |
+| learning rate | 0.1 (by default) |
+| local epochs | 5 (by default) |
+| local batch size | 10 (by default) |
+
 ## Running experiments
 
-WIP 
+The `config.yaml` file containing all the tunable hyperparameters and the necessary variables can be found under the `conf` folder.
+[Hydra](https://hydra.cc/docs/tutorials/) is used to manage the different parameters experiments can be ran with. 
 
-For the moment the experiment can be ran using the `playground.ipynb` notebook.
+To run using the default parameters, just enter `python main.py`, if some parameters need to be overwritten, you can do it like in the following example: 
+
+```sh
+python main.py num_epochs=5 num_rounds=1000 idd=True
+``` 
+
+Results will be stored as timestamped folders inside either `outputs` or `multiruns`, depending on whether you perform single- or multi-runs. 
 
 ### Example outputs
 
-WIP
+To help visualize results, the script also plots evaluation curves. Here are some examples:
+<center>
+<img src="docs/centralized_metrics.png" alt="Centralized evaluation results" width="400" />
+<img src="docs/distributed_metrics.png" alt="Distributed evaluation results" width="400" />
+</center>

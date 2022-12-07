@@ -21,12 +21,14 @@ class FlowerClient(fl.client.NumPyClient):
         valloader: DataLoader,
         device: torch.device,
         num_epochs: int,
+        learning_rate: float,
     ):
         self.net = net
         self.trainloader = trainloader
         self.valloader = valloader
         self.device = device
         self.num_epochs = num_epochs
+        self.learning_rate = learning_rate
 
     def get_parameters(self, config) -> List[np.ndarray]:
         """Returns the parameters of the current net."""
@@ -43,7 +45,13 @@ class FlowerClient(fl.client.NumPyClient):
     ) -> Tuple[List[np.ndarray], int, dict]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
-        model.train(self.net, self.trainloader, self.device, epochs=self.num_epochs)
+        model.train(
+            self.net,
+            self.trainloader,
+            self.device,
+            epochs=self.num_epochs,
+            learning_rate=self.learning_rate,
+        )
         return self.get_parameters(self.net), len(self.trainloader), {}
 
     def evaluate(self, parameters: List[np.ndarray], config):
@@ -54,7 +62,12 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 def gen_client_fn(
-    device: torch.device, idd: bool, num_clients: int, num_epochs: int, batch_size: int
+    device: torch.device,
+    idd: bool,
+    num_clients: int,
+    num_epochs: int,
+    batch_size: int,
+    learning_rate: float,
 ) -> Tuple[Callable[[str], FlowerClient], DataLoader]:
     """Generates the client function that creates the Flower Clients.
 
@@ -74,6 +87,8 @@ def gen_client_fn(
         sending it to the server.
     batch_size : int
         The size of the local batches each client trains on.
+    learning_rate : float
+        The learning rate for the SGD  optimizer of clients.
 
     Returns
     -------
@@ -97,6 +112,8 @@ def gen_client_fn(
         valloader = valloaders[int(cid)]
 
         # Create a  single Flower client representing a single organization
-        return FlowerClient(net, trainloader, valloader, device, num_epochs)
+        return FlowerClient(
+            net, trainloader, valloader, device, num_epochs, learning_rate
+        )
 
     return client_fn, testloader

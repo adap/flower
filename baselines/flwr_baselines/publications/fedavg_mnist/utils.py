@@ -15,8 +15,7 @@ from flwr_baselines.publications.fedavg_mnist import model
 
 
 def plot_metric_from_history(
-    hist: History,
-    save_plot_path: Path,
+    hist: History, save_plot_path: Path, expected_maximum: float
 ) -> None:
     """Function to plot from Flower server History.
 
@@ -26,10 +25,14 @@ def plot_metric_from_history(
         Object containing evaluation for all rounds.
     save_plot_path : Path
         Folder to save the plot to.
+    expected_maximum : float
+        The expected maximum accuracy from the original paper.
     """
     rounds, values = zip(*hist.metrics_distributed["accuracy"])
     plt.figure()
     plt.plot(rounds, np.asarray(values) * 100, label="FedAvg")  # Accuracy 0-100%
+    # Set expected graph
+    plt.axhline(y=expected_maximum, color="r", linestyle="--")
     plt.title(f"Distributed Validation - MNIST")
     plt.xlabel("Rounds")
     plt.ylabel("Accuracy")
@@ -39,6 +42,8 @@ def plot_metric_from_history(
     rounds, values = zip(*hist.metrics_centralized["accuracy"])
     plt.figure()
     plt.plot(rounds, np.asarray(values) * 100, label="FedAvg")  # Accuracy 0-100%
+    # Set expected graph
+    plt.axhline(y=expected_maximum, color="r", linestyle="--")
     plt.title(f"Centralized Validation - MNIST")
     plt.xlabel("Rounds")
     plt.ylabel("Accuracy")
@@ -65,7 +70,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     examples = [num_examples for num_examples, _ in metrics]
 
     # Aggregate and return custom metric (weighted average)
-    return {"accuracy": sum(accuracies) / sum(examples)}
+    return {"accuracy": int(sum(accuracies)) / int(sum(examples))}
 
 
 def gen_evaluate_fn(

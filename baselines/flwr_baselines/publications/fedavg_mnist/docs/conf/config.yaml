@@ -5,4 +5,6 @@ batch_size: 10
 num_rounds: 10
 idd: False
 client_fraction: 1.0
-plot_path: "docs/"
+expected_maximum: 99.4
+learning_rate: 0.1
+plot_path: "docs"

@@ -17,6 +17,7 @@ def main(cfg: DictConfig) -> None:
         device=DEVICE,
         num_clients=cfg.num_clients,
         idd=cfg.idd,
+        learning_rate=cfg.learning_rate,
     )
 
     evaluate_fn = utils.gen_evaluate_fn(testloader, DEVICE)
@@ -39,7 +40,7 @@ def main(cfg: DictConfig) -> None:
         strategy=strategy,
     )
 
-    utils.plot_metric_from_history(history, cfg.plot_path)
+    utils.plot_metric_from_history(history, cfg.plot_path, cfg.expected_maximum)
 
 
 if __name__ == "__main__":
