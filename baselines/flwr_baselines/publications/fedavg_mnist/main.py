@@ -11,6 +11,13 @@ DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 @hydra.main(config_path="docs/conf", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
+    """Main function to run CNN federated learning on MNIST.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        An omegacong object that stores the hydra config.
+    """
     client_fn, testloader = client.gen_client_fn(
         num_epochs=cfg.num_epochs,
         batch_size=cfg.batch_size,

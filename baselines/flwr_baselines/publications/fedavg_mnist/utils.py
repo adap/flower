@@ -1,3 +1,4 @@
+"""Contains utility functions for CNN FL on MNIST."""
 from collections import OrderedDict
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
@@ -8,7 +9,6 @@ import torch
 from flwr.common import Metrics
 from flwr.common.typing import NDArrays, Scalar
 from flwr.server.history import History
-from numpy.typing import NDArray
 from torch.utils.data import DataLoader
 
 from flwr_baselines.publications.fedavg_mnist import model
@@ -33,7 +33,7 @@ def plot_metric_from_history(
     plt.plot(rounds, np.asarray(values) * 100, label="FedAvg")  # Accuracy 0-100%
     # Set expected graph
     plt.axhline(y=expected_maximum, color="r", linestyle="--")
-    plt.title(f"Distributed Validation - MNIST")
+    plt.title("Distributed Validation - MNIST")
     plt.xlabel("Rounds")
     plt.ylabel("Accuracy")
     plt.legend(loc="upper left")
@@ -44,7 +44,7 @@ def plot_metric_from_history(
     plt.plot(rounds, np.asarray(values) * 100, label="FedAvg")  # Accuracy 0-100%
     # Set expected graph
     plt.axhline(y=expected_maximum, color="r", linestyle="--")
-    plt.title(f"Centralized Validation - MNIST")
+    plt.title("Centralized Validation - MNIST")
     plt.xlabel("Rounds")
     plt.ylabel("Accuracy")
     plt.legend(loc="upper left")

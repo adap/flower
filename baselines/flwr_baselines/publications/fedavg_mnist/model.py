@@ -52,7 +52,6 @@ def train(
     device: torch.device,
     epochs: int,
     learning_rate: float,
-    verbose: Optional[bool] = False,
 ) -> None:
     """Train the network on the training set.
 
@@ -68,9 +67,6 @@ def train(
         The number of epochs the model should be trained for.
     learning_rate : float
         The learning rate for the SGD optimizer.
-    verbose : Optional[bool], optional
-        Whether or not the loss and accuracy should be printed to standard output
-        at each epoch, by default False
     """
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
@@ -81,8 +77,6 @@ def train(
         )
         epoch_loss /= len(trainloader.dataset)
         epoch_acc = correct / total
-        if verbose:
-            print(f"Epoch {epoch+1}: train loss {epoch_loss}, accuracy {epoch_acc}")
 
 
 def _training_loop(
