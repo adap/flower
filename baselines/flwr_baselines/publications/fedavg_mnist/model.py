@@ -1,5 +1,5 @@
 """CNN model architecutre, training and testing functions for MNIST."""
-from typing import Optional, Tuple
+from typing import Tuple
 
 import torch
 import torch.nn as nn
@@ -72,11 +72,7 @@ def train(
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
     net.train()
     for epoch in range(epochs):
-        correct, total, epoch_loss = _training_loop(
-            net, trainloader, device, criterion, optimizer
-        )
-        epoch_loss /= len(trainloader.dataset)
-        epoch_acc = correct / total
+        net = _training_loop(net, trainloader, device, criterion, optimizer)
 
 
 def _training_loop(
@@ -85,7 +81,7 @@ def _training_loop(
     device: torch.device,
     criterion: torch.nn.CrossEntropyLoss,
     optimizer: torch.optim.Adam,
-) -> Tuple[int, int, float]:
+) -> nn.Module:
     """Train for one epoch.
 
     Parameters
@@ -100,8 +96,12 @@ def _training_loop(
         The loss function to use for training
     optimizer : torch.optim.Adam
         The optimizer to use for training
+
+    Returns
+    -------
+    nn.Module
+        The model that has been trained for one epoch.
     """
-    correct, total, epoch_loss = 0, 0, 0.0
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
@@ -109,11 +109,7 @@ def _training_loop(
         loss = criterion(net(images), labels)
         loss.backward()
         optimizer.step()
-        # Metrics
-        epoch_loss += loss
-        total += labels.size(0)
-        correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-    return correct, total, epoch_loss
+    return net
 
 
 def test(
