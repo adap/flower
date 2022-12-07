@@ -71,7 +71,7 @@ def train(
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
     net.train()
-    for epoch in range(epochs):
+    for _ in range(epochs):
         net = _training_loop(net, trainloader, device, criterion, optimizer)
 
 
@@ -105,7 +105,6 @@ def _training_loop(
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
-        outputs = net(images)
         loss = criterion(net(images), labels)
         loss.backward()
         optimizer.step()
