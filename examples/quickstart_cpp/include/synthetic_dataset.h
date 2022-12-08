@@ -6,7 +6,7 @@
 #define FLOWER_CPP_SYNTHETIC_DATASET_H
 
 #include <vector>
-
+#include <cstddef>
 class SyntheticDataset {
  public:
   // Generates the synthetic dataset of size size around given vector m of size ms_size and given bias b.
