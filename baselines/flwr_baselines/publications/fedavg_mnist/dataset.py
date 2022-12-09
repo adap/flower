@@ -1,4 +1,6 @@
 """MNIST dataset utilities for federated learning."""
+
+
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -10,7 +12,7 @@ from torchvision.datasets import MNIST
 
 def load_datasets(
     num_clients: int = 10,
-    idd: Optional[bool] = True,
+    iid: Optional[bool] = True,
     val_ratio: float = 0.1,
     batch_size: Optional[int] = 32,
     seed: Optional[int] = 42,
@@ -21,7 +23,7 @@ def load_datasets(
     ----------
     num_clients : int, optional
         The number of clients that hold a part of the data, by default 10
-    idd : bool, optional
+    iid : bool, optional
         Whether the data should be independent and identically distributed between the
         clients or if the data should first be sorted by labels and distributed by chunks
         to each client (used to test the convergence in a worst case scenario), by default True
@@ -38,7 +40,7 @@ def load_datasets(
     Tuple[DataLoader, DataLoader, DataLoader]
         The DataLoader for training, the DataLoader for validation, the DataLoader for testing.
     """
-    datasets, testset = _partition_data(num_clients, idd, seed)
+    datasets, testset = _partition_data(num_clients, iid, seed)
     # Split each partition into train/val and create DataLoader
     trainloaders = []
     valloaders = []
@@ -72,17 +74,17 @@ def _download_data() -> Tuple[Dataset, Dataset]:
 
 def _partition_data(
     num_clients: int = 10,
-    idd: Optional[bool] = True,
+    iid: Optional[bool] = True,
     seed: Optional[int] = 42,
 ) -> Tuple[List[Dataset], Dataset]:
-    """Split training set into idd or non idd partitions to simulate the
+    """Split training set into iid or non iid partitions to simulate the
     federated setting.
 
     Parameters
     ----------
     num_clients : int, optional
         The number of clients that hold a part of the data, by default 10
-    idd : bool, optional
+    iid : bool, optional
         Whether the data should be independent and identically distributed between
         the clients or if the data should first be sorted by labels and distributed by chunks
         to each client (used to test the convergence in a worst case scenario), by default True
@@ -97,7 +99,7 @@ def _partition_data(
     trainset, testset = _download_data()
     partition_size = int(len(trainset) / num_clients)
     lengths = [partition_size] * num_clients
-    if idd:
+    if iid:
         datasets = random_split(trainset, lengths, torch.Generator().manual_seed(seed))
     else:
         shard_size = int(partition_size / 2)

@@ -1,4 +1,6 @@
 """Runs CNN federated learning for MNST dataset."""
+
+
 import flwr as fl
 import hydra
 import torch
@@ -16,14 +18,14 @@ def main(cfg: DictConfig) -> None:
     Parameters
     ----------
     cfg : DictConfig
-        An omegacong object that stores the hydra config.
+        An omegaconf object that stores the hydra config.
     """
     client_fn, testloader = client.gen_client_fn(
         num_epochs=cfg.num_epochs,
         batch_size=cfg.batch_size,
         device=DEVICE,
         num_clients=cfg.num_clients,
-        idd=cfg.idd,
+        iid=cfg.iid,
         learning_rate=cfg.learning_rate,
     )
 

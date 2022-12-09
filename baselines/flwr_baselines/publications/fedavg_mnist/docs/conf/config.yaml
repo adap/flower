@@ -3,7 +3,7 @@ num_clients: 100
 num_epochs: 20
 batch_size: 10
 num_rounds: 10
-idd: False
+iid: False
 client_fraction: 1.0
 expected_maximum: 99.4
 learning_rate: 0.1

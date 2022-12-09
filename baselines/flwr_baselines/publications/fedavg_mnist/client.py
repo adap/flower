@@ -1,5 +1,7 @@
 # pylint: disable=too-many-arguments
 """Defines the MNIST Flower Client and a function to instantiate it."""
+
+
 from collections import OrderedDict
 from typing import Callable, List, Tuple
 
@@ -64,7 +66,7 @@ class FlowerClient(fl.client.NumPyClient):
 
 def gen_client_fn(
     device: torch.device,
-    idd: bool,
+    iid: bool,
     num_clients: int,
     num_epochs: int,
     batch_size: int,
@@ -76,7 +78,7 @@ def gen_client_fn(
     ----------
     device : torch.device
         The device on which the the client will train on and test on.
-    idd : bool
+    iid : bool
         The way to partition the data for each client, i.e. whether the data
         should be independent and identically distributed between the clients
         or if the data should first be sorted by labels and distributed by chunks
@@ -98,7 +100,7 @@ def gen_client_fn(
         the DataLoader that will be used for testing
     """
     trainloaders, valloaders, testloader = load_datasets(
-        idd=idd, num_clients=num_clients, batch_size=batch_size
+        iid=iid, num_clients=num_clients, batch_size=batch_size
     )
 
     def client_fn(cid: str) -> FlowerClient:

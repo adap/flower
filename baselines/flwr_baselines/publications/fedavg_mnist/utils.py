@@ -28,28 +28,24 @@ def plot_metric_from_history(
     expected_maximum : float
         The expected maximum accuracy from the original paper.
     """
-    rounds, values = zip(*hist.metrics_distributed["accuracy"])
-    plt.figure()
-    plt.plot(rounds, np.asarray(values) * 100, label="FedAvg")  # Accuracy 0-100%
-    # Set expected graph
-    plt.axhline(y=expected_maximum, color="r", linestyle="--")
-    plt.title("Distributed Validation - MNIST")
-    plt.xlabel("Rounds")
-    plt.ylabel("Accuracy")
-    plt.legend(loc="upper left")
-    plt.savefig(Path(save_plot_path) / Path("distributed_metrics.png"))
-    plt.close()
-    rounds, values = zip(*hist.metrics_centralized["accuracy"])
-    plt.figure()
-    plt.plot(rounds, np.asarray(values) * 100, label="FedAvg")  # Accuracy 0-100%
-    # Set expected graph
-    plt.axhline(y=expected_maximum, color="r", linestyle="--")
-    plt.title("Centralized Validation - MNIST")
-    plt.xlabel("Rounds")
-    plt.ylabel("Accuracy")
-    plt.legend(loc="upper left")
-    plt.savefig(Path(save_plot_path) / Path("centralized_metrics.png"))
-    plt.close()
+    for metric_type in ["centralized", "distributed"]:
+        metric_dict = (
+            hist.metrics_centralized
+            if metric_type == "centralized"
+            else hist.metrics_distributed
+        )
+        rounds, values = zip(*metric_dict["accuracy"])
+        plt.figure()
+        plt.plot(rounds, np.asarray(values) * 100, label="FedAvg")  # Accuracy 0-100%
+        # Set expected graph
+        plt.axhline(y=expected_maximum, color="r", linestyle="--")
+        plt.title(f"{metric_type.capitalize()} Validation - MNIST")
+        plt.xticks(range(1, max(rounds)))
+        plt.xlabel("Rounds")
+        plt.ylabel("Accuracy")
+        plt.legend(loc="upper left")
+        plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics.png"))
+        plt.close()
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
@@ -110,19 +106,3 @@ def gen_evaluate_fn(
         return loss, {"accuracy": accuracy}
 
     return evaluate
-
-
-def _test_cnn_size_mnist() -> None:
-    """Test number of parameters with MNIST-sized inputs."""
-    # Prepare
-    net = model.Net()
-    expected = 1_663_370
-
-    # Execute
-    actual = sum([p.numel() for p in net.parameters()])
-
-    # Assert
-    assert actual == expected
-
-
-_test_cnn_size_mnist()

@@ -1,6 +1,6 @@
 # Federated Averaging MNIST
 
-The following baseline replicates the experiments in *Communication-Efficient Learning of Deep Networks from Decentralized Data*, which was the first paper to propose a federated approach to machine learning and demonstrated the FederatedAveraging algorthim on the MNIST dataset.
+The following baseline replicates the experiments in *Communication-Efficient Learning of Deep Networks from Decentralized Data* (McMahan et al., 2017), which was the first paper to coin the term Federated Learning and to propose the FederatedAveraging algorthim.
 
 **Paper Abstract:** 
 
@@ -33,7 +33,7 @@ H. Brendan McMahan, Eider Moore, Daniel Ramage, Seth Hampson, and Blaise Aguera 
 
 Note: If you use this implementation in your work, please remember to cite the original authors of the paper. 
 
-**[Link to paper.](https://arxiv.org/pdf/1602.05629.pdf)**
+**[Link to paper.](https://arxiv.org/abs/1602.05629)**
 
 ## Training Setup
 
@@ -66,7 +66,7 @@ The `config.yaml` file containing all the tunable hyperparameters and the necess
 To run using the default parameters, just enter `python main.py`, if some parameters need to be overwritten, you can do it like in the following example: 
 
 ```sh
-python main.py num_epochs=5 num_rounds=1000 idd=True
+python main.py num_epochs=5 num_rounds=1000 iid=True
 ``` 
 
 Results will be stored as timestamped folders inside either `outputs` or `multiruns`, depending on whether you perform single- or multi-runs. 
@@ -75,6 +75,6 @@ Results will be stored as timestamped folders inside either `outputs` or `multir
 
 To help visualize results, the script also plots evaluation curves. Here are some examples:
 <center>
-<img src="docs/centralized_metrics.png" alt="Centralized evaluation results" width="400" />
-<img src="docs/distributed_metrics.png" alt="Distributed evaluation results" width="400" />
+    <img src="docs/centralized_metrics.png" alt="Centralized evaluation results" width="400" />
+    <img src="docs/distributed_metrics.png" alt="Distributed evaluation results" width="400" />
 </center>
