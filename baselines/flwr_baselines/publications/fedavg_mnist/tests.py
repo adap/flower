@@ -30,6 +30,6 @@ def test_non_iid_partitionning(num_clients: int = 100) -> None:
     )
     for trainloader in trainloaders:
         labels = []
-        for image, label in trainloader:
+        for _, label in trainloader:
             labels.append(label.item())
         assert len(set(labels)) <= 2
