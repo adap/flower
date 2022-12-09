@@ -61,10 +61,10 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    :caption: How-to guides
 
    installation
-   configuring-clients
+   configure-clients
    strategies
    implementing-strategies
-   saving-progress
+   save-progress
    saving-and-loading-pytorch-checkpoints
    ssl-enabled-connections
    example-walkthrough-pytorch-mnist
