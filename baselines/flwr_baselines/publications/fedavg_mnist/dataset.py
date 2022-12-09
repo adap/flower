@@ -43,7 +43,7 @@ def load_datasets(
     trainloaders = []
     valloaders = []
     for dataset in datasets:
-        len_val = int(len(dataset) // (1 / val_ratio))
+        len_val = int(len(dataset) / (1 / val_ratio))
         len_train = len(dataset) - len_val
         lengths = [len_train, len_val]
         ds_train, ds_val = random_split(
@@ -95,12 +95,12 @@ def _partition_data(
         A list of dataset for each client and a single dataset to be use for testing the model.
     """
     trainset, testset = _download_data()
-    partition_size = len(trainset) // num_clients
+    partition_size = int(len(trainset) / num_clients)
     lengths = [partition_size] * num_clients
     if idd:
         datasets = random_split(trainset, lengths, torch.Generator().manual_seed(seed))
     else:
-        shard_size = partition_size // 2
+        shard_size = int(partition_size / 2)
         idxs = trainset.targets.argsort()
         sorted_data = Subset(trainset, idxs)
         tmp = []
