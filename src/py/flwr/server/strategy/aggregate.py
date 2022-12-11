@@ -20,7 +20,7 @@ from typing import List, Tuple
 
 import numpy as np
 
-from flwr.common import NDArrays
+from flwr.common import NDArray, NDArrays
 
 
 def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
@@ -53,6 +53,44 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
     return median_w
 
 
+def aggregate_krum(
+    results: List[Tuple[NDArrays, int]], num_malicious: int, to_keep: int
+) -> NDArrays:
+    """Choose one parameter vector according to the Krum fucntion.
+
+    If to_keep is not None, then MultiKrum is applied.
+    """
+    # Create a list of weights and ignore the number of examples
+    weights = [weights for weights, _ in results]
+
+    # Compute distances between vectors
+    distance_matrix = _compute_distances(weights)
+
+    # For each client, take the n-f-2 closest parameters vectors
+    num_closest = max(1, len(weights) - num_malicious - 2)
+    closest_indices = []
+    for i, _ in enumerate(distance_matrix):
+        closest_indices.append(
+            np.argsort(distance_matrix[i])[1 : num_closest + 1].tolist()  # noqa: E203
+        )
+
+    # Compute the score for each client, that is the sum of the distances
+    # of the n-f-2 closest parameters vectors
+    scores = [
+        np.sum(distance_matrix[i, closest_indices[i]])
+        for i in range(len(distance_matrix))
+    ]
+
+    if to_keep > 0:
+        # Choose to_keep clients and return their average (MultiKrum)
+        best_indices = np.argsort(scores)[::-1][len(scores) - to_keep :]  # noqa: E203
+        best_results = [results[i] for i in best_indices]
+        return aggregate(best_results)
+
+    # Return the index of the client which minimizes the score (Krum)
+    return weights[np.argmin(scores)]
+
+
 def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
     """Aggregate evaluation results obtained from multiple clients."""
     num_total_evaluation_examples = sum([num_examples for num_examples, _ in results])
@@ -76,3 +114,21 @@ def aggregate_qffl(
         updates.append(tmp)
     new_parameters = [(u - v) * 1.0 for u, v in zip(parameters, updates)]
     return new_parameters
+
+
+def _compute_distances(weights: List[NDArrays]) -> NDArray:
+    """Compute distances between vectors.
+
+    Input: weights - list of weights vectors
+    Output: distances - matrix distance_matrix of squared distances between the vectors
+    """
+    flat_w = np.array(
+        [np.concatenate(p, axis=None).ravel() for p in weights]  # type: ignore
+    )
+    distance_matrix = np.zeros((len(weights), len(weights)))
+    for i, _ in enumerate(flat_w):
+        for j, _ in enumerate(flat_w):
+            delta = flat_w[i] - flat_w[j]
+            norm = np.linalg.norm(delta)  # type: ignore
+            distance_matrix[i, j] = norm**2
+    return distance_matrix
