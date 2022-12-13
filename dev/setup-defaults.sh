@@ -18,7 +18,15 @@ then
     source $rcfile
 else
     # If pyenv is already installed, check for a newer version
-    pyenv update
+
+    # If the pyenv-update plugin isn't installed do the update manually
+    if [ ! -d $HOME/.pyenv/plugins/pyenv-update ]
+    then
+        git -C $HOME/.pyenv pull
+        git -C $HOME/.pyenv/plugins/pyenv-virtualenv pull
+    else
+        pyenv update
+    fi
 fi
 
 # Create the virtual environment for Flower
