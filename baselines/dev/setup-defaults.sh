@@ -16,10 +16,13 @@ then
     echo 'eval "$(pyenv init -)"' >> $rcfile
     echo 'eval "$(pyenv virtualenv-init -)"' >> $rcfile
     source $rcfile
+else
+    # If pyenv is already installed, check for a newer version
+    pyenv update
 fi
 
 # Create the virtual environment for Flower baselines
 $( dirname "${BASH_SOURCE[0]}" )/venv-create.sh
 
-# Install the dependancies inside the virtual environment
+# Install the dependencies inside the virtual environment
 $( dirname "${BASH_SOURCE[0]}" )/bootstrap.sh
