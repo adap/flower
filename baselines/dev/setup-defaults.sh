@@ -9,13 +9,16 @@ then
     # To add the config to the right file (depends on the shell used)
     rcfile=$HOME/.$(basename $SHELL)rc
 
+    # Add $PYENV_ROOT environmnet variable
+    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $rcfile
     # Add pyenv to $PATH
     echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> $rcfile
 
     # Init pyenv with the shell
     echo 'eval "$(pyenv init -)"' >> $rcfile
     echo 'eval "$(pyenv virtualenv-init -)"' >> $rcfile
-    source $rcfile
+    
+    exec "$SHELL"
 else
     # If pyenv is already installed, check for a newer version
 
@@ -29,6 +32,7 @@ else
     fi
 fi
 
+export PYENV_ROOT="$HOME/.pyenv"
 # Create the virtual environment for Flower baselines
 $( dirname "${BASH_SOURCE[0]}" )/venv-create.sh
 
