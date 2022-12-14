@@ -1,45 +1,27 @@
-# Federated Averaging MNIST
+# FedProx MNIST
 
-The following baseline replicates the experiments in *Communication-Efficient Learning of Deep Networks from Decentralized Data* (McMahan et al., 2017), which was the first paper to coin the term Federated Learning and to propose the FederatedAveraging algorthim.
+The following baseline replicates the experiments in *Federated Optimization in Heterogeneous Networks* (Li et al., 2018), which proposed the FedProx algorthim.
 
 **Paper Abstract:** 
 
 <center>
-<i>Modern mobile devices have access to a wealth
-of data suitable for learning models, which in turn
-can greatly improve the user experience on the
-device. For example, language models can improve speech recognition and text entry, and image models can automatically select good photos.
-However, this rich data is often privacy sensitive,
-large in quantity, or both, which may preclude
-logging to the data center and training there using
-conventional approaches. We advocate an alternative that leaves the training data distributed on
-the mobile devices, and learns a shared model by
-aggregating locally-computed updates. We term
-this decentralized approach Federated Learning.
-We present a practical method for the federated
-learning of deep networks based on iterative
-model averaging, and conduct an extensive empirical evaluation, considering five different model architectures and four datasets. These experiments
-demonstrate the approach is robust to the unbalanced and non-IID data distributions that are a
-defining characteristic of this setting. Communication costs are the principal constraint, and
-we show a reduction in required communication
-rounds by 10–100× as compared to synchronized
-stochastic gradient descent</i>
+<i>Federated Learning is a distributed learning paradigm with two key challenges that differentiate it from traditional distributed optimization: (1) significant variability in terms of the systems characteristics on each device in the network (systems heterogeneity), and (2) non-identically distributed data across the network (statistical heterogeneity). In this work, we introduce a framework, FedProx, to tackle heterogeneity in federated networks. FedProx can be viewed as a generalization and re-parametrization of FedAvg, the current state-of-the-art method for federated learning. While this re-parameterization makes only minor modifications to the method itself, these modifications have important ramifications both in theory and in practice. Theoretically, we provide convergence guarantees for our framework when learning over data from non-identical distributions (statistical heterogeneity), and while adhering to device-level systems constraints by allowing each participating device to perform a variable amount of work (systems heterogeneity). Practically, we demonstrate that FedProx allows for more robust convergence than FedAvg across a suite of realistic federated datasets. In particular, in highly heterogeneous settings, FedProx demonstrates significantly more stable and accurate convergence behavior relative to FedAvg---improving absolute test accuracy by 22% on average.</i>
 </center>
 
 **Paper Authors:** 
 
-H. Brendan McMahan, Eider Moore, Daniel Ramage, Seth Hampson, and Blaise Aguera y Arcas.
+Tian Li, Anit Kumar Sahu, Manzil Zaheer, Maziar Sanjabi, Ameet Talwalkar and Virginia Smith.
 
 
 Note: If you use this implementation in your work, please remember to cite the original authors of the paper. 
 
-**[Link to paper.](https://arxiv.org/abs/1602.05629)**
+**[Link to paper.](https://arxiv.org/abs/1812.06127)**
 
 ## Training Setup
 
 ### CNN Architecture
 
-The CNN architecture is detailed in the paper and used to create the **Federated Averaging MNIST** baseline.
+The CNN architecture is detailed in the paper and used to create the **FedProx MNIST** baseline.
 
 | Layer | Details|
 | ----- | ------ |
@@ -53,8 +35,8 @@ The CNN architecture is detailed in the paper and used to create the **Federated
 | Description | Value |
 | ----------- | ----- |
 | loss | cross entropy loss |
-| optimizer | SGD |
-| learning rate | 0.1 (by default) |
+| optimizer | SGD with proximal term |
+| learning rate | 0.03 (by default) |
 | local epochs | 5 (by default) |
 | local batch size | 10 (by default) |
 
