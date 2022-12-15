@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+version=${1:-3.7.12}
+
 # To install pyenv and virtualenv plugin
 function install_pyenv(){
     curl https://pyenv.run | bash
@@ -27,15 +29,25 @@ else
     [[ ! $PYENV_ROOT ]] && echo "You must restart your shell for env variables to be set" && exit
 
     # If pyenv is already installed, check for a newer version
-    echo 'Pyenv already installed, updating it...'
+    read -p 'Pyenv already installed, do you want to updating it y/[n]? ' update
+    update="${update:-"n"}"
+    update="${update,,}"
 
-    # If the pyenv-update plugin isn't installed do the update manually
-    if [ ! -d $HOME/.pyenv/plugins/pyenv-update ]
+    if [ $update == "y" ]
     then
-        git -C $HOME/.pyenv pull &>/dev/null
-        git -C $HOME/.pyenv/plugins/pyenv-virtualenv pull &>/dev/null
-    else
-        pyenv update &>/dev/null
+        # If the pyenv-update plugin isn't installed do the update manually
+        if [ ! -d $HOME/.pyenv/plugins/pyenv-update ]
+        then
+            if [ ! -d $HOME/.pyenv/.git ]
+            then
+                echo "Couldn't perform the update, continuing..."
+            else
+                git -C $HOME/.pyenv pull &>/dev/null
+                git -C $HOME/.pyenv/plugins/pyenv-virtualenv pull &>/dev/null
+            fi
+        else
+            pyenv update &>/dev/null
+        fi
     fi
 fi
 
@@ -43,19 +55,21 @@ fi
 function create_venv(){
     export PYENV_ROOT="$HOME/.pyenv"
     export PATH="$PYENV_ROOT/bin:$PATH"
-    $( dirname "${BASH_SOURCE[0]}" )/venv-create.sh
+    $( dirname "${BASH_SOURCE[0]}" )/venv-create.sh $version
 }
 
-if [ ! -d $HOME/.pyenv/versions/flower-3.7.12 ]
+if [ ! -d $HOME/.pyenv/versions/flower-$version ]
 then
     echo 'Creating the virtual environment for Flower...'
     create_venv &>/dev/null
 else
     echo 'Virtual env already installed, nothing to do.'
-    echo 'If not already done, you must run dev/bootstrap.sh to install all the dependencies'
+    echo "If not already done, "\
+    "you must run dev/bootstrap.sh $version to install all the dependencies"
     exit
 fi
 
-echo "$(tput bold)Virtual env flower-3.7.12 created, you must now run dev/bootstrap.sh to install all dependencies.$(tput sgr0)"
+echo "$(tput bold)Virtual env flower-$version created, "\
+"you must now run dev/bootstrap.sh $version to install all dependencies.$(tput sgr0)"
 
 exec "$SHELL"
