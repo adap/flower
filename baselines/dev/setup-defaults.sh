@@ -3,7 +3,7 @@ set -e
 
 # To install pyenv and virtualenv plugin
 function install_pyenv(){
-        curl https://pyenv.run | bash
+    curl https://pyenv.run | bash
 }
 
 if [ ! -d $HOME/.pyenv ]
@@ -24,7 +24,7 @@ then
     echo 'eval "$(pyenv init -)"' >> $rcfile
     echo 'eval "$(pyenv virtualenv-init -)"' >> $rcfile
 else
-	[[ ! $PYENV_ROOT ]] && echo "You must restart your shell for env variables to be set" && exit
+    [[ ! $PYENV_ROOT ]] && echo "You must restart your shell for env variables to be set" && exit
 
     # If pyenv is already installed, check for a newer version
     echo 'Pyenv already installed, updating it...'
@@ -41,12 +41,20 @@ fi
 
 # Create the virtual environment for Flower baselines
 function create_venv(){
-        export PYENV_ROOT="$HOME/.pyenv"
-        export PATH="$PYENV_ROOT/bin:$PATH"
-        $( dirname "${BASH_SOURCE[0]}" )/venv-create.sh
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    $( dirname "${BASH_SOURCE[0]}" )/venv-create.sh
 }
-echo 'Creating the virtual environment for Flower baselines...'
-create_venv &>/dev/null
+
+if [ ! -d $HOME/.pyenv/versions/baseline-3.7.12 ]
+then
+    echo 'Creating the virtual environment for Flower baselines...'
+    create_venv &>/dev/null
+else
+    echo 'Virtual env already installed, nothing to do.'
+    echo 'If not already done, you must run baselines/dev/bootstrap.sh to install all the dependencies'
+    exit
+fi
 
 echo "$(tput bold)Virtual env baselines-3.7.12 created, you must now run baselines/dev/bootstrap.sh to install all dependencies.$(tput sgr0)"
 
