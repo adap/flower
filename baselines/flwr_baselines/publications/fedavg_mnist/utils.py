@@ -1,4 +1,6 @@
 """Contains utility functions for CNN FL on MNIST."""
+
+
 from collections import OrderedDict
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
@@ -36,14 +38,20 @@ def plot_metric_from_history(
         )
         rounds, values = zip(*metric_dict["accuracy"])
         plt.figure()
-        plt.plot(rounds, np.asarray(values) * 100, label="FedAvg")  # Accuracy 0-100%
+        plt.plot(
+            np.asarray(rounds), np.asarray(values) * 100, label="FedAvg"
+        )  # Accuracy 0-100%
         # Set expected graph
-        plt.axhline(y=expected_maximum, color="r", linestyle="--")
+        plt.axhline(
+            y=expected_maximum,
+            color="r",
+            linestyle="--",
+            label=f"Best result @{expected_maximum}",
+        )
         plt.title(f"{metric_type.capitalize()} Validation - MNIST")
-        plt.xticks(range(1, max(rounds)))
         plt.xlabel("Rounds")
         plt.ylabel("Accuracy")
-        plt.legend(loc="upper left")
+        plt.legend(loc="lower right")
         plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics.png"))
         plt.close()
 

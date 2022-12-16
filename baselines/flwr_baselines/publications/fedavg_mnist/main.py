@@ -8,7 +8,7 @@ from omegaconf import DictConfig
 
 from flwr_baselines.publications.fedavg_mnist import client, utils
 
-DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEVICE: str = torch.device("cpu")
 
 
 @hydra.main(config_path="docs/conf", config_name="config", version_base=None)
