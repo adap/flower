@@ -25,7 +25,7 @@ class FlowerClient(fl.client.NumPyClient):
         device: torch.device,
         num_epochs: int,
         learning_rate: float,
-        mu: float,
+        proximal_mu: float,
     ):
         self.net = net
         self.trainloader = trainloader
@@ -33,7 +33,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
-        self.mu = mu
+        self.proximal_mu = proximal_mu
 
     def get_parameters(self, config) -> List[np.ndarray]:
         """Returns the parameters of the current net."""
@@ -56,7 +56,7 @@ class FlowerClient(fl.client.NumPyClient):
             self.device,
             epochs=self.num_epochs,
             learning_rate=self.learning_rate,
-            mu=self.mu,
+            proximal_mu=self.proximal_mu,
         )
         return self.get_parameters(self.net), len(self.trainloader), {}
 
@@ -74,7 +74,7 @@ def gen_client_fn(
     num_epochs: int,
     batch_size: int,
     learning_rate: float,
-    mu: float,
+    proximal_mu: float,
 ) -> Tuple[Callable[[str], FlowerClient], DataLoader]:
     """Generates the client function that creates the Flower Clients.
 
@@ -96,7 +96,7 @@ def gen_client_fn(
         The size of the local batches each client trains on.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
-    mu : float
+    proximal_mu : float
         Parameter for the weight of the proximal term.
 
     Returns
@@ -122,7 +122,7 @@ def gen_client_fn(
 
         # Create a  single Flower client representing a single organization
         return FlowerClient(
-            net, trainloader, valloader, device, num_epochs, learning_rate, mu
+            net, trainloader, valloader, device, num_epochs, learning_rate, proximal_mu
         )
 
     return client_fn, testloader

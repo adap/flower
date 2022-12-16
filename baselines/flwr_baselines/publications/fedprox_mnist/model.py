@@ -56,7 +56,7 @@ def train(
     device: torch.device,
     epochs: int,
     learning_rate: float,
-    mu: float,
+    proximal_mu: float,
 ) -> None:
     """Train the network on the training set.
 
@@ -72,7 +72,7 @@ def train(
         The number of epochs the model should be trained for.
     learning_rate : float
         The learning rate for the SGD optimizer.
-    mu : float
+    proximal_mu : float
         Parameter for the weight of the proximal term.
     """
     criterion = torch.nn.CrossEntropyLoss()
@@ -81,7 +81,7 @@ def train(
     net.train()
     for _ in range(epochs):
         net = _training_loop(
-            net, global_params, trainloader, device, criterion, optimizer, mu
+            net, global_params, trainloader, device, criterion, optimizer, proximal_mu
         )
 
 
@@ -92,7 +92,7 @@ def _training_loop(
     device: torch.device,
     criterion: torch.nn.CrossEntropyLoss,
     optimizer: torch.optim.Adam,
-    mu: float,
+    proximal_mu: float,
 ) -> nn.Module:
     """Train for one epoch.
 
@@ -108,7 +108,7 @@ def _training_loop(
         The loss function to use for training
     optimizer : torch.optim.Adam
         The optimizer to use for training
-    mu : float
+    proximal_mu : float
         Parameter for the weight of the proximal term.
 
     Returns
@@ -122,7 +122,7 @@ def _training_loop(
         proximal_term = 0.0
         for w, w_t in zip(net.parameters(), global_params):
             proximal_term += (w - w_t).norm(2)
-        loss = criterion(net(images), labels) + (mu / 2) * proximal_term
+        loss = criterion(net(images), labels) + (proximal_mu / 2) * proximal_term
         loss.backward()
         optimizer.step()
     return net
