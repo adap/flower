@@ -2,9 +2,11 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+version=${1:-3.7.12}
+
 # Destroy and recreate the venv
-./dev/venv-delete.sh
-./dev/venv-create.sh
+./dev/venv-delete.sh $version
+./dev/venv-create.sh $version
 
 # Remove caches
 ./dev/rm-caches.sh
