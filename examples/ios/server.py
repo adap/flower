@@ -1,6 +1,5 @@
 import flwr
 
-
 def main() -> None:
 # Start Flower server
     strategy = flwr.server.strategy.FedAvg(
@@ -17,3 +16,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+    
