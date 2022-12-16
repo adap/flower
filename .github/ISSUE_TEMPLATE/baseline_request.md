@@ -15,6 +15,7 @@ assignees: ''
 - Abstract: <!-- Replace by the link (ideally an arxiv.org/abs/* link) to the abstract of the paper -->
 
 ### Why would you like this baseline to be implemented?
+
 <!-- Quickly give reasons why, if any, this paper should be implemented before others. 
 Otherwise, you can just remove this section.
 -->
