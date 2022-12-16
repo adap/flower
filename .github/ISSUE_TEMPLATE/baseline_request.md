@@ -26,7 +26,7 @@ Otherwise, you can just remove this section.
 
 <!-- Leave everything below untouched -->
 <details>
-    <summary><h3> For first time contributers</h3></summary>
+    <summary><h3> For first time contributors</h3></summary>
 
 - [ ]  Read the [`first contribution` doc](TODO)
 - [ ]  Complete the Flower tutorial
