@@ -7,32 +7,32 @@
 
 import Foundation
 
-func parametersToProto(parameters: Parameters) -> Flower_Transport_Parameters {
-    var ret = Flower_Transport_Parameters()
+func parametersToProto(parameters: Parameters) -> Flwr_Proto_Parameters {
+    var ret = Flwr_Proto_Parameters()
     ret.tensors = parameters.tensors
     ret.tensorType = parameters.tensorType
     return ret
 }
 
-func parametersFromProto(msg: Flower_Transport_Parameters) -> Parameters {
+func parametersFromProto(msg: Flwr_Proto_Parameters) -> Parameters {
     return Parameters(tensors: msg.tensors, tensorType: msg.tensorType)
 }
 
-func reconnectToProto(reconnect: Reconnect) -> Flower_Transport_ServerMessage.Reconnect {
+func reconnectToProto(reconnect: Reconnect) -> Flwr_Proto_ServerMessage.ReconnectIns {
     if let seconds = reconnect.seconds {
-        var ret = Flower_Transport_ServerMessage.Reconnect()
+        var ret = Flwr_Proto_ServerMessage.ReconnectIns()
         ret.seconds = Int64(seconds)
         return ret
     }
-    return Flower_Transport_ServerMessage.Reconnect()
+    return Flwr_Proto_ServerMessage.ReconnectIns()
 }
 
-func reconnectFromProto(msg: Flower_Transport_ServerMessage.Reconnect) -> Reconnect {
+func reconnectFromProto(msg: Flwr_Proto_ServerMessage.ReconnectIns) -> Reconnect {
     return Reconnect(seconds: Int(msg.seconds))
 }
 
-func disconnectToProto(disconnect: Disconnect) -> Flower_Transport_ClientMessage.Disconnect {
-    var reason: Flower_Transport_Reason = .unknown
+func disconnectToProto(disconnect: Disconnect) -> Flwr_Proto_ClientMessage.DisconnectRes {
+    var reason: Flwr_Proto_Reason = .unknown
     switch disconnect.reason {
     case "RECONNECT":
         reason = .reconnect
@@ -43,12 +43,12 @@ func disconnectToProto(disconnect: Disconnect) -> Flower_Transport_ClientMessage
     default:
         reason = .unknown
     }
-    var ret = Flower_Transport_ClientMessage.Disconnect()
+    var ret = Flwr_Proto_ClientMessage.DisconnectRes()
     ret.reason = reason
     return ret
 }
 
-func disconnectFromProto(msg: Flower_Transport_ClientMessage.Disconnect) -> Disconnect {
+func disconnectFromProto(msg: Flwr_Proto_ClientMessage.DisconnectRes) -> Disconnect {
     switch msg.reason {
     case .wifiUnavailable:
         return Disconnect(reason: "WIFI_UNAVAILABLE")
@@ -61,39 +61,39 @@ func disconnectFromProto(msg: Flower_Transport_ClientMessage.Disconnect) -> Disc
     }
 }
 
-func getParametersToProto() -> Flower_Transport_ServerMessage.GetParameters {
-    return Flower_Transport_ServerMessage.GetParameters()
+func getParametersToProto() -> Flwr_Proto_ServerMessage.GetParametersIns {
+    return Flwr_Proto_ServerMessage.GetParametersIns()
 }
 
-func parametersResToProto(res: ParametersRes) -> Flower_Transport_ClientMessage.ParametersRes {
+func parametersResToProto(res: ParametersRes) -> Flwr_Proto_ClientMessage.GetParametersRes {
     let parametersProto = parametersToProto(parameters: res.parameters)
-    var ret = Flower_Transport_ClientMessage.ParametersRes()
+    var ret = Flwr_Proto_ClientMessage.GetParametersRes()
     ret.parameters = parametersProto
     return ret
 }
 
-func parametersResFromProto(msg: Flower_Transport_ClientMessage.ParametersRes) -> ParametersRes {
+func parametersResFromProto(msg: Flwr_Proto_ClientMessage.GetParametersRes) -> ParametersRes {
     let parameters = parametersFromProto(msg: msg.parameters)
     return ParametersRes(parameters: parameters)
 }
 
-func fitInsToProto(ins: FitIns) -> Flower_Transport_ServerMessage.FitIns {
+func fitInsToProto(ins: FitIns) -> Flwr_Proto_ServerMessage.FitIns {
     let parametersProto = parametersToProto(parameters: ins.parameters)
     let configMsg = metricsToProto(metrics: ins.config)
-    var ret = Flower_Transport_ServerMessage.FitIns()
+    var ret = Flwr_Proto_ServerMessage.FitIns()
     ret.parameters = parametersProto
     ret.config = configMsg
     return ret
 }
 
-func fitInsFromProto(msg: Flower_Transport_ServerMessage.FitIns) -> FitIns {
+func fitInsFromProto(msg: Flwr_Proto_ServerMessage.FitIns) -> FitIns {
     let parameters = parametersFromProto(msg: msg.parameters)
     let config = metricsFromProto(proto: msg.config)
     return FitIns(parameters: parameters, config: config)
 }
 
-func fitResToProto(res: FitRes) -> Flower_Transport_ClientMessage.FitRes {
-    var ret = Flower_Transport_ClientMessage.FitRes()
+func fitResToProto(res: FitRes) -> Flwr_Proto_ClientMessage.FitRes {
+    var ret = Flwr_Proto_ClientMessage.FitRes()
     let parameters = parametersToProto(parameters: res.parameters)
     if let metrics = res.metrics {
        ret.metrics = metricsToProto(metrics: metrics)
@@ -103,53 +103,53 @@ func fitResToProto(res: FitRes) -> Flower_Transport_ClientMessage.FitRes {
     return ret
 }
 
-func fitResFromProto(msg: Flower_Transport_ClientMessage.FitRes) -> FitRes {
+func fitResFromProto(msg: Flwr_Proto_ClientMessage.FitRes) -> FitRes {
     let parameters = parametersFromProto(msg: msg.parameters)
     let metrics = metricsFromProto(proto: msg.metrics)
     return FitRes(parameters: parameters, numExamples: Int(msg.numExamples), metrics: metrics)
 }
 
-func propertiesInsToProto(ins: PropertiesIns) -> Flower_Transport_ServerMessage.PropertiesIns {
-    var ret = Flower_Transport_ServerMessage.PropertiesIns()
+func propertiesInsToProto(ins: PropertiesIns) -> Flwr_Proto_ServerMessage.GetPropertiesIns {
+    var ret = Flwr_Proto_ServerMessage.GetPropertiesIns()
     let config = propertiesToProto(properties: ins.config)
     ret.config = config
     return ret
 }
 
-func propertiesInsFromProto(msg: Flower_Transport_ServerMessage.PropertiesIns) -> PropertiesIns {
+func propertiesInsFromProto(msg: Flwr_Proto_ServerMessage.GetPropertiesIns) -> PropertiesIns {
     let config = propertiesFromProto(proto: msg.config)
     return PropertiesIns(config: config)
 }
 
-func propertiesResToProto(res: PropertiesRes) -> Flower_Transport_ClientMessage.PropertiesRes {
+func propertiesResToProto(res: PropertiesRes) -> Flwr_Proto_ClientMessage.GetPropertiesRes {
     let properties = propertiesToProto(properties: res.properties)
-    var ret = Flower_Transport_ClientMessage.PropertiesRes()
+    var ret = Flwr_Proto_ClientMessage.GetPropertiesRes()
     ret.properties = properties
     return ret
 }
 
-func propertiesResFromProto(msg: Flower_Transport_ClientMessage.PropertiesRes) -> PropertiesRes {
+func propertiesResFromProto(msg: Flwr_Proto_ClientMessage.GetPropertiesRes) -> PropertiesRes {
     let properties = propertiesFromProto(proto: msg.properties)
     return PropertiesRes(properties: properties)
 }
 
-func evaluateInsToProto(ins: EvaluateIns) -> Flower_Transport_ServerMessage.EvaluateIns {
+func evaluateInsToProto(ins: EvaluateIns) -> Flwr_Proto_ServerMessage.EvaluateIns {
     let parametersProto = parametersToProto(parameters: ins.parameters)
     let configMsg = metricsToProto(metrics: ins.config)
-    var ret = Flower_Transport_ServerMessage.EvaluateIns()
+    var ret = Flwr_Proto_ServerMessage.EvaluateIns()
     ret.config = configMsg
     ret.parameters = parametersProto
     return ret
 }
 
-func evaluateInsFromProto(msg: Flower_Transport_ServerMessage.EvaluateIns) -> EvaluateIns {
+func evaluateInsFromProto(msg: Flwr_Proto_ServerMessage.EvaluateIns) -> EvaluateIns {
     let parameters = parametersFromProto(msg: msg.parameters)
     let config = metricsFromProto(proto: msg.config)
     return EvaluateIns(parameters: parameters, config: config)
 }
 
-func evaluateResToProto(res: EvaluateRes) -> Flower_Transport_ClientMessage.EvaluateRes {
-    var ret = Flower_Transport_ClientMessage.EvaluateRes()
+func evaluateResToProto(res: EvaluateRes) -> Flwr_Proto_ClientMessage.EvaluateRes {
+    var ret = Flwr_Proto_ClientMessage.EvaluateRes()
     if let metrics = res.metrics {
         ret.metrics = metricsToProto(metrics: metrics)
     }
@@ -158,12 +158,12 @@ func evaluateResToProto(res: EvaluateRes) -> Flower_Transport_ClientMessage.Eval
     return ret
 }
 
-func evaluateResFromProto(msg: Flower_Transport_ClientMessage.EvaluateRes) -> EvaluateRes {
+func evaluateResFromProto(msg: Flwr_Proto_ClientMessage.EvaluateRes) -> EvaluateRes {
     return EvaluateRes(loss: msg.loss, numExamples: Int(msg.numExamples), metrics: metricsFromProto(proto: msg.metrics))
 }
 
-func propertiesToProto(properties: Properties) -> [String: Flower_Transport_Scalar] {
-    var proto: [String: Flower_Transport_Scalar] = [:]
+func propertiesToProto(properties: Properties) -> [String: Flwr_Proto_Scalar] {
+    var proto: [String: Flwr_Proto_Scalar] = [:]
     for (key, value) in properties {
         if let scalar = try? scalarToProto(scalar: value) {
             proto[key] = scalar
@@ -172,7 +172,7 @@ func propertiesToProto(properties: Properties) -> [String: Flower_Transport_Scal
     return proto
 }
 
-func propertiesFromProto(proto: [String: Flower_Transport_Scalar]) -> Properties {
+func propertiesFromProto(proto: [String: Flwr_Proto_Scalar]) -> Properties {
     var properties: Properties = [:]
     for (key, value) in proto {
         if let scalarMsg = try? scalarFromProto(scalarMsg: value) {
@@ -182,8 +182,8 @@ func propertiesFromProto(proto: [String: Flower_Transport_Scalar]) -> Properties
     return properties
 }
 
-func metricsToProto(metrics: Metrics) -> [String: Flower_Transport_Scalar] {
-    var proto: [String: Flower_Transport_Scalar] = [:]
+func metricsToProto(metrics: Metrics) -> [String: Flwr_Proto_Scalar] {
+    var proto: [String: Flwr_Proto_Scalar] = [:]
     for (key, value) in metrics {
         if let scalar = try? scalarToProto(scalar: value) {
             proto[key] = scalar
@@ -192,7 +192,7 @@ func metricsToProto(metrics: Metrics) -> [String: Flower_Transport_Scalar] {
     return proto
 }
 
-func metricsFromProto(proto: [String: Flower_Transport_Scalar]) -> Metrics {
+func metricsFromProto(proto: [String: Flwr_Proto_Scalar]) -> Metrics {
     var metrics: Metrics = [:]
     for (key, value) in proto {
         if let scalarMsg = try? scalarFromProto(scalarMsg: value) {
@@ -202,8 +202,8 @@ func metricsFromProto(proto: [String: Flower_Transport_Scalar]) -> Metrics {
     return metrics
 }
 
-func scalarToProto(scalar: Scalar) throws -> Flower_Transport_Scalar {
-    var ret = Flower_Transport_Scalar()
+func scalarToProto(scalar: Scalar) throws -> Flwr_Proto_Scalar {
+    var ret = Flwr_Proto_Scalar()
     if let bool = scalar.bool {
         ret.bool = bool
     } else if let bytes = scalar.bytes {
@@ -214,11 +214,13 @@ func scalarToProto(scalar: Scalar) throws -> Flower_Transport_Scalar {
         ret.double = Double(float)
     } else if let str = scalar.str {
         ret.string = str
+    } else {
+        throw FlowerException.TypeException("Accepted Types : Bool, Data, Float, Int, Str")
     }
-    throw FlowerException.TypeException("Accepted Types : Bool, Data, Float, Int, Str")
+    return ret
 }
 
-func scalarFromProto(scalarMsg: Flower_Transport_Scalar) throws -> Scalar {
+func scalarFromProto(scalarMsg: Flwr_Proto_Scalar) throws -> Scalar {
     var ret = Scalar()
     switch scalarMsg.scalar {
     case .double:

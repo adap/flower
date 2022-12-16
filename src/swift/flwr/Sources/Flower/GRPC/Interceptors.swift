@@ -9,8 +9,8 @@ import Foundation
 import GRPC
 import NIOCore
 
-class FlowerClientInterceptors: ClientInterceptor<Flower_Transport_ClientMessage, Flower_Transport_ServerMessage> {
-    override func receive(_ part: GRPCClientResponsePart<Flower_Transport_ServerMessage>, context: ClientInterceptorContext<Flower_Transport_ClientMessage, Flower_Transport_ServerMessage>) {
+class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage> {
+    override func receive(_ part: GRPCClientResponsePart<Flwr_Proto_ServerMessage>, context: ClientInterceptorContext<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>) {
         switch part {
             // The response headers received from the server. We expect to receive these once at the start
             // of a response stream, however, it is also valid to see no 'metadata' parts on the response
@@ -35,7 +35,7 @@ class FlowerClientInterceptors: ClientInterceptor<Flower_Transport_ClientMessage
         context.receive(part)
     }
     
-    override func send(_ part: GRPCClientRequestPart<Flower_Transport_ClientMessage>, promise: EventLoopPromise<Void>?, context: ClientInterceptorContext<Flower_Transport_ClientMessage, Flower_Transport_ServerMessage>) {
+    override func send(_ part: GRPCClientRequestPart<Flwr_Proto_ClientMessage>, promise: EventLoopPromise<Void>?, context: ClientInterceptorContext<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>) {
         switch part {
             // The (user-provided) request headers, we send these at the start of each RPC. They will be
             // augmented with transport specific headers once the request part reaches the transport.
@@ -67,39 +67,39 @@ func prettify(_ headers: HPACKHeaders) -> String {
   }.joined(separator: ", ") + "]"
 }
 
-func decipherServerMessage(_ msg: Flower_Transport_ServerMessage.OneOf_Msg) -> String {
+func decipherServerMessage(_ msg: Flwr_Proto_ServerMessage.OneOf_Msg) -> String {
     switch msg {
-    case .reconnect:
+    case .reconnectIns:
         return "Reconnect"
-    case .getParameters:
+    case .getParametersIns:
         return "GetParameters"
     case .fitIns:
         return "FitIns"
     case .evaluateIns:
         return "EvaluateIns"
-    case .propertiesIns:
+    case .getPropertiesIns:
         return "PropertiesIns"
     }
 
 }
 
-func decipherClientMessage(_ msg: Flower_Transport_ClientMessage.OneOf_Msg) -> String {
+func decipherClientMessage(_ msg: Flwr_Proto_ClientMessage.OneOf_Msg) -> String {
     switch msg {
-    case .disconnect:
+    case .disconnectRes:
         return "Disconnect"
     case .evaluateRes:
         return "EvaluateRes"
     case .fitRes:
         return "FitRes"
-    case .parametersRes:
+    case .getParametersRes:
         return "ParametersRes"
-    case .propertiesRes:
+    case .getPropertiesRes:
         return "PropertiesRes"
     }
 }
 
-class FlowerInterceptorsFactory: Flower_Transport_FlowerServiceClientInterceptorFactoryProtocol {
-    func makeJoinInterceptors() -> [ClientInterceptor<Flower_Transport_ClientMessage, Flower_Transport_ServerMessage>] {
+final class FlowerInterceptorsFactory: Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol {
+    func makeJoinInterceptors() -> [ClientInterceptor<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>] {
         return [FlowerClientInterceptors()]
     }
     
