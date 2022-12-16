@@ -1,0 +1,69 @@
+name: Baseline request
+description: Suggest a new baseline
+labels: ["new baseline"]
+
+body:
+  - type: textarea
+    attributes:
+      label: What paper would you like implemented as a baseline (authors, year, title)?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Provide a link (ideally an arxiv.org/abs/* link) to the abstract of the paper.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Maybe give motivations about why the paper should be implemented as a baseline.
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: >
+        #### If you want to propose a new baseline, please check the PRs if someone already works on it.
+
+        **What paper would you like to be implemented as a baseline?**
+        Please provide the authors, title, and link to the abstract of the paper.
+
+        **Why would you like this baseline to be implemented?**
+        Quickly give reasons why, if any, this paper should be implemented before others.
+
+        ## Implementation
+
+        ### Prep - understand the scope
+
+        It’s recommended to do the following items in that order:
+
+        - [ ]  Read the paper linked above
+        - [ ]  Create the directory structure in Flower Baselines (just the `__init__.py`files and a README)
+        - [ ]  Before starting to write code, 
+        write down all of the specs of this experiment in a README (dataset, partitioning, model, number of clients, all hyperparameters, …)
+        - [ ]  Open a draft PR
+
+        ### Implement - make it work
+
+        Everything up to this point should be pretty mechanical, 
+        the goal is to get a simple version of this working as quickly as possible, 
+        which means a model that’s starting to converge (doesn’t have to be good).
+
+        - [ ]  Implement some form of dataset loading and partitioning in a separate `dataset.py` (doesn’t have to match the paper exactly)
+        - [ ]  Implement the model in PyTorch
+        - [ ]  Write a test that shows that the model has the number of parameters mentioned in the paper
+        - [ ]  Implement the federated learning setup outlined in the paper, maybe starting with fewer clients
+        - [ ]  Plot accuracy and loss
+        - [ ]  Run it and check if the model starts to converge
+
+        ### Align - make it correct
+
+        - [ ]  Implement the exact data partitioning outlined in the paper
+        - [ ]  Use the exact hyperparameters outlined in the paper
+
+        ### Tuning - make it converge
+
+        - [ ]  Make it converge to roughly the same accuracy that the paper states
+        - [ ]  Mark the PR as ready
+
+  - type: textarea
+    attributes:
+      label: Is there something else you want to add?
