@@ -7,71 +7,71 @@
 
 import Foundation
 
-func handle(client: Client, serverMsg: Flower_Transport_ServerMessage) throws -> (Flower_Transport_ClientMessage, Int, Bool) {
+func handle(client: Client, serverMsg: Flwr_Proto_ServerMessage) throws -> (Flwr_Proto_ClientMessage, Int, Bool) {
     switch serverMsg.msg {
-    case .reconnect:
-        let tuple = reconnect(reconnectMsg: serverMsg.reconnect)
+    case .reconnectIns:
+        let tuple = reconnect(reconnectMsg: serverMsg.reconnectIns)
         let disconnectMsg = tuple.0
         let sleepDuration = tuple.1
         return (disconnectMsg, sleepDuration, false)
-    case .getParameters:
+    case .getParametersIns:
         return (getParameters(client: client), 0, true)
     case .fitIns:
         return (fit(client: client, fitMsg: serverMsg.fitIns), 0, true)
     case .evaluateIns:
         return (evaluate(client: client, evaluateMsg: serverMsg.evaluateIns), 0, true)
-    case .propertiesIns:
-        return (getProperties(client: client, propertiesMsg: serverMsg.propertiesIns), 0, true)
+    case .getPropertiesIns:
+        return (getProperties(client: client, propertiesMsg: serverMsg.getPropertiesIns), 0, true)
     default:
         throw FlowerException.UnknownServerMessage
     }
 }
 
-func reconnect(reconnectMsg: Flower_Transport_ServerMessage.Reconnect) -> (Flower_Transport_ClientMessage, Int) {
-    var reason: Flower_Transport_Reason = .ack
+func reconnect(reconnectMsg: Flwr_Proto_ServerMessage.ReconnectIns) -> (Flwr_Proto_ClientMessage, Int) {
+    var reason: Flwr_Proto_Reason = .ack
     var sleepDuration: Int = 0
     if reconnectMsg.seconds != 0 {
         reason = .reconnect
         sleepDuration = Int(reconnectMsg.seconds)
     }
-    var disconnect = Flower_Transport_ClientMessage.Disconnect()
+    var disconnect = Flwr_Proto_ClientMessage.DisconnectRes()
     disconnect.reason = reason
-    var ret = Flower_Transport_ClientMessage()
-    ret.disconnect = disconnect
+    var ret = Flwr_Proto_ClientMessage()
+    ret.disconnectRes = disconnect
     return (ret, sleepDuration)
  }
 
-func getParameters(client: Client) -> Flower_Transport_ClientMessage {
+func getParameters(client: Client) -> Flwr_Proto_ClientMessage {
     let parametersRes = client.getParameters()
     let parametersResProto = parametersResToProto(res: parametersRes)
-    var ret = Flower_Transport_ClientMessage()
-    ret.parametersRes = parametersResProto
+    var ret = Flwr_Proto_ClientMessage()
+    ret.getParametersRes = parametersResProto
     return ret
 }
 
-func getProperties(client: Client, propertiesMsg: Flower_Transport_ServerMessage.PropertiesIns) -> Flower_Transport_ClientMessage {
+func getProperties(client: Client, propertiesMsg: Flwr_Proto_ServerMessage.GetPropertiesIns) -> Flwr_Proto_ClientMessage {
     let propertiesIns = propertiesInsFromProto(msg: propertiesMsg)
     let propertiesRes = client.getProperties(ins: propertiesIns)
     let propertiesResProto = propertiesResToProto(res: propertiesRes)
-    var ret = Flower_Transport_ClientMessage()
-    ret.propertiesRes = propertiesResProto
+    var ret = Flwr_Proto_ClientMessage()
+    ret.getPropertiesRes = propertiesResProto
     return ret
 }
 
-func fit(client: Client, fitMsg: Flower_Transport_ServerMessage.FitIns) -> Flower_Transport_ClientMessage {
+func fit(client: Client, fitMsg: Flwr_Proto_ServerMessage.FitIns) -> Flwr_Proto_ClientMessage {
     let fitIns = fitInsFromProto(msg: fitMsg)
     let fitRes = client.fit(ins: fitIns)
     let fitResProto = fitResToProto(res: fitRes)
-    var ret = Flower_Transport_ClientMessage()
+    var ret = Flwr_Proto_ClientMessage()
     ret.fitRes = fitResProto
     return ret
 }
 
-func evaluate(client: Client, evaluateMsg: Flower_Transport_ServerMessage.EvaluateIns) -> Flower_Transport_ClientMessage {
+func evaluate(client: Client, evaluateMsg: Flwr_Proto_ServerMessage.EvaluateIns) -> Flwr_Proto_ClientMessage {
     let evaluateIns = evaluateInsFromProto(msg: evaluateMsg)
     let evaluateRes = client.evaluate(ins: evaluateIns)
     let evaluateResProto = evaluateResToProto(res: evaluateRes)
-    var ret = Flower_Transport_ClientMessage()
+    var ret = Flwr_Proto_ClientMessage()
     ret.evaluateRes = evaluateResProto
     return ret
 }

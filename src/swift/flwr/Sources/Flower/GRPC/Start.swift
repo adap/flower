@@ -17,8 +17,8 @@ let GRPCMaxMessageLength: Int = 536870912
 public func startClient(serverHost: String, serverPort: Int, client: Client) {
     let maxMessageLength: Int = GRPCMaxMessageLength
     var sleepDuration = 0;
-    let messagePublisher = CurrentValueSubject<Flower_Transport_ServerMessage?, Never>(nil)
-    var serverMessage: Flower_Transport_ServerMessage?
+    let messagePublisher = CurrentValueSubject<Flwr_Proto_ServerMessage?, Never>(nil)
+    var serverMessage: Flwr_Proto_ServerMessage?
     
     // Setup an `EventLoopGroup` for the connection to run on.
     //
@@ -56,7 +56,7 @@ public func startClient(serverHost: String, serverPort: Int, client: Client) {
         try! channel.close().wait()
     }
     
-    let grpcClient = Flower_Transport_FlowerServiceClient(channel: channel, interceptors: FlowerInterceptorsFactory())
+    let grpcClient = Flwr_Proto_FlowerServiceNIOClient(channel: channel, interceptors: FlowerInterceptorsFactory())
     var callOptions = CallOptions()
     callOptions.customMetadata.add(name: "maxReceiveMessageLength", value: String(maxMessageLength))
     callOptions.customMetadata.add(name: "maxSendMessageLength", value: String(maxMessageLength))

@@ -35,7 +35,59 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-enum Flower_Transport_Reason: SwiftProtobuf.Enum {
+enum Flwr_Proto_Code: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case ok // = 0
+  case getPropertiesNotImplemented // = 1
+  case getParametersNotImplemented // = 2
+  case fitNotImplemented // = 3
+  case evaluateNotImplemented // = 4
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .ok
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .ok
+    case 1: self = .getPropertiesNotImplemented
+    case 2: self = .getParametersNotImplemented
+    case 3: self = .fitNotImplemented
+    case 4: self = .evaluateNotImplemented
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .ok: return 0
+    case .getPropertiesNotImplemented: return 1
+    case .getParametersNotImplemented: return 2
+    case .fitNotImplemented: return 3
+    case .evaluateNotImplemented: return 4
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Flwr_Proto_Code: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Flwr_Proto_Code] = [
+    .ok,
+    .getPropertiesNotImplemented,
+    .getParametersNotImplemented,
+    .fitNotImplemented,
+    .evaluateNotImplemented,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
+enum Flwr_Proto_Reason: SwiftProtobuf.Enum {
   typealias RawValue = Int
   case unknown // = 0
   case reconnect // = 1
@@ -74,9 +126,9 @@ enum Flower_Transport_Reason: SwiftProtobuf.Enum {
 
 #if swift(>=4.2)
 
-extension Flower_Transport_Reason: CaseIterable {
+extension Flwr_Proto_Reason: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Flower_Transport_Reason] = [
+  static var allCases: [Flwr_Proto_Reason] = [
     .unknown,
     .reconnect,
     .powerDisconnected,
@@ -87,7 +139,21 @@ extension Flower_Transport_Reason: CaseIterable {
 
 #endif  // swift(>=4.2)
 
-struct Flower_Transport_Parameters {
+struct Flwr_Proto_Status {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var code: Flwr_Proto_Code = .ok
+
+  var message: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Flwr_Proto_Parameters {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -101,74 +167,78 @@ struct Flower_Transport_Parameters {
   init() {}
 }
 
-struct Flower_Transport_ServerMessage {
+struct Flwr_Proto_ServerMessage {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var msg: Flower_Transport_ServerMessage.OneOf_Msg? = nil
+  var msg: Flwr_Proto_ServerMessage.OneOf_Msg? = nil
 
-  var reconnect: Flower_Transport_ServerMessage.Reconnect {
+  var reconnectIns: Flwr_Proto_ServerMessage.ReconnectIns {
     get {
-      if case .reconnect(let v)? = msg {return v}
-      return Flower_Transport_ServerMessage.Reconnect()
+      if case .reconnectIns(let v)? = msg {return v}
+      return Flwr_Proto_ServerMessage.ReconnectIns()
     }
-    set {msg = .reconnect(newValue)}
+    set {msg = .reconnectIns(newValue)}
   }
 
-  var getParameters: Flower_Transport_ServerMessage.GetParameters {
+  var getPropertiesIns: Flwr_Proto_ServerMessage.GetPropertiesIns {
     get {
-      if case .getParameters(let v)? = msg {return v}
-      return Flower_Transport_ServerMessage.GetParameters()
+      if case .getPropertiesIns(let v)? = msg {return v}
+      return Flwr_Proto_ServerMessage.GetPropertiesIns()
     }
-    set {msg = .getParameters(newValue)}
+    set {msg = .getPropertiesIns(newValue)}
   }
 
-  var fitIns: Flower_Transport_ServerMessage.FitIns {
+  var getParametersIns: Flwr_Proto_ServerMessage.GetParametersIns {
+    get {
+      if case .getParametersIns(let v)? = msg {return v}
+      return Flwr_Proto_ServerMessage.GetParametersIns()
+    }
+    set {msg = .getParametersIns(newValue)}
+  }
+
+  var fitIns: Flwr_Proto_ServerMessage.FitIns {
     get {
       if case .fitIns(let v)? = msg {return v}
-      return Flower_Transport_ServerMessage.FitIns()
+      return Flwr_Proto_ServerMessage.FitIns()
     }
     set {msg = .fitIns(newValue)}
   }
 
-  var evaluateIns: Flower_Transport_ServerMessage.EvaluateIns {
+  var evaluateIns: Flwr_Proto_ServerMessage.EvaluateIns {
     get {
       if case .evaluateIns(let v)? = msg {return v}
-      return Flower_Transport_ServerMessage.EvaluateIns()
+      return Flwr_Proto_ServerMessage.EvaluateIns()
     }
     set {msg = .evaluateIns(newValue)}
-  }
-
-  var propertiesIns: Flower_Transport_ServerMessage.PropertiesIns {
-    get {
-      if case .propertiesIns(let v)? = msg {return v}
-      return Flower_Transport_ServerMessage.PropertiesIns()
-    }
-    set {msg = .propertiesIns(newValue)}
   }
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Msg: Equatable {
-    case reconnect(Flower_Transport_ServerMessage.Reconnect)
-    case getParameters(Flower_Transport_ServerMessage.GetParameters)
-    case fitIns(Flower_Transport_ServerMessage.FitIns)
-    case evaluateIns(Flower_Transport_ServerMessage.EvaluateIns)
-    case propertiesIns(Flower_Transport_ServerMessage.PropertiesIns)
+    case reconnectIns(Flwr_Proto_ServerMessage.ReconnectIns)
+    case getPropertiesIns(Flwr_Proto_ServerMessage.GetPropertiesIns)
+    case getParametersIns(Flwr_Proto_ServerMessage.GetParametersIns)
+    case fitIns(Flwr_Proto_ServerMessage.FitIns)
+    case evaluateIns(Flwr_Proto_ServerMessage.EvaluateIns)
 
   #if !swift(>=4.1)
-    static func ==(lhs: Flower_Transport_ServerMessage.OneOf_Msg, rhs: Flower_Transport_ServerMessage.OneOf_Msg) -> Bool {
+    static func ==(lhs: Flwr_Proto_ServerMessage.OneOf_Msg, rhs: Flwr_Proto_ServerMessage.OneOf_Msg) -> Bool {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch (lhs, rhs) {
-      case (.reconnect, .reconnect): return {
-        guard case .reconnect(let l) = lhs, case .reconnect(let r) = rhs else { preconditionFailure() }
+      case (.reconnectIns, .reconnectIns): return {
+        guard case .reconnectIns(let l) = lhs, case .reconnectIns(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
-      case (.getParameters, .getParameters): return {
-        guard case .getParameters(let l) = lhs, case .getParameters(let r) = rhs else { preconditionFailure() }
+      case (.getPropertiesIns, .getPropertiesIns): return {
+        guard case .getPropertiesIns(let l) = lhs, case .getPropertiesIns(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.getParametersIns, .getParametersIns): return {
+        guard case .getParametersIns(let l) = lhs, case .getParametersIns(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       case (.fitIns, .fitIns): return {
@@ -179,17 +249,13 @@ struct Flower_Transport_ServerMessage {
         guard case .evaluateIns(let l) = lhs, case .evaluateIns(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
-      case (.propertiesIns, .propertiesIns): return {
-        guard case .propertiesIns(let l) = lhs, case .propertiesIns(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
       default: return false
       }
     }
   #endif
   }
 
-  struct Reconnect {
+  struct ReconnectIns {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -201,10 +267,24 @@ struct Flower_Transport_ServerMessage {
     init() {}
   }
 
-  struct GetParameters {
+  struct GetPropertiesIns {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
+
+    var config: Dictionary<String,Flwr_Proto_Scalar> = [:]
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+  }
+
+  struct GetParametersIns {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var config: Dictionary<String,Flwr_Proto_Scalar> = [:]
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -216,8 +296,8 @@ struct Flower_Transport_ServerMessage {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var parameters: Flower_Transport_Parameters {
-      get {return _parameters ?? Flower_Transport_Parameters()}
+    var parameters: Flwr_Proto_Parameters {
+      get {return _parameters ?? Flwr_Proto_Parameters()}
       set {_parameters = newValue}
     }
     /// Returns true if `parameters` has been explicitly set.
@@ -225,13 +305,13 @@ struct Flower_Transport_ServerMessage {
     /// Clears the value of `parameters`. Subsequent reads from it will return its default value.
     mutating func clearParameters() {self._parameters = nil}
 
-    var config: Dictionary<String,Flower_Transport_Scalar> = [:]
+    var config: Dictionary<String,Flwr_Proto_Scalar> = [:]
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
-    fileprivate var _parameters: Flower_Transport_Parameters? = nil
+    fileprivate var _parameters: Flwr_Proto_Parameters? = nil
   }
 
   struct EvaluateIns {
@@ -239,8 +319,8 @@ struct Flower_Transport_ServerMessage {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var parameters: Flower_Transport_Parameters {
-      get {return _parameters ?? Flower_Transport_Parameters()}
+    var parameters: Flwr_Proto_Parameters {
+      get {return _parameters ?? Flwr_Proto_Parameters()}
       set {_parameters = newValue}
     }
     /// Returns true if `parameters` has been explicitly set.
@@ -248,98 +328,90 @@ struct Flower_Transport_ServerMessage {
     /// Clears the value of `parameters`. Subsequent reads from it will return its default value.
     mutating func clearParameters() {self._parameters = nil}
 
-    var config: Dictionary<String,Flower_Transport_Scalar> = [:]
+    var config: Dictionary<String,Flwr_Proto_Scalar> = [:]
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
-    fileprivate var _parameters: Flower_Transport_Parameters? = nil
-  }
-
-  struct PropertiesIns {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var config: Dictionary<String,Flower_Transport_Scalar> = [:]
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
+    fileprivate var _parameters: Flwr_Proto_Parameters? = nil
   }
 
   init() {}
 }
 
-struct Flower_Transport_ClientMessage {
+struct Flwr_Proto_ClientMessage {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var msg: Flower_Transport_ClientMessage.OneOf_Msg? = nil
+  var msg: Flwr_Proto_ClientMessage.OneOf_Msg? = nil
 
-  var disconnect: Flower_Transport_ClientMessage.Disconnect {
+  var disconnectRes: Flwr_Proto_ClientMessage.DisconnectRes {
     get {
-      if case .disconnect(let v)? = msg {return v}
-      return Flower_Transport_ClientMessage.Disconnect()
+      if case .disconnectRes(let v)? = msg {return v}
+      return Flwr_Proto_ClientMessage.DisconnectRes()
     }
-    set {msg = .disconnect(newValue)}
+    set {msg = .disconnectRes(newValue)}
   }
 
-  var parametersRes: Flower_Transport_ClientMessage.ParametersRes {
+  var getPropertiesRes: Flwr_Proto_ClientMessage.GetPropertiesRes {
     get {
-      if case .parametersRes(let v)? = msg {return v}
-      return Flower_Transport_ClientMessage.ParametersRes()
+      if case .getPropertiesRes(let v)? = msg {return v}
+      return Flwr_Proto_ClientMessage.GetPropertiesRes()
     }
-    set {msg = .parametersRes(newValue)}
+    set {msg = .getPropertiesRes(newValue)}
   }
 
-  var fitRes: Flower_Transport_ClientMessage.FitRes {
+  var getParametersRes: Flwr_Proto_ClientMessage.GetParametersRes {
+    get {
+      if case .getParametersRes(let v)? = msg {return v}
+      return Flwr_Proto_ClientMessage.GetParametersRes()
+    }
+    set {msg = .getParametersRes(newValue)}
+  }
+
+  var fitRes: Flwr_Proto_ClientMessage.FitRes {
     get {
       if case .fitRes(let v)? = msg {return v}
-      return Flower_Transport_ClientMessage.FitRes()
+      return Flwr_Proto_ClientMessage.FitRes()
     }
     set {msg = .fitRes(newValue)}
   }
 
-  var evaluateRes: Flower_Transport_ClientMessage.EvaluateRes {
+  var evaluateRes: Flwr_Proto_ClientMessage.EvaluateRes {
     get {
       if case .evaluateRes(let v)? = msg {return v}
-      return Flower_Transport_ClientMessage.EvaluateRes()
+      return Flwr_Proto_ClientMessage.EvaluateRes()
     }
     set {msg = .evaluateRes(newValue)}
-  }
-
-  var propertiesRes: Flower_Transport_ClientMessage.PropertiesRes {
-    get {
-      if case .propertiesRes(let v)? = msg {return v}
-      return Flower_Transport_ClientMessage.PropertiesRes()
-    }
-    set {msg = .propertiesRes(newValue)}
   }
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Msg: Equatable {
-    case disconnect(Flower_Transport_ClientMessage.Disconnect)
-    case parametersRes(Flower_Transport_ClientMessage.ParametersRes)
-    case fitRes(Flower_Transport_ClientMessage.FitRes)
-    case evaluateRes(Flower_Transport_ClientMessage.EvaluateRes)
-    case propertiesRes(Flower_Transport_ClientMessage.PropertiesRes)
+    case disconnectRes(Flwr_Proto_ClientMessage.DisconnectRes)
+    case getPropertiesRes(Flwr_Proto_ClientMessage.GetPropertiesRes)
+    case getParametersRes(Flwr_Proto_ClientMessage.GetParametersRes)
+    case fitRes(Flwr_Proto_ClientMessage.FitRes)
+    case evaluateRes(Flwr_Proto_ClientMessage.EvaluateRes)
 
   #if !swift(>=4.1)
-    static func ==(lhs: Flower_Transport_ClientMessage.OneOf_Msg, rhs: Flower_Transport_ClientMessage.OneOf_Msg) -> Bool {
+    static func ==(lhs: Flwr_Proto_ClientMessage.OneOf_Msg, rhs: Flwr_Proto_ClientMessage.OneOf_Msg) -> Bool {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch (lhs, rhs) {
-      case (.disconnect, .disconnect): return {
-        guard case .disconnect(let l) = lhs, case .disconnect(let r) = rhs else { preconditionFailure() }
+      case (.disconnectRes, .disconnectRes): return {
+        guard case .disconnectRes(let l) = lhs, case .disconnectRes(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
-      case (.parametersRes, .parametersRes): return {
-        guard case .parametersRes(let l) = lhs, case .parametersRes(let r) = rhs else { preconditionFailure() }
+      case (.getPropertiesRes, .getPropertiesRes): return {
+        guard case .getPropertiesRes(let l) = lhs, case .getPropertiesRes(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.getParametersRes, .getParametersRes): return {
+        guard case .getParametersRes(let l) = lhs, case .getParametersRes(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       case (.fitRes, .fitRes): return {
@@ -350,35 +422,63 @@ struct Flower_Transport_ClientMessage {
         guard case .evaluateRes(let l) = lhs, case .evaluateRes(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
-      case (.propertiesRes, .propertiesRes): return {
-        guard case .propertiesRes(let l) = lhs, case .propertiesRes(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
       default: return false
       }
     }
   #endif
   }
 
-  struct Disconnect {
+  struct DisconnectRes {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var reason: Flower_Transport_Reason = .unknown
+    var reason: Flwr_Proto_Reason = .unknown
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
   }
 
-  struct ParametersRes {
+  struct GetPropertiesRes {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var parameters: Flower_Transport_Parameters {
-      get {return _parameters ?? Flower_Transport_Parameters()}
+    var status: Flwr_Proto_Status {
+      get {return _status ?? Flwr_Proto_Status()}
+      set {_status = newValue}
+    }
+    /// Returns true if `status` has been explicitly set.
+    var hasStatus: Bool {return self._status != nil}
+    /// Clears the value of `status`. Subsequent reads from it will return its default value.
+    mutating func clearStatus() {self._status = nil}
+
+    var properties: Dictionary<String,Flwr_Proto_Scalar> = [:]
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+
+    fileprivate var _status: Flwr_Proto_Status? = nil
+  }
+
+  struct GetParametersRes {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var status: Flwr_Proto_Status {
+      get {return _status ?? Flwr_Proto_Status()}
+      set {_status = newValue}
+    }
+    /// Returns true if `status` has been explicitly set.
+    var hasStatus: Bool {return self._status != nil}
+    /// Clears the value of `status`. Subsequent reads from it will return its default value.
+    mutating func clearStatus() {self._status = nil}
+
+    var parameters: Flwr_Proto_Parameters {
+      get {return _parameters ?? Flwr_Proto_Parameters()}
       set {_parameters = newValue}
     }
     /// Returns true if `parameters` has been explicitly set.
@@ -390,7 +490,8 @@ struct Flower_Transport_ClientMessage {
 
     init() {}
 
-    fileprivate var _parameters: Flower_Transport_Parameters? = nil
+    fileprivate var _status: Flwr_Proto_Status? = nil
+    fileprivate var _parameters: Flwr_Proto_Parameters? = nil
   }
 
   struct FitRes {
@@ -398,8 +499,17 @@ struct Flower_Transport_ClientMessage {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var parameters: Flower_Transport_Parameters {
-      get {return _parameters ?? Flower_Transport_Parameters()}
+    var status: Flwr_Proto_Status {
+      get {return _status ?? Flwr_Proto_Status()}
+      set {_status = newValue}
+    }
+    /// Returns true if `status` has been explicitly set.
+    var hasStatus: Bool {return self._status != nil}
+    /// Clears the value of `status`. Subsequent reads from it will return its default value.
+    mutating func clearStatus() {self._status = nil}
+
+    var parameters: Flwr_Proto_Parameters {
+      get {return _parameters ?? Flwr_Proto_Parameters()}
       set {_parameters = newValue}
     }
     /// Returns true if `parameters` has been explicitly set.
@@ -409,17 +519,14 @@ struct Flower_Transport_ClientMessage {
 
     var numExamples: Int64 = 0
 
-    var numExamplesCeil: Int64 = 0
-
-    var fitDuration: Float = 0
-
-    var metrics: Dictionary<String,Flower_Transport_Scalar> = [:]
+    var metrics: Dictionary<String,Flwr_Proto_Scalar> = [:]
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
-    fileprivate var _parameters: Flower_Transport_Parameters? = nil
+    fileprivate var _status: Flwr_Proto_Status? = nil
+    fileprivate var _parameters: Flwr_Proto_Parameters? = nil
   }
 
   struct EvaluateRes {
@@ -427,44 +534,41 @@ struct Flower_Transport_ClientMessage {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var numExamples: Int64 = 0
+    var status: Flwr_Proto_Status {
+      get {return _status ?? Flwr_Proto_Status()}
+      set {_status = newValue}
+    }
+    /// Returns true if `status` has been explicitly set.
+    var hasStatus: Bool {return self._status != nil}
+    /// Clears the value of `status`. Subsequent reads from it will return its default value.
+    mutating func clearStatus() {self._status = nil}
 
     var loss: Float = 0
 
-    var accuracy: Float = 0
+    var numExamples: Int64 = 0
 
-    var metrics: Dictionary<String,Flower_Transport_Scalar> = [:]
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-  }
-
-  struct PropertiesRes {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var properties: Dictionary<String,Flower_Transport_Scalar> = [:]
+    var metrics: Dictionary<String,Flwr_Proto_Scalar> = [:]
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
+
+    fileprivate var _status: Flwr_Proto_Status? = nil
   }
 
   init() {}
 }
 
-struct Flower_Transport_Scalar {
+struct Flwr_Proto_Scalar {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// The following oneof contains all types that ProtoBuf considers to be
+  /// The following `oneof` contains all types that ProtoBuf considers to be
   /// "Scalar Value Types". Commented-out types are listed for reference and
   /// might be enabled in future releases. Source:
   /// https://developers.google.com/protocol-buffers/docs/proto3#scalar
-  var scalar: Flower_Transport_Scalar.OneOf_Scalar? = nil
+  var scalar: Flwr_Proto_Scalar.OneOf_Scalar? = nil
 
   var double: Double {
     get {
@@ -518,7 +622,7 @@ struct Flower_Transport_Scalar {
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  /// The following oneof contains all types that ProtoBuf considers to be
+  /// The following `oneof` contains all types that ProtoBuf considers to be
   /// "Scalar Value Types". Commented-out types are listed for reference and
   /// might be enabled in future releases. Source:
   /// https://developers.google.com/protocol-buffers/docs/proto3#scalar
@@ -540,7 +644,7 @@ struct Flower_Transport_Scalar {
     case bytes(Data)
 
   #if !swift(>=4.1)
-    static func ==(lhs: Flower_Transport_Scalar.OneOf_Scalar, rhs: Flower_Transport_Scalar.OneOf_Scalar) -> Bool {
+    static func ==(lhs: Flwr_Proto_Scalar.OneOf_Scalar, rhs: Flwr_Proto_Scalar.OneOf_Scalar) -> Bool {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
@@ -574,11 +678,44 @@ struct Flower_Transport_Scalar {
   init() {}
 }
 
+#if swift(>=5.5) && canImport(_Concurrency)
+extension Flwr_Proto_Code: @unchecked Sendable {}
+extension Flwr_Proto_Reason: @unchecked Sendable {}
+extension Flwr_Proto_Status: @unchecked Sendable {}
+extension Flwr_Proto_Parameters: @unchecked Sendable {}
+extension Flwr_Proto_ServerMessage: @unchecked Sendable {}
+extension Flwr_Proto_ServerMessage.OneOf_Msg: @unchecked Sendable {}
+extension Flwr_Proto_ServerMessage.ReconnectIns: @unchecked Sendable {}
+extension Flwr_Proto_ServerMessage.GetPropertiesIns: @unchecked Sendable {}
+extension Flwr_Proto_ServerMessage.GetParametersIns: @unchecked Sendable {}
+extension Flwr_Proto_ServerMessage.FitIns: @unchecked Sendable {}
+extension Flwr_Proto_ServerMessage.EvaluateIns: @unchecked Sendable {}
+extension Flwr_Proto_ClientMessage: @unchecked Sendable {}
+extension Flwr_Proto_ClientMessage.OneOf_Msg: @unchecked Sendable {}
+extension Flwr_Proto_ClientMessage.DisconnectRes: @unchecked Sendable {}
+extension Flwr_Proto_ClientMessage.GetPropertiesRes: @unchecked Sendable {}
+extension Flwr_Proto_ClientMessage.GetParametersRes: @unchecked Sendable {}
+extension Flwr_Proto_ClientMessage.FitRes: @unchecked Sendable {}
+extension Flwr_Proto_ClientMessage.EvaluateRes: @unchecked Sendable {}
+extension Flwr_Proto_Scalar: @unchecked Sendable {}
+extension Flwr_Proto_Scalar.OneOf_Scalar: @unchecked Sendable {}
+#endif  // swift(>=5.5) && canImport(_Concurrency)
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-fileprivate let _protobuf_package = "flower.transport"
+fileprivate let _protobuf_package = "flwr.proto"
 
-extension Flower_Transport_Reason: SwiftProtobuf._ProtoNameProviding {
+extension Flwr_Proto_Code: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "OK"),
+    1: .same(proto: "GET_PROPERTIES_NOT_IMPLEMENTED"),
+    2: .same(proto: "GET_PARAMETERS_NOT_IMPLEMENTED"),
+    3: .same(proto: "FIT_NOT_IMPLEMENTED"),
+    4: .same(proto: "EVALUATE_NOT_IMPLEMENTED"),
+  ]
+}
+
+extension Flwr_Proto_Reason: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     0: .same(proto: "UNKNOWN"),
     1: .same(proto: "RECONNECT"),
@@ -588,7 +725,45 @@ extension Flower_Transport_Reason: SwiftProtobuf._ProtoNameProviding {
   ]
 }
 
-extension Flower_Transport_Parameters: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Flwr_Proto_Status: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Status"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "code"),
+    2: .same(proto: "message"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.code) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.message) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.code != .ok {
+      try visitor.visitSingularEnumField(value: self.code, fieldNumber: 1)
+    }
+    if !self.message.isEmpty {
+      try visitor.visitSingularStringField(value: self.message, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Flwr_Proto_Status, rhs: Flwr_Proto_Status) -> Bool {
+    if lhs.code != rhs.code {return false}
+    if lhs.message != rhs.message {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Flwr_Proto_Parameters: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Parameters"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "tensors"),
@@ -618,7 +793,7 @@ extension Flower_Transport_Parameters: SwiftProtobuf.Message, SwiftProtobuf._Mes
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Flower_Transport_Parameters, rhs: Flower_Transport_Parameters) -> Bool {
+  static func ==(lhs: Flwr_Proto_Parameters, rhs: Flwr_Proto_Parameters) -> Bool {
     if lhs.tensors != rhs.tensors {return false}
     if lhs.tensorType != rhs.tensorType {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -626,14 +801,14 @@ extension Flower_Transport_Parameters: SwiftProtobuf.Message, SwiftProtobuf._Mes
   }
 }
 
-extension Flower_Transport_ServerMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Flwr_Proto_ServerMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ServerMessage"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "reconnect"),
-    2: .standard(proto: "get_parameters"),
-    3: .standard(proto: "fit_ins"),
-    4: .standard(proto: "evaluate_ins"),
-    5: .standard(proto: "properties_ins"),
+    1: .standard(proto: "reconnect_ins"),
+    2: .standard(proto: "get_properties_ins"),
+    3: .standard(proto: "get_parameters_ins"),
+    4: .standard(proto: "fit_ins"),
+    5: .standard(proto: "evaluate_ins"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -643,33 +818,46 @@ extension Flower_Transport_ServerMessage: SwiftProtobuf.Message, SwiftProtobuf._
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try {
-        var v: Flower_Transport_ServerMessage.Reconnect?
+        var v: Flwr_Proto_ServerMessage.ReconnectIns?
         var hadOneofValue = false
         if let current = self.msg {
           hadOneofValue = true
-          if case .reconnect(let m) = current {v = m}
+          if case .reconnectIns(let m) = current {v = m}
         }
         try decoder.decodeSingularMessageField(value: &v)
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.msg = .reconnect(v)
+          self.msg = .reconnectIns(v)
         }
       }()
       case 2: try {
-        var v: Flower_Transport_ServerMessage.GetParameters?
+        var v: Flwr_Proto_ServerMessage.GetPropertiesIns?
         var hadOneofValue = false
         if let current = self.msg {
           hadOneofValue = true
-          if case .getParameters(let m) = current {v = m}
+          if case .getPropertiesIns(let m) = current {v = m}
         }
         try decoder.decodeSingularMessageField(value: &v)
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.msg = .getParameters(v)
+          self.msg = .getPropertiesIns(v)
         }
       }()
       case 3: try {
-        var v: Flower_Transport_ServerMessage.FitIns?
+        var v: Flwr_Proto_ServerMessage.GetParametersIns?
+        var hadOneofValue = false
+        if let current = self.msg {
+          hadOneofValue = true
+          if case .getParametersIns(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.msg = .getParametersIns(v)
+        }
+      }()
+      case 4: try {
+        var v: Flwr_Proto_ServerMessage.FitIns?
         var hadOneofValue = false
         if let current = self.msg {
           hadOneofValue = true
@@ -681,8 +869,8 @@ extension Flower_Transport_ServerMessage: SwiftProtobuf.Message, SwiftProtobuf._
           self.msg = .fitIns(v)
         }
       }()
-      case 4: try {
-        var v: Flower_Transport_ServerMessage.EvaluateIns?
+      case 5: try {
+        var v: Flwr_Proto_ServerMessage.EvaluateIns?
         var hadOneofValue = false
         if let current = self.msg {
           hadOneofValue = true
@@ -692,19 +880,6 @@ extension Flower_Transport_ServerMessage: SwiftProtobuf.Message, SwiftProtobuf._
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
           self.msg = .evaluateIns(v)
-        }
-      }()
-      case 5: try {
-        var v: Flower_Transport_ServerMessage.PropertiesIns?
-        var hadOneofValue = false
-        if let current = self.msg {
-          hadOneofValue = true
-          if case .propertiesIns(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.msg = .propertiesIns(v)
         }
       }()
       default: break
@@ -718,24 +893,24 @@ extension Flower_Transport_ServerMessage: SwiftProtobuf.Message, SwiftProtobuf._
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
     switch self.msg {
-    case .reconnect?: try {
-      guard case .reconnect(let v)? = self.msg else { preconditionFailure() }
+    case .reconnectIns?: try {
+      guard case .reconnectIns(let v)? = self.msg else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     }()
-    case .getParameters?: try {
-      guard case .getParameters(let v)? = self.msg else { preconditionFailure() }
+    case .getPropertiesIns?: try {
+      guard case .getPropertiesIns(let v)? = self.msg else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
+    case .getParametersIns?: try {
+      guard case .getParametersIns(let v)? = self.msg else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
     }()
     case .fitIns?: try {
       guard case .fitIns(let v)? = self.msg else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
     }()
     case .evaluateIns?: try {
       guard case .evaluateIns(let v)? = self.msg else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
-    }()
-    case .propertiesIns?: try {
-      guard case .propertiesIns(let v)? = self.msg else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
     }()
     case nil: break
@@ -743,15 +918,15 @@ extension Flower_Transport_ServerMessage: SwiftProtobuf.Message, SwiftProtobuf._
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Flower_Transport_ServerMessage, rhs: Flower_Transport_ServerMessage) -> Bool {
+  static func ==(lhs: Flwr_Proto_ServerMessage, rhs: Flwr_Proto_ServerMessage) -> Bool {
     if lhs.msg != rhs.msg {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Flower_Transport_ServerMessage.Reconnect: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Flower_Transport_ServerMessage.protoMessageName + ".Reconnect"
+extension Flwr_Proto_ServerMessage.ReconnectIns: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Flwr_Proto_ServerMessage.protoMessageName + ".ReconnectIns"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "seconds"),
   ]
@@ -775,118 +950,15 @@ extension Flower_Transport_ServerMessage.Reconnect: SwiftProtobuf.Message, Swift
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Flower_Transport_ServerMessage.Reconnect, rhs: Flower_Transport_ServerMessage.Reconnect) -> Bool {
+  static func ==(lhs: Flwr_Proto_ServerMessage.ReconnectIns, rhs: Flwr_Proto_ServerMessage.ReconnectIns) -> Bool {
     if lhs.seconds != rhs.seconds {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Flower_Transport_ServerMessage.GetParameters: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Flower_Transport_ServerMessage.protoMessageName + ".GetParameters"
-  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let _ = try decoder.nextFieldNumber() {
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Flower_Transport_ServerMessage.GetParameters, rhs: Flower_Transport_ServerMessage.GetParameters) -> Bool {
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Flower_Transport_ServerMessage.FitIns: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Flower_Transport_ServerMessage.protoMessageName + ".FitIns"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "parameters"),
-    2: .same(proto: "config"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._parameters) }()
-      case 2: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flower_Transport_Scalar>.self, value: &self.config) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._parameters {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    } }()
-    if !self.config.isEmpty {
-      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flower_Transport_Scalar>.self, value: self.config, fieldNumber: 2)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Flower_Transport_ServerMessage.FitIns, rhs: Flower_Transport_ServerMessage.FitIns) -> Bool {
-    if lhs._parameters != rhs._parameters {return false}
-    if lhs.config != rhs.config {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Flower_Transport_ServerMessage.EvaluateIns: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Flower_Transport_ServerMessage.protoMessageName + ".EvaluateIns"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "parameters"),
-    2: .same(proto: "config"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._parameters) }()
-      case 2: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flower_Transport_Scalar>.self, value: &self.config) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._parameters {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    } }()
-    if !self.config.isEmpty {
-      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flower_Transport_Scalar>.self, value: self.config, fieldNumber: 2)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Flower_Transport_ServerMessage.EvaluateIns, rhs: Flower_Transport_ServerMessage.EvaluateIns) -> Bool {
-    if lhs._parameters != rhs._parameters {return false}
-    if lhs.config != rhs.config {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Flower_Transport_ServerMessage.PropertiesIns: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Flower_Transport_ServerMessage.protoMessageName + ".PropertiesIns"
+extension Flwr_Proto_ServerMessage.GetPropertiesIns: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Flwr_Proto_ServerMessage.protoMessageName + ".GetPropertiesIns"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "config"),
   ]
@@ -897,7 +969,7 @@ extension Flower_Transport_ServerMessage.PropertiesIns: SwiftProtobuf.Message, S
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flower_Transport_Scalar>.self, value: &self.config) }()
+      case 1: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: &self.config) }()
       default: break
       }
     }
@@ -905,26 +977,142 @@ extension Flower_Transport_ServerMessage.PropertiesIns: SwiftProtobuf.Message, S
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.config.isEmpty {
-      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flower_Transport_Scalar>.self, value: self.config, fieldNumber: 1)
+      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: self.config, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Flower_Transport_ServerMessage.PropertiesIns, rhs: Flower_Transport_ServerMessage.PropertiesIns) -> Bool {
+  static func ==(lhs: Flwr_Proto_ServerMessage.GetPropertiesIns, rhs: Flwr_Proto_ServerMessage.GetPropertiesIns) -> Bool {
     if lhs.config != rhs.config {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Flower_Transport_ClientMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Flwr_Proto_ServerMessage.GetParametersIns: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Flwr_Proto_ServerMessage.protoMessageName + ".GetParametersIns"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "config"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: &self.config) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.config.isEmpty {
+      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: self.config, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Flwr_Proto_ServerMessage.GetParametersIns, rhs: Flwr_Proto_ServerMessage.GetParametersIns) -> Bool {
+    if lhs.config != rhs.config {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Flwr_Proto_ServerMessage.FitIns: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Flwr_Proto_ServerMessage.protoMessageName + ".FitIns"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "parameters"),
+    2: .same(proto: "config"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._parameters) }()
+      case 2: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: &self.config) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._parameters {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if !self.config.isEmpty {
+      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: self.config, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Flwr_Proto_ServerMessage.FitIns, rhs: Flwr_Proto_ServerMessage.FitIns) -> Bool {
+    if lhs._parameters != rhs._parameters {return false}
+    if lhs.config != rhs.config {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Flwr_Proto_ServerMessage.EvaluateIns: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Flwr_Proto_ServerMessage.protoMessageName + ".EvaluateIns"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "parameters"),
+    2: .same(proto: "config"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._parameters) }()
+      case 2: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: &self.config) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._parameters {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if !self.config.isEmpty {
+      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: self.config, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Flwr_Proto_ServerMessage.EvaluateIns, rhs: Flwr_Proto_ServerMessage.EvaluateIns) -> Bool {
+    if lhs._parameters != rhs._parameters {return false}
+    if lhs.config != rhs.config {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Flwr_Proto_ClientMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientMessage"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "disconnect"),
-    2: .standard(proto: "parameters_res"),
-    3: .standard(proto: "fit_res"),
-    4: .standard(proto: "evaluate_res"),
-    5: .standard(proto: "properties_res"),
+    1: .standard(proto: "disconnect_res"),
+    2: .standard(proto: "get_properties_res"),
+    3: .standard(proto: "get_parameters_res"),
+    4: .standard(proto: "fit_res"),
+    5: .standard(proto: "evaluate_res"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -934,33 +1122,46 @@ extension Flower_Transport_ClientMessage: SwiftProtobuf.Message, SwiftProtobuf._
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try {
-        var v: Flower_Transport_ClientMessage.Disconnect?
+        var v: Flwr_Proto_ClientMessage.DisconnectRes?
         var hadOneofValue = false
         if let current = self.msg {
           hadOneofValue = true
-          if case .disconnect(let m) = current {v = m}
+          if case .disconnectRes(let m) = current {v = m}
         }
         try decoder.decodeSingularMessageField(value: &v)
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.msg = .disconnect(v)
+          self.msg = .disconnectRes(v)
         }
       }()
       case 2: try {
-        var v: Flower_Transport_ClientMessage.ParametersRes?
+        var v: Flwr_Proto_ClientMessage.GetPropertiesRes?
         var hadOneofValue = false
         if let current = self.msg {
           hadOneofValue = true
-          if case .parametersRes(let m) = current {v = m}
+          if case .getPropertiesRes(let m) = current {v = m}
         }
         try decoder.decodeSingularMessageField(value: &v)
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.msg = .parametersRes(v)
+          self.msg = .getPropertiesRes(v)
         }
       }()
       case 3: try {
-        var v: Flower_Transport_ClientMessage.FitRes?
+        var v: Flwr_Proto_ClientMessage.GetParametersRes?
+        var hadOneofValue = false
+        if let current = self.msg {
+          hadOneofValue = true
+          if case .getParametersRes(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.msg = .getParametersRes(v)
+        }
+      }()
+      case 4: try {
+        var v: Flwr_Proto_ClientMessage.FitRes?
         var hadOneofValue = false
         if let current = self.msg {
           hadOneofValue = true
@@ -972,8 +1173,8 @@ extension Flower_Transport_ClientMessage: SwiftProtobuf.Message, SwiftProtobuf._
           self.msg = .fitRes(v)
         }
       }()
-      case 4: try {
-        var v: Flower_Transport_ClientMessage.EvaluateRes?
+      case 5: try {
+        var v: Flwr_Proto_ClientMessage.EvaluateRes?
         var hadOneofValue = false
         if let current = self.msg {
           hadOneofValue = true
@@ -983,19 +1184,6 @@ extension Flower_Transport_ClientMessage: SwiftProtobuf.Message, SwiftProtobuf._
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
           self.msg = .evaluateRes(v)
-        }
-      }()
-      case 5: try {
-        var v: Flower_Transport_ClientMessage.PropertiesRes?
-        var hadOneofValue = false
-        if let current = self.msg {
-          hadOneofValue = true
-          if case .propertiesRes(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.msg = .propertiesRes(v)
         }
       }()
       default: break
@@ -1009,24 +1197,24 @@ extension Flower_Transport_ClientMessage: SwiftProtobuf.Message, SwiftProtobuf._
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
     switch self.msg {
-    case .disconnect?: try {
-      guard case .disconnect(let v)? = self.msg else { preconditionFailure() }
+    case .disconnectRes?: try {
+      guard case .disconnectRes(let v)? = self.msg else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     }()
-    case .parametersRes?: try {
-      guard case .parametersRes(let v)? = self.msg else { preconditionFailure() }
+    case .getPropertiesRes?: try {
+      guard case .getPropertiesRes(let v)? = self.msg else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
+    case .getParametersRes?: try {
+      guard case .getParametersRes(let v)? = self.msg else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
     }()
     case .fitRes?: try {
       guard case .fitRes(let v)? = self.msg else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
     }()
     case .evaluateRes?: try {
       guard case .evaluateRes(let v)? = self.msg else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
-    }()
-    case .propertiesRes?: try {
-      guard case .propertiesRes(let v)? = self.msg else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
     }()
     case nil: break
@@ -1034,15 +1222,15 @@ extension Flower_Transport_ClientMessage: SwiftProtobuf.Message, SwiftProtobuf._
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Flower_Transport_ClientMessage, rhs: Flower_Transport_ClientMessage) -> Bool {
+  static func ==(lhs: Flwr_Proto_ClientMessage, rhs: Flwr_Proto_ClientMessage) -> Bool {
     if lhs.msg != rhs.msg {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Flower_Transport_ClientMessage.Disconnect: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Flower_Transport_ClientMessage.protoMessageName + ".Disconnect"
+extension Flwr_Proto_ClientMessage.DisconnectRes: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Flwr_Proto_ClientMessage.protoMessageName + ".DisconnectRes"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "reason"),
   ]
@@ -1066,17 +1254,18 @@ extension Flower_Transport_ClientMessage.Disconnect: SwiftProtobuf.Message, Swif
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Flower_Transport_ClientMessage.Disconnect, rhs: Flower_Transport_ClientMessage.Disconnect) -> Bool {
+  static func ==(lhs: Flwr_Proto_ClientMessage.DisconnectRes, rhs: Flwr_Proto_ClientMessage.DisconnectRes) -> Bool {
     if lhs.reason != rhs.reason {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Flower_Transport_ClientMessage.ParametersRes: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Flower_Transport_ClientMessage.protoMessageName + ".ParametersRes"
+extension Flwr_Proto_ClientMessage.GetPropertiesRes: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Flwr_Proto_ClientMessage.protoMessageName + ".GetPropertiesRes"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "parameters"),
+    1: .same(proto: "status"),
+    2: .same(proto: "properties"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1085,7 +1274,8 @@ extension Flower_Transport_ClientMessage.ParametersRes: SwiftProtobuf.Message, S
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._parameters) }()
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._status) }()
+      case 2: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: &self.properties) }()
       default: break
       }
     }
@@ -1096,27 +1286,28 @@ extension Flower_Transport_ClientMessage.ParametersRes: SwiftProtobuf.Message, S
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._parameters {
+    try { if let v = self._status {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     } }()
+    if !self.properties.isEmpty {
+      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: self.properties, fieldNumber: 2)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Flower_Transport_ClientMessage.ParametersRes, rhs: Flower_Transport_ClientMessage.ParametersRes) -> Bool {
-    if lhs._parameters != rhs._parameters {return false}
+  static func ==(lhs: Flwr_Proto_ClientMessage.GetPropertiesRes, rhs: Flwr_Proto_ClientMessage.GetPropertiesRes) -> Bool {
+    if lhs._status != rhs._status {return false}
+    if lhs.properties != rhs.properties {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Flower_Transport_ClientMessage.FitRes: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Flower_Transport_ClientMessage.protoMessageName + ".FitRes"
+extension Flwr_Proto_ClientMessage.GetParametersRes: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Flwr_Proto_ClientMessage.protoMessageName + ".GetParametersRes"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "parameters"),
-    2: .standard(proto: "num_examples"),
-    3: .standard(proto: "num_examples_ceil"),
-    4: .standard(proto: "fit_duration"),
-    5: .same(proto: "metrics"),
+    1: .same(proto: "status"),
+    2: .same(proto: "parameters"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1125,11 +1316,8 @@ extension Flower_Transport_ClientMessage.FitRes: SwiftProtobuf.Message, SwiftPro
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._parameters) }()
-      case 2: try { try decoder.decodeSingularInt64Field(value: &self.numExamples) }()
-      case 3: try { try decoder.decodeSingularInt64Field(value: &self.numExamplesCeil) }()
-      case 4: try { try decoder.decodeSingularFloatField(value: &self.fitDuration) }()
-      case 5: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flower_Transport_Scalar>.self, value: &self.metrics) }()
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._status) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._parameters) }()
       default: break
       }
     }
@@ -1140,41 +1328,29 @@ extension Flower_Transport_ClientMessage.FitRes: SwiftProtobuf.Message, SwiftPro
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._parameters {
+    try { if let v = self._status {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     } }()
-    if self.numExamples != 0 {
-      try visitor.visitSingularInt64Field(value: self.numExamples, fieldNumber: 2)
-    }
-    if self.numExamplesCeil != 0 {
-      try visitor.visitSingularInt64Field(value: self.numExamplesCeil, fieldNumber: 3)
-    }
-    if self.fitDuration != 0 {
-      try visitor.visitSingularFloatField(value: self.fitDuration, fieldNumber: 4)
-    }
-    if !self.metrics.isEmpty {
-      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flower_Transport_Scalar>.self, value: self.metrics, fieldNumber: 5)
-    }
+    try { if let v = self._parameters {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Flower_Transport_ClientMessage.FitRes, rhs: Flower_Transport_ClientMessage.FitRes) -> Bool {
+  static func ==(lhs: Flwr_Proto_ClientMessage.GetParametersRes, rhs: Flwr_Proto_ClientMessage.GetParametersRes) -> Bool {
+    if lhs._status != rhs._status {return false}
     if lhs._parameters != rhs._parameters {return false}
-    if lhs.numExamples != rhs.numExamples {return false}
-    if lhs.numExamplesCeil != rhs.numExamplesCeil {return false}
-    if lhs.fitDuration != rhs.fitDuration {return false}
-    if lhs.metrics != rhs.metrics {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Flower_Transport_ClientMessage.EvaluateRes: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Flower_Transport_ClientMessage.protoMessageName + ".EvaluateRes"
+extension Flwr_Proto_ClientMessage.FitRes: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Flwr_Proto_ClientMessage.protoMessageName + ".FitRes"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "num_examples"),
-    2: .same(proto: "loss"),
-    3: .same(proto: "accuracy"),
+    1: .same(proto: "status"),
+    2: .same(proto: "parameters"),
+    3: .standard(proto: "num_examples"),
     4: .same(proto: "metrics"),
   ]
 
@@ -1184,45 +1360,52 @@ extension Flower_Transport_ClientMessage.EvaluateRes: SwiftProtobuf.Message, Swi
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularInt64Field(value: &self.numExamples) }()
-      case 2: try { try decoder.decodeSingularFloatField(value: &self.loss) }()
-      case 3: try { try decoder.decodeSingularFloatField(value: &self.accuracy) }()
-      case 4: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flower_Transport_Scalar>.self, value: &self.metrics) }()
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._status) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._parameters) }()
+      case 3: try { try decoder.decodeSingularInt64Field(value: &self.numExamples) }()
+      case 4: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: &self.metrics) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._status {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._parameters {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
     if self.numExamples != 0 {
-      try visitor.visitSingularInt64Field(value: self.numExamples, fieldNumber: 1)
-    }
-    if self.loss != 0 {
-      try visitor.visitSingularFloatField(value: self.loss, fieldNumber: 2)
-    }
-    if self.accuracy != 0 {
-      try visitor.visitSingularFloatField(value: self.accuracy, fieldNumber: 3)
+      try visitor.visitSingularInt64Field(value: self.numExamples, fieldNumber: 3)
     }
     if !self.metrics.isEmpty {
-      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flower_Transport_Scalar>.self, value: self.metrics, fieldNumber: 4)
+      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: self.metrics, fieldNumber: 4)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Flower_Transport_ClientMessage.EvaluateRes, rhs: Flower_Transport_ClientMessage.EvaluateRes) -> Bool {
+  static func ==(lhs: Flwr_Proto_ClientMessage.FitRes, rhs: Flwr_Proto_ClientMessage.FitRes) -> Bool {
+    if lhs._status != rhs._status {return false}
+    if lhs._parameters != rhs._parameters {return false}
     if lhs.numExamples != rhs.numExamples {return false}
-    if lhs.loss != rhs.loss {return false}
-    if lhs.accuracy != rhs.accuracy {return false}
     if lhs.metrics != rhs.metrics {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Flower_Transport_ClientMessage.PropertiesRes: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Flower_Transport_ClientMessage.protoMessageName + ".PropertiesRes"
+extension Flwr_Proto_ClientMessage.EvaluateRes: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Flwr_Proto_ClientMessage.protoMessageName + ".EvaluateRes"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "properties"),
+    1: .same(proto: "status"),
+    2: .same(proto: "loss"),
+    3: .standard(proto: "num_examples"),
+    4: .same(proto: "metrics"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1231,27 +1414,46 @@ extension Flower_Transport_ClientMessage.PropertiesRes: SwiftProtobuf.Message, S
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flower_Transport_Scalar>.self, value: &self.properties) }()
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._status) }()
+      case 2: try { try decoder.decodeSingularFloatField(value: &self.loss) }()
+      case 3: try { try decoder.decodeSingularInt64Field(value: &self.numExamples) }()
+      case 4: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: &self.metrics) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.properties.isEmpty {
-      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flower_Transport_Scalar>.self, value: self.properties, fieldNumber: 1)
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._status {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if self.loss != 0 {
+      try visitor.visitSingularFloatField(value: self.loss, fieldNumber: 2)
+    }
+    if self.numExamples != 0 {
+      try visitor.visitSingularInt64Field(value: self.numExamples, fieldNumber: 3)
+    }
+    if !self.metrics.isEmpty {
+      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Flwr_Proto_Scalar>.self, value: self.metrics, fieldNumber: 4)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Flower_Transport_ClientMessage.PropertiesRes, rhs: Flower_Transport_ClientMessage.PropertiesRes) -> Bool {
-    if lhs.properties != rhs.properties {return false}
+  static func ==(lhs: Flwr_Proto_ClientMessage.EvaluateRes, rhs: Flwr_Proto_ClientMessage.EvaluateRes) -> Bool {
+    if lhs._status != rhs._status {return false}
+    if lhs.loss != rhs.loss {return false}
+    if lhs.numExamples != rhs.numExamples {return false}
+    if lhs.metrics != rhs.metrics {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Flower_Transport_Scalar: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Flwr_Proto_Scalar: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Scalar"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "double"),
@@ -1343,7 +1545,7 @@ extension Flower_Transport_Scalar: SwiftProtobuf.Message, SwiftProtobuf._Message
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Flower_Transport_Scalar, rhs: Flower_Transport_Scalar) -> Bool {
+  static func ==(lhs: Flwr_Proto_Scalar, rhs: Flwr_Proto_Scalar) -> Bool {
     if lhs.scalar != rhs.scalar {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
