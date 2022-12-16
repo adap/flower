@@ -9,7 +9,7 @@ import Foundation
 import Vision
 import CoreML
 import SwiftUI
-import Flower
+import flwr
 
 
 class CoreMLClient: Client {

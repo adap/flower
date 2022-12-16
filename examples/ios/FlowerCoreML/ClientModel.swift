@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Flower
+import flwr
 import CoreML
 import Compression
 
