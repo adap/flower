@@ -2,7 +2,7 @@
 name: Baseline request
 about: Suggest a new baseline
 title: Add [BASELINE_NAME] baseline
-labels: 'new baseline'
+labels: 'new baseline', 'good first issue'
 assignees: ''
 
 ---
