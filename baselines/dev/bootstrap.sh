@@ -11,5 +11,4 @@ python -m pip install -U setuptools==63.2.0
 python -m pip install -U poetry==1.1.14
 
 # Use `poetry` to install project dependencies
-python -m poetry install \
-  --extras "simulation"
+python -m poetry install
