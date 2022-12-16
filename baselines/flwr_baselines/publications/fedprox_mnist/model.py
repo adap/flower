@@ -1,3 +1,4 @@
+# pylint: disable=too-many-arguments
 """CNN model architecutre, training and testing functions for MNIST."""
 
 
@@ -120,8 +121,8 @@ def _training_loop(
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
         proximal_term = 0.0
-        for w, w_t in zip(net.parameters(), global_params):
-            proximal_term += (w - w_t).norm(2)
+        for local_weights, global_weights in zip(net.parameters(), global_params):
+            proximal_term += (local_weights - global_weights).norm(2)
         loss = criterion(net(images), labels) + (proximal_mu / 2) * proximal_term
         loss.backward()
         optimizer.step()

@@ -27,7 +27,7 @@ def main(cfg: DictConfig) -> None:
         num_clients=cfg.num_clients,
         iid=cfg.iid,
         learning_rate=cfg.learning_rate,
-        mu=cfg.mu,
+        proximal_mu=cfg.mu,
     )
 
     evaluate_fn = utils.gen_evaluate_fn(testloader, DEVICE)
