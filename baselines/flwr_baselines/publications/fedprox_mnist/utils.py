@@ -38,7 +38,7 @@ def plot_metric_from_history(
         )
         rounds, values = zip(*metric_dict["accuracy"])
         plt.figure()
-        plt.plot(np.asarray(rounds), np.asarray(values), label="FedAvg")
+        plt.plot(np.asarray(rounds), np.asarray(values), label="FedProx")
         # Set expected graph
         plt.axhline(
             y=expected_maximum,
