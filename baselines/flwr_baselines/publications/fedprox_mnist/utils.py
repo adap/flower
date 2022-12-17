@@ -48,6 +48,7 @@ def plot_metric_from_history(
             linestyle="--",
             label=f"Best result @{expected_maximum}",
         )
+        plt.ylim([0.97, 1])
         plt.title(f"{metric_type.capitalize()} Validation - MNIST")
         plt.xlabel("Rounds")
         plt.ylabel("Accuracy")
