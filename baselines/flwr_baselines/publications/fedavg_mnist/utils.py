@@ -38,9 +38,7 @@ def plot_metric_from_history(
         )
         rounds, values = zip(*metric_dict["accuracy"])
         plt.figure()
-        plt.plot(
-            np.asarray(rounds), np.asarray(values) * 100, label="FedAvg"
-        )  # Accuracy 0-100%
+        plt.plot(np.asarray(rounds), np.asarray(values), label="FedAvg")
         # Set expected graph
         plt.axhline(
             y=expected_maximum,
@@ -48,6 +46,7 @@ def plot_metric_from_history(
             linestyle="--",
             label=f"Best result @{expected_maximum}",
         )
+        plt.ylim([0.97, 1])
         plt.title(f"{metric_type.capitalize()} Validation - MNIST")
         plt.xlabel("Rounds")
         plt.ylabel("Accuracy")
