@@ -75,6 +75,5 @@ Results will be stored as timestamped folders inside either `outputs` or `multir
 
 To help visualize results, the script also plots evaluation curves. Here are some examples:
 <center>
-    <img src="docs/centralized_metrics.png" alt="Centralized evaluation results" width="400" />
-    <img src="docs/distributed_metrics.png" alt="Distributed evaluation results" width="400" />
+    <img src="docs/centralized_metrics.png" alt="Centralized evaluation results" width="400" /> <img src="docs/distributed_metrics.png" alt="Distributed evaluation results" width="400" />
 </center>
