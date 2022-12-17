@@ -102,5 +102,4 @@ Next steps
 
 Once you have made your first PR, and want to contribute more, be sure to check out the following :
 
-- `Good first contributions <https://flower.dev/docs/good-first-contributions.html>`_, 
-where you should look into the baseline contributions.
+- `Good first contributions <https://flower.dev/docs/good-first-contributions.html>`_, where you should particularly look into the :code:`baselines` contributions.
