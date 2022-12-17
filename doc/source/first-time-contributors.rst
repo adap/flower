@@ -19,6 +19,9 @@ navigate to https://github.com/adap/flower (while connected to your GitHub accou
 
 You can change the name if you want, but this is not necessary as this version of Flower will be yours and will sit inside your own repositories.
 
+Contributing
+------------
+
 Then, the process for contributing is as follows:
 
 - Setting up the environment by following this `guide <https://flower.dev/docs/getting-started-for-contributors.html>`_
