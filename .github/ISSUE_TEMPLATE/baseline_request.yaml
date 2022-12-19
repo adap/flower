@@ -1,0 +1,75 @@
+name: Baseline request
+description: Suggest a new baseline
+labels: ["new baseline, good first issue"]
+title: Add [new_baseline_name] baseline
+
+body:
+  - type: input
+    attributes:
+      label: Paper
+      description: What paper would you like implemented as a baseline ?
+      placeholder: "Authors, year, title"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Link
+      description: Provide a link (ideally an arxiv.org/abs/* link) to the abstract of the paper.
+      placeholder: https://arxiv.org/abs/1608.03452
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Maybe give motivations about why the paper should be implemented as a baseline.
+  - type: textarea
+    attributes:
+      label: Is there something else you want to add?
+  - type: markdown
+    attributes:
+      value: |
+        #### If you want to propose a new baseline, please check the PRs if someone already works on it.
+        
+        ## ⚠️ Do not touch anything below ⚠️
+  - type: input
+    attributes:
+      label: Implementation
+      value: "#### To implement this baseline, it is recommended to do the following items in that order:"
+  - type: textarea
+    attributes:
+      label: For first time contributors
+      value: |
+        - [ ]  Read the [`first contribution` doc](TODO)
+        - [ ]  Complete the Flower tutorial
+        - [ ]  Read the Flower Baselines docs to get an overview:
+            - [ ]  [https://flower.dev/docs/using-baselines.html](https://flower.dev/docs/using-baselines.html)
+            - [ ]  [https://flower.dev/docs/contributing-baselines.html](https://flower.dev/docs/contributing-baselines.html)
+  - type: checkboxes
+    attributes:
+      label: Prep - understand the scope
+      options:
+        - label: Read the paper linked above
+        - label: Create the directory structure in Flower Baselines (just the `__init__.py`files and a README)
+        - label: Before starting to write code, write down all of the specs of this experiment in a README (dataset, partitioning, model, number of clients, all hyperparameters, …)
+        - label: Open a draft PR
+  - type: checkboxes
+    attributes:
+      label: Implement - make it work
+      options:
+        - label: Implement some form of dataset loading and partitioning in a separate `dataset.py` (doesn’t have to match the paper exactly)
+        - label: Implement the model in PyTorch
+        - label: Write a test that shows that the model has the number of parameters mentioned in the paper
+        - label: Implement the federated learning setup outlined in the paper, maybe starting with fewer clients
+        - label: Plot accuracy and loss
+        - label: Run it and check if the model starts to converge
+  - type: checkboxes
+    attributes:
+      label: Align - make it correct
+      options:
+        - label: Implement the exact data partitioning outlined in the paper
+        - label: Use the exact hyperparameters outlined in the paper
+  - type: checkboxes
+    attributes:
+      label: Tuning - make it converge
+      options:
+        - label: Make it converge to roughly the same accuracy that the paper states
+        - label: Mark the PR as ready
