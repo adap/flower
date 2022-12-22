@@ -100,7 +100,7 @@ def gen_evaluate_fn(
         server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         # pylint: disable=unused-argument
-        """Use the entire CIFAR-10 test set for evaluation."""
+        """Use the entire MNIST test set for evaluation."""
         # determine device
         net = model.Net()
         params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
