@@ -30,29 +30,37 @@ def plot_metric_from_history(
     expected_maximum : float
         The expected maximum accuracy from the original paper.
     """
-    for metric_type in ["centralized", "distributed"]:
-        metric_dict = (
-            hist.metrics_centralized
-            if metric_type == "centralized"
-            else hist.metrics_distributed
-        )
-        rounds, values = zip(*metric_dict["accuracy"])
-        plt.figure()
-        plt.plot(np.asarray(rounds), np.asarray(values), label="FedAvg")
-        # Set expected graph
-        plt.axhline(
-            y=expected_maximum,
-            color="r",
-            linestyle="--",
-            label=f"Best result @{expected_maximum}",
-        )
-        plt.ylim([0.97, 1])
-        plt.title(f"{metric_type.capitalize()} Validation - MNIST")
-        plt.xlabel("Rounds")
-        plt.ylabel("Accuracy")
-        plt.legend(loc="lower right")
-        plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics.png"))
-        plt.close()
+    metric_type = "centralized"
+    metric_dict = (
+        hist.metrics_centralized
+        if metric_type == "centralized"
+        else hist.metrics_distributed
+    )
+    rounds, values = zip(*metric_dict["accuracy"])
+    plt.figure()
+    plt.plot(np.asarray(rounds), np.asarray(values), label="FedAvg")
+    # Set expected graph for data
+    plt.axhline(
+        y=expected_maximum,
+        color="r",
+        linestyle="--",
+        label=f"Best MNIST result @{expected_maximum}",
+    )
+    # Set paper's results
+    plt.axhline(
+        y=0.9924,
+        color="g",
+        linestyle="--",
+        label=f"Paper's results @0.9924",
+    )
+    plt.ylim([0.97, 1])
+    plt.axis("square")
+    plt.title(f"{metric_type.capitalize()} Validation - MNIST")
+    plt.xlabel("Rounds")
+    plt.ylabel("Accuracy")
+    plt.legend(loc="lower right")
+    plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics.png"))
+    plt.close()
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
