@@ -51,7 +51,7 @@ def plot_metric_from_history(
         y=0.9924,
         color="g",
         linestyle="--",
-        label=f"Paper's results @0.9924",
+        label="Paper's results @0.9924",
     )
     plt.ylim([0.97, 1])
     plt.axis("square")
