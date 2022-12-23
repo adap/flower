@@ -17,6 +17,7 @@ public class ClientModel: ObservableObject {
     
     @Published public var trainingBatchStatus = BatchPreparationStatus.notPrepared
     @Published public var testBatchStatus = BatchPreparationStatus.notPrepared
+    @Published public var modelCompilationStatus = BatchPreparationStatus.notPrepared
     
     @Published public var trainingBatchProvider: MLBatchProvider?
     @Published public var testBatchProvider: MLBatchProvider?
@@ -26,7 +27,11 @@ public class ClientModel: ObservableObject {
     @Published public var port: Int = 8080
     
     @Published public var epoch: Int = 5
-    @Published public var modelStatus = "Train model"
+    @Published public var modelStatus = BatchPreparationModelStatus.notPrepared
+    
+    @Published public var federatedServerStatus = ServerStatus.stop
+    
+    
     
     public func prepareTrainDataset() {
         trainingBatchStatus = .preparing(count: 0)
@@ -52,18 +57,26 @@ public class ClientModel: ObservableObject {
     
     private func initCoreMLClient() {
         if coreMLClient == nil {
-            let url = Bundle.main.url(forResource: "MNIST_Model", withExtension: "mlmodel")
-            let dataLoader = DataLoader(trainBatchProvider: trainingBatchProvider!, testBatchProvider: testBatchProvider!)
-            self.coreMLClient = CoreMLClient(modelUrl: url!, dataLoader: dataLoader)
+            DispatchQueue.global(qos: .userInitiated).async {
+                let url = Bundle.main.url(forResource: "MNIST_Model", withExtension: "mlmodel")
+                let dataLoader = DataLoader(trainBatchProvider: self.trainingBatchProvider!, testBatchProvider: self.testBatchProvider!)
+                self.coreMLClient = CoreMLClient(modelUrl: url!, dataLoader: dataLoader)
+                DispatchQueue.main.async {
+                    self.modelCompilationStatus = .ready
+                }
+            }
+        }
+        else {
+            modelCompilationStatus = .ready
         }
     }
     
     public func compileModel() {
+        modelCompilationStatus = .preparing(count: 0)
         initCoreMLClient()
     }
     
     public func startLocalTraining() {
-        self.modelStatus = "Training Starting"
         let configuration = MLModelConfiguration()
         let epochs = MLParameterKey.epochs
         configuration.parameters = [epochs:self.epoch]
@@ -76,13 +89,13 @@ public class ClientModel: ObservableObject {
             switch contextProgress.event {
             case .trainingBegin:
                 DispatchQueue.main.async {
-                    self.modelStatus = "Training Started.."
+                    self.modelStatus = .preparing(info: "Started to train")
                 }
             case .epochEnd:
                 let epochIndex = contextProgress.metrics[.epochIndex] as! Int
                 let trainLoss = contextProgress.metrics[.lossValue] as! Double
                 DispatchQueue.main.async {
-                    self.modelStatus = "Epoch \(epochIndex + 1) end with loss \(trainLoss)"
+                    self.modelStatus = .preparing(info: "Epoch \(epochIndex + 1) end with loss \(trainLoss)")
                 }
 
             default:
@@ -94,7 +107,7 @@ public class ClientModel: ObservableObject {
         let completionHandler = { (finalContext: MLUpdateContext) in
             let trainLoss = finalContext.metrics[.lossValue] as! Double
             DispatchQueue.main.async {
-                self.modelStatus = "Training completed with loss: \(trainLoss) in \(Int(Date().timeIntervalSince(trainingStartTime))) secs"
+                self.modelStatus = .ready(info: "Training completed with loss: \(trainLoss) in \(Int(Date().timeIntervalSince(trainingStartTime))) secs")
             }
         }
         
@@ -113,6 +126,7 @@ public class ClientModel: ObservableObject {
     }
     
     public func startFederatedLearning() {
+        self.federatedServerStatus = .run
         initCoreMLClient()
         startClient(serverHost: hostname, serverPort: port, client: coreMLClient!)
     }
@@ -273,7 +287,7 @@ public class ClientModel: ObservableObject {
     
 }
 
-public enum BatchPreparationStatus {
+public enum BatchPreparationStatus: Comparable {
     case notPrepared
     case preparing(count: Int)
     case ready
@@ -288,4 +302,26 @@ public enum BatchPreparationStatus {
             return "Ready"
         }
     }
+}
+
+public enum BatchPreparationModelStatus {
+    case notPrepared
+    case preparing(info: String)
+    case ready(info: String)
+    
+    var description: String {
+        switch self {
+        case .notPrepared:
+            return "Not Prepared"
+        case .preparing(let info):
+            return info
+        case .ready(let info):
+            return info
+        }
+    }
+}
+
+public enum ServerStatus {
+    case stop
+    case run
 }

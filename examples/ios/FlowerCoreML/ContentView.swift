@@ -49,7 +49,15 @@ struct ContentView: View {
                             Button(action: {
                                 clientModel.prepareTrainDataset()
                             }) {
-                                Text("Start")
+                                switch self.clientModel.trainingBatchStatus {
+                                case BatchPreparationStatus.notPrepared:
+                                    Text("Start")
+                                case BatchPreparationStatus.ready:
+                                    Image(systemName: "checkmark")
+                                default:
+                                    ProgressView()
+                                }
+                                
                             }
                             //.disabled(self.isDataPreparing(for: self.model.trainingBatchStatus))
                         }
@@ -62,7 +70,14 @@ struct ContentView: View {
                             Button(action: {
                                 clientModel.prepareTestDataset()
                             }) {
-                                Text("Start")
+                                switch self.clientModel.testBatchStatus {
+                                case BatchPreparationStatus.notPrepared:
+                                    Text("Start")
+                                case BatchPreparationStatus.ready:
+                                    Image(systemName: "checkmark")
+                                default:
+                                    ProgressView()
+                                }
                             }
                             //.disabled(self.isDataPreparing(for: self.mnist.predictionBatchStatus))
                         }
@@ -75,22 +90,42 @@ struct ContentView: View {
                             Button(action: {
                                 clientModel.compileModel()
                             }) {
-                                Text("Start")
+                                switch self.clientModel.modelCompilationStatus {
+                                case BatchPreparationStatus.notPrepared:
+                                    Text("Start")
+                                case BatchPreparationStatus.ready:
+                                    Image(systemName: "checkmark")
+                                default:
+                                    ProgressView()
+                                }
                             }
-                            //.disabled(!self.isDataReady(for: self.mnist.trainingBatchStatus))
+                            .disabled(self.clientModel.testBatchStatus != BatchPreparationStatus.ready || self.clientModel.trainingBatchStatus != BatchPreparationStatus.ready)
                         }
                         
                         Stepper(value: self.$clientModel.epoch, in: 1...10, label: { Text("Epoch:  \(self.clientModel.epoch)")})
+                            .disabled(self.clientModel.modelCompilationStatus != BatchPreparationStatus.ready)
                         
                         HStack {
-                            Text(self.clientModel.modelStatus)
+                            switch self.clientModel.modelStatus {
+                            case BatchPreparationModelStatus.notPrepared:
+                                Text("Training")
+                            default:
+                                Text(self.clientModel.modelStatus.description)
+                            }
                             Spacer()
                             Button(action: {
                                 clientModel.startLocalTraining()
                             }) {
-                                Text("Start")
+                                switch self.clientModel.modelStatus {
+                                case BatchPreparationModelStatus.notPrepared:
+                                    Text("Start")
+                                case BatchPreparationModelStatus.ready:
+                                    Image(systemName: "checkmark")
+                                default:
+                                    ProgressView()
+                                }
                             }
-                            //.disabled(!self.mnist.modelCompiled)
+                            .disabled(self.clientModel.modelCompilationStatus != BatchPreparationStatus.ready)
                         }
                         HStack {
                             Text("Predict Test data")
@@ -100,7 +135,7 @@ struct ContentView: View {
                             }) {
                                 Text("Start")
                             }
-                            //.disabled(!self.isDataReady(for: self.mnist.predictionBatchStatus) || !self.mnist.modelTrained)
+                            .disabled(!self.clientModel.modelStatus.description.hasPrefix("Training completed"))
                         }
                         //Text(self.mnist.accuracy)
                     }
@@ -116,12 +151,26 @@ struct ContentView: View {
                                 .multilineTextAlignment(.trailing)
                         }
                         HStack {
+                            if self.clientModel.federatedServerStatus == .run {
+                                Button(action: {
+                                    // TODO
+                                }) {
+                                    Text("Stop").foregroundColor(.red)
+                                }
+                            }
                             Spacer()
                             Button(action: {
                                 clientModel.startFederatedLearning()
                             }) {
-                                Text("Start")
+                                switch self.clientModel.federatedServerStatus {
+                                case .stop:
+                                    Text("Start")
+                                default:
+                                    ProgressView()
+                                }
+                                
                             }
+                            .disabled(!self.clientModel.modelStatus.description.hasPrefix("Training completed"))
                         }
                     }
                 }
