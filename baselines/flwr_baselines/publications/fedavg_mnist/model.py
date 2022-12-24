@@ -143,7 +143,7 @@ def test(
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    print(len(testloader.dataset))
-    loss /= len(testloader.dataset)
+    length = float(len(testloader.dataset))
+    loss /= length
     accuracy = correct / total
     return loss, accuracy
