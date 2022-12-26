@@ -33,10 +33,10 @@ def main(cfg: DictConfig) -> None:
     evaluate_fn = utils.gen_evaluate_fn(testloader, DEVICE)
 
     strategy = fl.server.strategy.FedAvg(
-        fraction_fit=cfg.client_fraction,
-        fraction_evaluate=cfg.client_fraction / 2,
-        min_fit_clients=int(cfg.num_clients * cfg.client_fraction),
-        min_evaluate_clients=int(cfg.num_clients / 2),
+        fraction_fit=1 - cfg.staggers_fraction,
+        fraction_evaluate=0.0,
+        min_fit_clients=int(cfg.num_clients * (1 - cfg.staggers_fraction)),
+        min_evaluate_clients=0,
         min_available_clients=cfg.num_clients,
         evaluate_fn=evaluate_fn,
         evaluate_metrics_aggregation_fn=utils.weighted_average,
@@ -50,7 +50,12 @@ def main(cfg: DictConfig) -> None:
         strategy=strategy,
     )
 
-    utils.plot_metric_from_history(history, cfg.plot_path, cfg.expected_maximum)
+    utils.plot_metric_from_history(
+        history,
+        cfg.plot_path,
+        cfg.expected_maximum,
+        f"_cli={cfg.num_clients}_rds={cfg.num_rounds}_mu={cfg.mu}_stag={cfg.staggers_fraction}",
+    )
 
 
 if __name__ == "__main__":
