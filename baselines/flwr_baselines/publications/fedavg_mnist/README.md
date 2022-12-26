@@ -71,12 +71,11 @@ python main.py num_epochs=5 num_rounds=1000 iid=True
 
 Results will be stored as timestamped folders inside either `outputs` or `multiruns`, depending on whether you perform single- or multi-runs. 
 
-### Example outputs
+### Example output
 
-To help visualize results, the script also plots evaluation curves. Here are some examples:
+To help visualize results, the script also plots evaluation curves. Here is an example:
 
 <p align="center">
       <img src="docs/centralized_metrics.png" alt="Centralized evaluation results" width="400">
-      <img src="docs/distributed_metrics.png" alt="Distributed evaluation results" width="400">
 </p>
 
