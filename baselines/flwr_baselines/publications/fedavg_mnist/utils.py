@@ -38,7 +38,7 @@ def plot_metric_from_history(
     )
     rounds, values = zip(*metric_dict["accuracy"])
     fig = plt.figure()
-    ax = fig.add_subplot(111)
+    axis = fig.add_subplot(111)
     plt.plot(np.asarray(rounds), np.asarray(values), label="FedAvg")
     # Set expected graph for data
     plt.axhline(
@@ -60,9 +60,9 @@ def plot_metric_from_history(
     plt.legend(loc="lower right")
 
     # Set the apect ratio to 1.0
-    xleft, xright = ax.get_xlim()
-    ybottom, ytop = ax.get_ylim()
-    ax.set_aspect(abs((xright - xleft) / (ybottom - ytop)) * 1.0)
+    xleft, xright = axis.get_xlim()
+    ybottom, ytop = axis.get_ylim()
+    axis.set_aspect(abs((xright - xleft) / (ybottom - ytop)) * 1.0)
 
     plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics.png"))
     plt.close()
