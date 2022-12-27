@@ -49,7 +49,12 @@ def main(cfg: DictConfig) -> None:
         strategy=strategy,
     )
 
-    utils.plot_metric_from_history(history, cfg.plot_path, cfg.expected_maximum)
+    utils.plot_metric_from_history(
+        history,
+        cfg.plot_path,
+        cfg.expected_maximum,
+        f"_cli={cfg.num_clients}_rds={cfg.num_rounds}_mu={cfg.mu}_stag={1 - cfg.client_fraction}",
+    )
 
 
 if __name__ == "__main__":

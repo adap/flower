@@ -17,7 +17,10 @@ from flwr_baselines.publications.fedavg_mnist import model
 
 
 def plot_metric_from_history(
-    hist: History, save_plot_path: Path, expected_maximum: float
+    hist: History,
+    save_plot_path: Path,
+    expected_maximum: float,
+    suffix: Optional[str] = "",
 ) -> None:
     """Function to plot from Flower server History.
 
@@ -29,6 +32,8 @@ def plot_metric_from_history(
         Folder to save the plot to.
     expected_maximum : float
         The expected maximum accuracy from the original paper.
+    suffix: Optional[str]
+        Optional string to add at the end of the filename for the plot.
     """
     metric_type = "centralized"
     metric_dict = (
@@ -64,7 +69,7 @@ def plot_metric_from_history(
     ybottom, ytop = axis.get_ylim()
     axis.set_aspect(abs((xright - xleft) / (ybottom - ytop)) * 1.0)
 
-    plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics.png"))
+    plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
     plt.close()
 
 
