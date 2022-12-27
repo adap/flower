@@ -53,7 +53,7 @@ def main(cfg: DictConfig) -> None:
         history,
         cfg.plot_path,
         cfg.expected_maximum,
-        f"_cli={cfg.num_clients}_rds={cfg.num_rounds}_mu={cfg.mu}_stag={1 - cfg.client_fraction}",
+        f"_cli={cfg.num_clients}_rds={cfg.num_rounds}_stag={1 - cfg.client_fraction}",
     )
 
 
