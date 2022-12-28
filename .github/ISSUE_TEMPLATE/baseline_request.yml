@@ -1,7 +1,7 @@
 name: Baseline request
 description: Suggest a new baseline
 labels: ["new baseline, good first issue"]
-title: Add [new_baseline_name] baseline
+title: "Add Flower Baseline: [new_baseline_name]"
 
 body:
   - type: input
