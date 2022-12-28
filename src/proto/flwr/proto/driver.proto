@@ -20,8 +20,8 @@ package flwr.proto;
 import "flwr/proto/task.proto";
 
 service Driver {
-  // Return a list of clients.
-  rpc GetClients(GetClientsRequest) returns (GetClientsResponse) {}
+  // Return a set of nodes
+  rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
 
   // Create one or more tasks
   rpc CreateTasks(CreateTasksRequest) returns (CreateTasksResponse) {}
@@ -30,9 +30,9 @@ service Driver {
   rpc GetResults(GetResultsRequest) returns (GetResultsResponse) {}
 }
 
-// GetClients messages
-message GetClientsRequest {}
-message GetClientsResponse { repeated uint64 client_ids = 1; }
+// GetNodes messages
+message GetNodesRequest {}
+message GetNodesResponse { repeated uint64 node_ids = 1; }
 
 // CreateTasks messages
 message CreateTasksRequest { repeated TaskAssignment task_assignments = 1; }

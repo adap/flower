@@ -28,8 +28,8 @@ from flwr.proto import driver_pb2, driver_pb2_grpc
 from .messages import (
     CreateTasksRequest,
     CreateTasksResponse,
-    GetClientsRequest,
-    GetClientsResponse,
+    GetNodesRequest,
+    GetNodesResponse,
     GetResultsRequest,
     GetResultsResponse,
 )
@@ -80,18 +80,16 @@ class Driver:
         channel.close()
         log(INFO, "[Driver] Disconnected")
 
-    def get_clients(self, req: GetClientsRequest) -> GetClientsResponse:
+    def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
         """Get client IDs."""
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise Exception("`Driver` instance not connected")
 
         # Serialize, call Driver API, deserialize
-        req_proto = serde.get_clients_request_to_proto(req)
-        res_proto: driver_pb2.GetClientsResponse = self.stub.GetClients(
-            request=req_proto
-        )
-        return serde.get_clients_response_from_proto(res_proto)
+        req_proto = serde.get_nodes_request_to_proto(req)
+        res_proto: driver_pb2.GetNodesResponse = self.stub.GetNodes(request=req_proto)
+        return serde.get_nodes_response_from_proto(res_proto)
 
     def create_tasks(self, req: CreateTasksRequest) -> CreateTasksResponse:
         """Schedule tasks."""

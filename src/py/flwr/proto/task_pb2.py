@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15\x66lwr/proto/task.proto\x12\nflwr.proto\x1a\x1a\x66lwr/proto/transport.proto\"U\n\x04Task\x12\x0f\n\x07task_id\x18\x01 \x01(\x04\x12<\n\x15legacy_server_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ServerMessageB\x02\x18\x01\"D\n\x0eTaskAssignment\x12\x1e\n\x04task\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Task\x12\x12\n\nclient_ids\x18\x02 \x03(\x04\"W\n\x06Result\x12\x0f\n\x07task_id\x18\x01 \x01(\x04\x12<\n\x15legacy_client_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ClientMessageB\x02\x18\x01\x62\x06proto3'
+  serialized_pb=b'\n\x15\x66lwr/proto/task.proto\x12\nflwr.proto\x1a\x1a\x66lwr/proto/transport.proto\"U\n\x04Task\x12\x0f\n\x07task_id\x18\x01 \x01(\x04\x12<\n\x15legacy_server_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ServerMessageB\x02\x18\x01\"B\n\x0eTaskAssignment\x12\x1e\n\x04task\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Task\x12\x10\n\x08node_ids\x18\x02 \x03(\x04\"W\n\x06Result\x12\x0f\n\x07task_id\x18\x01 \x01(\x04\x12<\n\x15legacy_client_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ClientMessageB\x02\x18\x01\x62\x06proto3'
   ,
   dependencies=[flwr_dot_proto_dot_transport__pb2.DESCRIPTOR,])
 
@@ -82,7 +82,7 @@ _TASKASSIGNMENT = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='client_ids', full_name='flwr.proto.TaskAssignment.client_ids', index=1,
+      name='node_ids', full_name='flwr.proto.TaskAssignment.node_ids', index=1,
       number=2, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -101,7 +101,7 @@ _TASKASSIGNMENT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=152,
-  serialized_end=220,
+  serialized_end=218,
 )
 
 
@@ -139,8 +139,8 @@ _RESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=222,
-  serialized_end=309,
+  serialized_start=220,
+  serialized_end=307,
 )
 
 _TASK.fields_by_name['legacy_server_message'].message_type = flwr_dot_proto_dot_transport__pb2._SERVERMESSAGE

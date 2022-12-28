@@ -4,8 +4,8 @@ import time
 
 from flwr.driver import (
     Driver,
-    GetClientsResponse,
-    GetClientsRequest,
+    GetNodesResponse,
+    GetNodesRequest,
     Task,
     Result,
     CreateTasksRequest,
@@ -34,10 +34,10 @@ for server_round in range(num_rounds):
     print(f"Commencing server round {server_round + 1}")
 
     # Get a list of client ID's from the server
-    get_clients_req = GetClientsRequest()
+    get_clients_req = GetNodesRequest()
 
     # ---------------------------------------------------------------------- Driver SDK
-    get_clients_res: GetClientsResponse = driver.get_clients(req=get_clients_req)
+    get_clients_res: GetNodesResponse = driver.get_clients(req=get_clients_req)
     # ---------------------------------------------------------------------- Driver SDK
 
     # Sample three clients
