@@ -10,7 +10,7 @@ on:
 
 jobs:
   build_docs:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Build docs
@@ -36,7 +36,7 @@ jobs:
   deploy_docs:
     needs: build_docs
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Deploy docs
