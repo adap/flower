@@ -12,24 +12,24 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-class GetClientsRequest(google.protobuf.message.Message):
-    """GetClients messages"""
+class GetNodesRequest(google.protobuf.message.Message):
+    """GetNodes messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
-global___GetClientsRequest = GetClientsRequest
+global___GetNodesRequest = GetNodesRequest
 
-class GetClientsResponse(google.protobuf.message.Message):
+class GetNodesResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    CLIENT_IDS_FIELD_NUMBER: builtins.int
+    NODE_IDS_FIELD_NUMBER: builtins.int
     @property
-    def client_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
+    def node_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
     def __init__(self,
         *,
-        client_ids: typing.Optional[typing.Iterable[builtins.int]] = ...,
+        node_ids: typing.Optional[typing.Iterable[builtins.int]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["client_ids",b"client_ids"]) -> None: ...
-global___GetClientsResponse = GetClientsResponse
+    def ClearField(self, field_name: typing_extensions.Literal["node_ids",b"node_ids"]) -> None: ...
+global___GetNodesResponse = GetNodesResponse
 
 class CreateTasksRequest(google.protobuf.message.Message):
     """CreateTasks messages"""
