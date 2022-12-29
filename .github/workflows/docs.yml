@@ -20,9 +20,9 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt install pandoc
-          python -m pip install -U pip==22.2
-          python -m pip install -U setuptools==63.2.0
-          python -m pip install -U poetry==1.1.14
+          python -m pip install -U pip==22.3.1
+          python -m pip install -U setuptools==65.6.3
+          python -m pip install -U poetry==1.1.15
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
@@ -46,9 +46,9 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt install pandoc
-          python -m pip install -U pip==22.2
-          python -m pip install -U setuptools==63.2.0
-          python -m pip install -U poetry==1.1.14
+          python -m pip install -U pip==22.3.1
+          python -m pip install -U setuptools==65.6.3
+          python -m pip install -U poetry==1.1.15
           poetry config virtualenvs.create false
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
