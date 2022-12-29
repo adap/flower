@@ -106,9 +106,7 @@ class DriverClientManager(ClientManager):
         """
         return set(self.ids_to_cps)
 
-    ### -----------------------------------------------------------------------
-    ### --- Unimplemented methods ---------------------------------------------
-    ### -----------------------------------------------------------------------
+    # --- Unimplemented methods -----------------------------------------------
 
     def all(self) -> Dict[str, ClientProxy]:
         """Not implemented."""
