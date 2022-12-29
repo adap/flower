@@ -17,11 +17,7 @@
 
 import threading
 import uuid
-from abc import ABC, abstractmethod
-from logging import INFO
 from typing import Dict, List, Optional, Set
-
-from flwr.common.logger import log
 
 from ..client_manager import ClientManager
 from ..client_proxy import ClientProxy
