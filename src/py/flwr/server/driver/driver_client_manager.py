@@ -102,7 +102,7 @@ class DriverClientManager(ClientManager):
 
     def all_ids(self) -> Set[int]:
         """Return all available client ids.
-        
+
         Returns
         -------
         ids : Set[int]
