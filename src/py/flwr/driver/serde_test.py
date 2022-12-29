@@ -19,36 +19,36 @@ from flwr.driver import serde
 from flwr.driver.messages import (
     CreateTasksRequest,
     CreateTasksResponse,
-    GetClientsRequest,
-    GetClientsResponse,
+    GetNodesRequest,
+    GetNodesResponse,
     GetResultsRequest,
     GetResultsResponse,
 )
 
 
-def test_get_clients_request_serde() -> None:
-    """Test `GetClientsRequest` (de-)serialization."""
+def test_get_nodes_request_serde() -> None:
+    """Test `GetNodesRequest` (de-)serialization."""
 
     # Prepare
-    req = GetClientsRequest()
+    req = GetNodesRequest()
 
     # Execute
-    msg = serde.get_clients_request_to_proto(req)
-    req_actual = serde.get_clients_request_from_proto(msg)
+    msg = serde.get_nodes_request_to_proto(req)
+    req_actual = serde.get_nodes_request_from_proto(msg)
 
     # Assert
     assert req_actual == req
 
 
-def test_get_clients_response_serde() -> None:
-    """Test `GetClientsResponse` (de-)serialization."""
+def test_get_nodes_response_serde() -> None:
+    """Test `GetNodesResponse` (de-)serialization."""
 
     # Prepare
-    res = GetClientsResponse(client_ids=[1, 2, 3])
+    res = GetNodesResponse(node_ids=[1, 2, 3])
 
     # Execute
-    msg = serde.get_clients_response_to_proto(res)
-    res_actual = serde.get_clients_response_from_proto(msg)
+    msg = serde.get_nodes_response_to_proto(res)
+    res_actual = serde.get_nodes_response_from_proto(msg)
 
     # Assert
     assert res_actual == res
