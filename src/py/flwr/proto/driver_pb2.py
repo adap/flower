@@ -20,16 +20,16 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x17\x66lwr/proto/driver.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/task.proto\"\x13\n\x11GetClientsRequest\"(\n\x12GetClientsResponse\x12\x12\n\nclient_ids\x18\x01 \x03(\x04\"J\n\x12\x43reateTasksRequest\x12\x34\n\x10task_assignments\x18\x01 \x03(\x0b\x32\x1a.flwr.proto.TaskAssignment\"\'\n\x13\x43reateTasksResponse\x12\x10\n\x08task_ids\x18\x01 \x03(\x04\"%\n\x11GetResultsRequest\x12\x10\n\x08task_ids\x18\x01 \x03(\x04\"9\n\x12GetResultsResponse\x12#\n\x07results\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result2\xf8\x01\n\x06\x44river\x12M\n\nGetClients\x12\x1d.flwr.proto.GetClientsRequest\x1a\x1e.flwr.proto.GetClientsResponse\"\x00\x12P\n\x0b\x43reateTasks\x12\x1e.flwr.proto.CreateTasksRequest\x1a\x1f.flwr.proto.CreateTasksResponse\"\x00\x12M\n\nGetResults\x12\x1d.flwr.proto.GetResultsRequest\x1a\x1e.flwr.proto.GetResultsResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x17\x66lwr/proto/driver.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/task.proto\"\x11\n\x0fGetNodesRequest\"$\n\x10GetNodesResponse\x12\x10\n\x08node_ids\x18\x01 \x03(\x04\"J\n\x12\x43reateTasksRequest\x12\x34\n\x10task_assignments\x18\x01 \x03(\x0b\x32\x1a.flwr.proto.TaskAssignment\"\'\n\x13\x43reateTasksResponse\x12\x10\n\x08task_ids\x18\x01 \x03(\x04\"%\n\x11GetResultsRequest\x12\x10\n\x08task_ids\x18\x01 \x03(\x04\"9\n\x12GetResultsResponse\x12#\n\x07results\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result2\xf2\x01\n\x06\x44river\x12G\n\x08GetNodes\x12\x1b.flwr.proto.GetNodesRequest\x1a\x1c.flwr.proto.GetNodesResponse\"\x00\x12P\n\x0b\x43reateTasks\x12\x1e.flwr.proto.CreateTasksRequest\x1a\x1f.flwr.proto.CreateTasksResponse\"\x00\x12M\n\nGetResults\x12\x1d.flwr.proto.GetResultsRequest\x1a\x1e.flwr.proto.GetResultsResponse\"\x00\x62\x06proto3'
   ,
   dependencies=[flwr_dot_proto_dot_task__pb2.DESCRIPTOR,])
 
 
 
 
-_GETCLIENTSREQUEST = _descriptor.Descriptor(
-  name='GetClientsRequest',
-  full_name='flwr.proto.GetClientsRequest',
+_GETNODESREQUEST = _descriptor.Descriptor(
+  name='GetNodesRequest',
+  full_name='flwr.proto.GetNodesRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -48,20 +48,20 @@ _GETCLIENTSREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=62,
-  serialized_end=81,
+  serialized_end=79,
 )
 
 
-_GETCLIENTSRESPONSE = _descriptor.Descriptor(
-  name='GetClientsResponse',
-  full_name='flwr.proto.GetClientsResponse',
+_GETNODESRESPONSE = _descriptor.Descriptor(
+  name='GetNodesResponse',
+  full_name='flwr.proto.GetNodesResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='client_ids', full_name='flwr.proto.GetClientsResponse.client_ids', index=0,
+      name='node_ids', full_name='flwr.proto.GetNodesResponse.node_ids', index=0,
       number=1, type=4, cpp_type=4, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -79,8 +79,8 @@ _GETCLIENTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=83,
-  serialized_end=123,
+  serialized_start=81,
+  serialized_end=117,
 )
 
 
@@ -111,8 +111,8 @@ _CREATETASKSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=125,
-  serialized_end=199,
+  serialized_start=119,
+  serialized_end=193,
 )
 
 
@@ -143,8 +143,8 @@ _CREATETASKSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=201,
-  serialized_end=240,
+  serialized_start=195,
+  serialized_end=234,
 )
 
 
@@ -175,8 +175,8 @@ _GETRESULTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=242,
-  serialized_end=279,
+  serialized_start=236,
+  serialized_end=273,
 )
 
 
@@ -207,33 +207,33 @@ _GETRESULTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=281,
-  serialized_end=338,
+  serialized_start=275,
+  serialized_end=332,
 )
 
 _CREATETASKSREQUEST.fields_by_name['task_assignments'].message_type = flwr_dot_proto_dot_task__pb2._TASKASSIGNMENT
 _GETRESULTSRESPONSE.fields_by_name['results'].message_type = flwr_dot_proto_dot_task__pb2._RESULT
-DESCRIPTOR.message_types_by_name['GetClientsRequest'] = _GETCLIENTSREQUEST
-DESCRIPTOR.message_types_by_name['GetClientsResponse'] = _GETCLIENTSRESPONSE
+DESCRIPTOR.message_types_by_name['GetNodesRequest'] = _GETNODESREQUEST
+DESCRIPTOR.message_types_by_name['GetNodesResponse'] = _GETNODESRESPONSE
 DESCRIPTOR.message_types_by_name['CreateTasksRequest'] = _CREATETASKSREQUEST
 DESCRIPTOR.message_types_by_name['CreateTasksResponse'] = _CREATETASKSRESPONSE
 DESCRIPTOR.message_types_by_name['GetResultsRequest'] = _GETRESULTSREQUEST
 DESCRIPTOR.message_types_by_name['GetResultsResponse'] = _GETRESULTSRESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-GetClientsRequest = _reflection.GeneratedProtocolMessageType('GetClientsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GETCLIENTSREQUEST,
+GetNodesRequest = _reflection.GeneratedProtocolMessageType('GetNodesRequest', (_message.Message,), {
+  'DESCRIPTOR' : _GETNODESREQUEST,
   '__module__' : 'flwr.proto.driver_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.GetClientsRequest)
+  # @@protoc_insertion_point(class_scope:flwr.proto.GetNodesRequest)
   })
-_sym_db.RegisterMessage(GetClientsRequest)
+_sym_db.RegisterMessage(GetNodesRequest)
 
-GetClientsResponse = _reflection.GeneratedProtocolMessageType('GetClientsResponse', (_message.Message,), {
-  'DESCRIPTOR' : _GETCLIENTSRESPONSE,
+GetNodesResponse = _reflection.GeneratedProtocolMessageType('GetNodesResponse', (_message.Message,), {
+  'DESCRIPTOR' : _GETNODESRESPONSE,
   '__module__' : 'flwr.proto.driver_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.GetClientsResponse)
+  # @@protoc_insertion_point(class_scope:flwr.proto.GetNodesResponse)
   })
-_sym_db.RegisterMessage(GetClientsResponse)
+_sym_db.RegisterMessage(GetNodesResponse)
 
 CreateTasksRequest = _reflection.GeneratedProtocolMessageType('CreateTasksRequest', (_message.Message,), {
   'DESCRIPTOR' : _CREATETASKSREQUEST,
@@ -272,16 +272,16 @@ _DRIVER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=341,
-  serialized_end=589,
+  serialized_start=335,
+  serialized_end=577,
   methods=[
   _descriptor.MethodDescriptor(
-    name='GetClients',
-    full_name='flwr.proto.Driver.GetClients',
+    name='GetNodes',
+    full_name='flwr.proto.Driver.GetNodes',
     index=0,
     containing_service=None,
-    input_type=_GETCLIENTSREQUEST,
-    output_type=_GETCLIENTSRESPONSE,
+    input_type=_GETNODESREQUEST,
+    output_type=_GETNODESRESPONSE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
