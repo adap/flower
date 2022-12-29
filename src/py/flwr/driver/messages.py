@@ -36,7 +36,7 @@ class TaskAssignment:
     """."""
 
     task: Task
-    client_ids: List[int]
+    node_ids: List[int]
 
 
 @dataclass
@@ -51,15 +51,15 @@ class Result:
 
 
 @dataclass
-class GetClientsRequest:
+class GetNodesRequest:
     """."""
 
 
 @dataclass
-class GetClientsResponse:
+class GetNodesResponse:
     """."""
 
-    client_ids: List[int]
+    node_ids: List[int]
 
 
 @dataclass
