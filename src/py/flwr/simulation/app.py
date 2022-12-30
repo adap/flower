@@ -29,7 +29,6 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
 
-# from flwr.simulation.ray_monitoring import RayClientProfilerProxy
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 from flwr.simulation.ray_monitoring.profiler import RayClientProfilerProxy
 
@@ -187,6 +186,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     # Register one RayClientProxy object for each client with the ClientManager
     resources = client_resources if client_resources is not None else {}
     Proxy = RayClientProfilerProxy if use_profiler else RayClientProxy
+
     for cid in cids:
         client_proxy = Proxy(
             client_fn=client_fn,

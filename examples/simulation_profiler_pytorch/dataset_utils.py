@@ -1,13 +1,16 @@
+import pickle
+import shutil
 from pathlib import Path
+from typing import Any, Callable, Optional, Tuple
+
 import numpy as np
 import torch
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
-import shutil
-from PIL import Image
-from torchvision.datasets import VisionDataset
-from typing import Callable, Optional, Tuple, Any
 from common import XY, create_lda_partitions
+from PIL import Image
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
+from torchvision.datasets import VisionDataset
+
 from flwr.common.typing import NDArray, NDArrays
 
 
@@ -21,7 +24,7 @@ def get_dataset(path_to_data: Path, cid: str, partition: str):
 def get_dataloader(
     path_to_data: Path, cid: str, is_train: bool, batch_size: int, workers: int
 ) -> DataLoader:
-    """Generates trainset/valset object and returns appropiate dataloader."""
+    """Generates trainset/valset object and returns appropriate dataloader."""
 
     partition = "train" if is_train else "val"
     dataset = get_dataset(Path(path_to_data).absolute(), cid, partition)
@@ -81,7 +84,9 @@ def do_fl_partitioning(
         shutil.rmtree(splits_dir)
     Path.mkdir(splits_dir, parents=True)
 
-    for p in range(pool_size):
+    dataset_sizes = {"train": {}, "val": {}}
+
+    for cid, p in enumerate(range(pool_size)):
 
         labels = partitions[p][1]
         image_idx = partitions[p][0]
@@ -89,7 +94,6 @@ def do_fl_partitioning(
 
         # create dir
         Path.mkdir(splits_dir / str(p))
-
         if val_ratio > 0.0:
             # split data according to val_ratio
             train_idx, val_idx = get_random_id_splits(len(labels), val_ratio)
@@ -102,9 +106,16 @@ def do_fl_partitioning(
             # remaining images for training
             imgs = imgs[train_idx]
             labels = labels[train_idx]
+            dataset_sizes["val"][(cid)] = len(val_labels)
 
         with open(splits_dir / str(p) / "train.pt", "wb") as f:
             torch.save([imgs, labels], f)
+
+        dataset_sizes["train"][str(cid)] = len(labels)
+
+    # Save profile
+    with open(splits_dir / "profiles.pickle", "wb") as f:
+        pickle.dump(dataset_sizes, f)
 
     return splits_dir
 

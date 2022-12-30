@@ -1,129 +1,22 @@
 import argparse
+import pickle
 import ray
-import torch
-import torchvision
-import numpy as np
-from collections import OrderedDict
-from pathlib import Path
-from typing import Dict, Callable, Optional, Tuple, List
-from dataset_utils import get_cifar_10, do_fl_partitioning, get_dataloader
-from utils import Net, train, test
-from flwr.common.typing import Scalar, NDArrays
-from flwr.client import NumPyClient
-from flwr.simulation import start_simulation
-from flwr.server import ServerConfig
-from flwr.server.strategy import FedAvg
 
+from client import FlowerClient
+from dataset_utils import do_fl_partitioning, get_cifar_10
+from utils import evaluate_config, fit_config
+
+from flwr.server import ServerConfig
+from flwr.server.strategy import ResourceAwareFedAvg
+from flwr.simulation import start_simulation
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
-parser.add_argument("--num_client_cpus", type=float, default=1)
-parser.add_argument("--num_client_gpus", type=float, default=0.25)
+parser.add_argument("--num_cpus_per_client", type=float, default=1)  # Initial values
+parser.add_argument("--num_gpus_per_client", type=float, default=0.5)  # Initial values
 parser.add_argument("--num_rounds", type=int, default=5)
 
-
 # Flower client, adapted from Pytorch quickstart example
-class FlowerClient(NumPyClient):
-    def __init__(self, cid: str, fed_dir_data: str):
-        self.cid = cid
-        self.fed_dir = Path(fed_dir_data)
-        self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
-
-        # Instantiate model
-        self.net = Net()
-
-        # Determine device
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-    def get_parameters(self, config):
-        return get_params(self.net)
-
-    def fit(self, parameters, config):
-        set_params(self.net, parameters)
-
-        # Load data for this client and get trainloader
-        num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
-        trainloader = get_dataloader(
-            self.fed_dir,
-            self.cid,
-            is_train=True,
-            batch_size=int(config["batch_size"]),
-            workers=num_workers,
-        )
-
-        # Send model to device
-        self.net.to(self.device)
-
-        # Train
-        train(self.net, trainloader, epochs=config["epochs"], device=self.device)
-
-        # Return local model and statistics
-        return get_params(self.net), len(trainloader.dataset), {}
-
-    def evaluate(self, parameters, config):
-        set_params(self.net, parameters)
-
-        # Load data for this client and get trainloader
-        num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
-        valloader = get_dataloader(
-            self.fed_dir, self.cid, is_train=False, batch_size=8, workers=num_workers
-        )
-
-        # Send model to device
-        self.net.to(self.device)
-
-        # Evaluate
-        loss, accuracy = test(self.net, valloader, device=self.device)
-
-        # Return statistics
-        return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
-
-
-def fit_config(server_round: int) -> Dict[str, Scalar]:
-    """Return a configuration with static batch size and (local) epochs."""
-    config = {
-        "epochs": 5,  # number of local epochs
-        "batch_size": 8,
-    }
-    return config
-
-
-def get_params(model: torch.nn.Module) -> List[np.ndarray]:
-    """Get model weights as a list of NumPy ndarrays."""
-    return [val.cpu().numpy() for _, val in model.state_dict().items()]
-
-
-def set_params(model: torch.nn.Module, params: List[np.ndarray]):
-    """Set model weights from a list of NumPy ndarrays."""
-    params_dict = zip(model.state_dict().keys(), params)
-    state_dict = OrderedDict({k: torch.from_numpy(np.copy(v)) for k, v in params_dict})
-    model.load_state_dict(state_dict, strict=True)
-
-
-def get_evaluate_fn(
-    testset: torchvision.datasets.CIFAR10,
-) -> Callable[[NDArrays], Optional[Tuple[float, float]]]:
-    """Return an evaluation function for centralized evaluation."""
-
-    def evaluate(
-        server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Optional[Tuple[float, float]]:
-        """Use the entire CIFAR-10 test set for evaluation."""
-
-        # determine device
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-        model = Net()
-        set_params(model, parameters)
-        model.to(device)
-
-        testloader = torch.utils.data.DataLoader(testset, batch_size=50)
-        loss, accuracy = test(model, testloader, device=device)
-
-        # return statistics
-        return loss, {"accuracy": accuracy}
-
-    return evaluate
 
 
 # Start simulation (a _default server_ will be created)
@@ -136,16 +29,17 @@ def get_evaluate_fn(
 #    Also, the global model is evaluated on the valset partition residing in each
 #    client. This is useful to get a sense on how well the global model can generalise
 #    to each client's data.
+
+
 if __name__ == "__main__":
 
-    # parse input arguments
     args = parser.parse_args()
 
-    pool_size = 100  # number of dataset partions (= number of total clients)
+    pool_size = 100  # number of dataset partitions (= number of total clients)
     client_resources = {
-        "num_cpus": args.num_client_cpus,
-        "num_gpus": args.num_client_gpus,
-    }  # each client will get allocated 1 CPUs
+        "num_cpus": args.num_cpus_per_client,
+        "num_gpus": args.num_gpus_per_client,
+    }
 
     # Download CIFAR-10 dataset
     train_path, testset = get_cifar_10()
@@ -156,26 +50,40 @@ if __name__ == "__main__":
     # CIFAR-10 lives. Inside it, there will be N=pool_size sub-directories each with
     # its own train/set split.
     fed_dir = do_fl_partitioning(
-        train_path, pool_size=pool_size, alpha=1000, num_classes=10, val_ratio=0.1
+        path_to_dataset=train_path,
+        pool_size=pool_size,
+        alpha=1000,
+        num_classes=10,
+        val_ratio=0.1,
     )
 
+    # Get profiles
+    with open(fed_dir / "profiles.pickle", "rb") as f:
+        profiles = pickle.load(f)
+
     # configure the strategy
-    strategy = FedAvg(
+    strategy = ResourceAwareFedAvg(
         fraction_fit=0.1,
+        fraction_evaluate=0.0,
         min_fit_clients=2,
-        fraction_evaluate=0.02,
-        min_evaluate_clients=2,
-        min_available_clients=pool_size,  # All clients should be available
+        # min_evaluate_clients=0,
+        min_available_clients=pool_size,
         on_fit_config_fn=fit_config,
-        evaluate_fn=get_evaluate_fn(testset),  # centralised evaluation of global model
+        # on_evaluate_config_fn=evaluate_config,
+        profiles=profiles
+        # evaluate_fn=get_evaluate_fn(testset),  # centralized evaluation of global model
     )
 
     def client_fn(cid: str):
         # create a single client instance
-        return FlowerClient(cid, fed_dir)
+        return FlowerClient(cid, str(fed_dir.absolute()))
 
     # (optional) specify Ray config
-    ray_init_args = {"include_dashboard": False, "num_cpus": 3}
+    ray.init(include_dashboard=False)
+
+    ray_init_args = {
+        "include_dashboard": False,
+    }
 
     # start simulation
     start_simulation(
@@ -185,5 +93,5 @@ if __name__ == "__main__":
         config=ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
         ray_init_args=ray_init_args,
-        use_profiler=False,
+        use_profiler=True,
     )

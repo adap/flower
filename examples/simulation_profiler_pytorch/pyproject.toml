@@ -3,14 +3,12 @@ requires = ["poetry_core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "simulation_pytorch"
+name = "simulation_profiler_pytorch"
 version = "0.1.0"
 description = "Federated Learning Simulation with Flower and PyTorch"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-flwr = { extras = ["simulation"], version = "^1.1.0" }
-torch = "^1.12.0"
-torchvision = "^0.13.0"
-nvsmi = "^0.4.2"
+# flwr = { extras = ["simulation"], version = "^1.0.0" }
+flwr = { path = "../../", develop = true, extras = ["simulation"] }  # Development
