@@ -38,7 +38,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7.12"
+python = "^3.8.15"
 # Mandatory dependencies
 flwr = { extras = ["simulation"], version = "==1.0.0" }
 torch = "^1.10.1"
