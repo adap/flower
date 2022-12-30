@@ -16,7 +16,7 @@ jobs:
       - name: Build docs
         uses: actions/setup-python@v4
         with:
-          python-version: 3.7.12
+          python-version: 3.7.16
       - name: Install build tools
         run: |
           sudo apt install pandoc
@@ -42,7 +42,7 @@ jobs:
       - name: Deploy docs
         uses: actions/setup-python@v4
         with:
-          python-version: 3.7.12
+          python-version: 3.7.16
       - name: Install build tools
         run: |
           sudo apt install pandoc
