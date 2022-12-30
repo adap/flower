@@ -79,7 +79,7 @@ struct ContentView: View {
                                     ProgressView()
                                 }
                             }
-                            //.disabled(self.isDataPreparing(for: self.mnist.predictionBatchStatus))
+                            .disabled(self.clientModel.trainingBatchStatus != BatchPreparationStatus.ready)
                         }
                         
                     }
