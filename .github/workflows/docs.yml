@@ -10,13 +10,13 @@ on:
 
 jobs:
   build_docs:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Build docs
         uses: actions/setup-python@v4
         with:
-          python-version: 3.7.12
+          python-version: 3.7.15
       - name: Install build tools
         run: |
           sudo apt install pandoc
@@ -36,13 +36,13 @@ jobs:
   deploy_docs:
     needs: build_docs
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Deploy docs
         uses: actions/setup-python@v4
         with:
-          python-version: 3.7.12
+          python-version: 3.7.15
       - name: Install build tools
         run: |
           sudo apt install pandoc
