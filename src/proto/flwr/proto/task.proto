@@ -27,7 +27,7 @@ message Task {
 
 message TaskAssignment {
   Task task = 1;
-  repeated uint64 client_ids = 2;
+  repeated uint64 node_ids = 2;
 }
 
 message Result {

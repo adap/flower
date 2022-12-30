@@ -140,6 +140,7 @@ intended to help along the way.
    release-process
    creating-new-messages
    devcontainer
+   fed/index
 
 
 .. Indices and tables
