@@ -1,4 +1,4 @@
-FROM python:3.7.16-slim-buster
+FROM python:3.7.15-slim-buster
 
 # Install the biggest dependencies before copying the wheel
 RUN pip install tensorflow-cpu==2.6.2 numpy==1.19.5
