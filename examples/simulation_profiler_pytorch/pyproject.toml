@@ -12,3 +12,4 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 python = "^3.7"
 # flwr = { extras = ["simulation"], version = "^1.0.0" }
 flwr = { path = "../../", develop = true, extras = ["simulation"] }  # Development
+matplotlib = "3.5.3"

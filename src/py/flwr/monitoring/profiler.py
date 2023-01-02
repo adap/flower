@@ -165,7 +165,7 @@ class SystemMonitor(Thread):
 
     def save_and_clear(self, sub_folder: PurePath):
 
-        save_path = self.save_path_root / sub_folder / self.node_id
+        save_path = self.save_path_root / sub_folder
         resources_folder = save_path / "resources"
         resources_folder.mkdir(parents=True, exist_ok=True)
         task_folder = save_path / "tasks"
