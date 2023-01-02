@@ -50,10 +50,11 @@ class CoreMLClient: Client {
         try? JSONSerialization.data(withJSONObject: data as Any)
     }
     
-    func getParameters() -> ParametersRes {
+    func getParameters() -> GetParametersRes {
 //        print(layerWrappers.map{ $0.shape })
         let parameters = weightsToParameters()
-        return ParametersRes(parameters: parameters)
+        let status = Status(code: .ok, message: String())
+        return GetParametersRes(parameters: parameters, status: status)
     }
     
     func fit(ins: FitIns) -> FitRes {
@@ -63,10 +64,11 @@ class CoreMLClient: Client {
         train(modelConfig: parametersToWeights(parameters: ins.parameters)) { result in
             trainingResult = result
         }
+        let status = Status(code: .ok, message: String())
         while true {
             if let result = trainingResult {
                 let parameters = weightsToParameters()
-                return FitRes(parameters: parameters, numExamples: result.numSamples)
+                return FitRes(parameters: parameters, numExamples: result.numSamples, status: status)
             }
         }
     }
@@ -76,9 +78,10 @@ class CoreMLClient: Client {
         test(modelConfig: parametersToWeights(parameters: ins.parameters)) { result in
             evaluateResult = result
         }
+        let status = Status(code: .ok, message: String())
         while true {
             if let result = evaluateResult {
-                return EvaluateRes(loss: Float(result.loss), numExamples: result.numSamples)
+                return EvaluateRes(loss: Float(result.loss), numExamples: result.numSamples, status: status)
             }
         }
     }
