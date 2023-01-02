@@ -50,8 +50,9 @@ public struct ParametersRes {
     public var parameters: Parameters
     public var status: Status
     
-    public init(parameters: Parameters, status: Status) {
+    public init(parameters: Parameters) {
         self.parameters = parameters
+        let status = Status(code: .ok, message: "ok")
         self.status = status
     }
 }
@@ -67,10 +68,11 @@ public struct FitRes {
     public var metrics: Metrics? = nil
     public var status: Status
     
-    public init(parameters: Parameters, numExamples: Int, metrics: Metrics? = nil, status: Status) {
+    public init(parameters: Parameters, numExamples: Int, metrics: Metrics? = nil) {
         self.parameters = parameters
         self.numExamples = numExamples
         self.metrics = metrics
+        let status = Status(code: .ok, message: "ok")
         self.status = status
     }
 }
@@ -86,10 +88,11 @@ public struct EvaluateRes {
     public var metrics: Metrics? = nil
     public var status: Status
     
-    public init(loss: Float, numExamples: Int, metrics: Metrics? = nil, status: Status) {
+    public init(loss: Float, numExamples: Int, metrics: Metrics? = nil) {
         self.loss = loss
         self.numExamples = numExamples
         self.metrics = metrics
+        let status = Status(code: .ok, message: "ok")
         self.status = status
     }
 }
@@ -100,7 +103,7 @@ public struct PropertiesIns {
 
 public struct PropertiesRes {
     public var properties: Properties
-    public var status: Status
+    public var status: Status = Status(code: .ok, message: "ok")
 }
 
 public struct Reconnect {

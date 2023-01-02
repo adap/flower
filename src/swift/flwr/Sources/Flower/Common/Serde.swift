@@ -72,9 +72,9 @@ func parametersResToProto(res: ParametersRes) -> Flwr_Proto_ClientMessage.GetPar
     return ret
 }
 
-func parametersResFromProto(msg: Flwr_Proto_ClientMessage.GetParametersRes, status: Status) -> ParametersRes {
+func parametersResFromProto(msg: Flwr_Proto_ClientMessage.GetParametersRes) -> ParametersRes {
     let parameters = parametersFromProto(msg: msg.parameters)
-    return ParametersRes(parameters: parameters, status: status)
+    return ParametersRes(parameters: parameters)
 }
 
 func fitInsToProto(ins: FitIns) -> Flwr_Proto_ServerMessage.FitIns {
@@ -103,10 +103,10 @@ func fitResToProto(res: FitRes) -> Flwr_Proto_ClientMessage.FitRes {
     return ret
 }
 
-func fitResFromProto(msg: Flwr_Proto_ClientMessage.FitRes, status: Status) -> FitRes {
+func fitResFromProto(msg: Flwr_Proto_ClientMessage.FitRes) -> FitRes {
     let parameters = parametersFromProto(msg: msg.parameters)
     let metrics = metricsFromProto(proto: msg.metrics)
-    return FitRes(parameters: parameters, numExamples: Int(msg.numExamples), metrics: metrics, status: status)
+    return FitRes(parameters: parameters, numExamples: Int(msg.numExamples), metrics: metrics)
 }
 
 func propertiesInsToProto(ins: PropertiesIns) -> Flwr_Proto_ServerMessage.GetPropertiesIns {
@@ -128,9 +128,9 @@ func propertiesResToProto(res: PropertiesRes) -> Flwr_Proto_ClientMessage.GetPro
     return ret
 }
 
-func propertiesResFromProto(msg: Flwr_Proto_ClientMessage.GetPropertiesRes, status: Status) -> PropertiesRes {
+func propertiesResFromProto(msg: Flwr_Proto_ClientMessage.GetPropertiesRes) -> PropertiesRes {
     let properties = propertiesFromProto(proto: msg.properties)
-    return PropertiesRes(properties: properties, status: status)
+    return PropertiesRes(properties: properties)
 }
 
 func evaluateInsToProto(ins: EvaluateIns) -> Flwr_Proto_ServerMessage.EvaluateIns {
@@ -158,8 +158,8 @@ func evaluateResToProto(res: EvaluateRes) -> Flwr_Proto_ClientMessage.EvaluateRe
     return ret
 }
 
-func evaluateResFromProto(msg: Flwr_Proto_ClientMessage.EvaluateRes, status: Status) -> EvaluateRes {
-    return EvaluateRes(loss: msg.loss, numExamples: Int(msg.numExamples), metrics: metricsFromProto(proto: msg.metrics), status: status)
+func evaluateResFromProto(msg: Flwr_Proto_ClientMessage.EvaluateRes) -> EvaluateRes {
+    return EvaluateRes(loss: msg.loss, numExamples: Int(msg.numExamples), metrics: metricsFromProto(proto: msg.metrics))
 }
 
 func propertiesToProto(properties: Properties) -> [String: Flwr_Proto_Scalar] {
