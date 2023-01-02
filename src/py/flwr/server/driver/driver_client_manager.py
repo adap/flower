@@ -17,7 +17,7 @@
 
 import threading
 import uuid
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple
 
 from ..client_manager import ClientManager
 from ..client_proxy import ClientProxy
@@ -29,8 +29,7 @@ class DriverClientManager(ClientManager):
 
     def __init__(self) -> None:
         self._cv = threading.Condition()
-        self.cids_to_ids: Dict[str, int] = {}
-        self.ids_to_cps: Dict[int, ClientProxy] = {}
+        self.cids: Dict[str, Tuple[int, ClientProxy]] = {}
 
     def __len__(self) -> int:
         """Return the number of available clients.
@@ -40,7 +39,7 @@ class DriverClientManager(ClientManager):
         num_available : int
             The number of currently available clients.
         """
-        return len(self.ids_to_cps)
+        return len(self.cids)
 
     def num_available(self) -> int:
         """Return the number of available clients.
@@ -65,15 +64,14 @@ class DriverClientManager(ClientManager):
             Indicating if registration was successful. False if ClientProxy is
             already registered or can not be registered for any reason.
         """
-        if client.cid in self.cids_to_ids:
+        if client.cid in self.cids:
             return False
 
         # Generate random integer ID
         random_client_id: int = uuid.uuid1().int >> 64
 
         # Store cid, id, and ClientProxy
-        self.cids_to_ids[client.cid] = random_client_id
-        self.ids_to_cps[random_client_id] = client
+        self.cids[client.cid] = (random_client_id, client)
 
         with self._cv:
             self._cv.notify_all()
@@ -89,9 +87,8 @@ class DriverClientManager(ClientManager):
         ----------
         client : flwr.server.client_proxy.ClientProxy
         """
-        if client.cid in self.cids_to_ids:
-            del self.ids_to_cps[self.cids_to_ids[client.cid]]
-            del self.cids_to_ids[client.cid]
+        if client.cid in self.cids:
+            del self.cids[client.cid]
 
             with self._cv:
                 self._cv.notify_all()
@@ -104,7 +101,7 @@ class DriverClientManager(ClientManager):
         ids : Set[int]
             The IDs of all currently available clients.
         """
-        return set(self.ids_to_cps)
+        return set([self.cids[cid][0] for cid in self.cids])
 
     # --- Unimplemented methods -----------------------------------------------
 
