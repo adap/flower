@@ -15,7 +15,7 @@ public protocol Client {
 }
 
 public extension Client {
-    func getProperties(ins: PropertiesIns) -> PropertiesRes {
-        return PropertiesRes(properties: [:])
+    func getProperties(ins: PropertiesIns, status: Status) -> PropertiesRes {
+        return PropertiesRes(properties: [:], status: status)
     }
 }
