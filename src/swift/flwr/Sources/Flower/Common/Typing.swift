@@ -8,11 +8,35 @@
 import Foundation
 
 public enum Code {
+    typealias RawValue = Int
     case ok
     case getPropertiesNotImplemented
     case getParametersNotImplemented
     case fitNotImplemented
     case evaluateNotImplemented
+    case UNRECOGNIZED(Int)
+    
+    init(rawValue: Int) {
+        switch rawValue {
+            case 0: self = .ok
+            case 1: self = .getPropertiesNotImplemented
+            case 2: self = .getParametersNotImplemented
+            case 3: self = .fitNotImplemented
+            case 4: self = .evaluateNotImplemented
+            default: self = .UNRECOGNIZED(rawValue)
+        }
+    }
+    
+    var rawValue: Int {
+      switch self {
+      case .ok: return 0
+      case .getPropertiesNotImplemented: return 1
+      case .getParametersNotImplemented: return 2
+      case .fitNotImplemented: return 3
+      case .evaluateNotImplemented: return 4
+      case .UNRECOGNIZED(let i): return i
+      }
+    }
 }
 
 public struct Scalar {
@@ -46,13 +70,13 @@ public struct Parameters {
     }
 }
 
-public struct ParametersRes {
+public struct GetParametersRes {
     public var parameters: Parameters
     public var status: Status
     
-    public init(parameters: Parameters) {
+    public init(parameters: Parameters, status: Status) {
         self.parameters = parameters
-        self.status = Status(code: .ok, message: String())
+        self.status = status
     }
 }
 
@@ -67,11 +91,11 @@ public struct FitRes {
     public var metrics: Metrics? = nil
     public var status: Status
     
-    public init(parameters: Parameters, numExamples: Int, metrics: Metrics? = nil) {
+    public init(parameters: Parameters, numExamples: Int, metrics: Metrics? = nil, status: Status) {
         self.parameters = parameters
         self.numExamples = numExamples
         self.metrics = metrics
-        self.status = Status(code: .ok, message: String())
+        self.status = status
     }
 }
 
@@ -86,21 +110,25 @@ public struct EvaluateRes {
     public var metrics: Metrics? = nil
     public var status: Status
     
-    public init(loss: Float, numExamples: Int, metrics: Metrics? = nil) {
+    public init(loss: Float, numExamples: Int, metrics: Metrics? = nil, status: Status) {
         self.loss = loss
         self.numExamples = numExamples
         self.metrics = metrics
-        self.status = Status(code: .ok, message: String())
+        self.status = status
     }
 }
 
-public struct PropertiesIns {
+public struct GetPropertiesIns {
     public var config: Properties
 }
 
-public struct PropertiesRes {
+public struct GetPropertiesRes {
     public var properties: Properties
-    public var status: Status = Status(code: .ok, message: String())
+    public var status: Status
+    public init(properties: Properties, status: Status) {
+        self.properties = properties
+        self.status = status
+    }
 }
 
 public struct Reconnect {
