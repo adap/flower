@@ -7,6 +7,14 @@
 
 import Foundation
 
+public enum Code {
+    case ok
+    case getPropertiesNotImplemented
+    case getParametersNotImplemented
+    case fitNotImplemented
+    case evaluateNotImplemented
+}
+
 public struct Scalar {
     public var bool: Bool?
     public var bytes: Data?
@@ -17,6 +25,16 @@ public struct Scalar {
 
 public typealias Metrics = [String: Scalar]
 public typealias Properties = [String: Scalar]
+
+public struct Status {
+    public var code: Code
+    public var message: String
+    
+    public init(code: Code, message: String) {
+        self.code = code
+        self.message = message
+    }
+}
 
 public struct Parameters {
     public var tensors: [Data]
@@ -30,9 +48,11 @@ public struct Parameters {
 
 public struct ParametersRes {
     public var parameters: Parameters
+    public var status: Status
     
-    public init(parameters: Parameters) {
+    public init(parameters: Parameters, status: Status) {
         self.parameters = parameters
+        self.status = status
     }
 }
 
@@ -45,11 +65,13 @@ public struct FitRes {
     public var parameters: Parameters
     public var numExamples: Int
     public var metrics: Metrics? = nil
+    public var status: Status
     
-    public init(parameters: Parameters, numExamples: Int, metrics: Metrics? = nil) {
+    public init(parameters: Parameters, numExamples: Int, metrics: Metrics? = nil, status: Status) {
         self.parameters = parameters
         self.numExamples = numExamples
         self.metrics = metrics
+        self.status = status
     }
 }
 
@@ -62,11 +84,13 @@ public struct EvaluateRes {
     public var loss: Float
     public var numExamples: Int
     public var metrics: Metrics? = nil
+    public var status: Status
     
-    public init(loss: Float, numExamples: Int, metrics: Metrics? = nil) {
+    public init(loss: Float, numExamples: Int, metrics: Metrics? = nil, status: Status) {
         self.loss = loss
         self.numExamples = numExamples
         self.metrics = metrics
+        self.status = status
     }
 }
 
@@ -76,6 +100,7 @@ public struct PropertiesIns {
 
 public struct PropertiesRes {
     public var properties: Properties
+    public var status: Status
 }
 
 public struct Reconnect {
