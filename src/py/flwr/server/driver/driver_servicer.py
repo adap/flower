@@ -24,8 +24,8 @@ from flwr.proto import driver_pb2_grpc
 from flwr.proto.driver_pb2 import (
     CreateTasksRequest,
     CreateTasksResponse,
-    GetClientsRequest,
-    GetClientsResponse,
+    GetNodesRequest,
+    GetNodesResponse,
     GetResultsRequest,
     GetResultsResponse,
 )
@@ -38,11 +38,11 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     def __init__(self, client_manager: ClientManager) -> None:
         self.client_manager = client_manager
 
-    def GetClients(
-        self, request: GetClientsRequest, context: grpc.ServicerContext
-    ) -> GetClientsResponse:
-        log(INFO, "DriverServicer.GetClients")
-        return GetClientsResponse(client_ids=[])
+    def GetNodes(
+        self, request: GetNodesRequest, context: grpc.ServicerContext
+    ) -> GetNodesResponse:
+        log(INFO, "DriverServicer.GetNodes")
+        return GetNodesResponse(node_ids=[])
 
     def CreateTasks(
         self, request: CreateTasksRequest, context: grpc.ServicerContext

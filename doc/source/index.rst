@@ -34,6 +34,8 @@ A learning-oriented series of federated learning tutorials, the best place to st
 
    tutorial/Flower-1-Intro-to-FL-PyTorch
    tutorial/Flower-2-Strategies-in-FL-PyTorch
+   tutorial/Flower-3-Building-a-Strategy-PyTorch
+   tutorial/Flower-4-Client-and-NumPyClient-PyTorch
 
 .. toctree::
    :maxdepth: 1
@@ -59,10 +61,10 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    :caption: How-to guides
 
    installation
-   configuring-clients
+   configure-clients
    strategies
    implementing-strategies
-   saving-progress
+   save-progress
    saving-and-loading-pytorch-checkpoints
    ssl-enabled-connections
    example-walkthrough-pytorch-mnist
@@ -137,6 +139,7 @@ intended to help along the way.
    release-process
    creating-new-messages
    devcontainer
+   fed/index
 
 
 .. Indices and tables

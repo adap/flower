@@ -18,8 +18,8 @@
 from .driver import Driver as Driver
 from .messages import CreateTasksRequest as CreateTasksRequest
 from .messages import CreateTasksResponse as CreateTasksResponse
-from .messages import GetClientsRequest as GetClientsRequest
-from .messages import GetClientsResponse as GetClientsResponse
+from .messages import GetNodesRequest as GetNodesRequest
+from .messages import GetNodesResponse as GetNodesResponse
 from .messages import GetResultsRequest as GetResultsRequest
 from .messages import GetResultsResponse as GetResultsResponse
 from .messages import Result as Result
@@ -30,8 +30,8 @@ __all__ = [
     "Driver",
     "CreateTasksRequest",
     "CreateTasksResponse",
-    "GetClientsRequest",
-    "GetClientsResponse",
+    "GetNodesRequest",
+    "GetNodesResponse",
     "GetResultsRequest",
     "GetResultsResponse",
     "Task",

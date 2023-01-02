@@ -8,10 +8,10 @@ import grpc
 
 class DriverStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
-    GetClients: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.driver_pb2.GetClientsRequest,
-        flwr.proto.driver_pb2.GetClientsResponse]
-    """Return a list of clients."""
+    GetNodes: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.driver_pb2.GetNodesRequest,
+        flwr.proto.driver_pb2.GetNodesResponse]
+    """Return a set of nodes"""
 
     CreateTasks: grpc.UnaryUnaryMultiCallable[
         flwr.proto.driver_pb2.CreateTasksRequest,
@@ -26,11 +26,11 @@ class DriverStub:
 
 class DriverServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def GetClients(self,
-        request: flwr.proto.driver_pb2.GetClientsRequest,
+    def GetNodes(self,
+        request: flwr.proto.driver_pb2.GetNodesRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.driver_pb2.GetClientsResponse:
-        """Return a list of clients."""
+    ) -> flwr.proto.driver_pb2.GetNodesResponse:
+        """Return a set of nodes"""
         pass
 
     @abc.abstractmethod

@@ -3,12 +3,19 @@ Release Process
 
 This document describes the current release process. It may or may not change in the future.
 
-Process
--------
+Before the release
+------------------
+
+Update the changelog (``changelog.md``) with all relevant changes that happened after the last release. If the last release was tagged ``v1.0.0``, you can use the following URL to see all commits that got merged into ``main`` since then:
+
+`GitHub: Compare v1.0.0...main <https://github.com/adap/flower/compare/v1.0.0...main>`_
+
+During the release
+------------------
 
 The version number of a release is stated in ``pyproject.toml``. To release a new version of Flower, the following things need to happen (in that order):
 
-1. Update the ``changelog.rst`` section header ``Unreleased`` to contain the version number and date for the release you are building. Create a pull request with the change.
+1. Update the ``changelog.md`` section header ``Unreleased`` to contain the version number and date for the release you are building. Create a pull request with the change.
 2. Tag the release commit with the version number as soon as the PR is merged: ``git tag v0.12.3``, then ``git push --tags``
 3. Build the release with ``./dev/build.sh``, then publish it with ``./dev/publish.sh``
 4. Create an entry in GitHub releases with the release notes for the previously tagged commit and attach the build artifacts (:code:`.whl` and :code:`.tar.gz`).
@@ -20,7 +27,7 @@ Create a pull request which contains the following changes:
 
 1. Increase the minor version in ``pyproject.toml`` by one.
 2. Update all files which contain the current version number if necessary.
-3. Add a new ``Unreleased`` section in ``changelog.rst``.
+3. Add a new ``Unreleased`` section in ``changelog.md``.
 
 Merge the pull request on the same day (i.e., before a new nighly release gets published to PyPI).
 
