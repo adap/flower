@@ -8,14 +8,14 @@
 import Foundation
 
 public protocol Client {
-    func getParameters() -> ParametersRes
-    func getProperties(ins: PropertiesIns) -> PropertiesRes
+    func getParameters() -> GetParametersRes
+    func getProperties(ins: GetPropertiesIns) -> GetPropertiesRes
     func fit(ins: FitIns) -> FitRes
     func evaluate(ins: EvaluateIns) -> EvaluateRes
 }
 
 public extension Client {
-    func getProperties(ins: PropertiesIns) -> PropertiesRes {
-        return PropertiesRes(properties: [:])
+    func getProperties(ins: GetPropertiesIns) -> GetPropertiesRes {
+        return GetPropertiesRes(properties: [:], status: Status(code: .getPropertiesNotImplemented, message: String()))
     }
 }
