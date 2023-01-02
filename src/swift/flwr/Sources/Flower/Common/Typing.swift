@@ -52,7 +52,7 @@ public struct ParametersRes {
     
     public init(parameters: Parameters) {
         self.parameters = parameters
-        self.status = Status(code: .ok, message: "ok")
+        self.status = Status(code: .ok, message: String())
     }
 }
 
@@ -71,7 +71,7 @@ public struct FitRes {
         self.parameters = parameters
         self.numExamples = numExamples
         self.metrics = metrics
-        self.status = Status(code: .ok, message: "ok")
+        self.status = Status(code: .ok, message: String())
     }
 }
 
@@ -90,7 +90,7 @@ public struct EvaluateRes {
         self.loss = loss
         self.numExamples = numExamples
         self.metrics = metrics
-        self.status = Status(code: .ok, message: "ok")
+        self.status = Status(code: .ok, message: String())
     }
 }
 
@@ -100,7 +100,7 @@ public struct PropertiesIns {
 
 public struct PropertiesRes {
     public var properties: Properties
-    public var status: Status = Status(code: .ok, message: "ok")
+    public var status: Status = Status(code: .ok, message: String())
 }
 
 public struct Reconnect {
