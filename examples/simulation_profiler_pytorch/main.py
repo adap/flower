@@ -65,7 +65,7 @@ if __name__ == "__main__":
     strategy = ResourceAwareFedAvg(
         fraction_fit=0.1,
         fraction_evaluate=0.0,
-        min_fit_clients=2,
+        min_fit_clients=10,
         # min_evaluate_clients=0,
         min_available_clients=pool_size,
         on_fit_config_fn=fit_config,

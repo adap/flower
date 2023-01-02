@@ -6,7 +6,7 @@ import socket
 import time
 from dataclasses import dataclass, field
 from functools import wraps
-from pathlib import Path
+from pathlib import Path, PurePath
 from subprocess import check_output
 from threading import Lock, Thread
 from typing import (
@@ -97,7 +97,11 @@ class SystemMonitor(Thread):
     """
 
     def __init__(
-        self, *, node_id: Optional[str] = None, interval_s: float = 1.0, save_path=None
+        self,
+        *,
+        node_id: Optional[str] = None,
+        interval_s: float = 1.0,
+        save_path_root: Optional[Path] = None,
     ):
         super(SystemMonitor, self).__init__()
         self.node_id = node_id if node_id else socket.getfqdn()
@@ -106,13 +110,13 @@ class SystemMonitor(Thread):
         self.gpus: Dict[str, SimpleGPU] = dict()
         self.start_time_ns: int = 0
         self.stop_time_ns: int = 0
-        self.stopped: bool = False
-        self.interval_s = interval_s
-        self._lock = Lock()
-        self.save_path: Path = (
-            Path.home() / "flwr_exp" if save_path is None else save_path
+        self.stopped: bool = True
+        self.interval_s: float = interval_s
+        self._lock: Lock = Lock()
+        self.save_path_root: Path = (
+            save_path_root if save_path_root else Path(Path.home() / "flwr_monitor")
         )
-        self.active_tasks: List["str"] = []
+        self.active_task_ids: List["str"] = []
         self._collect_resources()
 
     def get_resources(self) -> Dict[str, Union[SimpleCPU, SimpleGPU]]:
@@ -122,10 +126,10 @@ class SystemMonitor(Thread):
         return self.tasks
 
     def get_active_tasks(self) -> Dict[str, Task]:
-        return {k: v for k, v in self.tasks.items() if k in self.active_tasks}
+        return {k: v for k, v in self.tasks.items() if k in self.active_task_ids}
 
     def get_active_tasks_ids(self) -> List[str]:
-        return self.active_tasks
+        return self.active_task_ids
 
     def is_running(self) -> bool:
         return not self.stopped
@@ -146,7 +150,7 @@ class SystemMonitor(Thread):
                     task_name=task_name,
                     start_time_ns=time.time_ns(),
                 )
-                self.active_tasks.append(task_id)
+                self.active_task_ids.append(task_id)
 
     def unregister_tasks(self, task_ids: List[str]) -> None:
         """Removes list of tasks in set of tasks that are being monitored.
@@ -157,23 +161,23 @@ class SystemMonitor(Thread):
         with self._lock:
             for task_id in task_ids:
                 self.tasks[task_id].stop_time_ns = time.time_ns()
-                self.active_tasks.pop(self.active_tasks.index(task_id))
+                self.active_task_ids.pop(self.active_task_ids.index(task_id))
 
-    def save_and_release(self):
-        current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
-        resources_folder = self.save_path / current_time / "resources"
+    def save_and_clear(self, sub_folder: PurePath):
+
+        save_path = self.save_path_root / sub_folder / self.node_id
+        resources_folder = save_path / "resources"
         resources_folder.mkdir(parents=True, exist_ok=True)
-        task_folder = self.save_path / current_time / "tasks"
+        task_folder = save_path / "tasks"
         task_folder.mkdir(parents=True, exist_ok=True)
-        # Save CPU, and GPU
-        cpu_filename = resources_folder / "cpu.pickle"
-        gpu_filename = resources_folder / "gpus.pickle"
-        with open(cpu_filename, "wb") as handle:
-            pickle.dump(self.cpu, handle)
-        with open(gpu_filename, "wb") as handle:
-            pickle.dump(self.gpus, handle)
 
-        # Release CPU and GPU
+        # Save Resources
+        for hw in ["cpu", "gpus"]:
+            filename = resources_folder / f"{hw}.pickle"
+            with open(filename, "wb") as handle:
+                pickle.dump(getattr(self, hw), handle)
+
+        # Clear CPU and GPU
         del self.cpu.all_proc_mem_used_mb[:]
         for k in self.gpus.keys():
             del self.gpus[k].all_proc_mem_used_mb[:]
@@ -182,13 +186,11 @@ class SystemMonitor(Thread):
         # Save Tasks
         for task_id, task in self.tasks.items():
             filename = task_folder / f"{task_id}.pickle"
-            # Release
             with open(filename, "wb") as handle:
                 pickle.dump(task, handle)
 
         # Release memory from Tasks
-        for task in self.tasks.values():
-            del task.cpu_process.this_proc_mem_used_mb[:]
+        self.tasks.clear()
 
     def _collect_resources(self) -> None:
         # Retrieve GPU info
@@ -216,7 +218,7 @@ class SystemMonitor(Thread):
         self.stopped = False
         while not self.stopped:
             if self.tasks:
-                self._collect_utilization()
+                self._collect_system_usage()
             time.sleep(self.interval_s)  # Sleep is managed by collect_cpu
         self.stop_time_ns = time.time_ns()
 
@@ -281,7 +283,7 @@ class SystemMonitor(Thread):
             self.cpu.all_proc_mem_used_mb.append((timestamp, cpu_mem_used))
         self._get_cpu_process_utilization()
 
-    def _collect_utilization(self) -> None:
+    def _collect_system_usage(self) -> None:
         with self._lock:
             self._collect_cpu_usage()
             self._collect_gpu_usage()
@@ -293,10 +295,13 @@ class SystemMonitor(Thread):
         metrics["round_duration"] = stop_time_ns - self.start_time_ns
 
         # Max GPU memory across all clients for all GPUs
-        max_this_proc_mem_used_mb: Dict[str, Dict[str, float]] = {}  # task_id: {uuid:mem_mb}
+        max_this_proc_mem_used_mb: Dict[
+            str, Dict[str, float]
+        ] = {}  # task_id: {uuid:mem_mb}
         selected_task_ids = task_ids if task_ids else [k for k in self.tasks.keys()]
         for task_id in selected_task_ids:
             task = self.tasks[task_id]
+            print(task)
             max_this_proc_mem_used_mb[task_id] = {}
             for uuid, gpu_process in task.gpu_processes.items():
                 this_task_uuid_mem_usage_mb = [
@@ -354,8 +359,6 @@ def basic_profiler(interval_s: float = 0.1, save_path=None):
             output, num_examples, metrics = _func(*args, **kwargs)
             system_monitor.unregister_tasks(task_ids=[this_task_id])
             system_monitor.stop()
-            stats_dict = system_monitor.aggregate_statistics()
-            metrics = {**metrics, **stats_dict}
             return output, num_examples, metrics
 
         return cast(ProfFunDec, wrapper)

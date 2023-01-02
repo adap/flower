@@ -16,9 +16,12 @@ from collections import defaultdict
 from logging import WARNING
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
+import datetime
 import numpy as np
 import numpy.typing as npt
 import ray
+from time import sleep
+from pathlib import PurePath
 from numpy.polynomial.polynomial import Polynomial
 from numpy.random import choice
 from ray.experimental.state.api import list_actors
@@ -117,6 +120,7 @@ class ResourceAwareFedAvg(FedAvg):
         self.resources_model: Dict[
             Tuple[str, str], Tuple[Polynomial, int]
         ] = {}  # {(node_id, gpu_uuid): (Polynomial, max_num_clients)
+        self.start_time: str = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
 
     def __repr__(self) -> str:
         rep = f"ResourceAwareFedAvg(accept_failures={self.accept_failures})"
@@ -136,14 +140,41 @@ class ResourceAwareFedAvg(FedAvg):
         for actor in actors:
             node_id: str = actor["name"]
             this_actor = ray.get_actor(node_id, namespace=self.namespace)
+            is_running = ray.get(this_actor.is_running.remote())
+            print(f"1-START COLLECTION Is running? {is_running}")
+            print("sleep")
+            sleep(3)
             this_actor.run.remote()
+            is_running = ray.get(this_actor.is_running.remote())
+            print(f"2-START COLLECTION Is still running? {is_running}")
 
     def _stop_data_collection(self):
         actors = self._get_monitors()
         for actor in actors:
             node_id: str = actor["name"]
             this_actor = ray.get_actor(node_id, namespace=self.namespace)
+            is_running = ray.get(this_actor.is_running.remote())
+            print(f"1-STOP COLLECTION Is running? {is_running}")
+            print("sleep")
+            sleep(3)
             ray.get(this_actor.stop.remote())
+            is_running = ray.get(this_actor.is_running.remote())
+            print(f"2-STOP COLLECTION Is still running? {is_running}")
+
+    def _save_and_clear_monitors(self, sub_dir: Optional[PurePath] = None):
+        # This is suitable for a single FL training. If multiple, then each
+        # monitor should be doing its thing
+        sub_dir = (
+            sub_dir
+            if sub_dir
+            else PurePath(datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S"))
+        )
+
+        actors = self._get_monitors()
+        for actor in actors:
+            node_id: str = actor["name"]
+            this_actor = ray.get_actor(node_id, namespace=self.namespace)
+            ray.get(this_actor.save_and_clear.remote(sub_folder=sub_dir))
 
     def request_available_resources(self) -> None:
         actors = self._get_monitors()
@@ -152,7 +183,7 @@ class ResourceAwareFedAvg(FedAvg):
             this_actor = ray.get_actor(node_id, namespace=self.namespace)
 
             # Start System Monitor
-            ray.get(this_actor.start.remote())
+            # NO NEED NOW ray.get(this_actor.start.remote())
 
             # Get resources
             obj_ref = this_actor.get_resources.remote()
@@ -165,11 +196,11 @@ class ResourceAwareFedAvg(FedAvg):
                 if isinstance(v, SimpleGPU):  # Only get GPUs for now
                     self.gpu_resources[node_id][k] = v
                     gpu_uuid = v.uuid
-                    self.create_model(node_id=node_id, gpu_uuid=gpu_uuid)
+                    self.create_gpu_poly_model(node_id=node_id, gpu_uuid=gpu_uuid)
                 elif isinstance(v, SimpleCPU):  # Only get GPUs for now
                     self.cpu_resources[node_id] = v
 
-    def create_model(self, node_id: str, gpu_uuid: str):
+    def create_gpu_poly_model(self, node_id: str, gpu_uuid: str):
         coefficients = (self.resource_poly_degree + 1) * [0.0]
         coefficients[0] = 1.0
         m = Polynomial(coefficients)
@@ -221,12 +252,14 @@ class ResourceAwareFedAvg(FedAvg):
 
             # consider largest num_steps
             multi_client_per_gpu_expected_time = model_poly(these_clients[0][1])
+            print(multi_client_per_gpu_expected_time)
             expected_training_times[idx] += multi_client_per_gpu_expected_time
 
             # Now associate resources
             for client, num_steps in these_clients:
                 client.resources["scheduling_strategy"] = scheduling_strategy
-                client.resources["num_gpu"] = 1 / actual_num_clients
+                client.resources["num_gpus"] = 1 / 3  # 1 / actual_num_clients
+                client.resources["num_cpus"] = 1
                 self.client_configs_map[client.cid] = (node_id, gpu_uuid, num_steps)
                 client_fit_list.append((client, FitIns(parameters, this_config)))
 
@@ -244,6 +277,8 @@ class ResourceAwareFedAvg(FedAvg):
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configures the next round of training and allocates resources accordingly."""
 
+        print(f" BEGIN CONFIGURE FIT {server_round} !!!!!!!!!")
+
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
@@ -252,7 +287,8 @@ class ResourceAwareFedAvg(FedAvg):
         client_fit_list: List[Tuple[ClientProxy, FitIns]] = []
 
         if server_round == 1:
-            # Calculate MAX NUM_CLIENTS PER GPU
+            # Calculate maximum number of clients per GPU
+            # based on VRAM
             self.request_available_resources()
 
             # Sample one client per device
@@ -282,6 +318,8 @@ class ResourceAwareFedAvg(FedAvg):
                 )
                 # Ray node allocation
                 client.resources["scheduling_strategy"] = scheduling_strategy
+                client.resources["num_gpus"] = 1
+                client.resources["num_cpus"] = 1
                 self.client_configs_map[client.cid] = (
                     node_id,
                     gpu_uuid,
@@ -290,7 +328,7 @@ class ResourceAwareFedAvg(FedAvg):
                 client_fit_list.append((client, FitIns(parameters, this_config)))
 
         elif server_round == 2:
-            # Now time the usage considering the maximum number of clients
+            # Calculate training time considering the maximum number of clients per GPU
             clients: List[ClientProxy] = client_manager.sample(
                 num_clients=(self.resource_poly_degree + 1) * len(self.resources_model),
                 min_num_clients=(self.resource_poly_degree + 1)
@@ -305,10 +343,20 @@ class ResourceAwareFedAvg(FedAvg):
                     )
                 )
                 gpu_id = self.gpu_resources[node_id][gpu_uuid].gpu_id
+                # Here we either need a piece-wise linear model,
+                # using with variables running from
+                # we should probably collect this as we train.
+                # Also, for fairness, we should consider re-setting the model
+                # after training for the warm-up rounds.
+                # this can be done by saving the original model on the first round of
+                # config_fit and re-using it after the warm-up period.
+
                 for num_local_steps in self.warm_up_steps:
                     client = clients.pop()
                     # Ray node allocation
                     client.resources["scheduling_strategy"] = scheduling_strategy
+                    client.resources["num_gpus"] = 1
+                    client.resources["num_cpus"] = 1
                     this_config = dict(
                         config,
                         **{
@@ -325,7 +373,6 @@ class ResourceAwareFedAvg(FedAvg):
                     client_fit_list.append((client, FitIns(parameters, this_config)))
 
         else:  # All other rounds
-            print(f"CONFIG FIT {server_round} !!!!!!!!!")
             # Sample clients
             sample_size, min_num_clients = self.num_fit_clients(
                 client_manager.num_available()
@@ -342,6 +389,8 @@ class ResourceAwareFedAvg(FedAvg):
                 parameters, config, clients_with_weights
             )
 
+        print(f"###END CONFIGURE FIT {server_round} !!!!!!!!!")
+
         self._start_data_collection()
         return client_fit_list
 
@@ -352,6 +401,7 @@ class ResourceAwareFedAvg(FedAvg):
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
+        print(f"###BEGIN AGGREGATE FIT {server_round} !!!!!!!!!")
         self._stop_data_collection()
 
         # Task_id used in this round
@@ -405,9 +455,7 @@ class ResourceAwareFedAvg(FedAvg):
                         print(
                             f"Maximum number of clients for {node_id}, {gpu_uuid} = {max_num_clients_this_gpu}"
                         )
-
         elif server_round == 2:
-            print(f"AGGREGATE FIT {server_round} !!!!!!!!!")
             task_to_cid: Dict[Scalar, str] = {}
             for client, result in results:
                 this_task_id = result.metrics["_flwr.monitoring.task_id"]
@@ -442,5 +490,11 @@ class ResourceAwareFedAvg(FedAvg):
                     y = resource_model_y[(node_id, gpu_uuid)]
                     m = m.fit(x, y, deg=self.resource_poly_degree)
                     self.resources_model[(node_id, gpu_uuid)] = (m, max_num_clients)
+        else:
+            # Tell monitor to store and continue
+            sub_dir = PurePath(self.start_time, str(server_round))
+            self._save_and_clear_monitors(sub_dir=sub_dir)
+            print("OKAY")
 
+        print(f"###END AGGREGATE FIT {server_round} !!!!!!!!!")
         return super().aggregate_fit(server_round, results, failures)

@@ -25,6 +25,7 @@ class FlowerClient(NumPyClient):
         return model_to_arrays(model)
 
     def fit(self, parameters, config):
+        print(f"Starting client {self.cid}")
 
         # Load train data for this client
         dataset = get_dataset(Path(self.fed_dir).absolute(), self.cid, "train")
@@ -60,6 +61,7 @@ class FlowerClient(NumPyClient):
             device=device,
         )
         metrics: Metrics = {"loss": loss, "accuracy": loss}
+        print(f"Finished client {self.cid}")
 
         # Return local model and statistics
         return model_to_arrays(model), len(dataset), metrics
