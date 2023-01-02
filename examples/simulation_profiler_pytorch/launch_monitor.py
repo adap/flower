@@ -10,7 +10,7 @@ def launch_ray_system_monitor(
     *, ip: str, port: int, namespace="flwr_experiment", interval_s: float = 0.1
 ) -> None:
     address = f"ray://{ip}:{port}" if ip and port else "auto"
-    address = "auto"
+    print(f"Connecting to Ray Head at {address}")
     with ray.init(address=address, namespace=namespace):
         this_node_id = ray.get_runtime_context().get_node_id()
         ray_monitor = RaySystemMonitor.options(
