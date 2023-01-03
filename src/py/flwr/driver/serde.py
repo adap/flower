@@ -27,8 +27,8 @@ from flwr.common.typing import ClientMessage, ServerMessage
 from flwr.driver.messages import (
     CreateTasksRequest,
     CreateTasksResponse,
-    GetClientsRequest,
-    GetClientsResponse,
+    GetNodesRequest,
+    GetNodesResponse,
     GetResultsRequest,
     GetResultsResponse,
     Result,
@@ -37,37 +37,37 @@ from flwr.driver.messages import (
 )
 from flwr.proto import driver_pb2, task_pb2
 
-# === GetClients messages ===
+# === GetNodes messages ===
 
 
-def get_clients_request_to_proto(
-    req: GetClientsRequest,
-) -> driver_pb2.GetClientsRequest:
-    """Serialize `GetClientsRequest` to ProtoBuf."""
+def get_nodes_request_to_proto(
+    req: GetNodesRequest,
+) -> driver_pb2.GetNodesRequest:
+    """Serialize `GetNodesRequest` to ProtoBuf."""
     # pylint: disable=W0613
-    return driver_pb2.GetClientsRequest()
+    return driver_pb2.GetNodesRequest()
 
 
-def get_clients_request_from_proto(
-    msg: driver_pb2.GetClientsRequest,
-) -> GetClientsRequest:
-    """Deserialize `GetClientsRequest` from ProtoBuf."""
+def get_nodes_request_from_proto(
+    msg: driver_pb2.GetNodesRequest,
+) -> GetNodesRequest:
+    """Deserialize `GetNodesRequest` from ProtoBuf."""
     # pylint: disable=W0613
-    return GetClientsRequest()
+    return GetNodesRequest()
 
 
-def get_clients_response_to_proto(
-    res: GetClientsResponse,
-) -> driver_pb2.GetClientsResponse:
-    """Serialize `GetClientsResponse` to ProtoBuf."""
-    return driver_pb2.GetClientsResponse(client_ids=res.client_ids)
+def get_nodes_response_to_proto(
+    res: GetNodesResponse,
+) -> driver_pb2.GetNodesResponse:
+    """Serialize `GetNodesResponse` to ProtoBuf."""
+    return driver_pb2.GetNodesResponse(node_ids=res.node_ids)
 
 
-def get_clients_response_from_proto(
-    msg: driver_pb2.GetClientsResponse,
-) -> GetClientsResponse:
-    """Deserialize `GetClientsResponse` from ProtoBuf."""
-    return GetClientsResponse(client_ids=list(msg.client_ids))
+def get_nodes_response_from_proto(
+    msg: driver_pb2.GetNodesResponse,
+) -> GetNodesResponse:
+    """Deserialize `GetNodesResponse` from ProtoBuf."""
+    return GetNodesResponse(node_ids=list(msg.node_ids))
 
 
 # === CreateTasks messages ===
@@ -92,7 +92,7 @@ def create_tasks_request_to_proto(
         )
         task_assignment_proto = task_pb2.TaskAssignment(
             task=task_proto,
-            client_ids=task_assignment.client_ids,
+            node_ids=task_assignment.node_ids,
         )
         task_assignments_proto.append(task_assignment_proto)
     return driver_pb2.CreateTasksRequest(task_assignments=task_assignments_proto)
@@ -117,7 +117,7 @@ def create_tasks_request_from_proto(
         )
         task_assignment = TaskAssignment(
             task=task,
-            client_ids=list(task_assignment_proto.client_ids),
+            node_ids=list(task_assignment_proto.node_ids),
         )
         task_assignments.append(task_assignment)
     return CreateTasksRequest(task_assignments=task_assignments)
