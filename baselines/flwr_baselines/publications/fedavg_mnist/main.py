@@ -53,7 +53,11 @@ def main(cfg: DictConfig) -> None:
     np.save(
         Path(cfg.save_path)
         / Path(
-            f"hist_C={cfg.num_clients}_B={cfg.batch_size}_E={cfg.num_epochs}_R={cfg.num_rounds}_stag={1 - cfg.client_fraction}"
+            f"hist_C={cfg.num_clients}"
+            f"_B={cfg.batch_size}"
+            f"_E={cfg.num_epochs}"
+            f"_R={cfg.num_rounds}"
+            f"_stag={1 - cfg.client_fraction}"
         ),
         history,
     )
@@ -62,7 +66,13 @@ def main(cfg: DictConfig) -> None:
         history,
         cfg.save_path,
         cfg.expected_maximum,
-        f"_C={cfg.num_clients}_B={cfg.batch_size}_E={cfg.num_epochs}_R={cfg.num_rounds}_stag={1 - cfg.client_fraction}",
+        (
+            f"_C={cfg.num_clients}"
+            f"_B={cfg.batch_size}"
+            f"_E={cfg.num_epochs}"
+            f"_R={cfg.num_rounds}"
+            f"_stag={1 - cfg.client_fraction}"
+        ),
     )
 
 
