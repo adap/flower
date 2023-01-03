@@ -1,8 +1,7 @@
----
-num_clients: 100
-num_epochs: 5 
+num_clients: 10
+num_rounds: 10
+num_epochs: 5
 batch_size: 10
-num_rounds: 1000
 iid: False
 client_fraction: 1.0
 expected_maximum: 0.9924
