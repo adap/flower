@@ -1,8 +1,10 @@
 """Runs CNN federated learning for MNST dataset."""
 
+from pathlib import Path
 
 import flwr as fl
 import hydra
+import numpy as np
 import torch
 from omegaconf import DictConfig
 
@@ -48,12 +50,19 @@ def main(cfg: DictConfig) -> None:
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
     )
+    np.save(
+        Path(cfg.save_path)
+        / Path(
+            f"hist_C={cfg.num_clients}_B={cfg.batch_size}_E={cfg.num_epochs}_R={cfg.num_rounds}_stag={1 - cfg.client_fraction}"
+        ),
+        history,
+    )
 
     utils.plot_metric_from_history(
         history,
-        cfg.plot_path,
+        cfg.save_path,
         cfg.expected_maximum,
-        f"_cli={cfg.num_clients}_rds={cfg.num_rounds}_stag={1 - cfg.client_fraction}",
+        f"_C={cfg.num_clients}_B={cfg.batch_size}_E={cfg.num_epochs}_R={cfg.num_rounds}_stag={1 - cfg.client_fraction}",
     )
 
 
