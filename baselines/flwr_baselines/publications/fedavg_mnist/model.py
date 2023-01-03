@@ -145,7 +145,7 @@ def test(
             correct += (predicted == labels).sum().item()
     if len(testloader.dataset) == 0:
         print("Testloader can't be 0, exiting...")
-        return 
+        return
     loss /= len(testloader.dataset)
     accuracy = correct / total
     return loss, accuracy
