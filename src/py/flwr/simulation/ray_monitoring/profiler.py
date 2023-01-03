@@ -71,7 +71,7 @@ def launch_and_fit(
     # Get node_id and task_id
     this_node_id = ray.get_runtime_context().get_node_id()
     this_task_id = ray.get_runtime_context().get_task_id() or "no_task_id"
-    task = (this_task_id, os.getpid(), "fit")
+    task = (this_task_id, os.getpid(), f"{cid}_fit")
     sysmon = ray.get_actor(f"{this_node_id}", namespace="flwr_experiment")
 
     # Register task

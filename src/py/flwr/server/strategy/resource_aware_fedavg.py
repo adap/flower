@@ -432,19 +432,26 @@ class ResourceAwareFedAvg(FedAvg):
                 ]
 
                 for this_task, gpu_mem_dict in max_this_proc_mem_used_mb.items():
-                    for (gpu_uuid, max_mem_used_this_gpu) in gpu_mem_dict.items():
+                    for (gpu_uuid, max_mem_this_proc_this_gpu) in gpu_mem_dict.items():
                         total_mem_this_gpu = self.gpu_resources[node_id][
                             gpu_uuid
                         ].total_mem_mb
                         max_all_proc_mem = max_all_proc_mem_used_mb[gpu_uuid]
+                        print(
+                            f"Total Memory for GPU: {gpu_uuid} = {total_mem_this_gpu}"
+                        )
+                        print(f"Max all proc mem GPU: {gpu_uuid} = {max_all_proc_mem}")
+                        print(
+                            f"Max mem this process GPU: {gpu_uuid} {max_mem_this_proc_this_gpu}"
+                        )
 
                         max_num_clients_this_gpu = int(
                             (
                                 total_mem_this_gpu
                                 - max_all_proc_mem
-                                + max_mem_used_this_gpu
+                                + max_mem_this_proc_this_gpu
                             )
-                            / max_mem_used_this_gpu
+                            / max_mem_this_proc_this_gpu
                         )
                         # Update the resource_model max number of clients per gpu
                         poly_model, t = self.resources_model[(node_id, gpu_uuid)]

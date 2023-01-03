@@ -104,7 +104,8 @@ class SystemMonitor(Thread):
         save_path_root: Optional[Path] = None,
     ):
         super(SystemMonitor, self).__init__()
-        self.node_id = node_id if node_id else socket.getfqdn()
+        # self.node_id = node_id if node_id else socket.getfqdn()
+        self.node_id = socket.getfqdn()
         self.tasks: Dict[str, Task] = dict()
         self.cpu: SimpleCPU = SimpleCPU()
         self.gpus: Dict[str, SimpleGPU] = dict()
@@ -165,7 +166,7 @@ class SystemMonitor(Thread):
 
     def save_and_clear(self, sub_folder: PurePath):
 
-        save_path = self.save_path_root / sub_folder
+        save_path = self.save_path_root / sub_folder / self.node_id
         resources_folder = save_path / "resources"
         resources_folder.mkdir(parents=True, exist_ok=True)
         task_folder = save_path / "tasks"
@@ -229,16 +230,19 @@ class SystemMonitor(Thread):
 
     def _collect_gpu_usage(self) -> None:
         # Need to get PID of a task, same order guaranteed in Python 3.7
-        task_id_pid_map = {task.pid: task.id for task in self.tasks.values()}
+        # task_id_pid_map = {task.pid: task.id for task in self.tasks.values()}
+        pid_task_id_map = {
+            self.tasks[task_id].pid: task_id for task_id in self.active_task_ids
+        }
 
         # Retrieve single process GPU memory usage
         timestamp = time.time_ns()
 
         pros = nvsmi.get_gpu_processes()
         for pro in pros:
-            if pro.pid in task_id_pid_map.keys():
+            if pro.pid in pid_task_id_map.keys():
                 uuid = pro.gpu_uuid
-                task_id = task_id_pid_map[pro.pid]
+                task_id = pid_task_id_map[pro.pid]
                 if uuid not in self.tasks[task_id].gpu_processes.keys():
                     self.tasks[task_id].gpu_processes[uuid] = SimpleGPUProcess()
 
@@ -255,33 +259,33 @@ class SystemMonitor(Thread):
                 self.gpus[uuid].all_proc_mem_used_mb.append((timestamp, gpu.mem_used))
                 self.gpus[uuid].utilization.append((timestamp, gpu.gpu_util))
 
-    def _get_cpu_process_utilization(self) -> None:
+    def _collect_cpu_usage(self) -> None:
         timestamp = time.time_ns()
-        # Tracked processed
-        task_map = {task.pid: task.id for task in self.tasks.values()}
-        pid_list = ",".join([str(x) for x in task_map.keys()])
+        if psutil is not None:
+            # Total System Memory Utilization
+            cpu_mem_used = psutil.virtual_memory().used
+            self.cpu.all_proc_mem_used_mb.append((timestamp, cpu_mem_used))
+
+        # Tracked Processed Memory and CPU
+        # task_map = {task.pid: task.id for task in self.tasks.values()}
+        pid_task_id_map = {
+            self.tasks[task_id].pid: task_id for task_id in self.active_task_ids
+        }
+        pid_list = ",".join([str(x) for x in pid_task_id_map.keys()])
         try:
             output = check_output(
                 ["ps", "-p", pid_list, "--no-headers", "-o", "pid,%mem,%cpu"]
             )
             for line in output.splitlines():
                 pid, mem, cpu_percent = line.split()
-                self.tasks[task_map[int(pid)]].cpu_process.utilization.append(
+                self.tasks[pid_task_id_map[int(pid)]].cpu_process.utilization.append(
                     (timestamp, float(cpu_percent))
                 )
-                self.tasks[task_map[int(pid)]].cpu_process.this_proc_mem_used_mb.append(
-                    (timestamp, float(mem))
-                )
+                self.tasks[
+                    pid_task_id_map[int(pid)]
+                ].cpu_process.this_proc_mem_used_mb.append((timestamp, float(mem)))
         except:
             pass
-
-    def _collect_cpu_usage(self) -> None:
-        if psutil is not None:
-            # System Memory Utilization
-            timestamp = time.time_ns()
-            cpu_mem_used = psutil.virtual_memory().used
-            self.cpu.all_proc_mem_used_mb.append((timestamp, cpu_mem_used))
-        self._get_cpu_process_utilization()
 
     def _collect_system_usage(self) -> None:
         with self._lock:
@@ -301,7 +305,6 @@ class SystemMonitor(Thread):
         selected_task_ids = task_ids if task_ids else [k for k in self.tasks.keys()]
         for task_id in selected_task_ids:
             task = self.tasks[task_id]
-            print(task)
             max_this_proc_mem_used_mb[task_id] = {}
             for uuid, gpu_process in task.gpu_processes.items():
                 this_task_uuid_mem_usage_mb = [
