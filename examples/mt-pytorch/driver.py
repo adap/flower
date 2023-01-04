@@ -4,8 +4,8 @@ import time
 
 from flwr.driver import (
     Driver,
-    GetClientsResponse,
-    GetClientsRequest,
+    GetNodesResponse,
+    GetNodesRequest,
     Task,
     Result,
     CreateTasksRequest,
@@ -33,26 +33,26 @@ driver.connect()
 for server_round in range(num_rounds):
     print(f"Commencing server round {server_round + 1}")
 
-    # Get a list of client ID's from the server
-    get_clients_req = GetClientsRequest()
+    # Get a list of node ID's from the server
+    get_nodes_req = GetNodesRequest()
 
     # ---------------------------------------------------------------------- Driver SDK
-    get_clients_res: GetClientsResponse = driver.get_clients(req=get_clients_req)
+    get_nodes_res: GetNodesResponse = driver.get_nodes(req=get_nodes_req)
     # ---------------------------------------------------------------------- Driver SDK
 
-    # Sample three clients
-    all_client_ids: List[int] = get_clients_res.client_ids
-    print(f"Got {len(all_client_ids)} client IDs")
-    sampled_client_ids: List[int] = random.sample(all_client_ids, 3)
-    print(f"Sampled {len(sampled_client_ids)} client IDs")
+    # Sample three nodes
+    all_node_ids: List[int] = get_nodes_res.node_ids
+    print(f"Got {len(all_node_ids)} node IDs")
+    sampled_node_ids: List[int] = random.sample(all_node_ids, 3)
+    print(f"Sampled {len(sampled_node_ids)} node IDs")
 
     time.sleep(sleep_time)
 
-    # Schedule a task for all three clients
+    # Schedule a task for all three nodes
     fit_ins: FitIns = FitIns(parameters=parameters, config={})
     task = Task(task_id=123, legacy_server_message=ServerMessage(fit_ins=fit_ins))
     task_assignment: TaskAssignment = TaskAssignment(
-        task=task, client_ids=sampled_client_ids
+        task=task, node_ids=sampled_node_ids
     )
     create_tasks_req = CreateTasksRequest(task_assignments=[task_assignment])
 
@@ -84,8 +84,8 @@ for server_round in range(num_rounds):
             break
 
     # "Aggregate" results
-    client_messages = [result.legacy_client_message for result in all_results]
-    print(f"Received {len(client_messages)} results")
+    node_messages = [result.legacy_client_message for result in all_results]
+    print(f"Received {len(node_messages)} results")
 
     time.sleep(sleep_time)
 

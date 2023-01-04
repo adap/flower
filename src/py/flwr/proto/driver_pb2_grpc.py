@@ -14,10 +14,10 @@ class DriverStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetClients = channel.unary_unary(
-                '/flwr.proto.Driver/GetClients',
-                request_serializer=flwr_dot_proto_dot_driver__pb2.GetClientsRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_driver__pb2.GetClientsResponse.FromString,
+        self.GetNodes = channel.unary_unary(
+                '/flwr.proto.Driver/GetNodes',
+                request_serializer=flwr_dot_proto_dot_driver__pb2.GetNodesRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_driver__pb2.GetNodesResponse.FromString,
                 )
         self.CreateTasks = channel.unary_unary(
                 '/flwr.proto.Driver/CreateTasks',
@@ -34,8 +34,8 @@ class DriverStub(object):
 class DriverServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def GetClients(self, request, context):
-        """Return a list of clients.
+    def GetNodes(self, request, context):
+        """Return a set of nodes
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -58,10 +58,10 @@ class DriverServicer(object):
 
 def add_DriverServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetClients': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetClients,
-                    request_deserializer=flwr_dot_proto_dot_driver__pb2.GetClientsRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_driver__pb2.GetClientsResponse.SerializeToString,
+            'GetNodes': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetNodes,
+                    request_deserializer=flwr_dot_proto_dot_driver__pb2.GetNodesRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_driver__pb2.GetNodesResponse.SerializeToString,
             ),
             'CreateTasks': grpc.unary_unary_rpc_method_handler(
                     servicer.CreateTasks,
@@ -84,7 +84,7 @@ class Driver(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetClients(request,
+    def GetNodes(request,
             target,
             options=(),
             channel_credentials=None,
@@ -94,9 +94,9 @@ class Driver(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/GetClients',
-            flwr_dot_proto_dot_driver__pb2.GetClientsRequest.SerializeToString,
-            flwr_dot_proto_dot_driver__pb2.GetClientsResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/GetNodes',
+            flwr_dot_proto_dot_driver__pb2.GetNodesRequest.SerializeToString,
+            flwr_dot_proto_dot_driver__pb2.GetNodesResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
