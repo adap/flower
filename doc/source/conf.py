@@ -29,12 +29,12 @@ sys.path.insert(0, os.path.abspath("../../src/py"))
 
 # -- Project information -----------------------------------------------------
 
-project = u"Flower"
-copyright = u"2022 Adap GmbH"
-author = u"The Flower Authors"
+project = "Flower"
+copyright = "2022 Adap GmbH"
+author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = u"1.2.0"
+release = "1.2.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -97,7 +97,9 @@ html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.dev/docs/"
 
 html_theme_options = {
+    #
     # Sphinx Book Theme
+    #
     # https://sphinx-book-theme.readthedocs.io/en/latest/configure.html
     # "repository_url": "https://github.com/adap/flower",
     # "repository_branch": "main",
@@ -106,15 +108,16 @@ html_theme_options = {
     # "use_repository_button": True,
     # "use_issues_button": True,
     # "use_edit_page_button": True,
-
+    #
     # Furo
+    #
     # https://pradyunsg.me/furo/customisation/
     # "light_css_variables": {
     #     "color-brand-primary": "#292F36",
-    #     "color-brand-content": "#292F36",  
+    #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": "Flower Summit 2022 <a href=\"https://flower.dev/conf/flower-summit-2022/\">watch now</a>",
+    "announcement": 'Flower Summit 2022 <a href="https://flower.dev/conf/flower-summit-2022/">watch now</a>',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -125,7 +128,7 @@ html_css_files = ["custom.css"]
 
 # -- Options for nbsphinx -------------------------------------------------
 
-nbsphinx_execute = 'never'
+nbsphinx_execute = "never"
 
 _open_in_colab_button = """
 .. raw:: html

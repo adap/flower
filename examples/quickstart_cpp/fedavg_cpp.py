@@ -34,7 +34,7 @@ class FedAvgCpp(FedAvg):
                 [int, NDArrays, Dict[str, Scalar]],
                 Optional[Tuple[float, Dict[str, Scalar]]],
             ]
-            #Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
+            # Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
