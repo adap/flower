@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # https://code.visualstudio.com/docs/remote/containers-advanced#_creating-a-nonroot-user
 ARG USERNAME=flwr-vscode
@@ -29,9 +29,9 @@ RUN apt install -y curl wget gnupg python3 python-is-python3 python3-pip git \
     build-essential clang-format tmux vim
 
 RUN python -m pip install \
-    pip==22.2 \
-    setuptools==63.2.0 \
-    poetry==1.1.14
+    pip==22.3.1 \
+    setuptools==65.6.3 \
+    poetry==1.1.15
 
 USER $USERNAME
 ENV PATH="/home/$USERNAME/.local/bin:${PATH}"
