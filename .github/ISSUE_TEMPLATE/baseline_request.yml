@@ -7,8 +7,8 @@ body:
   - type: input
     attributes:
       label: Paper
-      description: What paper would you like implemented as a baseline ?
-      placeholder: "Authors, year, title"
+      description: What paper/ experiment would you like to see implemented as a Flower Baseline ?
+      placeholder: "Authors, year, title, experiment"
     validations:
       required: true
   - type: input
@@ -28,8 +28,8 @@ body:
     attributes:
       value: |
         #### If you want to propose a new baseline, please check the PRs if someone already works on it.
-        
-        ## ⚠️ Do not touch anything below ⚠️
+
+        ## ⚠️ Below are the recommended steps for the Baseline implementation, it shouldn't be touched upon while creating the issue, thanks! ⚠️
   - type: input
     attributes:
       label: Implementation
