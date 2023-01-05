@@ -87,7 +87,7 @@ sphinxcontrib-mermaid = "==0.7.1"
 furo = "==2022.6.21"
 sphinx-reredirects = "==0.1.1"
 nbsphinx = "==0.8.9"
-xgboost = "==1.7.0"
+xgboost = "==1.7.2"
 
 [tool.isort]
 line_length = 88
