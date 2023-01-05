@@ -79,3 +79,9 @@ To help visualize results, the script also plots evaluation curves. Here is an e
       <img src="docs/centralized_metrics.png" alt="Centralized evaluation results" width="400">
 </p>
 
+You will also find the saved history in the `docs/results/` folder, 
+here `C` is referring to the number of clients, `B` the batch size, 
+`E` the number of local epochs, `R` the number of rounds, and `stag`
+the proportion of clients that are unreachable at each round.
+
+
