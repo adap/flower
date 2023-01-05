@@ -49,8 +49,8 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 """
 
 # flake8: noqa: E501
-class FedXGB_NN_Avg(Strategy):
-    """Configurable FedXGB_NN_Avg strategy implementation."""
+class FedXgbNnAvg(Strategy):
+    """Configurable FedXgbNnAvg strategy implementation."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
     def __init__(
