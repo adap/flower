@@ -36,7 +36,7 @@ python3 -c "import flwr"
 
 If you don't see any errors you're good to go!
 
-# Run Federated Learning with Pandas and Flower
+# Run Federated Analytics with Pandas and Flower
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
@@ -58,4 +58,4 @@ Start client 2 in the second terminal:
 python3 client.py
 ```
 
-You will see that PyTorch is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart-pytorch.html) for a detailed explanation.
+You will see that the server is printing aggregated statistics about the dataset distributed amongst clients. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart-pandas.html) for a detailed explanation.
