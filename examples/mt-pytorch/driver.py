@@ -43,7 +43,8 @@ for server_round in range(num_rounds):
     # Sample three nodes
     all_node_ids: List[int] = get_nodes_res.node_ids
     print(f"Got {len(all_node_ids)} node IDs")
-    sampled_node_ids: List[int] = random.sample(all_node_ids, 3)
+    num_node_ids_to_sample = 3 if len(all_node_ids) >= 3 else 1
+    sampled_node_ids: List[int] = random.sample(all_node_ids, num_node_ids_to_sample)
     print(f"Sampled {len(sampled_node_ids)} node IDs")
 
     time.sleep(sleep_time)
@@ -68,7 +69,7 @@ for server_round in range(num_rounds):
     task_ids: List[int] = create_tasks_res.task_ids
     all_results: List[Result] = []
     while True:
-        get_results_req = GetResultsRequest(task_ids=create_tasks_res.task_ids)
+        get_results_req = GetResultsRequest(task_ids=task_ids)
 
         # ------------------------------------------------------------------ Driver SDK
         get_results_res: GetResultsResponse = driver.get_results(req=get_results_req)
