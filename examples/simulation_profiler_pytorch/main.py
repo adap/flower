@@ -12,8 +12,6 @@ from flwr.simulation import start_simulation
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
-parser.add_argument("--num_cpus_per_client", type=float, default=1)  # Initial values
-parser.add_argument("--num_gpus_per_client", type=float, default=0.5)  # Initial values
 parser.add_argument("--num_rounds", type=int, default=5)
 
 # Flower client, adapted from Pytorch quickstart example
@@ -36,10 +34,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     pool_size = 100  # number of dataset partitions (= number of total clients)
-    client_resources = {
-        "num_cpus": args.num_cpus_per_client,
-        "num_gpus": args.num_gpus_per_client,
-    }
 
     # Download CIFAR-10 dataset
     train_path, testset = get_cifar_10()
@@ -78,18 +72,12 @@ if __name__ == "__main__":
         # create a single client instance
         return FlowerClient(cid, str(fed_dir.absolute()))
 
-    # (optional) specify Ray config
-    ray.init(include_dashboard=False)
-
-    ray_init_args = {
-        "include_dashboard": False,
-    }
+    ray_init_args = {"include_dashboard": False}
 
     # start simulation
     start_simulation(
         client_fn=client_fn,
         num_clients=pool_size,
-        client_resources=client_resources,
         config=ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
         ray_init_args=ray_init_args,

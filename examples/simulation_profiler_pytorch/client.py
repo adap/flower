@@ -3,6 +3,7 @@ from typing import Dict, Optional
 
 import numpy as np
 import torch
+import os
 from dataset_utils import get_dataset
 from torch.nn import Module
 from torch.utils.data import DataLoader, RandomSampler

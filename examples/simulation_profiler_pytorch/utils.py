@@ -94,8 +94,7 @@ def fit_config(server_round: int) -> Config:
     """Return a configuration with static batch size and (local) epochs."""
     config: Config = {
         "epochs": 5,  # number of local epochs
-        "batch_size": 8,
-        "gpu_id": 0,
+        "batch_size": 32,
     }
     return config
 
@@ -104,8 +103,7 @@ def evaluate_config(server_round: int) -> Config:
     """Return a configuration with static batch size and (local) epochs."""
     config: Config = {
         "epochs": 5,  # number of local epochs
-        "batch_size": 16,
-        "gpu_id": 0,
+        "batch_size": 32,
     }
     return config
 

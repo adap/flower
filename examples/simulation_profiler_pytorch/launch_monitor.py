@@ -2,6 +2,7 @@ import argparse
 from socket import getfqdn
 
 import ray
+import nvsmi
 
 from flwr.simulation.ray_monitoring import RaySystemMonitor
 
@@ -26,6 +27,7 @@ def launch_ray_system_monitor(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser = argparse.ArgumentParser(description="Launch Ray System Monitor.")
+    args = parser.parse_args()
     parser.add_argument(
         "--namespace",
         type=str,
