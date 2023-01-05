@@ -1,10 +1,10 @@
 First time contributors
 =======================
 
-This guide is geared towards people that want to get involved in Flower
-but that are not used to contributing on GitHub projects.
+This guide is for people who want to get involved with Flower
+but who are not used to contributing to GitHub projects.
 
-If GitHub contributions have no secret for you, 
+If you're familiar with how contributing on GitHub works, 
 you can directly checkout our 
 `getting started guide for contributors <https://flower.dev/docs/getting-started-for-contributors.html>`_ 
 and examples of `good first contributions <https://flower.dev/docs/good-first-contributions.html>`_.
@@ -13,7 +13,7 @@ Setting up the repository
 -------------------------
 
 1. **Create a GitHub account and setup Git**
-    Git is a distributed version control tool. This allows for an entire codebase's history to be stored and every developper's machine.
+    Git is a distributed version control tool. This allows for an entire codebase's history to be stored and every developer's machine.
     It is a software that will need to be installed on your local machine, you can follow this `guide <https://docs.github.com/en/get-started/quickstart/set-up-git>`_ to set it up.
 
     GitHub, itself, is a code hosting platform for version control and collaboration. It allows for everyone to collaborate and work from anywhere on remote repositories.
@@ -24,19 +24,19 @@ Setting up the repository
     you download code from a remote repository on GitHub, make changes locally and keep track of them using Git and then you upload your new history back to GitHub.
 
 2. **Forking the Flower repository**
-    A fork is a personnal copy of a GitHub repository. To create one for Flower, you must navigate to https://github.com/adap/flower (while connected to your GitHub account)
-    and click the `Fork` button situated on the top right of the page.
+    A fork is a personal copy of a GitHub repository. To create one for Flower, you must navigate to https://github.com/adap/flower (while connected to your GitHub account)
+    and click the ``Fork`` button situated on the top right of the page.
 
     .. image:: _static/fork_button.png
     
-    You can change the name if you want, but this is not necessary as this version of Flower will be yours and will sit inside your own repositories.
+    You can change the name if you want, but this is not necessary as this version of Flower will be yours and will sit inside your own account (i.e., in your own list of repositories).
     Once created, you should see on the top left corner that you are looking at your own version of Flower.
 
     .. image:: _static/fork_link.png
 
 3. **Cloning your forked repository**
     The next step is to download the forked repository on your machine to be able to make changes to it.
-    On your forked repository page, you should first click on the `Code` button on the right, 
+    On your forked repository page, you should first click on the ``Code`` button on the right, 
     this will give you the ability to copy the HTTPS link of the repository.
 
     .. image:: _static/cloning_fork.png
@@ -57,7 +57,7 @@ Setting up the repository
         $ cd flower
 
     And here we will need to add an origin to our repository. The origin is the \<URL\> of the remote fork repository.
-    To obtain it, we can do as previously mentionned by going to our fork repository on our GitHub account and copying the link.
+    To obtain it, we can do as previously mentioned by going to our fork repository on our GitHub account and copying the link.
 
     .. image:: _static/cloning_fork.png
     
@@ -82,7 +82,7 @@ Setting up the repository
 
     The upstream is the GitHub remote address of the parent repository (in this case Flower), 
     i.e. the one we eventually want to contribute to and therefore need an up-to-date history of. 
-    The origin is just the GitHub remote address of the forked repository we created.
+    The origin is just the GitHub remote address of the forked repository we created, i.e. the copy (fork) in our own account.
 
     To make sure our local version of the fork is up-to-date with the latest changes from the Flower repository,
     we can execute the following command:
@@ -188,7 +188,7 @@ Creating and merging a pull request (PR)
 
     .. image:: _static/merging_branch.png
     
-    In this example you can see that the request is to merge the branch `doc-fixes` from my forked repository to branch main from the Flower repository.
+    In this example you can see that the request is to merge the branch ``doc-fixes`` from my forked repository to branch ``main`` from the Flower repository.
 
     The input box in the middle is there for you to describe what your PR does and to link it to existing issues. 
     We have placed comments (that won't be rendered once the PR is opened) to guide you through the process.
