@@ -45,6 +45,7 @@ A learning-oriented series of federated learning tutorials, the best place to st
    quickstart-pytorch
    quickstart-tensorflow
    quickstart-huggingface
+   quickstart-pandas
    quickstart-pytorch-lightning
    quickstart-mxnet
    quickstart-scikitlearn
@@ -130,6 +131,7 @@ intended to help along the way.
    :maxdepth: 1
    :caption: Contributor guide
 
+   first-time-contributors
    getting-started-for-contributors
    good-first-contributions
    contributor-setup
