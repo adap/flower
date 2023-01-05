@@ -36,9 +36,6 @@ class FlowerClient(fl.client.Client):
     def get_parameters(self, config):
         return {"column_names": column_names}
 
-    def set_parameters(self, parameters):
-        pass
-
     def fit(self, parameters, config):
         # Execute query locally
         outputs = {}
@@ -52,9 +49,6 @@ class FlowerClient(fl.client.Client):
             len(df),
             {},
         )  # [Tensors, num_examples, dict] - I am storing analytics analysis in results
-
-    def evaluate(self, parameters, data):
-        pass
 
     def _format_outputs(self, inputs: dict):
         # Format outputs to [NDTupes, int, dict]

@@ -40,7 +40,6 @@ class FedAnalytics(Strategy):
     def aggregate_fit(self, server_round, results, failures):
         # Get results from fit
         # Convert results
-        print("agg fit")
         values_aggregated = [
             (parameters_to_ndarrays(fit_res.parameters)) for _, fit_res in results
         ]

@@ -2,7 +2,7 @@
 
 
 Quickstart Pandas
-============================
+=================
 
 Let's build a federated analytics system using Pandas and Flower!
 

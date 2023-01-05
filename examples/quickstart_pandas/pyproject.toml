@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "quickstart_pandas"
 version = "0.1.0"
-description = "Pandas Federated Learning Quickstart with Flower"
+description = "Pandas Federated Analytics Quickstart with Flower"
 authors = ["Ragy Haddad <todo@todo.todo>"]
 maintainers = ["The Flower Authors <hello@flower.dev>"]
 
