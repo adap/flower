@@ -130,6 +130,7 @@ intended to help along the way.
    :maxdepth: 1
    :caption: Contributor guide
 
+   first-time-contributors
    getting-started-for-contributors
    good-first-contributions
    contributor-setup
