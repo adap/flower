@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Provides class GRPCBridge."""
+"""Provides class GrpcBridge."""
+
 
 from dataclasses import dataclass
 from enum import Enum
@@ -37,8 +38,8 @@ class ResWrapper:
     client_message: ClientMessage
 
 
-class GRPCBridgeClosed(Exception):
-    """Error signaling that GRPCBridge is closed."""
+class GrpcBridgeClosed(Exception):
+    """Error signaling that GrpcBridge is closed."""
 
 
 class Status(Enum):
@@ -51,8 +52,8 @@ class Status(Enum):
     CLOSED = 5
 
 
-class GRPCBridge:
-    """GRPCBridge holding res_wrapper and ins_wrapper.
+class GrpcBridge:
+    """GrpcBridge holding res_wrapper and ins_wrapper.
 
     For understanding this class it is recommended to understand how
     the threading.Condition class works. See here:
@@ -74,7 +75,7 @@ class GRPCBridge:
 
     def _raise_if_closed(self) -> None:
         if self._status == Status.CLOSED:
-            raise GRPCBridgeClosed()
+            raise GrpcBridgeClosed()
 
     def _transition(self, next_status: Status) -> None:
         """Validate status transition and set next status.

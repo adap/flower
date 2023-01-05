@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for GRPCBridge class."""
+"""Tests for GrpcBridge class."""
 
 
 import time
@@ -21,15 +21,15 @@ from typing import List, Union
 
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.grpc_server.grpc_bridge import (
-    GRPCBridge,
-    GRPCBridgeClosed,
+    GrpcBridge,
+    GrpcBridgeClosed,
     InsWrapper,
     ResWrapper,
 )
 
 
 def start_worker(
-    rounds: int, bridge: GRPCBridge, results: List[ClientMessage]
+    rounds: int, bridge: GrpcBridge, results: List[ClientMessage]
 ) -> Thread:
     """Simulate processing loop with five calls."""
 
@@ -41,7 +41,7 @@ def start_worker(
                 res_wrapper = bridge.request(
                     InsWrapper(server_message=ServerMessage(), timeout=None)
                 )
-            except GRPCBridgeClosed:
+            except GrpcBridgeClosed:
                 break
 
             results.append(res_wrapper.client_message)
@@ -58,7 +58,7 @@ def test_workflow_successful() -> None:
     rounds = 5
     client_messages_received: List[ClientMessage] = []
 
-    bridge = GRPCBridge()
+    bridge = GrpcBridge()
     ins_wrapper_iterator = bridge.ins_wrapper_iterator()
 
     worker_thread = start_worker(rounds, bridge, client_messages_received)
@@ -88,12 +88,12 @@ def test_workflow_close() -> None:
     rounds = 5
     client_messages_received: List[ClientMessage] = []
 
-    bridge = GRPCBridge()
+    bridge = GrpcBridge()
     ins_wrapper_iterator = bridge.ins_wrapper_iterator()
 
     worker_thread = start_worker(rounds, bridge, client_messages_received)
 
-    raised_error: Union[GRPCBridgeClosed, StopIteration, None] = None
+    raised_error: Union[GrpcBridgeClosed, StopIteration, None] = None
 
     # Execute
     for i in range(rounds):
@@ -109,7 +109,7 @@ def test_workflow_close() -> None:
                 # on next invocation.
                 bridge.close()
 
-        except GRPCBridgeClosed as err:
+        except GrpcBridgeClosed as err:
             raised_error = err
             break
         except StopIteration as err:
@@ -133,12 +133,12 @@ def test_ins_wrapper_iterator_close_while_blocking() -> None:
     rounds = 5
     client_messages_received: List[ClientMessage] = []
 
-    bridge = GRPCBridge()
+    bridge = GrpcBridge()
     ins_wrapper_iterator = bridge.ins_wrapper_iterator()
 
     worker_thread = start_worker(rounds, bridge, client_messages_received)
 
-    raised_error: Union[GRPCBridgeClosed, StopIteration, None] = None
+    raised_error: Union[GrpcBridgeClosed, StopIteration, None] = None
 
     def close_bridge_delayed(secs: int) -> None:
         """Close brige after {secs} second(s)."""
@@ -160,7 +160,7 @@ def test_ins_wrapper_iterator_close_while_blocking() -> None:
             if i < 2:
                 bridge.set_res_wrapper(ResWrapper(ClientMessage()))
 
-        except GRPCBridgeClosed as err:
+        except GrpcBridgeClosed as err:
             raised_error = err
             break
         except StopIteration as err:
@@ -172,4 +172,4 @@ def test_ins_wrapper_iterator_close_while_blocking() -> None:
 
     # Assert
     assert len(client_messages_received) == 2
-    assert isinstance(raised_error, GRPCBridgeClosed)
+    assert isinstance(raised_error, GrpcBridgeClosed)
