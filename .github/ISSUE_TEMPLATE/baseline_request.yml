@@ -38,7 +38,7 @@ body:
     attributes:
       label: For first time contributors
       value: |
-        - [ ]  Read the [`first contribution` doc](TODO)
+        - [ ]  Read the [`first contribution` doc](https://flower.dev/docs/first-time-contributors.html)
         - [ ]  Complete the Flower tutorial
         - [ ]  Read the Flower Baselines docs to get an overview:
             - [ ]  [https://flower.dev/docs/using-baselines.html](https://flower.dev/docs/using-baselines.html)
