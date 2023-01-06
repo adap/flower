@@ -88,7 +88,7 @@ class ResourceAwareFedAvg(FedAvg):
             str, Dict[str, int]
         ] = {},  # Eventually, change this to List[Profiles]
         num_warmup_steps: int = 100,
-        save_parameter: Path = PurePath("/home/pedro/flwr"),
+        save_models_folder: Path = Path("/home/pedro/flwr_monitor/"),
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -124,6 +124,7 @@ class ResourceAwareFedAvg(FedAvg):
         self.start_time: str = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
         self.num_warmup_steps = num_warmup_steps
         self.begin_round: int = 0
+        self.save_models_folder = save_models_folder
 
     def __repr__(self) -> str:
         rep = f"ResourceAwareFedAvg(accept_failures={self.accept_failures})"
@@ -175,7 +176,9 @@ class ResourceAwareFedAvg(FedAvg):
 
         # save_model
         if parameters:
-            with open(sub_dir / f"{str(server_round)}.pickle", "wb") as f:
+            tmp_dir = self.save_models_folder / self.start_time
+            tmp_dir.mkdir(exist_ok=True, parents=True)
+            with open(tmp_dir / f"{str(server_round)}.pickle", "wb") as f:
                 pickle.dump(parameters, f)
 
     def request_available_resources(self) -> None:
