@@ -41,7 +41,7 @@ class EventType(str, Enum):
     # https://docs.python.org/3.7/library/enum.html#using-automatic-values
     # Also this function signature is super weird the only reasonable option
     # was to disable all checks for it.
-    def _generate_next_value_(name, start, count, last_values):  # type: ignore # pylint: disable=no-self-argument,arguments-differ
+    def _generate_next_value_(name, start, count, last_values):  # type: ignore # pylint: disable=no-self-argument,arguments-differ # noqa: E501
         return name
 
     # Client
