@@ -198,6 +198,7 @@ class ResourceAwareFedAvg(FedAvg):
 
     def configure_warmup_round(
         self,
+        *,
         client_manager: ClientManager,
         parameters: Parameters,
         num_clients_per_gpu: int,
@@ -208,6 +209,7 @@ class ResourceAwareFedAvg(FedAvg):
             num_clients=num_clients_per_gpu * len(self.resources_model),
             min_num_clients=num_clients_per_gpu * len(self.resources_model),
         )
+        print(clients)
 
         client_fit_list: List[Tuple[ClientProxy, FitIns]] = []
 
@@ -227,7 +229,6 @@ class ResourceAwareFedAvg(FedAvg):
                     )
                     * config["epochs"]
                 )
-                num_steps = 100
                 this_config = dict(
                     config,
                     **{"gpu_id": gpu_id, "local_steps": self.num_warmup_steps},
