@@ -555,6 +555,8 @@ class ResourceAwareFedAvg(FedAvg):
         # Tell monitor to store and continue
         agg_results = super().aggregate_fit(server_round, results, failures)
         sub_dir = PurePath(self.start_time, str(server_round))
-        self._save_and_clear_monitors(sub_dir=sub_dir, parameters=agg_results[0])
+        self._save_and_clear_monitors(
+            sub_dir=sub_dir, parameters=agg_results[0], server_round=server_round
+        )
 
         return agg_results
