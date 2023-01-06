@@ -9,6 +9,7 @@ GPUS=$(nvidia-smi --query-gpu=uuid, --format=csv,noheader | awk '{print "\"" $1 
 GPUS="{"${GPUS%?}"}"
 
 export RAY_EXPERIMENTAL_NOSET_CUDA_VISIBLE_DEVICES=1
+export RAY_memory_monitor_refresh_ms=0
 
 ray stop && ray start --head --num-cpus 8 --resources "${GPUS}"
 
