@@ -69,7 +69,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
-    keep_initialised: Optional[bool] = False,
+    keep_initialised: Optional[bool] = True,
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -120,7 +120,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
         An empty dictionary can be used (ray_init_args={}) to prevent any
         arguments from being passed to ray.init.
-    keep_initialised: Optional[bool] (default: False)
+    keep_initialised: Optional[bool] (default: True)
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
 
     Returns
