@@ -23,6 +23,7 @@ from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
+    telemetry,
 )
 from flwr.common.logger import log
 from flwr.common.typing import (
@@ -128,6 +129,8 @@ def start_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
+    telemetry.send(event_type=telemetry.EventType.START_CLIENT)
+
     while True:
         sleep_duration: int = 0
         with grpc_connection(
@@ -155,6 +158,8 @@ def start_client(
             sleep_duration,
         )
         time.sleep(sleep_duration)
+
+    telemetry.send(event_type=telemetry.EventType.STOP_CLIENT)
 
 
 def start_numpy_client(
