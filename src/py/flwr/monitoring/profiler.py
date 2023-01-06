@@ -1,4 +1,6 @@
+from copy import deepcopy
 import datetime
+from psutil import cpu_count
 import os
 import pickle
 import platform
@@ -8,6 +10,7 @@ from dataclasses import dataclass, field
 from functools import wraps
 from pathlib import Path, PurePath
 from subprocess import check_output
+from ray.experimental.state.api import list_tasks
 from threading import Lock, Thread
 from typing import (
     Callable,
@@ -48,6 +51,7 @@ class SimpleCPU:
     name: str = "cpu"
     total_mem_mb: float = 0.0
     all_proc_mem_used_mb: List[FloatSample] = field(default_factory=list)
+    num_cores: int = 1
 
 
 @dataclass
@@ -130,12 +134,15 @@ class SystemMonitor(Thread):
         return {k: v for k, v in self.tasks.items() if k in self.active_task_ids}
 
     def get_active_tasks_ids(self) -> List[str]:
-        return self.active_task_ids
+        t = []
+        with self._lock:
+            t = deepcopy(self.active_task_ids)
+        return t
 
     def is_running(self) -> bool:
         return not self.stopped
 
-    def register_tasks(self, tasks: List[Tuple[str, int, str]]) -> None:
+    def register_tasks(self, tasks: List[Tuple[str, int, str]]) -> bool:
         """Include list of tasks in set of tasks that are being monitored.
 
         Args:
@@ -152,17 +159,16 @@ class SystemMonitor(Thread):
                     start_time_ns=time.time_ns(),
                 )
                 self.active_task_ids.append(task_id)
+        return True
 
-    def unregister_tasks(self, task_ids: List[str]) -> None:
-        """Removes list of tasks in set of tasks that are being monitored.
-
-        Args:
-            tasks (List[Tuple[str, int, str]]): List of (task_id,pid,task_name)s to be removed
-        """
+    def unregister_tasks(self, task_ids: List[str]) -> bool:
         with self._lock:
             for task_id in task_ids:
-                self.tasks[task_id].stop_time_ns = time.time_ns()
-                self.active_task_ids.pop(self.active_task_ids.index(task_id))
+                if task_id in self.active_task_ids:
+                    self.active_task_ids.remove(task_id)
+                    self.tasks[task_id].stop_time_ns = time.time_ns()
+
+        return True
 
     def save_and_clear(self, sub_folder: PurePath):
 
@@ -202,7 +208,11 @@ class SystemMonitor(Thread):
 
         # Retrieve CPU and system RAM info
         cpu_name = platform.processor()
-        self.cpu = SimpleCPU(name=cpu_name, total_mem_mb=psutil.virtual_memory().total)
+        self.cpu = SimpleCPU(
+            name=cpu_name,
+            total_mem_mb=psutil.virtual_memory().total,
+            num_cores=cpu_count(logical=False),
+        )
 
     def _safe_copy_task_ids_and_pids(self) -> List[Tuple[str, int]]:
         """Returns temporary copy of tasks to be monitored.
@@ -218,8 +228,9 @@ class SystemMonitor(Thread):
         self.start_time_ns = time.time_ns()
         self.stopped = False
         while not self.stopped:
-            if self.tasks:
-                self._collect_system_usage()
+            current_active_tasks = self.get_active_tasks_ids()
+            if current_active_tasks:
+                self._collect_system_usage(current_active_tasks)
             time.sleep(self.interval_s)  # Sleep is managed by collect_cpu
         self.stop_time_ns = time.time_ns()
 
@@ -228,27 +239,39 @@ class SystemMonitor(Thread):
         self.stopped = True
         self.stop_time_ns = time.time_ns()
 
-    def _collect_gpu_usage(self) -> None:
+    def _collect_gpu_usage(self, active_task_ids: List[str]) -> None:
         # Need to get PID of a task, same order guaranteed in Python 3.7
         # task_id_pid_map = {task.pid: task.id for task in self.tasks.values()}
-        pid_task_id_map = {
-            self.tasks[task_id].pid: task_id for task_id in self.active_task_ids
-        }
+        pid_task_id_map = {}
+        with open("/home/pedro/monitor_txt.txt", "w+") as f:
+            f.write("INSIDE\n")
+        try:
+            pid_task_id_map = {
+                self.tasks[task_id].pid: task_id for task_id in active_task_ids
+            }
+        except:
+            pass
+        # self.tasks[task_id].pid: task_id for task_id in active_task_ids
 
         # Retrieve single process GPU memory usage
         timestamp = time.time_ns()
 
         pros = nvsmi.get_gpu_processes()
-        for pro in pros:
-            if pro.pid in pid_task_id_map.keys():
-                uuid = pro.gpu_uuid
-                task_id = pid_task_id_map[pro.pid]
-                if uuid not in self.tasks[task_id].gpu_processes.keys():
-                    self.tasks[task_id].gpu_processes[uuid] = SimpleGPUProcess()
+        try:
+            for pro in pros:
+                if pro.pid in pid_task_id_map.keys():
+                    uuid = pro.gpu_uuid
+                    task_id = pid_task_id_map[pro.pid]
+                    if uuid not in self.tasks[task_id].gpu_processes.keys():
+                        self.tasks[task_id].gpu_processes[uuid] = SimpleGPUProcess()
 
-                self.tasks[task_id].gpu_processes[uuid].this_proc_mem_used_mb.append(
-                    (timestamp, pro.used_memory)
-                )
+                    self.tasks[task_id].gpu_processes[
+                        uuid
+                    ].this_proc_mem_used_mb.append((timestamp, pro.used_memory))
+        except:
+            with open("/home/pedro/monitor_txt.txt", "w+") as f:
+                f.write("ERROR HERE")
+            # pass
 
         # Retrieve GPU total memory utilization
         gpus_all = nvsmi.get_gpus()
@@ -259,7 +282,7 @@ class SystemMonitor(Thread):
                 self.gpus[uuid].all_proc_mem_used_mb.append((timestamp, gpu.mem_used))
                 self.gpus[uuid].utilization.append((timestamp, gpu.gpu_util))
 
-    def _collect_cpu_usage(self) -> None:
+    def _collect_cpu_usage(self, active_task_ids: List[str]) -> None:
         timestamp = time.time_ns()
         if psutil is not None:
             # Total System Memory Utilization
@@ -267,12 +290,19 @@ class SystemMonitor(Thread):
             self.cpu.all_proc_mem_used_mb.append((timestamp, cpu_mem_used))
 
         # Tracked Processed Memory and CPU
-        # task_map = {task.pid: task.id for task in self.tasks.values()}
-        pid_task_id_map = {
-            self.tasks[task_id].pid: task_id for task_id in self.active_task_ids
-        }
-        pid_list = ",".join([str(x) for x in pid_task_id_map.keys()])
+
+        pid_task_id_map = {}
+        for id in active_task_ids:
+            try:
+                pid_task_id_map = {
+                    self.tasks[task_id].pid: task_id for task_id in active_task_ids
+                }
+            except:
+                pass
+
         try:
+            pid_list = ",".join([str(x) for x in pid_task_id_map.keys()])
+
             output = check_output(
                 ["ps", "-p", pid_list, "--no-headers", "-o", "pid,%mem,%cpu"]
             )
@@ -287,10 +317,10 @@ class SystemMonitor(Thread):
         except:
             pass
 
-    def _collect_system_usage(self) -> None:
+    def _collect_system_usage(self, current_active_tasks) -> None:
         with self._lock:
-            self._collect_cpu_usage()
-            self._collect_gpu_usage()
+            self._collect_cpu_usage(current_active_tasks)
+            self._collect_gpu_usage(current_active_tasks)
 
     def aggregate_statistics(self, task_ids: Optional[List[str]]) -> Dict[str, Scalar]:
         # System-wise
@@ -302,7 +332,8 @@ class SystemMonitor(Thread):
         max_this_proc_mem_used_mb: Dict[
             str, Dict[str, float]
         ] = {}  # task_id: {uuid:mem_mb}
-        selected_task_ids = task_ids if task_ids else [k for k in self.tasks.keys()]
+        print(self.active_task_ids)
+        selected_task_ids = task_ids if task_ids else self.active_task_ids
         for task_id in selected_task_ids:
             task = self.tasks[task_id]
             max_this_proc_mem_used_mb[task_id] = {}
@@ -323,10 +354,10 @@ class SystemMonitor(Thread):
         metrics["max_all_proc_mem_used_mb"] = max_all_proc_mem_used_mb
 
         # Training Times per task
-        training_times_ns: Dict[str, int] = {}  # task_id:
+        training_times_ns: Dict[str, Tuple[int, int]] = {}  # task_id:
         for task_id in selected_task_ids:
             task = self.tasks[task_id]
-            training_times_ns[task_id] = task.stop_time_ns - task.start_time_ns
+            training_times_ns[task_id] = (task.start_time_ns, task.stop_time_ns)
 
         metrics["training_times_ns"] = training_times_ns
 
