@@ -76,7 +76,7 @@ def launch_and_fit(
 
     # Register task
     future_update_monitor_task_list = sysmon.register_tasks.remote(tasks=[task])
-    print(f"Registered client {cid}: {ray.get(future_update_monitor_task_list)}")
+    #print(f"Registered client {cid}: {ray.get(future_update_monitor_task_list)}")
     from time import sleep
 
     client: Client = _create_client(client_fn, cid)
@@ -90,6 +90,6 @@ def launch_and_fit(
     future_update_monitor_task_list = sysmon.unregister_tasks.remote(
         task_ids=[this_task_id]
     )
-    print(f"Unregistered client {cid}: {ray.get(future_update_monitor_task_list)}")
+    #print(f"Unregistered client {cid}: {ray.get(future_update_monitor_task_list)}")
 
     return fit_res

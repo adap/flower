@@ -225,7 +225,6 @@ class ResourceAwareFedAvg(FedAvg):
             num_clients=num_clients_per_gpu * len(self.resources_model),
             min_num_clients=num_clients_per_gpu * len(self.resources_model),
         )
-        print(clients)
 
         client_fit_list: List[Tuple[ClientProxy, FitIns]] = []
 

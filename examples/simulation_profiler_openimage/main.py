@@ -36,15 +36,16 @@ if __name__ == "__main__":
 
 
     strategy = ResourceAwareFedAvg(
-        fraction_fit=0.1,
+        fraction_fit=0.00911992704,
         fraction_evaluate=0.0,
-        min_fit_clients=10,
+        min_fit_clients=100,
         # min_evaluate_clients=0,
         min_available_clients=pool_size,
         on_fit_config_fn=fit_config,
         # on_evaluate_config_fn=evaluate_config,
         profiles=profiles,
         num_warmup_steps= 20,
+        save_models_folder=Path('/home/pedro/experiments/atc/openimg')
         # evaluate_fn=get_evaluate_fn(testset),  # centralized evaluation of global model
     )
     
