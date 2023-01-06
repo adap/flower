@@ -20,8 +20,9 @@ import datetime
 import numpy as np
 import numpy.typing as npt
 import ray
+import pickle
 from time import sleep, time_ns
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from ray.experimental.state.api import list_actors
 from numpy.linalg import lstsq
 
@@ -87,6 +88,7 @@ class ResourceAwareFedAvg(FedAvg):
             str, Dict[str, int]
         ] = {},  # Eventually, change this to List[Profiles]
         num_warmup_steps: int = 100,
+        save_parameter: Path = PurePath("/home/pedro/flwr"),
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -150,7 +152,13 @@ class ResourceAwareFedAvg(FedAvg):
             this_actor = ray.get_actor(node_id, namespace=self.namespace)
             ray.get(this_actor.stop.remote())
 
-    def _save_and_clear_monitors(self, sub_dir: Optional[PurePath] = None):
+    def _save_and_clear_monitors(
+        self,
+        *,
+        server_round: int = 0,
+        parameters: Optional[Parameters],
+        sub_dir: Optional[PurePath] = None,
+    ):
         # This is suitable for a single FL training. If multiple, then each
         # monitor should be doing its thing
         sub_dir = (
@@ -164,6 +172,11 @@ class ResourceAwareFedAvg(FedAvg):
             node_id: str = actor["name"]
             this_actor = ray.get_actor(node_id, namespace=self.namespace)
             ray.get(this_actor.save_and_clear.remote(sub_folder=sub_dir))
+
+        # save_model
+        if parameters:
+            with open(sub_dir / f"{str(server_round)}.pickle", "wb") as f:
+                pickle.dump(parameters, f)
 
     def request_available_resources(self) -> None:
         actors = self._get_monitors()
@@ -536,10 +549,9 @@ class ResourceAwareFedAvg(FedAvg):
                     poly_model,
                     max_num_clients,
                 )
-        else:
-            # Tell monitor to store and continue
-            sub_dir = PurePath(self.start_time, str(server_round))
-            self._save_and_clear_monitors(sub_dir=sub_dir)
+        # Tell monitor to store and continue
+        agg_results = super().aggregate_fit(server_round, results, failures)
+        sub_dir = PurePath(self.start_time, str(server_round))
+        self._save_and_clear_monitors(sub_dir=sub_dir, parameters=agg_results[0])
 
-        print(f"###END AGGREGATE FIT {server_round} !!!!!!!!!")
-        return super().aggregate_fit(server_round, results, failures)
+        return agg_results
