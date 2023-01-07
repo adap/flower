@@ -119,7 +119,7 @@ class SystemMonitor(Thread):
         self.interval_s: float = interval_s
         self._lock: Lock = Lock()
         self.save_path_root: Path = (
-            save_path_root if save_path_root else Path(Path.home() / "flwr_monitor")
+            save_path_root if save_path_root else Path('/local/scratch/pedro/experiments/monitor')
         )
         self.active_task_ids: List["str"] = []
         self._collect_resources()
@@ -243,8 +243,6 @@ class SystemMonitor(Thread):
         # Need to get PID of a task, same order guaranteed in Python 3.7
         # task_id_pid_map = {task.pid: task.id for task in self.tasks.values()}
         pid_task_id_map = {}
-        with open("/home/pedro/monitor_txt.txt", "w+") as f:
-            f.write("INSIDE\n")
         try:
             pid_task_id_map = {
                 self.tasks[task_id].pid: task_id for task_id in active_task_ids
@@ -269,9 +267,7 @@ class SystemMonitor(Thread):
                         uuid
                     ].this_proc_mem_used_mb.append((timestamp, pro.used_memory))
         except:
-            with open("/home/pedro/monitor_txt.txt", "w+") as f:
-                f.write("ERROR HERE")
-            # pass
+            pass
 
         # Retrieve GPU total memory utilization
         gpus_all = nvsmi.get_gpus()

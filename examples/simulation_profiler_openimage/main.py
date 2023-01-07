@@ -13,7 +13,7 @@ from flwr.common.typing import Config, Metrics, NDArrays
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
-parser.add_argument("--num_rounds", type=int, default=500)
+parser.add_argument("--num_rounds", type=int, default=503) # IT WAS 500 for single node, fix it when calculating mean and std
 
 # Flower client, adapted from Pytorch quickstart example
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
         # on_evaluate_config_fn=evaluate_config,
         profiles=profiles,
         num_warmup_steps= 20,
-        save_models_folder=Path('/home/pedro/experiments/atc/openimg')
+        save_models_folder=Path('/local/scratch/pedro/experiments/')
         # evaluate_fn=get_evaluate_fn(testset),  # centralized evaluation of global model
     )
     

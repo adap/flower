@@ -88,7 +88,7 @@ class ResourceAwareFedAvg(FedAvg):
             str, Dict[str, int]
         ] = {},  # Eventually, change this to List[Profiles]
         num_warmup_steps: int = 100,
-        save_models_folder: Path = Path("/home/pedro/flwr_monitor/"),
+        save_models_folder: Path = Path("/local/scratch/pedro/experiments/"),
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -351,11 +351,12 @@ class ResourceAwareFedAvg(FedAvg):
 
             # Now associate resources
             for client, num_samples in these_clients:
-                client.resources["resources"] = {gpu_uuid: 1.0 / actual_num_clients}
+                client.resources["resources"] = {gpu_uuid: 1.0 / max_num_clients}
                 client.resources["num_cpus"] = 1
-                num_steps = np.ceil(int(num_samples) // int(config["batch_size"]))
+                num_steps = np.ceil(int(num_samples) / int(config["batch_size"]))
                 self.client_configs_map[client.cid] = (node_id, gpu_uuid, num_steps)
                 client_fit_list.append((client, FitIns(parameters, this_config)))
+                #print(f'Requested Resources {client.cid} {client.resources["resources"]}')
 
             del clients_with_weights[:actual_num_clients]
 

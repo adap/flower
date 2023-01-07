@@ -7,6 +7,7 @@ import nvsmi
 from flwr.simulation.ray_monitoring import RaySystemMonitor
 
 
+
 def launch_ray_system_monitor(
     *, namespace="flwr_experiment", interval_s: float = 0.1
 ) -> None:
@@ -19,7 +20,7 @@ def launch_ray_system_monitor(
             num_gpus=0,
             max_concurrency=2,
         ).remote(
-            interval_s=interval_s, node_id=this_node_id
+            interval_s=interval_s, node_id=this_node_id,
         )  # type: ignore
         print(f"Launched RaySystemMonitor on node {getfqdn()} with ID={this_node_id}.")
 

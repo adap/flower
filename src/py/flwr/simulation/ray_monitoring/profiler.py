@@ -48,6 +48,7 @@ class RayClientProfilerProxy(RayClientProxy):
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
+        #print(self.resources)
         future_fit_res = launch_and_fit.options(  # type: ignore
             **self.resources
         ).remote(self.client_fn, self.cid, ins)
@@ -62,7 +63,7 @@ class RayClientProfilerProxy(RayClientProxy):
         )
 
 
-@ray.remote(max_calls=1)
+@ray.remote
 def launch_and_fit(
     client_fn: ClientFn, cid: str, fit_ins: common.FitIns
 ) -> common.FitRes:

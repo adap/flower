@@ -11,7 +11,7 @@ GPUS="{"${GPUS%?}"}"
 export RAY_EXPERIMENTAL_NOSET_CUDA_VISIBLE_DEVICES=1
 export RAY_memory_monitor_refresh_ms=0
 
-ray stop && ray start --head --num-cpus 11 --resources "${GPUS}"
+ray stop && ray start --head --num-cpus 13 --resources "${GPUS}"
 
 # Launch System Monitor for this node.
 python launch_monitor.py 
