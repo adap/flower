@@ -16,13 +16,16 @@ def launch_ray_system_monitor(
         ray_monitor = RaySystemMonitor.options(
             name=f"{this_node_id}",
             lifetime="detached",
-            num_cpus=2,
+            num_cpus=4,
             num_gpus=0,
-            max_concurrency=2,
+            max_concurrency=4,
         ).remote(
             interval_s=interval_s, node_id=this_node_id,
         )  # type: ignore
-        print(f"Launched RaySystemMonitor on node {getfqdn()} with ID={this_node_id}.")
+
+        c = ray.get(ray_monitor._collect_resources.remote())
+        print(c)
+        print(f"Launched RaySystemMonitor on node {getfqdn()} with ID={this_node_id}, {c}.")
 
 
 if __name__ == "__main__":

@@ -13,27 +13,28 @@ from flwr.common.typing import Config, Metrics, NDArrays
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
-parser.add_argument("--num_rounds", type=int, default=503) # IT WAS 500 for single node, fix it when calculating mean and std
+parser.add_argument("--num_rounds", type=int, default=503)
 
 # Flower client, adapted from Pytorch quickstart example
 
 if __name__ == "__main__":
 
     args = parser.parse_args()
-    pool_size=10965
+    pool_size = 10965
 
     # Get profiles
-    with open("/datasets/FedScale/openImg/client_data_mapping/profiles.pickle", "rb") as f: ###TODOOO
+    with open(
+        "/datasets/FedScale/openImg/client_data_mapping/profiles.pickle", "rb"
+    ) as f:  ###TODOOO
         profiles = pickle.load(f)
 
     # configure the strategy
-    def fit_config(server_round: int)-> Config:
+    def fit_config(server_round: int) -> Config:
         config: Config = {
-        "epochs": 1,  # number of local epochs
-        "batch_size": 20,
+            "epochs": 1,  # number of local epochs
+            "batch_size": 20,
         }
         return config
-
 
     strategy = ResourceAwareFedAvg(
         fraction_fit=0.00911992704,
@@ -44,11 +45,11 @@ if __name__ == "__main__":
         on_fit_config_fn=fit_config,
         # on_evaluate_config_fn=evaluate_config,
         profiles=profiles,
-        num_warmup_steps= 20,
-        save_models_folder=Path('/local/scratch/pedro/experiments/')
+        num_warmup_steps=20,
+        save_models_folder=Path("/local/scratch/pedro/experiments/")
         # evaluate_fn=get_evaluate_fn(testset),  # centralized evaluation of global model
     )
-    
+
     fed_dir = Path("/datasets/FedScale/openImg/")
 
     def client_fn(cid: str):
@@ -65,4 +66,5 @@ if __name__ == "__main__":
         strategy=strategy,
         ray_init_args=ray_init_args,
         use_profiler=True,
+        max_workers=18,
     )

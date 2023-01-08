@@ -8,10 +8,22 @@
 GPUS=$(nvidia-smi --query-gpu=uuid, --format=csv,noheader | awk '{print "\"" $1 "\"" ": 1.0," }')
 GPUS="{"${GPUS%?}"}"
 
+NUM_CPUS=8
+STARTING_PORT=5001
+
+WORKER_PORTS=${STARTING_PORT}
+for VAR_PORT in $(seq 1 $NUM_CPUS)
+do
+	TEMP=`expr ${STARTING_PORT} + ${VAR_PORT} `
+	WORKER_PORTS=${WORKER_PORTS}","${TEMP}
+done
+echo ${WORKER_PORTS}
 export RAY_EXPERIMENTAL_NOSET_CUDA_VISIBLE_DEVICES=1
 export RAY_memory_monitor_refresh_ms=0
 
-ray stop && ray start --head --num-cpus 13 --resources "${GPUS}"
+ray stop && ray start --head --num-cpus ${NUM_CPUS} --resources "${GPUS}" --system-config='{"object_spilling_config": "{\"type\": \"filesystem\", \"params\": {\"directory_path\": \"/hdd1/ray\", \"buffer_size\":10000000}}"}' --worker-port-list=${WORKER_PORTS}
+
+sleep 3;
 
 # Launch System Monitor for this node.
 python launch_monitor.py 

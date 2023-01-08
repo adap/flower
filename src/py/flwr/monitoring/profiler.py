@@ -122,7 +122,7 @@ class SystemMonitor(Thread):
             save_path_root if save_path_root else Path('/local/scratch/pedro/experiments/monitor')
         )
         self.active_task_ids: List["str"] = []
-        self._collect_resources()
+        #self._collect_resources()
 
     def get_resources(self) -> Dict[str, Union[SimpleCPU, SimpleGPU]]:
         return {**self.gpus, "cpu": self.cpu}
@@ -199,7 +199,7 @@ class SystemMonitor(Thread):
         # Release memory from Tasks
         self.tasks.clear()
 
-    def _collect_resources(self) -> None:
+    def _collect_resources(self) -> bool:
         # Retrieve GPU info
         all_gpus = nvsmi.get_gpus()
         for gpu in all_gpus:
@@ -213,6 +213,7 @@ class SystemMonitor(Thread):
             total_mem_mb=psutil.virtual_memory().total,
             num_cores=cpu_count(logical=False),
         )
+        return True
 
     def _safe_copy_task_ids_and_pids(self) -> List[Tuple[str, int]]:
         """Returns temporary copy of tasks to be monitored.
