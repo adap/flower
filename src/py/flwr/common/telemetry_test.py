@@ -31,18 +31,21 @@ class TelemetryTest(unittest.TestCase):
         expected = "{'status': 'created'}"
 
         # Execute
-        actual = event(event_type=EventType.START_SERVER)
+        future = event(event_type=EventType.START_SERVER)
+        actual = future.result()
 
         # Assert
         self.assertEqual(actual, expected)
 
     def test_not_blocking(self) -> None:
         """Test if the code is blocking.
-        
-        If the code does not block duration_actual should be less than 0.001s. 
+
+        If the code does not block duration_actual should be less than
+        0.001s.
         """
         # Prepare
-        duration_max = 0.001
+        # Use 0.1ms as any blocking networked call would take longer.
+        duration_max = 0.0001
         start = time.time()
 
         # Execute
@@ -59,7 +62,8 @@ class TelemetryTest(unittest.TestCase):
         expected = ""
 
         # Execute
-        actual = event(event_type=EventType.START_SERVER)
+        future = event(event_type=EventType.START_SERVER)
+        actual = future.result()
 
         # Assert
         self.assertEqual(actual, expected)
@@ -77,7 +81,8 @@ class TelemetryTest(unittest.TestCase):
         expected_stdout = "POST"  # Just checking for a substring
 
         # Execute
-        actual_return = event(event_type=EventType.START_SERVER)
+        future = event(event_type=EventType.START_SERVER)
+        actual_return = future.result()
 
         # Assert
         self.assertEqual(actual_return, expected_return)

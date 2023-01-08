@@ -19,6 +19,7 @@ import json
 import os
 import platform
 import urllib.request
+from concurrent.futures import Future, ThreadPoolExecutor
 from enum import Enum, auto
 
 FLWR_TELEMETRY_ENABLED = os.getenv("FLWR_TELEMETRY_ENABLED", "1")
@@ -58,9 +59,17 @@ class EventType(str, Enum):
     STOP_SIMULATION = auto()
 
 
-def event(
-    event_type: EventType,
-) -> str:
+# Use the ThreadPoolExecutor with max_workers=1 to have a queue
+# as well as ensure that telemetry is unblocking.
+executor = ThreadPoolExecutor(max_workers=1)
+
+
+def event(event_type: EventType) -> Future[str]:
+    """Submit create_event to ThreadPoolExecutor to avoid blocking."""
+    return executor.submit(create_event, event_type)
+
+
+def create_event(event_type: EventType) -> str:
     """Create telemetry event."""
     try:
         date = datetime.datetime.now().isoformat()
@@ -78,15 +87,15 @@ def event(
             },
         }
 
-        event = {
+        data = {
             "event_type": event_type,
             "context": context,
         }
 
-        event_json = json.dumps(event)
+        data_json = json.dumps(data)
 
         if FLWR_TELEMETRY_LOGGING == "1":
-            msg = " - ".join([date, "POST", event_json])
+            msg = " - ".join([date, "POST", data_json])
             print(msg)
 
         # If telemetry is not disabled with setting FLWR_TELEMETRY_ENABLED=0
@@ -94,7 +103,7 @@ def event(
         if FLWR_TELEMETRY_ENABLED == "1":
             request = urllib.request.Request(
                 url=TELEMETRY_EVENTS_URL,
-                data=event_json.encode("utf-8"),
+                data=data_json.encode("utf-8"),
                 headers={
                     "User-Agent": "flwr/123",
                     "Content-Type": "application/json",
@@ -103,7 +112,9 @@ def event(
             )
 
             with urllib.request.urlopen(request, timeout=60) as response:
-                response_json = str(json.loads(response.read().decode("utf-8")))
+                result = response.read()
+
+            response_json = str(json.loads(result.decode("utf-8")))
 
             return response_json  # The return value is mostly used for testing
     except Exception as ex:  # pylint: disable=broad-except
