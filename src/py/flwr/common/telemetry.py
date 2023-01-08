@@ -116,8 +116,8 @@ def create_event(event_type: EventType) -> str:
 
             response_json = str(json.loads(result.decode("utf-8")))
 
-            return response_json  # The return value is mostly used for testing
+            return response_json
     except Exception as ex:  # pylint: disable=broad-except
         print(ex)
 
-    return ""  # In case telemetry is disabled
+    return ""
