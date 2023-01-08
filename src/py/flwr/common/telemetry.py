@@ -19,7 +19,6 @@ import json
 import os
 import platform
 import urllib.request
-import uuid
 from enum import Enum, auto
 
 FLWR_TELEMETRY_ENABLED = os.getenv("FLWR_TELEMETRY_ENABLED", "1")
@@ -27,20 +26,18 @@ FLWR_TELEMETRY_LOGGING = os.getenv("FLWR_TELEMETRY_LOGGING", "0")
 
 TELEMETRY_EVENTS_URL = "https://telemetry.flower.dev/api/v1/event"
 
-# A random session to identify, for example, on which platforms a START
-# event is emitted without a STOP event.
-SESSION = str(uuid.uuid4())
-
-# Using str as first base type to make it JSON serializable
-# otherwise we will get the following exception:
+# Using str as first base type to make it JSON serializable as
+# otherwise the following exception will be thrown when serializing
+# the event dict:
 # TypeError: Object of type EventType is not JSON serializable
 class EventType(str, Enum):
     """Types of telemetry events."""
 
-    # Checkout Python docs for why this code is here:
-    # https://docs.python.org/3.7/library/enum.html#using-automatic-values
-    # Also this function signature is super weird the only reasonable option
-    # was to disable all checks for it.
+    # This method combined with auto() will set the property value to
+    # the property name e.g.
+    # `START_CLIENT = auto()` becomes `START_CLIENT = "START_CLIENT"`
+    # The type signature is not compatible with mypy, pylint and flake8
+    # so each of those needs to be disabled for this line
     def _generate_next_value_(name, start, count, last_values):  # type: ignore # pylint: disable=no-self-argument,arguments-differ # noqa: E501
         return name
 
@@ -61,23 +58,13 @@ class EventType(str, Enum):
     STOP_SIMULATION = auto()
 
 
-class Colors:
-    """Colors used for log messages."""
-
-    BLUE = "\033[94m"
-    CYAN = "\033[96m"
-    GREEN = "\033[92m"
-    ENDC = "\033[0m"
-
-
-def send(
+def event(
     event_type: EventType,
 ) -> str:
-    """Send telemetry event."""
+    """Create telemetry event."""
     try:
         date = datetime.datetime.now().isoformat()
         context = {
-            "session": SESSION,
             "date": date,
             "cpu": os.cpu_count(),
             "platform": {
@@ -99,13 +86,7 @@ def send(
         event_json = json.dumps(event)
 
         if FLWR_TELEMETRY_LOGGING == "1":
-            msg = " - ".join(
-                [
-                    f"{Colors.BLUE}{date}{Colors.ENDC}",
-                    f"{Colors.CYAN}POST{Colors.ENDC}",
-                    f"{Colors.GREEN}{event_json}{Colors.ENDC}",
-                ]
-            )
+            msg = " - ".join([date, "POST", event_json])
             print(msg)
 
         # If telemetry is not disabled with setting FLWR_TELEMETRY_ENABLED=0

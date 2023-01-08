@@ -14,35 +14,52 @@
 # ==============================================================================
 """Telemetry tests."""
 
+import time
 import unittest
 from io import StringIO
 from unittest import mock
 
-from flwr.common import telemetry
+from flwr.common.telemetry import EventType, event
 
 
 class TelemetryTest(unittest.TestCase):
     """Tests for the telemetry module."""
 
-    def test_send(self) -> None:
+    def test_event(self) -> None:
         """Test if sending works against the actual API."""
         # Prepare
         expected = "{'status': 'created'}"
 
         # Execute
-        actual = telemetry.send(event_type=telemetry.EventType.START_SERVER)
+        actual = event(event_type=EventType.START_SERVER)
 
         # Assert
         self.assertEqual(actual, expected)
 
+    def test_not_blocking(self) -> None:
+        """Test if the code is blocking.
+        
+        If the code does not block duration_actual should be less than 0.001s. 
+        """
+        # Prepare
+        duration_max = 0.001
+        start = time.time()
+
+        # Execute
+        event(event_type=EventType.START_SERVER)
+        duration_actual = time.time() - start
+
+        # Assert
+        self.assertLess(duration_actual, duration_max)
+
     @mock.patch("flwr.common.telemetry.FLWR_TELEMETRY_ENABLED", "0")
-    def test_no_send(self) -> None:
+    def test_no_sending(self) -> None:
         """Test if disableing sending works."""
         # Prepare
         expected = ""
 
         # Execute
-        actual = telemetry.send(event_type=telemetry.EventType.START_SERVER)
+        actual = event(event_type=EventType.START_SERVER)
 
         # Assert
         self.assertEqual(actual, expected)
@@ -60,7 +77,7 @@ class TelemetryTest(unittest.TestCase):
         expected_stdout = "POST"  # Just checking for a substring
 
         # Execute
-        actual_return = telemetry.send(event_type=telemetry.EventType.START_SERVER)
+        actual_return = event(event_type=EventType.START_SERVER)
 
         # Assert
         self.assertEqual(actual_return, expected_return)

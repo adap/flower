@@ -22,8 +22,8 @@ from typing import Any, Callable, Dict, List, Optional
 import ray
 
 from flwr.client.client import Client
-from flwr.common import telemetry
 from flwr.common.logger import log
+from flwr.common.telemetry import EventType, event
 from flwr.server import Server
 from flwr.server.app import ServerConfig, _fl, _init_defaults
 from flwr.server.client_manager import ClientManager
@@ -130,7 +130,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
             Object containing metrics from training.
     """
     # pylint: disable-msg=too-many-locals
-    telemetry.send(event_type=telemetry.EventType.START_SIMULATION)
+    event(event_type=EventType.START_SIMULATION)
 
     # Initialize server and server config
     initialized_server, initialized_config = _init_defaults(
@@ -195,6 +195,6 @@ def start_simulation(  # pylint: disable=too-many-arguments
         config=initialized_config,
     )
 
-    telemetry.send(event_type=telemetry.EventType.STOP_SIMULATION)
+    event(event_type=EventType.STOP_SIMULATION)
 
     return hist

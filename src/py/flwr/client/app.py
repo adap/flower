@@ -23,9 +23,9 @@ from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
-    telemetry,
 )
 from flwr.common.logger import log
+from flwr.common.telemetry import EventType, event
 from flwr.common.typing import (
     Code,
     EvaluateIns,
@@ -129,7 +129,7 @@ def start_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-    telemetry.send(event_type=telemetry.EventType.START_CLIENT)
+    event(event_type=EventType.START_CLIENT)
 
     while True:
         sleep_duration: int = 0
@@ -159,7 +159,7 @@ def start_client(
         )
         time.sleep(sleep_duration)
 
-    telemetry.send(event_type=telemetry.EventType.STOP_CLIENT)
+    event(event_type=EventType.STOP_CLIENT)
 
 
 def start_numpy_client(
