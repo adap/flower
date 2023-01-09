@@ -16,8 +16,7 @@
 
 
 from logging import INFO
-from typing import List, Optional, Set
-from uuid import UUID
+from typing import Set
 
 import grpc
 
