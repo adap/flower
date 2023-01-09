@@ -138,6 +138,7 @@ intended to help along the way.
    writing-documentation
    architecture
    secagg
+   profiler
    release-process
    creating-new-messages
    devcontainer
