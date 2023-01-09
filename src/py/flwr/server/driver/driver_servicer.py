@@ -16,7 +16,8 @@
 
 
 from logging import INFO
-from typing import Set
+from typing import List, Optional, Set
+from uuid import UUID
 
 import grpc
 
@@ -30,7 +31,9 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
+from flwr.proto.task_pb2 import TaskRes
 from flwr.server.driver.driver_client_manager import DriverClientManager
+from flwr.server.driver.state import DriverState
 
 
 class DriverServicer(driver_pb2_grpc.DriverServicer):
@@ -39,8 +42,10 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     def __init__(
         self,
         driver_client_manager: DriverClientManager,
+        driver_state: DriverState,
     ) -> None:
         self.driver_client_manager = driver_client_manager
+        self.driver_state = driver_state
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
@@ -56,7 +61,18 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Push a set of TaskIns."""
         log(INFO, "DriverServicer.PushTaskIns")
 
-        return PushTaskInsResponse(task_ids=[])
+        task_ids: List[Optional[UUID]] = []
+        for task_ins in request.task_ins_set:
+            # TODO Verify that task_id is not set
+            # TODO Verify that only legacy_server_message is set
+
+            # Store TaskIns
+            task_id: Optional[UUID] = self.driver_state.store_task_ins(
+                task_ins=task_ins
+            )
+            task_ids.append(task_id)
+
+        return PushTaskInsResponse(task_ids=[str(task_id) for task_id in task_ids])
 
     def PullTaskRes(
         self, request: PullTaskResRequest, context: grpc.ServicerContext
@@ -64,4 +80,12 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Pull a set of TaskRes."""
         log(INFO, "DriverServicer.PullTaskRes")
 
-        return PullTaskResResponse(task_res_set=[])
+        # Convert each task_id str to UUID
+        task_ids: Set[UUID] = {UUID(task_id) for task_id in request.task_ids}
+
+        # Read from state
+        task_res_set: List[TaskRes] = self.driver_state.get_task_res(
+            node_id=None, task_ids=task_ids
+        )
+
+        return PullTaskResResponse(task_res_set=task_res_set)
