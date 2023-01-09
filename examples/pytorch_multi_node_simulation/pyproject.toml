@@ -1,0 +1,15 @@
+[build-system]
+requires = ["poetry_core>=1.1.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "pytorch_multi_node_simulation"
+version = "0.1.0"
+description = "PyTorch Multi-Node Simulation"
+authors = ["The Flower Authors <hello@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+flwr = "^1.1.0"
+torch = "^1.13.0"
+torchvision = "^0.14.0"
