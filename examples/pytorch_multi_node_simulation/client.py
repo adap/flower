@@ -1,10 +1,11 @@
 from collections import OrderedDict
-
+from utils import valid_folder
 import flwr as fl
 import torch
 import nvsmi
 import uuid
 
+from argparse import ArgumentParser
 from copy import deepcopy
 from socket import getfqdn
 from torch.utils.data import DataLoader
@@ -169,9 +170,27 @@ class FlowerWorker(fl.client.NumPyClient):
 
 
 if __name__ == "__main__":
+    parser = ArgumentParser(
+        prog="Flower Worker Wrapper",
+        description="This is a pseudo-client that runs multiple virtual clients in a single process.",
+    )
+    parser.add_argument(
+        "--path_imgs",
+        type=str,
+        default="/datasets/FedScale/openImg/",
+        help="Root directory containing 'train' and 'test' folders with images.",
+    )
+    parser.add_argument(
+        "--path_csv_map",
+        type=valid_folder,
+        default="/datasets/FedScale/openImg/client_data_mapping/clean_ids/",
+        help="Root directory containing 'train' and 'test' folders with {virtual_client_id}.csv mapping files.",
+    )
+    args = parser.parse_args()
+
     # Start Flower Worker
-    img_root = Path("/datasets/FedScale/openImg/")
-    cid_csv_root = Path("/datasets/FedScale/openImg/client_data_mapping/clean_ids")
+    img_root = Path(args.path_imgs)
+    cid_csv_root = Path(args.path_csv_map)
     fl.client.start_numpy_client(
         server_address="127.0.0.1:8080",
         client=FlowerWorker(cid_csv_root=cid_csv_root, img_root=img_root),
