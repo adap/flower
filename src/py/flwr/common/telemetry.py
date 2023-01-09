@@ -96,6 +96,8 @@ def create_event(event_type: EventType) -> str:
 
         if FLWR_TELEMETRY_LOGGING == "1":
             msg = " - ".join([date, "POST", data_json])
+            # Use print so this is independent of the current
+            # log-level of the Flower logger
             print(msg)
 
         # If telemetry is not disabled with setting FLWR_TELEMETRY_ENABLED=0
@@ -118,6 +120,11 @@ def create_event(event_type: EventType) -> str:
 
             return response_json
     except Exception as ex:  # pylint: disable=broad-except
-        print(ex)
+        # Telemetry should not impact users so any exception
+        # is just ignored if not setting FLWR_TELEMETRY_LOGGING=1
+        if FLWR_TELEMETRY_LOGGING == "1":
+            # Use print so this is independent of the current
+            # log-level of the Flower logger
+            print(ex)
 
     return ""
