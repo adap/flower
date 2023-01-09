@@ -86,7 +86,7 @@ class DriverState:
         return task_id
 
     def get_task_res(
-        self, node_id: Optional[int], task_ids: Set[UUID], limit: int = 1
+        self, node_id: Optional[int], task_ids: Set[UUID], limit: int
     ) -> List[TaskRes]:
         """Get all TaskRes that have not been delivered yet."""
 

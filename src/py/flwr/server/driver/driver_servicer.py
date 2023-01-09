@@ -85,7 +85,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         # Read from state
         task_res_set: List[TaskRes] = self.driver_state.get_task_res(
-            node_id=None, task_ids=task_ids
+            node_id=None, task_ids=task_ids, limit=10
         )
 
         return PullTaskResResponse(task_res_set=task_res_set)
