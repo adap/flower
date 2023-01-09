@@ -257,4 +257,4 @@ def run_server() -> None:
     # Wait for termination of both servers
     driver_grpc_server.wait_for_termination()
     fleet_grpc_server.wait_for_termination()
-    event(event_type=EventType.END_SERVER)
+    event(event_type=EventType.TERMINATE_SERVER)

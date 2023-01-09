@@ -21,6 +21,7 @@ import platform
 import urllib.request
 from concurrent.futures import Future, ThreadPoolExecutor
 from enum import Enum, auto
+from typing import Any, List
 
 FLWR_TELEMETRY_ENABLED = os.getenv("FLWR_TELEMETRY_ENABLED", "1")
 FLWR_TELEMETRY_LOGGING = os.getenv("FLWR_TELEMETRY_LOGGING", "0")
@@ -38,13 +39,14 @@ class EventType(str, Enum):
     # the property name e.g.
     # `START_CLIENT = auto()` becomes `START_CLIENT = "START_CLIENT"`
     # The type signature is not compatible with mypy, pylint and flake8
-    # so each of those needs to be disabled for this line
-    def _generate_next_value_(name, start, count, last_values):  # type: ignore # pylint: disable=no-self-argument,arguments-differ # noqa: E501
+    # so each of those needs to be disabled for this line.
+    # pylint: disable-next=no-self-argument,arguments-differ,line-too-long
+    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:  # type: ignore # noqa: E501
         return name
 
     # Client
-    START_CLIENT = auto()
-    STOP_CLIENT = auto()
+    START_CLIENT_ENTER = auto()
+    START_CLIENT_LEAVE = auto()
 
     # Server
     START_SERVER = auto()
@@ -52,11 +54,11 @@ class EventType(str, Enum):
 
     # New Server
     RUN_SERVER = auto()
-    END_SERVER = auto()
+    TERMINATE_SERVER = auto()
 
     # Simulation
     START_SIMULATION = auto()
-    STOP_SIMULATION = auto()
+    FINISH_SIMULATION = auto()
 
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue

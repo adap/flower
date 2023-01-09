@@ -195,6 +195,6 @@ def start_simulation(  # pylint: disable=too-many-arguments
         config=initialized_config,
     )
 
-    event(event_type=EventType.STOP_SIMULATION)
+    event(event_type=EventType.FINISH_SIMULATION)
 
     return hist
