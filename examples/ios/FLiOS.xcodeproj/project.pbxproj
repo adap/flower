@@ -101,7 +101,7 @@
 		21A77B2A2865B4CB0062EBD8 /* mnist_train.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 21A77B272865B4CB0062EBD8 /* mnist_train.csv.lzfse */; };
 		21A77B2B2865B4CB0062EBD8 /* mnist_test.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 21A77B282865B4CB0062EBD8 /* mnist_test.csv.lzfse */; };
 		21A77B36286EEC420062EBD8 /* MNIST_Model.mlmodel in CopyFiles */ = {isa = PBXBuildFile; fileRef = 21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */; };
-		21B540712865B14000185DEE /* FlowerCoreMLApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B540702865B14000185DEE /* FlowerCoreMLApp.swift */; };
+		21B540712865B14000185DEE /* FLiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B540702865B14000185DEE /* FLiOSApp.swift */; };
 		21B540732865B14000185DEE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B540722865B14000185DEE /* ContentView.swift */; };
 		21B540752865B14100185DEE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540742865B14100185DEE /* Assets.xcassets */; };
 		21B540782865B14100185DEE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540772865B14100185DEE /* Preview Assets.xcassets */; };
@@ -216,7 +216,7 @@
 		21A77B272865B4CB0062EBD8 /* mnist_train.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = mnist_train.csv.lzfse; sourceTree = "<group>"; };
 		21A77B282865B4CB0062EBD8 /* mnist_test.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = mnist_test.csv.lzfse; sourceTree = "<group>"; };
 		21B5406D2865B14000185DEE /* FLiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FLiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		21B540702865B14000185DEE /* FlowerCoreMLApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowerCoreMLApp.swift; sourceTree = "<group>"; };
+		21B540702865B14000185DEE /* FLiOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLiOSApp.swift; sourceTree = "<group>"; };
 		21B540722865B14000185DEE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		21B540742865B14100185DEE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		21B540772865B14100185DEE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -387,7 +387,7 @@
 				21A77A802865B22B0062EBD8 /* CoreMLProto */,
 				21A77B262865B4CB0062EBD8 /* MNISTDataset */,
 				21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */,
-				21B540702865B14000185DEE /* FlowerCoreMLApp.swift */,
+				21B540702865B14000185DEE /* FLiOSApp.swift */,
 				21A77B1D2865B2AB0062EBD8 /* ClientModel.swift */,
 				21B540722865B14000185DEE /* ContentView.swift */,
 				21B540742865B14100185DEE /* Assets.xcassets */,
@@ -549,7 +549,7 @@
 				21A77AE82865B22B0062EBD8 /* FeatureVectorizer.pb.swift in Sources */,
 				21A77AE92865B22B0062EBD8 /* OneHotEncoder.pb.swift in Sources */,
 				21A77AC72865B22B0062EBD8 /* UIImage+Extensions.swift in Sources */,
-				21B540712865B14000185DEE /* FlowerCoreMLApp.swift in Sources */,
+				21B540712865B14000185DEE /* FLiOSApp.swift in Sources */,
 				21A77B022865B22B0062EBD8 /* BayesianProbitRegressor.pb.swift in Sources */,
 				21A77B032865B22B0062EBD8 /* ItemSimilarityRecommender.proto in Sources */,
 				21A77AD22865B22B0062EBD8 /* CVPixelBuffer+Resize.swift in Sources */,
