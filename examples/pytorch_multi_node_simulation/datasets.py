@@ -2,6 +2,8 @@ from pathlib import Path
 from PIL import Image
 from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
+import pandas as pd
+import numpy as np
 import torch
 
 # Adapted from: https://github.com/SymbioticLab/FedScale/blob/a6ce9f1c15287b8a9704ef6ce2bf66508bcd3340/fedscale/dataloaders/utils_data.py#L107
@@ -33,18 +35,19 @@ class OpenImage(Dataset):
         self.transforms["train"] = train_transform
         self.transforms["test"] = test_transform
 
-        self.data = []
-        self.targets = []
+        self.data: pd.DataFrame
 
     def load_client(self, *, cid: str, dataset_type: str = "train"):
-        with open(self.cid_csv_root / dataset_type / f"{cid}.csv", "r") as f:
-            for line in f:
-                img_name, target_idx = line.strip("\n").split(",")
-                self.data.append(img_name)
-                self.targets.append(int(target_idx))
+        filename = self.cid_csv_root / dataset_type / f"{cid}.csv"
+        self.data = pd.read_csv(
+            filename,
+            # engine="pyarrow",
+            dtype={"images": "string", "labels": np.int64},
+            names=["images", "labels"],
+        )
 
     def __getitem__(self, index: int):
-        img_name, target = self.data[index], torch.tensor(self.targets[index])
+        img_name, target = self.data.iloc[index]
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
