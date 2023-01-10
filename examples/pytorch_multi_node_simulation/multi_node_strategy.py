@@ -1,10 +1,13 @@
-from copy import deepcopy
 import json
 import random
+import pickle
+from copy import deepcopy
+from pathlib import Path
 from flwr.server.strategy import Strategy
 from typing import Dict, List, Optional, Tuple, Union
 from flwr.common.typing import GetPropertiesIns, Parameters, Scalar
-from flwr.server.client_manager import ClientManager, ClientProxy
+from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
 from math import ceil
 from collections import defaultdict
 
@@ -27,6 +30,7 @@ class MultiNodeWrapper(Strategy):
         num_virtual_clients_eval_total: int,
         num_virtual_clients_eval_per_round: int,
         aggregating_strategy: Strategy,
+        path_save_model: Optional[Path] = None,
     ) -> None:
         self.num_virtual_clients_fit_per_round = num_virtual_clients_fit_per_round
         self.num_virtual_clients_eval_per_round = num_virtual_clients_eval_per_round
@@ -36,6 +40,7 @@ class MultiNodeWrapper(Strategy):
         self.map_node_list_gpu_id: Dict[str, List[str]] = defaultdict(list)
         self.map_node_list_cid: Dict[str, List[str]] = defaultdict(list)
         self.map_cid_gpu_id: Dict[str, str] = {}
+        self.path_save_model = path_save_model
 
     def __repr__(self) -> str:
         rep = f"Multi-Node version of {self.aggregating_strategy}"
@@ -58,7 +63,7 @@ class MultiNodeWrapper(Strategy):
     ):
         ins = GetPropertiesIns(config={})
         for client_proxy, _ in list_config_fits:
-            cid = client_proxy.cid  # More than on per
+            cid = client_proxy.cid
             worker_properties = client_proxy.get_properties(
                 ins=ins, timeout=60
             ).properties
@@ -78,7 +83,7 @@ class MultiNodeWrapper(Strategy):
                 for gpu_uuid in all_gpus_uuids:
                     gpu_dict = json.loads(str(worker_properties[gpu_uuid]))
                     gpu_id = gpu_dict["id"]
-                    self.map_node_list_gpu_id["node_name"].append(gpu_id)
+                    self.map_node_list_gpu_id[node_name].append(gpu_id)
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -93,7 +98,7 @@ class MultiNodeWrapper(Strategy):
             range(self.num_virtual_clients_fit_total),
             self.num_virtual_clients_fit_per_round,
         )
-        chunk_size = ceil(len(sampled_virtual_cids) // len(list_config_fits))
+        chunk_size = ceil(len(sampled_virtual_cids) / len(list_config_fits))
         p_list = [
             sampled_virtual_cids[i : i + chunk_size]
             for i in range(0, len(sampled_virtual_cids), chunk_size)
@@ -111,11 +116,12 @@ class MultiNodeWrapper(Strategy):
 
         ## Round-Robin:
         for idx, (c, f) in enumerate(list_config_fits):
-            f.config = deepcopy(f.config)
-            f.config["list_clients"] = "_".join(
+            a = deepcopy(f)
+            a.config["list_clients"] = "_".join(
                 [str(virtual_cid) for virtual_cid in p_list[idx]]
             )
-            f.config["gpu_id"] = self.map_cid_gpu_id[c.cid]
+            a.config["gpu_id"] = self.map_cid_gpu_id[c.cid]
+            list_config_fits[idx] = (c, a)
 
         # Return client/config pairs
         return list_config_fits
@@ -126,7 +132,15 @@ class MultiNodeWrapper(Strategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        return self.aggregating_strategy.aggregate_fit(server_round, results, failures)
+        agg_results = self.aggregating_strategy.aggregate_fit(
+            server_round, results, failures
+        )
+        if self.path_save_model:
+            self.path_save_model.mkdir(parents=True, exist_ok=True)
+            with open("/", "wb") as f:
+                pickle.dump(agg_results[0], f)
+
+        return agg_results
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
