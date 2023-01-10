@@ -101,7 +101,7 @@
 		21A77B2A2865B4CB0062EBD8 /* mnist_train.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 21A77B272865B4CB0062EBD8 /* mnist_train.csv.lzfse */; };
 		21A77B2B2865B4CB0062EBD8 /* mnist_test.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 21A77B282865B4CB0062EBD8 /* mnist_test.csv.lzfse */; };
 		21A77B36286EEC420062EBD8 /* MNIST_Model.mlmodel in CopyFiles */ = {isa = PBXBuildFile; fileRef = 21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */; };
-		21B540712865B14000185DEE /* FlowerCoreMLApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B540702865B14000185DEE /* FlowerCoreMLApp.swift */; };
+		21B540712865B14000185DEE /* FLiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B540702865B14000185DEE /* FLiOSApp.swift */; };
 		21B540732865B14000185DEE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B540722865B14000185DEE /* ContentView.swift */; };
 		21B540752865B14100185DEE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540742865B14100185DEE /* Assets.xcassets */; };
 		21B540782865B14100185DEE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540772865B14100185DEE /* Preview Assets.xcassets */; };
@@ -215,8 +215,8 @@
 		21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = MNIST_Model.mlmodel; sourceTree = "<group>"; };
 		21A77B272865B4CB0062EBD8 /* mnist_train.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = mnist_train.csv.lzfse; sourceTree = "<group>"; };
 		21A77B282865B4CB0062EBD8 /* mnist_test.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = mnist_test.csv.lzfse; sourceTree = "<group>"; };
-		21B5406D2865B14000185DEE /* FlowerCoreML.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlowerCoreML.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		21B540702865B14000185DEE /* FlowerCoreMLApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowerCoreMLApp.swift; sourceTree = "<group>"; };
+		21B5406D2865B14000185DEE /* FLiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FLiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		21B540702865B14000185DEE /* FLiOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLiOSApp.swift; sourceTree = "<group>"; };
 		21B540722865B14000185DEE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		21B540742865B14100185DEE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		21B540772865B14100185DEE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -365,7 +365,7 @@
 			isa = PBXGroup;
 			children = (
 				50B5A2C3294C841300B0ABC6 /* Packages */,
-				21B5406F2865B14000185DEE /* FlowerCoreML */,
+				21B5406F2865B14000185DEE /* FLiOS */,
 				21B5406E2865B14000185DEE /* Products */,
 				21A77B2E2865B5420062EBD8 /* Frameworks */,
 			);
@@ -374,12 +374,12 @@
 		21B5406E2865B14000185DEE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				21B5406D2865B14000185DEE /* FlowerCoreML.app */,
+				21B5406D2865B14000185DEE /* FLiOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		21B5406F2865B14000185DEE /* FlowerCoreML */ = {
+		21B5406F2865B14000185DEE /* FLiOS */ = {
 			isa = PBXGroup;
 			children = (
 				21A77B162865B23D0062EBD8 /* CoreMLClient */,
@@ -387,13 +387,13 @@
 				21A77A802865B22B0062EBD8 /* CoreMLProto */,
 				21A77B262865B4CB0062EBD8 /* MNISTDataset */,
 				21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */,
-				21B540702865B14000185DEE /* FlowerCoreMLApp.swift */,
+				21B540702865B14000185DEE /* FLiOSApp.swift */,
 				21A77B1D2865B2AB0062EBD8 /* ClientModel.swift */,
 				21B540722865B14000185DEE /* ContentView.swift */,
 				21B540742865B14100185DEE /* Assets.xcassets */,
 				21B540762865B14100185DEE /* Preview Content */,
 			);
-			path = FlowerCoreML;
+			path = FLiOS;
 			sourceTree = "<group>";
 		};
 		21B540762865B14100185DEE /* Preview Content */ = {
@@ -415,9 +415,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		21B5406C2865B14000185DEE /* FlowerCoreML */ = {
+		21B5406C2865B14000185DEE /* FLiOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 21B5407B2865B14100185DEE /* Build configuration list for PBXNativeTarget "FlowerCoreML" */;
+			buildConfigurationList = 21B5407B2865B14100185DEE /* Build configuration list for PBXNativeTarget "FLiOS" */;
 			buildPhases = (
 				21B540692865B14000185DEE /* Sources */,
 				21B5406A2865B14000185DEE /* Frameworks */,
@@ -429,12 +429,12 @@
 			dependencies = (
 				21A77B322865B55D0062EBD8 /* PBXTargetDependency */,
 			);
-			name = FlowerCoreML;
+			name = FLiOS;
 			packageProductDependencies = (
 				50B5A2C5294C848000B0ABC6 /* flwr */,
 			);
 			productName = FlowerCoreML;
-			productReference = 21B5406D2865B14000185DEE /* FlowerCoreML.app */;
+			productReference = 21B5406D2865B14000185DEE /* FLiOS.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -452,7 +452,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 21B540682865B14000185DEE /* Build configuration list for PBXProject "FlowerCoreML" */;
+			buildConfigurationList = 21B540682865B14000185DEE /* Build configuration list for PBXProject "FLiOS" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -468,7 +468,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				21B5406C2865B14000185DEE /* FlowerCoreML */,
+				21B5406C2865B14000185DEE /* FLiOS */,
 			);
 		};
 /* End PBXProject section */
@@ -549,7 +549,7 @@
 				21A77AE82865B22B0062EBD8 /* FeatureVectorizer.pb.swift in Sources */,
 				21A77AE92865B22B0062EBD8 /* OneHotEncoder.pb.swift in Sources */,
 				21A77AC72865B22B0062EBD8 /* UIImage+Extensions.swift in Sources */,
-				21B540712865B14000185DEE /* FlowerCoreMLApp.swift in Sources */,
+				21B540712865B14000185DEE /* FLiOSApp.swift in Sources */,
 				21A77B022865B22B0062EBD8 /* BayesianProbitRegressor.pb.swift in Sources */,
 				21A77B032865B22B0062EBD8 /* ItemSimilarityRecommender.proto in Sources */,
 				21A77AD22865B22B0062EBD8 /* CVPixelBuffer+Resize.swift in Sources */,
@@ -719,7 +719,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"FlowerCoreML/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"FLiOS/Preview Content\"";
 				DEVELOPMENT_TEAM = W47Y3X8372;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -733,7 +733,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = flwr.FlowerCoreML;
+				PRODUCT_BUNDLE_IDENTIFIER = flwr.FLiOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -748,7 +748,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"FlowerCoreML/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"FLiOS/Preview Content\"";
 				DEVELOPMENT_TEAM = W47Y3X8372;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -762,7 +762,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = flwr.FlowerCoreML;
+				PRODUCT_BUNDLE_IDENTIFIER = flwr.FLiOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -773,7 +773,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		21B540682865B14000185DEE /* Build configuration list for PBXProject "FlowerCoreML" */ = {
+		21B540682865B14000185DEE /* Build configuration list for PBXProject "FLiOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				21B540792865B14100185DEE /* Debug */,
@@ -782,7 +782,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		21B5407B2865B14100185DEE /* Build configuration list for PBXNativeTarget "FlowerCoreML" */ = {
+		21B5407B2865B14100185DEE /* Build configuration list for PBXNativeTarget "FLiOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				21B5407C2865B14100185DEE /* Debug */,
