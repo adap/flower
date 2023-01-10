@@ -4,6 +4,7 @@ from flwr.common import Metrics
 from flwr.server.strategy import FedAvg
 from flwr.common.typing import Scalar
 from multi_node_strategy import MultiNodeWrapper
+from utils import valid_folder
 import flwr
 
 
@@ -41,6 +42,11 @@ if __name__ == "__main__":
         required=True,
         help="Number of workers required for training.",
     )
+    parser.add_argument(
+        "--path_save_model",
+        default="/local/scratch/pedro/experiments/multi_node/openimg/single_node/single_gpu/",
+        help="Directory where aggregated models are saved.",
+    )
     args = parser.parse_args()
 
     # Define strategy
@@ -58,6 +64,7 @@ if __name__ == "__main__":
         num_virtual_clients_eval_per_round=0,
         num_virtual_clients_eval_total=0,
         aggregating_strategy=aggregating_strategy,
+        path_save_model=args.path_save_model,
     )
 
     # Start Flower server

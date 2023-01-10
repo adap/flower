@@ -1,6 +1,8 @@
+import datetime
 import json
 import random
 import pickle
+import numpy as np
 from copy import deepcopy
 from pathlib import Path
 from flwr.server.strategy import Strategy
@@ -40,7 +42,8 @@ class MultiNodeWrapper(Strategy):
         self.map_node_list_gpu_id: Dict[str, List[str]] = defaultdict(list)
         self.map_node_list_cid: Dict[str, List[str]] = defaultdict(list)
         self.map_cid_gpu_id: Dict[str, str] = {}
-        self.path_save_model = path_save_model
+        self.path_save_model = Path(path_save_model) if path_save_model else None
+        self.starting_time: str = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
 
     def __repr__(self) -> str:
         rep = f"Multi-Node version of {self.aggregating_strategy}"
@@ -92,17 +95,19 @@ class MultiNodeWrapper(Strategy):
         list_config_fits = self.aggregating_strategy.configure_fit(
             server_round, parameters, client_manager
         )
+        num_workers = len(list_config_fits)
 
         ## Generate random selection of virtual clients (number of virtual clients per round)
         sampled_virtual_cids = random.sample(
             range(self.num_virtual_clients_fit_total),
             self.num_virtual_clients_fit_per_round,
         )
-        chunk_size = ceil(len(sampled_virtual_cids) / len(list_config_fits))
-        p_list = [
-            sampled_virtual_cids[i : i + chunk_size]
-            for i in range(0, len(sampled_virtual_cids), chunk_size)
-        ]
+
+        # chunk_size = ceil(len(sampled_virtual_cids) / len(list_config_fits))
+        # p_list = [
+        #    sampled_virtual_cids[i : i + chunk_size]
+        #    for i in range(0, len(sampled_virtual_cids), chunk_size)
+        # ]
 
         ## Get clients properties. This should be done elsewhere at the beginning by the Server+ClientManager:
         if server_round == 1:
@@ -115,6 +120,9 @@ class MultiNodeWrapper(Strategy):
             pass
 
         ## Round-Robin:
+        # Creates clients splits amongst workers
+        p_list = np.array_split(sampled_virtual_cids, num_workers)
+
         for idx, (c, f) in enumerate(list_config_fits):
             a = deepcopy(f)
             a.config["list_clients"] = "_".join(
@@ -136,8 +144,9 @@ class MultiNodeWrapper(Strategy):
             server_round, results, failures
         )
         if self.path_save_model:
-            self.path_save_model.mkdir(parents=True, exist_ok=True)
-            with open("/", "wb") as f:
+            path_and_timestamp = self.path_save_model / self.starting_time
+            path_and_timestamp.mkdir(parents=True, exist_ok=True)
+            with open(path_and_timestamp / f"{server_round}.pickle", "wb") as f:
                 pickle.dump(agg_results[0], f)
 
         return agg_results

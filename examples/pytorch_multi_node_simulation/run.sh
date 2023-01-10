@@ -7,14 +7,14 @@ export IMG_ROOT='/datasets/FedScale/openImg/'
 export CID_CSV_ROOT='/datasets/FedScale/openImg/client_data_mapping/clean_ids'
 
 # Define number of workers
-export NUM_WORKERS=10
+export NUM_WORKERS=11
 
 # Experiment timestamp
 timestamp=$(date +%Y-%m-%d_%H%M%S)
 
 # Start Server
 echo "Starting server"
-python server.py --num_workers=${NUM_WORKERS}&
+python server.py --num_workers=${NUM_WORKERS} --path_save_model /local/scratch/pedro/experiments/multi_node/openimg/single_node/single_gpu/ > ${timestamp}_SERVER.txt 2>&1 &
 
 # Collect GPU DATA
 nvidia-smi --query-gpu=timestamp,name,index,pci.bus_id,utilization.gpu,utilization.memory,memory.total,memory.free,memory.used --format=csv --filename=${timestamp}_NVIDIA.csv --loop-ms=200 &
