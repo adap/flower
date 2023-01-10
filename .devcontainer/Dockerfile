@@ -31,7 +31,7 @@ RUN apt install -y curl wget gnupg python3 python-is-python3 python3-pip git \
 RUN python -m pip install \
     pip==22.3.1 \
     setuptools==65.6.3 \
-    poetry==1.1.15
+    poetry==1.2.2
 
 USER $USERNAME
 ENV PATH="/home/$USERNAME/.local/bin:${PATH}"
