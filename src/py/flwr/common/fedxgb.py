@@ -14,6 +14,7 @@
 # ==============================================================================
 """Federated XGBoost utility functions."""
 
+import typing
 from typing import Any, Dict, List, Union
 
 import numpy as np
@@ -23,10 +24,10 @@ from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, Dataset
 from xgboost import XGBClassifier, XGBRegressor
 
-from flwr.common.typing import NDArray, NDArrays
+from flwr.common.typing import NDArray
 
 
-# flake8: noqa: E501
+@typing.no_type_check
 class TreeDataset(Dataset):
     def __init__(self, data: NDArray, labels: NDArray) -> None:
         self.labels = labels
@@ -42,6 +43,7 @@ class TreeDataset(Dataset):
         return sample
 
 
+@typing.no_type_check
 def plot_xgbtree(tree: Union[XGBClassifier, XGBRegressor], n_tree: int) -> None:
     xgb.plot_tree(tree, num_trees=n_tree)
     plt.rcParams["figure.figsize"] = [50, 10]
@@ -131,12 +133,13 @@ def tree_encoding(
     X_train_enc = np.zeros((X_train.shape[0], client_num * client_tree_num))
     X_train_enc = np.array(X_train_enc, copy=True)
 
+    temp_trees: Any = None
     if type(client_trees) is not list:
-        temp_trees: Any = [client_trees] * client_num
+        temp_trees = [client_trees] * client_num
     elif type(client_trees) is list and len(client_trees) != client_num:
-        temp_trees: Any = [client_trees[0]] * client_num
+        temp_trees = [client_trees[0]] * client_num
     else:
-        temp_trees: Any = client_trees
+        temp_trees = client_trees
 
     for i in range(len(temp_trees)):
         for j in range(client_tree_num):
