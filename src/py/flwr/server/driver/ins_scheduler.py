@@ -78,10 +78,15 @@ def _worker(
             time.sleep(3)
             continue
 
-        log(DEBUG, "Worker for node %i: task FOUND!!", client_proxy.node_id)
+        task_ins = task_ins_set[0]
+        log(
+            DEBUG,
+            "Worker for node %i: FOUND task %s",
+            client_proxy.node_id,
+            task_ins.task_id,
+        )
 
         # Step 2: call client_proxy.{fit,evaluate,...}
-        task_ins = task_ins_set[0]
         server_message = task_ins.task.legacy_server_message
         client_message_proto = _call_client_proxy(
             client_proxy=client_proxy,
