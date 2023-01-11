@@ -24,10 +24,10 @@ def test_get_task_ins_empty() -> None:
     """."""
 
     # Prepare
-    ds = DriverState()
+    state = DriverState()
 
     # Execute
-    task_ins_set = ds.get_task_ins(
+    task_ins_set = state.get_task_ins(
         node_id=None,
         limit=10,
     )
@@ -40,10 +40,10 @@ def test_get_task_res_empty() -> None:
     """."""
 
     # Prepare
-    ds = DriverState()
+    state = DriverState()
 
     # Execute
-    task_ins_set = ds.get_task_res(
+    task_ins_set = state.get_task_res(
         node_id=123,
         task_ids={uuid4()},
         limit=10,
