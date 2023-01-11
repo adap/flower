@@ -15,9 +15,12 @@
 """Flower server app."""
 
 
+import argparse
 from dataclasses import dataclass
 from logging import INFO, WARN
 from typing import Optional, Tuple
+
+import uvicorn
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
@@ -36,7 +39,9 @@ from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
 
-DEFAULT_SERVER_ADDRESS = "[::]:8080"
+DEFAULT_GRPC_SERVER_ADDRESS = "[::]:8080"
+DEFAULT_REST_SERVER_HOST = "0.0.0.0"
+DEFAULT_REST_SERVER_PORT = 8000
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 DEFAULT_SERVER_ADDRESS_FLEET = "[::]:9092"
 
@@ -55,7 +60,7 @@ class ServerConfig:
 
 def start_server(  # pylint: disable=too-many-arguments
     *,
-    server_address: str = DEFAULT_SERVER_ADDRESS,
+    server_address: str = DEFAULT_GRPC_SERVER_ADDRESS,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
@@ -204,12 +209,16 @@ def _fl(
 
 def run_server() -> None:
     """Run Flower server."""
+    args = parse_args()
+
     log(INFO, "Starting Flower server")
 
     driver_state = DriverState()
     driver_client_manager = DriverClientManager(
         driver_state=driver_state,
     )
+
+    log(INFO, "Starting Flower gRPC server")
 
     # Create Driver API gRPC server
     driver_server_address: str = DEFAULT_SERVER_ADDRESS_DRIVER
@@ -225,18 +234,34 @@ def run_server() -> None:
         certificates=None,
     )
 
-    # Create (legacy) Fleet API gRPC server
-    fleet_server_address: str = DEFAULT_SERVER_ADDRESS_FLEET
-    fleet_servicer = FlowerServiceServicer(
-        client_manager=driver_client_manager,
-    )
-    fleet_add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
-    fleet_grpc_server = generic_create_grpc_server(
-        servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
-        server_address=fleet_server_address,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=None,
-    )
+    # Start Fleet API (gRPC-based)
+    fleet_grpc_server = None
+    if args.server_type == "grpc":
+        # Create (legacy) Fleet API gRPC server
+        fleet_server_address: str = DEFAULT_SERVER_ADDRESS_FLEET
+        fleet_servicer = FlowerServiceServicer(
+            client_manager=driver_client_manager,
+        )
+        fleet_add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
+        fleet_grpc_server = generic_create_grpc_server(
+            servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
+            server_address=fleet_server_address,
+            max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+            certificates=None,
+        )
+
+    # Start Fleet API (HTTP-based)
+    elif args.server_type == "rest":
+        port = args.rest_bind_port
+        host = args.rest_bind_host
+        log(INFO, "Starting Flower REST server")
+        uvicorn.run(
+            "flwr.server.rest_server.rest_api:app",
+            port=port,
+            host=host,
+            reload=True,
+            access_log=False,
+        )
 
     # Start Driver API gRPC server
     driver_grpc_server.start()
@@ -247,13 +272,68 @@ def run_server() -> None:
     )
 
     # Start (legacy) Fleet API gRPC server
-    fleet_grpc_server.start()
-    log(
-        INFO,
-        "Flower ECE: fleet gRPC server running on %s",
-        fleet_server_address,
-    )
+    if fleet_grpc_server:
+        fleet_grpc_server.start()
+        log(
+            INFO,
+            "Flower ECE: fleet gRPC server running on %s",
+            fleet_server_address,
+        )
 
     # Wait for termination of both servers
     driver_grpc_server.wait_for_termination()
-    fleet_grpc_server.wait_for_termination()
+    if fleet_grpc_server:
+        fleet_grpc_server.wait_for_termination()
+    # TODO handle REST server termination
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Use this script to start a Flower Server."
+    )
+    # Possible Server types
+    ex_g = parser.add_mutually_exclusive_group()
+    ex_g.add_argument(
+        "--grpc",
+        action="store_const",
+        dest="server_type",
+        const="grpc",
+        default="grpc",
+        help="Starts a gRPC Flower server",
+    )
+    ex_g.add_argument(
+        "--rest",
+        action="store_const",
+        dest="server_type",
+        const="rest",
+        help="Starts a REST Flower server",
+    )
+    # Possible options
+    grpc_group = parser.add_argument_group("gRPC Server options", "")
+    grpc_group.add_argument(
+        "--grpc_driver_address",
+        help=f"Driver server address. Default:'{DEFAULT_SERVER_ADDRESS_DRIVER}'",
+        default=DEFAULT_SERVER_ADDRESS_DRIVER,
+    )
+    grpc_group.add_argument(
+        "--grpc_fleet_address",
+        help=f"Fleet server address. Default:'{DEFAULT_SERVER_ADDRESS_FLEET}'",
+        default=DEFAULT_SERVER_ADDRESS_FLEET,
+    )
+    grpc_group.add_argument(
+        "--grpc_server_address",
+        help=f"gRPC server address [DEPRECATED]. Default:'{DEFAULT_GRPC_SERVER_ADDRESS}'",
+        default=DEFAULT_GRPC_SERVER_ADDRESS,
+    )
+    rest_group = parser.add_argument_group("REST Server options", "")
+    rest_group.add_argument(
+        "--rest_bind_host",
+        help=f"REST bind socket to this host. Default:'{DEFAULT_REST_SERVER_HOST}'",
+        default=DEFAULT_REST_SERVER_HOST,
+    )
+    rest_group.add_argument(
+        "--rest_bind_port",
+        help=f"REST bind to a socket with this port. Default:'{DEFAULT_REST_SERVER_PORT}'",
+        default=DEFAULT_REST_SERVER_PORT,
+    )
+    return parser.parse_args()
