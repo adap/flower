@@ -27,7 +27,8 @@ from xgboost import XGBClassifier, XGBRegressor
 from flwr.common.typing import NDArray
 
 
-class TreeDataset(Dataset):  # type: ignore[override]
+# type: ignore
+class TreeDataset(Dataset):
     def __init__(self, data: NDArray, labels: NDArray) -> None:
         self.labels = labels
         self.data = data
@@ -42,9 +43,9 @@ class TreeDataset(Dataset):  # type: ignore[override]
         return sample
 
 
-@typing.no_type_check
+# @typing.no_type_check
 def plot_xgbtree(tree: Union[XGBClassifier, XGBRegressor], n_tree: int) -> None:
-    xgb.plot_tree(tree, num_trees=n_tree)
+    xgb.plot_tree(tree, num_trees=n_tree)  # type: ignore
     plt.rcParams["figure.figsize"] = [50, 10]
     plt.show()
     return
@@ -114,7 +115,7 @@ def single_tree_prediction(
     )
 
 
-@typing.no_type_check
+# @typing.no_type_check
 def tree_encoding(
     trainloader: DataLoader,
     batch_size: int,
@@ -151,8 +152,10 @@ def tree_encoding(
     y_train32: Any = np.float32(y_train)
 
     X_train_enc32, y_train32 = torch.from_numpy(
-        np.expand_dims(X_train_enc32, axis=1)
-    ), torch.from_numpy(np.expand_dims(y_train32, axis=-1))
+        np.expand_dims(X_train_enc32, axis=1)  # type: ignore
+    ), torch.from_numpy(
+        np.expand_dims(y_train32, axis=-1)
+    )  # type: ignore
     trainset = TreeDataset(X_train_enc32, y_train32)
     trainset = DataLoader(
         trainset, batch_size=batch_size, pin_memory=True, shuffle=False
