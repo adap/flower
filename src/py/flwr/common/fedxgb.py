@@ -27,8 +27,7 @@ from xgboost import XGBClassifier, XGBRegressor
 from flwr.common.typing import NDArray
 
 
-@typing.no_type_check
-class TreeDataset(Dataset):
+class TreeDataset(Dataset):  # type: ignore[override]
     def __init__(self, data: NDArray, labels: NDArray) -> None:
         self.labels = labels
         self.data = data
@@ -115,6 +114,7 @@ def single_tree_prediction(
     )
 
 
+@typing.no_type_check
 def tree_encoding(
     trainloader: DataLoader,
     batch_size: int,
