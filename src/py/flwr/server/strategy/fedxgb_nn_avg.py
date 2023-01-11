@@ -20,7 +20,7 @@ Paper:
 
 
 from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from xgboost import XGBClassifier, XGBRegressor
 
@@ -155,7 +155,7 @@ class FedXgbNnAvg(Strategy):
         return initial_parameters
 
     def evaluate(
-        self, server_round: int, parameters: Parameters
+        self, server_round: int, parameters: Any
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
         if self.evaluate_fn is None:
