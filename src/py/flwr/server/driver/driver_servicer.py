@@ -68,7 +68,6 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         # Store each TaskIns
         task_ids: List[Optional[UUID]] = []
         for task_ins in request.task_ins_set:
-            # TODO set created_at
             task_id: Optional[UUID] = self.driver_state.store_task_ins(
                 task_ins=task_ins
             )
@@ -118,7 +117,9 @@ def _validate_incoming_task_ins(task_ins: TaskIns) -> None:
     )
 
     # Created/delivered/TTL
-    _raise_if(task.delivered_at is not False, "`delivered_at` must be `False`")
+    _raise_if(task.created_at == None, "`created_at` must be `None`")
+    _raise_if(task.delivered_at == None, "`delivered_at` must be `None`")
+    _raise_if(task.ttl == None, "`ttl` must be `None`")
 
     # Legacy ServerMessage/ClientMessage
     _raise_if(

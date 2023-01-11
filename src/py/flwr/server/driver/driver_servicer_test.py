@@ -73,10 +73,9 @@ def _create_task_ins(
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=1, anonymous=False),
-            blob=b"",
-            created_at=0,
-            delivered_at=False,
-            ttl=0,
+            created_at="",
+            delivered_at="",
+            ttl="",
             ancestry=[],
             legacy_server_message=ServerMessage(fit_ins=ServerMessage.FitIns())
             if server_message

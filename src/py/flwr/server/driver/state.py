@@ -15,7 +15,7 @@
 """DriverState."""
 
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Set
 from uuid import UUID, uuid4
 
@@ -37,9 +37,12 @@ class DriverState:
         task_ins.task_id = str(task_id)
 
         # Set created_at
-        # TODO task_ins.task.created_at = _now()
+        created_at: datetime = _now()
+        ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskIns
+        task_ins.task.created_at = created_at.isoformat()
+        task_ins.task.ttl = ttl.isoformat()
         self.task_ins_store[task_id] = task_ins
 
         # Return the new task_id
@@ -54,14 +57,14 @@ class DriverState:
             # TODO handle optional int
             if (
                 task_ins.task.consumer.node_id == node_id
-                and task_ins.task.delivered_at is False  # TODO change to date check
+                and task_ins.task.delivered_at != ""
             ):
                 task_ins_set.append(task_ins)
             if len(task_ins_set) == limit:
                 break
 
         # Mark all of them as delivered
-        delivered_at = True  # TODO _now()
+        delivered_at = _now().isoformat()
         for task_ins in task_ins_set:
             task_ins.task.delivered_at = delivered_at
 
@@ -76,9 +79,12 @@ class DriverState:
         task_res.task_id = str(task_id)
 
         # Set created_at
-        # TODO task_res.task.created_at = _now()
+        created_at: datetime = _now()
+        ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskRes
+        task_res.task.created_at = created_at.isoformat()
+        task_res.task.ttl = ttl.isoformat()
         self.task_res_store[task_id] = task_res
 
         # Return the new task_id
@@ -94,14 +100,14 @@ class DriverState:
         for _, task_res in self.task_res_store.items():
             if (
                 UUID(task_res.task.ancestry[0]) in task_ids
-                and task_res.task.delivered_at is False  # TODO change to date
+                and task_res.task.delivered_at != ""
             ):
                 task_res_set.append(task_res)
             if len(task_res_set) == limit:
                 break
 
         # Mark all of them as delivered
-        delivered_at = True  # TODO _now()
+        delivered_at = _now().isoformat()
         for task_res in task_res_set:
             task_res.task.delivered_at = delivered_at
 
