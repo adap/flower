@@ -23,11 +23,10 @@ import "flwr/proto/transport.proto";
 message Task {
   Node producer = 1;
   Node consumer = 2;
-  bytes blob = 3;
-  uint64 ttl = 4;        // TODO: Timestamp
-  uint64 created_at = 5; // TODO: Timestamp
-  bool delivered_at = 6; // TODO: Timestamp
-  repeated string ancestry = 9;
+  string created_at = 3;
+  string delivered_at = 4;
+  string ttl = 5;
+  repeated string ancestry = 6;
 
   ServerMessage legacy_server_message = 101 [ deprecated = true ];
   ClientMessage legacy_client_message = 102 [ deprecated = true ];

@@ -17,10 +17,9 @@ class Task(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PRODUCER_FIELD_NUMBER: builtins.int
     CONSUMER_FIELD_NUMBER: builtins.int
-    BLOB_FIELD_NUMBER: builtins.int
-    TTL_FIELD_NUMBER: builtins.int
     CREATED_AT_FIELD_NUMBER: builtins.int
     DELIVERED_AT_FIELD_NUMBER: builtins.int
+    TTL_FIELD_NUMBER: builtins.int
     ANCESTRY_FIELD_NUMBER: builtins.int
     LEGACY_SERVER_MESSAGE_FIELD_NUMBER: builtins.int
     LEGACY_CLIENT_MESSAGE_FIELD_NUMBER: builtins.int
@@ -28,16 +27,9 @@ class Task(google.protobuf.message.Message):
     def producer(self) -> flwr.proto.node_pb2.Node: ...
     @property
     def consumer(self) -> flwr.proto.node_pb2.Node: ...
-    blob: builtins.bytes
-    ttl: builtins.int
-    """TODO: Timestamp"""
-
-    created_at: builtins.int
-    """TODO: Timestamp"""
-
-    delivered_at: builtins.bool
-    """TODO: Timestamp"""
-
+    created_at: typing.Text
+    delivered_at: typing.Text
+    ttl: typing.Text
     @property
     def ancestry(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     @property
@@ -48,16 +40,15 @@ class Task(google.protobuf.message.Message):
         *,
         producer: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         consumer: typing.Optional[flwr.proto.node_pb2.Node] = ...,
-        blob: builtins.bytes = ...,
-        ttl: builtins.int = ...,
-        created_at: builtins.int = ...,
-        delivered_at: builtins.bool = ...,
+        created_at: typing.Text = ...,
+        delivered_at: typing.Text = ...,
+        ttl: typing.Text = ...,
         ancestry: typing.Optional[typing.Iterable[typing.Text]] = ...,
         legacy_server_message: typing.Optional[flwr.proto.transport_pb2.ServerMessage] = ...,
         legacy_client_message: typing.Optional[flwr.proto.transport_pb2.ClientMessage] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["consumer",b"consumer","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["ancestry",b"ancestry","blob",b"blob","consumer",b"consumer","created_at",b"created_at","delivered_at",b"delivered_at","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer","ttl",b"ttl"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ancestry",b"ancestry","consumer",b"consumer","created_at",b"created_at","delivered_at",b"delivered_at","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer","ttl",b"ttl"]) -> None: ...
 global___Task = Task
 
 class TaskIns(google.protobuf.message.Message):
