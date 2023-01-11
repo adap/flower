@@ -14,12 +14,16 @@
 # ==============================================================================
 """Federated XGBoost utility functions."""
 
+from typing import List, Union
+
 import numpy as np
 import torch
 import xgboost as xgb
 from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, Dataset
-from xgboost import XGBClassifier, XGBRegressor, plot_tree
+from xgboost import XGBClassifier, XGBRegressor
+
+from flwr.common.typing import NDArrays
 
 
 class TreeDataset(Dataset):
@@ -37,14 +41,16 @@ class TreeDataset(Dataset):
         return sample
 
 
-def plot_xgbtree(tree, n_tree):
+def plot_xgbtree(tree: Union[XGBClassifier, XGBRegressor], n_tree: int) -> None:
     xgb.plot_tree(tree, num_trees=n_tree)
     plt.rcParams["figure.figsize"] = [50, 10]
     plt.show()
     return
 
 
-def construct_tree(dataset, label, n_estimators, tree_type="BINARY"):
+def construct_tree(
+    dataset: Dataset, label: NDArrays, n_estimators: int, tree_type: str
+) -> Union[XGBClassifier, XGBRegressor]:
     if tree_type == "BINARY":
         tree = xgb.XGBClassifier(
             objective="binary:logistic",
@@ -81,13 +87,17 @@ def construct_tree(dataset, label, n_estimators, tree_type="BINARY"):
     return tree
 
 
-def construct_tree_from_loader(dataset_loader, n_estimators, tree_type="BINARY"):
+def construct_tree_from_loader(
+    dataset_loader: DataLoader, n_estimators: int, tree_type: str
+) -> Union[XGBClassifier, XGBRegressor]:
     for dataset in dataset_loader:
         data, label = dataset[0], dataset[1]
     return construct_tree(data, label, n_estimators, tree_type)
 
 
-def single_tree_prediction(tree, n_tree, dataset):
+def single_tree_prediction(
+    tree: Union[XGBClassifier, XGBRegressor], n_tree: int, dataset: NDArrays
+) -> NDArrays:
     # How to access a single tree
     # https://github.com/bmreiniger/datascience.stackexchange/blob/master/57905.ipynb
     num_t = len(tree.get_booster().get_dump())
@@ -102,7 +112,15 @@ def single_tree_prediction(tree, n_tree, dataset):
     )
 
 
-def tree_encoding(trainloader, batch_size, client_trees, client_tree_num, client_num):
+def tree_encoding(
+    trainloader: DataLoader,
+    batch_size: int,
+    client_trees: Union[
+        Union[XGBClassifier, XGBRegressor], List[Union[XGBClassifier, XGBRegressor]]
+    ],
+    client_tree_num: int,
+    client_num: int,
+) -> DataLoader:
     if trainloader is None:
         return None
 
