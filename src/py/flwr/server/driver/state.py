@@ -26,8 +26,8 @@ class DriverState:
     """DriverState."""
 
     def __init__(self) -> None:
-        self.task_ins_store: Dict[str, TaskIns] = dict()
-        self.task_res_store: Dict[str, TaskRes] = dict()
+        self.task_ins_store: Dict[UUID, TaskIns] = dict()
+        self.task_res_store: Dict[UUID, TaskRes] = dict()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
