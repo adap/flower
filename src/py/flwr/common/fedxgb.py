@@ -14,7 +14,7 @@
 # ==============================================================================
 """Federated XGBoost utility functions."""
 
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import torch
@@ -23,19 +23,19 @@ from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, Dataset
 from xgboost import XGBClassifier, XGBRegressor
 
-from flwr.common.typing import NDArrays
+from flwr.common.typing import NDArray, NDArrays
 
 
 # flake8: noqa: E501
 class TreeDataset(Dataset):
-    def __init__(self, data: NDArrays, labels: NDArrays) -> None:
+    def __init__(self, data: NDArray, labels: NDArray) -> None:
         self.labels = labels
         self.data = data
 
     def __len__(self) -> int:
         return len(self.labels)
 
-    def __getitem__(self, idx: int) -> Dict[int, NDArrays]:
+    def __getitem__(self, idx: int) -> Dict[int, Union[NDArray, Any]]:
         label = self.labels[idx]
         data = self.data[idx, :]
         sample = {0: data, 1: label}
@@ -50,7 +50,7 @@ def plot_xgbtree(tree: Union[XGBClassifier, XGBRegressor], n_tree: int) -> None:
 
 
 def construct_tree(
-    dataset: Dataset, label: NDArrays, n_estimators: int, tree_type: str
+    dataset: Dataset, label: NDArray, n_estimators: int, tree_type: str
 ) -> Union[XGBClassifier, XGBRegressor]:
     if tree_type == "BINARY":
         tree = xgb.XGBClassifier(
@@ -97,8 +97,8 @@ def construct_tree_from_loader(
 
 
 def single_tree_prediction(
-    tree: Union[XGBClassifier, XGBRegressor], n_tree: int, dataset: NDArrays
-) -> Union[None, NDArrays]:
+    tree: Union[XGBClassifier, XGBRegressor], n_tree: int, dataset: NDArray
+) -> Union[None, NDArray]:
     # How to access a single tree
     # https://github.com/bmreiniger/datascience.stackexchange/blob/master/57905.ipynb
     num_t = len(tree.get_booster().get_dump())
@@ -132,11 +132,11 @@ def tree_encoding(
     X_train_enc = np.array(X_train_enc, copy=True)
 
     if type(client_trees) is not list:
-        temp_trees = [client_trees] * client_num
+        temp_trees: Any = [client_trees] * client_num
     elif type(client_trees) is list and len(client_trees) != client_num:
-        temp_trees = [client_trees[0]] * client_num
+        temp_trees: Any = [client_trees[0]] * client_num
     else:
-        temp_trees = client_trees
+        temp_trees: Any = client_trees
 
     for i in range(len(temp_trees)):
         for j in range(client_tree_num):
@@ -144,7 +144,9 @@ def tree_encoding(
                 temp_trees[i], j, X_train
             )
 
-    X_train_enc32, y_train32 = np.float32(X_train_enc), np.float32(y_train)
+    X_train_enc32: Any = np.float32(X_train_enc)
+    y_train32: Any = np.float32(y_train)
+
     X_train_enc32, y_train32 = torch.from_numpy(
         np.expand_dims(X_train_enc32, axis=1)
     ), torch.from_numpy(np.expand_dims(y_train32, axis=-1))
