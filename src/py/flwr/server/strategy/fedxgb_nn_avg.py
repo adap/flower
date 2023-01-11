@@ -219,11 +219,7 @@ class FedXgbNnAvg(Strategy):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[
-        Optional[Parameters],
-        List[Union[XGBClassifier, XGBRegressor]],
-        Dict[str, Scalar],
-    ]:
+    ) -> Tuple[Optional[Any], Dict[str, Scalar],]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
@@ -252,7 +248,7 @@ class FedXgbNnAvg(Strategy):
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
-        return parameters_aggregated, trees_aggregated, metrics_aggregated
+        return [parameters_aggregated, trees_aggregated], metrics_aggregated
 
     def aggregate_evaluate(
         self,
