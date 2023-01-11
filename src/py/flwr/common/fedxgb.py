@@ -27,7 +27,7 @@ from xgboost import XGBClassifier, XGBRegressor
 from flwr.common.typing import NDArray
 
 
-# type: ignore
+# type: ignore[misc]
 class TreeDataset(Dataset):
     def __init__(self, data: NDArray, labels: NDArray) -> None:
         self.labels = labels
@@ -43,7 +43,6 @@ class TreeDataset(Dataset):
         return sample
 
 
-# @typing.no_type_check
 def plot_xgbtree(tree: Union[XGBClassifier, XGBRegressor], n_tree: int) -> None:
     xgb.plot_tree(tree, num_trees=n_tree)  # type: ignore
     plt.rcParams["figure.figsize"] = [50, 10]
@@ -115,7 +114,6 @@ def single_tree_prediction(
     )
 
 
-# @typing.no_type_check
 def tree_encoding(
     trainloader: DataLoader,
     batch_size: int,
@@ -154,8 +152,8 @@ def tree_encoding(
     X_train_enc32, y_train32 = torch.from_numpy(
         np.expand_dims(X_train_enc32, axis=1)  # type: ignore
     ), torch.from_numpy(
-        np.expand_dims(y_train32, axis=-1)
-    )  # type: ignore
+        np.expand_dims(y_train32, axis=-1)  # type: ignore
+    )
     trainset = TreeDataset(X_train_enc32, y_train32)
     trainset = DataLoader(
         trainset, batch_size=batch_size, pin_memory=True, shuffle=False
