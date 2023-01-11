@@ -31,7 +31,7 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
-from flwr.proto.task_pb2 import TaskRes
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.server.driver.driver_client_manager import DriverClientManager
 from flwr.server.driver.state import DriverState
 
@@ -61,12 +61,14 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Push a set of TaskIns."""
         log(INFO, "DriverServicer.PushTaskIns")
 
+        # Validate request
+        for task_ins in request.task_ins_set:
+            _validate_incoming_task_ins(task_ins=task_ins)
+
+        # Store each TaskIns
         task_ids: List[Optional[UUID]] = []
         for task_ins in request.task_ins_set:
-            # TODO Verify that task_id is not set
-            # TODO Verify that only legacy_server_message is set
-
-            # Store TaskIns
+            # TODO set created_at
             task_id: Optional[UUID] = self.driver_state.store_task_ins(
                 task_ins=task_ins
             )
@@ -89,3 +91,49 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         )
 
         return PullTaskResResponse(task_res_set=task_res_set)
+
+
+def _validate_incoming_task_ins(task_ins: TaskIns) -> None:
+    """Validate incoming TaskIns."""
+
+    _raise_if(task_ins.task_id != "", "non-empty `task_id`")
+    _raise_if(task_ins.task is None, "`task` is `None`")
+
+    task: Task = task_ins.task
+
+    # Task producer
+    _raise_if(task.producer is None, "`producer` is `None`")
+    _raise_if(task.producer.node_id != 0, "`producer.node_id` is not 0")
+    _raise_if(not task.producer.anonymous, "`producer` is not anonymous")
+
+    # Task consumer
+    _raise_if(task.consumer is None, "`consumer` is `None`")
+    _raise_if(
+        task.consumer.anonymous and task.consumer.node_id != 0,
+        "anonymous consumers MUST NOT set a `node_id`",
+    )
+    _raise_if(
+        not task.consumer.anonymous and task.consumer.node_id == 0,
+        "non-anonymous consumer MUST provide a `node_id`",
+    )
+
+    # Created/delivered/TTL
+    _raise_if(task.delivered_at is not False, "`delivered_at` must be `False`")
+
+    # Legacy ServerMessage/ClientMessage
+    _raise_if(
+        task.legacy_client_message.HasField("msg"),
+        "`legacy_client_message` is not `None`",
+    )
+    _raise_if(
+        not task.legacy_server_message.HasField("msg"),
+        "`legacy_server_message` is `None`",
+    )
+
+    # Ancestors
+    _raise_if(len(task.ancestry) != 0, "`ancestry` is not empty")
+
+
+def _raise_if(validation_error: bool, detail: str) -> None:
+    if validation_error:
+        raise ValueError(f"Malformed PushTaskInsRequest: {detail}")
