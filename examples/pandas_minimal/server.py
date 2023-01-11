@@ -17,39 +17,39 @@ from flwr.common import (
 )
 from symbol import parameters
 
+
 class FedAnalytics(Strategy):
-    def __init__(self, compute_fns:List[Callable] = None, col_names:List[str] = None) -> None:
+    def __init__(
+        self, compute_fns: List[Callable] = None, col_names: List[str] = None
+    ) -> None:
         super().__init__()
         self.parameters: Parameters = Parameters(
             tensors=[], tensor_type="numpy.ndarray"
         )
 
     def initialize_parameters(self, client_manager=None):
-        return self.parameters 
+        return self.parameters
 
     def configure_fit(self, server_round, parameters, client_manager):
         # Tell fit what to do - this isnt really doing anything currently
         config = {}
         fit_ins = FitIns(parameters, config)
-        clients = client_manager.sample(
-            num_clients=2, min_num_clients=2
-        )
+        clients = client_manager.sample(num_clients=2, min_num_clients=2)
         return [(client, fit_ins) for client in clients]
 
     def aggregate_fit(self, server_round, results, failures):
-        # Get results from fit 
+        # Get results from fit
         # Convert results
-        print('agg fit')
+        print("agg fit")
         values_aggregated = [
-            (parameters_to_ndarrays(fit_res.parameters))
-            for _, fit_res in results
+            (parameters_to_ndarrays(fit_res.parameters)) for _, fit_res in results
         ]
-        # Hacking around to load back data from parameters 
+        # Hacking around to load back data from parameters
         metrics_aggregated = {}
-        for index,arr in enumerate(values_aggregated):
-            i = 0 
+        for index, arr in enumerate(values_aggregated):
+            i = 0
             metrics_aggregated[index] = {}
-            metrics_aggregated[index] = arr 
+            metrics_aggregated[index] = arr
         print(metrics_aggregated)
         return [], metrics_aggregated
 
@@ -59,12 +59,11 @@ class FedAnalytics(Strategy):
     def aggregate_evaluate(self, server_round, results, failures):
         pass
 
-    def evaluate(self, data,parameters):
+    def evaluate(self, data, parameters):
         pass
 
 
-
-strategy = FedAnalytics() 
+strategy = FedAnalytics()
 
 # Start Flower server
 fl.server.start_server(

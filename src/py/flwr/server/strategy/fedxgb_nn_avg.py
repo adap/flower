@@ -12,14 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated XGBoost based on building Neural Network and averaging on prediction outcomes [Ma et al., 2022].
+"""Federated XGBoost based on building Neural Network and averaging on
+prediction outcomes [Ma et al., 2022].
 
-Paper: 
+Paper:
 """
 
 
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
+
 from xgboost import XGBClassifier, XGBRegressor
 
 from flwr.common import (
@@ -74,7 +76,8 @@ class FedXgbNnAvg(Strategy):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
-        """Federated XGBoost based on building Neural Network and averaging on prediction outcomes strategy.
+        """Federated XGBoost based on building Neural Network and averaging on
+        prediction outcomes strategy.
 
         Parameters
         ----------
@@ -216,7 +219,11 @@ class FedXgbNnAvg(Strategy):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], List[Union[XGBClassifier, XGBRegressor]], Dict[str, Scalar]]:
+    ) -> Tuple[
+        Optional[Parameters],
+        List[Union[XGBClassifier, XGBRegressor]],
+        Dict[str, Scalar],
+    ]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
@@ -226,16 +233,16 @@ class FedXgbNnAvg(Strategy):
 
         # Convert results
         weights_results = [
-            (parameters_to_ndarrays(fit_res.parameters[0].parameters), fit_res.num_examples)
+            (
+                parameters_to_ndarrays(fit_res.parameters[0].parameters),
+                fit_res.num_examples,
+            )
             for _, fit_res in results
         ]
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
         # Aggregate XGBoost trees from all clients
-        trees_aggregated = [
-            fit_res.parameters[1]
-            for _, fit_res in results
-        ]
+        trees_aggregated = [fit_res.parameters[1] for _, fit_res in results]
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}

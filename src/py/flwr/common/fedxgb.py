@@ -14,21 +14,22 @@
 # ==============================================================================
 """Federated XGBoost utility functions."""
 
-import xgboost as xgb
-from xgboost import XGBClassifier, XGBRegressor
-from xgboost import plot_tree
 import numpy as np
 import torch
+import xgboost as xgb
 from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, Dataset
+from xgboost import XGBClassifier, XGBRegressor, plot_tree
 
 
 class TreeDataset(Dataset):
     def __init__(self, data, labels):
         self.labels = labels
         self.data = data
+
     def __len__(self):
         return len(self.labels)
+
     def __getitem__(self, idx):
         label = self.labels[idx]
         data = self.data[idx, :]
@@ -38,29 +39,49 @@ class TreeDataset(Dataset):
 
 def plot_xgbtree(tree, n_tree):
     xgb.plot_tree(tree, num_trees=n_tree)
-    plt.rcParams['figure.figsize'] = [50, 10]
+    plt.rcParams["figure.figsize"] = [50, 10]
     plt.show()
     return
 
 
-def construct_tree(dataset, label, n_estimators, tree_type='BINARY'):
-    if tree_type == 'BINARY':
-        tree = xgb.XGBClassifier(objective ='binary:logistic', learning_rate = 0.1, max_depth = 10, n_estimators = n_estimators,
-            subsample=0.8, colsample_bylevel=1, colsample_bynode=1, colsample_bytree=1,
-            alpha=5, gamma=5,
-            num_parallel_tree=1, min_child_weight=1)
+def construct_tree(dataset, label, n_estimators, tree_type="BINARY"):
+    if tree_type == "BINARY":
+        tree = xgb.XGBClassifier(
+            objective="binary:logistic",
+            learning_rate=0.1,
+            max_depth=10,
+            n_estimators=n_estimators,
+            subsample=0.8,
+            colsample_bylevel=1,
+            colsample_bynode=1,
+            colsample_bytree=1,
+            alpha=5,
+            gamma=5,
+            num_parallel_tree=1,
+            min_child_weight=1,
+        )
 
-    elif tree_type == 'REG':
-        tree = xgb.XGBRegressor(objective ='reg:squarederror', learning_rate = 0.1, max_depth = 10, n_estimators = n_estimators,
-            subsample=0.8, colsample_bylevel=1, colsample_bynode=1, colsample_bytree=1,
-            alpha=5, gamma=5,
-            num_parallel_tree=1, min_child_weight=1)
-            
+    elif tree_type == "REG":
+        tree = xgb.XGBRegressor(
+            objective="reg:squarederror",
+            learning_rate=0.1,
+            max_depth=10,
+            n_estimators=n_estimators,
+            subsample=0.8,
+            colsample_bylevel=1,
+            colsample_bynode=1,
+            colsample_bytree=1,
+            alpha=5,
+            gamma=5,
+            num_parallel_tree=1,
+            min_child_weight=1,
+        )
+
     tree.fit(dataset, label)
     return tree
 
 
-def construct_tree_from_loader(dataset_loader, n_estimators, tree_type='BINARY'):
+def construct_tree_from_loader(dataset_loader, n_estimators, tree_type="BINARY"):
     for dataset in dataset_loader:
         data, label = dataset[0], dataset[1]
     return construct_tree(data, label, n_estimators, tree_type)
@@ -71,22 +92,26 @@ def single_tree_prediction(tree, n_tree, dataset):
     # https://github.com/bmreiniger/datascience.stackexchange/blob/master/57905.ipynb
     num_t = len(tree.get_booster().get_dump())
     if n_tree > num_t:
-        print("The index of tree to be extracted is larger than the total number of trees.")
+        print(
+            "The index of tree to be extracted is larger than the total number of trees."
+        )
         return None
 
-    return tree.predict(dataset, iteration_range=(n_tree, n_tree+1), output_margin=True)
+    return tree.predict(
+        dataset, iteration_range=(n_tree, n_tree + 1), output_margin=True
+    )
 
 
 def tree_encoding(trainloader, batch_size, client_trees, client_tree_num, client_num):
     if trainloader is None:
         return None
-    
+
     for local_dataset in trainloader:
         X_train, y_train = local_dataset[0], local_dataset[1]
-    
+
     X_train_enc = np.zeros((X_train.shape[0], client_num * client_tree_num))
     X_train_enc = np.array(X_train_enc, copy=True)
-    
+
     if type(client_trees) is not list:
         temp = [client_trees] * client_num
         client_trees = temp
@@ -97,11 +122,17 @@ def tree_encoding(trainloader, batch_size, client_trees, client_tree_num, client
 
     for i in range(len(client_trees)):
         for j in range(client_tree_num):
-            X_train_enc[:, i*client_tree_num+j] = single_tree_prediction(client_trees[i], j, X_train)
+            X_train_enc[:, i * client_tree_num + j] = single_tree_prediction(
+                client_trees[i], j, X_train
+            )
 
     X_train_enc, y_train = np.float32(X_train_enc), np.float32(y_train)
-    X_train_enc, y_train  = torch.from_numpy(np.expand_dims(X_train_enc, axis=1)), torch.from_numpy(np.expand_dims(y_train, axis=-1)) 
+    X_train_enc, y_train = torch.from_numpy(
+        np.expand_dims(X_train_enc, axis=1)
+    ), torch.from_numpy(np.expand_dims(y_train, axis=-1))
     trainset = TreeDataset(X_train_enc, y_train)
-    trainset = DataLoader(trainset, batch_size=batch_size, pin_memory=True, shuffle=False)
+    trainset = DataLoader(
+        trainset, batch_size=batch_size, pin_memory=True, shuffle=False
+    )
 
     return trainset
