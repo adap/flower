@@ -1,7 +1,9 @@
 import warnings
-import flwr as fl
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+
+import flwr as fl
 
 
 def load_data():
@@ -34,9 +36,12 @@ class FlowerClient(fl.client.Client):
     def get_parameters(self, config):
         return {"column_names": column_names}
 
+<<<<<<< HEAD:examples/pandas_minimal/client.py
     def set_parameters(self, parameters):
         pass
 
+=======
+>>>>>>> 347169d771321ef39b04383ab63c3ac5eab3f1e5:examples/quickstart_pandas/client.py
     def fit(self, parameters, config):
         # Execute query locally
         outputs = {}
@@ -51,9 +56,12 @@ class FlowerClient(fl.client.Client):
             {},
         )  # [Tensors, num_examples, dict] - I am storing analytics analysis in results
 
+<<<<<<< HEAD:examples/pandas_minimal/client.py
     def evaluate(self, parameters, data):
         pass
 
+=======
+>>>>>>> 347169d771321ef39b04383ab63c3ac5eab3f1e5:examples/quickstart_pandas/client.py
     def _format_outputs(self, inputs: dict):
         # Format outputs to [NDTupes, int, dict]
         metrics_dict = {}

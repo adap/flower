@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **New Pandas code example** ([#1469](https://github.com/adap/flower/pull/1469), [#1535](https://github.com/adap/flower/pull/1535))
+
+  A new code example (`quickstart_pandas`) demonstrates federated analytics with Pandas and Flower.
+
 ### What's new?
 
 ### Incompatible changes

@@ -1,13 +1,13 @@
-import flwr as fl
 import pickle
-from typing import List, Tuple, Callable
-from flwr.server.strategy import Strategy
-from flwr.common import Metrics
+from typing import Callable, List, Tuple
+
+import flwr as fl
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
+    Metrics,
     MetricsAggregationFn,
     NDArrays,
     Parameters,
@@ -15,7 +15,8 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from symbol import parameters
+from flwr.server.strategy import Strategy
+
 
 
 class FedAnalytics(Strategy):
@@ -40,7 +41,10 @@ class FedAnalytics(Strategy):
     def aggregate_fit(self, server_round, results, failures):
         # Get results from fit
         # Convert results
+<<<<<<< HEAD:examples/pandas_minimal/server.py
         print("agg fit")
+=======
+>>>>>>> 347169d771321ef39b04383ab63c3ac5eab3f1e5:examples/quickstart_pandas/server.py
         values_aggregated = [
             (parameters_to_ndarrays(fit_res.parameters)) for _, fit_res in results
         ]
