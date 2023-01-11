@@ -26,8 +26,8 @@ class DriverState:
     """DriverState."""
 
     def __init__(self) -> None:
-        self.task_ins_store: Dict[UUID, TaskIns] = dict()
-        self.task_res_store: Dict[UUID, TaskRes] = dict()
+        self.task_ins_store: Dict[UUID, TaskIns] = {}
+        self.task_res_store: Dict[UUID, TaskRes] = {}
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
@@ -50,12 +50,11 @@ class DriverState:
 
         # Find TaskIns for node_id that were not delivered yet
         task_ins_set: List[TaskIns] = []
-        for task_id in self.task_ins_store:
-            task_ins = self.task_ins_store[task_id]
+        for _, task_ins in self.task_ins_store.items():
             # TODO handle optional int
             if (
                 task_ins.task.consumer.node_id == node_id
-                and task_ins.task.delivered_at == False  # TODO change to date check
+                and task_ins.task.delivered_at is False  # TODO change to date check
             ):
                 task_ins_set.append(task_ins)
             if len(task_ins_set) == limit:
@@ -92,11 +91,10 @@ class DriverState:
 
         # Find TaskRes that were not delivered yet
         task_res_set: List[TaskRes] = []
-        for task_id in self.task_res_store:
-            task_res = self.task_res_store[task_id]
+        for _, task_res in self.task_res_store.items():
             if (
                 UUID(task_res.task.ancestry[0]) in task_ids
-                and task_res.task.delivered_at == False  # TODO change to date
+                and task_res.task.delivered_at is False  # TODO change to date
             ):
                 task_res_set.append(task_res)
             if len(task_res_set) == limit:
