@@ -230,7 +230,7 @@ class FedXgbNnAvg(Strategy):
         # Convert results
         weights_results = [
             (
-                parameters_to_ndarrays(fit_res.parameters[0].parameters),
+                parameters_to_ndarrays(fit_res.parameters[0].parameters),  # type: ignore
                 fit_res.num_examples,
             )
             for _, fit_res in results
@@ -238,7 +238,7 @@ class FedXgbNnAvg(Strategy):
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
         # Aggregate XGBoost trees from all clients
-        trees_aggregated = [fit_res.parameters[1] for _, fit_res in results]
+        trees_aggregated = [fit_res.parameters[1] for _, fit_res in results]  # type: ignore
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
