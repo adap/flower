@@ -57,7 +57,7 @@ class DriverState:
             # TODO handle optional int
             if (
                 task_ins.task.consumer.node_id == node_id
-                and task_ins.task.delivered_at is not None
+                and task_ins.task.delivered_at == ""
             ):
                 task_ins_set.append(task_ins)
             if len(task_ins_set) == limit:
@@ -100,7 +100,7 @@ class DriverState:
         for _, task_res in self.task_res_store.items():
             if (
                 UUID(task_res.task.ancestry[0]) in task_ids
-                and task_res.task.delivered_at is not None
+                and task_res.task.delivered_at == ""
             ):
                 task_res_set.append(task_res)
             if len(task_res_set) == limit:
