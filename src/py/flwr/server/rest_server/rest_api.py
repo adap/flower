@@ -15,94 +15,75 @@
 """REST API server."""
 
 
-from random import choice
-from typing import Dict
+from logging import INFO
 
 from asgiref.sync import async_to_sync
 from fastapi import FastAPI, HTTPException, Request, Response
 from starlette.datastructures import Headers
 
+from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
-    CreateResultsRequest,
-    CreateResultsResponse,
-    GetTasksRequest,
-    GetTasksResponse,
-    TokenizedTask,
+    PullTaskInsRequest,
+    PullTaskInsResponse,
+    PushTaskResRequest,
+    PushTaskResResponse,
 )
-from flwr.server.rest_server.mock_msgs import gen_mock_messages
-
-# tm = TaskManagerDB()
-# cm = ClientManagerDB()
 
 app = FastAPI()
 
-###############################################################################
-# Dummy messages
-###############################################################################
-mock_messages: Dict[str, TokenizedTask] = gen_mock_messages()
 
-
-###############################################################################
-# Tasks and results
-###############################################################################
-
-
-@app.post("/api/1.1/tasks", response_class=Response)
-def tasks(request: Request) -> Response:
+@app.post("/api/v0/fleet/pull-task-ins", response_class=Response)
+def pull_task_ins(request: Request) -> Response:
     """."""
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
-    get_tasks_req_msg_bytes: bytes = async_to_sync(request.body)()  # type: ignore
+    pull_task_ins_request_bytes: bytes = async_to_sync(request.body)()  # type: ignore
 
     # Deserialize ProtoBuf
-    get_tasks_req_msg = GetTasksRequest()
-    get_tasks_req_msg.ParseFromString(get_tasks_req_msg_bytes)
+    pull_task_ins_request_proto = PullTaskInsRequest()
+    pull_task_ins_request_proto.ParseFromString(pull_task_ins_request_bytes)
 
     # Print received message
-    print(f"POST - Receiving GetTaskRequest:")
-    print(get_tasks_req_msg)
+    log(INFO, "POST - Receiving GetTaskRequest %s", pull_task_ins_request_proto)
 
-    # Create a mock message. See mock_msgs.py for more details.
-    message_being_sent = choice(list(mock_messages.keys()))
-    tokenized_task = mock_messages[message_being_sent]
+    # TODO get pull_task_ins from state
 
     # Return serialized ProtoBuf
-    task_resp_msg = GetTasksResponse()
-    task_resp_msg.tokenized_tasks.tokenized_tasks.append(tokenized_task)
-    task_resp_bytes = task_resp_msg.SerializeToString()
-    print(f"POST - Sending GetTasksResponse {message_being_sent}:")
-    print(task_resp_msg)
+    pull_task_ins_response_proto = PullTaskInsResponse()
+    pull_task_ins_response_bytes = pull_task_ins_response_proto.SerializeToString()
+    log(INFO, "POST - Returning PullTaskInsResponse %s", pull_task_ins_response_proto)
     return Response(
         status_code=200,
-        content=task_resp_bytes,
+        content=pull_task_ins_response_bytes,
         headers={"Content-Type": "application/protobuf"},
     )
 
 
-@app.post("/api/1.1/results")
-def results(request: Request) -> Response:  # Check if token is needed here
+@app.post("/api/v0/fleet/push-task-res")
+def push_task_res(request: Request) -> Response:  # Check if token is needed here
     """."""
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
-    create_results_req_msg_bytes: bytes = async_to_sync(request.body)()  # type: ignore
+    push_task_res_request_bytes: bytes = async_to_sync(request.body)()  # type: ignore
 
     # Deserialize ProtoBuf
-    create_results_req_msg = CreateResultsRequest()
-    create_results_req_msg.ParseFromString(create_results_req_msg_bytes)
+    push_task_res_request_proto = PushTaskResRequest()
+    push_task_res_request_proto.ParseFromString(push_task_res_request_bytes)
 
     # Print received message
-    print(f"POST - Receiving CreateResultsRequest:")
-    print(create_results_req_msg)
+    log(INFO, "POST - Receiving PushTaskResRequest %", push_task_res_request_proto)
 
-    # Create response
-    create_results_resp_msg = CreateResultsResponse()
-    create_results_resp_msg_bytes = create_results_resp_msg.SerializeToString()
-    print(f"POST - Sending CreateResultsResponse {create_results_resp_msg}:")
+    # TODO get pull_task_ins from state
+
+    # Return serialized ProtoBuf
+    push_task_res_response_proto = PushTaskResResponse()
+    push_task_res_response_bytes = push_task_res_response_proto.SerializeToString()
+    log(INFO, "POST - Returning PushTaskResResponse %s", push_task_res_response_proto)
     return Response(
         status_code=200,
-        content=create_results_resp_msg_bytes,
+        content=push_task_res_response_bytes,
         headers={"Content-Type": "application/protobuf"},
     )
 
@@ -110,10 +91,10 @@ def results(request: Request) -> Response:  # Check if token is needed here
 def _check_headers(headers: Headers) -> None:
     """Check if expected headers are set."""
     if not "content-type" in headers:
-        raise HTTPException(status_code=400, detail="Missing header Content-Type")
+        raise HTTPException(status_code=400, detail="Missing header `Content-Type`")
     if headers["content-type"] != "application/protobuf":
-        raise HTTPException(status_code=400, detail="Unsupported Content-Type")
+        raise HTTPException(status_code=400, detail="Unsupported `Content-Type`")
     if not "accept" in headers:
-        raise HTTPException(status_code=400, detail="Missing header Accept")
+        raise HTTPException(status_code=400, detail="Missing header `Accept`")
     if headers["accept"] != "application/protobuf":
-        raise HTTPException(status_code=400, detail="Unsupported Accept")
+        raise HTTPException(status_code=400, detail="Unsupported `Accept`")

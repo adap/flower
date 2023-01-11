@@ -15,19 +15,27 @@
 """Contextmanager managing a REST-based channel to the Flower server."""
 
 
+import uuid
 from contextlib import contextmanager
+from logging import ERROR, INFO, WARN
 from typing import Callable, Iterator, Optional, Tuple
 
 import requests
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
-    CreateResultsRequest,
-    GetTasksRequest,
-    GetTasksResponse,
-    TokenizedResult,
+    PullTaskInsRequest,
+    PullTaskInsResponse,
+    PushTaskResRequest,
+    PushTaskResResponse,
 )
+from flwr.proto.node_pb2 import Node
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+
+PATH_PULL_TASK_INS: str = "/api/v0/fleet/pull-task-ins"
+PATH_PUSH_TASK_RES: str = "/api/v0/fleet/push-task-res"
 
 
 @contextmanager
@@ -35,7 +43,6 @@ def rest_not_a_connection(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
-    client_id: Optional[str] = None,
 ) -> Iterator[
     Tuple[Callable[[], Optional[ServerMessage]], Callable[[ClientMessage], None]]
 ]:
@@ -53,13 +60,20 @@ def rest_not_a_connection(
         Ignored, only present to preserve API-compatibility.
     root_certificates : Optional[bytes] (default: None)
         Ignored, for now. TODO: enable secure connections
+    node_id : Optional[int]
 
     Returns
     -------
     receive, send : Callable, Callable
     """
 
-    base_url = f"http://{server_address}"
+    base_url = f"http://{server_address}"  # TODO handle HTTPS
+
+    # Generate a random node_id that lives as long as the process lives
+    node_id: int = uuid.uuid1().int >> 64
+
+    # Necessary state to link TaskRes to TaskIns
+    current_task_ins: Optional[TaskIns] = None
 
     ###########################################################################
     # receive/send functions
@@ -69,69 +83,139 @@ def rest_not_a_connection(
         """Receive next task from server."""
 
         # Serialize ProtoBuf to bytes
-        get_tasks_req_msg = GetTasksRequest()
-        get_tasks_req_msg_bytes: bytes = get_tasks_req_msg.SerializeToString()
+        pull_task_ins_req_proto = PullTaskInsRequest(node_id=node_id)
+        pull_task_ins_req_bytes: bytes = pull_task_ins_req_proto.SerializeToString()
 
         # Request instructions (task) from server
         r = requests.post(
-            f"{base_url}/api/1.1/tasks",
+            f"{base_url}/{PATH_PULL_TASK_INS}",
             headers={
                 "Accept": "application/protobuf",
                 "Content-Type": "application/protobuf",
             },
-            data=get_tasks_req_msg_bytes,
+            data=pull_task_ins_req_bytes,
         )
-        print(f"[C-{client_id}] POST /api/1.1/tasks:", r.status_code, r.headers)
+        log(
+            INFO,
+            "[Node %s] POST /%s: %s %s",
+            node_id,
+            PATH_PULL_TASK_INS,
+            r.status_code,
+            r.headers,
+        )
         if r.status_code != 200:
             return None
 
         # Check headers
         if not "content-type" in r.headers:
-            print(f"[C-{client_id}] POST /api/1.1/tasks: missing header `Content-Type`")
+            log(
+                WARN,
+                "[Node %s] POST /%s: missing header `Content-Type`",
+                node_id,
+                PATH_PULL_TASK_INS,
+            )
             return None
         if r.headers["content-type"] != "application/protobuf":
-            print(
-                f"[C-{client_id}] POST /api/1.1/tasks: header `Content-Type` has wrong value"
+            log(
+                WARN,
+                "[Node %s] POST /%s: header `Content-Type` has wrong value",
+                node_id,
+                PATH_PULL_TASK_INS,
             )
             return None
 
         # Deserialize ProtoBuf from bytes
-        get_tasks_response_msg = GetTasksResponse()
-        get_tasks_response_msg.ParseFromString(r.content)
+        pull_task_ins_response_proto = PullTaskInsResponse()
+        pull_task_ins_response_proto.ParseFromString(r.content)
 
-        server_msg = ServerMessage()
-        server_msg.CopyFrom(
-            get_tasks_response_msg.tokenized_tasks.tokenized_tasks[
-                0
-            ].task.legacy_server_message
-        )
+        # Extract a single ServerMessage from the response, if possible
+        if len(pull_task_ins_response_proto.task_ins_set) == 0:
+            log(
+                INFO,
+                "[Node %s] POST /%s: No TaskIns received",
+                node_id,
+                PATH_PULL_TASK_INS,
+            )
+            return None
 
-        print(f"[C-{client_id}] POST /api/1.1/tasks: success")
+        task_ins: TaskIns = pull_task_ins_response_proto.task_ins_set[
+            0
+        ]  # TODO handle multiple
 
-        return server_msg
+        if task_ins.task.consumer.node_id != node_id:
+            log(
+                ERROR,
+                "[Node %s] POST /%s: Task consumer node_id (%s) is different from local node_id (%s)",
+                node_id,
+                PATH_PULL_TASK_INS,
+                task_ins.task.consumer.node_id,
+                node_id,
+            )
+            return None
 
-    def send(client_message: ClientMessage) -> None:
+        if task_ins.task.legacy_server_message == None:
+            log(
+                ERROR,
+                "[Node %s] POST /%s: legacy_server_message is None",
+                node_id,
+                PATH_PULL_TASK_INS,
+            )
+            return None
+
+        # Remember the current TaskIns
+        current_task_ins = task_ins
+        server_message_proto: ServerMessage = task_ins.task.legacy_server_message
+
+        # Return the ServerMessage
+        log(INFO, "[Node {node_id}] POST /%s: success", PATH_PULL_TASK_INS)
+        return server_message_proto
+
+    def send(client_message_proto: ClientMessage) -> None:
         """Send task result back to server."""
 
+        if current_task_ins is None:
+            log(ERROR, "No current TaskIns")
+            return
+
+        # Wrap ClientMessage in TaskRes
+        task_res = TaskRes(
+            task_id="",  # This will be generated by the server
+            task=Task(
+                producer=Node(node_id=node_id, anonymous=False),
+                legacy_client_message=client_message_proto,
+                ancestry=[current_task_ins.task_id],
+            ),
+        )
+
         # Serialize ProtoBuf to bytes
-        results_req_msg = CreateResultsRequest()
-        tokenized_result = TokenizedResult()
-
-        tokenized_result.result.legacy_client_message.CopyFrom(client_message)
-        results_req_msg.tokenized_results.append(tokenized_result)
-
-        results_req_msg_bytes: bytes = results_req_msg.SerializeToString()
+        push_task_res_request_proto = PushTaskResRequest(
+            node_id=node_id,
+            task_res_set=[task_res],
+        )
+        push_task_res_request_bytes: bytes = (
+            push_task_res_request_proto.SerializeToString()
+        )
 
         # Send ClientMessage to server
         r = requests.post(
-            f"{base_url}/api/1.1/results",
+            f"{base_url}/{PATH_PUSH_TASK_RES}",
             headers={
                 "Accept": "application/protobuf",
                 "Content-Type": "application/protobuf",
             },
-            data=results_req_msg_bytes,
+            data=push_task_res_request_bytes,
         )
-        print(f"[C-{client_id}] POST /api/1.1/results:", r.status_code, r.headers)
+        log(
+            INFO,
+            "[Node %s] POST /%s:",
+            PATH_PUSH_TASK_RES,
+            node_id,
+            r.status_code,
+            r.headers,
+        )
+
+        # TODO check status code and response
+        current_task_ins = None
 
     # yield methods
     try:
