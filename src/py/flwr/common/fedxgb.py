@@ -29,7 +29,6 @@ from flwr.common.typing import NDArray
 
 # type: ignore
 class TreeDataset(Dataset):
-    # type: ignore
     def __init__(self, data: NDArray, labels: NDArray) -> None:
         self.labels = labels
         self.data = data
@@ -133,7 +132,9 @@ def tree_encoding(
     X_train_enc = np.zeros((X_train.shape[0], client_num * client_tree_num))
     X_train_enc = np.array(X_train_enc, copy=True)
 
-    temp_trees: List[Union[XGBClassifier, XGBRegressor]]
+    temp_trees: Union[
+        XGBClassifier, XGBRegressor, List[Union[XGBClassifier, XGBRegressor]]
+    ]
     if type(client_trees) is not list:
         temp_trees = [client_trees] * client_num
     elif type(client_trees) is list and len(client_trees) != client_num:
@@ -147,8 +148,8 @@ def tree_encoding(
                 temp_trees[i], j, X_train
             )
 
-    X_train_enc32: Any = np.float32(X_train_enc)
-    y_train32: Any = np.float32(y_train)
+    X_train_enc32: NDArray = np.float32(X_train_enc)
+    y_train32: NDArray = np.float32(y_train)
 
     X_train_enc32, y_train32 = torch.from_numpy(
         np.expand_dims(X_train_enc32, axis=1)  # type: ignore
