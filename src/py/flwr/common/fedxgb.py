@@ -92,7 +92,7 @@ def single_tree_prediction(
     num_t = len(tree.get_booster().get_dump())
     if n_tree > num_t:
         print(
-            "The index of tree to be extracted is larger than the total number of trees."
+            "The tree index to be extracted is larger than the total number of trees."
         )
         return None
 
