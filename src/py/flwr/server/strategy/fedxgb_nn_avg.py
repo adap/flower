@@ -22,7 +22,7 @@ Paper:
 from logging import WARNING
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from xgboost import XGBClassifier, XGBRegressor  # pylint: disable=W0611
+#from xgboost import XGBClassifier, XGBRegressor  # pylint: disable=W0611
 
 from flwr.common import (
     EvaluateIns,
