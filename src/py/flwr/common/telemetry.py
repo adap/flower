@@ -16,17 +16,42 @@
 
 import datetime
 import json
+import logging
 import os
 import platform
 import urllib.request
 from concurrent.futures import Future, ThreadPoolExecutor
 from enum import Enum, auto
-from typing import Any, List
+from typing import Any, List, Union
+
+from flwr.common.version import version
 
 FLWR_TELEMETRY_ENABLED = os.getenv("FLWR_TELEMETRY_ENABLED", "1")
 FLWR_TELEMETRY_LOGGING = os.getenv("FLWR_TELEMETRY_LOGGING", "0")
 
 TELEMETRY_EVENTS_URL = "https://telemetry.flower.dev/api/v1/event"
+
+# Create logger
+LOGGER_NAME = "flwr-telemetry"
+FLOWER_LOGGER = logging.getLogger(LOGGER_NAME)
+FLOWER_LOGGER.setLevel(logging.DEBUG)
+
+DEFAULT_FORMATTER = logging.Formatter(
+    "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
+)
+
+# Configure console logger
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+console_handler.setFormatter(DEFAULT_FORMATTER)
+FLOWER_LOGGER.addHandler(console_handler)
+
+logger = logging.getLogger(LOGGER_NAME)  # pylint: disable=invalid-name
+
+
+def log(msg: Union[str, Exception]) -> None:
+    logger.log(logging.DEBUG, msg)
+
 
 # Using str as first base type to make it JSON serializable as
 # otherwise the following exception will be thrown when serializing
@@ -43,6 +68,9 @@ class EventType(str, Enum):
     # pylint: disable-next=no-self-argument,arguments-differ,line-too-long
     def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:  # type: ignore # noqa: E501
         return name
+
+    # Ping
+    PING = auto()
 
     # Client
     START_CLIENT_ENTER = auto()
@@ -63,12 +91,19 @@ class EventType(str, Enum):
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # as well as ensure that telemetry is unblocking.
-executor = ThreadPoolExecutor(max_workers=1)
+state = {
+    # Will be assigned ThreadPoolExecutor(max_workers=1)
+    # in event() the first time its required
+    "executor": None
+}
 
 
 def event(event_type: EventType) -> Future[str]:
     """Submit create_event to ThreadPoolExecutor to avoid blocking."""
-    return executor.submit(create_event, event_type)
+    if state["executor"] is None:
+        state["executor"] = ThreadPoolExecutor(max_workers=1)
+
+    return state["executor"].submit(create_event, event_type)
 
 
 def create_event(event_type: EventType) -> str:
@@ -78,6 +113,7 @@ def create_event(event_type: EventType) -> str:
         context = {
             "date": date,
             "cpu": os.cpu_count(),
+            "flwr": version(),
             "platform": {
                 "system": platform.system(),
                 "release": platform.release(),
@@ -98,9 +134,7 @@ def create_event(event_type: EventType) -> str:
 
         if FLWR_TELEMETRY_LOGGING == "1":
             msg = " - ".join([date, "POST", data_json])
-            # Use print so this is independent of the current
-            # log-level of the Flower logger
-            print(msg)
+            log(msg)
 
         # If telemetry is not disabled with setting FLWR_TELEMETRY_ENABLED=0
         # create a request and send it to the telemetry backend
@@ -125,8 +159,6 @@ def create_event(event_type: EventType) -> str:
         # Telemetry should not impact users so any exception
         # is just ignored if not setting FLWR_TELEMETRY_LOGGING=1
         if FLWR_TELEMETRY_LOGGING == "1":
-            # Use print so this is independent of the current
-            # log-level of the Flower logger
-            print(ex)
+            log(ex)
 
-    return ""
+    return "disabled"
