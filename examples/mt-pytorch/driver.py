@@ -46,12 +46,12 @@ for server_round in range(num_rounds):
         server_message=server_message
     )
     task_ins_set: List[task_pb2.TaskIns] = []
-    for samled_node_id in sampled_node_ids:
+    for sampled_node_id in sampled_node_ids:
         new_task_ins = task_pb2.TaskIns(
             task_id="",  # Will be created and set by the DriverAPI
             task=task_pb2.Task(
                 producer=node_pb2.Node(node_id=0, anonymous=True),
-                consumer=node_pb2.Node(node_id=samled_node_id, anonymous=False),
+                consumer=node_pb2.Node(node_id=sampled_node_id, anonymous=False),
                 legacy_server_message=server_message_proto,
             ),
         )
