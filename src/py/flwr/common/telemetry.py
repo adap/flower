@@ -81,8 +81,8 @@ class EventType(str, Enum):
     START_SERVER_LEAVE = auto()
 
     # New Server
-    RUN_SERVER = auto()
-    TERMINATE_SERVER = auto()
+    RUN_SERVER_ENTER = auto()
+    RUN_SERVER_LEAVE = auto()
 
     # Simulation
     START_SIMULATION = auto()
