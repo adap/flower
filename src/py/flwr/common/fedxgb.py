@@ -98,7 +98,7 @@ def single_tree_prediction(
     )
 
 
-# type: ignore
+# flake8: noqa
 def tree_encoding(
     trainloader: DataLoader,
     batch_size: int,
