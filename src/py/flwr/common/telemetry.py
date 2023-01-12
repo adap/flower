@@ -94,7 +94,7 @@ class EventType(str, Enum):
 # and also ensure that telemetry calls are not blocking.
 state: Dict[str, Optional[ThreadPoolExecutor]] = {
     # Will be assigned ThreadPoolExecutor(max_workers=1)
-    # in event() the first time its required
+    # in event() the first time it's required
     "executor": None
 }
 
