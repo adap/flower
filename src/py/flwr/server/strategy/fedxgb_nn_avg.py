@@ -22,7 +22,7 @@ Paper:
 from logging import WARNING
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from xgboost import XGBClassifier, XGBRegressor  # type: ignore
+from xgboost import XGBClassifier, XGBRegressor  # noqa
 
 from flwr.common import (
     EvaluateIns,
