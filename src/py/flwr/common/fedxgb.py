@@ -17,10 +17,10 @@
 from typing import Any, List, Optional, Tuple, Union
 
 import numpy as np
-import torch
+import torch  # flake8: noqa: E0401
 import xgboost as xgb
 from matplotlib import pyplot as plt
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset  # flake8: noqa: E0401
 from xgboost import XGBClassifier, XGBRegressor
 
 from flwr.common.typing import NDArray
@@ -121,7 +121,7 @@ def tree_encoding(
     x_train_enc = np.array(x_train_enc, copy=True)
 
     temp_trees: Any = None
-    if isinstance(client_trees, list) == False:
+    if isinstance(client_trees, list) is False:
         temp_trees = [client_trees] * client_num
     elif isinstance(client_trees, list) and len(client_trees) != client_num:
         temp_trees = [client_trees[0]] * client_num
