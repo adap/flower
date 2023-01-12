@@ -14,8 +14,7 @@
 # ==============================================================================
 """Federated XGBoost utility functions."""
 
-import typing
-from typing import Any, Dict, List, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -83,7 +82,7 @@ def construct_tree_from_loader(
 
 def single_tree_prediction(
     tree: Union[XGBClassifier, XGBRegressor], n_tree: int, dataset: NDArray
-) -> Union[None, NDArray]:
+) -> Optional[NDArray]:
     # How to access a single tree
     # https://github.com/bmreiniger/datascience.stackexchange/blob/master/57905.ipynb
     num_t = len(tree.get_booster().get_dump())
@@ -98,30 +97,14 @@ def single_tree_prediction(
     )
 
 
-# noqa
 def tree_encoding(
     trainloader: DataLoader,
-    batch_size: int,
     client_trees: Union[
         XGBClassifier, XGBRegressor, List[Union[XGBClassifier, XGBRegressor]]
     ],
     client_tree_num: int,
     client_num: int,
-) -> DataLoader:
-    class TreeDataset(Dataset):
-        def __init__(self, data: NDArray, labels: NDArray) -> None:
-            self.labels = labels
-            self.data = data
-
-        def __len__(self) -> int:
-            return len(self.labels)
-
-        def __getitem__(self, idx: int) -> Dict[int, NDArray]:
-            label = self.labels[idx]
-            data = self.data[idx, :]
-            sample = {0: data, 1: label}
-            return sample
-
+) -> Tuple[NDArray, NDArray]:
     if trainloader is None:
         return None
 
@@ -153,9 +136,4 @@ def tree_encoding(
     ), torch.from_numpy(
         np.expand_dims(y_train32, axis=-1)  # type: ignore
     )
-    trainset = TreeDataset(X_train_enc32, y_train32)
-    trainset = DataLoader(
-        trainset, batch_size=batch_size, pin_memory=True, shuffle=False
-    )
-
-    return trainset
+    return X_train_enc32, y_train32
