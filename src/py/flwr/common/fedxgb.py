@@ -104,7 +104,7 @@ def tree_encoding(
     ],
     client_tree_num: int,
     client_num: int,
-) -> Tuple[NDArray, NDArray]:
+) -> Optional[Tuple[NDArray, NDArray]]:
     if trainloader is None:
         return None
 
