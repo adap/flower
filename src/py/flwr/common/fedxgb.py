@@ -15,7 +15,7 @@
 """Federated XGBoost utility functions."""
 
 import typing
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, no_type_check
 
 import numpy as np
 import torch
@@ -27,6 +27,7 @@ from xgboost import XGBClassifier, XGBRegressor
 from flwr.common.typing import NDArray
 
 
+@no_type_check
 class TreeDataset(Dataset):  # flake8: noqa
     def __init__(self, data: NDArray, labels: NDArray) -> None:
         self.labels = labels
