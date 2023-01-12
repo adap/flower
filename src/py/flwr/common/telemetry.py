@@ -22,7 +22,7 @@ import platform
 import urllib.request
 from concurrent.futures import Future, ThreadPoolExecutor
 from enum import Enum, auto
-from typing import Any, List, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 from flwr.common.version import version
 
@@ -50,6 +50,7 @@ logger = logging.getLogger(LOGGER_NAME)  # pylint: disable=invalid-name
 
 
 def log(msg: Union[str, Exception]) -> None:
+    """Log message using logger at DEBUG level."""
     logger.log(logging.DEBUG, msg)
 
 
@@ -91,7 +92,7 @@ class EventType(str, Enum):
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.
-state = {
+state: Dict[str, Optional[ThreadPoolExecutor]] = {
     # Will be assigned ThreadPoolExecutor(max_workers=1)
     # in event() the first time its required
     "executor": None
@@ -103,13 +104,16 @@ def event(event_type: EventType) -> Future[str]:
     if state["executor"] is None:
         state["executor"] = ThreadPoolExecutor(max_workers=1)
 
-    return state["executor"].submit(create_event, event_type)
+    executor: ThreadPoolExecutor = cast(ThreadPoolExecutor, state["executor"])
+
+    result = executor.submit(create_event, event_type)
+    return result
 
 
 def create_event(event_type: EventType) -> str:
     """Create telemetry event."""
     try:
-        date = datetime.datetime.now(tz=timezone.utc).isoformat()
+        date = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
         context = {
             "date": date,
             "cpu": os.cpu_count(),

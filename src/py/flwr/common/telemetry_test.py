@@ -16,7 +16,6 @@
 
 import time
 import unittest
-from io import StringIO
 from unittest import mock
 
 from flwr.common.telemetry import EventType, event
