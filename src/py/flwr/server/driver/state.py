@@ -48,13 +48,12 @@ class DriverState:
         # Return the new task_id
         return task_id
 
-    def get_task_ins(self, node_id: Optional[int], limit: int) -> List[TaskIns]:
+    def get_task_ins(self, node_id: int, limit: int) -> List[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
 
         # Find TaskIns for node_id that were not delivered yet
         task_ins_set: List[TaskIns] = []
         for _, task_ins in self.task_ins_store.items():
-            # TODO handle optional int
             if (
                 task_ins.task.consumer.node_id == node_id
                 and task_ins.task.delivered_at == ""
@@ -90,9 +89,7 @@ class DriverState:
         # Return the new task_id
         return task_id
 
-    def get_task_res(
-        self, node_id: Optional[int], task_ids: Set[UUID], limit: int
-    ) -> List[TaskRes]:
+    def get_task_res(self, task_ids: Set[UUID], limit: int) -> List[TaskRes]:
         """Get all TaskRes that have not been delivered yet."""
 
         # Find TaskRes that were not delivered yet
