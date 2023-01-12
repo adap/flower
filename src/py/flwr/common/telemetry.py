@@ -85,8 +85,8 @@ class EventType(str, Enum):
     RUN_SERVER_LEAVE = auto()
 
     # Simulation
-    START_SIMULATION = auto()
-    FINISH_SIMULATION = auto()
+    START_SIMULATION_ENTER = auto()
+    START_SIMULATION_LEAVE = auto()
 
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
