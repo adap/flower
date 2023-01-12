@@ -14,7 +14,7 @@
 # ==============================================================================
 """Flower main package."""
 
-from flwr.common.version import version
+from flwr.common.version import package_version as _package_version
 
 from . import client, server, simulation
 
@@ -24,4 +24,4 @@ __all__ = [
     "simulation",
 ]
 
-__version__ = version()
+__version__ = _package_version

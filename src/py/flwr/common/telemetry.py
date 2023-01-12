@@ -24,7 +24,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from enum import Enum, auto
 from typing import Any, Dict, List, Optional, Union, cast
 
-from flwr.common.version import version
+from flwr.common.version import package_name, package_version
 
 FLWR_TELEMETRY_ENABLED = os.getenv("FLWR_TELEMETRY_ENABLED", "1")
 FLWR_TELEMETRY_LOGGING = os.getenv("FLWR_TELEMETRY_LOGGING", "0")
@@ -116,57 +116,58 @@ def event(event_type: EventType) -> Future:  # type: ignore
 
 def create_event(event_type: EventType) -> str:
     """Create telemetry event."""
-    try:
-        date = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
-        context = {
-            "date": date,
+    date = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
+    context = {
+        "date": date,
+        "flower": {
+            "package_name": package_name,
+            "package_version": package_version,
+        },
+        "hw": {
             "cpu": os.cpu_count(),
-            "flwr": version(),
-            "platform": {
-                "system": platform.system(),
-                "release": platform.release(),
-                "platform": platform.platform(),
-                "python_implementation": platform.python_implementation(),
-                "python_version": platform.python_version(),
-                "machine": platform.machine(),
-                "architecture": platform.architecture(),
+        },
+        "platform": {
+            "system": platform.system(),
+            "release": platform.release(),
+            "platform": platform.platform(),
+            "python_implementation": platform.python_implementation(),
+            "python_version": platform.python_version(),
+            "machine": platform.machine(),
+            "architecture": platform.architecture(),
+            "version": platform.uname().version,
+        },
+    }
+    payload = {
+        "event_type": event_type,
+        "context": context,
+    }
+    payload_json = json.dumps(payload)
+    if FLWR_TELEMETRY_LOGGING == "1":
+        log(" - ".join([date, "POST", payload_json]))
+
+    # If telemetry is not disabled with setting FLWR_TELEMETRY_ENABLED=0
+    # create a request and send it to the telemetry backend
+    if FLWR_TELEMETRY_ENABLED == "1":
+        request = urllib.request.Request(
+            url=TELEMETRY_EVENTS_URL,
+            data=payload_json.encode("utf-8"),
+            headers={
+                "User-Agent": f"{package_name}/{package_version}",
+                "Content-Type": "application/json",
             },
-        }
-
-        data = {
-            "event_type": event_type,
-            "context": context,
-        }
-
-        data_json = json.dumps(data)
-
-        if FLWR_TELEMETRY_LOGGING == "1":
-            msg = " - ".join([date, "POST", data_json])
-            log(msg)
-
-        # If telemetry is not disabled with setting FLWR_TELEMETRY_ENABLED=0
-        # create a request and send it to the telemetry backend
-        if FLWR_TELEMETRY_ENABLED == "1":
-            request = urllib.request.Request(
-                url=TELEMETRY_EVENTS_URL,
-                data=data_json.encode("utf-8"),
-                headers={
-                    "User-Agent": f"flwr/{version()}",
-                    "Content-Type": "application/json",
-                },
-                method="POST",
-            )
-
+            method="POST",
+        )
+        try:
             with urllib.request.urlopen(request, timeout=60) as response:
                 result = response.read()
 
             response_json = str(json.loads(result.decode("utf-8")))
 
             return response_json
-    except Exception as ex:  # pylint: disable=broad-except
-        # Telemetry should not impact users so any exception
-        # is just ignored if not setting FLWR_TELEMETRY_LOGGING=1
-        if FLWR_TELEMETRY_LOGGING == "1":
-            log(ex)
+        except Exception as ex:  # pylint: disable=broad-except
+            # Telemetry should not impact users so any exception
+            # is just ignored if not setting FLWR_TELEMETRY_LOGGING=1
+            if FLWR_TELEMETRY_LOGGING == "1":
+                log(ex)
 
     return "disabled"
