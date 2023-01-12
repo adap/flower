@@ -151,7 +151,7 @@ def create_event(event_type: EventType) -> str:
                 url=TELEMETRY_EVENTS_URL,
                 data=data_json.encode("utf-8"),
                 headers={
-                    "User-Agent": "flwr/123",
+                    "User-Agent": f"flwr/{version()}",
                     "Content-Type": "application/json",
                 },
                 method="POST",
