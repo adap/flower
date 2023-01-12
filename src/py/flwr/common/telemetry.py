@@ -90,7 +90,7 @@ class EventType(str, Enum):
 
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
-# as well as ensure that telemetry is unblocking.
+# and also ensure that telemetry calls are not blocking.
 state = {
     # Will be assigned ThreadPoolExecutor(max_workers=1)
     # in event() the first time its required
