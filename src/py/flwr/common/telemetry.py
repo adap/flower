@@ -103,7 +103,7 @@ state: Dict[str, Optional[ThreadPoolExecutor]] = {
 # This pylint disable line can be remove when dropping support
 # for Python 3.7
 # pylint: disable-next=unsubscriptable-object
-def event(event_type: EventType) -> Future[str]:
+def event(event_type: EventType) -> Future:  # type: ignore
     """Submit create_event to ThreadPoolExecutor to avoid blocking."""
     if state["executor"] is None:
         state["executor"] = ThreadPoolExecutor(max_workers=1)
