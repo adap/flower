@@ -77,8 +77,8 @@ class EventType(str, Enum):
     START_CLIENT_LEAVE = auto()
 
     # Server
-    START_SERVER = auto()
-    STOP_SERVER = auto()
+    START_SERVER_ENTER = auto()
+    START_SERVER_LEAVE = auto()
 
     # New Server
     RUN_SERVER = auto()
