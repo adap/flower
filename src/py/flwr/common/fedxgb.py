@@ -98,7 +98,7 @@ def single_tree_prediction(
     )
 
 
-@typing.no_type_check
+# type: ignore
 def tree_encoding(
     trainloader: DataLoader,
     batch_size: int,
