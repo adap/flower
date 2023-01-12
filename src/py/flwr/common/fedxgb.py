@@ -17,10 +17,10 @@
 from typing import Any, List, Optional, Tuple, Union
 
 import numpy as np
-import torch  # flake8: noqa: E0401
+import torch  # pylint: disable=E0401
 import xgboost as xgb
 from matplotlib import pyplot as plt
-from torch.utils.data import DataLoader, Dataset  # flake8: noqa: E0401
+from torch.utils.data import DataLoader, Dataset  # pylint: disable=E0401
 from xgboost import XGBClassifier, XGBRegressor
 
 from flwr.common.typing import NDArray

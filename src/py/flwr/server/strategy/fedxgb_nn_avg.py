@@ -22,6 +22,8 @@ Paper:
 from logging import WARNING
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+from xgboost import XGBClassifier, XGBRegressor  # pylint: disable=W0611
+
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -40,9 +42,6 @@ from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
-
-# from xgboost import XGBClassifier, XGBRegressor
-
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
