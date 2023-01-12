@@ -15,7 +15,7 @@
 """Federated XGBoost utility functions."""
 
 import typing
-from typing import Any, Dict, List, Union, no_type_check
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import torch
@@ -25,22 +25,6 @@ from torch.utils.data import DataLoader, Dataset
 from xgboost import XGBClassifier, XGBRegressor
 
 from flwr.common.typing import NDArray
-
-
-@no_type_check
-class TreeDataset(Dataset):  # flake8: noqa
-    def __init__(self, data: NDArray, labels: NDArray) -> None:
-        self.labels = labels
-        self.data = data
-
-    def __len__(self) -> int:
-        return len(self.labels)
-
-    def __getitem__(self, idx: int) -> Dict[int, NDArray]:
-        label = self.labels[idx]
-        data = self.data[idx, :]
-        sample = {0: data, 1: label}
-        return sample
 
 
 def plot_xgbtree(tree: Union[XGBClassifier, XGBRegressor], n_tree: int) -> None:
@@ -114,6 +98,7 @@ def single_tree_prediction(
     )
 
 
+@typing.no_type_check
 def tree_encoding(
     trainloader: DataLoader,
     batch_size: int,
@@ -123,6 +108,20 @@ def tree_encoding(
     client_tree_num: int,
     client_num: int,
 ) -> DataLoader:
+    class TreeDataset(Dataset):
+        def __init__(self, data: NDArray, labels: NDArray) -> None:
+            self.labels = labels
+            self.data = data
+
+        def __len__(self) -> int:
+            return len(self.labels)
+
+        def __getitem__(self, idx: int) -> Dict[int, NDArray]:
+            label = self.labels[idx]
+            data = self.data[idx, :]
+            sample = {0: data, 1: label}
+            return sample
+
     if trainloader is None:
         return None
 
