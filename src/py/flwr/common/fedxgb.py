@@ -27,15 +27,16 @@ from flwr.common.typing import NDArray
 
 
 def plot_xgbtree(tree: Union[XGBClassifier, XGBRegressor], n_tree: int) -> None:
+    """Visualize the built xgboost tree."""
     xgb.plot_tree(tree, num_trees=n_tree)  # type: ignore
     plt.rcParams["figure.figsize"] = [50, 10]
     plt.show()
-    return
 
 
 def construct_tree(
     dataset: Dataset, label: NDArray, n_estimators: int, tree_type: str
 ) -> Union[XGBClassifier, XGBRegressor]:
+    """Construct a xgboost tree form tabular dataset."""
     if tree_type == "BINARY":
         tree = xgb.XGBClassifier(
             objective="binary:logistic",
@@ -75,6 +76,7 @@ def construct_tree(
 def construct_tree_from_loader(
     dataset_loader: DataLoader, n_estimators: int, tree_type: str
 ) -> Union[XGBClassifier, XGBRegressor]:
+    """Construct a xgboost tree form tabular dataset loader."""
     for dataset in dataset_loader:
         data, label = dataset[0], dataset[1]
     return construct_tree(data, label, n_estimators, tree_type)
@@ -83,6 +85,8 @@ def construct_tree_from_loader(
 def single_tree_prediction(
     tree: Union[XGBClassifier, XGBRegressor], n_tree: int, dataset: NDArray
 ) -> Optional[NDArray]:
+    """Extract the prediction result of a single tree in the xgboost tree
+    ensemble."""
     # How to access a single tree
     # https://github.com/bmreiniger/datascience.stackexchange/blob/master/57905.ipynb
     num_t = len(tree.get_booster().get_dump())
@@ -105,35 +109,37 @@ def tree_encoding(
     client_tree_num: int,
     client_num: int,
 ) -> Optional[Tuple[NDArray, NDArray]]:
+    """Transform the tabular dataset into prediction results using the
+    aggregated xgboost tree ensembles from all clients."""
     if trainloader is None:
         return None
 
     for local_dataset in trainloader:
-        X_train, y_train = local_dataset[0], local_dataset[1]
+        x_train, y_train = local_dataset[0], local_dataset[1]
 
-    X_train_enc = np.zeros((X_train.shape[0], client_num * client_tree_num))
-    X_train_enc = np.array(X_train_enc, copy=True)
+    x_train_enc = np.zeros((x_train.shape[0], client_num * client_tree_num))
+    x_train_enc = np.array(x_train_enc, copy=True)
 
     temp_trees: Any = None
-    if type(client_trees) is not list:
+    if isinstance(client_trees, list) == False:
         temp_trees = [client_trees] * client_num
-    elif type(client_trees) is list and len(client_trees) != client_num:
+    elif isinstance(client_trees, list) and len(client_trees) != client_num:
         temp_trees = [client_trees[0]] * client_num
     else:
         temp_trees = client_trees
 
-    for i in range(len(temp_trees)):
+    for i, _ in enumerate(temp_trees):
         for j in range(client_tree_num):
-            X_train_enc[:, i * client_tree_num + j] = single_tree_prediction(
-                temp_trees[i], j, X_train
+            x_train_enc[:, i * client_tree_num + j] = single_tree_prediction(
+                temp_trees[i], j, x_train
             )
 
-    X_train_enc32: Any = np.float32(X_train_enc)
+    x_train_enc32: Any = np.float32(x_train_enc)
     y_train32: Any = np.float32(y_train)
 
-    X_train_enc32, y_train32 = torch.from_numpy(
-        np.expand_dims(X_train_enc32, axis=1)  # type: ignore
+    x_train_enc32, y_train32 = torch.from_numpy(
+        np.expand_dims(x_train_enc32, axis=1)  # type: ignore
     ), torch.from_numpy(
         np.expand_dims(y_train32, axis=-1)  # type: ignore
     )
-    return X_train_enc32, y_train32
+    return x_train_enc32, y_train32
