@@ -31,7 +31,7 @@ def test_get_task_ins_empty() -> None:
 
     # Execute
     task_ins_set = state.get_task_ins(
-        node_id=None,
+        node_id=1,
         limit=10,
     )
 
@@ -47,7 +47,6 @@ def test_get_task_res_empty() -> None:
 
     # Execute
     task_ins_set = state.get_task_res(
-        node_id=123,
         task_ids={uuid4()},
         limit=10,
     )
@@ -62,16 +61,16 @@ def test_store_task_ins_one() -> None:
     # Prepare
     node_id = 1
     state = DriverState()
-    task_ins = TaskIns(
+    task_ins: TaskIns = TaskIns(
         task_id=str(uuid4()),
         task=Task(
             consumer=Node(node_id=node_id, anonymous=False),
         ),
     )
 
-    assert task_ins.task.created_at == ""
-    assert task_ins.task.delivered_at == ""
-    assert task_ins.task.ttl == ""
+    assert task_ins.task.created_at == ""  # pylint: disable=no-member
+    assert task_ins.task.delivered_at == ""  # pylint: disable=no-member
+    assert task_ins.task.ttl == ""  # pylint: disable=no-member
 
     # Execute
     state.store_task_ins(task_ins=task_ins)
@@ -82,7 +81,7 @@ def test_store_task_ins_one() -> None:
 
     actual_task_ins = task_ins_set[0]
 
-    assert actual_task_ins.task_id == task_ins.task_id
+    assert actual_task_ins.task_id == task_ins.task_id  # pylint: disable=no-member
     assert actual_task_ins.task is not None
 
     actual_task = actual_task_ins.task
