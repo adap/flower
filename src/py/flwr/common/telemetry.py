@@ -109,7 +109,7 @@ def event(event_type: EventType) -> Future[str]:
 def create_event(event_type: EventType) -> str:
     """Create telemetry event."""
     try:
-        date = datetime.datetime.now().isoformat()
+        date = datetime.datetime.now(tz=timezone.utc).isoformat()
         context = {
             "date": date,
             "cpu": os.cpu_count(),
