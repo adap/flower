@@ -66,23 +66,3 @@ class TelemetryTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(actual, expected)
-
-    # @mock.patch("flwr.common.telemetry.FLWR_TELEMETRY_ENABLED", "0")
-    # @mock.patch("flwr.common.telemetry.FLWR_TELEMETRY_LOGGING", "1")
-    # @mock.patch("sys.stdout", new_callable=StringIO)
-    # def test_logging(self, stdout: StringIO) -> None:
-    #     """Test if logging works.
-
-    #     NOTE: Sending is disabled as we don't need it to test.
-    #     """
-    #     # Prepare
-    #     expected_return = "disabled"
-    #     expected_stdout = "POST"  # Just checking for a substring
-
-    #     # Execute
-    #     future = event(event_type=EventType.PING)
-    #     actual_return = future.result()
-
-    #     # Assert
-    #     self.assertEqual(actual_return, expected_return)
-    #     self.assertIn(expected_stdout, stdout.getvalue())

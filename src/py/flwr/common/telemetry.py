@@ -98,7 +98,11 @@ state: Dict[str, Optional[ThreadPoolExecutor]] = {
     "executor": None
 }
 
-
+# In Python 3.7 pylint will throw an error stating that
+# "Value 'Future' is unsubscriptable".
+# This pylint disable line can be remove when dropping support
+# for Python 3.7
+# pylint: disable-next=unsubscriptable-object
 def event(event_type: EventType) -> Future[str]:
     """Submit create_event to ThreadPoolExecutor to avoid blocking."""
     if state["executor"] is None:
