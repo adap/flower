@@ -213,7 +213,7 @@ def run_server() -> None:
 
     driver_state = DriverState()
     driver_client_manager = DriverClientManager(
-        # driver_state=driver_state,
+        driver_state=driver_state,
     )
 
     # Create Driver API gRPC server
