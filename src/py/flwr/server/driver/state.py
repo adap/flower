@@ -48,7 +48,7 @@ class DriverState:
         # Return the new task_id
         return task_id
 
-    def get_task_ins(self, node_id: int, limit: int) -> List[TaskIns]:
+    def get_task_ins(self, node_id: int, limit: Optional[int]) -> List[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
 
         # Find TaskIns for node_id that were not delivered yet
@@ -59,7 +59,7 @@ class DriverState:
                 and task_ins.task.delivered_at == ""
             ):
                 task_ins_set.append(task_ins)
-            if len(task_ins_set) == limit:
+            if limit is not None and len(task_ins_set) == limit:
                 break
 
         # Mark all of them as delivered
@@ -89,7 +89,7 @@ class DriverState:
         # Return the new task_id
         return task_id
 
-    def get_task_res(self, task_ids: Set[UUID], limit: int) -> List[TaskRes]:
+    def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
         """Get all TaskRes that have not been delivered yet."""
 
         # Find TaskRes that were not delivered yet
@@ -100,7 +100,7 @@ class DriverState:
                 and task_res.task.delivered_at == ""
             ):
                 task_res_set.append(task_res)
-            if len(task_res_set) == limit:
+            if limit is not None and len(task_res_set) == limit:
                 break
 
         # Mark all of them as delivered
