@@ -62,6 +62,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         log(INFO, "DriverServicer.PushTaskIns")
 
         # Validate request
+        _raise_if(len(request.task_ins_set), "`task_ins_set` must not be empty")
         for task_ins in request.task_ins_set:
             _validate_incoming_task_ins(task_ins=task_ins)
 
@@ -73,7 +74,9 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
             )
             task_ids.append(task_id)
 
-        return PushTaskInsResponse(task_ids=[str(task_id) for task_id in task_ids])
+        return PushTaskInsResponse(
+            task_ids=[str(task_id) if task_id else "" for task_id in task_ids]
+        )
 
     def PullTaskRes(
         self, request: PullTaskResRequest, context: grpc.ServicerContext

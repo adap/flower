@@ -17,8 +17,8 @@
 
 import threading
 import time
-from logging import DEBUG
-from typing import Dict, List, Optional, Set
+from logging import DEBUG, ERROR
+from typing import Dict, List, Optional
 
 from flwr.common import EvaluateRes, FitRes, GetParametersRes, GetPropertiesRes, serde
 from flwr.common.logger import log
@@ -52,6 +52,9 @@ class InsScheduler:
 
     def stop(self) -> None:
         """Stop the worker thread."""
+        if self.worker_thread is None:
+            log(ERROR, "InsScheduler.stop called, but worker_thread is None")
+            return
         self.shared_memory_state["stop"] = True
         self.worker_thread.join()
         self.worker_thread = None
@@ -116,11 +119,16 @@ def _call_client_proxy(
 ) -> ClientMessage:
     """."""
 
+    # pylint: disable=too-many-locals
+
     field = server_message.WhichOneof("msg")
 
     if field == "get_properties_ins":
+        get_properties_ins = serde.get_properties_ins_from_proto(
+            msg=server_message.get_properties_ins
+        )
         get_properties_res: GetPropertiesRes = client_proxy.get_properties(
-            ins=server_message.get_properties_ins,
+            ins=get_properties_ins,
             timeout=timeout,
         )
         get_properties_res_proto = serde.get_properties_res_to_proto(
@@ -129,8 +137,11 @@ def _call_client_proxy(
         return ClientMessage(get_properties_res=get_properties_res_proto)
 
     if field == "get_parameters_ins":
+        get_parameters_ins = serde.get_parameters_ins_from_proto(
+            msg=server_message.get_parameters_ins
+        )
         get_parameters_res: GetParametersRes = client_proxy.get_parameters(
-            ins=server_message.get_parameters_ins,
+            ins=get_parameters_ins,
             timeout=timeout,
         )
         get_parameters_res_proto = serde.get_parameters_res_to_proto(
@@ -139,16 +150,18 @@ def _call_client_proxy(
         return ClientMessage(get_parameters_res=get_parameters_res_proto)
 
     if field == "fit_ins":
+        fit_ins = serde.fit_ins_from_proto(msg=server_message.fit_ins)
         fit_res: FitRes = client_proxy.fit(
-            ins=server_message.fit_ins,
+            ins=fit_ins,
             timeout=timeout,
         )
         fit_res_proto = serde.fit_res_to_proto(res=fit_res)
         return ClientMessage(fit_res=fit_res_proto)
 
     if field == "evaluate_ins":
+        evaluate_ins = serde.evaluate_ins_from_proto(msg=server_message.evaluate_ins)
         evaluate_res: EvaluateRes = client_proxy.evaluate(
-            ins=server_message.evaluate_ins,
+            ins=evaluate_ins,
             timeout=timeout,
         )
         evaluate_res_proto = serde.evaluate_res_to_proto(res=evaluate_res)
