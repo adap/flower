@@ -92,6 +92,10 @@ class EventType(str, Enum):
     START_SIMULATION_ENTER = auto()
     START_SIMULATION_LEAVE = auto()
 
+    # Driver Client
+    DRIVER_CONNECT = auto()
+    DRIVER_DISCONNECT = auto()
+
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.
