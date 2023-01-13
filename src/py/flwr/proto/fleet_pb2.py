@@ -20,21 +20,35 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x16\x66lwr/proto/fleet.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/task.proto\"\x11\n\x0fGetTasksRequest\"2\n\x10GetTasksResponse\x12\x1e\n\x04task\x18\x01 \x03(\x0b\x32\x10.flwr.proto.Task\";\n\x14\x43reateResultsRequest\x12#\n\x07results\x18\x01 \x03(\x0b\x32\x12.flwr.proto.Result\"\x17\n\x15\x43reateResultsResponse2\xa8\x01\n\x05\x46leet\x12G\n\x08GetTasks\x12\x1b.flwr.proto.GetTasksRequest\x1a\x1c.flwr.proto.GetTasksResponse\"\x00\x12V\n\rCreateResults\x12 .flwr.proto.CreateResultsRequest\x1a!.flwr.proto.CreateResultsResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x16\x66lwr/proto/fleet.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/task.proto\"7\n\x12PullTaskInsRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\x04\x12\x10\n\x08task_ids\x18\x02 \x03(\t\"j\n\x13PullTaskInsResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12)\n\x0ctask_ins_set\x18\x02 \x03(\x0b\x32\x13.flwr.proto.TaskIns\"?\n\x12PushTaskResRequest\x12)\n\x0ctask_res_set\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskRes\"\xae\x01\n\x13PushTaskResResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12=\n\x07results\x18\x02 \x03(\x0b\x32,.flwr.proto.PushTaskResResponse.ResultsEntry\x1a.\n\x0cResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\"\x1e\n\tReconnect\x12\x11\n\treconnect\x18\x01 \x01(\x04\x32\xab\x01\n\x05\x46leet\x12P\n\x0bPullTaskIns\x12\x1e.flwr.proto.PullTaskInsRequest\x1a\x1f.flwr.proto.PullTaskInsResponse\"\x00\x12P\n\x0bPushTaskRes\x12\x1e.flwr.proto.PushTaskResRequest\x1a\x1f.flwr.proto.PushTaskResResponse\"\x00\x62\x06proto3'
   ,
   dependencies=[flwr_dot_proto_dot_task__pb2.DESCRIPTOR,])
 
 
 
 
-_GETTASKSREQUEST = _descriptor.Descriptor(
-  name='GetTasksRequest',
-  full_name='flwr.proto.GetTasksRequest',
+_PULLTASKINSREQUEST = _descriptor.Descriptor(
+  name='PullTaskInsRequest',
+  full_name='flwr.proto.PullTaskInsRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
+    _descriptor.FieldDescriptor(
+      name='node_id', full_name='flwr.proto.PullTaskInsRequest.node_id', index=0,
+      number=1, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='task_ids', full_name='flwr.proto.PullTaskInsRequest.task_ids', index=1,
+      number=2, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -48,20 +62,59 @@ _GETTASKSREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=61,
-  serialized_end=78,
+  serialized_end=116,
 )
 
 
-_GETTASKSRESPONSE = _descriptor.Descriptor(
-  name='GetTasksResponse',
-  full_name='flwr.proto.GetTasksResponse',
+_PULLTASKINSRESPONSE = _descriptor.Descriptor(
+  name='PullTaskInsResponse',
+  full_name='flwr.proto.PullTaskInsResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='task', full_name='flwr.proto.GetTasksResponse.task', index=0,
+      name='reconnect', full_name='flwr.proto.PullTaskInsResponse.reconnect', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='task_ins_set', full_name='flwr.proto.PullTaskInsResponse.task_ins_set', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=118,
+  serialized_end=224,
+)
+
+
+_PUSHTASKRESREQUEST = _descriptor.Descriptor(
+  name='PushTaskResRequest',
+  full_name='flwr.proto.PushTaskResRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='task_res_set', full_name='flwr.proto.PushTaskResRequest.task_res_set', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -79,23 +132,100 @@ _GETTASKSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=80,
-  serialized_end=130,
+  serialized_start=226,
+  serialized_end=289,
 )
 
 
-_CREATERESULTSREQUEST = _descriptor.Descriptor(
-  name='CreateResultsRequest',
-  full_name='flwr.proto.CreateResultsRequest',
+_PUSHTASKRESRESPONSE_RESULTSENTRY = _descriptor.Descriptor(
+  name='ResultsEntry',
+  full_name='flwr.proto.PushTaskResResponse.ResultsEntry',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='results', full_name='flwr.proto.CreateResultsRequest.results', index=0,
-      number=1, type=11, cpp_type=10, label=3,
+      name='key', full_name='flwr.proto.PushTaskResResponse.ResultsEntry.key', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='flwr.proto.PushTaskResResponse.ResultsEntry.value', index=1,
+      number=2, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=b'8\001',
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=420,
+  serialized_end=466,
+)
+
+_PUSHTASKRESRESPONSE = _descriptor.Descriptor(
+  name='PushTaskResResponse',
+  full_name='flwr.proto.PushTaskResResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='reconnect', full_name='flwr.proto.PushTaskResResponse.reconnect', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='results', full_name='flwr.proto.PushTaskResResponse.results', index=1,
+      number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[_PUSHTASKRESRESPONSE_RESULTSENTRY, ],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=292,
+  serialized_end=466,
+)
+
+
+_RECONNECT = _descriptor.Descriptor(
+  name='Reconnect',
+  full_name='flwr.proto.Reconnect',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='reconnect', full_name='flwr.proto.Reconnect.reconnect', index=0,
+      number=1, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -111,72 +241,68 @@ _CREATERESULTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=132,
-  serialized_end=191,
+  serialized_start=468,
+  serialized_end=498,
 )
 
-
-_CREATERESULTSRESPONSE = _descriptor.Descriptor(
-  name='CreateResultsResponse',
-  full_name='flwr.proto.CreateResultsResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=193,
-  serialized_end=216,
-)
-
-_GETTASKSRESPONSE.fields_by_name['task'].message_type = flwr_dot_proto_dot_task__pb2._TASK
-_CREATERESULTSREQUEST.fields_by_name['results'].message_type = flwr_dot_proto_dot_task__pb2._RESULT
-DESCRIPTOR.message_types_by_name['GetTasksRequest'] = _GETTASKSREQUEST
-DESCRIPTOR.message_types_by_name['GetTasksResponse'] = _GETTASKSRESPONSE
-DESCRIPTOR.message_types_by_name['CreateResultsRequest'] = _CREATERESULTSREQUEST
-DESCRIPTOR.message_types_by_name['CreateResultsResponse'] = _CREATERESULTSRESPONSE
+_PULLTASKINSRESPONSE.fields_by_name['reconnect'].message_type = _RECONNECT
+_PULLTASKINSRESPONSE.fields_by_name['task_ins_set'].message_type = flwr_dot_proto_dot_task__pb2._TASKINS
+_PUSHTASKRESREQUEST.fields_by_name['task_res_set'].message_type = flwr_dot_proto_dot_task__pb2._TASKRES
+_PUSHTASKRESRESPONSE_RESULTSENTRY.containing_type = _PUSHTASKRESRESPONSE
+_PUSHTASKRESRESPONSE.fields_by_name['reconnect'].message_type = _RECONNECT
+_PUSHTASKRESRESPONSE.fields_by_name['results'].message_type = _PUSHTASKRESRESPONSE_RESULTSENTRY
+DESCRIPTOR.message_types_by_name['PullTaskInsRequest'] = _PULLTASKINSREQUEST
+DESCRIPTOR.message_types_by_name['PullTaskInsResponse'] = _PULLTASKINSRESPONSE
+DESCRIPTOR.message_types_by_name['PushTaskResRequest'] = _PUSHTASKRESREQUEST
+DESCRIPTOR.message_types_by_name['PushTaskResResponse'] = _PUSHTASKRESRESPONSE
+DESCRIPTOR.message_types_by_name['Reconnect'] = _RECONNECT
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-GetTasksRequest = _reflection.GeneratedProtocolMessageType('GetTasksRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GETTASKSREQUEST,
+PullTaskInsRequest = _reflection.GeneratedProtocolMessageType('PullTaskInsRequest', (_message.Message,), {
+  'DESCRIPTOR' : _PULLTASKINSREQUEST,
   '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.GetTasksRequest)
+  # @@protoc_insertion_point(class_scope:flwr.proto.PullTaskInsRequest)
   })
-_sym_db.RegisterMessage(GetTasksRequest)
+_sym_db.RegisterMessage(PullTaskInsRequest)
 
-GetTasksResponse = _reflection.GeneratedProtocolMessageType('GetTasksResponse', (_message.Message,), {
-  'DESCRIPTOR' : _GETTASKSRESPONSE,
+PullTaskInsResponse = _reflection.GeneratedProtocolMessageType('PullTaskInsResponse', (_message.Message,), {
+  'DESCRIPTOR' : _PULLTASKINSRESPONSE,
   '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.GetTasksResponse)
+  # @@protoc_insertion_point(class_scope:flwr.proto.PullTaskInsResponse)
   })
-_sym_db.RegisterMessage(GetTasksResponse)
+_sym_db.RegisterMessage(PullTaskInsResponse)
 
-CreateResultsRequest = _reflection.GeneratedProtocolMessageType('CreateResultsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _CREATERESULTSREQUEST,
+PushTaskResRequest = _reflection.GeneratedProtocolMessageType('PushTaskResRequest', (_message.Message,), {
+  'DESCRIPTOR' : _PUSHTASKRESREQUEST,
   '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.CreateResultsRequest)
+  # @@protoc_insertion_point(class_scope:flwr.proto.PushTaskResRequest)
   })
-_sym_db.RegisterMessage(CreateResultsRequest)
+_sym_db.RegisterMessage(PushTaskResRequest)
 
-CreateResultsResponse = _reflection.GeneratedProtocolMessageType('CreateResultsResponse', (_message.Message,), {
-  'DESCRIPTOR' : _CREATERESULTSRESPONSE,
+PushTaskResResponse = _reflection.GeneratedProtocolMessageType('PushTaskResResponse', (_message.Message,), {
+
+  'ResultsEntry' : _reflection.GeneratedProtocolMessageType('ResultsEntry', (_message.Message,), {
+    'DESCRIPTOR' : _PUSHTASKRESRESPONSE_RESULTSENTRY,
+    '__module__' : 'flwr.proto.fleet_pb2'
+    # @@protoc_insertion_point(class_scope:flwr.proto.PushTaskResResponse.ResultsEntry)
+    })
+  ,
+  'DESCRIPTOR' : _PUSHTASKRESRESPONSE,
   '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.CreateResultsResponse)
+  # @@protoc_insertion_point(class_scope:flwr.proto.PushTaskResResponse)
   })
-_sym_db.RegisterMessage(CreateResultsResponse)
+_sym_db.RegisterMessage(PushTaskResResponse)
+_sym_db.RegisterMessage(PushTaskResResponse.ResultsEntry)
+
+Reconnect = _reflection.GeneratedProtocolMessageType('Reconnect', (_message.Message,), {
+  'DESCRIPTOR' : _RECONNECT,
+  '__module__' : 'flwr.proto.fleet_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.Reconnect)
+  })
+_sym_db.RegisterMessage(Reconnect)
 
 
+_PUSHTASKRESRESPONSE_RESULTSENTRY._options = None
 
 _FLEET = _descriptor.ServiceDescriptor(
   name='Fleet',
@@ -185,26 +311,26 @@ _FLEET = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=219,
-  serialized_end=387,
+  serialized_start=501,
+  serialized_end=672,
   methods=[
   _descriptor.MethodDescriptor(
-    name='GetTasks',
-    full_name='flwr.proto.Fleet.GetTasks',
+    name='PullTaskIns',
+    full_name='flwr.proto.Fleet.PullTaskIns',
     index=0,
     containing_service=None,
-    input_type=_GETTASKSREQUEST,
-    output_type=_GETTASKSRESPONSE,
+    input_type=_PULLTASKINSREQUEST,
+    output_type=_PULLTASKINSRESPONSE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
-    name='CreateResults',
-    full_name='flwr.proto.Fleet.CreateResults',
+    name='PushTaskRes',
+    full_name='flwr.proto.Fleet.PushTaskRes',
     index=1,
     containing_service=None,
-    input_type=_CREATERESULTSREQUEST,
-    output_type=_CREATERESULTSRESPONSE,
+    input_type=_PUSHTASKRESREQUEST,
+    output_type=_PUSHTASKRESRESPONSE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

@@ -23,12 +23,12 @@ import grpc
 from flwr.common.logger import log
 from flwr.proto import driver_pb2_grpc
 from flwr.proto.driver_pb2 import (
-    CreateTasksRequest,
-    CreateTasksResponse,
     GetNodesRequest,
     GetNodesResponse,
-    GetResultsRequest,
-    GetResultsResponse,
+    PullTaskResRequest,
+    PullTaskResResponse,
+    PushTaskInsRequest,
+    PushTaskInsResponse,
 )
 from flwr.server.driver.driver_client_manager import DriverClientManager
 
@@ -45,18 +45,23 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
     ) -> GetNodesResponse:
+        """Get available nodes."""
         log(INFO, "DriverServicer.GetNodes")
         all_ids: Set[int] = self.driver_client_manager.all_ids()
         return GetNodesResponse(node_ids=list(all_ids))
 
-    def CreateTasks(
-        self, request: CreateTasksRequest, context: grpc.ServicerContext
-    ) -> CreateTasksResponse:
-        log(INFO, "DriverServicer.CreateTasks")
-        return CreateTasksResponse(task_ids=[])
+    def PushTaskIns(
+        self, request: PushTaskInsRequest, context: grpc.ServicerContext
+    ) -> PushTaskInsResponse:
+        """Push a set of TaskIns."""
+        log(INFO, "DriverServicer.PushTaskIns")
 
-    def GetResults(
-        self, request: GetResultsRequest, context: grpc.ServicerContext
-    ) -> GetResultsResponse:
-        log(INFO, "DriverServicer.GetResults")
-        return GetResultsResponse(results=[])
+        return PushTaskInsResponse(task_ids=[])
+
+    def PullTaskRes(
+        self, request: PullTaskResRequest, context: grpc.ServicerContext
+    ) -> PullTaskResResponse:
+        """Pull a set of TaskRes."""
+        log(INFO, "DriverServicer.PullTaskRes")
+
+        return PullTaskResResponse(task_res_set=[])

@@ -22,24 +22,28 @@ import grpc
 from flwr.common.logger import log
 from flwr.proto import fleet_pb2_grpc
 from flwr.proto.fleet_pb2 import (
-    CreateResultsRequest,
-    CreateResultsResponse,
-    GetTasksRequest,
-    GetTasksResponse,
+    PullTaskInsRequest,
+    PullTaskInsResponse,
+    PushTaskResRequest,
+    PushTaskResResponse,
 )
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
-    def GetTasks(
-        self, request: GetTasksRequest, context: grpc.ServicerContext
-    ) -> GetTasksResponse:
-        log(INFO, "GetTasks")
-        return super().GetTasks(request, context)
+    def PullTaskIns(
+        self, request: PullTaskInsRequest, context: grpc.ServicerContext
+    ) -> PullTaskInsResponse:
+        """."""
+        log(INFO, "FleetServicer.PullTaskIns")
 
-    def CreateResults(
-        self, request: CreateResultsRequest, context: grpc.ServicerContext
-    ) -> CreateResultsResponse:
-        log(INFO, "CreateResults")
-        return super().CreateResults(request, context)
+        return PullTaskInsResponse(task_ins_set=[])
+
+    def PushTaskRes(
+        self, request: PushTaskResRequest, context: grpc.ServicerContext
+    ) -> PushTaskResResponse:
+        """."""
+        log(INFO, "FleetServicer.PushTaskRes")
+
+        return PushTaskResResponse(reconnect=None, results={})

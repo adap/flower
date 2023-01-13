@@ -14,7 +14,7 @@
 # ==============================================================================
 """Flower main package."""
 
-import sys
+from flwr.common.version import package_version as _package_version
 
 from . import client, server, simulation
 
@@ -24,11 +24,4 @@ __all__ = [
     "simulation",
 ]
 
-# pylint: disable=import-error, no-name-in-module
-if sys.version_info < (3, 8):
-    import importlib_metadata
-else:
-    import importlib.metadata as importlib_metadata
-# pylint: enable=import-error, no-name-in-module
-
-__version__: str = importlib_metadata.version(__name__)
+__version__ = _package_version
