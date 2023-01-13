@@ -34,7 +34,7 @@ Flower telemetry collects the following metrics:
 
 **Python version.** Knowing the Python version helps us, for example, to decide whether we should invest effort into supporting old versions of Python or stop supporting them and start taking advantage of new Python features.
 
-**CPU/GPU properties.** Knowing some general data about CPU/GPU properties helps us to understand the hardware environment Flower is being used in and whether we should, for example, put more effort into supporting low-resource environments.
+**Hardware properties.** Understanding the hardware environment that Flower is being used in helps to decide whether we should, for example, put more effort into supporting low-resource environments.
 
 **Execution mode.** Knowing in which execution mode Flower starts enables us to understand how much certain features are used and better prioritize based on that.
 
