@@ -170,7 +170,7 @@ struct ContentView: View {
                                 }
                                 
                             }
-                            .disabled(!self.clientModel.modelStatus.description.hasPrefix("Training completed"))
+                            .disabled(self.clientModel.testBatchStatus != BatchPreparationStatus.ready || self.clientModel.trainingBatchStatus != BatchPreparationStatus.ready)
                         }
                     }
                 }
