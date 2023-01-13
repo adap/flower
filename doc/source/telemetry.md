@@ -36,7 +36,7 @@ Flower telemetry collects the following metrics:
 
 **Hardware properties.** Understanding the hardware environment that Flower is being used in helps to decide whether we should, for example, put more effort into supporting low-resource environments.
 
-**Execution mode.** Knowing in which execution mode Flower starts enables us to understand how much certain features are used and better prioritize based on that.
+**Execution mode.** Knowing what execution mode Flower starts in enables us to understand how heavily certain features are being used and better prioritize based on that.
 
 We will not collect any personally identifiable information. If you think any of the metrics collected could be misused in any way, please [get in touch with us](#how-to-contact-us). We will update this page to reflect any changes to the metrics collected and publish all changes in the changelog.
 
