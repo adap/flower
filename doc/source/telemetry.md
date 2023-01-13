@@ -28,17 +28,19 @@ Alternatively, you can export `FLWR_TELEMETRY_ENABLED=0` in, for example, `.bash
 
 Flower telemetry collects the following metrics:
 
-**Flower version.** Understand which versions of Flower are currently being used. This helps us to decide whether we should invest effort into releasing a patch version for an older version of Flower, or instead use the bandwidth to build new features.
+**Flower version.** Understand which versions of Flower are currently being used. This helps us to decide whether we should invest effort into releasing a patch version for an older version of Flower or instead use the bandwidth to build new features.
 
 **Operating system.** Enables us to answer questions such as: *Should we create more guides for Linux, macOS, or Windows?*
 
-**Python version.** This helps us, for example, decide whether we should invest effort into supporting old versions of Python or stop supporting them and start taking advantage of new Python features.
+**Python version.** Knowing the Python version helps us, for example, to decide whether we should invest effort into supporting old versions of Python or stop supporting them and start taking advantage of new Python features.
 
-**CPU/GPU properties.** This helps us to understand the hardware environment Flower is being used in and whether we should, for example, put more effort into supporting low-resource environments.
+**Hardware properties.** Understanding the hardware environment that Flower is being used in helps to decide whether we should, for example, put more effort into supporting low-resource environments.
 
-We will not collect any personally identifiable information. If you think any of the metrics collected could be misused in any way, please [contact us](#how-to-contact-us). We will update this page to reflect any changes to the metrics collected and publish all changes in the changelog.
+**Execution mode.** Knowing what execution mode Flower starts in enables us to understand how heavily certain features are being used and better prioritize based on that.
 
-If you think other metrics would be helpful for us to better guide our decisions please let us know! We will carefully review them and if we are confident that they do not compromise user privacy, we may add them.
+We will not collect any personally identifiable information. If you think any of the metrics collected could be misused in any way, please [get in touch with us](#how-to-contact-us). We will update this page to reflect any changes to the metrics collected and publish changes in the changelog.
+
+If you think other metrics would be helpful for us to better guide our decisions, please let us know! We will carefully review them; if we are confident that they do not compromise user privacy, we may add them.
 
 ## How to inspect what is being reported
 
