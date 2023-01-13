@@ -38,7 +38,7 @@ Flower telemetry collects the following metrics:
 
 **Execution mode.** Knowing what execution mode Flower starts in enables us to understand how heavily certain features are being used and better prioritize based on that.
 
-We will not collect any personally identifiable information. If you think any of the metrics collected could be misused in any way, please [get in touch with us](#how-to-contact-us). We will update this page to reflect any changes to the metrics collected and publish all changes in the changelog.
+We will not collect any personally identifiable information. If you think any of the metrics collected could be misused in any way, please [get in touch with us](#how-to-contact-us). We will update this page to reflect any changes to the metrics collected and publish changes in the changelog.
 
 If you think other metrics would be helpful for us to better guide our decisions, please let us know! We will carefully review them; if we are confident that they do not compromise user privacy, we may add them.
 
