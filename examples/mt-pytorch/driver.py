@@ -71,8 +71,10 @@ for server_round in range(num_rounds):
 
     time.sleep(sleep_time)
 
-    # Wait for results
-    task_ids: List[str] = push_task_ins_res.task_ids
+    # Wait for results, ignore empty task_ids
+    task_ids: List[str] = [
+        task_id for task_id in push_task_ins_res.task_ids if task_id != ""
+    ]
     all_task_res: List[task_pb2.TaskRes] = []
     while True:
         pull_task_res_req = driver_pb2.PullTaskResRequest(task_ids=task_ids)
