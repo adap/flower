@@ -30,7 +30,7 @@ class TelemetryTest(unittest.TestCase):
         expected = '{\n    "status": "created"\n}'
 
         # Execute
-        future = event(event_type=EventType.PING)
+        future = event(EventType.PING)
         actual = future.result()
 
         # Assert
@@ -48,7 +48,7 @@ class TelemetryTest(unittest.TestCase):
         start = time.time()
 
         # Execute
-        event(event_type=EventType.PING)
+        event(EventType.PING)
         duration_actual = time.time() - start
 
         # Assert
@@ -61,7 +61,7 @@ class TelemetryTest(unittest.TestCase):
         expected = "disabled"
 
         # Execute
-        future = event(event_type=EventType.PING)
+        future = event(EventType.PING)
         actual = future.result()
 
         # Assert

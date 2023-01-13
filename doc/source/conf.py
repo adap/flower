@@ -148,3 +148,7 @@ nbsphinx_epilog = _open_in_colab_button
 # require.js script added by `nbsphinx`. We can only enforce this in the theme
 # itself.
 mermaid_version = ""
+
+# -- Options for MyST config  -------------------------------------
+# Enable this option to link to headers (`#`, `##`, or `###`)
+myst_heading_anchors = 3

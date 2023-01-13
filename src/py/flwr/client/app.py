@@ -129,7 +129,7 @@ def start_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-    event(event_type=EventType.START_CLIENT_ENTER)
+    event(EventType.START_CLIENT_ENTER)
 
     while True:
         sleep_duration: int = 0
@@ -159,7 +159,7 @@ def start_client(
         )
         time.sleep(sleep_duration)
 
-    event(event_type=EventType.START_CLIENT_LEAVE)
+    event(EventType.START_CLIENT_LEAVE)
 
 
 def start_numpy_client(
