@@ -16,7 +16,7 @@ class CoreMLClient: Client {
     
     var model : MLModel?
     
-    private var parameterConverter = ParameterConverter()
+    private var parameterConverter = ParameterConverter.shared
     private let dataLoader: DataLoader
     
     var layerWrappers: [MLLayerWrapper] = []
@@ -87,7 +87,6 @@ class CoreMLClient: Client {
     }
     
     func parametersToWeights(parameters: Parameters) -> MLModelConfiguration {
-        parameterConverter = ParameterConverter()
         let config = MLModelConfiguration()
         
         guard parameters.tensors.count == self.layerWrappers.count else {
@@ -122,7 +121,6 @@ class CoreMLClient: Client {
     }
     
     func weightsToParameters() -> Parameters {
-        parameterConverter = ParameterConverter()
         let dataArray = layerWrappers.compactMap { parameterConverter.arrayToData(array: $0.weights, shape: $0.shape) }
         if dataArray.count != layerWrappers.count {
             print("dataArray size != layerWrappers size")

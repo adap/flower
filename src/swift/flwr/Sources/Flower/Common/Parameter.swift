@@ -10,24 +10,35 @@ import NumPySupport
 import PythonSupport
 import PythonKit
 import CoreML
+import NIOCore
+import NIOPosix
 
 @available(iOS 14.0, *)
 public class ParameterConverter {
-    var np: PythonObject
-    var io: PythonObject
-    var typing: PythonObject
+    private var np: PythonObject?
     
     private static let appDirectory = FileManager.default.urls(for: .applicationSupportDirectory,
                                                                in: .userDomainMask).first!
     /// The permanent location of the numpyArray.
     private var numpyArrayUrl = appDirectory.appendingPathComponent("numpyArray.npy")
+    private let group: EventLoopGroup
     
-    public init() {
-        PythonSupport.initialize()
-        NumPySupport.sitePackagesURL.insertPythonPath()
-        np = Python.import("numpy")
-        io = Python.import("io")
-        typing = Python.import("typing")
+    public static let shared = ParameterConverter()
+    
+    private init() {
+        group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
+        let future = group.next().submit {
+            PythonSupport.initialize()
+            NumPySupport.sitePackagesURL.insertPythonPath()
+            self.np = Python.import("numpy")
+        }
+        
+        do {
+            try future.wait()
+        } catch let error {
+            print(error)
+        }
     }
     
     private func multiArrayToNumpy(multiArray: MLMultiArray) -> PythonObject? {
@@ -39,7 +50,11 @@ public class ParameterConverter {
     }
     
     private func numpyToData(numpy: PythonObject) -> Data? {
-        guard Python.isinstance(numpy, np.ndarray) == true else {
+        guard np != nil else {
+            return nil
+        }
+        
+        guard Python.isinstance(numpy, np?.ndarray) == true else {
             return nil
         }
         
@@ -48,22 +63,30 @@ public class ParameterConverter {
             try? fileManager.removeItem(at: numpyArrayUrl)
         }
         
-        np.save(numpyArrayUrl.path, numpy)
+        np?.save(numpyArrayUrl.path, numpy)
         return try? Data(contentsOf: numpyArrayUrl)
     }
     
     private func dataToNumpy(data: Data) -> PythonObject? {
+        guard np != nil else {
+            return nil
+        }
+        
         let fileManager = FileManager.default
         if fileManager.fileExists(atPath: numpyArrayUrl.path) {
             try? fileManager.removeItem(at: numpyArrayUrl)
         }
         try? data.write(to: numpyArrayUrl)
         
-        return np.load(numpyArrayUrl.path)
+        return np?.load(numpyArrayUrl.path)
     }
     
     private func numpyToArray(numpy: PythonObject) -> [Float]? {
-        guard Python.isinstance(numpy, np.ndarray) == true else {
+        guard np != nil else {
+            return nil
+        }
+        
+        guard Python.isinstance(numpy, np?.ndarray) == true else {
             return nil
         }
         let flattened = numpy.flatten()
@@ -71,7 +94,11 @@ public class ParameterConverter {
     }
     
     private func numpyToMultiArray(numpy: PythonObject) -> MLMultiArray? {
-        guard Python.isinstance(numpy, np.ndarray) == true else {
+        guard np != nil else {
+            return nil
+        }
+        
+        guard Python.isinstance(numpy, np?.ndarray) == true else {
             return nil
         }
         
@@ -90,31 +117,74 @@ public class ParameterConverter {
     }
     
     public func dataToMultiArray(data: Data) -> MLMultiArray? {
-        if let numpy = dataToNumpy(data: data) {
-            return numpyToMultiArray(numpy: numpy)
+        let future = group.next().submit {
+            if let numpy = self.dataToNumpy(data: data) {
+                return self.numpyToMultiArray(numpy: numpy)
+            }
+            return nil
         }
-        return nil
+        
+        do {
+            let ret = try future.wait()
+            return ret
+        } catch let error {
+            print(error)
+            return nil
+        }
+        
     }
     
     public func multiArrayToData(multiArray: MLMultiArray) -> Data? {
-        if let numpy = multiArrayToNumpy(multiArray: multiArray) {
-            return numpyToData(numpy: numpy)
+        let future = group.next().submit {
+            if let numpy = self.multiArrayToNumpy(multiArray: multiArray) {
+                return self.numpyToData(numpy: numpy)
+            }
+            return nil
         }
-        return nil
+        
+        do {
+            let ret = try future.wait()
+            return ret
+        } catch let error {
+            print(error)
+            return nil
+        }
+        
     }
     
     public func dataToArray(data: Data) -> [Float]? {
-        if let numpy = dataToNumpy(data: data) {
-            return numpyToArray(numpy: numpy)
+        let future = group.next().submit {
+            if let numpy = self.dataToNumpy(data: data) {
+                return self.numpyToArray(numpy: numpy)
+            }
+            return nil
         }
-        return nil
+        
+        do {
+            let ret = try future.wait()
+            return ret
+        } catch let error {
+            print(error)
+            return nil
+        }
+        
     }
     
     public func arrayToData(array: [Float], shape: [Int16]) -> Data? {
-        let numpy = array.makeNumpyArray().reshape(shape)
-        //print("before shape: \(shape)")
-        //print("after shape: \(numpy.shape)")
-        return numpyToData(numpy: numpy)
+        let future = group.next().submit {
+            let numpy = array.makeNumpyArray().reshape(shape)
+            //print("before shape: \(shape)")
+            //print("after shape: \(numpy.shape)")
+            return self.numpyToData(numpy: numpy)
+        }
+        
+        do {
+            let ret = try future.wait()
+            return ret
+        } catch let error {
+            print(error)
+            return nil
+        }
     }
 }
 
