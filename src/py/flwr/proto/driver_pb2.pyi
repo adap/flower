@@ -34,14 +34,14 @@ global___GetNodesResponse = GetNodesResponse
 class PushTaskInsRequest(google.protobuf.message.Message):
     """PushTaskIns messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    TASK_INS_SET_FIELD_NUMBER: builtins.int
+    TASK_INS_LIST_FIELD_NUMBER: builtins.int
     @property
-    def task_ins_set(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.TaskIns]: ...
+    def task_ins_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.TaskIns]: ...
     def __init__(self,
         *,
-        task_ins_set: typing.Optional[typing.Iterable[flwr.proto.task_pb2.TaskIns]] = ...,
+        task_ins_list: typing.Optional[typing.Iterable[flwr.proto.task_pb2.TaskIns]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["task_ins_set",b"task_ins_set"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["task_ins_list",b"task_ins_list"]) -> None: ...
 global___PushTaskInsRequest = PushTaskInsRequest
 
 class PushTaskInsResponse(google.protobuf.message.Message):
@@ -74,12 +74,12 @@ global___PullTaskResRequest = PullTaskResRequest
 
 class PullTaskResResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    TASK_RES_SET_FIELD_NUMBER: builtins.int
+    TASK_RES_LIST_FIELD_NUMBER: builtins.int
     @property
-    def task_res_set(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.TaskRes]: ...
+    def task_res_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.TaskRes]: ...
     def __init__(self,
         *,
-        task_res_set: typing.Optional[typing.Iterable[flwr.proto.task_pb2.TaskRes]] = ...,
+        task_res_list: typing.Optional[typing.Iterable[flwr.proto.task_pb2.TaskRes]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["task_res_set",b"task_res_set"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["task_res_list",b"task_res_list"]) -> None: ...
 global___PullTaskResResponse = PullTaskResResponse
