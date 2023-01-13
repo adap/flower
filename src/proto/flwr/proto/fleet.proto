@@ -33,11 +33,10 @@ service Fleet {
 
 // PullTaskIns messages
 message PullTaskInsRequest {
-  uint64 node_id = 1; repeated string task_ids = 2; }
+  uint64 node_id = 1;
+  repeated string task_ids = 2;
+}
 message PullTaskInsResponse {
-
-
-  
   Reconnect reconnect = 1;
   repeated TaskIns task_ins_set = 2;
 }
