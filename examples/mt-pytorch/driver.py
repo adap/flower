@@ -23,16 +23,23 @@ driver.connect()
 for server_round in range(num_rounds):
     print(f"Commencing server round {server_round + 1}")
 
-    # Get a list of node ID's from the server
-    get_nodes_req = driver_pb2.GetNodesRequest()
+    while True:
+        # Get a list of node ID's from the server
+        get_nodes_req = driver_pb2.GetNodesRequest()
 
-    # ---------------------------------------------------------------------- Driver SDK
-    get_nodes_res: driver_pb2.GetNodesResponse = driver.get_nodes(req=get_nodes_req)
-    # ---------------------------------------------------------------------- Driver SDK
+        # ---------------------------------------------------------------------- Driver SDK
+        get_nodes_res: driver_pb2.GetNodesResponse = driver.get_nodes(req=get_nodes_req)
+        # ---------------------------------------------------------------------- Driver SDK
 
-    # Sample three nodes
-    all_node_ids: List[int] = get_nodes_res.node_ids
-    print(f"Got {len(all_node_ids)} node IDs")
+        # Sample three nodes
+        all_node_ids: List[int] = get_nodes_res.node_ids
+        print(f"Got {len(all_node_ids)} node IDs")
+
+        if len(all_node_ids) >= 1:
+            break
+            
+        time.sleep(3)
+
     num_node_ids_to_sample = 3 if len(all_node_ids) >= 3 else 1
     sampled_node_ids: List[int] = random.sample(all_node_ids, num_node_ids_to_sample)
     print(f"Sampled {len(sampled_node_ids)} node IDs: {sampled_node_ids}")
