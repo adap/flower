@@ -13,7 +13,7 @@ authors = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-flwr = "^0.17.0"
+flwr = "^1.0.0"
 # flwr = { path = "../../", develop = true }  # Development
 tensorflow = "^2.5.0"
 tensorflow-privacy = {git = "https://github.com/tensorflow/privacy", rev = "aaf4c25"}

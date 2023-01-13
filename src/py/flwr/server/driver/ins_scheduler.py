@@ -72,16 +72,16 @@ def _worker(
         log(DEBUG, "Worker for node %i checking state", client_proxy.node_id)
 
         # Step 1: pull *Ins (next task) out of `driver_state`
-        task_ins_set: List[TaskIns] = driver_state.get_task_ins(
+        task_ins_list: List[TaskIns] = driver_state.get_task_ins(
             node_id=client_proxy.node_id,
             limit=1,
         )
-        if not task_ins_set:
+        if not task_ins_list:
             log(DEBUG, "Worker for node %i: no task found", client_proxy.node_id)
             time.sleep(3)
             continue
 
-        task_ins = task_ins_set[0]
+        task_ins = task_ins_list[0]
         log(
             DEBUG,
             "Worker for node %i: FOUND task %s",
