@@ -55,7 +55,7 @@ class TelemetryTest(unittest.TestCase):
         self.assertLess(duration_actual, duration_max)
 
     @mock.patch("flwr.common.telemetry.FLWR_TELEMETRY_ENABLED", "0")
-    def test_no_sending(self) -> None:
+    def test_telemetry_disabled(self) -> None:
         """Test if disableing sending works."""
         # Prepare
         expected = "disabled"
