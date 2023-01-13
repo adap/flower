@@ -150,5 +150,5 @@ nbsphinx_epilog = _open_in_colab_button
 mermaid_version = ""
 
 # -- Options for MyST config  -------------------------------------
-# Enable options to link to headers
+# Enable this option to link to headers (`#`, `##`, or `###`)
 myst_heading_anchors = 3
