@@ -38,12 +38,12 @@ def main(args) -> None:
         fraction_fit=args.fraction_fit,
         min_available_clients=args.num_clients,
         evaluate_fn=get_evaluate_fn(model),
-        initial_parameters=fl.common.weights_to_parameters(model.get_weights()),
+        initial_parameters=fl.common.ndarrays_to_parameters(model.get_weights()),
     )
     fl.server.start_server(
         server_address="0.0.0.0:8080",
         strategy=strategy,
-        config={"num_rounds": args.num_rounds},
+        config=fl.server.ServerConfig(num_rounds=args.num_rounds),
     )
 
 
