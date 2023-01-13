@@ -15,7 +15,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Improve GPU support in Jupter notebooks** ([#1527](https://github.com/adap/flower/pull/1527), [#1558](https://github.com/adap/flower/pull/1558))
 
-  Some users have had issues with GPU support in Jupyter. We have lissend and made improvments to all of our Jupter notebooks! Check the updated notebooks out here:
+  Some users have had issues with GPU support in Jupyter Notebooks. We have listened and made improvements to all of our Jupyter notebooks! Check the updated notebooks out here:
 
   - [An Introduction to Federated Learning](https://flower.dev/docs/tutorial/Flower-1-Intro-to-FL-PyTorch.html)
   - [Strategies in Federated Learning](https://flower.dev/docs/tutorial/Flower-2-Strategies-in-FL-PyTorch.html)
@@ -30,7 +30,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Added a new strategy Krum / MultiKrum stragey** ([#1481](https://github.com/adap/flower/pull/1481))
 
-  Edoardo a computer science student at the Sapienza University of Rome contributed a new strategy.
+  Edoardo, a computer science student at the Sapienza University of Rome, contributed a new strategy.
 
 - **Introduce Telemetry to enable well-informed roadmap decisions** ([#1544](https://github.com/adap/flower/pull/1544), [#1533](https://github.com/adap/flower/pull/1533))
 
@@ -40,15 +40,13 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **New experimental DriverAPI** ([#1520](https://github.com/adap/flower/pull/1520), [#1525](https://github.com/adap/flower/pull/1525), [#1545](https://github.com/adap/flower/pull/1545), [#1546](https://github.com/adap/flower/pull/1546), [#1550](https://github.com/adap/flower/pull/1550), [#1551](https://github.com/adap/flower/pull/1551), [#1567](https://github.com/adap/flower/pull/1567))
 
-  The new (experimental) DriverAPI which will enable fully programable Federated Learning applications. Beware this is still experimental and will change significantly over time. We are looking for feedback!
+  Flower now has a new (experimental) API which will enable fully programable Federated Learning applications. The DriverAPI is still experimental and will change significantly over time. We are looking for feedback!
 
 - **General improvements** ([#1491](https://github.com/adap/flower/pull/1491), [#1504](https://github.com/adap/flower/pull/1504), [#1506](https://github.com/adap/flower/pull/1506), [#1514](https://github.com/adap/flower/pull/1514), [#1522](https://github.com/adap/flower/pull/1522), [#1523](https://github.com/adap/flower/pull/1523), [#1526](https://github.com/adap/flower/pull/1526), [#1528](https://github.com/adap/flower/pull/1528), [#1547](https://github.com/adap/flower/pull/1547), [#1549](https://github.com/adap/flower/pull/1549), [#1555](https://github.com/adap/flower/pull/1555), [#1560](https://github.com/adap/flower/pull/1560), [#1564](https://github.com/adap/flower/pull/1564), [#1566](https://github.com/adap/flower/pull/1566))
 
-  Many large and small improvments making Flower better
-
 - **Updated documentation** ([#1494](https://github.com/adap/flower/pull/1494), [#1496](https://github.com/adap/flower/pull/1496), [#1500](https://github.com/adap/flower/pull/1500), [#1503](https://github.com/adap/flower/pull/1503), [#1505](https://github.com/adap/flower/pull/1505), [#1524](https://github.com/adap/flower/pull/1524), [#1518](https://github.com/adap/flower/pull/1518), [#1519](https://github.com/adap/flower/pull/1519), [#1515](https://github.com/adap/flower/pull/1515))
 
-  The documentation has been improved quite a bit. This is another step in our effort to make the Flower documentation the best documentation of any project ever. Stay tuned!
+  The documentation has again improved quite a bit. It is another step in our effort to make the Flower documentation the best documentation of any project. Stay tuned and as always, feel free to provide feedback!
 
 ### Incompatible changes
 
