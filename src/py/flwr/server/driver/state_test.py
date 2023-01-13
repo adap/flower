@@ -30,13 +30,13 @@ def test_get_task_ins_empty() -> None:
     state = DriverState()
 
     # Execute
-    task_ins_set = state.get_task_ins(
+    task_ins_list = state.get_task_ins(
         node_id=1,
         limit=10,
     )
 
     # Assert
-    assert not task_ins_set
+    assert not task_ins_list
 
 
 def test_get_task_res_empty() -> None:
@@ -46,13 +46,13 @@ def test_get_task_res_empty() -> None:
     state = DriverState()
 
     # Execute
-    task_res_set = state.get_task_res(
+    task_res_list = state.get_task_res(
         task_ids={uuid4()},
         limit=10,
     )
 
     # Assert
-    assert not task_res_set
+    assert not task_res_list
 
 
 def test_store_task_ins_one() -> None:
@@ -74,12 +74,12 @@ def test_store_task_ins_one() -> None:
 
     # Execute
     state.store_task_ins(task_ins=task_ins)
-    task_ins_set = state.get_task_ins(node_id=node_id, limit=10)
+    task_ins_list = state.get_task_ins(node_id=node_id, limit=10)
 
     # Assert
-    assert len(task_ins_set) == 1
+    assert len(task_ins_list) == 1
 
-    actual_task_ins = task_ins_set[0]
+    actual_task_ins = task_ins_list[0]
 
     assert actual_task_ins.task_id == task_ins.task_id  # pylint: disable=no-member
     assert actual_task_ins.task is not None

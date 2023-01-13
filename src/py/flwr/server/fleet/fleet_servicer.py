@@ -42,7 +42,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """."""
         log(INFO, "FleetServicer.PullTaskIns")
 
-        return PullTaskInsResponse(task_ins_set=[])
+        return PullTaskInsResponse(task_ins_list=[])
 
     def PushTaskRes(
         self, request: PushTaskResRequest, context: grpc.ServicerContext

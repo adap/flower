@@ -53,7 +53,7 @@ for server_round in range(num_rounds):
     server_message_proto: transport_pb2.ServerMessage = serde.server_message_to_proto(
         server_message=server_message
     )
-    task_ins_set: List[task_pb2.TaskIns] = []
+    task_ins_list: List[task_pb2.TaskIns] = []
     for sampled_node_id in sampled_node_ids:
         new_task_ins = task_pb2.TaskIns(
             task_id="",  # Do not set, will be created and set by the DriverAPI
@@ -63,9 +63,9 @@ for server_round in range(num_rounds):
                 legacy_server_message=server_message_proto,
             ),
         )
-        task_ins_set.append(new_task_ins)
+        task_ins_list.append(new_task_ins)
 
-    push_task_ins_req = driver_pb2.PushTaskInsRequest(task_ins_set=task_ins_set)
+    push_task_ins_req = driver_pb2.PushTaskInsRequest(task_ins_list=task_ins_list)
 
     # ---------------------------------------------------------------------- Driver SDK
     push_task_ins_res: driver_pb2.PushTaskInsResponse = driver.push_task_ins(
@@ -93,12 +93,12 @@ for server_round in range(num_rounds):
         )
         # ------------------------------------------------------------------ Driver SDK
 
-        task_res_set: List[task_pb2.TaskRes] = pull_task_res_res.task_res_set
-        print(f"Got {len(task_res_set)} results")
+        task_res_list: List[task_pb2.TaskRes] = pull_task_res_res.task_res_list
+        print(f"Got {len(task_res_list)} results")
 
         time.sleep(sleep_time)
 
-        all_task_res += task_res_set
+        all_task_res += task_res_list
         if len(all_task_res) == len(task_ids):
             break
 
