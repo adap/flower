@@ -1,14 +1,58 @@
 # Changelog
 
-## Unreleased
-
-- **New Pandas code example** ([#1469](https://github.com/adap/flower/pull/1469), [#1535](https://github.com/adap/flower/pull/1535))
-
-  A new code example (`quickstart_pandas`) demonstrates federated analytics with Pandas and Flower.
+## v1.2.0 (2023-01-13)
 
 ### What's new?
 
+Thanks to our contributors
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Adam Narozniak`, `Charles Beauville`, `Daniel J. Beutel`, `Edoardo`, `L. Jiang`, `Ragy`, `Taner Topal`, `dannymcy`
+
+- **New Flower Baseline: FedAvg MNIST** ([#1497](https://github.com/adap/flower/pull/1497), [#1552](https://github.com/adap/flower/pull/1552))
+
+  Over the coming weeks, we will be releasing a number of new reference implementations useful especially to FL newcomers. They will typically revisit well known papers from the literature, and be suitable for integration in your own application or for experimentation, in order to deepen your knowledge of FL in general. Today's release is the first in this series. [Read more.](https://flower.dev/blog/2023-01-12-fl-starter-pack-fedavg-mnist-cnn/)
+
+- **Improve GPU support in Jupter notebooks** ([#1527](https://github.com/adap/flower/pull/1527), [#1558](https://github.com/adap/flower/pull/1558))
+
+  Some users have had issues with GPU support in Jupyter. We have lissend and made improvments to all of our Jupter notebooks! Check the updated notebooks out here:
+
+  - [An Introduction to Federated Learning](https://flower.dev/docs/tutorial/Flower-1-Intro-to-FL-PyTorch.html)
+  - [Strategies in Federated Learning](https://flower.dev/docs/tutorial/Flower-2-Strategies-in-FL-PyTorch.html)
+  - [Building a Strategy](https://flower.dev/docs/tutorial/Flower-3-Building-a-Strategy-PyTorch.html)
+  - [Client and NumPyClient](https://flower.dev/docs/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.html)
+
+- **New Pandas code example** ([#1469](https://github.com/adap/flower/pull/1469), [#1535](https://github.com/adap/flower/pull/1535))
+
+  A new code example (`quickstart_pandas`) demonstrates federated analytics with Pandas and Flower. You can find it here: [quickstart_pandas](https://github.com/adap/flower/tree/main/examples/quickstart_pandas).
+
+- **Update C++ example to be compatible with Flower v1.2.0** ([#1495](https://github.com/adap/flower/pull/1495))
+
+- **Added a new strategy Krum / MultiKrum stragey** ([#1481](https://github.com/adap/flower/pull/1481))
+
+  Edoardo a computer science student at the Sapienza University of Rome contributed a new strategy.
+
+- **Introduce Telemetry to enable well-informed roadmap decisions** ([#1544](https://github.com/adap/flower/pull/1544), [#1533](https://github.com/adap/flower/pull/1533))
+
+  The Flower open-source project collects **anonymous** usage metrics to make well-informed decisions to improve Flower. Doing this enables the Flower team to understand how Flower is used and what challenges users might face.
+
+  **Flower is a friendly framework for collaborative AI and data science.** Staying true to this statement, Flower makes it easy to disable telemetry for users that do not want to share anonymous usage metrics. [Read more.](https://flower.dev/docs/telemetry.html).
+
+- **New experimental DriverAPI** ([#1520](https://github.com/adap/flower/pull/1520), [#1525](https://github.com/adap/flower/pull/1525), [#1545](https://github.com/adap/flower/pull/1545), [#1546](https://github.com/adap/flower/pull/1546), [#1550](https://github.com/adap/flower/pull/1550), [#1551](https://github.com/adap/flower/pull/1551), [#1567](https://github.com/adap/flower/pull/1567))
+
+  The new (experimental) DriverAPI which will enable fully programable Federated Learning applications. Beware this is still experimental and will change significantly over time. We are looking for feedback!
+
+- **General improvements** ([#1491](https://github.com/adap/flower/pull/1491), [#1504](https://github.com/adap/flower/pull/1504), [#1506](https://github.com/adap/flower/pull/1506), [#1514](https://github.com/adap/flower/pull/1514), [#1522](https://github.com/adap/flower/pull/1522), [#1523](https://github.com/adap/flower/pull/1523), [#1526](https://github.com/adap/flower/pull/1526), [#1528](https://github.com/adap/flower/pull/1528), [#1547](https://github.com/adap/flower/pull/1547), [#1549](https://github.com/adap/flower/pull/1549), [#1555](https://github.com/adap/flower/pull/1555), [#1560](https://github.com/adap/flower/pull/1560), [#1564](https://github.com/adap/flower/pull/1564), [#1566](https://github.com/adap/flower/pull/1566))
+
+  Many large and small improvments making Flower better
+
+- **Updated documentation** ([#1494](https://github.com/adap/flower/pull/1494), [#1496](https://github.com/adap/flower/pull/1496), [#1500](https://github.com/adap/flower/pull/1500), [#1503](https://github.com/adap/flower/pull/1503), [#1505](https://github.com/adap/flower/pull/1505), [#1524](https://github.com/adap/flower/pull/1524), [#1518](https://github.com/adap/flower/pull/1518), [#1519](https://github.com/adap/flower/pull/1519), [#1515](https://github.com/adap/flower/pull/1515))
+
+  The documentation has been improved quite a bit. This is another step in our effort to make the Flower documentation the best documentation of any project ever. Stay tuned!
+
 ### Incompatible changes
+
+None
 
 ## v1.1.0 (2022-10-31)
 
