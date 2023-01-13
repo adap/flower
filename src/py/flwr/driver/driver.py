@@ -22,17 +22,7 @@ import grpc
 
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.driver import serde
 from flwr.proto import driver_pb2, driver_pb2_grpc
-
-from .messages import (
-    CreateTasksRequest,
-    CreateTasksResponse,
-    GetNodesRequest,
-    GetNodesResponse,
-    GetResultsRequest,
-    GetResultsResponse,
-)
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -80,39 +70,42 @@ class Driver:
         channel.close()
         log(INFO, "[Driver] Disconnected")
 
-    def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
+    def get_nodes(self, req: driver_pb2.GetNodesRequest) -> driver_pb2.GetNodesResponse:
         """Get client IDs."""
+
+        # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise Exception("`Driver` instance not connected")
 
-        # Serialize, call Driver API, deserialize
-        req_proto = serde.get_nodes_request_to_proto(req)
-        res_proto: driver_pb2.GetNodesResponse = self.stub.GetNodes(request=req_proto)
-        return serde.get_nodes_response_from_proto(res_proto)
+        # Call Driver API
+        res: driver_pb2.GetNodesResponse = self.stub.GetNodes(request=req)
+        return res
 
-    def create_tasks(self, req: CreateTasksRequest) -> CreateTasksResponse:
+    def push_task_ins(
+        self, req: driver_pb2.PushTaskInsRequest
+    ) -> driver_pb2.PushTaskInsResponse:
         """Schedule tasks."""
+
+        # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise Exception("`Driver` instance not connected")
 
-        # Serialize, call Driver API, deserialize
-        req_proto = serde.create_tasks_request_to_proto(req)
-        res_proto: driver_pb2.CreateTasksResponse = self.stub.CreateTasks(
-            request=req_proto
-        )
-        return serde.create_tasks_response_from_proto(res_proto)
+        # Call Driver API
+        res: driver_pb2.PushTaskInsResponse = self.stub.PushTaskIns(request=req)
+        return res
 
-    def get_results(self, req: GetResultsRequest) -> GetResultsResponse:
+    def pull_task_res(
+        self, req: driver_pb2.PullTaskResRequest
+    ) -> driver_pb2.PullTaskResResponse:
         """Get task results."""
+
+        # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise Exception("`Driver` instance not connected")
 
-        # Serialize, call Driver API, deserialize
-        req_proto = serde.get_results_request_to_proto(req)
-        res_proto: driver_pb2.GetResultsResponse = self.stub.GetResults(
-            request=req_proto
-        )
-        return serde.get_results_response_from_proto(res_proto)
+        # Call Driver API
+        res: driver_pb2.PullTaskResResponse = self.stub.PullTaskRes(request=req)
+        return res
