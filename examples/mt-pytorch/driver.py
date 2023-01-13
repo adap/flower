@@ -37,7 +37,7 @@ for server_round in range(num_rounds):
 
         if len(all_node_ids) >= 1:
             break
-            
+
         time.sleep(3)
 
     # Sample one or three nodes
