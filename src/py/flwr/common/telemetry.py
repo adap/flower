@@ -31,27 +31,30 @@ FLWR_TELEMETRY_LOGGING = os.getenv("FLWR_TELEMETRY_LOGGING", "0")
 
 TELEMETRY_EVENTS_URL = "https://telemetry.flower.dev/api/v1/event"
 
-# Create logger
 LOGGER_NAME = "flwr-telemetry"
-FLOWER_LOGGER = logging.getLogger(LOGGER_NAME)
-FLOWER_LOGGER.setLevel(logging.DEBUG)
+LOGGER_LEVEL = logging.DEBUG
 
-DEFAULT_FORMATTER = logging.Formatter(
-    "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
-)
 
-# Configure console logger
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-console_handler.setFormatter(DEFAULT_FORMATTER)
-FLOWER_LOGGER.addHandler(console_handler)
+def _configure_logger(log_level: int) -> None:
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(
+        logging.Formatter(
+            "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
+        )
+    )
 
-logger = logging.getLogger(LOGGER_NAME)  # pylint: disable=invalid-name
+    logger = logging.getLogger(LOGGER_NAME)
+    logger.setLevel(log_level)
+    logger.addHandler(console_handler)
+
+
+_configure_logger(LOGGER_LEVEL)
 
 
 def log(msg: Union[str, Exception]) -> None:
     """Log message using logger at DEBUG level."""
-    logger.log(logging.DEBUG, msg)
+    logging.getLogger(LOGGER_NAME).log(LOGGER_LEVEL, msg)
 
 
 # Using str as first base type to make it JSON serializable as
@@ -124,7 +127,7 @@ def create_event(event_type: EventType) -> str:
             "package_version": package_version,
         },
         "hw": {
-            "cpu": os.cpu_count(),
+            "cpu_count": os.cpu_count(),
         },
         "platform": {
             "system": platform.system(),
@@ -161,12 +164,10 @@ def create_event(event_type: EventType) -> str:
             with urllib.request.urlopen(request, timeout=60) as response:
                 result = response.read()
 
-            response_json = str(json.loads(result.decode("utf-8")))
+            response_json: str = result.decode("utf-8")
 
             return response_json
-        except Exception as ex:  # pylint: disable=broad-except
-            # Telemetry should not impact users so any exception
-            # is just ignored if not setting FLWR_TELEMETRY_LOGGING=1
+        except urllib.error.URLError as ex:
             if FLWR_TELEMETRY_LOGGING == "1":
                 log(ex)
 

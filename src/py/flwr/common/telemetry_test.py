@@ -27,7 +27,7 @@ class TelemetryTest(unittest.TestCase):
     def test_event(self) -> None:
         """Test if sending works against the actual API."""
         # Prepare
-        expected = "{'status': 'created'}"
+        expected = '{\n    "status": "created"\n}'
 
         # Execute
         future = event(event_type=EventType.PING)
