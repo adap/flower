@@ -24,7 +24,7 @@ from flwr.server.driver.state import DriverState
 
 
 def test_get_task_ins_empty() -> None:
-    """."""
+    """Validate that a new state has no TaskIns."""
 
     # Prepare
     state = DriverState()
@@ -40,19 +40,19 @@ def test_get_task_ins_empty() -> None:
 
 
 def test_get_task_res_empty() -> None:
-    """."""
+    """Validate that a new state has no TaskRes."""
 
     # Prepare
     state = DriverState()
 
     # Execute
-    task_ins_set = state.get_task_res(
+    task_res_set = state.get_task_res(
         task_ids={uuid4()},
         limit=10,
     )
 
     # Assert
-    assert not task_ins_set
+    assert not task_res_set
 
 
 def test_store_task_ins_one() -> None:

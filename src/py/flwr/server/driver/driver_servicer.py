@@ -88,10 +88,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         task_ids: Set[UUID] = {UUID(task_id) for task_id in request.task_ids}
 
         # Read from state
-        task_res_set: List[TaskRes] = self.driver_state.get_task_res(
-            task_ids=task_ids, limit=10
-        )
-
+        task_res_set: List[TaskRes] = self.driver_state.get_task_res(task_ids=task_ids)
         return PullTaskResResponse(task_res_set=task_res_set)
 
 
