@@ -22,6 +22,7 @@ import grpc
 
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.telemetry import EventType, event
 from flwr.proto import driver_pb2, driver_pb2_grpc
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
@@ -49,6 +50,7 @@ class Driver:
 
     def connect(self) -> None:
         """Connect to the Driver API."""
+        event(EventType.DRIVER_CONNECT)
         if self.channel is not None or self.stub is not None:
             log(WARNING, "Already connected")
             return
@@ -61,6 +63,7 @@ class Driver:
 
     def disconnect(self) -> None:
         """Disconnect from the Driver API."""
+        event(EventType.DRIVER_DISCONNECT)
         if self.channel is None or self.stub is None:
             log(WARNING, "Already disconnected")
             return
