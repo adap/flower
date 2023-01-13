@@ -21,23 +21,29 @@ public class ParameterConverter {
                                                                in: .userDomainMask).first!
     /// The permanent location of the numpyArray.
     private var numpyArrayUrl = appDirectory.appendingPathComponent("numpyArray.npy")
-    private let group: EventLoopGroup
+    private var group: EventLoopGroup?
     
     public static let shared = ParameterConverter()
     
     private init() {
-        group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        
-        let future = group.next().submit {
-            PythonSupport.initialize()
-            NumPySupport.sitePackagesURL.insertPythonPath()
-            self.np = Python.import("numpy")
-        }
-        
-        do {
-            try future.wait()
-        } catch let error {
-            print(error)
+        initGroup()
+    }
+    
+    private func initGroup() {
+        if group == nil {
+            group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+            
+            let future = group?.next().submit {
+                PythonSupport.initialize()
+                NumPySupport.sitePackagesURL.insertPythonPath()
+                self.np = Python.import("numpy")
+            }
+            
+            do {
+                try future?.wait()
+            } catch let error {
+                print(error)
+            }
         }
     }
     
@@ -117,7 +123,8 @@ public class ParameterConverter {
     }
     
     public func dataToMultiArray(data: Data) -> MLMultiArray? {
-        let future = group.next().submit {
+        initGroup()
+        let future = group?.next().submit {
             if let numpy = self.dataToNumpy(data: data) {
                 return self.numpyToMultiArray(numpy: numpy)
             }
@@ -125,7 +132,7 @@ public class ParameterConverter {
         }
         
         do {
-            let ret = try future.wait()
+            let ret = try future?.wait()
             return ret
         } catch let error {
             print(error)
@@ -135,7 +142,8 @@ public class ParameterConverter {
     }
     
     public func multiArrayToData(multiArray: MLMultiArray) -> Data? {
-        let future = group.next().submit {
+        initGroup()
+        let future = group?.next().submit {
             if let numpy = self.multiArrayToNumpy(multiArray: multiArray) {
                 return self.numpyToData(numpy: numpy)
             }
@@ -143,7 +151,7 @@ public class ParameterConverter {
         }
         
         do {
-            let ret = try future.wait()
+            let ret = try future?.wait()
             return ret
         } catch let error {
             print(error)
@@ -153,7 +161,8 @@ public class ParameterConverter {
     }
     
     public func dataToArray(data: Data) -> [Float]? {
-        let future = group.next().submit {
+        initGroup()
+        let future = group?.next().submit {
             if let numpy = self.dataToNumpy(data: data) {
                 return self.numpyToArray(numpy: numpy)
             }
@@ -161,7 +170,7 @@ public class ParameterConverter {
         }
         
         do {
-            let ret = try future.wait()
+            let ret = try future?.wait()
             return ret
         } catch let error {
             print(error)
@@ -171,7 +180,8 @@ public class ParameterConverter {
     }
     
     public func arrayToData(array: [Float], shape: [Int16]) -> Data? {
-        let future = group.next().submit {
+        initGroup()
+        let future = group?.next().submit {
             let numpy = array.makeNumpyArray().reshape(shape)
             //print("before shape: \(shape)")
             //print("after shape: \(numpy.shape)")
@@ -179,11 +189,26 @@ public class ParameterConverter {
         }
         
         do {
-            let ret = try future.wait()
+            let ret = try future?.wait()
             return ret
         } catch let error {
             print(error)
             return nil
+        }
+    }
+    
+    public func finalize() {
+        initGroup()
+        let future = group?.next().submit {
+            PythonSupport.finalize()
+        }
+        
+        do {
+            try future?.wait()
+            try group?.syncShutdownGracefully()
+            group = nil
+        } catch let error {
+            print(error)
         }
     }
 }
