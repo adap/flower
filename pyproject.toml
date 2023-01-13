@@ -65,6 +65,7 @@ simulation = ["ray"]
 types-protobuf = "==3.19.18"
 types-setuptools = "==57.4.14"
 types-dataclasses = "==0.6.5"
+clang-format = "==15.0.6"
 isort = "==5.10.1"
 black = "==22.8.0"
 docformatter = "==1.5.0"
