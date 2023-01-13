@@ -20,17 +20,32 @@ package flwr.proto;
 import "flwr/proto/task.proto";
 
 service Fleet {
-  // Get tasks
-  rpc GetTasks(GetTasksRequest) returns (GetTasksResponse) {}
+  // Retrieve one or more tasks, if possible
+  //
+  // HTTP API path: /api/v1/fleet/pull-task-ins
+  rpc PullTaskIns(PullTaskInsRequest) returns (PullTaskInsResponse) {}
 
-  // Get results
-  rpc CreateResults(CreateResultsRequest) returns (CreateResultsResponse) {}
+  // Complete one or more tasks, if possible
+  //
+  // HTTP API path: /api/v1/fleet/push-task-res
+  rpc PushTaskRes(PushTaskResRequest) returns (PushTaskResResponse) {}
 }
 
-// GetTasks messages
-message GetTasksRequest {}
-message GetTasksResponse { repeated Task task = 1; }
+// PullTaskIns messages
+message PullTaskInsRequest {
+  uint64 node_id = 1;
+  repeated string task_ids = 2;
+}
+message PullTaskInsResponse {
+  Reconnect reconnect = 1;
+  repeated TaskIns task_ins_set = 2;
+}
 
-// CreateResults messages
-message CreateResultsRequest { repeated Result results = 1; }
-message CreateResultsResponse {}
+// PushTaskRes messages
+message PushTaskResRequest { repeated TaskRes task_res_set = 1; }
+message PushTaskResResponse {
+  Reconnect reconnect = 1;
+  map<string, uint32> results = 2;
+}
+
+message Reconnect { uint64 reconnect = 1; }

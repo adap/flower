@@ -24,20 +24,23 @@ service Driver {
   rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
 
   // Create one or more tasks
-  rpc CreateTasks(CreateTasksRequest) returns (CreateTasksResponse) {}
+  rpc PushTaskIns(PushTaskInsRequest) returns (PushTaskInsResponse) {}
 
   // Get task results
-  rpc GetResults(GetResultsRequest) returns (GetResultsResponse) {}
+  rpc PullTaskRes(PullTaskResRequest) returns (PullTaskResResponse) {}
 }
 
 // GetNodes messages
 message GetNodesRequest {}
 message GetNodesResponse { repeated uint64 node_ids = 1; }
 
-// CreateTasks messages
-message CreateTasksRequest { repeated TaskAssignment task_assignments = 1; }
-message CreateTasksResponse { repeated uint64 task_ids = 1; }
+// PushTaskIns messages
+message PushTaskInsRequest { repeated TaskIns task_ins_set = 1; }
+message PushTaskInsResponse { repeated string task_ids = 2; }
 
-// GetResults messages
-message GetResultsRequest { repeated uint64 task_ids = 1; }
-message GetResultsResponse { repeated Result results = 1; }
+// PullTaskRes messages
+message PullTaskResRequest {
+  uint64 node_id = 1;
+  repeated string task_ids = 2;
+}
+message PullTaskResResponse { repeated TaskRes task_res_set = 1; }
