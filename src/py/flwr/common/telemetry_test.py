@@ -56,7 +56,7 @@ class TelemetryTest(unittest.TestCase):
 
     @mock.patch("flwr.common.telemetry.FLWR_TELEMETRY_ENABLED", "0")
     def test_telemetry_disabled(self) -> None:
-        """Test if disableing sending works."""
+        """Test opt-out."""
         # Prepare
         expected = "disabled"
 
