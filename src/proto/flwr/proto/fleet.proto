@@ -38,6 +38,7 @@ message PullTaskInsRequest {
 }
 message PullTaskInsResponse {
   Reconnect reconnect = 1;
+  repeated TaskIns task_ins_set = 2;
 }
 
 // PushTaskRes messages
