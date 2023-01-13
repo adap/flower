@@ -40,6 +40,7 @@ for server_round in range(num_rounds):
             
         time.sleep(3)
 
+    # Sample one or three nodes
     num_node_ids_to_sample = 3 if len(all_node_ids) >= 3 else 1
     sampled_node_ids: List[int] = random.sample(all_node_ids, num_node_ids_to_sample)
     print(f"Sampled {len(sampled_node_ids)} node IDs: {sampled_node_ids}")
