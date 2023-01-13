@@ -32,7 +32,7 @@ Flower telemetry collects the following metrics:
 
 **Operating system.** Enables us to answer questions such as: *Should we create more guides for Linux, macOS, or Windows?*
 
-**Python version.** Knowing the Python version helps us, for example, decide whether we should invest effort into supporting old versions of Python or stop supporting them and start taking advantage of new Python features.
+**Python version.** Knowing the Python version helps us, for example, to decide whether we should invest effort into supporting old versions of Python or stop supporting them and start taking advantage of new Python features.
 
 **CPU/GPU properties.** Knowing some general data about CPU/GPU properties helps us to understand the hardware environment Flower is being used in and whether we should, for example, put more effort into supporting low-resource environments.
 
