@@ -68,7 +68,7 @@ DPFedAvgAdaptive
 
 The additional functionality required to facilitate adaptive clipping has been provided in :code:`DPFedAvgAdaptive`, a subclass of :code:`DPFedAvgFixed`. It overrides the above-mentioned methods to do the following. 
 
-#. :code:`configure_fit()` : It intercepts the config dict returned by :code:`super.configure_fit()` to add the key-value pair :code:`dpfedavg_adaptive_clip_enabled:True`to it, which the client interprets as an instruction to include an indicator bit (1 if update norm <= clipping threshold, 0 otherwise) in the results returned by it. 
+#. :code:`configure_fit()` : It intercepts the config dict returned by :code:`super.configure_fit()` to add the key-value pair :code:`dpfedavg_adaptive_clip_enabled:True` to it, which the client interprets as an instruction to include an indicator bit (1 if update norm <= clipping threshold, 0 otherwise) in the results returned by it. 
 
 #. :code:`aggregate_fit()` : It follows a call to :code:`super.aggregate_fit()` with one to :code:`__update_clip_norm__()`, a procedure which adjusts the clipping threshold on the basis of the indicator bits received from the sampled clients. 
 
