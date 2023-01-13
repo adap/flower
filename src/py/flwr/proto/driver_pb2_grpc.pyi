@@ -13,14 +13,14 @@ class DriverStub:
         flwr.proto.driver_pb2.GetNodesResponse]
     """Return a set of nodes"""
 
-    CreateTasks: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.driver_pb2.CreateTasksRequest,
-        flwr.proto.driver_pb2.CreateTasksResponse]
+    PushTaskIns: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.driver_pb2.PushTaskInsRequest,
+        flwr.proto.driver_pb2.PushTaskInsResponse]
     """Create one or more tasks"""
 
-    GetResults: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.driver_pb2.GetResultsRequest,
-        flwr.proto.driver_pb2.GetResultsResponse]
+    PullTaskRes: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.driver_pb2.PullTaskResRequest,
+        flwr.proto.driver_pb2.PullTaskResResponse]
     """Get task results"""
 
 
@@ -34,18 +34,18 @@ class DriverServicer(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def CreateTasks(self,
-        request: flwr.proto.driver_pb2.CreateTasksRequest,
+    def PushTaskIns(self,
+        request: flwr.proto.driver_pb2.PushTaskInsRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.driver_pb2.CreateTasksResponse:
+    ) -> flwr.proto.driver_pb2.PushTaskInsResponse:
         """Create one or more tasks"""
         pass
 
     @abc.abstractmethod
-    def GetResults(self,
-        request: flwr.proto.driver_pb2.GetResultsRequest,
+    def PullTaskRes(self,
+        request: flwr.proto.driver_pb2.PullTaskResRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.driver_pb2.GetResultsResponse:
+    ) -> flwr.proto.driver_pb2.PullTaskResResponse:
         """Get task results"""
         pass
 

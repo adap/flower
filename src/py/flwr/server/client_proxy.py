@@ -36,6 +36,8 @@ from flwr.common import (
 class ClientProxy(ABC):
     """Abstract base class for Flower client proxies."""
 
+    node_id: int
+
     def __init__(self, cid: str):
         self.cid = cid
         self.properties: Properties = {}
