@@ -24,7 +24,7 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         self.set_parameters(parameters)
 
-        trainer = pl.Trainer(max_epochs=1, progress_bar_refresh_rate=0)
+        trainer = pl.Trainer(max_epochs=1)
         trainer.fit(self.model, self.train_loader, self.val_loader)
 
         return self.get_parameters(config={}), 55000, {}
@@ -32,7 +32,7 @@ class FlowerClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
 
-        trainer = pl.Trainer(progress_bar_refresh_rate=0)
+        trainer = pl.Trainer()
         results = trainer.test(self.model, self.test_loader)
         loss = results[0]["test_loss"]
 
