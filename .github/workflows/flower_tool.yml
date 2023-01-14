@@ -13,7 +13,7 @@ on:
       - "src/py/flwr_tool/**"
 
 env:
-  FLWR_TELEMETRY_ENABLED: ${{ vars.FLWR_TELEMETRY_ENABLED }}
+  FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
   test_tools:

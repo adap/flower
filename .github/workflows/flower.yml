@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  FLWR_TELEMETRY_ENABLED: ${{ vars.FLWR_TELEMETRY_ENABLED }}
+  FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
   test_core:
