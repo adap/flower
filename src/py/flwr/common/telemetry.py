@@ -20,6 +20,7 @@ import logging
 import os
 import platform
 import urllib.request
+import uuid
 from concurrent.futures import Future, ThreadPoolExecutor
 from enum import Enum, auto
 from typing import Any, Dict, List, Optional, Union, cast
@@ -33,6 +34,8 @@ TELEMETRY_EVENTS_URL = "https://telemetry.flower.dev/api/v1/event"
 
 LOGGER_NAME = "flwr-telemetry"
 LOGGER_LEVEL = logging.DEBUG
+
+UUID = str(uuid.uuid4())
 
 
 def _configure_logger(log_level: int) -> None:
@@ -125,7 +128,6 @@ def create_event(event_type: EventType) -> str:
     """Create telemetry event."""
     date = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
     context = {
-        "date": date,
         "flower": {
             "package_name": package_name,
             "package_version": package_version,
@@ -142,6 +144,10 @@ def create_event(event_type: EventType) -> str:
             "machine": platform.machine(),
             "architecture": platform.architecture(),
             "version": platform.uname().version,
+        },
+        "metadata": {
+            "uuid": UUID,
+            "date": date,
         },
     }
     payload = {
