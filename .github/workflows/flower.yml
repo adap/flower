@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+env:
+  FLWR_TELEMETRY_ENABLED: ${{ vars.FLWR_TELEMETRY_ENABLED }}
+
 jobs:
   test_core:
     runs-on: ubuntu-22.04

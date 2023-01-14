@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+env:
+  FLWR_TELEMETRY_ENABLED: ${{ vars.FLWR_TELEMETRY_ENABLED }}
+
 defaults:
   run:
     working-directory: baselines

@@ -12,6 +12,9 @@ on:
     paths:
       - "src/py/flwr_tool/**"
 
+env:
+  FLWR_TELEMETRY_ENABLED: ${{ vars.FLWR_TELEMETRY_ENABLED }}
+
 jobs:
   test_tools:
     runs-on: ubuntu-22.04

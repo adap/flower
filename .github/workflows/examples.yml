@@ -8,7 +8,36 @@ on:
     branches:
       - main
 
+env:
+  FLWR_TELEMETRY_ENABLED: ${{ vars.FLWR_TELEMETRY_ENABLED }}
+
 jobs:
+  test_quickstarts:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        example: [
+          quickstart_aws,
+          quickstart_cpp,
+          quickstart_huggingface,
+          quickstart_jax,
+          quickstart_mlcube,
+          quickstart_mxnet,
+          quickstart_pandas,
+          quickstart_pytorch,
+          quickstart_pytorch_lightning,
+          quickstart_tensorflow
+        ]
+    steps:
+      - uses: actions/checkout@v3
+      # - name: Set up Python
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: 3.9.16
+      - name: Echo me
+        run: |
+          echo ${{ matrix.example }} aslkfjsldkfjasdlfjldsajflkadsjf
+
   test_quickstart_pytorch:
     runs-on: ubuntu-22.04
     steps:
