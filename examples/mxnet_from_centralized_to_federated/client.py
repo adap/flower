@@ -26,7 +26,7 @@ class MNISTClient(fl.client.NumPyClient):
         self.val_data = val_data
         self.device = device
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config: Dict) -> List[np.ndarray]:
         # Return model parameters as a list of NumPy Arrays
         param = []
         for val in self.model.collect_params(".*weight").values():
@@ -50,7 +50,7 @@ class MNISTClient(fl.client.NumPyClient):
             self.model, self.train_data, epoch=2, device=self.device
         )
         results = {"accuracy": accuracy[1], "loss": loss[1]}
-        return self.get_parameters(), num_examples, results
+        return self.get_parameters(config={}), num_examples, results
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict
