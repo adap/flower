@@ -3,7 +3,7 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 # Disable telemetry for development
-./dev/disable-telemetry.sh
+./dev/set-flwr-envs.sh
 
 # Remove caches
 ./dev/rm-caches.sh
