@@ -34,7 +34,7 @@ copyright = "2022 Adap GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.2.0"
+release = "1.3.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -148,3 +148,7 @@ nbsphinx_epilog = _open_in_colab_button
 # require.js script added by `nbsphinx`. We can only enforce this in the theme
 # itself.
 mermaid_version = ""
+
+# -- Options for MyST config  -------------------------------------
+# Enable this option to link to headers (`#`, `##`, or `###`)
+myst_heading_anchors = 3
