@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
 jobs:
   test_core:
     runs-on: ubuntu-22.04
