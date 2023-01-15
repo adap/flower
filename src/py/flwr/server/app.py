@@ -19,9 +19,8 @@ from dataclasses import dataclass
 from logging import INFO, WARN
 from typing import Optional, Tuple
 
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.logger import log
-from flwr.common.telemetry import EventType, event
 from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
 from flwr.server.client_manager import ClientManager, SimpleClientManager

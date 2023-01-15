@@ -35,8 +35,6 @@ TELEMETRY_EVENTS_URL = "https://telemetry.flower.dev/api/v1/event"
 LOGGER_NAME = "flwr-telemetry"
 LOGGER_LEVEL = logging.DEBUG
 
-EVENT_GROUP = str(uuid.uuid4())
-
 
 def _configure_logger(log_level: int) -> None:
     console_handler = logging.StreamHandler()
@@ -102,10 +100,11 @@ class EventType(str, Enum):
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.
-state: Dict[str, Optional[ThreadPoolExecutor]] = {
+state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
     # Will be assigned ThreadPoolExecutor(max_workers=1)
     # in event() the first time it's required
-    "executor": None
+    "executor": None,
+    "group": None,
 }
 
 # In Python 3.7 pylint will throw an error stating that
@@ -126,9 +125,12 @@ def event(event_type: EventType) -> Future:  # type: ignore
 
 def create_event(event_type: EventType) -> str:
     """Create telemetry event."""
+    if state["group"] is None:
+        state["group"] = str(uuid.uuid4())
+
     date = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
     context = {
-        "event_group": EVENT_GROUP,
+        "group": state["group"],
         "date": date,
         "flower": {
             "package_name": package_name,

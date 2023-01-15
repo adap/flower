@@ -21,11 +21,12 @@ from typing import Callable, Dict, Optional, Union
 
 from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
+    EventType,
+    event,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
 from flwr.common.logger import log
-from flwr.common.telemetry import EventType, event
 from flwr.common.typing import (
     Code,
     EvaluateIns,
