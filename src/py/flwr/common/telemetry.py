@@ -35,7 +35,7 @@ TELEMETRY_EVENTS_URL = "https://telemetry.flower.dev/api/v1/event"
 LOGGER_NAME = "flwr-telemetry"
 LOGGER_LEVEL = logging.DEBUG
 
-UUID = str(uuid.uuid4())
+EVENT_GROUP = str(uuid.uuid4())
 
 
 def _configure_logger(log_level: int) -> None:
@@ -128,6 +128,8 @@ def create_event(event_type: EventType) -> str:
     """Create telemetry event."""
     date = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
     context = {
+        "event_group": EVENT_GROUP,
+        "date": date,
         "flower": {
             "package_name": package_name,
             "package_version": package_version,
@@ -144,10 +146,6 @@ def create_event(event_type: EventType) -> str:
             "machine": platform.machine(),
             "architecture": platform.architecture(),
             "version": platform.uname().version,
-        },
-        "metadata": {
-            "uuid": UUID,
-            "date": date,
         },
     }
     payload = {
