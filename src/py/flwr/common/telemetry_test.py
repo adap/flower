@@ -18,7 +18,7 @@ import time
 import unittest
 from unittest import mock
 
-from flwr.common.telemetry import EventType, event
+from flwr.common import EventType, event
 
 
 class TelemetryTest(unittest.TestCase):
