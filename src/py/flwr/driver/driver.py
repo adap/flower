@@ -20,9 +20,9 @@ from typing import Optional
 
 import grpc
 
+from flwr.common import EventType, event
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.telemetry import EventType, event
 from flwr.proto import driver_pb2, driver_pb2_grpc
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"

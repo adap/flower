@@ -22,8 +22,8 @@ from typing import Any, Callable, Dict, List, Optional
 import ray
 
 from flwr.client.client import Client
+from flwr.common import EventType, event
 from flwr.common.logger import log
-from flwr.common.telemetry import EventType, event
 from flwr.server import Server
 from flwr.server.app import ServerConfig, _fl, _init_defaults
 from flwr.server.client_manager import ClientManager
