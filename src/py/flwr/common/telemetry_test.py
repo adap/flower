@@ -24,6 +24,7 @@ from flwr.common.telemetry import EventType, event
 class TelemetryTest(unittest.TestCase):
     """Tests for the telemetry module."""
 
+    @mock.patch("flwr.common.telemetry.FLWR_TELEMETRY_ENABLED", "1")
     def test_event(self) -> None:
         """Test if sending works against the actual API."""
         # Prepare
@@ -36,6 +37,7 @@ class TelemetryTest(unittest.TestCase):
         # Assert
         self.assertEqual(actual, expected)
 
+    @mock.patch("flwr.common.telemetry.FLWR_TELEMETRY_ENABLED", "1")
     def test_not_blocking(self) -> None:
         """Test if the code is blocking.
 
