@@ -136,14 +136,12 @@ final class FlowerTests: XCTestCase {
         let evaluateRes = EvaluateRes(loss: 0.3, numExamples: 3, metrics: metrics, status: status)
         let proto = evaluateResToProto(res: evaluateRes)
         let result = evaluateResFromProto(msg: proto)
-        // fails due to argument order
         XCTAssertEqual(evaluateRes, result)
     }
     
     func testPropertiesProtoConversion() throws {
         let proto = propertiesToProto(properties: properties)
         let result = propertiesFromProto(proto: proto)
-        // fails due to argument order
         XCTAssertEqual(properties, result)
     }
     
