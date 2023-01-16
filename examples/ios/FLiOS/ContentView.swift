@@ -39,7 +39,7 @@ struct ContentView: View {
                     .font(.largeTitle)
                 Spacer()
                 Form {
-                    Section(header: Text("Preparing Dataset")) {
+                    Section(header: Text("Prepare Dataset")) {
                         HStack {
                             Text("Training Dataset: \(self.clientModel.trainingBatchStatus.description)")
                             /*if self.isDataReady(for: self.model.trainingBatchStatus) {
@@ -83,7 +83,7 @@ struct ContentView: View {
                         }
                         
                     }
-                    Section(header: Text("Local Training")) {
+                    Section(header: Text("Prepare Model")) {
                         HStack {
                             Text("Compile Model")
                             Spacer()
@@ -101,7 +101,8 @@ struct ContentView: View {
                             }
                             .disabled(self.clientModel.testBatchStatus != BatchPreparationStatus.ready || self.clientModel.trainingBatchStatus != BatchPreparationStatus.ready)
                         }
-                        
+                    }
+                    Section(header: Text("Local Training")) {
                         Stepper(value: self.$clientModel.epoch, in: 1...10, label: { Text("Epoch:  \(self.clientModel.epoch)")})
                             .disabled(self.clientModel.modelCompilationStatus != BatchPreparationStatus.ready)
                         
