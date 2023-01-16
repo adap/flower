@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum Code {
+public enum Code: Equatable {
     typealias RawValue = Int
     case ok
     case getPropertiesNotImplemented
@@ -39,7 +39,7 @@ public enum Code {
     }
 }
 
-public struct Scalar {
+public struct Scalar: Equatable {
     public var bool: Bool?
     public var bytes: Data?
     public var float: Float?
@@ -50,7 +50,14 @@ public struct Scalar {
 public typealias Metrics = [String: Scalar]
 public typealias Properties = [String: Scalar]
 
-public struct Status {
+public struct Status: Equatable {
+    public static func == (lhs: Status, rhs: Status) -> Bool {
+        if lhs.code == rhs.code && lhs.message == rhs.message {
+            return true
+        }
+        return false
+    }
+    
     public var code: Code
     public var message: String
     
@@ -60,7 +67,7 @@ public struct Status {
     }
 }
 
-public struct Parameters {
+public struct Parameters: Equatable {
     public var tensors: [Data]
     public var tensorType: String
     
@@ -70,7 +77,7 @@ public struct Parameters {
     }
 }
 
-public struct GetParametersRes {
+public struct GetParametersRes: Equatable {
     public var parameters: Parameters
     public var status: Status
     
@@ -80,12 +87,12 @@ public struct GetParametersRes {
     }
 }
 
-public struct FitIns {
+public struct FitIns: Equatable {
     public var parameters: Parameters
     public var config: [String: Scalar]
 }
 
-public struct FitRes {
+public struct FitRes: Equatable {
     public var parameters: Parameters
     public var numExamples: Int
     public var metrics: Metrics? = nil
@@ -99,12 +106,19 @@ public struct FitRes {
     }
 }
 
-public struct EvaluateIns {
+public struct EvaluateIns: Equatable {
     public var parameters: Parameters
     public var config: [String: Scalar]
 }
 
-public struct EvaluateRes {
+public struct EvaluateRes: Equatable {
+    public static func == (lhs: EvaluateRes, rhs: EvaluateRes) -> Bool {
+        if lhs.loss == rhs.loss && lhs.numExamples == rhs.numExamples && lhs.metrics == rhs.metrics && lhs.status == rhs.status {
+            return true
+        }
+        return false
+    }
+    
     public var loss: Float
     public var numExamples: Int
     public var metrics: Metrics? = nil
@@ -118,11 +132,11 @@ public struct EvaluateRes {
     }
 }
 
-public struct GetPropertiesIns {
+public struct GetPropertiesIns: Equatable {
     public var config: Properties
 }
 
-public struct GetPropertiesRes {
+public struct GetPropertiesRes: Equatable {
     public var properties: Properties
     public var status: Status
     public init(properties: Properties, status: Status) {
@@ -131,10 +145,10 @@ public struct GetPropertiesRes {
     }
 }
 
-public struct Reconnect {
+public struct Reconnect: Equatable {
     public var seconds: Int?
 }
 
-public struct Disconnect {
+public struct Disconnect: Equatable {
     public var reason: String
 }
