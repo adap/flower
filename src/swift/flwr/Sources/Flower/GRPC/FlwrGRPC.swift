@@ -84,6 +84,7 @@ public class FlwrGRPC {
             try self.eventLoopGroup.syncShutdownGracefully()
             
             if #available(iOS 14.0, *) {
+                print("Closing python event loop group")
                 ParameterConverter.shared.finalize()
             }
             

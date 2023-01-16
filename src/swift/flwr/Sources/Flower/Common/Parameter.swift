@@ -31,6 +31,7 @@ public class ParameterConverter {
     
     private func initGroup() {
         if group == nil {
+            print("Opening Python event loop group")
             group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
             
             let future = group?.next().submit {
