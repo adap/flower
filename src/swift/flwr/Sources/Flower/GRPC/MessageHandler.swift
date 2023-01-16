@@ -33,10 +33,6 @@ func reconnect(reconnectMsg: Flwr_Proto_ServerMessage.ReconnectIns) -> (Flwr_Pro
     if reconnectMsg.seconds != 0 {
         reason = .reconnect
         sleepDuration = Int(reconnectMsg.seconds)
-    } else {
-        if #available(iOS 14.0, *) {
-            ParameterConverter.shared.finalize()
-        }
     }
     var disconnect = Flwr_Proto_ClientMessage.DisconnectRes()
     disconnect.reason = reason
