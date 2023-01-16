@@ -9,9 +9,11 @@ import Foundation
 import flwr
 import CoreML
 import Compression
+import Combine
 
 public class ClientModel: ObservableObject {
     private var coreMLClient: CoreMLClient?
+    private var flwrGRPC: FlwrGRPC?
     private static let appDirectory = FileManager.default.urls(for: .applicationSupportDirectory,
                                                                in: .userDomainMask).first!
     
@@ -31,7 +33,7 @@ public class ClientModel: ObservableObject {
     
     @Published public var federatedServerStatus = ServerStatus.stop
     
-    
+    private var cancellable = Set<AnyCancellable>()
     
     public func prepareTrainDataset() {
         trainingBatchStatus = .preparing(count: 0)
@@ -128,7 +130,8 @@ public class ClientModel: ObservableObject {
     public func startFederatedLearning() {
         self.federatedServerStatus = .run
         initCoreMLClient()
-        startClient(serverHost: hostname, serverPort: port, client: coreMLClient!)
+        self.flwrGRPC = FlwrGRPC(serverHost: hostname, serverPort: port)
+        self.flwrGRPC?.startFlwrGRPC(client: coreMLClient!)
     }
     
     /// Extract file

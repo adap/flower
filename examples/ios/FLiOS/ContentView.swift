@@ -170,7 +170,7 @@ struct ContentView: View {
                                 }
                                 
                             }
-                            .disabled(self.clientModel.testBatchStatus != BatchPreparationStatus.ready || self.clientModel.trainingBatchStatus != BatchPreparationStatus.ready)
+                            .disabled(self.clientModel.modelCompilationStatus != BatchPreparationStatus.ready)
                         }
                     }
                 }
