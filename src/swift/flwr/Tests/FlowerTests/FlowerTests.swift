@@ -17,7 +17,7 @@ final class FlowerTests: XCTestCase {
     
     // ParameterConverter
     func testParameterConverter() throws {
-
+        
         let output1 = pConv.dataToArray(
             data: pConv.arrayToData(
                 array: input1,
@@ -36,7 +36,7 @@ final class FlowerTests: XCTestCase {
     
     // Serde
     func testParameterProtoConverter() throws {
-
+        
         let data1 = pConv.arrayToData(array: input1, shape: [2, 2])!
         let data2 = pConv.arrayToData(array: input2, shape: [2, 2])!
         let parameters = Parameters(tensors: [data1, data2], tensorType: "testTensor")
@@ -52,7 +52,7 @@ final class FlowerTests: XCTestCase {
         let result = statusFromProto(msg: proto)
         XCTAssertEqual(status, result)
     }
-
+    
     func testReconnectProtoConverter() throws {
         
         let proto = reconnectToProto(reconnect: reconnect)
@@ -68,7 +68,7 @@ final class FlowerTests: XCTestCase {
     }
     
     func testParametersResProtoConversion() throws {
-
+        
         let data1 = pConv.arrayToData(array: input1, shape: [2, 2])!
         let data2 = pConv.arrayToData(array: input2, shape: [2, 2])!
         let parameters = Parameters(tensors: [data1, data2], tensorType: "testTensor")
@@ -79,9 +79,9 @@ final class FlowerTests: XCTestCase {
         XCTAssertEqual(parametersRes, result)
     }
     
-
+    
     func testFitResProtoConversion() throws {
-
+        
         let data1 = pConv.arrayToData(array: input1, shape: [2, 2])!
         let data2 = pConv.arrayToData(array: input2, shape: [2, 2])!
         let parameters = Parameters(tensors: [data1, data2], tensorType: "testTensor")
@@ -162,5 +162,3 @@ final class FlowerTests: XCTestCase {
         XCTAssertEqual(scalar, result)
     }
 }
-
-
