@@ -166,7 +166,7 @@ def get_lr_schedule(
 
 def get_evaluate_fn(
     model: tf.keras.Model, num_classes: int, xy_test: Tuple[np.ndarray, np.ndarray]
-) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
+) -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
     ds_test = build_dataset(
@@ -177,7 +177,7 @@ def get_evaluate_fn(
         augment=False,
     )
 
-    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(weights: fl.common.NDArrays) -> Optional[Tuple[float, float]]:
         """Use entire test set for evaluation."""
         model.set_weights(weights)
         lss, acc = keras_evaluate(model, ds_test, batch_size=len(xy_test[0]))

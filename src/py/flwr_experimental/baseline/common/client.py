@@ -16,7 +16,7 @@
 
 
 from logging import DEBUG
-from typing import Tuple
+from typing import Dict, Tuple
 
 import numpy as np
 import tensorflow as tf
@@ -72,12 +72,12 @@ class VisionClassificationClient(fl.client.Client):
         self.num_examples_test = len(xy_test[0])
         self.delay_factor = delay_factor
 
-    def get_parameters(self) -> fl.common.ParametersRes:
+    def get_parameters(self, config: Dict[str, fl.common.Scalar]) -> fl.common.ParametersRes:
         parameters = fl.common.ndarrays_to_parameters(self.model.get_weights())
         return fl.common.ParametersRes(parameters=parameters)
 
     def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
-        weights: fl.common.Weights = fl.common.parameters_to_ndarrays(ins.parameters)
+        weights: fl.common.NDArrays = fl.common.parameters_to_ndarrays(ins.parameters)
         config = ins.config
         log(
             DEBUG,

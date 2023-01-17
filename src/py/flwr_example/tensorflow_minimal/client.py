@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     # Define Flower client
     class CifarClient(fl.client.NumPyClient):
-        def get_parameters(self):  # type: ignore
+        def get_parameters(self, config):  # type: ignore
             return model.get_weights()
 
         def fit(self, parameters, config):  # type: ignore

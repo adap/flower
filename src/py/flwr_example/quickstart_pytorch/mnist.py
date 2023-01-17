@@ -329,17 +329,17 @@ class PytorchMNISTClient(fl.client.Client):
         self.device = device
         self.epochs = epochs
 
-    def get_weights(self) -> fl.common.Weights:
+    def get_weights(self) -> fl.common.NDArrays:
         """Get model weights as a list of NumPy ndarrays."""
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
-    def set_weights(self, weights: fl.common.Weights) -> None:
+    def set_weights(self, weights: fl.common.NDArrays) -> None:
         """Set model weights from a list of NumPy ndarrays.
 
         Parameters
         ----------
-        weights: fl.common.Weights
-            Weights received by the server and set to local model
+        weights: fl.common.NDArrays
+            NDArrays received by the server and set to local model
 
 
         Returns
@@ -354,9 +354,9 @@ class PytorchMNISTClient(fl.client.Client):
         )
         self.model.load_state_dict(state_dict, strict=True)
 
-    def get_parameters(self) -> fl.common.ParametersRes:
+    def get_parameters(self, config: Dict[str, fl.common.Scalar]) -> fl.common.ParametersRes:
         """Encapsulates the weights into Flower Parameters."""
-        weights: fl.common.Weights = self.get_weights()
+        weights: fl.common.NDArrays = self.get_weights()
         parameters = fl.common.ndarrays_to_parameters(weights)
         return fl.common.ParametersRes(parameters=parameters)
 
@@ -378,7 +378,7 @@ class PytorchMNISTClient(fl.client.Client):
         # indices across all clients
         np.random.seed(123)
 
-        weights: fl.common.Weights = fl.common.parameters_to_ndarrays(ins.parameters)
+        weights: fl.common.NDArrays = fl.common.parameters_to_ndarrays(ins.parameters)
         fit_begin = timeit.default_timer()
 
         # Set model parameters/weights
@@ -390,7 +390,7 @@ class PytorchMNISTClient(fl.client.Client):
         )
 
         # Return the refined weights and the number of examples used for training
-        weights_prime: fl.common.Weights = self.get_weights()
+        weights_prime: fl.common.NDArrays = self.get_weights()
         params_prime = fl.common.ndarrays_to_parameters(weights_prime)
         fit_duration = timeit.default_timer() - fit_begin
         return fl.common.FitRes(

@@ -10,7 +10,7 @@ from flwr.common import (
     FitRes,
     Parameters,
     Scalar,
-    Weights,
+    NDArrays,
     parameters_to_ndarrays,
     ndarrays_to_parameters,
 )

@@ -24,7 +24,7 @@ import torch
 import torchvision
 
 import flwr as fl
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, NDArrays
 
 from . import cifar
 
@@ -44,7 +44,7 @@ class CifarClient(fl.client.NumPyClient):
         self.trainloader = trainloader
         self.testloader = testloader
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config: Dict[str, fl.common.Scalar]) -> List[np.ndarray]:
         return self.model.get_weights()
 
     def fit(
