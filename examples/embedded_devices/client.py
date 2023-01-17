@@ -24,7 +24,7 @@ import flwr as fl
 import numpy as np
 import torch
 import torchvision
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, NDArrays
 
 import utils
 
@@ -33,12 +33,12 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
 
 
-def get_weights(model: torch.nn.ModuleList) -> fl.common.Weights:
+def get_weights(model: torch.nn.ModuleList) -> fl.common.NDArrays:
     """Get model weights as a list of NumPy ndarrays."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
 
-def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
+def set_weights(model: torch.nn.ModuleList, weights: fl.common.NDArrays) -> None:
     """Set model weights from a list of NumPy ndarrays."""
     state_dict = OrderedDict(
         {
@@ -68,7 +68,7 @@ class CifarClient(fl.client.Client):
     def get_parameters(self, config) -> ParametersRes:
         print(f"Client {self.cid}: get_parameters")
 
-        weights: Weights = get_weights(self.model)
+        weights: NDArrays = get_weights(self.model)
         parameters = fl.common.ndarrays_to_parameters(weights)
         return ParametersRes(parameters=parameters)
 
@@ -82,7 +82,7 @@ class CifarClient(fl.client.Client):
     def fit(self, ins: FitIns) -> FitRes:
         print(f"Client {self.cid}: fit")
 
-        weights: Weights = fl.common.parameters_to_ndarrays(ins.parameters)
+        weights: NDArrays = fl.common.parameters_to_ndarrays(ins.parameters)
         config = ins.config
         fit_begin = timeit.default_timer()
 
@@ -111,7 +111,7 @@ class CifarClient(fl.client.Client):
         utils.train(self.model, trainloader, epochs=epochs, device=DEVICE)
 
         # Return the refined weights and the number of examples used for training
-        weights_prime: Weights = get_weights(self.model)
+        weights_prime: NDArrays = get_weights(self.model)
         params_prime = fl.common.ndarrays_to_parameters(weights_prime)
         num_examples_train = len(self.trainset)
         metrics = {"duration": timeit.default_timer() - fit_begin}
