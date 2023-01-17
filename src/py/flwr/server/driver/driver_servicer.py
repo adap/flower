@@ -16,42 +16,127 @@
 
 
 from logging import INFO
+from typing import List, Optional, Set
+from uuid import UUID
 
 import grpc
 
 from flwr.common.logger import log
 from flwr.proto import driver_pb2_grpc
 from flwr.proto.driver_pb2 import (
-    CreateTasksRequest,
-    CreateTasksResponse,
     GetNodesRequest,
     GetNodesResponse,
-    GetResultsRequest,
-    GetResultsResponse,
+    PullTaskResRequest,
+    PullTaskResResponse,
+    PushTaskInsRequest,
+    PushTaskInsResponse,
 )
-from flwr.server.client_manager import ClientManager
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+from flwr.server.driver.driver_client_manager import DriverClientManager
+from flwr.server.driver.state import DriverState
 
 
 class DriverServicer(driver_pb2_grpc.DriverServicer):
     """Driver API servicer."""
 
-    def __init__(self, client_manager: ClientManager) -> None:
-        self.client_manager = client_manager
+    def __init__(
+        self,
+        driver_client_manager: DriverClientManager,
+        driver_state: DriverState,
+    ) -> None:
+        self.driver_client_manager = driver_client_manager
+        self.driver_state = driver_state
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
     ) -> GetNodesResponse:
+        """Get available nodes."""
         log(INFO, "DriverServicer.GetNodes")
-        return GetNodesResponse(node_ids=[])
+        all_ids: Set[int] = self.driver_client_manager.all_ids()
+        return GetNodesResponse(node_ids=list(all_ids))
 
-    def CreateTasks(
-        self, request: CreateTasksRequest, context: grpc.ServicerContext
-    ) -> CreateTasksResponse:
-        log(INFO, "DriverServicer.CreateTasks")
-        return CreateTasksResponse(task_ids=[])
+    def PushTaskIns(
+        self, request: PushTaskInsRequest, context: grpc.ServicerContext
+    ) -> PushTaskInsResponse:
+        """Push a set of TaskIns."""
+        log(INFO, "DriverServicer.PushTaskIns")
 
-    def GetResults(
-        self, request: GetResultsRequest, context: grpc.ServicerContext
-    ) -> GetResultsResponse:
-        log(INFO, "DriverServicer.GetResults")
-        return GetResultsResponse(results=[])
+        # Validate request
+        _raise_if(len(request.task_ins_list) == 0, "`task_ins_list` must not be empty")
+        for task_ins in request.task_ins_list:
+            _validate_incoming_task_ins(task_ins=task_ins)
+
+        # Store each TaskIns
+        task_ids: List[Optional[UUID]] = []
+        for task_ins in request.task_ins_list:
+            task_id: Optional[UUID] = self.driver_state.store_task_ins(
+                task_ins=task_ins
+            )
+            task_ids.append(task_id)
+
+        return PushTaskInsResponse(
+            task_ids=[str(task_id) if task_id else "" for task_id in task_ids]
+        )
+
+    def PullTaskRes(
+        self, request: PullTaskResRequest, context: grpc.ServicerContext
+    ) -> PullTaskResResponse:
+        """Pull a set of TaskRes."""
+        log(INFO, "DriverServicer.PullTaskRes")
+
+        # Convert each task_id str to UUID
+        task_ids: Set[UUID] = {UUID(task_id) for task_id in request.task_ids}
+
+        # Read from state
+        task_res_list: List[TaskRes] = self.driver_state.get_task_res(
+            task_ids=task_ids, limit=None
+        )
+        return PullTaskResResponse(task_res_list=task_res_list)
+
+
+def _validate_incoming_task_ins(task_ins: TaskIns) -> None:
+    """Validate incoming TaskIns."""
+
+    _raise_if(task_ins.task_id != "", "non-empty `task_id`")
+    _raise_if(task_ins.task is None, "`task` is `None`")
+
+    task: Task = task_ins.task
+
+    # Task producer
+    _raise_if(task.producer is None, "`producer` is `None`")
+    _raise_if(task.producer.node_id != 0, "`producer.node_id` is not 0")
+    _raise_if(not task.producer.anonymous, "`producer` is not anonymous")
+
+    # Task consumer
+    _raise_if(task.consumer is None, "`consumer` is `None`")
+    _raise_if(
+        task.consumer.anonymous and task.consumer.node_id != 0,
+        "anonymous consumers MUST NOT set a `node_id`",
+    )
+    _raise_if(
+        not task.consumer.anonymous and task.consumer.node_id == 0,
+        "non-anonymous consumer MUST provide a `node_id`",
+    )
+
+    # Created/delivered/TTL
+    _raise_if(task.created_at != "", "`created_at` must be an empty str")
+    _raise_if(task.delivered_at != "", "`delivered_at` must be an empty str")
+    _raise_if(task.ttl != "", "`ttl` must be an empty str")
+
+    # Legacy ServerMessage/ClientMessage
+    _raise_if(
+        task.legacy_client_message.HasField("msg"),
+        "`legacy_client_message` is not `None`",
+    )
+    _raise_if(
+        not task.legacy_server_message.HasField("msg"),
+        "`legacy_server_message` is `None`",
+    )
+
+    # Ancestors
+    _raise_if(len(task.ancestry) != 0, "`ancestry` is not empty")
+
+
+def _raise_if(validation_error: bool, detail: str) -> None:
+    if validation_error:
+        raise ValueError(f"Malformed PushTaskInsRequest: {detail}")

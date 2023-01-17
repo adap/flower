@@ -19,12 +19,14 @@ from dataclasses import dataclass
 from logging import INFO, WARN
 from typing import Optional, Tuple
 
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.logger import log
 from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
 from flwr.server.client_manager import ClientManager, SimpleClientManager
+from flwr.server.driver.driver_client_manager import DriverClientManager
 from flwr.server.driver.driver_servicer import DriverServicer
+from flwr.server.driver.state import DriverState
 from flwr.server.grpc_server.flower_service_servicer import FlowerServiceServicer
 from flwr.server.grpc_server.grpc_server import (
     generic_create_grpc_server,
@@ -120,6 +122,7 @@ def start_server(  # pylint: disable=too-many-arguments
     >>>     )
     >>> )
     """
+    event(EventType.START_SERVER_ENTER)
 
     # Initialize server and server config
     initialized_server, initialized_config = _init_defaults(
@@ -156,6 +159,8 @@ def start_server(  # pylint: disable=too-many-arguments
 
     # Stop the gRPC server
     grpc_server.stop(grace=1)
+
+    event(EventType.START_SERVER_LEAVE)
 
     return hist
 
@@ -203,12 +208,19 @@ def _fl(
 def run_server() -> None:
     """Run Flower server."""
     log(INFO, "Starting Flower server")
+    event(EventType.RUN_SERVER_ENTER)
 
-    client_manager: ClientManager = SimpleClientManager()
+    driver_state = DriverState()
+    driver_client_manager = DriverClientManager(
+        driver_state=driver_state,
+    )
 
     # Create Driver API gRPC server
     driver_server_address: str = DEFAULT_SERVER_ADDRESS_DRIVER
-    driver_servicer = DriverServicer(client_manager=client_manager)
+    driver_servicer = DriverServicer(
+        driver_client_manager=driver_client_manager,
+        driver_state=driver_state,
+    )
     driver_add_servicer_to_server_fn = add_DriverServicer_to_server
     driver_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(driver_servicer, driver_add_servicer_to_server_fn),
@@ -219,7 +231,9 @@ def run_server() -> None:
 
     # Create (legacy) Fleet API gRPC server
     fleet_server_address: str = DEFAULT_SERVER_ADDRESS_FLEET
-    fleet_servicer = FlowerServiceServicer(client_manager=client_manager)
+    fleet_servicer = FlowerServiceServicer(
+        client_manager=driver_client_manager,
+    )
     fleet_add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
@@ -247,3 +261,4 @@ def run_server() -> None:
     # Wait for termination of both servers
     driver_grpc_server.wait_for_termination()
     fleet_grpc_server.wait_for_termination()
+    event(EventType.RUN_SERVER_LEAVE)

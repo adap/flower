@@ -40,11 +40,15 @@ def train(net, trainloader, epochs):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    batch_count = 0
     for _ in range(epochs):
         for images, labels in tqdm(trainloader):
             optimizer.zero_grad()
             criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
             optimizer.step()
+            batch_count += 1
+            if batch_count == 100:
+                break  # Just do a few batches
 
 
 def test(net, testloader):

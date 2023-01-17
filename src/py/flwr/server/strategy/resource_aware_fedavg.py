@@ -353,7 +353,7 @@ class ResourceAwareFedAvg(FedAvg):
             for client, num_samples in these_clients:
                 client.resources["resources"] = {gpu_uuid: 1.0 / actual_num_clients}
                 client.resources["num_cpus"] = 1
-                num_steps = np.ceil(int(num_samples) // int(config["batch_size"]))
+                num_steps = np.ceil(int(num_samples) / int(config["batch_size"]))
                 self.client_configs_map[client.cid] = (node_id, gpu_uuid, num_steps)
                 client_fit_list.append((client, FitIns(parameters, this_config)))
 
