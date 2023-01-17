@@ -4,4 +4,4 @@
 python main.py 
 
 # Once finished, stop System Monitor for this node.
-ray stop 
+#ray stop 

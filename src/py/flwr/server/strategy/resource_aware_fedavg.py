@@ -16,11 +16,13 @@ from collections import defaultdict
 from logging import WARNING
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
+import copy
 import datetime
 import numpy as np
 import numpy.typing as npt
 import ray
 import pickle
+import time
 from time import sleep, time_ns
 from pathlib import Path, PurePath
 from ray.experimental.state.api import list_actors
@@ -88,7 +90,7 @@ class ResourceAwareFedAvg(FedAvg):
             str, Dict[str, int]
         ] = {},  # Eventually, change this to List[Profiles]
         num_warmup_steps: int = 100,
-        save_models_folder: Path = Path("/home/pedro/flwr_monitor/"),
+        save_models_folder: Path = Path("/local/scratch/pedro/experiments/"),
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -203,7 +205,8 @@ class ResourceAwareFedAvg(FedAvg):
                     self.cpu_resources[node_id] = v
 
     def create_gpu_poly_model(self, node_id: str, gpu_uuid: str):
-        poly_model = np.array([1.0, 1.0, 1.0])
+        # poly_model = np.array([1.0, 1.0, 1.0])
+        poly_model = np.array([1.0, 1.0])
         self.resources_model[(node_id, gpu_uuid)] = poly_model, 1
 
     def generate_client_priority(
@@ -219,34 +222,28 @@ class ResourceAwareFedAvg(FedAvg):
         parameters: Parameters,
         num_clients_per_gpu: int,
         config: Dict[str, Scalar],
+        num_steps_factor: float = 1.0,
     ) -> List[Tuple[ClientProxy, FitIns]]:
-
-        clients: List[ClientProxy] = client_manager.sample(
-            num_clients=num_clients_per_gpu * len(self.resources_model),
-            min_num_clients=num_clients_per_gpu * len(self.resources_model),
-        )
 
         client_fit_list: List[Tuple[ClientProxy, FitIns]] = []
 
         for (node_id, gpu_uuid), (_, max_num_clients) in self.resources_model.items():
             gpu_id = self.gpu_resources[node_id][gpu_uuid].gpu_id
 
-            _, max_num_clients = self.resources_model[(node_id, gpu_uuid)]
-            these_clients = clients[: min(max_num_clients, len(clients))]
+            clients: List[ClientProxy] = client_manager.sample(
+                num_clients=num_clients_per_gpu,
+                min_num_clients=num_clients_per_gpu,
+            )
 
-            for client in these_clients:
+            for client in clients:
                 # Ray node allocation
+                client.resources = copy.deepcopy({})
                 client.resources["num_cpus"] = 1
                 client.resources["resources"] = {gpu_uuid: 1.0 / max_num_clients}
-                num_steps = (
-                    np.ceil(
-                        self.profiles["train"][client.cid] // int(config["batch_size"])
-                    )
-                    * config["epochs"]
-                )
+                num_steps = int(self.num_warmup_steps * num_steps_factor)
                 this_config = dict(
                     config,
-                    **{"gpu_id": gpu_id, "local_steps": self.num_warmup_steps},
+                    **{"gpu_id": gpu_id, "local_steps": num_steps},
                 )
                 self.client_configs_map[client.cid] = (
                     node_id,
@@ -254,9 +251,61 @@ class ResourceAwareFedAvg(FedAvg):
                     num_steps,
                 )
                 client_fit_list.append((client, FitIns(parameters, this_config)))
+
         return client_fit_list
 
-    def aggregate_warmup_round_time(self, results: List[Tuple[ClientProxy, FitRes]]):
+    def estimate_maximum_num_clients_per_gpu(
+        self, node_id: str, max_all_proc_mem_used_mb, max_this_proc_mem_used_mb
+    ):
+        # Get GPU memory usage. Here we consider single gpu per task,
+        # But we should also consider all possible combinations of multiple GPUs as well.
+        # {task_id:{gpu_uuid:float}}
+        # Find maximum number of clients, considering the number of CPUs
+        # total_num_available_cpu_cores = self.cpu_resources[node_id].num_cores
+        node_ref = ray.experimental.state.api.get_node(node_id)
+        total_num_available_cpu_cores = node_ref["resources_total"]["CPU"]
+        total_num_gpus_in_this_node = sum(
+            [1 for a, _ in self.resources_model.keys() if a == node_id]
+        )
+        cores_per_gpu = total_num_available_cpu_cores // total_num_gpus_in_this_node
+
+        print(f"Maximum number of cores per GPU in node {node_id}: {cores_per_gpu}")
+
+        # Calculate maximum memory
+        for this_task, gpu_mem_dict in max_this_proc_mem_used_mb.items():
+            # Just one task per gpu, as scheduled
+            for (gpu_uuid, max_mem_this_proc_this_gpu) in gpu_mem_dict.items():
+                total_mem_this_gpu = self.gpu_resources[node_id][gpu_uuid].total_mem_mb
+                max_all_proc_mem = max_all_proc_mem_used_mb[gpu_uuid]
+                print(f"Total Memory for GPU: {gpu_uuid} = {total_mem_this_gpu}")
+                print(f"Max all proc mem GPU: {gpu_uuid} = {max_all_proc_mem}")
+                print(
+                    f"Max mem this process GPU: {gpu_uuid} {max_mem_this_proc_this_gpu}"
+                )
+
+                # Try and consider the system memory as well
+                vram_max_num_clients_this_gpu = int(
+                    (total_mem_this_gpu - max_all_proc_mem + max_mem_this_proc_this_gpu)
+                    / max_mem_this_proc_this_gpu
+                )
+                # max_num_clients_this_gpu = vram_max_num_clients_this_gpu
+                max_num_clients_this_gpu = min(
+                    vram_max_num_clients_this_gpu, cores_per_gpu
+                )
+
+                # Update the resource_model max number of clients per gpu
+                poly_model, t = self.resources_model[(node_id, gpu_uuid)]
+                self.resources_model[(node_id, gpu_uuid)] = (
+                    poly_model,
+                    max_num_clients_this_gpu,
+                )
+                print(
+                    f"Maximum number of clients for {node_id}, {gpu_uuid} = {max_num_clients_this_gpu}"
+                )
+                if vram_max_num_clients_this_gpu > cores_per_gpu:
+                    print("Limited by CPU cores.")
+
+    def aggregate_warmup_round(self, results: List[Tuple[ClientProxy, FitRes]]):
         task_to_cid: Dict[Scalar, str] = {}
         for client, result in results:
             this_task_id = result.metrics["_flwr.monitoring.task_id"]
@@ -270,6 +319,7 @@ class ResourceAwareFedAvg(FedAvg):
                 task_ids=[k for k in task_to_cid.keys()]
             )
             this_monitor_metrics = ray.get(obj_ref)
+            # Estimate VRAM used?
 
             # Find earliest Task starting time and latest
             # Task finishing time per GPU.
@@ -301,7 +351,8 @@ class ResourceAwareFedAvg(FedAvg):
             for node_id, gpu_uuid in self.resources_model.keys():
                 x_1 = num_clients[(node_id, gpu_uuid)]
                 x_2 = total_num_steps[(node_id, gpu_uuid)]
-                self.resource_model_x[(node_id, gpu_uuid)].append((1, x_1, x_2))
+                # self.resource_model_x[(node_id, gpu_uuid)].append((1, x_1, x_2))
+                self.resource_model_x[(node_id, gpu_uuid)].append((1, x_2))
                 self.resource_model_y[(node_id, gpu_uuid)].append(
                     (
                         finishing_times[(node_id, gpu_uuid)]
@@ -319,12 +370,18 @@ class ResourceAwareFedAvg(FedAvg):
         clients_with_weights.sort(key=lambda x: x[1], reverse=True)
 
         expected_training_times: List[float] = len(self.resources_model) * [0.0]
+        clients_count: List[int] = len(self.resources_model) * [0]
+        steps_count: List[int] = len(self.resources_model) * [0]
         node_gpu_mapping = [k for k in self.resources_model.keys()]
 
         client_fit_list: List[Tuple[ClientProxy, FitIns]] = []
-        while clients_with_weights:
+        for client, num_samples in clients_with_weights:
             # Choose which GPU to use, based on time
-            idx = expected_training_times.index(min(expected_training_times))
+            # idx = expected_training_times.index(min(expected_training_times))
+
+            # NOW MIN NUM batches
+            idx = steps_count.index(min(steps_count))
+
             node_id, gpu_uuid = node_gpu_mapping[idx]
             gpu_id = self.gpu_resources[node_id][gpu_uuid].gpu_id
 
@@ -335,31 +392,31 @@ class ResourceAwareFedAvg(FedAvg):
                 },
             )
 
-            # Associate multiple clients to a single GPU if possible (maximize VRAM utilization)
+            # Update the time for that GPU
+            clients_count[idx] = clients_count[idx] + 1
+            num_steps = np.ceil(int(num_samples) / int(config["batch_size"]))
+            steps_count[idx] = steps_count[idx] + num_steps
+
             model_poly, max_num_clients = self.resources_model[(node_id, gpu_uuid)]
-            actual_num_clients = min(max_num_clients, len(clients_with_weights))
 
-            these_clients = clients_with_weights[:actual_num_clients]
-            sum_local_steps = np.sum([x[1] for x in these_clients])
-
-            # consider largest num_steps
-            multi_client_per_gpu_expected_time = np.matmul(
-                model_poly, [1, actual_num_clients, sum_local_steps]
-            )
-
-            expected_training_times[idx] += multi_client_per_gpu_expected_time
+            # Evaluate the model
+            expected_training_times[idx] = np.matmul(model_poly, [1, steps_count[idx]])
+            # expected_training_times[idx] = np.matmul(
+            #    model_poly, [1, clients_count[idx], steps_count[idx]]
+            # )
 
             # Now associate resources
-            for client, num_samples in these_clients:
-                client.resources["resources"] = {gpu_uuid: 1.0 / actual_num_clients}
-                client.resources["num_cpus"] = 1
-                num_steps = np.ceil(int(num_samples) / int(config["batch_size"]))
-                self.client_configs_map[client.cid] = (node_id, gpu_uuid, num_steps)
-                client_fit_list.append((client, FitIns(parameters, this_config)))
+            client.resources = copy.deepcopy({})
+            client.resources["resources"] = {gpu_uuid: 1.0 / max_num_clients}
+            client.resources["num_cpus"] = 1
 
-            del clients_with_weights[:actual_num_clients]
+            self.client_configs_map[client.cid] = (node_id, gpu_uuid, num_steps)
+            client_fit_list.append((client, FitIns(parameters, this_config)))
+            # print(f'Requested Resources {client.cid} {client.resources["resources"]}')
 
-        print(f"Expected training time: {max(expected_training_times)} seconds.")
+        print(f"Expected training times: {expected_training_times} seconds.")
+        print(f"Client Allocation : {clients_count}")
+        print(f"Number of Steps Allocation : {steps_count}")
 
         return client_fit_list
 
@@ -390,6 +447,7 @@ class ResourceAwareFedAvg(FedAvg):
                 parameters=parameters,
                 num_clients_per_gpu=1,
                 config=config,
+                num_steps_factor=1.0,
             )
 
         elif server_round == 2:
@@ -398,6 +456,7 @@ class ResourceAwareFedAvg(FedAvg):
                 parameters=parameters,
                 num_clients_per_gpu=2,
                 config=config,
+                num_steps_factor=1.5,
             )
 
         elif server_round == 3:
@@ -406,6 +465,16 @@ class ResourceAwareFedAvg(FedAvg):
                 parameters=parameters,
                 num_clients_per_gpu=3,
                 config=config,
+                num_steps_factor=2,
+            )
+
+        elif server_round == 4:
+            client_fit_list = self.configure_warmup_round(
+                client_manager=client_manager,
+                parameters=parameters,
+                num_clients_per_gpu=3,
+                config=config,
+                num_steps_factor=1,
             )
 
         else:  # All other rounds
@@ -424,6 +493,7 @@ class ResourceAwareFedAvg(FedAvg):
             client_fit_list = self.associate_resources(
                 parameters, config, clients_with_weights
             )
+
         self.begin_round = time_ns()
         return client_fit_list
 
@@ -458,62 +528,17 @@ class ResourceAwareFedAvg(FedAvg):
                 )
                 this_monitor_metrics = ray.get(obj_ref)
 
-                # Get GPU memory usage. Here we consider single gpu per task,
-                # But we should also consider all possible combinations of multiple GPUs as well.
                 max_this_proc_mem_used_mb: Dict[
-                    str, Dict[str, float]  # {task_id:{gpu_uuid:float}}
+                    str, Dict[str, float]
                 ] = this_monitor_metrics["max_this_proc_mem_used_mb"]
+
                 max_all_proc_mem_used_mb = this_monitor_metrics[
                     "max_all_proc_mem_used_mb"
                 ]
-                # Find maximum number of clients, considering the number of CPUs
-                total_num_available_cpu_cores = self.cpu_resources[node_id].num_cores
-                cores_per_gpu = total_num_available_cpu_cores // len(
-                    self.resources_model
+
+                self.estimate_maximum_num_clients_per_gpu(
+                    node_id, max_all_proc_mem_used_mb, max_this_proc_mem_used_mb
                 )
-                print(f"Maximum number of cores per GPU: {cores_per_gpu}")
-
-                # Calculate maximum memory
-                for this_task, gpu_mem_dict in max_this_proc_mem_used_mb.items():
-                    # Just one task per gpu, as scheduled
-                    for (gpu_uuid, max_mem_this_proc_this_gpu) in gpu_mem_dict.items():
-                        total_mem_this_gpu = self.gpu_resources[node_id][
-                            gpu_uuid
-                        ].total_mem_mb
-                        max_all_proc_mem = max_all_proc_mem_used_mb[gpu_uuid]
-                        print(
-                            f"Total Memory for GPU: {gpu_uuid} = {total_mem_this_gpu}"
-                        )
-                        print(f"Max all proc mem GPU: {gpu_uuid} = {max_all_proc_mem}")
-                        print(
-                            f"Max mem this process GPU: {gpu_uuid} {max_mem_this_proc_this_gpu}"
-                        )
-
-                        # Try and consider the system memory as well
-                        vram_max_num_clients_this_gpu = int(
-                            (
-                                total_mem_this_gpu
-                                - max_all_proc_mem
-                                + max_mem_this_proc_this_gpu
-                            )
-                            / max_mem_this_proc_this_gpu
-                        )
-                        # max_num_clients_this_gpu = vram_max_num_clients_this_gpu
-                        max_num_clients_this_gpu = min(
-                            vram_max_num_clients_this_gpu, cores_per_gpu
-                        )
-
-                        # Update the resource_model max number of clients per gpu
-                        poly_model, t = self.resources_model[(node_id, gpu_uuid)]
-                        self.resources_model[(node_id, gpu_uuid)] = (
-                            poly_model,
-                            max_num_clients_this_gpu,
-                        )
-                        print(
-                            f"Maximum number of clients for {node_id}, {gpu_uuid} = {max_num_clients_this_gpu}"
-                        )
-                        if vram_max_num_clients_this_gpu > cores_per_gpu:
-                            print("Limited by CPU cores.")
 
                 # Include time for training single user
                 # t = t_0 + t_1*N + t_2*(sum) per GPU, here N = 1
@@ -522,21 +547,26 @@ class ResourceAwareFedAvg(FedAvg):
                     this_task_id = result.metrics["_flwr.monitoring.task_id"]
                     task_id_to_cid[this_task_id] = client.cid
 
+                # Collect initial and lastest time
                 for task_id, training_time_ns in this_monitor_metrics[
                     "training_times_ns"
                 ].items():
                     cid = task_id_to_cid[task_id]
                     node_id, gpu_uuid, num_steps = self.client_configs_map[cid]
-                    self.resource_model_x[(node_id, gpu_uuid)].append((1, 1, num_steps))
+                    # self.resource_model_x[(node_id, gpu_uuid)].append((1, 1, num_steps))
+                    self.resource_model_x[(node_id, gpu_uuid)].append((1, num_steps))
                     self.resource_model_y[(node_id, gpu_uuid)].append(
                         (training_time_ns[1] - training_time_ns[0]) / 1e9
                     )
 
         elif server_round == 2:
-            self.aggregate_warmup_round_time(results)
+            self.aggregate_warmup_round(results)
 
         elif server_round == 3:
-            self.aggregate_warmup_round_time(results)
+            self.aggregate_warmup_round(results)
+
+        elif server_round == 4:
+            self.aggregate_warmup_round(results)
 
             # fit Polynomials
             for (

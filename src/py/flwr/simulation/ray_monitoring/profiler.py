@@ -48,6 +48,7 @@ class RayClientProfilerProxy(RayClientProxy):
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
+        #print(self.resources)
         future_fit_res = launch_and_fit.options(  # type: ignore
             **self.resources
         ).remote(self.client_fn, self.cid, ins)
@@ -62,7 +63,7 @@ class RayClientProfilerProxy(RayClientProxy):
         )
 
 
-@ray.remote(max_calls=1)
+@ray.remote
 def launch_and_fit(
     client_fn: ClientFn, cid: str, fit_ins: common.FitIns
 ) -> common.FitRes:
@@ -76,8 +77,8 @@ def launch_and_fit(
 
     # Register task
     future_update_monitor_task_list = sysmon.register_tasks.remote(tasks=[task])
+    ray.get(future_update_monitor_task_list)
     #print(f"Registered client {cid}: {ray.get(future_update_monitor_task_list)}")
-    from time import sleep
 
     client: Client = _create_client(client_fn, cid)
     fit_res = client.fit(fit_ins)
@@ -90,6 +91,7 @@ def launch_and_fit(
     future_update_monitor_task_list = sysmon.unregister_tasks.remote(
         task_ids=[this_task_id]
     )
+    ray.get(future_update_monitor_task_list)
     #print(f"Unregistered client {cid}: {ray.get(future_update_monitor_task_list)}")
 
     return fit_res
