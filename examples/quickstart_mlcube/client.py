@@ -15,7 +15,7 @@ class MLCubeClient(fl.client.NumPyClient):
         mlcube.write_hyperparameters(self.workspace, optimizer, epochs, batch_size)
         mlcube.run_task(self.workspace, "download")
 
-    def get_parameters(self):  # type: ignore
+    def get_parameters(self, config):  # type: ignore
         pass
 
     def fit(self, parameters, config):  # type: ignore
@@ -44,7 +44,7 @@ def main():
     )
 
     fl.client.start_numpy_client(
-        "0.0.0.0:8080", client=MLCubeClient(workspace=workspace)
+        server_address="0.0.0.0:8080", client=MLCubeClient(workspace=workspace)
     )
 
 

@@ -48,27 +48,30 @@ class DriverState:
         # Return the new task_id
         return task_id
 
-    def get_task_ins(self, node_id: int, limit: int) -> List[TaskIns]:
+    def get_task_ins(self, node_id: int, limit: Optional[int]) -> List[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
 
+        if limit is not None and limit < 1:
+            raise AssertionError("`limit` must be >= 1")
+
         # Find TaskIns for node_id that were not delivered yet
-        task_ins_set: List[TaskIns] = []
+        task_ins_list: List[TaskIns] = []
         for _, task_ins in self.task_ins_store.items():
             if (
                 task_ins.task.consumer.node_id == node_id
                 and task_ins.task.delivered_at == ""
             ):
-                task_ins_set.append(task_ins)
-            if len(task_ins_set) == limit:
+                task_ins_list.append(task_ins)
+            if limit and len(task_ins_list) == limit:
                 break
 
         # Mark all of them as delivered
         delivered_at = _now().isoformat()
-        for task_ins in task_ins_set:
+        for task_ins in task_ins_list:
             task_ins.task.delivered_at = delivered_at
 
         # Return TaskIns
-        return task_ins_set
+        return task_ins_list
 
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes."""
@@ -89,27 +92,30 @@ class DriverState:
         # Return the new task_id
         return task_id
 
-    def get_task_res(self, task_ids: Set[UUID], limit: int) -> List[TaskRes]:
+    def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
         """Get all TaskRes that have not been delivered yet."""
 
+        if limit is not None and limit < 1:
+            raise AssertionError("`limit` must be >= 1")
+
         # Find TaskRes that were not delivered yet
-        task_res_set: List[TaskRes] = []
+        task_res_list: List[TaskRes] = []
         for _, task_res in self.task_res_store.items():
             if (
                 UUID(task_res.task.ancestry[0]) in task_ids
                 and task_res.task.delivered_at == ""
             ):
-                task_res_set.append(task_res)
-            if len(task_res_set) == limit:
+                task_res_list.append(task_res)
+            if limit and len(task_res_list) == limit:
                 break
 
         # Mark all of them as delivered
         delivered_at = _now().isoformat()
-        for task_res in task_res_set:
+        for task_res in task_res_list:
             task_res.task.delivered_at = delivered_at
 
         # Return TaskRes
-        return task_res_set
+        return task_res_list
 
 
 def _now() -> datetime:

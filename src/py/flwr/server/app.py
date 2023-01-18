@@ -22,7 +22,7 @@ from typing import Optional, Tuple
 
 import uvicorn
 
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.logger import log
 from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
@@ -127,6 +127,7 @@ def start_server(  # pylint: disable=too-many-arguments
     >>>     )
     >>> )
     """
+    event(EventType.START_SERVER_ENTER)
 
     # Initialize server and server config
     initialized_server, initialized_config = _init_defaults(
@@ -163,6 +164,8 @@ def start_server(  # pylint: disable=too-many-arguments
 
     # Stop the gRPC server
     grpc_server.stop(grace=1)
+
+    event(EventType.START_SERVER_LEAVE)
 
     return hist
 
@@ -212,6 +215,7 @@ def run_server() -> None:
     args = parse_args()
 
     log(INFO, "Starting Flower server")
+    event(EventType.RUN_SERVER_ENTER)
 
     driver_state = DriverState()
     driver_client_manager = DriverClientManager(
@@ -282,9 +286,13 @@ def run_server() -> None:
 
     # Wait for termination of both servers
     driver_grpc_server.wait_for_termination()
+
     if fleet_grpc_server:
         fleet_grpc_server.wait_for_termination()
+    
     # TODO handle REST server termination
+
+    event(EventType.RUN_SERVER_LEAVE)
 
 
 def parse_args() -> argparse.Namespace:

@@ -22,6 +22,8 @@ from uuid import uuid4
 
 from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
+    EventType,
+    event,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
@@ -135,6 +137,8 @@ def start_client(
     >>> )
     """
 
+    event(EventType.START_CLIENT_ENTER)
+
     # Use either gRPC bidirectional streaming or REST request/response
     connection = rest_not_a_connection if use_rest else grpc_connection
 
@@ -168,6 +172,8 @@ def start_client(
             sleep_duration,
         )
         time.sleep(sleep_duration)
+
+    event(EventType.START_CLIENT_LEAVE)
 
 
 def start_numpy_client(

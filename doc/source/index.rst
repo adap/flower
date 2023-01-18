@@ -104,6 +104,7 @@ Information-oriented API reference and other reference material.
    :caption: Reference docs
 
    examples
+   telemetry
    changelog
    faq
 

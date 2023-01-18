@@ -9,7 +9,7 @@ description = "Android Example"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-flwr = "^0.17.0"
+python = ">=3.7,<3.11"
+flwr = "^1.0.0"
 # flwr = { path = "../../", develop = true }  # Development
-tensorflow-cpu = "^2.6.2"
+tensorflow-cpu = "^2.9.1"
