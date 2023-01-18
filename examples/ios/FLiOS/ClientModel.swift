@@ -127,6 +127,16 @@ public class ClientModel: ObservableObject {
         configuration.parameters = [epochs:1]
     }
     
+    
+    public func stopFederatedLearning() {
+        if self.federatedServerStatus == .run {
+            DispatchQueue.main.async {
+                self.federatedServerStatus = .stop
+            }
+            self.flwrGRPC?.closeGRPCConnection()
+        }
+    }
+    
     public func startFederatedLearning() {
         self.federatedServerStatus = .run
         initCoreMLClient()

@@ -154,7 +154,7 @@ struct ContentView: View {
                         HStack {
                             if self.clientModel.federatedServerStatus == .run {
                                 Button(action: {
-                                    // TODO
+                                    self.clientModel.stopFederatedLearning()
                                 }) {
                                     Text("Stop").foregroundColor(.red)
                                 }
