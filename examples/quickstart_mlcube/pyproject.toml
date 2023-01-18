@@ -9,10 +9,10 @@ description = "Keras Federated Learning Quickstart with Flower"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-flwr = "^0.17.0"  # For development: { path = "../../", develop = true }
-tensorflow-cpu = "^2.6.2"
-mlcube = "0.0.4"
-mlcube-docker = "0.0.4"
+python = ">=3.7,<3.11"
+flwr = "^1.1.0"  # For development: { path = "../../", develop = true }
+tensorflow-cpu = "^2.11.0"
+mlcube = "0.0.8"
+mlcube-docker = "0.0.8"
 cookiecutter = "1.7.*"
-tensorflow-estimator = "^2.6.0"
+tensorflow-estimator = "^2.11.0"

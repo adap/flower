@@ -21,6 +21,8 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
+    EventType,
+    event,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
@@ -144,6 +146,8 @@ def start_client(
         
 
     """
+    event(EventType.START_CLIENT_ENTER)
+
     while True:
         sleep_duration: int = 0
         with grpc_connection(
@@ -172,6 +176,8 @@ def start_client(
             sleep_duration,
         )
         time.sleep(sleep_duration)
+
+    event(EventType.START_CLIENT_LEAVE)
 
 
 def start_numpy_client(

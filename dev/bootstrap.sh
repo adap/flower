@@ -2,6 +2,9 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+# Setup environment variables for development
+./dev/setup-envs.sh
+
 # Remove caches
 ./dev/rm-caches.sh
 
