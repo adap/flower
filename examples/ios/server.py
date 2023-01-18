@@ -36,7 +36,7 @@ from flwr.common import (
     Reconnect,
     Scalar,
 )
-from flwr.common.parameter import parameters_to_weights
+from flwr.common.parameter import parameters_to_ndarrays
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
@@ -46,11 +46,11 @@ from flwr.server.server import Server
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
-    List[BaseException],
+    List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 ]
 EvaluateResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, EvaluateRes]],
-    List[BaseException],
+    List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
 ]
 ReconnectResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, Disconnect]],
@@ -99,7 +99,7 @@ class TestServer(Server):
         # Initialize parameters
         log(INFO, "Initializing global parameters")
         self.parameters = self._get_initial_parameters()
-        weights = parameters_to_weights(self.parameters)
+        weights = parameters_to_ndarrays(self.parameters)
         shapes = [weight.shape for weight in weights]
         log(INFO, "Evaluating initial parameters")
         res = self.strategy.evaluate(parameters=self.parameters)
@@ -323,7 +323,7 @@ def fit_clients(
 
     # Gather results
     results: List[Tuple[ClientProxy, FitRes]] = []
-    failures: List[BaseException] = []
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
     for future in finished_fs:
         failure = future.exception()
         if failure is not None:
@@ -358,7 +358,7 @@ def evaluate_clients(
 
     # Gather results
     results: List[Tuple[ClientProxy, EvaluateRes]] = []
-    failures: List[BaseException] = []
+    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]] = []
     for future in finished_fs:
         failure = future.exception()
         if failure is not None:
@@ -386,5 +386,5 @@ clientmanager = SimpleClientManager()
 server = TestServer(client_manager=clientmanager, strategy=strategy)
 
 flwr.server.start_server(
-    server_address="[::]:8080", server=server, config={"num_rounds": 1}
+    server_address="[::]:8080", server=server, config=flwr.server.ServerConfig(num_rounds=1),
 )

@@ -105,7 +105,7 @@ def main() -> None:
         10,
         normalization_factor=100.0,
     )
-    fl.client.start_client(args.server_address, client)
+    fl.client.start_client(server_address=args.server_address, client=client)
 
 
 if __name__ == "__main__":

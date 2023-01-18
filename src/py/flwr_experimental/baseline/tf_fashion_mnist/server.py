@@ -163,7 +163,7 @@ def main() -> None:
     log(INFO, "Instantiating server, strategy: %s", str(strategy))
     fl.server.start_server(
         DEFAULT_SERVER_ADDRESS,
-        config={"num_rounds": server_setting.rounds},
+        config=flwr.server.ServerConfig(num_rounds=server_setting.rounds),
         strategy=strategy,
     )
 

@@ -354,7 +354,7 @@ class PytorchMNISTClient(fl.client.Client):
         )
         self.model.load_state_dict(state_dict, strict=True)
 
-    def get_parameters(self, config: Dict[str, fl.common.Scalar]) -> fl.common.ParametersRes:
+    def get_parameters(self, ins: fl.common.GetParametersIns) -> fl.common.ParametersRes:
         """Encapsulates the weights into Flower Parameters."""
         weights: fl.common.NDArrays = self.get_weights()
         parameters = fl.common.ndarrays_to_parameters(weights)

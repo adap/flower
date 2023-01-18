@@ -22,7 +22,7 @@ import torch
 import torchvision
 
 import flwr as fl
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, NDArrays
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, NDArrays, GetParametersIns
 
 from . import DEFAULT_SERVER_ADDRESS, cifar
 
@@ -46,7 +46,7 @@ class CifarClient(fl.client.Client):
         self.trainset = trainset
         self.testset = testset
 
-    def get_parameters(self) -> ParametersRes:
+    def get_parameters(self, ins: GetParametersIns) -> ParametersRes:
         print(f"Client {self.cid}: get_parameters")
 
         weights: NDArrays = self.model.get_weights()
@@ -134,7 +134,7 @@ def main() -> None:
 
     # Start client
     client = CifarClient(args.cid, model, trainset, testset)
-    fl.client.start_client(args.server_address, client)
+    fl.client.start_client(server_address=args.server_address, client=client)
 
 
 if __name__ == "__main__":

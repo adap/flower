@@ -69,7 +69,7 @@ class CifarClient(fl.client.Client):
         print(f"Client {self.cid}: get_parameters")
 
         weights: Weights = get_weights(self.model)
-        parameters = fl.common.weights_to_parameters(weights)
+        parameters = fl.common.ndarrays_to_parameters(weights)
         return ParametersRes(parameters=parameters)
 
     def _instantiate_model(self, model_str: str):
@@ -82,7 +82,7 @@ class CifarClient(fl.client.Client):
     def fit(self, ins: FitIns) -> FitRes:
         print(f"Client {self.cid}: fit")
 
-        weights: Weights = fl.common.parameters_to_weights(ins.parameters)
+        weights: Weights = fl.common.parameters_to_ndarrays(ins.parameters)
         config = ins.config
         fit_begin = timeit.default_timer()
 
@@ -112,7 +112,7 @@ class CifarClient(fl.client.Client):
 
         # Return the refined weights and the number of examples used for training
         weights_prime: Weights = get_weights(self.model)
-        params_prime = fl.common.weights_to_parameters(weights_prime)
+        params_prime = fl.common.ndarrays_to_parameters(weights_prime)
         num_examples_train = len(self.trainset)
         metrics = {"duration": timeit.default_timer() - fit_begin}
         return FitRes(
@@ -122,7 +122,7 @@ class CifarClient(fl.client.Client):
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         print(f"Client {self.cid}: evaluate")
 
-        weights = fl.common.parameters_to_weights(ins.parameters)
+        weights = fl.common.parameters_to_ndarrays(ins.parameters)
 
         # Use provided weights to update the local model
         set_weights(self.model, weights)
@@ -182,7 +182,7 @@ def main() -> None:
 
     # Start client
     client = CifarClient(args.cid, model, trainset, testset)
-    fl.client.start_client(args.server_address, client)
+    fl.client.start_client(server_address=args.server_address, client=client)
 
 
 if __name__ == "__main__":

@@ -93,4 +93,4 @@ if __name__ == "__main__":
     )
 
     # Start client
-    fl.client.start_client(args.server_address, client)
+    fl.client.start_client(server_address=args.server_address, client=client)

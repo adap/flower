@@ -141,7 +141,7 @@ def main() -> None:
     # Run server
     fl.server.start_server(
         DEFAULT_SERVER_ADDRESS,
-        config={"num_rounds": server_setting.rounds},
+        config=flwr.server.ServerConfig(num_rounds=server_setting.rounds),
         strategy=strategy,
     )
 

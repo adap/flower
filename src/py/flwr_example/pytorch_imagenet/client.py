@@ -67,7 +67,7 @@ class ImageNetClient(fl.client.Client):
         self.testset = testset
         self.nb_clients = nb_clients
 
-    def get_parameters(self, config: Dict[str, fl.common.Scalar]) -> fl.common.ParametersRes:
+    def get_parameters(self, ins: fl.common.GetParametersIns) -> fl.common.ParametersRes:
         print(f"Client {self.cid}: get_parameters")
         weights: fl.common.NDArrays = get_weights(self.model)
         parameters = fl.common.ndarrays_to_parameters(weights)
@@ -201,7 +201,7 @@ def main() -> None:
 
     # Start client
     client = ImageNetClient(args.cid, trainset, testset, args.nb_clients)
-    fl.client.start_client(args.server_address, client)
+    fl.client.start_client(server_address=args.server_address, client=client)
 
 
 if __name__ == "__main__":

@@ -72,7 +72,7 @@ class VisionClassificationClient(fl.client.Client):
         self.num_examples_test = len(xy_test[0])
         self.delay_factor = delay_factor
 
-    def get_parameters(self, config: Dict[str, fl.common.Scalar]) -> fl.common.ParametersRes:
+    def get_parameters(self, ins: fl.common.GetParametersIns) -> fl.common.ParametersRes:
         parameters = fl.common.ndarrays_to_parameters(self.model.get_weights())
         return fl.common.ParametersRes(parameters=parameters)
 

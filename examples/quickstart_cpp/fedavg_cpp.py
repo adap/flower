@@ -68,11 +68,11 @@ class FedAvgCpp(FedAvg):
             return None, {}
         # Convert results
         weights_results = [
-            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
         aggregated_weights = aggregate(weights_results)
-        parameters_results = weights_to_parameters(aggregated_weights)
+        parameters_results = ndarrays_to_parameters(aggregated_weights)
 
         return parameters_results, {}
 
@@ -115,12 +115,12 @@ class FedAvgCpp(FedAvg):
         return loss_aggregated, metrics_aggregated
 
 
-def weights_to_parameters(weights) -> Parameters:
+def ndarrays_to_parameters(weights) -> Parameters:
     tensors = [ndarray_to_bytes(tensor) for tensor in weights]
     return Parameters(tensors=tensors, tensor_type="cpp_double")
 
 
-def parameters_to_weights(parameters: Parameters) -> NDArrays:
+def parameters_to_ndarrays(parameters: Parameters) -> NDArrays:
     """Convert parameters object to NumPy weights."""
     weights = [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
     return weights

@@ -119,7 +119,7 @@ def main() -> None:
     fl.server.start_server(
         server_address=args.server_address,
         server=server,
-        config={"num_rounds": args.rounds},
+        config=flwr.server.ServerConfig(num_rounds=args.rounds),
     )
 
 
