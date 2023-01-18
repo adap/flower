@@ -74,8 +74,15 @@ final class FlowerTests: XCTestCase {
         let parameters = Parameters(tensors: [data1, data2], tensorType: "testTensor")
         
         let parametersRes = GetParametersRes(parameters: parameters, status: status)
+        
+        // To Proto
         let proto = parametersResToProto(res: parametersRes)
-        let result = parametersResFromProto(msg: proto)
+        //let statusProto = statusToProto(status: parametersRes.status)
+        
+        // From Proto
+        var result = parametersResFromProto(msg: proto)
+        //result.status = statusFromProto(msg: statusProto)
+        
         XCTAssertEqual(parametersRes, result)
     }
     
@@ -87,8 +94,15 @@ final class FlowerTests: XCTestCase {
         let parameters = Parameters(tensors: [data1, data2], tensorType: "testTensor")
         
         let fitRes = FitRes(parameters: parameters, numExamples: 3, status: status)
+        
+        // To Proto
         let proto = fitResToProto(res: fitRes)
-        let result = fitResFromProto(msg: proto)
+        let statusProto = statusToProto(status: fitRes.status)
+        
+        // From Proto
+        var result = fitResFromProto(msg: proto)
+        result.status = statusFromProto(msg: statusProto)
+        
         XCTAssertEqual(fitRes, result)
     }
     
@@ -115,8 +129,14 @@ final class FlowerTests: XCTestCase {
     
     func testPropertiesResProtoConversion() throws {
         let propertiesRes = GetPropertiesRes(properties: properties, status: status)
+        
+        // To Proto
         let proto = propertiesResToProto(res: propertiesRes)
-        let result = propertiesResFromProto(msg: proto)
+        let protoStatus = statusToProto(status: propertiesRes.status)
+        
+        // From Proto
+        var result = propertiesResFromProto(msg: proto)
+        result.status = statusFromProto(msg: protoStatus)
         XCTAssertEqual(propertiesRes, result)
     }
     
