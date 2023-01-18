@@ -18,24 +18,26 @@ import time
 import unittest
 from unittest import mock
 
-from flwr.common.telemetry import EventType, event
+from flwr.common import EventType, event
 
 
 class TelemetryTest(unittest.TestCase):
     """Tests for the telemetry module."""
 
+    @mock.patch("flwr.common.telemetry.FLWR_TELEMETRY_ENABLED", "1")
     def test_event(self) -> None:
         """Test if sending works against the actual API."""
         # Prepare
         expected = '{\n    "status": "created"\n}'
 
         # Execute
-        future = event(event_type=EventType.PING)
+        future = event(EventType.PING)
         actual = future.result()
 
         # Assert
         self.assertEqual(actual, expected)
 
+    @mock.patch("flwr.common.telemetry.FLWR_TELEMETRY_ENABLED", "1")
     def test_not_blocking(self) -> None:
         """Test if the code is blocking.
 
@@ -48,7 +50,7 @@ class TelemetryTest(unittest.TestCase):
         start = time.time()
 
         # Execute
-        event(event_type=EventType.PING)
+        event(EventType.PING)
         duration_actual = time.time() - start
 
         # Assert
@@ -61,7 +63,7 @@ class TelemetryTest(unittest.TestCase):
         expected = "disabled"
 
         # Execute
-        future = event(event_type=EventType.PING)
+        future = event(EventType.PING)
         actual = future.result()
 
         # Assert

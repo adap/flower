@@ -19,9 +19,8 @@ from dataclasses import dataclass
 from logging import INFO, WARN
 from typing import Optional, Tuple
 
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.logger import log
-from flwr.common.telemetry import EventType, event
 from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
 from flwr.server.client_manager import ClientManager, SimpleClientManager
@@ -123,7 +122,7 @@ def start_server(  # pylint: disable=too-many-arguments
     >>>     )
     >>> )
     """
-    event(event_type=EventType.START_SERVER_ENTER)
+    event(EventType.START_SERVER_ENTER)
 
     # Initialize server and server config
     initialized_server, initialized_config = _init_defaults(
@@ -161,7 +160,7 @@ def start_server(  # pylint: disable=too-many-arguments
     # Stop the gRPC server
     grpc_server.stop(grace=1)
 
-    event(event_type=EventType.START_SERVER_LEAVE)
+    event(EventType.START_SERVER_LEAVE)
 
     return hist
 
@@ -209,7 +208,7 @@ def _fl(
 def run_server() -> None:
     """Run Flower server."""
     log(INFO, "Starting Flower server")
-    event(event_type=EventType.RUN_SERVER_ENTER)
+    event(EventType.RUN_SERVER_ENTER)
 
     driver_state = DriverState()
     driver_client_manager = DriverClientManager(
@@ -262,4 +261,4 @@ def run_server() -> None:
     # Wait for termination of both servers
     driver_grpc_server.wait_for_termination()
     fleet_grpc_server.wait_for_termination()
-    event(event_type=EventType.RUN_SERVER_LEAVE)
+    event(EventType.RUN_SERVER_LEAVE)

@@ -21,11 +21,12 @@ from typing import Callable, Dict, Optional, Union
 
 from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
+    EventType,
+    event,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
 from flwr.common.logger import log
-from flwr.common.telemetry import EventType, event
 from flwr.common.typing import (
     Code,
     EvaluateIns,
@@ -129,7 +130,7 @@ def start_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-    event(event_type=EventType.START_CLIENT_ENTER)
+    event(EventType.START_CLIENT_ENTER)
 
     while True:
         sleep_duration: int = 0
@@ -159,7 +160,7 @@ def start_client(
         )
         time.sleep(sleep_duration)
 
-    event(event_type=EventType.START_CLIENT_LEAVE)
+    event(EventType.START_CLIENT_LEAVE)
 
 
 def start_numpy_client(

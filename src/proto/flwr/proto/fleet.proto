@@ -38,11 +38,11 @@ message PullTaskInsRequest {
 }
 message PullTaskInsResponse {
   Reconnect reconnect = 1;
-  repeated TaskIns task_ins_set = 2;
+  repeated TaskIns task_ins_list = 2;
 }
 
 // PushTaskRes messages
-message PushTaskResRequest { repeated TaskRes task_res_set = 1; }
+message PushTaskResRequest { repeated TaskRes task_res_list = 1; }
 message PushTaskResResponse {
   Reconnect reconnect = 1;
   map<string, uint32> results = 2;
