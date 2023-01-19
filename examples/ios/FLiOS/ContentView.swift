@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var clientModel = ClientModel()
+    @State var preparedExport = false
     
     func isDataReady(for status: BatchPreparationStatus) -> Bool {
         switch status {
@@ -173,6 +174,23 @@ struct ContentView: View {
                             }
                             .disabled(self.clientModel.modelCompilationStatus != BatchPreparationStatus.ready)
                         }
+                    }
+                    Section(header: Text("Benchmark")) {
+                        HStack{
+                            Text("Prepare Benchmark Export")
+                            Spacer()
+                            Button(action: {
+                                clientModel.benchmarkSuite.exportBenchmark()
+                                preparedExport = true
+                            }) {
+                                Text("Start").disabled(preparedExport)
+                            }
+                        }
+                        
+                        if clientModel.benchmarkSuite.benchmarkExists() || preparedExport {
+                            ShareLink(item:clientModel.benchmarkSuite.getBenchmarkFileUrl())
+                        }
+                        
                     }
                 }
             }
