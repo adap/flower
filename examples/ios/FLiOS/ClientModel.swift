@@ -17,6 +17,8 @@ public class ClientModel: ObservableObject {
     private static let appDirectory = FileManager.default.urls(for: .applicationSupportDirectory,
                                                                in: .userDomainMask).first!
     
+    public var benchmarkSuite = BenchmarkSuite.shared
+    
     @Published public var trainingBatchStatus = BatchPreparationStatus.notPrepared
     @Published public var testBatchStatus = BatchPreparationStatus.notPrepared
     @Published public var modelCompilationStatus = BatchPreparationStatus.notPrepared
@@ -37,22 +39,26 @@ public class ClientModel: ObservableObject {
     
     public func prepareTrainDataset() {
         trainingBatchStatus = .preparing(count: 0)
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "startedPreparingTrainDataset"))
         DispatchQueue.global(qos: .userInitiated).async {
             let batchProvider = self.prepareTrainBatchProvider()
             DispatchQueue.main.async {
                 self.trainingBatchProvider = batchProvider
                 self.trainingBatchStatus = .ready
+                self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "finishedPreparingTrainDataset"))
             }
         }
     }
     
     public func prepareTestDataset() {
         testBatchStatus = .preparing(count: 0)
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "startedPreparingTestDataset"))
         DispatchQueue.global(qos: .userInitiated).async {
             let batchProvider = self.prepareTestBatchProvider()
             DispatchQueue.main.async {
                 self.testBatchProvider = batchProvider
                 self.testBatchStatus = .ready
+                self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "finishedPreparingTestDataset"))
             }
         }
     }
@@ -74,11 +80,14 @@ public class ClientModel: ObservableObject {
     }
     
     public func compileModel() {
-        modelCompilationStatus = .preparing(count: 0)
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "startedCompilingModel"))
+        self.modelCompilationStatus = .preparing(count: 0)
         initCoreMLClient()
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "finishedCompilingModel"))
     }
     
     public func startLocalTraining() {
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "startedLocalTraining"))
         let configuration = MLModelConfiguration()
         let epochs = MLParameterKey.epochs
         configuration.parameters = [epochs:self.epoch]
@@ -98,6 +107,7 @@ public class ClientModel: ObservableObject {
                 let trainLoss = contextProgress.metrics[.lossValue] as! Double
                 DispatchQueue.main.async {
                     self.modelStatus = .preparing(info: "Epoch \(epochIndex + 1) end with loss \(trainLoss)")
+                    self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "LocalTraining: Epoch \(epochIndex + 1) end with loss \(trainLoss)"))
                 }
 
             default:
@@ -110,6 +120,8 @@ public class ClientModel: ObservableObject {
             let trainLoss = finalContext.metrics[.lossValue] as! Double
             DispatchQueue.main.async {
                 self.modelStatus = .ready(info: "Training completed with loss: \(trainLoss) in \(Int(Date().timeIntervalSince(trainingStartTime))) secs")
+                self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "LocalTraining: Training completed with loss: \(trainLoss) in \(Int(Date().timeIntervalSince(trainingStartTime))) secs"))
+                self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "finishedLocalTraining"))
             }
         }
         
@@ -121,10 +133,12 @@ public class ClientModel: ObservableObject {
     }
     
     public func startLocalTest() {
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "startedLocalTest"))
         //coreMLClient?.test(modelConfig: <#T##MLModelConfiguration#>, result: <#T##(MLResult) -> Void#>)
         let configuration = MLModelConfiguration()
         let epochs = MLParameterKey.epochs
         configuration.parameters = [epochs:1]
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "finishedLocalTest"))
     }
     
     
@@ -132,6 +146,7 @@ public class ClientModel: ObservableObject {
         if self.federatedServerStatus == .run {
             DispatchQueue.main.async {
                 self.federatedServerStatus = .stop
+                self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "stopFederatedLearning"))
             }
             self.flwrGRPC?.closeGRPCConnection()
         }
@@ -217,6 +232,9 @@ public class ClientModel: ObservableObject {
             print("error opening file")
         }
         while let line = readLine()?.split(separator: ",") {
+            if count == 1000 {
+                break
+            }
             count += 1
             DispatchQueue.main.async {
                 self.trainingBatchStatus = .preparing(count: count)
@@ -268,6 +286,9 @@ public class ClientModel: ObservableObject {
             print("error opening file")
         }
         while let line = readLine()?.split(separator: ",") {
+            if count == 1000 {
+                break
+            }
             count += 1
             DispatchQueue.main.async {
                 self.testBatchStatus = .preparing(count: count)
