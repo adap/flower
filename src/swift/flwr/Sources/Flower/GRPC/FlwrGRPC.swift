@@ -68,6 +68,7 @@ public class FlwrGRPC {
                 _ = self.bidirectionalStream?.sendMessage(response.0)
                 if !response.2 {
                     self.closeGRPCConnection()
+                    
                 }
             } catch let error {
                 print(error)
@@ -75,7 +76,7 @@ public class FlwrGRPC {
         }
     }
     
-    func closeGRPCConnection() {
+    public func closeGRPCConnection() {
         do {
             print("Closing gRPC bidirectional stream channel")
             try self.channel.close().wait()
