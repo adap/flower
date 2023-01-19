@@ -232,9 +232,6 @@ public class ClientModel: ObservableObject {
             print("error opening file")
         }
         while let line = readLine()?.split(separator: ",") {
-            if count == 1000 {
-                break
-            }
             count += 1
             DispatchQueue.main.async {
                 self.trainingBatchStatus = .preparing(count: count)
@@ -286,9 +283,6 @@ public class ClientModel: ObservableObject {
             print("error opening file")
         }
         while let line = readLine()?.split(separator: ",") {
-            if count == 1000 {
-                break
-            }
             count += 1
             DispatchQueue.main.async {
                 self.testBatchStatus = .preparing(count: count)
