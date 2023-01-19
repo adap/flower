@@ -28,7 +28,7 @@ class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr
             let size = String(describing: response.msg).count
             let log = "< Received response '\(decipherServerMessage(response.msg!))' with text size '\(size)'"
             BenchmarkSuite.shared.takeActionSnapshot(snapshot: ActionSnaptshot(action: log))
-            BenchmarkSuite.shared.takeNetworkSnaptshot(snapshot: NetworkSnapshot(dataSize: size, type: .received))
+            BenchmarkSuite.shared.takeNetworkSnaptshot(snapshot: NetworkSnapshot(type: .received(data: size)))
             print(log)
             
             
@@ -60,7 +60,7 @@ class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr
         case let .message(request, _):
             let size = String(describing: request.msg).count
             let log = "> Sending request \(decipherClientMessage(request.msg!)) with text size \(size)"
-            BenchmarkSuite.shared.takeNetworkSnaptshot(snapshot: NetworkSnapshot(dataSize: size, type: .sent))
+            BenchmarkSuite.shared.takeNetworkSnaptshot(snapshot: NetworkSnapshot(type: .sent(data: size)))
             BenchmarkSuite.shared.takeActionSnapshot(snapshot: ActionSnaptshot(action: log))
             print(log)
             

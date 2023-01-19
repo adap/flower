@@ -8,17 +8,15 @@
 import Foundation
 
 public enum NetworkAction : Encodable {
-    case received
-    case sent
+    case received(data: Int)
+    case sent(data: Int)
 }
 
 public class NetworkSnapshot : Encodable {
-    let dataSize : Int
     let date : Date
     let type : NetworkAction
     
-    init(dataSize: Int, date: Date = Date(), type: NetworkAction) {
-        self.dataSize = dataSize
+    init(date: Date = Date(), type: NetworkAction) {
         self.date = date
         self.type = type
     }
