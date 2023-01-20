@@ -36,6 +36,13 @@ python3 -c "import flwr"
 
 If you don't see any errors you're good to go!
 
+If you don't plan on using the `run.sh` script that automates the run, you should first download the data and put it in a `data` folder, this can be done by executing:
+
+```shell
+mkdir -p ./data
+python -c "from sklearn.datasets import load_iris; load_iris(as_frame=True)['data'].to_csv('./data/client.csv')"
+```
+
 # Run Federated Analytics with Pandas and Flower
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
