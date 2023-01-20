@@ -154,7 +154,7 @@ def start_client(
             while True:
                 server_message = receive()
                 if server_message is None:
-                    time.sleep(2)  # Wait for 2s before asking again
+                    time.sleep(3)  # Wait for 3s before asking again
                     continue
                 client_message, sleep_duration, keep_going = handle(
                     client, server_message
