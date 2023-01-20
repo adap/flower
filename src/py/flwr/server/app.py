@@ -286,7 +286,7 @@ def run_server() -> None:
             port=port,
             host=host,
             reload=False,
-            access_log=False,
+            access_log=True,
         )
 
     # Wait for termination of both gRPC servers

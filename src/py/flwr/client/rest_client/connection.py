@@ -94,12 +94,12 @@ def rest_not_a_connection(
             },
             data=pull_task_ins_req_bytes,
         )
-        log(
-            INFO,
-            "[Node] POST /%s: %s",
-            PATH_PULL_TASK_INS,
-            r.status_code,
-        )
+        # log(
+        #     INFO,
+        #     "[Node] POST /%s: %s",
+        #     PATH_PULL_TASK_INS,
+        #     r.status_code,
+        # )
         if r.status_code != 200:
             return None
 
@@ -125,11 +125,11 @@ def rest_not_a_connection(
 
         # Extract a single ServerMessage from the response, if possible
         if len(pull_task_ins_response_proto.task_ins_list) == 0:
-            log(
-                INFO,
-                "[Node] POST /%s: No TaskIns received",
-                PATH_PULL_TASK_INS,
-            )
+            # log(
+            #     INFO,
+            #     "[Node] POST /%s: No TaskIns received",
+            #     PATH_PULL_TASK_INS,
+            # )
             return None
 
         task_ins: TaskIns = pull_task_ins_response_proto.task_ins_list[
@@ -184,12 +184,12 @@ def rest_not_a_connection(
             },
             data=push_task_res_request_bytes,
         )
-        log(
-            INFO,
-            "[Node] POST /%s: %s",
-            PATH_PUSH_TASK_RES,
-            r.status_code,
-        )
+        # log(
+        #     INFO,
+        #     "[Node] POST /%s: %s",
+        #     PATH_PUSH_TASK_RES,
+        #     r.status_code,
+        # )
 
         # TODO check status code and response
         current_task_ins = None
