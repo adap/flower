@@ -36,6 +36,7 @@ from flwr.server.grpc_server.grpc_server import (
     start_grpc_server,
 )
 from flwr.server.history import History
+from flwr.server.rest_server.singleton import Singleton
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
 
@@ -272,6 +273,10 @@ def run_server() -> None:
 
     # Start Fleet API (HTTP-based)
     elif args.server_type == "rest":
+        #
+        instance = Singleton.instance()
+        instance.set_driver_state(driver_state=driver_state)
+
         # Start Fleet API HTTP server
         port = args.rest_bind_port
         host = args.rest_bind_host
