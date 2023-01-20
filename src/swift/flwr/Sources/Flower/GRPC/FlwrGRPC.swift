@@ -77,7 +77,7 @@ public class FlwrGRPC {
             }
         }
     }
-    
+
     func closeGRPCConnection(completion: @escaping () -> Void) {
         do {
             print("Closing gRPC bidirectional stream channel")
