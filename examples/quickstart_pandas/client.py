@@ -13,8 +13,8 @@ column_names = ["sepal length (cm)", "sepal width (cm)"]
 
 
 def compute_hist(df: pd.DataFrame, col_name: str) -> np.ndarray:
-    vals, _ = np.histogram(df[col_name])
-    return vals
+    freqs, _ = np.histogram(df[col_name])
+    return freqs 
 
 
 # Define Flower client
@@ -23,14 +23,13 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[List[np.ndarray], int, Dict]:
-        outputs = {}
-        v_arr = []
+        hist_list = []
         # Execute query locally
         for c in column_names:
-            h = compute_hist(df, c)
-            v_arr.append(h)
+            hist = compute_hist(df, c)
+            hist_list.append(hist)
         return (
-            v_arr,
+            hist_list,
             len(df),
             {},
         )
