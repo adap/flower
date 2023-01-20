@@ -17,6 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
 
 service Fleet {
@@ -33,7 +34,7 @@ service Fleet {
 
 // PullTaskIns messages
 message PullTaskInsRequest {
-  uint64 node_id = 1;
+  Node node = 1;
   repeated string task_ids = 2;
 }
 message PullTaskInsResponse {
