@@ -63,6 +63,8 @@ def test_store_task_ins_one() -> None:
     state = DriverState()
     task_ins: TaskIns = TaskIns(
         task_id=str(uuid4()),
+        group_id="",
+        workload_id="",
         task=Task(
             consumer=Node(node_id=node_id, anonymous=False),
         ),
