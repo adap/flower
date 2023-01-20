@@ -238,6 +238,14 @@ def run_server() -> None:
         certificates=None,
     )
 
+    # Start Driver API gRPC server
+    driver_grpc_server.start()
+    log(
+        INFO,
+        "Flower ECE: driver gRPC server running on %s",
+        driver_server_address,
+    )
+
     # Start Fleet API (gRPC-based)
     fleet_grpc_server = None
     if args.server_type == "grpc":
@@ -254,29 +262,7 @@ def run_server() -> None:
             certificates=None,
         )
 
-    # Start Fleet API (HTTP-based)
-    elif args.server_type == "rest":
-        port = args.rest_bind_port
-        host = args.rest_bind_host
-        log(INFO, "Starting Flower REST server")
-        uvicorn.run(
-            "flwr.server.rest_server.rest_api:app",
-            port=port,
-            host=host,
-            reload=True,
-            access_log=False,
-        )
-
-    # Start Driver API gRPC server
-    driver_grpc_server.start()
-    log(
-        INFO,
-        "Flower ECE: driver gRPC server running on %s",
-        driver_server_address,
-    )
-
-    # Start (legacy) Fleet API gRPC server
-    if fleet_grpc_server:
+        # Start (legacy) Fleet API gRPC server
         fleet_grpc_server.start()
         log(
             INFO,
@@ -284,13 +270,25 @@ def run_server() -> None:
             fleet_server_address,
         )
 
-    # Wait for termination of both servers
+    # Start Fleet API (HTTP-based)
+    elif args.server_type == "rest":
+        # Start Fleet API HTTP server
+        port = args.rest_bind_port
+        host = args.rest_bind_host
+        log(INFO, "Starting Flower REST server")
+        uvicorn.run(
+            "flwr.server.rest_server.rest_api:app",
+            port=port,
+            host=host,
+            reload=False,
+            access_log=False,
+        )
+
+    # Wait for termination of both gRPC servers
     driver_grpc_server.wait_for_termination()
 
     if fleet_grpc_server:
         fleet_grpc_server.wait_for_termination()
-    
-    # TODO handle REST server termination
 
     event(EventType.RUN_SERVER_LEAVE)
 
