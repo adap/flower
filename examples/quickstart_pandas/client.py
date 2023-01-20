@@ -1,4 +1,5 @@
 import warnings
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -6,58 +7,33 @@ import pandas as pd
 import flwr as fl
 
 
-def load_data():
-    df = pd.read_csv("./data/client.csv")
-    return df
-
-
-df = load_data()
+df = pd.read_csv("./data/client.csv")
 
 column_names = ["sepal length (cm)", "sepal width (cm)"]
 
 
-def compute_hist(df, col_name):
-    _, vals = np.histogram(df[col_name])
+def compute_hist(df: pd.DataFrame, col_name: str) -> np.ndarray:
+    vals, _ = np.histogram(df[col_name])
     return vals
 
 
-def compute_sum(df, col_name):
-    val = df[col_name].sum()
-    return val
-
-
-def compute_min(df, col_name):
-    val = df[col_name].min()
-    return val
-
-
 # Define Flower client
-class FlowerClient(fl.client.Client):
-    def get_parameters(self, config):
-        return {"column_names": column_names}
+class FlowerClient(fl.client.NumPyClient):
 
-    def fit(self, parameters, config):
-        # Execute query locally
+    def fit(
+        self, parameters: List[np.ndarray], config: Dict[str, str]
+    ) -> Tuple[List[np.ndarray], int, Dict]:
         outputs = {}
         v_arr = []
+        # Execute query locally
         for c in column_names:
             h = compute_hist(df, c)
-            v_arr.append([c])
             v_arr.append(h)
         return (
             v_arr,
             len(df),
             {},
-        )  # [Tensors, num_examples, dict] - I am storing analytics analysis in results
-
-    def _format_outputs(self, inputs: dict):
-        # Format outputs to [NDTupes, int, dict]
-        metrics_dict = {}
-        values_arr = []
-        for index, key in enumerate(list(inputs.keys())):
-            metrics_dict[str(index)] = key
-            values_arr.append(inputs[key])
-        return values_arr, metrics_dict
+        )
 
 
 # Start Flower client
