@@ -8,21 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @ObservedObject var clientModel = ClientModel()
-    
-    func isDataReady(for status: BatchPreparationStatus) -> Bool {
-        switch status {
-        case .ready: return true
-        default: return false
-        }
-    }
-
-    func isDataPreparing(for status: BatchPreparationStatus) -> Bool {
-        switch status {
-        case .preparing: return true
-        default: return false
-        }
-    }
+    @ObservedObject var model = FLiOSModel()
     
     var numberFormatter: NumberFormatter = {
         var nf = NumberFormatter()
@@ -41,137 +27,156 @@ struct ContentView: View {
                 Form {
                     Section(header: Text("Prepare Dataset")) {
                         HStack {
-                            Text("Training Dataset: \(self.clientModel.trainingBatchStatus.description)")
-                            /*if self.isDataReady(for: self.model.trainingBatchStatus) {
-                                Text(" \(self.mnist.trainingBatchProvider!.count) samples")
-                            }*/
+                            Text("Training Dataset: \(self.model.trainingBatchStatus.description)")
                             Spacer()
                             Button(action: {
-                                clientModel.prepareTrainDataset()
+                                model.prepareTrainDataset()
                             }) {
-                                switch self.clientModel.trainingBatchStatus {
-                                case BatchPreparationStatus.notPrepared:
+                                switch self.model.trainingBatchStatus {
+                                case .notPrepared:
                                     Text("Start")
-                                case BatchPreparationStatus.ready:
+                                case .ready:
                                     Image(systemName: "checkmark")
                                 default:
                                     ProgressView()
                                 }
-                                
                             }
-                            //.disabled(self.isDataPreparing(for: self.model.trainingBatchStatus))
                         }
                         HStack {
-                            Text("Test Dataset: \(self.clientModel.testBatchStatus.description)")
-                            /*if self.isDataReady(for: self.mnist.predictionBatchStatus) {
-                                Text(" \(self.mnist.predictionBatchProvider!.count) samples")
-                            }*/
+                            Text("Test Dataset: \(self.model.testBatchStatus.description)")
                             Spacer()
                             Button(action: {
-                                clientModel.prepareTestDataset()
+                                model.prepareTestDataset()
                             }) {
-                                switch self.clientModel.testBatchStatus {
-                                case BatchPreparationStatus.notPrepared:
+                                switch self.model.testBatchStatus {
+                                case .notPrepared:
                                     Text("Start")
-                                case BatchPreparationStatus.ready:
+                                case .ready:
                                     Image(systemName: "checkmark")
                                 default:
                                     ProgressView()
                                 }
                             }
-                            .disabled(self.clientModel.trainingBatchStatus != BatchPreparationStatus.ready)
-                        }
-                        
-                    }
-                    Section(header: Text("Prepare Model")) {
-                        HStack {
-                            Text("Compile Model")
-                            Spacer()
-                            Button(action: {
-                                clientModel.compileModel()
-                            }) {
-                                switch self.clientModel.modelCompilationStatus {
-                                case BatchPreparationStatus.notPrepared:
-                                    Text("Start")
-                                case BatchPreparationStatus.ready:
-                                    Image(systemName: "checkmark")
-                                default:
-                                    ProgressView()
-                                }
-                            }
-                            .disabled(self.clientModel.testBatchStatus != BatchPreparationStatus.ready || self.clientModel.trainingBatchStatus != BatchPreparationStatus.ready)
+                            .disabled(model.trainingBatchStatus != PreparationStatus.ready)
                         }
                     }
                     Section(header: Text("Local Training")) {
-                        Stepper(value: self.$clientModel.epoch, in: 1...10, label: { Text("Epoch:  \(self.clientModel.epoch)")})
-                            .disabled(self.clientModel.modelCompilationStatus != BatchPreparationStatus.ready)
-                        
                         HStack {
-                            switch self.clientModel.modelStatus {
-                            case BatchPreparationModelStatus.notPrepared:
-                                Text("Training")
-                            default:
-                                Text(self.clientModel.modelStatus.description)
-                            }
+                            Text("Prepare Local Client")
                             Spacer()
                             Button(action: {
-                                clientModel.startLocalTraining()
+                                model.initLocalClient()
                             }) {
-                                switch self.clientModel.modelStatus {
-                                case BatchPreparationModelStatus.notPrepared:
+                                switch model.localClientStatus {
+                                case .notPrepared:
                                     Text("Start")
-                                case BatchPreparationModelStatus.ready:
+                                case .ready:
                                     Image(systemName: "checkmark")
                                 default:
                                     ProgressView()
                                 }
                             }
-                            .disabled(self.clientModel.modelCompilationStatus != BatchPreparationStatus.ready)
+                            .disabled(model.testBatchStatus != .ready || model.trainingBatchStatus != .ready)
                         }
+                        Stepper(value: $model.epoch, in: 1...10, label: { Text("Epoch: \(model.epoch)")})
+                            .disabled(model.localClientStatus != .ready)
                         HStack {
-                            Text("Predict Test data")
+                            switch model.localTrainingStatus {
+                            case .idle:
+                                Text("Local Train")
+                            default:
+                                Text(model.localTrainingStatus.description)
+                            }
                             Spacer()
                             Button(action: {
-                               //self.mnist.testModel()
+                                model.startLocalTrain()
                             }) {
-                                Text("Start")
+                                switch model.localTrainingStatus {
+                                case .idle:
+                                    Text("Start")
+                                case .completed:
+                                    Image(systemName: "checkmark")
+                                default:
+                                    ProgressView()
+                                }
                             }
-                            .disabled(!self.clientModel.modelStatus.description.hasPrefix("Training completed"))
+                            .disabled(model.localClientStatus != .ready)
                         }
-                        //Text(self.mnist.accuracy)
+                        HStack {
+                            switch model.localTestStatus {
+                            case .idle:
+                                Text("Local Test")
+                            default:
+                                Text(model.localTestStatus.description)
+                            }
+                            Spacer()
+                            Button(action: {
+                                model.startLocalTest()
+                            }) {
+                                switch model.localTestStatus {
+                                case .idle:
+                                    Text("Start")
+                                case .completed:
+                                    Image(systemName: "checkmark")
+                                default:
+                                    ProgressView()
+                                }
+                            }
+                            .disabled(model.localTrainingStatus != .completed(info: ""))
+                        }
                     }
                     Section(header: Text("Federated Learning")) {
                         HStack {
+                            Text("Prepare Federated Client")
+                            Spacer()
+                            Button(action: {
+                                model.initMLFlwrClient()
+                            }) {
+                                switch model.mlFlwrClientStatus {
+                                case .notPrepared:
+                                    Text("Start")
+                                case .ready:
+                                    Image(systemName: "checkmark")
+                                default:
+                                    ProgressView()
+                                }
+                            }
+                            .disabled(model.testBatchStatus != .ready || model.trainingBatchStatus != .ready)
+                        }
+                        HStack {
                             Text("Server Hostname: ")
-                            TextField("Server Hostname", text: $clientModel.hostname)
+                            TextField("Server Hostname", text: $model.hostname)
                                 .multilineTextAlignment(.trailing)
                         }
                         HStack {
                             Text("Server Port: ")
-                            TextField( "Server Port", value: $clientModel.port, formatter: numberFormatter)
+                            TextField( "Server Port", value: $model.port, formatter: numberFormatter)
                                 .multilineTextAlignment(.trailing)
                         }
                         HStack {
-                            if self.clientModel.federatedServerStatus == .run {
+                            if model.federatedServerStatus == .ongoing(info: "") {
                                 Button(action: {
                                     // TODO
+                                    model.abortFederatedLearning()
                                 }) {
                                     Text("Stop").foregroundColor(.red)
                                 }
                             }
                             Spacer()
                             Button(action: {
-                                clientModel.startFederatedLearning()
+                                model.startFederatedLearning()
                             }) {
-                                switch self.clientModel.federatedServerStatus {
-                                case .stop:
+                                switch model.federatedServerStatus {
+                                case .idle:
                                     Text("Start")
+                                case .completed:
+                                    Text("Rerun FL")
                                 default:
                                     ProgressView()
                                 }
                                 
                             }
-                            .disabled(self.clientModel.modelCompilationStatus != BatchPreparationStatus.ready)
+                            .disabled(model.mlFlwrClientStatus != .ready)
                         }
                     }
                 }
