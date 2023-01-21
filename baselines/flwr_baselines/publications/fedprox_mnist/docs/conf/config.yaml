@@ -5,7 +5,6 @@ batch_size: 10
 num_rounds: 10
 iid: False
 staggers_fraction: 0.5
-expected_maximum: 0.9924
 learning_rate: 0.1
 mu: 1
 plot_path: "docs"

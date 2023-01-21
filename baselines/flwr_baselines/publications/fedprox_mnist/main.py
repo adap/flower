@@ -67,7 +67,6 @@ def main(cfg: DictConfig) -> None:
     utils.plot_metric_from_history(
         history,
         cfg.save_path,
-        cfg.expected_maximum,
         (
             f"_C={cfg.num_clients}"
             f"_B={cfg.batch_size}"
