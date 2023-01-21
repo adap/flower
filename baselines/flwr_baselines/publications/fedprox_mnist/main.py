@@ -3,6 +3,7 @@
 
 import flwr as fl
 import hydra
+import numpy as np
 import torch
 from omegaconf import DictConfig
 
@@ -49,12 +50,29 @@ def main(cfg: DictConfig) -> None:
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
     )
+    np.save(
+        Path(cfg.save_path)
+        / Path(
+            f"hist_C={cfg.num_clients}"
+            f"_B={cfg.batch_size}"
+            f"_E={cfg.num_epochs}"
+            f"_R={cfg.num_rounds}"
+            f"_stag={cfg.staggers_fraction}"
+        ),
+        history,
+    )
 
     utils.plot_metric_from_history(
         history,
-        cfg.plot_path,
+        cfg.save_path,
         cfg.expected_maximum,
-        f"_cli={cfg.num_clients}_rds={cfg.num_rounds}_mu={cfg.mu}_stag={cfg.staggers_fraction}",
+        (
+            f"_C={cfg.num_clients}"
+            f"_B={cfg.batch_size}"
+            f"_E={cfg.num_epochs}"
+            f"_R={cfg.num_rounds}"
+            f"_stag={cfg.staggers_fraction}"
+        ),
     )
 
 

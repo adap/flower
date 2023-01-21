@@ -45,18 +45,10 @@ def plot_metric_from_history(
     fig = plt.figure()
     axis = fig.add_subplot(111)
     plt.plot(np.asarray(rounds), np.asarray(values), label="FedProx")
-    # Set expected graph for data
-    plt.axhline(
-        y=expected_maximum,
-        color="r",
-        linestyle="--",
-        label=f"Paper's best result @{expected_maximum}",
-    )
-    # Set paper's results
     plt.axhline(
         y=0.99,
         color="silver",
-        label="Paper's baseline @0.9900",
+        label="Convergence baseline @0.9900",
     )
     plt.ylim([0.97, 1])
     plt.title(f"{metric_type.capitalize()} Validation - MNIST")
