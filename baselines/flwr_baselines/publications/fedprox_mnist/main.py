@@ -1,6 +1,8 @@
 """Runs CNN federated learning for MNST dataset."""
 
 
+from pathlib import Path
+
 import flwr as fl
 import hydra
 import numpy as np
