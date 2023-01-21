@@ -19,7 +19,6 @@ from flwr_baselines.publications.fedprox_mnist import model
 def plot_metric_from_history(
     hist: History,
     save_plot_path: Path,
-    expected_maximum: float,
     suffix: Optional[str] = "",
 ) -> None:
     """Function to plot from Flower server History.
@@ -30,8 +29,6 @@ def plot_metric_from_history(
         Object containing evaluation for all rounds.
     save_plot_path : Path
         Folder to save the plot to.
-    expected_maximum : float
-        The expected maximum accuracy from the original paper.
     suffix: Optional[str]
         Optional string to add at the end of the filename for the plot.
     """
