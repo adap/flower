@@ -100,6 +100,8 @@ def _worker(
         # Step 3: wrap FitRes in a ServerMessage in a Task in a TaskRes
         task_res = TaskRes(
             task_id="",  # Will be created and set by the DriverState
+            group_id="",
+            workload_id="",
             task=Task(
                 producer=Node(node_id=client_proxy.node_id, anonymous=False),
                 legacy_client_message=client_message_proto,
