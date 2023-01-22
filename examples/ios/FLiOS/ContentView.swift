@@ -184,15 +184,15 @@ struct ContentView: View {
                             Text("Prepare Benchmark Export")
                             Spacer()
                             Button(action: {
-                                clientModel.benchmarkSuite.exportBenchmark()
+                                model.benchmarkSuite.exportBenchmark()
                                 preparedExport = true
                             }) {
                                 Text("Start").disabled(preparedExport)
                             }
                         }
                         
-                        if clientModel.benchmarkSuite.benchmarkExists() || preparedExport {
-                            ShareLink(item:clientModel.benchmarkSuite.getBenchmarkFileUrl())
+                        if model.benchmarkSuite.benchmarkExists() || preparedExport {
+                            ShareLink(item:model.benchmarkSuite.getBenchmarkFileUrl())
                         }
                         
                     }
