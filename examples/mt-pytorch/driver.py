@@ -57,6 +57,8 @@ for server_round in range(num_rounds):
     for sampled_node_id in sampled_node_ids:
         new_task_ins = task_pb2.TaskIns(
             task_id="",  # Do not set, will be created and set by the DriverAPI
+            group_id="",
+            workload_id="",
             task=task_pb2.Task(
                 producer=node_pb2.Node(node_id=0, anonymous=True),
                 consumer=node_pb2.Node(node_id=sampled_node_id, anonymous=False),
@@ -85,7 +87,10 @@ for server_round in range(num_rounds):
     ]
     all_task_res: List[task_pb2.TaskRes] = []
     while True:
-        pull_task_res_req = driver_pb2.PullTaskResRequest(task_ids=task_ids)
+        pull_task_res_req = driver_pb2.PullTaskResRequest(
+            node=node_pb2.Node(node_id=0, anonymous=True),
+            task_ids=task_ids,
+        )
 
         # ------------------------------------------------------------------ Driver SDK
         pull_task_res_res: driver_pb2.PullTaskResResponse = driver.pull_task_res(
