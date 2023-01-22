@@ -13,12 +13,12 @@ import CoreML
 import NIOCore
 import NIOPosix
 
+let appDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+
 @available(iOS 14.0, *)
 public class ParameterConverter {
     private var np: PythonObject?
     
-    private static let appDirectory = FileManager.default.urls(for: .applicationSupportDirectory,
-                                                               in: .userDomainMask).first!
     /// The permanent location of the numpyArray.
     private var numpyArrayUrl = appDirectory.appendingPathComponent("numpyArray.npy")
     private var group: EventLoopGroup?
