@@ -34,11 +34,11 @@ public class FLiOSModel: ObservableObject {
     
     public func prepareTrainDataset() {
         trainingBatchStatus = .preparing(count: 0)
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing train dataset"))
         DispatchQueue.global(qos: .userInitiated).async {
             let batchProvider = MNISTDataLoader.trainBatchProvider { count in
                 DispatchQueue.main.async {
                     self.trainingBatchStatus = .preparing(count: count)
-                    self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing train dataset \(count)"))
                 }
             }
             DispatchQueue.main.async {
@@ -51,11 +51,11 @@ public class FLiOSModel: ObservableObject {
     
     public func prepareTestDataset() {
         testBatchStatus = .preparing(count: 0)
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing test dataset"))
         DispatchQueue.global(qos: .userInitiated).async {
             let batchProvider = MNISTDataLoader.testBatchProvider { count in
                 DispatchQueue.main.async {
                     self.testBatchStatus = .preparing(count: count)
-                    self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing test dataset \(count)"))
                 }
             }
             DispatchQueue.main.async {
@@ -150,7 +150,7 @@ public class FLiOSModel: ObservableObject {
         self.federatedServerStatus = .ongoing(info: "Starting federated learning")
         self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "starting federated learning"))
         if self.flwrGRPC == nil {
-            self.flwrGRPC = FlwrGRPC(serverHost: hostname, serverPort: port)
+            self.flwrGRPC = FlwrGRPC(serverHost: hostname, serverPort: port, additionalInterceptor: BenchmarkInterceptor())
         }
         
         self.flwrGRPC?.startFlwrGRPC(client: self.mlFlwrClient!) {
@@ -256,7 +256,6 @@ class LocalClient {
             switch contextProgress.event {
             case .trainingBegin:
                 let taskStatus: TaskStatus = .ongoing(info: "Started to \(task) locally")
-                self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "Started to \(task) locally"))
                 statusHandler(taskStatus)
             case .epochEnd:
                 let taskStatus: TaskStatus
@@ -265,10 +264,8 @@ class LocalClient {
                 case .train:
                     let epochIndex = contextProgress.metrics[.epochIndex] as! Int
                     taskStatus = .ongoing(info: "Epoch \(epochIndex + 1) end with loss \(loss)")
-                    self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "Epoch \(epochIndex + 1) end with loss \(loss)"))
                 case .test:
                     taskStatus = .ongoing(info: "Local test end with loss \(loss)")
-                    self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "Local test end with loss \(loss)"))
                 }
                 statusHandler(taskStatus)
             default:
@@ -279,7 +276,6 @@ class LocalClient {
         let completionHandler = { (finalContext: MLUpdateContext) in
             let loss = finalContext.metrics[.lossValue] as! Double
             let taskStatus: TaskStatus = .completed(info: "Local \(task) completed with loss: \(loss) in \(Int(Date().timeIntervalSince(startTime))) secs")
-            self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "Local \(task) completed with loss: \(loss) in \(Int(Date().timeIntervalSince(startTime))) secs"))
             statusHandler(taskStatus)
         }
         
