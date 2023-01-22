@@ -18,72 +18,86 @@ class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr
     
     override func receive(_ part: GRPCClientResponsePart<Flwr_Proto_ServerMessage>, context: ClientInterceptorContext<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>) {
         
-        additionalInterceptor?.receive()
+        // wrapper to expose message for additional interceptor
+        let grpcPart: GRPCPartWrapper
         
         switch part {
             // The response headers received from the server. We expect to receive these once at the start
             // of a response stream, however, it is also valid to see no 'metadata' parts on the response
             // stream if the server rejects the RPC (in which case we expect the 'end' part).
         case let .metadata(headers):
-            let log = "< Received headers: \(prettify(headers))"
+            let formatted = prettify(headers)
+            let log = "< Received headers: \(formatted)"
             print(log)
-            BenchmarkSuite.shared.takeActionSnapshot(snapshot: ActionSnaptshot(action: log))
             
+            grpcPart = .metadata(header: formatted)
             
             // A response message received from the server. For unary and client-streaming RPCs we expect
             // one message. For server-streaming and bidirectional-streaming we expect any number of
             // messages (including zero).
         case let .message(response):
-            let size = String(describing: response.msg).count
-            let log = "< Received response '\(decipherServerMessage(response.msg!))' with text size '\(size)'"
-            BenchmarkSuite.shared.takeActionSnapshot(snapshot: ActionSnaptshot(action: log))
-            BenchmarkSuite.shared.takeNetworkSnaptshot(snapshot: NetworkSnapshot(type: .received(data: size)))
+            let msg = String(describing: response.msg)
+            let log = "< Received response '\(decipherServerMessage(response.msg!))' with text size '\(msg.count)'"
             print(log)
             
-            
-            
+            grpcPart = .message(content: msg)
+
             // The end of the response stream (and by extension, request stream). We expect one 'end' part,
             // after which no more response parts may be received and no more request parts will be sent.
         case let .end(status, trailers):
-            let log = "< Response stream closed with status: '\(status)' and trailers: \(prettify(trailers))"
-            BenchmarkSuite.shared.takeActionSnapshot(snapshot: ActionSnaptshot(action: log))
+            let formatted = prettify(trailers)
+            let log = "< Response stream closed with status: '\(status)' and trailers: \(formatted)"
             print(log)
+            
+            grpcPart = .end(status: status, trailers: formatted)
         }
+        
         
         // Forward the response part to the next interceptor.
         context.receive(part)
+        
+        // Forward part to custom user Interceptor
+        additionalInterceptor?.receive(part: grpcPart)
     }
     
     override func send(_ part: GRPCClientRequestPart<Flwr_Proto_ClientMessage>, promise: EventLoopPromise<Void>?, context: ClientInterceptorContext<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>) {
         
-        additionalInterceptor?.send()
+        // wrapper to expose message for additional interceptor
+        let grpcPart: GRPCPartWrapper
         
         switch part {
             // The (user-provided) request headers, we send these at the start of each RPC. They will be
             // augmented with transport specific headers once the request part reaches the transport.
         case let .metadata(headers):
-            let log = "> Starting '\(context.path)' RPC, headers: \(prettify(headers))"
-            BenchmarkSuite.shared.takeActionSnapshot(snapshot: ActionSnaptshot(action: log))
+            let formatted = prettify(headers)
+            let log = "> Starting '\(context.path)' RPC, headers: \(formatted)"
             print(log)
+            
+            grpcPart = .metadata(header: formatted)
             
             // The request message and metadata (ignored here). For unary and server-streaming RPCs we
             // expect exactly one message, for client-streaming and bidirectional streaming RPCs any number
             // of messages is permitted.
         case let .message(request, _):
-            let size = String(describing: request.msg).count
-            let log = "> Sending request \(decipherClientMessage(request.msg!)) with text size \(size)"
-            BenchmarkSuite.shared.takeNetworkSnaptshot(snapshot: NetworkSnapshot(type: .sent(data: size)))
-            BenchmarkSuite.shared.takeActionSnapshot(snapshot: ActionSnaptshot(action: log))
+            let msg = String(describing: request.msg)
+            let log = "> Sending request \(decipherClientMessage(request.msg!)) with text size \(msg.count)"
             print(log)
+            
+            grpcPart = .message(content: msg)
             
             // The end of the request stream: must be sent exactly once, after which no more messages may
             // be sent.
         case .end:
             print("> Closing request stream")
+            
+            grpcPart = .end(status: nil, trailers: nil)
         }
         
         // Forward the request part to the next interceptor.
         context.send(part, promise: promise)
+        
+        // Forward part to custom user Interceptor
+        additionalInterceptor?.send(part: grpcPart)
     }
 }
 
