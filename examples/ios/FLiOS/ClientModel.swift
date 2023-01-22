@@ -155,7 +155,7 @@ public class ClientModel: ObservableObject {
     public func startFederatedLearning() {
         self.federatedServerStatus = .run
         initCoreMLClient()
-        self.flwrGRPC = FlwrGRPC(serverHost: hostname, serverPort: port)
+        self.flwrGRPC = FlwrGRPC(serverHost: hostname, serverPort: port, additionalInterceptor: BenchmarkInterceptor())
         self.flwrGRPC?.startFlwrGRPC(client: coreMLClient!)
     }
     
