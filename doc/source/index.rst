@@ -46,6 +46,7 @@ A learning-oriented series of federated learning tutorials, the best place to st
    quickstart-tensorflow
    quickstart-huggingface
    quickstart-pandas
+   quickstart-fastai
    quickstart-pytorch-lightning
    quickstart-mxnet
    quickstart-scikitlearn
