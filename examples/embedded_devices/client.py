@@ -182,7 +182,7 @@ def main() -> None:
 
     # Start client
     client = CifarClient(args.cid, model, trainset, testset)
-    fl.client.start_client(args.server_address, client)
+    fl.client.start_client(server_address=args.server_address, client=client)
 
 
 if __name__ == "__main__":
