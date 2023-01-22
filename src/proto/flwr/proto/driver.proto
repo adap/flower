@@ -17,6 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
 
 service Driver {
@@ -40,7 +41,7 @@ message PushTaskInsResponse { repeated string task_ids = 2; }
 
 // PullTaskRes messages
 message PullTaskResRequest {
-  uint64 node_id = 1;
+  Node node = 1;
   repeated string task_ids = 2;
 }
 message PullTaskResResponse { repeated TaskRes task_res_list = 1; }
