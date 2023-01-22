@@ -6,8 +6,17 @@
 //
 
 import Foundation
+import GRPC
 
 public protocol FlwrGRPCInterceptor {
-    func receive()
-    func send()
+    func receive(part: GRPCPartWrapper)
+    func send(part: GRPCPartWrapper)
+}
+
+
+public enum GRPCPartWrapper {
+    case metadata(header: String)
+    case message(content: String)
+    case end(status: GRPCStatus?, trailers: String?)
+
 }
