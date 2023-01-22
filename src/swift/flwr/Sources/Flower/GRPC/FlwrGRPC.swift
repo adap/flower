@@ -8,16 +8,15 @@
 import Foundation
 import GRPC
 import NIOCore
-import NIOPosix
 
 public class FlwrGRPC {
     typealias GRPCResponse = (Flwr_Proto_ClientMessage, Int, Bool)
     
-    static let maxMessageLength: Int = 536870912
-    var bidirectionalStream: BidirectionalStreamingCall<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>? = nil
+    private static let maxMessageLength: Int = 536870912
+    private var bidirectionalStream: BidirectionalStreamingCall<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>? = nil
     
-    let eventLoopGroup: EventLoopGroup
-    let channel: GRPCChannel
+    private let eventLoopGroup: EventLoopGroup
+    private let channel: GRPCChannel
     
     let additionalInterceptor: FlwrGRPCInterceptor?
     
@@ -46,6 +45,10 @@ public class FlwrGRPC {
     }
     
     public func startFlwrGRPC(client: Client) {
+        startFlwrGRPC(client: client) {}
+    }
+    
+    public func startFlwrGRPC(client: Client, completion: @escaping () -> Void) {
         let grpcClient = Flwr_Proto_FlowerServiceNIOClient(channel: channel, interceptors: FlowerInterceptorsFactory(additionalInterceptor: self.additionalInterceptor))
         var callOptions = CallOptions()
         callOptions.customMetadata.add(name: "maxReceiveMessageLength", value: String(FlwrGRPC.maxMessageLength))
@@ -58,29 +61,28 @@ public class FlwrGRPC {
                     .makePromise(of: GRPCResponse.self)
                 let response = try handle(client: client, serverMsg: sm)
                 promise.succeed(response)
-                self.sendResponse(future: promise.futureResult)
+                self.sendResponse(future: promise.futureResult, completion: completion)
             } catch let error {
                 print(error)
             }
         })
     }
     
-    func sendResponse(future: EventLoopFuture<GRPCResponse>) {
+    func sendResponse(future: EventLoopFuture<GRPCResponse>, completion: @escaping () -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 let response = try future.wait()
                 _ = self.bidirectionalStream?.sendMessage(response.0)
                 if !response.2 {
-                    self.closeGRPCConnection()
-                    
+                    self.closeGRPCConnection(completion: completion)
                 }
             } catch let error {
                 print(error)
             }
         }
     }
-    
-    public func closeGRPCConnection() {
+
+    func closeGRPCConnection(completion: @escaping () -> Void) {
         do {
             print("Closing gRPC bidirectional stream channel")
             try self.channel.close().wait()
@@ -88,14 +90,24 @@ public class FlwrGRPC {
             print("Closing gRPC event loop group")
             try self.eventLoopGroup.syncShutdownGracefully()
             
-            if #available(iOS 14.0, *) {
+            /*if #available(iOS 14.0, *) {
                 print("Closing python event loop group")
                 ParameterConverter.shared.finalize()
-            }
+            }*/
+            completion()
             
         } catch let error {
             print(error)
         }
     }
     
+    public func abortGRPCConnection(completion: @escaping () -> Void) {
+        var disconnect = Flwr_Proto_ClientMessage.DisconnectRes()
+        disconnect.reason = .powerDisconnected
+        var clientMessage = Flwr_Proto_ClientMessage()
+        clientMessage.disconnectRes = disconnect
+        
+        _ = self.bidirectionalStream?.sendMessage(clientMessage)
+        closeGRPCConnection(completion: completion)
+    }
 }

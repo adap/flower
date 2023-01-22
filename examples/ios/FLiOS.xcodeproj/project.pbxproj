@@ -10,6 +10,7 @@
 		19764EEA297D2B12009F3E5D /* BenchmarkInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19764EE9297D2B11009F3E5D /* BenchmarkInterceptor.swift */; };
 		19764EED297D3ABE009F3E5D /* BenchmarkModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19764EEC297D3ABE009F3E5D /* BenchmarkModel.swift */; };
 		19764EEF297D3AC9009F3E5D /* BenchmarkSuite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19764EEE297D3AC9009F3E5D /* BenchmarkSuite.swift */; };
+		21075DC929788ED400311461 /* FLiOSModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21075DC829788ED400311461 /* FLiOSModel.swift */; };
 		21A77AC32865B22B0062EBD8 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A6F2865B22A0062EBD8 /* Array+Extensions.swift */; };
 		21A77AC42865B22B0062EBD8 /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A702865B22A0062EBD8 /* Math.swift */; };
 		21A77AC52865B22B0062EBD8 /* UIImage+CVPixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A712865B22A0062EBD8 /* UIImage+CVPixelBuffer.swift */; };
@@ -93,13 +94,8 @@
 		21A77B132865B22B0062EBD8 /* Model.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AC02865B22B0062EBD8 /* Model.pb.swift */; };
 		21A77B142865B22B0062EBD8 /* NeuralNetwork.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AC12865B22B0062EBD8 /* NeuralNetwork.pb.swift */; };
 		21A77B152865B22B0062EBD8 /* Scaler.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AC22865B22B0062EBD8 /* Scaler.pb.swift */; };
-		21A77B1A2865B26C0062EBD8 /* DataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B172865B26C0062EBD8 /* DataLoader.swift */; };
 		21A77B1B2865B26C0062EBD8 /* MNISTDataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B182865B26C0062EBD8 /* MNISTDataLoader.swift */; };
-		21A77B1C2865B26C0062EBD8 /* CoreMLClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B192865B26C0062EBD8 /* CoreMLClient.swift */; };
-		21A77B1E2865B2AB0062EBD8 /* ClientModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B1D2865B2AB0062EBD8 /* ClientModel.swift */; };
-		21A77B222865B3B10062EBD8 /* MLLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B1F2865B3B10062EBD8 /* MLLayerWrapper.swift */; };
 		21A77B232865B3B10062EBD8 /* MLModelInspect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B202865B3B10062EBD8 /* MLModelInspect.swift */; };
-		21A77B242865B3B10062EBD8 /* MLResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B212865B3B10062EBD8 /* MLResult.swift */; };
 		21A77B292865B4CB0062EBD8 /* MNIST_Model.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */; };
 		21A77B2A2865B4CB0062EBD8 /* mnist_train.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 21A77B272865B4CB0062EBD8 /* mnist_train.csv.lzfse */; };
 		21A77B2B2865B4CB0062EBD8 /* mnist_test.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 21A77B282865B4CB0062EBD8 /* mnist_test.csv.lzfse */; };
@@ -128,6 +124,7 @@
 		19764EE9297D2B11009F3E5D /* BenchmarkInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkInterceptor.swift; sourceTree = "<group>"; };
 		19764EEC297D3ABE009F3E5D /* BenchmarkModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkModel.swift; sourceTree = "<group>"; };
 		19764EEE297D3AC9009F3E5D /* BenchmarkSuite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkSuite.swift; sourceTree = "<group>"; };
+		21075DC829788ED400311461 /* FLiOSModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLiOSModel.swift; sourceTree = "<group>"; };
 		21A77A6F2865B22A0062EBD8 /* Array+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+Extensions.swift"; sourceTree = "<group>"; };
 		21A77A702865B22A0062EBD8 /* Math.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
 		21A77A712865B22A0062EBD8 /* UIImage+CVPixelBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImage+CVPixelBuffer.swift"; sourceTree = "<group>"; };
@@ -211,13 +208,8 @@
 		21A77AC02865B22B0062EBD8 /* Model.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Model.pb.swift; sourceTree = "<group>"; };
 		21A77AC12865B22B0062EBD8 /* NeuralNetwork.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralNetwork.pb.swift; sourceTree = "<group>"; };
 		21A77AC22865B22B0062EBD8 /* Scaler.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scaler.pb.swift; sourceTree = "<group>"; };
-		21A77B172865B26C0062EBD8 /* DataLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataLoader.swift; sourceTree = "<group>"; };
 		21A77B182865B26C0062EBD8 /* MNISTDataLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MNISTDataLoader.swift; sourceTree = "<group>"; };
-		21A77B192865B26C0062EBD8 /* CoreMLClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreMLClient.swift; sourceTree = "<group>"; };
-		21A77B1D2865B2AB0062EBD8 /* ClientModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientModel.swift; sourceTree = "<group>"; };
-		21A77B1F2865B3B10062EBD8 /* MLLayerWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLLayerWrapper.swift; sourceTree = "<group>"; };
 		21A77B202865B3B10062EBD8 /* MLModelInspect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLModelInspect.swift; sourceTree = "<group>"; };
-		21A77B212865B3B10062EBD8 /* MLResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLResult.swift; sourceTree = "<group>"; };
 		21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = MNIST_Model.mlmodel; sourceTree = "<group>"; };
 		21A77B272865B4CB0062EBD8 /* mnist_train.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = mnist_train.csv.lzfse; sourceTree = "<group>"; };
 		21A77B282865B4CB0062EBD8 /* mnist_test.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = mnist_test.csv.lzfse; sourceTree = "<group>"; };
@@ -351,12 +343,8 @@
 		21A77B162865B23D0062EBD8 /* CoreMLClient */ = {
 			isa = PBXGroup;
 			children = (
-				21A77B192865B26C0062EBD8 /* CoreMLClient.swift */,
-				21A77B172865B26C0062EBD8 /* DataLoader.swift */,
 				21A77B182865B26C0062EBD8 /* MNISTDataLoader.swift */,
-				21A77B1F2865B3B10062EBD8 /* MLLayerWrapper.swift */,
 				21A77B202865B3B10062EBD8 /* MLModelInspect.swift */,
-				21A77B212865B3B10062EBD8 /* MLResult.swift */,
 			);
 			path = CoreMLClient;
 			sourceTree = "<group>";
@@ -405,7 +393,7 @@
 				21A77B262865B4CB0062EBD8 /* MNISTDataset */,
 				21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */,
 				21B540702865B14000185DEE /* FLiOSApp.swift */,
-				21A77B1D2865B2AB0062EBD8 /* ClientModel.swift */,
+				21075DC829788ED400311461 /* FLiOSModel.swift */,
 				21B540722865B14000185DEE /* ContentView.swift */,
 				21B540742865B14100185DEE /* Assets.xcassets */,
 				21B540762865B14100185DEE /* Preview Content */,
@@ -519,7 +507,6 @@
 				21A77ACC2865B22B0062EBD8 /* CoreML+Combine.swift in Sources */,
 				21A77B0A2865B22B0062EBD8 /* CategoricalMapping.proto in Sources */,
 				21B540732865B14000185DEE /* ContentView.swift in Sources */,
-				21A77B1E2865B2AB0062EBD8 /* ClientModel.swift in Sources */,
 				21A77AE62865B22B0062EBD8 /* NearestNeighbors.pb.swift in Sources */,
 				21A77AEE2865B22B0062EBD8 /* AudioFeaturePrint.pb.swift in Sources */,
 				21A77AE72865B22B0062EBD8 /* MIL.proto in Sources */,
@@ -548,7 +535,6 @@
 				21A77AC52865B22B0062EBD8 /* UIImage+CVPixelBuffer.swift in Sources */,
 				21A77AEA2865B22B0062EBD8 /* CustomModel.proto in Sources */,
 				21A77B042865B22B0062EBD8 /* Identity.proto in Sources */,
-				21A77B1C2865B26C0062EBD8 /* CoreMLClient.swift in Sources */,
 				21A77AEB2865B22B0062EBD8 /* NonMaximumSuppression.pb.swift in Sources */,
 				21A77ADD2865B22B0062EBD8 /* WordEmbedding.proto in Sources */,
 				21A77ACE2865B22B0062EBD8 /* CGImage+CVPixelBuffer.swift in Sources */,
@@ -560,9 +546,7 @@
 				21A77AF52865B22B0062EBD8 /* DataStructures.proto in Sources */,
 				21A77AED2865B22B0062EBD8 /* Normalizer.proto in Sources */,
 				21A77AE02865B22B0062EBD8 /* TreeEnsemble.proto in Sources */,
-				21A77B222865B3B10062EBD8 /* MLLayerWrapper.swift in Sources */,
 				21A77AD12865B22B0062EBD8 /* MLMultiArray+Image.swift in Sources */,
-				21A77B1A2865B26C0062EBD8 /* DataLoader.swift in Sources */,
 				21A77AF12865B22B0062EBD8 /* Identity.pb.swift in Sources */,
 				21A77ADA2865B22B0062EBD8 /* AudioFeaturePrint.proto in Sources */,
 				21A77AE82865B22B0062EBD8 /* FeatureVectorizer.pb.swift in Sources */,
@@ -586,9 +570,9 @@
 				21A77B082865B22B0062EBD8 /* SoundAnalysisPreprocessing.proto in Sources */,
 				21A77B062865B22B0062EBD8 /* DictVectorizer.pb.swift in Sources */,
 				21A77B0E2865B22B0062EBD8 /* NearestNeighbors.proto in Sources */,
-				21A77B242865B3B10062EBD8 /* MLResult.swift in Sources */,
 				21A77AF32865B22B0062EBD8 /* LinkedModel.pb.swift in Sources */,
 				21A77AEC2865B22B0062EBD8 /* SVM.pb.swift in Sources */,
+				21075DC929788ED400311461 /* FLiOSModel.swift in Sources */,
 				21A77B122865B22B0062EBD8 /* DataStructures.pb.swift in Sources */,
 				21A77AD72865B22B0062EBD8 /* NeuralNetwork.proto in Sources */,
 				21A77AD52865B22B0062EBD8 /* Imputer.proto in Sources */,
