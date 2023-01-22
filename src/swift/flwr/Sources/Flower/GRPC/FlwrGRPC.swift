@@ -19,7 +19,11 @@ public class FlwrGRPC {
     let eventLoopGroup: EventLoopGroup
     let channel: GRPCChannel
     
-    public init(serverHost: String, serverPort: Int) {
+    let additionalInterceptor: FlwrGRPCInterceptor?
+    
+    public init(serverHost: String, serverPort: Int, additionalInterceptor: FlwrGRPCInterceptor? = nil) {
+        self.additionalInterceptor = additionalInterceptor
+        
         self.eventLoopGroup = PlatformSupport
             .makeEventLoopGroup(loopCount: 1, networkPreference: .best)
         
@@ -42,7 +46,7 @@ public class FlwrGRPC {
     }
     
     public func startFlwrGRPC(client: Client) {
-        let grpcClient = Flwr_Proto_FlowerServiceNIOClient(channel: channel, interceptors: FlowerInterceptorsFactory())
+        let grpcClient = Flwr_Proto_FlowerServiceNIOClient(channel: channel, interceptors: FlowerInterceptorsFactory(additionalInterceptor: self.additionalInterceptor))
         var callOptions = CallOptions()
         callOptions.customMetadata.add(name: "maxReceiveMessageLength", value: String(FlwrGRPC.maxMessageLength))
         callOptions.customMetadata.add(name: "maxSendMessageLength", value: String(FlwrGRPC.maxMessageLength))

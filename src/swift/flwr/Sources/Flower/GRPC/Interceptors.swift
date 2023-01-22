@@ -10,7 +10,16 @@ import GRPC
 import NIOCore
 
 class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage> {
+    var additionalInterceptor: FlwrGRPCInterceptor?
+    
+    init(additionalInterceptor: FlwrGRPCInterceptor?) {
+        self.additionalInterceptor = additionalInterceptor
+    }
+    
     override func receive(_ part: GRPCClientResponsePart<Flwr_Proto_ServerMessage>, context: ClientInterceptorContext<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>) {
+        
+        additionalInterceptor?.receive()
+        
         switch part {
             // The response headers received from the server. We expect to receive these once at the start
             // of a response stream, however, it is also valid to see no 'metadata' parts on the response
@@ -46,6 +55,9 @@ class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr
     }
     
     override func send(_ part: GRPCClientRequestPart<Flwr_Proto_ClientMessage>, promise: EventLoopPromise<Void>?, context: ClientInterceptorContext<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>) {
+        
+        additionalInterceptor?.send()
+        
         switch part {
             // The (user-provided) request headers, we send these at the start of each RPC. They will be
             // augmented with transport specific headers once the request part reaches the transport.
@@ -115,8 +127,14 @@ func decipherClientMessage(_ msg: Flwr_Proto_ClientMessage.OneOf_Msg) -> String 
 }
 
 final class FlowerInterceptorsFactory: Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol {
+    let additionalInterceptor: FlwrGRPCInterceptor?
+    
+    init(additionalInterceptor: FlwrGRPCInterceptor? = nil) {
+        self.additionalInterceptor = additionalInterceptor
+    }
+    
     func makeJoinInterceptors() -> [ClientInterceptor<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>] {
-        return [FlowerClientInterceptors()]
+        return [FlowerClientInterceptors(additionalInterceptor: self.additionalInterceptor)]
     }
     
 }
