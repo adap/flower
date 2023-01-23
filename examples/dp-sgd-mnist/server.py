@@ -22,7 +22,7 @@ def get_evaluate_fn(model):
     test_data, test_labels = common.preprocess(test_data, test_labels)
 
     # The `evaluate` function will be called after every round
-    def evaluate(weights: fl.common.Weights):
+    def evaluate(weights: fl.common.NDArrays):
         model.set_weights(weights)  # Update model with the latest parameters
         loss, accuracy = model.evaluate(test_data, test_labels)
         return loss, {"accuracy": accuracy}
