@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void runGRPC(View view){
+    public void runGrpc(View view){
         MainActivity activity = this;
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     private static class FlowerServiceRunnable{
         protected Throwable failed;
         private StreamObserver<ClientMessage> requestObserver;
-//        @Override
+
         public void run(FlowerServiceStub asyncStub, MainActivity activity) {
              join(asyncStub, activity);
         }
