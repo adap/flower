@@ -8,6 +8,8 @@
 
 - **Add support for ** `workload_id` **and** `group_id` **in Driver API** ([#1595](https://github.com/adap/flower/pull/1595))
 
+- **Make iOS example compatible with** `flwr >= 1.0.0` ([#1602](https://github.com/adap/flower/pull/1602))
+
 ### Incompatible changes
 
 ## v1.2.0 (2023-01-13)
