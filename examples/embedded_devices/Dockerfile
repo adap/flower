@@ -23,6 +23,6 @@ ADD utils.py /app
 RUN pip3 install --upgrade pip
 
 # making sure the latest version of flower is installed
-RUN pip3 install flwr==0.16.0
+RUN pip3 install flwr>=1.0.0
 
 ENTRYPOINT ["python3","-u","./client.py"]
