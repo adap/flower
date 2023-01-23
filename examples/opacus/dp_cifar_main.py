@@ -94,7 +94,7 @@ class DPCifarClient(fl.client.NumPyClient):
             noise_multiplier=PRIVACY_PARAMS["noise_multiplier"],
         )
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_parameters(self, parameters):
@@ -108,7 +108,7 @@ class DPCifarClient(fl.client.NumPyClient):
             self.model, self.trainloader, self.privacy_engine, PARAMS["local_epochs"]
         )
         print(f"epsilon = {epsilon:.2f}")
-        return self.get_parameters(), len(self.trainloader), {"epsilon": epsilon}
+        return self.get_parameters(config={}), len(self.trainloader), {"epsilon": epsilon}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
