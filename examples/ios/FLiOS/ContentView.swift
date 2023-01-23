@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var model = FLiOSModel()
+    @State var preparedExport = false
     
     var numberFormatter: NumberFormatter = {
         var nf = NumberFormatter()
@@ -177,6 +178,23 @@ struct ContentView: View {
                             }
                             .disabled(model.mlFlwrClientStatus != .ready)
                         }
+                    }
+                    Section(header: Text("Benchmark")) {
+                        HStack{
+                            Text("Prepare Benchmark Export")
+                            Spacer()
+                            Button(action: {
+                                model.benchmarkSuite.exportBenchmark()
+                                preparedExport = true
+                            }) {
+                                Text("Start").disabled(preparedExport)
+                            }
+                        }
+                        
+                        if model.benchmarkSuite.benchmarkExists() || preparedExport {
+                            ShareLink(item:model.benchmarkSuite.getBenchmarkFileUrl())
+                        }
+                        
                     }
                 }
             }
