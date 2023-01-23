@@ -70,7 +70,7 @@
         android:layout_margin="5sp"
         android:backgroundTint="#9DE1EA"
         android:enabled="false"
-        android:onClick="runGRCP"
+        android:onClick="runGRPC"
         android:text="Train Federated!" />
 
     <TextView

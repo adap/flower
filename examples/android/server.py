@@ -8,11 +8,11 @@ def main() -> None:
     # Create strategy
     strategy = fl.server.strategy.FedAvgAndroid(
         fraction_fit=1.0,
-        fraction_eval=1.0,
+        fraction_evaluate=1.0,
         min_fit_clients=4,
-        min_eval_clients=4,
+        min_evaluate_clients=4,
         min_available_clients=4,
-        eval_fn=None,
+        evaluate_fn=None,
         on_fit_config_fn=fit_config,
         initial_parameters=None,
     )

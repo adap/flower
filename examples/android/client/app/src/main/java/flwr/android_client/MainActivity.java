@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText device_id;
     private ManagedChannel channel;
     public FlowerClient fc;
-    private static String TAG = "Flower";
+    private static final String TAG = "Flower";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,15 +99,21 @@ public class MainActivity extends AppCompatActivity {
             hideKeyboard(this);
             setResultText("Loading the local training dataset in memory. It will take several seconds.");
             loadDataButton.setEnabled(false);
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    fc.loadData(Integer.parseInt(device_id.getText().toString()));
-                    setResultText("Training dataset is loaded in memory.");
-                    connectButton.setEnabled(true);
-                }
-            }, 1000);
+            new LoadDataTask().execute(fc, device_id, this);
+//            final Handler handler = new Handler();
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    handler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            fc.loadData(Integer.parseInt(device_id.getText().toString()));
+//                            setResultText("Training dataset is loaded in memory.");
+//                            connectButton.setEnabled(true);
+//                        }
+//                    }, 1000);
+//                }
+//            }).start();
         }
     }
 
@@ -118,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Please enter the correct IP and port of the FL server", Toast.LENGTH_LONG).show();
         }
         else {
-            int port = TextUtils.isEmpty(portStr) ? 0 : Integer.valueOf(portStr);
+            int port = TextUtils.isEmpty(portStr) ? 0 : Integer.parseInt(portStr);
             channel = ManagedChannelBuilder.forAddress(host, port).maxInboundMessageSize(10 * 1024 * 1024).usePlaintext().build();
             hideKeyboard(this);
             trainButton.setEnabled(true);
@@ -127,8 +133,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void runGRCP(View view){
+    public void runGRPC(View view){
+        Log.e(TAG, "Running GRPC task");
         new GrpcTask(new FlowerServiceRunnable(), channel, this).execute();
+    }
+
+    private static class LoadDataTask extends AsyncTask<Object, Void, String> {
+        private MainActivity activityReference;
+
+        @Override
+        protected String doInBackground(Object... params) {
+            this.activityReference = (MainActivity) params[2];
+            try {
+                FlowerClient fc = (FlowerClient) params[0];
+                EditText device_id = (EditText) params[1];
+                fc.loadData(Integer.parseInt(device_id.getText().toString()));
+                return "Training dataset is loaded in memory.";
+            } catch (Exception e) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                pw.flush();
+                return "Failed to connect to the FL server \n" + sw;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            MainActivity activity = this.activityReference;
+            if (activity == null) {
+                return;
+            }
+            activity.setResultText(result);
+            activity.connectButton.setEnabled(true);
+        }
     }
 
     private static class GrpcTask extends AsyncTask<Void, Void, String> {
@@ -177,6 +215,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run(FlowerServiceBlockingStub blockingStub, FlowerServiceStub asyncStub, MainActivity activity)
                 throws Exception {
+             Log.e(TAG, "Running join stub");
              join(asyncStub, activity);
         }
 
@@ -184,15 +223,18 @@ public class MainActivity extends AppCompatActivity {
                 throws InterruptedException, RuntimeException {
 
             final CountDownLatch finishLatch = new CountDownLatch(1);
+            Log.e(TAG, "Requesting observer");
             requestObserver = asyncStub.join(
                             new StreamObserver<ServerMessage>() {
                                 @Override
                                 public void onNext(ServerMessage msg) {
+                                    Log.e(TAG, "Handling next server message");
                                     handleMessage(msg, activity);
                                 }
 
                                 @Override
                                 public void onError(Throwable t) {
+                                    t.printStackTrace();
                                     failed = t;
                                     finishLatch.countDown();
                                     Log.e(TAG, t.getMessage());
@@ -211,8 +253,9 @@ public class MainActivity extends AppCompatActivity {
             try {
                 ByteBuffer[] weights;
                 ClientMessage c = null;
+                Log.e(TAG, "I WAS HERE");
 
-                if (message.hasGetParameters()) {
+                if (message.hasGetParametersIns()) {
                     Log.e(TAG, "Handling GetParameters");
                     activity.setResultText("Handling GetParameters message from the server.");
 
@@ -226,6 +269,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Scalar epoch_config = message.getFitIns().getConfigMap().getOrDefault("local_epochs", Scalar.newBuilder().setSint64(1).build());
 
+                    assert epoch_config != null;
                     int local_epochs = (int) epoch_config.getSint64();
 
                     // Our model has 10 layers
@@ -260,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
                 c = null;
             }
             catch (Exception e){
+                Log.e(TAG, "Is it this exception?");
                 Log.e(TAG, e.getMessage());
             }
         }
@@ -267,18 +312,18 @@ public class MainActivity extends AppCompatActivity {
 
     private static ClientMessage weightsAsProto(ByteBuffer[] weights){
         List<ByteString> layers = new ArrayList<ByteString>();
-        for (int i=0; i < weights.length; i++) {
-            layers.add(ByteString.copyFrom(weights[i]));
+        for (ByteBuffer weight : weights) {
+            layers.add(ByteString.copyFrom(weight));
         }
         Parameters p = Parameters.newBuilder().addAllTensors(layers).setTensorType("ND").build();
-        ClientMessage.ParametersRes res = ClientMessage.ParametersRes.newBuilder().setParameters(p).build();
-        return ClientMessage.newBuilder().setParametersRes(res).build();
+        ClientMessage.GetParametersRes res = ClientMessage.GetParametersRes.newBuilder().setParameters(p).build();
+        return ClientMessage.newBuilder().setGetParametersRes(res).build();
     }
 
     private static ClientMessage fitResAsProto(ByteBuffer[] weights, int training_size){
         List<ByteString> layers = new ArrayList<ByteString>();
-        for (int i=0; i < weights.length; i++) {
-            layers.add(ByteString.copyFrom(weights[i]));
+        for (ByteBuffer weight : weights) {
+            layers.add(ByteString.copyFrom(weight));
         }
         Parameters p = Parameters.newBuilder().addAllTensors(layers).setTensorType("ND").build();
         ClientMessage.FitRes res = ClientMessage.FitRes.newBuilder().setParameters(p).setNumExamples(training_size).build();
