@@ -8,6 +8,8 @@
 
 - **Add support for ** `workload_id` **and** `group_id` **in Driver API** ([#1595](https://github.com/adap/flower/pull/1595))
 
+- **Introduce new Flower Baseline: FedProx MNIST** ([#1513](https://github.com/adap/flower/pull/1513))
+
 ### Incompatible changes
 
 ## v1.2.0 (2023-01-13)
