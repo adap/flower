@@ -2,14 +2,12 @@ package flwr.android_client;
 
 import android.app.Activity;
 import android.icu.text.SimpleDateFormat;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -25,23 +23,22 @@ import android.widget.Toast;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
-import  flwr.android_client.FlowerServiceGrpc.FlowerServiceBlockingStub;
 import  flwr.android_client.FlowerServiceGrpc.FlowerServiceStub;
 import com.google.protobuf.ByteString;
 
 import io.grpc.stub.StreamObserver;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
-import javax.net.ssl.HttpsURLConnection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 public class MainActivity extends AppCompatActivity {
     private EditText ip;
@@ -82,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void setResultText(String text) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss", Locale.GERMANY);
         String time = dateFormat.format(new Date());
         resultText.append("\n" + time + "   " + text);
     }
@@ -99,21 +96,30 @@ public class MainActivity extends AppCompatActivity {
             hideKeyboard(this);
             setResultText("Loading the local training dataset in memory. It will take several seconds.");
             loadDataButton.setEnabled(false);
-            new LoadDataTask().execute(fc, device_id, this);
-//            final Handler handler = new Handler();
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    handler.postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            fc.loadData(Integer.parseInt(device_id.getText().toString()));
-//                            setResultText("Training dataset is loaded in memory.");
-//                            connectButton.setEnabled(true);
-//                        }
-//                    }, 1000);
-//                }
-//            }).start();
+
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Handler handler = new Handler(Looper.getMainLooper());
+
+            executor.execute(new Runnable() {
+                private String result;
+                @Override
+                public void run() {
+                    try {
+                        fc.loadData(Integer.parseInt(device_id.getText().toString()));
+                        result =  "Training dataset is loaded in memory.";
+                    } catch (Exception e) {
+                        StringWriter sw = new StringWriter();
+                        PrintWriter pw = new PrintWriter(sw);
+                        e.printStackTrace(pw);
+                        pw.flush();
+                        result =  "Training dataset is loaded in memory.";
+                    }
+                    handler.post(() -> {
+                        setResultText(result);
+                        connectButton.setEnabled(true);
+                    });
+                }
+            });
         }
     }
 
@@ -134,101 +140,49 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void runGRPC(View view){
-        Log.e(TAG, "Running GRPC task");
-        new GrpcTask(new FlowerServiceRunnable(), channel, this).execute();
+        MainActivity activity = this;
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        executor.execute(new Runnable() {
+            private String result;
+            @Override
+            public void run() {
+                try {
+                    (new FlowerServiceRunnable()).run(FlowerServiceGrpc.newStub(channel), activity);
+                    result =  "Connection to the FL server successful \n";
+                } catch (Exception e) {
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    e.printStackTrace(pw);
+                    pw.flush();
+                    result = "Failed to connect to the FL server \n" + sw;
+                }
+                handler.post(() -> {
+                    setResultText(result);
+                    trainButton.setEnabled(false);
+                });
+            }
+        });
     }
 
-    private static class LoadDataTask extends AsyncTask<Object, Void, String> {
-        private MainActivity activityReference;
 
-        @Override
-        protected String doInBackground(Object... params) {
-            this.activityReference = (MainActivity) params[2];
-            try {
-                FlowerClient fc = (FlowerClient) params[0];
-                EditText device_id = (EditText) params[1];
-                fc.loadData(Integer.parseInt(device_id.getText().toString()));
-                return "Training dataset is loaded in memory.";
-            } catch (Exception e) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                pw.flush();
-                return "Failed to connect to the FL server \n" + sw;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            MainActivity activity = this.activityReference;
-            if (activity == null) {
-                return;
-            }
-            activity.setResultText(result);
-            activity.connectButton.setEnabled(true);
-        }
-    }
-
-    private static class GrpcTask extends AsyncTask<Void, Void, String> {
-        private final GrpcRunnable grpcRunnable;
-        private final ManagedChannel channel;
-        private final MainActivity activityReference;
-
-        GrpcTask(GrpcRunnable grpcRunnable, ManagedChannel channel, MainActivity activity) {
-            this.grpcRunnable = grpcRunnable;
-            this.channel = channel;
-            this.activityReference = activity;
-        }
-
-        @Override
-        protected String doInBackground(Void... nothing) {
-            try {
-                grpcRunnable.run(FlowerServiceGrpc.newBlockingStub(channel), FlowerServiceGrpc.newStub(channel), this.activityReference);
-                return "Connection to the FL server successful \n";
-            } catch (Exception e) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                pw.flush();
-                return "Failed to connect to the FL server \n" + sw;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            MainActivity activity = activityReference;
-            if (activity == null) {
-                return;
-            }
-            activity.setResultText(result);
-            activity.trainButton.setEnabled(false);
-        }
-    }
-
-    private interface GrpcRunnable {
-        void run(FlowerServiceBlockingStub blockingStub, FlowerServiceStub asyncStub, MainActivity activity) throws Exception;
-    }
-
-    private static class FlowerServiceRunnable implements GrpcRunnable {
-        private Throwable failed;
+    private static class FlowerServiceRunnable{
+        protected Throwable failed;
         private StreamObserver<ClientMessage> requestObserver;
-        @Override
-        public void run(FlowerServiceBlockingStub blockingStub, FlowerServiceStub asyncStub, MainActivity activity)
-                throws Exception {
-             Log.e(TAG, "Running join stub");
+//        @Override
+        public void run(FlowerServiceStub asyncStub, MainActivity activity) {
              join(asyncStub, activity);
         }
 
         private void join(FlowerServiceStub asyncStub, MainActivity activity)
-                throws InterruptedException, RuntimeException {
+                throws RuntimeException {
 
             final CountDownLatch finishLatch = new CountDownLatch(1);
-            Log.e(TAG, "Requesting observer");
             requestObserver = asyncStub.join(
                             new StreamObserver<ServerMessage>() {
                                 @Override
                                 public void onNext(ServerMessage msg) {
-                                    Log.e(TAG, "Handling next server message");
                                     handleMessage(msg, activity);
                                 }
 
@@ -253,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
             try {
                 ByteBuffer[] weights;
                 ClientMessage c = null;
-                Log.e(TAG, "I WAS HERE");
 
                 if (message.hasGetParametersIns()) {
                     Log.e(TAG, "Handling GetParameters");
@@ -301,17 +254,15 @@ public class MainActivity extends AppCompatActivity {
                 }
                 requestObserver.onNext(c);
                 activity.setResultText("Response sent to the server");
-                c = null;
             }
             catch (Exception e){
-                Log.e(TAG, "Is it this exception?");
                 Log.e(TAG, e.getMessage());
             }
         }
     }
 
     private static ClientMessage weightsAsProto(ByteBuffer[] weights){
-        List<ByteString> layers = new ArrayList<ByteString>();
+        List<ByteString> layers = new ArrayList<>();
         for (ByteBuffer weight : weights) {
             layers.add(ByteString.copyFrom(weight));
         }
@@ -321,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private static ClientMessage fitResAsProto(ByteBuffer[] weights, int training_size){
-        List<ByteString> layers = new ArrayList<ByteString>();
+        List<ByteString> layers = new ArrayList<>();
         for (ByteBuffer weight : weights) {
             layers.add(ByteString.copyFrom(weight));
         }

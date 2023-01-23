@@ -20,7 +20,7 @@ option java_package = "flwr.android_client";
 option java_outer_classname = "FlowerTransport";
 option objc_class_prefix = "gRPC";
 
-package flower.transport;
+package flwr.proto;
 
 service FlowerService {
   rpc Join(stream ClientMessage) returns (stream ServerMessage) {}
