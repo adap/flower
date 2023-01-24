@@ -217,7 +217,7 @@ def _fl(
 
 def run_server() -> None:
     """Run Flower server."""
-    args = parse_args()
+    args = _parse_args()
 
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SERVER_ENTER)
@@ -338,9 +338,9 @@ def _run_fleet_api_grpc_legacy(
     return fleet_grpc_server
 
 
-def parse_args() -> argparse.Namespace:
+def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Use this script to start a Flower Server."
+        description="Start a long-running Flower Server."
     )
     # Possible Server types
     ex_g = parser.add_mutually_exclusive_group()
