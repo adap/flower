@@ -18,7 +18,6 @@
 import time
 from logging import INFO
 from typing import Callable, Dict, Optional, Union
-from uuid import uuid4
 
 from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,

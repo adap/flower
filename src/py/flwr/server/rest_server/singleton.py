@@ -16,13 +16,13 @@
 
 
 from logging import DEBUG
-from typing import Optional
+from typing import Any, Optional
 
 from flwr.common.logger import log
 from flwr.server.driver.state import DriverState
 
 
-class Singleton(object):
+class Singleton:
     """The Singleton singleton is a container to hold shared references.
 
     There are to several components that are needed to facilitate
@@ -39,7 +39,9 @@ class Singleton(object):
         raise RuntimeError("Call instance() instead")
 
     @classmethod
-    def instance(cls) -> Singleton:
+    def instance(cls) -> Any:
+        """."""
+
         # This is not threadsafe
         if cls._instance is None:
             log(DEBUG, "Creating new instance")
@@ -47,7 +49,9 @@ class Singleton(object):
         return cls._instance
 
     def set_driver_state(self, driver_state: DriverState) -> None:
+        """."""
         self._driver_state = driver_state
 
     def get_driver_state(self) -> Optional[DriverState]:
+        """."""
         return self._driver_state
