@@ -108,7 +108,11 @@ class DPCifarClient(fl.client.NumPyClient):
             self.model, self.trainloader, self.privacy_engine, PARAMS["local_epochs"]
         )
         print(f"epsilon = {epsilon:.2f}")
-        return self.get_parameters(config={}), len(self.trainloader), {"epsilon": epsilon}
+        return (
+            self.get_parameters(config={}),
+            len(self.trainloader),
+            {"epsilon": epsilon},
+        )
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
