@@ -31,7 +31,7 @@ class FedAnalytics(Strategy):
     def initialize_parameters(
         self, client_manager: Optional[ClientManager] = None
     ) -> Optional[Parameters]:
-        return None 
+        return None
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -57,9 +57,11 @@ class FedAnalytics(Strategy):
         for val in values_aggregated:
             length_agg_hist += val[0]
             width_agg_hist += val[1]
-        
-        ndarr = np.concatenate((["Length:"], length_agg_hist, ["Width:"], width_agg_hist))
-        return ndarrays_to_parameters(ndarr), {} 
+
+        ndarr = np.concatenate(
+            (["Length:"], length_agg_hist, ["Width:"], width_agg_hist)
+        )
+        return ndarrays_to_parameters(ndarr), {}
 
     def evaluate(
         self, server_round: int, parameters: Parameters
@@ -87,4 +89,3 @@ fl.server.start_server(
     config=fl.server.ServerConfig(num_rounds=1),
     strategy=FedAnalytics(),
 )
-

@@ -12,6 +12,8 @@
 
   A new code example (`quickstart_fastai`) demonstrates federated learning with [fast.ai](https://www.fast.ai/) and Flower. You can find it here: [quickstart_fastai](https://github.com/adap/flower/tree/main/examples/quickstart_fastai).
 
+- **Make Android example compatible with** `flwr >= 1.0.0` **and the latest versions of Android** ([#1603](https://github.com/adap/flower/pull/1603))
+  
 ### Incompatible changes
 
 ## v1.2.0 (2023-01-13)
