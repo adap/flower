@@ -19,7 +19,6 @@ import sys
 from dataclasses import dataclass
 from logging import INFO, WARN
 from signal import SIGINT, SIGTERM, signal
-from time import sleep
 from types import FrameType
 from typing import Optional, Tuple
 
