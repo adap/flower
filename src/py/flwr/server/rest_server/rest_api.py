@@ -37,7 +37,7 @@ async def pull_task_ins(request: Request) -> Response:
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
-    pull_task_ins_request_bytes: bytes = await request.body()  # type: ignore
+    pull_task_ins_request_bytes: bytes = await request.body()
 
     # Deserialize ProtoBuf
     pull_task_ins_request_proto = PullTaskInsRequest()
@@ -65,7 +65,7 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
-    push_task_res_request_bytes: bytes = await request.body()  # type: ignore
+    push_task_res_request_bytes: bytes = await request.body()
 
     # Deserialize ProtoBuf
     push_task_res_request_proto = PushTaskResRequest()

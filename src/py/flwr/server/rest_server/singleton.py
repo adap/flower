@@ -16,6 +16,7 @@
 
 
 from logging import DEBUG
+from typing import Optional
 
 from flwr.common.logger import log
 from flwr.server.driver.state import DriverState
@@ -34,11 +35,11 @@ class Singleton(object):
     _instance = None
     _driver_state = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         raise RuntimeError("Call instance() instead")
 
     @classmethod
-    def instance(cls):
+    def instance(cls) -> Singleton:
         # This is not threadsafe
         if cls._instance is None:
             log(DEBUG, "Creating new instance")
@@ -48,5 +49,5 @@ class Singleton(object):
     def set_driver_state(self, driver_state: DriverState) -> None:
         self._driver_state = driver_state
 
-    def get_driver_state(self) -> DriverState:
+    def get_driver_state(self) -> Optional[DriverState]:
         return self._driver_state
