@@ -15,6 +15,7 @@
 """Flower server app."""
 
 
+import threading
 from dataclasses import dataclass
 from logging import INFO, WARN
 from typing import Optional, Tuple
@@ -210,13 +211,43 @@ def run_server() -> None:
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SERVER_ENTER)
 
+    # Shared DriverState
     driver_state = DriverState()
+
+    # Shared DriverClientManager
     driver_client_manager = DriverClientManager(
         driver_state=driver_state,
     )
 
+    # Start Driver API
+    driver_thread = threading.Thread(
+        target=_run_driver_api_grpc,
+        args=(driver_state, driver_client_manager),
+    )
+    driver_thread.start()
+
+    # Start Fleet API
+    fleet_thread = threading.Thread(
+        target=_run_fleet_api_grpc_legacy,
+        args=(driver_client_manager),
+    )
+    fleet_thread.start()
+
+    # Wait for termination of both servers
+    driver_thread.join()
+    fleet_thread.join()
+
+    event(EventType.RUN_SERVER_LEAVE)
+
+
+def _run_driver_api_grpc(
+    driver_state: DriverState,
+    driver_client_manager: DriverClientManager,
+) -> None:
+    """Run Driver API (gRPC-based)."""
+
     # Create Driver API gRPC server
-    driver_server_address: str = DEFAULT_SERVER_ADDRESS_DRIVER
+    address: str = DEFAULT_SERVER_ADDRESS_DRIVER
     driver_servicer = DriverServicer(
         driver_client_manager=driver_client_manager,
         driver_state=driver_state,
@@ -224,41 +255,38 @@ def run_server() -> None:
     driver_add_servicer_to_server_fn = add_DriverServicer_to_server
     driver_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(driver_servicer, driver_add_servicer_to_server_fn),
-        server_address=driver_server_address,
+        server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=None,
     )
 
+    log(INFO, "Flower ECE: Starting Driver API (gRPC-based) on %s", address)
+    driver_grpc_server.start()
+
+    # Block
+    driver_grpc_server.wait_for_termination()
+
+
+def _run_fleet_api_grpc_legacy(
+    driver_client_manager: DriverClientManager,
+) -> None:
+    """Run Fleet API (gRPC-based, legacy)."""
+
     # Create (legacy) Fleet API gRPC server
-    fleet_server_address: str = DEFAULT_SERVER_ADDRESS_FLEET
+    address: str = DEFAULT_SERVER_ADDRESS_FLEET
     fleet_servicer = FlowerServiceServicer(
         client_manager=driver_client_manager,
     )
     fleet_add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
-        server_address=fleet_server_address,
+        server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=None,
     )
 
-    # Start Driver API gRPC server
-    driver_grpc_server.start()
-    log(
-        INFO,
-        "Flower ECE: driver gRPC server running on %s",
-        driver_server_address,
-    )
-
-    # Start (legacy) Fleet API gRPC server
+    log(INFO, "Flower ECE: Starting Fleet API (gRPC-based, legacy) on %s", address)
     fleet_grpc_server.start()
-    log(
-        INFO,
-        "Flower ECE: fleet gRPC server running on %s",
-        fleet_server_address,
-    )
 
-    # Wait for termination of both servers
-    driver_grpc_server.wait_for_termination()
+    # Block
     fleet_grpc_server.wait_for_termination()
-    event(EventType.RUN_SERVER_LEAVE)
