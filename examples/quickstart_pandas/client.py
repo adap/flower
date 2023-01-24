@@ -14,12 +14,11 @@ column_names = ["sepal length (cm)", "sepal width (cm)"]
 
 def compute_hist(df: pd.DataFrame, col_name: str) -> np.ndarray:
     freqs, _ = np.histogram(df[col_name])
-    return freqs 
+    return freqs
 
 
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
-
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[List[np.ndarray], int, Dict]:
