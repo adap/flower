@@ -8,6 +8,8 @@
 
 - **Add support for ** `workload_id` **and** `group_id` **in Driver API** ([#1595](https://github.com/adap/flower/pull/1595))
 
+- **Make Android example compatible with** `flwr >= 1.0.0` **and the latest versions of Android** ([#1603](https://github.com/adap/flower/pull/1603))
+  
 ### Incompatible changes
 
 ## v1.2.0 (2023-01-13)

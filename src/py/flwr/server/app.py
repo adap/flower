@@ -16,10 +16,14 @@
 
 
 import argparse
+import sys
 from dataclasses import dataclass
 from logging import INFO, WARN
+from signal import SIGINT, SIGTERM, signal
+from types import FrameType
 from typing import Optional, Tuple
 
+import grpc
 import uvicorn
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
@@ -218,65 +222,53 @@ def run_server() -> None:
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SERVER_ENTER)
 
+    # Shared DriverState
     driver_state = DriverState()
+    instance = Singleton.instance()
+    instance.set_driver_state(driver_state=driver_state)
+
+    # Shared DriverClientManager
     driver_client_manager = DriverClientManager(
         driver_state=driver_state,
     )
 
-    log(INFO, "Starting Flower gRPC server")
+    # Start Driver API
+    driver_server = _run_driver_api_grpc(driver_state, driver_client_manager)
 
-    # Create Driver API gRPC server
-    driver_server_address: str = DEFAULT_SERVER_ADDRESS_DRIVER
-    driver_servicer = DriverServicer(
-        driver_client_manager=driver_client_manager,
-        driver_state=driver_state,
-    )
-    driver_add_servicer_to_server_fn = add_DriverServicer_to_server
-    driver_grpc_server = generic_create_grpc_server(
-        servicer_and_add_fn=(driver_servicer, driver_add_servicer_to_server_fn),
-        server_address=driver_server_address,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=None,
-    )
+    default_handlers = {
+        SIGINT: None,
+        SIGTERM: None,
+    }
 
-    # Start Driver API gRPC server
-    driver_grpc_server.start()
-    log(
-        INFO,
-        "Flower ECE: driver gRPC server running on %s",
-        driver_server_address,
-    )
+    def graceful_exit_handler(  # type: ignore
+        signalnum,
+        frame: FrameType,  # pylint: disable=unused-argument
+    ) -> None:
+        """Exit handler to be registered with signal.signal.
 
-    # Start Fleet API (gRPC-based)
-    fleet_grpc_server = None
-    if args.server_type == "grpc":
-        # Create (legacy) Fleet API gRPC server
-        fleet_server_address: str = DEFAULT_SERVER_ADDRESS_FLEET
-        fleet_servicer = FlowerServiceServicer(
-            client_manager=driver_client_manager,
-        )
-        fleet_add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
-        fleet_grpc_server = generic_create_grpc_server(
-            servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
-            server_address=fleet_server_address,
-            max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-            certificates=None,
-        )
+        When called will reset signal handler to original signal handler
+        from default_handlers.
+        """
 
-        # Start (legacy) Fleet API gRPC server
-        fleet_grpc_server.start()
-        log(
-            INFO,
-            "Flower ECE: fleet gRPC server running on %s",
-            fleet_server_address,
-        )
+        # Reset to default handler
+        signal(signalnum, default_handlers[signalnum])
 
-    # Start Fleet API (HTTP-based)
-    elif args.server_type == "rest":
-        #
-        instance = Singleton.instance()
-        instance.set_driver_state(driver_state=driver_state)
+        event_res = event(EventType.RUN_SERVER_LEAVE)
 
+        driver_server.stop(grace=1)
+        fleet_server.stop(grace=1)
+
+        # Ensure event has happend
+        event_res.result()
+
+        # Setup things for graceful exit
+        sys.exit(0)
+
+    default_handlers[SIGINT] = signal(SIGINT, graceful_exit_handler)  # type: ignore
+    default_handlers[SIGTERM] = signal(SIGTERM, graceful_exit_handler)  # type: ignore
+
+    # Start Fleet API
+    if args.server_type == "rest":
         # Start Fleet API HTTP server
         port = args.rest_bind_port
         host = args.rest_bind_host
@@ -288,14 +280,62 @@ def run_server() -> None:
             reload=False,
             access_log=True,
         )
+    if args.server_type == "grpc":
+        fleet_server = _run_fleet_api_grpc_legacy(driver_client_manager)
+        fleet_server.wait_for_termination()
 
-    # Wait for termination of both gRPC servers
-    driver_grpc_server.wait_for_termination()
+    # Not really necessary
+    driver_server.wait_for_termination()
 
-    if fleet_grpc_server:
-        fleet_grpc_server.wait_for_termination()
 
-    event(EventType.RUN_SERVER_LEAVE)
+def _run_driver_api_grpc(
+    driver_state: DriverState,
+    driver_client_manager: DriverClientManager,
+) -> grpc.Server:
+    """Run Driver API (gRPC-based)."""
+
+    # Create Driver API gRPC server
+    address: str = DEFAULT_SERVER_ADDRESS_DRIVER
+    driver_servicer = DriverServicer(
+        driver_client_manager=driver_client_manager,
+        driver_state=driver_state,
+    )
+    driver_add_servicer_to_server_fn = add_DriverServicer_to_server
+    driver_grpc_server = generic_create_grpc_server(
+        servicer_and_add_fn=(driver_servicer, driver_add_servicer_to_server_fn),
+        server_address=address,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        certificates=None,
+    )
+
+    log(INFO, "Flower ECE: Starting Driver API (gRPC-based) on %s", address)
+    driver_grpc_server.start()
+
+    return driver_grpc_server
+
+
+def _run_fleet_api_grpc_legacy(
+    driver_client_manager: DriverClientManager,
+) -> grpc.Server:
+    """Run Fleet API (gRPC-based, legacy)."""
+
+    # Create (legacy) Fleet API gRPC server
+    address: str = DEFAULT_SERVER_ADDRESS_FLEET
+    fleet_servicer = FlowerServiceServicer(
+        client_manager=driver_client_manager,
+    )
+    fleet_add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
+    fleet_grpc_server = generic_create_grpc_server(
+        servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
+        server_address=address,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        certificates=None,
+    )
+
+    log(INFO, "Flower ECE: Starting Fleet API (gRPC-based, legacy) on %s", address)
+    fleet_grpc_server.start()
+
+    return fleet_grpc_server
 
 
 def parse_args() -> argparse.Namespace:
