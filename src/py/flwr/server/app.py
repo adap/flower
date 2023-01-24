@@ -15,10 +15,15 @@
 """Flower server app."""
 
 
-import threading
+import sys
 from dataclasses import dataclass
 from logging import INFO, WARN
+from signal import SIGINT, SIGTERM, signal
+from time import sleep
+from types import FrameType
 from typing import Optional, Tuple
+
+import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.logger import log
@@ -220,30 +225,51 @@ def run_server() -> None:
     )
 
     # Start Driver API
-    driver_thread = threading.Thread(
-        target=_run_driver_api_grpc,
-        args=(driver_state, driver_client_manager),
-    )
-    driver_thread.start()
+    driver_server = _run_driver_api_grpc(driver_state, driver_client_manager)
 
     # Start Fleet API
-    fleet_thread = threading.Thread(
-        target=_run_fleet_api_grpc_legacy,
-        args=(driver_client_manager,),
-    )
-    fleet_thread.start()
+    fleet_server = _run_fleet_api_grpc_legacy(driver_client_manager)
 
-    # Wait for termination of both servers
-    driver_thread.join()
-    fleet_thread.join()
+    default_handlers = {
+        SIGINT: None,
+        SIGTERM: None,
+    }
 
-    event(EventType.RUN_SERVER_LEAVE)
+    def graceful_exit_handler(  # type: ignore
+        signalnum,
+        frame: FrameType,  # pylint: disable=unused-argument
+    ) -> None:
+        """Exit handler to be registered with signal.signal.
+
+        When called will reset signal handler to original signal handler
+        from default_handlers.
+        """
+
+        # Reset to default handler
+        signal(signalnum, default_handlers[signalnum])
+
+        event_res = event(EventType.RUN_SERVER_LEAVE)
+
+        driver_server.stop(grace=1)
+        fleet_server.stop(grace=1)
+
+        # Ensure event has happend
+        event_res.result()
+
+        # Setup things for graceful exit
+        sys.exit(0)
+
+    default_handlers[SIGINT] = signal(SIGINT, graceful_exit_handler)  # type: ignore
+    default_handlers[SIGTERM] = signal(SIGTERM, graceful_exit_handler)  # type: ignore
+
+    driver_server.wait_for_termination()
+    fleet_server.wait_for_termination()
 
 
 def _run_driver_api_grpc(
     driver_state: DriverState,
     driver_client_manager: DriverClientManager,
-) -> None:
+) -> grpc.Server:
     """Run Driver API (gRPC-based)."""
 
     # Create Driver API gRPC server
@@ -263,13 +289,12 @@ def _run_driver_api_grpc(
     log(INFO, "Flower ECE: Starting Driver API (gRPC-based) on %s", address)
     driver_grpc_server.start()
 
-    # Block
-    driver_grpc_server.wait_for_termination()
+    return driver_grpc_server
 
 
 def _run_fleet_api_grpc_legacy(
     driver_client_manager: DriverClientManager,
-) -> None:
+) -> grpc.Server:
     """Run Fleet API (gRPC-based, legacy)."""
 
     # Create (legacy) Fleet API gRPC server
@@ -288,5 +313,4 @@ def _run_fleet_api_grpc_legacy(
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-based, legacy) on %s", address)
     fleet_grpc_server.start()
 
-    # Block
-    fleet_grpc_server.wait_for_termination()
+    return fleet_grpc_server
