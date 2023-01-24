@@ -15,13 +15,13 @@
 """Contextmanager managing a REST-based channel to the Flower server."""
 
 
-import uuid
 from contextlib import contextmanager
 from logging import ERROR, INFO, WARN
-from typing import Callable, Iterator, Optional, Tuple
+from typing import Callable, Dict, Iterator, Optional, Tuple
 
 import requests
 
+from flwr.client.message_handler.task_handler import get_server_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
@@ -70,7 +70,7 @@ def rest_not_a_connection(
     base_url = f"http://{server_address}"  # TODO handle HTTPS
 
     # Necessary state to link TaskRes to TaskIns
-    current_task_ins: Optional[TaskIns] = None
+    state: Dict[str, Optional[TaskIns]] = {"current_task_ins": None}
 
     ###########################################################################
     # receive/send functions
@@ -123,39 +123,25 @@ def rest_not_a_connection(
         pull_task_ins_response_proto = PullTaskInsResponse()
         pull_task_ins_response_proto.ParseFromString(r.content)
 
-        # Extract a single ServerMessage from the response, if possible
-        if len(pull_task_ins_response_proto.task_ins_list) == 0:
-            # log(
-            #     INFO,
-            #     "[Node] POST /%s: No TaskIns received",
-            #     PATH_PULL_TASK_INS,
-            # )
-            return None
-
-        task_ins: TaskIns = pull_task_ins_response_proto.task_ins_list[
-            0
-        ]  # TODO handle multiple
-
-        if task_ins.task.legacy_server_message == None:
-            log(
-                ERROR,
-                "[Node] POST /%s: legacy_server_message is None",
-                PATH_PULL_TASK_INS,
-            )
-            return None
-
         # Remember the current TaskIns
-        current_task_ins = task_ins
-        server_message_proto: ServerMessage = task_ins.task.legacy_server_message
+        task_ins_server_message_tuple = get_server_message(pull_task_ins_response_proto)
+        if task_ins_server_message_tuple is None:
+            state["current_task_ins"] = None
+            return None
+
+        task_ins, server_message = task_ins_server_message_tuple
+
+        # Remember `task_ins` until `task_res` is available
+        state["current_task_ins"] = task_ins
 
         # Return the ServerMessage
         log(INFO, "[Node {node_id}] POST /%s: success", PATH_PULL_TASK_INS)
-        return server_message_proto
+        return server_message
 
     def send(client_message_proto: ClientMessage) -> None:
         """Send task result back to server."""
 
-        if current_task_ins is None:
+        if state["current_task_ins"] is None:
             log(ERROR, "No current TaskIns")
             return
 
@@ -165,7 +151,7 @@ def rest_not_a_connection(
             task=Task(
                 producer=Node(node_id=0, anonymous=True),
                 legacy_client_message=client_message_proto,
-                ancestry=[current_task_ins.task_id],
+                ancestry=[state["current_task_ins"].task_id],
             ),
         )
 
@@ -192,7 +178,7 @@ def rest_not_a_connection(
         # )
 
         # TODO check status code and response
-        current_task_ins = None
+        state["current_task_ins"] = None
 
     # yield methods
     try:
