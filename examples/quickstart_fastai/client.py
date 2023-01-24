@@ -13,7 +13,7 @@ import flwr as fl
 
 warnings.filterwarnings("ignore", category=UserWarning)
 # DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-defaults.device = torch.device("cuda:0")
+defaults.device = torch.device("cpu")
 
 path = untar_data(URLs.PETS)
 files = get_image_files(path / "images")
