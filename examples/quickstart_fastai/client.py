@@ -7,25 +7,16 @@ from fastai.vision.all import *
 import flwr as fl
 
 
-# #############################################################################
-# 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
-# #############################################################################
-
 warnings.filterwarnings("ignore", category=UserWarning)
-# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-defaults.device = torch.device("cpu")
 
-path = untar_data(URLs.PETS)
-files = get_image_files(path / "images")
+# Download MNIST dataset
+path = untar_data(URLs.MNIST)
 
+# Load dataset
+dls = ImageDataLoaders.from_folder(path, valid_pct=0.5, train="training", valid="testing")
 
-def label_func(f):
-    return f[0].isupper()
-
-
-dls = ImageDataLoaders.from_name_func(path, files, label_func, item_tfms=Resize(224))
-
-learn = vision_learner(dls, resnet34, metrics=error_rate)
+# Define model
+learn = vision_learner(dls, squeezenet1_1, metrics=error_rate)
 
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
@@ -39,7 +30,7 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
-        learn.fine_tune(1)
+        learn.fit(1)
         return self.get_parameters(config={}), len(dls.train), {}
 
     def evaluate(self, parameters, config):
