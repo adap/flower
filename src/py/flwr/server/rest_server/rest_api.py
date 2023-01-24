@@ -43,8 +43,11 @@ async def pull_task_ins(request: Request) -> Response:
     pull_task_ins_request_proto = PullTaskInsRequest()
     pull_task_ins_request_proto.ParseFromString(pull_task_ins_request_bytes)
 
+    # Get DriverState
+    driver_state = cast(DriverState, Singleton.instance().get_driver_state())
+
     # Print received message
-    log(INFO, "POST - Receiving GetTaskRequest %s", pull_task_ins_request_proto)
+    log(INFO, "POST - Receiving GetTaskRequest")
 
     # TODO get pull_task_ins from state
 
@@ -71,8 +74,12 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
     push_task_res_request_proto = PushTaskResRequest()
     push_task_res_request_proto.ParseFromString(push_task_res_request_bytes)
 
+    # Get DriverState
+    driver_state = cast(DriverState, Singleton.instance().get_driver_state())
+
     # Print received message
-    log(INFO, "POST - Receiving PushTaskResRequest %", push_task_res_request_proto)
+    log(INFO, "POST - Receiving PushTaskResRequest")
+
 
     # TODO get pull_task_ins from state
 
