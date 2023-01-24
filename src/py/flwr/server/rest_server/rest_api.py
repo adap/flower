@@ -17,7 +17,6 @@
 
 from logging import INFO
 
-from asgiref.sync import async_to_sync
 from fastapi import FastAPI, HTTPException, Request, Response
 from starlette.datastructures import Headers
 
@@ -33,12 +32,12 @@ app = FastAPI()
 
 
 @app.post("/api/v0/fleet/pull-task-ins", response_class=Response)
-def pull_task_ins(request: Request) -> Response:
+async def pull_task_ins(request: Request) -> Response:
     """."""
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
-    pull_task_ins_request_bytes: bytes = async_to_sync(request.body)()  # type: ignore
+    pull_task_ins_request_bytes: bytes = await request.body()  # type: ignore
 
     # Deserialize ProtoBuf
     pull_task_ins_request_proto = PullTaskInsRequest()
@@ -60,13 +59,13 @@ def pull_task_ins(request: Request) -> Response:
     )
 
 
-@app.post("/api/v0/fleet/push-task-res")
-def push_task_res(request: Request) -> Response:  # Check if token is needed here
+@app.post("/api/v0/fleet/push-task-res", response_class=Response)
+async def push_task_res(request: Request) -> Response:  # Check if token is needed here
     """."""
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
-    push_task_res_request_bytes: bytes = async_to_sync(request.body)()  # type: ignore
+    push_task_res_request_bytes: bytes = await request.body()  # type: ignore
 
     # Deserialize ProtoBuf
     push_task_res_request_proto = PushTaskResRequest()
