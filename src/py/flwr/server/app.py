@@ -229,7 +229,7 @@ def run_server() -> None:
     # Start Fleet API
     fleet_thread = threading.Thread(
         target=_run_fleet_api_grpc_legacy,
-        args=(driver_client_manager),
+        args=(driver_client_manager,),
     )
     fleet_thread.start()
 
