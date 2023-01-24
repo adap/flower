@@ -339,9 +339,7 @@ def _run_fleet_api_grpc_legacy(
 
 
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Start a long-running Flower Server."
-    )
+    parser = argparse.ArgumentParser(description="Start a long-running Flower Server.")
     # Possible Server types
     ex_g = parser.add_mutually_exclusive_group()
     ex_g.add_argument(
