@@ -37,8 +37,8 @@ def get_server_message(
     # Discard the message if it is not in
     # {GetPropertiesIns, GetParametersIns, FitIns, EvaluateIns}
     if (
-        task_ins.task is None
-        or task_ins.task.legacy_server_message is None
+        not task_ins.HasField("task")
+        or not task_ins.task.HasField("legacy_server_message")
         or task_ins.task.legacy_server_message.WhichOneof("msg") == "reconnect_ins"
     ):
         return None
