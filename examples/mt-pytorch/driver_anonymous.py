@@ -15,7 +15,7 @@ driver = Driver(driver_service_address="0.0.0.0:9091", certificates=None)
 sleep_time = 1
 parameters = ndarrays_to_parameters(get_parameters(net=Net()))
 num_rounds = 3
-num_nodes = 1
+num_nodes = 3
 
 # -------------------------------------------------------------------------- Driver SDK
 driver.connect()
