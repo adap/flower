@@ -17,6 +17,7 @@
 
 import argparse
 import sys
+import threading
 from dataclasses import dataclass
 from logging import INFO, WARN
 from signal import SIGINT, SIGTERM, signal
@@ -237,6 +238,10 @@ def run_server() -> None:
         driver_state, driver_client_manager
     )
 
+    # Fleet API
+    fleet_server: Optional[grpc.Server] = None
+    fleet_thread: Optional[threading.Thread] = None
+
     # Graceful shutdown
     default_handlers = {
         SIGINT: None,
@@ -259,7 +264,10 @@ def run_server() -> None:
         event_res = event(EventType.RUN_SERVER_LEAVE)
 
         driver_server.stop(grace=1)
-        fleet_server.stop(grace=1)
+        if fleet_server is not None:
+            fleet_server.stop(grace=1)
+        if fleet_thread is not None:
+            fleet_thread.join()
 
         # Ensure event has happend
         event_res.result()
@@ -273,19 +281,16 @@ def run_server() -> None:
     # Start Fleet API
     if args.server_type == "rest":
         # Start Fleet API HTTP server
-        port = args.rest_bind_port
-        host = args.rest_bind_host
-        log(INFO, "Starting Flower REST server")
-        uvicorn.run(
-            "flwr.server.rest_server.rest_api:app",
-            port=port,
-            host=host,
-            reload=False,
-            access_log=True,
-        )
-    if args.server_type == "grpc":
+        fleet_thread = threading.Thread(
+            target=_run_fleet_api_rest,
+            args=(args.rest_bind_host, args.rest_bind_port),
+        ).start()
+
+    elif args.server_type == "grpc":
         fleet_server = _run_fleet_api_grpc_legacy(driver_client_manager)
         fleet_server.wait_for_termination()
+    else:
+        raise ValueError(f"Unknown server_type: {args.server_type}")
 
     # Not really necessary
     driver_server.wait_for_termination()
@@ -339,6 +344,19 @@ def _run_fleet_api_grpc_legacy(
     fleet_grpc_server.start()
 
     return fleet_grpc_server
+
+
+def _run_fleet_api_rest(host: str, port: int) -> None:
+    """Run Driver API (REST-based)."""
+    log(INFO, "Starting Flower REST server")
+    uvicorn.run(
+        "flwr.server.rest_server.rest_api:app",
+        port=port,
+        host=host,
+        reload=False,
+        access_log=True,
+        workers=1,
+    )
 
 
 def _parse_args() -> argparse.Namespace:
