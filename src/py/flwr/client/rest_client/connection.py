@@ -86,7 +86,7 @@ def rest_not_a_connection(
         pull_task_ins_req_bytes: bytes = pull_task_ins_req_proto.SerializeToString()
 
         # Request instructions (task) from server
-        r = requests.post(
+        res = requests.post(
             url=f"{base_url}/{PATH_PULL_TASK_INS}",
             headers={
                 "Accept": "application/protobuf",
@@ -94,24 +94,18 @@ def rest_not_a_connection(
             },
             data=pull_task_ins_req_bytes,
         )
-        # log(
-        #     INFO,
-        #     "[Node] POST /%s: %s",
-        #     PATH_PULL_TASK_INS,
-        #     r.status_code,
-        # )
-        if r.status_code != 200:
-            return None
 
-        # Check headers
-        if not "content-type" in r.headers:
+        # Check status code and headers
+        if res.status_code != 200:
+            return None
+        if not "content-type" in res.headers:
             log(
                 WARN,
                 "[Node] POST /%s: missing header `Content-Type`",
                 PATH_PULL_TASK_INS,
             )
             return None
-        if r.headers["content-type"] != "application/protobuf":
+        if res.headers["content-type"] != "application/protobuf":
             log(
                 WARN,
                 "[Node] POST /%s: header `Content-Type` has wrong value",
@@ -121,7 +115,7 @@ def rest_not_a_connection(
 
         # Deserialize ProtoBuf from bytes
         pull_task_ins_response_proto = PullTaskInsResponse()
-        pull_task_ins_response_proto.ParseFromString(r.content)
+        pull_task_ins_response_proto.ParseFromString(res.content)
 
         # Remember the current TaskIns
         task_ins_server_message_tuple = get_server_message(pull_task_ins_response_proto)
@@ -162,7 +156,7 @@ def rest_not_a_connection(
         )
 
         # Send ClientMessage to server
-        r = requests.post(
+        res = requests.post(
             url=f"{base_url}/{PATH_PUSH_TASK_RES}",
             headers={
                 "Accept": "application/protobuf",
@@ -170,18 +164,39 @@ def rest_not_a_connection(
             },
             data=push_task_res_request_bytes,
         )
-        # log(
-        #     INFO,
-        #     "[Node] POST /%s: %s",
-        #     PATH_PUSH_TASK_RES,
-        #     r.status_code,
-        # )
 
-        # TODO check status code and response
         state["current_task_ins"] = None
+
+        # Check status code and headers
+        if res.status_code != 200:
+            return
+        if not "content-type" in res.headers:
+            log(
+                WARN,
+                "[Node] POST /%s: missing header `Content-Type`",
+                PATH_PUSH_TASK_RES,
+            )
+            return
+        if res.headers["content-type"] != "application/protobuf":
+            log(
+                WARN,
+                "[Node] POST /%s: header `Content-Type` has wrong value",
+                PATH_PUSH_TASK_RES,
+            )
+            return
+
+        # Deserialize ProtoBuf from bytes
+        push_task_res_response_proto = PushTaskResResponse()
+        push_task_res_response_proto.ParseFromString(res.content)
+        log(
+            INFO,
+            "[Node] POST /%s: success, created result %s",
+            PATH_PUSH_TASK_RES,
+            push_task_res_response_proto.results,
+        )
 
     # yield methods
     try:
         yield (receive, send)
-    except Exception as e:
-        print(e)
+    except Exception as exc:  # pylint: disable=broad-except
+        log(ERROR, exc)
