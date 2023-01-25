@@ -2,12 +2,16 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-case "$SHELL" in
-  "/bin/bash") CONFIG_FILE="$HOME/.bashrc"
+SHELL_BIN=$(basename "$SHELL")
+
+case "$SHELL_BIN" in
+  *"bash"*) CONFIG_FILE="$HOME/.bashrc"
   ;;
-  "/bin/zsh") CONFIG_FILE="$HOME/.zshrc"
+  *"zsh"*) CONFIG_FILE="$HOME/.zshrc"
   ;;
-  "/bin/ksh") CONFIG_FILE="$HOME/.kshrc"
+  *"ksh"*) CONFIG_FILE="$HOME/.kshrc"
+  ;;
+  *) echo "Shell config file not found, you might want to add 'export FLWR_TELEMETRY_ENABLED=0' manually to it." && exit 0
   ;;
 esac
 
