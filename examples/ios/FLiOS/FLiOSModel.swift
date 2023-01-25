@@ -150,7 +150,7 @@ public class FLiOSModel: ObservableObject {
         self.federatedServerStatus = .ongoing(info: "Starting federated learning")
         self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "starting federated learning"))
         if self.flwrGRPC == nil {
-            self.flwrGRPC = FlwrGRPC(serverHost: hostname, serverPort: port, additionalInterceptor: BenchmarkInterceptor())
+            self.flwrGRPC = FlwrGRPC(serverHost: hostname, serverPort: port, extendedInterceptor: BenchmarkInterceptor())
         }
         
         self.flwrGRPC?.startFlwrGRPC(client: self.mlFlwrClient!) {

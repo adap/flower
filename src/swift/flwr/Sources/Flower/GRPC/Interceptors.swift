@@ -10,10 +10,10 @@ import GRPC
 import NIOCore
 
 class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage> {
-    var additionalInterceptor: FlwrGRPCInterceptor?
+    var extendedInterceptor: InterceptorExtension?
     
-    init(additionalInterceptor: FlwrGRPCInterceptor?) {
-        self.additionalInterceptor = additionalInterceptor
+    init(extendedInterceptor: InterceptorExtension?) {
+        self.extendedInterceptor = extendedInterceptor
     }
     
     override func receive(_ part: GRPCClientResponsePart<Flwr_Proto_ServerMessage>, context: ClientInterceptorContext<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>) {
@@ -57,7 +57,7 @@ class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr
         context.receive(part)
         
         // Forward part to custom user Interceptor
-        additionalInterceptor?.receive(part: grpcPart)
+        extendedInterceptor?.receive(part: grpcPart)
     }
     
     override func send(_ part: GRPCClientRequestPart<Flwr_Proto_ClientMessage>, promise: EventLoopPromise<Void>?, context: ClientInterceptorContext<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>) {
@@ -97,7 +97,7 @@ class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr
         context.send(part, promise: promise)
         
         // Forward part to custom user Interceptor
-        additionalInterceptor?.send(part: grpcPart)
+        extendedInterceptor?.send(part: grpcPart)
     }
 }
 
@@ -141,14 +141,14 @@ func decipherClientMessage(_ msg: Flwr_Proto_ClientMessage.OneOf_Msg) -> String 
 }
 
 final class FlowerInterceptorsFactory: Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol {
-    let additionalInterceptor: FlwrGRPCInterceptor?
+    let extendedInterceptor: InterceptorExtension?
     
-    init(additionalInterceptor: FlwrGRPCInterceptor? = nil) {
-        self.additionalInterceptor = additionalInterceptor
+    init(extendedInterceptor: InterceptorExtension? = nil) {
+        self.extendedInterceptor = extendedInterceptor
     }
     
     func makeJoinInterceptors() -> [ClientInterceptor<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage>] {
-        return [FlowerClientInterceptors(additionalInterceptor: self.additionalInterceptor)]
+        return [FlowerClientInterceptors(extendedInterceptor: self.extendedInterceptor)]
     }
     
 }

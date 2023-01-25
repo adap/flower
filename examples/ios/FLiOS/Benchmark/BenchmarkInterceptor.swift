@@ -8,7 +8,7 @@
 import Foundation
 import flwr
 
-class BenchmarkInterceptor: FlwrGRPCInterceptor {
+class BenchmarkInterceptor: InterceptorExtension {
     let benchmarkSuite = BenchmarkSuite.shared
     
     func receive(part: GRPCPartWrapper) {
