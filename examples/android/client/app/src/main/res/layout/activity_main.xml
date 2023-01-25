@@ -92,7 +92,7 @@
         android:backgroundTint="#F2B705"
         android:enabled="false"
         android:fontFamily="@font/share_tech_mono"
-        android:onClick="runGRPC"
+        android:onClick="runGrpc"
         android:text="Train Federated!" />
 
     <TextView
