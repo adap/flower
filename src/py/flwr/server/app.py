@@ -233,8 +233,11 @@ def run_server() -> None:
     )
 
     # Start Driver API
-    driver_server = _run_driver_api_grpc(driver_state, driver_client_manager)
+    driver_server: grpc.Server = _run_driver_api_grpc(
+        driver_state, driver_client_manager
+    )
 
+    # Graceful shutdown
     default_handlers = {
         SIGINT: None,
         SIGTERM: None,
