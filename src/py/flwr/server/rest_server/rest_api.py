@@ -16,6 +16,8 @@
 
 
 from logging import INFO
+from typing import List, Optional, cast
+from uuid import UUID
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from starlette.datastructures import Headers
@@ -26,7 +28,11 @@ from flwr.proto.fleet_pb2 import (
     PullTaskInsResponse,
     PushTaskResRequest,
     PushTaskResResponse,
+    Reconnect,
 )
+from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.server.driver.state import DriverState
+from flwr.server.rest_server.singleton import Singleton
 
 app = FastAPI()
 
@@ -49,12 +55,14 @@ async def pull_task_ins(request: Request) -> Response:
     # Print received message
     log(INFO, "POST - Receiving GetTaskRequest")
 
-    # TODO get pull_task_ins from state
+    # Retrieve TaskIns from DriverState
+    node = pull_task_ins_request_proto.node
+    node_id: Optional[int] = None if node.anonymous else node.node_id
+    task_ins_list: List[TaskIns] = driver_state.get_task_ins(node_id=node_id, limit=1)
+    pull_task_ins_response_proto = PullTaskInsResponse(task_ins_list=task_ins_list)
 
     # Return serialized ProtoBuf
-    pull_task_ins_response_proto = PullTaskInsResponse()
     pull_task_ins_response_bytes = pull_task_ins_response_proto.SerializeToString()
-    log(INFO, "POST - Returning PullTaskInsResponse %s", pull_task_ins_response_proto)
     return Response(
         status_code=200,
         content=pull_task_ins_response_bytes,
@@ -80,11 +88,17 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
     # Print received message
     log(INFO, "POST - Receiving PushTaskResRequest")
 
+    # Store TaskRes in DriverState
+    task_res: TaskRes = push_task_res_request_proto.task_res_list[0]
+    task_id: Optional[UUID] = driver_state.store_task_res(task_res=task_res)
 
-    # TODO get pull_task_ins from state
+    # Build response
+    push_task_res_response_proto = PushTaskResResponse(
+        reconnect=Reconnect(reconnect=5),
+        results={str(task_id): 0},
+    )
 
     # Return serialized ProtoBuf
-    push_task_res_response_proto = PushTaskResResponse()
     push_task_res_response_bytes = push_task_res_response_proto.SerializeToString()
     log(INFO, "POST - Returning PushTaskResResponse %s", push_task_res_response_proto)
     return Response(
