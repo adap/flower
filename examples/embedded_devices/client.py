@@ -24,7 +24,14 @@ import flwr as fl
 import numpy as np
 import torch
 import torchvision
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, NDArrays
+from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    ParametersRes,
+    NDArrays,
+)
 
 import utils
 

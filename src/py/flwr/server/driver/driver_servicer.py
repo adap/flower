@@ -98,17 +98,17 @@ def _validate_incoming_task_ins(task_ins: TaskIns) -> None:
     """Validate incoming TaskIns."""
 
     _raise_if(task_ins.task_id != "", "non-empty `task_id`")
-    _raise_if(task_ins.task is None, "`task` is `None`")
+    _raise_if(not task_ins.HasField("task"), "`task` does not set field `task`")
 
     task: Task = task_ins.task
 
     # Task producer
-    _raise_if(task.producer is None, "`producer` is `None`")
+    _raise_if(not task.HasField("producer"), "`producer` does not set field `producer`")
     _raise_if(task.producer.node_id != 0, "`producer.node_id` is not 0")
     _raise_if(not task.producer.anonymous, "`producer` is not anonymous")
 
     # Task consumer
-    _raise_if(task.consumer is None, "`consumer` is `None`")
+    _raise_if(not task.HasField("consumer"), "`consumer` does not set field `consumer`")
     _raise_if(
         task.consumer.anonymous and task.consumer.node_id != 0,
         "anonymous consumers MUST NOT set a `node_id`",
@@ -125,12 +125,16 @@ def _validate_incoming_task_ins(task_ins: TaskIns) -> None:
 
     # Legacy ServerMessage/ClientMessage
     _raise_if(
-        task.legacy_client_message.HasField("msg"),
+        task.HasField("legacy_client_message"),
         "`legacy_client_message` is not `None`",
     )
     _raise_if(
+        not task.HasField("legacy_server_message"),
+        "`task` does not set field `legacy_server_message`",
+    )
+    _raise_if(
         not task.legacy_server_message.HasField("msg"),
-        "`legacy_server_message` is `None`",
+        "`legacy_server_message` does not set field `msg`",
     )
 
     # Ancestors

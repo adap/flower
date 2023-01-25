@@ -10,6 +10,8 @@
 
 - **Introduce new Flower Baseline: FedProx MNIST** ([#1513](https://github.com/adap/flower/pull/1513))
 
+- **Make Android example compatible with** `flwr >= 1.0.0` **and the latest versions of Android** ([#1603](https://github.com/adap/flower/pull/1603))
+  
 ### Incompatible changes
 
 ## v1.2.0 (2023-01-13)
