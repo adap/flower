@@ -8,7 +8,7 @@
 import Foundation
 import GRPC
 
-public protocol FlwrGRPCInterceptor {
+public protocol InterceptorExtension {
     func receive(part: GRPCPartWrapper)
     func send(part: GRPCPartWrapper)
 }
