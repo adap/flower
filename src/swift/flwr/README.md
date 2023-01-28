@@ -12,11 +12,12 @@ You can either download the Flower project and integrate the package manually, o
 
 ## Usage
 
-A comprehensive example is available in: ```examples/iOS/``` To give information about the usage structurally: 
+A comprehensive example is available in: ```examples/iOS/```. To give information about the usage structurally: 
 
 ```
 import flwr
 
+...
 let mlFlwrClient = MLFlwrClient(layerWrappers: layerWrappers, dataLoader: dataLoader, compiledModelUrl: compiledModelUrl)
 let flwrGRPC = FlwrGRPC(serverHost: hostname, serverPort: port)
 startFlwrGRPC(client: mlFlwrClient) {
