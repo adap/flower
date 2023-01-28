@@ -1,6 +1,12 @@
 name: Swift
 
-on: [push]
+on: 
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
 
 jobs:
   build:
@@ -11,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest]
-        swift: ["5.3"]
+        swift: ["5.6"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: fwal/setup-swift@2040b795e5c453c3a05fcb8316496afc8a74f192
