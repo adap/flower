@@ -90,10 +90,6 @@ public class FlwrGRPC {
             print("Closing gRPC event loop group")
             try self.eventLoopGroup.syncShutdownGracefully()
             
-            /*if #available(iOS 14.0, *) {
-                print("Closing python event loop group")
-                ParameterConverter.shared.finalize()
-            }*/
             completion()
             
         } catch let error {
