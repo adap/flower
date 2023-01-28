@@ -27,6 +27,12 @@ startFlwrGRPC(client: mlFlwrClient) {
 ...
 ```
 
+## Dependencies
+
+1. grpc-swift https://github.com/grpc/grpc-swift
+2. NumPy-iOS https://github.com/kewlbear/NumPy-iOS
+3. PythonKit https://github.com/pvieito/PythonKit
+
 ## License
 
 Apache-2.0 license
