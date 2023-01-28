@@ -106,7 +106,7 @@ Define then the validation of the  machine learning network. We loop over the te
 
 After defining the training and testing of a PyTorch machine learning model, we use the functions for the Flower clients.
 
-The Flower clients will use a simle CNN adapted from 'PyTorch: A 60 Minute Blitz':
+The Flower clients will use a simple CNN adapted from 'PyTorch: A 60 Minute Blitz':
 
 .. code-block:: python
 
