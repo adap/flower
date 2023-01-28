@@ -15,8 +15,10 @@
 """Servicer for FlowerService.
 
 Relevant knowledge for reading this modules code:
-    - https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
+- https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
 """
+
+
 from typing import Callable, Iterator
 
 import grpc
@@ -25,36 +27,34 @@ from iterators import TimeoutIterator
 from flwr.proto import transport_pb2_grpc
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import ClientManager
-from flwr.server.grpc_server.grpc_bridge import GRPCBridge, InsWrapper, ResWrapper
+from flwr.server.grpc_server.grpc_bridge import GrpcBridge, InsWrapper, ResWrapper
 from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
 
 
-def default_bridge_factory() -> GRPCBridge:
-    """Return GRPCBridge instance."""
-    return GRPCBridge()
+def default_bridge_factory() -> GrpcBridge:
+    """Return GrpcBridge instance."""
+    return GrpcBridge()
 
 
-def default_grpc_client_factory(cid: str, bridge: GRPCBridge) -> GrpcClientProxy:
+def default_grpc_client_proxy_factory(cid: str, bridge: GrpcBridge) -> GrpcClientProxy:
     """Return GrpcClientProxy instance."""
     return GrpcClientProxy(cid=cid, bridge=bridge)
 
 
-def register_client(
+def register_client_proxy(
     client_manager: ClientManager,
-    client: GrpcClientProxy,
+    client_proxy: GrpcClientProxy,
     context: grpc.ServicerContext,
 ) -> bool:
     """Try registering GrpcClientProxy with ClientManager."""
-    is_success = client_manager.register(client)
-
+    is_success = client_manager.register(client_proxy)
     if is_success:
 
         def rpc_termination_callback() -> None:
-            client.bridge.close()
-            client_manager.unregister(client)
+            client_proxy.bridge.close()
+            client_manager.unregister(client_proxy)
 
         context.add_callback(rpc_termination_callback)
-
     return is_success
 
 
@@ -64,33 +64,32 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
     def __init__(
         self,
         client_manager: ClientManager,
-        grpc_bridge_factory: Callable[[], GRPCBridge] = default_bridge_factory,
-        grpc_client_factory: Callable[
-            [str, GRPCBridge], GrpcClientProxy
-        ] = default_grpc_client_factory,
+        grpc_bridge_factory: Callable[[], GrpcBridge] = default_bridge_factory,
+        grpc_client_proxy_factory: Callable[
+            [str, GrpcBridge], GrpcClientProxy
+        ] = default_grpc_client_proxy_factory,
     ) -> None:
         self.client_manager: ClientManager = client_manager
         self.grpc_bridge_factory = grpc_bridge_factory
-        self.client_factory = grpc_client_factory
+        self.client_proxy_factory = grpc_client_proxy_factory
 
     def Join(  # pylint: disable=invalid-name
         self,
         request_iterator: Iterator[ClientMessage],
         context: grpc.ServicerContext,
     ) -> Iterator[ServerMessage]:
-        """Method will be invoked by each GrpcClientProxy which participates in
-        the network.
+        """Invoked by each gRPC client which participates in the network.
 
         Protocol:
-            - The first message is sent from the server to the client
-            - Both ServerMessage and ClientMessage are message "wrappers"
-                wrapping the actual message
-            - The Join method is (pretty much) protocol unaware
+        - The first message is sent from the server to the client
+        - Both `ServerMessage` and `ClientMessage` are message "wrappers"
+          wrapping the actual message
+        - The `Join` method is (pretty much) unaware of the protocol
         """
         peer: str = context.peer()
         bridge = self.grpc_bridge_factory()
-        client = self.client_factory(peer, bridge)
-        is_success = register_client(self.client_manager, client, context)
+        client_proxy = self.client_proxy_factory(peer, bridge)
+        is_success = register_client_proxy(self.client_manager, client_proxy, context)
 
         if is_success:
             # Get iterators
