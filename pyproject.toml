@@ -69,7 +69,7 @@ rest = ["fastapi", "requests", "uvicorn"]
 [tool.poetry.dev-dependencies]
 types-dataclasses = "==0.6.5"
 types-protobuf = "==3.19.18"
-types-requests = "^2.28.11.7"
+types-requests = "==2.28.11.7"
 types-setuptools = "==57.4.14"
 clang-format = "==15.0.6"
 isort = "==5.10.1"
