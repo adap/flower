@@ -79,7 +79,7 @@ public class MLFlwrClient: Client {
         }
         
         let progressHandler: (MLUpdateContext) -> Void = { contextProgress in
-            let loss = contextProgress.metrics[.lossValue] as! Double
+            let loss = String(format: "%.4f", contextProgress.metrics[.lossValue] as! Double)
             switch task {
             case .train:
                 print("Epoch \(contextProgress.metrics[.epochIndex] as! Int + 1) finished with loss \(loss)")
