@@ -34,6 +34,7 @@ func handle(client: Client, serverMsg: Flwr_Proto_ServerMessage) throws -> (Flwr
     }
 }
 
+/// Handle for the server message that initiates a reconnection.
 func reconnect(reconnectMsg: Flwr_Proto_ServerMessage.ReconnectIns) -> (Flwr_Proto_ClientMessage, Int) {
     var reason: Flwr_Proto_Reason = .ack
     var sleepDuration: Int = 0
@@ -48,6 +49,7 @@ func reconnect(reconnectMsg: Flwr_Proto_ServerMessage.ReconnectIns) -> (Flwr_Pro
     return (ret, sleepDuration)
  }
 
+/// Handle for the server message that requests the local model parameters.
 func getParameters(client: Client) -> Flwr_Proto_ClientMessage {
     let parametersRes = client.getParameters()
     let parametersResProto = parametersResToProto(res: parametersRes)
@@ -56,6 +58,7 @@ func getParameters(client: Client) -> Flwr_Proto_ClientMessage {
     return ret
 }
 
+/// Handle for the server message that requests the local model properties.
 func getProperties(client: Client, propertiesMsg: Flwr_Proto_ServerMessage.GetPropertiesIns) -> Flwr_Proto_ClientMessage {
     let propertiesIns = propertiesInsFromProto(msg: propertiesMsg)
     let propertiesRes = client.getProperties(ins: propertiesIns)
@@ -65,6 +68,7 @@ func getProperties(client: Client, propertiesMsg: Flwr_Proto_ServerMessage.GetPr
     return ret
 }
 
+/// Handle for the server message that instructs to optimize the local model.
 func fit(client: Client, fitMsg: Flwr_Proto_ServerMessage.FitIns) -> Flwr_Proto_ClientMessage {
     let fitIns = fitInsFromProto(msg: fitMsg)
     let fitRes = client.fit(ins: fitIns)
@@ -74,6 +78,7 @@ func fit(client: Client, fitMsg: Flwr_Proto_ServerMessage.FitIns) -> Flwr_Proto_
     return ret
 }
 
+/// Handle for the server message that instructs to evaluate the local model.
 func evaluate(client: Client, evaluateMsg: Flwr_Proto_ServerMessage.EvaluateIns) -> Flwr_Proto_ClientMessage {
     let evaluateIns = evaluateInsFromProto(msg: evaluateMsg)
     let evaluateRes = client.evaluate(ins: evaluateIns)
