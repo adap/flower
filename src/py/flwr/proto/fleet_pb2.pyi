@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import builtins
+import flwr.proto.node_pb2
 import flwr.proto.task_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -15,17 +16,19 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 class PullTaskInsRequest(google.protobuf.message.Message):
     """PullTaskIns messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    NODE_ID_FIELD_NUMBER: builtins.int
+    NODE_FIELD_NUMBER: builtins.int
     TASK_IDS_FIELD_NUMBER: builtins.int
-    node_id: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
     @property
     def task_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     def __init__(self,
         *,
-        node_id: builtins.int = ...,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         task_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["node_id",b"node_id","task_ids",b"task_ids"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node",b"node","task_ids",b"task_ids"]) -> None: ...
 global___PullTaskInsRequest = PullTaskInsRequest
 
 class PullTaskInsResponse(google.protobuf.message.Message):

@@ -11,8 +11,6 @@ from utils import model_to_arrays, set_params, test, train
 from flwr.client import NumPyClient
 from flwr.common.typing import Config, Metrics, NDArrays, Scalar
 
-from dataloaders.openimage import OpenImage
-
 from torchvision.models import shufflenet_v2_x2_0
 
 
