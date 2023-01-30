@@ -112,6 +112,10 @@ public class FlwrGRPC {
         }
     }
     
+    /// Aborts the connection to the server on behalf of the client.
+    ///
+    /// - Parameters:
+    ///   - completion: Handler function to define the action after closing the connection.
     public func abortGRPCConnection(completion: @escaping () -> Void) {
         var disconnect = Flwr_Proto_ClientMessage.DisconnectRes()
         disconnect.reason = .powerDisconnected
