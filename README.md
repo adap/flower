@@ -1,4 +1,4 @@
-# Flower - A Friendly Federated Learning Framework
+# Flower: A Friendly Federated Learning Framework
 
 <p align="center">
   <a href="https://flower.dev/">
