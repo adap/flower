@@ -25,6 +25,12 @@ public class MLFlwrClient: Client {
     private var compiledModelUrl: URL
     private var tempModelUrl: URL
     
+    /// Inits the implementation of the Client protocol.
+    ///
+    /// - Parameters:
+    ///   - layerWrappers: A MLLayerWrapper struct that contains layer information.
+    ///   - dataLoader: A MLDataLoader struct that contains train- and testdata batches.
+    ///   - compiledModelUrl: An URL specifying the location or path of the compiled model.
     public init(layerWrappers: [MLLayerWrapper], dataLoader: MLDataLoader, compiledModelUrl: URL) {
         self.parameters = MLParameter(layerWrappers: layerWrappers)
         self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
@@ -41,6 +47,9 @@ public class MLFlwrClient: Client {
         }
     }
     
+    /// Parses the parameters from the local model and returns them as GetParametersRes struct
+    ///
+    /// - Returns: Parameters from the local model
     public func getParameters() -> GetParametersRes {
         let parameters = parameters.weightsToParameters()
         let status = Status(code: .ok, message: String())
@@ -48,6 +57,9 @@ public class MLFlwrClient: Client {
         return GetParametersRes(parameters: parameters, status: status)
     }
     
+    /// Calls the routine to fit the local model
+    ///
+    /// - Returns: The result from the local training, e.g., updated parameters
     public func fit(ins: FitIns) -> FitRes {
         let status = Status(code: .ok, message: String())
         let result = runMLTask(configuration: parameters.parametersToWeights(parameters: ins.parameters), task: .train)
@@ -56,6 +68,9 @@ public class MLFlwrClient: Client {
         return FitRes(parameters: parameters, numExamples: result.numSamples, status: status)
     }
     
+    /// Calls the routine to evaluate the local model
+    ///
+    /// - Returns: The result from the evaluation, e.g., loss
     public func evaluate(ins: EvaluateIns) -> EvaluateRes {
         let status = Status(code: .ok, message: String())
         let result = runMLTask(configuration: parameters.parametersToWeights(parameters: ins.parameters), task: .test)
@@ -121,6 +136,7 @@ public class MLFlwrClient: Client {
         return result ?? MLResult(loss: 1, numSamples: 0, accuracy: 0)
     }
     
+    /// Closes the initiated group of event-loop
     public func closeEventLoopGroup() {
         do {
             try self.eventLoopGroup?.syncShutdownGracefully()

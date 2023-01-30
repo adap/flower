@@ -7,6 +7,9 @@
 
 import Foundation
 
+/// The protocol class for the client implementation.
+/// It contains abstract functions required for processing the server statements.
+/// The expected return types are derived from the defined return structure.
 public protocol Client {
     func getParameters() -> GetParametersRes
     func getProperties(ins: GetPropertiesIns) -> GetPropertiesRes

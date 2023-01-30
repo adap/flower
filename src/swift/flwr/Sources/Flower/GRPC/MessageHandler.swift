@@ -7,6 +7,13 @@
 
 import Foundation
 
+/// Handles the incoming messages from the server
+///
+/// - Parameters:
+///   - client: The implementation of the Client containing executable routines based on server instructions
+///   - serverMsg: The server's message parsed as a Flwr_Proto_ServerMessage struct.
+/// - Returns:
+///   - The client's answer after proofing or executing the server's instructions
 func handle(client: Client, serverMsg: Flwr_Proto_ServerMessage) throws -> (Flwr_Proto_ClientMessage, Int, Bool) {
     switch serverMsg.msg {
     case .reconnectIns:
