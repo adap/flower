@@ -70,6 +70,8 @@ def _create_task_ins(
 ) -> TaskIns:
     return TaskIns(
         task_id=task_id,
+        group_id="",
+        workload_id="",
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=1, anonymous=False),
