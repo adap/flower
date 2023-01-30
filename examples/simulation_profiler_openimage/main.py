@@ -10,6 +10,8 @@ from flwr.server import ServerConfig
 from flwr.server.strategy import ResourceAwareFedAvg
 from flwr.simulation import start_simulation
 from flwr.common.typing import Config, Metrics, NDArrays
+from datasets.openimage import OpenImage
+
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -50,11 +52,13 @@ if __name__ == "__main__":
         # evaluate_fn=get_evaluate_fn(testset),  # centralized evaluation of global model
     )
 
-    fed_dir = Path("/datasets/FedScale/openImg/")
+    img_root = Path("/datasets/FedScale/openImg/")
+    cid_csv_root = Path("/datasets/FedScale/openImg/client_data_mapping/clean_ids")
+    dataset = OpenImage(cid_csv_root=cid_csv_root, img_root=img_root)
 
     def client_fn(cid: str):
         # create a single client instance
-        return FlowerClient(cid, str(fed_dir.absolute()))
+        return FlowerClient(cid=cid, dataset=dataset)
 
     ray_init_args = {"include_dashboard": False}
 

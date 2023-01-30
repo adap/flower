@@ -1,34 +1,24 @@
-from copy import deepcopy
 import datetime
-from psutil import cpu_count
 import os
 import pickle
 import platform
-import socket
 import time
+import socket
+from copy import deepcopy
 from dataclasses import dataclass, field
 from functools import wraps
+from multiprocessing.connection import Client, Listener
 from pathlib import Path, PurePath
 from subprocess import check_output
-from ray.experimental.state.api import list_tasks
 from threading import Lock, Thread
-from typing import (
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    TypeVar,
-    Union,
-    cast,
-)
-
+from typing import Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
+from uuid import uuid4
 import numpy as np
 import nvsmi
 import psutil
+from psutil import cpu_count
 
 from flwr.common import NDArrays, Scalar
-
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
@@ -82,10 +72,9 @@ class Node:
 
 
 @dataclass(eq=True, frozen=False)
-class Task:
+class Transaction: # Set by the Server / Strategy
     id: str
     pid: int
-    task_name: str
     start_time_ns: int = 0
     stop_time_ns: int = 0
     cpu_process: SimpleCPUProcess = SimpleCPUProcess()
@@ -103,29 +92,26 @@ class SystemMonitor(Thread):
     def __init__(
         self,
         *,
-        node_id: Optional[str] = None,
-        interval_s: float = 1.0,
-        save_path_root: Optional[Path] = None,
+        address: Tuple[str, int],
+        sampling_interval_s: float = 1.0,
+        path_save_stats: Optional[Path] = None,
     ):
         super(SystemMonitor, self).__init__()
-        # self.node_id = node_id if node_id else socket.getfqdn()
         self.node_id = socket.getfqdn()
         self.tasks: Dict[str, Task] = dict()
-        self.cpu: SimpleCPU = SimpleCPU()
-        self.gpus: Dict[str, SimpleGPU] = dict()
+        self.node_cpu: SimpleCPU = SimpleCPU()
+        self.node_gpus: Dict[str, SimpleGPU] = dict()
         self.start_time_ns: int = 0
         self.stop_time_ns: int = 0
         self.stopped: bool = True
-        self.interval_s: float = interval_s
+        self.sampling_interval: float = sampling_interval_s
+        self.address: Tuple[str, int] = address
         self._lock: Lock = Lock()
-        self.save_path_root: Path = (
-            save_path_root if save_path_root else Path('/local/scratch/pedro/experiments/monitor')
-        )
+        self.path_save_stats = path_save_stats
         self.active_task_ids: List["str"] = []
-        #self._collect_resources()
 
     def get_resources(self) -> Dict[str, Union[SimpleCPU, SimpleGPU]]:
-        return {**self.gpus, "cpu": self.cpu}
+        return {**self.node_gpus, "cpu": self.node_cpu}
 
     def get_tasks(self) -> Dict[str, Task]:
         return self.tasks
@@ -142,7 +128,7 @@ class SystemMonitor(Thread):
     def is_running(self) -> bool:
         return not self.stopped
 
-    def register_tasks(self, tasks: List[Tuple[str, int, str]]) -> bool:
+    def _register_tasks(self, tasks: List[Tuple[str, str, int]]) -> bool:
         """Include list of tasks in set of tasks that are being monitored.
 
         Args:
@@ -150,51 +136,59 @@ class SystemMonitor(Thread):
         """
         with self._lock:
             for task in tasks:
-                task_id, pid, task_name = task
-
+                task_id, cid, pid = task
                 self.tasks[task_id] = Task(
                     id=task_id,
                     pid=pid,
-                    task_name=task_name,
+                    cid=cid,
                     start_time_ns=time.time_ns(),
                 )
                 self.active_task_ids.append(task_id)
         return True
 
-    def unregister_tasks(self, task_ids: List[str]) -> bool:
+    def _unregister_tasks(
+        self, tags: List[(str, str, int)]
+    ) -> bool:  # Is there a risk of having two the same task_id being sent to the same client. DO we need the concept of transaction?
         with self._lock:
-            for task_id in task_ids:
+            for tag in tags:
+                task_id, cid, pid = args
                 if task_id in self.active_task_ids:
                     self.active_task_ids.remove(task_id)
                     self.tasks[task_id].stop_time_ns = time.time_ns()
 
         return True
 
-    def save_and_clear(self, sub_folder: PurePath):
+    def _save_tasks_and_resources(self, sub_folder: PurePath) -> bool:
+        save_successful = False
+        if self.path_save_stats is not None:
+            save_path = self.path_save_stats / sub_folder / self.node_id
+            resources_folder = save_path / "resources"
+            resources_folder.mkdir(parents=True, exist_ok=True)
+            task_folder = save_path / "tasks"
+            task_folder.mkdir(parents=True, exist_ok=True)
 
-        save_path = self.save_path_root / sub_folder / self.node_id
-        resources_folder = save_path / "resources"
-        resources_folder.mkdir(parents=True, exist_ok=True)
-        task_folder = save_path / "tasks"
-        task_folder.mkdir(parents=True, exist_ok=True)
+            # Save Tasks
+            for task_id, task in self.tasks.items():
+                filename = task_folder / f"{task_id}.pickle"
+                with open(filename, "wb") as handle:
+                    pickle.dump(task, handle)
 
-        # Save Resources
-        for hw in ["cpu", "gpus"]:
-            filename = resources_folder / f"{hw}.pickle"
-            with open(filename, "wb") as handle:
-                pickle.dump(getattr(self, hw), handle)
+            # Save Resources
+            for hw in ["cpu", "gpus"]:
+                filename = resources_folder / f"{hw}.pickle"
+                with open(filename, "wb") as handle:
+                    pickle.dump(getattr(self, hw), handle)
 
+            save_successful = True
+
+        return save_successful
+
+    def _clear_tasks_and_resources(self):
         # Clear CPU and GPU
         del self.cpu.all_proc_mem_used_mb[:]
-        for k in self.gpus.keys():
-            del self.gpus[k].all_proc_mem_used_mb[:]
-            del self.gpus[k].utilization[:]
-
-        # Save Tasks
-        for task_id, task in self.tasks.items():
-            filename = task_folder / f"{task_id}.pickle"
-            with open(filename, "wb") as handle:
-                pickle.dump(task, handle)
+        for k in self.node_gpus.keys():
+            del self.node_gpus[k].all_proc_mem_used_mb[:]
+            del self.node_gpus[k].utilization[:]
 
         # Release memory from Tasks
         self.tasks.clear()
@@ -203,8 +197,10 @@ class SystemMonitor(Thread):
         # Retrieve GPU info
         all_gpus = nvsmi.get_gpus()
         for gpu in all_gpus:
-            self.gpus[gpu.uuid] = SimpleGPU(uuid=gpu.uuid, gpu_id=gpu.id, name=gpu.name)
-            self.gpus[gpu.uuid].total_mem_mb = gpu.mem_total
+            self.node_gpus[gpu.uuid] = SimpleGPU(
+                uuid=gpu.uuid, gpu_id=gpu.id, name=gpu.name
+            )
+            self.node_gpus[gpu.uuid].total_mem_mb = gpu.mem_total
 
         # Retrieve CPU and system RAM info
         cpu_name = platform.processor()
@@ -224,6 +220,26 @@ class SystemMonitor(Thread):
         with self._lock:
             return [(task.id, task.pid) for task in self.tasks.values()]
 
+    def _switch(self):
+        with Listener(address=self.address) as listener:
+            with listener.accept() as conn:
+                while True:
+                    try:
+                        command, args = conn.recv()
+                        if (
+                            command == "register_task"
+                        ):  # TaskID set by the "server"/strategy, who should also know the type.
+                            task_id, cid, pid = args
+                            with self._lock:
+                                self._register_tasks([(task_id, cid, pid)])
+                        elif command == "unregister_task":
+                            task_id, cid, pid = args
+                            with self._lock:
+                                self._unregister_tasks([(task_id, cid, pid)])
+                    except EOFError:
+                        print("Connection closed.")
+                    break
+
     def run(self) -> None:
         """Runs thread and sleeps for self.interval_s seconds."""
         self.start_time_ns = time.time_ns()
@@ -232,7 +248,7 @@ class SystemMonitor(Thread):
             current_active_tasks = self.get_active_tasks_ids()
             if current_active_tasks:
                 self._collect_system_usage(current_active_tasks)
-            time.sleep(self.interval_s)  # Sleep is managed by collect_cpu
+            time.sleep(self.sampling_interval)  # Sleep is managed by collect_cpu
         self.stop_time_ns = time.time_ns()
 
     def stop(self) -> None:
@@ -275,9 +291,11 @@ class SystemMonitor(Thread):
         timestamp = time.time_ns()
         for gpu in gpus_all:
             uuid: str = gpu.uuid
-            if uuid in self.gpus.keys():
-                self.gpus[uuid].all_proc_mem_used_mb.append((timestamp, gpu.mem_used))
-                self.gpus[uuid].utilization.append((timestamp, gpu.gpu_util))
+            if uuid in self.node_gpus.keys():
+                self.node_gpus[uuid].all_proc_mem_used_mb.append(
+                    (timestamp, gpu.mem_used)
+                )
+                self.node_gpus[uuid].utilization.append((timestamp, gpu.gpu_util))
 
     def _collect_cpu_usage(self, active_task_ids: List[str]) -> None:
         timestamp = time.time_ns()
@@ -376,22 +394,40 @@ class SystemMonitor(Thread):
         return metrics
 
 
-def basic_profiler(interval_s: float = 0.1, save_path=None):
+##### Client function wrapper #####
+def send_message_to_system_monitor(
+    task_id: str, msg: str, address: Tuple[str, int]
+) -> None:
+    try:
+        with Client(address) as conn:
+            conn.send((msg, task_id, os.getpid()))
+    except Exception as e:
+        print(f"Error trying to register with System Monitor. {e}")
+
+
+def profile(port: int = 6000):
     def numpy_profiler(_func: ProfFunDec) -> ProfFunDec:
         @wraps(_func)
         def wrapper(
             *args, **kwargs
         ) -> Tuple[Union[NDArrays, float], int, Dict[str, Scalar]]:
-            this_task_id = _func.__name__
-            list_tasks = [(this_task_id, os.getpid(), _func.__name__)]
-            system_monitor = SystemMonitor(interval_s=interval_s, save_path=None)
-            system_monitor.register_tasks(tasks=list_tasks)
-            system_monitor.start()
+            task_id = _func.__name__
+            address = ("localhost", port)
+            # Register
+            send_message_to_system_monitor(
+                task_id=task_id, msg="register", address=address
+            )
+            # Run methods
             output, num_examples, metrics = _func(*args, **kwargs)
-            system_monitor.unregister_tasks(task_ids=[this_task_id])
-            system_monitor.stop()
+            # De-register
+            send_message_to_system_monitor(
+                task_id=task_id, msg="deregister", address=address
+            )
             return output, num_examples, metrics
 
         return cast(ProfFunDec, wrapper)
 
     return numpy_profiler
+
+
+##### Strategy fit and aggregate wrappers

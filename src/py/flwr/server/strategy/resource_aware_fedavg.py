@@ -12,21 +12,21 @@
 # limitations under the License.
 # ==============================================================================
 
-from collections import defaultdict
-from logging import WARNING
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
-
 import copy
 import datetime
+import pickle
+import time
+from collections import defaultdict
+from logging import WARNING
+from pathlib import Path, PurePath
+from time import sleep, time_ns
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+
 import numpy as np
 import numpy.typing as npt
 import ray
-import pickle
-import time
-from time import sleep, time_ns
-from pathlib import Path, PurePath
-from ray.experimental.state.api import list_actors
 from numpy.linalg import lstsq
+from ray.experimental.state.api import list_actors
 
 from flwr.common import (
     EvaluateRes,
@@ -49,9 +49,7 @@ from flwr.monitoring.profiler import (
     SimpleGPUProcess,
     Task,
 )
-
 from flwr.server.client_manager import ClientManager
-
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 
@@ -426,7 +424,8 @@ class ResourceAwareFedAvg(FedAvg):
         parameters: Parameters,
         client_manager: ClientManager,
     ) -> List[Tuple[ClientProxy, FitIns]]:
-        """Configures the next round of training and allocates resources accordingly."""
+        """Configures the next round of training and allocates resources
+        accordingly."""
 
         self._start_data_collection()
 

@@ -42,7 +42,9 @@ def train(
 ) -> float:
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.005, momentum=0.9,weight_decay=5e-4)
+    optimizer = torch.optim.SGD(
+        net.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4
+    )
     correct, total, loss = 0, 0, 0.0
     net.train()
     last_loss = 0.0

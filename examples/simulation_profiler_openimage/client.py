@@ -5,22 +5,21 @@ import numpy as np
 import torch
 from dataset_utils import get_dataset
 from torch.nn import Module
-from torch.utils.data import DataLoader, RandomSampler
+from torch.utils.data import DataLoader, Dataset, RandomSampler
 from utils import model_to_arrays, set_params, test, train
 
 from flwr.client import NumPyClient
 from flwr.common.typing import Config, Metrics, NDArrays, Scalar
 
-from openimage_loader import OpenImage, train_transform
+from dataloaders.openimage import OpenImage
 
 from torchvision.models import shufflenet_v2_x2_0
 
 
 class FlowerClient(NumPyClient):
-    def __init__(self, cid: str, fed_dir_data: str):
+    def __init__(self, *, cid: str, dataset: Dataset):
         self.cid = cid
-        self.fed_dir = Path(fed_dir_data)
-        self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
+        self.dataset = dataset
 
     def get_parameters(self, config: Config, model: Optional[Module] = None):
         if model is None:
@@ -29,31 +28,22 @@ class FlowerClient(NumPyClient):
         return model_to_arrays(model)
 
     def fit(self, parameters, config):
-
-        # OpenImage
-        train_path = Path("/datasets/FedScale/openImg")
-        dataset = OpenImage(
-            root=train_path,
-            cid=int(self.cid),
-            dataset="train",
-            transform=train_transform,
-        )
-
-        # Regular
+        # Working with steps or local epochs
         replacement = True if "local_steps" in config.keys() else False
         local_steps = (
             int(config["local_steps"]) if "local_steps" in config.keys() else 0
         )
         num_samples = (
             local_steps * int(config["batch_size"])
-            if local_steps != 0  # local_steps not set by the server
-            else len(dataset)
+            if local_steps != 0  # if local_steps not set by the server
+            else len(self.dataset)
         )
         sampler = RandomSampler(
-            dataset, replacement=replacement, num_samples=num_samples
+            self.dataset, replacement=replacement, num_samples=num_samples
         )
+        self.dataset.load_client(cid=self.cid)
         dataloader = DataLoader(
-            dataset, sampler=sampler, batch_size=int(config["batch_size"])
+            self.dataset, sampler=sampler, batch_size=int(config["batch_size"])
         )
 
         # Get assigned device from
@@ -78,7 +68,7 @@ class FlowerClient(NumPyClient):
 
     def evaluate(self, parameters: NDArrays, config: Config):
         # Load test data for this client
-        dataset = get_dataset(Path(self.fed_dir).absolute(), self.cid, "val")
+        dataset = get_dataset(Path(self.fed_dir).absolute(), str(config["cid"]), "val")
         dataloader = DataLoader(dataset, batch_size=int(config["batch_size"]))
 
         # Get assigned device from

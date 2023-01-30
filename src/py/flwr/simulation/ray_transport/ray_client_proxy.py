@@ -14,8 +14,6 @@
 # ==============================================================================
 """Ray-based Flower ClientProxy implementation."""
 
-import os
-
 from logging import DEBUG
 from typing import Any, Callable, Dict, Optional, cast
 
@@ -31,7 +29,6 @@ from flwr.client.client import (
 )
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
-from flwr.monitoring.profiler import SystemMonitor
 
 ClientFn = Callable[[str], ClientLike]
 
@@ -65,19 +62,11 @@ class RayClientProxy(ClientProxy):
         self, ins: common.GetParametersIns, timeout: Optional[float]
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-<<<<<<< HEAD
         future_parameters_res = launch_and_get_parameters.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
         try:
             res = ray.get(future_parameters_res, timeout=timeout)
-=======
-        future_paramseters_res = launch_and_get_parameters.options(
-            **self.resources,
-        ).remote(self.client_fn, self.cid, ins)
-        try:
-            res = ray.get(future_paramseters_res, timeout=timeout)  # type: ignore
->>>>>>> 90ed294efcfe22ca77e4391e945d4f07a68370a2
         except Exception as ex:
             log(DEBUG, ex)
             raise ex
