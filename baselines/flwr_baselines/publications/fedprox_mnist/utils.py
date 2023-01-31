@@ -42,21 +42,10 @@ def plot_metric_from_history(
     fig = plt.figure()
     axis = fig.add_subplot(111)
     plt.plot(np.asarray(rounds), np.asarray(values), label="FedProx")
-    plt.axhline(
-        y=0.99,
-        color="silver",
-        label="Convergence baseline @0.9900",
-    )
-    plt.ylim([0.97, 1])
     plt.title(f"{metric_type.capitalize()} Validation - MNIST")
     plt.xlabel("Rounds")
     plt.ylabel("Accuracy")
     plt.legend(loc="lower right")
-
-    # Set the apect ratio to 1.0
-    xleft, xright = axis.get_xlim()
-    ybottom, ytop = axis.get_ylim()
-    axis.set_aspect(abs((xright - xleft) / (ybottom - ytop)) * 1.0)
 
     plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
     plt.close()

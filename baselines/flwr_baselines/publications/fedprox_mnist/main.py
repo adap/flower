@@ -28,19 +28,22 @@ def main(cfg: DictConfig) -> None:
         batch_size=cfg.batch_size,
         device=DEVICE,
         num_clients=cfg.num_clients,
+        num_rounds=cfg.num_rounds,
         iid=cfg.iid,
         learning_rate=cfg.learning_rate,
         proximal_mu=cfg.mu,
+        stagglers=cfg.stagglers_fraction,
     )
 
     evaluate_fn = utils.gen_evaluate_fn(testloader, DEVICE)
 
     strategy = fl.server.strategy.FedAvg(
-        fraction_fit=1 - cfg.staggers_fraction,
+        fraction_fit=1.0,
         fraction_evaluate=0.0,
-        min_fit_clients=int(cfg.num_clients * (1 - cfg.staggers_fraction)),
+        min_fit_clients=int(cfg.num_clients * (1 - cfg.stagglers_fraction)),
         min_evaluate_clients=0,
         min_available_clients=cfg.num_clients,
+        on_fit_config_fn=lambda curr_round: {"curr_round": curr_round},
         evaluate_fn=evaluate_fn,
         evaluate_metrics_aggregation_fn=utils.weighted_average,
     )
@@ -59,7 +62,7 @@ def main(cfg: DictConfig) -> None:
             f"_B={cfg.batch_size}"
             f"_E={cfg.num_epochs}"
             f"_R={cfg.num_rounds}"
-            f"_stag={cfg.staggers_fraction}"
+            f"_stag={cfg.stagglers_fraction}"
         ),
         history,
     )
@@ -72,7 +75,7 @@ def main(cfg: DictConfig) -> None:
             f"_B={cfg.batch_size}"
             f"_E={cfg.num_epochs}"
             f"_R={cfg.num_rounds}"
-            f"_stag={cfg.staggers_fraction}"
+            f"_stag={cfg.stagglers_fraction}"
         ),
     )
 

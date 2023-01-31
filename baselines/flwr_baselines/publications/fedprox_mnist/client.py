@@ -3,7 +3,7 @@
 
 
 from collections import OrderedDict
-from typing import Callable, List, Tuple
+from typing import Callable, Dict, List, Tuple
 
 import flwr as fl
 import numpy as np
@@ -26,6 +26,7 @@ class FlowerClient(fl.client.NumPyClient):
         num_epochs: int,
         learning_rate: float,
         proximal_mu: float,
+        staggler_schedule: np.ndarray,
     ):
         self.net = net
         self.trainloader = trainloader
@@ -34,6 +35,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
         self.proximal_mu = proximal_mu
+        self.staggler_schedule = staggler_schedule
 
     def get_parameters(self, config) -> List[np.ndarray]:
         """Returns the parameters of the current net."""
@@ -46,21 +48,28 @@ class FlowerClient(fl.client.NumPyClient):
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(
-        self, parameters: List[np.ndarray], config
+        self, parameters: List[np.ndarray], config: Dict[str, int]
     ) -> Tuple[List[np.ndarray], int, dict]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
+
+        if self.staggler_schedule[config["curr_round"] - 1]:
+            num_epochs = np.random.randint(1, self.num_epochs)
+        else:
+            num_epochs = self.num_epochs
+
         model.train(
             self.net,
             self.trainloader,
             self.device,
-            epochs=self.num_epochs,
+            epochs=num_epochs,
             learning_rate=self.learning_rate,
             proximal_mu=self.proximal_mu,
         )
+
         return self.get_parameters(self.net), len(self.trainloader), {}
 
-    def evaluate(self, parameters: List[np.ndarray], config):
+    def evaluate(self, parameters: List[np.ndarray], config: Dict[str, int]):
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
         loss, accuracy = model.test(self.net, self.valloader, self.device)
@@ -71,10 +80,12 @@ def gen_client_fn(
     device: torch.device,
     iid: bool,
     num_clients: int,
+    num_rounds: int,
     num_epochs: int,
     batch_size: int,
     learning_rate: float,
     proximal_mu: float,
+    stagglers: float,
 ) -> Tuple[Callable[[str], FlowerClient], DataLoader]:
     """Generates the client function that creates the Flower Clients.
 
@@ -98,6 +109,8 @@ def gen_client_fn(
         The learning rate for the SGD  optimizer of clients.
     proximal_mu : float
         Parameter for the weight of the proximal term.
+    stagglers : float
+        Proportion of stagglers in the clients, between 0 and 1.
 
     Returns
     -------
@@ -107,6 +120,12 @@ def gen_client_fn(
     """
     trainloaders, valloaders, testloader = load_datasets(
         iid=iid, num_clients=num_clients, batch_size=batch_size
+    )
+
+    stagglers_mat = np.transpose(
+        np.random.choice(
+            [0, 1], size=(num_rounds, num_clients), p=[1 - stagglers, stagglers]
+        )
     )
 
     def client_fn(cid: str) -> FlowerClient:
@@ -122,7 +141,14 @@ def gen_client_fn(
 
         # Create a  single Flower client representing a single organization
         return FlowerClient(
-            net, trainloader, valloader, device, num_epochs, learning_rate, proximal_mu
+            net,
+            trainloader,
+            valloader,
+            device,
+            num_epochs,
+            learning_rate,
+            proximal_mu,
+            stagglers_mat[int(cid)],
         )
 
     return client_fn, testloader
