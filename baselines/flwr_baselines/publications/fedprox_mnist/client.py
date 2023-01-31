@@ -1,4 +1,3 @@
-# pylint: disable=too-many-arguments
 """Defines the MNIST Flower Client and a function to instantiate it."""
 
 
@@ -27,7 +26,7 @@ class FlowerClient(fl.client.NumPyClient):
         learning_rate: float,
         proximal_mu: float,
         staggler_schedule: np.ndarray,
-    ):
+    ):  # pylint: disable=too-many-arguments, too-many-instance-attributes
         self.net = net
         self.trainloader = trainloader
         self.valloader = valloader
@@ -53,6 +52,8 @@ class FlowerClient(fl.client.NumPyClient):
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
 
+        # At each round check if the client is a staggler,
+        # if so, train less epochs (to simulate partial work)
         if self.staggler_schedule[config["curr_round"] - 1]:
             num_epochs = np.random.randint(1, self.num_epochs)
         else:
@@ -86,7 +87,9 @@ def gen_client_fn(
     learning_rate: float,
     proximal_mu: float,
     stagglers: float,
-) -> Tuple[Callable[[str], FlowerClient], DataLoader]:
+) -> Tuple[
+    Callable[[str], FlowerClient], DataLoader
+]:  # pylint: disable=too-many-arguments
     """Generates the client function that creates the Flower Clients.
 
     Parameters
@@ -122,6 +125,9 @@ def gen_client_fn(
         iid=iid, num_clients=num_clients, batch_size=batch_size
     )
 
+    # Defines a staggling schedule for each clients, i.e at which round will they
+    # be a staggler. This is done so at each round the proportion of staggling
+    # clients is respected
     stagglers_mat = np.transpose(
         np.random.choice(
             [0, 1], size=(num_rounds, num_clients), p=[1 - stagglers, stagglers]

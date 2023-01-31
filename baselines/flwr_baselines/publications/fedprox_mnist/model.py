@@ -1,4 +1,3 @@
-# pylint: disable=too-many-arguments
 """CNN model architecutre, training and testing functions for MNIST."""
 
 
@@ -58,7 +57,7 @@ def train(
     epochs: int,
     learning_rate: float,
     proximal_mu: float,
-) -> None:
+) -> None:  # pylint: disable=too-many-arguments
     """Train the network on the training set.
 
     Parameters
@@ -94,7 +93,7 @@ def _training_loop(
     criterion: torch.nn.CrossEntropyLoss,
     optimizer: torch.optim.Adam,
     proximal_mu: float,
-) -> nn.Module:
+) -> nn.Module:  # pylint: disable=too-many-arguments
     """Train for one epoch.
 
     Parameters

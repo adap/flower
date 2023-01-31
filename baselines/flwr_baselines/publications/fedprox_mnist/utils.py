@@ -39,8 +39,6 @@ def plot_metric_from_history(
         else hist.metrics_distributed
     )
     rounds, values = zip(*metric_dict["accuracy"])
-    fig = plt.figure()
-    axis = fig.add_subplot(111)
     plt.plot(np.asarray(rounds), np.asarray(values), label="FedProx")
     plt.title(f"{metric_type.capitalize()} Validation - MNIST")
     plt.xlabel("Rounds")
