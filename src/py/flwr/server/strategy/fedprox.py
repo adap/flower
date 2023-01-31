@@ -99,7 +99,7 @@ class FedProx(Strategy):
 
           for local_weights, global_weights in zip(net.parameters(), global_params):
               proximal_term += (local_weights - global_weights).norm(2)
-          loss = criterion(net(inputs), labels) + (proximal_mu / 2) * proximal_term
+          loss = criterion(net(inputs), labels) + (config["proximal_mu"] / 2) * proximal_term
 
         With `global_params` being a copy of the parameters before the training takes place.
 
@@ -209,6 +209,10 @@ class FedProx(Strategy):
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(server_round)
+
+        # Add proximal_mu to config
+        config["proximal_mu"] = self.proximal_mu
+
         fit_ins = FitIns(parameters, config)
 
         # Sample clients
