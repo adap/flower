@@ -117,7 +117,7 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": 'Flower Monthly: Feb 1st 1700 GMT <a href="https://flower.dev/join-flower-monthly/">watch now</a>',
+    "announcement": 'Flower Monthly: Feb 1st 1700 GMT <a href="https://flower.dev/conf/flower-monthly/">read now</a>',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
