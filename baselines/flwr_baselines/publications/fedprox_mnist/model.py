@@ -50,14 +50,14 @@ class Net(nn.Module):
         return output_tensor
 
 
-def train(
+def train(  # pylint: disable=too-many-arguments
     net: nn.Module,
     trainloader: DataLoader,
     device: torch.device,
     epochs: int,
     learning_rate: float,
     proximal_mu: float,
-) -> None:  # pylint: disable=too-many-arguments
+) -> None:
     """Train the network on the training set.
 
     Parameters
@@ -85,7 +85,7 @@ def train(
         )
 
 
-def _training_loop(
+def _training_loop(  # pylint: disable=too-many-arguments
     net: nn.Module,
     global_params: Iterator[Parameter],
     trainloader: DataLoader,
@@ -93,7 +93,7 @@ def _training_loop(
     criterion: torch.nn.CrossEntropyLoss,
     optimizer: torch.optim.Adam,
     proximal_mu: float,
-) -> nn.Module:  # pylint: disable=too-many-arguments
+) -> nn.Module:
     """Train for one epoch.
 
     Parameters

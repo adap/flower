@@ -13,7 +13,9 @@ from flwr_baselines.publications.fedprox_mnist import model
 from flwr_baselines.publications.fedprox_mnist.dataset import load_datasets
 
 
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(
+    fl.client.NumPyClient
+):  # pylint: disable=too-many-instance-attributes
     """Standard Flower client for CNN training."""
 
     def __init__(
@@ -26,7 +28,7 @@ class FlowerClient(fl.client.NumPyClient):
         learning_rate: float,
         proximal_mu: float,
         staggler_schedule: np.ndarray,
-    ):  # pylint: disable=too-many-arguments, too-many-instance-attributes
+    ):  # pylint: disable=too-many-arguments
         self.net = net
         self.trainloader = trainloader
         self.valloader = valloader
