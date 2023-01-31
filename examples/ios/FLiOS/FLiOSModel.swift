@@ -164,7 +164,7 @@ public class FLiOSModel: ObservableObject {
     
     public func abortFederatedLearning() {
         print("aborting federated learning")
-        self.flwrGRPC?.abortGRPCConnection {
+        self.flwrGRPC?.abortGRPCConnection(reasonDisconnect: .powerDisconnected) {
             DispatchQueue.main.async {
                 self.federatedServerStatus = .completed(info: "Federated learning aborted")
                 self.flwrGRPC = nil

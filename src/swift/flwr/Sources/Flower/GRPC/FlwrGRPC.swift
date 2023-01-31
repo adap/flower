@@ -101,9 +101,11 @@ public class FlwrGRPC {
         }
     }
     
-    public func abortGRPCConnection(completion: @escaping () -> Void) {
+    public func abortGRPCConnection(reasonDisconnect: ReasonDisconnect, completion: @escaping () -> Void) {
         var disconnect = Flwr_Proto_ClientMessage.DisconnectRes()
-        disconnect.reason = .powerDisconnected
+        let reasonDisconnectProto = Flwr_Proto_Reason(rawValue: reasonDisconnect.rawValue)
+        
+        disconnect.reason = reasonDisconnectProto ?? .unknown
         var clientMessage = Flwr_Proto_ClientMessage()
         clientMessage.disconnectRes = disconnect
         
