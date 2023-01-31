@@ -82,27 +82,30 @@ class FedProx(Strategy):
         A proximal term needs to be added to the loss function during the training:
 
         .. math::
-            \frac{\mu}{2} || w - w^t ||^2
+            \\frac{\\mu}{2} || w - w^t ||^2
 
         Where $w^t$ are the global parameters and $w$ are the local weights the function will
         be optimized with.
 
         In PyTorch for example, the loss would go from:
 
-        .. code::
-            loss = criterion(net(inputs), labels)
+        .. code:: python
+
+          loss = criterion(net(inputs), labels)
 
         To:
 
-        .. code::
-            for local_weights, global_weights in zip(net.parameters(), global_params):
-                proximal_term += (local_weights - global_weights).norm(2)
-            loss = criterion(net(inputs), labels) + (proximal_mu / 2) * proximal_term
+        .. code:: python
+
+          for local_weights, global_weights in zip(net.parameters(), global_params):
+              proximal_term += (local_weights - global_weights).norm(2)
+          loss = criterion(net(inputs), labels) + (proximal_mu / 2) * proximal_term
 
         With `global_params` being a copy of the parameters before the training takes place.
 
-        .. code::
-            global_params = copy.deepcopy(net).parameters()
+        .. code:: python
+
+          global_params = copy.deepcopy(net).parameters()
 
         Parameters
         ----------
