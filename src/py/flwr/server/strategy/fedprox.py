@@ -151,6 +151,7 @@ class FedProx(Strategy):
         ):
             log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
+        self.proximal_mu = proximal_mu
         self.fraction_fit = fraction_fit
         self.fraction_evaluate = fraction_evaluate
         self.min_fit_clients = min_fit_clients
