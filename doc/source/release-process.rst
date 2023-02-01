@@ -6,9 +6,12 @@ This document describes the current release process. It may or may not change in
 Before the release
 ------------------
 
-Update the changelog (``changelog.md``) with all relevant changes that happened after the last release. If the last release was tagged ``v1.0.0``, you can use the following URL to see all commits that got merged into ``main`` since then:
+Update the changelog (``changelog.md``) with all relevant changes that happened after the last release. If the last release was tagged ``v1.2.0``, you can use the following URL to see all commits that got merged into ``main`` since then:
 
-`GitHub: Compare v1.0.0...main <https://github.com/adap/flower/compare/v1.0.0...main>`_
+`GitHub: Compare v1.2.0...main <https://github.com/adap/flower/compare/v1.2.0...main>`_
+
+Thank the authors who contributed since the last release. This command helps extract them: `git log --format='%aN' v1.1.0..HEAD | sort -u`. The command has the same order as `git shortlog`.
+
 
 During the release
 ------------------
