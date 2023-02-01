@@ -21,12 +21,12 @@ class FlowerClient(fl.client.NumPyClient):
         return get_parameters(net)
 
     def fit(self, parameters, config):
-        set_parameters(parameters)
+        set_parameters(net, parameters)
         train(net, trainloader, epochs=1)
-        return get_parameters(), len(trainloader.dataset), {}
+        return get_parameters(net), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
-        set_parameters(parameters)
+        set_parameters(net, parameters)
         loss, accuracy = test(net, testloader)
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
