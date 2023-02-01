@@ -1,4 +1,4 @@
-Writing documentation
+How to write documentation
 =====================
 
 
