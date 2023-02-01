@@ -20,6 +20,12 @@ public class FlwrGRPC {
     
     let extendedInterceptor: InterceptorExtension?
     
+    /// Creates the client side communication class towards the server.
+    ///
+    /// - Parameters:
+    ///   - serverHost: The address of the server.
+    ///   - serverPort: The reserved server-side port.
+    ///   - extendedInterceptor: A custom implementation of a communication interceptor.
     public init(serverHost: String, serverPort: Int, extendedInterceptor: InterceptorExtension? = nil) {
         self.extendedInterceptor = extendedInterceptor
         
@@ -44,10 +50,19 @@ public class FlwrGRPC {
         }
     }
     
+    /// Opens the bidirectional stream with the server and starts sending messages.
+    ///
+    /// - Parameters:
+    ///   - client: The implementation of the Client which includes the machine learning routines and results.
     public func startFlwrGRPC(client: Client) {
         startFlwrGRPC(client: client) {}
     }
     
+    /// Opens the bidirectional stream with the server and starts sending messages.
+    ///
+    /// - Parameters:
+    ///   - client: The implementation of the Client which includes the machine learning routines and results.
+    ///   - completion: A handler to define the action that will be executed after sending the response.
     public func startFlwrGRPC(client: Client, completion: @escaping () -> Void) {
         let grpcClient = Flwr_Proto_FlowerServiceNIOClient(channel: channel, interceptors: FlowerInterceptorsFactory(extendedInterceptor: self.extendedInterceptor))
         var callOptions = CallOptions()
@@ -90,10 +105,6 @@ public class FlwrGRPC {
             print("Closing gRPC event loop group")
             try self.eventLoopGroup.syncShutdownGracefully()
             
-            /*if #available(iOS 14.0, *) {
-                print("Closing python event loop group")
-                ParameterConverter.shared.finalize()
-            }*/
             completion()
             
         } catch let error {
@@ -101,6 +112,10 @@ public class FlwrGRPC {
         }
     }
     
+    /// Aborts the connection to the server on behalf of the client.
+    ///
+    /// - Parameters:
+    ///   - completion: Handler function to define the action after closing the connection.
     public func abortGRPCConnection(reasonDisconnect: ReasonDisconnect, completion: @escaping () -> Void) {
         var disconnect = Flwr_Proto_ClientMessage.DisconnectRes()
         let reasonDisconnectProto = Flwr_Proto_Reason(rawValue: reasonDisconnect.rawValue)

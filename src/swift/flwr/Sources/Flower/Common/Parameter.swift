@@ -184,8 +184,6 @@ public class ParameterConverter {
         initGroup()
         let future = group?.next().submit {
             let numpy = array.makeNumpyArray().reshape(shape)
-            //print("before shape: \(shape)")
-            //print("after shape: \(numpy.shape)")
             return self.numpyToData(numpy: numpy)
         }
         
