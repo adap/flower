@@ -28,6 +28,12 @@ poetry install
 poetry shell
 ```
 
+If you are an M1 Mac user you might experience clang-related errors during the poetry installation. In this case we recommend you to install the packages in an alternative manner (in your favourite isolated environment):
+
+```shell
+python3 -m pip install -r requirements.txt
+```
+
 Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
 
 ```shell
