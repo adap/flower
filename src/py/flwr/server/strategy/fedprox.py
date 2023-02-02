@@ -19,26 +19,20 @@ Paper: https://arxiv.org/abs/1812.06127
 
 
 from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple
 
 from flwr.common import (
-    EvaluateIns,
-    EvaluateRes,
     FitIns,
-    FitRes,
     MetricsAggregationFn,
     NDArrays,
     Parameters,
-    Scalar,
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
-from .strategy import Strategy
+from .fedavg import FedAvg
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
