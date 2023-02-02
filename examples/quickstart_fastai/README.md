@@ -1,6 +1,6 @@
 # Flower Example using fast.ai
 
-This introductory example to Flower uses fast.ai, but deep knowledge of fast.ai is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
+This introductory example to Flower uses [fast.ai](https://www.fast.ai/), but deep knowledge of fast.ai is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
 Running this example in itself is quite easy.
 
 ## Project Setup
@@ -28,13 +28,13 @@ poetry install
 poetry shell
 ```
 
-If you are an M1 Mac user you might experience clang-related errors during the poetry installation. In this case we recommend you to install the packages in an alternative manner (in your favourite isolated environment):
+If you are an M1 Mac user you might experience clang-related errors during the Poetry installation. In this case we recommend you to install the packages in an alternative manner (in your favourite isolated environment):
 
 ```shell
 python3 -m pip install -r requirements.txt
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+To verify that everything works correctly you can run the following command:
 
 ```shell
 python3 -c "import flwr"
