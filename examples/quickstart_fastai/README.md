@@ -1,6 +1,6 @@
-# Flower Example using fast.ai
+# Flower Example using fastai
 
-This introductory example to Flower uses [fast.ai](https://www.fast.ai/), but deep knowledge of fast.ai is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
+This introductory example to Flower uses [fastai](https://www.fast.ai/), but deep knowledge of fastai is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
 Running this example in itself is quite easy.
 
 ## Project Setup
@@ -42,7 +42,7 @@ python3 -c "import flwr"
 
 If you don't see any errors you're good to go!
 
-# Run Federated Learning with fast.ai and Flower
+# Run Federated Learning with fastai and Flower
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
@@ -64,4 +64,4 @@ Start client 2 in the second terminal:
 python3 client.py
 ```
 
-You will see that fast.ai is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart-fastai.html) for a detailed explanation.
+You will see that fastai is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart-fastai.html) for a detailed explanation.
