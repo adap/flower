@@ -21,7 +21,7 @@ Paper: https://arxiv.org/abs/1812.06127
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple
 
-from flwr.common import FitIns, MetricsAggregationFn, NDArrays, Parameters
+from flwr.common import FitIns, MetricsAggregationFn, NDArrays, Parameters, Scalar
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
