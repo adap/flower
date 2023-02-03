@@ -1,5 +1,5 @@
-Writing documentation
-=====================
+How to write documentation
+==========================
 
 
 Project layout
