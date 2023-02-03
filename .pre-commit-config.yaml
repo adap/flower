@@ -1,12 +1,9 @@
 repos:
-  - repo: local
+  - repo: https://github.com/nbQA-dev/nbQA
+    rev: 1.6.1
     hooks:
-      - id: jupyter-nb-clean
-        name: jupyter-nb-clean
-        files: \.ipynb$
-        stages: [commit]
-        language: system
-        entry: jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --inplace
+      - id: nbqa-black
+      - id: nbqa-isort
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -31,3 +28,7 @@ repos:
     rev: 5.12.0
     hooks:
       - id: isort
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.6.0
+    hooks:
+      - id: nbstripout
