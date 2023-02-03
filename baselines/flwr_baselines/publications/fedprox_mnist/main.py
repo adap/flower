@@ -62,6 +62,7 @@ def main(cfg: DictConfig) -> None:
             f"_B={cfg.batch_size}"
             f"_E={cfg.num_epochs}"
             f"_R={cfg.num_rounds}"
+            f"_mu={cfg.mu}"
             f"_stag={cfg.stagglers_fraction}"
         ),
         history,
@@ -75,6 +76,7 @@ def main(cfg: DictConfig) -> None:
             f"_B={cfg.batch_size}"
             f"_E={cfg.num_epochs}"
             f"_R={cfg.num_rounds}"
+            f"_mu={cfg.mu}"
             f"_stag={cfg.stagglers_fraction}"
         ),
     )
