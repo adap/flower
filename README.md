@@ -34,7 +34,7 @@ design of Flower is based on a few guiding principles:
 * **Framework-agnostic**: Different machine learning frameworks have different
   strengths. Flower can be used with any machine learning framework, for
   example, [PyTorch](https://pytorch.org),
-  [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [MXNet](https://mxnet.apache.org/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), [Pandas](https://pandas.pydata.org/
+  [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [MXNet](https://mxnet.apache.org/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), [fastai](https://www.fast.ai/), [Pandas](https://pandas.pydata.org/
 ) for federated analytics, or even raw [NumPy](https://numpy.org/)
   for users who enjoy computing gradients by hand.
 
@@ -75,6 +75,7 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 * [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/quickstart-pytorch-lightning.html)
 * [Quickstart (MXNet)](https://flower.dev/docs/example-mxnet-walk-through.html)
 * [Quickstart (Pandas)](https://flower.dev/docs/quickstart-pandas.html)
+* [Quickstart (fastai)](https://flower.dev/docs/quickstart-fastai.html)
 * [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart_jax)
 * [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 * [Quickstart (TFLite on Android [code example])](https://github.com/adap/flower/tree/main/examples/android)
@@ -104,6 +105,7 @@ Quickstart examples:
 * [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/examples/quickstart_pytorch)
 * [Quickstart (Hugging Face)](https://github.com/adap/flower/tree/main/examples/quickstart_huggingface)
 * [Quickstart (PyTorch Lightning)](https://github.com/adap/flower/tree/main/examples/quickstart_pytorch_lightning)
+* [Quickstart (fastai)](https://github.com/adap/flower/tree/main/examples/quickstart_fastai)
 * [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart_pandas)
 * [Quickstart (MXNet)](https://github.com/adap/flower/tree/main/examples/quickstart_mxnet)
 * [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart_jax)
