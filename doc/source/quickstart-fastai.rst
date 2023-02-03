@@ -2,7 +2,7 @@
 
 
 Quickstart fastai
-============================
+=================
 
 Let's build a federated learning system using fastai and Flower!
 
