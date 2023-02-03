@@ -75,7 +75,7 @@ class FedProx(FedAvg):
         Where $w^t$ are the global parameters and $w$ are the local weights the function will
         be optimized with.
 
-        In PyTorch for example, the loss would go from:
+        In PyTorch, for example, the loss would go from:
 
         .. code:: python
 
@@ -129,7 +129,7 @@ class FedProx(FedAvg):
             The weight of the proximal term used in the optimization. 0.0 makes
             this strategy equivalent to FedAvg, and the higher the coefficient, the more
             regularization will be used (that is, the client parameters will need to be
-            to the server parameters during training).
+            closer to the server parameters during training).
         """
         super().__init__()
 
@@ -166,23 +166,19 @@ class FedProx(FedAvg):
 
         Sends the proximal factor mu to the clients
         """
-        config = {}
-        if self.on_fit_config_fn is not None:
-            # Custom fit config function provided
-            config = self.on_fit_config_fn(server_round)
-
-        # Add proximal_mu to config
-        config["proximal_mu"] = self.proximal_mu
-
-        fit_ins = FitIns(parameters, config)
-
-        # Sample clients
-        sample_size, min_num_clients = self.num_fit_clients(
-            client_manager.num_available()
-        )
-        clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
+        # Get the standard client/config pairs from the FedAvg super-class
+        client_config_pairs = super().configure_fit(
+            server_round, parameters, client_manager
         )
 
-        # Return client/config pairs
-        return [(client, fit_ins) for client in clients]
+        # Return client/config pairs with the proximal factor mu added
+        return [
+            (
+                client,
+                FitIns(
+                    fit_ins.parameters,
+                    fit_ins.config | {"proximal_mu": self.proximal_mu},
+                ),
+            )
+            for client, fit_ins in client_config_pairs
+        ]
