@@ -12,9 +12,11 @@ from task import Net, get_parameters, set_parameters
 driver = Driver(driver_service_address="[::]:9091", certificates=None)
 # -------------------------------------------------------------------------- Driver SDK
 
+anonymous_client_nodes = True
+num_client_nodes_per_round = 1
 sleep_time = 1
-parameters = ndarrays_to_parameters(get_parameters(net=Net()))
 num_rounds = 3
+parameters = ndarrays_to_parameters(get_parameters(net=Net()))
 
 # -------------------------------------------------------------------------- Driver SDK
 driver.connect()
@@ -23,35 +25,57 @@ driver.connect()
 for server_round in range(num_rounds):
     print(f"Commencing server round {server_round + 1}")
 
-    while True:
-        # Get a list of node ID's from the server
-        get_nodes_req = driver_pb2.GetNodesRequest()
+    # List of sampled node IDs in this round
+    sampled_node_ids: List[int] = []
 
-        # ---------------------------------------------------------------------- Driver SDK
-        get_nodes_res: driver_pb2.GetNodesResponse = driver.get_nodes(req=get_nodes_req)
-        # ---------------------------------------------------------------------- Driver SDK
+    # Sample node ids
+    if anonymous_client_nodes:
+        # If we're working with anonymous clients, we don't know their identities, and
+        # we don't know how many of them we have. We, therefore, have to assume that
+        # enough anonymous client nodes are available or become available over time.
+        #
+        # To schedule a TaskIns for an anonymous client node, we set the node_id to 0
+        # (and `anonymous` to True)
+        # Here, we create an array with only zeros in it:
+        sampled_node_ids = [0] * num_client_nodes_per_round
+    else:
+        # If our client nodes have identiy (i.e., they are not anonymous), we can get
+        # those IDs from the Driver API using `get_nodes`. If enough clients are
+        # available via the Driver API, we can select a subset by taking a random
+        # sample.
+        #
+        # The Driver API might not immediately return enough client node IDs, so we
+        # loop and wait until enough client nodes are available.
+        while True:
+            # Get a list of node ID's from the server
+            get_nodes_req = driver_pb2.GetNodesRequest()
 
-        # Sample three nodes
-        all_node_ids: List[int] = get_nodes_res.node_ids
-        print(f"Got {len(all_node_ids)} node IDs")
+            # ---------------------------------------------------------------------- Driver SDK
+            get_nodes_res: driver_pb2.GetNodesResponse = driver.get_nodes(
+                req=get_nodes_req
+            )
+            # ---------------------------------------------------------------------- Driver SDK
 
-        if len(all_node_ids) >= 1:
-            break
+            all_node_ids: List[int] = get_nodes_res.node_ids
+            print(f"Got {len(all_node_ids)} node IDs")
 
-        time.sleep(3)
+            if len(all_node_ids) >= num_client_nodes_per_round:
+                # Sample client nodes
+                sampled_node_ids = random.sample(
+                    all_node_ids, num_client_nodes_per_round
+                )
+                break
 
-    # Sample one or three nodes
-    num_node_ids_to_sample = 3 if len(all_node_ids) >= 3 else 1
-    sampled_node_ids: List[int] = random.sample(all_node_ids, num_node_ids_to_sample)
+            time.sleep(3)
+
+    # Log sampled node IDs
     print(f"Sampled {len(sampled_node_ids)} node IDs: {sampled_node_ids}")
-
     time.sleep(sleep_time)
 
-    # Schedule a task for all three nodes
+    # Schedule a task for all sampled nodes
     fit_ins: FitIns = FitIns(parameters=parameters, config={})
-    server_message = ServerMessage(fit_ins=fit_ins)
     server_message_proto: transport_pb2.ServerMessage = serde.server_message_to_proto(
-        server_message=server_message
+        server_message=ServerMessage(fit_ins=fit_ins)
     )
     task_ins_list: List[task_pb2.TaskIns] = []
     for sampled_node_id in sampled_node_ids:
@@ -60,8 +84,14 @@ for server_round in range(num_rounds):
             group_id="",
             workload_id="",
             task=task_pb2.Task(
-                producer=node_pb2.Node(node_id=0, anonymous=True),
-                consumer=node_pb2.Node(node_id=sampled_node_id, anonymous=False),
+                producer=node_pb2.Node(
+                    node_id=0,
+                    anonymous=True,
+                ),
+                consumer=node_pb2.Node(
+                    node_id=sampled_node_id,
+                    anonymous=anonymous_client_nodes,  # Must be True if we're working with anonymous clients
+                ),
                 legacy_server_message=server_message_proto,
             ),
         )
