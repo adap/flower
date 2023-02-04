@@ -31,13 +31,12 @@ def main(cfg: DictConfig) -> None:
         num_rounds=cfg.num_rounds,
         iid=cfg.iid,
         learning_rate=cfg.learning_rate,
-        proximal_mu=cfg.mu,
         stagglers=cfg.stagglers_fraction,
     )
 
     evaluate_fn = utils.gen_evaluate_fn(testloader, DEVICE)
 
-    strategy = fl.server.strategy.FedAvg(
+    strategy = fl.server.strategy.FedProx(
         fraction_fit=1.0,
         fraction_evaluate=0.0,
         min_fit_clients=int(cfg.num_clients * (1 - cfg.stagglers_fraction)),
@@ -46,6 +45,7 @@ def main(cfg: DictConfig) -> None:
         on_fit_config_fn=lambda curr_round: {"curr_round": curr_round},
         evaluate_fn=evaluate_fn,
         evaluate_metrics_aggregation_fn=utils.weighted_average,
+        proximal_mu=cfg.mu,
     )
 
     # Start simulation
