@@ -60,7 +60,6 @@ def rest_not_a_connection(
         Ignored, only present to preserve API-compatibility.
     root_certificates : Optional[bytes] (default: None)
         Ignored, for now. TODO: enable secure connections
-    node_id : Optional[int]
 
     Returns
     -------
@@ -129,7 +128,7 @@ def rest_not_a_connection(
         state["current_task_ins"] = task_ins
 
         # Return the ServerMessage
-        log(INFO, "[Node {node_id}] POST /%s: success", PATH_PULL_TASK_INS)
+        log(INFO, "[Node] POST /%s: success", PATH_PULL_TASK_INS)
         return server_message
 
     def send(client_message_proto: ClientMessage) -> None:
