@@ -26,6 +26,7 @@ class DriverState:
     """DriverState."""
 
     def __init__(self) -> None:
+        self.node_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
 
@@ -126,6 +127,22 @@ class DriverState:
 
         # Return TaskRes
         return task_res_list
+
+    def register_node(self, node_id: int) -> None:
+        """Register a client node."""
+        if node_id in self.node_ids:
+            raise ValueError(f"Node {node_id} is already registered")
+        self.node_ids.add(node_id)
+
+    def unregister_node(self, node_id: int) -> None:
+        """Unregister a client node."""
+        if node_id not in self.node_ids:
+            raise ValueError(f"Node {node_id} is not registered")
+        self.node_ids.remove(node_id)
+
+    def get_nodes(self) -> Set[int]:
+        """Return all available client nodes."""
+        return self.node_ids
 
 
 def _now() -> datetime:

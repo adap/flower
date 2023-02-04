@@ -32,7 +32,6 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsResponse,
 )
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.server.driver.driver_client_manager import DriverClientManager
 from flwr.server.driver.state import DriverState
 
 
@@ -41,10 +40,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
     def __init__(
         self,
-        driver_client_manager: DriverClientManager,
         driver_state: DriverState,
     ) -> None:
-        self.driver_client_manager = driver_client_manager
         self.driver_state = driver_state
 
     def GetNodes(
@@ -52,7 +49,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     ) -> GetNodesResponse:
         """Get available nodes."""
         log(INFO, "DriverServicer.GetNodes")
-        all_ids: Set[int] = self.driver_client_manager.all_ids()
+        all_ids: Set[int] = self.driver_state.get_nodes()
         return GetNodesResponse(node_ids=list(all_ids))
 
     def PushTaskIns(

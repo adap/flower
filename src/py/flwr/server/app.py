@@ -224,7 +224,7 @@ def run_server() -> None:
     )
 
     # Start Driver API
-    driver_server = _run_driver_api_grpc(driver_state, driver_client_manager)
+    driver_server = _run_driver_api_grpc(driver_state)
 
     # Start Fleet API
     fleet_server = _run_fleet_api_grpc_legacy(driver_client_manager)
@@ -267,14 +267,12 @@ def run_server() -> None:
 
 def _run_driver_api_grpc(
     driver_state: DriverState,
-    driver_client_manager: DriverClientManager,
 ) -> grpc.Server:
     """Run Driver API (gRPC-based)."""
 
     # Create Driver API gRPC server
     address: str = DEFAULT_SERVER_ADDRESS_DRIVER
     driver_servicer = DriverServicer(
-        driver_client_manager=driver_client_manager,
         driver_state=driver_state,
     )
     driver_add_servicer_to_server_fn = add_DriverServicer_to_server
