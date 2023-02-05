@@ -278,7 +278,7 @@ def _run_driver_api_grpc(
     address: str,
     driver_state: DriverState,
 ) -> grpc.Server:
-    """Run Driver API (gRPC, request response)."""
+    """Run Driver API (gRPC, request-response)."""
 
     # Create Driver API gRPC server
     driver_servicer = DriverServicer(
