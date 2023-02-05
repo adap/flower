@@ -13,7 +13,9 @@ warnings.filterwarnings("ignore", category=UserWarning)
 path = untar_data(URLs.MNIST)
 
 # Load dataset
-dls = ImageDataLoaders.from_folder(path, valid_pct=0.5, train="training", valid="testing")
+dls = ImageDataLoaders.from_folder(
+    path, valid_pct=0.5, train="training", valid="testing"
+)
 
 # Define model
 learn = vision_learner(dls, squeezenet1_1, metrics=error_rate)
