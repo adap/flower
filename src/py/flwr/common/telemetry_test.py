@@ -14,11 +14,12 @@
 # ==============================================================================
 """Telemetry tests."""
 
+import os
 import time
 import unittest
 from unittest import mock
 
-from flwr.common import EventType, event
+from flwr.common.telemetry import EventType, _get_home, _get_source_id, event
 
 
 class TelemetryTest(unittest.TestCase):
@@ -68,3 +69,41 @@ class TelemetryTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(actual, expected)
+
+    def test_get_source_id(self) -> None:
+        """Test if _get_source_id returns an ID successfully.
+
+        This test might fail if the UNIX user invoking the test has no
+        home directory.
+        """
+        # Prepare
+        # nothing to prepare
+
+        # Execute
+        source_id = _get_source_id()
+
+        # Assert
+        # source_id should be len 36 as it's a uuid4 in the current
+        # implementation
+        self.assertIsNotNone(source_id)
+        self.assertEqual(len(source_id), 36)
+
+    def test_get_source_id_no_home(self) -> None:
+        """Test if _get_source_id returns None without a home dir."""
+        # Prepare
+        def _new_failing_get_home():
+            raise RuntimeError
+
+        except_value = "unset"
+
+        new_callable = lambda: _new_failing_get_home
+
+        # Execute
+        with mock.patch(
+            "flwr.common.telemetry._get_home",
+            new_callable=new_callable,
+        ):
+            source_id = _get_source_id()
+
+        # Assert
+        self.assertEqual(source_id, except_value)
