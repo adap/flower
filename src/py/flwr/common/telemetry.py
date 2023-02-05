@@ -63,9 +63,9 @@ def _get_home() -> Path:
     return Path().home()
 
 
-def _get_source_id() -> Optional[str]:
+def _get_source_id() -> str:
     """Get existing or new source ID."""
-    source_id: Optional[str] = "unset"
+    source_id = "unavailable"
     # Check if .flwr in home exists
     try:
         home = _get_home()

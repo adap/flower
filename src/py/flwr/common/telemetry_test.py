@@ -16,7 +16,7 @@
 
 import time
 import unittest
-from typing import Callable, cast
+from typing import Callable
 from unittest import mock
 
 from flwr.common.telemetry import EventType, _get_source_id, event
@@ -86,9 +86,6 @@ class TelemetryTest(unittest.TestCase):
         # source_id should be len 36 as it's a uuid4 in the current
         # implementation
         self.assertIsNotNone(source_id)
-        # This cast is required as mypy does not consider the previous line
-        # to automatically cast Optional[str] to str
-        source_id = cast(str, source_id)
         self.assertEqual(len(source_id), 36)
 
     def test_get_source_id_no_home(self) -> None:
@@ -100,7 +97,7 @@ class TelemetryTest(unittest.TestCase):
 
             return _new_failing_get_home
 
-        except_value = "unset"
+        except_value = "unavailable"
 
         # Execute
         with mock.patch(
