@@ -6,6 +6,14 @@
 
 ### What's new?
 
+- **Make Driver API and Fleet API address configurable** ([#1637](https://github.com/adap/flower/pull/1637))
+
+  The (experimental) long-running Flower server (Driver API and Fleet API) can now configure the server address of both Driver API (via `--driver-api-address`) and Fleet API (via `--fleet-api-address`) when starting:
+
+  ``flower-server --driver-api-address "0.0.0.0:8081" --fleet-api-address "0.0.0.0:8086"``
+
+  Both IPv4 and IPv6 addresses are supported.
+
 - **Add support for** `workload_id` **and** `group_id` **in Driver API** ([#1595](https://github.com/adap/flower/pull/1595))
 
 - **Add new example of Federated Learning using fastai and Flower** ([#1598](https://github.com/adap/flower/pull/1598))
