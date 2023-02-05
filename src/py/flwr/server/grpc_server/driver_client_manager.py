@@ -19,11 +19,12 @@ import threading
 import uuid
 from typing import Dict, List, Optional, Set, Tuple
 
-from ..client_manager import ClientManager
-from ..client_proxy import ClientProxy
-from ..criterion import Criterion
+from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.criterion import Criterion
+from flwr.server.state.state import DriverState
+
 from .ins_scheduler import InsScheduler
-from .state import DriverState
 
 
 class DriverClientManager(ClientManager):

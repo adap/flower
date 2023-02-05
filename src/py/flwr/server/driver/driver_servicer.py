@@ -32,7 +32,7 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsResponse,
 )
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.server.driver.state import DriverState
+from flwr.server.state.state import DriverState
 
 
 class DriverServicer(driver_pb2_grpc.DriverServicer):
