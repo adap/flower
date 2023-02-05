@@ -107,7 +107,7 @@ class DriverClientManager(ClientManager):
             ins_scheduler.stop()
 
             # Unregister node_id in with DriverState
-            self.driver_state.register_node(node_id=node_id)
+            self.driver_state.unregister_node(node_id=node_id)
 
             with self._cv:
                 self._cv.notify_all()
