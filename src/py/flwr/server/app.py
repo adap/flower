@@ -32,9 +32,8 @@ from flwr.common.logger import log
 from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
 from flwr.server.client_manager import ClientManager, SimpleClientManager
-from flwr.server.driver.driver_client_manager import DriverClientManager
 from flwr.server.driver.driver_servicer import DriverServicer
-from flwr.server.driver.state import DriverState
+from flwr.server.grpc_server.driver_client_manager import DriverClientManager
 from flwr.server.grpc_server.flower_service_servicer import FlowerServiceServicer
 from flwr.server.grpc_server.grpc_server import (
     generic_create_grpc_server,
@@ -43,6 +42,7 @@ from flwr.server.grpc_server.grpc_server import (
 from flwr.server.history import History
 from flwr.server.rest_server.singleton import Singleton
 from flwr.server.server import Server
+from flwr.server.state.state import DriverState
 from flwr.server.strategy import FedAvg, Strategy
 
 DEFAULT_GRPC_SERVER_ADDRESS = "[::]:8080"
@@ -234,9 +234,7 @@ def run_server() -> None:
     )
 
     # Start Driver API
-    driver_server: grpc.Server = _run_driver_api_grpc(
-        driver_state, driver_client_manager
-    )
+    driver_server: grpc.Server = _run_driver_api_grpc(driver_state)
 
     # Fleet API
     fleet_server: Optional[grpc.Server] = None
@@ -298,14 +296,12 @@ def run_server() -> None:
 
 def _run_driver_api_grpc(
     driver_state: DriverState,
-    driver_client_manager: DriverClientManager,
 ) -> grpc.Server:
     """Run Driver API (gRPC-based)."""
 
     # Create Driver API gRPC server
     address: str = DEFAULT_SERVER_ADDRESS_DRIVER
     driver_servicer = DriverServicer(
-        driver_client_manager=driver_client_manager,
         driver_state=driver_state,
     )
     driver_add_servicer_to_server_fn = add_DriverServicer_to_server

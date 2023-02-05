@@ -26,7 +26,7 @@ from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.driver.state import DriverState
+from flwr.server.state.state import DriverState
 
 
 class InsScheduler:
