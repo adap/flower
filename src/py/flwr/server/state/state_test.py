@@ -20,7 +20,7 @@ from uuid import uuid4
 
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns
-from flwr.server.driver.state import DriverState
+from flwr.server.state.state import DriverState
 
 
 def test_get_task_ins_empty() -> None:

@@ -27,7 +27,7 @@ from flwr.proto.fleet_pb2 import (
     PushTaskResRequest,
     PushTaskResResponse,
 )
-from flwr.server.driver.state import DriverState
+from flwr.server.state.state import DriverState
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
