@@ -76,13 +76,20 @@ def _get_source_id() -> Optional[str]:
 
     flwr_dir = home.joinpath(".flwr")
     # Create .flwr directory if it does not exist yet.
-    flwr_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        flwr_dir.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        return source_id
+
     source_file = flwr_dir.joinpath("source")
 
     # If no source_file exists create one and write it
     if not source_file.exists():
-        source_file.touch(exist_ok=True)
-        source_file.write_text(str(uuid.uuid4()))
+        try:
+            source_file.touch(exist_ok=True)
+            source_file.write_text(str(uuid.uuid4()))
+        except PermissionError:
+            return source_id
 
     source_id = source_file.read_text().strip()
 
