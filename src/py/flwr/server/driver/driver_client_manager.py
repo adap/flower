@@ -74,6 +74,9 @@ class DriverClientManager(ClientManager):
         random_node_id: int = uuid.uuid1().int >> 64
         client.node_id = random_node_id
 
+        # Register node_id in with DriverState
+        self.driver_state.register_node(node_id=random_node_id)
+
         # Create and start the instruction scheduler
         ins_scheduler = InsScheduler(
             client_proxy=client,
@@ -99,9 +102,12 @@ class DriverClientManager(ClientManager):
         client : flwr.server.client_proxy.ClientProxy
         """
         if client.cid in self.nodes:
-            _, ins_scheduler = self.nodes[client.cid]
+            node_id, ins_scheduler = self.nodes[client.cid]
             del self.nodes[client.cid]
             ins_scheduler.stop()
+
+            # Unregister node_id in with DriverState
+            self.driver_state.unregister_node(node_id=node_id)
 
             with self._cv:
                 self._cv.notify_all()
