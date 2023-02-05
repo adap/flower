@@ -19,7 +19,7 @@ from logging import DEBUG
 from typing import Any, Optional
 
 from flwr.common.logger import log
-from flwr.server.driver.state import DriverState
+from flwr.server.state.state import DriverState
 
 
 class Singleton:

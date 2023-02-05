@@ -31,7 +31,7 @@ from flwr.proto.fleet_pb2 import (
     Reconnect,
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes
-from flwr.server.driver.state import DriverState
+from flwr.server.state.state import DriverState
 from flwr.server.rest_server.singleton import Singleton
 
 app = FastAPI()
