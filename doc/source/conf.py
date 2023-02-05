@@ -77,6 +77,7 @@ redirects = {
     "quickstart_tensorflow": "quickstart-tensorflow.html",
     "release_process": "release-process.html",
     "saving-progress": "save-progress.html",
+    "writing-documentation": "write-documentation.html",
     "quickstart_scikitlearn": "quickstart-scikitlearn.html",
     # Deleted pages
     "people": "index.html",
@@ -117,7 +118,7 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": 'Flower Summit 2022 <a href="https://flower.dev/conf/flower-summit-2022/">watch now</a>',
+    "announcement": 'Flower Monthly: Feb 1st 1700 GMT <a href="https://flower.dev/conf/flower-monthly/">join now</a>',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
