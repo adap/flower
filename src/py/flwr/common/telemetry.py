@@ -150,18 +150,21 @@ state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
 # This pylint disable line can be remove when dropping support
 # for Python 3.7
 # pylint: disable-next=unsubscriptable-object
-def event(event_type: EventType, meta: Dict[str, Any] = None) -> Future:  # type: ignore
+def event(
+    event_type: EventType,
+    event_details: Optional[Dict[str, Any]] = None,
+) -> Future:  # type: ignore
     """Submit create_event to ThreadPoolExecutor to avoid blocking."""
     if state["executor"] is None:
         state["executor"] = ThreadPoolExecutor(max_workers=1)
 
     executor: ThreadPoolExecutor = cast(ThreadPoolExecutor, state["executor"])
 
-    result = executor.submit(create_event, event_type, meta)
+    result = executor.submit(create_event, event_type, event_details)
     return result
 
 
-def create_event(event_type: EventType, meta: Optional[Dict[str, Any]]) -> str:
+def create_event(event_type: EventType, event_details: Optional[Dict[str, Any]]) -> str:
     """Create telemetry event."""
     if state["source"] is None:
         state["source"] = _get_source_id()
@@ -169,8 +172,8 @@ def create_event(event_type: EventType, meta: Optional[Dict[str, Any]]) -> str:
     if state["cluster"] is None:
         state["cluster"] = str(uuid.uuid4())
 
-    if meta is None:
-        meta = {}
+    if event_details is None:
+        event_details = {}
 
     date = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
     context = {
@@ -197,7 +200,7 @@ def create_event(event_type: EventType, meta: Optional[Dict[str, Any]]) -> str:
     }
     payload = {
         "event_type": event_type,
-        "event_meta": meta,
+        "event_details": event_details,
         "context": context,
     }
     payload_json = json.dumps(payload)
