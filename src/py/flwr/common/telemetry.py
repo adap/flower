@@ -15,7 +15,6 @@
 """Flower telemetry."""
 
 import datetime
-import functools
 import json
 import logging
 import os
@@ -87,11 +86,11 @@ def _get_source_id() -> Optional[str]:
     if not source_file.exists():
         try:
             source_file.touch(exist_ok=True)
-            source_file.write_text(str(uuid.uuid4()))
+            source_file.write_text(str(uuid.uuid4()), encoding="utf-8")
         except PermissionError:
             return source_id
 
-    source_id = source_file.read_text().strip()
+    source_id = source_file.read_text(encoding="utf-8").strip()
 
     return source_id
 
@@ -151,24 +150,27 @@ state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
 # This pylint disable line can be remove when dropping support
 # for Python 3.7
 # pylint: disable-next=unsubscriptable-object
-def event(event_type: EventType) -> Future:  # type: ignore
+def event(event_type: EventType, meta: Dict[str, Any] = None) -> Future:  # type: ignore
     """Submit create_event to ThreadPoolExecutor to avoid blocking."""
     if state["executor"] is None:
         state["executor"] = ThreadPoolExecutor(max_workers=1)
 
     executor: ThreadPoolExecutor = cast(ThreadPoolExecutor, state["executor"])
 
-    result = executor.submit(create_event, event_type)
+    result = executor.submit(create_event, event_type, meta)
     return result
 
 
-def create_event(event_type: EventType) -> str:
+def create_event(event_type: EventType, meta: Optional[Dict[str, Any]]) -> str:
     """Create telemetry event."""
     if state["source"] is None:
         state["source"] = _get_source_id()
 
     if state["cluster"] is None:
         state["cluster"] = str(uuid.uuid4())
+
+    if meta is None:
+        meta = {}
 
     date = datetime.datetime.now(tz=datetime.timezone.utc).isoformat()
     context = {
@@ -195,6 +197,7 @@ def create_event(event_type: EventType) -> str:
     }
     payload = {
         "event_type": event_type,
+        "event_meta": meta,
         "context": context,
     }
     payload_json = json.dumps(payload)

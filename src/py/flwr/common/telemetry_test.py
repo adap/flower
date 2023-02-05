@@ -14,12 +14,12 @@
 # ==============================================================================
 """Telemetry tests."""
 
-import os
 import time
 import unittest
+from typing import Callable, cast
 from unittest import mock
 
-from flwr.common.telemetry import EventType, _get_home, _get_source_id, event
+from flwr.common.telemetry import EventType, _get_source_id, event
 
 
 class TelemetryTest(unittest.TestCase):
@@ -86,17 +86,21 @@ class TelemetryTest(unittest.TestCase):
         # source_id should be len 36 as it's a uuid4 in the current
         # implementation
         self.assertIsNotNone(source_id)
+        # This cast is required as mypy does not consider the previous line
+        # to automatically cast Optional[str] to str
+        source_id = cast(str, source_id)
         self.assertEqual(len(source_id), 36)
 
     def test_get_source_id_no_home(self) -> None:
         """Test if _get_source_id returns None without a home dir."""
         # Prepare
-        def _new_failing_get_home():
-            raise RuntimeError
+        def new_callable() -> Callable[[], None]:
+            def _new_failing_get_home() -> None:
+                raise RuntimeError
+
+            return _new_failing_get_home
 
         except_value = "unset"
-
-        new_callable = lambda: _new_failing_get_home
 
         # Execute
         with mock.patch(
