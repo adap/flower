@@ -26,6 +26,7 @@ class DriverState:
     """DriverState."""
 
     def __init__(self) -> None:
+        self.node_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
 
@@ -48,7 +49,9 @@ class DriverState:
         # Return the new task_id
         return task_id
 
-    def get_task_ins(self, node_id: int, limit: Optional[int]) -> List[TaskIns]:
+    def get_task_ins(
+        self, node_id: Optional[int], limit: Optional[int]
+    ) -> List[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
 
         if limit is not None and limit < 1:
@@ -57,8 +60,16 @@ class DriverState:
         # Find TaskIns for node_id that were not delivered yet
         task_ins_list: List[TaskIns] = []
         for _, task_ins in self.task_ins_store.items():
+            # pylint: disable=too-many-boolean-expressions
             if (
-                task_ins.task.consumer.node_id == node_id
+                node_id is not None  # Not anonymous
+                and task_ins.task.consumer.anonymous is False
+                and task_ins.task.consumer.node_id == node_id
+                and task_ins.task.delivered_at == ""
+            ) or (
+                node_id is None  # Anonymous
+                and task_ins.task.consumer.anonymous is True
+                and task_ins.task.consumer.node_id == 0
                 and task_ins.task.delivered_at == ""
             ):
                 task_ins_list.append(task_ins)
@@ -116,6 +127,22 @@ class DriverState:
 
         # Return TaskRes
         return task_res_list
+
+    def register_node(self, node_id: int) -> None:
+        """Register a client node."""
+        if node_id in self.node_ids:
+            raise ValueError(f"Node {node_id} is already registered")
+        self.node_ids.add(node_id)
+
+    def unregister_node(self, node_id: int) -> None:
+        """Unregister a client node."""
+        if node_id not in self.node_ids:
+            raise ValueError(f"Node {node_id} is not registered")
+        self.node_ids.remove(node_id)
+
+    def get_nodes(self) -> Set[int]:
+        """Return all available client nodes."""
+        return self.node_ids
 
 
 def _now() -> datetime:
