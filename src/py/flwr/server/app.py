@@ -15,6 +15,7 @@
 """Flower server app."""
 
 
+import argparse
 import sys
 from dataclasses import dataclass
 from logging import INFO, WARN
@@ -41,9 +42,8 @@ from flwr.server.server import Server
 from flwr.server.state.state import DriverState
 from flwr.server.strategy import FedAvg, Strategy
 
-DEFAULT_SERVER_ADDRESS = "[::]:8080"
-DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
-DEFAULT_SERVER_ADDRESS_FLEET = "[::]:9092"
+DEFAULT_ADDRESS_DRIVER_API = "[::]:9091"
+DEFAULT_ADDRESS_FLEET_API = "[::]:9092"
 
 
 @dataclass
@@ -60,7 +60,7 @@ class ServerConfig:
 
 def start_server(  # pylint: disable=too-many-arguments
     *,
-    server_address: str = DEFAULT_SERVER_ADDRESS,
+    server_address: str = DEFAULT_ADDRESS_FLEET_API,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
@@ -212,6 +212,9 @@ def _fl(
 
 def run_server() -> None:
     """Run Flower server."""
+
+    args = _parse_args()
+
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SERVER_ENTER)
 
@@ -224,10 +227,16 @@ def run_server() -> None:
     )
 
     # Start Driver API
-    driver_server = _run_driver_api_grpc(driver_state)
+    driver_server = _run_driver_api_grpc(
+        address=args.driver_api_address,
+        driver_state=driver_state,
+    )
 
     # Start Fleet API
-    fleet_server = _run_fleet_api_grpc_legacy(driver_client_manager)
+    fleet_server = _run_fleet_api_grpc_bidi(
+        address=args.fleet_api_address,
+        driver_client_manager=driver_client_manager,
+    )
 
     default_handlers = {
         SIGINT: None,
@@ -266,12 +275,12 @@ def run_server() -> None:
 
 
 def _run_driver_api_grpc(
+    address: str,
     driver_state: DriverState,
 ) -> grpc.Server:
-    """Run Driver API (gRPC-based)."""
+    """Run Driver API (gRPC, request-response)."""
 
     # Create Driver API gRPC server
-    address: str = DEFAULT_SERVER_ADDRESS_DRIVER
     driver_servicer = DriverServicer(
         driver_state=driver_state,
     )
@@ -283,19 +292,19 @@ def _run_driver_api_grpc(
         certificates=None,
     )
 
-    log(INFO, "Flower ECE: Starting Driver API (gRPC-based) on %s", address)
+    log(INFO, "Flower ECE: Starting Driver API (gRPC-rere) on %s", address)
     driver_grpc_server.start()
 
     return driver_grpc_server
 
 
-def _run_fleet_api_grpc_legacy(
+def _run_fleet_api_grpc_bidi(
+    address: str,
     driver_client_manager: DriverClientManager,
 ) -> grpc.Server:
-    """Run Fleet API (gRPC-based, legacy)."""
+    """Run Fleet API (gRPC, bidirectional streaming)."""
 
     # Create (legacy) Fleet API gRPC server
-    address: str = DEFAULT_SERVER_ADDRESS_FLEET
     fleet_servicer = FlowerServiceServicer(
         client_manager=driver_client_manager,
     )
@@ -307,7 +316,28 @@ def _run_fleet_api_grpc_legacy(
         certificates=None,
     )
 
-    log(INFO, "Flower ECE: Starting Fleet API (gRPC-based, legacy) on %s", address)
+    log(INFO, "Flower ECE: Starting Fleet API (gRPC-bidi) on %s", address)
     fleet_grpc_server.start()
 
     return fleet_grpc_server
+
+
+def _parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="Start a long-running Flower server")
+
+    # Driver API
+    parser.add_argument(
+        "--driver-api-address",
+        help=f"Driver API gRPC server address. Default:'{DEFAULT_ADDRESS_DRIVER_API}'",
+        default=DEFAULT_ADDRESS_DRIVER_API,
+    )
+
+    # Fleet API
+    parser.add_argument(
+        "--fleet-api-address",
+        help=f"Fleet API gRPC server address. Default:'{DEFAULT_ADDRESS_FLEET_API}'",
+        default=DEFAULT_ADDRESS_FLEET_API,
+    )
+
+    return parser.parse_args()
