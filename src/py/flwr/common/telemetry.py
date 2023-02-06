@@ -92,6 +92,11 @@ def _get_source_id() -> str:
 
     source_id = source_file.read_text(encoding="utf-8").strip()
 
+    try:
+        uuid.UUID(source_id)
+    except ValueError:
+        source_id = "invalid"
+
     return source_id
 
 
