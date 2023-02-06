@@ -45,9 +45,9 @@ from flwr.server.server import Server
 from flwr.server.state.state import DriverState
 from flwr.server.strategy import FedAvg, Strategy
 
-DEFAULT_ADDRESS_DRIVER_API = "[::]:9091"
-DEFAULT_ADDRESS_FLEET_API_GRPC = "[::]:9092"
-DEFAULT_ADDRESS_FLEET_API_REST = "0.0.0.0:8000"
+ADDRESS_DRIVER_API = "[::]:9091"
+ADDRESS_FLEET_API_GRPC = "[::]:9092"
+ADDRESS_FLEET_API_REST = "0.0.0.0:8000"
 
 
 @dataclass
@@ -64,7 +64,7 @@ class ServerConfig:
 
 def start_server(  # pylint: disable=too-many-arguments
     *,
-    server_address: str = DEFAULT_ADDRESS_FLEET_API_GRPC,
+    server_address: str = ADDRESS_FLEET_API_GRPC,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
@@ -308,7 +308,7 @@ def _run_driver_api_grpc(
     """Run Driver API (gRPC, request-response)."""
 
     # Create Driver API gRPC server
-    driver_servicer = DriverServicer(
+    driver_servicer: grpc.Server = DriverServicer(
         driver_state=driver_state,
     )
     driver_add_servicer_to_server_fn = add_DriverServicer_to_server
@@ -387,24 +387,24 @@ def _parse_args() -> argparse.Namespace:
     # Driver API
     parser.add_argument(
         "--driver-api-address",
-        help=f"Driver API gRPC server address. Default:'{DEFAULT_ADDRESS_DRIVER_API}'",
-        default=DEFAULT_ADDRESS_DRIVER_API,
+        help=f"Driver API gRPC server address. Default: {ADDRESS_DRIVER_API}",
+        default=ADDRESS_DRIVER_API,
     )
 
     # Fleet API gRPC options
     grpc_group = parser.add_argument_group("Fleet API gRPC server options", "")
     grpc_group.add_argument(
         "--grpc-fleet-api-address",
-        help=f"Fleet API gRPC server address. Default:'{DEFAULT_ADDRESS_FLEET_API_GRPC}'",
-        default=DEFAULT_ADDRESS_FLEET_API_GRPC,
+        help=f"Fleet API gRPC server address. Default:'{ADDRESS_FLEET_API_GRPC}'",
+        default=ADDRESS_FLEET_API_GRPC,
     )
 
     # Fleet API REST options
     rest_group = parser.add_argument_group("Fleet API REST server options", "")
     rest_group.add_argument(
         "--rest-fleet-api-address",
-        help=f"Fleet API REST server address. Default:'{DEFAULT_ADDRESS_FLEET_API_REST}'",
-        default=DEFAULT_ADDRESS_FLEET_API_REST,
+        help=f"Fleet API REST server address. Default:'{ADDRESS_FLEET_API_REST}'",
+        default=ADDRESS_FLEET_API_REST,
     )
 
     return parser.parse_args()
