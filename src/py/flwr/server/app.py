@@ -286,7 +286,8 @@ def run_server() -> None:
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
             args=(rest_bind_host, rest_bind_port),
-        ).start()
+        )
+        fleet_thread.start()
 
     elif args.fleet_api_type == "grpc":
         fleet_server = _run_fleet_api_grpc_bidi(
