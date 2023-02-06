@@ -32,7 +32,7 @@ from flwr.proto.fleet_pb2 import (
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.rest_server.singleton import Singleton
-from flwr.server.state.state import DriverState
+from flwr.server.state import State
 
 app = FastAPI()
 
@@ -49,16 +49,16 @@ async def pull_task_ins(request: Request) -> Response:
     pull_task_ins_request_proto = PullTaskInsRequest()
     pull_task_ins_request_proto.ParseFromString(pull_task_ins_request_bytes)
 
-    # Get DriverState
-    driver_state = cast(DriverState, Singleton.instance().get_driver_state())
+    # Get State
+    state = cast(State, Singleton.instance().get_state())
 
     # Print received message
     log(INFO, "POST - Receiving GetTaskRequest")
 
-    # Retrieve TaskIns from DriverState
+    # Retrieve TaskIns from State
     node = pull_task_ins_request_proto.node
     node_id: Optional[int] = None if node.anonymous else node.node_id
-    task_ins_list: List[TaskIns] = driver_state.get_task_ins(node_id=node_id, limit=1)
+    task_ins_list: List[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
     pull_task_ins_response_proto = PullTaskInsResponse(task_ins_list=task_ins_list)
 
     # Return serialized ProtoBuf
@@ -82,15 +82,15 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
     push_task_res_request_proto = PushTaskResRequest()
     push_task_res_request_proto.ParseFromString(push_task_res_request_bytes)
 
-    # Get DriverState
-    driver_state = cast(DriverState, Singleton.instance().get_driver_state())
+    # Get State
+    state = cast(State, Singleton.instance().get_state())
 
     # Print received message
     log(INFO, "POST - Receiving PushTaskResRequest")
 
-    # Store TaskRes in DriverState
+    # Store TaskRes in State
     task_res: TaskRes = push_task_res_request_proto.task_res_list[0]
-    task_id: Optional[UUID] = driver_state.store_task_res(task_res=task_res)
+    task_id: Optional[UUID] = state.store_task_res(task_res=task_res)
 
     # Build response
     push_task_res_response_proto = PushTaskResResponse(

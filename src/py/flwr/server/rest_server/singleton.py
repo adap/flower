@@ -19,7 +19,7 @@ from logging import DEBUG
 from typing import Any, Optional
 
 from flwr.common.logger import log
-from flwr.server.state.state import DriverState
+from flwr.server.state import State
 
 
 class Singleton:
@@ -29,11 +29,11 @@ class Singleton:
     communication between the main thread (running the Flower server's
     fit method) and the REST API server thread (running the FastAPI
     server through uvicorn). At the time of writing, there is one shared
-    component: DriverState.
+    component: State.
     """
 
     _instance = None
-    _driver_state = None
+    _state = None
 
     def __init__(self) -> None:
         raise RuntimeError("Call instance() instead")
@@ -48,10 +48,10 @@ class Singleton:
             cls._instance = cls.__new__(cls)
         return cls._instance
 
-    def set_driver_state(self, driver_state: DriverState) -> None:
+    def set_state(self, state: State) -> None:
         """."""
-        self._driver_state = driver_state
+        self._state = state
 
-    def get_driver_state(self) -> Optional[DriverState]:
+    def get_state(self) -> Optional[State]:
         """."""
-        return self._driver_state
+        return self._state
