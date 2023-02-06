@@ -59,7 +59,7 @@ class Driver:
             root_certificates=self.certificates,
         )
         self.stub = driver_pb2_grpc.DriverStub(self.channel)
-        log(INFO, "[Driver] Connected")
+        log(INFO, "[Driver] Connected to %s", self.driver_service_address)
 
     def disconnect(self) -> None:
         """Disconnect from the Driver API."""
