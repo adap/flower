@@ -1,8 +1,12 @@
 # Changelog
 
-## Unreleased
+## v1.3.0 (2023-02-05)
 
 ### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Adam Narozniak`, `Alexander Viala Bellander`, `Charles Beauville`, `Daniel J. Beutel`, `JDRanpariya`, `Lennart Behme`, `Taner Topal`
 
 ### What's new?
 
@@ -24,11 +28,23 @@
 
 - **Add new `FedProx` strategy** ([#1619](https://github.com/adap/flower/pull/1619))
   
-  This [strategy](https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedprox.py) is almost identical to [`FedAvg`](https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedavg.py), 
- but helps users replicate what is described in this [paper](https://arxiv.org/abs/1812.06127). It essentially adds a parameter called `proximal_mu` to 
- regularize the local models with respect to the global models. You might want to checkout this [blog post](https://flower.dev/blog/2023-02-02-fl-starter-pack-fedprox-mnist-cnn/) for more information. 
-  
+  This [strategy](https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedprox.py) is almost identical to [`FedAvg`](https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedavg.py), but helps users replicate what is described in this [paper](https://arxiv.org/abs/1812.06127). It essentially adds a parameter called `proximal_mu` to regularize the local models with respect to the global models.
+
+- **Add new custom strategy tutorial** [#1623](https://github.com/adap/flower/pull/1623)
+
+- **Add new metrics to better understand VCE usage** ([#1640](https://github.com/adap/flower/pull/1640))
+
+- **Improve tutorial four by adding a part about custom serialization** ([#1622](https://github.com/adap/flower/pull/1622))
+
+- **Add a new quickstart example using fast.ai** ([#1598](https://github.com/adap/flower/pull/1598))
+
+- **General improvements** ([#1638](https://github.com/adap/flower/pull/1638), [#1634](https://github.com/adap/flower/pull/1634), [#1636](https://github.com/adap/flower/pull/1636), [#1635](https://github.com/adap/flower/pull/1635), [#1633](https://github.com/adap/flower/pull/1633), [#1632](https://github.com/adap/flower/pull/1632), [#1631](https://github.com/adap/flower/pull/1631), [#1630](https://github.com/adap/flower/pull/1630), [#1627](https://github.com/adap/flower/pull/1627), [#1593](https://github.com/adap/flower/pull/1593), [#1616](https://github.com/adap/flower/pull/1616), [#1615](https://github.com/adap/flower/pull/1615), [#1607](https://github.com/adap/flower/pull/1607), [#1609](https://github.com/adap/flower/pull/1609), [#1608](https://github.com/adap/flower/pull/1608), [#1603](https://github.com/adap/flower/pull/1603), [#1590](https://github.com/adap/flower/pull/1590), [#1580](https://github.com/adap/flower/pull/1580), [#1599](https://github.com/adap/flower/pull/1599), [#1600](https://github.com/adap/flower/pull/1600), [#1601](https://github.com/adap/flower/pull/1601), [#1597](https://github.com/adap/flower/pull/1597), [#1595](https://github.com/adap/flower/pull/1595), [#1591](https://github.com/adap/flower/pull/1591), [#1588](https://github.com/adap/flower/pull/1588), [#1589](https://github.com/adap/flower/pull/1589), [#1587](https://github.com/adap/flower/pull/1587), [#1573](https://github.com/adap/flower/pull/1573), [#1581](https://github.com/adap/flower/pull/1581), [#1578](https://github.com/adap/flower/pull/1578), [#1574](https://github.com/adap/flower/pull/1574), [#1572](https://github.com/adap/flower/pull/1572), [#1586](https://github.com/adap/flower/pull/1586))
+
+- **Updated documentation** ([#1629](https://github.com/adap/flower/pull/1629), [#1628](https://github.com/adap/flower/pull/1628), [#1620](https://github.com/adap/flower/pull/1620), [#1618](https://github.com/adap/flower/pull/1618), [#1617](https://github.com/adap/flower/pull/1617), [#1613](https://github.com/adap/flower/pull/1613), [#1614](https://github.com/adap/flower/pull/1614))
+
 ### Incompatible changes
+
+None
 
 ## v1.2.0 (2023-01-13)
 
