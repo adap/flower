@@ -4,10 +4,9 @@
 import argparse
 import json
 from collections import OrderedDict
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 import flwr as fl
-import numpy as np
 import torch
 from flwr.common.typing import NDArrays, Scalar
 from torch import nn
