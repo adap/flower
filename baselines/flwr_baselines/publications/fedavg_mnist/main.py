@@ -51,7 +51,7 @@ def main(cfg: DictConfig) -> None:
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
-        )
+    )
     np.save(
         Path(cfg.save_path)
         / Path(
