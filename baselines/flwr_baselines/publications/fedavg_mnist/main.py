@@ -60,7 +60,7 @@ def main(cfg: DictConfig) -> None:
             f"_stag={1 - cfg.client_fraction}"
         ),
         history,
-    )
+    )  # type: ignore
 
     utils.plot_metric_from_history(
         history,
