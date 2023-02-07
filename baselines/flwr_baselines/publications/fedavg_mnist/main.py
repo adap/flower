@@ -1,16 +1,18 @@
 """Runs CNN federated learning for MNST dataset."""
 
 from pathlib import Path
+from typing import Dict, List, Tuple, Union
 
 import flwr as fl
 import hydra
 import numpy as np
 import torch
+from flwr.common.typing import Scalar
 from omegaconf import DictConfig
 
 from flwr_baselines.publications.fedavg_mnist import client, utils
 
-DEVICE: str = torch.device("cpu")
+DEVICE: torch.device = torch.device("cpu")
 
 
 @hydra.main(config_path="docs/conf", config_name="config", version_base=None)
@@ -49,7 +51,7 @@ def main(cfg: DictConfig) -> None:
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
-    )
+        )
     np.save(
         Path(cfg.save_path)
         / Path(
@@ -59,8 +61,8 @@ def main(cfg: DictConfig) -> None:
             f"_R={cfg.num_rounds}"
             f"_stag={1 - cfg.client_fraction}"
         ),
-        history,
-    )  # type: ignore
+        history,  # type: ignore
+    )
 
     utils.plot_metric_from_history(
         history,
