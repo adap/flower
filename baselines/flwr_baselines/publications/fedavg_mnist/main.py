@@ -1,13 +1,11 @@
 """Runs CNN federated learning for MNST dataset."""
 
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
 
 import flwr as fl
 import hydra
 import numpy as np
 import torch
-from flwr.common.typing import Scalar
 from omegaconf import DictConfig
 
 from flwr_baselines.publications.fedavg_mnist import client, utils
