@@ -84,7 +84,7 @@ class RayClient(fl.client.NumPyClient):
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[float, int, Dict[str, float]]:
+    ) -> Tuple[float, int, Dict[str, Scalar]]:
         """Implements distributed evaluation for a given client.
 
         Args:
