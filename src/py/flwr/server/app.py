@@ -39,11 +39,11 @@ from flwr.server.grpc_server.grpc_server import (
 )
 from flwr.server.history import History
 from flwr.server.server import Server
-from flwr.server.state.state import DriverState
+from flwr.server.state import InMemoryState, State
 from flwr.server.strategy import FedAvg, Strategy
 
-DEFAULT_ADDRESS_DRIVER_API = "[::]:9091"
-DEFAULT_ADDRESS_FLEET_API = "[::]:9092"
+ADDRESS_DRIVER_API = "[::]:9091"
+ADDRESS_FLEET_API_GRPC = "[::]:9092"
 
 
 @dataclass
@@ -60,7 +60,7 @@ class ServerConfig:
 
 def start_server(  # pylint: disable=too-many-arguments
     *,
-    server_address: str = DEFAULT_ADDRESS_FLEET_API,
+    server_address: str = ADDRESS_FLEET_API_GRPC,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
@@ -218,18 +218,18 @@ def run_server() -> None:
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SERVER_ENTER)
 
-    # Shared DriverState
-    driver_state = DriverState()
+    # Shared State
+    state = InMemoryState()
 
     # Shared DriverClientManager
     driver_client_manager = DriverClientManager(
-        driver_state=driver_state,
+        state=state,
     )
 
     # Start Driver API
     driver_server = _run_driver_api_grpc(
         address=args.driver_api_address,
-        driver_state=driver_state,
+        state=state,
     )
 
     # Start Fleet API
@@ -276,13 +276,13 @@ def run_server() -> None:
 
 def _run_driver_api_grpc(
     address: str,
-    driver_state: DriverState,
+    state: State,
 ) -> grpc.Server:
     """Run Driver API (gRPC, request-response)."""
 
     # Create Driver API gRPC server
-    driver_servicer = DriverServicer(
-        driver_state=driver_state,
+    driver_servicer: grpc.Server = DriverServicer(
+        state=state,
     )
     driver_add_servicer_to_server_fn = add_DriverServicer_to_server
     driver_grpc_server = generic_create_grpc_server(
@@ -329,15 +329,15 @@ def _parse_args() -> argparse.Namespace:
     # Driver API
     parser.add_argument(
         "--driver-api-address",
-        help=f"Driver API gRPC server address. Default:'{DEFAULT_ADDRESS_DRIVER_API}'",
-        default=DEFAULT_ADDRESS_DRIVER_API,
+        help=f"Driver API gRPC server address. Default: {ADDRESS_DRIVER_API}",
+        default=ADDRESS_DRIVER_API,
     )
 
     # Fleet API
     parser.add_argument(
         "--fleet-api-address",
-        help=f"Fleet API gRPC server address. Default:'{DEFAULT_ADDRESS_FLEET_API}'",
-        default=DEFAULT_ADDRESS_FLEET_API,
+        help=f"Fleet API gRPC server address. Default: {ADDRESS_FLEET_API_GRPC}",
+        default=ADDRESS_FLEET_API_GRPC,
     )
 
     return parser.parse_args()

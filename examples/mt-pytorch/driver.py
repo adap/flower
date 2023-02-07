@@ -12,10 +12,10 @@ from task import Net, get_parameters, set_parameters
 driver = Driver(driver_service_address="[::]:9091", certificates=None)
 # -------------------------------------------------------------------------- Driver SDK
 
-anonymous_client_nodes = True
+anonymous_client_nodes = False
 num_client_nodes_per_round = 1
 sleep_time = 1
-num_rounds = 3
+num_rounds = 1
 parameters = ndarrays_to_parameters(get_parameters(net=Net()))
 
 # -------------------------------------------------------------------------- Driver SDK

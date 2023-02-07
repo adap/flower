@@ -27,14 +27,14 @@ from flwr.proto.fleet_pb2 import (
     PushTaskResRequest,
     PushTaskResResponse,
 )
-from flwr.server.state.state import DriverState
+from flwr.server.state import State
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
-    def __init__(self, driver_state: DriverState) -> None:
-        self.driver_state = driver_state
+    def __init__(self, state: State) -> None:
+        self.state = state
 
     def PullTaskIns(
         self, request: PullTaskInsRequest, context: grpc.ServicerContext
