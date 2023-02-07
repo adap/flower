@@ -37,7 +37,7 @@ def main(cfg: DictConfig) -> None:
         fraction_fit=cfg.client_fraction,
         fraction_evaluate=0.0,
         min_fit_clients=int(cfg.num_clients * cfg.client_fraction),
-        min_evaluate_clients=0.0,
+        min_evaluate_clients=0,
         min_available_clients=cfg.num_clients,
         evaluate_fn=evaluate_fn,
         evaluate_metrics_aggregation_fn=utils.weighted_average,
