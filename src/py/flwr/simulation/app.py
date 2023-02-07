@@ -130,7 +130,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
             Object containing metrics from training.
     """
     # pylint: disable-msg=too-many-locals
-    event(EventType.START_SIMULATION_ENTER)
+    event(
+        EventType.START_SIMULATION_ENTER,
+        {"num_clients": len(clients_ids) if clients_ids is not None else num_clients},
+    )
 
     # Initialize server and server config
     initialized_server, initialized_config = _init_defaults(
