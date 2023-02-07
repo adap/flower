@@ -38,6 +38,12 @@ Flower telemetry collects the following metrics:
 
 **Execution mode.** Knowing what execution mode Flower starts in enables us to understand how heavily certain features are being used and better prioritize based on that.
 
+**Cluster.** Flower telemetry assigns a random in-memory cluster ID each time a Flower workload starts. This allows us to understand which device types not only start Flower workloads but also successfully complete them.
+
+**Source.** Flower telemetry tries to store a random source ID in `~/.flwr/source` the first time a telemetry event is generated. The source ID is important to identify whether an issue is recurring or whether an issue is triggered by multiple clusters running concurrently (which often happens in simulation). For example, if a device runs multiple workloads at the same time, and this results in an issue, then, in order to reproduce the issue, multiple workloads must be started at the same time.
+
+You may delete the source ID at any time. If you wish for all events logged under a specific source ID to be deleted, you can send a deletion request mentioning the source ID to `telemetry@flower.dev`. All events related to that source ID will then be permanently deleted.
+
 We will not collect any personally identifiable information. If you think any of the metrics collected could be misused in any way, please [get in touch with us](#how-to-contact-us). We will update this page to reflect any changes to the metrics collected and publish changes in the changelog.
 
 If you think other metrics would be helpful for us to better guide our decisions, please let us know! We will carefully review them; if we are confident that they do not compromise user privacy, we may add them.

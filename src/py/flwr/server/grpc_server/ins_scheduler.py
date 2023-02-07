@@ -26,15 +26,15 @@ from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.state.state import DriverState
+from flwr.server.state import State
 
 
 class InsScheduler:
     """Schedule ClientProxy calls on a background thread."""
 
-    def __init__(self, client_proxy: ClientProxy, driver_state: DriverState):
+    def __init__(self, client_proxy: ClientProxy, state: State):
         self.client_proxy = client_proxy
-        self.driver_state = driver_state
+        self.state = state
         self.worker_thread: Optional[threading.Thread] = None
         self.shared_memory_state = {"stop": False}
 
@@ -45,7 +45,7 @@ class InsScheduler:
             args=(
                 self.client_proxy,
                 self.shared_memory_state,
-                self.driver_state,
+                self.state,
             ),
         )
         self.worker_thread.start()
@@ -64,15 +64,15 @@ class InsScheduler:
 def _worker(
     client_proxy: ClientProxy,
     shared_memory_state: Dict[str, bool],
-    driver_state: DriverState,
+    state: State,
 ) -> None:
     """Sequentially call ClientProxy methods to process outstanding tasks."""
     log(DEBUG, "Worker for node %i started", client_proxy.node_id)
     while not shared_memory_state["stop"]:
         log(DEBUG, "Worker for node %i checking state", client_proxy.node_id)
 
-        # Step 1: pull *Ins (next task) out of `driver_state`
-        task_ins_list: List[TaskIns] = driver_state.get_task_ins(
+        # Step 1: pull *Ins (next task) out of `state`
+        task_ins_list: List[TaskIns] = state.get_task_ins(
             node_id=client_proxy.node_id,
             limit=1,
         )
@@ -99,7 +99,7 @@ def _worker(
 
         # Step 3: wrap FitRes in a ServerMessage in a Task in a TaskRes
         task_res = TaskRes(
-            task_id="",  # Will be created and set by the DriverState
+            task_id="",  # Will be created and set by the State
             group_id="",
             workload_id="",
             task=Task(
@@ -109,8 +109,8 @@ def _worker(
             ),
         )
 
-        # Step 4: write *Res (result) back to `driver_state`
-        driver_state.store_task_res(task_res=task_res)
+        # Step 4: write *Res (result) back to `state`
+        state.store_task_res(task_res=task_res)
 
     # Exit worker thread
     log(DEBUG, "Worker for node %i stopped", client_proxy.node_id)
