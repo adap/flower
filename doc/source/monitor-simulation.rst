@@ -1,4 +1,4 @@
-Monitoring Simulation
+Monitore Simulation
 =====================
 
 Flower allows you to monitor system resources while running your simulation. Moreover, the Flower simulation engine is powerful and enables you to decide how to allocate resources per client manner and constrain the total usage. Insights from resource consumption can help you make smarter decisions and speed up the execution time.
