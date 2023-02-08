@@ -2,7 +2,7 @@
 
 
 from collections import OrderedDict
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, Tuple
 
 import flwr as fl
 import numpy as np
