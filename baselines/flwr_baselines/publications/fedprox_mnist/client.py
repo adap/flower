@@ -7,6 +7,7 @@ from typing import Callable, Dict, List, Tuple
 import flwr as fl
 import numpy as np
 import torch
+from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import DataLoader
 
 from flwr_baselines.publications.fedprox_mnist import model
@@ -36,19 +37,19 @@ class FlowerClient(
         self.learning_rate = learning_rate
         self.staggler_schedule = staggler_schedule
 
-    def get_parameters(self, config) -> List[np.ndarray]:
+    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
-    def set_parameters(self, parameters: List[np.ndarray]) -> None:
+    def set_parameters(self, parameters: NDArrays) -> None:
         """Changes the parameters of the model using the given ones."""
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, int]
-    ) -> Tuple[List[np.ndarray], int, dict]:
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, dict]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
 
@@ -70,7 +71,7 @@ class FlowerClient(
 
         return self.get_parameters(self.net), len(self.trainloader), {}
 
-    def evaluate(self, parameters: List[np.ndarray], config: Dict[str, int]):
+    def evaluate(self, parameters: NDArrays, config: Dict[str, Scalar]):
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
         loss, accuracy = model.test(self.net, self.valloader, self.device)

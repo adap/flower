@@ -65,7 +65,7 @@ def main(cfg: DictConfig) -> None:
             f"_mu={cfg.mu}"
             f"_stag={cfg.stagglers_fraction}"
         ),
-        history,
+        history,  # type: ignore
     )
 
     utils.plot_metric_from_history(
