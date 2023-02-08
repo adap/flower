@@ -49,7 +49,7 @@ class FlowerClient(
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[NDArrays, int, dict]:
+    ) -> Tuple[NDArrays, int, Dict]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
 
@@ -74,7 +74,9 @@ class FlowerClient(
 
         return self.get_parameters({}), len(self.trainloader), {}
 
-    def evaluate(self, parameters: NDArrays, config: Dict[str, Scalar]):
+    def evaluate(
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[float, int, Dict]:
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
         loss, accuracy = model.test(self.net, self.valloader, self.device)
