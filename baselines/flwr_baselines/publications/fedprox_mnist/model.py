@@ -2,7 +2,7 @@
 
 
 import copy
-from typing import Iterator, Tuple
+from typing import List, Tuple
 
 import torch
 import torch.nn as nn
@@ -87,7 +87,7 @@ def train(  # pylint: disable=too-many-arguments
 
 def _training_loop(  # pylint: disable=too-many-arguments
     net: nn.Module,
-    global_params: Iterator[Parameter],
+    global_params: List[Parameter],
     trainloader: DataLoader,
     device: torch.device,
     criterion: torch.nn.CrossEntropyLoss,
@@ -100,6 +100,8 @@ def _training_loop(  # pylint: disable=too-many-arguments
     ----------
     net : nn.Module
         The neural network to train.
+    global_params : List[Parameter]
+        The parameters of the global model (from the server).
     trainloader : DataLoader
         The DataLoader containing the data to train the network on.
     device : torch.device
