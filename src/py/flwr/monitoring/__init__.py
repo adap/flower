@@ -12,17 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower main package."""
+"""Flower monitoring."""
 
-from flwr.common.version import package_version as _package_version
+from .profiler import SystemMonitor, basic_profiler
 
-from . import client, monitoring, server, simulation
-
-__all__ = [
-    "client",
-    "monitoring",
-    "server",
-    "simulation",
-]
-
-__version__ = _package_version
+__all__ = ["SystemMonitor", "basic_profiler"]

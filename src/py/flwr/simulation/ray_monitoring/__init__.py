@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2022 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,17 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower main package."""
+"""Ray-based Flower System Monitor implementation."""
 
-from flwr.common.version import package_version as _package_version
+from .profiler import RayClientProfilerProxy, RaySystemMonitor  # , virtual_profiler
 
-from . import client, monitoring, server, simulation
-
-__all__ = [
-    "client",
-    "monitoring",
-    "server",
-    "simulation",
-]
-
-__version__ = _package_version
+__all__ = ["RayClientProfilerProxy", "RaySystemMonitor"]  # , "virtual_profiler"]

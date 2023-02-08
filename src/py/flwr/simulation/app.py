@@ -29,6 +29,7 @@ from flwr.server.app import ServerConfig, _fl, _init_defaults
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
+from flwr.simulation.ray_monitoring.profiler import RayClientProfilerProxy
 from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 
 INVALID_ARGUMENTS_START_SIMULATION = """
@@ -71,6 +72,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
     keep_initialised: Optional[bool] = False,
+    use_profiler: Optional[bool] = False,
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -93,7 +95,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
-    client_resources : Optional[Dict[str, float]] (default: None)
+    client_resources : Optional[Dict[str, int]] (default: None)
         CPU and GPU resources for a single client. Supported keys are
         `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`.
         To understand the GPU utilization caused by `num_gpus`, consult the Ray
@@ -123,6 +125,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
         arguments from being passed to ray.init.
     keep_initialised: Optional[bool] (default: False)
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
+    use_profiler: Optional[bool] (default: False)
+        Set to True if RayClients are being profiled. This requires
+        launching a RaySystemMonitor separately.
 
     Returns
     -------
@@ -184,8 +189,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # Register one RayClientProxy object for each client with the ClientManager
     resources = client_resources if client_resources is not None else {}
+    Proxy = RayClientProfilerProxy if use_profiler else RayClientProxy
+
     for cid in cids:
-        client_proxy = RayClientProxy(
+        client_proxy = Proxy(
             client_fn=client_fn,
             cid=cid,
             resources=resources,
