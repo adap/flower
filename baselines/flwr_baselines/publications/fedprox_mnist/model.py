@@ -1,7 +1,6 @@
 """CNN model architecutre, training and testing functions for MNIST."""
 
 
-import copy
 from typing import List, Tuple
 
 import torch
