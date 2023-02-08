@@ -77,6 +77,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    fedbn-example-pytorch-from-centralized-to-federated
    recommended-env-setup
    upgrade-to-flower-1.0
+   monitor-simulation
 
 Explanations
 ~~~~~~~~~~~~
