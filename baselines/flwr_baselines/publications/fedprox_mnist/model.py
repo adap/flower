@@ -77,7 +77,7 @@ def train(  # pylint: disable=too-many-arguments
     """
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
-    global_params = copy.deepcopy(net).parameters()
+    global_params = [val.detach().clone() for val in net.parameters()]
     net.train()
     for _ in range(epochs):
         net = _training_loop(
