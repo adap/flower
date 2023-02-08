@@ -55,7 +55,10 @@ class FlowerClient(
 
         # At each round check if the client is a staggler,
         # if so, train less epochs (to simulate partial work)
-        if self.staggler_schedule[config["curr_round"] - 1] and self.num_epochs > 1:
+        if (
+            self.staggler_schedule[int(config["curr_round"]) - 1]
+            and self.num_epochs > 1
+        ):
             num_epochs = np.random.randint(1, self.num_epochs)
         else:
             num_epochs = self.num_epochs
@@ -69,7 +72,7 @@ class FlowerClient(
             proximal_mu=config["proximal_mu"],
         )
 
-        return self.get_parameters(self.net), len(self.trainloader), {}
+        return self.get_parameters({}), len(self.trainloader), {}
 
     def evaluate(self, parameters: NDArrays, config: Dict[str, Scalar]):
         """Implements distributed evaluation for a given client."""
