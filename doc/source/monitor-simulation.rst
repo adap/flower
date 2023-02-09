@@ -1,9 +1,9 @@
 Monitor Simulation
-=====================
+==================
 
 Flower allows you to monitor system resources while running your simulation. Moreover, the Flower simulation engine is powerful and enables you to decide how to allocate resources per client manner and constrain the total usage. Insights from resource consumption can help you make smarter decisions and speed up the execution time.
 
-The specific instructions assume you are using macOS and have the homebrew package manager installed.
+The specific instructions assume you are using macOS and have the `Homebrew <https://brew.sh/>`_ package manager installed.
 
 Downloads
 ---------
@@ -11,12 +11,11 @@ Downloads
 
   brew install prometheus grafana
 
-Prometheus is used for data collection, while Grafana will enable you to visualize the collected data. They are both well integrated with Ray Flower uses under the hood.
-
+`Prometheus <https://prometheus.io/>`_ is used for data collection, while `Grafana <https://grafana.com/>`_ will enable you to visualize the collected data. They are both well integrated with `Ray <https://www.ray.io/>`_ which Flower uses under the hood.
 
 Overwrite the configuration files (depending on your device, it might be installed on a different path).
 
-Given you are on an M1 Mac, it should be:
+If you are on an M1 Mac, it should be:
 
 .. code-block:: bash
 
@@ -40,7 +39,6 @@ Open the respective configuration files and change them. Depending on your devic
   # Intel macOS
   open /usr/local/etc/prometheus.yml
 
-
 and then delete all the text in the file and paste a new Prometheus config you see below. You may adjust the time intervals to your requirements:
 
 .. code-block:: bash
@@ -58,13 +56,13 @@ and then delete all the text in the file and paste a new Prometheus config you s
 
 Now after you have edited the Prometheus configuration, do the same with the Grafana configuration files. Open those using one of the following commands as before:
 
-.. code-block::python
+.. code-block:: python
+
   # M1 macOS
   open /opt/homebrew/etc/grafana/grafana.ini
 
   # Intel macOS
   open /usr/local/etc/grafana/grafana.ini
-
 
 Your terminal editor should open and allow you to apply the following configuration as before.
 
@@ -113,13 +111,13 @@ Shortly after the simulation starts, you should see the following logs in your t
   2023-01-20 16:22:58,620	INFO [worker.py:1529](http://worker.py:1529/) -- Started a local Ray instance. View the dashboard at http://127.0.0.1:8265
 
 
-You can look at everything at http://127.0.0.1:8265 .
+You can look at everything at `<http://127.0.0.1:8265>`_ .
 
 It's a Ray Dashboard. You can navigate to Metrics (on the left panel, the lowest option).
 
 Or alternatively, you can just see them in Grafana by clicking on the right-up corner, “View in Grafana”. Please note that the Ray dashboard is only accessible during the simulation. After the simulation ends, you can only use Grafana to explore the metrics. You can start Grafana by going to http://localhost:3000/.
 
-After you finish the visualization, stop Prometheus and Grafana. This is important as they will otherwise block, e.g. port 3000 on your machine as long as they are running.
+After you finish the visualization, stop Prometheus and Grafana. This is important as they will otherwise block, for example port :code:`3000` on your machine as long as they are running.
 
 .. code-block:: bash
 
@@ -156,7 +154,7 @@ However, you can overwrite the defaults. When starting a simulation, do the foll
 
   num_cpus = 2
   num_gpus = 1
-  ram_memory = 16_000 * 1024 * 1024 # 16 GB
+  ram_memory = 16_000 * 1024 * 1024  # 16 GB
   fl.simulation.start_simulation(
       # ...
       # all the args you were specyfing before
@@ -203,28 +201,28 @@ Let’s also specify the resource for a single client.
 Now comes the crucial part. Ray will start a new client only when it has all the required resources (such that they run in parallel) when the resources allow.
 
 In the example above, only one client will be run, so your clients won't run concurrently. Setting :code:`client_num_gpus = 0.5` would allow running two clients and therefore enable them to run concurrently.
-Be careful not to require more resources than are available. If you specified :code:`client_num_gpus = 2`, the simulation wouldn't start (even if you had 2 GPUs but decided to set 1 in :code:`ray_init_args`).
+Be careful not to require more resources than available. If you specified :code:`client_num_gpus = 2`, the simulation wouldn't start (even if you had 2 GPUs but decided to set 1 in :code:`ray_init_args`).
 
 FAQ
 ---
 Q: I don't see any metrics logged.
 
-A: Probably, you don't have a proper timeframe set. It is in the top right corner ("Last 30 minutes" by default). Please change the timeframe to reflect the period when the simulation was running.
+A: The timeframe might not be properly set. The setting is in the top right corner ("Last 30 minutes" by default). Please change the timeframe to reflect the period when the simulation was running.
 
 Q: I see “Grafana server not detected. Please make sure the Grafana server is running and refresh this page” after going to the Metrics tab in Ray Dashboard.
 
-A: You probably don't have the Grafana running. Please check the running services
+A: You probably don't have Grafana running. Please check the running services
 
 .. code-block:: bash
 
   brew services list
 
-Q: I see "This site can't be reached" when going to http://127.0.0.1:8265.
+Q: I see "This site can't be reached" when going to `<http://127.0.0.1:8265>`_.
 
 A: Either the simulation has already finished, or you still need to start Prometheus.
 
 Resources
 ---------
-Ray Dashboard: https://docs.ray.io/en/latest/ray-core/ray-dashboard.html
+Ray Dashboard: `<https://docs.ray.io/en/latest/ray-core/ray-dashboard.html>`_
 
-Ray Metrics: https://docs.ray.io/en/latest/ray-observability/ray-metrics.html
+Ray Metrics: `<https://docs.ray.io/en/latest/ray-observability/ray-metrics.html>`_

@@ -69,6 +69,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    implementing-strategies
    save-progress
    saving-and-loading-pytorch-checkpoints
+   monitor-simulation
    ssl-enabled-connections
    example-walkthrough-pytorch-mnist
    example-pytorch-from-centralized-to-federated
@@ -77,7 +78,6 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    fedbn-example-pytorch-from-centralized-to-federated
    recommended-env-setup
    upgrade-to-flower-1.0
-   monitor-simulation
 
 Explanations
 ~~~~~~~~~~~~
