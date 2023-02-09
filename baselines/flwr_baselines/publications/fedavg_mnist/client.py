@@ -3,11 +3,11 @@
 
 
 from collections import OrderedDict
-from typing import Callable, List, Tuple
+from typing import Callable, Dict, Tuple
 
 import flwr as fl
-import numpy as np
 import torch
+from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import DataLoader
 
 from flwr_baselines.publications.fedavg_mnist import model
@@ -33,19 +33,19 @@ class FlowerClient(fl.client.NumPyClient):
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
 
-    def get_parameters(self, config) -> List[np.ndarray]:
+    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
-    def set_parameters(self, parameters: List[np.ndarray]) -> None:
+    def set_parameters(self, parameters: NDArrays) -> None:
         """Changes the parameters of the model using the given ones."""
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(
-        self, parameters: List[np.ndarray], config
-    ) -> Tuple[List[np.ndarray], int, dict]:
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
         model.train(
@@ -55,9 +55,11 @@ class FlowerClient(fl.client.NumPyClient):
             epochs=self.num_epochs,
             learning_rate=self.learning_rate,
         )
-        return self.get_parameters(self.net), len(self.trainloader), {}
+        return self.get_parameters({}), len(self.trainloader), {}
 
-    def evaluate(self, parameters: List[np.ndarray], config):
+    def evaluate(
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[float, int, Dict]:
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
         loss, accuracy = model.test(self.net, self.valloader, self.device)
