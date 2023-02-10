@@ -13,7 +13,7 @@ jobs:
     defaults:
         run:
             working-directory: src/swift/flwr
-    name: Testing Swift ${{ matrix.swift }} on ${{ matrix.os }}
+    name: test_swift
     strategy:
       matrix:
         os: [macos-latest]
