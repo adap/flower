@@ -164,7 +164,7 @@ public class FLiOSModel: ObservableObject {
     
     public func abortFederatedLearning() {
         print("aborting federated learning")
-        self.flwrGRPC?.abortGRPCConnection {
+        self.flwrGRPC?.abortGRPCConnection(reasonDisconnect: .powerDisconnected) {
             DispatchQueue.main.async {
                 self.federatedServerStatus = .completed(info: "Federated learning aborted")
                 self.flwrGRPC = nil
@@ -259,7 +259,7 @@ class LocalClient {
                 statusHandler(taskStatus)
             case .epochEnd:
                 let taskStatus: TaskStatus
-                let loss = contextProgress.metrics[.lossValue] as! Double
+                let loss = String(format: "%.4f", contextProgress.metrics[.lossValue] as! Double)
                 switch task {
                 case .train:
                     let epochIndex = contextProgress.metrics[.epochIndex] as! Int
@@ -274,7 +274,7 @@ class LocalClient {
         }
         
         let completionHandler = { (finalContext: MLUpdateContext) in
-            let loss = finalContext.metrics[.lossValue] as! Double
+            let loss = String(format: "%.4f", finalContext.metrics[.lossValue] as! Double)
             let taskStatus: TaskStatus = .completed(info: "Local \(task) completed with loss: \(loss) in \(Int(Date().timeIntervalSince(startTime))) secs")
             statusHandler(taskStatus)
         }

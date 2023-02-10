@@ -44,10 +44,19 @@ public class MLParameter {
     
     var layerWrappers: [MLLayerWrapper]
     
+    /// Inits MLParameter class that contains information about the model parameters and implements routines for their update and transformation.
+    ///
+    /// - Parameters:
+    ///   - layerWrappers: Information about the layer provided with primitive data types.
     public init(layerWrappers: [MLLayerWrapper]) {
         self.layerWrappers = layerWrappers
     }
     
+    /// Converts the Parameters structure to MLModelConfiguration to interface with CoreML.
+    ///
+    /// - Parameters:
+    ///   - parameters: The parameters of the model passed as Parameters struct.
+    /// - Returns: Specification of the machine learning model configuration in the CoreML structure.
     public func parametersToWeights(parameters: Parameters) -> MLModelConfiguration {
         let config = MLModelConfiguration()
         
@@ -82,6 +91,9 @@ public class MLParameter {
         return config
     }
     
+    /// Returns the weights of the current layer wrapper in parameter format
+    ///
+    /// - Returns: The weights of the current layer wrapper in parameter format
     public func weightsToParameters() -> Parameters {
         let dataArray = layerWrappers.compactMap { parameterConverter.arrayToData(array: $0.weights, shape: $0.shape) }
         if dataArray.count != layerWrappers.count {
@@ -90,12 +102,14 @@ public class MLParameter {
         return Parameters(tensors: dataArray, tensorType: "ndarray")
     }
     
+    /// Updates the layers given the CoreML update context
+    ///
+    /// - Parameters:
+    ///   - context: The context of the update procedure of the CoreML model.
     public func updateLayerWrappers(context: MLUpdateContext) {
         for (index, layer) in self.layerWrappers.enumerated() {
-            //print("checking if layer \(layer.name) updatable")
             if layer.isUpdatable {
                 let paramKey = MLParameterKey.weights.scoped(to: layer.name)
-                //print("retrieving parameters for layer \(layer.name)")
                 if let weightsMultiArray = try? context.model.parameterValue(for: paramKey) as? MLMultiArray {
                     let weightsShape = Array(weightsMultiArray.shape.map({ Int16(truncating: $0) }).drop(while: { $0 < 2 }))
                     guard weightsShape == layer.shape else {
@@ -104,10 +118,7 @@ public class MLParameter {
                     }
                     
                     if let pointer = try? UnsafeBufferPointer<Float>(weightsMultiArray) {
-                        //print("updating weights for layer \(layer.name)")
                         let array = pointer.compactMap{$0}
-                        //print("layer weight array size = \(layer.weights.count)")
-                        //print("array size = \(array.count)")
                         self.layerWrappers[index].weights = array
                     }
                 }

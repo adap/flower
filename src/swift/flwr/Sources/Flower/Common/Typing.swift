@@ -39,6 +39,27 @@ public enum Code: Equatable {
     }
 }
 
+public enum ReasonDisconnect {
+    typealias RawValue = Int
+    case unknown // = 0
+    case reconnect // = 1
+    case powerDisconnected // = 2
+    case wifiUnavailable // = 3
+    case ack // = 4
+    case UNRECOGNIZED(Int)
+
+    var rawValue: Int {
+      switch self {
+      case .unknown: return 0
+      case .reconnect: return 1
+      case .powerDisconnected: return 2
+      case .wifiUnavailable: return 3
+      case .ack: return 4
+      case .UNRECOGNIZED(let i): return i
+      }
+    }
+}
+
 public struct Scalar: Equatable {
     public var bool: Bool?
     public var bytes: Data?

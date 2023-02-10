@@ -223,4 +223,22 @@ final class FlowerTests: XCTestCase {
         XCTExpectFailure("Working on a fix for this problem.")
         XCTAssertEqual(scalar, result)
     }
+    
+    func testDisconnectReasonTransformation() throws {
+        let reasonUnkownProto = Flwr_Proto_Reason.unknown.rawValue
+        let reasonUnkown = ReasonDisconnect.unknown.rawValue
+        XCTAssertEqual(reasonUnkownProto, reasonUnkown)
+        let reasonPowerProto = Flwr_Proto_Reason.powerDisconnected.rawValue
+        let reasonPower = ReasonDisconnect.powerDisconnected.rawValue
+        XCTAssertEqual(reasonPowerProto, reasonPower)
+        let reasonReconnectProto = Flwr_Proto_Reason.reconnect.rawValue
+        let reasonReconnect = ReasonDisconnect.reconnect.rawValue
+        XCTAssertEqual(reasonReconnectProto, reasonReconnect)
+        let reasonAckProto = Flwr_Proto_Reason.ack.rawValue
+        let reasonAck = ReasonDisconnect.ack.rawValue
+        XCTAssertEqual(reasonAckProto, reasonAck)
+        let reasonWifiUnavailableProto = Flwr_Proto_Reason.wifiUnavailable.rawValue
+        let reasonWifiUnavailable = ReasonDisconnect.wifiUnavailable.rawValue
+        XCTAssertEqual(reasonWifiUnavailableProto, reasonWifiUnavailable)
+    }
 }

@@ -1,3 +1,4 @@
 [flake8]
 max-line-length = 88
 exclude = src/py/flwr/proto
+ignore = E302,W503

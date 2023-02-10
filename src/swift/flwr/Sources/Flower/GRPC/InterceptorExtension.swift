@@ -13,7 +13,6 @@ public protocol InterceptorExtension {
     func send(part: GRPCPartWrapper)
 }
 
-
 public enum GRPCPartWrapper {
     case metadata(header: String)
     case message(content: String)
