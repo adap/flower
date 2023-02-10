@@ -139,6 +139,17 @@ server.strategy.FedOpt
     .. automethod:: __init__
 
 
+.. _flwr-server-strategy-FedProx-apiref:
+
+server.strategy.FedProx
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: flwr.server.strategy.FedProx
+    :members:
+
+    .. automethod:: __init__
+
+
 .. _flwr-server-strategy-FedAdagrad-apiref:
 
 server.strategy.FedAdagrad

@@ -45,12 +45,14 @@ A learning-oriented series of federated learning tutorials, the best place to st
    quickstart-pytorch
    quickstart-tensorflow
    quickstart-huggingface
+   quickstart-jax
    quickstart-pandas
+   quickstart-fastai
    quickstart-pytorch-lightning
    quickstart-mxnet
    quickstart-scikitlearn
 
-QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <quickstart-tensorflow>` | :ref:`🤗 Transformers <quickstart-huggingface>` | :ref:`PyTorch Lightning <quickstart-pytorch-lightning>` | :ref:`MXNet <quickstart-mxnet>` | :ref:`scikit-learn <quickstart-scikitlearn>`
+QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <quickstart-tensorflow>` | :ref:`🤗 Transformers <quickstart-huggingface>` | :ref:`JAX <quickstart-jax>` | :ref:`Pandas <quickstart-pandas>` | :ref:`fastai <quickstart-fastai>` | :ref:`PyTorch Lightning <quickstart-pytorch-lightning>` | :ref:`MXNet <quickstart-mxnet>` | :ref:`scikit-learn <quickstart-scikitlearn>`
 
 How-to guides
 ~~~~~~~~~~~~~
@@ -136,7 +138,7 @@ intended to help along the way.
    getting-started-for-contributors
    good-first-contributions
    contributor-setup
-   writing-documentation
+   write-documentation
    architecture
    secagg
    release-process

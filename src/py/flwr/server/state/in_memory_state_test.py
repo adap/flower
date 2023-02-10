@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""DriverState tests."""
+"""InMemortState tests."""
 
 
 from datetime import datetime, timezone
@@ -20,14 +20,15 @@ from uuid import uuid4
 
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns
-from flwr.server.driver.state import DriverState
+
+from .in_memory_state import InMemoryState
 
 
 def test_get_task_ins_empty() -> None:
     """Validate that a new state has no TaskIns."""
 
     # Prepare
-    state = DriverState()
+    state = InMemoryState()
 
     # Execute
     task_ins_list = state.get_task_ins(
@@ -39,11 +40,67 @@ def test_get_task_ins_empty() -> None:
     assert not task_ins_list
 
 
+def test_get_task_ins_identity() -> None:
+    """Validate that a new state has no TaskIns."""
+
+    # Prepare
+    state = InMemoryState()
+    task_id = state.store_task_ins(
+        task_ins=TaskIns(
+            task_id="",
+            group_id="",
+            workload_id="",
+            task=Task(
+                producer=Node(node_id=0, anonymous=True),
+                consumer=Node(node_id=123, anonymous=False),
+            ),
+        )
+    )
+
+    # Execute
+    task_ins_list = state.get_task_ins(
+        node_id=123,
+        limit=10,
+    )
+
+    # Assert
+    assert len(task_ins_list) == 1
+    assert task_ins_list[0].task_id == str(task_id)
+
+
+def test_get_task_ins_anonymous() -> None:
+    """Validate that a new state has no TaskIns."""
+
+    # Prepare
+    state = InMemoryState()
+    task_id = state.store_task_ins(
+        task_ins=TaskIns(
+            task_id="",
+            group_id="",
+            workload_id="",
+            task=Task(
+                producer=Node(node_id=0, anonymous=True),
+                consumer=Node(node_id=0, anonymous=True),
+            ),
+        )
+    )
+
+    # Execute
+    task_ins_list = state.get_task_ins(
+        node_id=None,
+        limit=10,
+    )
+
+    # Assert
+    assert len(task_ins_list) == 1
+    assert task_ins_list[0].task_id == str(task_id)
+
+
 def test_get_task_res_empty() -> None:
     """Validate that a new state has no TaskRes."""
 
     # Prepare
-    state = DriverState()
+    state = InMemoryState()
 
     # Execute
     task_res_list = state.get_task_res(
@@ -60,7 +117,7 @@ def test_store_task_ins_one() -> None:
 
     # Prepare
     node_id = 1
-    state = DriverState()
+    state = InMemoryState()
     task_ins: TaskIns = TaskIns(
         task_id=str(uuid4()),
         group_id="",

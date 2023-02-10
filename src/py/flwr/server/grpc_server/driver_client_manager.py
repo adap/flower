@@ -19,20 +19,21 @@ import threading
 import uuid
 from typing import Dict, List, Optional, Set, Tuple
 
-from ..client_manager import ClientManager
-from ..client_proxy import ClientProxy
-from ..criterion import Criterion
+from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.criterion import Criterion
+from flwr.server.state import State
+
 from .ins_scheduler import InsScheduler
-from .state import DriverState
 
 
 class DriverClientManager(ClientManager):
     """Provides a pool of available clients."""
 
-    def __init__(self, driver_state: DriverState) -> None:
+    def __init__(self, state: State) -> None:
         self._cv = threading.Condition()
         self.nodes: Dict[str, Tuple[int, InsScheduler]] = {}
-        self.driver_state = driver_state
+        self.state = state
 
     def __len__(self) -> int:
         """Return the number of available clients.
@@ -74,10 +75,13 @@ class DriverClientManager(ClientManager):
         random_node_id: int = uuid.uuid1().int >> 64
         client.node_id = random_node_id
 
+        # Register node_id in with State
+        self.state.register_node(node_id=random_node_id)
+
         # Create and start the instruction scheduler
         ins_scheduler = InsScheduler(
             client_proxy=client,
-            driver_state=self.driver_state,
+            state=self.state,
         )
         ins_scheduler.start()
 
@@ -99,9 +103,12 @@ class DriverClientManager(ClientManager):
         client : flwr.server.client_proxy.ClientProxy
         """
         if client.cid in self.nodes:
-            _, ins_scheduler = self.nodes[client.cid]
+            node_id, ins_scheduler = self.nodes[client.cid]
             del self.nodes[client.cid]
             ins_scheduler.stop()
+
+            # Unregister node_id in with State
+            self.state.unregister_node(node_id=node_id)
 
             with self._cv:
                 self._cv.notify_all()
