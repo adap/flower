@@ -24,7 +24,5 @@ jobs:
         with:
           swift-version: ${{ matrix.swift }}
       - uses: actions/checkout@v3
-      - name: Build
-        run: swift build
       - name: Run tests
-        run: swift test
+        run: arch -x86_64 xcodebuild test -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.1'
