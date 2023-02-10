@@ -10,7 +10,7 @@ from omegaconf import DictConfig
 
 from flwr_baselines.publications.fedavg_mnist import client, utils
 
-DEVICE: str = torch.device("cpu")
+DEVICE: torch.device = torch.device("cpu")
 
 
 @hydra.main(config_path="docs/conf", config_name="config", version_base=None)
@@ -37,7 +37,7 @@ def main(cfg: DictConfig) -> None:
         fraction_fit=cfg.client_fraction,
         fraction_evaluate=0.0,
         min_fit_clients=int(cfg.num_clients * cfg.client_fraction),
-        min_evaluate_clients=0.0,
+        min_evaluate_clients=0,
         min_available_clients=cfg.num_clients,
         evaluate_fn=evaluate_fn,
         evaluate_metrics_aggregation_fn=utils.weighted_average,
@@ -59,7 +59,7 @@ def main(cfg: DictConfig) -> None:
             f"_R={cfg.num_rounds}"
             f"_stag={1 - cfg.client_fraction}"
         ),
-        history,
+        history,  # type: ignore
     )
 
     utils.plot_metric_from_history(

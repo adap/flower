@@ -32,8 +32,7 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsResponse,
 )
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.server.driver.driver_client_manager import DriverClientManager
-from flwr.server.driver.state import DriverState
+from flwr.server.state import State
 
 
 class DriverServicer(driver_pb2_grpc.DriverServicer):
@@ -41,18 +40,16 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
     def __init__(
         self,
-        driver_client_manager: DriverClientManager,
-        driver_state: DriverState,
+        state: State,
     ) -> None:
-        self.driver_client_manager = driver_client_manager
-        self.driver_state = driver_state
+        self.state = state
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
     ) -> GetNodesResponse:
         """Get available nodes."""
         log(INFO, "DriverServicer.GetNodes")
-        all_ids: Set[int] = self.driver_client_manager.all_ids()
+        all_ids: Set[int] = self.state.get_nodes()
         return GetNodesResponse(node_ids=list(all_ids))
 
     def PushTaskIns(
@@ -69,9 +66,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         # Store each TaskIns
         task_ids: List[Optional[UUID]] = []
         for task_ins in request.task_ins_list:
-            task_id: Optional[UUID] = self.driver_state.store_task_ins(
-                task_ins=task_ins
-            )
+            task_id: Optional[UUID] = self.state.store_task_ins(task_ins=task_ins)
             task_ids.append(task_id)
 
         return PushTaskInsResponse(
@@ -88,7 +83,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         task_ids: Set[UUID] = {UUID(task_id) for task_id in request.task_ids}
 
         # Read from state
-        task_res_list: List[TaskRes] = self.driver_state.get_task_res(
+        task_res_list: List[TaskRes] = self.state.get_task_res(
             task_ids=task_ids, limit=None
         )
         return PullTaskResResponse(task_res_list=task_res_list)
