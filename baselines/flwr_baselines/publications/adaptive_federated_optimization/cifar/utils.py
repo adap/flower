@@ -73,6 +73,7 @@ cifar100_real_to_coarse = [
 ]
 # fmt: on
 
+
 # transforms
 def get_transforms(num_classes: int = 10) -> Dict[str, Compose]:
     """Returns the right Transform Compose for both train and evaluation.

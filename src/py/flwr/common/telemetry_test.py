@@ -90,6 +90,7 @@ class TelemetryTest(unittest.TestCase):
 
     def test_get_source_id_no_home(self) -> None:
         """Test if _get_source_id returns unavailable without a home dir."""
+
         # Prepare
         def new_callable() -> Callable[[], None]:
             def _new_failing_get_home() -> None:

@@ -269,7 +269,6 @@ def run_server() -> None:
 
     default_handlers[SIGINT] = signal(SIGINT, graceful_exit_handler)  # type: ignore
     default_handlers[SIGTERM] = signal(SIGTERM, graceful_exit_handler)  # type: ignore
-
     driver_server.wait_for_termination()
     fleet_server.wait_for_termination()
 
