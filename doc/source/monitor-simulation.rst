@@ -115,7 +115,7 @@ You can look at everything at `<http://127.0.0.1:8265>`_ .
 
 It's a Ray Dashboard. You can navigate to Metrics (on the left panel, the lowest option).
 
-Or alternatively, you can just see them in Grafana by clicking on the right-up corner, “View in Grafana”. Please note that the Ray dashboard is only accessible during the simulation. After the simulation ends, you can only use Grafana to explore the metrics. You can start Grafana by going to http://localhost:3000/.
+Or alternatively, you can just see them in Grafana by clicking on the right-up corner, “View in Grafana”. Please note that the Ray dashboard is only accessible during the simulation. After the simulation ends, you can only use Grafana to explore the metrics. You can start Grafana by going to ``http://localhost:3000/``.
 
 After you finish the visualization, stop Prometheus and Grafana. This is important as they will otherwise block, for example port :code:`3000` on your machine as long as they are running.
 
