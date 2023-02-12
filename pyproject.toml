@@ -94,6 +94,7 @@ sphinxcontrib-mermaid = "==0.7.1"
 furo = "==2022.12.7"
 sphinx-reredirects = "==0.1.1"
 nbsphinx = "==0.8.12"
+nbstripout = "==0.6.1"
 
 [tool.isort]
 line_length = 88
