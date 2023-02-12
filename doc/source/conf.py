@@ -34,7 +34,7 @@ copyright = "2022 Adap GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.3.0"
+release = "1.4.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -118,7 +118,7 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": 'Flower Monthly: Feb 1st 1700 GMT <a href="https://flower.dev/conf/flower-monthly/">join now</a>',
+    "announcement": 'Flower Monthly: 1 March 2023 (17:00 GMT) <a href="https://flower.dev/conf/flower-monthly/">join</a>',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

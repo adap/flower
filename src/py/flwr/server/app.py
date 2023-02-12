@@ -277,10 +277,8 @@ def run_server() -> None:
 
     default_handlers[SIGINT] = signal(SIGINT, graceful_exit_handler)  # type: ignore
     default_handlers[SIGTERM] = signal(SIGTERM, graceful_exit_handler)  # type: ignore
-
     # Start Fleet API
     if args.fleet_api_type == "rest":
-        # Start Fleet API HTTP server
         rest_bind_host, rest_bind_port_str = args.rest_fleet_api_address.split(":")
         rest_bind_port = int(rest_bind_port_str)
         fleet_thread = threading.Thread(
@@ -288,7 +286,6 @@ def run_server() -> None:
             args=(rest_bind_host, rest_bind_port),
         )
         fleet_thread.start()
-
     elif args.fleet_api_type == "grpc":
         fleet_server = _run_fleet_api_grpc_bidi(
             address=args.grpc_fleet_api_address,

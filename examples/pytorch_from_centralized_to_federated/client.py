@@ -19,6 +19,7 @@ USE_FEDBN: bool = True
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
 
+
 # Flower Client
 class CifarClient(fl.client.NumPyClient):
     """Flower client implementing CIFAR-10 image classification using
