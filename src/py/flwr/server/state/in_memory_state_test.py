@@ -205,7 +205,8 @@ def test_store_delete_tasks() -> None:
         group_id="",
         workload_id="",
         task=Task(
-            consumer=Node(node_id=node_id, anonymous=False), ancestry=[str(task_id_1)]
+            consumer=Node(node_id=node_id, anonymous=False),
+            ancestry=[str(task_id_1)],
         ),
     )
     _ = state.store_task_res(task_res=task_res_1)
