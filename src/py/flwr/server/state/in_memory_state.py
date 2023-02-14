@@ -18,10 +18,15 @@
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Set
 from uuid import UUID, uuid4
+from google.protobuf.json_format import MessageToJson
+
 
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 from .state import State
+
+from flwr.common.logger import log
+from logging import ERROR
 
 
 class InMemoryState(State):
@@ -46,6 +51,11 @@ class InMemoryState(State):
         # Store TaskIns
         task_ins.task.created_at = created_at.isoformat()
         task_ins.task.ttl = ttl.isoformat()
+
+        # Enforce node_id = 0 of consumer is anonymous
+        if task_ins.task.consumer.anonymous:
+            task_ins.task.consumer.node_id = 0
+
         self.task_ins_store[task_id] = task_ins
 
         # Return the new task_id
@@ -89,17 +99,30 @@ class InMemoryState(State):
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes."""
 
+        # Validate ancestry
+        if len(task_res.task.ancestry) == 0:
+            log(
+                ERROR,
+                "`task_res.task.ancestry` may not be empty:\n%s"
+                % MessageToJson(
+                    task_res, including_default_value_fields=True
+                ),
+            )
+            return None
+
         # Create and set task_id
         task_id = uuid4()
         task_res.task_id = str(task_id)
 
         # Set created_at
         created_at: datetime = _now()
+        task_res.task.created_at = created_at.isoformat()
+
+        # Set ttl
         ttl: datetime = created_at + timedelta(hours=24)
+        task_res.task.ttl = ttl.isoformat()
 
         # Store TaskRes
-        task_res.task.created_at = created_at.isoformat()
-        task_res.task.ttl = ttl.isoformat()
         self.task_res_store[task_id] = task_res
 
         # Return the new task_id

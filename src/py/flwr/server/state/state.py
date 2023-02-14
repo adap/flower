@@ -38,7 +38,8 @@ class State(abc.ABC):
         Constraints
         -----------
         If `task_ins.task.consumer.anonymous` is `True`, then `task_ins.task.consumer.node_id`
-        MUST NOT be set (equal 0)
+        MUST NOT be set (equal 0). Any implemenation may just override it with zero instead of
+        validating.
 
         If `task_ins.task.consumer.anonymous` is `False`, then `task_ins.task.consumer.node_id`
         MUST be set (not 0)
@@ -55,16 +56,18 @@ class State(abc.ABC):
         Constraints
         ----------- 
         If `node_id` is not `None`, retrieve all TaskIns where
+            
             1. the `task_ins.task.consumer.node_id` equals `node_id` AND
             2. the `task_ins.task.consumer.anonymous` equals `False` AND
-            2. the `task_ins.task.delivered_at` equals `""`.
+            3. the `task_ins.task.delivered_at` equals `""`.
 
         If `node_id` is `None`, retrieve all TaskIns where the `task_ins.task.consumer.node_id`
         equals `0` and `task_ins.task.consumer.anonymous` is set to `True`.
 
         If `delivered_at` MUST BE set (not `""`) otherwise the TaskIns MUST not be in the result. 
 
-        If `limit` is not `None`, return, at most, `limit` number of `task_ins`.
+        If `limit` is not `None`, return, at most, `limit` number of `task_ins`. If `limit` is set,
+        it has to be greater zero.
         """
 
     @abc.abstractmethod
@@ -91,12 +94,14 @@ class State(abc.ABC):
         
         Usually, the Driver API calls this for Nodes planning to work on one or more TaskIns.
         
-        Retrieves all TaskRes for the given `task_ids` and returns and empty list of none could be found.
+        Retrieves all TaskRes for the given `task_ids` and returns and empty list of none could
+        be found.
 
         Constraints
         ----------- 
-        If `limit` is not `None`, return, at most, `limit` number of TaskRes. The limit will only take effect
-        if enough task_ids are in the set AND are currently available.
+        If `limit` is not `None`, return, at most, `limit` number of TaskRes. The limit will only
+        take effect if enough task_ids are in the set AND are currently available. If `limit` is set,
+        it has to be greater zero.
         """
 
     @abc.abstractmethod

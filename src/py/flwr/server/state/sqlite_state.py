@@ -71,6 +71,9 @@ class SqliteState(State):
     def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
         """Get all TaskRes that have not been delivered yet."""
 
+    def delete_tasks(self, task_ids: Set[UUID]) -> None:
+        """Delete all delivered TaskIns/TaskRes pairs."""
+
     def register_node(self, node_id: int) -> None:
         """Register a client node."""
 
