@@ -211,12 +211,11 @@ def _fl(
 
 
 def run_server() -> None:
-    """Run Flower server."""
-
-    args = _parse_args()
+    """Run Flower server (Driver API and Fleet API)."""
 
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SERVER_ENTER)
+    args = _parse_args()
 
     # Shared State
     state = InMemoryState()
