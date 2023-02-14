@@ -82,10 +82,26 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         # Convert each task_id str to UUID
         task_ids: Set[UUID] = {UUID(task_id) for task_id in request.task_ids}
 
+        # Register callback
+        def on_rpc_done() -> None:
+            log(INFO, "DriverServicer.PullTaskRes callback: delete TaskIns/TaskRes")
+
+            if context.is_active():
+                return
+            if context.code() != grpc.StatusCode.OK:
+                return
+
+            # Delete delivered TaskIns and TaskRes
+            self.state.delete_tasks(task_ids=task_ids)
+
+        context.add_callback(on_rpc_done)
+
         # Read from state
         task_res_list: List[TaskRes] = self.state.get_task_res(
             task_ids=task_ids, limit=None
         )
+
+        context.set_code(grpc.StatusCode.OK)
         return PullTaskResResponse(task_res_list=task_res_list)
 
 
