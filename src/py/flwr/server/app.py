@@ -275,11 +275,11 @@ def _register_exit_handlers(
         # Setup things for graceful exit
         sys.exit(0)
 
-    default_handlers[SIGINT] = signal(
+    default_handlers[SIGINT] = signal(  # type: ignore
         SIGINT,
         graceful_exit_handler,  # type: ignore
     )
-    default_handlers[SIGTERM] = signal(
+    default_handlers[SIGTERM] = signal(  # type: ignore
         SIGTERM,
         graceful_exit_handler,  # type: ignore
     )
