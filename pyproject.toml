@@ -66,7 +66,7 @@ uvicorn = {extras = ["standard"], version = "^0.20.0"}
 simulation = ["ray"]
 rest = ["fastapi", "requests", "uvicorn"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.5"
 types-protobuf = "==3.19.18"
 types-requests = "==2.28.11.7"
