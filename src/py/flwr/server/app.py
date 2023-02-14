@@ -277,12 +277,12 @@ def _register_exit_handlers(
 
     default_handlers[SIGINT] = signal(
         SIGINT,
-        graceful_exit_handler,
-    )  # type: ignore
+        graceful_exit_handler,  # type: ignore
+    )
     default_handlers[SIGTERM] = signal(
         SIGTERM,
-        graceful_exit_handler,
-    )  # type: ignore
+        graceful_exit_handler,  # type: ignore
+    )
 
 
 def _run_driver_api_grpc(
@@ -350,7 +350,7 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _add_arg_driver_api_address(parser: argparse.Namespace) -> None:
+def _add_arg_driver_api_address(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--driver-api-address",
         help=f"Driver API gRPC server address. Default: {ADDRESS_DRIVER_API}",
@@ -358,7 +358,7 @@ def _add_arg_driver_api_address(parser: argparse.Namespace) -> None:
     )
 
 
-def _add_arg_fleet_api_address(parser: argparse.Namespace) -> None:
+def _add_arg_fleet_api_address(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--fleet-api-address",
         help=f"Fleet API gRPC server address. Default: {ADDRESS_FLEET_API_GRPC}",
