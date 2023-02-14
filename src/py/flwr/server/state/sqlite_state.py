@@ -1,8 +1,7 @@
 """SQLite based implemenation of server state."""
 import sqlite3
 from logging import INFO
-from os import PathLike
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Set
 from uuid import UUID
 
 from flwr.common.logger import log
@@ -37,7 +36,7 @@ class SqliteState(State):
 
     def __init__(
         self,
-        database_path: Union[str, bytes, PathLike[str], PathLike[bytes]] = ":memory:",
+        database_path: str = ":memory:",
     ) -> None:
         """Initialize an SqliteState.
 
