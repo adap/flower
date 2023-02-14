@@ -31,12 +31,20 @@ CREATE TABLE task(
 
 
 class SqliteState(State):
-    def __init__(self, db_name: str) -> None:
-        self.db_name = db_name
+    def __init__(self, database_path: str = ":memory:") -> None:
+        """Initialize an SqliteState.
+        
+        Parameters
+        ----------
+        database : (path-like object)
+            The path to the database file to be opened. Pass ":memory:" to open
+            a connectionto a database that is in RAM instead of on disk.
+        """
+        self.database_path = database_path
 
     def init_state(self) -> None:
         """."""
-        con = sqlite3.connect(self.db_name)
+        con = sqlite3.connect(self.database_path)
         cur = con.cursor()
 
         # Check if the DB has already been initialized
