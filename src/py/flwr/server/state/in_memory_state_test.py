@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 
 from .in_memory_state import InMemoryState
 
@@ -158,3 +158,69 @@ def test_store_task_ins_one() -> None:
     assert datetime.fromisoformat(actual_task.ttl) > datetime(
         2020, 1, 1, tzinfo=timezone.utc
     )
+
+
+def test_store_delete_tasks() -> None:
+    """Test store_task_ins."""
+
+    # Prepare
+    node_id = 1
+    state = InMemoryState()
+    task_ins: TaskIns = TaskIns(
+        task_id=str(uuid4()),
+        group_id="",
+        workload_id="",
+        task=Task(
+            consumer=Node(node_id=node_id, anonymous=False),
+        ),
+    )
+
+    # Insert three TaskIns
+    task_id_0 = state.store_task_ins(task_ins=task_ins)
+    task_id_1 = state.store_task_ins(task_ins=task_ins)
+    task_id_2 = state.store_task_ins(task_ins=task_ins)
+
+    assert task_id_0
+    assert task_id_1
+    assert task_id_2
+
+    # Get TaskIns to mark them delivered
+    _ = state.get_task_ins(node_id=node_id, limit=None)
+
+    # Insert one TaskRes and retrive it to mark it as delivered
+    task_res_0: TaskRes = TaskRes(
+        task_id=str(uuid4()),
+        group_id="",
+        workload_id="",
+        task=Task(
+            consumer=Node(node_id=node_id, anonymous=False), ancestry=[str(task_id_0)]
+        ),
+    )
+    _ = state.store_task_res(task_res=task_res_0)
+    _ = state.get_task_res(task_ids=set([task_id_0]), limit=None)
+
+    # Insert one TaskRes, but don't retrive it
+    task_res_1: TaskRes = TaskRes(
+        task_id=str(uuid4()),
+        group_id="",
+        workload_id="",
+        task=Task(
+            consumer=Node(node_id=node_id, anonymous=False),
+            ancestry=[str(task_id_1)],
+        ),
+    )
+    _ = state.store_task_res(task_res=task_res_1)
+
+    # Situation now:
+    # - State has three TaskIns, all of them delivered
+    # - State has two TaskRes, one of the delivered, the other not
+
+    assert len(state.task_ins_store) == 3
+    assert len(state.task_res_store) == 2
+
+    # Execute
+    state.delete_tasks(task_ids=set([task_id_0, task_id_1, task_id_2]))
+
+    # Assert
+    assert len(state.task_ins_store) == 2
+    assert len(state.task_res_store) == 1

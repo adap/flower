@@ -44,6 +44,10 @@ class State(abc.ABC):
         """Get all TaskRes that have not been delivered yet."""
 
     @abc.abstractmethod
+    def delete_tasks(self, task_ids: Set[UUID]) -> None:
+        """Delete all delivered TaskIns/TaskRes pairs."""
+
+    @abc.abstractmethod
     def register_node(self, node_id: int) -> None:
         """Register a client node."""
 
