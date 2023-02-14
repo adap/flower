@@ -1,6 +1,8 @@
+"""SQLite based implemenation of server state."""
 import sqlite3
 from logging import INFO
-from typing import List, Optional, Set
+from os import PathLike
+from typing import List, Optional, Set, Union
 from uuid import UUID
 
 from flwr.common.logger import log
@@ -25,15 +27,20 @@ CREATE TABLE task(
     ttl,
     ancestry,
     legacy_server_message,
-    legacy_client_message,                        
+    legacy_client_message,
 )
 """
 
 
 class SqliteState(State):
-    def __init__(self, database_path: str = ":memory:") -> None:
+    """."""
+
+    def __init__(
+        self,
+        database_path: Union[str, bytes, PathLike[str], PathLike[bytes]] = ":memory:",
+    ) -> None:
         """Initialize an SqliteState.
-        
+
         Parameters
         ----------
         database : (path-like object)

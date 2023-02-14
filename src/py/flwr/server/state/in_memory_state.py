@@ -18,15 +18,10 @@
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Set
 from uuid import UUID, uuid4
-from google.protobuf.json_format import MessageToJson
-
 
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
-from .state import State
-
-from flwr.common.logger import log
-from logging import ERROR
+from .state import State, is_valid_task
 
 
 class InMemoryState(State):
@@ -39,6 +34,10 @@ class InMemoryState(State):
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
+
+        # Validate task
+        if not is_valid_task(task_ins):
+            return None
 
         # Create and set task_id
         task_id = uuid4()
@@ -99,15 +98,8 @@ class InMemoryState(State):
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes."""
 
-        # Validate ancestry
-        if len(task_res.task.ancestry) == 0:
-            log(
-                ERROR,
-                "`task_res.task.ancestry` may not be empty:\n%s"
-                % MessageToJson(
-                    task_res, including_default_value_fields=True
-                ),
-            )
+        # Validate task
+        if not is_valid_task(task_res):
             return None
 
         # Create and set task_id
