@@ -210,6 +210,57 @@ def _fl(
     return hist
 
 
+def run_driver_api() -> None:
+    """Run Flower server (Driver API)."""
+
+    log(INFO, "Starting Flower server (Driver API)")
+    event(EventType.RUN_DRIVER_API_ENTER)
+    args = _parse_args_driver()
+
+    # Init state
+    state = InMemoryState()
+
+    # Start server
+    grpc_server: grpc.Server = _run_driver_api_grpc(
+        address=args.driver_api_address,
+        state=state,
+    )
+
+    # Graceful shutdown
+    _register_exit_handlers(
+        grpc_servers=[grpc_server],
+        event_type=EventType.RUN_DRIVER_API_LEAVE,
+    )
+
+    # Block
+    grpc_server.wait_for_termination()
+
+
+def run_fleet_api() -> None:
+    """Run Flower server (Fleet API)."""
+
+    log(INFO, "Starting Flower server (Fleet API)")
+    event(EventType.RUN_FLEET_API_ENTER)
+    args = _parse_args_fleet()
+
+    # Init state
+    state = InMemoryState()
+
+    # Start server
+    grpc_server: grpc.Server = _run_fleet_api_grpc_bidi(
+        address=args.fleet_api_address,
+        state=state,
+    )
+
+    _register_exit_handlers(
+        grpc_servers=[grpc_server],
+        event_type=EventType.RUN_FLEET_API_LEAVE,
+    )
+
+    # Block
+    grpc_server.wait_for_termination()
+
+
 def run_server() -> None:
     """Run Flower server (Driver API and Fleet API)."""
 
@@ -336,6 +387,28 @@ def _run_fleet_api_grpc_bidi(
     fleet_grpc_server.start()
 
     return fleet_grpc_server
+
+
+def _parse_args_driver() -> argparse.Namespace:
+    """Parse command line arguments for Driver API."""
+    parser = argparse.ArgumentParser(
+        description="Start Flower server (Driver API)",
+    )
+
+    _add_arg_driver_api_address(parser=parser)
+
+    return parser.parse_args()
+
+
+def _parse_args_fleet() -> argparse.Namespace:
+    """Parse command line arguments for Fleet API."""
+    parser = argparse.ArgumentParser(
+        description="Start Flower server (Fleet API)",
+    )
+
+    _add_arg_fleet_api_address(parser=parser)
+
+    return parser.parse_args()
 
 
 def _parse_args() -> argparse.Namespace:
