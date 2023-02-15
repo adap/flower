@@ -20,6 +20,7 @@ dls = ImageDataLoaders.from_folder(
 # Define model
 learn = vision_learner(dls, squeezenet1_1, metrics=error_rate)
 
+
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):

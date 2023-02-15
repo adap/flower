@@ -24,6 +24,7 @@ eval_list = []
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
 
+
 # mypy: allow-any-generics
 # pylint: disable= too-many-arguments, too-many-locals, global-statement
 class FlowerClient(fl.client.NumPyClient):
