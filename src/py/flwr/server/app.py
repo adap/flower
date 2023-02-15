@@ -49,6 +49,8 @@ ADDRESS_DRIVER_API = "0.0.0.0:9091"
 ADDRESS_FLEET_API_GRPC = "0.0.0.0:9092"
 ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
+DATABASE_PATH = ""
+
 
 @dataclass
 class ServerConfig:
@@ -222,7 +224,12 @@ def run_driver_api() -> None:
     args = _parse_args_driver()
 
     # Init state
-    state = InMemoryState()
+    if args.database_path != "":
+        log(INFO, "Driver API: loading SqliteState")
+        state = InMemoryState()  # TODO replace with SqliteState
+    else:
+        log(INFO, "Driver API: loading InMemoryState")
+        state = InMemoryState()
 
     # Start server
     grpc_server: grpc.Server = _run_driver_api_grpc(
@@ -249,7 +256,12 @@ def run_fleet_api() -> None:
     args = _parse_args_fleet()
 
     # Init state
-    state = InMemoryState()
+    if args.database_path != "":
+        log(INFO, "Fleet API: loading SqliteState")
+        state = InMemoryState()  # TODO replace with SqliteState
+    else:
+        log(INFO, "Fleet API: loading InMemoryState")
+        state = InMemoryState()
 
     grpc_servers = []
     bckg_threads = []
@@ -461,6 +473,7 @@ def _parse_args_driver() -> argparse.Namespace:
         description="Start Flower server (Driver API)",
     )
 
+    _add_args_common(parser=parser)
     _add_arg_driver_api(parser=parser)
 
     return parser.parse_args()
@@ -472,6 +485,7 @@ def _parse_args_fleet() -> argparse.Namespace:
         description="Start Flower server (Fleet API)",
     )
 
+    _add_args_common(parser=parser)
     _add_arg_fleet_api(parser=parser)
 
     return parser.parse_args()
@@ -483,10 +497,19 @@ def _parse_args() -> argparse.Namespace:
         description="Start Flower server (Driver API and Fleet API)",
     )
 
+    _add_args_common(parser=parser)
     _add_arg_driver_api(parser=parser)
     _add_arg_fleet_api(parser=parser)
 
     return parser.parse_args()
+
+
+def _add_args_common(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--database-path",
+        help=f"Flower server database path. Default: {DATABASE_PATH}",
+        default=DATABASE_PATH,
+    )
 
 
 def _add_arg_driver_api(parser: argparse.ArgumentParser) -> None:
