@@ -60,7 +60,7 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
     if tasks_ins_res.task.ttl != "":
         validation_errors.append("`ttl` must be an empty str")
 
-    # TaskInstruction specific
+    # TaskIns specific
     if isinstance(tasks_ins_res, TaskIns):
         # Legacy ServerMessage
         if not tasks_ins_res.task.HasField("legacy_server_message"):
@@ -74,7 +74,7 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         if len(tasks_ins_res.task.ancestry) != 0:
             validation_errors.append("`ancestry` is not empty")
 
-    # TaskResult specific
+    # TaskRes specific
     if isinstance(tasks_ins_res, TaskRes):
         # Legacy ClientMessage
         if not tasks_ins_res.task.HasField("legacy_client_message"):
