@@ -49,12 +49,10 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
 
         # Execute
-        task_ins_list = state.get_task_ins(
-            node_id=1,
-            limit=10,
-        )
+        task_ins_list = state.get_task_ins(node_id=1, limit=10)
 
         # Assert
+        assert type(task_ins_list) == list
         assert not task_ins_list
 
     def test_get_task_ins_anonymous(self) -> None:
@@ -401,22 +399,47 @@ class InMemoryStateTest(StateTest):
 class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
     """Test SqliteState implemenation with in-memory database."""
 
-    __test__ = False
+    __test__ = True
 
     def state_factory(self) -> State:
         """Return SqliteState with in-memory database."""
-        return SqliteState()
+        state = SqliteState()
+        state.initialize()
+        return state
+
+    def test_init_state(self) -> State:
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        result = state._query("SELECT name FROM sqlite_schema;")
+
+        # Assert
+        assert len(result) == 2
+
 
 
 class SqliteFileBaseTest(StateTest, unittest.TestCase):
     """Test SqliteState implemenation with file-based database."""
 
-    __test__ = False
+    __test__ = True
 
     def state_factory(self) -> State:
         """Return SqliteState with file-based database."""
-        file_path = cast(str, tempfile.TemporaryFile())
-        return SqliteState(database_path=file_path)
+        self.tmp_file = tempfile.NamedTemporaryFile()
+        state = SqliteState(database_path=self.tmp_file.name)
+        state.initialize()
+        return state
+
+    def test_init_state(self) -> State:
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        result = state._query("SELECT name FROM sqlite_schema;")
+
+        # Assert
+        assert len(result) == 2
 
 
 if __name__ == "__main__":
