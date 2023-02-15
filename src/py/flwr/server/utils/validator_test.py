@@ -47,7 +47,7 @@ class ValidatorTest(unittest.TestCase):
     def test_is_valid_task_res(self) -> None:
         """Test is_valid task_res."""
         # Prepare
-        # (consumer_node_id, anonymous, ancestry)
+        # (producer_node_id, anonymous, ancestry)
         valid_res: List[Tuple[int, bool, List[str]]] = [
             (0, True, ["1"]),
             (1, False, ["1"]),
@@ -63,15 +63,15 @@ class ValidatorTest(unittest.TestCase):
         ]
 
         # Execute & Assert
-        for consumer_node_id, anonymous, ancestry in valid_res:
-            msg = create_task_res(consumer_node_id, anonymous, ancestry)
+        for producer_node_id, anonymous, ancestry in valid_res:
+            msg = create_task_res(producer_node_id, anonymous, ancestry)
             val_errors = validate_task_ins_or_res(msg)
             self.assertFalse(val_errors)
 
-        for consumer_node_id, anonymous, ancestry in invalid_res:
-            msg = create_task_res(consumer_node_id, anonymous, ancestry)
+        for producer_node_id, anonymous, ancestry in invalid_res:
+            msg = create_task_res(producer_node_id, anonymous, ancestry)
             val_errors = validate_task_ins_or_res(msg)
-            self.assertTrue(val_errors)
+            self.assertTrue(val_errors, (producer_node_id, anonymous, ancestry))
 
 
 def create_task_ins(
@@ -99,7 +99,7 @@ def create_task_ins(
 
 
 def create_task_res(
-    consumer_node_id: int, anonymous: bool, ancestry: List[str]
+    producer_node_id: int, anonymous: bool, ancestry: List[str]
 ) -> TaskRes:
     """Create a TaskRes for testing."""
     task_res = TaskRes(
@@ -107,8 +107,8 @@ def create_task_res(
         group_id="",
         workload_id="",
         task=Task(
-            producer=Node(node_id=0, anonymous=True),
-            consumer=Node(node_id=consumer_node_id, anonymous=anonymous),
+            producer=Node(node_id=producer_node_id, anonymous=anonymous),
+            consumer=Node(node_id=0, anonymous=True),
             ancestry=ancestry,
             legacy_client_message=ClientMessage(
                 disconnect_res=ClientMessage.DisconnectRes()

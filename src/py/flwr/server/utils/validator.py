@@ -30,28 +30,6 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
     if not tasks_ins_res.HasField("task"):
         validation_errors.append("`task` does not set field `task`")
 
-    # Task producer
-    if not tasks_ins_res.task.HasField("producer"):
-        validation_errors.append("`producer` does not set field `producer`")
-    if tasks_ins_res.task.producer.node_id != 0:
-        validation_errors.append("`producer.node_id` is not 0")
-    if not tasks_ins_res.task.producer.anonymous:
-        validation_errors.append("`producer` is not anonymous")
-
-    # Task consumer
-    if not tasks_ins_res.task.HasField("consumer"):
-        validation_errors.append("`consumer` does not set field `consumer`")
-    if (
-        tasks_ins_res.task.consumer.anonymous
-        and tasks_ins_res.task.consumer.node_id != 0
-    ):
-        validation_errors.append("anonymous consumers MUST NOT set a `node_id`")
-    if (
-        not tasks_ins_res.task.consumer.anonymous
-        and tasks_ins_res.task.consumer.node_id == 0
-    ):
-        validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
-
     # Created/delivered/TTL
     if tasks_ins_res.task.created_at != "":
         validation_errors.append("`created_at` must be an empty str")
@@ -62,6 +40,28 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
 
     # TaskIns specific
     if isinstance(tasks_ins_res, TaskIns):
+        # Task producer
+        if not tasks_ins_res.task.HasField("producer"):
+            validation_errors.append("`producer` does not set field `producer`")
+        if tasks_ins_res.task.producer.node_id != 0:
+            validation_errors.append("`producer.node_id` is not 0")
+        if not tasks_ins_res.task.producer.anonymous:
+            validation_errors.append("`producer` is not anonymous")
+
+        # Task consumer
+        if not tasks_ins_res.task.HasField("consumer"):
+            validation_errors.append("`consumer` does not set field `consumer`")
+        if (
+            tasks_ins_res.task.consumer.anonymous
+            and tasks_ins_res.task.consumer.node_id != 0
+        ):
+            validation_errors.append("anonymous consumers MUST NOT set a `node_id`")
+        if (
+            not tasks_ins_res.task.consumer.anonymous
+            and tasks_ins_res.task.consumer.node_id == 0
+        ):
+            validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
+
         # Legacy ServerMessage
         if not tasks_ins_res.task.HasField("legacy_server_message"):
             validation_errors.append(
@@ -76,6 +76,34 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
 
     # TaskRes specific
     if isinstance(tasks_ins_res, TaskRes):
+        # Task producer
+        if not tasks_ins_res.task.HasField("producer"):
+            validation_errors.append("`producer` does not set field `producer`")
+        if (
+            tasks_ins_res.task.producer.anonymous
+            and tasks_ins_res.task.producer.node_id != 0
+        ):
+            validation_errors.append("anonymous producers MUST NOT set a `node_id`")
+        if (
+            not tasks_ins_res.task.producer.anonymous
+            and tasks_ins_res.task.producer.node_id == 0
+        ):
+            validation_errors.append("non-anonymous producer MUST provide a `node_id`")
+
+        # Task consumer
+        if not tasks_ins_res.task.HasField("consumer"):
+            validation_errors.append("`consumer` does not set field `consumer`")
+        if (
+            tasks_ins_res.task.consumer.anonymous
+            and tasks_ins_res.task.consumer.node_id != 0
+        ):
+            validation_errors.append("anonymous consumers MUST NOT set a `node_id`")
+        if (
+            not tasks_ins_res.task.consumer.anonymous
+            and tasks_ins_res.task.consumer.node_id == 0
+        ):
+            validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
+
         # Legacy ClientMessage
         if not tasks_ins_res.task.HasField("legacy_client_message"):
             validation_errors.append(
