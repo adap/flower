@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from logging import INFO, WARN
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import grpc
 import uvicorn
@@ -45,9 +45,9 @@ from flwr.server.server import Server
 from flwr.server.state import InMemoryState, State
 from flwr.server.strategy import FedAvg, Strategy
 
-ADDRESS_DRIVER_API = "[::]:9091"
-ADDRESS_FLEET_API_GRPC = "[::]:9092"
-ADDRESS_FLEET_API_REST = "0.0.0.0:8000"
+ADDRESS_DRIVER_API = "0.0.0.0:9091"
+ADDRESS_FLEET_API_GRPC = "0.0.0.0:9092"
+ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
 
 @dataclass
@@ -214,23 +214,88 @@ def _fl(
     return hist
 
 
-def run_server() -> None:
-    """Run Flower server."""
+def run_driver_api() -> None:
+    """Run Flower server (Driver API)."""
 
-    args = _parse_args()
+    log(INFO, "Starting Flower server (Driver API)")
+    event(EventType.RUN_DRIVER_API_ENTER)
+    args = _parse_args_driver()
+
+    # Init state
+    state = InMemoryState()
+
+    # Start server
+    grpc_server: grpc.Server = _run_driver_api_grpc(
+        address=args.driver_api_address,
+        state=state,
+    )
+
+    # Graceful shutdown
+    _register_exit_handlers(
+        grpc_servers=[grpc_server],
+        bckg_threads=[],
+        event_type=EventType.RUN_DRIVER_API_LEAVE,
+    )
+
+    # Block
+    grpc_server.wait_for_termination()
+
+
+def run_fleet_api() -> None:
+    """Run Flower server (Fleet API)."""
+
+    log(INFO, "Starting Flower server (Fleet API)")
+    event(EventType.RUN_FLEET_API_ENTER)
+    args = _parse_args_fleet()
+
+    # Init state
+    state = InMemoryState()
+
+    grpc_servers = []
+    bckg_threads = []
+
+    # Start Fleet API
+    if args.fleet_api_type == "rest":
+        fleet_thread = threading.Thread(
+            target=_run_fleet_api_rest,
+            args=(args.rest_fleet_api_address, state),
+        )
+        fleet_thread.start()
+        bckg_threads.append(fleet_thread)
+    elif args.fleet_api_type == "grpc":
+        fleet_server = _run_fleet_api_grpc_bidi(
+            address=args.grpc_fleet_api_address,
+            state=state,
+        )
+        grpc_servers.append(fleet_server)
+    else:
+        raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
+
+    # Graceful shutdown
+    _register_exit_handlers(
+        grpc_servers=grpc_servers,
+        bckg_threads=bckg_threads,
+        event_type=EventType.RUN_FLEET_API_LEAVE,
+    )
+
+    # Block
+    if len(grpc_servers) > 0:
+        grpc_servers[0].wait_for_termination()
+    elif len(bckg_threads) > 0:
+        bckg_threads[0].join()
+
+
+def run_server() -> None:
+    """Run Flower server (Driver API and Fleet API)."""
 
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SERVER_ENTER)
+    args = _parse_args()
 
     # Shared State
     state = InMemoryState()
-    instance = Singleton.instance()
-    instance.set_state(state=state)
-
-    # Shared DriverClientManager
-    driver_client_manager = DriverClientManager(
-        state=state,
-    )
+    # instance = Singleton.instance()
+    # instance.set_state(state=state)
 
     # Start Driver API
     driver_server: grpc.Server = _run_driver_api_grpc(
@@ -238,11 +303,42 @@ def run_server() -> None:
         state=state,
     )
 
-    # Fleet API
-    fleet_server: Optional[grpc.Server] = None
-    fleet_thread: Optional[threading.Thread] = None
+    grpc_servers = [driver_server]
+    bckg_threads = []
+
+    # Start Fleet API
+    if args.fleet_api_type == "rest":
+        fleet_thread = threading.Thread(
+            target=_run_fleet_api_rest,
+            args=(args.rest_fleet_api_address, state),
+        )
+        fleet_thread.start()
+        bckg_threads.append(fleet_thread)
+    elif args.fleet_api_type == "grpc":
+        fleet_server = _run_fleet_api_grpc_bidi(
+            address=args.grpc_fleet_api_address,
+            state=state,
+        )
+        grpc_servers.append(fleet_server)
+    else:
+        raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Graceful shutdown
+    _register_exit_handlers(
+        grpc_servers=grpc_servers,
+        bckg_threads=bckg_threads,
+        event_type=EventType.RUN_SERVER_LEAVE,
+    )
+
+    # Block
+    driver_server.wait_for_termination()
+
+
+def _register_exit_handlers(
+    grpc_servers: List[grpc.Server],
+    bckg_threads: List[threading.Thread],
+    event_type: EventType,
+) -> None:
     default_handlers = {
         SIGINT: None,
         SIGTERM: None,
@@ -261,13 +357,13 @@ def run_server() -> None:
         # Reset to default handler
         signal(signalnum, default_handlers[signalnum])
 
-        event_res = event(EventType.RUN_SERVER_LEAVE)
+        event_res = event(event_type=event_type)
 
-        driver_server.stop(grace=1)
-        if fleet_server is not None:
-            fleet_server.stop(grace=1)
-        if fleet_thread is not None:
-            fleet_thread.join()
+        for grpc_server in grpc_servers:
+            grpc_server.stop(grace=1)
+
+        for bckg_thread in bckg_threads:
+            bckg_thread.join()
 
         # Ensure event has happend
         event_res.result()
@@ -275,28 +371,14 @@ def run_server() -> None:
         # Setup things for graceful exit
         sys.exit(0)
 
-    default_handlers[SIGINT] = signal(SIGINT, graceful_exit_handler)  # type: ignore
-    default_handlers[SIGTERM] = signal(SIGTERM, graceful_exit_handler)  # type: ignore
-    # Start Fleet API
-    if args.fleet_api_type == "rest":
-        rest_bind_host, rest_bind_port_str = args.rest_fleet_api_address.split(":")
-        rest_bind_port = int(rest_bind_port_str)
-        fleet_thread = threading.Thread(
-            target=_run_fleet_api_rest,
-            args=(rest_bind_host, rest_bind_port),
-        )
-        fleet_thread.start()
-    elif args.fleet_api_type == "grpc":
-        fleet_server = _run_fleet_api_grpc_bidi(
-            address=args.grpc_fleet_api_address,
-            driver_client_manager=driver_client_manager,
-        )
-        fleet_server.wait_for_termination()
-    else:
-        raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
-
-    # Not really necessary
-    driver_server.wait_for_termination()
+    default_handlers[SIGINT] = signal(  # type: ignore
+        SIGINT,
+        graceful_exit_handler,  # type: ignore
+    )
+    default_handlers[SIGTERM] = signal(  # type: ignore
+        SIGTERM,
+        graceful_exit_handler,  # type: ignore
+    )
 
 
 def _run_driver_api_grpc(
@@ -325,9 +407,14 @@ def _run_driver_api_grpc(
 
 def _run_fleet_api_grpc_bidi(
     address: str,
-    driver_client_manager: DriverClientManager,
+    state: State,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, bidirectional streaming)."""
+
+    # DriverClientManager
+    driver_client_manager = DriverClientManager(
+        state=state,
+    )
 
     # Create (legacy) Fleet API gRPC server
     fleet_servicer = FlowerServiceServicer(
@@ -347,9 +434,19 @@ def _run_fleet_api_grpc_bidi(
     return fleet_grpc_server
 
 
-def _run_fleet_api_rest(host: str, port: int) -> None:
+def _run_fleet_api_rest(
+    address: str,
+    state: State,
+) -> None:
     """Run Driver API (REST-based)."""
     log(INFO, "Starting Flower REST server")
+
+    instance = Singleton.instance()
+    instance.set_state(state=state)
+
+    host, port_str = address.split(":")
+    port = int(port_str)
+
     uvicorn.run(
         "flwr.server.rest_server.rest_api:app",
         port=port,
@@ -360,11 +457,50 @@ def _run_fleet_api_rest(host: str, port: int) -> None:
     )
 
 
-def _parse_args() -> argparse.Namespace:
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="Start a long-running Flower server")
+def _parse_args_driver() -> argparse.Namespace:
+    """Parse command line arguments for Driver API."""
+    parser = argparse.ArgumentParser(
+        description="Start Flower server (Driver API)",
+    )
 
-    # Fleet API transport layer
+    _add_arg_driver_api(parser=parser)
+
+    return parser.parse_args()
+
+
+def _parse_args_fleet() -> argparse.Namespace:
+    """Parse command line arguments for Fleet API."""
+    parser = argparse.ArgumentParser(
+        description="Start Flower server (Fleet API)",
+    )
+
+    _add_arg_fleet_api(parser=parser)
+
+    return parser.parse_args()
+
+
+def _parse_args() -> argparse.Namespace:
+    """Parse command line arguments for both Driver API and Fleet API."""
+    parser = argparse.ArgumentParser(
+        description="Start Flower server (Driver API and Fleet API)",
+    )
+
+    _add_arg_driver_api(parser=parser)
+    _add_arg_fleet_api(parser=parser)
+
+    return parser.parse_args()
+
+
+def _add_arg_driver_api(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--driver-api-address",
+        help=f"Driver API gRPC server address. Default: {ADDRESS_DRIVER_API}",
+        default=ADDRESS_DRIVER_API,
+    )
+
+
+def _add_arg_fleet_api(parser: argparse.ArgumentParser) -> None:
+    # Fleet API transport layer type
     ex_group = parser.add_mutually_exclusive_group()
     ex_group.add_argument(
         "--grpc",
@@ -382,13 +518,6 @@ def _parse_args() -> argparse.Namespace:
         help="Start a REST-based Fleet API server",
     )
 
-    # Driver API
-    parser.add_argument(
-        "--driver-api-address",
-        help=f"Driver API gRPC server address. Default: {ADDRESS_DRIVER_API}",
-        default=ADDRESS_DRIVER_API,
-    )
-
     # Fleet API gRPC options
     grpc_group = parser.add_argument_group("Fleet API gRPC server options", "")
     grpc_group.add_argument(
@@ -404,5 +533,3 @@ def _parse_args() -> argparse.Namespace:
         help=f"Fleet API REST server address. Default:'{ADDRESS_FLEET_API_REST}'",
         default=ADDRESS_FLEET_API_REST,
     )
-
-    return parser.parse_args()

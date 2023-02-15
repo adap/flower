@@ -130,6 +130,28 @@ class InMemoryState(State):
         # Return TaskRes
         return task_res_list
 
+    def delete_tasks(self, task_ids: Set[UUID]) -> None:
+        """Delete all delivered TaskIns/TaskRes pairs."""
+
+        task_ins_to_be_deleted: Set[UUID] = set()
+        task_res_to_be_deleted: Set[UUID] = set()
+
+        for task_ins_id in task_ids:
+            # Find the task_id of the matching task_res
+            for task_res_id, task_res in self.task_res_store.items():
+                if UUID(task_res.task.ancestry[0]) != task_ins_id:
+                    continue
+                if task_res.task.delivered_at == "":
+                    continue
+
+                task_ins_to_be_deleted.add(task_ins_id)
+                task_res_to_be_deleted.add(task_res_id)
+
+        for task_id in task_ins_to_be_deleted:
+            del self.task_ins_store[task_id]
+        for task_id in task_res_to_be_deleted:
+            del self.task_res_store[task_id]
+
     def register_node(self, node_id: int) -> None:
         """Register a client node."""
         if node_id in self.node_ids:
