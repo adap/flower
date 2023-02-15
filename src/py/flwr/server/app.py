@@ -294,8 +294,6 @@ def run_server() -> None:
 
     # Shared State
     state = InMemoryState()
-    # instance = Singleton.instance()
-    # instance.set_state(state=state)
 
     # Start Driver API
     driver_server: grpc.Server = _run_driver_api_grpc(
