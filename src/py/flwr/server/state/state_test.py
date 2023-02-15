@@ -150,13 +150,17 @@ class StateTest(unittest.TestCase):
         _ = state.get_task_ins(node_id=consumer_node_id, limit=None)
 
         # Insert one TaskRes and retrive it to mark it as delivered
-        task_res_0 = create_task_res(producer_node_id=100, anonymous=False, ancestry=[str(task_id_0)])
-  
+        task_res_0 = create_task_res(
+            producer_node_id=100, anonymous=False, ancestry=[str(task_id_0)]
+        )
+
         _ = state.store_task_res(task_res=task_res_0)
         _ = state.get_task_res(task_ids=set([task_id_0]), limit=None)
 
         # Insert one TaskRes, but don't retrive it
-        task_res_1: TaskRes = create_task_res(producer_node_id=100, anonymous=False, ancestry=[str(task_id_0)])
+        task_res_1: TaskRes = create_task_res(
+            producer_node_id=100, anonymous=False, ancestry=[str(task_id_0)]
+        )
         _ = state.store_task_res(task_res=task_res_1)
 
         # Situation now:
