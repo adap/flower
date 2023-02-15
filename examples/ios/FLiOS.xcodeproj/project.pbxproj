@@ -104,6 +104,7 @@
 		21B540732865B14000185DEE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B540722865B14000185DEE /* ContentView.swift */; };
 		21B540752865B14100185DEE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540742865B14100185DEE /* Assets.xcassets */; };
 		21B540782865B14100185DEE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540772865B14100185DEE /* Preview Assets.xcassets */; };
+		50773984299D48C1001FD22F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50773983299D48C1001FD22F /* Constants.swift */; };
 		50B5A2C6294C848000B0ABC6 /* flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 50B5A2C5294C848000B0ABC6 /* flwr */; };
 /* End PBXBuildFile section */
 
@@ -218,6 +219,7 @@
 		21B540722865B14000185DEE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		21B540742865B14100185DEE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		21B540772865B14100185DEE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		50773983299D48C1001FD22F /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		50B5A2C4294C841300B0ABC6 /* flwr */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = flwr; path = ../../src/swift/flwr; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -386,6 +388,7 @@
 		21B5406F2865B14000185DEE /* FLiOS */ = {
 			isa = PBXGroup;
 			children = (
+				50773981299D48AF001FD22F /* Data */,
 				19764EEB297D3AAE009F3E5D /* Benchmark */,
 				21A77B162865B23D0062EBD8 /* CoreMLClient */,
 				21A77A6E2865B22A0062EBD8 /* CoreMLHelpers */,
@@ -407,6 +410,14 @@
 				21B540772865B14100185DEE /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		50773981299D48AF001FD22F /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				50773983299D48C1001FD22F /* Constants.swift */,
+			);
+			path = Data;
 			sourceTree = "<group>";
 		};
 		50B5A2C3294C841300B0ABC6 /* Packages */ = {
@@ -545,6 +556,7 @@
 				21A77AD62865B22B0062EBD8 /* FeatureTypes.pb.swift in Sources */,
 				21A77AF52865B22B0062EBD8 /* DataStructures.proto in Sources */,
 				21A77AED2865B22B0062EBD8 /* Normalizer.proto in Sources */,
+				50773984299D48C1001FD22F /* Constants.swift in Sources */,
 				21A77AE02865B22B0062EBD8 /* TreeEnsemble.proto in Sources */,
 				21A77AD12865B22B0062EBD8 /* MLMultiArray+Image.swift in Sources */,
 				21A77AF12865B22B0062EBD8 /* Identity.pb.swift in Sources */,

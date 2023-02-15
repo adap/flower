@@ -10,8 +10,10 @@ import CoreML
 import flwr
 
 public class FLiOSModel: ObservableObject {
+    @Published public var scenarioSelection = Constants.ScenarioTypes.MNIST
     private var trainingBatchProvider: MLBatchProvider?
     @Published public var trainingBatchStatus = PreparationStatus.notPrepared
+    let scenarios = Constants.ScenarioTypes.allCases
     
     private var testBatchProvider: MLBatchProvider?
     @Published public var testBatchStatus = PreparationStatus.notPrepared

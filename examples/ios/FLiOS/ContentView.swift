@@ -26,6 +26,15 @@ struct ContentView: View {
                     .font(.largeTitle)
                 Spacer()
                 Form {
+                    Section(header: Text("Scenario")) {
+                        HStack{
+                            Picker("Select a Scenario", selection: $model.scenarioSelection) {
+                                ForEach(model.scenarios, id: \.self) {
+                                    Text($0.description)
+                                }
+                            }
+                        }
+                    }
                     Section(header: Text("Prepare Dataset")) {
                         HStack {
                             Text("Training Dataset: \(self.model.trainingBatchStatus.description)")
