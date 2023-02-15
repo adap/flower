@@ -21,7 +21,7 @@ from dataclasses import dataclass
 from logging import INFO, WARN
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import grpc
 
@@ -211,20 +211,14 @@ def _fl(
 
 
 def run_server() -> None:
-    """Run Flower server."""
-
-    args = _parse_args()
+    """Run Flower server (Driver API and Fleet API)."""
 
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SERVER_ENTER)
+    args = _parse_args()
 
     # Shared State
     state = InMemoryState()
-
-    # Shared DriverClientManager
-    driver_client_manager = DriverClientManager(
-        state=state,
-    )
 
     # Start Driver API
     driver_server = _run_driver_api_grpc(
@@ -235,9 +229,23 @@ def run_server() -> None:
     # Start Fleet API
     fleet_server = _run_fleet_api_grpc_bidi(
         address=args.fleet_api_address,
-        driver_client_manager=driver_client_manager,
+        state=state,
     )
 
+    # Graceful shutdown
+    _register_exit_handlers(
+        grpc_servers=[driver_server, fleet_server],
+        event_type=EventType.RUN_SERVER_LEAVE,
+    )
+
+    # Block
+    driver_server.wait_for_termination()
+    fleet_server.wait_for_termination()
+
+
+def _register_exit_handlers(
+    grpc_servers: List[grpc.Server], event_type: EventType
+) -> None:
     default_handlers = {
         SIGINT: None,
         SIGTERM: None,
@@ -256,10 +264,10 @@ def run_server() -> None:
         # Reset to default handler
         signal(signalnum, default_handlers[signalnum])
 
-        event_res = event(EventType.RUN_SERVER_LEAVE)
+        event_res = event(event_type=event_type)
 
-        driver_server.stop(grace=1)
-        fleet_server.stop(grace=1)
+        for grpc_server in grpc_servers:
+            grpc_server.stop(grace=1)
 
         # Ensure event has happend
         event_res.result()
@@ -267,10 +275,14 @@ def run_server() -> None:
         # Setup things for graceful exit
         sys.exit(0)
 
-    default_handlers[SIGINT] = signal(SIGINT, graceful_exit_handler)  # type: ignore
-    default_handlers[SIGTERM] = signal(SIGTERM, graceful_exit_handler)  # type: ignore
-    driver_server.wait_for_termination()
-    fleet_server.wait_for_termination()
+    default_handlers[SIGINT] = signal(  # type: ignore
+        SIGINT,
+        graceful_exit_handler,  # type: ignore
+    )
+    default_handlers[SIGTERM] = signal(  # type: ignore
+        SIGTERM,
+        graceful_exit_handler,  # type: ignore
+    )
 
 
 def _run_driver_api_grpc(
@@ -299,9 +311,14 @@ def _run_driver_api_grpc(
 
 def _run_fleet_api_grpc_bidi(
     address: str,
-    driver_client_manager: DriverClientManager,
+    state: State,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, bidirectional streaming)."""
+
+    # DriverClientManager
+    driver_client_manager = DriverClientManager(
+        state=state,
+    )
 
     # Create (legacy) Fleet API gRPC server
     fleet_servicer = FlowerServiceServicer(
@@ -322,21 +339,28 @@ def _run_fleet_api_grpc_bidi(
 
 
 def _parse_args() -> argparse.Namespace:
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="Start a long-running Flower server")
+    """Parse command line arguments for both Driver API and Fleet API."""
+    parser = argparse.ArgumentParser(
+        description="Start Flower server (Driver API and Fleet API)",
+    )
 
-    # Driver API
+    _add_arg_driver_api_address(parser=parser)
+    _add_arg_fleet_api_address(parser=parser)
+
+    return parser.parse_args()
+
+
+def _add_arg_driver_api_address(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--driver-api-address",
         help=f"Driver API gRPC server address. Default: {ADDRESS_DRIVER_API}",
         default=ADDRESS_DRIVER_API,
     )
 
-    # Fleet API
+
+def _add_arg_fleet_api_address(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--fleet-api-address",
         help=f"Fleet API gRPC server address. Default: {ADDRESS_FLEET_API_GRPC}",
         default=ADDRESS_FLEET_API_GRPC,
     )
-
-    return parser.parse_args()
