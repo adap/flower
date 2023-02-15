@@ -31,8 +31,9 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+from flwr.proto.task_pb2 import TaskRes
 from flwr.server.state import State
+from flwr.server.utils.validator import validate_task_ins_or_res
 
 
 class DriverServicer(driver_pb2_grpc.DriverServicer):
@@ -61,7 +62,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         # Validate request
         _raise_if(len(request.task_ins_list) == 0, "`task_ins_list` must not be empty")
         for task_ins in request.task_ins_list:
-            _validate_incoming_task_ins(task_ins=task_ins)
+            validation_errors = validate_task_ins_or_res(task_ins)
+            _raise_if(bool(validation_errors), ", ".join(validation_errors))
 
         # Store each TaskIns
         task_ids: List[Optional[UUID]] = []
@@ -103,53 +105,6 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         context.set_code(grpc.StatusCode.OK)
         return PullTaskResResponse(task_res_list=task_res_list)
-
-
-def _validate_incoming_task_ins(task_ins: TaskIns) -> None:
-    """Validate incoming TaskIns."""
-
-    _raise_if(task_ins.task_id != "", "non-empty `task_id`")
-    _raise_if(not task_ins.HasField("task"), "`task` does not set field `task`")
-
-    task: Task = task_ins.task
-
-    # Task producer
-    _raise_if(not task.HasField("producer"), "`producer` does not set field `producer`")
-    _raise_if(task.producer.node_id != 0, "`producer.node_id` is not 0")
-    _raise_if(not task.producer.anonymous, "`producer` is not anonymous")
-
-    # Task consumer
-    _raise_if(not task.HasField("consumer"), "`consumer` does not set field `consumer`")
-    _raise_if(
-        task.consumer.anonymous and task.consumer.node_id != 0,
-        "anonymous consumers MUST NOT set a `node_id`",
-    )
-    _raise_if(
-        not task.consumer.anonymous and task.consumer.node_id == 0,
-        "non-anonymous consumer MUST provide a `node_id`",
-    )
-
-    # Created/delivered/TTL
-    _raise_if(task.created_at != "", "`created_at` must be an empty str")
-    _raise_if(task.delivered_at != "", "`delivered_at` must be an empty str")
-    _raise_if(task.ttl != "", "`ttl` must be an empty str")
-
-    # Legacy ServerMessage/ClientMessage
-    _raise_if(
-        task.HasField("legacy_client_message"),
-        "`legacy_client_message` is not `None`",
-    )
-    _raise_if(
-        not task.HasField("legacy_server_message"),
-        "`task` does not set field `legacy_server_message`",
-    )
-    _raise_if(
-        not task.legacy_server_message.HasField("msg"),
-        "`legacy_server_message` does not set field `msg`",
-    )
-
-    # Ancestors
-    _raise_if(len(task.ancestry) != 0, "`ancestry` is not empty")
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
