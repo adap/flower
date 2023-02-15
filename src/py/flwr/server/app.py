@@ -42,7 +42,7 @@ from flwr.server.grpc_server.grpc_server import (
 from flwr.server.history import History
 from flwr.server.rest_server.singleton import Singleton
 from flwr.server.server import Server
-from flwr.server.state import InMemoryState, State
+from flwr.server.state import InMemoryState, SqliteState, State
 from flwr.server.strategy import FedAvg, Strategy
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
@@ -226,7 +226,7 @@ def run_driver_api() -> None:
     # Init state
     if args.database_path != "":
         log(INFO, "Driver API: loading SqliteState")
-        state = InMemoryState()  # TODO replace with SqliteState
+        state = SqliteState(database_path=args.database_path)
     else:
         log(INFO, "Driver API: loading InMemoryState")
         state = InMemoryState()
@@ -258,7 +258,7 @@ def run_fleet_api() -> None:
     # Init state
     if args.database_path != "":
         log(INFO, "Fleet API: loading SqliteState")
-        state = InMemoryState()  # TODO replace with SqliteState
+        state = SqliteState(database_path=args.database_path)
     else:
         log(INFO, "Fleet API: loading InMemoryState")
         state = InMemoryState()
@@ -270,7 +270,7 @@ def run_fleet_api() -> None:
     if args.fleet_api_type == "rest":
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state),
+            args=(args.rest_fleet_api_address,),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
@@ -320,7 +320,7 @@ def run_server() -> None:
     if args.fleet_api_type == "rest":
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state),
+            args=(args.rest_fleet_api_address,),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
@@ -446,13 +446,9 @@ def _run_fleet_api_grpc_bidi(
 
 def _run_fleet_api_rest(
     address: str,
-    state: State,
 ) -> None:
     """Run Driver API (REST-based)."""
     log(INFO, "Starting Flower REST server")
-
-    instance = Singleton.instance()
-    instance.set_state(state=state)
 
     host, port_str = address.split(":")
     port = int(port_str)
