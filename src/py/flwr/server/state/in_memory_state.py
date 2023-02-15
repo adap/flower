@@ -113,15 +113,13 @@ class InMemoryState(State):
         task_id = uuid4()
         task_res.task_id = str(task_id)
 
-        # Set created_at
+        # Set created_at and ttl
         created_at: datetime = _now()
-        task_res.task.created_at = created_at.isoformat()
-
-        # Set ttl
         ttl: datetime = created_at + timedelta(hours=24)
-        task_res.task.ttl = ttl.isoformat()
 
         # Store TaskRes
+        task_res.task.created_at = created_at.isoformat()
+        task_res.task.ttl = ttl.isoformat()
         self.task_res_store[task_id] = task_res
 
         # Return the new task_id
