@@ -16,66 +16,10 @@
 
 
 import abc
-from logging import ERROR
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Set
 from uuid import UUID
 
-from google.protobuf.json_format import MessageToJson
-
-from flwr.common.logger import log
 from flwr.proto.task_pb2 import TaskIns, TaskRes
-
-
-def is_valid_task(message: Union[TaskIns, TaskRes]) -> bool:
-    """Validate message of type TaskIns or TaskRes.
-
-    If the message is not valid return False and log the validation
-    error.
-    """
-    if message.task.consumer.anonymous and message.task.consumer.node_id != 0:
-        log(
-            ERROR,
-            "`task.consumer.anonymous` is `True` then `node_id` must be 0\n%s",
-            MessageToJson(message, including_default_value_fields=True),
-        )
-        return False
-
-    if not message.task.consumer.anonymous and message.task.consumer.node_id == 0:
-        log(
-            ERROR,
-            "`task.consumer.anonymous` is `False` then `node_id` must not be 0\n%s",
-            MessageToJson(message, including_default_value_fields=True),
-        )
-        return False
-
-    if message.task.HasField("producer"):
-        if message.task.producer.anonymous and message.task.producer.node_id != 0:
-            log(
-                ERROR,
-                "`task.producer.anonymous` is `True` then `node_id` must be 0\n%s",
-                MessageToJson(message, including_default_value_fields=True),
-            )
-            return False
-
-        if not message.task.producer.anonymous and message.task.producer.node_id == 0:
-            log(
-                ERROR,
-                "`task.producer.anonymous` is `False` then `node_id` must not be 0\n%s",
-                MessageToJson(message, including_default_value_fields=True),
-            )
-            return False
-
-    # A task TaskRes message has to have at least one ancestor for the embedded task
-    if isinstance(message, TaskRes):
-        if len(message.task.ancestry) == 0:
-            log(
-                ERROR,
-                "`task_res.task.ancestry` may not be empty:\n%s",
-                MessageToJson(message, including_default_value_fields=True),
-            )
-            return False
-
-    return True
 
 
 class State(abc.ABC):

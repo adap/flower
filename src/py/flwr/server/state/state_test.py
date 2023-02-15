@@ -19,54 +19,16 @@ import tempfile
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timezone
-from typing import List, Tuple, cast
+from typing import List, cast
 from uuid import uuid4
 
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 from .in_memory_state import InMemoryState
 from .sqlite_state import SqliteState
-from .state import State, is_valid_task
-
-
-class ValidatorTest(unittest.TestCase):
-    """Test validation code in state."""
-
-    def test_is_valid_task_ins(self) -> None:
-        """Test is_valid task_ins."""
-        # Prepare
-        is_valid_tests = [
-            ((0, False), False),
-            ((0, True), True),
-            ((1, False), True),
-            ((1, True), False),
-        ]
-
-        # Execute & Assert
-        for (consumer_node_id, anonymous), result in is_valid_tests:
-            msg = create_task_ins(consumer_node_id, anonymous)
-            assert is_valid_task(msg) == result
-
-    def test_is_valid_task_res(self) -> None:
-        """Test is_valid task_res."""
-        # Prepare
-        # (consumer_node_id, anonymous, ancestry), is_valid
-        is_valid_tests: List[Tuple[Tuple[int, bool, List[str]], bool]] = [
-            ((0, False, []), False),
-            ((0, False, ["1"]), False),
-            ((0, True, []), False),
-            ((0, True, ["1"]), True),
-            ((1, False, []), False),
-            ((1, False, ["1"]), True),
-            ((1, True, []), False),
-            ((1, True, ["1"]), False),
-        ]
-
-        # Execute & Assert
-        for (consumer_node_id, anonymous, ancestry), result in is_valid_tests:
-            msg = create_task_res(consumer_node_id, anonymous, ancestry)
-            assert is_valid_task(msg) == result
+from .state import State
 
 
 class StateTest(unittest.TestCase):
@@ -80,20 +42,89 @@ class StateTest(unittest.TestCase):
         """Provide state implementation to test."""
         raise NotImplementedError()
 
+    def test_get_task_ins_empty(self) -> None:
+        """Validate that a new state has no TaskIns."""
+
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        task_ins_list = state.get_task_ins(
+            node_id=1,
+            limit=10,
+        )
+
+        # Assert
+        assert not task_ins_list
+
+    def test_get_task_ins_identity(self) -> None:
+        """Validate that a new state has no TaskIns."""
+
+        # Prepare
+        state = self.state_factory()
+        task_id = state.store_task_ins(
+            task_ins=create_task_ins(consumer_node_id=1, anonymous=False)
+        )
+
+        # Execute
+        task_ins_list = state.get_task_ins(
+            node_id=123,
+            limit=10,
+        )
+
+        # Assert
+        assert len(task_ins_list) == 1
+        assert task_ins_list[0].task_id == str(task_id)
+
+    def test_get_task_ins_anonymous(self) -> None:
+        """Validate that a new state has no TaskIns."""
+
+        # Prepare
+        state = self.state_factory()
+        task_id = state.store_task_ins(
+            task_ins=TaskIns(
+                task_id="",
+                group_id="",
+                workload_id="",
+                task=Task(
+                    producer=Node(node_id=0, anonymous=True),
+                    consumer=Node(node_id=0, anonymous=True),
+                ),
+            )
+        )
+
+        # Execute
+        task_ins_list = state.get_task_ins(
+            node_id=None,
+            limit=10,
+        )
+
+        # Assert
+        assert len(task_ins_list) == 1
+        assert task_ins_list[0].task_id == str(task_id)
+
+    def test_get_task_res_empty(self) -> None:
+        """Validate that a new state has no TaskRes."""
+
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        task_res_list = state.get_task_res(
+            task_ids={uuid4()},
+            limit=10,
+        )
+
+        # Assert
+        assert not task_res_list
+
     def test_store_task_ins_one(self) -> None:
         """Test store_task_ins."""
 
         # Prepare
-        node_id = 1
+        consumer_node_id = 1
         state = self.state_factory()
-        task_ins: TaskIns = TaskIns(
-            task_id=str(uuid4()),
-            group_id="",
-            workload_id="",
-            task=Task(
-                consumer=Node(node_id=node_id, anonymous=False),
-            ),
-        )
+        task_ins = create_task_ins(consumer_node_id=consumer_node_id, anonymous=False)
 
         assert task_ins.task.created_at == ""  # pylint: disable=no-member
         assert task_ins.task.delivered_at == ""  # pylint: disable=no-member
@@ -126,6 +157,72 @@ class StateTest(unittest.TestCase):
         assert datetime.fromisoformat(actual_task.ttl) > datetime(
             2020, 1, 1, tzinfo=timezone.utc
         )
+
+    def test_store_delete_tasks() -> None:
+        """Test store_task_ins."""
+
+        # Prepare
+        node_id = 1
+        state = self.state_factory()
+        task_ins: TaskIns = TaskIns(
+            task_id=str(uuid4()),
+            group_id="",
+            workload_id="",
+            task=Task(
+                consumer=Node(node_id=node_id, anonymous=False),
+            ),
+        )
+
+        # Insert three TaskIns
+        task_id_0 = state.store_task_ins(task_ins=task_ins)
+        task_id_1 = state.store_task_ins(task_ins=task_ins)
+        task_id_2 = state.store_task_ins(task_ins=task_ins)
+
+        assert task_id_0
+        assert task_id_1
+        assert task_id_2
+
+        # Get TaskIns to mark them delivered
+        _ = state.get_task_ins(node_id=node_id, limit=None)
+
+        # Insert one TaskRes and retrive it to mark it as delivered
+        task_res_0: TaskRes = TaskRes(
+            task_id=str(uuid4()),
+            group_id="",
+            workload_id="",
+            task=Task(
+                consumer=Node(node_id=node_id, anonymous=False),
+                ancestry=[str(task_id_0)],
+            ),
+        )
+        _ = state.store_task_res(task_res=task_res_0)
+        _ = state.get_task_res(task_ids=set([task_id_0]), limit=None)
+
+        # Insert one TaskRes, but don't retrive it
+        task_res_1: TaskRes = TaskRes(
+            task_id=str(uuid4()),
+            group_id="",
+            workload_id="",
+            task=Task(
+                consumer=Node(node_id=node_id, anonymous=False),
+                ancestry=[str(task_id_1)],
+            ),
+        )
+        _ = state.store_task_res(task_res=task_res_1)
+
+        # Situation now:
+        # - State has three TaskIns, all of them delivered
+        # - State has two TaskRes, one of the delivered, the other not
+
+        assert len(state.task_ins_store) == 3
+        assert len(state.task_res_store) == 2
+
+        # Execute
+        state.delete_tasks(task_ids=set([task_id_0, task_id_1, task_id_2]))
+
+        # Assert
+        assert len(state.task_ins_store) == 2
+        assert len(state.task_res_store) == 1
 
     # Init tests
     def test_init_state(self) -> None:
@@ -227,7 +324,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         invalid_task_res = create_task_res(
-            consumer_node_id=0, anonymous=True, ancestry=[]
+            producer_node_id=0, anonymous=True, ancestry=[]
         )
 
         # Execute
@@ -242,7 +339,7 @@ class StateTest(unittest.TestCase):
         state: State = self.state_factory()
         task_ins_id = uuid4()
         task_res = create_task_res(
-            consumer_node_id=0, anonymous=True, ancestry=[str(task_ins_id)]
+            producer_node_id=0, anonymous=True, ancestry=[str(task_ins_id)]
         )
 
         # Execute
@@ -310,22 +407,29 @@ def create_task_ins(
             delivered_at=delivered_at,
             producer=Node(node_id=0, anonymous=True),
             consumer=consumer,
+            legacy_server_message=ServerMessage(
+                reconnect_ins=ServerMessage.ReconnectIns()
+            ),
         ),
     )
     return task
 
 
 def create_task_res(
-    consumer_node_id: int, anonymous: bool, ancestry: List[str]
+    producer_node_id: int, anonymous: bool, ancestry: List[str]
 ) -> TaskRes:
     """Create a TaskRes for testing."""
     task_res = TaskRes(
-        task_id=str(uuid4()),
+        task_id="",
         group_id="",
         workload_id="",
         task=Task(
-            consumer=Node(node_id=consumer_node_id, anonymous=anonymous),
+            producer=Node(node_id=producer_node_id, anonymous=anonymous),
+            consumer=Node(node_id=0, anonymous=True),
             ancestry=ancestry,
+            legacy_client_message=ClientMessage(
+                disconnect_res=ClientMessage.DisconnectRes()
+            ),
         ),
     )
     return task_res

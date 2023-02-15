@@ -20,9 +20,12 @@ from typing import Dict, List, Optional, Set
 from uuid import UUID, uuid4
 
 from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.server.utils.validator import validate_task_ins_or_res
 
-from .state import State, is_valid_task
+from .state import State
 
+from logging import ERROR
+from flwr.common.logger import log
 
 class InMemoryState(State):
     """In-memory State implementation."""
@@ -36,7 +39,9 @@ class InMemoryState(State):
         """Store one TaskIns."""
 
         # Validate task
-        if not is_valid_task(task_ins):
+        errors = validate_task_ins_or_res(task_ins)
+        if any(errors):
+            log(ERROR, errors)
             return None
 
         # Create and set task_id
@@ -99,7 +104,9 @@ class InMemoryState(State):
         """Store one TaskRes."""
 
         # Validate task
-        if not is_valid_task(task_res):
+        errors = validate_task_ins_or_res(task_res)
+        if any(errors):
+            log(ERROR, errors)
             return None
 
         # Create and set task_id
