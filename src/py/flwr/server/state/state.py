@@ -27,21 +27,87 @@ class State(abc.ABC):
 
     @abc.abstractmethod
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
-        """Store one TaskIns."""
+        """Store one TaskIns.
+
+        Usually, the Driver API calls this to schedule instructions.
+
+        Stores the value of the task_ins in the state and, if successful, returns the
+        task_id (UUID) of the task_ins. If, for any reason, storing the task_ins fails,
+        `None` is returned.
+
+        Constraints
+        -----------
+        If `task_ins.task.consumer.anonymous` is `True`, then
+        `task_ins.task.consumer.node_id` MUST NOT be set (equal 0). Any implemenation
+        may just override it with zero instead of validating.
+
+        If `task_ins.task.consumer.anonymous` is `False`, then
+        `task_ins.task.consumer.node_id` MUST be set (not 0)
+        """
 
     @abc.abstractmethod
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
     ) -> List[TaskIns]:
-        """Get all TaskIns that have not been delivered yet."""
+        """Get TaskIns optionally filtered by node_id.
+
+        Usually, the Fleet API calls this for Nodes planning to work on one or more
+        TaskIns.
+
+        Constraints
+        -----------
+        If `node_id` is not `None`, retrieve all TaskIns where
+
+            1. the `task_ins.task.consumer.node_id` equals `node_id` AND
+            2. the `task_ins.task.consumer.anonymous` equals `False` AND
+            3. the `task_ins.task.delivered_at` equals `""`.
+
+        If `node_id` is `None`, retrieve all TaskIns where the
+        `task_ins.task.consumer.node_id` equals `0` and
+        `task_ins.task.consumer.anonymous` is set to `True`.
+
+        If `delivered_at` MUST BE set (not `""`) otherwise the TaskIns MUST not be in
+        the result.
+
+        If `limit` is not `None`, return, at most, `limit` number of `task_ins`. If
+        `limit` is set, it has to be greater zero.
+        """
 
     @abc.abstractmethod
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
-        """Store one TaskRes."""
+        """Store one TaskRes.
+
+        Usually, the Fleet API calls this for Nodes returning results.
+
+        Stores the TaskRes and, if successful, returns the `task_id` (UUID) of
+        the `task_res`. If storing the `task_res` fails, `None` is returned.
+
+        Constraints
+        -----------
+        If `task_res.task.consumer.anonymous` is `True`, then
+        `task_res.task.consumer.node_id` MUST NOT be set (equal 0). Any implemenation
+        may just override it with zero instead of validating.
+
+        If `task_res.task.consumer.anonymous` is `False`, then
+        `task_res.task.consumer.node_id` MUST be set (not 0)
+        """
 
     @abc.abstractmethod
     def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
-        """Get all TaskRes that have not been delivered yet."""
+        """Get TaskRes for task_ids.
+
+        Usually, the Driver API calls this for Nodes planning to work on one or more
+        TaskIns.
+
+        Retrieves all TaskRes for the given `task_ids` and returns and empty list of
+        none could be found.
+
+        Constraints
+        -----------
+        If `limit` is not `None`, return, at most, `limit` number of TaskRes. The limit
+        will only take effect if enough task_ids are in the set AND are currently
+        available. If `limit` is set, it has to be greater zero.
+        """
 
     @abc.abstractmethod
     def delete_tasks(self, task_ids: Set[UUID]) -> None:
@@ -49,12 +115,12 @@ class State(abc.ABC):
 
     @abc.abstractmethod
     def register_node(self, node_id: int) -> None:
-        """Register a client node."""
+        """Store `node_id` in state."""
 
     @abc.abstractmethod
     def unregister_node(self, node_id: int) -> None:
-        """Unregister a client node."""
+        """Remove `node_id` from state."""
 
     @abc.abstractmethod
     def get_nodes(self) -> Set[int]:
-        """Return all available client nodes."""
+        """Retrieve all currently stored node IDs as a set."""
