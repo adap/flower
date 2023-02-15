@@ -55,11 +55,6 @@ class InMemoryState(State):
         # Store TaskIns
         task_ins.task.created_at = created_at.isoformat()
         task_ins.task.ttl = ttl.isoformat()
-
-        # Enforce node_id = 0 of consumer is anonymous
-        if task_ins.task.consumer.anonymous:
-            task_ins.task.consumer.node_id = 0
-
         self.task_ins_store[task_id] = task_ins
 
         # Return the new task_id
