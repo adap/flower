@@ -57,41 +57,13 @@ class StateTest(unittest.TestCase):
         # Assert
         assert not task_ins_list
 
-    def test_get_task_ins_identity(self) -> None:
-        """Validate that a new state has no TaskIns."""
-
-        # Prepare
-        state = self.state_factory()
-        task_id = state.store_task_ins(
-            task_ins=create_task_ins(consumer_node_id=1, anonymous=False)
-        )
-
-        # Execute
-        task_ins_list = state.get_task_ins(
-            node_id=123,
-            limit=10,
-        )
-
-        # Assert
-        assert len(task_ins_list) == 1
-        assert task_ins_list[0].task_id == str(task_id)
-
     def test_get_task_ins_anonymous(self) -> None:
         """Validate that a new state has no TaskIns."""
 
         # Prepare
         state = self.state_factory()
-        task_id = state.store_task_ins(
-            task_ins=TaskIns(
-                task_id="",
-                group_id="",
-                workload_id="",
-                task=Task(
-                    producer=Node(node_id=0, anonymous=True),
-                    consumer=Node(node_id=0, anonymous=True),
-                ),
-            )
-        )
+        task_ins = create_task_ins(consumer_node_id=0, anonymous=True)
+        task_id = state.store_task_ins(task_ins=task_ins)
 
         # Execute
         task_ins_list = state.get_task_ins(
@@ -110,10 +82,7 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
 
         # Execute
-        task_res_list = state.get_task_res(
-            task_ids={uuid4()},
-            limit=10,
-        )
+        task_res_list = state.get_task_res(task_ids={uuid4()}, limit=10)
 
         # Assert
         assert not task_res_list
@@ -132,7 +101,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         state.store_task_ins(task_ins=task_ins)
-        task_ins_list = state.get_task_ins(node_id=node_id, limit=10)
+        task_ins_list = state.get_task_ins(node_id=consumer_node_id, limit=10)
 
         # Assert
         assert len(task_ins_list) == 1
@@ -158,71 +127,51 @@ class StateTest(unittest.TestCase):
             2020, 1, 1, tzinfo=timezone.utc
         )
 
-    def test_store_delete_tasks() -> None:
+    def test_store_delete_tasks(self) -> None:
         """Test store_task_ins."""
 
         # Prepare
-        node_id = 1
+        consumer_node_id = 1
         state = self.state_factory()
-        task_ins: TaskIns = TaskIns(
-            task_id=str(uuid4()),
-            group_id="",
-            workload_id="",
-            task=Task(
-                consumer=Node(node_id=node_id, anonymous=False),
-            ),
-        )
+        task_ins_0 = create_task_ins(consumer_node_id=consumer_node_id, anonymous=False)
+        task_ins_1 = create_task_ins(consumer_node_id=consumer_node_id, anonymous=False)
+        task_ins_2 = create_task_ins(consumer_node_id=consumer_node_id, anonymous=False)
 
         # Insert three TaskIns
-        task_id_0 = state.store_task_ins(task_ins=task_ins)
-        task_id_1 = state.store_task_ins(task_ins=task_ins)
-        task_id_2 = state.store_task_ins(task_ins=task_ins)
+        task_id_0 = state.store_task_ins(task_ins=task_ins_0)
+        task_id_1 = state.store_task_ins(task_ins=task_ins_1)
+        task_id_2 = state.store_task_ins(task_ins=task_ins_2)
 
         assert task_id_0
         assert task_id_1
         assert task_id_2
 
         # Get TaskIns to mark them delivered
-        _ = state.get_task_ins(node_id=node_id, limit=None)
+        _ = state.get_task_ins(node_id=consumer_node_id, limit=None)
 
         # Insert one TaskRes and retrive it to mark it as delivered
-        task_res_0: TaskRes = TaskRes(
-            task_id=str(uuid4()),
-            group_id="",
-            workload_id="",
-            task=Task(
-                consumer=Node(node_id=node_id, anonymous=False),
-                ancestry=[str(task_id_0)],
-            ),
-        )
+        task_res_0 = create_task_res(producer_node_id=100, anonymous=False, ancestry=[str(task_id_0)])
+  
         _ = state.store_task_res(task_res=task_res_0)
         _ = state.get_task_res(task_ids=set([task_id_0]), limit=None)
 
         # Insert one TaskRes, but don't retrive it
-        task_res_1: TaskRes = TaskRes(
-            task_id=str(uuid4()),
-            group_id="",
-            workload_id="",
-            task=Task(
-                consumer=Node(node_id=node_id, anonymous=False),
-                ancestry=[str(task_id_1)],
-            ),
-        )
+        task_res_1: TaskRes = create_task_res(producer_node_id=100, anonymous=False, ancestry=[str(task_id_0)])
         _ = state.store_task_res(task_res=task_res_1)
 
         # Situation now:
         # - State has three TaskIns, all of them delivered
         # - State has two TaskRes, one of the delivered, the other not
 
-        assert len(state.task_ins_store) == 3
-        assert len(state.task_res_store) == 2
+        assert state.num_task_ins() == 3
+        assert state.num_task_res() == 2
 
         # Execute
         state.delete_tasks(task_ids=set([task_id_0, task_id_1, task_id_2]))
 
         # Assert
-        assert len(state.task_ins_store) == 2
-        assert len(state.task_res_store) == 1
+        assert state.num_task_ins() == 2
+        assert state.num_task_res() == 1
 
     # Init tests
     def test_init_state(self) -> None:

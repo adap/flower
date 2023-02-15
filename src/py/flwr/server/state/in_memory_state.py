@@ -16,16 +16,16 @@
 
 
 from datetime import datetime, timedelta, timezone
+from logging import ERROR
 from typing import Dict, List, Optional, Set
 from uuid import UUID, uuid4
 
+from flwr.common.logger import log
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .state import State
 
-from logging import ERROR
-from flwr.common.logger import log
 
 class InMemoryState(State):
     """In-memory State implementation."""
@@ -166,6 +166,12 @@ class InMemoryState(State):
             del self.task_ins_store[task_id]
         for task_id in task_res_to_be_deleted:
             del self.task_res_store[task_id]
+
+    def num_task_ins(self) -> int:
+        return len(self.task_ins_store)
+
+    def num_task_res(self) -> int:
+        return len(self.task_res_store)
 
     def register_node(self, node_id: int) -> None:
         """Register a client node."""
