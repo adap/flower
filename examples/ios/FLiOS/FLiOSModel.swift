@@ -10,7 +10,11 @@ import CoreML
 import flwr
 
 public class FLiOSModel: ObservableObject {
-    @Published public var scenarioSelection = Constants.ScenarioTypes.MNIST
+    @Published public var scenarioSelection = Constants.ScenarioTypes.MNIST {
+        didSet {
+            self.resetPreperation()
+        }
+    }
     private var trainingBatchProvider: MLBatchProvider?
     @Published public var trainingBatchStatus = PreparationStatus.notPrepared
     let scenarios = Constants.ScenarioTypes.allCases
@@ -34,11 +38,18 @@ public class FLiOSModel: ObservableObject {
     
     public var benchmarkSuite = BenchmarkSuite.shared
     
+    public func resetPreperation() {
+        self.trainingBatchStatus = .notPrepared
+        self.testBatchStatus = .notPrepared
+        self.localClientStatus = .notPrepared
+        self.mlFlwrClientStatus = .notPrepared
+    }
+    
     public func prepareTrainDataset() {
         trainingBatchStatus = .preparing(count: 0)
         self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing train dataset"))
         DispatchQueue.global(qos: .userInitiated).async {
-            let batchProvider = MNISTDataLoader.trainBatchProvider { count in
+            let batchProvider = DataLoader.trainBatchProvider(dataset: self.scenarioSelection.description) { count in
                 DispatchQueue.main.async {
                     self.trainingBatchStatus = .preparing(count: count)
                 }
@@ -55,7 +66,7 @@ public class FLiOSModel: ObservableObject {
         testBatchStatus = .preparing(count: 0)
         self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing test dataset"))
         DispatchQueue.global(qos: .userInitiated).async {
-            let batchProvider = MNISTDataLoader.testBatchProvider { count in
+            let batchProvider = DataLoader.testBatchProvider(dataset: self.scenarioSelection.description) { count in
                 DispatchQueue.main.async {
                     self.testBatchStatus = .preparing(count: count)
                 }
@@ -68,13 +79,13 @@ public class FLiOSModel: ObservableObject {
         }
     }
     
-    public func initLocalClient() {
+    public func initLocalClient(mlModel: String) {
         self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "init local client"))
         self.localClientStatus = .preparing(count: 0)
         if self.localClient == nil {
             DispatchQueue.global(qos: .userInitiated).async {
                 let dataLoader = MLDataLoader(trainBatchProvider: self.trainingBatchProvider!, testBatchProvider: self.testBatchProvider!)
-                if let modelUrl = Bundle.main.url(forResource: "MNIST_Model", withExtension: "mlmodel") {
+                if let modelUrl = Bundle.main.url(forResource: mlModel + "_Model", withExtension: "mlmodel") {
                     self.initClient(modelUrl: modelUrl, dataLoader: dataLoader, clientType: .local)
                     DispatchQueue.main.async {
                         self.localClientStatus = .ready
@@ -88,13 +99,13 @@ public class FLiOSModel: ObservableObject {
         }
     }
     
-    public func initMLFlwrClient() {
+    public func initMLFlwrClient(mlModel: String) {
         self.mlFlwrClientStatus = .preparing(count: 0)
         self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "init ML Flwr Client"))
         if self.mlFlwrClient == nil {
             DispatchQueue.global(qos: .userInitiated).async {
                 let dataLoader = MLDataLoader(trainBatchProvider: self.trainingBatchProvider!, testBatchProvider: self.testBatchProvider!)
-                if let modelUrl = Bundle.main.url(forResource: "MNIST_Model", withExtension: "mlmodel") {
+                if let modelUrl = Bundle.main.url(forResource: mlModel + "_Model", withExtension: "mlmodel") {
                     self.initClient(modelUrl: modelUrl, dataLoader: dataLoader, clientType: .federated)
                     DispatchQueue.main.async {
                         self.mlFlwrClientStatus = .ready

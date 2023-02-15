@@ -75,7 +75,7 @@ struct ContentView: View {
                             Text("Prepare Local Client")
                             Spacer()
                             Button(action: {
-                                model.initLocalClient()
+                                model.initLocalClient(mlModel: model.scenarioSelection.description)
                             }) {
                                 switch model.localClientStatus {
                                 case .notPrepared:
@@ -140,7 +140,7 @@ struct ContentView: View {
                             Text("Prepare Federated Client")
                             Spacer()
                             Button(action: {
-                                model.initMLFlwrClient()
+                                model.initMLFlwrClient(mlModel: model.scenarioSelection.description)
                             }) {
                                 switch model.mlFlwrClientStatus {
                                 case .notPrepared:
