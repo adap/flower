@@ -12,13 +12,13 @@ import UIKit
 
 let appDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
 
-class MNISTDataLoader {
-    static func trainBatchProvider(progressHandler: @escaping (Int) -> Void) -> MLBatchProvider {
-        return prepareMLBatchProvider(filePath: extractTrainFile(), progressHandler: progressHandler)
+class DataLoader {
+    static func trainBatchProvider(dataset: String, progressHandler: @escaping (Int) -> Void) -> MLBatchProvider {
+        return prepareMLBatchProvider(filePath: extractTrainFile(dataset: dataset), progressHandler: progressHandler)
     }
     
-    static func testBatchProvider(progressHandler: @escaping (Int) -> Void) -> MLBatchProvider {
-        return prepareMLBatchProvider(filePath: extractTestFile(), progressHandler: progressHandler)
+    static func testBatchProvider(dataset: String, progressHandler: @escaping (Int) -> Void) -> MLBatchProvider {
+        return prepareMLBatchProvider(filePath: extractTestFile(dataset: dataset), progressHandler: progressHandler)
     }
 
     /// Extract file
@@ -68,18 +68,18 @@ class MNISTDataLoader {
     /// Extract train file
     ///
     /// - returns: Temporary path of extracted file
-    private static func extractTrainFile() -> String {
-        let sourceURL = Bundle.main.url(forResource: "mnist_train", withExtension: "csv.lzfse")!
-        let destinationURL = appDirectory.appendingPathComponent("mnist_train.csv")
+    private static func extractTrainFile(dataset: String) -> String {
+        let sourceURL = Bundle.main.url(forResource: dataset + "_train", withExtension: "csv.lzfse")!
+        let destinationURL = appDirectory.appendingPathComponent(dataset + "_train.csv")
         return extractFile(from: sourceURL, to: destinationURL)
     }
 
     /// Extract test file
     ///
     /// - returns: Temporary path of extracted file
-    private static func extractTestFile() -> String {
-        let sourceURL = Bundle.main.url(forResource: "mnist_test", withExtension: "csv.lzfse")!
-        let destinationURL = appDirectory.appendingPathComponent("mnist_test.csv")
+    private static func extractTestFile(dataset: String) -> String {
+        let sourceURL = Bundle.main.url(forResource: dataset + "_test", withExtension: "csv.lzfse")!
+        let destinationURL = appDirectory.appendingPathComponent(dataset + "_test.csv")
         return extractFile(from: sourceURL, to: destinationURL)
     }
     
@@ -124,13 +124,13 @@ class MNISTDataLoader {
         return MLArrayBatchProvider(array: featureProviders)
     }
     
-    static func predictionBatchProvider() -> MLBatchProvider {
+    static func predictionBatchProvider(dataset: String) -> MLBatchProvider {
         var featureProviders = [MLFeatureProvider]()
         
         var count = 0
         errno = 0
         
-        let testFilePath = extractTestFile()
+        let testFilePath = extractTestFile(dataset: dataset)
         if freopen(testFilePath, "r", stdin) == nil {
             print("error opening file")
         }

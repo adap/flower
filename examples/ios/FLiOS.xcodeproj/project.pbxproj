@@ -94,7 +94,6 @@
 		21A77B132865B22B0062EBD8 /* Model.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AC02865B22B0062EBD8 /* Model.pb.swift */; };
 		21A77B142865B22B0062EBD8 /* NeuralNetwork.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AC12865B22B0062EBD8 /* NeuralNetwork.pb.swift */; };
 		21A77B152865B22B0062EBD8 /* Scaler.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AC22865B22B0062EBD8 /* Scaler.pb.swift */; };
-		21A77B1B2865B26C0062EBD8 /* DataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B182865B26C0062EBD8 /* DataLoader.swift */; };
 		21A77B232865B3B10062EBD8 /* MLModelInspect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B202865B3B10062EBD8 /* MLModelInspect.swift */; };
 		21A77B292865B4CB0062EBD8 /* MNIST_Model.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */; };
 		21A77B2A2865B4CB0062EBD8 /* MNIST_train.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 21A77B272865B4CB0062EBD8 /* MNIST_train.csv.lzfse */; };
@@ -105,9 +104,8 @@
 		21B540752865B14100185DEE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540742865B14100185DEE /* Assets.xcassets */; };
 		21B540782865B14100185DEE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540772865B14100185DEE /* Preview Assets.xcassets */; };
 		50773984299D48C1001FD22F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50773983299D48C1001FD22F /* Constants.swift */; };
-		50773989299D4E0D001FD22F /* CIFAR_test.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 50773988299D4E0D001FD22F /* CIFAR_test.csv.lzfse */; };
-		5077398B299D4E17001FD22F /* CIFAR_train.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 5077398A299D4E17001FD22F /* CIFAR_train.csv.lzfse */; };
 		50B5A2C6294C848000B0ABC6 /* flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 50B5A2C5294C848000B0ABC6 /* flwr */; };
+		50CDF0E1299D807300AEBD55 /* DataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50CDF0E0299D807300AEBD55 /* DataLoader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -211,7 +209,6 @@
 		21A77AC02865B22B0062EBD8 /* Model.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Model.pb.swift; sourceTree = "<group>"; };
 		21A77AC12865B22B0062EBD8 /* NeuralNetwork.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralNetwork.pb.swift; sourceTree = "<group>"; };
 		21A77AC22865B22B0062EBD8 /* Scaler.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scaler.pb.swift; sourceTree = "<group>"; };
-		21A77B182865B26C0062EBD8 /* DataLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataLoader.swift; sourceTree = "<group>"; };
 		21A77B202865B3B10062EBD8 /* MLModelInspect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLModelInspect.swift; sourceTree = "<group>"; };
 		21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = MNIST_Model.mlmodel; sourceTree = "<group>"; };
 		21A77B272865B4CB0062EBD8 /* MNIST_train.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = MNIST_train.csv.lzfse; sourceTree = "<group>"; };
@@ -222,9 +219,8 @@
 		21B540742865B14100185DEE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		21B540772865B14100185DEE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		50773983299D48C1001FD22F /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
-		50773988299D4E0D001FD22F /* CIFAR_test.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = CIFAR_test.csv.lzfse; sourceTree = "<group>"; };
-		5077398A299D4E17001FD22F /* CIFAR_train.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = CIFAR_train.csv.lzfse; sourceTree = "<group>"; };
 		50B5A2C4294C841300B0ABC6 /* flwr */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = flwr; path = ../../src/swift/flwr; sourceTree = "<group>"; };
+		50CDF0E0299D807300AEBD55 /* DataLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataLoader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -349,7 +345,7 @@
 		21A77B162865B23D0062EBD8 /* CoreMLClient */ = {
 			isa = PBXGroup;
 			children = (
-				21A77B182865B26C0062EBD8 /* DataLoader.swift */,
+				50CDF0E0299D807300AEBD55 /* DataLoader.swift */,
 				21A77B202865B3B10062EBD8 /* MLModelInspect.swift */,
 			);
 			path = CoreMLClient;
@@ -436,8 +432,6 @@
 		50773987299D4C51001FD22F /* CIFAR */ = {
 			isa = PBXGroup;
 			children = (
-				50773988299D4E0D001FD22F /* CIFAR_test.csv.lzfse */,
-				5077398A299D4E17001FD22F /* CIFAR_train.csv.lzfse */,
 			);
 			path = CIFAR;
 			sourceTree = "<group>";
@@ -517,10 +511,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				21A77B0C2865B22B0062EBD8 /* LICENSE.txt in Resources */,
-				5077398B299D4E17001FD22F /* CIFAR_train.csv.lzfse in Resources */,
 				21A77B2A2865B4CB0062EBD8 /* MNIST_train.csv.lzfse in Resources */,
 				21A77B2B2865B4CB0062EBD8 /* MNIST_test.csv.lzfse in Resources */,
-				50773989299D4E0D001FD22F /* CIFAR_test.csv.lzfse in Resources */,
 				21B540782865B14100185DEE /* Preview Assets.xcassets in Resources */,
 				21A77B0B2865B22B0062EBD8 /* README.rst in Resources */,
 				21B540752865B14100185DEE /* Assets.xcassets in Resources */,
@@ -543,6 +535,7 @@
 				21A77B0A2865B22B0062EBD8 /* CategoricalMapping.proto in Sources */,
 				21B540732865B14000185DEE /* ContentView.swift in Sources */,
 				21A77AE62865B22B0062EBD8 /* NearestNeighbors.pb.swift in Sources */,
+				50CDF0E1299D807300AEBD55 /* DataLoader.swift in Sources */,
 				21A77AEE2865B22B0062EBD8 /* AudioFeaturePrint.pb.swift in Sources */,
 				21A77AE72865B22B0062EBD8 /* MIL.proto in Sources */,
 				21A77AE32865B22B0062EBD8 /* Scaler.proto in Sources */,
@@ -573,7 +566,6 @@
 				21A77AEB2865B22B0062EBD8 /* NonMaximumSuppression.pb.swift in Sources */,
 				21A77ADD2865B22B0062EBD8 /* WordEmbedding.proto in Sources */,
 				21A77ACE2865B22B0062EBD8 /* CGImage+CVPixelBuffer.swift in Sources */,
-				21A77B1B2865B26C0062EBD8 /* DataLoader.swift in Sources */,
 				21A77AD82865B22B0062EBD8 /* Normalizer.pb.swift in Sources */,
 				21A77B002865B22B0062EBD8 /* Model.proto in Sources */,
 				19764EEA297D2B12009F3E5D /* BenchmarkInterceptor.swift in Sources */,
