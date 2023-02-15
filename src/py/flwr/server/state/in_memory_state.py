@@ -16,10 +16,13 @@
 
 
 from datetime import datetime, timedelta, timezone
+from logging import ERROR
 from typing import Dict, List, Optional, Set
 from uuid import UUID, uuid4
 
+from flwr.common.logger import log
 from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .state import State
 
@@ -34,6 +37,12 @@ class InMemoryState(State):
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
+
+        # Validate task
+        errors = validate_task_ins_or_res(task_ins)
+        if any(errors):
+            log(ERROR, errors)
+            return None
 
         # Create and set task_id
         task_id = uuid4()
@@ -89,11 +98,17 @@ class InMemoryState(State):
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes."""
 
+        # Validate task
+        errors = validate_task_ins_or_res(task_res)
+        if any(errors):
+            log(ERROR, errors)
+            return None
+
         # Create and set task_id
         task_id = uuid4()
         task_res.task_id = str(task_id)
 
-        # Set created_at
+        # Set created_at and ttl
         created_at: datetime = _now()
         ttl: datetime = created_at + timedelta(hours=24)
 
@@ -151,6 +166,12 @@ class InMemoryState(State):
             del self.task_ins_store[task_id]
         for task_id in task_res_to_be_deleted:
             del self.task_res_store[task_id]
+
+    def num_task_ins(self) -> int:
+        return len(self.task_ins_store)
+
+    def num_task_res(self) -> int:
+        return len(self.task_res_store)
 
     def register_node(self, node_id: int) -> None:
         """Register a client node."""

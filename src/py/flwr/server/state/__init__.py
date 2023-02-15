@@ -16,9 +16,11 @@
 
 
 from .in_memory_state import InMemoryState
+from .sqlite_state import SqliteState
 from .state import State
 
 __all__ = [
     "InMemoryState",
+    "SqliteState",
     "State",
 ]
