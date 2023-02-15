@@ -44,6 +44,8 @@ exclude = [
 ]
 
 [tool.poetry.scripts]
+flower-driver-api = "flwr.server:run_driver_api"
+flower-fleet-api = "flwr.server:run_fleet_api"
 flower-server = "flwr.server:run_server"
 flower-client = "flwr.client:run_client"
 
