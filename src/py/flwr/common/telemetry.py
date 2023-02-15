@@ -127,7 +127,15 @@ class EventType(str, Enum):
     START_SERVER_ENTER = auto()
     START_SERVER_LEAVE = auto()
 
-    # New Server
+    # Driver API
+    RUN_DRIVER_API_ENTER = auto()
+    RUN_DRIVER_API_LEAVE = auto()
+
+    # Fleet API
+    RUN_FLEET_API_ENTER = auto()
+    RUN_FLEET_API_LEAVE = auto()
+
+    # Driver API and Fleet API
     RUN_SERVER_ENTER = auto()
     RUN_SERVER_LEAVE = auto()
 
