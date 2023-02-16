@@ -86,6 +86,7 @@ class FlowerClient(
 def gen_client_fn(
     device: torch.device,
     iid: bool,
+    balance: bool,
     num_clients: int,
     num_rounds: int,
     num_epochs: int,
@@ -106,6 +107,9 @@ def gen_client_fn(
         should be independent and identically distributed between the clients
         or if the data should first be sorted by labels and distributed by chunks
         to each client (used to test the convergence in a worst case scenario)
+    balance : bool
+        Whether the dataset should contain an equal number of samples in each class,
+        by default True
     num_clients : int
         The number of clients present in the setup
     num_epochs : int
@@ -125,7 +129,7 @@ def gen_client_fn(
         the DataLoader that will be used for testing
     """
     trainloaders, valloaders, testloader = load_datasets(
-        iid=iid, num_clients=num_clients, batch_size=batch_size
+        iid=iid, balance=balance, num_clients=num_clients, batch_size=batch_size
     )
 
     # Defines a staggling schedule for each clients, i.e at which round will they

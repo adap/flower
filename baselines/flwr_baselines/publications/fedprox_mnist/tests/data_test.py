@@ -13,7 +13,7 @@ def test_non_iid_partitionning(num_clients: int = 100) -> None:
         The number of clients to distribute the data to, by default 100
     """
     trainloaders, _, _ = dataset.load_datasets(
-        batch_size=1, num_clients=num_clients, iid=False
+        batch_size=1, num_clients=num_clients, iid=False, balance=True
     )
     for trainloader in trainloaders:
         labels = []

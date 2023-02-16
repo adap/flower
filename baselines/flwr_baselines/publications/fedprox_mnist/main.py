@@ -30,6 +30,7 @@ def main(cfg: DictConfig) -> None:
         num_clients=cfg.num_clients,
         num_rounds=cfg.num_rounds,
         iid=cfg.iid,
+        balance=cfg.balance,
         learning_rate=cfg.learning_rate,
         stagglers=cfg.stagglers_fraction,
     )

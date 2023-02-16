@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 
 class Net(nn.Module):
     """Convolutional Neural Network architecture.
-    
+
     As described in McMahan 2017 paper :
 
     [Communication-Efficient Learning of Deep Networks from
