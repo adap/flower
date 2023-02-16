@@ -169,4 +169,3 @@ def _balance_classes(
     shuffled.targets = unshuffled_targets[shuffled_idxs]
 
     return shuffled
-
