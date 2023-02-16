@@ -98,21 +98,20 @@ class DataLoader {
         scenario.shapeData.enumerated().forEach { index, value in
             lengthEntry = Int(truncating: value) * lengthEntry
         }
-        print(lengthEntry)
+
         // MARK: Fails if commas occur in the values of csv
         while let line = readLine()?.split(separator: ",") {
             if count == 1000 {
                 break
             }
-            print(line)
             count += 1
             progressHandler(count)
             let imageMultiArr = try! MLMultiArray(shape: scenario.shapeData, dataType: .float32)
             let outputMultiArr = try! MLMultiArray(shape: scenario.shapeTarget, dataType: .int32)
             for i in 0..<lengthEntry {
-                imageMultiArr[i] = NSNumber(value: Float(String(line[i + 1]))! / Float(255.0))
+                imageMultiArr[i] = NSNumber(value: Float(String(line[i]))! / scenario.normalization)
             }
-            outputMultiArr[0] = NSNumber(value: Int(String(line[0]))!)
+            outputMultiArr[0] = NSNumber(value: Float(String(line.last!))!)
             let imageValue = MLFeatureValue(multiArray: imageMultiArr)
             let outputValue = MLFeatureValue(multiArray: outputMultiArr)
             let dataPointFeatures: [String: MLFeatureValue] = ["image": imageValue,
@@ -143,7 +142,7 @@ class DataLoader {
             count += 1
             let imageMultiArr = try! MLMultiArray(shape: scenario.shapeData, dataType: .float32)
             for i in 0..<lengthEntry {
-                imageMultiArr[i] = NSNumber(value: Float(String(line[i + 1]))! / Float(255.0))
+                imageMultiArr[i] = NSNumber(value: Float(String(line[i]))! / scenario.normalization)
             }
             let imageValue = MLFeatureValue(multiArray: imageMultiArr)
             let dataPointFeatures: [String: MLFeatureValue] = ["image": imageValue]

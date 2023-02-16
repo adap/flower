@@ -67,7 +67,7 @@ struct ContentView: View {
                                     ProgressView()
                                 }
                             }
-                            .disabled(model.trainingBatchStatus != PreparationStatus.ready)
+                            .disabled(model.trainingBatchStatus != Constants.PreparationStatus.ready)
                         }
                     }
                     Section(header: Text("Local Training")) {
@@ -75,7 +75,7 @@ struct ContentView: View {
                             Text("Prepare Local Client")
                             Spacer()
                             Button(action: {
-                                model.initLocalClient(mlModel: model.scenarioSelection.description)
+                                model.initLocalClient()
                             }) {
                                 switch model.localClientStatus {
                                 case .notPrepared:
@@ -140,7 +140,7 @@ struct ContentView: View {
                             Text("Prepare Federated Client")
                             Spacer()
                             Button(action: {
-                                model.initMLFlwrClient(mlModel: model.scenarioSelection.description)
+                                model.initMLFlwrClient()
                             }) {
                                 switch model.mlFlwrClientStatus {
                                 case .notPrepared:
