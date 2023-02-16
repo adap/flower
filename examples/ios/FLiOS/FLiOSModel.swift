@@ -47,7 +47,7 @@ public class FLiOSModel: ObservableObject {
     
     public func prepareTrainDataset() {
         trainingBatchStatus = .preparing(count: 0)
-        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing train dataset"))
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing train dataset " + scenarioSelection.description))
         DispatchQueue.global(qos: .userInitiated).async {
             let batchProvider = DataLoader.trainBatchProvider(scenario: self.scenarioSelection) { count in
                 DispatchQueue.main.async {
@@ -64,7 +64,7 @@ public class FLiOSModel: ObservableObject {
     
     public func prepareTestDataset() {
         testBatchStatus = .preparing(count: 0)
-        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing test dataset"))
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing test dataset " + scenarioSelection.description))
         DispatchQueue.global(qos: .userInitiated).async {
             let batchProvider = DataLoader.testBatchProvider(scenario: self.scenarioSelection) { count in
                 DispatchQueue.main.async {
@@ -80,7 +80,7 @@ public class FLiOSModel: ObservableObject {
     }
     
     public func initLocalClient() {
-        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "init local client"))
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "init local client with " + scenarioSelection.modelName))
         self.localClientStatus = .preparing(count: 0)
         if self.localClient == nil {
             DispatchQueue.global(qos: .userInitiated).async {
@@ -101,7 +101,7 @@ public class FLiOSModel: ObservableObject {
     
     public func initMLFlwrClient() {
         self.mlFlwrClientStatus = .preparing(count: 0)
-        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "init ML Flwr Client"))
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "init ML Flwr Client with " + scenarioSelection.modelName))
         if self.mlFlwrClient == nil {
             DispatchQueue.global(qos: .userInitiated).async {
                 let dataLoader = MLDataLoader(trainBatchProvider: self.trainingBatchProvider!, testBatchProvider: self.testBatchProvider!)
