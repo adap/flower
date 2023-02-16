@@ -156,11 +156,11 @@ def _balance_classes(
     class_counts = np.bincount(trainset.targets)
     smallest = np.min(class_counts)
     idxs = trainset.targets.argsort()
-    tmp = [Subset(trainset, idxs[:smallest])]
-    tmp_targets = [trainset.targets[idxs[:smallest]]]
+    tmp = [Subset(trainset, idxs[: int(smallest)])]
+    tmp_targets = [trainset.targets[idxs[: int(smallest)]]]
     for count in class_counts:
-        tmp.append(Subset(trainset, idxs[count : count + smallest]))
-        tmp_targets.append(trainset.targets[idxs[count : count + smallest]])
+        tmp.append(Subset(trainset, idxs[int(count) : int(count + smallest)]))
+        tmp_targets.append(trainset.targets[idxs[int(count) : int(count + smallest)]])
     unshuffled = ConcatDataset(tmp)
     unshuffled_targets = torch.cat(tmp_targets)
     shuffled_idxs = torch.randperm(
