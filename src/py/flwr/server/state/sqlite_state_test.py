@@ -20,7 +20,7 @@ import unittest
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 
-from .sqlite_state import task_ins_to_dict
+from .sqlite_state import task_to_dict
 from .state_test import create_task_ins, create_task_res
 
 INS_KEYS = [
@@ -49,7 +49,7 @@ class SqliteStateTest(unittest.TestCase):
         ins_res = create_task_ins(consumer_node_id=1, anonymous=True)
 
         # Execute
-        result = task_ins_to_dict(ins_res)
+        result = task_to_dict(ins_res)
 
         # Assert
         for key in INS_KEYS:
