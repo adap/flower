@@ -10,7 +10,7 @@ from torch.utils.data import ConcatDataset, DataLoader, Dataset, Subset, random_
 from torchvision.datasets import MNIST
 
 
-def load_datasets(
+def load_datasets(  # pylint: disable=too-many-arguments
     num_clients: int = 10,
     iid: Optional[bool] = True,
     balance: Optional[bool] = True,
@@ -50,8 +50,7 @@ def load_datasets(
     valloaders = []
     for dataset in datasets:
         len_val = int(len(dataset) / (1 / val_ratio))
-        len_train = len(dataset) - len_val
-        lengths = [len_train, len_val]
+        lengths = [len(dataset) - len_val, len_val]
         ds_train, ds_val = random_split(
             dataset, lengths, torch.Generator().manual_seed(seed)
         )
