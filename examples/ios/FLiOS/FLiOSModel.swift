@@ -49,7 +49,7 @@ public class FLiOSModel: ObservableObject {
         trainingBatchStatus = .preparing(count: 0)
         self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing train dataset"))
         DispatchQueue.global(qos: .userInitiated).async {
-            let batchProvider = DataLoader.trainBatchProvider(dataset: self.scenarioSelection.description) { count in
+            let batchProvider = DataLoader.trainBatchProvider(scenario: self.scenarioSelection) { count in
                 DispatchQueue.main.async {
                     self.trainingBatchStatus = .preparing(count: count)
                 }
@@ -66,7 +66,7 @@ public class FLiOSModel: ObservableObject {
         testBatchStatus = .preparing(count: 0)
         self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing test dataset"))
         DispatchQueue.global(qos: .userInitiated).async {
-            let batchProvider = DataLoader.testBatchProvider(dataset: self.scenarioSelection.description) { count in
+            let batchProvider = DataLoader.testBatchProvider(scenario: self.scenarioSelection) { count in
                 DispatchQueue.main.async {
                     self.testBatchStatus = .preparing(count: count)
                 }

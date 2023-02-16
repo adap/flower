@@ -203,7 +203,6 @@ struct ContentView: View {
                         if model.benchmarkSuite.benchmarkExists() || preparedExport {
                             ShareLink(item:model.benchmarkSuite.getBenchmarkFileUrl())
                         }
-                        
                     }
                 }
             }
