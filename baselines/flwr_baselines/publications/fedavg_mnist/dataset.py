@@ -13,7 +13,7 @@ from torchvision.datasets import MNIST
 def load_datasets(  # pylint: disable=too-many-arguments
     num_clients: int = 10,
     iid: Optional[bool] = True,
-    balance: Optional[bool] = True
+    balance: Optional[bool] = True,
     val_ratio: float = 0.1,
     batch_size: Optional[int] = 32,
     seed: Optional[int] = 42,
