@@ -57,18 +57,19 @@ def main(cfg: DictConfig) -> None:
         strategy=strategy,
     )
 
-    file_suffix: str = (f"{'_iid' if cfg.iid else ''}"
-                        f"{'_balanced' if cfg.balance else ''}"
-                        f"_C={cfg.num_clients}"
-                        f"_B={cfg.batch_size}"
-                        f"_E={cfg.num_epochs}"
-                        f"_R={cfg.num_rounds}"
-                        f"_mu={cfg.mu}"
-                        f"_stag={cfg.stagglers_fraction}")
+    file_suffix: str = (
+        f"{'_iid' if cfg.iid else ''}"
+        f"{'_balanced' if cfg.balance else ''}"
+        f"_C={cfg.num_clients}"
+        f"_B={cfg.batch_size}"
+        f"_E={cfg.num_epochs}"
+        f"_R={cfg.num_rounds}"
+        f"_mu={cfg.mu}"
+        f"_stag={cfg.stagglers_fraction}"
+    )
 
     np.save(
-        Path(cfg.save_path)
-        / Path(f"hist{file_suffix}"),
+        Path(cfg.save_path) / Path(f"hist{file_suffix}"),
         history,  # type: ignore
     )
 
