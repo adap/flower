@@ -1,4 +1,4 @@
-"""Runs CNN federated learning for MNST dataset."""
+"""Runs CNN federated learning for MNIST dataset."""
 
 
 from pathlib import Path

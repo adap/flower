@@ -12,7 +12,6 @@ The following baseline replicates the experiments in *Federated Optimization in 
 
 Tian Li, Anit Kumar Sahu, Manzil Zaheer, Maziar Sanjabi, Ameet Talwalkar and Virginia Smith.
 
-
 Note: If you use this implementation in your work, please remember to cite the original authors of the paper. 
 
 **[Link to paper.](https://arxiv.org/abs/1812.06127)**
