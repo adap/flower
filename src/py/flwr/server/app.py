@@ -224,9 +224,11 @@ def run_driver_api() -> None:
     args = _parse_args_driver()
 
     # Init state
-    if args.database_path != "":
+    db_path: str = args.database_path
+    if db_path != "":
         log(INFO, "Driver API: loading SqliteState")
         state = SqliteState(database_path=args.database_path)
+        state.initialize()
     else:
         log(INFO, "Driver API: loading InMemoryState")
         state = InMemoryState()
@@ -235,6 +237,7 @@ def run_driver_api() -> None:
     grpc_server: grpc.Server = _run_driver_api_grpc(
         address=args.driver_api_address,
         state=state,
+        db_path=db_path
     )
 
     # Graceful shutdown
@@ -256,9 +259,11 @@ def run_fleet_api() -> None:
     args = _parse_args_fleet()
 
     # Init state
-    if args.database_path != "":
+    db_path: str = args.database_path
+    if db_path != "":
         log(INFO, "Fleet API: loading SqliteState")
         state = SqliteState(database_path=args.database_path)
+        state.initialize()
     else:
         log(INFO, "Fleet API: loading InMemoryState")
         state = InMemoryState()
@@ -278,6 +283,7 @@ def run_fleet_api() -> None:
         fleet_server = _run_fleet_api_grpc_bidi(
             address=args.grpc_fleet_api_address,
             state=state,
+            db_path=db_path,
         )
         grpc_servers.append(fleet_server)
     else:
@@ -304,13 +310,19 @@ def run_server() -> None:
     event(EventType.RUN_SERVER_ENTER)
     args = _parse_args()
 
-    # Shared State
-    state = InMemoryState()
+    # Init state
+    db_path: str = args.database_path
+    if db_path != "":
+        state = SqliteState(database_path=args.database_path)
+        state.initialize()
+    else:
+        state = InMemoryState()
 
     # Start Driver API
     driver_server: grpc.Server = _run_driver_api_grpc(
         address=args.driver_api_address,
         state=state,
+        db_path=db_path,
     )
 
     grpc_servers = [driver_server]
@@ -394,12 +406,14 @@ def _register_exit_handlers(
 def _run_driver_api_grpc(
     address: str,
     state: State,
+    db_path: str,
 ) -> grpc.Server:
     """Run Driver API (gRPC, request-response)."""
 
     # Create Driver API gRPC server
     driver_servicer: grpc.Server = DriverServicer(
         state=state,
+        db_path=db_path,
     )
     driver_add_servicer_to_server_fn = add_DriverServicer_to_server
     driver_grpc_server = generic_create_grpc_server(
@@ -418,12 +432,14 @@ def _run_driver_api_grpc(
 def _run_fleet_api_grpc_bidi(
     address: str,
     state: State,
+    db_path: str,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, bidirectional streaming)."""
 
     # DriverClientManager
     driver_client_manager = DriverClientManager(
         state=state,
+        db_path=db_path,
     )
 
     # Create (legacy) Fleet API gRPC server

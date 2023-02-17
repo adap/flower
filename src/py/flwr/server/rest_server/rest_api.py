@@ -33,6 +33,10 @@ from flwr.proto.fleet_pb2 import (
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.state import State, SqliteState
 
+
+state: State = SqliteState(database_path="flwr.db")
+state.initialize()
+
 app = FastAPI()
 
 
@@ -47,9 +51,6 @@ async def pull_task_ins(request: Request) -> Response:
     # Deserialize ProtoBuf
     pull_task_ins_request_proto = PullTaskInsRequest()
     pull_task_ins_request_proto.ParseFromString(pull_task_ins_request_bytes)
-
-    # Get State
-    state: State = SqliteState(database_path="flwr.db")
 
     # Print received message
     log(INFO, "POST - Receiving GetTaskRequest")
@@ -80,9 +81,6 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
     # Deserialize ProtoBuf
     push_task_res_request_proto = PushTaskResRequest()
     push_task_res_request_proto.ParseFromString(push_task_res_request_bytes)
-
-    # Get State
-    state: State = SqliteState(database_path="flwr.db")
 
     # Print received message
     log(INFO, "POST - Receiving PushTaskResRequest")

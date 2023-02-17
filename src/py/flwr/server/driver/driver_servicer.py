@@ -32,7 +32,7 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsResponse,
 )
 from flwr.proto.task_pb2 import TaskRes
-from flwr.server.state import State
+from flwr.server.state import State, SqliteState
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 
@@ -42,15 +42,24 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     def __init__(
         self,
         state: State,
+        db_path: str,
     ) -> None:
         self.state = state
+        self.db_path = db_path
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
     ) -> GetNodesResponse:
         """Get available nodes."""
         log(INFO, "DriverServicer.GetNodes")
-        all_ids: Set[int] = self.state.get_nodes()
+
+        # Init state
+        state = self.state
+        if self.db_path != "":
+            state = SqliteState(database_path=self.db_path)
+            state.initialize()
+
+        all_ids: Set[int] = state.get_nodes()
         return GetNodesResponse(node_ids=list(all_ids))
 
     def PushTaskIns(
@@ -58,6 +67,12 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     ) -> PushTaskInsResponse:
         """Push a set of TaskIns."""
         log(INFO, "DriverServicer.PushTaskIns")
+
+        # Init state
+        state = self.state
+        if self.db_path != "":
+            state = SqliteState(database_path=self.db_path)
+            state.initialize()
 
         # Validate request
         _raise_if(len(request.task_ins_list) == 0, "`task_ins_list` must not be empty")
@@ -68,7 +83,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         # Store each TaskIns
         task_ids: List[Optional[UUID]] = []
         for task_ins in request.task_ins_list:
-            task_id: Optional[UUID] = self.state.store_task_ins(task_ins=task_ins)
+            task_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
             task_ids.append(task_id)
 
         return PushTaskInsResponse(
@@ -80,6 +95,12 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     ) -> PullTaskResResponse:
         """Pull a set of TaskRes."""
         log(INFO, "DriverServicer.PullTaskRes")
+
+        # Init state
+        state = self.state
+        if self.db_path != "":
+            state = SqliteState(database_path=self.db_path)
+            state.initialize()
 
         # Convert each task_id str to UUID
         task_ids: Set[UUID] = {UUID(task_id) for task_id in request.task_ids}
@@ -94,12 +115,12 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
                 return
 
             # Delete delivered TaskIns and TaskRes
-            self.state.delete_tasks(task_ids=task_ids)
+            state.delete_tasks(task_ids=task_ids)
 
         context.add_callback(on_rpc_done)
 
         # Read from state
-        task_res_list: List[TaskRes] = self.state.get_task_res(
+        task_res_list: List[TaskRes] = state.get_task_res(
             task_ids=task_ids, limit=None
         )
 

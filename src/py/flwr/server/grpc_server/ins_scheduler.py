@@ -26,15 +26,16 @@ from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.state import State
+from flwr.server.state import State, SqliteState
 
 
 class InsScheduler:
     """Schedule ClientProxy calls on a background thread."""
 
-    def __init__(self, client_proxy: ClientProxy, state: State):
+    def __init__(self, client_proxy: ClientProxy, state: State, db_path: str):
         self.client_proxy = client_proxy
         self.state = state
+        self.db_path = db_path
         self.worker_thread: Optional[threading.Thread] = None
         self.shared_memory_state = {"stop": False}
 
@@ -65,9 +66,16 @@ def _worker(
     client_proxy: ClientProxy,
     shared_memory_state: Dict[str, bool],
     state: State,
+    db_path: str,
 ) -> None:
     """Sequentially call ClientProxy methods to process outstanding tasks."""
     log(DEBUG, "Worker for node %i started", client_proxy.node_id)
+
+    # Init state
+    if db_path != "":
+        state = SqliteState(database_path=db_path)
+        state.initialize()
+
     while not shared_memory_state["stop"]:
         log(DEBUG, "Worker for node %i checking state", client_proxy.node_id)
 
