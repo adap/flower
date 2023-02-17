@@ -127,7 +127,15 @@ class EventType(str, Enum):
     START_SERVER_ENTER = auto()
     START_SERVER_LEAVE = auto()
 
-    # New Server
+    # Driver API
+    RUN_DRIVER_API_ENTER = auto()
+    RUN_DRIVER_API_LEAVE = auto()
+
+    # Fleet API
+    RUN_FLEET_API_ENTER = auto()
+    RUN_FLEET_API_LEAVE = auto()
+
+    # Driver API and Fleet API
     RUN_SERVER_ENTER = auto()
     RUN_SERVER_LEAVE = auto()
 
@@ -149,6 +157,7 @@ state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
     "source": None,
     "cluster": None,
 }
+
 
 # In Python 3.7 pylint will throw an error stating that
 # "Value 'Future' is unsubscriptable".
