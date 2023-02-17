@@ -13,7 +13,7 @@ flower-driver-api --driver-api-address "0.0.0.0:9091" --database-path flwr.db
 Start Flower Fleet API:
 
 ```bash
-flower-driver-api --rest --driver-api-address "0.0.0.0:9092" --database-path flwr.db
+flower-fleet-api --rest --rest-fleet-api-address "0.0.0.0:9093" --database-path flwr.db
 ```
 
 ## Start Client Node(s)
