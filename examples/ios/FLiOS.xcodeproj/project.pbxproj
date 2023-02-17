@@ -100,7 +100,6 @@
 		21A77B2A2865B4CB0062EBD8 /* mnist_train.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 21A77B272865B4CB0062EBD8 /* mnist_train.csv.lzfse */; };
 		21A77B2B2865B4CB0062EBD8 /* mnist_test.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 21A77B282865B4CB0062EBD8 /* mnist_test.csv.lzfse */; };
 		21A77B36286EEC420062EBD8 /* MNIST_Model.mlmodel in CopyFiles */ = {isa = PBXBuildFile; fileRef = 21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */; };
-		21AD436D2992D19C00FB0C15 /* CIFAR10DataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AD436C2992D19C00FB0C15 /* CIFAR10DataLoader.swift */; };
 		21B540712865B14000185DEE /* FLiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B540702865B14000185DEE /* FLiOSApp.swift */; };
 		21B540732865B14000185DEE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B540722865B14000185DEE /* ContentView.swift */; };
 		21B540752865B14100185DEE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540742865B14100185DEE /* Assets.xcassets */; };
@@ -214,7 +213,6 @@
 		21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = MNIST_Model.mlmodel; sourceTree = "<group>"; };
 		21A77B272865B4CB0062EBD8 /* mnist_train.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = mnist_train.csv.lzfse; sourceTree = "<group>"; };
 		21A77B282865B4CB0062EBD8 /* mnist_test.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = mnist_test.csv.lzfse; sourceTree = "<group>"; };
-		21AD436C2992D19C00FB0C15 /* CIFAR10DataLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIFAR10DataLoader.swift; sourceTree = "<group>"; };
 		21B5406D2865B14000185DEE /* FLiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FLiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21B540702865B14000185DEE /* FLiOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLiOSApp.swift; sourceTree = "<group>"; };
 		21B540722865B14000185DEE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -345,7 +343,6 @@
 		21A77B162865B23D0062EBD8 /* CoreMLClient */ = {
 			isa = PBXGroup;
 			children = (
-				21AD436C2992D19C00FB0C15 /* CIFAR10DataLoader.swift */,
 				21A77B182865B26C0062EBD8 /* MNISTDataLoader.swift */,
 				21A77B202865B3B10062EBD8 /* MLModelInspect.swift */,
 			);
@@ -537,7 +534,6 @@
 				21A77B292865B4CB0062EBD8 /* MNIST_Model.mlmodel in Sources */,
 				21A77AC52865B22B0062EBD8 /* UIImage+CVPixelBuffer.swift in Sources */,
 				21A77AEA2865B22B0062EBD8 /* CustomModel.proto in Sources */,
-				21AD436D2992D19C00FB0C15 /* CIFAR10DataLoader.swift in Sources */,
 				21A77B042865B22B0062EBD8 /* Identity.proto in Sources */,
 				21A77AEB2865B22B0062EBD8 /* NonMaximumSuppression.pb.swift in Sources */,
 				21A77ADD2865B22B0062EBD8 /* WordEmbedding.proto in Sources */,
