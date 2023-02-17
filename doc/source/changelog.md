@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+### What's new?
+
+- **Add new "What is Federated Learning?" tutorial** ([#1657](https://github.com/adap/flower/pull/1657))
+
+- **Delete delivered** `TaskIns/TaskRes` ([#1662](https://github.com/adap/flower/pull/1662))
+
+- **General improvements** ([#1659](https://github.com/adap/flower/pull/1659))
+
+- **Introduce new Flower Baseline: FedProx MNIST** ([#1513](https://github.com/adap/flower/pull/1513))
+
+### Incompatible changes
+
+None
+
 ## v1.3.0 (2023-02-06)
 
 ### Thanks to our contributors
