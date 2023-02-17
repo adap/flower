@@ -49,11 +49,15 @@ Global parameters:
 
 Strategy details:
 * 1 000 rounds, 5 clients per round, local learning rate of 10^{-3},
-* minibatch SGD  
-  * has a size 10  
+* minibatch SGD
+  * has a size 10
   * is trained for 5 minibatches,
   * is evaluated on an unseen set of test devices
 * Reptile
   * has a linearly decaying meta-learning rate that goes from 2 to 0,
   * is evaluated by fine-tuning each test device for 50 mini-batches of size 5
 
+## LEAF Additional Resources
+
+* code https://github.com/TalwalkarLab/leaf
+* documentation https://leaf.cmu.edu/build/html/index.html
