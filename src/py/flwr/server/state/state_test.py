@@ -49,12 +49,10 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
 
         # Execute
-        task_ins_list = state.get_task_ins(
-            node_id=1,
-            limit=10,
-        )
+        task_ins_list = state.get_task_ins(node_id=1, limit=10)
 
         # Assert
+        assert type(task_ins_list) == list
         assert not task_ins_list
 
     def test_get_task_ins_anonymous(self) -> None:
@@ -159,7 +157,7 @@ class StateTest(unittest.TestCase):
 
         # Insert one TaskRes, but don't retrive it
         task_res_1: TaskRes = create_task_res(
-            producer_node_id=100, anonymous=False, ancestry=[str(task_id_0)]
+            producer_node_id=100, anonymous=False, ancestry=[str(task_id_1)]
         )
         _ = state.store_task_res(task_res=task_res_1)
 
@@ -327,7 +325,7 @@ class StateTest(unittest.TestCase):
 
         # Assert
         for i in retrieved_node_ids:
-            assert 10 in node_ids
+            assert i in node_ids
 
     def test_unregister_node(self) -> None:
         """Test unregistering a client node."""
@@ -343,6 +341,39 @@ class StateTest(unittest.TestCase):
         # Assert
         assert len(retrieved_node_ids) == 0
 
+    def test_num_task_ins(self) -> None:
+        """Test unregistering a client node."""
+        # Prepare
+        state: State = self.state_factory()
+        task_0 = create_task_ins(consumer_node_id=0, anonymous=True)
+        task_1 = create_task_ins(consumer_node_id=0, anonymous=True)
+        
+        # Store two tasks
+        state.store_task_ins(task_0)
+        state.store_task_ins(task_1)
+
+        # Execute
+        num = state.num_task_ins()
+
+        # Assert
+        assert num == 2
+
+    def test_num_task_res(self) -> None:
+        """Test unregistering a client node."""
+        # Prepare
+        state: State = self.state_factory()
+        task_0 = create_task_res(producer_node_id=0, anonymous=True, ancestry=["1"])
+        task_1 = create_task_res(producer_node_id=0, anonymous=True, ancestry=["1"])
+        
+        # Store two tasks
+        state.store_task_res(task_0)
+        state.store_task_res(task_1)
+
+        # Execute
+        num = state.num_task_res()
+
+        # Assert
+        assert num == 2
 
 def create_task_ins(
     consumer_node_id: int, anonymous: bool, delivered_at: str = ""
@@ -367,7 +398,6 @@ def create_task_ins(
     )
     return task
 
-
 def create_task_res(
     producer_node_id: int, anonymous: bool, ancestry: List[str]
 ) -> TaskRes:
@@ -387,7 +417,6 @@ def create_task_res(
     )
     return task_res
 
-
 class InMemoryStateTest(StateTest):
     """Test InMemoryState implemenation."""
 
@@ -397,27 +426,48 @@ class InMemoryStateTest(StateTest):
         """Return InMemoryState."""
         return InMemoryState()
 
-
 class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
     """Test SqliteState implemenation with in-memory database."""
 
-    __test__ = False
+    __test__ = True
 
     def state_factory(self) -> State:
         """Return SqliteState with in-memory database."""
-        return SqliteState()
+        state = SqliteState()
+        state.initialize()
+        return state
 
+    def test_initialize(self) -> State:
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        result = state._query("SELECT name FROM sqlite_schema;")
+
+        # Assert
+        assert len(result) == 6
 
 class SqliteFileBaseTest(StateTest, unittest.TestCase):
     """Test SqliteState implemenation with file-based database."""
 
-    __test__ = False
+    __test__ = True
 
     def state_factory(self) -> State:
         """Return SqliteState with file-based database."""
-        file_path = cast(str, tempfile.TemporaryFile())
-        return SqliteState(database_path=file_path)
+        self.tmp_file = tempfile.NamedTemporaryFile()
+        state = SqliteState(database_path=self.tmp_file.name)
+        state.initialize()
+        return state
 
+    def test_initialize(self) -> State:
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        result = state._query("SELECT name FROM sqlite_schema;")
+
+        # Assert
+        assert len(result) == 6
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
