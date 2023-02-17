@@ -87,8 +87,6 @@ public class BenchmarkSuite: ObservableObject {
             let completeBenchmark = try encoder.encode(BenchmarkSnaptshot(batteryHistory: self.batteryHistory, networkHistory: self.networkHistory, actionHistory: self.actionHistory, deviceID: self.deviceID))
             let benchmarkString = String(data: completeBenchmark, encoding: .utf8)!
             try benchmarkString.write(to: url, atomically: true, encoding: .utf8)
-            let test = try String(contentsOf: url)
-            print(test)
         } catch {
             print("Error while encoding complete Benchmark history...")
         }

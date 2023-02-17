@@ -11,7 +11,7 @@ import flwr
 struct MLModelInspect {
     
     private let mlModel: CoreML_Specification_Model?
-    //private let updatableLayerTypes: [CoreML_Specification_NeuralNetworkLayer.OneOf_Layer] = [.innerProduct()]
+    
     init(serializedData data: Data) {
         mlModel = try? CoreML_Specification_Model(serializedData: data)
     }

@@ -4,32 +4,20 @@ Flower iOS contains a Swift Package for Flower clients in iOS and an example tha
 
 ## Project Setup
 
-Requirements for setting up a server:
-
-- Conda for managing environment
-- Python3
-
-Requirements for setting up a client:
-
-- XCode
-
-To set up the project, start by cloning the ios folder. After that create a new conda environment.
+Project dependencies (`flwr`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
 ```shell
-conda create --name flower-ios
+poetry install
+poetry shell
 ```
 
-Activate the created conda enviroment
+Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
 
 ```shell
-conda activate flower-ios
+python3 -c "import flwr"
 ```
 
-Install flwr using pip3
-
-```shell
-pip3 install flwr
-```
+If you don't see any errors you're good to go!
 
 # Run Federated Learning on iOS Clients
 
