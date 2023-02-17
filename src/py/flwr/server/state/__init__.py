@@ -14,10 +14,9 @@
 # ==============================================================================
 """Flower server state."""
 
-
-from .in_memory_state import InMemoryState
-from .sqlite_state import SqliteState
-from .state import State
+from flwr.server.state.in_memory_state import InMemoryState as InMemoryState
+from flwr.server.state.sqlite_state import SqliteState as SqliteState
+from flwr.server.state.state import State as State
 
 __all__ = [
     "InMemoryState",
