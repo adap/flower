@@ -17,11 +17,8 @@
 
 import unittest
 
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-
-from .sqlite_state import task_to_dict
-from .state_test import create_task_ins, create_task_res
+from flwr.server.state.sqlite_state import task_to_dict
+from flwr.server.state.state_test import create_task_ins
 
 INS_KEYS = [
     "task_id",
@@ -39,6 +36,7 @@ INS_KEYS = [
     "legacy_client_message",
 ]
 
+
 class SqliteStateTest(unittest.TestCase):
     """Test utilitiy functions."""
 
@@ -54,6 +52,7 @@ class SqliteStateTest(unittest.TestCase):
         # Assert
         for key in INS_KEYS:
             assert key in result.keys()
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
