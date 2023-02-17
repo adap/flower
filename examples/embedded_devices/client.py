@@ -80,7 +80,6 @@ class CifarClient(fl.client.Client):
         return ParametersRes(parameters=parameters)
 
     def _instantiate_model(self, model_str: str):
-
         # will load utils.model_str
         m = getattr(import_module("utils"), model_str)
         # instantiate model
