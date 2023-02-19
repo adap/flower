@@ -52,9 +52,6 @@ async def pull_task_ins(request: Request) -> Response:
     pull_task_ins_request_proto = PullTaskInsRequest()
     pull_task_ins_request_proto.ParseFromString(pull_task_ins_request_bytes)
 
-    # Print received message
-    log(INFO, "POST - Receiving GetTaskRequest")
-
     # Retrieve TaskIns from State
     node = pull_task_ins_request_proto.node
     node_id: Optional[int] = None if node.anonymous else node.node_id
@@ -81,9 +78,6 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
     # Deserialize ProtoBuf
     push_task_res_request_proto = PushTaskResRequest()
     push_task_res_request_proto.ParseFromString(push_task_res_request_bytes)
-
-    # Print received message
-    log(INFO, "POST - Receiving PushTaskResRequest")
 
     # Store TaskRes in State
     task_res: TaskRes = push_task_res_request_proto.task_res_list[0]
