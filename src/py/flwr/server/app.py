@@ -313,10 +313,14 @@ def run_server() -> None:
     # Init state
     db_path: str = args.database_path
     if db_path != "":
+        log(INFO, "Loading SqliteState")
         state = SqliteState(database_path=args.database_path)
         state.initialize()
     else:
+        log(INFO, "Loading InMemoryState")
         state = InMemoryState()
+        singleton = Singleton.instance()
+        singleton.set_state(state=state)
 
     # Start Driver API
     driver_server: grpc.Server = _run_driver_api_grpc(
