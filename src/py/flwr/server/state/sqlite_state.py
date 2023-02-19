@@ -230,6 +230,7 @@ class SqliteState(State):
                 FROM task_ins
                 WHERE consumer_anonymous == 1
                 AND   consumer_node_id == 0
+                AND   delivered_at = ""
             """
 
         else:
@@ -238,6 +239,7 @@ class SqliteState(State):
                 FROM task_ins
                 WHERE consumer_anonymous == 0
                 AND   consumer_node_id == :node_id
+                AND   delivered_at = ""
             """
             data["node_id"] = node_id
 
