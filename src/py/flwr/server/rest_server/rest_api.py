@@ -31,7 +31,8 @@ from flwr.proto.fleet_pb2 import (
     Reconnect,
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes
-from flwr.server.state import State, SqliteState
+from flwr.server.state import SqliteState, State
+
 from .singleton import Singleton
 
 state: State = SqliteState(database_path="flwr.db")
@@ -61,6 +62,12 @@ async def pull_task_ins(request: Request) -> Response:
 
     # Return serialized ProtoBuf
     pull_task_ins_response_bytes = pull_task_ins_response_proto.SerializeToString()
+
+    log(
+        INFO,
+        "POST - Returning PullTaskInsResponse %s",
+        [ins.task_id for ins in task_ins_list],
+    )
     return Response(
         status_code=200,
         content=pull_task_ins_response_bytes,
