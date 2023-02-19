@@ -16,6 +16,12 @@ Start Flower Fleet API:
 flower-fleet-api --rest --rest-fleet-api-address "0.0.0.0:9093" --database-path flwr.db
 ```
 
+Or, start them both together:
+
+```bash
+flower-server --rest --rest-fleet-api-address "0.0.0.0:9093" --database-path flwr.db
+```
+
 ## Start Client Node(s)
 
 Using the `mt-pytorch` code example, run
