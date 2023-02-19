@@ -180,7 +180,7 @@ class SqliteState(State):
         task_ins.task.ttl = ttl.isoformat()
 
         # Store TaskIns
-        data = (task_to_dict(task_ins),)
+        data = (task_ins_to_dict(task_ins),)
         columns = ", ".join([f":{key}" for key in data[0].keys()])
         query = f"INSERT INTO task_ins VALUES({columns});"
 
@@ -269,7 +269,7 @@ class SqliteState(State):
             # Run query
             rows = self._query(query, data)
 
-        result = [dict_to_task(row) for row in rows]
+        result = [dict_to_task_ins(row) for row in rows]
 
         return result
 
@@ -309,7 +309,7 @@ class SqliteState(State):
         task_res.task.ttl = ttl.isoformat()
 
         # Store TaskIns
-        data = (task_to_dict(task_res),)
+        data = (task_res_to_dict(task_res),)
         columns = ", ".join([f":{key}" for key in data[0].keys()])
         query = f"INSERT INTO task_res VALUES({columns});"
 
@@ -379,7 +379,7 @@ class SqliteState(State):
             # Run query
             rows = self._query(query, data)
 
-        result = [dict_to_task(row) for row in rows]
+        result = [dict_to_task_res(row) for row in rows]
         return result
 
     def num_task_ins(self) -> int:
@@ -469,7 +469,7 @@ def dict_factory(cursor: sqlite3.Cursor, row: sqlite3.Row) -> Dict[str, Any]:
     return {key: value for key, value in zip(fields, row)}
 
 
-def task_to_dict(task_msg: Union[TaskIns, TaskRes]) -> Dict[str, Any]:
+def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
     result = {
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
@@ -482,18 +482,35 @@ def task_to_dict(task_msg: Union[TaskIns, TaskRes]) -> Dict[str, Any]:
         "delivered_at": task_msg.task.delivered_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
-        "legacy_server_message": task_msg.task.legacy_client_message.SerializeToString(),
-        "legacy_client_message": task_msg.task.legacy_server_message.SerializeToString(),
+        "legacy_server_message": task_msg.task.legacy_server_message.SerializeToString(),
+        "legacy_client_message": None,
     }
     return result
 
 
-def dict_to_task(task_dict: Dict[str, Any]) -> Union[TaskIns, TaskRes]:
+def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
+    result = {
+        "task_id": task_msg.task_id,
+        "group_id": task_msg.group_id,
+        "workload_id": task_msg.workload_id,
+        "producer_anonymous": task_msg.task.producer.anonymous,
+        "producer_node_id": task_msg.task.producer.node_id,
+        "consumer_anonymous": task_msg.task.consumer.anonymous,
+        "consumer_node_id": task_msg.task.consumer.node_id,
+        "created_at": task_msg.task.created_at,
+        "delivered_at": task_msg.task.delivered_at,
+        "ttl": task_msg.task.ttl,
+        "ancestry": ",".join(task_msg.task.ancestry),
+        "legacy_server_message": None,
+        "legacy_client_message": task_msg.task.legacy_client_message.SerializeToString(),
+    }
+    return result
+
+
+def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
     """Turn task_dict into protobuf message."""
     server_message = ServerMessage()
     server_message.ParseFromString(task_dict["legacy_server_message"])
-    client_message = ClientMessage()
-    client_message.ParseFromString(task_dict["legacy_client_message"])
 
     result = TaskIns(
         task_id=task_dict["task_id"],
@@ -513,6 +530,33 @@ def dict_to_task(task_dict: Dict[str, Any]) -> Union[TaskIns, TaskRes]:
             ttl=task_dict["ttl"],
             ancestry=task_dict["ancestry"].split(","),
             legacy_server_message=server_message,
+        ),
+    )
+    return result
+
+
+def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
+    """Turn task_dict into protobuf message."""
+    client_message = ClientMessage()
+    client_message.ParseFromString(task_dict["legacy_client_message"])
+
+    result = TaskRes(
+        task_id=task_dict["task_id"],
+        group_id=task_dict["group_id"],
+        workload_id=task_dict["workload_id"],
+        task=Task(
+            producer=Node(
+                node_id=task_dict["producer_node_id"],
+                anonymous=task_dict["producer_anonymous"],
+            ),
+            consumer=Node(
+                node_id=task_dict["consumer_node_id"],
+                anonymous=task_dict["consumer_anonymous"],
+            ),
+            created_at=task_dict["created_at"],
+            delivered_at=task_dict["delivered_at"],
+            ttl=task_dict["ttl"],
+            ancestry=task_dict["ancestry"].split(","),
             legacy_client_message=client_message,
         ),
     )
