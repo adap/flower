@@ -1,5 +1,6 @@
 """Runs CNN federated learning for MNIST dataset."""
 
+
 from pathlib import Path
 
 import flwr as fl
@@ -8,9 +9,9 @@ import numpy as np
 import torch
 from omegaconf import DictConfig
 
-from flwr_baselines.publications.fedavg_mnist import client, utils
+from flwr_baselines.publications.fedprox_mnist import client, utils
 
-DEVICE: torch.device = torch.device("cpu")
+DEVICE: str = torch.device("cpu")
 
 
 @hydra.main(config_path="docs/conf", config_name="config", version_base=None)
@@ -27,21 +28,25 @@ def main(cfg: DictConfig) -> None:
         batch_size=cfg.batch_size,
         device=DEVICE,
         num_clients=cfg.num_clients,
+        num_rounds=cfg.num_rounds,
         iid=cfg.iid,
         balance=cfg.balance,
         learning_rate=cfg.learning_rate,
+        stagglers=cfg.stagglers_fraction,
     )
 
     evaluate_fn = utils.gen_evaluate_fn(testloader, DEVICE)
 
-    strategy = fl.server.strategy.FedAvg(
-        fraction_fit=cfg.client_fraction,
+    strategy = fl.server.strategy.FedProx(
+        fraction_fit=1.0,
         fraction_evaluate=0.0,
-        min_fit_clients=int(cfg.num_clients * cfg.client_fraction),
+        min_fit_clients=int(cfg.num_clients * (1 - cfg.stagglers_fraction)),
         min_evaluate_clients=0,
         min_available_clients=cfg.num_clients,
+        on_fit_config_fn=lambda curr_round: {"curr_round": curr_round},
         evaluate_fn=evaluate_fn,
         evaluate_metrics_aggregation_fn=utils.weighted_average,
+        proximal_mu=cfg.mu,
     )
 
     # Start simulation
@@ -59,6 +64,8 @@ def main(cfg: DictConfig) -> None:
         f"_B={cfg.batch_size}"
         f"_E={cfg.num_epochs}"
         f"_R={cfg.num_rounds}"
+        f"_mu={cfg.mu}"
+        f"_stag={cfg.stagglers_fraction}"
     )
 
     np.save(
@@ -69,8 +76,7 @@ def main(cfg: DictConfig) -> None:
     utils.plot_metric_from_history(
         history,
         cfg.save_path,
-        cfg.expected_maximum,
-        file_suffix,
+        (file_suffix),
     )
 
 
