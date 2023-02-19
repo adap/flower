@@ -248,19 +248,21 @@ class StateTest(unittest.TestCase):
         retrieved_task_ins = task_ins_list[0]
         assert retrieved_task_ins.task_id == str(task_ins_uuid)
 
-    @unittest.skip(
-        "The validation function does not allow to store ins with delivered_at set. Need to mock.patch it first"
-    )
     def test_task_ins_store_delivered_and_fail_retrieving(self) -> None:
         """Fail retrieving delivered task."""
         # Prepare
         state: State = self.state_factory()
-        task_ins = create_task_ins(
-            consumer_node_id=1, anonymous=False, delivered_at="1989-11-09"
-        )
+        task_ins = create_task_ins(consumer_node_id=1, anonymous=False)
 
         # Execute
         _ = state.store_task_ins(task_ins)
+        
+        # Get once to set delivered
+        task_ins_list = state.get_task_ins(node_id=1, limit=None)
+
+        assert len(task_ins_list) == 1
+
+        # Get twice to get nothing
         task_ins_list = state.get_task_ins(node_id=1, limit=None)
 
         # Assert
