@@ -235,9 +235,7 @@ def run_driver_api() -> None:
 
     # Start server
     grpc_server: grpc.Server = _run_driver_api_grpc(
-        address=args.driver_api_address,
-        state=state,
-        db_path=db_path
+        address=args.driver_api_address, state=state, db_path=db_path
     )
 
     # Graceful shutdown

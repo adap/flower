@@ -32,7 +32,7 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsResponse,
 )
 from flwr.proto.task_pb2 import TaskRes
-from flwr.server.state import State, SqliteState
+from flwr.server.state import SqliteState, State
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 
@@ -120,9 +120,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         context.add_callback(on_rpc_done)
 
         # Read from state
-        task_res_list: List[TaskRes] = state.get_task_res(
-            task_ids=task_ids, limit=None
-        )
+        task_res_list: List[TaskRes] = state.get_task_res(task_ids=task_ids, limit=None)
 
         context.set_code(grpc.StatusCode.OK)
         return PullTaskResResponse(task_res_list=task_res_list)

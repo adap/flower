@@ -22,7 +22,7 @@ from typing import Dict, List, Optional, Set, Tuple
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-from flwr.server.state import State, SqliteState
+from flwr.server.state import SqliteState, State
 
 from .ins_scheduler import InsScheduler
 
@@ -34,7 +34,7 @@ class DriverClientManager(ClientManager):
         self._cv = threading.Condition()
         self.nodes: Dict[str, Tuple[int, InsScheduler]] = {}
         self.state = state
-        self.db_path = db_path,
+        self.db_path = db_path
 
     def __len__(self) -> int:
         """Return the number of available clients.
