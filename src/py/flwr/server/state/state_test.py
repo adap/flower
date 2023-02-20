@@ -446,8 +446,6 @@ class SqliteFileBaseTest(StateTest, unittest.TestCase):
 
     __test__ = True
 
-    tmp_file: tempfile.NamedTemporaryFile
-
     def state_factory(self) -> SqliteState:
         """Return SqliteState with file-based database."""
         # pylint: disable-next=consider-using-with,attribute-defined-outside-init
