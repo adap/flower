@@ -1,4 +1,3 @@
-# type: ignore
 # Copyright 2023 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +13,16 @@
 # limitations under the License.
 # ==============================================================================
 """SQLite based implemenation of server state."""
+
+
 import re
 import sqlite3
-from datetime import datetime, timedelta, timezone
-from logging import ERROR
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from datetime import datetime, timedelta
+from logging import DEBUG, ERROR
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
-from flwr.common.logger import log
+from flwr.common import log, now
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
@@ -31,7 +32,7 @@ from .state import State
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
-    id INTEGER UNIQUE
+    node_id INTEGER UNIQUE
 );
 """
 
@@ -50,7 +51,6 @@ CREATE TABLE IF NOT EXISTS task_ins(
     ancestry                TEXT,
     legacy_server_message   BLOB,
     legacy_client_message   BLOB
-    -- FOREIGN KEY(task_id) REFERENCES node(id)
 );
 """
 
@@ -70,15 +70,14 @@ CREATE TABLE IF NOT EXISTS task_res(
     ancestry                TEXT,
     legacy_server_message   BLOB,
     legacy_client_message   BLOB
-    -- FOREIGN KEY(task_id) REFERENCES node(id)
 );
 """
 
-DICT_OR_TUPLE = Union[Tuple[Any], Dict[str, Any]]
+DictOrTuple = Union[Tuple[Any], Dict[str, Any]]
 
 
 class SqliteState(State):
-    """SQLite based state implemenation."""
+    """SQLite-based state implementation."""
 
     def __init__(
         self,
@@ -90,16 +89,23 @@ class SqliteState(State):
         ----------
         database : (path-like object)
             The path to the database file to be opened. Pass ":memory:" to open
-            a connectionto a database that is in RAM instead of on disk.
+            a connection to a database that is in RAM, instead of on disk.
         """
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
 
-    def initialize(self) -> List[Tuple[str]]:
-        """Create tables if they don't exist yet."""
+    def initialize(self, log_queries: bool = False) -> List[Tuple[str]]:
+        """Create tables if they don't exist yet.
+
+        Parameters
+        ----------
+        log_queries : bool
+            Log each query which is executed.
+        """
         self.conn = sqlite3.connect(self.database_path)
         self.conn.row_factory = dict_factory
-        self.conn.set_trace_callback(lambda query: log(1, query))
+        if log_queries:
+            self.conn.set_trace_callback(lambda query: log(DEBUG, query))
         cur = self.conn.cursor()
 
         # Create each table if not exists queries
@@ -111,32 +117,37 @@ class SqliteState(State):
 
         return res.fetchall()
 
-    def _query(
+    def query(
         self,
         query: str,
-        data: Optional[Union[List[DICT_OR_TUPLE], DICT_OR_TUPLE]] = None,
-    ) -> List[Tuple[Any]]:
+        data: Optional[Union[List[DictOrTuple], DictOrTuple]] = None,
+    ) -> List[Dict[str, Any]]:
+        """Execute a SQL query."""
         if self.conn is None:
             raise Exception("State is not initialized.")
 
         if data is None:
             data = []
 
-        # Cleanup whitespace to make the logs nicer
+        # Clean up whitespace to make the logs nicer
         query = re.sub(r"\s+", " ", query)
 
         try:
             with self.conn:
                 if (
                     len(data) > 0
+                    # pylint: disable-next=C0123
                     and (type(data) == tuple or type(data) == list)
+                    # pylint: disable-next=C0123
                     and (type(data[0]) == tuple or type(data[0]) == dict)
                 ):
                     rows = self.conn.executemany(query, data)
                 else:
                     rows = self.conn.execute(query, data)
 
-                # Extract results before commiting to support INSERT/UPDATE ... RETURNING style queries
+                # Extract results before committing to support
+                #   INSERT/UPDATE ... RETURNING
+                # style queries
                 result = rows.fetchall()
         except KeyError as exc:
             log(ERROR, {"query": query, "data": data, "exception": exc})
@@ -155,8 +166,7 @@ class SqliteState(State):
         Constraints
         -----------
         If `task_ins.task.consumer.anonymous` is `True`, then
-        `task_ins.task.consumer.node_id` MUST NOT be set (equal 0). Any implemenation
-        may just override it with zero instead of validating.
+        `task_ins.task.consumer.node_id` MUST NOT be set (equal 0).
 
         If `task_ins.task.consumer.anonymous` is `False`, then
         `task_ins.task.consumer.node_id` MUST be set (not 0)
@@ -167,31 +177,27 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Create and set task_id
+        # Create task_id, created_at and ttl
         task_id = uuid4()
-        task_ins.task_id = str(task_id)
-
-        # Set created_at
-        created_at: datetime = _now()
-        task_ins.task.created_at = created_at.isoformat()
-
-        # Set ttl
+        created_at: datetime = now()
         ttl: datetime = created_at + timedelta(hours=24)
-        task_ins.task.ttl = ttl.isoformat()
 
         # Store TaskIns
+        task_ins.task_id = str(task_id)
+        task_ins.task.created_at = created_at.isoformat()
+        task_ins.task.ttl = ttl.isoformat()
         data = (task_ins_to_dict(task_ins),)
-        columns = ", ".join([f":{key}" for key in data[0].keys()])
+        columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
 
-        self._query(query, data)
+        self.query(query, data)
 
         return task_id
 
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
     ) -> List[TaskIns]:
-        """Get TaskIns optionally filtered by node_id.
+        """Get undelivered TaskIns for one node (either anonymous or with ID).
 
         Usually, the Fleet API calls this for Nodes planning to work on one or more
         TaskIns.
@@ -208,23 +214,26 @@ class SqliteState(State):
         `task_ins.task.consumer.node_id` equals `0` and
         `task_ins.task.consumer.anonymous` is set to `True`.
 
-        If `delivered_at` MUST BE set (not `""`) otherwise the TaskIns MUST not be in
+        `delivered_at` MUST BE set (i.e., not `""`) otherwise the TaskIns MUST not be in
         the result.
 
         If `limit` is not `None`, return, at most, `limit` number of `task_ins`. If
-        `limit` is set, it has to be greater zero.
+        `limit` is set, it has to be greater than zero.
         """
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
-        # Retrieve all anonymous Tasks
         if node_id == 0:
-            return []
+            msg = (
+                "`node_id` must be >= 1"
+                + "\n\n For requesting anonymous tasks use `node_id` equal `None`"
+            )
+            raise AssertionError(msg)
 
         data: Dict[str, Union[str, int]] = {}
 
-        # Retrieve all anonymous Tasks
         if node_id is None:
+            # Retrieve all anonymous Tasks
             query = """
                 SELECT task_id
                 FROM task_ins
@@ -232,9 +241,9 @@ class SqliteState(State):
                 AND   consumer_node_id == 0
                 AND   delivered_at = ""
             """
-
         else:
-            query = f"""
+            # Retrieve all TaskIns for node_id
+            query = """
                 SELECT task_id
                 FROM task_ins
                 WHERE consumer_anonymous == 0
@@ -249,7 +258,7 @@ class SqliteState(State):
 
         query += ";"
 
-        rows = self._query(query, data)
+        rows = self.query(query, data)
 
         if rows:
             # Prepare query
@@ -263,13 +272,13 @@ class SqliteState(State):
             """
 
             # Prepare data for query
-            delivered_at = _now().isoformat()
+            delivered_at = now().isoformat()
             data = {"delivered_at": delivered_at}
             for index, task_id in enumerate(task_ids):
                 data[f"id_{index}"] = str(task_id)
 
             # Run query
-            rows = self._query(query, data)
+            rows = self.query(query, data)
 
         result = [dict_to_task_ins(row) for row in rows]
 
@@ -278,7 +287,7 @@ class SqliteState(State):
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes.
 
-        Usually, the Fleet API calls this for Nodes returning results.
+        Usually, the Fleet API calls this when Nodes return their results.
 
         Stores the TaskRes and, if successful, returns the `task_id` (UUID) of
         the `task_res`. If storing the `task_res` fails, `None` is returned.
@@ -286,8 +295,7 @@ class SqliteState(State):
         Constraints
         -----------
         If `task_res.task.consumer.anonymous` is `True`, then
-        `task_res.task.consumer.node_id` MUST NOT be set (equal 0). Any implemenation
-        may just override it with zero instead of validating.
+        `task_res.task.consumer.node_id` MUST NOT be set (equal 0).
 
         If `task_res.task.consumer.anonymous` is `False`, then
         `task_res.task.consumer.node_id` MUST be set (not 0)
@@ -298,41 +306,37 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Create and set task_id
+        # Create task_id, created_at and ttl
         task_id = uuid4()
-        task_res.task_id = str(task_id)
-
-        # Set created_at
-        created_at: datetime = _now()
-        task_res.task.created_at = created_at.isoformat()
-
-        # Set ttl
+        created_at: datetime = now()
         ttl: datetime = created_at + timedelta(hours=24)
-        task_res.task.ttl = ttl.isoformat()
 
         # Store TaskIns
+        task_res.task_id = str(task_id)
+        task_res.task.created_at = created_at.isoformat()
+        task_res.task.ttl = ttl.isoformat()
         data = (task_res_to_dict(task_res),)
-        columns = ", ".join([f":{key}" for key in data[0].keys()])
+        columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
 
-        self._query(query, data)
+        self.query(query, data)
 
         return task_id
 
     def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
         """Get TaskRes for task_ids.
 
-        Usually, the Driver API calls this for Nodes planning to work on one or more
-        TaskIns.
+        Usually, the Driver API calls this method to get results for instructions it has
+        previously scheduled.
 
-        Retrieves all TaskRes for the given `task_ids` and returns and empty list of
+        Retrieves all TaskRes for the given `task_ids` and returns and empty list if
         none could be found.
 
         Constraints
         -----------
         If `limit` is not `None`, return, at most, `limit` number of TaskRes. The limit
         will only take effect if enough task_ids are in the set AND are currently
-        available. If `limit` is set, it has to be greater zero.
+        available. If `limit` is set, it has to be greater than zero.
         """
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
@@ -349,22 +353,23 @@ class SqliteState(State):
             AND delivered_at = ""
         """
 
+        data: Dict[str, Union[str, int]] = {}
+
         if limit is not None:
             query += " LIMIT :limit"
+            data["limit"] = limit
 
         query += ";"
-
-        data: Dict[str, Union[str, int]] = {"limit": limit}
 
         for index, task_id in enumerate(task_ids):
             data[f"id_{index}"] = str(task_id)
 
-        rows = self._query(query, data)
+        rows = self.query(query, data)
 
         if rows:
             # Prepare query
-            task_ids = [row["task_id"] for row in rows]
-            placeholders = ",".join([f":id_{i}" for i in range(len(task_ids))])
+            found_task_ids = [row["task_id"] for row in rows]
+            placeholders = ",".join([f":id_{i}" for i in range(len(found_task_ids))])
             query = f"""
                 UPDATE task_res
                 SET delivered_at = :delivered_at
@@ -373,13 +378,13 @@ class SqliteState(State):
             """
 
             # Prepare data for query
-            delivered_at = _now().isoformat()
+            delivered_at = now().isoformat()
             data = {"delivered_at": delivered_at}
-            for index, task_id in enumerate(task_ids):
+            for index, task_id in enumerate(found_task_ids):
                 data[f"id_{index}"] = str(task_id)
 
             # Run query
-            rows = self._query(query, data)
+            rows = self.query(query, data)
 
         result = [dict_to_task_res(row) for row in rows]
         return result
@@ -390,9 +395,10 @@ class SqliteState(State):
         This includes delivered but not yet deleted task_ins.
         """
         query = "SELECT count(*) AS num FROM task_ins;"
-        rows = self._query(query)
+        rows = self.query(query)
         result = rows[0]
-        return result["num"]
+        num = cast(int, result["num"])
+        return num
 
     def num_task_res(self) -> int:
         """Number of task_res in store.
@@ -400,7 +406,7 @@ class SqliteState(State):
         This includes delivered but not yet deleted task_res.
         """
         query = "SELECT count(*) AS num FROM task_res;"
-        rows = self._query(query)
+        rows = self.query(query)
         result: Dict[str, int] = rows[0]
         return result["num"]
 
@@ -439,39 +445,41 @@ class SqliteState(State):
             self.conn.execute(query_1, data)
             self.conn.execute(query_2, data)
 
+        return None
+
     def register_node(self, node_id: int) -> None:
         """Store `node_id` in state."""
-        query = "INSERT INTO node VALUES(:id);"
-        self._query(query, (node_id,))
+        query = "INSERT INTO node VALUES(:node_id);"
+        self.query(query, {"node_id": node_id})
 
     def unregister_node(self, node_id: int) -> None:
         """Remove `node_id` from state."""
-        query = "DELETE FROM node WHERE id = :id;"
-        self._query(query, (node_id,))
+        query = "DELETE FROM node WHERE node_id = :node_id;"
+        self.query(query, {"node_id": node_id})
 
     def get_nodes(self) -> Set[int]:
         """Retrieve all currently stored node IDs as a set."""
         query = "SELECT * FROM node;"
-        rows = self._query(query)
-        result: Set[int] = {row["id"] for row in rows}
+        rows = self.query(query)
+        result: Set[int] = {row["node_id"] for row in rows}
         return result
 
 
-def _now() -> datetime:
-    return datetime.now(tz=timezone.utc)
-
-
-def dict_factory(cursor: sqlite3.Cursor, row: sqlite3.Row) -> Dict[str, Any]:
+def dict_factory(
+    cursor: sqlite3.Cursor,
+    row: sqlite3.Row,  # type: ignore
+) -> Dict[str, Any]:
     """Used to turn SQLite results into dicts.
 
     Less efficent for retrival of large amounts of data but easier to
     use.
     """
     fields = [column[0] for column in cursor.description]
-    return {key: value for key, value in zip(fields, row)}
+    return dict(zip(fields, row))
 
 
 def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
+    """Transform TaskIns to dict."""
     result = {
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
@@ -484,13 +492,16 @@ def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
         "delivered_at": task_msg.task.delivered_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
-        "legacy_server_message": task_msg.task.legacy_server_message.SerializeToString(),
+        "legacy_server_message": (
+            task_msg.task.legacy_server_message.SerializeToString()
+        ),
         "legacy_client_message": None,
     }
     return result
 
 
 def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
+    """Transform TaskRes to dict."""
     result = {
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
@@ -504,7 +515,9 @@ def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
         "legacy_server_message": None,
-        "legacy_client_message": task_msg.task.legacy_client_message.SerializeToString(),
+        "legacy_client_message": (
+            task_msg.task.legacy_client_message.SerializeToString()
+        ),
     }
     return result
 
