@@ -31,7 +31,7 @@ from flwr.server.state.state import State
 class StateTest(unittest.TestCase):
     """Test all state implementations."""
 
-    # This is to true in each child class
+    # This is to True in each child class
     __test__ = False
 
     @abstractmethod
