@@ -329,7 +329,7 @@ class SqliteState(State):
         Usually, the Driver API calls this for Nodes planning to work on one or more
         TaskIns.
 
-        Retrieves all TaskRes for the given `task_ids` and returns and empty list of
+        Retrieves all TaskRes for the given `task_ids` and returns and empty list if
         none could be found.
 
         Constraints
