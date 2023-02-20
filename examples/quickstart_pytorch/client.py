@@ -42,7 +42,7 @@ class Net(nn.Module):
 
 def train(net, trainloader, epochs):
     """Train the model on the training set."""
-    criterion = torch.nn.CrossEntropyLoss(reduction='sum')
+    criterion = torch.nn.CrossEntropyLoss(reduction="sum")
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     for _ in range(epochs):
         for images, labels in tqdm(trainloader):
@@ -53,7 +53,7 @@ def train(net, trainloader, epochs):
 
 def test(net, testloader):
     """Validate the model on the test set."""
-    criterion = torch.nn.CrossEntropyLoss(reduction='sum')
+    criterion = torch.nn.CrossEntropyLoss(reduction="sum")
     correct, loss = 0, 0.0
     with torch.no_grad():
         for images, labels in tqdm(testloader):

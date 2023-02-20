@@ -13,14 +13,16 @@
 # limitations under the License.
 # ==============================================================================
 """SQLite based implemenation of server state."""
+
+
 import re
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from logging import ERROR
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
-from flwr.common.logger import log
+from flwr.common import log, now
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
@@ -49,8 +51,6 @@ CREATE TABLE IF NOT EXISTS task_ins(
     ancestry                TEXT,
     legacy_server_message   BLOB,
     legacy_client_message   BLOB
-    -- FOREIGN KEY(task_id) REFERENCES node(id)
-);
 """
 
 
@@ -69,7 +69,6 @@ CREATE TABLE IF NOT EXISTS task_res(
     ancestry                TEXT,
     legacy_server_message   BLOB,
     legacy_client_message   BLOB
-    -- FOREIGN KEY(task_id) REFERENCES node(id)
 );
 """
 
@@ -176,7 +175,7 @@ class SqliteState(State):
         task_ins.task_id = str(task_id)
 
         # Set created_at
-        created_at: datetime = _now()
+        created_at: datetime = now()
         task_ins.task.created_at = created_at.isoformat()
 
         # Set ttl
@@ -267,7 +266,7 @@ class SqliteState(State):
             """
 
             # Prepare data for query
-            delivered_at = _now().isoformat()
+            delivered_at = now().isoformat()
             data = {"delivered_at": delivered_at}
             for index, task_id in enumerate(task_ids):
                 data[f"id_{index}"] = str(task_id)
@@ -307,7 +306,7 @@ class SqliteState(State):
         task_res.task_id = str(task_id)
 
         # Set created_at
-        created_at: datetime = _now()
+        created_at: datetime = now()
         task_res.task.created_at = created_at.isoformat()
 
         # Create and set ttl
@@ -326,8 +325,8 @@ class SqliteState(State):
     def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
         """Get TaskRes for task_ids.
 
-        Usually, the Driver API calls this for Nodes planning to work on one or more
-        TaskIns.
+        Usually, the Driver API calls this method to get results for instructions it has
+        previously scheduled.
 
         Retrieves all TaskRes for the given `task_ids` and returns and empty list if
         none could be found.
@@ -378,7 +377,7 @@ class SqliteState(State):
             """
 
             # Prepare data for query
-            delivered_at = _now().isoformat()
+            delivered_at = now().isoformat()
             data = {"delivered_at": delivered_at}
             for index, task_id in enumerate(found_task_ids):
                 data[f"id_{index}"] = str(task_id)
@@ -463,10 +462,6 @@ class SqliteState(State):
         rows = self.query(query)
         result: Set[int] = {row["id"] for row in rows}
         return result
-
-
-def _now() -> datetime:
-    return datetime.now(tz=timezone.utc)
 
 
 def dict_factory(

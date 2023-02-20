@@ -15,12 +15,12 @@
 """In-memory State implementation."""
 
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from logging import ERROR
 from typing import Dict, List, Optional, Set
 from uuid import UUID, uuid4
 
-from flwr.common.logger import log
+from flwr.common import log, now
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
@@ -45,7 +45,7 @@ class InMemoryState(State):
 
         # Create task_id, created_at and ttl
         task_id = uuid4()
-        created_at: datetime = _now()
+        created_at: datetime = now()
         ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskIns
@@ -85,7 +85,7 @@ class InMemoryState(State):
                 break
 
         # Mark all of them as delivered
-        delivered_at = _now().isoformat()
+        delivered_at = now().isoformat()
         for task_ins in task_ins_list:
             task_ins.task.delivered_at = delivered_at
 
@@ -103,7 +103,7 @@ class InMemoryState(State):
 
         # Create task_id, created_at and ttl
         task_id = uuid4()
-        created_at: datetime = _now()
+        created_at: datetime = now()
         ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskRes
@@ -133,7 +133,7 @@ class InMemoryState(State):
                 break
 
         # Mark all of them as delivered
-        delivered_at = _now().isoformat()
+        delivered_at = now().isoformat()
         for task_res in task_res_list:
             task_res.task.delivered_at = delivered_at
 
@@ -183,7 +183,3 @@ class InMemoryState(State):
     def get_nodes(self) -> Set[int]:
         """Return all available client nodes."""
         return self.node_ids
-
-
-def _now() -> datetime:
-    return datetime.now(tz=timezone.utc)
