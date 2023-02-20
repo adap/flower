@@ -107,7 +107,7 @@ class InMemoryState(State):
         task_id = uuid4()
         task_res.task_id = str(task_id)
 
-        # Set created_at and ttl
+        # Create created_at and ttl
         created_at: datetime = _now()
         ttl: datetime = created_at + timedelta(hours=24)
 
