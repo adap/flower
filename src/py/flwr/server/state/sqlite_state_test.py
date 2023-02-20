@@ -20,37 +20,36 @@ import unittest
 from flwr.server.state.sqlite_state import task_ins_to_dict
 from flwr.server.state.state_test import create_task_ins
 
-INS_KEYS = [
-    "task_id",
-    "group_id",
-    "workload_id",
-    "producer_anonymous",
-    "producer_node_id",
-    "consumer_anonymous",
-    "consumer_node_id",
-    "created_at",
-    "delivered_at",
-    "ttl",
-    "ancestry",
-    "legacy_server_message",
-    "legacy_client_message",
-]
-
 
 class SqliteStateTest(unittest.TestCase):
     """Test utilitiy functions."""
 
     def test_ins_res_to_dict(self) -> None:
-        """Validate that a new state has no TaskIns."""
+        """Check if all required keys are included in return value."""
 
         # Prepare
         ins_res = create_task_ins(consumer_node_id=1, anonymous=True)
+        expected_keys = [
+            "task_id",
+            "group_id",
+            "workload_id",
+            "producer_anonymous",
+            "producer_node_id",
+            "consumer_anonymous",
+            "consumer_node_id",
+            "created_at",
+            "delivered_at",
+            "ttl",
+            "ancestry",
+            "legacy_server_message",
+            "legacy_client_message",
+        ]
 
         # Execute
         result = task_ins_to_dict(ins_res)
 
         # Assert
-        for key in INS_KEYS:
+        for key in expected_keys:
             assert key in result
 
 
