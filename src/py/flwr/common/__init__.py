@@ -17,7 +17,7 @@
 
 from .date import now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
-from .logger import log
+from .logger import log as log
 from .parameter import bytes_to_ndarray as bytes_to_ndarray
 from .parameter import ndarray_to_bytes as ndarray_to_bytes
 from .parameter import ndarrays_to_parameters as ndarrays_to_parameters
