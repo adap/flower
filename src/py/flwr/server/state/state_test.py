@@ -466,5 +466,6 @@ class SqliteFileBaseTest(StateTest, unittest.TestCase):
         assert len(result) == 6
 
 
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
