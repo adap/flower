@@ -46,10 +46,10 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
 
         # Execute
-        task_ins_list = state.get_task_ins(node_id=1, limit=10)
+        num_task_ins = state.num_task_ins()
 
         # Assert
-        assert len(task_ins_list) == 0
+        assert num_task_ins == 0
 
     def test_get_task_res_empty(self) -> None:
         """Validate that a new state has no TaskRes."""
@@ -85,7 +85,7 @@ class StateTest(unittest.TestCase):
         actual_task_ins = task_ins_list[0]
 
         assert actual_task_ins.task_id == task_ins.task_id  # pylint: disable=no-member
-        assert actual_task_ins.task is not None
+        assert actual_task_ins.HasField('task')
 
         actual_task = actual_task_ins.task
 
