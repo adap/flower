@@ -255,7 +255,7 @@ class StateTest(unittest.TestCase):
 
         assert len(task_ins_list) == 1
 
-        # Get twice to get nothing
+        # 2nd get: no TaskIns because it was already delivered before
         task_ins_list = state.get_task_ins(node_id=1, limit=None)
 
         # Assert
