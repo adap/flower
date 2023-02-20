@@ -77,7 +77,7 @@ DictOrTuple = Union[Tuple[Any], Dict[str, Any]]
 
 
 class SqliteState(State):
-    """SQLite based state implemenation."""
+    """SQLite-based state implementation."""
 
     def __init__(
         self,
