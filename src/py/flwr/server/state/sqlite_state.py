@@ -166,8 +166,7 @@ class SqliteState(State):
         Constraints
         -----------
         If `task_ins.task.consumer.anonymous` is `True`, then
-        `task_ins.task.consumer.node_id` MUST NOT be set (equal 0). Any implemenation
-        may just override it with zero instead of validating.
+        `task_ins.task.consumer.node_id` MUST NOT be set (equal 0).
 
         If `task_ins.task.consumer.anonymous` is `False`, then
         `task_ins.task.consumer.node_id` MUST be set (not 0)
@@ -297,8 +296,7 @@ class SqliteState(State):
         Constraints
         -----------
         If `task_res.task.consumer.anonymous` is `True`, then
-        `task_res.task.consumer.node_id` MUST NOT be set (equal 0). Any implemenation
-        may just override it with zero instead of validating.
+        `task_res.task.consumer.node_id` MUST NOT be set (equal 0).
 
         If `task_res.task.consumer.anonymous` is `False`, then
         `task_res.task.consumer.node_id` MUST be set (not 0)
