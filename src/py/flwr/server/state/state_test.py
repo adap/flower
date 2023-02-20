@@ -424,7 +424,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         assert len(result) == 6
 
 
-class SqliteFileBaseTest(StateTest, unittest.TestCase):
+class SqliteFileBasedTest(StateTest, unittest.TestCase):
     """Test SqliteState implemenation with file-based database."""
 
     __test__ = True
