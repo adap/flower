@@ -408,7 +408,7 @@ def create_task_res(
 
 
 class InMemoryStateTest(StateTest):
-    """Test InMemoryState implemenation."""
+    """Test InMemoryState implementation."""
 
     __test__ = True
 
