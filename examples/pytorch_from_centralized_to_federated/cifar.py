@@ -113,9 +113,7 @@ def test(
     """Validate the network on the entire test set."""
     # Define loss and metrics
     criterion = nn.CrossEntropyLoss()
-    correct = 0
-    total = 0
-    loss = 0.0
+    correct, loss = 0, 0.0
 
     # Evaluate the network
     net.to(device)
@@ -126,9 +124,8 @@ def test(
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)  # pylint: disable=no-member
-            total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    accuracy = correct / total
+    accuracy = correct / len(testloader.dataset)
     return loss, accuracy
 
 
