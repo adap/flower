@@ -104,7 +104,7 @@ class StateTest(unittest.TestCase):
         )
 
     def test_store_and_delete_tasks(self) -> None:
-        """Test store_task_ins."""
+        """Test delete_tasks."""
 
         # Prepare
         consumer_node_id = 1
