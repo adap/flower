@@ -18,7 +18,7 @@
 import re
 import sqlite3
 from datetime import datetime, timedelta
-from logging import ERROR
+from logging import DEBUG, ERROR
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
@@ -32,7 +32,7 @@ from .state import State
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
-    id INTEGER UNIQUE
+    node_id INTEGER UNIQUE
 );
 """
 
@@ -94,11 +94,18 @@ class SqliteState(State):
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
 
-    def initialize(self) -> List[Tuple[str]]:
-        """Create tables if they don't exist yet."""
+    def initialize(self, log_queries: bool = False) -> List[Tuple[str]]:
+        """Create tables if they don't exist yet.
+
+        Parameters
+        ----------
+        log_queries : bool
+            Log each query which is executed.
+        """
         self.conn = sqlite3.connect(self.database_path)
         self.conn.row_factory = dict_factory
-        self.conn.set_trace_callback(lambda query: log(1, query))
+        if log_queries:
+            self.conn.set_trace_callback(lambda query: log(DEBUG, query))
         cur = self.conn.cursor()
 
         # Create each table if not exists queries
@@ -449,19 +456,19 @@ class SqliteState(State):
 
     def register_node(self, node_id: int) -> None:
         """Store `node_id` in state."""
-        query = "INSERT INTO node VALUES(:id);"
-        self.query(query, (node_id,))
+        query = "INSERT INTO node VALUES(:node_id);"
+        self.query(query, {"node_id": node_id})
 
     def unregister_node(self, node_id: int) -> None:
         """Remove `node_id` from state."""
-        query = "DELETE FROM node WHERE id = :id;"
-        self.query(query, (node_id,))
+        query = "DELETE FROM node WHERE node_id = :node_id;"
+        self.query(query, {"node_id": node_id})
 
     def get_nodes(self) -> Set[int]:
         """Retrieve all currently stored node IDs as a set."""
         query = "SELECT * FROM node;"
         rows = self.query(query)
-        result: Set[int] = {row["id"] for row in rows}
+        result: Set[int] = {row["node_id"] for row in rows}
         return result
 
 
