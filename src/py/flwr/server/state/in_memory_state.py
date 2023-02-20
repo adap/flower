@@ -23,7 +23,7 @@ from uuid import UUID, uuid4
 from flwr.common.logger import log
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.state.state import State
-from flwr.server.utils.validator import validate_task_ins_or_res
+from flwr.server.utils import validate_task_ins_or_res
 
 
 class InMemoryState(State):
@@ -43,15 +43,13 @@ class InMemoryState(State):
             log(ERROR, errors)
             return None
 
-        # Create and set task_id
+        # Create task_id, created_at and ttl
         task_id = uuid4()
-        task_ins.task_id = str(task_id)
-
-        # Set created_at
         created_at: datetime = _now()
         ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskIns
+        task_ins.task_id = str(task_id)
         task_ins.task.created_at = created_at.isoformat()
         task_ins.task.ttl = ttl.isoformat()
         self.task_ins_store[task_id] = task_ins
@@ -103,15 +101,13 @@ class InMemoryState(State):
             log(ERROR, errors)
             return None
 
-        # Create and set task_id
+        # Create task_id, created_at and ttl
         task_id = uuid4()
-        task_res.task_id = str(task_id)
-
-        # Set created_at and ttl
         created_at: datetime = _now()
         ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskRes
+        task_res.task_id = str(task_id)
         task_res.task.created_at = created_at.isoformat()
         task_res.task.ttl = ttl.isoformat()
         self.task_res_store[task_id] = task_res

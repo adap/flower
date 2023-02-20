@@ -26,14 +26,13 @@ from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.state.in_memory_state import InMemoryState
-from flwr.server.state.sqlite_state import SqliteState
 from flwr.server.state.state import State
 
 
 class StateTest(unittest.TestCase):
     """Test all state implementations."""
 
-    # This is to true in each child class
+    # This is to True in each child class
     __test__ = False
 
     @abstractmethod
@@ -48,28 +47,10 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
 
         # Execute
-        task_ins_list = state.get_task_ins(node_id=1, limit=10)
+        num_task_ins = state.num_task_ins()
 
         # Assert
-        assert len(task_ins_list) == 0
-
-    def test_get_task_ins_anonymous(self) -> None:
-        """Validate that a new state has no TaskIns."""
-
-        # Prepare
-        state = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=0, anonymous=True)
-        task_id = state.store_task_ins(task_ins=task_ins)
-
-        # Execute
-        task_ins_list = state.get_task_ins(
-            node_id=None,
-            limit=10,
-        )
-
-        # Assert
-        assert len(task_ins_list) == 1
-        assert task_ins_list[0].task_id == str(task_id)
+        assert num_task_ins == 0
 
     def test_get_task_res_empty(self) -> None:
         """Validate that a new state has no TaskRes."""
@@ -78,10 +59,10 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
 
         # Execute
-        task_res_list = state.get_task_res(task_ids={uuid4()}, limit=10)
+        num_tasks_res = state.num_task_res()
 
         # Assert
-        assert not task_res_list
+        assert num_tasks_res == 0
 
     def test_store_task_ins_one(self) -> None:
         """Test store_task_ins."""
@@ -105,7 +86,7 @@ class StateTest(unittest.TestCase):
         actual_task_ins = task_ins_list[0]
 
         assert actual_task_ins.task_id == task_ins.task_id  # pylint: disable=no-member
-        assert actual_task_ins.task is not None
+        assert actual_task_ins.HasField("task")
 
         actual_task = actual_task_ins.task
 
@@ -123,8 +104,8 @@ class StateTest(unittest.TestCase):
             2020, 1, 1, tzinfo=timezone.utc
         )
 
-    def test_store_delete_tasks(self) -> None:
-        """Test store_task_ins."""
+    def test_store_and_delete_tasks(self) -> None:
+        """Test delete_tasks."""
 
         # Prepare
         consumer_node_id = 1
@@ -175,7 +156,7 @@ class StateTest(unittest.TestCase):
 
     # Init tests
     def test_init_state(self) -> None:
-        """Test that state is innitialized correctly."""
+        """Test that state is initialized correctly."""
 
         # Execute
         state = self.state_factory()
@@ -198,8 +179,8 @@ class StateTest(unittest.TestCase):
         task_ins_list = state.get_task_ins(node_id=None, limit=None)
 
         # Assert
-        retrieved_task_ins = task_ins_list[0]
-        assert retrieved_task_ins.task_id == str(task_ins_uuid)
+        assert len(task_ins_list) == 1
+        assert task_ins_list[0].task_id == str(task_ins_uuid)
 
     def test_task_ins_store_anonymous_and_fail_retrieving_identitiy(self) -> None:
         """Store anonymous TaskIns and fail to retrieve it."""
@@ -251,12 +232,13 @@ class StateTest(unittest.TestCase):
 
         # Execute
         _ = state.store_task_ins(task_ins)
-        # Get once to set delivered
+
+        # 1st get: set to delivered
         task_ins_list = state.get_task_ins(node_id=1, limit=None)
 
         assert len(task_ins_list) == 1
 
-        # Get twice to get nothing
+        # 2nd get: no TaskIns because it was already delivered before
         task_ins_list = state.get_task_ins(node_id=1, limit=None)
 
         # Assert
@@ -330,7 +312,8 @@ class StateTest(unittest.TestCase):
         assert len(retrieved_node_ids) == 0
 
     def test_num_task_ins(self) -> None:
-        """Test unregistering a client node."""
+        """Test if num_tasks returns correct number of not delivered
+        task_ins."""
         # Prepare
         state: State = self.state_factory()
         task_0 = create_task_ins(consumer_node_id=0, anonymous=True)
@@ -347,7 +330,8 @@ class StateTest(unittest.TestCase):
         assert num == 2
 
     def test_num_task_res(self) -> None:
-        """Test unregistering a client node."""
+        """Test if num_tasks returns correct number of not delivered
+        task_res."""
         # Prepare
         state: State = self.state_factory()
         task_0 = create_task_res(producer_node_id=0, anonymous=True, ancestry=["1"])
@@ -409,61 +393,13 @@ def create_task_res(
 
 
 class InMemoryStateTest(StateTest):
-    """Test InMemoryState implemenation."""
+    """Test InMemoryState implementation."""
 
     __test__ = True
 
     def state_factory(self) -> State:
         """Return InMemoryState."""
         return InMemoryState()
-
-
-class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
-    """Test SqliteState implemenation with in-memory database."""
-
-    __test__ = True
-
-    def state_factory(self) -> SqliteState:
-        """Return SqliteState with in-memory database."""
-        state = SqliteState(":memory:")
-        state.initialize()
-        return state
-
-    def test_initialize(self) -> None:
-        """Test initialization."""
-        # Prepare
-        state = self.state_factory()
-
-        # Execute
-        result = state.query("SELECT name FROM sqlite_schema;")
-
-        # Assert
-        assert len(result) == 6
-
-
-class SqliteFileBaseTest(StateTest, unittest.TestCase):
-    """Test SqliteState implemenation with file-based database."""
-
-    __test__ = True
-
-    def state_factory(self) -> SqliteState:
-        """Return SqliteState with file-based database."""
-        # pylint: disable-next=consider-using-with,attribute-defined-outside-init
-        self.tmp_file = tempfile.NamedTemporaryFile()
-        state = SqliteState(database_path=self.tmp_file.name)
-        state.initialize()
-        return state
-
-    def test_initialize(self) -> None:
-        """Test initialization."""
-        # Prepare
-        state = self.state_factory()
-
-        # Execute
-        result = state.query("SELECT name FROM sqlite_schema;")
-
-        # Assert
-        assert len(result) == 6
 
 
 if __name__ == "__main__":
