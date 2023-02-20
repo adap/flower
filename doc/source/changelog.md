@@ -10,6 +10,8 @@
 
 - **General improvements** ([#1659](https://github.com/adap/flower/pull/1659))
 
+- **Introduce new Flower Baseline: FedProx MNIST** ([#1513](https://github.com/adap/flower/pull/1513))
+
 ### Incompatible changes
 
 None

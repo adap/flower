@@ -1,4 +1,3 @@
-# pylint: disable=too-many-arguments
 """Defines the MNIST Flower Client and a function to instantiate it."""
 
 
@@ -6,15 +5,18 @@ from collections import OrderedDict
 from typing import Callable, Dict, Tuple
 
 import flwr as fl
+import numpy as np
 import torch
 from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import DataLoader
 
-from flwr_baselines.publications.fedavg_mnist import model
-from flwr_baselines.publications.fedavg_mnist.dataset import load_datasets
+from flwr_baselines.publications.fedprox_mnist import model
+from flwr_baselines.publications.fedprox_mnist.dataset import load_datasets
 
 
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(
+    fl.client.NumPyClient
+):  # pylint: disable=too-many-instance-attributes
     """Standard Flower client for CNN training."""
 
     def __init__(
@@ -25,13 +27,15 @@ class FlowerClient(fl.client.NumPyClient):
         device: torch.device,
         num_epochs: int,
         learning_rate: float,
-    ):
+        staggler_schedule: np.ndarray,
+    ):  # pylint: disable=too-many-arguments
         self.net = net
         self.trainloader = trainloader
         self.valloader = valloader
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
+        self.staggler_schedule = staggler_schedule
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -48,13 +52,26 @@ class FlowerClient(fl.client.NumPyClient):
     ) -> Tuple[NDArrays, int, Dict]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
+
+        # At each round check if the client is a staggler,
+        # if so, train less epochs (to simulate partial work)
+        if (
+            self.staggler_schedule[int(config["curr_round"]) - 1]
+            and self.num_epochs > 1
+        ):
+            num_epochs = np.random.randint(1, self.num_epochs)
+        else:
+            num_epochs = self.num_epochs
+
         model.train(
             self.net,
             self.trainloader,
             self.device,
-            epochs=self.num_epochs,
+            epochs=num_epochs,
             learning_rate=self.learning_rate,
+            proximal_mu=config["proximal_mu"],
         )
+
         return self.get_parameters({}), len(self.trainloader), {}
 
     def evaluate(
@@ -71,10 +88,14 @@ def gen_client_fn(
     iid: bool,
     balance: bool,
     num_clients: int,
+    num_rounds: int,
     num_epochs: int,
     batch_size: int,
     learning_rate: float,
-) -> Tuple[Callable[[str], FlowerClient], DataLoader]:
+    stagglers: float,
+) -> Tuple[
+    Callable[[str], FlowerClient], DataLoader
+]:  # pylint: disable=too-many-arguments
     """Generates the client function that creates the Flower Clients.
 
     Parameters
@@ -98,6 +119,8 @@ def gen_client_fn(
         The size of the local batches each client trains on.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
+    stagglers : float
+        Proportion of stagglers in the clients, between 0 and 1.
 
     Returns
     -------
@@ -107,6 +130,15 @@ def gen_client_fn(
     """
     trainloaders, valloaders, testloader = load_datasets(
         iid=iid, balance=balance, num_clients=num_clients, batch_size=batch_size
+    )
+
+    # Defines a staggling schedule for each clients, i.e at which round will they
+    # be a staggler. This is done so at each round the proportion of staggling
+    # clients is respected
+    stagglers_mat = np.transpose(
+        np.random.choice(
+            [0, 1], size=(num_rounds, num_clients), p=[1 - stagglers, stagglers]
+        )
     )
 
     def client_fn(cid: str) -> FlowerClient:
@@ -122,7 +154,13 @@ def gen_client_fn(
 
         # Create a  single Flower client representing a single organization
         return FlowerClient(
-            net, trainloader, valloader, device, num_epochs, learning_rate
+            net,
+            trainloader,
+            valloader,
+            device,
+            num_epochs,
+            learning_rate,
+            stagglers_mat[int(cid)],
         )
 
     return client_fn, testloader
