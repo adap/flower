@@ -17,7 +17,7 @@
 
 import unittest
 
-from flwr.server.state.sqlite_state import task_to_dict
+from flwr.server.state.sqlite_state import task_ins_to_dict
 from flwr.server.state.state_test import create_task_ins
 
 INS_KEYS = [
@@ -47,7 +47,7 @@ class SqliteStateTest(unittest.TestCase):
         ins_res = create_task_ins(consumer_node_id=1, anonymous=True)
 
         # Execute
-        result = task_to_dict(ins_res)
+        result = task_ins_to_dict(ins_res)
 
         # Assert
         for key in INS_KEYS:
