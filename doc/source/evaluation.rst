@@ -13,6 +13,10 @@ All built-in strategies support centralized evaluation by providing an evaluatio
 An evaluation function is any function that can take the current global model parameters as input and return evaluation results:
 
 .. code-block:: python
+    
+    from flwr.common import NDArrays, Scalar
+    
+    from typing import Dict, Optional, Tuple
 
     def get_evaluate_fn(model):
         """Return an evaluation function for server-side evaluation."""
@@ -24,8 +28,10 @@ An evaluation function is any function that can take the current global model pa
         x_val, y_val = x_train[45000:50000], y_train[45000:50000]
 
         # The `evaluate` function will be called after every round
-        def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, Dict]]:
-            model.set_weights(weights)  # Update model with the latest parameters
+        def evaluate(
+            server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
+        ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+            model.set_weights(parameters)  # Update model with the latest parameters
             loss, accuracy = model.evaluate(x_val, y_val)
             return loss, {"accuracy": accuracy}
 
