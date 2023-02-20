@@ -129,7 +129,7 @@ class SqliteState(State):
         if data is None:
             data = []
 
-        # Cleanup whitespace to make the logs nicer
+        # Clean up whitespace to make the logs nicer
         query = re.sub(r"\s+", " ", query)
 
         try:
@@ -201,7 +201,7 @@ class SqliteState(State):
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
     ) -> List[TaskIns]:
-        """Get TaskIns optionally filtered by node_id.
+        """Get undelivered TaskIns for one node (either anonymous or with ID).
 
         Usually, the Fleet API calls this for Nodes planning to work on one or more
         TaskIns.
@@ -218,11 +218,11 @@ class SqliteState(State):
         `task_ins.task.consumer.node_id` equals `0` and
         `task_ins.task.consumer.anonymous` is set to `True`.
 
-        If `delivered_at` MUST BE set (not `""`) otherwise the TaskIns MUST not be in
+        `delivered_at` MUST BE set (i.e., not `""`) otherwise the TaskIns MUST not be in
         the result.
 
         If `limit` is not `None`, return, at most, `limit` number of `task_ins`. If
-        `limit` is set, it has to be greater zero.
+        `limit` is set, it has to be greater than zero.
         """
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
