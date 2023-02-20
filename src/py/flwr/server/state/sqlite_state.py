@@ -223,9 +223,12 @@ class SqliteState(State):
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
-        # Retrieve all anonymous Tasks
         if node_id == 0:
-            return []
+            msg = (
+                "`node_id` must be >= 1"
+                + "\n\n For requesting anonymous tasks use `node_id` equal `None`"
+            )
+            raise AssertionError(msg)
 
         data: Dict[str, Union[str, int]] = {}
 
@@ -238,7 +241,6 @@ class SqliteState(State):
                 AND   consumer_node_id == 0
                 AND   delivered_at = ""
             """
-
         else:
             query = """
                 SELECT task_id
