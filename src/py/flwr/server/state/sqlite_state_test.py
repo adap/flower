@@ -51,7 +51,7 @@ class SqliteStateTest(unittest.TestCase):
 
         # Assert
         for key in INS_KEYS:
-            assert key in result.keys()
+            assert key in result
 
 
 if __name__ == "__main__":

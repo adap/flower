@@ -430,11 +430,12 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         return state
 
     def test_initialize(self) -> None:
+        """Test initialization."""
         # Prepare
         state = self.state_factory()
 
         # Execute
-        result = state._query("SELECT name FROM sqlite_schema;")
+        result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
         assert len(result) == 6
@@ -447,17 +448,19 @@ class SqliteFileBaseTest(StateTest, unittest.TestCase):
 
     def state_factory(self) -> SqliteState:
         """Return SqliteState with file-based database."""
-        self.tmp_file = tempfile.NamedTemporaryFile()
-        state = SqliteState(database_path=self.tmp_file.name)
+        # pylint: disable-next=consider-using-with,attribute-defined-outside-init
+        tmp_file = tempfile.NamedTemporaryFile()
+        state = SqliteState(database_path=tmp_file.name)
         state.initialize()
         return state
 
     def test_initialize(self) -> None:
+        """Test initialization."""
         # Prepare
         state = self.state_factory()
 
         # Execute
-        result = state._query("SELECT name FROM sqlite_schema;")
+        result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
         assert len(result) == 6

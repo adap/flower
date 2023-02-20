@@ -1,4 +1,3 @@
-# type: ignore
 # Copyright 2023 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +17,7 @@ import re
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from logging import ERROR
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common.logger import log
@@ -74,7 +73,7 @@ CREATE TABLE IF NOT EXISTS task_res(
 );
 """
 
-DICT_OR_TUPLE = Union[Tuple[Any], Dict[str, Any]]
+DictOrTuple = Union[Tuple[Any], Dict[str, Any]]
 
 
 class SqliteState(State):
@@ -111,11 +110,12 @@ class SqliteState(State):
 
         return res.fetchall()
 
-    def _query(
+    def query(
         self,
         query: str,
-        data: Optional[Union[List[DICT_OR_TUPLE], DICT_OR_TUPLE]] = None,
-    ) -> List[Tuple[Any]]:
+        data: Optional[Union[List[DictOrTuple], DictOrTuple]] = None,
+    ) -> List[Dict[str, Any]]:
+        """Run SQLQuery."""
         if self.conn is None:
             raise Exception("State is not initialized.")
 
@@ -129,14 +129,18 @@ class SqliteState(State):
             with self.conn:
                 if (
                     len(data) > 0
+                    # pylint: disable-next=C0123
                     and (type(data) == tuple or type(data) == list)
+                    # pylint: disable-next=C0123
                     and (type(data[0]) == tuple or type(data[0]) == dict)
                 ):
                     rows = self.conn.executemany(query, data)
                 else:
                     rows = self.conn.execute(query, data)
 
-                # Extract results before commiting to support INSERT/UPDATE ... RETURNING style queries
+                # Extract results before commiting to support
+                #   INSERT/UPDATE ... RETURNING
+                # style queries
                 result = rows.fetchall()
         except KeyError as exc:
             log(ERROR, {"query": query, "data": data, "exception": exc})
@@ -181,10 +185,10 @@ class SqliteState(State):
 
         # Store TaskIns
         data = (task_ins_to_dict(task_ins),)
-        columns = ", ".join([f":{key}" for key in data[0].keys()])
+        columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
 
-        self._query(query, data)
+        self.query(query, data)
 
         return task_id
 
@@ -234,7 +238,7 @@ class SqliteState(State):
             """
 
         else:
-            query = f"""
+            query = """
                 SELECT task_id
                 FROM task_ins
                 WHERE consumer_anonymous == 0
@@ -249,7 +253,7 @@ class SqliteState(State):
 
         query += ";"
 
-        rows = self._query(query, data)
+        rows = self.query(query, data)
 
         if rows:
             # Prepare query
@@ -269,7 +273,7 @@ class SqliteState(State):
                 data[f"id_{index}"] = str(task_id)
 
             # Run query
-            rows = self._query(query, data)
+            rows = self.query(query, data)
 
         result = [dict_to_task_ins(row) for row in rows]
 
@@ -312,10 +316,10 @@ class SqliteState(State):
 
         # Store TaskIns
         data = (task_res_to_dict(task_res),)
-        columns = ", ".join([f":{key}" for key in data[0].keys()])
+        columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
 
-        self._query(query, data)
+        self.query(query, data)
 
         return task_id
 
@@ -349,22 +353,23 @@ class SqliteState(State):
             AND delivered_at = ""
         """
 
+        data: Dict[str, Union[str, int]] = {}
+
         if limit is not None:
             query += " LIMIT :limit"
+            data["limit"] = limit
 
         query += ";"
-
-        data: Dict[str, Union[str, int]] = {"limit": limit}
 
         for index, task_id in enumerate(task_ids):
             data[f"id_{index}"] = str(task_id)
 
-        rows = self._query(query, data)
+        rows = self.query(query, data)
 
         if rows:
             # Prepare query
-            task_ids = [row["task_id"] for row in rows]
-            placeholders = ",".join([f":id_{i}" for i in range(len(task_ids))])
+            found_task_ids = [row["task_id"] for row in rows]
+            placeholders = ",".join([f":id_{i}" for i in range(len(found_task_ids))])
             query = f"""
                 UPDATE task_res
                 SET delivered_at = :delivered_at
@@ -375,11 +380,11 @@ class SqliteState(State):
             # Prepare data for query
             delivered_at = _now().isoformat()
             data = {"delivered_at": delivered_at}
-            for index, task_id in enumerate(task_ids):
+            for index, task_id in enumerate(found_task_ids):
                 data[f"id_{index}"] = str(task_id)
 
             # Run query
-            rows = self._query(query, data)
+            rows = self.query(query, data)
 
         result = [dict_to_task_res(row) for row in rows]
         return result
@@ -390,9 +395,10 @@ class SqliteState(State):
         This includes delivered but not yet deleted task_ins.
         """
         query = "SELECT count(*) AS num FROM task_ins;"
-        rows = self._query(query)
+        rows = self.query(query)
         result = rows[0]
-        return result["num"]
+        num = cast(int, result["num"])
+        return num
 
     def num_task_res(self) -> int:
         """Number of task_res in store.
@@ -400,7 +406,7 @@ class SqliteState(State):
         This includes delivered but not yet deleted task_res.
         """
         query = "SELECT count(*) AS num FROM task_res;"
-        rows = self._query(query)
+        rows = self.query(query)
         result: Dict[str, int] = rows[0]
         return result["num"]
 
@@ -439,20 +445,22 @@ class SqliteState(State):
             self.conn.execute(query_1, data)
             self.conn.execute(query_2, data)
 
+        return None
+
     def register_node(self, node_id: int) -> None:
         """Store `node_id` in state."""
         query = "INSERT INTO node VALUES(:id);"
-        self._query(query, (node_id,))
+        self.query(query, (node_id,))
 
     def unregister_node(self, node_id: int) -> None:
         """Remove `node_id` from state."""
         query = "DELETE FROM node WHERE id = :id;"
-        self._query(query, (node_id,))
+        self.query(query, (node_id,))
 
     def get_nodes(self) -> Set[int]:
         """Retrieve all currently stored node IDs as a set."""
         query = "SELECT * FROM node;"
-        rows = self._query(query)
+        rows = self.query(query)
         result: Set[int] = {row["id"] for row in rows}
         return result
 
@@ -461,17 +469,20 @@ def _now() -> datetime:
     return datetime.now(tz=timezone.utc)
 
 
-def dict_factory(cursor: sqlite3.Cursor, row: sqlite3.Row) -> Dict[str, Any]:
+def dict_factory(
+    cursor: sqlite3.Cursor, row: sqlite3.Row[Tuple[Any]]
+) -> Dict[str, Any]:
     """Used to turn SQLite results into dicts.
 
     Less efficent for retrival of large amounts of data but easier to
     use.
     """
     fields = [column[0] for column in cursor.description]
-    return {key: value for key, value in zip(fields, row)}
+    return dict(zip(fields, row))
 
 
 def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
+    """Transform TaskIns to dict."""
     result = {
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
@@ -484,13 +495,16 @@ def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
         "delivered_at": task_msg.task.delivered_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
-        "legacy_server_message": task_msg.task.legacy_server_message.SerializeToString(),
+        "legacy_server_message": (
+            task_msg.task.legacy_server_message.SerializeToString()
+        ),
         "legacy_client_message": None,
     }
     return result
 
 
 def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
+    """Transform TaskRes to dict."""
     result = {
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
@@ -504,7 +518,9 @@ def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
         "legacy_server_message": None,
-        "legacy_client_message": task_msg.task.legacy_client_message.SerializeToString(),
+        "legacy_client_message": (
+            task_msg.task.legacy_client_message.SerializeToString()
+        ),
     }
     return result
 
