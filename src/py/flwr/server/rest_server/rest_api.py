@@ -99,7 +99,12 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
 
     # Return serialized ProtoBuf
     push_task_res_response_bytes = push_task_res_response_proto.SerializeToString()
-    log(INFO, "POST - Returning PushTaskResResponse %s", push_task_res_response_proto)
+
+    log(
+        INFO,
+        "POST - Returning PushTaskResResponse %s",
+        push_task_res_response_proto,
+    )
     return Response(
         status_code=200,
         content=push_task_res_response_bytes,
