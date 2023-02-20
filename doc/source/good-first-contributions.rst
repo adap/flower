@@ -22,7 +22,7 @@ are:
 Request for Baselines
 ---------------------
 
-If you are not familiar with baselines, you should probably check-out our `contributing guide for baselines <https://flower.dev/docs/contributing-baselines.html>`_.
+If you are not familiar with Flower Baselines, you should probably check-out our `contributing guide for baselines <https://flower.dev/docs/contributing-baselines.html>`_.
 
 You should then check out the open 
 `issues <https://github.com/adap/flower/issues?q=is%3Aopen+is%3Aissue+label%3A%22new+baseline%22>`_ for baseline requests.
