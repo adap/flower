@@ -115,7 +115,7 @@ class SqliteState(State):
         query: str,
         data: Optional[Union[List[DictOrTuple], DictOrTuple]] = None,
     ) -> List[Dict[str, Any]]:
-        """Run SQLQuery."""
+        """Execute a SQL query."""
         if self.conn is None:
             raise Exception("State is not initialized.")
 
