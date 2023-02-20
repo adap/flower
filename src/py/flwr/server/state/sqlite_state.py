@@ -145,7 +145,7 @@ class SqliteState(State):
                 else:
                     rows = self.conn.execute(query, data)
 
-                # Extract results before commiting to support
+                # Extract results before committing to support
                 #   INSERT/UPDATE ... RETURNING
                 # style queries
                 result = rows.fetchall()
