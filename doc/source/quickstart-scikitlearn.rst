@@ -162,9 +162,10 @@ First, we import again all required libraries such as Flower and scikit-learn.
 
     import flwr as fl
     import utils
+    from flwr.common import NDArrays, Scalar
     from sklearn.metrics import log_loss
     from sklearn.linear_model import LogisticRegression
-    from typing import Dict
+    from typing import Dict, Optional
 
 The number of federated learning rounds is set in :code:`fit_round()` and the evaluation is defined in :code:`get_evaluate_fn()`.
 The evaluation function is called after each federated learning round and gives you information about loss and accuracy.
@@ -181,7 +182,9 @@ The evaluation function is called after each federated learning round and gives 
 
         _, (X_test, y_test) = utils.load_mnist()
 
-        def evaluate(parameters: fl.common.Weights):
+        def evaluate(
+            server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
+        ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
             utils.set_model_params(model, parameters)
             loss = log_loss(y_test, model.predict_proba(X_test))
             accuracy = model.score(X_test, y_test)
