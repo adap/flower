@@ -232,8 +232,8 @@ class SqliteState(State):
 
         data: Dict[str, Union[str, int]] = {}
 
-        # Retrieve all anonymous Tasks
         if node_id is None:
+            # Retrieve all anonymous Tasks
             query = """
                 SELECT task_id
                 FROM task_ins
@@ -242,6 +242,7 @@ class SqliteState(State):
                 AND   delivered_at = ""
             """
         else:
+            # Retrieve all TaskIns for node_id
             query = """
                 SELECT task_id
                 FROM task_ins
