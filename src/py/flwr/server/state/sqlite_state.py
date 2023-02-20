@@ -336,7 +336,7 @@ class SqliteState(State):
         -----------
         If `limit` is not `None`, return, at most, `limit` number of TaskRes. The limit
         will only take effect if enough task_ids are in the set AND are currently
-        available. If `limit` is set, it has to be greater zero.
+        available. If `limit` is set, it has to be greater than zero.
         """
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
