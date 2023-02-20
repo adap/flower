@@ -177,19 +177,15 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Create and set task_id
+        # Create task_id, created_at and ttl
         task_id = uuid4()
-        task_ins.task_id = str(task_id)
-
-        # Set created_at
         created_at: datetime = now()
-        task_ins.task.created_at = created_at.isoformat()
-
-        # Set ttl
         ttl: datetime = created_at + timedelta(hours=24)
-        task_ins.task.ttl = ttl.isoformat()
 
         # Store TaskIns
+        task_ins.task_id = str(task_id)
+        task_ins.task.created_at = created_at.isoformat()
+        task_ins.task.ttl = ttl.isoformat()
         data = (task_ins_to_dict(task_ins),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
@@ -307,19 +303,15 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Create and set task_id
+        # Create task_id, created_at and ttl
         task_id = uuid4()
-        task_res.task_id = str(task_id)
-
-        # Set created_at
         created_at: datetime = now()
-        task_res.task.created_at = created_at.isoformat()
-
-        # Create and set ttl
         ttl: datetime = created_at + timedelta(hours=24)
-        task_res.task.ttl = ttl.isoformat()
 
         # Store TaskIns
+        task_res.task_id = str(task_id)
+        task_res.task.created_at = created_at.isoformat()
+        task_res.task.ttl = ttl.isoformat()
         data = (task_res_to_dict(task_res),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
