@@ -15,7 +15,7 @@
 """Flower utilities shared between server and client."""
 
 
-from .date import now
+from .date import now as now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
 from .logger import log as log
 from .parameter import bytes_to_ndarray as bytes_to_ndarray
