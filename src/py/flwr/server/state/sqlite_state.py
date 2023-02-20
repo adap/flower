@@ -287,7 +287,7 @@ class SqliteState(State):
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes.
 
-        Usually, the Fleet API calls this for Nodes returning results.
+        Usually, the Fleet API calls this when Nodes return their results.
 
         Stores the TaskRes and, if successful, returns the `task_id` (UUID) of
         the `task_res`. If storing the `task_res` fails, `None` is returned.
