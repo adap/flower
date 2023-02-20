@@ -77,7 +77,7 @@ DictOrTuple = Union[Tuple[Any], Dict[str, Any]]
 
 
 class SqliteState(State):
-    """SQLite based state implemenation."""
+    """SQLite-based state implementation."""
 
     def __init__(
         self,
@@ -89,7 +89,7 @@ class SqliteState(State):
         ----------
         database : (path-like object)
             The path to the database file to be opened. Pass ":memory:" to open
-            a connectionto a database that is in RAM instead of on disk.
+            a connection to a database that is in RAM, instead of on disk.
         """
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
