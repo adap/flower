@@ -30,10 +30,6 @@ from flwr.server.state.sqlite_state import SqliteState
 from flwr.server.state.state import State
 
 
-def mock_validator() -> List[str]:
-    return []
-
-
 class StateTest(unittest.TestCase):
     """Test all state implementations."""
 
@@ -55,8 +51,12 @@ class StateTest(unittest.TestCase):
         task_ins_list = state.get_task_ins(node_id=1, limit=10)
 
         # Assert
+<<<<<<< HEAD
         assert type(task_ins_list) == list
         assert not task_ins_list
+=======
+        assert len(task_ins_list) == 0
+>>>>>>> improve_state
 
     def test_get_task_ins_anonymous(self) -> None:
         """Validate that a new state has no TaskIns."""
@@ -256,7 +256,11 @@ class StateTest(unittest.TestCase):
 
         # Execute
         _ = state.store_task_ins(task_ins)
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> improve_state
         # Get once to set delivered
         task_ins_list = state.get_task_ins(node_id=1, limit=None)
 
@@ -424,6 +428,7 @@ class InMemoryStateTest(StateTest):
         return InMemoryState()
 
 
+<<<<<<< HEAD
 class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
     """Test SqliteState implemenation with in-memory database."""
 
@@ -469,5 +474,7 @@ class SqliteFileBaseTest(StateTest, unittest.TestCase):
         assert len(result) == 6
 
 
+=======
+>>>>>>> improve_state
 if __name__ == "__main__":
     unittest.main(verbosity=2)
