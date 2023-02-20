@@ -16,12 +16,14 @@
 
 
 from datetime import datetime, timedelta, timezone
+from logging import ERROR
 from typing import Dict, List, Optional, Set
 from uuid import UUID, uuid4
 
+from flwr.common.logger import log
 from flwr.proto.task_pb2 import TaskIns, TaskRes
-
-from .state import State
+from flwr.server.state.state import State
+from flwr.server.utils import validate_task_ins_or_res
 
 
 class InMemoryState(State):
@@ -35,15 +37,19 @@ class InMemoryState(State):
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
 
-        # Create and set task_id
-        task_id = uuid4()
-        task_ins.task_id = str(task_id)
+        # Validate task
+        errors = validate_task_ins_or_res(task_ins)
+        if any(errors):
+            log(ERROR, errors)
+            return None
 
-        # Set created_at
+        # Create task_id, created_at and ttl
+        task_id = uuid4()
         created_at: datetime = _now()
         ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskIns
+        task_ins.task_id = str(task_id)
         task_ins.task.created_at = created_at.isoformat()
         task_ins.task.ttl = ttl.isoformat()
         self.task_ins_store[task_id] = task_ins
@@ -89,15 +95,19 @@ class InMemoryState(State):
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes."""
 
-        # Create and set task_id
-        task_id = uuid4()
-        task_res.task_id = str(task_id)
+        # Validate task
+        errors = validate_task_ins_or_res(task_res)
+        if any(errors):
+            log(ERROR, errors)
+            return None
 
-        # Set created_at
+        # Create task_id, created_at and ttl
+        task_id = uuid4()
         created_at: datetime = _now()
         ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskRes
+        task_res.task_id = str(task_id)
         task_res.task.created_at = created_at.isoformat()
         task_res.task.ttl = ttl.isoformat()
         self.task_res_store[task_id] = task_res
@@ -151,6 +161,12 @@ class InMemoryState(State):
             del self.task_ins_store[task_id]
         for task_id in task_res_to_be_deleted:
             del self.task_res_store[task_id]
+
+    def num_task_ins(self) -> int:
+        return len(self.task_ins_store)
+
+    def num_task_res(self) -> int:
+        return len(self.task_res_store)
 
     def register_node(self, node_id: int) -> None:
         """Register a client node."""
