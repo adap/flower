@@ -470,7 +470,8 @@ def _now() -> datetime:
 
 
 def dict_factory(
-    cursor: sqlite3.Cursor, row: sqlite3.Row[Tuple[Any]]
+    cursor: sqlite3.Cursor,
+    row: sqlite3.Row,  # type: ignore
 ) -> Dict[str, Any]:
     """Used to turn SQLite results into dicts.
 
