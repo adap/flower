@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS task_ins(
     ancestry                TEXT,
     legacy_server_message   BLOB,
     legacy_client_message   BLOB
+);
 """
 
 
