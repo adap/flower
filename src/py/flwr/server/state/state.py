@@ -38,8 +38,7 @@ class State(abc.ABC):
         Constraints
         -----------
         If `task_ins.task.consumer.anonymous` is `True`, then
-        `task_ins.task.consumer.node_id` MUST NOT be set (equal 0). Any implemenation
-        may just override it with zero instead of validating.
+        `task_ins.task.consumer.node_id` MUST NOT be set (equal 0).
 
         If `task_ins.task.consumer.anonymous` is `False`, then
         `task_ins.task.consumer.node_id` MUST be set (not 0)
@@ -85,8 +84,7 @@ class State(abc.ABC):
         Constraints
         -----------
         If `task_res.task.consumer.anonymous` is `True`, then
-        `task_res.task.consumer.node_id` MUST NOT be set (equal 0). Any implemenation
-        may just override it with zero instead of validating.
+        `task_res.task.consumer.node_id` MUST NOT be set (equal 0).
 
         If `task_res.task.consumer.anonymous` is `False`, then
         `task_res.task.consumer.node_id` MUST be set (not 0)
@@ -96,8 +94,8 @@ class State(abc.ABC):
     def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
         """Get TaskRes for task_ids.
 
-        Usually, the Driver API calls this for Nodes planning to work on one or more
-        TaskIns.
+        Usually, the Driver API calls this method to get results for instructions it has
+        previously scheduled.
 
         Retrieves all TaskRes for the given `task_ids` and returns and empty list of
         none could be found.
