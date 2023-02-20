@@ -15,6 +15,7 @@
 """Tests all state implemenations have to conform to."""
 # pylint: disable=no-self-use, invalid-name, disable=R0904
 
+import tempfile
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timezone
@@ -24,8 +25,7 @@ from uuid import uuid4
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
-from flwr.server.state.in_memory_state import InMemoryState
-from flwr.server.state.state import State
+from flwr.server.state import InMemoryState, SqliteState, State
 
 
 class StateTest(unittest.TestCase):
@@ -399,6 +399,54 @@ class InMemoryStateTest(StateTest):
     def state_factory(self) -> State:
         """Return InMemoryState."""
         return InMemoryState()
+
+
+class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
+    """Test SqliteState implemenation with in-memory database."""
+
+    __test__ = True
+
+    def state_factory(self) -> SqliteState:
+        """Return SqliteState with in-memory database."""
+        state = SqliteState(":memory:")
+        state.initialize()
+        return state
+
+    def test_initialize(self) -> None:
+        """Test initialization."""
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        result = state.query("SELECT name FROM sqlite_schema;")
+
+        # Assert
+        assert len(result) == 6
+
+
+class SqliteFileBasedTest(StateTest, unittest.TestCase):
+    """Test SqliteState implemenation with file-based database."""
+
+    __test__ = True
+
+    def state_factory(self) -> SqliteState:
+        """Return SqliteState with file-based database."""
+        # pylint: disable-next=consider-using-with,attribute-defined-outside-init
+        self.tmp_file = tempfile.NamedTemporaryFile()
+        state = SqliteState(database_path=self.tmp_file.name)
+        state.initialize()
+        return state
+
+    def test_initialize(self) -> None:
+        """Test initialization."""
+        # Prepare
+        state = self.state_factory()
+
+        # Execute
+        result = state.query("SELECT name FROM sqlite_schema;")
+
+        # Assert
+        assert len(result) == 6
 
 
 if __name__ == "__main__":
