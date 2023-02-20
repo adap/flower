@@ -23,7 +23,7 @@ from uuid import UUID, uuid4
 from flwr.common.logger import log
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.state.state import State
-from flwr.server.utils.validator import validate_task_ins_or_res
+from flwr.server.utils import validate_task_ins_or_res
 
 
 class InMemoryState(State):
