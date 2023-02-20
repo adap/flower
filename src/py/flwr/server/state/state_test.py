@@ -51,24 +51,6 @@ class StateTest(unittest.TestCase):
         # Assert
         assert len(task_ins_list) == 0
 
-    def test_get_task_ins_anonymous(self) -> None:
-        """Validate that a new state has no TaskIns."""
-
-        # Prepare
-        state = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=0, anonymous=True)
-        task_id = state.store_task_ins(task_ins=task_ins)
-
-        # Execute
-        task_ins_list = state.get_task_ins(
-            node_id=None,
-            limit=10,
-        )
-
-        # Assert
-        assert len(task_ins_list) == 1
-        assert task_ins_list[0].task_id == str(task_id)
-
     def test_get_task_res_empty(self) -> None:
         """Validate that a new state has no TaskRes."""
 
@@ -76,10 +58,10 @@ class StateTest(unittest.TestCase):
         state = self.state_factory()
 
         # Execute
-        task_res_list = state.get_task_res(task_ids={uuid4()}, limit=10)
+        num_tasks_res = state.num_task_res()
 
         # Assert
-        assert not task_res_list
+        assert num_tasks_res == 0
 
     def test_store_task_ins_one(self) -> None:
         """Test store_task_ins."""
@@ -121,7 +103,7 @@ class StateTest(unittest.TestCase):
             2020, 1, 1, tzinfo=timezone.utc
         )
 
-    def test_store_delete_tasks(self) -> None:
+    def test_store_and_delete_tasks(self) -> None:
         """Test store_task_ins."""
 
         # Prepare
@@ -173,7 +155,7 @@ class StateTest(unittest.TestCase):
 
     # Init tests
     def test_init_state(self) -> None:
-        """Test that state is innitialized correctly."""
+        """Test that state is initialized correctly."""
 
         # Execute
         state = self.state_factory()
@@ -196,8 +178,8 @@ class StateTest(unittest.TestCase):
         task_ins_list = state.get_task_ins(node_id=None, limit=None)
 
         # Assert
-        retrieved_task_ins = task_ins_list[0]
-        assert retrieved_task_ins.task_id == str(task_ins_uuid)
+        assert len(task_ins_list) == 1
+        assert task_ins_list[0].task_id == str(task_ins_uuid)
 
     def test_task_ins_store_anonymous_and_fail_retrieving_identitiy(self) -> None:
         """Store anonymous TaskIns and fail to retrieve it."""
@@ -250,7 +232,7 @@ class StateTest(unittest.TestCase):
         # Execute
         _ = state.store_task_ins(task_ins)
 
-        # Get once to set delivered
+        # 1st get: set to delivered
         task_ins_list = state.get_task_ins(node_id=1, limit=None)
 
         assert len(task_ins_list) == 1
@@ -329,7 +311,7 @@ class StateTest(unittest.TestCase):
         assert len(retrieved_node_ids) == 0
 
     def test_num_task_ins(self) -> None:
-        """Test unregistering a client node."""
+        """Test if num_tasks returns correct number of not delivered task_ins."""
         # Prepare
         state: State = self.state_factory()
         task_0 = create_task_ins(consumer_node_id=0, anonymous=True)
@@ -346,7 +328,7 @@ class StateTest(unittest.TestCase):
         assert num == 2
 
     def test_num_task_res(self) -> None:
-        """Test unregistering a client node."""
+        """Test if num_tasks returns correct number of not delivered task_res."""
         # Prepare
         state: State = self.state_factory()
         task_0 = create_task_res(producer_node_id=0, anonymous=True, ancestry=["1"])
