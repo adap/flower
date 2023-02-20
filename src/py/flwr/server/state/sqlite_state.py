@@ -310,7 +310,7 @@ class SqliteState(State):
         created_at: datetime = _now()
         task_res.task.created_at = created_at.isoformat()
 
-        # Set ttl
+        # Create and set ttl
         ttl: datetime = created_at + timedelta(hours=24)
         task_res.task.ttl = ttl.isoformat()
 
