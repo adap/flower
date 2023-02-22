@@ -60,8 +60,9 @@ iterators = "^0.0.2"
 # Optional dependencies (VCE)
 ray = { extras = ["default"], version = "~2.2.0", optional = true }
 # Optional dependencies (REST transport layer)
-requests = "^2.28.1"
-fastapi = "^0.89.1"
+requests = "^2.28.2"
+fastapi = "^0.92.0"
+starlette = "^0.25.0"
 uvicorn = {extras = ["standard"], version = "^0.20.0"}
 
 [tool.poetry.extras]
