@@ -65,94 +65,95 @@ In this implementation, each client will be assigned with a unique index (int) f
 The Flower server will execute and process received results in the following order:
 
 .. mermaid::
-  sequenceDiagram
-      participant S as Flower Server
-      participant P as SecAgg+ Protocol
-      participant C1 as Flower Client
-      participant C2 as Flower Client
-      participant C3 as Flower Client
 
-      S->>P: generate_graph
-      activate P
-      P-->>S: client_graph
-      deactivate P
+    sequenceDiagram
+        participant S as Flower Server
+        participant P as SecAgg+ Protocol
+        participant C1 as Flower Client
+        participant C2 as Flower Client
+        participant C3 as Flower Client
 
-      Note left of P: Stage 0:<br/>Setup Config
-      rect rgb(249, 219, 130)
-      S->>P: setup_config<br/>clients, config_dict
-      activate P
-      P->>C1: SetupConfigIns
-      deactivate P
-      P->>C2:
-      P->>C3:
-      C1->>P: SetupConfigRes (empty)
-      C2->>P:
-      C3->>P:
-      activate P
-      P-->>S: None
-      deactivate P
-      end
+        S->>P: generate_graph
+        activate P
+        P-->>S: client_graph
+        deactivate P
 
-      Note left of P: Stage 1:<br/>Ask Keys
-      rect rgb(249, 219, 130)
-      S->>P: ask_keys<br/>clients
-      activate P
-      P->>C1: AskKeysIns (empty)
-      deactivate P
-      P->>C2:
-      P->>C3:
-      C1->>P: AskKeysRes
-      C2->>P:
-      C3->>P:
-      activate P
-      P-->>S: public keys
-      deactivate P
-      end
+        Note left of P: Stage 0:<br/>Setup Config
+        rect rgb(249, 219, 130)
+        S->>P: setup_config<br/>clients, config_dict
+        activate P
+        P->>C1: SetupConfigIns
+        deactivate P
+        P->>C2: 
+        P->>C3: 
+        C1->>P: SetupConfigRes (empty)
+        C2->>P: 
+        C3->>P: 
+        activate P
+        P-->>S: None
+        deactivate P
+        end
 
-      Note left of P: Stage 2:<br/>Share Keys
-      rect rgb(249, 219, 130)
-      S->>P: share_keys<br/>clients, public_keys_dict,<br/>client_graph
-      activate P
-      P->>C1: ShareKeysIns
-      deactivate P
-      P->>C2:
-      P->>C3:
-      C1->>P: ShareKeysRes
-      C2->>P:
-      C3->>P:
-      activate P
-      P-->>S: encryted key shares
-      deactivate P
-      end
+        Note left of P: Stage 1:<br/>Ask Keys
+        rect rgb(249, 219, 130)
+        S->>P: ask_keys<br/>clients
+        activate P
+        P->>C1: AskKeysIns (empty)
+        deactivate P
+        P->>C2: 
+        P->>C3: 
+        C1->>P: AskKeysRes
+        C2->>P: 
+        C3->>P: 
+        activate P
+        P-->>S: public keys
+        deactivate P
+        end
 
-      Note left of P: Stage 3:<br/>Ask Vectors
-      rect rgb(249, 219, 130)
-      S->>P: ask_vectors<br/>clients,<br/>forward_packet_list_dict
-      activate P
-      P->>C1: AskVectorsIns
-      deactivate P
-      P->>C2:
-      P->>C3:
-      C1->>P: AskVectorsRes
-      C2->>P:
-      activate P
-      P-->>S: masked vectors
-      deactivate P
-      end
+        Note left of P: Stage 2:<br/>Share Keys
+        rect rgb(249, 219, 130)
+        S->>P: share_keys<br/>clients, public_keys_dict,<br/>client_graph
+        activate P
+        P->>C1: ShareKeysIns
+        deactivate P
+        P->>C2: 
+        P->>C3: 
+        C1->>P: ShareKeysRes
+        C2->>P: 
+        C3->>P: 
+        activate P
+        P-->>S: encryted key shares
+        deactivate P
+        end
 
-      Note left of P: Stage 4:<br/>Unmask Vectors
-      rect rgb(249, 219, 130)
-      S->>P: unmask_vectors<br/>clients, dropped_clients,<br/>client_graph
-      activate P
-      P->>C1: UnmaskVectorsIns
-      deactivate P
-      P->>C2:
-      C1->>P: UnmaskVectorsRes
-      C2->>P:
-      activate P
-      P-->>S: key shares
-      deactivate P
-      end
+        Note left of P: Stage 3:<br/>Ask Vectors
+        rect rgb(249, 219, 130)
+        S->>P: ask_vectors<br/>clients,<br/>forward_packet_list_dict
+        activate P
+        P->>C1: AskVectorsIns
+        deactivate P
+        P->>C2: 
+        P->>C3: 
+        C1->>P: AskVectorsRes
+        C2->>P: 
+        activate P
+        P-->>S: masked vectors
+        deactivate P
+        end
+
+        Note left of P: Stage 4:<br/>Unmask Vectors
+        rect rgb(249, 219, 130)
+        S->>P: unmask_vectors<br/>clients, dropped_clients,<br/>client_graph
+        activate P
+        P->>C1: UnmaskVectorsIns
+        deactivate P
+        P->>C2: 
+        C1->>P: UnmaskVectorsRes
+        C2->>P: 
+        activate P
+        P-->>S: key shares
+        deactivate P
+        end
 
 The :code:`LightSecAgg` abstraction
 -----------------------------------
@@ -197,73 +198,74 @@ In this implementation, each client will be assigned with a unique index (int) f
 The Flower server will execute and process received results in the following order:
 
 .. mermaid::
-  sequenceDiagram
-      participant S as Flower Server
-      participant P as LightSecAgg Protocol
-      participant C1 as Flower Client
-      participant C2 as Flower Client
-      participant C3 as Flower Client
 
-      Note left of P: Stage 0:<br/>Setup Config
-      rect rgb(249, 219, 130)
-      S->>P: setup_config<br/>clients, config_dict
-      activate P
-      P->>C1: LightSecAggSetupConfigIns
-      deactivate P
-      P->>C2:
-      P->>C3:
-      C1->>P: LightSecAggSetupConfigRes
-      C2->>P:
-      C3->>P:
-      activate P
-      P-->>S: public keys
-      deactivate P
-      end
+    sequenceDiagram
+        participant S as Flower Server
+        participant P as LightSecAgg Protocol
+        participant C1 as Flower Client
+        participant C2 as Flower Client
+        participant C3 as Flower Client
 
-      Note left of P: Stage 1:<br/>Ask Encrypted Encoded Masks
-      rect rgb(249, 219, 130)
-      S->>P: ask_encrypted_encoded_masks<br/>clients, public_keys_dict
-      activate P
-      P->>C1: AskEncryptedEncodedMasksIns
-      deactivate P
-      P->>C2:
-      P->>C3:
-      C1->>P: AskEncryptedEncodedMasksRes
-      C2->>P:
-      C3->>P:
-      activate P
-      P-->>S: forward packets
-      deactivate P
-      end
+        Note left of P: Stage 0:<br/>Setup Config
+        rect rgb(249, 219, 130)
+        S->>P: setup_config<br/>clients, config_dict
+        activate P
+        P->>C1: LightSecAggSetupConfigIns
+        deactivate P
+        P->>C2: 
+        P->>C3: 
+        C1->>P: LightSecAggSetupConfigRes
+        C2->>P: 
+        C3->>P: 
+        activate P
+        P-->>S: public keys
+        deactivate P
+        end
 
-      Note left of P: Stage 2:<br/>Ask Masked Models
-      rect rgb(249, 219, 130)
-      S->>P: share_keys<br/>clients, forward_packet_list_dict
-      activate P
-      P->>C1: AskMaskedModelsIns
-      deactivate P
-      P->>C2:
-      P->>C3:
-      C1->>P: AskMaskedModelsRes
-      C2->>P:
-      activate P
-      P-->>S: masked local models
-      deactivate P
-      end
+        Note left of P: Stage 1:<br/>Ask Encrypted Encoded Masks
+        rect rgb(249, 219, 130)
+        S->>P: ask_encrypted_encoded_masks<br/>clients, public_keys_dict
+        activate P
+        P->>C1: AskEncryptedEncodedMasksIns
+        deactivate P
+        P->>C2: 
+        P->>C3: 
+        C1->>P: AskEncryptedEncodedMasksRes
+        C2->>P: 
+        C3->>P: 
+        activate P
+        P-->>S: forward packets
+        deactivate P
+        end
 
-      Note left of P: Stage 3:<br/>Ask Aggregated Encoded Masks
-      rect rgb(249, 219, 130)
-      S->>P: ask_aggregated_encoded_masks<br/>clients
-      activate P
-      P->>C1: AskAggregatedEncodedMasksIns
-      deactivate P
-      P->>C2:
-      C1->>P: AskAggregatedEncodedMasksRes
-      C2->>P:
-      activate P
-      P-->>S: the aggregated model
-      deactivate P
-      end
+        Note left of P: Stage 2:<br/>Ask Masked Models
+        rect rgb(249, 219, 130)
+        S->>P: share_keys<br/>clients, forward_packet_list_dict
+        activate P
+        P->>C1: AskMaskedModelsIns
+        deactivate P
+        P->>C2: 
+        P->>C3: 
+        C1->>P: AskMaskedModelsRes
+        C2->>P: 
+        activate P
+        P-->>S: masked local models
+        deactivate P
+        end
+
+        Note left of P: Stage 3:<br/>Ask Aggregated Encoded Masks
+        rect rgb(249, 219, 130)
+        S->>P: ask_aggregated_encoded_masks<br/>clients
+        activate P
+        P->>C1: AskAggregatedEncodedMasksIns
+        deactivate P
+        P->>C2: 
+        C1->>P: AskAggregatedEncodedMasksRes
+        C2->>P: 
+        activate P
+        P-->>S: the aggregated model
+        deactivate P
+        end
 
 Types
 -----

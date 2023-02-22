@@ -1,11 +1,11 @@
 [build-system]
-requires = ["poetry_core>=1.0.0"]
+requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.1.0"
-description = "Flower - A Friendly Federated Learning Framework"
+version = "1.4.0"
+description = "Flower: A Friendly Federated Learning Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
 readme = "README.md"
@@ -44,6 +44,8 @@ exclude = [
 ]
 
 [tool.poetry.scripts]
+flower-driver-api = "flwr.server:run_driver_api"
+flower-fleet-api = "flwr.server:run_fleet_api"
 flower-server = "flwr.server:run_server"
 flower-client = "flwr.client:run_client"
 
@@ -51,23 +53,31 @@ flower-client = "flwr.client:run_client"
 python = "^3.7"
 # Mandatory dependencies
 numpy = "^1.21.0"
-grpcio = "^1.43.0"
+grpcio = "^1.43.0,!=1.52.0"
 protobuf = "^3.19.0"
 importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
 iterators = "^0.0.2"
-# Optional dependencies
-ray = { extras = ["default"], version = "~2.0.0", optional = true }
+# Optional dependencies (VCE)
+ray = { extras = ["default"], version = "~2.2.0", optional = true }
+# Optional dependencies (REST transport layer)
+requests = "^2.28.2"
+fastapi = "^0.92.0"
+starlette = "^0.25.0"
+uvicorn = {extras = ["standard"], version = "^0.20.0"}
 
 [tool.poetry.extras]
 simulation = ["ray"]
+rest = ["fastapi", "requests", "uvicorn"]
 
-[tool.poetry.dev-dependencies]
-types-protobuf = "==3.19.18"
-types-setuptools = "==57.4.14"
+[tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.5"
-isort = "==5.10.1"
-black = "==22.8.0"
-docformatter = "==1.5.0"
+types-protobuf = "==3.19.18"
+types-requests = "==2.28.11.7"
+types-setuptools = "==57.4.14"
+clang-format = "==15.0.6"
+isort = "==5.11.5"
+black = "==23.1.0"
+docformatter = "==1.5.1"
 mypy = "==0.961"
 pylint = "==2.13.8"
 flake8 = "==3.9.2"
@@ -76,17 +86,18 @@ pytest-cov = "==3.0.0"
 pytest-watch = "==4.2.0"
 grpcio-tools = "==1.43.0"
 mypy-protobuf = "==3.2.0"
-jupyterlab = "==3.3.2"
+jupyterlab = "==3.5.3"
 rope = "==0.19.0"
 semver = "==2.13.0"
-sphinx = "==5.1.1"
-myst-parser = "==0.18.0"
+sphinx = "==5.3.0"
+myst-parser = "==0.18.1"
 sphinx-design = "==0.3.0"
-sphinx-copybutton = "==0.5.0"
+sphinx-copybutton = "==0.5.1"
 sphinxcontrib-mermaid = "==0.7.1"
-furo = "==2022.6.21"
+furo = "==2022.12.7"
 sphinx-reredirects = "==0.1.1"
-nbsphinx = "==0.8.9"
+nbsphinx = "==0.8.12"
+nbstripout = "==0.6.1"
 
 [tool.isort]
 line_length = 88

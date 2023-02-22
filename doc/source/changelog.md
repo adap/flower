@@ -2,6 +2,209 @@
 
 ## Unreleased
 
+### What's new?
+
+- **Add new "What is Federated Learning?" tutorial** ([#1657](https://github.com/adap/flower/pull/1657))
+
+- **Delete delivered** `TaskIns/TaskRes` ([#1662](https://github.com/adap/flower/pull/1662))
+
+- **General improvements** ([#1659](https://github.com/adap/flower/pull/1659))
+
+- **Introduce new Flower Baseline: FedProx MNIST** ([#1513](https://github.com/adap/flower/pull/1513))
+
+### Incompatible changes
+
+None
+
+## v1.3.0 (2023-02-06)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Adam Narozniak`, `Alexander Viala Bellander`, `Charles Beauville`, `Daniel J. Beutel`, `JDRanpariya`, `Lennart Behme`, `Taner Topal`
+
+### What's new?
+
+- **Add support for** `workload_id` **and** `group_id` **in Driver API** ([#1595](https://github.com/adap/flower/pull/1595))
+
+  The (experimental) Driver API now supports a `workload_id` that can be used to identify which workload a task belongs to. It also supports a new `group_id` that can be used, for example, to indicate the current training round. Both the `workload_id` and `group_id` enable client nodes to decide whether they want to handle a task or not.
+
+- **Make Driver API and Fleet API address configurable** ([#1637](https://github.com/adap/flower/pull/1637))
+
+  The (experimental) long-running Flower server (Driver API and Fleet API) can now configure the server address of both Driver API (via `--driver-api-address`) and Fleet API (via `--fleet-api-address`) when starting:
+
+  ``flower-server --driver-api-address "0.0.0.0:8081" --fleet-api-address "0.0.0.0:8086"``
+
+  Both IPv4 and IPv6 addresses are supported.
+
+- **Add new example of Federated Learning using fastai and Flower** ([#1598](https://github.com/adap/flower/pull/1598))
+
+  A new code example (`quickstart_fastai`) demonstrates federated learning with [fastai](https://www.fast.ai/) and Flower. You can find it here: [quickstart_fastai](https://github.com/adap/flower/tree/main/examples/quickstart_fastai).
+
+- **Make Android example compatible with** `flwr >= 1.0.0` **and the latest versions of Android** ([#1603](https://github.com/adap/flower/pull/1603))
+
+  The Android code example has received a substantial update: the project is compatible with Flower 1.0 and later, the UI received a full refresh, and the project is updated to be compatible with newer Android tooling.
+
+- **Add new `FedProx` strategy** ([#1619](https://github.com/adap/flower/pull/1619))
+
+  This [strategy](https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedprox.py) is almost identical to [`FedAvg`](https://github.com/adap/flower/blob/main/src/py/flwr/server/strategy/fedavg.py), but helps users replicate what is described in this [paper](https://arxiv.org/abs/1812.06127). It essentially adds a parameter called `proximal_mu` to regularize the local models with respect to the global models.
+
+- **Add new metrics to telemetry events** ([#1640](https://github.com/adap/flower/pull/1640))
+
+  An updated event structure allows, for example, the clustering of events within the same workload.
+
+- **Add new custom strategy tutorial section** [#1623](https://github.com/adap/flower/pull/1623)
+
+  The Flower tutorial now has a new section that covers implementing a custom strategy from scratch: [Open in Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb)
+
+- **Add new custom serialization tutorial section** ([#1622](https://github.com/adap/flower/pull/1622))
+
+  The Flower tutorial now has a new section that covers custom serialization: [Open in Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb)
+
+- **General improvements** ([#1638](https://github.com/adap/flower/pull/1638), [#1634](https://github.com/adap/flower/pull/1634), [#1636](https://github.com/adap/flower/pull/1636), [#1635](https://github.com/adap/flower/pull/1635), [#1633](https://github.com/adap/flower/pull/1633), [#1632](https://github.com/adap/flower/pull/1632), [#1631](https://github.com/adap/flower/pull/1631), [#1630](https://github.com/adap/flower/pull/1630), [#1627](https://github.com/adap/flower/pull/1627), [#1593](https://github.com/adap/flower/pull/1593), [#1616](https://github.com/adap/flower/pull/1616), [#1615](https://github.com/adap/flower/pull/1615), [#1607](https://github.com/adap/flower/pull/1607), [#1609](https://github.com/adap/flower/pull/1609), [#1608](https://github.com/adap/flower/pull/1608), [#1603](https://github.com/adap/flower/pull/1603), [#1590](https://github.com/adap/flower/pull/1590), [#1580](https://github.com/adap/flower/pull/1580), [#1599](https://github.com/adap/flower/pull/1599), [#1600](https://github.com/adap/flower/pull/1600), [#1601](https://github.com/adap/flower/pull/1601), [#1597](https://github.com/adap/flower/pull/1597), [#1595](https://github.com/adap/flower/pull/1595), [#1591](https://github.com/adap/flower/pull/1591), [#1588](https://github.com/adap/flower/pull/1588), [#1589](https://github.com/adap/flower/pull/1589), [#1587](https://github.com/adap/flower/pull/1587), [#1573](https://github.com/adap/flower/pull/1573), [#1581](https://github.com/adap/flower/pull/1581), [#1578](https://github.com/adap/flower/pull/1578), [#1574](https://github.com/adap/flower/pull/1574), [#1572](https://github.com/adap/flower/pull/1572), [#1586](https://github.com/adap/flower/pull/1586))
+
+  Flower received many improvements under the hood, too many to list here.
+
+- **Updated documentation** ([#1629](https://github.com/adap/flower/pull/1629), [#1628](https://github.com/adap/flower/pull/1628), [#1620](https://github.com/adap/flower/pull/1620), [#1618](https://github.com/adap/flower/pull/1618), [#1617](https://github.com/adap/flower/pull/1617), [#1613](https://github.com/adap/flower/pull/1613), [#1614](https://github.com/adap/flower/pull/1614))
+
+  As usual, the documentation has improved quite a bit. It is another step in our effort to make the Flower documentation the best documentation of any project. Stay tuned and as always, feel free to provide feedback!
+
+### Incompatible changes
+
+None
+
+## v1.2.0 (2023-01-13)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Adam Narozniak`, `Charles Beauville`, `Daniel J. Beutel`, `Edoardo`, `L. Jiang`, `Ragy`, `Taner Topal`, `dannymcy`
+
+### What's new?
+
+- **Introduce new Flower Baseline: FedAvg MNIST** ([#1497](https://github.com/adap/flower/pull/1497), [#1552](https://github.com/adap/flower/pull/1552))
+
+  Over the coming weeks, we will be releasing a number of new reference implementations useful especially to FL newcomers. They will typically revisit well known papers from the literature, and be suitable for integration in your own application or for experimentation, in order to deepen your knowledge of FL in general. Today's release is the first in this series. [Read more.](https://flower.dev/blog/2023-01-12-fl-starter-pack-fedavg-mnist-cnn/)
+
+- **Improve GPU support in simulations** ([#1555](https://github.com/adap/flower/pull/1555))
+
+  The Ray-based Virtual Client Engine (`start_simulation`) has been updated to improve GPU support. The update includes some of the hard-earned lessons from scaling simulations in GPU cluster environments. New defaults make running GPU-based simulations substantially more robust.  
+
+- **Improve GPU support in Jupyter Notebook tutorials** ([#1527](https://github.com/adap/flower/pull/1527), [#1558](https://github.com/adap/flower/pull/1558))
+
+  Some users reported that Jupyter Notebooks have not always been easy to use on GPU instances. We listened and made improvements to all of our Jupyter notebooks! Check out the updated notebooks here:
+
+  - [An Introduction to Federated Learning](https://flower.dev/docs/tutorial/Flower-1-Intro-to-FL-PyTorch.html)
+  - [Strategies in Federated Learning](https://flower.dev/docs/tutorial/Flower-2-Strategies-in-FL-PyTorch.html)
+  - [Building a Strategy](https://flower.dev/docs/tutorial/Flower-3-Building-a-Strategy-PyTorch.html)
+  - [Client and NumPyClient](https://flower.dev/docs/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.html)
+
+- **Introduce optional telemetry** ([#1533](https://github.com/adap/flower/pull/1533), [#1544](https://github.com/adap/flower/pull/1544), [#1584](https://github.com/adap/flower/pull/1584))
+
+  After a [request for feedback](https://github.com/adap/flower/issues/1534) from the community, the Flower open-source project introduces optional collection of *anonymous* usage metrics to make well-informed decisions to improve Flower. Doing this enables the Flower team to understand how Flower is used and what challenges users might face.
+
+  **Flower is a friendly framework for collaborative AI and data science.** Staying true to this statement, Flower makes it easy to disable telemetry for users that do not want to share anonymous usage metrics. [Read more.](https://flower.dev/docs/telemetry.html).
+
+- **Introduce (experimental) Driver API** ([#1520](https://github.com/adap/flower/pull/1520), [#1525](https://github.com/adap/flower/pull/1525), [#1545](https://github.com/adap/flower/pull/1545), [#1546](https://github.com/adap/flower/pull/1546), [#1550](https://github.com/adap/flower/pull/1550), [#1551](https://github.com/adap/flower/pull/1551), [#1567](https://github.com/adap/flower/pull/1567))
+
+  Flower now has a new (experimental) Driver API which will enable fully programmable, async, and multi-tenant Federated Learning and Federated Analytics applications. Phew, that's a lot! Going forward, the Driver API will be the abstraction that many upcoming features will be built on - and you can start building those things now, too.
+
+  The Driver API also enables a new execution mode in which the server runs indefinitely. Multiple individual workloads can run concurrently and start and stop their execution independent of the server. This is especially useful for users who want to deploy Flower in production.
+
+  To learn more, check out the `mt-pytorch` code example. We look forward to you feedback!
+  
+  Please note: *The Driver API is still experimental and will likely change significantly over time.*
+
+- **Add new Federated Analytics with Pandas example** ([#1469](https://github.com/adap/flower/pull/1469), [#1535](https://github.com/adap/flower/pull/1535))
+
+  A new code example (`quickstart_pandas`) demonstrates federated analytics with Pandas and Flower. You can find it here: [quickstart_pandas](https://github.com/adap/flower/tree/main/examples/quickstart_pandas).
+
+- **Add new strategies: Krum and MultiKrum** ([#1481](https://github.com/adap/flower/pull/1481))
+
+  Edoardo, a computer science student at the Sapienza University of Rome, contributed a new `Krum` strategy that enables users to easily use Krum and MultiKrum in their workloads.
+
+- **Update C++ example to be compatible with Flower v1.2.0** ([#1495](https://github.com/adap/flower/pull/1495))
+
+  The C++ code example has received a substantial update to make it compatible with the latest version of Flower.
+
+- **General improvements** ([#1491](https://github.com/adap/flower/pull/1491), [#1504](https://github.com/adap/flower/pull/1504), [#1506](https://github.com/adap/flower/pull/1506), [#1514](https://github.com/adap/flower/pull/1514), [#1522](https://github.com/adap/flower/pull/1522), [#1523](https://github.com/adap/flower/pull/1523), [#1526](https://github.com/adap/flower/pull/1526), [#1528](https://github.com/adap/flower/pull/1528), [#1547](https://github.com/adap/flower/pull/1547), [#1549](https://github.com/adap/flower/pull/1549), [#1560](https://github.com/adap/flower/pull/1560), [#1564](https://github.com/adap/flower/pull/1564), [#1566](https://github.com/adap/flower/pull/1566))
+
+  Flower received many improvements under the hood, too many to list here.
+
+- **Updated documentation** ([#1494](https://github.com/adap/flower/pull/1494), [#1496](https://github.com/adap/flower/pull/1496), [#1500](https://github.com/adap/flower/pull/1500), [#1503](https://github.com/adap/flower/pull/1503), [#1505](https://github.com/adap/flower/pull/1505), [#1524](https://github.com/adap/flower/pull/1524), [#1518](https://github.com/adap/flower/pull/1518), [#1519](https://github.com/adap/flower/pull/1519), [#1515](https://github.com/adap/flower/pull/1515))
+
+  As usual, the documentation has improved quite a bit. It is another step in our effort to make the Flower documentation the best documentation of any project. Stay tuned and as always, feel free to provide feedback!
+
+  One highlight is the new [first time contributor guide](https://flower.dev/docs/first-time-contributors.html): if you've never contributed on GitHub before, this is the perfect place to start!
+
+### Incompatible changes
+
+None
+
+## v1.1.0 (2022-10-31)
+
+### Thanks to our contributors
+
+We would like to give our **special thanks** to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Akis Linardos`, `Christopher S`, `Daniel J. Beutel`, `George`, `Jan Schlicht`, `Mohammad Fares`, `Pedro Porto Buarque de Gusmão`, `Philipp Wiesner`, `Rob Luke`, `Taner Topal`, `VasundharaAgarwal`, `danielnugraha`, `edogab33`
+
+### What's new?
+
+- **Introduce Differential Privacy wrappers (preview)** ([#1357](https://github.com/adap/flower/pull/1357), [#1460](https://github.com/adap/flower/pull/1460))
+
+  The first (experimental) preview of pluggable Differential Privacy wrappers enables easy configuration and usage of differential privacy (DP). The pluggable DP wrappers enable framework-agnostic **and** strategy-agnostic usage of both client-side DP and server-side DP. Head over to the Flower docs, a new explainer goes into more detail.
+
+- **New iOS CoreML code example** ([#1289](https://github.com/adap/flower/pull/1289))
+
+  Flower goes iOS! A massive new code example shows how Flower clients can be built for iOS. The code example contains both Flower iOS SDK components that can be used for many tasks, and one task example running on CoreML.
+
+- **New FedMedian strategy** ([#1461](https://github.com/adap/flower/pull/1461))
+
+  The new `FedMedian` strategy implements Federated Median (FedMedian) by [Yin et al., 2018](https://arxiv.org/pdf/1803.01498v1.pdf).
+
+- **Log** `Client` **exceptions in Virtual Client Engine** ([#1493](https://github.com/adap/flower/pull/1493))
+
+  All `Client` exceptions happening in the VCE are now logged by default and not just exposed to the configured `Strategy` (via the `failures` argument).
+
+- **Improve Virtual Client Engine internals** ([#1401](https://github.com/adap/flower/pull/1401), [#1453](https://github.com/adap/flower/pull/1453))
+
+  Some internals of the Virtual Client Engine have been revamped. The VCE now uses Ray 2.0 under the hood, the value type of the `client_resources` dictionary changed to `float` to allow fractions of resources to be allocated.
+
+- **Support optional** `Client`**/**`NumPyClient` **methods in Virtual Client Engine**
+
+  The Virtual Client Engine now has full support for optional `Client` (and `NumPyClient`) methods.
+
+- **Provide type information to packages using** `flwr` ([#1377](https://github.com/adap/flower/pull/1377))
+
+  The package `flwr` is now bundled with a `py.typed` file indicating that the package is typed. This enables typing support for projects or packages that use `flwr` by enabling them to improve their code using static type checkers like `mypy`.
+
+- **Updated code example** ([#1344](https://github.com/adap/flower/pull/1344), [#1347](https://github.com/adap/flower/pull/1347))
+
+  The code examples covering scikit-learn and PyTorch Lightning have been updated to work with the latest version of Flower.
+
+- **Updated documentation** ([#1355](https://github.com/adap/flower/pull/1355), [#1558](https://github.com/adap/flower/pull/1558), [#1379](https://github.com/adap/flower/pull/1379), [#1380](https://github.com/adap/flower/pull/1380), [#1381](https://github.com/adap/flower/pull/1381), [#1332](https://github.com/adap/flower/pull/1332), [#1391](https://github.com/adap/flower/pull/1391), [#1403](https://github.com/adap/flower/pull/1403), [#1364](https://github.com/adap/flower/pull/1364), [#1409](https://github.com/adap/flower/pull/1409), [#1419](https://github.com/adap/flower/pull/1419), [#1444](https://github.com/adap/flower/pull/1444), [#1448](https://github.com/adap/flower/pull/1448), [#1417](https://github.com/adap/flower/pull/1417), [#1449](https://github.com/adap/flower/pull/1449), [#1465](https://github.com/adap/flower/pull/1465), [#1467](https://github.com/adap/flower/pull/1467))
+
+  There have been so many documentation updates that it doesn't even make sense to list them individually.
+
+- **Restructured documentation** ([#1387](https://github.com/adap/flower/pull/1387))
+
+  The documentation has been restructured to make it easier to navigate. This is just the first step in a larger effort to make the Flower documentation the best documentation of any project ever. Stay tuned!
+
+- **Open in Colab button** ([#1389](https://github.com/adap/flower/pull/1389))
+
+  The four parts of the Flower Federated Learning Tutorial now come with a new `Open in Colab` button. No need to install anything on your local machine, you can now use and learn about Flower in your browser, it's only a single click away.
+
+- **Improved tutorial** ([#1468](https://github.com/adap/flower/pull/1468), [#1470](https://github.com/adap/flower/pull/1470), [#1472](https://github.com/adap/flower/pull/1472), [#1473](https://github.com/adap/flower/pull/1473), [#1474](https://github.com/adap/flower/pull/1474), [#1475](https://github.com/adap/flower/pull/1475))
+
+  The Flower Federated Learning Tutorial has two brand-new parts covering custom strategies (still WIP) and the distinction between `Client` and `NumPyClient`. The existing parts one and two have also been improved (many small changes and fixes).
+
+### Incompatible changes
+
+None
+
 ## v1.0.0 (2022-07-28)
 
 ### Highlights
@@ -76,7 +279,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
   
   The `start_simulation` function now accepts a configuration dictionary `config` instead of the `num_rounds` integer. This improves the consistency between `start_simulation` and `start_server` and makes transitioning between the two easier.
 
-### New features
+### What's new?
 
 - **Support Python 3.10** ([#1320](https://github.com/adap/flower/pull/1320))
 
@@ -115,6 +318,8 @@ We would like to give our **special thanks** to all the contributors who made Fl
   - Rename ProtoBuf messages to improve consistency ([#1214](https://github.com/adap/flower/pull/1214), [#1258](https://github.com/adap/flower/pull/1258), [#1259](https://github.com/adap/flower/pull/1259))
 
 ## v0.19.0 (2022-05-18)
+
+### What's new?
 
 - **Flower Baselines (preview): FedOpt, FedBN, FedAvgM** ([#919](https://github.com/adap/flower/pull/919), [#1127](https://github.com/adap/flower/pull/1127), [#914](https://github.com/adap/flower/pull/914))
 
@@ -237,7 +442,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
     - Added a new FAQ section to the documentation ([#948](https://github.com/adap/flower/pull/948))
     - And many more under-the-hood changes, library updates, documentation changes, and tooling improvements!
 
-### Incompatible changes:
+### Incompatible changes
 
 - **Removed** `flwr_example` **and** `flwr_experimental` **from release build** ([#869](https://github.com/adap/flower/pull/869))
   
@@ -272,7 +477,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
     - Improved error message in `NumPyClient` ([#851](https://github.com/adap/flower/pull/851))
     - Improved PyTorch quickstart code example ([#852](https://github.com/adap/flower/pull/852))
 
-### Incompatible changes:
+### Incompatible changes
 
 - **Disabled final distributed evaluation** ([#800](https://github.com/adap/flower/pull/800))
 
@@ -288,7 +493,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
 ## v0.16.0 (2021-05-11)
 
-What's new?
+### What's new?
 
 - **New built-in strategies** ([#549](https://github.com/adap/flower/pull/549))
     - (abstract) FedOpt
@@ -314,7 +519,7 @@ What's new?
 
 - FedBN implementation in example PyTorch: From Centralized To Federated ([#696](https://github.com/adap/flower/pull/696) [#702](https://github.com/adap/flower/pull/702) [#705](https://github.com/adap/flower/pull/705))
 
-Incompatible changes:
+### Incompatible changes
 
 - **Serialization-agnostic server** ([#721](https://github.com/adap/flower/pull/721))
 

@@ -11,8 +11,8 @@ from flwr.common import (
     Parameters,
     Scalar,
     Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    parameters_to_ndarrays,
+    ndarrays_to_parameters,
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager, SimpleClientManager

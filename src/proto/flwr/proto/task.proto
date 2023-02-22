@@ -17,6 +17,31 @@ syntax = "proto3";
 
 package flwr.proto;
 
-message Task { string id = 1; }
+import "flwr/proto/node.proto";
+import "flwr/proto/transport.proto";
 
-message Result { string task_id = 1; }
+message Task {
+  Node producer = 1;
+  Node consumer = 2;
+  string created_at = 3;
+  string delivered_at = 4;
+  string ttl = 5;
+  repeated string ancestry = 6;
+
+  ServerMessage legacy_server_message = 101 [ deprecated = true ];
+  ClientMessage legacy_client_message = 102 [ deprecated = true ];
+}
+
+message TaskIns {
+  string task_id = 1;
+  string group_id = 2;
+  string workload_id = 3;
+  Task task = 4;
+}
+
+message TaskRes {
+  string task_id = 1;
+  string group_id = 2;
+  string workload_id = 3;
+  Task task = 4;
+}

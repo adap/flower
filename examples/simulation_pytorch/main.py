@@ -133,7 +133,6 @@ def get_evaluate_fn(
 #    client. This is useful to get a sense on how well the global model can generalise
 #    to each client's data.
 if __name__ == "__main__":
-
     # parse input arguments
     args = parser.parse_args()
 

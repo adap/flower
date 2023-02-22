@@ -16,42 +16,97 @@
 
 
 from logging import INFO
+from typing import List, Optional, Set
+from uuid import UUID
 
 import grpc
 
 from flwr.common.logger import log
 from flwr.proto import driver_pb2_grpc
 from flwr.proto.driver_pb2 import (
-    CreateTasksRequest,
-    CreateTasksResponse,
-    GetClientsRequest,
-    GetClientsResponse,
-    GetResultsRequest,
-    GetResultsResponse,
+    GetNodesRequest,
+    GetNodesResponse,
+    PullTaskResRequest,
+    PullTaskResResponse,
+    PushTaskInsRequest,
+    PushTaskInsResponse,
 )
-from flwr.server.client_manager import ClientManager
+from flwr.proto.task_pb2 import TaskRes
+from flwr.server.state import State
+from flwr.server.utils.validator import validate_task_ins_or_res
 
 
 class DriverServicer(driver_pb2_grpc.DriverServicer):
     """Driver API servicer."""
 
-    def __init__(self, client_manager: ClientManager) -> None:
-        self.client_manager = client_manager
+    def __init__(
+        self,
+        state: State,
+    ) -> None:
+        self.state = state
 
-    def GetClients(
-        self, request: GetClientsRequest, context: grpc.ServicerContext
-    ) -> GetClientsResponse:
-        log(INFO, "DriverServicer.GetClients")
-        return super().GetClients(request, context)
+    def GetNodes(
+        self, request: GetNodesRequest, context: grpc.ServicerContext
+    ) -> GetNodesResponse:
+        """Get available nodes."""
+        log(INFO, "DriverServicer.GetNodes")
+        all_ids: Set[int] = self.state.get_nodes()
+        return GetNodesResponse(node_ids=list(all_ids))
 
-    def CreateTasks(
-        self, request: CreateTasksRequest, context: grpc.ServicerContext
-    ) -> CreateTasksResponse:
-        log(INFO, "DriverServicer.CreateTasks")
-        return super().CreateTasks(request, context)
+    def PushTaskIns(
+        self, request: PushTaskInsRequest, context: grpc.ServicerContext
+    ) -> PushTaskInsResponse:
+        """Push a set of TaskIns."""
+        log(INFO, "DriverServicer.PushTaskIns")
 
-    def GetResults(
-        self, request: GetResultsRequest, context: grpc.ServicerContext
-    ) -> GetResultsResponse:
-        log(INFO, "DriverServicer.GetResults")
-        return super().GetResults(request, context)
+        # Validate request
+        _raise_if(len(request.task_ins_list) == 0, "`task_ins_list` must not be empty")
+        for task_ins in request.task_ins_list:
+            validation_errors = validate_task_ins_or_res(task_ins)
+            _raise_if(bool(validation_errors), ", ".join(validation_errors))
+
+        # Store each TaskIns
+        task_ids: List[Optional[UUID]] = []
+        for task_ins in request.task_ins_list:
+            task_id: Optional[UUID] = self.state.store_task_ins(task_ins=task_ins)
+            task_ids.append(task_id)
+
+        return PushTaskInsResponse(
+            task_ids=[str(task_id) if task_id else "" for task_id in task_ids]
+        )
+
+    def PullTaskRes(
+        self, request: PullTaskResRequest, context: grpc.ServicerContext
+    ) -> PullTaskResResponse:
+        """Pull a set of TaskRes."""
+        log(INFO, "DriverServicer.PullTaskRes")
+
+        # Convert each task_id str to UUID
+        task_ids: Set[UUID] = {UUID(task_id) for task_id in request.task_ids}
+
+        # Register callback
+        def on_rpc_done() -> None:
+            log(INFO, "DriverServicer.PullTaskRes callback: delete TaskIns/TaskRes")
+
+            if context.is_active():
+                return
+            if context.code() != grpc.StatusCode.OK:
+                return
+
+            # Delete delivered TaskIns and TaskRes
+            self.state.delete_tasks(task_ids=task_ids)
+
+        context.add_callback(on_rpc_done)
+
+        # Read from state
+        task_res_list: List[TaskRes] = self.state.get_task_res(
+            task_ids=task_ids, limit=None
+        )
+
+        context.set_code(grpc.StatusCode.OK)
+        return PullTaskResResponse(task_res_list=task_res_list)
+
+
+def _raise_if(validation_error: bool, detail: str) -> None:
+    if validation_error:
+        raise ValueError(f"Malformed PushTaskInsRequest: {detail}")

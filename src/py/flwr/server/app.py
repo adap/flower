@@ -15,16 +15,23 @@
 """Flower server app."""
 
 
+import argparse
+import sys
 from dataclasses import dataclass
 from logging import INFO, WARN
-from typing import Optional, Tuple
+from signal import SIGINT, SIGTERM, signal
+from types import FrameType
+from typing import List, Optional, Tuple
 
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+import grpc
+
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.logger import log
 from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
 from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.driver.driver_servicer import DriverServicer
+from flwr.server.grpc_server.driver_client_manager import DriverClientManager
 from flwr.server.grpc_server.flower_service_servicer import FlowerServiceServicer
 from flwr.server.grpc_server.grpc_server import (
     generic_create_grpc_server,
@@ -32,11 +39,11 @@ from flwr.server.grpc_server.grpc_server import (
 )
 from flwr.server.history import History
 from flwr.server.server import Server
+from flwr.server.state import InMemoryState, State
 from flwr.server.strategy import FedAvg, Strategy
 
-DEFAULT_SERVER_ADDRESS = "[::]:8080"
-DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
-DEFAULT_SERVER_ADDRESS_FLEET = "[::]:9092"
+ADDRESS_DRIVER_API = "[::]:9091"
+ADDRESS_FLEET_API_GRPC = "[::]:9092"
 
 
 @dataclass
@@ -53,7 +60,7 @@ class ServerConfig:
 
 def start_server(  # pylint: disable=too-many-arguments
     *,
-    server_address: str = DEFAULT_SERVER_ADDRESS,
+    server_address: str = ADDRESS_FLEET_API_GRPC,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
@@ -63,15 +70,15 @@ def start_server(  # pylint: disable=too-many-arguments
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     server_address : Optional[str]
         The IPv4 or IPv6 address of the server. Defaults to `"[::]:8080"`.
     server : Optional[flwr.server.Server] (default: None)
         A server implementation, either `flwr.server.Server` or a subclass
         thereof. If no instance is provided, then `start_server` will create
         one.
-    config : ServerConfig (default: None)
+    config : Optional[ServerConfig] (default: None)
         Currently supported values are `num_rounds` (int, default: 1) and
         `round_timeout` in seconds (float, default: None).
     strategy : Optional[flwr.server.Strategy] (default: None).
@@ -120,6 +127,7 @@ def start_server(  # pylint: disable=too-many-arguments
     >>>     )
     >>> )
     """
+    event(EventType.START_SERVER_ENTER)
 
     # Initialize server and server config
     initialized_server, initialized_config = _init_defaults(
@@ -156,6 +164,8 @@ def start_server(  # pylint: disable=too-many-arguments
 
     # Stop the gRPC server
     grpc_server.stop(grace=1)
+
+    event(EventType.START_SERVER_LEAVE)
 
     return hist
 
@@ -200,50 +210,230 @@ def _fl(
     return hist
 
 
-def run_server() -> None:
-    """Run Flower server."""
-    log(INFO, "Starting Flower server")
+def run_driver_api() -> None:
+    """Run Flower server (Driver API)."""
 
-    client_manager: ClientManager = SimpleClientManager()
+    log(INFO, "Starting Flower server (Driver API)")
+    event(EventType.RUN_DRIVER_API_ENTER)
+    args = _parse_args_driver()
+
+    # Init state
+    state = InMemoryState()
+
+    # Start server
+    grpc_server: grpc.Server = _run_driver_api_grpc(
+        address=args.driver_api_address,
+        state=state,
+    )
+
+    # Graceful shutdown
+    _register_exit_handlers(
+        grpc_servers=[grpc_server],
+        event_type=EventType.RUN_DRIVER_API_LEAVE,
+    )
+
+    # Block
+    grpc_server.wait_for_termination()
+
+
+def run_fleet_api() -> None:
+    """Run Flower server (Fleet API)."""
+
+    log(INFO, "Starting Flower server (Fleet API)")
+    event(EventType.RUN_FLEET_API_ENTER)
+    args = _parse_args_fleet()
+
+    # Init state
+    state = InMemoryState()
+
+    # Start server
+    grpc_server: grpc.Server = _run_fleet_api_grpc_bidi(
+        address=args.fleet_api_address,
+        state=state,
+    )
+
+    _register_exit_handlers(
+        grpc_servers=[grpc_server],
+        event_type=EventType.RUN_FLEET_API_LEAVE,
+    )
+
+    # Block
+    grpc_server.wait_for_termination()
+
+
+def run_server() -> None:
+    """Run Flower server (Driver API and Fleet API)."""
+
+    log(INFO, "Starting Flower server")
+    event(EventType.RUN_SERVER_ENTER)
+    args = _parse_args()
+
+    # Shared State
+    state = InMemoryState()
+
+    # Start Driver API
+    driver_server = _run_driver_api_grpc(
+        address=args.driver_api_address,
+        state=state,
+    )
+
+    # Start Fleet API
+    fleet_server = _run_fleet_api_grpc_bidi(
+        address=args.fleet_api_address,
+        state=state,
+    )
+
+    # Graceful shutdown
+    _register_exit_handlers(
+        grpc_servers=[driver_server, fleet_server],
+        event_type=EventType.RUN_SERVER_LEAVE,
+    )
+
+    # Block
+    driver_server.wait_for_termination()
+    fleet_server.wait_for_termination()
+
+
+def _register_exit_handlers(
+    grpc_servers: List[grpc.Server], event_type: EventType
+) -> None:
+    default_handlers = {
+        SIGINT: None,
+        SIGTERM: None,
+    }
+
+    def graceful_exit_handler(  # type: ignore
+        signalnum,
+        frame: FrameType,  # pylint: disable=unused-argument
+    ) -> None:
+        """Exit handler to be registered with signal.signal.
+
+        When called will reset signal handler to original signal handler
+        from default_handlers.
+        """
+
+        # Reset to default handler
+        signal(signalnum, default_handlers[signalnum])
+
+        event_res = event(event_type=event_type)
+
+        for grpc_server in grpc_servers:
+            grpc_server.stop(grace=1)
+
+        # Ensure event has happend
+        event_res.result()
+
+        # Setup things for graceful exit
+        sys.exit(0)
+
+    default_handlers[SIGINT] = signal(  # type: ignore
+        SIGINT,
+        graceful_exit_handler,  # type: ignore
+    )
+    default_handlers[SIGTERM] = signal(  # type: ignore
+        SIGTERM,
+        graceful_exit_handler,  # type: ignore
+    )
+
+
+def _run_driver_api_grpc(
+    address: str,
+    state: State,
+) -> grpc.Server:
+    """Run Driver API (gRPC, request-response)."""
 
     # Create Driver API gRPC server
-    driver_server_address: str = DEFAULT_SERVER_ADDRESS_DRIVER
-    driver_servicer = DriverServicer(client_manager=client_manager)
+    driver_servicer: grpc.Server = DriverServicer(
+        state=state,
+    )
     driver_add_servicer_to_server_fn = add_DriverServicer_to_server
     driver_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(driver_servicer, driver_add_servicer_to_server_fn),
-        server_address=driver_server_address,
+        server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=None,
+    )
+
+    log(INFO, "Flower ECE: Starting Driver API (gRPC-rere) on %s", address)
+    driver_grpc_server.start()
+
+    return driver_grpc_server
+
+
+def _run_fleet_api_grpc_bidi(
+    address: str,
+    state: State,
+) -> grpc.Server:
+    """Run Fleet API (gRPC, bidirectional streaming)."""
+
+    # DriverClientManager
+    driver_client_manager = DriverClientManager(
+        state=state,
     )
 
     # Create (legacy) Fleet API gRPC server
-    fleet_server_address: str = DEFAULT_SERVER_ADDRESS_FLEET
-    fleet_servicer = FlowerServiceServicer(client_manager=client_manager)
+    fleet_servicer = FlowerServiceServicer(
+        client_manager=driver_client_manager,
+    )
     fleet_add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
-        server_address=fleet_server_address,
+        server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=None,
     )
 
-    # Start Driver API gRPC server
-    driver_grpc_server.start()
-    log(
-        INFO,
-        "Flower ECE: driver gRPC server running on %s",
-        driver_server_address,
-    )
-
-    # Start (legacy) Fleet API gRPC server
+    log(INFO, "Flower ECE: Starting Fleet API (gRPC-bidi) on %s", address)
     fleet_grpc_server.start()
-    log(
-        INFO,
-        "Flower ECE: fleet gRPC server running on %s",
-        fleet_server_address,
+
+    return fleet_grpc_server
+
+
+def _parse_args_driver() -> argparse.Namespace:
+    """Parse command line arguments for Driver API."""
+    parser = argparse.ArgumentParser(
+        description="Start Flower server (Driver API)",
     )
 
-    # Wait for termination of both servers
-    driver_grpc_server.wait_for_termination()
-    fleet_grpc_server.wait_for_termination()
+    _add_arg_driver_api_address(parser=parser)
+
+    return parser.parse_args()
+
+
+def _parse_args_fleet() -> argparse.Namespace:
+    """Parse command line arguments for Fleet API."""
+    parser = argparse.ArgumentParser(
+        description="Start Flower server (Fleet API)",
+    )
+
+    _add_arg_fleet_api_address(parser=parser)
+
+    return parser.parse_args()
+
+
+def _parse_args() -> argparse.Namespace:
+    """Parse command line arguments for both Driver API and Fleet API."""
+    parser = argparse.ArgumentParser(
+        description="Start Flower server (Driver API and Fleet API)",
+    )
+
+    _add_arg_driver_api_address(parser=parser)
+    _add_arg_fleet_api_address(parser=parser)
+
+    return parser.parse_args()
+
+
+def _add_arg_driver_api_address(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--driver-api-address",
+        help=f"Driver API gRPC server address. Default: {ADDRESS_DRIVER_API}",
+        default=ADDRESS_DRIVER_API,
+    )
+
+
+def _add_arg_fleet_api_address(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--fleet-api-address",
+        help=f"Fleet API gRPC server address. Default: {ADDRESS_FLEET_API_GRPC}",
+        default=ADDRESS_FLEET_API_GRPC,
+    )

@@ -41,7 +41,6 @@ class DPFedAvgNumPyClient(NumPyClient):
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
-
         original_params = copy.deepcopy(parameters)
         # Getting the updated model from the wrapped client
         updated_params, num_examples, metrics = self.client.fit(parameters, config)

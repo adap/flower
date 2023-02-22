@@ -141,3 +141,23 @@ class DisconnectRes:
     """DisconnectRes message from client to server."""
 
     reason: str
+
+
+@dataclass
+class ServerMessage:
+    """ServerMessage is a container used to hold one instruction message."""
+
+    get_properties_ins: Optional[GetPropertiesIns] = None
+    get_parameters_ins: Optional[GetParametersIns] = None
+    fit_ins: Optional[FitIns] = None
+    evaluate_ins: Optional[EvaluateIns] = None
+
+
+@dataclass
+class ClientMessage:
+    """ClientMessage is a container used to hold one result message."""
+
+    get_properties_res: Optional[GetPropertiesRes] = None
+    get_parameters_res: Optional[GetParametersRes] = None
+    fit_res: Optional[FitRes] = None
+    evaluate_res: Optional[EvaluateRes] = None

@@ -15,12 +15,20 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
+from logging import DEBUG
 from typing import Callable, Dict, Optional, cast
 
 import ray
 
 from flwr import common
 from flwr.client import Client, ClientLike, to_client
+from flwr.client.client import (
+    maybe_call_evaluate,
+    maybe_call_fit,
+    maybe_call_get_parameters,
+    maybe_call_get_properties,
+)
+from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 
 ClientFn = Callable[[str], ClientLike]
@@ -29,7 +37,7 @@ ClientFn = Callable[[str], ClientLike]
 class RayClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(self, client_fn: ClientFn, cid: str, resources: Dict[str, int]):
+    def __init__(self, client_fn: ClientFn, cid: str, resources: Dict[str, float]):
         super().__init__(cid)
         self.client_fn = client_fn
         self.resources = resources
@@ -38,10 +46,14 @@ class RayClientProxy(ClientProxy):
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
     ) -> common.GetPropertiesRes:
         """Returns client's properties."""
-        future_get_properties_res = launch_and_get_properties.options(  # type: ignore
+        future_get_properties_res = launch_and_get_properties.options(
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.get(future_get_properties_res, timeout=timeout)
+        try:
+            res = ray.get(future_get_properties_res, timeout=timeout)  # type: ignore
+        except Exception as ex:
+            log(DEBUG, ex)
+            raise ex
         return cast(
             common.GetPropertiesRes,
             res,
@@ -51,10 +63,14 @@ class RayClientProxy(ClientProxy):
         self, ins: common.GetParametersIns, timeout: Optional[float]
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-        future_paramseters_res = launch_and_get_parameters.options(  # type: ignore
+        future_paramseters_res = launch_and_get_parameters.options(
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.get(future_paramseters_res, timeout=timeout)
+        try:
+            res = ray.get(future_paramseters_res, timeout=timeout)  # type: ignore
+        except Exception as ex:
+            log(DEBUG, ex)
+            raise ex
         return cast(
             common.GetParametersRes,
             res,
@@ -62,10 +78,14 @@ class RayClientProxy(ClientProxy):
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
-        future_fit_res = launch_and_fit.options(  # type: ignore
+        future_fit_res = launch_and_fit.options(
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.get(future_fit_res, timeout=timeout)
+        try:
+            res = ray.get(future_fit_res, timeout=timeout)  # type: ignore
+        except Exception as ex:
+            log(DEBUG, ex)
+            raise ex
         return cast(
             common.FitRes,
             res,
@@ -75,10 +95,14 @@ class RayClientProxy(ClientProxy):
         self, ins: common.EvaluateIns, timeout: Optional[float]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-        future_evaluate_res = launch_and_evaluate.options(  # type: ignore
+        future_evaluate_res = launch_and_evaluate.options(
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
-        res = ray.get(future_evaluate_res, timeout=timeout)
+        try:
+            res = ray.get(future_evaluate_res, timeout=timeout)  # type: ignore
+        except Exception as ex:
+            log(DEBUG, ex)
+            raise ex
         return cast(
             common.EvaluateRes,
             res,
@@ -91,40 +115,52 @@ class RayClientProxy(ClientProxy):
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
 
 
-@ray.remote
+@ray.remote  # type: ignore
 def launch_and_get_properties(
     client_fn: ClientFn, cid: str, get_properties_ins: common.GetPropertiesIns
 ) -> common.GetPropertiesRes:
     """Exectue get_properties remotely."""
     client: Client = _create_client(client_fn, cid)
-    return client.get_properties(get_properties_ins)
+    return maybe_call_get_properties(
+        client=client,
+        get_properties_ins=get_properties_ins,
+    )
 
 
-@ray.remote
+@ray.remote  # type: ignore
 def launch_and_get_parameters(
     client_fn: ClientFn, cid: str, get_parameters_ins: common.GetParametersIns
 ) -> common.GetParametersRes:
     """Exectue get_parameters remotely."""
     client: Client = _create_client(client_fn, cid)
-    return client.get_parameters(get_parameters_ins)
+    return maybe_call_get_parameters(
+        client=client,
+        get_parameters_ins=get_parameters_ins,
+    )
 
 
-@ray.remote
+@ray.remote  # type: ignore
 def launch_and_fit(
     client_fn: ClientFn, cid: str, fit_ins: common.FitIns
 ) -> common.FitRes:
     """Exectue fit remotely."""
     client: Client = _create_client(client_fn, cid)
-    return client.fit(fit_ins)
+    return maybe_call_fit(
+        client=client,
+        fit_ins=fit_ins,
+    )
 
 
-@ray.remote
+@ray.remote  # type: ignore
 def launch_and_evaluate(
     client_fn: ClientFn, cid: str, evaluate_ins: common.EvaluateIns
 ) -> common.EvaluateRes:
     """Exectue evaluate remotely."""
     client: Client = _create_client(client_fn, cid)
-    return client.evaluate(evaluate_ins)
+    return maybe_call_evaluate(
+        client=client,
+        evaluate_ins=evaluate_ins,
+    )
 
 
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
