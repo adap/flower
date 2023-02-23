@@ -1,8 +1,8 @@
-from typing import List, Tuple, Callable
+from typing import List
 
-import torch
-import numpy as np
 import flwr as fl
+import numpy as np
+import torch
 from torch.utils.data import DataLoader
 
 from model import train, test, Net
@@ -49,25 +49,19 @@ class FlowerClient(fl.client.NumPyClient):
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
 
-def full_client_fn(cid: str,
-                   trainloaders: List[DataLoader],
-                   testloaders: List[DataLoader],
-                   device: torch.device,
-                   # num_clients: int,
-                   num_epochs: int,
-                   learning_rate: float,
-                   num_classes: int = 62,
-
-                   ):
-    # todo: remove redundant arguments (I assume to have already created the dataset instead of recreate it all the times
+def create_client(cid: str,
+                  trainloaders: List[DataLoader],
+                  testloaders: List[DataLoader],
+                  device: torch.device,
+                  num_epochs: int,
+                  learning_rate: float,
+                  num_classes: int = 62
+                  ):
     net = Net(num_classes).to(device)
 
-    # Note: each client gets a different trainloader/valloader, so each client
-    # will train and evaluate on their own unique data
     trainloader = trainloaders[int(cid)]
     testloader = testloaders[int(cid)]
 
-    # Create a  single Flower client representing a single organization
     return FlowerClient(
         net, trainloader, testloader, device, num_epochs, learning_rate
     )
