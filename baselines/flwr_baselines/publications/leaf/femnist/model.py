@@ -46,7 +46,8 @@ def train(
     for epoch in range(epochs):
         correct, total, epoch_loss = 0, 0, 0.0
         for images, labels in trainloader:
-            images, labels = images.to(device), labels.to(device)
+            images = images.to(device)
+            labels = labels.to(device)
             optimizer.zero_grad()
             outputs = net(images)
             loss = criterion(outputs, labels)
