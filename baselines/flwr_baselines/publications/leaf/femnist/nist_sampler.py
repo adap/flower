@@ -22,6 +22,7 @@ class NistSampler:
         self._data_info_df = data_info_df
 
     def sample(self, type: str, frac: float, n_clients) -> pd.DataFrame:
+        # n_clients is not used when niid
         # The question is if that hold in memory
         if type == "iid":
             idd_data_info_df = self._data_info_df.sample(frac=frac)
