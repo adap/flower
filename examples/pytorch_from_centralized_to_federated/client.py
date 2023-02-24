@@ -19,6 +19,7 @@ USE_FEDBN: bool = True
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
 
+
 # Flower Client
 class CifarClient(fl.client.NumPyClient):
     """Flower client implementing CIFAR-10 image classification using
@@ -36,7 +37,7 @@ class CifarClient(fl.client.NumPyClient):
         self.testloader = testloader
         self.num_examples = num_examples
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config: Dict[str, str]) -> List[np.ndarray]:
         self.model.train()
         if USE_FEDBN:
             # Return model parameters as a list of NumPy ndarrays, excluding parameters of BN layers when using FedBN
@@ -68,7 +69,7 @@ class CifarClient(fl.client.NumPyClient):
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
         cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
-        return self.get_parameters(), self.num_examples["trainset"], {}
+        return self.get_parameters(config={}), self.num_examples["trainset"], {}
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, str]

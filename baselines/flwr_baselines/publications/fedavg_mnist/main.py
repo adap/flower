@@ -1,4 +1,4 @@
-"""Runs CNN federated learning for MNST dataset."""
+"""Runs CNN federated learning for MNIST dataset."""
 
 from pathlib import Path
 
@@ -10,7 +10,7 @@ from omegaconf import DictConfig
 
 from flwr_baselines.publications.fedavg_mnist import client, utils
 
-DEVICE: str = torch.device("cpu")
+DEVICE: torch.device = torch.device("cpu")
 
 
 @hydra.main(config_path="docs/conf", config_name="config", version_base=None)
@@ -28,6 +28,7 @@ def main(cfg: DictConfig) -> None:
         device=DEVICE,
         num_clients=cfg.num_clients,
         iid=cfg.iid,
+        balance=cfg.balance,
         learning_rate=cfg.learning_rate,
     )
 
@@ -37,7 +38,7 @@ def main(cfg: DictConfig) -> None:
         fraction_fit=cfg.client_fraction,
         fraction_evaluate=0.0,
         min_fit_clients=int(cfg.num_clients * cfg.client_fraction),
-        min_evaluate_clients=0.0,
+        min_evaluate_clients=0,
         min_available_clients=cfg.num_clients,
         evaluate_fn=evaluate_fn,
         evaluate_metrics_aggregation_fn=utils.weighted_average,
@@ -50,29 +51,26 @@ def main(cfg: DictConfig) -> None:
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
     )
+
+    file_suffix: str = (
+        f"{'_iid' if cfg.iid else ''}"
+        f"{'_balanced' if cfg.balance else ''}"
+        f"_C={cfg.num_clients}"
+        f"_B={cfg.batch_size}"
+        f"_E={cfg.num_epochs}"
+        f"_R={cfg.num_rounds}"
+    )
+
     np.save(
-        Path(cfg.save_path)
-        / Path(
-            f"hist_C={cfg.num_clients}"
-            f"_B={cfg.batch_size}"
-            f"_E={cfg.num_epochs}"
-            f"_R={cfg.num_rounds}"
-            f"_stag={1 - cfg.client_fraction}"
-        ),
-        history,
+        Path(cfg.save_path) / Path(f"hist{file_suffix}"),
+        history,  # type: ignore
     )
 
     utils.plot_metric_from_history(
         history,
         cfg.save_path,
         cfg.expected_maximum,
-        (
-            f"_C={cfg.num_clients}"
-            f"_B={cfg.batch_size}"
-            f"_E={cfg.num_epochs}"
-            f"_R={cfg.num_rounds}"
-            f"_stag={1 - cfg.client_fraction}"
-        ),
+        file_suffix,
     )
 
 

@@ -14,7 +14,7 @@ Source: `Official VSCode documentation <https://code.visualstudio.com/docs/remot
 Getting started
 ---------------
 
-Configuring and setting up the :code:`Dockerfile` as well the configuration for the devcontainer can be a bit more involved. The good thing is you want have to do it. Usually it should be enough to install Docker on your system and ensure its available on your command line. Additoinally, install the `VSCode Containers Extension <vscode:extension/ms-vscode-remote.remote-containers>`_.
+Configuring and setting up the :code:`Dockerfile` as well the configuration for the devcontainer can be a bit more involved. The good thing is you want have to do it. Usually it should be enough to install Docker on your system and ensure its available on your command line. Additionally, install the `VSCode Containers Extension <vscode:extension/ms-vscode-remote.remote-containers>`_.
 
 Now you should be good to go. When starting VSCode, it will ask you to run in the container environment and - if you confirm - automatically build the container and use it. To manually instruct VSCode to use the devcontainer, you can, after installing the extension, click the green area in the bottom left corner of your VSCode window and select the option *(Re)Open Folder in Container*.
 

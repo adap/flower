@@ -73,6 +73,7 @@ cifar100_real_to_coarse = [
 ]
 # fmt: on
 
+
 # transforms
 def get_transforms(num_classes: int = 10) -> Dict[str, Compose]:
     """Returns the right Transform Compose for both train and evaluation.
@@ -454,7 +455,7 @@ def gen_on_fit_config_fn(
 
     def on_fit_config(server_round: int) -> Dict[str, Scalar]:
         """Return a configuration with specific client learning rate."""
-        local_config = {
+        local_config: Dict[str, Scalar] = {
             "epoch_global": server_round,
             "epochs": epochs_per_round,
             "batch_size": batch_size,

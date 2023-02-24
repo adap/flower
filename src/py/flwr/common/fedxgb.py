@@ -104,7 +104,9 @@ def single_tree_prediction(
 def tree_encoding(
     trainloader: DataLoader,
     client_trees: Union[
-        XGBClassifier, XGBRegressor, List[Union[XGBClassifier, XGBRegressor]]
+        Tuple[XGBClassifier, int],
+        Tuple[XGBRegressor, int],
+        List[Union[Tuple[XGBClassifier, int], Tuple[XGBRegressor, int]]],
     ],
     client_tree_num: int,
     client_num: int,
@@ -122,11 +124,17 @@ def tree_encoding(
 
     temp_trees: Any = None
     if isinstance(client_trees, list) is False:
-        temp_trees = [client_trees] * client_num
-    elif isinstance(client_trees, list) and len(client_trees) != client_num:
         temp_trees = [client_trees[0]] * client_num
+    elif isinstance(client_trees, list) and len(client_trees) != client_num:
+        temp_trees = [client_trees[0][0]] * client_num
     else:
-        temp_trees = client_trees
+        cids = []
+        temp_trees = []
+        for i in range(len(client_trees)):
+            temp_trees.append(client_trees[i][0])
+            cids.append(client_trees[i][1])
+        sorted_index = np.argsort(np.asarray(cids))
+        temp_trees = np.asarray(temp_trees)[sorted_index]
 
     for i, _ in enumerate(temp_trees):
         for j in range(client_tree_num):

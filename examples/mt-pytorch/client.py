@@ -15,11 +15,9 @@ from task import (
 net = Net().to(DEVICE)
 trainloader, testloader = load_data()
 
+
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
-    def get_parameters(self, config):
-        return get_parameters(net)
-
     def fit(self, parameters, config):
         set_parameters(net, parameters)
         train(net, trainloader, epochs=1)

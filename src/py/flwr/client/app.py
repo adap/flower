@@ -21,11 +21,12 @@ from typing import Callable, Dict, Optional, Union
 
 from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
+    EventType,
+    event,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
 from flwr.common.logger import log
-from flwr.common.telemetry import EventType, event
 from flwr.common.typing import (
     Code,
     EvaluateIns,
@@ -90,7 +91,7 @@ def start_client(
 
     Parameters
     ----------
-        server_address: str. The IPv6 address of the server. If the Flower
+        server_address: str. The IPv4 or IPv6 address of the server. If the Flower
             server runs on the same machine on port 8080, then `server_address`
             would be `"[::]:8080"`.
         client: flwr.client.Client. An implementation of the abstract base
@@ -129,7 +130,7 @@ def start_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-    event(event_type=EventType.START_CLIENT_ENTER)
+    event(EventType.START_CLIENT_ENTER)
 
     while True:
         sleep_duration: int = 0
@@ -159,7 +160,7 @@ def start_client(
         )
         time.sleep(sleep_duration)
 
-    event(event_type=EventType.START_CLIENT_LEAVE)
+    event(EventType.START_CLIENT_LEAVE)
 
 
 def start_numpy_client(
@@ -174,8 +175,9 @@ def start_numpy_client(
     Parameters
     ----------
     server_address : str
-        The IPv6 address of the server. If the Flower server runs on the same
-        machine on port 8080, then `server_address` would be `"[::]:8080"`.
+        The IPv4 or IPv6 address of the server. If the Flower server runs on
+        the same machine on port 8080, then `server_address` would be
+        `"[::]:8080"`.
     client : flwr.client.NumPyClient
         An implementation of the abstract base class `flwr.client.NumPyClient`.
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)

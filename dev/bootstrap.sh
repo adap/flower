@@ -2,6 +2,9 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+# Setup environment variables for development
+./dev/setup-envs.sh
+
 # Remove caches
 ./dev/rm-caches.sh
 
@@ -11,5 +14,4 @@ python -m pip install -U setuptools==65.6.3
 python -m pip install -U poetry==1.3.2
 
 # Use `poetry` to install project dependencies
-python -m poetry install \
-  --extras "simulation"
+python -m poetry install --all-extras
