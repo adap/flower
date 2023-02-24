@@ -35,12 +35,13 @@ class Net(nn.Module):
 def train(
         net: nn.Module,
         trainloader: DataLoader,
+        valloader: DataLoader,
         epochs: int,
         learning_rate: float,
         device: torch.device,
         n_batches: int = None,
         verbose: bool = False
-) -> None:
+):
     # n_batches in case of training for n_batches instead of epochs
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
@@ -62,8 +63,12 @@ def train(
                 correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
             epoch_loss /= len(trainloader.dataset)
             epoch_acc = correct / total
+
             if verbose:
                 print(f"Epoch {epoch + 1}: train loss {epoch_loss}, accuracy {epoch_acc}")
+        train_loss, train_acc = _validate(net, trainloader)
+        val_loss, val_acc = _validate(net, valloader)
+        return train_loss, train_acc, val_loss, val_acc
     else:
         # Training time given in number of batches not epochs
         correct, total, train_loss = 0, 0, 0.0
@@ -81,10 +86,33 @@ def train(
             train_loss += loss
             total += labels.size(0)
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-        train_loss /= len(trainloader.dataset)
+        train_loss /= n_batches * images.size(0)
         train_acc = correct / total
         if verbose:
             print(f"Batch len based training: train loss {train_loss}, accuracy {train_acc}")
+        val_loss, val_acc = _validate(net, valloader)
+        return train_loss, train_acc, val_loss, val_acc
+
+
+def _validate(net, valloader):
+    criterion = torch.nn.CrossEntropyLoss()
+    if len(valloader) == 0:
+        return None
+    # Validation loop
+    with torch.no_grad():
+        val_loss = 0
+        correct = 0
+        total = 0
+        for data, target in valloader:
+            output = net(data)
+            val_loss += criterion(output, target).item()
+            _, predicted = output.max(1)
+            total += target.size(0)
+            correct += predicted.eq(target).sum().item()
+
+        accuracy = 100. * correct / total
+        val_loss /= len(valloader)
+    return accuracy, val_loss
 
 
 def test(net: nn.Module, testloader: DataLoader, device: torch.device) -> Tuple[float, float]:
