@@ -104,6 +104,7 @@ def _worker(
             workload_id="",
             task=Task(
                 producer=Node(node_id=client_proxy.node_id, anonymous=False),
+                consumer=Node(node_id=0, anonymous=True),
                 legacy_client_message=client_message_proto,
                 ancestry=[task_ins.task_id],
             ),
