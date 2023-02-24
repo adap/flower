@@ -41,7 +41,6 @@ from flwr.server.grpc_server.grpc_server import (
 )
 from flwr.server.history import History
 from flwr.server.rest_server.rest_api import app as fast_api_app
-from flwr.server.rest_server.singleton import Singleton
 from flwr.server.server import Server
 from flwr.server.state import StateFactory
 from flwr.server.strategy import FedAvg, Strategy
