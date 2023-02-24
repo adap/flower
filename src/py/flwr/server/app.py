@@ -46,7 +46,8 @@ from flwr.server.state import StateFactory
 from flwr.server.strategy import FedAvg, Strategy
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
-ADDRESS_FLEET_API_GRPC = "0.0.0.0:9092"
+ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
+ADDRESS_FLEET_API_GRPC_BIDI = "[::]:8080"  # IPv6 to keep start_server compatible
 ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
 DATABASE = ":flwr-in-memory-state:"
@@ -66,7 +67,7 @@ class ServerConfig:
 
 def start_server(  # pylint: disable=too-many-arguments
     *,
-    server_address: str = ADDRESS_FLEET_API_GRPC,
+    server_address: str = ADDRESS_FLEET_API_GRPC_BIDI,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
@@ -534,8 +535,8 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     grpc_group = parser.add_argument_group("Fleet API gRPC server options", "")
     grpc_group.add_argument(
         "--grpc-fleet-api-address",
-        help=f"Fleet API gRPC server address. Default:'{ADDRESS_FLEET_API_GRPC}'",
-        default=ADDRESS_FLEET_API_GRPC,
+        help=f"Fleet API gRPC server address. Default:'{ADDRESS_FLEET_API_GRPC_RERE}'",
+        default=ADDRESS_FLEET_API_GRPC_RERE,
     )
 
     # Fleet API REST options
