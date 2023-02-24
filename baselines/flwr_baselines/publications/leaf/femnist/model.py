@@ -38,14 +38,38 @@ def train(
         epochs: int,
         learning_rate: float,
         device: torch.device,
+        n_batches: int = None,
         verbose: bool = False
 ) -> None:
+    # n_batches in case of training for n_batches instead of epochs
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
     net.train()
-    for epoch in range(epochs):
-        correct, total, epoch_loss = 0, 0, 0.0
-        for images, labels in trainloader:
+    if epochs is not None:
+        for epoch in range(epochs):
+            correct, total, epoch_loss = 0, 0, 0.0
+            for images, labels in trainloader:
+                images = images.to(device)
+                labels = labels.to(device)
+                optimizer.zero_grad()
+                outputs = net(images)
+                loss = criterion(outputs, labels)
+                loss.backward()
+                optimizer.step()
+                # Metrics
+                epoch_loss += loss
+                total += labels.size(0)
+                correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+            epoch_loss /= len(trainloader.dataset)
+            epoch_acc = correct / total
+            if verbose:
+                print(f"Epoch {epoch + 1}: train loss {epoch_loss}, accuracy {epoch_acc}")
+    else:
+        # Training time given in number of batches not epochs
+        correct, total, train_loss = 0, 0, 0.0
+        for idx, (images, labels) in enumerate(trainloader):
+            if idx == n_batches:
+                break
             images = images.to(device)
             labels = labels.to(device)
             optimizer.zero_grad()
@@ -54,13 +78,13 @@ def train(
             loss.backward()
             optimizer.step()
             # Metrics
-            epoch_loss += loss
+            train_loss += loss
             total += labels.size(0)
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-        epoch_loss /= len(trainloader.dataset)
-        epoch_acc = correct / total
+        train_loss /= len(trainloader.dataset)
+        train_acc = correct / total
         if verbose:
-            print(f"Epoch {epoch + 1}: train loss {epoch_loss}, accuracy {epoch_acc}")
+            print(f"Batch len based training: train loss {train_loss}, accuracy {train_acc}")
 
 
 def test(net: nn.Module, testloader: DataLoader, device: torch.device) -> Tuple[float, float]:
