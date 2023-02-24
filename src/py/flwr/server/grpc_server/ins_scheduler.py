@@ -26,15 +26,15 @@ from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.state import State
+from flwr.server.state import State, StateFactory
 
 
 class InsScheduler:
     """Schedule ClientProxy calls on a background thread."""
 
-    def __init__(self, client_proxy: ClientProxy, state: State):
+    def __init__(self, client_proxy: ClientProxy, state_factory: StateFactory):
         self.client_proxy = client_proxy
-        self.state = state
+        self.state_factory = state_factory
         self.worker_thread: Optional[threading.Thread] = None
         self.shared_memory_state = {"stop": False}
 
@@ -45,7 +45,7 @@ class InsScheduler:
             args=(
                 self.client_proxy,
                 self.shared_memory_state,
-                self.state,
+                self.state_factory,
             ),
         )
         self.worker_thread.start()
@@ -64,10 +64,12 @@ class InsScheduler:
 def _worker(
     client_proxy: ClientProxy,
     shared_memory_state: Dict[str, bool],
-    state: State,
+    state_factory: StateFactory,
 ) -> None:
     """Sequentially call ClientProxy methods to process outstanding tasks."""
     log(DEBUG, "Worker for node %i started", client_proxy.node_id)
+
+    state: State = state_factory.state()
     while not shared_memory_state["stop"]:
         log(DEBUG, "Worker for node %i checking state", client_proxy.node_id)
 
