@@ -38,7 +38,7 @@ app = FastAPI()
 
 @app.post("/api/v0/fleet/pull-task-ins", response_class=Response)
 async def pull_task_ins(request: Request) -> Response:
-    """."""
+    """Pull TaskIns."""
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
@@ -74,7 +74,7 @@ async def pull_task_ins(request: Request) -> Response:
 
 @app.post("/api/v0/fleet/push-task-res", response_class=Response)
 async def push_task_res(request: Request) -> Response:  # Check if token is needed here
-    """."""
+    """Push TaskRes."""
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
