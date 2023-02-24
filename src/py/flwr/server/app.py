@@ -51,8 +51,6 @@ ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
 DATABASE = ":flwr-in-memory-state:"
 
-DATABASE = ":flwr-in-memory-state:"
-
 
 @dataclass
 class ServerConfig:
