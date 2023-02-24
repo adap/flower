@@ -17,9 +17,11 @@
 from .in_memory_state import InMemoryState as InMemoryState
 from .sqlite_state import SqliteState as SqliteState
 from .state import State as State
+from .state_factory import StateFactory as StateFactory
 
 __all__ = [
     "InMemoryState",
     "SqliteState",
     "State",
+    "StateFactory",
 ]

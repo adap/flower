@@ -40,16 +40,17 @@ from flwr.server.grpc_server.grpc_server import (
     start_grpc_server,
 )
 from flwr.server.history import History
+from flwr.server.rest_server.rest_api import app as fast_api_app
 from flwr.server.rest_server.singleton import Singleton
 from flwr.server.server import Server
-from flwr.server.state import InMemoryState, State
+from flwr.server.state import StateFactory
 from flwr.server.strategy import FedAvg, Strategy
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
 ADDRESS_FLEET_API_GRPC = "0.0.0.0:9092"
 ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
-DATABASE_PATH = ""
+DATABASE = ":flwr-in-memory-state:"
 
 
 @dataclass
@@ -223,18 +224,13 @@ def run_driver_api() -> None:
     event(EventType.RUN_DRIVER_API_ENTER)
     args = _parse_args_driver()
 
-    # Init state
-    if args.database_path != "":
-        log(INFO, "Driver API: loading SqliteState")
-        state = InMemoryState()  # TODO replace with SqliteState
-    else:
-        log(INFO, "Driver API: loading InMemoryState")
-        state = InMemoryState()
+    # Initialize StateFactory
+    state_factory = StateFactory(args.database)
 
     # Start server
     grpc_server: grpc.Server = _run_driver_api_grpc(
         address=args.driver_api_address,
-        state=state,
+        state_factory=state_factory,
     )
 
     # Graceful shutdown
@@ -255,13 +251,8 @@ def run_fleet_api() -> None:
     event(EventType.RUN_FLEET_API_ENTER)
     args = _parse_args_fleet()
 
-    # Init state
-    if args.database_path != "":
-        log(INFO, "Fleet API: loading SqliteState")
-        state = InMemoryState()  # TODO replace with SqliteState
-    else:
-        log(INFO, "Fleet API: loading InMemoryState")
-        state = InMemoryState()
+    # Initialize StateFactory
+    state_factory = StateFactory(args.database)
 
     grpc_servers = []
     bckg_threads = []
@@ -270,14 +261,14 @@ def run_fleet_api() -> None:
     if args.fleet_api_type == "rest":
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state),
+            args=(args.rest_fleet_api_address, state_factory),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
     elif args.fleet_api_type == "grpc":
         fleet_server = _run_fleet_api_grpc_bidi(
             address=args.grpc_fleet_api_address,
-            state=state,
+            state_factory=state_factory,
         )
         grpc_servers.append(fleet_server)
     else:
@@ -302,15 +293,15 @@ def run_server() -> None:
 
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SERVER_ENTER)
-    args = _parse_args()
+    args = _parse_args_server()
 
-    # Shared State
-    state = InMemoryState()
+    # Initialize StateFactory
+    state_factory = StateFactory(args.database)
 
     # Start Driver API
     driver_server: grpc.Server = _run_driver_api_grpc(
         address=args.driver_api_address,
-        state=state,
+        state_factory=state_factory,
     )
 
     grpc_servers = [driver_server]
@@ -320,14 +311,14 @@ def run_server() -> None:
     if args.fleet_api_type == "rest":
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state),
+            args=(args.rest_fleet_api_address, state_factory),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
     elif args.fleet_api_type == "grpc":
         fleet_server = _run_fleet_api_grpc_bidi(
             address=args.grpc_fleet_api_address,
-            state=state,
+            state_factory=state_factory,
         )
         grpc_servers.append(fleet_server)
     else:
@@ -393,13 +384,13 @@ def _register_exit_handlers(
 
 def _run_driver_api_grpc(
     address: str,
-    state: State,
+    state_factory: StateFactory,
 ) -> grpc.Server:
     """Run Driver API (gRPC, request-response)."""
 
     # Create Driver API gRPC server
     driver_servicer: grpc.Server = DriverServicer(
-        state=state,
+        state_factory=state_factory,
     )
     driver_add_servicer_to_server_fn = add_DriverServicer_to_server
     driver_grpc_server = generic_create_grpc_server(
@@ -417,13 +408,13 @@ def _run_driver_api_grpc(
 
 def _run_fleet_api_grpc_bidi(
     address: str,
-    state: State,
+    state_factory: StateFactory,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, bidirectional streaming)."""
 
     # DriverClientManager
     driver_client_manager = DriverClientManager(
-        state=state,
+        state_factory=state_factory,
     )
 
     # Create (legacy) Fleet API gRPC server
@@ -446,19 +437,20 @@ def _run_fleet_api_grpc_bidi(
 
 def _run_fleet_api_rest(
     address: str,
-    state: State,
+    state_factory: StateFactory,
 ) -> None:
     """Run Driver API (REST-based)."""
     log(INFO, "Starting Flower REST server")
 
-    instance = Singleton.instance()
-    instance.set_state(state=state)
+    # See: https://www.starlette.io/applications/#accessing-the-app-instance
+    fast_api_app.state.STATE_FACTORY = state_factory
 
     host, port_str = address.split(":")
     port = int(port_str)
 
     uvicorn.run(
-        "flwr.server.rest_server.rest_api:app",
+        # "flwr.server.rest_server.rest_api:app",
+        app=fast_api_app,
         port=port,
         host=host,
         reload=False,
@@ -474,7 +466,7 @@ def _parse_args_driver() -> argparse.Namespace:
     )
 
     _add_args_common(parser=parser)
-    _add_arg_driver_api(parser=parser)
+    _add_args_driver_api(parser=parser)
 
     return parser.parse_args()
 
@@ -486,33 +478,33 @@ def _parse_args_fleet() -> argparse.Namespace:
     )
 
     _add_args_common(parser=parser)
-    _add_arg_fleet_api(parser=parser)
+    _add_args_fleet_api(parser=parser)
 
     return parser.parse_args()
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args_server() -> argparse.Namespace:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
         description="Start Flower server (Driver API and Fleet API)",
     )
 
     _add_args_common(parser=parser)
-    _add_arg_driver_api(parser=parser)
-    _add_arg_fleet_api(parser=parser)
+    _add_args_driver_api(parser=parser)
+    _add_args_fleet_api(parser=parser)
 
     return parser.parse_args()
 
 
 def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
-        "--database-path",
-        help=f"Flower server database path. Default: {DATABASE_PATH}",
-        default=DATABASE_PATH,
+        "--database",
+        help=f"Flower server database. Default: {DATABASE}",
+        default=DATABASE,
     )
 
 
-def _add_arg_driver_api(parser: argparse.ArgumentParser) -> None:
+def _add_args_driver_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--driver-api-address",
         help=f"Driver API gRPC server address. Default: {ADDRESS_DRIVER_API}",
@@ -520,7 +512,7 @@ def _add_arg_driver_api(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def _add_arg_fleet_api(parser: argparse.ArgumentParser) -> None:
+def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     # Fleet API transport layer type
     ex_group = parser.add_mutually_exclusive_group()
     ex_group.add_argument(
