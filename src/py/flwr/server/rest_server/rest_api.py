@@ -16,7 +16,7 @@
 
 
 from logging import INFO
-from typing import List, Optional, cast
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -52,7 +52,7 @@ async def pull_task_ins(request: Request) -> Response:
     state: State = app.state.STATE_FACTORY.state()
 
     # Retrieve TaskIns from State
-    node = pull_task_ins_request_proto.node
+    node = pull_task_ins_request_proto.node  # pylint: disable=no-member
     node_id: Optional[int] = None if node.anonymous else node.node_id
     task_ins_list: List[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
     pull_task_ins_response_proto = PullTaskInsResponse(task_ins_list=task_ins_list)
@@ -88,7 +88,11 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
     state: State = app.state.STATE_FACTORY.state()
 
     # Store TaskRes in State
+
+    # pylint: disable=no-member
     task_res: TaskRes = push_task_res_request_proto.task_res_list[0]
+    # pylint: enable=no-member
+
     task_id: Optional[UUID] = state.store_task_res(task_res=task_res)
 
     # Build response
@@ -114,11 +118,11 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
 
 def _check_headers(headers: Headers) -> None:
     """Check if expected headers are set."""
-    if not "content-type" in headers:
+    if "content-type" not in headers:
         raise HTTPException(status_code=400, detail="Missing header `Content-Type`")
     if headers["content-type"] != "application/protobuf":
         raise HTTPException(status_code=400, detail="Unsupported `Content-Type`")
-    if not "accept" in headers:
+    if "accept" not in headers:
         raise HTTPException(status_code=400, detail="Missing header `Accept`")
     if headers["accept"] != "application/protobuf":
         raise HTTPException(status_code=400, detail="Unsupported `Accept`")

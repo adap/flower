@@ -41,7 +41,7 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 @contextmanager
 def rest_not_a_connection(
     server_address: str,
-    max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=unused-argument
+    max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[bytes] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[Callable[[], Optional[ServerMessage]], Callable[[ClientMessage], None]]
@@ -59,14 +59,14 @@ def rest_not_a_connection(
     max_message_length : int
         Ignored, only present to preserve API-compatibility.
     root_certificates : Optional[bytes] (default: None)
-        Ignored, for now. TODO: enable secure connections
+        Ignored, for now.
 
     Returns
     -------
     receive, send : Callable, Callable
     """
 
-    base_url = f"http://{server_address}"  # TODO handle HTTPS
+    base_url = f"http://{server_address}"
 
     # Necessary state to link TaskRes to TaskIns
     state: Dict[str, Optional[TaskIns]] = {"current_task_ins": None}
@@ -97,7 +97,7 @@ def rest_not_a_connection(
         # Check status code and headers
         if res.status_code != 200:
             return None
-        if not "content-type" in res.headers:
+        if "content-type" not in res.headers:
             log(
                 WARN,
                 "[Node] POST /%s: missing header `Content-Type`",
@@ -170,7 +170,7 @@ def rest_not_a_connection(
         # Check status code and headers
         if res.status_code != 200:
             return
-        if not "content-type" in res.headers:
+        if "content-type" not in res.headers:
             log(
                 WARN,
                 "[Node] POST /%s: missing header `Content-Type`",
@@ -192,7 +192,7 @@ def rest_not_a_connection(
             INFO,
             "[Node] POST /%s: success, created result %s",
             PATH_PUSH_TASK_RES,
-            push_task_res_response_proto.results,
+            push_task_res_response_proto.results,  # pylint: disable=no-member
         )
 
     # yield methods

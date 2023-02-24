@@ -122,4 +122,7 @@ def test_get_server_message_legacy_valid() -> None:
     assert actual is not None
     actual_task_ins, actual_server_message = actual
     assert actual_task_ins == expected
+
+    # pylint: disable=no-member
     assert actual_server_message == expected.task.legacy_server_message
+    # pylint: enable=no-member
