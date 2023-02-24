@@ -30,7 +30,7 @@ class NISTLikeDataset(Dataset):
         return image, label
 
 
-def create_dataset(df_info: pd.DataFrame, labels):
+def create_dataset(df_info: pd.DataFrame, labels: np.ndarray):
     nist_like_dataset = NISTLikeDataset(df_info["path"].values, labels)
     return nist_like_dataset
 
@@ -49,23 +49,27 @@ def partition_dataset(dataset: Dataset, division_list) -> List[Dataset]:
     return subsets
 
 
-def get_partitioned_train_test_dataset(partitioned_dataset, train_split: float = 0.9, test_split: float = 0.1):
+def get_partitioned_train_test_dataset(partitioned_dataset: List[Dataset], train_split: float = 0.8,
+                                       validation_split: float = 0.1):
     # todo: remove redundant test_split_param (or add also validation argument)
     train_subsets = []
+    validation_subsets = []
     test_subsets = []
 
     for subset in partitioned_dataset:
         subset_len = len(subset)
         train_len = int(train_split * subset_len)
-        test_len = subset_len - train_len
-        train_dataset, test_dataset = random_split(
+        val_len = int(validation_split * subset_len)
+        test_len = subset_len - train_len - val_len
+        train_dataset, validation_dataset, test_dataset = random_split(
             subset,
-            lengths=[train_len, test_len],
+            lengths=[train_len, val_len, test_len],
             generator=torch.Generator().manual_seed(42))
         train_subsets.append(train_dataset)
+        validation_subsets.append(validation_dataset)
         test_subsets.append(test_dataset)
 
-    return train_subsets, test_subsets
+    return train_subsets, validation_subsets, test_subsets
 
 
 def transform_datasets_into_dataloaders(datasets, **kwargs):
@@ -83,6 +87,7 @@ if __name__ == "__main__":
     # Create a list of DataLoaders
     full_dataset = create_dataset(sampled_data_info, labels)
     division_list = create_division_list(sampled_data_info)
+    # Partitioned by writer (therefore by client in the FL settings)
     partitioned_dataset = partition_dataset(full_dataset, division_list)
     partitioned_train, partitioned_test = get_partitioned_train_test_dataset(partitioned_dataset)
     trainloaders = transform_datasets_into_dataloaders(partitioned_train)
