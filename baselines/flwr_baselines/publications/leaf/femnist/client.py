@@ -27,6 +27,7 @@ class FlowerClient(fl.client.NumPyClient):
             device: torch.device,
             num_epochs: int,
             learning_rate: float,
+            num_batches: int = None
     ):
         self.net = net
         self.trainloader = trainloader
@@ -34,13 +35,15 @@ class FlowerClient(fl.client.NumPyClient):
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
+        self.num_batches = num_batches
 
     def get_parameters(self, config):
         return get_parameters(self.net)
 
     def fit(self, parameters, config):
         set_parameters(self.net, parameters)
-        train(self.net, self.trainloader, epochs=self.num_epochs, learning_rate=self.learning_rate, device=self.device)
+        train(self.net, self.trainloader, epochs=self.num_epochs, learning_rate=self.learning_rate, device=self.device,
+              n_batches=self.num_batches)
         return get_parameters(self.net), len(self.trainloader), {}
 
     def evaluate(self, parameters, config):
@@ -55,7 +58,8 @@ def create_client(cid: str,
                   device: torch.device,
                   num_epochs: int,
                   learning_rate: float,
-                  num_classes: int = 62
+                  num_classes: int = 62,
+                  num_batches: int = None
                   ):
     net = Net(num_classes).to(device)
 
@@ -63,5 +67,5 @@ def create_client(cid: str,
     testloader = testloaders[int(cid)]
 
     return FlowerClient(
-        net, trainloader, testloader, device, num_epochs, learning_rate
+        net, trainloader, testloader, device, num_epochs, learning_rate, num_batches
     )
