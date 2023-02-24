@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Contains server side utilities to be used in combination with various
-components."""
+"""Server-side utilities."""
 
 
 from .tensorboard import tensorboard as tensorboard

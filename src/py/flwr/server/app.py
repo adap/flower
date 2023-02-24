@@ -252,6 +252,7 @@ def run_fleet_api() -> None:
         state=state,
     )
 
+    # Graceful shutdown
     _register_exit_handlers(
         grpc_servers=[grpc_server],
         event_type=EventType.RUN_FLEET_API_LEAVE,
@@ -272,13 +273,13 @@ def run_server() -> None:
     state = InMemoryState()
 
     # Start Driver API
-    driver_server = _run_driver_api_grpc(
+    driver_server: grpc.Server = _run_driver_api_grpc(
         address=args.driver_api_address,
         state=state,
     )
 
     # Start Fleet API
-    fleet_server = _run_fleet_api_grpc_bidi(
+    fleet_server: grpc.Server = _run_fleet_api_grpc_bidi(
         address=args.fleet_api_address,
         state=state,
     )
@@ -295,7 +296,8 @@ def run_server() -> None:
 
 
 def _register_exit_handlers(
-    grpc_servers: List[grpc.Server], event_type: EventType
+    grpc_servers: List[grpc.Server],
+    event_type: EventType,
 ) -> None:
     default_handlers = {
         SIGINT: None,

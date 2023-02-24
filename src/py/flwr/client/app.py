@@ -91,7 +91,7 @@ def start_client(
 
     Parameters
     ----------
-        server_address: str. The IPv6 address of the server. If the Flower
+        server_address: str. The IPv4 or IPv6 address of the server. If the Flower
             server runs on the same machine on port 8080, then `server_address`
             would be `"[::]:8080"`.
         client: flwr.client.Client. An implementation of the abstract base
@@ -175,8 +175,9 @@ def start_numpy_client(
     Parameters
     ----------
     server_address : str
-        The IPv6 address of the server. If the Flower server runs on the same
-        machine on port 8080, then `server_address` would be `"[::]:8080"`.
+        The IPv4 or IPv6 address of the server. If the Flower server runs on
+        the same machine on port 8080, then `server_address` would be
+        `"[::]:8080"`.
     client : flwr.client.NumPyClient
         An implementation of the abstract base class `flwr.client.NumPyClient`.
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
