@@ -39,11 +39,13 @@ from flwr.server.grpc_server.grpc_server import (
 )
 from flwr.server.history import History
 from flwr.server.server import Server
-from flwr.server.state import InMemoryState, State
+from flwr.server.state import StateFactory
 from flwr.server.strategy import FedAvg, Strategy
 
 ADDRESS_DRIVER_API = "[::]:9091"
 ADDRESS_FLEET_API_GRPC = "[::]:9092"
+
+DATABASE = ":flwr-in-memory-state:"
 
 
 @dataclass
@@ -217,13 +219,13 @@ def run_driver_api() -> None:
     event(EventType.RUN_DRIVER_API_ENTER)
     args = _parse_args_driver()
 
-    # Init state
-    state = InMemoryState()
+    # Initialize StateFactory
+    state_factory = StateFactory(args.database)
 
     # Start server
     grpc_server: grpc.Server = _run_driver_api_grpc(
         address=args.driver_api_address,
-        state=state,
+        state_factory=state_factory,
     )
 
     # Graceful shutdown
@@ -243,13 +245,13 @@ def run_fleet_api() -> None:
     event(EventType.RUN_FLEET_API_ENTER)
     args = _parse_args_fleet()
 
-    # Init state
-    state = InMemoryState()
+    # Initialize StateFactory
+    state_factory = StateFactory(args.database)
 
     # Start server
     grpc_server: grpc.Server = _run_fleet_api_grpc_bidi(
         address=args.fleet_api_address,
-        state=state,
+        state_factory=state_factory,
     )
 
     # Graceful shutdown
@@ -269,19 +271,19 @@ def run_server() -> None:
     event(EventType.RUN_SERVER_ENTER)
     args = _parse_args()
 
-    # Shared State
-    state = InMemoryState()
+    # Initialize StateFactory
+    state_factory = StateFactory(args.database)
 
     # Start Driver API
     driver_server: grpc.Server = _run_driver_api_grpc(
         address=args.driver_api_address,
-        state=state,
+        state_factory=state_factory,
     )
 
     # Start Fleet API
     fleet_server: grpc.Server = _run_fleet_api_grpc_bidi(
         address=args.fleet_api_address,
-        state=state,
+        state_factory=state_factory,
     )
 
     # Graceful shutdown
@@ -340,13 +342,13 @@ def _register_exit_handlers(
 
 def _run_driver_api_grpc(
     address: str,
-    state: State,
+    state_factory: StateFactory,
 ) -> grpc.Server:
     """Run Driver API (gRPC, request-response)."""
 
     # Create Driver API gRPC server
     driver_servicer: grpc.Server = DriverServicer(
-        state=state,
+        state_factory=state_factory,
     )
     driver_add_servicer_to_server_fn = add_DriverServicer_to_server
     driver_grpc_server = generic_create_grpc_server(
@@ -364,13 +366,13 @@ def _run_driver_api_grpc(
 
 def _run_fleet_api_grpc_bidi(
     address: str,
-    state: State,
+    state_factory: StateFactory,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, bidirectional streaming)."""
 
     # DriverClientManager
     driver_client_manager = DriverClientManager(
-        state=state,
+        state_factory=state_factory,
     )
 
     # Create (legacy) Fleet API gRPC server
@@ -397,6 +399,7 @@ def _parse_args_driver() -> argparse.Namespace:
         description="Start Flower server (Driver API)",
     )
 
+    _add_args_common(parser=parser)
     _add_arg_driver_api_address(parser=parser)
 
     return parser.parse_args()
@@ -408,6 +411,7 @@ def _parse_args_fleet() -> argparse.Namespace:
         description="Start Flower server (Fleet API)",
     )
 
+    _add_args_common(parser=parser)
     _add_arg_fleet_api_address(parser=parser)
 
     return parser.parse_args()
@@ -419,10 +423,19 @@ def _parse_args() -> argparse.Namespace:
         description="Start Flower server (Driver API and Fleet API)",
     )
 
+    _add_args_common(parser=parser)
     _add_arg_driver_api_address(parser=parser)
     _add_arg_fleet_api_address(parser=parser)
 
     return parser.parse_args()
+
+
+def _add_args_common(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--database",
+        help=f"Flower server database. Default: {DATABASE}",
+        default=DATABASE,
+    )
 
 
 def _add_arg_driver_api_address(parser: argparse.ArgumentParser) -> None:
