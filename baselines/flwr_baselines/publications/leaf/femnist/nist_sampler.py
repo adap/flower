@@ -26,7 +26,6 @@ class NistSampler:
         # The question is if that hold in memory
         if type == "iid":
             idd_data_info_df = self._data_info_df.sample(frac=frac)
-            print(idd_data_info_df.shape)
             # add client ids (todo: maybe better in the index)
             idd_data_info_df["client_id"] = _create_samples_division_list(idd_data_info_df.shape[0], n_clients, True)
             return idd_data_info_df
@@ -36,7 +35,6 @@ class NistSampler:
             # Then take remaining M samples (from 1 or more users, probably only one) till the  total number of samples
             # is reached
             frac_samples = math.ceil(frac * self._data_info_df.shape[0])  # make it consistent with pd.DatFrame.sample()
-            print(frac_samples)
             niid_data_info_full = self._data_info_df.copy()
             writer_ids_to_cumsum = niid_data_info_full.groupby("writer_id").size().sample(frac=1.).cumsum()
             writer_ids_to_consider_mask = writer_ids_to_cumsum < frac_samples
