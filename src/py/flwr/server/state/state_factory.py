@@ -26,6 +26,8 @@ from .state import State
 
 
 class StateFactory:
+    """Factory class that creates State instances."""
+
     def __init__(self, database: str) -> None:
         self.database = database
         self.state_instance: Optional[State] = None
@@ -35,7 +37,7 @@ class StateFactory:
 
         # InMemoryState
         if self.database == ":flwr-in-memory-state:":
-            if self.state_instance == None:
+            if self.state_instance is None:
                 self.state_instance = InMemoryState()
             log(DEBUG, "Using InMemoryState")
             return self.state_instance
