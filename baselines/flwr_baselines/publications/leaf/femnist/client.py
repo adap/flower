@@ -24,6 +24,7 @@ class FlowerClient(fl.client.NumPyClient):
             net: torch.nn.Module,
             trainloader: DataLoader,
             valloader: DataLoader,
+            testloader: DataLoader,
             device: torch.device,
             num_epochs: int,
             learning_rate: float,
@@ -32,6 +33,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.net = net
         self.trainloader = trainloader
         self.valloader = valloader
+        self.testloader = testloader
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
@@ -42,18 +44,22 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         set_parameters(self.net, parameters)
-        train(self.net, self.trainloader, epochs=self.num_epochs, learning_rate=self.learning_rate, device=self.device,
-              n_batches=self.num_batches)
-        return get_parameters(self.net), len(self.trainloader), {}
+        train_loss, train_acc, val_loss, val_acc = train(self.net, self.trainloader, self.valloader,
+                                                         epochs=self.num_epochs,
+                                                         learning_rate=self.learning_rate, device=self.device,
+                                                         n_batches=self.num_batches)
+        return get_parameters(self.net), len(self.trainloader), {"train_loss": train_loss, "train_acc": train_acc,
+                                                                 "val_loss": val_loss, "val_acc": val_acc}
 
     def evaluate(self, parameters, config):
         set_parameters(self.net, parameters)
-        loss, accuracy = test(self.net, self.valloader, device=self.device)
-        return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
+        loss, accuracy = test(self.net, self.testloader, device=self.device)
+        return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
 
 
 def create_client(cid: str,
                   trainloaders: List[DataLoader],
+                  valloaders: List[DataLoader],
                   testloaders: List[DataLoader],
                   device: torch.device,
                   num_epochs: int,
@@ -64,8 +70,9 @@ def create_client(cid: str,
     net = Net(num_classes).to(device)
 
     trainloader = trainloaders[int(cid)]
+    valloader = valloaders[int(cid)]
     testloader = testloaders[int(cid)]
 
     return FlowerClient(
-        net, trainloader, testloader, device, num_epochs, learning_rate, num_batches
+        net, trainloader, valloader, testloader, device, num_epochs, learning_rate, num_batches
     )
