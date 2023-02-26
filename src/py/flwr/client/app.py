@@ -87,36 +87,34 @@ def start_client(
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
-    use_rest: bool = False,
+    rest: bool = False,
 ) -> None:
     """Start a Flower Client which connects to a gRPC server.
 
     Parameters
     ----------
-        server_address: str. The IPv4 or IPv6 address of the server. If the Flower
-            server runs on the same machine on port 8080, then `server_address`
-            would be `"[::]:8080"`.
-        client: flwr.client.Client. An implementation of the abstract base
-            class `flwr.client.Client`.
-        grpc_max_message_length: int (default: 536_870_912, this equals 512MB).
-            The maximum length of gRPC messages that can be exchanged with the
-            Flower server. The default should be sufficient for most models.
-            Users who train very large models might need to increase this
-            value. Note that the Flower server needs to be started with the
-            same value (see `flwr.server.start_server`), otherwise it will not
-            know about the increased limit and block larger messages.
-        root_certificates: bytes (default: None)
-            The PEM-encoded root certificates as a byte string. If provided, a secure
-            connection using the certificates will be established to a
-            SSL-enabled Flower server.
-        use_rest: bool (default: False)
-            Defines whether or not the client is interacting with the server using the
-            experimental REST API. This feature is experimental, it might change
-            considerably in future versions of Flower.
-
-    Returns
-    -------
-        None
+    server_address : str
+        The IPv4 or IPv6 address of the server. If the Flower
+        server runs on the same machine on port 8080, then `server_address`
+        would be `"[::]:8080"`.
+    client : flwr.client.Client
+        An implementation of the abstract base
+        class `flwr.client.Client`.
+    grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
+        The maximum length of gRPC messages that can be exchanged with the
+        Flower server. The default should be sufficient for most models.
+        Users who train very large models might need to increase this
+        value. Note that the Flower server needs to be started with the
+        same value (see `flwr.server.start_server`), otherwise it will not
+        know about the increased limit and block larger messages.
+    root_certificates : bytes (default: None)
+        The PEM-encoded root certificates as a byte string. If provided, a secure
+        connection using the certificates will be established to a
+        SSL-enabled Flower server.
+    rest : bool (default: False)
+        Defines whether or not the client is interacting with the server using the
+        experimental REST API. This feature is experimental, it might change
+        considerably in future versions of Flower.
 
     Examples
     --------
@@ -140,7 +138,7 @@ def start_client(
     event(EventType.START_CLIENT_ENTER)
 
     # Use either gRPC bidirectional streaming or REST request/response
-    connection = http_request_response if use_rest else grpc_connection
+    connection = http_request_response if rest else grpc_connection
     while True:
         sleep_duration: int = 0
         with connection(
@@ -181,7 +179,7 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
-    use_rest: bool = False,
+    rest: bool = False,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -204,7 +202,7 @@ def start_numpy_client(
         The PEM-encoded root certificates a byte string. If provided, a secure
         connection using the certificates will be established to a
         SSL-enabled Flower server.
-    use_rest: bool (default: False)
+    rest : bool (default: False)
         Defines whether or not the client is interacting with the server using the
         experimental REST API. This feature is experimental, it might be change
         considerably in future versions of Flower.
@@ -234,7 +232,7 @@ def start_numpy_client(
         client=_wrap_numpy_client(client=client),
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
-        use_rest=use_rest,
+        rest=rest,
     )
 
 
