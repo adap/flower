@@ -111,8 +111,8 @@ def start_client(
             SSL-enabled Flower server.
         use_rest: bool (default: False)
             Defines whether or not the client is interacting with the server using the
-            experimental REST API. This feature is experimental and might be renamed
-            or changed in future versions.
+            experimental REST API. This feature is experimental, it might change
+            considerably in future versions of Flower.
 
     Returns
     -------
@@ -141,13 +141,6 @@ def start_client(
 
     # Use either gRPC bidirectional streaming or REST request/response
     connection = http_request_response if use_rest else grpc_connection
-    
-    if use_rest:
-        log(
-            WARN,
-            "EXPERIMENTAL: `use_rest` is an experimental feature which might be renamed or changed in future versions.",
-        )
-
     while True:
         sleep_duration: int = 0
         with connection(
@@ -213,8 +206,8 @@ def start_numpy_client(
         SSL-enabled Flower server.
     use_rest: bool (default: False)
         Defines whether or not the client is interacting with the server using the
-        experimental REST API. This feature is experimental and might be renamed
-        or changed in future versions.
+        experimental REST API. This feature is experimental, it might be change
+        considerably in future versions of Flower.
 
     Examples
     --------

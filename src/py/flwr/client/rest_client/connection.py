@@ -66,6 +66,14 @@ def http_request_response(
     receive, send : Callable, Callable
     """
 
+    log(
+        WARN,
+        """
+        EXPERIMENTAL: `use_rest` is an experimental feature, it might change
+        considerably in future versions of Flower
+        """,
+    )
+
     base_url = f"http://{server_address}"
 
     # Necessary state to link TaskRes to TaskIns
