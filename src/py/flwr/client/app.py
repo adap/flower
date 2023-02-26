@@ -110,8 +110,9 @@ def start_client(
             connection using the certificates will be established to a
             SSL-enabled Flower server.
         use_rest: bool (default: False)
-            Defines whether or not client is interacting with the server using the
-            REST API.
+            Defines whether or not the client is interacting with the server using the
+            experimental REST API. This feature is experimental and might be renamed
+            or changed in future versions.
 
     Returns
     -------
