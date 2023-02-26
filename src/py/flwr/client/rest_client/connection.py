@@ -39,7 +39,7 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 
 
 @contextmanager
-def rest_not_a_connection(
+def http_request_response(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[bytes] = None,  # pylint: disable=unused-argument
