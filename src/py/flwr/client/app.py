@@ -139,7 +139,13 @@ def start_client(
     event(EventType.START_CLIENT_ENTER)
 
     # Use either gRPC bidirectional streaming or REST request/response
-    connection = rest_not_a_connection if use_rest else grpc_connection
+    connection = http_request_response if use_rest else grpc_connection
+    
+    if use_rest:
+        log(
+            WARN,
+            "EXPERIMENTAL: `use_rest` is an experimental feature which might be renamed or changed in future versions.",
+        )
 
     while True:
         sleep_duration: int = 0
