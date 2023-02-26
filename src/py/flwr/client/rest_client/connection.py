@@ -69,7 +69,7 @@ def http_request_response(
     log(
         WARN,
         """
-        EXPERIMENTAL: `use_rest` is an experimental feature, it might change
+        EXPERIMENTAL: `rest` is an experimental feature, it might change
         considerably in future versions of Flower
         """,
     )
