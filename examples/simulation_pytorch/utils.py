@@ -1,3 +1,7 @@
+import numbers
+from collections import defaultdict
+from typing import List, Dict, Tuple
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -25,19 +29,53 @@ class Net(nn.Module):
         return x
 
 
+def aggregate_weighted_average(metrics: List[Tuple[int, Dict]]) -> dict:
+    """Generic function to combine results from multiple clients
+    following training or evaluation.
+
+    Args:
+        metrics (List[Tuple[int, dict]]): collected clients metrics
+
+    Returns:
+        dict: result dictionary containing the aggregate of the metrics passed.
+    """
+    average_dict: dict = defaultdict(list)
+    total_examples: int = 0
+    for num_examples, metrics_dict in metrics:
+        for key, val in metrics_dict.items():
+            if isinstance(val, numbers.Number):
+                average_dict[key].append((num_examples, val))  # type:ignore
+        total_examples += num_examples
+    return {
+        key: {
+            "avg": float(
+                sum([num_examples * metr for num_examples, metr in val])
+                / float(total_examples)
+            ),
+            "all": val,
+        }
+        for key, val in average_dict.items()
+    }
+
 # borrowed from Pytorch quickstart example
 def train(net, trainloader, epochs, device: str):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
     net.train()
-    for _ in range(epochs):
+    running_loss = 0.0
+    total_samples = 0
+    for _ in range(2):
         for images, labels in trainloader:
             images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
             loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
+            running_loss += loss.item()
+            total_samples += len(labels)
+    average_loss = running_loss / total_samples if total_samples > 0 else None
+    return average_loss
 
 
 # borrowed from Pytorch quickstart example

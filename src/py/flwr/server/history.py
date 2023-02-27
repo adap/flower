@@ -26,6 +26,7 @@ class History:
     def __init__(self) -> None:
         self.losses_distributed: List[Tuple[int, float]] = []
         self.losses_centralized: List[Tuple[int, float]] = []
+        self.fit_metrics_distributed: Dict[str, List[Tuple[int, Scalar]]] = {}
         self.metrics_distributed: Dict[str, List[Tuple[int, Scalar]]] = {}
         self.metrics_centralized: Dict[str, List[Tuple[int, Scalar]]] = {}
 
@@ -37,6 +38,17 @@ class History:
         """Add one loss entry (from centralized evaluation)."""
         self.losses_centralized.append((server_round, loss))
 
+    def add_fit_metrics_distributed(
+        self, server_round: int, metrics: Dict[str, Scalar]
+    ) -> None:
+        """Add metrics entries (from distributed fit)."""
+        for key in metrics:
+            # if not (isinstance(metrics[key], float) or isinstance(metrics[key], int)):
+            #     continue  # ignore non-numeric key/value pairs
+            if key not in self.fit_metrics_distributed:
+                self.fit_metrics_distributed[key] = []
+            self.fit_metrics_distributed[key].append((server_round, metrics[key]))
+
     def add_metrics_distributed(
         self, server_round: int, metrics: Dict[str, Scalar]
     ) -> None:
@@ -46,7 +58,8 @@ class History:
             #     continue  # ignore non-numeric key/value pairs
             if key not in self.metrics_distributed:
                 self.metrics_distributed[key] = []
-            self.metrics_distributed[key].append((server_round, metrics[key]))
+            self.metrics_distributed[key].append
+            ((server_round, metrics[key]))
 
     def add_metrics_centralized(
         self, server_round: int, metrics: Dict[str, Scalar]
@@ -77,8 +90,14 @@ class History:
                     for server_round, loss in self.losses_centralized
                 ],
             )
+        if self.fit_metrics_distributed:
+            rep += "History (metrics, distributed, fit):\n" + str(
+                self.fit_metrics_distributed
+            )
         if self.metrics_distributed:
-            rep += "History (metrics, distributed):\n" + str(self.metrics_distributed)
+            rep += "History (metrics, distributed, eval):\n" + str(
+                self.eval_metrics_distributed
+            )
         if self.metrics_centralized:
             rep += "History (metrics, centralized):\n" + str(self.metrics_centralized)
         return rep
