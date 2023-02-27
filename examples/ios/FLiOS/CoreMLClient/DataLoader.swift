@@ -101,9 +101,6 @@ class DataLoader {
 
         // MARK: Fails if commas occur in the values of csv
         while let line = readLine()?.split(separator: ",") {
-            if count == 1000 {
-                break
-            }
             count += 1
             progressHandler(count)
             let imageMultiArr = try! MLMultiArray(shape: scenario.shapeData, dataType: .float32)

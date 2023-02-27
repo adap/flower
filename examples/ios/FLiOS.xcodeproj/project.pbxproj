@@ -103,9 +103,9 @@
 		21B540732865B14000185DEE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B540722865B14000185DEE /* ContentView.swift */; };
 		21B540752865B14100185DEE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540742865B14100185DEE /* Assets.xcassets */; };
 		21B540782865B14100185DEE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540772865B14100185DEE /* Preview Assets.xcassets */; };
-		50773984299D48C1001FD22F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50773983299D48C1001FD22F /* Constants.swift */; };
 		50B5A2C6294C848000B0ABC6 /* flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 50B5A2C5294C848000B0ABC6 /* flwr */; };
 		50CDF0E1299D807300AEBD55 /* DataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50CDF0E0299D807300AEBD55 /* DataLoader.swift */; };
+		50EB97CA29AC9C94000AC771 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EB97C929AC9C94000AC771 /* Constants.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -218,9 +218,9 @@
 		21B540722865B14000185DEE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		21B540742865B14100185DEE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		21B540772865B14100185DEE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		50773983299D48C1001FD22F /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		50B5A2C4294C841300B0ABC6 /* flwr */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = flwr; path = ../../src/swift/flwr; sourceTree = "<group>"; };
 		50CDF0E0299D807300AEBD55 /* DataLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataLoader.swift; sourceTree = "<group>"; };
+		50EB97C929AC9C94000AC771 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -347,6 +347,7 @@
 			children = (
 				50CDF0E0299D807300AEBD55 /* DataLoader.swift */,
 				21A77B202865B3B10062EBD8 /* MLModelInspect.swift */,
+				50EB97C929AC9C94000AC771 /* Constants.swift */,
 			);
 			path = CoreMLClient;
 			sourceTree = "<group>";
@@ -380,7 +381,6 @@
 			isa = PBXGroup;
 			children = (
 				50773985299D4C35001FD22F /* Scenarios */,
-				50773981299D48AF001FD22F /* Data */,
 				19764EEB297D3AAE009F3E5D /* Benchmark */,
 				21A77B162865B23D0062EBD8 /* CoreMLClient */,
 				21A77A6E2865B22A0062EBD8 /* CoreMLHelpers */,
@@ -402,18 +402,9 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		50773981299D48AF001FD22F /* Data */ = {
-			isa = PBXGroup;
-			children = (
-				50773983299D48C1001FD22F /* Constants.swift */,
-			);
-			path = Data;
-			sourceTree = "<group>";
-		};
 		50773985299D4C35001FD22F /* Scenarios */ = {
 			isa = PBXGroup;
 			children = (
-				50773987299D4C51001FD22F /* CIFAR */,
 				50773986299D4C3E001FD22F /* MNIST */,
 			);
 			path = Scenarios;
@@ -427,13 +418,6 @@
 				21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */,
 			);
 			path = MNIST;
-			sourceTree = "<group>";
-		};
-		50773987299D4C51001FD22F /* CIFAR */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = CIFAR;
 			sourceTree = "<group>";
 		};
 		50B5A2C3294C841300B0ABC6 /* Packages */ = {
@@ -572,7 +556,7 @@
 				21A77AD62865B22B0062EBD8 /* FeatureTypes.pb.swift in Sources */,
 				21A77AF52865B22B0062EBD8 /* DataStructures.proto in Sources */,
 				21A77AED2865B22B0062EBD8 /* Normalizer.proto in Sources */,
-				50773984299D48C1001FD22F /* Constants.swift in Sources */,
+				50EB97CA29AC9C94000AC771 /* Constants.swift in Sources */,
 				21A77AE02865B22B0062EBD8 /* TreeEnsemble.proto in Sources */,
 				21A77AD12865B22B0062EBD8 /* MLMultiArray+Image.swift in Sources */,
 				21A77AF12865B22B0062EBD8 /* Identity.pb.swift in Sources */,
