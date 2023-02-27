@@ -146,6 +146,8 @@ def tree_encoding(
     y_train32: Any = np.float32(y_train)
 
     x_train_enc32, y_train32 = torch.from_numpy(
-        np.expand_dims(x_train_enc32, axis=1)
-    ), torch.from_numpy(np.expand_dims(y_train32, axis=-1))
+        np.expand_dims(x_train_enc32, axis=1)  # type: ignore
+    ), torch.from_numpy(
+        np.expand_dims(y_train32, axis=-1)  # type: ignore
+    )
     return x_train_enc32, y_train32
