@@ -58,8 +58,7 @@ class History:
             #     continue  # ignore non-numeric key/value pairs
             if key not in self.metrics_distributed:
                 self.metrics_distributed[key] = []
-            self.metrics_distributed[key].append
-            ((server_round, metrics[key]))
+            self.metrics_distributed[key].append((server_round, metrics[key]))
 
     def add_metrics_centralized(
         self, server_round: int, metrics: Dict[str, Scalar]
