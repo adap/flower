@@ -9,7 +9,7 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Dict, Callable, Optional, Tuple, List
 from dataset_utils import get_cifar_10, do_fl_partitioning, get_dataloader
-from utils import Net, train, test, aggregate_weighted_average
+from utils import Net, train, test
 
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
@@ -51,10 +51,10 @@ class FlowerClient(fl.client.NumPyClient):
         self.net.to(self.device)
 
         # Train
-        loss = train(self.net, trainloader, epochs=config["epochs"], device=self.device)
+        train(self.net, trainloader, epochs=config["epochs"], device=self.device)
 
         # Return local model and statistics
-        return get_params(self.net), len(trainloader.dataset), {"loss": loss}
+        return get_params(self.net), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
         set_params(self.net, parameters)
@@ -155,13 +155,11 @@ if __name__ == "__main__":
 
     # configure the strategy
     strategy = fl.server.strategy.FedAvg(
-        fraction_fit=0.02,
-        fraction_evaluate=0.02,
-        min_fit_clients=1,
-        min_evaluate_clients=1,
+        fraction_fit=0.1,
+        fraction_evaluate=0.1,
+        min_fit_clients=10,
+        min_evaluate_clients=10,
         min_available_clients=pool_size,  # All clients should be available
-        fit_metrics_aggregation_fn=aggregate_weighted_average,
-        evaluate_metrics_aggregation_fn=aggregate_weighted_average,
         on_fit_config_fn=fit_config,
         evaluate_fn=get_evaluate_fn(testset),  # centralised evaluation of global model
     )
