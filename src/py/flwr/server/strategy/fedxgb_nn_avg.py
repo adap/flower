@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Federated XGBoost in the horizontal setting based on building Neural Network
-and averaging on prediction outcomes [Ma et al., 2022].
+and averaging on prediction outcomes [Ma et al., 2023].
 
 Paper: Coming
 """
@@ -46,6 +46,7 @@ Setting `min_available_clients` lower than `min_fit_clients` or
 connected to the server. `min_available_clients` must be set to a value larger
 than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 """
+
 
 # flake8: noqa: E501
 class FedXgbNnAvg(FedAvg):
