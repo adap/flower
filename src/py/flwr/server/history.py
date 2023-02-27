@@ -95,7 +95,7 @@ class History:
             )
         if self.metrics_distributed:
             rep += "History (metrics, distributed, eval):\n" + str(
-                self.eval_metrics_distributed
+                self.metrics_distributed
             )
         if self.metrics_centralized:
             rep += "History (metrics, centralized):\n" + str(self.metrics_centralized)
