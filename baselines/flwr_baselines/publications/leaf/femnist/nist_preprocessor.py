@@ -9,6 +9,8 @@ from dataset_utils import hex_decimal_to_char, calculate_series_hashes
 
 
 class NISTPreprocessor:
+    """Preprocess files from two directories divided by class and by writer."""
+
     def __init__(self, data_dir: Union[str, pathlib.Path]) -> None:
         self._data_dir = data_dir if isinstance(data_dir, str) else pathlib.Path(data_dir)
         self._raw_data_dir = self._data_dir / "raw"
@@ -21,6 +23,16 @@ class NISTPreprocessor:
         self._df: pd.DataFrame
 
     def preprocess(self):
+        """Extracts necessary information to create data that has both writer and class information and preprocesses
+        the dataset as by the authors of the FEMNIST paper (which is not the same as by the EMNIST paper).
+
+        1. Extract writer_id from the directory structure.
+        2. Extracts class_id from the directory structure.
+        3. Calculate hashes from the images to enable merging data.
+        4. Merge information based on hash values.
+        5. Preprocess images (reduce the size of them, use LANCZOS resampling).
+        6. Create csv file with the path.
+        """
         self._writer_df = self._extract_writer_information()
         self._class_df = self._extract_class_information()
         self._calculate_hashes()
@@ -84,7 +96,7 @@ class NISTPreprocessor:
         """Preprocess images - resize to 28x28 and save them in the processed directory."""
         print("Image preprocessing started")
         resized_size = (28, 28)
-        new_df = self._df.copy()  # maybe drop path_by_witer and by_class and add hsf
+        new_df = self._df.copy()
         new_df["path"] = pathlib.Path("")
         for index, row in tqdm(self._df.iterrows(), total=self._df.shape[0]):
             file_path = row["path_by_writer"]
