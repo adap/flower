@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from src.py.flwr.common import Metrics
+from flwr.common import Metrics
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
