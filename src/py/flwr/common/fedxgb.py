@@ -28,7 +28,7 @@ from flwr.common.typing import NDArray
 
 def plot_xgbtree(tree: Union[XGBClassifier, XGBRegressor], n_tree: int) -> None:
     """Visualize the built xgboost tree."""
-    xgb.plot_tree(tree, num_trees=n_tree)  # type: ignore
+    xgb.plot_tree(tree, num_trees=n_tree)
     plt.rcParams["figure.figsize"] = [50, 10]
     plt.show()
 
@@ -96,7 +96,7 @@ def single_tree_prediction(
         )
         return None
 
-    return tree.predict(
+    return tree.predict(  # type: ignore
         dataset, iteration_range=(n_tree, n_tree + 1), output_margin=True
     )
 
@@ -131,8 +131,8 @@ def tree_encoding(
         cids = []
         temp_trees = []
         for i in range(len(client_trees)):
-            temp_trees.append(client_trees[i][0])
-            cids.append(client_trees[i][1])
+            temp_trees.append(client_trees[i][0])  # type: ignore
+            cids.append(client_trees[i][1])  # type: ignore
         sorted_index = np.argsort(np.asarray(cids))
         temp_trees = np.asarray(temp_trees)[sorted_index]
 
@@ -146,8 +146,6 @@ def tree_encoding(
     y_train32: Any = np.float32(y_train)
 
     x_train_enc32, y_train32 = torch.from_numpy(
-        np.expand_dims(x_train_enc32, axis=1)  # type: ignore
-    ), torch.from_numpy(
-        np.expand_dims(y_train32, axis=-1)  # type: ignore
-    )
+        np.expand_dims(x_train_enc32, axis=1)
+    ), torch.from_numpy(np.expand_dims(y_train32, axis=-1))
     return x_train_enc32, y_train32
