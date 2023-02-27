@@ -6,13 +6,15 @@ from typing import Union
 import wget
 
 
-class NISTDownloader:
+class ZipDownloader:
+    """Download and unzip a file."""
+
     def __init__(self, name: str, url: str, save_path: Union[str, pathlib.Path] = None) -> None:
         self._name = name
         self._url = url
         self._save_path = save_path if save_path is not None else pathlib.Path(f"./{name}" + ".zip")
 
-    def download(self) -> None:
+    def download(self, unzip: bool = True) -> None:
         if self._save_path.with_suffix("").exists() and len(list(self._save_path.with_suffix("").glob("*"))) != 0:
             print("Files are already downloaded and extracted from the zip file")
             return None
@@ -21,7 +23,8 @@ class NISTDownloader:
             print("Zip file already downloaded. Skipping downloading.")
         else:
             wget.download(self._url, out=str(self._save_path))
-        self._unzip()
+        if unzip:
+            self._unzip()
 
     def _create_dir_structure(self):
         self._save_path.parent.mkdir(parents=True, exist_ok=True)
@@ -38,7 +41,7 @@ class NISTDownloader:
 if __name__ == "__main__":
     nist_by_class_url = "https://s3.amazonaws.com/nist-srd/SD19/by_class.zip"
     nist_by_writer_url = "https://s3.amazonaws.com/nist-srd/SD19/by_write.zip"
-    nist_by_class_downloader = NISTDownloader("data/raw", nist_by_class_url)
-    nist_by_writer_downloader = NISTDownloader("data/raw", nist_by_writer_url)
+    nist_by_class_downloader = ZipDownloader("data/raw", nist_by_class_url)
+    nist_by_writer_downloader = ZipDownloader("data/raw", nist_by_writer_url)
     nist_by_class_downloader.download()
     nist_by_writer_downloader.download()
