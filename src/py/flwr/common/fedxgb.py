@@ -18,10 +18,10 @@ from typing import Any, List, Optional, Tuple, Union
 
 import numpy as np
 import torch  # pylint: disable=E0401
-import xgboost as xgb
-from matplotlib import pyplot as plt
+import xgboost as xgb  # pylint: disable=E0401
+from matplotlib import pyplot as plt  # pylint: disable=E0401
 from torch.utils.data import DataLoader, Dataset  # pylint: disable=E0401
-from xgboost import XGBClassifier, XGBRegressor
+from xgboost import XGBClassifier, XGBRegressor  # pylint: disable=E0401
 
 from flwr.common.typing import NDArray
 
@@ -101,7 +101,7 @@ def single_tree_prediction(
     )
 
 
-def tree_encoding(
+def tree_encoding(  # pylint: disable=R0914
     trainloader: DataLoader,
     client_trees: Union[
         Tuple[XGBClassifier, int],
@@ -130,7 +130,7 @@ def tree_encoding(
     else:
         cids = []
         temp_trees = []
-        for i in range(len(client_trees)):
+        for i, _ in enumerate(client_trees):
             temp_trees.append(client_trees[i][0])  # type: ignore
             cids.append(client_trees[i][1])  # type: ignore
         sorted_index = np.argsort(np.asarray(cids))
