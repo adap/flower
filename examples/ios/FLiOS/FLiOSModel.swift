@@ -10,33 +10,46 @@ import CoreML
 import flwr
 
 public class FLiOSModel: ObservableObject {
+    @Published public var scenarioSelection = Constants.ScenarioTypes.MNIST {
+        didSet {
+            self.resetPreperation()
+        }
+    }
     private var trainingBatchProvider: MLBatchProvider?
-    @Published public var trainingBatchStatus = PreparationStatus.notPrepared
+    @Published public var trainingBatchStatus = Constants.PreparationStatus.notPrepared
+    let scenarios = Constants.ScenarioTypes.allCases
     
     private var testBatchProvider: MLBatchProvider?
-    @Published public var testBatchStatus = PreparationStatus.notPrepared
+    @Published public var testBatchStatus = Constants.PreparationStatus.notPrepared
     
     private var localClient: LocalClient?
-    @Published public var localClientStatus = PreparationStatus.notPrepared
+    @Published public var localClientStatus = Constants.PreparationStatus.notPrepared
     @Published public var epoch: Int = 5
-    @Published public var localTrainingStatus = TaskStatus.idle
-    @Published public var localTestStatus = TaskStatus.idle
+    @Published public var localTrainingStatus = Constants.TaskStatus.idle
+    @Published public var localTestStatus = Constants.TaskStatus.idle
     
     private var mlFlwrClient: MLFlwrClient?
-    @Published public var mlFlwrClientStatus = PreparationStatus.notPrepared
+    @Published public var mlFlwrClientStatus = Constants.PreparationStatus.notPrepared
     
     private var flwrGRPC: FlwrGRPC?
     @Published public var hostname: String = "localhost"
     @Published public var port: Int = 8080
-    @Published public var federatedServerStatus = TaskStatus.idle
+    @Published public var federatedServerStatus = Constants.TaskStatus.idle
     
     public var benchmarkSuite = BenchmarkSuite.shared
     
+    public func resetPreperation() {
+        self.trainingBatchStatus = .notPrepared
+        self.testBatchStatus = .notPrepared
+        self.localClientStatus = .notPrepared
+        self.mlFlwrClientStatus = .notPrepared
+    }
+    
     public func prepareTrainDataset() {
         trainingBatchStatus = .preparing(count: 0)
-        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing train dataset"))
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing train dataset " + scenarioSelection.description))
         DispatchQueue.global(qos: .userInitiated).async {
-            let batchProvider = MNISTDataLoader.trainBatchProvider { count in
+            let batchProvider = DataLoader.trainBatchProvider(scenario: self.scenarioSelection) { count in
                 DispatchQueue.main.async {
                     self.trainingBatchStatus = .preparing(count: count)
                 }
@@ -51,9 +64,9 @@ public class FLiOSModel: ObservableObject {
     
     public func prepareTestDataset() {
         testBatchStatus = .preparing(count: 0)
-        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing test dataset"))
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "preparing test dataset " + scenarioSelection.description))
         DispatchQueue.global(qos: .userInitiated).async {
-            let batchProvider = MNISTDataLoader.testBatchProvider { count in
+            let batchProvider = DataLoader.testBatchProvider(scenario: self.scenarioSelection) { count in
                 DispatchQueue.main.async {
                     self.testBatchStatus = .preparing(count: count)
                 }
@@ -67,12 +80,12 @@ public class FLiOSModel: ObservableObject {
     }
     
     public func initLocalClient() {
-        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "init local client"))
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "init local client with " + scenarioSelection.modelName))
         self.localClientStatus = .preparing(count: 0)
         if self.localClient == nil {
             DispatchQueue.global(qos: .userInitiated).async {
                 let dataLoader = MLDataLoader(trainBatchProvider: self.trainingBatchProvider!, testBatchProvider: self.testBatchProvider!)
-                if let modelUrl = Bundle.main.url(forResource: "MNIST_Model", withExtension: "mlmodel") {
+                if let modelUrl = Bundle.main.url(forResource: self.scenarioSelection.modelName, withExtension: "mlmodel") {
                     self.initClient(modelUrl: modelUrl, dataLoader: dataLoader, clientType: .local)
                     DispatchQueue.main.async {
                         self.localClientStatus = .ready
@@ -88,11 +101,11 @@ public class FLiOSModel: ObservableObject {
     
     public func initMLFlwrClient() {
         self.mlFlwrClientStatus = .preparing(count: 0)
-        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "init ML Flwr Client"))
+        self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "init ML Flwr Client with " + scenarioSelection.modelName))
         if self.mlFlwrClient == nil {
             DispatchQueue.global(qos: .userInitiated).async {
                 let dataLoader = MLDataLoader(trainBatchProvider: self.trainingBatchProvider!, testBatchProvider: self.testBatchProvider!)
-                if let modelUrl = Bundle.main.url(forResource: "MNIST_Model", withExtension: "mlmodel") {
+                if let modelUrl = Bundle.main.url(forResource: self.scenarioSelection.modelName, withExtension: "mlmodel") {
                     self.initClient(modelUrl: modelUrl, dataLoader: dataLoader, clientType: .federated)
                     DispatchQueue.main.async {
                         self.mlFlwrClientStatus = .ready
@@ -106,7 +119,7 @@ public class FLiOSModel: ObservableObject {
         }
     }
     
-    private func initClient(modelUrl url: URL, dataLoader: MLDataLoader, clientType: ClientType) {
+    private func initClient(modelUrl url: URL, dataLoader: MLDataLoader, clientType: Constants.ClientType) {
         do {
             let compiledModelUrl = try MLModel.compileModel(at: url)
             switch clientType {
@@ -126,7 +139,7 @@ public class FLiOSModel: ObservableObject {
     }
     
     public func startLocalTrain() {
-        let statusHandler: (TaskStatus) -> Void = { status in
+        let statusHandler: (Constants.TaskStatus) -> Void = { status in
             DispatchQueue.main.async {
                 self.localTrainingStatus = status
                 self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "local train status: \(status)"))
@@ -136,7 +149,7 @@ public class FLiOSModel: ObservableObject {
     }
     
     public func startLocalTest() {
-        let statusHandler: (TaskStatus) -> Void = { status in
+        let statusHandler: (Constants.TaskStatus) -> Void = { status in
             DispatchQueue.main.async {
                 self.localTestStatus = status
                 self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "local test status: \(status)"))
@@ -174,58 +187,6 @@ public class FLiOSModel: ObservableObject {
     }
 }
 
-public enum PreparationStatus: Comparable {
-    case notPrepared
-    case preparing(count: Int)
-    case ready
-    
-    var description: String {
-        switch self {
-        case .notPrepared:
-            return "Not Prepared"
-        case .preparing(let count):
-            return "Preparing \(count)"
-        case .ready:
-            return "Ready"
-        }
-    }
-}
-
-public enum TaskStatus: Equatable {
-    case idle
-    case ongoing(info: String)
-    case completed(info: String)
-    
-    var description: String {
-        switch self {
-        case .idle:
-            return "Not Yet Started"
-        case .ongoing(let info):
-            return info
-        case .completed(let info):
-            return info
-        }
-    }
-    
-    public static func ==(lhs: TaskStatus, rhs: TaskStatus) -> Bool {
-        switch(lhs, rhs) {
-        case (.idle, .idle):
-            return true
-        case (.ongoing(_), .ongoing(_)):
-            return true
-        case (.completed(_), .completed(_)):
-            return true
-        default:
-            return false
-        }
-    }
-}
-
-public enum ClientType {
-    case federated
-    case local
-}
-
 class LocalClient {
     private var dataLoader: MLDataLoader
     private var compiledModelUrl: URL
@@ -235,7 +196,7 @@ class LocalClient {
         self.compiledModelUrl = compiledModelUrl
     }
     
-    func runMLTask(statusHandler: @escaping (TaskStatus) -> Void,
+    func runMLTask(statusHandler: @escaping (Constants.TaskStatus) -> Void,
                    numEpochs: Int,
                    task: flwr.MLTask
     ) {
@@ -255,10 +216,10 @@ class LocalClient {
         let progressHandler = { (contextProgress: MLUpdateContext) in
             switch contextProgress.event {
             case .trainingBegin:
-                let taskStatus: TaskStatus = .ongoing(info: "Started to \(task) locally")
+                let taskStatus: Constants.TaskStatus = .ongoing(info: "Started to \(task) locally")
                 statusHandler(taskStatus)
             case .epochEnd:
-                let taskStatus: TaskStatus
+                let taskStatus: Constants.TaskStatus
                 let loss = String(format: "%.4f", contextProgress.metrics[.lossValue] as! Double)
                 switch task {
                 case .train:
@@ -275,7 +236,7 @@ class LocalClient {
         
         let completionHandler = { (finalContext: MLUpdateContext) in
             let loss = String(format: "%.4f", finalContext.metrics[.lossValue] as! Double)
-            let taskStatus: TaskStatus = .completed(info: "Local \(task) completed with loss: \(loss) in \(Int(Date().timeIntervalSince(startTime))) secs")
+            let taskStatus: Constants.TaskStatus = .completed(info: "Local \(task) completed with loss: \(loss) in \(Int(Date().timeIntervalSince(startTime))) secs")
             statusHandler(taskStatus)
         }
         

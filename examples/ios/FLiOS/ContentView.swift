@@ -26,6 +26,15 @@ struct ContentView: View {
                     .font(.largeTitle)
                 Spacer()
                 Form {
+                    Section(header: Text("Scenario")) {
+                        HStack{
+                            Picker("Select a Scenario", selection: $model.scenarioSelection) {
+                                ForEach(model.scenarios, id: \.self) {
+                                    Text($0.description)
+                                }
+                            }
+                        }
+                    }
                     Section(header: Text("Prepare Dataset")) {
                         HStack {
                             Text("Training Dataset: \(self.model.trainingBatchStatus.description)")
@@ -58,7 +67,7 @@ struct ContentView: View {
                                     ProgressView()
                                 }
                             }
-                            .disabled(model.trainingBatchStatus != PreparationStatus.ready)
+                            .disabled(model.trainingBatchStatus != Constants.PreparationStatus.ready)
                         }
                     }
                     Section(header: Text("Local Training")) {
@@ -194,7 +203,6 @@ struct ContentView: View {
                         if model.benchmarkSuite.benchmarkExists() || preparedExport {
                             ShareLink(item:model.benchmarkSuite.getBenchmarkFileUrl())
                         }
-                        
                     }
                 }
             }
