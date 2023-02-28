@@ -23,9 +23,10 @@ from flwr import common
 from flwr.client import ClientLike
 from flwr.common import serde
 from flwr.common.logger import log
-from flwr.driver import Driver
 from flwr.proto import driver_pb2, node_pb2, task_pb2, transport_pb2
 from flwr.server.client_proxy import ClientProxy
+
+from .driver import Driver
 
 ClientFn = Callable[[str], ClientLike]
 

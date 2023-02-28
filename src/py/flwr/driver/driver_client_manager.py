@@ -21,12 +21,13 @@ from logging import INFO
 from typing import Dict, List, Optional
 
 from flwr.common.logger import log
-from flwr.driver import Driver
-from flwr.driver.driver_client_proxy import DriverClientProxy
 from flwr.proto import driver_pb2
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
+
+from .driver import Driver
+from .driver.driver_client_proxy import DriverClientProxy
 
 
 class DriverClientManager(ClientManager):
