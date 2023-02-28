@@ -22,11 +22,11 @@ class ZipDownloader:
         unzip - whether to unzip the downloaded filed
         """
         if self._save_path.with_suffix("").exists() and len(list(self._save_path.with_suffix("").glob("*"))) != 0:
-            print("Files are already downloaded and extracted from the zip file")
+            print(f"Files for {self._name} are already downloaded and extracted from the zip file")
             return None
         self._create_dir_structure()
         if self._save_path.exists():
-            print("Zip file already downloaded. Skipping downloading.")
+            print(f"Zip file for {self._name} are already downloaded. Skip downloading.")
         else:
             wget.download(self._url, out=str(self._save_path))
         if unzip:
@@ -36,12 +36,12 @@ class ZipDownloader:
         self._save_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _unzip(self):
-        print(f"Unzipping of {self._save_path} started")
-        shutil.unpack_archive(self._save_path, self._save_path.with_suffix(""))
+        print(f"Unzipping of {self._save_path} to {self._save_path.parent} started")
+        shutil.unpack_archive(self._save_path, self._save_path.parent)
         print(f"Unzipping of {self._save_path} done")
-        print("Removing zip file started")
+        print(f"Removing zip file started: {self._save_path}")
         os.remove(self._save_path)
-        print("Removing zip file done")
+        print(f"Removing zip file done: {self._save_path}")
 
 
 if __name__ == "__main__":
