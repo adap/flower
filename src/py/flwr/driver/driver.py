@@ -16,7 +16,7 @@
 
 
 from logging import ERROR, INFO, WARNING
-from typing import Optional
+from typing import Optional, Tuple
 
 import grpc
 
@@ -25,7 +25,8 @@ from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.driver.driver_client_manager import DriverClientManager
 from flwr.proto import driver_pb2, driver_pb2_grpc
-from flwr.server.client_manager import ClientManager, SimpleClientManager
+from flwr.server.app import ServerConfig
+from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
@@ -42,10 +43,10 @@ methods.
 
 def start_driver(  # pylint: disable=too-many-arguments
     *,
-    server_address: str = ADDRESS_FLEET_API_GRPC,
+    server_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
-    certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    certificates: Optional[bytes] = None,
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
 
@@ -60,7 +61,7 @@ def start_driver(  # pylint: disable=too-many-arguments
         An implementation of the abstract base class
         `flwr.server.strategy.Strategy`. If no strategy is provided, then
         `start_server` will use `flwr.server.strategy.FedAvg`.
-    certificates : Tuple[bytes, bytes, bytes] (default: None)
+    certificates : bytes (default: None)
         Tuple containing root certificate, server certificate, and private key
         to start a secure SSL-enabled server. The tuple is expected to have
         three bytes elements in the following order:
@@ -83,19 +84,12 @@ def start_driver(  # pylint: disable=too-many-arguments
     Starting an SSL-enabled server:
 
     >>> start_driver(
-    >>>     certificates=(
-    >>>         Path("/crts/root.pem").read_bytes(),
-    >>>         Path("/crts/localhost.crt").read_bytes(),
-    >>>         Path("/crts/localhost.key").read_bytes()
-    >>>     )
+    >>>     certificates=Path("/crts/root.pem").read_bytes()
     >>> )
     """
-    event(EventType.START_DRIVER_ENTER)
-
     driver = Driver(driver_service_address=server_address, certificates=certificates)
 
-    if client_manager is None:
-        client_manager = DriverClientManager(driver=driver, anonymous=False)
+    client_manager = DriverClientManager(driver=driver, anonymous=False)
 
     # Initialize server and server config
     initialized_server, initialized_config = _init_defaults(
@@ -118,8 +112,6 @@ def start_driver(  # pylint: disable=too-many-arguments
     )
 
     driver.disconnect()
-
-    event(EventType.START_SERVER_LEAVE)
 
     return hist
 

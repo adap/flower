@@ -17,13 +17,16 @@
 
 import random
 import time
-from typing import Dict, List, Optional, Set, Tuple
+from logging import INFO
+from typing import Dict, List, Optional
 
+from flwr.common.logger import log
 from flwr.driver import Driver
+from flwr.driver.driver_client_proxy import DriverClientProxy
+from flwr.proto import driver_pb2
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-from flwr.server.state import State
 
 
 class DriverClientManager(ClientManager):
@@ -78,25 +81,23 @@ class DriverClientManager(ClientManager):
         ----------
         client : flwr.server.client_proxy.ClientProxy
         """
-        pass
 
     def all(self) -> Dict[str, ClientProxy]:
         return self.clients
 
     def wait_for(self, num_clients: int, timeout: int = 86400) -> bool:
         start_time = time.time()
-        while len(self) < num_clients and time.time() < start_time + timeout:
-            get_nodes_res: driver_pb2.GetNodesResponse = self.driver.get_nodes(
-                req=driver_pb2.GetNodesRequest()
-            )
+        while time.time() < start_time + timeout:
+            get_nodes_res = self.driver.get_nodes(req=driver_pb2.GetNodesRequest())
             all_node_ids = get_nodes_res.node_ids
-            if len(all_node_ids) >= min_num_clients:
+            if len(all_node_ids) >= num_clients:
                 for node_id in all_node_ids:
-                    self.client[node_id] = ClientProxy(
+                    self.clients[str(node_id)] = DriverClientProxy(
                         node_id, self.driver, self.anonymous
                     )
-                break
+                return True
             time.sleep(1)
+        return False
 
     def sample(
         self,

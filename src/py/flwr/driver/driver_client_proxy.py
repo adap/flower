@@ -17,7 +17,7 @@
 
 import time
 from logging import DEBUG
-from typing import Callable, Optional, cast
+from typing import Callable, cast, List, Optional
 
 from flwr import common
 from flwr.client import ClientLike
@@ -51,7 +51,7 @@ class DriverClientProxy(ClientProxy):
             )
         )
         client_message = self._send_receive_msg(server_message_proto, timeout)
-        return client_message.get_properties_res
+        return cast(common.GetPropertiesRes, client_message.get_properties_res)
 
     def get_parameters(
         self, ins: common.GetParametersIns, timeout: Optional[float]
@@ -63,7 +63,7 @@ class DriverClientProxy(ClientProxy):
             )
         )
         client_message = self._send_receive_msg(server_message_proto, timeout)
-        return client_message.get_parameters_res
+        return cast(common.GetParametersRes, client_message.get_parameters_res)
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
@@ -73,7 +73,7 @@ class DriverClientProxy(ClientProxy):
             )
         )
         client_message = self._send_receive_msg(server_message_proto, timeout)
-        return client_message.fit_res
+        return cast(common.FitRes, client_message.fit_res)
 
     def evaluate(
         self, ins: common.EvaluateIns, timeout: Optional[float]
@@ -81,11 +81,11 @@ class DriverClientProxy(ClientProxy):
         """Evaluate model parameters on the locally held dataset."""
         server_message_proto: transport_pb2.ServerMessage = (
             serde.server_message_to_proto(
-                server_message=common.ServerMessage(fit_ins=ins)
+                server_message=common.ServerMessage(evaluate_ins=ins)
             )
         )
         client_message = self._send_receive_msg(server_message_proto, timeout)
-        return client_message.evaluate_res
+        return cast(common.EvaluateRes, client_message.evaluate_res)
 
     def reconnect(
         self, ins: common.ReconnectIns, timeout: Optional[float]
@@ -113,14 +113,10 @@ class DriverClientProxy(ClientProxy):
             ),
         )
         push_task_ins_req = driver_pb2.PushTaskInsRequest(task_ins_list=[task_ins])
-        push_task_ins_res: driver_pb2.PushTaskInsResponse = self.driver.push_task_ins(
-            req=push_task_ins_req
-        )
+        push_task_ins_res = self.driver.push_task_ins(req=push_task_ins_req)
         time.sleep(SLEEP_TIME)
-        task_ids: List[str] = [
-            task_id for task_id in push_task_ins_res.task_ids if task_id != ""
-        ]
-        all_task_res: List[task_pb2.TaskRes] = []
+        task_ids = [task_id for task_id in push_task_ins_res.task_ids if task_id != ""]
+        all_task_res = []
 
         if timeout:
             start_time = time.time()
@@ -131,12 +127,12 @@ class DriverClientProxy(ClientProxy):
                 task_ids=task_ids,
             )
 
-            pull_task_res_res: driver_pb2.PullTaskResResponse = (
-                self.driver.pull_task_res(req=pull_task_res_req)
-            )
+            pull_task_res_res = self.driver.pull_task_res(req=pull_task_res_req)
 
-            task_res_list: List[task_pb2.TaskRes] = pull_task_res_res.task_res_list
-            print(f"Got {len(task_res_list)} results")
+            task_res_list: List[task_pb2.TaskRes] = list(
+                pull_task_res_res.task_res_list
+            )
+            log(DEBUG, "Got %s results", len(task_res_list))
 
             time.sleep(SLEEP_TIME)
 
