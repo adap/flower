@@ -14,10 +14,11 @@
 # ==============================================================================
 """Flower ClientProxy implementation for Driver API."""
 
+from __future__ import annotations
 
 import time
 from logging import DEBUG
-from typing import Callable, List, Optional, cast
+from typing import TYPE_CHECKING, Callable, List, Optional, cast
 
 from flwr import common
 from flwr.client import ClientLike
@@ -26,7 +27,8 @@ from flwr.common.logger import log
 from flwr.proto import driver_pb2, node_pb2, task_pb2, transport_pb2
 from flwr.server.client_proxy import ClientProxy
 
-from .driver import Driver
+if TYPE_CHECKING:
+    from .driver import Driver
 
 ClientFn = Callable[[str], ClientLike]
 

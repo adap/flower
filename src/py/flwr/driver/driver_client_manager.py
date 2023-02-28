@@ -15,10 +15,12 @@
 """Flower DriverClientManager."""
 
 
+from __future__ import annotations
+
 import random
 import time
 from logging import INFO
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from flwr.common.logger import log
 from flwr.proto import driver_pb2
@@ -26,8 +28,10 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
 
-from .driver import Driver
 from .driver_client_proxy import DriverClientProxy
+
+if TYPE_CHECKING:
+    from .driver import Driver
 
 
 class DriverClientManager(ClientManager):
