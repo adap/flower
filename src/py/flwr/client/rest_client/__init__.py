@@ -1,4 +1,4 @@
-# Copyright 2023 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,16 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower server state."""
-
-from .in_memory_state import InMemoryState as InMemoryState
-from .sqlite_state import SqliteState as SqliteState
-from .state import State as State
-from .state_factory import StateFactory as StateFactory
-
-__all__ = [
-    "InMemoryState",
-    "SqliteState",
-    "State",
-    "StateFactory",
-]
+"""Client-side part of the REST transport layer."""
