@@ -35,6 +35,124 @@ methods.
 """
 
 
+def start_driver(  # pylint: disable=too-many-arguments
+    *,
+    server_address: str = ADDRESS_FLEET_API_GRPC,
+    config: Optional[ServerConfig] = None,
+    strategy: Optional[Strategy] = None,
+    certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+) -> History:
+    """Start a Flower server using the gRPC transport layer.
+
+    Parameters
+    ----------
+    server_address : Optional[str]
+        The IPv4 or IPv6 address of the server. Defaults to `"[::]:8080"`.
+    config : Optional[ServerConfig] (default: None)
+        Currently supported values are `num_rounds` (int, default: 1) and
+        `round_timeout` in seconds (float, default: None).
+    strategy : Optional[flwr.server.Strategy] (default: None).
+        An implementation of the abstract base class
+        `flwr.server.strategy.Strategy`. If no strategy is provided, then
+        `start_server` will use `flwr.server.strategy.FedAvg`.
+    certificates : Tuple[bytes, bytes, bytes] (default: None)
+        Tuple containing root certificate, server certificate, and private key
+        to start a secure SSL-enabled server. The tuple is expected to have
+        three bytes elements in the following order:
+
+            * CA certificate.
+            * server certificate.
+            * server private key.
+
+    Returns
+    -------
+    hist : flwr.server.history.History
+        Object containing training and evaluation metrics.
+
+    Examples
+    --------
+    Starting an insecure server:
+
+    >>> start_driver()
+
+    Starting an SSL-enabled server:
+
+    >>> start_driver(
+    >>>     certificates=(
+    >>>         Path("/crts/root.pem").read_bytes(),
+    >>>         Path("/crts/localhost.crt").read_bytes(),
+    >>>         Path("/crts/localhost.key").read_bytes()
+    >>>     )
+    >>> )
+    """
+    event(EventType.START_DRIVER_ENTER)
+
+    driver = Driver(driver_service_address=server_address, certificates=certificates)
+
+    if client_manager is None:
+        client_manager = DriverClientManager(driver=driver, anonymous=False)
+
+    # Initialize server and server config
+    initialized_server, initialized_config = _init_defaults(
+        client_manager=client_manager,
+        config=config,
+        strategy=strategy,
+    )
+    log(
+        INFO,
+        "Starting Flower server, config: %s",
+        initialized_config,
+    )
+
+    driver.connect()
+
+    # Start training
+    hist = _fl(
+        server=initialized_server,
+        config=initialized_config,
+    )
+
+    driver.disconnect()
+
+    event(EventType.START_SERVER_LEAVE)
+
+    return hist
+
+
+def _init_defaults(
+    client_manager: ClientManager,
+    config: Optional[ServerConfig],
+    strategy: Optional[Strategy],
+) -> Tuple[Server, ServerConfig]:
+    # Create server instance if none was given
+    if strategy is None:
+        strategy = FedAvg()
+    server = Server(client_manager=client_manager, strategy=strategy)
+
+    # Set default config values
+    if config is None:
+        config = ServerConfig()
+
+    return server, config
+
+
+def _fl(
+    server: Server,
+    config: ServerConfig,
+) -> History:
+    # Fit model
+    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
+    log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
+    log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
+    log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
+    log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
+
+    # Graceful shutdown
+    server.disconnect_all_clients(timeout=config.round_timeout)
+
+    return hist
+
+
 class Driver:
     """`Driver` provides access to the Driver API."""
 
