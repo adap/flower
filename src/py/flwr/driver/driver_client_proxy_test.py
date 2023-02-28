@@ -104,7 +104,9 @@
 #         # Prepare
 #         client = DriverClientProxy(node_id=1, driver=self.driver, anonymous=True)
 #         parameters = flwr.common.Parameters(tensors=[], tensor_type="np")
-#         evaluate_ins: flwr.common.EvaluateIns = flwr.common.EvaluateIns(parameters, {})
+#         evaluate_ins: flwr.common.EvaluateIns = flwr.common.EvaluateIns(
+#           parameters, {}
+#         )
 
 #         # Execute
 #         evaluate_res = client.evaluate(evaluate_ins, timeout=TIMEOUT)
