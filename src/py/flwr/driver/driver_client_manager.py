@@ -27,7 +27,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
 
 from .driver import Driver
-from .driver.driver_client_proxy import DriverClientProxy
+from .driver_client_proxy import DriverClientProxy
 
 
 class DriverClientManager(ClientManager):

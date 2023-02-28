@@ -26,7 +26,7 @@ from flwr.proto import driver_pb2, task_pb2
 from flwr.proto.transport_pb2 import ClientMessage, Parameters, Scalar
 from flwr.server.grpc_server.grpc_bridge import ResWrapper
 
-from .driver.driver_client_proxy import DriverClientProxy
+from .driver_client_proxy import DriverClientProxy
 
 MESSAGE_PARAMETERS = Parameters(tensors=[], tensor_type="np")
 MESSAGE_FIT_RES = ClientMessage(
