@@ -17,7 +17,7 @@
 
 import time
 from logging import DEBUG
-from typing import Callable, cast, List, Optional
+from typing import Callable, List, Optional, cast
 
 from flwr import common
 from flwr.client import ClientLike
