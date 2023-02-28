@@ -22,10 +22,10 @@ import numpy as np
 
 import flwr
 from flwr.common.typing import Config, GetParametersIns
+from flwr.driver.driver_client_proxy import DriverClientProxy
+from flwr.proto import driver_pb2, node_pb2, task_pb2
 from flwr.proto.transport_pb2 import ClientMessage, Parameters, Scalar
 from flwr.server.grpc_server.grpc_bridge import ResWrapper
-from flwr.driver.driver_client_proxy import DriverClientProxy
-from flwr.proto import driver_pb2, task_pb2, node_pb2
 
 MESSAGE_PARAMETERS = Parameters(tensors=[], tensor_type="np")
 MESSAGE_FIT_RES = ClientMessage(

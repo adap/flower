@@ -23,7 +23,12 @@ import grpc
 from flwr.common import EventType, event
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.driver.driver_client_manager import DriverClientManager
 from flwr.proto import driver_pb2, driver_pb2_grpc
+from flwr.server.client_manager import ClientManager, SimpleClientManager
+from flwr.server.history import History
+from flwr.server.server import Server
+from flwr.server.strategy import FedAvg, Strategy
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
