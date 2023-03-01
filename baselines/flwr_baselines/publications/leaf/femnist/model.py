@@ -6,6 +6,8 @@ from torch.utils.data import DataLoader
 
 
 class Net(nn.Module):
+    """Implementation of the model used in the LEAF paper for training on FEMNIST data."""
+
     def __init__(self, num_classes):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=5, padding='same')
@@ -19,6 +21,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(2048, num_classes)
 
     def forward(self, x):
+        """Forward step in training."""
         x = self.conv1(x)
         x = self.relu1(x)
         x = self.pool1(x)
@@ -42,7 +45,11 @@ def train(
         n_batches: int = None,
         verbose: bool = False
 ):
-    # n_batches in case of training for n_batches instead of epochs
+    """
+    Train a given model with CrossEntropy and SGD (or some version of it like batch-SGD).
+
+    n_batches is an alternative way of specifying the training length (instead of epochs)
+    """
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
     net.train()
@@ -94,7 +101,8 @@ def train(
         return train_loss, train_acc, val_loss, val_acc
 
 
-def _validate(net, valloader):
+def _validate(net, valloader) -> Tuple[float, float]:
+    """Calculate metrics on the given valloader."""
     criterion = torch.nn.CrossEntropyLoss()
     if len(valloader) == 0:
         return None
@@ -116,6 +124,7 @@ def _validate(net, valloader):
 
 
 def test(net: nn.Module, testloader: DataLoader, device: torch.device) -> Tuple[float, float]:
+    """Test network on the given testloader."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
     net.eval()
