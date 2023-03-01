@@ -89,9 +89,9 @@ class History:
                     for server_round, loss in self.losses_centralized
                 ],
             )
-        if self.fit_metrics_distributed:
+        if self.metrics_distributed_fit:
             rep += "History (metrics, distributed, fit):\n" + str(
-                self.fit_metrics_distributed
+                self.metrics_distributed_fit
             )
         if self.metrics_distributed:
             rep += "History (metrics, distributed, evaluate):\n" + str(
