@@ -9,10 +9,10 @@ from flwr.proto import driver_pb2, task_pb2, node_pb2, transport_pb2
 from task import Net, get_parameters, set_parameters
 
 # -------------------------------------------------------------------------- Driver SDK
-driver = Driver(driver_service_address="[::]:9091", certificates=None)
+driver = Driver(driver_service_address="0.0.0.0:9091", certificates=None)
 # -------------------------------------------------------------------------- Driver SDK
 
-anonymous_client_nodes = False
+anonymous_client_nodes = True
 num_client_nodes_per_round = 1
 sleep_time = 1
 num_rounds = 1
