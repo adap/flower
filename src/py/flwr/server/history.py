@@ -45,9 +45,9 @@ class History:
         for key in metrics:
             # if not (isinstance(metrics[key], float) or isinstance(metrics[key], int)):
             #     continue  # ignore non-numeric key/value pairs
-            if key not in self.fit_metrics_distributed:
-                self.fit_metrics_distributed[key] = []
-            self.fit_metrics_distributed[key].append((server_round, metrics[key]))
+            if key not in self.metrics_distributed_fit:
+                self.metrics_distributed_fit[key] = []
+            self.metrics_distributed_fit[key].append((server_round, metrics[key]))
 
     def add_metrics_distributed(
         self, server_round: int, metrics: Dict[str, Scalar]
