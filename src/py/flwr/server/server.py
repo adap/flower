@@ -108,7 +108,7 @@ class Server:
                 parameters_prime, fit_metrics, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
                     self.parameters = parameters_prime
-                history.add_fit_metrics_distributed(
+                history.add_metrics_distributed_fit(
                     server_round=current_round, metrics=fit_metrics
                 )
 
