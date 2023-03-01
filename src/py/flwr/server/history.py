@@ -26,7 +26,7 @@ class History:
     def __init__(self) -> None:
         self.losses_distributed: List[Tuple[int, float]] = []
         self.losses_centralized: List[Tuple[int, float]] = []
-        self.fit_metrics_distributed: Dict[str, List[Tuple[int, Scalar]]] = {}
+        self.metrics_distributed_fit: Dict[str, List[Tuple[int, Scalar]]] = {}
         self.metrics_distributed: Dict[str, List[Tuple[int, Scalar]]] = {}
         self.metrics_centralized: Dict[str, List[Tuple[int, Scalar]]] = {}
 
@@ -38,7 +38,7 @@ class History:
         """Add one loss entry (from centralized evaluation)."""
         self.losses_centralized.append((server_round, loss))
 
-    def add_fit_metrics_distributed(
+    def add_metrics_distributed_fit(
         self, server_round: int, metrics: Dict[str, Scalar]
     ) -> None:
         """Add metrics entries (from distributed fit)."""
@@ -94,7 +94,7 @@ class History:
                 self.fit_metrics_distributed
             )
         if self.metrics_distributed:
-            rep += "History (metrics, distributed, eval):\n" + str(
+            rep += "History (metrics, distributed, evaluate):\n" + str(
                 self.metrics_distributed
             )
         if self.metrics_centralized:
