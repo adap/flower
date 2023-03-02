@@ -33,5 +33,5 @@ class FlowerClient(fl.client.NumPyClient):
 fl.client.start_numpy_client(
     server_address="0.0.0.0:9093",
     client=FlowerClient(),
-    use_rest=True,
+    rest=True,
 )
