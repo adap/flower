@@ -1,7 +1,6 @@
 from typing import List, Tuple
 
 import numpy as np
-import pandas as pd
 import torch
 from flwr.common import Metrics
 
@@ -30,9 +29,8 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     return weighted_metrics
 
 
-def steup_seed():
-    np.random.seed(42)
-    pd.np.random.seed(42)
-    torch.manual_seed(42)
+def steup_seed(seed):
+    np.random.seed(seed)
+    torch.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
