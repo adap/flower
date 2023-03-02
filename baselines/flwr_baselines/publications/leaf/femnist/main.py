@@ -7,6 +7,8 @@ import flwr as fl
 from flwr.server.strategy import FedAvg
 from sklearn import preprocessing
 
+from fedavg_same_clients import FedAvgSameClients
+from constants import RANDOM_SEED
 from utils import weighted_average, steup_seed
 from client import create_client
 from dataset import create_dataset, create_division_list, partition_dataset, \
@@ -19,7 +21,7 @@ DEVICE = torch.device("cpu")
 
 if __name__ == "__main__":
     # Ensure reproducibility
-    steup_seed()
+    steup_seed(RANDOM_SEED)
     # Download and unzip the data
     print("Data downloading started")
     nist_by_class_url = "https://s3.amazonaws.com/nist-srd/SD19/by_class.zip"
@@ -84,7 +86,13 @@ if __name__ == "__main__":
 
     total_n_clients = len(trainloaders)  # the total number of clients created produced from sampling
 
-    strategy = fl.server.strategy.FedAvg(
+    same_train_test_clients = True
+    if same_train_test_clients:
+        #  assign pointer to a function
+        flwr_strategy = FedAvgSameClients
+    else:
+        flwr_strategy = FedAvg
+    strategy = flwr_strategy(
         min_available_clients=total_n_clients,  # min number of clients to sample from for fit and evaluate
         # Keep fraction fit low (not zero for consistency reasons with fraction_evaluate)
         # and determine number of clients by the min_fit_clients
