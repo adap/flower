@@ -1,5 +1,6 @@
 import math
 import pathlib
+from typing import Union
 
 import pandas as pd
 
@@ -21,15 +22,21 @@ class NistSampler:
     def __init__(self, data_info_df: pd.DataFrame):
         self._data_info_df = data_info_df
 
-    def sample(self, type: str, frac: float, n_clients) -> pd.DataFrame:
+    def sample(self, type: str, frac: float, n_clients: Union[int, None] = None) -> pd.DataFrame:
         # n_clients is not used when niid
         # The question is if that hold in memory
         if type == "iid":
+            if n_clients is None:
+                raise ValueError("n_clients can not be None for idd training")
             idd_data_info_df = self._data_info_df.sample(frac=frac)
             # add client ids (todo: maybe better in the index)
             idd_data_info_df["client_id"] = _create_samples_division_list(idd_data_info_df.shape[0], n_clients, True)
             return idd_data_info_df
         elif type == "niid":
+            if n_clients is not None:
+                print(
+                    "Warning: the n_clinets is ignored in case of niid training. "
+                    "The number of clients is equal to the number of unique writers")
             # It uses the following sampling logic:
             # Take N users with their full data till it doesn't exceed the total number of data that can be used
             # Then take remaining M samples (from 1 or more users, probably only one) till the  total number of samples
@@ -62,10 +69,9 @@ if __name__ == "__main__":
     sampled_data_info = sampler.sample("niid", 0.05, 100)
     sampled_data_info.to_csv("data/processed/niid_sampled_images_to_labels.csv")
 
-
     import matplotlib.pyplot as plt
+
     plt.figure()
     sampled_data_info.reset_index(drop=False)["writer_id"].value_counts().plot.hist()
     print(sampled_data_info.shape)
     # plt.show()
-
