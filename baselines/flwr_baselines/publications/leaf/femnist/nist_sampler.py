@@ -1,7 +1,7 @@
 import math
 import pathlib
 from typing import Union
-
+from constants import RANDOM_SEED
 import pandas as pd
 
 
@@ -28,7 +28,7 @@ class NistSampler:
         if type == "iid":
             if n_clients is None:
                 raise ValueError("n_clients can not be None for idd training")
-            idd_data_info_df = self._data_info_df.sample(frac=frac)
+            idd_data_info_df = self._data_info_df.sample(frac=frac, random_state=RANDOM_SEED)
             # add client ids (todo: maybe better in the index)
             idd_data_info_df["client_id"] = _create_samples_division_list(idd_data_info_df.shape[0], n_clients, True)
             return idd_data_info_df
@@ -43,7 +43,8 @@ class NistSampler:
             # is reached
             frac_samples = math.ceil(frac * self._data_info_df.shape[0])  # make it consistent with pd.DatFrame.sample()
             niid_data_info_full = self._data_info_df.copy()
-            writer_ids_to_cumsum = niid_data_info_full.groupby("writer_id").size().sample(frac=1.).cumsum()
+            writer_ids_to_cumsum = niid_data_info_full.groupby("writer_id").size().sample(frac=1.,
+                                                                                          random_state=RANDOM_SEED).cumsum()
             writer_ids_to_consider_mask = writer_ids_to_cumsum < frac_samples
             partial_writer_id = writer_ids_to_consider_mask.idxmin()
             niid_data_info_full = niid_data_info_full.set_index("writer_id", append=True)
