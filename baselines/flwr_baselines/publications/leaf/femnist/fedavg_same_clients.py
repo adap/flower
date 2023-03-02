@@ -1,9 +1,9 @@
 from typing import List, Tuple
 
-from src.py.flwr.common import Parameters, FitIns, EvaluateIns
-from src.py.flwr.server import ClientManager
-from src.py.flwr.server.client_proxy import ClientProxy
-from src.py.flwr.server.strategy import FedAvg
+from flwr.common import Parameters, FitIns, EvaluateIns
+from flwr.server import ClientManager
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.strategy import FedAvg
 
 
 class FedAvgSameClients(FedAvg):
