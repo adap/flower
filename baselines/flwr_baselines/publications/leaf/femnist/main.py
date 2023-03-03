@@ -1,58 +1,58 @@
 import pathlib
 from functools import partial
 
-import pandas as pd
-import torch
 import flwr as fl
+import hydra
+import pandas as pd
 from flwr.server.strategy import FedAvg
+from omegaconf import DictConfig
 from sklearn import preprocessing
 
-from fedavg_same_clients import FedAvgSameClients
-from constants import RANDOM_SEED
-from utils import weighted_average, steup_seed
 from client import create_client
+from constants import RANDOM_SEED, DEVICE
 from dataset import create_dataset, create_division_list, partition_dataset, \
     partition_datasets, transform_datasets_into_dataloaders
-from zip_downloader import ZipDownloader
+from fedavg_same_clients import FedAvgSameClients
 from nist_preprocessor import NISTPreprocessor
 from nist_sampler import NistSampler
+from utils import weighted_average, steup_seed
+from zip_downloader import ZipDownloader
 
-DEVICE = torch.device("cpu")
 
-if __name__ == "__main__":
+@hydra.main(config_path="conf", config_name="modified_config", version_base=None)
+def main(cfg: DictConfig):
     # Ensure reproducibility
     steup_seed(RANDOM_SEED)
+
     # Download and unzip the data
-    print("Data downloading started")
+    print("NIST data downloading started")
     nist_by_class_url = "https://s3.amazonaws.com/nist-srd/SD19/by_class.zip"
     nist_by_writer_url = "https://s3.amazonaws.com/nist-srd/SD19/by_write.zip"
     nist_by_class_downloader = ZipDownloader("data/raw", nist_by_class_url)
     nist_by_writer_downloader = ZipDownloader("data/raw", nist_by_writer_url)
     nist_by_class_downloader.download()
     nist_by_writer_downloader.download()
-    print("Data downloading done")
+    print("NIST data downloading done")
 
-    # Preprocess teh data
-    print("Preprocessing of the data started")
+    # Preprocess the data
+    print("Preprocessing of the NIST data started")
     nist_data_path = pathlib.Path("data")
     nist_preprocessor = NISTPreprocessor(nist_data_path)
     nist_preprocessor.preprocess()
-    print("Preprocessing of the data done")
+    print("Preprocessing of the NIST data done")
 
     # Create information for sampling
-    print("Creation of sampling information started")
+    print("Creation of the sampling information started")
     df_info_path = pathlib.Path("data/processed/resized_images_to_labels.csv")
     df_info = pd.read_csv(df_info_path, index_col=0)
     sampler = NistSampler(df_info)
-    sampled_data_info = sampler.sample("niid", 0.05, n_clients=100)
-    sampled_data_info.to_csv("data/processed/niid_sampled_images_to_labels.csv")
-    print("Creation of sampling information done")
+    sampled_data_info = sampler.sample(cfg.distribution_type, cfg.dataset_fraction)
+    sampled_data_info_path = pathlib.Path("data/processed/niid_sampled_images_to_labels.csv")
+    sampled_data_info.to_csv(sampled_data_info_path)
+    print("Creation of the sampling information done")
 
     # Create a list of DataLoaders
-    # Prepare the batch_size_parameter
-    mini_batch_size = 10
-
-    print("Creation of partitioned by writer_id PyTorch Datasets started")
+    print("Creation of the partitioned by writer_id PyTorch Datasets started")
     sampled_data_info = pd.read_csv("data/processed/niid_sampled_images_to_labels.csv")
     label_encoder = preprocessing.LabelEncoder()
     labels = label_encoder.fit_transform(sampled_data_info["character"])
@@ -61,48 +61,42 @@ if __name__ == "__main__":
     partitioned_dataset = partition_dataset(full_dataset, division_list)
     partitioned_train, partitioned_validation, partitioned_test = partition_datasets(
         partitioned_dataset)
-    trainloaders = transform_datasets_into_dataloaders(partitioned_train, batch_size=mini_batch_size)
-    valloaders = transform_datasets_into_dataloaders(partitioned_validation, batch_size=mini_batch_size)
-    testloaders = transform_datasets_into_dataloaders(partitioned_test, batch_size=mini_batch_size)
-    print("Creation of partitioned by writer_id PyTorch Datasets done")
+    trainloaders = transform_datasets_into_dataloaders(partitioned_train, batch_size=cfg.batch_size)
+    valloaders = transform_datasets_into_dataloaders(partitioned_validation, batch_size=cfg.batch_size)
+    testloaders = transform_datasets_into_dataloaders(partitioned_test, batch_size=cfg.batch_size)
+    print("Creation of the partitioned by writer_id PyTorch Datasets done")
 
-    # Prepare to launch flwr.simulation
-    n_rounds = 1  # 00#0  # confirmed - the very last bullet point of the paper
-    n_clients_per_round = 5  # confirmed - the very last bullet point of the paper
-    local_lr = 0.001  # confirmed - the very last bullet point of the paper
-
-    n_client_epochs = 5  # None
-    n_client_batches = None  # 5
+    # The total number of clients created produced from sampling differs (on different random seeds)
+    total_n_clients = len(trainloaders)
 
     client_fnc = partial(create_client,
                          trainloaders=trainloaders,
                          valloaders=valloaders,
                          testloaders=testloaders,
-                         device=torch.device("cpu"),
-                         num_epochs=n_client_epochs,
-                         learning_rate=local_lr,
+                         device=DEVICE,
+                         num_epochs=cfg.epochs_per_round,
+                         learning_rate=cfg.learning_rate,
+                         # There exist other variants of the FEMNIST dataset with different # of classes
                          num_classes=62,
-                         num_batches=n_client_batches)
+                         num_batches=cfg.batches_per_round)
 
-    total_n_clients = len(trainloaders)  # the total number of clients created produced from sampling
-
-    same_train_test_clients = True
-    if same_train_test_clients:
-        #  assign pointer to a function
+    if cfg.same_train_test_clients:
+        #  Assign reference to a class
         flwr_strategy = FedAvgSameClients
     else:
         flwr_strategy = FedAvg
+
     strategy = flwr_strategy(
         min_available_clients=total_n_clients,  # min number of clients to sample from for fit and evaluate
         # Keep fraction fit low (not zero for consistency reasons with fraction_evaluate)
         # and determine number of clients by the min_fit_clients
         # (it's max of 1. fraction_fit * available clients 2. min_fit_clients)
         fraction_fit=0.001,
-        min_fit_clients=n_clients_per_round,
+        min_fit_clients=cfg.num_clients_per_round,
         fraction_evaluate=0.001,
-        min_evaluate_clients=n_clients_per_round,
-        # evaluate_fn=evaluate_fn, #  Leave empty since it's responsible for the centralized evaluation
-        fit_metrics_aggregation_fn=weighted_average,
+        min_evaluate_clients=cfg.num_clients_per_round,
+        # evaluate_fn=None, #  Leave empty since it's responsible for the centralized evaluation
+        fit_metrics_aggregation_fn=weighted_average,  # todo: collect the fit metrics
         evaluate_metrics_aggregation_fn=weighted_average,
     )
     client_resources = None
@@ -113,22 +107,28 @@ if __name__ == "__main__":
     history = fl.simulation.start_simulation(
         client_fn=client_fnc,
         num_clients=total_n_clients,  # total number of clients in a simulation
-        config=fl.server.ServerConfig(num_rounds=n_rounds),
+        config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
         client_resources=client_resources,
     )
 
-    # keywords = ["accuracy", "test_loss", "vall_loss"]
     print(history)
-    pd_history_acc = pd.DataFrame(history.metrics_distributed["accuracy"], columns=["round", "accuracy"])
-    # pd_history_sth = pd.DataFrame(history.metrics_distributed["sth"], columns=["round", "sth"])
+    pd_history_acc = pd.DataFrame(history.metrics_distributed["accuracy"], columns=["round", "test_accuracy"])
     pd_history_loss = pd.DataFrame(history.losses_distributed, columns=["round", "test_loss"])
-    pd1 = pd.merge(pd_history_acc, pd_history_loss, on="round")
-    print(pd1)
-    pd1.to_csv("results/acc_loss.csv")
-    ax = pd1[["accuracy", "test_loss"]].plot()
+    print(pd_history_acc)
+    print(pd_history_acc)
 
-    # save the plot to a file
+    results_dir_path = pathlib.Path(cfg.results_dir_path)
+    pd_history_acc.to_csv(results_dir_path / "test_accuracy.csv")
+    ax = pd_history_acc["test_accuracy"].plot()
     fig = ax.get_figure()
-    fig.savefig('results/acc_loss.png')
-    # print(pd.merge(pd1, pd_history_sth, on="round"))
+    fig.savefig(results_dir_path / "test_accuracy.jpg", dpi=200)
+
+    pd_history_loss.to_csv(results_dir_path / "train_loss.csv")
+    ax = pd_history_acc["test_loss"].plot()
+    fig = ax.get_figure()
+    fig.savefig(results_dir_path / "test_accuracy.jpg", dpi=200)
+
+
+if __name__ == "__main__":
+    main()
