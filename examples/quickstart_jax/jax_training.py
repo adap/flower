@@ -17,9 +17,9 @@ import numpy as np
 key = jax.random.PRNGKey(0)
 
 
-def load_data() -> Tuple[
-    List[np.ndarray], List[np.ndarray], List[np.ndarray], List[np.ndarray]
-]:
+def load_data() -> (
+    Tuple[List[np.ndarray], List[np.ndarray], List[np.ndarray], List[np.ndarray]]
+):
     # Load dataset
     X, y = make_regression(n_features=3, random_state=0)
     X, X_test, y, y_test = train_test_split(X, y)

@@ -44,6 +44,8 @@ exclude = [
 ]
 
 [tool.poetry.scripts]
+flower-driver-api = "flwr.server:run_driver_api"
+flower-fleet-api = "flwr.server:run_fleet_api"
 flower-server = "flwr.server:run_server"
 flower-client = "flwr.client:run_client"
 
@@ -56,25 +58,26 @@ protobuf = "^3.19.0"
 importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
 iterators = "^0.0.2"
 # Optional dependencies (VCE)
-ray = { extras = ["default"], version = "~2.2.0", optional = true }
+ray = { extras = ["default"], version = "~2.3.0", optional = true }
 # Optional dependencies (REST transport layer)
-requests = "^2.28.1"
-fastapi = "^0.89.1"
+requests = "^2.28.2"
+fastapi = "^0.92.0"
+starlette = "^0.25.0"
 uvicorn = {extras = ["standard"], version = "^0.20.0"}
 
 [tool.poetry.extras]
 simulation = ["ray"]
 rest = ["fastapi", "requests", "uvicorn"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.5"
 types-protobuf = "==3.19.18"
 types-requests = "==2.28.11.7"
 types-setuptools = "==57.4.14"
 clang-format = "==15.0.6"
-isort = "==5.10.1"
-black = "==22.8.0"
-docformatter = "==1.5.0"
+isort = "==5.11.5"
+black = "==23.1.0"
+docformatter = "==1.5.1"
 mypy = "==0.961"
 pylint = "==2.13.8"
 flake8 = "==3.9.2"
@@ -94,6 +97,7 @@ sphinxcontrib-mermaid = "==0.7.1"
 furo = "==2022.12.7"
 sphinx-reredirects = "==0.1.1"
 nbsphinx = "==0.8.12"
+nbstripout = "==0.6.1"
 
 [tool.isort]
 line_length = 88

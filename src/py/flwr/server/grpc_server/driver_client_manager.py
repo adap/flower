@@ -22,7 +22,7 @@ from typing import Dict, List, Optional, Set, Tuple
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-from flwr.server.state import State
+from flwr.server.state import State, StateFactory
 
 from .ins_scheduler import InsScheduler
 
@@ -30,10 +30,10 @@ from .ins_scheduler import InsScheduler
 class DriverClientManager(ClientManager):
     """Provides a pool of available clients."""
 
-    def __init__(self, state: State) -> None:
+    def __init__(self, state_factory: StateFactory) -> None:
         self._cv = threading.Condition()
         self.nodes: Dict[str, Tuple[int, InsScheduler]] = {}
-        self.state = state
+        self.state_factory = state_factory
 
     def __len__(self) -> int:
         """Return the number of available clients.
@@ -76,12 +76,13 @@ class DriverClientManager(ClientManager):
         client.node_id = random_node_id
 
         # Register node_id in with State
-        self.state.register_node(node_id=random_node_id)
+        state: State = self.state_factory.state()
+        state.register_node(node_id=random_node_id)
 
         # Create and start the instruction scheduler
         ins_scheduler = InsScheduler(
             client_proxy=client,
-            state=self.state,
+            state_factory=self.state_factory,
         )
         ins_scheduler.start()
 
@@ -108,7 +109,8 @@ class DriverClientManager(ClientManager):
             ins_scheduler.stop()
 
             # Unregister node_id in with State
-            self.state.unregister_node(node_id=node_id)
+            state: State = self.state_factory.state()
+            state.unregister_node(node_id=node_id)
 
             with self._cv:
                 self._cv.notify_all()

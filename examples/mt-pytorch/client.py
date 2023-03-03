@@ -15,6 +15,7 @@ from task import (
 net = Net().to(DEVICE)
 trainloader, testloader = load_data()
 
+
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
@@ -30,6 +31,7 @@ class FlowerClient(fl.client.NumPyClient):
 
 # Start Flower client
 fl.client.start_numpy_client(
-    server_address="[::]:9092",
+    server_address="0.0.0.0:9093",
     client=FlowerClient(),
+    rest=True,
 )

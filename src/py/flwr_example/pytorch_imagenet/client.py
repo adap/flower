@@ -73,7 +73,6 @@ class ImageNetClient(fl.client.Client):
         return fl.common.ParametersRes(parameters=parameters)
 
     def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
-
         # Set the seed so we are sure to generate the same global batches
         # indices across all clients
         np.random.seed(123)
@@ -124,7 +123,6 @@ class ImageNetClient(fl.client.Client):
         )
 
     def evaluate(self, ins: fl.common.EvaluateIns) -> fl.common.EvaluateRes:
-
         # Set the set so we are sure to generate the same batches
         # across all clients.
         np.random.seed(123)

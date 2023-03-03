@@ -32,6 +32,7 @@ A learning-oriented series of federated learning tutorials, the best place to st
    :maxdepth: 1
    :caption: Tutorial
 
+   tutorial/Flower-0-What-is-FL
    tutorial/Flower-1-Intro-to-FL-PyTorch
    tutorial/Flower-2-Strategies-in-FL-PyTorch
    tutorial/Flower-3-Building-a-Strategy-PyTorch
@@ -69,6 +70,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    implementing-strategies
    save-progress
    saving-and-loading-pytorch-checkpoints
+   monitor-simulation
    ssl-enabled-connections
    example-walkthrough-pytorch-mnist
    example-pytorch-from-centralized-to-federated
