@@ -4,22 +4,26 @@ from functools import partial
 import flwr as fl
 import hydra
 import pandas as pd
-from flwr.server.strategy import FedAvg
-from omegaconf import DictConfig
-from sklearn import preprocessing
-
 from client import create_client
-from constants import RANDOM_SEED, DEVICE
-from dataset import create_dataset, create_division_list, partition_dataset, \
-    partition_datasets, transform_datasets_into_dataloaders
+from constants import DEVICE, RANDOM_SEED
+from dataset import (
+    create_dataset,
+    create_division_list,
+    partition_dataset,
+    partition_datasets,
+    transform_datasets_into_dataloaders,
+)
 from fedavg_same_clients import FedAvgSameClients
+from flwr.server.strategy import FedAvg
 from nist_preprocessor import NISTPreprocessor
 from nist_sampler import NistSampler
-from utils import weighted_average, steup_seed
+from omegaconf import DictConfig
+from sklearn import preprocessing
+from utils import steup_seed, weighted_average
 from zip_downloader import ZipDownloader
 
 
-@hydra.main(config_path="conf", config_name="modified_config", version_base=None)
+@hydra.main(config_path="conf", config_name="paper_config", version_base=None)
 def main(cfg: DictConfig):
     # Ensure reproducibility
     steup_seed(RANDOM_SEED)
@@ -47,38 +51,49 @@ def main(cfg: DictConfig):
     df_info = pd.read_csv(df_info_path, index_col=0)
     sampler = NistSampler(df_info)
     sampled_data_info = sampler.sample(cfg.distribution_type, cfg.dataset_fraction)
-    sampled_data_info_path = pathlib.Path("data/processed/niid_sampled_images_to_labels.csv")
+    sampled_data_info_path = pathlib.Path(
+        f"data/processed/{cfg.distribution_type}_sampled_images_to_labels.csv"
+    )
     sampled_data_info.to_csv(sampled_data_info_path)
     print("Creation of the sampling information done")
 
     # Create a list of DataLoaders
     print("Creation of the partitioned by writer_id PyTorch Datasets started")
-    sampled_data_info = pd.read_csv("data/processed/niid_sampled_images_to_labels.csv")
+    sampled_data_info = pd.read_csv(sampled_data_info_path)
     label_encoder = preprocessing.LabelEncoder()
     labels = label_encoder.fit_transform(sampled_data_info["character"])
     full_dataset = create_dataset(sampled_data_info, labels)
     division_list = create_division_list(sampled_data_info)
     partitioned_dataset = partition_dataset(full_dataset, division_list)
     partitioned_train, partitioned_validation, partitioned_test = partition_datasets(
-        partitioned_dataset)
-    trainloaders = transform_datasets_into_dataloaders(partitioned_train, batch_size=cfg.batch_size)
-    valloaders = transform_datasets_into_dataloaders(partitioned_validation, batch_size=cfg.batch_size)
-    testloaders = transform_datasets_into_dataloaders(partitioned_test, batch_size=cfg.batch_size)
+        partitioned_dataset
+    )
+    trainloaders = transform_datasets_into_dataloaders(
+        partitioned_train, batch_size=cfg.batch_size
+    )
+    valloaders = transform_datasets_into_dataloaders(
+        partitioned_validation, batch_size=cfg.batch_size
+    )
+    testloaders = transform_datasets_into_dataloaders(
+        partitioned_test, batch_size=cfg.batch_size
+    )
     print("Creation of the partitioned by writer_id PyTorch Datasets done")
 
     # The total number of clients created produced from sampling differs (on different random seeds)
     total_n_clients = len(trainloaders)
 
-    client_fnc = partial(create_client,
-                         trainloaders=trainloaders,
-                         valloaders=valloaders,
-                         testloaders=testloaders,
-                         device=DEVICE,
-                         num_epochs=cfg.epochs_per_round,
-                         learning_rate=cfg.learning_rate,
-                         # There exist other variants of the FEMNIST dataset with different # of classes
-                         num_classes=62,
-                         num_batches=cfg.batches_per_round)
+    client_fnc = partial(
+        create_client,
+        trainloaders=trainloaders,
+        valloaders=valloaders,
+        testloaders=testloaders,
+        device=DEVICE,
+        num_epochs=cfg.epochs_per_round,
+        learning_rate=cfg.learning_rate,
+        # There exist other variants of the FEMNIST dataset with different # of classes
+        num_classes=62,
+        num_batches=cfg.batches_per_round,
+    )
 
     if cfg.same_train_test_clients:
         #  Assign reference to a class
@@ -87,7 +102,8 @@ def main(cfg: DictConfig):
         flwr_strategy = FedAvg
 
     strategy = flwr_strategy(
-        min_available_clients=total_n_clients,  # min number of clients to sample from for fit and evaluate
+        min_available_clients=total_n_clients,
+        # min number of clients to sample from for fit and evaluate
         # Keep fraction fit low (not zero for consistency reasons with fraction_evaluate)
         # and determine number of clients by the min_fit_clients
         # (it's max of 1. fraction_fit * available clients 2. min_fit_clients)
@@ -113,8 +129,12 @@ def main(cfg: DictConfig):
     )
 
     print(history)
-    pd_history_acc = pd.DataFrame(history.metrics_distributed["accuracy"], columns=["round", "test_accuracy"])
-    pd_history_loss = pd.DataFrame(history.losses_distributed, columns=["round", "test_loss"])
+    pd_history_acc = pd.DataFrame(
+        history.metrics_distributed["accuracy"], columns=["round", "test_accuracy"]
+    )
+    pd_history_loss = pd.DataFrame(
+        history.losses_distributed, columns=["round", "test_loss"]
+    )
     print(pd_history_acc)
     print(pd_history_acc)
 

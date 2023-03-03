@@ -5,8 +5,7 @@ import pandas as pd
 
 
 def hex_decimal_to_char(char_hex: str) -> str:
-    """
-    Convert hexadecimal string to ASCII representation.
+    """Convert hexadecimal string to ASCII representation.
 
     Parameters
     ----------
@@ -22,8 +21,7 @@ def hex_decimal_to_char(char_hex: str) -> str:
 
 
 def calculate_file_hash(path: pathlib.Path) -> str:
-    """
-    Calculate a hash of a file.
+    """Calculate a hash of a file.
 
     Parameters
     ----------
@@ -42,8 +40,7 @@ def calculate_file_hash(path: pathlib.Path) -> str:
 
 
 def calculate_series_hashes(paths: pd.Series) -> pd.Series:
-    """
-    Calculate hashes from pd.Series of paths.
+    """Calculate hashes from pd.Series of paths.
 
     Parameters
     ----------

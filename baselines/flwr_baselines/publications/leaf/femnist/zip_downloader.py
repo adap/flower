@@ -9,24 +9,35 @@ import wget
 class ZipDownloader:
     """Zip downloader that enable also unzip and remove the downloaded file."""
 
-    def __init__(self, name: str, url: str, save_path: Union[str, pathlib.Path] = None) -> None:
+    def __init__(
+        self, name: str, url: str, save_path: Union[str, pathlib.Path] = None
+    ) -> None:
         self._name = name
         self._url = url
-        self._save_path = save_path if save_path is not None else pathlib.Path(f"./{name}" + ".zip")
+        self._save_path = (
+            save_path if save_path is not None else pathlib.Path(f"./{name}" + ".zip")
+        )
 
     def download(self, unzip: bool = True) -> None:
-        """ Download file from url only if it does not exist.
+        """Download file from url only if it does not exist.
 
         Parameters
         ----------
         unzip - whether to unzip the downloaded filed
         """
-        if self._save_path.with_suffix("").exists() and len(list(self._save_path.with_suffix("").glob("*"))) != 0:
-            print(f"Files for {self._name} are already downloaded and extracted from the zip file")
+        if (
+            self._save_path.with_suffix("").exists()
+            and len(list(self._save_path.with_suffix("").glob("*"))) != 0
+        ):
+            print(
+                f"Files for {self._name} are already downloaded and extracted from the zip file"
+            )
             return None
         self._create_dir_structure()
         if self._save_path.exists():
-            print(f"Zip file for {self._name} are already downloaded. Skip downloading.")
+            print(
+                f"Zip file for {self._name} are already downloaded. Skip downloading."
+            )
         else:
             wget.download(self._url, out=str(self._save_path))
         if unzip:

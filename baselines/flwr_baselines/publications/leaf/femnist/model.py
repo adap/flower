@@ -6,14 +6,15 @@ from torch.utils.data import DataLoader
 
 
 class Net(nn.Module):
-    """Implementation of the model used in the LEAF paper for training on FEMNIST data."""
+    """Implementation of the model used in the LEAF paper for training on
+    FEMNIST data."""
 
     def __init__(self, num_classes):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=5, padding='same')
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=5, padding="same")
         self.relu1 = nn.ReLU()
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=5, padding='same')
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=5, padding="same")
         self.relu2 = nn.ReLU()
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.fc1 = nn.Linear(7 * 7 * 64, 2048)
@@ -36,19 +37,20 @@ class Net(nn.Module):
 
 
 def train(
-        net: nn.Module,
-        trainloader: DataLoader,
-        valloader: DataLoader,
-        epochs: int,
-        learning_rate: float,
-        device: torch.device,
-        n_batches: int = None,
-        verbose: bool = False
+    net: nn.Module,
+    trainloader: DataLoader,
+    valloader: DataLoader,
+    epochs: int,
+    learning_rate: float,
+    device: torch.device,
+    n_batches: int = None,
+    verbose: bool = False,
 ):
-    """
-    Train a given model with CrossEntropy and SGD (or some version of it like batch-SGD).
+    """Train a given model with CrossEntropy and SGD (or some version of it
+    like batch-SGD).
 
-    n_batches is an alternative way of specifying the training length (instead of epochs)
+    n_batches is an alternative way of specifying the training length
+    (instead of epochs)
     """
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
@@ -72,7 +74,9 @@ def train(
             epoch_acc = correct / total
 
             if verbose:
-                print(f"Epoch {epoch + 1}: train loss {epoch_loss}, accuracy {epoch_acc}")
+                print(
+                    f"Epoch {epoch + 1}: train loss {epoch_loss}, accuracy {epoch_acc}"
+                )
         train_loss, train_acc = _validate(net, trainloader)
         val_loss, val_acc = _validate(net, valloader)
         return train_loss, train_acc, val_loss, val_acc
@@ -96,7 +100,9 @@ def train(
         train_loss /= n_batches * images.size(0)
         train_acc = correct / total
         if verbose:
-            print(f"Batch len based training: train loss {train_loss}, accuracy {train_acc}")
+            print(
+                f"Batch len based training: train loss {train_loss}, accuracy {train_acc}"
+            )
         val_loss, val_acc = _validate(net, valloader)
         return train_loss, train_acc, val_loss, val_acc
 
@@ -118,12 +124,14 @@ def _validate(net, valloader) -> Tuple[float, float]:
             total += target.size(0)
             correct += predicted.eq(target).sum().item()
 
-        accuracy = 100. * correct / total
+        accuracy = 100.0 * correct / total
         val_loss /= len(valloader)
     return accuracy, val_loss
 
 
-def test(net: nn.Module, testloader: DataLoader, device: torch.device) -> Tuple[float, float]:
+def test(
+    net: nn.Module, testloader: DataLoader, device: torch.device
+) -> Tuple[float, float]:
     """Test network on the given testloader."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0

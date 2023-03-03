@@ -1,12 +1,12 @@
 from typing import List, Tuple
 
+import numpy as np
 import pandas as pd
+import torch
 import torchvision.transforms as transforms
 from PIL import Image
-from torch.utils.data import Dataset, DataLoader, Subset, random_split
-import numpy as np
-import torch
 from sklearn import preprocessing
+from torch.utils.data import DataLoader, Dataset, Subset, random_split
 
 
 class NISTLikeDataset(Dataset):
@@ -31,8 +31,7 @@ class NISTLikeDataset(Dataset):
 
 
 def create_dataset(df_info: pd.DataFrame, labels: np.ndarray):
-    """
-    Instantiate NISTLikeDataset.
+    """Instantiate NISTLikeDataset.
 
     Parameters
     ----------
@@ -65,11 +64,16 @@ def create_division_list(df_info: pd.DataFrame) -> List[List[int]]:
     """
     writers_ids = df_info["writer_id"].values
     unique_writers = np.unique(writers_ids)
-    indices = {writer_id: np.where(writers_ids == writer_id)[0].tolist() for writer_id in unique_writers}
+    indices = {
+        writer_id: np.where(writers_ids == writer_id)[0].tolist()
+        for writer_id in unique_writers
+    }
     return list(indices.values())
 
 
-def partition_dataset(dataset: Dataset, division_list: List[List[int]]) -> List[Dataset]:
+def partition_dataset(
+    dataset: Dataset, division_list: List[List[int]]
+) -> List[Dataset]:
     """
     Partition dataset for niid settings - by writer id (each partition has only single writer data).
     Parameters
@@ -91,13 +95,12 @@ def partition_dataset(dataset: Dataset, division_list: List[List[int]]) -> List[
 
 
 def partition_datasets(
-        partitioned_dataset: List[Dataset],
-        train_split: float = 0.8,
-        validation_split: float = 0.1) -> Tuple[
-    List[Dataset], List[Dataset], List[Dataset]
-]:
-    """
-    Partition list of datasets to train, validation and test splits (each dataset from the list individually).
+    partitioned_dataset: List[Dataset],
+    train_split: float = 0.8,
+    validation_split: float = 0.1,
+) -> Tuple[List[Dataset], List[Dataset], List[Dataset]]:
+    """Partition list of datasets to train, validation and test splits (each
+    dataset from the list individually).
 
     Parameters
     ----------
@@ -112,7 +115,6 @@ def partition_datasets(
     -------
         (train, validation, test): Tuple[List[Dataset], List[Dataset], List[Dataset]]
         split datasets
-
     """
     train_subsets = []
     validation_subsets = []
@@ -126,7 +128,8 @@ def partition_datasets(
         train_dataset, validation_dataset, test_dataset = random_split(
             subset,
             lengths=[train_len, val_len, test_len],
-            generator=torch.Generator().manual_seed(42))
+            generator=torch.Generator().manual_seed(42),
+        )
         train_subsets.append(train_dataset)
         validation_subsets.append(validation_dataset)
         test_subsets.append(test_dataset)
@@ -134,7 +137,9 @@ def partition_datasets(
     return train_subsets, validation_subsets, test_subsets
 
 
-def transform_datasets_into_dataloaders(datasets: List[Dataset], **dataloader_kwargs) -> List[DataLoader]:
+def transform_datasets_into_dataloaders(
+    datasets: List[Dataset], **dataloader_kwargs
+) -> List[DataLoader]:
     """
     Transform datasets into dataloaders.
     Parameters
@@ -165,6 +170,7 @@ if __name__ == "__main__":
     # Partitioned by writer (therefore by client in the FL settings)
     partitioned_dataset = partition_dataset(full_dataset, division_list)
     partitioned_train, partitioned_validation, partitioned_test = partition_datasets(
-        partitioned_dataset)
+        partitioned_dataset
+    )
     trainloaders = transform_datasets_into_dataloaders(partitioned_train)
     testloaders = transform_datasets_into_dataloaders(partitioned_test)

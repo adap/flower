@@ -2,21 +2,24 @@ import pathlib
 from typing import Union
 
 import pandas as pd
+from dataset_utils import calculate_series_hashes, hex_decimal_to_char
 from PIL import Image
 from tqdm import tqdm
-
-from dataset_utils import hex_decimal_to_char, calculate_series_hashes
 
 
 class NISTPreprocessor:
     """Preprocess files from two directories divided by class and by writer."""
 
     def __init__(self, data_dir: Union[str, pathlib.Path]) -> None:
-        self._data_dir = data_dir if isinstance(data_dir, str) else pathlib.Path(data_dir)
+        self._data_dir = (
+            data_dir if isinstance(data_dir, str) else pathlib.Path(data_dir)
+        )
         self._raw_data_dir = self._data_dir / "raw"
         self._processed_dir = self._data_dir / "processed"
         self._processed_images_dir = self._processed_dir / "images"
-        self._processed_images_information_path = self._processed_dir / "resized_images_to_labels.csv"
+        self._processed_images_information_path = (
+            self._processed_dir / "resized_images_to_labels.csv"
+        )
         self._by_class_nist = self._raw_data_dir / "by_class"
         self._by_writer_nist = self._raw_data_dir / "by_write"
         self._writer_df: pd.DataFrame
@@ -24,8 +27,9 @@ class NISTPreprocessor:
         self._df: pd.DataFrame
 
     def preprocess(self, overwrite: bool = False) -> None:
-        """Extracts necessary information to create data that has both writer and class information and preprocesses
-        the dataset as by the authors of the FEMNIST paper (which is not the same as by the EMNIST paper).
+        """Extracts necessary information to create data that has both writer
+        and class information and preprocesses the dataset as by the authors of
+        the FEMNIST paper (which is not the same as by the EMNIST paper).
 
         1. Extract writer_id from the directory structure.
         2. Extracts class_id from the directory structure.
@@ -35,22 +39,34 @@ class NISTPreprocessor:
         6. Create csv file with the path.
         """
         if self._processed_images_information_path.exists() and not overwrite:
-            print(f"The preprocessed information already exists in {self._processed_images_information_path}. "
-                  f"Specify 'overwrite' as True to recreate this information.")
+            print(
+                f"The preprocessed information already exists in {self._processed_images_information_path}. "
+                f"Specify 'overwrite' as True to recreate this information."
+            )
             return
         self._writer_df = self._extract_writer_information()
         self._class_df = self._extract_class_information()
         self._calculate_hashes()
         self._df = self._merge_class_and_writer_information()
         self.create_dir_structure()
-        original_images_information_path = self._processed_dir / "original_images_to_labels.csv"
-        print(f"Saving information about raw images to {original_images_information_path} started")
+        original_images_information_path = (
+            self._processed_dir / "original_images_to_labels.csv"
+        )
+        print(
+            f"Saving information about raw images to {original_images_information_path} started"
+        )
         self._df.to_csv(original_images_information_path)
-        print(f"Saving information about raw images to {original_images_information_path} done")
+        print(
+            f"Saving information about raw images to {original_images_information_path} done"
+        )
         self._new_df = self._preprocess_images()
-        print(f"Saving information about raw images to {self._processed_images_information_path} started")
+        print(
+            f"Saving information about raw images to {self._processed_images_information_path} started"
+        )
         self._new_df.to_csv(self._processed_images_information_path)
-        print(f"Saving information about raw images to {self._processed_images_information_path} done")
+        print(
+            f"Saving information about raw images to {self._processed_images_information_path} done"
+        )
 
     def create_dir_structure(self):
         print("Directory structure creation started")
@@ -65,7 +81,9 @@ class NISTPreprocessor:
         images_paths = self._by_writer_nist.glob("*/*/*/*")
         images_paths = list(images_paths)
         writer_df = pd.DataFrame(images_paths, columns=["path_by_writer"])
-        writer_df["writer_id"] = writer_df["path_by_writer"].map(lambda x: x.parent.parent.name)
+        writer_df["writer_id"] = writer_df["path_by_writer"].map(
+            lambda x: x.parent.parent.name
+        )
         print("Writer information preprocessing done")
         return writer_df
 
@@ -91,8 +109,12 @@ class NISTPreprocessor:
     def _calculate_hashes(self):
         print("Hashes calculation started")
         # Assumes that the class_df and writer_df are created
-        self._writer_df["hash"] = calculate_series_hashes(self._writer_df["path_by_writer"])
-        self._class_df["hash"] = calculate_series_hashes(self._class_df["path_by_class"])
+        self._writer_df["hash"] = calculate_series_hashes(
+            self._writer_df["path_by_writer"]
+        )
+        self._class_df["hash"] = calculate_series_hashes(
+            self._class_df["path_by_class"]
+        )
         self._df = pd.merge(self._writer_df, self._class_df, on="hash")
         print("Hashes calculation done")
 
@@ -105,9 +127,16 @@ class NISTPreprocessor:
         for index, row in tqdm(self._df.iterrows(), total=self._df.shape[0]):
             file_path = row["path_by_writer"]
             img = Image.open(file_path)
-            gray = img.convert('L')
+            gray = img.convert("L")
             gray.thumbnail(resized_size, Image.LANCZOS)
-            image_name = "character_" + row["character"] + "_" + "author_" + row["writer_id"] + ".png"
+            image_name = (
+                "character_"
+                + row["character"]
+                + "_"
+                + "author_"
+                + row["writer_id"]
+                + ".png"
+            )
             new_path = self._processed_images_dir / image_name
             gray.save(new_path)
             new_df.iloc[index, -1] = new_path
