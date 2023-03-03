@@ -12,11 +12,10 @@ from sklearn import preprocessing
 class NISTLikeDataset(Dataset):
     """Dataset representing NIST or preprocessed variant of it."""
 
-    def __init__(self, image_paths, labels, transform=transforms.ToTensor(), target_transform=transforms.ToTensor()):
+    def __init__(self, image_paths, labels, transform=transforms.ToTensor()):
         self.image_paths = image_paths
         self.labels = labels
         self.transform = transform
-        self.target_transform = target_transform
 
     def __len__(self):
         return len(self.image_paths)
