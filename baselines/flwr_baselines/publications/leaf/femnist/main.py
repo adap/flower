@@ -125,7 +125,7 @@ def main(cfg: DictConfig):
     fig.savefig(results_dir_path / "test_accuracy.jpg", dpi=200)
 
     pd_history_loss.to_csv(results_dir_path / "train_loss.csv")
-    ax = pd_history_acc["test_loss"].plot()
+    ax = pd_history_loss["test_loss"].plot()
     fig = ax.get_figure()
     fig.savefig(results_dir_path / "test_accuracy.jpg", dpi=200)
 
