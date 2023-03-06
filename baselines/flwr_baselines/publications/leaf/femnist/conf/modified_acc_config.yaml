@@ -1,3 +1,4 @@
+# todo: describe the config
 # training
 num_rounds: 1_000
 num_clients_per_round: 5

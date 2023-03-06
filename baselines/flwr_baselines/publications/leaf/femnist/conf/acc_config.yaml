@@ -1,5 +1,6 @@
+# Configuration replicating accuracy experiments from table 2
 # training
-num_rounds: 1_000
+num_rounds: 1
 num_clients_per_round: 5
 learning_rate: 0.001
 epochs_per_round: null
