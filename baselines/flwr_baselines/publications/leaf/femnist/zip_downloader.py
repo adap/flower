@@ -10,7 +10,7 @@ class ZipDownloader:
     """Zip downloader that enable also unzip and remove the downloaded file."""
 
     def __init__(
-        self, name: str, url: str, save_path: Optional[pathlib].Path = None
+        self, name: str, url: str, save_path: Optional[pathlib.Path] = None
     ) -> None:
         self._name = name
         self._url = url
