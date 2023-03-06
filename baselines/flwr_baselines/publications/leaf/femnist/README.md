@@ -57,6 +57,13 @@ Strategy details:
   * has a linearly decaying meta-learning rate that goes from 2 to 0,
   * is evaluated by fine-tuning each test device for 50 mini-batches of size 5
 
+#### Running experiments
+Go to the femnist directory and execute the following command.
+
+```bash
+python main.py --config-name acc_config; python main.py --config-name modified_acc_config; python main.py --config-name sys_ana_fedavg_e1_c3; python main.py --config-name sys_ana_fedavg_e100_c3; python main.py --config-name sys_ana_fedavg_e1_c35
+```
+
 ## LEAF Additional Resources
 
 * code https://github.com/TalwalkarLab/leaf
