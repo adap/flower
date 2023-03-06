@@ -16,7 +16,7 @@ class FedAvgSameClients(FedAvg):
     """
 
     def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+            self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         config = {}
@@ -39,10 +39,13 @@ class FedAvgSameClients(FedAvg):
         return self._current_round_fit_clients_fits_list
 
     def configure_evaluate(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+            self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         # Keep the fraction_settings for consistency reasons
         if self.fraction_evaluate == 0.0:
             return []
-
-        return self._current_round_fit_clients_fits_list
+        evaluate_config = []
+        for tuple_client_proxy_fit_ins in self._current_round_fit_clients_fits_list:
+            eval_ins = EvaluateIns(tuple_client_proxy_fit_ins[1].parameters, tuple_client_proxy_fit_ins[1].config)
+            evaluate_config.append((tuple_client_proxy_fit_ins[0], eval_ins))
+        return evaluate_config
