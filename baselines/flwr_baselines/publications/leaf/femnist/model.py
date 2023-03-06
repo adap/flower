@@ -114,7 +114,7 @@ def _validate(net, valloader) -> Tuple[float, float]:
         raise ValueError("Valloader can't be 0, exiting...")
     # Validation loop
     with torch.no_grad():
-        val_loss = 0
+        val_loss = 0.
         correct = 0
         total = 0
         for data, target in valloader:
