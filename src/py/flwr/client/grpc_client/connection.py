@@ -98,8 +98,11 @@ def grpc_connection(
 
     server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
 
-    receive: Callable[[], ServerMessage] = lambda: next(server_message_iterator)
-    send: Callable[[ClientMessage], None] = lambda msg: queue.put(msg, block=False)
+    def receive() -> ServerMessage:
+        return next(server_message_iterator)
+
+    def send(msg: ClientMessage):
+        return queue.put(msg, block=False)
 
     try:
         yield (receive, send)

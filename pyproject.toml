@@ -97,6 +97,7 @@ furo = "==2022.12.7"
 sphinx-reredirects = "==0.1.1"
 nbsphinx = "==0.8.12"
 nbstripout = "==0.6.1"
+ruff = "^0.0.254"
 
 [tool.isort]
 line_length = 88
@@ -149,3 +150,35 @@ disallow_untyped_calls = false
 module = "torch.*"
 follow_imports = "skip"
 follow_imports_for_stubs = true
+
+[tool.ruff]
+select = ["E", "F", "W", "B"]
+fixable = ["E", "F", "W", "B"]
+ignore = ["B027"]
+# ruff is less lenient than pylint and does not make any exceptions
+# (for docstrings, strings and comments in particular).
+line-length = 115
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "proto",
+]
