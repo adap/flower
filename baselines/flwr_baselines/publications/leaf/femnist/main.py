@@ -23,7 +23,7 @@ from utils import steup_seed, weighted_average
 from zip_downloader import ZipDownloader
 
 
-@hydra.main(config_path="conf", config_name="acc_config", version_base=None)
+@hydra.main(config_path="conf", version_base=None)
 def main(cfg: DictConfig):
     # Ensure reproducibility
     steup_seed(RANDOM_SEED)
