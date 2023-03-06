@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import time
 from logging import DEBUG
-from typing import TYPE_CHECKING, Callable, List, Optional, cast
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 from flwr import common
 from flwr.client import ClientLike
@@ -53,8 +53,7 @@ class DriverClientProxy(ClientProxy):
                 server_message=common.ServerMessage(get_properties_ins=ins)
             )
         )
-        client_message = self._send_receive_msg(server_message_proto, timeout)
-        return cast(common.GetPropertiesRes, client_message.get_properties_res)
+        return self._send_receive_msg(server_message_proto, timeout).get_properties_res
 
     def get_parameters(
         self, ins: common.GetParametersIns, timeout: Optional[float]
@@ -65,8 +64,7 @@ class DriverClientProxy(ClientProxy):
                 server_message=common.ServerMessage(get_parameters_ins=ins)
             )
         )
-        client_message = self._send_receive_msg(server_message_proto, timeout)
-        return cast(common.GetParametersRes, client_message.get_parameters_res)
+        return self._send_receive_msg(server_message_proto, timeout).get_parameters_res
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
@@ -75,8 +73,7 @@ class DriverClientProxy(ClientProxy):
                 server_message=common.ServerMessage(fit_ins=ins)
             )
         )
-        client_message = self._send_receive_msg(server_message_proto, timeout)
-        return cast(common.FitRes, client_message.fit_res)
+        return self._send_receive_msg(server_message_proto, timeout).fit_res
 
     def evaluate(
         self, ins: common.EvaluateIns, timeout: Optional[float]
@@ -87,8 +84,7 @@ class DriverClientProxy(ClientProxy):
                 server_message=common.ServerMessage(evaluate_ins=ins)
             )
         )
-        client_message = self._send_receive_msg(server_message_proto, timeout)
-        return cast(common.EvaluateRes, client_message.evaluate_res)
+        return self._send_receive_msg(server_message_proto, timeout).evaluate_res
 
     def reconnect(
         self, ins: common.ReconnectIns, timeout: Optional[float]
@@ -121,6 +117,10 @@ class DriverClientProxy(ClientProxy):
         task_ids = [task_id for task_id in push_task_ins_res.task_ids if task_id != ""]
         all_task_res = []
 
+        if len(task_ids) == 0:
+            log(DEBUG, "No task_ids")
+            return None
+
         if timeout:
             start_time = time.time()
 
@@ -141,11 +141,12 @@ class DriverClientProxy(ClientProxy):
 
             all_task_res += task_res_list
 
-            if timeout:
-                has_to_break = time.time() > start_time + timeout
-            else:
-                has_to_break = False
+            if timeout and time.time() > start_time + timeout:
+                log(DEBUG, "Timeout reached")
+                return None
 
-            if len(all_task_res) == len(task_ids) or has_to_break:
+            if len(all_task_res) == len(task_ids):
                 break
-        return all_task_res[0].task.legacy_client_message
+        return serde.client_message_from_proto(
+            all_task_res[0].task.legacy_client_message
+        )
