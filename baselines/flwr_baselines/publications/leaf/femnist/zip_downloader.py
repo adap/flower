@@ -1,7 +1,7 @@
 import os
 import pathlib
 import shutil
-from typing import Union
+from typing import Optional
 
 import wget
 
@@ -10,7 +10,7 @@ class ZipDownloader:
     """Zip downloader that enable also unzip and remove the downloaded file."""
 
     def __init__(
-        self, name: str, url: str, save_path: Union[str, pathlib.Path] = None
+        self, name: str, url: str, save_path: Optional[pathlib].Path = None
     ) -> None:
         self._name = name
         self._url = url

@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Union
 
 import numpy as np
 import torch
@@ -8,7 +8,7 @@ from flwr.common import Metrics
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     n_batches_list = [n_batches for n_batches, _ in metrics]
     n_batches_sum = sum(n_batches_list)
-    metrics_lists = {}
+    metrics_lists: Dict[str, List[Union[float, int]]] = {}
     for number_of_batches, all_metrics_dict in metrics:
         #  Calculate each metric one by one
         for single_metric, _ in all_metrics_dict.items():
@@ -29,7 +29,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     return weighted_metrics
 
 
-def steup_seed(seed):
+def setup_seed(seed: int):
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.backends.cudnn.deterministic = True

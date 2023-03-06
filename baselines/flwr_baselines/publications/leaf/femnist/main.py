@@ -19,14 +19,14 @@ from nist_preprocessor import NISTPreprocessor
 from nist_sampler import NistSampler
 from omegaconf import DictConfig
 from sklearn import preprocessing
-from utils import steup_seed, weighted_average
+from utils import setup_seed, weighted_average
 from zip_downloader import ZipDownloader
 
 
 @hydra.main(config_path="conf", version_base=None)
 def main(cfg: DictConfig):
     # Ensure reproducibility
-    steup_seed(RANDOM_SEED)
+    setup_seed(RANDOM_SEED)
 
     # Download and unzip the data
     print("NIST data downloading started")
@@ -117,7 +117,7 @@ def main(cfg: DictConfig):
     )
     client_resources = None
     if DEVICE.type == "cuda":
-        client_resources = {"num_gpus": 1}
+        client_resources = {"num_gpus": 1.0}
 
     # Start simulation
     history = fl.simulation.start_simulation(

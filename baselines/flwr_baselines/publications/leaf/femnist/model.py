@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 import torch
 import torch.nn as nn
@@ -111,7 +111,7 @@ def _validate(net, valloader) -> Tuple[float, float]:
     """Calculate metrics on the given valloader."""
     criterion = torch.nn.CrossEntropyLoss()
     if len(valloader) == 0:
-        return None
+        raise ValueError("Valloader can't be 0, exiting...")
     # Validation loop
     with torch.no_grad():
         val_loss = 0
@@ -125,7 +125,7 @@ def _validate(net, valloader) -> Tuple[float, float]:
             correct += predicted.eq(target).sum().item()
 
         accuracy = 100.0 * correct / total
-        val_loss /= len(valloader)
+        val_loss /= float(len(valloader))
     return accuracy, val_loss
 
 

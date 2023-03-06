@@ -12,7 +12,7 @@ class NISTPreprocessor:
 
     def __init__(self, data_dir: Union[str, pathlib.Path]) -> None:
         self._data_dir = (
-            data_dir if isinstance(data_dir, str) else pathlib.Path(data_dir)
+            data_dir if isinstance(data_dir, pathlib.Path) else pathlib.Path(data_dir)
         )
         self._raw_data_dir = self._data_dir / "raw"
         self._processed_dir = self._data_dir / "processed"
