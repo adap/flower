@@ -93,7 +93,7 @@ class DriverClientProxy(ClientProxy):
             )
         )
         return cast(
-            common.EvaluateIns,
+            common.EvaluateRes,
             self._send_receive_msg(server_message_proto, timeout).evaluate_res,
         )
 
