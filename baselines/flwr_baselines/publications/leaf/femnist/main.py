@@ -139,6 +139,9 @@ def main(cfg: DictConfig):
     print(pd_history_acc)
 
     results_dir_path = pathlib.Path(cfg.results_dir_path)
+    if not results_dir_path.exists():
+        results_dir_path.mkdir(parents=True)
+
     pd_history_acc.to_csv(results_dir_path / "test_accuracy.csv")
     ax = pd_history_acc["test_accuracy"].plot()
     fig = ax.get_figure()

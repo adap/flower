@@ -14,4 +14,4 @@ distribution_type: "niid"
 batch_size: 10
 
 # docs
-results_dir_path: "./results"
+results_dir_path: "./results/acc"
