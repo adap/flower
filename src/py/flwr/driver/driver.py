@@ -49,7 +49,7 @@ def start_driver(  # pylint: disable=too-many-arguments
     strategy: Optional[Strategy] = None,
     certificates: Optional[bytes] = None,
 ) -> History:
-    """Start a Flower server using the gRPC transport layer.
+    """Start a Flower driver server.
 
     Parameters
     ----------
