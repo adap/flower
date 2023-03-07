@@ -16,14 +16,13 @@ from dataset.dataset import (
 )
 from dataset.nist_preprocessor import NISTPreprocessor
 from dataset.nist_sampler import NistSampler
+from dataset.zip_downloader import ZipDownloader
 from fedavg_same_clients import FedAvgSameClients
 from flwr.common.logger import log
 from flwr.server.strategy import FedAvg
 from omegaconf import DictConfig
 from sklearn import preprocessing
 from utils import setup_seed, weighted_average
-
-from dataset.zip_downloader import ZipDownloader
 
 
 @hydra.main(config_path="../conf", version_base=None)

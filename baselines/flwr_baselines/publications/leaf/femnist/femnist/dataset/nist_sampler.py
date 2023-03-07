@@ -4,9 +4,8 @@ from logging import INFO
 from typing import Union
 
 import pandas as pd
-from flwr.common.logger import log
-
 from femnist.constants import RANDOM_SEED
+from flwr.common.logger import log
 
 
 def _create_samples_division_list(n_samples, n_groups, keep_remainder=True):
