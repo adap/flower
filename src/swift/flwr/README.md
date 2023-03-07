@@ -1,6 +1,6 @@
 # flwr Swift SDK
 
-This package implements the Swift SDK for Flower - a friendly federated learning framework https://flower.dev/
+This package implements a Swift SDK for Flower.
 
 ## Installation
 

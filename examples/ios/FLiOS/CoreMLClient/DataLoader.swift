@@ -9,10 +9,15 @@ import Foundation
 import CoreML
 import Compression
 import UIKit
+import os
 
 let appDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
 
 class DataLoader {
+    
+    private static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
+                             category: String(describing: DataLoader.self))
+    
     static func trainBatchProvider(scenario: Constants.ScenarioTypes, progressHandler: @escaping (Int) -> Void) -> MLBatchProvider {
         return prepareMLBatchProvider(filePath: extractTrainFile(scenario: scenario), scenario: scenario, progressHandler: progressHandler)
     }
@@ -92,7 +97,7 @@ class DataLoader {
         errno = 0
         
         if freopen(filePath, "r", stdin) == nil {
-            print("error opening file")
+            log.error("error opening file")
         }
         var lengthEntry = 1
         scenario.shapeData.enumerated().forEach { index, value in
@@ -129,7 +134,7 @@ class DataLoader {
         
         let testFilePath = extractTestFile(scenario: scenario)
         if freopen(testFilePath, "r", stdin) == nil {
-            print("error opening file")
+            log.error("error opening file")
         }
         var lengthEntry = 1
         scenario.shapeData.enumerated().forEach { index, value in

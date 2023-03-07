@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-
+import os
 
 public class BenchmarkSuite: ObservableObject {
     
@@ -25,6 +25,9 @@ public class BenchmarkSuite: ObservableObject {
     private var interval: Double
     
     private var deviceID: String
+    
+    private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
+                                    category: String(describing: BenchmarkSuite.self))
     
     private init(interval: Double = 60.0) {
         
@@ -88,7 +91,7 @@ public class BenchmarkSuite: ObservableObject {
             let benchmarkString = String(data: completeBenchmark, encoding: .utf8)!
             try benchmarkString.write(to: url, atomically: true, encoding: .utf8)
         } catch {
-            print("Error while encoding complete Benchmark history...")
+            log.error("Error while encoding complete Benchmark history.")
         }
     }
 }
