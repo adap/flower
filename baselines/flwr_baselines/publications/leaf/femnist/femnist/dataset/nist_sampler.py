@@ -1,9 +1,12 @@
 import math
 import pathlib
+from logging import INFO
 from typing import Union
 
 import pandas as pd
-from ..constants import RANDOM_SEED
+from flwr.common.logger import log
+
+from femnist.constants import RANDOM_SEED
 
 
 def _create_samples_division_list(n_samples, n_groups, keep_remainder=True):
@@ -41,9 +44,10 @@ class NistSampler:
             return idd_data_info_df
         elif type == "niid":
             if n_clients is not None:
-                print(
+                log(
+                    INFO,
                     "Warning: the n_clinets is ignored in case of niid training. "
-                    "The number of clients is equal to the number of unique writers"
+                    "The number of clients is equal to the number of unique writers",
                 )
             # It uses the following sampling logic:
             # Take N users with their full data till it doesn't exceed the total number of data that can be used
@@ -99,5 +103,5 @@ if __name__ == "__main__":
 
     plt.figure()
     sampled_data_info.reset_index(drop=False)["writer_id"].value_counts().plot.hist()
-    print(sampled_data_info.shape)
+    log(INFO, sampled_data_info.shape)
     # plt.show()

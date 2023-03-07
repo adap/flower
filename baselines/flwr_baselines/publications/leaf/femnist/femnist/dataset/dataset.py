@@ -161,7 +161,9 @@ def transform_datasets_into_dataloaders(
 
 
 if __name__ == "__main__":
-    sampled_data_info = pd.read_csv("../../data/processed/niid_sampled_images_to_labels.csv")
+    sampled_data_info = pd.read_csv(
+        "../../data/processed/niid_sampled_images_to_labels.csv"
+    )
     label_encoder = preprocessing.LabelEncoder()
     labels = label_encoder.fit_transform(sampled_data_info["character"])
     # Create a list of DataLoaders

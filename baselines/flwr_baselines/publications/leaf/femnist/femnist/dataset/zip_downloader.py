@@ -1,9 +1,11 @@
 import os
 import pathlib
 import shutil
+from logging import INFO
 from typing import Optional
 
 import wget
+from flwr.common.logger import log
 
 
 class ZipDownloader:
@@ -29,14 +31,16 @@ class ZipDownloader:
             self._save_path.with_suffix("").exists()
             and len(list(self._save_path.with_suffix("").glob("*"))) != 0
         ):
-            print(
-                f"Files for {self._name} are already downloaded and extracted from the zip file"
+            log(
+                INFO,
+                f"Files for {self._name} are already downloaded and extracted from the zip file",
             )
             return None
         self._create_dir_structure()
         if self._save_path.exists():
-            print(
-                f"Zip file for {self._name} are already downloaded. Skip downloading."
+            log(
+                INFO,
+                f"Zip file for {self._name} are already downloaded. Skip downloading.",
             )
         else:
             wget.download(self._url, out=str(self._save_path))
@@ -47,12 +51,12 @@ class ZipDownloader:
         self._save_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _unzip(self):
-        print(f"Unzipping of {self._save_path} to {self._save_path.parent} started")
+        log(INFO, f"Unzipping of {self._save_path} to {self._save_path.parent} started")
         shutil.unpack_archive(self._save_path, self._save_path.parent)
-        print(f"Unzipping of {self._save_path} done")
-        print(f"Removing zip file started: {self._save_path}")
+        log(INFO, f"Unzipping of {self._save_path} done")
+        log(INFO, f"Removing zip file started: {self._save_path}")
         os.remove(self._save_path)
-        print(f"Removing zip file done: {self._save_path}")
+        log(INFO, f"Removing zip file done: {self._save_path}")
 
 
 if __name__ == "__main__":

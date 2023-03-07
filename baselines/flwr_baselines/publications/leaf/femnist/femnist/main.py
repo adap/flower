@@ -1,5 +1,6 @@
 import pathlib
 from functools import partial
+from logging import INFO
 
 import flwr as fl
 import hydra
@@ -13,52 +14,54 @@ from dataset.dataset import (
     partition_datasets,
     transform_datasets_into_dataloaders,
 )
-from fedavg_same_clients import FedAvgSameClients
-from flwr.server.strategy import FedAvg
 from dataset.nist_preprocessor import NISTPreprocessor
 from dataset.nist_sampler import NistSampler
+from fedavg_same_clients import FedAvgSameClients
+from flwr.common.logger import log
+from flwr.server.strategy import FedAvg
 from omegaconf import DictConfig
 from sklearn import preprocessing
 from utils import setup_seed, weighted_average
-from flwr_baselines.publications.leaf.femnist.femnist.dataset.zip_downloader import ZipDownloader
+
+from dataset.zip_downloader import ZipDownloader
 
 
-@hydra.main(config_path="../../conf", version_base=None)
+@hydra.main(config_path="../conf", version_base=None)
 def main(cfg: DictConfig):
     # Ensure reproducibility
     setup_seed(RANDOM_SEED)
 
     # Download and unzip the data
-    print("NIST data downloading started")
+    log(INFO, "NIST data downloading started")
     nist_by_class_url = "https://s3.amazonaws.com/nist-srd/SD19/by_class.zip"
     nist_by_writer_url = "https://s3.amazonaws.com/nist-srd/SD19/by_write.zip"
     nist_by_class_downloader = ZipDownloader("data/raw", nist_by_class_url)
     nist_by_writer_downloader = ZipDownloader("data/raw", nist_by_writer_url)
     nist_by_class_downloader.download()
     nist_by_writer_downloader.download()
-    print("NIST data downloading done")
+    log(INFO, "NIST data downloading done")
 
     # Preprocess the data
-    print("Preprocessing of the NIST data started")
-    nist_data_path = pathlib.Path("../data")
+    log(INFO, "Preprocessing of the NIST data started")
+    nist_data_path = pathlib.Path("data")
     nist_preprocessor = NISTPreprocessor(nist_data_path)
     nist_preprocessor.preprocess()
-    print("Preprocessing of the NIST data done")
+    log(INFO, "Preprocessing of the NIST data done")
 
     # Create information for sampling
-    print("Creation of the sampling information started")
-    df_info_path = pathlib.Path("../data/processed/resized_images_to_labels.csv")
+    log(INFO, "Creation of the sampling information started")
+    df_info_path = pathlib.Path("data/processed/resized_images_to_labels.csv")
     df_info = pd.read_csv(df_info_path, index_col=0)
     sampler = NistSampler(df_info)
     sampled_data_info = sampler.sample(cfg.distribution_type, cfg.dataset_fraction)
     sampled_data_info_path = pathlib.Path(
-        f"dataset/processed/{cfg.distribution_type}_sampled_images_to_labels.csv"
+        f"data/processed/{cfg.distribution_type}_sampled_images_to_labels.csv"
     )
     sampled_data_info.to_csv(sampled_data_info_path)
-    print("Creation of the sampling information done")
+    log(INFO, "Creation of the sampling information done")
 
     # Create a list of DataLoaders
-    print("Creation of the partitioned by writer_id PyTorch Datasets started")
+    log(INFO, "Creation of the partitioned by writer_id PyTorch Datasets started")
     sampled_data_info = pd.read_csv(sampled_data_info_path)
     label_encoder = preprocessing.LabelEncoder()
     labels = label_encoder.fit_transform(sampled_data_info["character"])
@@ -77,7 +80,7 @@ def main(cfg: DictConfig):
     testloaders = transform_datasets_into_dataloaders(
         partitioned_test, batch_size=cfg.batch_size
     )
-    print("Creation of the partitioned by writer_id PyTorch Datasets done")
+    log(INFO, "Creation of the partitioned by writer_id PyTorch Datasets done")
 
     # The total number of clients created produced from sampling differs (on different random seeds)
     total_n_clients = len(trainloaders)
@@ -128,7 +131,7 @@ def main(cfg: DictConfig):
         client_resources=client_resources,
     )
 
-    print(history)
+    log(INFO, history)
     pd_history_acc = pd.DataFrame(
         history.metrics_distributed["accuracy"], columns=["round", "test_accuracy"]
     )
@@ -136,7 +139,7 @@ def main(cfg: DictConfig):
         history.losses_distributed, columns=["round", "test_loss"]
     )
     print(pd_history_acc)
-    print(pd_history_acc)
+    print(pd_history_loss)
 
     results_dir_path = pathlib.Path(cfg.results_dir_path)
     if not results_dir_path.exists():

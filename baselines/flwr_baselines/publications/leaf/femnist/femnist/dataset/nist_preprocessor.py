@@ -1,8 +1,10 @@
 import pathlib
+from logging import INFO
 from typing import Union
 
 import pandas as pd
-from dataset_utils import calculate_series_hashes, hex_decimal_to_char
+from femnist.dataset.dataset_utils import calculate_series_hashes, hex_decimal_to_char
+from flwr.common.logger import log
 from PIL import Image
 from tqdm import tqdm
 
@@ -39,9 +41,10 @@ class NISTPreprocessor:
         6. Create csv file with the path.
         """
         if self._processed_images_information_path.exists() and not overwrite:
-            print(
+            log(
+                INFO,
                 f"The preprocessed information already exists in {self._processed_images_information_path}. "
-                f"Specify 'overwrite' as True to recreate this information."
+                f"Specify 'overwrite' as True to recreate this information.",
             )
             return
         self._writer_df = self._extract_writer_information()
@@ -52,43 +55,47 @@ class NISTPreprocessor:
         original_images_information_path = (
             self._processed_dir / "original_images_to_labels.csv"
         )
-        print(
-            f"Saving information about raw images to {original_images_information_path} started"
+        log(
+            INFO,
+            f"Saving information about raw images to {original_images_information_path} started",
         )
         self._df.to_csv(original_images_information_path)
-        print(
-            f"Saving information about raw images to {original_images_information_path} done"
+        log(
+            INFO,
+            f"Saving information about raw images to {original_images_information_path} done",
         )
         self._new_df = self._preprocess_images()
-        print(
-            f"Saving information about raw images to {self._processed_images_information_path} started"
+        log(
+            INFO,
+            f"Saving information about raw images to {self._processed_images_information_path} started",
         )
         self._new_df.to_csv(self._processed_images_information_path)
-        print(
-            f"Saving information about raw images to {self._processed_images_information_path} done"
+        log(
+            INFO,
+            f"Saving information about raw images to {self._processed_images_information_path} done",
         )
 
     def create_dir_structure(self):
-        print("Directory structure creation started")
+        log(INFO, "Directory structure creation started")
         self._processed_dir.mkdir(exist_ok=True)
-        print(f"Created/already exist directory {self._processed_dir}")
+        log(INFO, f"Created/already exist directory {self._processed_dir}")
         self._processed_images_dir.mkdir(exist_ok=True)
-        print(f"Created/already exist directory {self._processed_images_dir}")
-        print("Directory structure creation done")
+        log(INFO, f"Created/already exist directory {self._processed_images_dir}")
+        log(INFO, "Directory structure creation done")
 
     def _extract_writer_information(self):
-        print("Writer information preprocessing started")
+        log(INFO, "Writer information preprocessing started")
         images_paths = self._by_writer_nist.glob("*/*/*/*")
         images_paths = list(images_paths)
         writer_df = pd.DataFrame(images_paths, columns=["path_by_writer"])
         writer_df["writer_id"] = writer_df["path_by_writer"].map(
             lambda x: x.parent.parent.name
         )
-        print("Writer information preprocessing done")
+        log(INFO, "Writer information preprocessing done")
         return writer_df
 
     def _extract_class_information(self):
-        print("Class information preprocessing started")
+        log(INFO, "Class information preprocessing started")
         hsf_and_train_dir = self._by_class_nist.glob("*/*")
         hsf_dirs = [path for path in hsf_and_train_dir if "train" not in str(path)]
         images_paths = []
@@ -97,17 +104,17 @@ class NISTPreprocessor:
         class_df = pd.DataFrame(images_paths, columns=["path_by_class"])
         chars = class_df["path_by_class"].map(lambda x: x.parent.parent.name)
         class_df["character"] = chars.map(hex_decimal_to_char)
-        print("Class information preprocessing done")
+        log(INFO, "Class information preprocessing done")
         return class_df
 
     def _merge_class_and_writer_information(self) -> pd.DataFrame:
-        print("Merging of the class and writer information by hash values started")
+        log(INFO, "Merging of the class and writer information by hash values started")
         merged = pd.merge(self._writer_df, self._class_df, on="hash")
-        print("Merging of the class and writer information by hash values done")
+        log(INFO, "Merging of the class and writer information by hash values done")
         return merged
 
     def _calculate_hashes(self):
-        print("Hashes calculation started")
+        log(INFO, "Hashes calculation started")
         # Assumes that the class_df and writer_df are created
         self._writer_df["hash"] = calculate_series_hashes(
             self._writer_df["path_by_writer"]
@@ -116,11 +123,11 @@ class NISTPreprocessor:
             self._class_df["path_by_class"]
         )
         self._df = pd.merge(self._writer_df, self._class_df, on="hash")
-        print("Hashes calculation done")
+        log(INFO, "Hashes calculation done")
 
     def _preprocess_images(self):
         """Preprocess images - resize to 28x28 and save them in the processed directory."""
-        print("Image preprocessing started")
+        log(INFO, "Image preprocessing started")
         resized_size = (28, 28)
         new_df = self._df.copy()
         new_df["path"] = pathlib.Path("")
@@ -140,7 +147,7 @@ class NISTPreprocessor:
             new_path = self._processed_images_dir / image_name
             gray.save(new_path)
             new_df.iloc[index, -1] = new_path
-        print("Image preprocessing done")
+        log(INFO, "Image preprocessing done")
         return new_df
 
 
