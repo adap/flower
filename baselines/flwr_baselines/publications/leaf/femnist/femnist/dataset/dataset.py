@@ -98,6 +98,7 @@ def partition_datasets(
     partitioned_dataset: List[Dataset],
     train_split: float = 0.8,
     validation_split: float = 0.1,
+    random_seed: int = None,
 ) -> Tuple[List[Dataset], List[Dataset], List[Dataset]]:
     """Partition list of datasets to train, validation and test splits (each
     dataset from the list individually).
@@ -110,6 +111,8 @@ def partition_datasets(
         part of the data used for training
     validation_split: float
         part of the data used for validation
+    random_seed: int
+        seed for data splitting
 
     Returns
     -------
@@ -128,7 +131,7 @@ def partition_datasets(
         train_dataset, validation_dataset, test_dataset = random_split(
             subset,
             lengths=[train_len, val_len, test_len],
-            generator=torch.Generator().manual_seed(42),
+            generator=torch.Generator().manual_seed(random_seed),
         )
         train_subsets.append(train_dataset)
         validation_subsets.append(validation_dataset)

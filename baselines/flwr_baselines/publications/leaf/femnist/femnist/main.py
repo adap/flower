@@ -68,7 +68,7 @@ def main(cfg: DictConfig):
     division_list = create_division_list(sampled_data_info)
     partitioned_dataset = partition_dataset(full_dataset, division_list)
     partitioned_train, partitioned_validation, partitioned_test = partition_datasets(
-        partitioned_dataset
+        partitioned_dataset, random_seed=RANDOM_SEED
     )
     trainloaders = transform_datasets_into_dataloaders(
         partitioned_train, batch_size=cfg.batch_size
