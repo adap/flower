@@ -41,7 +41,7 @@ def construct_tree(
         tree = xgb.XGBClassifier(
             objective="binary:logistic",
             learning_rate=0.1,
-            max_depth=10,
+            max_depth=8,
             n_estimators=n_estimators,
             subsample=0.8,
             colsample_bylevel=1,
@@ -57,7 +57,7 @@ def construct_tree(
         tree = xgb.XGBRegressor(
             objective="reg:squarederror",
             learning_rate=0.1,
-            max_depth=10,
+            max_depth=8,
             n_estimators=n_estimators,
             subsample=0.8,
             colsample_bylevel=1,
