@@ -1,7 +1,9 @@
+from logging import INFO
 from typing import Optional, Tuple
 
 import torch
 import torch.nn as nn
+from flwr.common.logger import log
 from torch.utils.data import DataLoader
 
 
@@ -40,12 +42,12 @@ def train(
     net: nn.Module,
     trainloader: DataLoader,
     valloader: DataLoader,
-    epochs: int,
+    epochs: Optional[int],
     learning_rate: float,
     device: torch.device,
-    n_batches: int = None,
+    n_batches: Optional[int] = None,
     verbose: bool = False,
-):
+) -> Tuple[float, float, float, float]:
     """Train a given model with CrossEntropy and SGD (or some version of it
     like batch-SGD).
 
@@ -74,8 +76,9 @@ def train(
             epoch_acc = correct / total
 
             if verbose:
-                print(
-                    f"Epoch {epoch + 1}: train loss {epoch_loss}, accuracy {epoch_acc}"
+                log(
+                    INFO,
+                    f"Epoch {epoch + 1}: train loss {epoch_loss}, accuracy {epoch_acc}",
                 )
         train_loss, train_acc = _validate(net, trainloader)
         val_loss, val_acc = _validate(net, valloader)
@@ -100,8 +103,9 @@ def train(
         train_loss /= n_batches * images.size(0)
         train_acc = correct / total
         if verbose:
-            print(
-                f"Batch len based training: train loss {train_loss}, accuracy {train_acc}"
+            log(
+                INFO,
+                f"Batch len based training: train loss {train_loss}, accuracy {train_acc}",
             )
         val_loss, val_acc = _validate(net, valloader)
         return train_loss, train_acc, val_loss, val_acc
@@ -114,7 +118,7 @@ def _validate(net, valloader) -> Tuple[float, float]:
         raise ValueError("Valloader can't be 0, exiting...")
     # Validation loop
     with torch.no_grad():
-        val_loss = 0.
+        val_loss = 0.0
         correct = 0
         total = 0
         for data, target in valloader:

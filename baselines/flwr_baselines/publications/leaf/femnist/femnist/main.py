@@ -6,7 +6,7 @@ import hydra
 import pandas as pd
 from client import create_client
 from constants import DEVICE, RANDOM_SEED
-from dataset import (
+from dataset.dataset import (
     create_dataset,
     create_division_list,
     partition_dataset,
@@ -15,15 +15,15 @@ from dataset import (
 )
 from fedavg_same_clients import FedAvgSameClients
 from flwr.server.strategy import FedAvg
-from nist_preprocessor import NISTPreprocessor
-from nist_sampler import NistSampler
+from dataset.nist_preprocessor import NISTPreprocessor
+from dataset.nist_sampler import NistSampler
 from omegaconf import DictConfig
 from sklearn import preprocessing
 from utils import setup_seed, weighted_average
-from zip_downloader import ZipDownloader
+from flwr_baselines.publications.leaf.femnist.femnist.dataset.zip_downloader import ZipDownloader
 
 
-@hydra.main(config_path="conf", version_base=None)
+@hydra.main(config_path="../../conf", version_base=None)
 def main(cfg: DictConfig):
     # Ensure reproducibility
     setup_seed(RANDOM_SEED)
@@ -40,19 +40,19 @@ def main(cfg: DictConfig):
 
     # Preprocess the data
     print("Preprocessing of the NIST data started")
-    nist_data_path = pathlib.Path("data")
+    nist_data_path = pathlib.Path("../data")
     nist_preprocessor = NISTPreprocessor(nist_data_path)
     nist_preprocessor.preprocess()
     print("Preprocessing of the NIST data done")
 
     # Create information for sampling
     print("Creation of the sampling information started")
-    df_info_path = pathlib.Path("data/processed/resized_images_to_labels.csv")
+    df_info_path = pathlib.Path("../data/processed/resized_images_to_labels.csv")
     df_info = pd.read_csv(df_info_path, index_col=0)
     sampler = NistSampler(df_info)
     sampled_data_info = sampler.sample(cfg.distribution_type, cfg.dataset_fraction)
     sampled_data_info_path = pathlib.Path(
-        f"data/processed/{cfg.distribution_type}_sampled_images_to_labels.csv"
+        f"dataset/processed/{cfg.distribution_type}_sampled_images_to_labels.csv"
     )
     sampled_data_info.to_csv(sampled_data_info_path)
     print("Creation of the sampling information done")

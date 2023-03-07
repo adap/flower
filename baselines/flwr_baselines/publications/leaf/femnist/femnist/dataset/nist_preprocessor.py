@@ -145,6 +145,6 @@ class NISTPreprocessor:
 
 
 if __name__ == "__main__":
-    nist_data_path = pathlib.Path("data")
+    nist_data_path = pathlib.Path("../../data")
     nist_preprocessor = NISTPreprocessor(nist_data_path)
     nist_preprocessor.preprocess()

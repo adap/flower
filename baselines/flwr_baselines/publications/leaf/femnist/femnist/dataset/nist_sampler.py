@@ -3,7 +3,7 @@ import pathlib
 from typing import Union
 
 import pandas as pd
-from constants import RANDOM_SEED
+from ..constants import RANDOM_SEED
 
 
 def _create_samples_division_list(n_samples, n_groups, keep_remainder=True):
@@ -89,7 +89,7 @@ class NistSampler:
 
 
 if __name__ == "__main__":
-    df_info_path = pathlib.Path("data/processed/resized_images_to_labels.csv")
+    df_info_path = pathlib.Path("../../data/processed/resized_images_to_labels.csv")
     df_info = pd.read_csv(df_info_path, index_col=0)
     sampler = NistSampler(df_info)
     sampled_data_info = sampler.sample("niid", 0.05, 100)
