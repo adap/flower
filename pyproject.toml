@@ -65,7 +65,7 @@ fastapi = "^0.92.0"
 starlette = "^0.25.0"
 uvicorn = {extras = ["standard"], version = "^0.20.0"}
 # Optional dependencies (xgboost)
-xgboost = "^1.7.4"
+xgboost = "^1.6.2"
 
 [tool.poetry.extras]
 simulation = ["ray"]
