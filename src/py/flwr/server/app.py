@@ -434,17 +434,16 @@ def _run_fleet_api_grpc_bidi(
     return fleet_grpc_server
 
 
+# pylint: disable=import-outside-toplevel
 def _run_fleet_api_rest(
     address: str,
     state_factory: StateFactory,
 ) -> None:
     """Run Driver API (REST-based)."""
     try:
-        import uvicorn  # pylint: disable=import-outside-toplevel
+        import uvicorn
 
-        from flwr.server.rest_server.rest_api import (
-            app as fast_api_app,  # pylint: disable=import-outside-toplevel
-        )
+        from flwr.server.rest_server.rest_api import app as fast_api_app
     except ImportError as missing_dep:
         raise ImportError(
             "To use the REST API you must install the "

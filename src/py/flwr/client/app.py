@@ -79,7 +79,7 @@ Example
 
 ClientLike = Union[Client, NumPyClient]
 
-
+# pylint: disable=import-outside-toplevel
 def start_client(
     *,
     server_address: str,
@@ -139,9 +139,7 @@ def start_client(
     # Use either gRPC bidirectional streaming or REST request/response
     if rest:
         try:
-            from .rest_client.connection import (
-                http_request_response,  # pylint: disable=import-outside-toplevel
-            )
+            from .rest_client.connection import http_request_response
         except ImportError as missing_dep:
             raise ImportError(
                 "To use the REST API you must install the "
