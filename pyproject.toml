@@ -64,10 +64,13 @@ requests = "^2.28.2"
 fastapi = "^0.92.0"
 starlette = "^0.25.0"
 uvicorn = {extras = ["standard"], version = "^0.20.0"}
+# Optional dependencies (xgboost)
+xgboost = { version = "^1.6.2", optional = true }
 
 [tool.poetry.extras]
 simulation = ["ray"]
 rest = ["fastapi", "requests", "uvicorn"]
+xgboost = ["xgboost"]
 
 [tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.5"
