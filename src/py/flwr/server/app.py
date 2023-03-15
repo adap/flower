@@ -258,15 +258,6 @@ def run_fleet_api() -> None:
 
     # Start Fleet API
     if args.fleet_api_type == "rest":
-        try:
-            import uvicorn
-
-            from flwr.server.rest_server.rest_api import app as fast_api_app
-        except ImportError:
-            raise ImportError(
-                "To use the REST API you must install the "
-                "extra dependencies by running `pip install flwr['rest']`."
-            )
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
             args=(args.rest_fleet_api_address, state_factory),
@@ -317,15 +308,6 @@ def run_server() -> None:
 
     # Start Fleet API
     if args.fleet_api_type == "rest":
-        try:
-            import uvicorn
-
-            from flwr.server.rest_server.rest_api import app as fast_api_app
-        except ImportError:
-            raise ImportError(
-                "To use the REST API you must install the "
-                "extra dependencies by running `pip install flwr['rest']`."
-            )
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
             args=(args.rest_fleet_api_address, state_factory),
@@ -457,6 +439,16 @@ def _run_fleet_api_rest(
     state_factory: StateFactory,
 ) -> None:
     """Run Driver API (REST-based)."""
+    try:
+        import uvicorn
+
+        from flwr.server.rest_server.rest_api import app as fast_api_app
+    except ImportError as missing_dep:
+        raise ImportError(
+            "To use the REST API you must install the "
+            "extra dependencies by running "
+            "`pip install flwr['rest']`."
+        ) from missing_dep
     log(INFO, "Starting Flower REST server")
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance

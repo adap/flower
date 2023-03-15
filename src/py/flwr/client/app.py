@@ -140,11 +140,11 @@ def start_client(
     if rest:
         try:
             from .rest_client.connection import http_request_response
-        except ImportError:
+        except ImportError as missing_dep:
             raise ImportError(
                 "To use the REST API you must install the "
                 "extra dependencies by running `pip install flwr['rest']`."
-            )
+            ) from missing_dep
         connection = http_request_response
     else:
         connection = grpc_connection
