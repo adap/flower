@@ -61,17 +61,8 @@ def train(
         for epoch in range(epochs):
             correct, total, epoch_loss = 0, 0, 0.0
             for images, labels in trainloader:
-                images = images.to(device)
-                labels = labels.to(device)
-                optimizer.zero_grad()
-                outputs = net(images)
-                loss = criterion(outputs, labels)
-                loss.backward()
-                optimizer.step()
-                # Metrics
-                epoch_loss += loss
-                total += labels.size(0)
-                correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+                correct, epoch_loss, total = inner_loop(correct, criterion, device, epoch_loss, images, labels, net,
+                                                        optimizer, total)
             epoch_loss /= len(trainloader.dataset)
             epoch_acc = correct / total
 
@@ -80,8 +71,8 @@ def train(
                     INFO,
                     f"Epoch {epoch + 1}: train loss {epoch_loss}, accuracy {epoch_acc}",
                 )
-        train_loss, train_acc = _validate(net, trainloader)
-        val_loss, val_acc = _validate(net, valloader)
+        train_loss, train_acc = test(net, trainloader, device)
+        val_loss, val_acc = test(net, valloader, device)
         return train_loss, train_acc, val_loss, val_acc
     else:
         # Training time given in number of batches not epochs
@@ -89,17 +80,8 @@ def train(
         for idx, (images, labels) in enumerate(trainloader):
             if idx == n_batches:
                 break
-            images = images.to(device)
-            labels = labels.to(device)
-            optimizer.zero_grad()
-            outputs = net(images)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-            # Metrics
-            train_loss += loss
-            total += labels.size(0)
-            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+            correct, epoch_loss, total = inner_loop(correct, criterion, device, train_loss, images, labels, net,
+                                                    optimizer, total)
         train_loss /= n_batches * images.size(0)
         train_acc = correct / total
         if verbose:
@@ -107,50 +89,46 @@ def train(
                 INFO,
                 f"Batch len based training: train loss {train_loss}, accuracy {train_acc}",
             )
-        val_loss, val_acc = _validate(net, valloader)
+        val_loss, val_acc = test(net, valloader, device)
         return train_loss, train_acc, val_loss, val_acc
 
 
-def _validate(net, valloader) -> Tuple[float, float]:
-    """Calculate metrics on the given valloader."""
-    criterion = torch.nn.CrossEntropyLoss()
-    if len(valloader) == 0:
-        raise ValueError("Valloader can't be 0, exiting...")
-    # Validation loop
-    with torch.no_grad():
-        val_loss = 0.0
-        correct = 0
-        total = 0
-        for data, target in valloader:
-            output = net(data)
-            val_loss += criterion(output, target).item()
-            _, predicted = output.max(1)
-            total += target.size(0)
-            correct += predicted.eq(target).sum().item()
-
-        accuracy = 100.0 * correct / total
-        val_loss /= float(len(valloader))
-    return accuracy, val_loss
+def inner_loop(correct, criterion, device, epoch_loss, images, labels, net, optimizer, total):
+    images = images.to(device)
+    labels = labels.to(device)
+    optimizer.zero_grad()
+    outputs = net(images)
+    loss = criterion(outputs, labels)
+    loss.backward()
+    optimizer.step()
+    # Metrics
+    epoch_loss += loss
+    total += labels.size(0)
+    correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+    return correct, epoch_loss, total
 
 
 def test(
-    net: nn.Module, testloader: DataLoader, device: torch.device
+    net: nn.Module, dataloader: DataLoader, device: torch.device
 ) -> Tuple[float, float]:
-    """Test network on the given testloader."""
+    """Calculate metrics on the given dataloader."""
     criterion = torch.nn.CrossEntropyLoss()
+    if len(dataloader) == 0:
+        raise ValueError("Dataloader can't be 0, exiting...")
+    # Validation loop
     correct, total, loss = 0, 0, 0.0
     net.eval()
     with torch.no_grad():
-        for images, labels in testloader:
+        for data, target in dataloader:
             images, labels = images.to(device), labels.to(device)
-            outputs = net(images)
-            loss += criterion(outputs, labels).item()
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-    loss /= len(testloader.dataset)
-    accuracy = correct / total
-    return loss, accuracy
+            output = net(data)
+            loss += criterion(output, target).item()
+            _, predicted = output.max(1)
+            total += target.size(0)
+            correct += predicted.eq(target).sum().item()
+        accuracy = 100.0 * correct / total
+        loss /= float(len(dataloader))
+    return accuracy, loss
 
 
 if __name__ == "__main__":
