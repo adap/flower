@@ -17,8 +17,8 @@
 from typing import Any, List, Optional, Tuple, Union
 
 try:
-    import xgboost as xgb  # pylint: disable=E0401
     import torch  # pylint: disable=E0401
+    import xgboost as xgb  # pylint: disable=E0401
     from matplotlib import pyplot as plt  # pylint: disable=E0401
     from torch.utils.data import DataLoader, Dataset  # pylint: disable=E0401
     from xgboost import XGBClassifier, XGBRegressor  # pylint: disable=E0401
@@ -29,7 +29,6 @@ except ImportError as missing_dep:
     ) from missing_dep
 
 import numpy as np
-
 
 from flwr.common.typing import NDArray
 

@@ -442,7 +442,9 @@ def _run_fleet_api_rest(
     try:
         import uvicorn  # pylint: disable=import-outside-toplevel
 
-        from flwr.server.rest_server.rest_api import app as fast_api_app  # pylint: disable=import-outside-toplevel
+        from flwr.server.rest_server.rest_api import (
+            app as fast_api_app,  # pylint: disable=import-outside-toplevel
+        )
     except ImportError as missing_dep:
         raise ImportError(
             "To use the REST API you must install the "
