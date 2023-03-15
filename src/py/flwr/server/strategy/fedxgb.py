@@ -19,9 +19,11 @@ from typing import Any, List, Optional, Tuple, Union
 try:
     import xgboost as xgb  # pylint: disable=E0401
 except ImportError:
-    raise ImportError("To use the xgboost you must install the "
-                      "extra dependency by running `pip install flwr['xgboost']` "
-                      "or `pip install xgboost`.")
+    raise ImportError(
+        "To use the xgboost you must install the "
+        "extra dependency by running `pip install flwr['xgboost']` "
+        "or `pip install xgboost`."
+    )
 
 import numpy as np
 import torch  # pylint: disable=E0401

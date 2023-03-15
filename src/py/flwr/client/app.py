@@ -139,10 +139,12 @@ def start_client(
     # Use either gRPC bidirectional streaming or REST request/response
     if rest:
         try:
-            from .rest_client.connection import http_request_response 
+            from .rest_client.connection import http_request_response
         except ImportError:
-            raise ImportError("To use the REST API you must install the "
-                              "extra dependencies by running `pip install flwr['rest']`.")
+            raise ImportError(
+                "To use the REST API you must install the "
+                "extra dependencies by running `pip install flwr['rest']`."
+            )
         connection = http_request_response
     else:
         connection = grpc_connection
