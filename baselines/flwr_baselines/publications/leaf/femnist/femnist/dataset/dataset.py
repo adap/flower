@@ -1,3 +1,5 @@
+import pathlib
+from logging import INFO
 from typing import List, Tuple
 
 import numpy as np
@@ -5,8 +7,14 @@ import pandas as pd
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
+from flwr.common.logger import log
 from sklearn import preprocessing
 from torch.utils.data import DataLoader, Dataset, Subset, random_split
+
+from femnist.constants import RANDOM_SEED
+from femnist.dataset.nist_preprocessor import NISTPreprocessor
+from femnist.dataset.nist_sampler import NistSampler
+from femnist.dataset.zip_downloader import ZipDownloader
 
 
 class NISTLikeDataset(Dataset):
@@ -72,7 +80,7 @@ def create_division_list(df_info: pd.DataFrame) -> List[List[int]]:
 
 
 def partition_dataset(
-    dataset: Dataset, division_list: List[List[int]]
+        dataset: Dataset, division_list: List[List[int]]
 ) -> List[Dataset]:
     """
     Partition dataset for niid settings - by writer id (each partition has only single writer data).
@@ -95,10 +103,10 @@ def partition_dataset(
 
 
 def partition_datasets(
-    partitioned_dataset: List[Dataset],
-    train_split: float = 0.8,
-    validation_split: float = 0.1,
-    random_seed: int = None,
+        partitioned_dataset: List[Dataset],
+        train_split: float = 0.8,
+        validation_split: float = 0.1,
+        random_seed: int = None,
 ) -> Tuple[List[Dataset], List[Dataset], List[Dataset]]:
     """Partition list of datasets to train, validation and test splits (each
     dataset from the list individually).
@@ -141,7 +149,7 @@ def partition_datasets(
 
 
 def transform_datasets_into_dataloaders(
-    datasets: List[Dataset], **dataloader_kwargs
+        datasets: List[Dataset], **dataloader_kwargs
 ) -> List[DataLoader]:
     """
     Transform datasets into dataloaders.
@@ -161,6 +169,60 @@ def transform_datasets_into_dataloaders(
     for dataset in datasets:
         dataloaders.append(DataLoader(dataset, **dataloader_kwargs))
     return dataloaders
+
+
+def create_federated_dataloaders(distribution_type: str, dataset_fraction: float, batch_size: int):
+    # Download and unzip the data
+    log(INFO, "NIST data downloading started")
+    nist_by_class_url = "https://s3.amazonaws.com/nist-srd/SD19/by_class.zip"
+    nist_by_writer_url = "https://s3.amazonaws.com/nist-srd/SD19/by_write.zip"
+    nist_by_class_downloader = ZipDownloader("data/raw", nist_by_class_url)
+    nist_by_writer_downloader = ZipDownloader("data/raw", nist_by_writer_url)
+    nist_by_class_downloader.download()
+    nist_by_writer_downloader.download()
+    log(INFO, "NIST data downloading done")
+
+    # Preprocess the data
+    log(INFO, "Preprocessing of the NIST data started")
+    nist_data_path = pathlib.Path("data")
+    nist_preprocessor = NISTPreprocessor(nist_data_path)
+    nist_preprocessor.preprocess()
+    log(INFO, "Preprocessing of the NIST data done")
+
+    # Create information for sampling
+    log(INFO, "Creation of the sampling information started")
+    df_info_path = pathlib.Path("data/processed/resized_images_to_labels.csv")
+    df_info = pd.read_csv(df_info_path, index_col=0)
+    sampler = NistSampler(df_info)
+    sampled_data_info = sampler.sample(distribution_type, dataset_fraction)
+    sampled_data_info_path = pathlib.Path(
+        f"data/processed/{distribution_type}_sampled_images_to_labels.csv"
+    )
+    sampled_data_info.to_csv(sampled_data_info_path)
+    log(INFO, "Creation of the sampling information done")
+
+    # Create a list of DataLoaders
+    log(INFO, "Creation of the partitioned by writer_id PyTorch Datasets started")
+    sampled_data_info = pd.read_csv(sampled_data_info_path)
+    label_encoder = preprocessing.LabelEncoder()
+    labels = label_encoder.fit_transform(sampled_data_info["character"])
+    full_dataset = create_dataset(sampled_data_info, labels)
+    division_list = create_division_list(sampled_data_info)
+    partitioned_dataset = partition_dataset(full_dataset, division_list)
+    partitioned_train, partitioned_validation, partitioned_test = partition_datasets(
+        partitioned_dataset, random_seed=RANDOM_SEED
+    )
+    trainloaders = transform_datasets_into_dataloaders(
+        partitioned_train, batch_size=batch_size
+    )
+    valloaders = transform_datasets_into_dataloaders(
+        partitioned_validation, batch_size=batch_size
+    )
+    testloaders = transform_datasets_into_dataloaders(
+        partitioned_test, batch_size=batch_size
+    )
+    log(INFO, "Creation of the partitioned by writer_id PyTorch Datasets done")
+    return trainloaders, valloaders, testloaders
 
 
 if __name__ == "__main__":
