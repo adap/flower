@@ -33,14 +33,15 @@ class ZipDownloader:
         ):
             log(
                 INFO,
-                f"Files for {self._name} are already downloaded and extracted from the zip file",
+                f"Files from {self._url} are already downloaded and extracted from the zip file into {self._name}. "
+                f"Skipping downloading and extracting.",
             )
             return None
         self._create_dir_structure()
         if self._save_path.exists():
             log(
                 INFO,
-                f"Zip file for {self._name} are already downloaded. Skip downloading.",
+                f"Zip file under {self._save_path} already exists. Skipping downloading.",
             )
         else:
             wget.download(self._url, out=str(self._save_path))
