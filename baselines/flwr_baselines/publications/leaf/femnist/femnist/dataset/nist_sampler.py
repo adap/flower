@@ -4,7 +4,6 @@ from logging import INFO
 from typing import Union
 
 import pandas as pd
-from femnist.constants import RANDOM_SEED
 from flwr.common.logger import log
 
 
@@ -26,7 +25,7 @@ class NistSampler:
         self._data_info_df = data_info_df
 
     def sample(
-        self, type: str, frac: float, n_clients: Union[int, None] = None
+        self, type: str, frac: float, n_clients: Union[int, None] = None, random_seed: int = None
     ) -> pd.DataFrame:
         # n_clients is not used when niid
         # The question is if that hold in memory
@@ -34,7 +33,7 @@ class NistSampler:
             if n_clients is None:
                 raise ValueError("n_clients can not be None for idd training")
             idd_data_info_df = self._data_info_df.sample(
-                frac=frac, random_state=RANDOM_SEED
+                frac=frac, random_state=random_seed
             )
             # add client ids (todo: maybe better in the index)
             idd_data_info_df["client_id"] = _create_samples_division_list(
@@ -59,7 +58,7 @@ class NistSampler:
             writer_ids_to_cumsum = (
                 niid_data_info_full.groupby("writer_id")
                 .size()
-                .sample(frac=1.0, random_state=RANDOM_SEED)
+                .sample(frac=1.0, random_state=random_seed)
                 .cumsum()
             )
             writer_ids_to_consider_mask = writer_ids_to_cumsum < frac_samples

@@ -10,22 +10,27 @@ from flwr.server.strategy import FedAvg
 from omegaconf import DictConfig
 
 from client import create_client
-from constants import DEVICE, RANDOM_SEED
 from dataset.dataset import (
     create_federated_dataloaders,
 )
 from fedavg_same_clients import FedAvgSameClients
-from utils import setup_seed, weighted_average
+from utils import setup_seed, weighted_average, create_pytorch_device
 
 
 @hydra.main(config_path="../conf", version_base=None)
 def main(cfg: DictConfig):
     # Ensure reproducibility
-    setup_seed(RANDOM_SEED)
-
-    trainloaders, valloaders, testloaders = create_federated_dataloaders(cfg.distribution_type,
-                                                                         cfg.dataset_fraction,
-                                                                         cfg.batch_size)
+    setup_seed(cfg.random_seed)
+    # Specify PyTorch device
+    device = create_pytorch_device(cfg.device)
+    # Create datasets for federated learning
+    trainloaders, valloaders, testloaders = create_federated_dataloaders(cfg.dataset.distribution_type,
+                                                                         cfg.dataset.dataset_fraction,
+                                                                         cfg.dataset.batch_size,
+                                                                         cfg.dataset.train_fraction,
+                                                                         cfg.dataset.validation_fraction,
+                                                                         cfg.dataset.test_fraction,
+                                                                         cfg.random_seed)
 
     # The total number of clients created produced from sampling differs (on different random seeds)
     total_n_clients = len(trainloaders)
@@ -35,12 +40,12 @@ def main(cfg: DictConfig):
         trainloaders=trainloaders,
         valloaders=valloaders,
         testloaders=testloaders,
-        device=DEVICE,
-        num_epochs=cfg.epochs_per_round,
-        learning_rate=cfg.learning_rate,
+        device=device,
+        num_epochs=cfg.training.epochs_per_round,
+        learning_rate=cfg.training.learning_rate,
         # There exist other variants of the FEMNIST dataset with different # of classes
         num_classes=62,
-        num_batches=cfg.batches_per_round,
+        num_batches=cfg.training.batches_per_round,
     )
 
     if cfg.same_train_test_clients:
@@ -56,15 +61,15 @@ def main(cfg: DictConfig):
         # and determine number of clients by the min_fit_clients
         # (it's max of 1. fraction_fit * available clients 2. min_fit_clients)
         fraction_fit=0.001,
-        min_fit_clients=cfg.num_clients_per_round,
+        min_fit_clients=cfg.training.num_clients_per_round,
         fraction_evaluate=0.001,
-        min_evaluate_clients=cfg.num_clients_per_round,
+        min_evaluate_clients=cfg.training.num_clients_per_round,
         # evaluate_fn=None, #  Leave empty since it's responsible for the centralized evaluation
         fit_metrics_aggregation_fn=weighted_average,  # todo: collect the fit metrics
         evaluate_metrics_aggregation_fn=weighted_average,
     )
     client_resources = None
-    if DEVICE.type == "cuda":
+    if device.type == "cuda":
         client_resources = {"num_gpus": 1.0}
 
     # Start simulation
