@@ -5,3 +5,4 @@ batch_size: 10
 train_fraction: 0.9
 validation_fraction: 0.0
 test_fraction: 0.1
+num_classes: 62

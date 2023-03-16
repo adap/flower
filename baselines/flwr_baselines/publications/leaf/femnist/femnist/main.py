@@ -44,7 +44,7 @@ def main(cfg: DictConfig):
         num_epochs=cfg.training.epochs_per_round,
         learning_rate=cfg.training.learning_rate,
         # There exist other variants of the FEMNIST dataset with different # of classes
-        num_classes=62,
+        num_classes=cfg.dataset.num_classes,
         num_batches=cfg.training.batches_per_round,
     )
 
