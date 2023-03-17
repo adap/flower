@@ -12,6 +12,7 @@ import PythonKit
 import CoreML
 import NIOCore
 import NIOPosix
+import os
 
 let appDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
 
@@ -23,6 +24,8 @@ public class ParameterConverter {
     private var numpyArrayUrl = appDirectory.appendingPathComponent("numpyArray.npy")
     private var group: EventLoopGroup?
     
+    private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
+                                    category: String(describing: ParameterConverter.self))
     public static let shared = ParameterConverter()
     
     private init() {
@@ -31,7 +34,7 @@ public class ParameterConverter {
     
     private func initGroup() {
         if group == nil {
-            print("Opening Python event loop group")
+            log.log("Opening Python event loop group")
             group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
             
             let future = group?.next().submit {
@@ -42,8 +45,8 @@ public class ParameterConverter {
             
             do {
                 try future?.wait()
-            } catch let error {
-                print(error)
+            } catch {
+                log.error("\(error)")
             }
         }
     }
@@ -135,8 +138,8 @@ public class ParameterConverter {
         do {
             let ret = try future?.wait()
             return ret
-        } catch let error {
-            print(error)
+        } catch {
+            log.error("\(error)")
             return nil
         }
         
@@ -154,8 +157,8 @@ public class ParameterConverter {
         do {
             let ret = try future?.wait()
             return ret
-        } catch let error {
-            print(error)
+        } catch {
+            log.error("\(error)")
             return nil
         }
         
@@ -173,8 +176,8 @@ public class ParameterConverter {
         do {
             let ret = try future?.wait()
             return ret
-        } catch let error {
-            print(error)
+        } catch {
+            log.error("\(error)")
             return nil
         }
         
@@ -190,8 +193,8 @@ public class ParameterConverter {
         do {
             let ret = try future?.wait()
             return ret
-        } catch let error {
-            print(error)
+        } catch {
+            log.error("\(error)")
             return nil
         }
     }
@@ -206,8 +209,8 @@ public class ParameterConverter {
             try future?.wait()
             try group?.syncShutdownGracefully()
             group = nil
-        } catch let error {
-            print(error)
+        } catch {
+            log.error("\(error)")
         }
     }
 }

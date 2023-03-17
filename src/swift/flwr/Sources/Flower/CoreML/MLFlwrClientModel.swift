@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreML
+import os
 
 public struct MLDataLoader {
     public let trainBatchProvider: MLBatchProvider
@@ -43,6 +44,8 @@ public class MLParameter {
     private var parameterConverter = ParameterConverter.shared
     
     var layerWrappers: [MLLayerWrapper]
+    private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
+                                    category: String(describing: MLParameter.self))
     
     /// Inits MLParameter class that contains information about the model parameters and implements routines for their update and transformation.
     ///
@@ -61,7 +64,7 @@ public class MLParameter {
         let config = MLModelConfiguration()
         
         guard parameters.tensors.count == self.layerWrappers.count else {
-            print("parameters received is not valid")
+            log.info("parameters received is not valid")
             return config
         }
         
@@ -69,7 +72,7 @@ public class MLParameter {
             let expectedNumberOfElements = layerWrappers[index].shape.map({Int($0)}).reduce(1, *)
             if let weightsArray = parameterConverter.dataToArray(data: data) {
                 guard weightsArray.count == expectedNumberOfElements else {
-                    print("array received has wrong number of elements")
+                    log.info("array received has wrong number of elements")
                     continue
                 }
                 
@@ -78,7 +81,7 @@ public class MLParameter {
                     if let weightsMultiArray = parameterConverter.dataToMultiArray(data: data) {
                         let weightsShape = weightsMultiArray.shape.map { Int16(truncating: $0) }
                         guard weightsShape == layerWrappers[index].shape else {
-                            print("shape not the same")
+                            log.info("shape not the same")
                             continue
                         }
                         let paramKey = MLParameterKey.weights.scoped(to: layerWrappers[index].name)
@@ -97,7 +100,7 @@ public class MLParameter {
     public func weightsToParameters() -> Parameters {
         let dataArray = layerWrappers.compactMap { parameterConverter.arrayToData(array: $0.weights, shape: $0.shape) }
         if dataArray.count != layerWrappers.count {
-            print("dataArray size != layerWrappers size")
+            log.info("dataArray size != layerWrappers size")
         }
         return Parameters(tensors: dataArray, tensorType: "ndarray")
     }
@@ -113,7 +116,7 @@ public class MLParameter {
                 if let weightsMultiArray = try? context.model.parameterValue(for: paramKey) as? MLMultiArray {
                     let weightsShape = Array(weightsMultiArray.shape.map({ Int16(truncating: $0) }).drop(while: { $0 < 2 }))
                     guard weightsShape == layer.shape else {
-                        print("shape \(weightsShape) is not the same as \(layer.shape)")
+                        log.info("shape \(weightsShape) is not the same as \(layer.shape)")
                         continue
                     }
                     

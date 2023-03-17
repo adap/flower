@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  FlwrGRPC.swift
 //  
 //
 //  Created by Daniel Nugraha on 16.01.23.
@@ -8,7 +8,9 @@
 import Foundation
 import GRPC
 import NIOCore
+import os
 
+@available(iOS 14.0, *)
 public class FlwrGRPC {
     typealias GRPCResponse = (Flwr_Proto_ClientMessage, Int, Bool)
     
@@ -20,6 +22,8 @@ public class FlwrGRPC {
     
     let extendedInterceptor: InterceptorExtension?
     
+    private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
+                                    category: String(describing: FlwrGRPC.self))
     /// Creates the client side communication class towards the server.
     ///
     /// - Parameters:
@@ -77,8 +81,8 @@ public class FlwrGRPC {
                 let response = try handle(client: client, serverMsg: sm)
                 promise.succeed(response)
                 self.sendResponse(future: promise.futureResult, completion: completion)
-            } catch let error {
-                print(error)
+            } catch {
+                self.log.error("\(error)")
             }
         })
     }
@@ -91,24 +95,24 @@ public class FlwrGRPC {
                 if !response.2 {
                     self.closeGRPCConnection(completion: completion)
                 }
-            } catch let error {
-                print(error)
+            } catch {
+                self.log.error("\(error)")
             }
         }
     }
 
     func closeGRPCConnection(completion: @escaping () -> Void) {
         do {
-            print("Closing gRPC bidirectional stream channel")
+            log.info("Closing gRPC bidirectional stream channel")
             try self.channel.close().wait()
             
-            print("Closing gRPC event loop group")
+            log.info("Closing gRPC event loop group")
             try self.eventLoopGroup.syncShutdownGracefully()
             
             completion()
             
-        } catch let error {
-            print(error)
+        } catch {
+            log.error("\(error)")
         }
     }
     

@@ -8,9 +8,13 @@
 import Foundation
 import GRPC
 import NIOCore
+import os
 
+@available(iOS 14.0, *)
 class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr_Proto_ServerMessage> {
     var extendedInterceptor: InterceptorExtension?
+    private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
+                                    category: String(describing: FlowerClientInterceptors.self))
     
     init(extendedInterceptor: InterceptorExtension?) {
         self.extendedInterceptor = extendedInterceptor
@@ -27,8 +31,7 @@ class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr
             // stream if the server rejects the RPC (in which case we expect the 'end' part).
         case let .metadata(headers):
             let formatted = prettify(headers)
-            let log = "< Received headers: \(formatted)"
-            print(log)
+            log.info("< Received headers: \(formatted)")
             
             grpcPart = .metadata(header: formatted)
             
@@ -37,8 +40,7 @@ class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr
             // messages (including zero).
         case let .message(response):
             let msg = String(describing: response.msg)
-            let log = "< Received response '\(decipherServerMessage(response.msg!))' with text size '\(msg.count)'"
-            print(log)
+            log.info("< Received response '\(decipherServerMessage(response.msg!))' with text size '\(msg.count)'")
             
             grpcPart = .message(content: msg)
 
@@ -46,8 +48,7 @@ class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr
             // after which no more response parts may be received and no more request parts will be sent.
         case let .end(status, trailers):
             let formatted = prettify(trailers)
-            let log = "< Response stream closed with status: '\(status)' and trailers: \(formatted)"
-            print(log)
+            log.info("< Response stream closed with status: '\(status)' and trailers: \(formatted)")
             
             grpcPart = .end(status: status, trailers: formatted)
         }
@@ -70,8 +71,7 @@ class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr
             // augmented with transport specific headers once the request part reaches the transport.
         case let .metadata(headers):
             let formatted = prettify(headers)
-            let log = "> Starting '\(context.path)' RPC, headers: \(formatted)"
-            print(log)
+            log.info("> Starting '\(context.path)' RPC, headers: \(formatted)")
             
             grpcPart = .metadata(header: formatted)
             
@@ -80,15 +80,14 @@ class FlowerClientInterceptors: ClientInterceptor<Flwr_Proto_ClientMessage, Flwr
             // of messages is permitted.
         case let .message(request, _):
             let msg = String(describing: request.msg)
-            let log = "> Sending request \(decipherClientMessage(request.msg!)) with text size \(msg.count)"
-            print(log)
+            log.info("> Sending request \(decipherClientMessage(request.msg!)) with text size \(msg.count)")
             
             grpcPart = .message(content: msg)
             
             // The end of the request stream: must be sent exactly once, after which no more messages may
             // be sent.
         case .end:
-            print("> Closing request stream")
+            log.info("> Closing request stream")
             
             grpcPart = .end(status: nil, trailers: nil)
         }
@@ -140,6 +139,7 @@ func decipherClientMessage(_ msg: Flwr_Proto_ClientMessage.OneOf_Msg) -> String 
     }
 }
 
+@available(iOS 14.0, *)
 final class FlowerInterceptorsFactory: Flwr_Proto_FlowerServiceClientInterceptorFactoryProtocol {
     let extendedInterceptor: InterceptorExtension?
     

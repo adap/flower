@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  MLFlwrClient.swift
 //  
 //
 //  Created by Daniel Nugraha on 18.01.23.
@@ -9,6 +9,7 @@ import Foundation
 import NIOCore
 import NIOPosix
 import CoreML
+import os
 
 public enum MLTask {
     case train
@@ -24,6 +25,9 @@ public class MLFlwrClient: Client {
     
     private var compiledModelUrl: URL
     private var tempModelUrl: URL
+    
+    private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
+                                    category: String(describing: MLFlwrClient.self))
     
     /// Inits the implementation of the Client protocol.
     ///
@@ -97,9 +101,9 @@ public class MLFlwrClient: Client {
             let loss = String(format: "%.4f", contextProgress.metrics[.lossValue] as! Double)
             switch task {
             case .train:
-                print("Epoch \(contextProgress.metrics[.epochIndex] as! Int + 1) finished with loss \(loss)")
+                self.log.info("Epoch \(contextProgress.metrics[.epochIndex] as! Int + 1) finished with loss \(loss)")
             case .test:
-                print("Evaluate finished with loss \(loss)")
+                self.log.info("Evaluate finished with loss \(loss)")
             }
         }
         
@@ -128,9 +132,9 @@ public class MLFlwrClient: Client {
             updateTask.resume()
             
             result = try promise?.futureResult.wait()
-        } catch let error {
+        } catch {
             result = nil
-            print(error)
+            log.error("\(error)")
         }
         
         return result ?? MLResult(loss: 1, numSamples: 0, accuracy: 0)
@@ -141,8 +145,8 @@ public class MLFlwrClient: Client {
         do {
             try self.eventLoopGroup?.syncShutdownGracefully()
             self.eventLoopGroup = nil
-        } catch let error {
-            print(error)
+        } catch {
+            log.error("\(error)")
         }
     }
     
@@ -154,7 +158,7 @@ public class MLFlwrClient: Client {
             try updatedModel.write(to: tempModelUrl)
             _ = try fileManager.replaceItemAt(compiledModelUrl, withItemAt: tempModelUrl)
         } catch let error {
-            print("Could not save updated model to the file system: \(error.localizedDescription)")
+            log.error("Could not save updated model to the file system: \(error.localizedDescription)")
         }
     }
 }

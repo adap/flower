@@ -8,6 +8,7 @@
 import Foundation
 import CoreML
 import flwr
+import os
 
 public class FLiOSModel: ObservableObject {
     @Published public var scenarioSelection = Constants.ScenarioTypes.MNIST {
@@ -37,6 +38,8 @@ public class FLiOSModel: ObservableObject {
     @Published public var federatedServerStatus = Constants.TaskStatus.idle
     
     public var benchmarkSuite = BenchmarkSuite.shared
+    private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
+                             category: String(describing: DataLoader.self))
     
     public func resetPreperation() {
         self.trainingBatchStatus = .notPrepared
@@ -133,8 +136,8 @@ public class FLiOSModel: ObservableObject {
                 self.localClient = LocalClient(dataLoader: dataLoader, compiledModelUrl: compiledModelUrl)
             }
             
-        } catch let error {
-            print(error)
+        } catch {
+            log.error("\(error)")
         }
     }
     
@@ -159,7 +162,7 @@ public class FLiOSModel: ObservableObject {
     }
     
     public func startFederatedLearning() {
-        print("starting federated learning")
+        log.info("starting federated learning")
         self.federatedServerStatus = .ongoing(info: "Starting federated learning")
         self.benchmarkSuite.takeActionSnapshot(snapshot: ActionSnaptshot(action: "starting federated learning"))
         if self.flwrGRPC == nil {
@@ -176,7 +179,7 @@ public class FLiOSModel: ObservableObject {
     }
     
     public func abortFederatedLearning() {
-        print("aborting federated learning")
+        log.info("aborting federated learning")
         self.flwrGRPC?.abortGRPCConnection(reasonDisconnect: .powerDisconnected) {
             DispatchQueue.main.async {
                 self.federatedServerStatus = .completed(info: "Federated learning aborted")
@@ -190,6 +193,8 @@ public class FLiOSModel: ObservableObject {
 class LocalClient {
     private var dataLoader: MLDataLoader
     private var compiledModelUrl: URL
+    private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
+                                    category: String(describing: LocalClient.self))
     
     init(dataLoader: MLDataLoader, compiledModelUrl: URL) {
         self.dataLoader = dataLoader
@@ -230,7 +235,7 @@ class LocalClient {
                 }
                 statusHandler(taskStatus)
             default:
-                print("Unknown event")
+                self.log.info("Unknown event")
             }
         }
         
@@ -256,7 +261,7 @@ class LocalClient {
             updateTask.resume()
             
         } catch let error {
-            print(error)
+            log.error("\(error)")
         }
     }
 }
