@@ -192,12 +192,12 @@ def create_federated_dataloaders(distribution_type: str, dataset_fraction: float
 
     # Create information for sampling
     log(INFO, "Creation of the sampling information started")
-    df_info_path = pathlib.Path("data/processed/resized_images_to_labels.csv")
+    df_info_path = pathlib.Path("data/processed_FeMNIST/processed_images_to_labels.csv")
     df_info = pd.read_csv(df_info_path, index_col=0)
     sampler = NistSampler(df_info)
     sampled_data_info = sampler.sample(distribution_type, dataset_fraction, random_seed=random_seed)
     sampled_data_info_path = pathlib.Path(
-        f"data/processed/{distribution_type}_sampled_images_to_labels.csv"
+        f"data/processed_FeMNIST/{distribution_type}_sampled_images_to_labels.csv"
     )
     sampled_data_info.to_csv(sampled_data_info_path)
     log(INFO, "Creation of the sampling information done")
