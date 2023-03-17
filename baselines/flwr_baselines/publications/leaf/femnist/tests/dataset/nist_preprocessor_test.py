@@ -1,16 +1,17 @@
 import pathlib
-import unittest
 import random
 import tempfile
-from hamcrest import assert_that, equal_to
+import unittest
 from pathlib import Path
-from PIL import Image
-from ..utils import recreate_nist
+
 from femnist.dataset.nist_preprocessor import NISTPreprocessor
+from hamcrest import assert_that, equal_to
+from PIL import Image
+
+from ..utils import recreate_nist
 
 
 class NistPreprocessorTest(unittest.TestCase):
-
     def test_preprocessing(self):
         """Test if the number of created images examples match expected."""
         temp_dir = recreate_nist()

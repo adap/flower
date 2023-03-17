@@ -6,14 +6,13 @@ import numpy as np
 import pandas as pd
 import torch
 import torchvision.transforms as transforms
-from PIL import Image
-from flwr.common.logger import log
-from sklearn import preprocessing
-from torch.utils.data import DataLoader, Dataset, Subset, random_split
-
 from femnist.dataset.nist_preprocessor import NISTPreprocessor
 from femnist.dataset.nist_sampler import NistSampler
 from femnist.dataset.zip_downloader import ZipDownloader
+from flwr.common.logger import log
+from PIL import Image
+from sklearn import preprocessing
+from torch.utils.data import DataLoader, Dataset, Subset, random_split
 
 
 class NISTLikeDataset(Dataset):
@@ -79,7 +78,7 @@ def create_division_list(df_info: pd.DataFrame) -> List[List[int]]:
 
 
 def partition_dataset(
-        dataset: Dataset, division_list: List[List[int]]
+    dataset: Dataset, division_list: List[List[int]]
 ) -> List[Dataset]:
     """
     Partition dataset for niid settings - by writer id (each partition has only single writer data).
@@ -102,10 +101,10 @@ def partition_dataset(
 
 
 def partition_datasets(
-        partitioned_dataset: List[Dataset],
-        train_split: float = 0.9,
-        validation_split: float = 0.0,
-        random_seed: int = None,
+    partitioned_dataset: List[Dataset],
+    train_split: float = 0.9,
+    validation_split: float = 0.0,
+    random_seed: int = None,
 ) -> Tuple[List[Dataset], List[Dataset], List[Dataset]]:
     """Partition list of datasets to train, validation and test splits (each
     dataset from the list individually).
@@ -148,7 +147,7 @@ def partition_datasets(
 
 
 def transform_datasets_into_dataloaders(
-        datasets: List[Dataset], **dataloader_kwargs
+    datasets: List[Dataset], **dataloader_kwargs
 ) -> List[DataLoader]:
     """
     Transform datasets into dataloaders.
@@ -170,9 +169,19 @@ def transform_datasets_into_dataloaders(
     return dataloaders
 
 
-def create_federated_dataloaders(distribution_type: str, dataset_fraction: float, batch_size: int, train_fraction: float, validation_fraction: float, test_fraction: float, random_seed: int):
+def create_federated_dataloaders(
+    distribution_type: str,
+    dataset_fraction: float,
+    batch_size: int,
+    train_fraction: float,
+    validation_fraction: float,
+    test_fraction: float,
+    random_seed: int,
+):
     if train_fraction + validation_fraction + test_fraction != 1.0:
-        raise ValueError("The fraction of train, validation and test should add up to 1.0.")
+        raise ValueError(
+            "The fraction of train, validation and test should add up to 1.0."
+        )
     # Download and unzip the data
     log(INFO, "NIST data downloading started")
     nist_by_class_url = "https://s3.amazonaws.com/nist-srd/SD19/by_class.zip"
@@ -195,7 +204,9 @@ def create_federated_dataloaders(distribution_type: str, dataset_fraction: float
     df_info_path = pathlib.Path("data/processed_FeMNIST/processed_images_to_labels.csv")
     df_info = pd.read_csv(df_info_path, index_col=0)
     sampler = NistSampler(df_info)
-    sampled_data_info = sampler.sample(distribution_type, dataset_fraction, random_seed=random_seed)
+    sampled_data_info = sampler.sample(
+        distribution_type, dataset_fraction, random_seed=random_seed
+    )
     sampled_data_info_path = pathlib.Path(
         f"data/processed_FeMNIST/{distribution_type}_sampled_images_to_labels.csv"
     )
@@ -211,8 +222,10 @@ def create_federated_dataloaders(distribution_type: str, dataset_fraction: float
     division_list = create_division_list(sampled_data_info)
     partitioned_dataset = partition_dataset(full_dataset, division_list)
     partitioned_train, partitioned_validation, partitioned_test = partition_datasets(
-        partitioned_dataset, random_seed=random_seed,
-        train_split=train_fraction, validation_split=validation_fraction
+        partitioned_dataset,
+        random_seed=random_seed,
+        train_split=train_fraction,
+        validation_split=validation_fraction,
     )
     trainloaders = transform_datasets_into_dataloaders(
         partitioned_train, batch_size=batch_size

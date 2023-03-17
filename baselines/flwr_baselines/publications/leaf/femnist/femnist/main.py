@@ -5,16 +5,13 @@ from logging import INFO
 import flwr as fl
 import hydra
 import pandas as pd
+from client import create_client
+from dataset.dataset import create_federated_dataloaders
+from fedavg_same_clients import FedAvgSameClients
 from flwr.common.logger import log
 from flwr.server.strategy import FedAvg
 from omegaconf import DictConfig
-
-from client import create_client
-from dataset.dataset import (
-    create_federated_dataloaders,
-)
-from fedavg_same_clients import FedAvgSameClients
-from utils import setup_seed, weighted_average, create_pytorch_device
+from utils import create_pytorch_device, setup_seed, weighted_average
 
 
 @hydra.main(config_path="../conf", version_base=None)
@@ -24,13 +21,15 @@ def main(cfg: DictConfig):
     # Specify PyTorch device
     device = create_pytorch_device(cfg.device)
     # Create datasets for federated learning
-    trainloaders, valloaders, testloaders = create_federated_dataloaders(cfg.dataset.distribution_type,
-                                                                         cfg.dataset.dataset_fraction,
-                                                                         cfg.dataset.batch_size,
-                                                                         cfg.dataset.train_fraction,
-                                                                         cfg.dataset.validation_fraction,
-                                                                         cfg.dataset.test_fraction,
-                                                                         cfg.random_seed)
+    trainloaders, valloaders, testloaders = create_federated_dataloaders(
+        cfg.dataset.distribution_type,
+        cfg.dataset.dataset_fraction,
+        cfg.dataset.batch_size,
+        cfg.dataset.train_fraction,
+        cfg.dataset.validation_fraction,
+        cfg.dataset.test_fraction,
+        cfg.random_seed,
+    )
 
     # The total number of clients created produced from sampling differs (on different random seeds)
     total_n_clients = len(trainloaders)

@@ -1,7 +1,8 @@
 import unittest
-from hamcrest import assert_that, equal_to
-from femnist.model import Net
+
 import torch
+from femnist.model import Net
+from hamcrest import assert_that, equal_to
 
 
 class ModelTest(unittest.TestCase):
@@ -18,5 +19,5 @@ class ModelTest(unittest.TestCase):
         assert_that(output.shape, equal_to(torch.Size([1, n_classes])))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

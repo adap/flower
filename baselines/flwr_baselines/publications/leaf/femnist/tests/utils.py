@@ -1,7 +1,9 @@
+import random
 import tempfile
 from pathlib import Path
+
 from PIL import Image
-import random
+
 
 def recreate_nist():
     temp_dir = tempfile.TemporaryDirectory()

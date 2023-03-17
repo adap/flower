@@ -4,9 +4,8 @@ from logging import INFO, WARN
 from typing import Union
 
 import pandas as pd
-from flwr.common.logger import log
-
 from femnist.dataset.dataset_utils import _create_samples_division_list
+from flwr.common.logger import log
 
 
 class NistSampler:
@@ -18,11 +17,16 @@ class NistSampler:
         (path_by_writer,writer_id,hash,path_by_class,character,path)
 
     """
+
     def __init__(self, data_info_df: pd.DataFrame):
         self._data_info_df = data_info_df
 
     def sample(
-        self, sampling_type: str, frac: float, n_clients: Union[int, None] = None, random_seed: int = None
+        self,
+        sampling_type: str,
+        frac: float,
+        n_clients: Union[int, None] = None,
+        random_seed: int = None,
     ) -> pd.DataFrame:
         # n_clients is not used when niid
         # The question is if that hold in memory

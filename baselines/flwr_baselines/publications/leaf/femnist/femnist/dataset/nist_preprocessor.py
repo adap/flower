@@ -1,6 +1,6 @@
 import pathlib
 from logging import INFO, WARN
-from typing import Union, Dict, Optional
+from typing import Dict, Optional, Union
 
 import pandas as pd
 from femnist.dataset.dataset_utils import calculate_series_hashes, hex_decimal_to_char
@@ -10,7 +10,8 @@ from tqdm import tqdm
 
 
 class NISTPreprocessor:
-    """Preprocess NIST images from two directories divided by class and by writer.
+    """Preprocess NIST images from two directories divided by class and by
+    writer.
 
     The preprocessing procedure include different step for FEMNIST and FeMNIST.
 
@@ -18,7 +19,9 @@ class NISTPreprocessor:
     required to merge information about the writer_id and label.
     """
 
-    def __init__(self, data_dir: Union[str, pathlib.Path], to_dataset: str = "FeMNIST") -> None:
+    def __init__(
+        self, data_dir: Union[str, pathlib.Path], to_dataset: str = "FeMNIST"
+    ) -> None:
         self._data_dir = (
             data_dir if isinstance(data_dir, pathlib.Path) else pathlib.Path(data_dir)
         )
@@ -28,9 +31,7 @@ class NISTPreprocessor:
         self._processed_images_information_path = (
             self._processed_dir / "processed_images_to_labels.csv"
         )
-        self._raw_images_information_path = (
-                self._data_dir / "raw_images_to_labels.csv"
-        )
+        self._raw_images_information_path = self._data_dir / "raw_images_to_labels.csv"
         self._by_class_nist = self._raw_data_dir / "by_class"
         self._by_writer_nist = self._raw_data_dir / "by_write"
         self._writer_df: Optional[pd.DataFrame] = None
@@ -147,7 +148,7 @@ class NISTPreprocessor:
             dataframe with information about the path, writer_id, character(label)
         """
         log(INFO, "Image preprocessing started")
-        writer_to_character_to_count: Dict[str: Dict[str: int]] = {}
+        writer_to_character_to_count: Dict[str : Dict[str:int]] = {}
         resized_size = (28, 28)
         new_df = self._df.copy()
         new_df["path"] = pathlib.Path("")

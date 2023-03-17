@@ -61,8 +61,17 @@ def train(
         for epoch in range(epochs):
             correct, total, epoch_loss = 0, 0, 0.0
             for images, labels in trainloader:
-                correct, epoch_loss, total = inner_loop(correct, criterion, device, epoch_loss, images, labels, net,
-                                                        optimizer, total)
+                correct, epoch_loss, total = inner_loop(
+                    correct,
+                    criterion,
+                    device,
+                    epoch_loss,
+                    images,
+                    labels,
+                    net,
+                    optimizer,
+                    total,
+                )
             epoch_loss /= len(trainloader.dataset)
             epoch_acc = correct / total
 
@@ -80,8 +89,17 @@ def train(
         for idx, (images, labels) in enumerate(trainloader):
             if idx == n_batches:
                 break
-            correct, epoch_loss, total = inner_loop(correct, criterion, device, train_loss, images, labels, net,
-                                                    optimizer, total)
+            correct, epoch_loss, total = inner_loop(
+                correct,
+                criterion,
+                device,
+                train_loss,
+                images,
+                labels,
+                net,
+                optimizer,
+                total,
+            )
         train_loss /= n_batches * images.size(0)
         train_acc = correct / total
         if verbose:
@@ -93,7 +111,9 @@ def train(
         return train_loss, train_acc, val_loss, val_acc
 
 
-def inner_loop(correct, criterion, device, epoch_loss, images, labels, net, optimizer, total):
+def inner_loop(
+    correct, criterion, device, epoch_loss, images, labels, net, optimizer, total
+):
     images = images.to(device)
     labels = labels.to(device)
     optimizer.zero_grad()
