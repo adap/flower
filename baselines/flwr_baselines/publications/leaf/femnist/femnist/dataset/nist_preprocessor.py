@@ -1,6 +1,6 @@
 import pathlib
-from logging import INFO
-from typing import Union
+from logging import INFO, WARN
+from typing import Union, Dict, Optional
 
 import pandas as pd
 from femnist.dataset.dataset_utils import calculate_series_hashes, hex_decimal_to_char
@@ -10,23 +10,33 @@ from tqdm import tqdm
 
 
 class NISTPreprocessor:
-    """Preprocess files from two directories divided by class and by writer."""
+    """Preprocess NIST images from two directories divided by class and by writer.
 
-    def __init__(self, data_dir: Union[str, pathlib.Path]) -> None:
+    The preprocessing procedure include different step for FEMNIST and FeMNIST.
+
+    Using two datasets (by_class and by_write, actually one dataset but divided differently) is
+    required to merge information about the writer_id and label.
+    """
+
+    def __init__(self, data_dir: Union[str, pathlib.Path], to_dataset: str = "FeMNIST") -> None:
         self._data_dir = (
             data_dir if isinstance(data_dir, pathlib.Path) else pathlib.Path(data_dir)
         )
         self._raw_data_dir = self._data_dir / "raw"
-        self._processed_dir = self._data_dir / "processed"
+        self._processed_dir = self._data_dir / ("processed" + "_" + to_dataset)
         self._processed_images_dir = self._processed_dir / "images"
         self._processed_images_information_path = (
-            self._processed_dir / "resized_images_to_labels.csv"
+            self._processed_dir / "processed_images_to_labels.csv"
+        )
+        self._raw_images_information_path = (
+                self._data_dir / "raw_images_to_labels.csv"
         )
         self._by_class_nist = self._raw_data_dir / "by_class"
         self._by_writer_nist = self._raw_data_dir / "by_write"
-        self._writer_df: pd.DataFrame
-        self._class_df: pd.DataFrame
-        self._df: pd.DataFrame
+        self._writer_df: Optional[pd.DataFrame] = None
+        self._class_df: Optional[pd.DataFrame] = None
+        self._df: Optional[pd.DataFrame] = None
+        self._preprocessed_df: Optional[pd.DataFrame] = None
 
     def preprocess(self, overwrite: bool = False) -> None:
         """Extracts necessary information to create data that has both writer
@@ -40,36 +50,40 @@ class NISTPreprocessor:
         5. Preprocess images (reduce the size of them, use LANCZOS resampling).
         6. Create csv file with the path.
         """
+        # Do not preprocess if the preprocessed information already exist
         if self._processed_images_information_path.exists() and not overwrite:
             log(
-                INFO,
+                WARN,
                 f"The preprocessed information already exists in {self._processed_images_information_path}. "
-                f"Specify 'overwrite' as True to recreate this information.",
+                f"It's assumed that the preprocessed images exist too."
+                f"Specify 'overwrite' as True to preprocess the images and recreate the reference information.",
             )
             return
-        self._writer_df = self._extract_writer_information()
-        self._class_df = self._extract_class_information()
-        self._calculate_hashes()
-        self._df = self._merge_class_and_writer_information()
+
+        # Extraction th raw images information if it does not already exist
+        if not self._raw_images_information_path.exists():
+            self._writer_df = self._extract_writer_information()
+            self._class_df = self._extract_class_information()
+            self._calculate_hashes()
+            self._df = self._merge_class_and_writer_information()
+            log(
+                INFO,
+                f"Saving information about raw images to {self._raw_images_information_path} started",
+            )
+            self._df.to_csv(self._raw_images_information_path)
+            log(
+                INFO,
+                f"Saving information about raw images to {self._raw_images_information_path} done",
+            )
+        else:
+            self._df = pd.read_csv(self._raw_images_information_path, index_col=0)
         self.create_dir_structure()
-        original_images_information_path = (
-            self._processed_dir / "original_images_to_labels.csv"
-        )
-        log(
-            INFO,
-            f"Saving information about raw images to {original_images_information_path} started",
-        )
-        self._df.to_csv(original_images_information_path)
-        log(
-            INFO,
-            f"Saving information about raw images to {original_images_information_path} done",
-        )
-        self._new_df = self._preprocess_images()
+        self._preprocessed_df = self._preprocess_images()
         log(
             INFO,
             f"Saving information about raw images to {self._processed_images_information_path} started",
         )
-        self._new_df.to_csv(self._processed_images_information_path)
+        self._preprocessed_df.to_csv(self._processed_images_information_path)
         log(
             INFO,
             f"Saving information about raw images to {self._processed_images_information_path} done",
@@ -125,9 +139,15 @@ class NISTPreprocessor:
         self._df = pd.merge(self._writer_df, self._class_df, on="hash")
         log(INFO, "Hashes calculation done")
 
-    def _preprocess_images(self):
-        """Preprocess images - resize to 28x28 and save them in the processed directory."""
+    def _preprocess_images(self) -> pd.DataFrame:
+        """Preprocess images - resize to 28x28 and save them in the processed directory.
+
+        Returns
+            preprocessed_df_info: pd.DataFrame
+            dataframe with information about the path, writer_id, character(label)
+        """
         log(INFO, "Image preprocessing started")
+        writer_to_character_to_count: Dict[str: Dict[str: int]] = {}
         resized_size = (28, 28)
         new_df = self._df.copy()
         new_df["path"] = pathlib.Path("")
@@ -136,18 +156,29 @@ class NISTPreprocessor:
             img = Image.open(file_path)
             gray = img.convert("L")
             gray.thumbnail(resized_size, Image.LANCZOS)
+            writer_id = row["writer_id"]
+            character = row["character"]
+            if writer_id not in writer_to_character_to_count:
+                writer_to_character_to_count[writer_id] = {}
+            if character not in writer_to_character_to_count[writer_id]:
+                writer_to_character_to_count[writer_id][character] = 0
             image_name = (
                 "character_"
-                + row["character"]
+                + character
+                + "_"
+                + "nth_"
+                + str(writer_to_character_to_count[writer_id][character])
                 + "_"
                 + "author_"
-                + row["writer_id"]
+                + writer_id
                 + ".png"
             )
+            writer_to_character_to_count[writer_id][character] += 1
             new_path = self._processed_images_dir / image_name
             gray.save(new_path)
             new_df.iloc[index, -1] = new_path
         log(INFO, "Image preprocessing done")
+        new_df = new_df.loc[:, ["path", "writer_id", "character"]]
         return new_df
 
 
