@@ -1,35 +1,32 @@
 import math
 import pathlib
-from logging import INFO
+from logging import INFO, WARN
 from typing import Union
 
 import pandas as pd
 from flwr.common.logger import log
 
-
-def _create_samples_division_list(n_samples, n_groups, keep_remainder=True):
-    group_size = n_samples // n_groups
-    n_samples_in_full_groups = n_groups * group_size
-    samples_division_list = []
-    for i in range(n_groups):
-        samples_division_list.extend([i] * group_size)
-    if n_samples_in_full_groups != n_samples:
-        # add remainder only if it is needed == remainder is not equal zero
-        remainder = n_samples - n_samples_in_full_groups
-        samples_division_list.extend([n_groups] * remainder)
-    return samples_division_list
+from femnist.dataset.dataset_utils import _create_samples_division_list
 
 
 class NistSampler:
+    """
+    Attributes
+    ----------
+    _data_info_df: pd.DataFrame
+        dataframe that hold the information about the files' location
+        (path_by_writer,writer_id,hash,path_by_class,character,path)
+
+    """
     def __init__(self, data_info_df: pd.DataFrame):
         self._data_info_df = data_info_df
 
     def sample(
-        self, type: str, frac: float, n_clients: Union[int, None] = None, random_seed: int = None
+        self, sampling_type: str, frac: float, n_clients: Union[int, None] = None, random_seed: int = None
     ) -> pd.DataFrame:
         # n_clients is not used when niid
         # The question is if that hold in memory
-        if type == "iid":
+        if sampling_type == "iid":
             if n_clients is None:
                 raise ValueError("n_clients can not be None for idd training")
             idd_data_info_df = self._data_info_df.sample(
@@ -40,11 +37,11 @@ class NistSampler:
                 idd_data_info_df.shape[0], n_clients, True
             )
             return idd_data_info_df
-        elif type == "niid":
+        elif sampling_type == "niid":
             if n_clients is not None:
                 log(
-                    INFO,
-                    "Warning: the n_clinets is ignored in case of niid training. "
+                    WARN,
+                    "The n_clinets is ignored in case of niid training. "
                     "The number of clients is equal to the number of unique writers",
                 )
             # It uses the following sampling logic:
@@ -83,10 +80,10 @@ class NistSampler:
             ].iloc[:missing_samples]
 
             niid_data_info = pd.concat([niid_data_info, partial_writer_samples], axis=0)
-            return niid_data_info  # todo: think if you should change the writer_id here to client_id and if it should be a number
+            return niid_data_info
         else:
             raise ValueError(
-                f"The given type of smapling is not supported. Given: {type}"
+                f"The given sampling_type of sampling is not supported. Given: {sampling_type}"
             )
 
 

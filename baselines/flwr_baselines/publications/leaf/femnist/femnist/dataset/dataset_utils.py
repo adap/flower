@@ -54,3 +54,16 @@ def calculate_series_hashes(paths: pd.Series) -> pd.Series:
     """
     series_hashes = paths.map(calculate_file_hash)
     return series_hashes
+
+
+def _create_samples_division_list(n_samples, n_groups, keep_remainder=True):
+    group_size = n_samples // n_groups
+    n_samples_in_full_groups = n_groups * group_size
+    samples_division_list = []
+    for i in range(n_groups):
+        samples_division_list.extend([i] * group_size)
+    if n_samples_in_full_groups != n_samples:
+        # add remainder only if it is needed == remainder is not equal zero
+        remainder = n_samples - n_samples_in_full_groups
+        samples_division_list.extend([n_groups] * remainder)
+    return samples_division_list
