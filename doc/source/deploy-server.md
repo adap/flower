@@ -1,43 +1,72 @@
-# 🧑‍🔬 Deploy a Flower Server
+# Deploy a Flower Server 🧪
+
+🧪 = this page covers experimental features that might change in future versions of Flower
 
 This how-to guide describes the deployment of a long-running Flower server.
 
 ## Start Flower server
 
+### ... using the gRPC transport layer
+
 Start Driver API:
 
 ```bash
-flower-driver-api --driver-api-address "0.0.0.0:9091" --database-path flwr.db
+flower-driver-api --driver-api-address "0.0.0.0:9091" --database flwr.db
 ```
 
 Start Flower Fleet API:
 
 ```bash
-flower-fleet-api --rest --rest-fleet-api-address "0.0.0.0:9093" --database-path flwr.db
+flower-fleet-api --rest --rest-fleet-api-address "0.0.0.0:9093" --database flwr.db
 ```
 
 Or, start them both together:
 
 ```bash
-flower-server --rest --rest-fleet-api-address "0.0.0.0:9093" --database-path flwr.db
+flower-server --rest --rest-fleet-api-address "0.0.0.0:9093" --database flwr.db
+```
+
+### ... using the (experimental) REST transport layer
+
+Start Driver API:
+
+```bash
+flower-driver-api --driver-api-address "0.0.0.0:9091" --database flwr.db
+```
+
+Start Flower Fleet API:
+
+```bash
+flower-fleet-api --rest --rest-fleet-api-address "0.0.0.0:9093" --database flwr.db
+```
+
+Or, start them both together:
+
+```bash
+flower-server --rest --rest-fleet-api-address "0.0.0.0:9093" --database flwr.db
 ```
 
 ## Start Client Node(s)
 
-Using the `mt-pytorch` code example, run
+### ... connecting to the gRPC Fleet API
 
-```bash
-python client.py
-```
+In `examples/mt-pytorch`:
 
-in three different terminal windows.
+1. Open `client.py` and change `rest=True` to `rest=False`
+2. Run `python client.py` in three separate terminal windows to start three clients
+
+### ... connecting to the REST Fleet API
+
+In `examples/mt-pytorch`:
+
+1. Open `client.py` and change `rest=True` to `rest=False`
+2. Run `python client.py` in three separate terminal windows to start three clients
 
 ## Run Driver Script
 
-Using the `mt-pytorch` code example, run
+To test whether everything is running as expected, start a driver script.
 
-```bash
-python driver.py
-```
+In `examples/mt-pytorch`:
 
-in yet another terminal window.
+1. Open `driver.py` and verify that the `Driver` class is initialized with the correct Driver API address (host and port)
+2. Run `python driver.py` in a separate terminal window to start the driver script
