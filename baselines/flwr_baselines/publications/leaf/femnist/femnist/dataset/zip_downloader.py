@@ -12,12 +12,12 @@ class ZipDownloader:
     """Zip downloader that enable also unzip and remove the downloaded file."""
 
     def __init__(
-        self, name: str, url: str, save_path: Optional[pathlib.Path] = None
+        self, extract_path: str, url: str, save_path: Optional[pathlib.Path] = None
     ) -> None:
-        self._name = name
+        self._extract_path = extract_path
         self._url = url
         self._save_path = (
-            save_path if save_path is not None else pathlib.Path(f"./{name}" + ".zip")
+            save_path if save_path is not None else pathlib.Path(f"{extract_path}" + ".zip")
         )
 
     def download(self, unzip: bool = True) -> None:
@@ -33,7 +33,7 @@ class ZipDownloader:
         ):
             log(
                 INFO,
-                f"Files from {self._url} are already downloaded and extracted from the zip file into {self._name}. "
+                f"Files from {self._url} are already downloaded and extracted from the zip file into {self._extract_path}. "
                 f"Skipping downloading and extracting.",
             )
             return None
