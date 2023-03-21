@@ -55,7 +55,7 @@ def create_dataset(df_info: pd.DataFrame, labels: np.ndarray):
     return nist_like_dataset
 
 
-def create_division_list(df_info: pd.DataFrame) -> List[List[int]]:
+def create_partition_list(df_info: pd.DataFrame) -> List[List[int]]:
     """
     Create list of list with int masks identifying writers.
     Parameters
@@ -100,10 +100,11 @@ def partition_dataset(
     return subsets
 
 
-def partition_datasets(
+def train_valid_test_partition(
     partitioned_dataset: List[Dataset],
     train_split: float = 0.9,
     validation_split: float = 0.0,
+    test_split: float = 0.1,
     random_seed: int = None,
 ) -> Tuple[List[Dataset], List[Dataset], List[Dataset]]:
     """Partition list of datasets to train, validation and test splits (each
@@ -132,8 +133,17 @@ def partition_datasets(
     for subset in partitioned_dataset:
         subset_len = len(subset)
         train_len = int(train_split * subset_len)
-        val_len = int(validation_split * subset_len)
-        test_len = subset_len - train_len - val_len
+        # Do this checkup for full dataset use
+        # Consider the case sample size == 5 and
+        # train_split = 0.5 test_split = 0.5
+        # if such check as below is not performed
+        # one sample will be missing
+        if validation_split == 0.0:
+            test_len = subset_len - train_len
+            val_len = 0
+        else:
+            test_len = int(test_split * subset_len)
+            val_len = subset_len - train_len - test_len
         train_dataset, validation_dataset, test_dataset = random_split(
             subset,
             lengths=[train_len, val_len, test_len],
@@ -142,7 +152,6 @@ def partition_datasets(
         train_subsets.append(train_dataset)
         validation_subsets.append(validation_dataset)
         test_subsets.append(test_dataset)
-
     return train_subsets, validation_subsets, test_subsets
 
 
@@ -219,13 +228,14 @@ def create_federated_dataloaders(
     label_encoder = preprocessing.LabelEncoder()
     labels = label_encoder.fit_transform(sampled_data_info["character"])
     full_dataset = create_dataset(sampled_data_info, labels)
-    division_list = create_division_list(sampled_data_info)
+    division_list = create_partition_list(sampled_data_info)
     partitioned_dataset = partition_dataset(full_dataset, division_list)
-    partitioned_train, partitioned_validation, partitioned_test = partition_datasets(
+    partitioned_train, partitioned_validation, partitioned_test = train_valid_test_partition(
         partitioned_dataset,
         random_seed=random_seed,
         train_split=train_fraction,
         validation_split=validation_fraction,
+        test_split=test_fraction,
     )
     trainloaders = transform_datasets_into_dataloaders(
         partitioned_train, batch_size=batch_size
@@ -248,10 +258,10 @@ if __name__ == "__main__":
     labels = label_encoder.fit_transform(sampled_data_info["character"])
     # Create a list of DataLoaders
     full_dataset = create_dataset(sampled_data_info, labels)
-    division_list = create_division_list(sampled_data_info)
+    division_list = create_partition_list(sampled_data_info)
     # Partitioned by writer (therefore by client in the FL settings)
     partitioned_dataset = partition_dataset(full_dataset, division_list)
-    partitioned_train, partitioned_validation, partitioned_test = partition_datasets(
+    partitioned_train, partitioned_validation, partitioned_test = train_valid_test_partition(
         partitioned_dataset
     )
     trainloaders = transform_datasets_into_dataloaders(partitioned_train)
