@@ -81,7 +81,10 @@ def train(
                     f"Epoch {epoch + 1}: train loss {epoch_loss}, accuracy {epoch_acc}",
                 )
         train_loss, train_acc = test(net, trainloader, device)
-        val_loss, val_acc = test(net, valloader, device)
+        if len(valloader):
+            val_loss, val_acc = test(net, valloader, device)
+        else:
+            val_loss, val_acc = None, None
         return train_loss, train_acc, val_loss, val_acc
     else:
         # Training time given in number of batches not epochs
@@ -139,13 +142,13 @@ def test(
     correct, total, loss = 0, 0, 0.0
     net.eval()
     with torch.no_grad():
-        for data, target in dataloader:
+        for images, labels in dataloader:
             images, labels = images.to(device), labels.to(device)
-            output = net(data)
-            loss += criterion(output, target).item()
+            output = net(images)
+            loss += criterion(output, labels).item()
             _, predicted = output.max(1)
-            total += target.size(0)
-            correct += predicted.eq(target).sum().item()
+            total += labels.size(0)
+            correct += predicted.eq(labels).sum().item()
         accuracy = 100.0 * correct / total
         loss /= float(len(dataloader))
     return accuracy, loss
