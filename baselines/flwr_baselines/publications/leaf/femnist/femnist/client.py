@@ -40,9 +40,8 @@ class FlowerClient(fl.client.NumPyClient):
         ----------
         net: torch.nn.Module
             PyTorch model
-        trainloader:
-        valloader
-        testloader
+        trainloader, valloader, testloader: torch.utils.data.DataLoader
+            dataloaders with images and labels
         device: torch.device
             denotes CPU or GPU training
         num_epochs: int
