@@ -1,18 +1,19 @@
-from typing import List
+from typing import List, Dict, Tuple
 
 import flwr as fl
 import numpy as np
 import torch
 from model import Net, test, train
 from torch.utils.data import DataLoader
+from flwr.common.typing import NDArrays, Scalar
 
 
-def get_parameters(net: torch.nn.Module) -> List[np.ndarray]:
+def get_parameters(net: torch.nn.Module) -> NDArrays:
     """Get parameters from a PyTorch network."""
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
 
-def set_parameters(net: torch.nn.Module, parameters: List[np.ndarray]) -> None:
+def set_parameters(net: torch.nn.Module, parameters: NDArrays) -> None:
     """Set parameters to a PyTorch network."""
     params_dict = zip(net.state_dict().keys(), parameters)
     state_dict = dict({k: torch.Tensor(v) for k, v in params_dict})
@@ -33,7 +34,7 @@ class FlowerClient(fl.client.NumPyClient):
         num_epochs: int,
         learning_rate: float,
         num_batches: int = None,
-    ):
+    ) -> None:
         """
 
         Parameters
@@ -61,10 +62,10 @@ class FlowerClient(fl.client.NumPyClient):
         self.learning_rate = learning_rate
         self.num_batches = num_batches
 
-    def get_parameters(self, config):
+    def get_parameters(self, config) -> NDArrays:
         return get_parameters(self.net)
 
-    def fit(self, parameters, config):
+    def fit(self, parameters, config) -> Tuple[NDArrays, int, Dict[str: Scalar]]:
         """Fit locally training model."""
         set_parameters(self.net, parameters)
         train_loss, train_acc, val_loss, val_acc = train(
@@ -87,7 +88,7 @@ class FlowerClient(fl.client.NumPyClient):
             },
         )
 
-    def evaluate(self, parameters, config):
+    def evaluate(self, parameters, config)-> Tuple[float, int, Dict[str: Scalar]]:
         """Evaluate locally training model."""
         set_parameters(self.net, parameters)
         loss, accuracy = test(self.net, self.testloader, device=self.device)
@@ -104,7 +105,7 @@ def create_client(
     learning_rate: float,
     num_classes: int = 62,
     num_batches: int = None,
-):
+) -> FlowerClient:
     """Create client for the flower simulation."""
     net = Net(num_classes).to(device)
 
