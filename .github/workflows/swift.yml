@@ -5,10 +5,12 @@ on:
         branches:
             - main
 	paths:
-	    - src/swift
+	    - "src/swift/**"
     pull_request:
         branches:
-            - main
+      	    - main
+        paths:
+     	    - "src/swift/**"
 
 jobs:
   build:
