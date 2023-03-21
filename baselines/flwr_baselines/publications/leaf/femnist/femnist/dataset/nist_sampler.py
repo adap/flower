@@ -91,18 +91,3 @@ class NistSampler:
             raise ValueError(
                 f"The given sampling_type of sampling is not supported. Given: {sampling_type}"
             )
-
-
-if __name__ == "__main__":
-    df_info_path = pathlib.Path("../../data/processed/resized_images_to_labels.csv")
-    df_info = pd.read_csv(df_info_path, index_col=0)
-    sampler = NistSampler(df_info)
-    sampled_data_info = sampler.sample("niid", 0.05, 100)
-    sampled_data_info.to_csv("data/processed/niid_sampled_images_to_labels.csv")
-
-    import matplotlib.pyplot as plt
-
-    plt.figure()
-    sampled_data_info.reset_index(drop=False)["writer_id"].value_counts().plot.hist()
-    log(INFO, sampled_data_info.shape)
-    # plt.show()

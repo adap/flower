@@ -248,21 +248,3 @@ def create_federated_dataloaders(
     )
     log(INFO, "Creation of the partitioned by writer_id PyTorch Datasets done")
     return trainloaders, valloaders, testloaders
-
-
-if __name__ == "__main__":
-    sampled_data_info = pd.read_csv(
-        "../../data/processed/niid_sampled_images_to_labels.csv"
-    )
-    label_encoder = preprocessing.LabelEncoder()
-    labels = label_encoder.fit_transform(sampled_data_info["character"])
-    # Create a list of DataLoaders
-    full_dataset = create_dataset(sampled_data_info, labels)
-    division_list = create_partition_list(sampled_data_info)
-    # Partitioned by writer (therefore by client in the FL settings)
-    partitioned_dataset = partition_dataset(full_dataset, division_list)
-    partitioned_train, partitioned_validation, partitioned_test = train_valid_test_partition(
-        partitioned_dataset
-    )
-    trainloaders = transform_datasets_into_dataloaders(partitioned_train)
-    testloaders = transform_datasets_into_dataloaders(partitioned_test)

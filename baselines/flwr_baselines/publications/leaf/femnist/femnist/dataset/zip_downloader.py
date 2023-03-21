@@ -59,11 +59,3 @@ class ZipDownloader:
         os.remove(self._save_path)
         log(INFO, f"Removing zip file done: {self._save_path}")
 
-
-if __name__ == "__main__":
-    nist_by_class_url = "https://s3.amazonaws.com/nist-srd/SD19/by_class.zip"
-    nist_by_writer_url = "https://s3.amazonaws.com/nist-srd/SD19/by_write.zip"
-    nist_by_class_downloader = ZipDownloader("data/raw", nist_by_class_url)
-    nist_by_writer_downloader = ZipDownloader("data/raw", nist_by_writer_url)
-    nist_by_class_downloader.download()
-    nist_by_writer_downloader.download()

@@ -152,9 +152,3 @@ def test(
         accuracy = 100.0 * correct / total
         loss /= float(len(dataloader))
     return accuracy, loss
-
-
-if __name__ == "__main__":
-    model = Net(num_classes=10)
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
