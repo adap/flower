@@ -47,7 +47,7 @@ def main(cfg: DictConfig):
         num_batches=cfg.training.batches_per_round,
     )
 
-    if cfg.same_train_test_clients:
+    if cfg.training.same_train_test_clients:
         #  Assign reference to a class
         flwr_strategy = FedAvgSameClients
     else:
@@ -75,7 +75,7 @@ def main(cfg: DictConfig):
     history = fl.simulation.start_simulation(
         client_fn=client_fnc,
         num_clients=total_n_clients,  # total number of clients in a simulation
-        config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
+        config=fl.server.ServerConfig(num_rounds=cfg.training.num_rounds),
         strategy=strategy,
         client_resources=client_resources,
     )
