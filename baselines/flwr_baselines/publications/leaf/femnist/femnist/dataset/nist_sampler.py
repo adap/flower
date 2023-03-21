@@ -84,6 +84,8 @@ class NistSampler:
             ].iloc[:missing_samples]
 
             niid_data_info = pd.concat([niid_data_info, partial_writer_samples], axis=0)
+            niid_data_info.index = niid_data_info.index.set_names(["id", "writer_id"])
+            niid_data_info = niid_data_info.reset_index(level=1)
             return niid_data_info
         else:
             raise ValueError(
