@@ -53,9 +53,6 @@ optimizer = tf.keras.optimizers.Adam(lr)
 model.compile(optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
 
 
-
-
-
 # Define Flower client
 class TabNetClient(fl.client.NumPyClient):
     def get_parameters(self, config):
