@@ -1,11 +1,11 @@
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
 import flwr as fl
 import numpy as np
 import torch
+from flwr.common.typing import NDArrays, Scalar
 from model import Net, test, train
 from torch.utils.data import DataLoader
-from flwr.common.typing import NDArrays, Scalar
 
 
 def get_parameters(net: torch.nn.Module) -> NDArrays:
@@ -65,7 +65,7 @@ class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config) -> NDArrays:
         return get_parameters(self.net)
 
-    def fit(self, parameters, config) -> Tuple[NDArrays, int, Dict[str: Scalar]]:
+    def fit(self, parameters, config) -> Tuple[NDArrays, int, Dict[str:Scalar]]:
         """Fit locally training model."""
         set_parameters(self.net, parameters)
         train_loss, train_acc, val_loss, val_acc = train(
@@ -88,7 +88,7 @@ class FlowerClient(fl.client.NumPyClient):
             },
         )
 
-    def evaluate(self, parameters, config)-> Tuple[float, int, Dict[str: Scalar]]:
+    def evaluate(self, parameters, config) -> Tuple[float, int, Dict[str:Scalar]]:
         """Evaluate locally training model."""
         set_parameters(self.net, parameters)
         loss, accuracy = test(self.net, self.testloader, device=self.device)
