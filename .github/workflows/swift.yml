@@ -1,14 +1,17 @@
 name: Swift
 
-on: 
-    push:
-        branches:
-            - main
-	paths:
-	    - src/swift
-    pull_request:
-        branches:
-            - main
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/swift/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "src/swift/**"
+
 
 jobs:
   build:
