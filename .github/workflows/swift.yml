@@ -9,8 +9,6 @@ on:
     pull_request:
         branches:
             - main
-	paths:
-	    - src/swift
 
 jobs:
   build:
