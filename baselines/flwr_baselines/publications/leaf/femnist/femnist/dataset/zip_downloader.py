@@ -17,7 +17,9 @@ class ZipDownloader:
         self._extract_path = extract_path
         self._url = url
         self._save_path = (
-            save_path if save_path is not None else pathlib.Path(f"{extract_path}" + ".zip")
+            save_path
+            if save_path is not None
+            else pathlib.Path(f"{extract_path}" + ".zip")
         )
 
     def download(self, unzip: bool = True) -> None:
@@ -58,4 +60,3 @@ class ZipDownloader:
         log(INFO, f"Removing zip file started: {self._save_path}")
         os.remove(self._save_path)
         log(INFO, f"Removing zip file done: {self._save_path}")
-

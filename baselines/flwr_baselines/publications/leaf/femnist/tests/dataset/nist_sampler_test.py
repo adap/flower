@@ -9,7 +9,8 @@ from tests.utils import recreate_nist
 
 class TestNistSampler(unittest.TestCase):
     def test_niid_sampling_information(self):
-        """Checks if the sampled dataframe has a string denoting the location"""
+        """Checks if the sampled dataframe has a string denoting the
+        location."""
         temp_dir = recreate_nist()
         nist_preprocessor = NISTPreprocessor(temp_dir.name)
         nist_preprocessor.preprocess()

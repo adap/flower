@@ -1,8 +1,7 @@
 import unittest
 
-from hamcrest import assert_that, equal_to
-
 from femnist.dataset.nist_preprocessor import NISTPreprocessor
+from hamcrest import assert_that, equal_to
 from tests.utils import recreate_nist
 
 

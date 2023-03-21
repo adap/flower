@@ -230,7 +230,11 @@ def create_federated_dataloaders(
     full_dataset = create_dataset(sampled_data_info, labels)
     division_list = create_partition_list(sampled_data_info)
     partitioned_dataset = partition_dataset(full_dataset, division_list)
-    partitioned_train, partitioned_validation, partitioned_test = train_valid_test_partition(
+    (
+        partitioned_train,
+        partitioned_validation,
+        partitioned_test,
+    ) = train_valid_test_partition(
         partitioned_dataset,
         random_seed=random_seed,
         train_split=train_fraction,
