@@ -49,6 +49,7 @@ scikit-image = "^0.18.1"
 scikit-learn = "^1.2.1"
 wget = "^3.2"
 pandas = "^1.5.3"
+pyhamcrest = "^2.0.4"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
