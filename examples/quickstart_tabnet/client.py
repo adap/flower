@@ -41,7 +41,7 @@ ds_train, ds_test, feature_columns = prepare_iris_dataset()
 # Make TensorFlow log less verbose  
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
-# Load model and data (MobileNetV2, CIFAR-10)
+# Load TabNet model
 model = tabnet.TabNetClassifier(feature_columns, num_classes=3,
                                 feature_dim=8, output_dim=4,
                                 num_decision_steps=4, relaxation_factor=1.0,
