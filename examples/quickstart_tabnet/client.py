@@ -63,7 +63,7 @@ class TabNetClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         model.set_weights(parameters)
-        model.fit(ds_train, epochs=100)
+        model.fit(ds_train, epochs=25)
         return model.get_weights(), len(ds_train), {}
 
     def evaluate(self, parameters, config):
