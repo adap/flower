@@ -6,11 +6,12 @@ import tabnet
 
 train_size = 125
 BATCH_SIZE = 50
-col_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
+col_names = ["sepal_length", "sepal_width", "petal_length", "petal_width"]
+
 
 def transform(ds):
-    features = tf.unstack(ds['features'])
-    labels = ds['label']
+    features = tf.unstack(ds["features"])
+    labels = ds["label"]
 
     x = dict(zip(col_names, features))
     y = tf.one_hot(labels, 3)
@@ -33,24 +34,32 @@ def prepare_iris_dataset():
     for col_name in col_names:
         feature_columns.append(tf.feature_column.numeric_column(col_name))
 
-
     return ds_train, ds_test, feature_columns
 
 
 ds_train, ds_test, feature_columns = prepare_iris_dataset()
-# Make TensorFlow log less verbose  
+# Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 # Load TabNet model
-model = tabnet.TabNetClassifier(feature_columns, num_classes=3,
-                                feature_dim=8, output_dim=4,
-                                num_decision_steps=4, relaxation_factor=1.0,
-                                sparsity_coefficient=1e-5, batch_momentum=0.98,
-                                virtual_batch_size=None, norm_type='group',
-                                num_groups=1)
-lr = tf.keras.optimizers.schedules.ExponentialDecay(0.01, decay_steps=100, decay_rate=0.9, staircase=False)
+model = tabnet.TabNetClassifier(
+    feature_columns,
+    num_classes=3,
+    feature_dim=8,
+    output_dim=4,
+    num_decision_steps=4,
+    relaxation_factor=1.0,
+    sparsity_coefficient=1e-5,
+    batch_momentum=0.98,
+    virtual_batch_size=None,
+    norm_type="group",
+    num_groups=1,
+)
+lr = tf.keras.optimizers.schedules.ExponentialDecay(
+    0.01, decay_steps=100, decay_rate=0.9, staircase=False
+)
 optimizer = tf.keras.optimizers.Adam(lr)
-model.compile(optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
+model.compile(optimizer, loss="categorical_crossentropy", metrics=["accuracy"])
 
 
 # Define Flower client
