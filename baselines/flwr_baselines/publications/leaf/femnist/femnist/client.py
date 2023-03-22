@@ -17,7 +17,8 @@ def set_parameters(net: torch.nn.Module, parameters: NDArrays) -> None:
     """Set parameters to a PyTorch network."""
     params_dict = zip(net.state_dict().keys(), parameters)
     state_dict = dict({k: torch.Tensor(v) for k, v in params_dict})
-    net.load_state_dict(state_dict, strict=True)
+    # ignore argument type because Dict keeps order in the supported python versions
+    net.load_state_dict(state_dict, strict=True)  # type: ignore
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -65,7 +66,7 @@ class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config) -> NDArrays:
         return get_parameters(self.net)
 
-    def fit(self, parameters, config) -> Tuple[NDArrays, int, Dict[str:Scalar]]:
+    def fit(self, parameters, config) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
         """Fit locally training model."""
         set_parameters(self.net, parameters)
         train_loss, train_acc, val_loss, val_acc = train(
@@ -77,18 +78,20 @@ class FlowerClient(fl.client.NumPyClient):
             device=self.device,
             n_batches=self.num_batches,
         )
-        return (
-            get_parameters(self.net),
-            len(self.trainloader),
-            {
+        return_dict: Dict[str, Scalar]
+        if val_loss is None or val_acc is None:
+            return_dict = {"train_loss": train_loss, "train_acc": train_acc}
+        else:
+            return_dict = {
                 "train_loss": train_loss,
                 "train_acc": train_acc,
                 "val_loss": val_loss,
                 "val_acc": val_acc,
-            },
-        )
+            }
 
-    def evaluate(self, parameters, config) -> Tuple[float, int, Dict[str:Scalar]]:
+        return get_parameters(self.net), len(self.trainloader), return_dict
+
+    def evaluate(self, parameters, config) -> Tuple[float, int, Dict[str, Scalar]]:
         """Evaluate locally training model."""
         set_parameters(self.net, parameters)
         loss, accuracy = test(self.net, self.testloader, device=self.device)

@@ -1,6 +1,7 @@
 import pathlib
 from functools import partial
 from logging import INFO
+from typing import Type, Union
 
 import flwr as fl
 import hydra
@@ -42,11 +43,11 @@ def main(cfg: DictConfig):
         device=device,
         num_epochs=cfg.training.epochs_per_round,
         learning_rate=cfg.training.learning_rate,
-        # There exist other variants of the FEMNIST dataset with different # of classes
+        # There exist other variants of the NIST dataset with different # of classes
         num_classes=cfg.dataset.num_classes,
         num_batches=cfg.training.batches_per_round,
     )
-
+    flwr_strategy: Union[Type[FedAvg], Type[FedAvgSameClients]]
     if cfg.training.same_train_test_clients:
         #  Assign reference to a class
         flwr_strategy = FedAvgSameClients
@@ -73,7 +74,7 @@ def main(cfg: DictConfig):
 
     # Start simulation
     history = fl.simulation.start_simulation(
-        client_fn=client_fnc,
+        client_fn=client_fnc,  # type: ignore
         num_clients=total_n_clients,  # total number of clients in a simulation
         config=fl.server.ServerConfig(num_rounds=cfg.training.num_rounds),
         strategy=strategy,

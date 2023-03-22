@@ -1,11 +1,11 @@
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
-from flwr.common import Metrics
+from flwr.common import Metrics, Scalar
 
 
-def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, float]:
+def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, Scalar]:
     n_batches_list = [n_batches for n_batches, _ in metrics]
     n_batches_sum = sum(n_batches_list)
     metrics_lists: Dict[str, List[float]] = {}
@@ -24,7 +24,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, float]:
             if isinstance(value, float) or isinstance(value, int):
                 metrics_lists[single_metric].append(float(number_of_batches * value))
 
-    weighted_metrics = {}
+    weighted_metrics: Dict[str, Scalar] = {}
     for metric_name, metric_values in metrics_lists.items():
         weighted_metrics[metric_name] = sum(metric_values) / n_batches_sum
 
