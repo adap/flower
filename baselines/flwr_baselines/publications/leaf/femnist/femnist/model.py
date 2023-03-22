@@ -47,7 +47,7 @@ def train(
     device: torch.device,
     n_batches: Optional[int] = None,
     verbose: bool = False,
-) -> Tuple[float, float, float, float]:
+) -> Tuple[float, float, Optional[float], Optional[float]]:
     """Train a given model with CrossEntropy and SGD (or some version of it
     like batch-SGD).
 

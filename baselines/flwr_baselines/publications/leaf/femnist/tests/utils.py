@@ -1,8 +1,8 @@
 import tempfile
 from pathlib import Path
 
-import PIL
 import numpy as np
+import PIL
 from PIL import Image
 
 

@@ -1,6 +1,6 @@
 import pathlib
 from logging import INFO, WARN
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 
 import pandas as pd
 from femnist.dataset.dataset_utils import calculate_series_hashes, hex_decimal_to_char
@@ -34,10 +34,10 @@ class NISTPreprocessor:
         self._raw_images_information_path = self._data_dir / "raw_images_to_labels.csv"
         self._by_class_nist = self._raw_data_dir / "by_class"
         self._by_writer_nist = self._raw_data_dir / "by_write"
-        self._writer_df: Optional[pd.DataFrame] = None
-        self._class_df: Optional[pd.DataFrame] = None
-        self._df: Optional[pd.DataFrame] = None
-        self._preprocessed_df: Optional[pd.DataFrame] = None
+        self._writer_df: pd.DataFrame = pd.DataFrame()
+        self._class_df: pd.DataFrame = pd.DataFrame()
+        self._df: pd.DataFrame = pd.DataFrame()
+        self._preprocessed_df: pd.DataFrame = pd.DataFrame()
 
     def preprocess(self, overwrite: bool = False) -> None:
         """Extracts necessary information to create data that has both writer
@@ -148,7 +148,7 @@ class NISTPreprocessor:
             dataframe with information about the path, writer_id, character(label)
         """
         log(INFO, "Image preprocessing started")
-        writer_to_character_to_count: Dict[str : Dict[str:int]] = {}
+        writer_to_character_to_count: Dict[str, Dict[str, int]] = dict()
         resized_size = (28, 28)
         new_df = self._df.copy()
         new_df["path"] = pathlib.Path("")
