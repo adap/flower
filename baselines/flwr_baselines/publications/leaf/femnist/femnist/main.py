@@ -9,10 +9,10 @@ import pandas as pd
 from client import create_client
 from dataset.dataset import create_federated_dataloaders
 from fedavg_same_clients import FedAvgSameClients
+from femnist_utils import create_pytorch_device, setup_seed, weighted_average
 from flwr.common.logger import log
 from flwr.server.strategy import FedAvg
 from omegaconf import DictConfig
-from femnist_utils import create_pytorch_device, setup_seed, weighted_average
 
 
 @hydra.main(config_path="../conf", version_base=None)
