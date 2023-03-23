@@ -54,15 +54,15 @@ def train(net, trainloader, epochs):
 def test(net, testloader):
     """Validate the model on the test set."""
     criterion = torch.nn.CrossEntropyLoss()
-    correct, total, loss = 0, 0, 0.0
+    correct, loss = 0, 0.0
     with torch.no_grad():
         for images, labels in tqdm(testloader):
             outputs = net(images.to(DEVICE))
             labels = labels.to(DEVICE)
             loss += criterion(outputs, labels).item()
-            total += labels.size(0)
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-    return loss / len(testloader.dataset), correct / total
+    accuracy = correct / len(testloader.dataset)
+    return loss, accuracy
 
 
 def load_data():
