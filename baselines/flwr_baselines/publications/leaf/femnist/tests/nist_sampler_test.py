@@ -1,5 +1,6 @@
+"""NIST sampler test."""
+# pylint: disable=no-self-use, protected-access
 import unittest
-from pathlib import Path
 
 from femnist.dataset.nist_preprocessor import NISTPreprocessor
 from femnist.dataset.nist_sampler import NistSampler
@@ -8,6 +9,8 @@ from tests.utils import recreate_nist
 
 
 class TestNistSampler(unittest.TestCase):
+    """Test NIST sampler."""
+
     def test_niid_sampling_information(self):
         """Checks if the sampled dataframe has a string denoting the
         location."""

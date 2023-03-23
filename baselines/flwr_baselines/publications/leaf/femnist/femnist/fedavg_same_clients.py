@@ -60,7 +60,7 @@ class FedAvgSameClients(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self._current_round_fit_clients_fits_list = None
+        self._current_round_fit_clients_fits_list: List[Tuple[ClientProxy, FitIns]] = []
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager

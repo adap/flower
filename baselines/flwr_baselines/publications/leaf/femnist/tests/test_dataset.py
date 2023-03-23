@@ -1,3 +1,5 @@
+"""Dataset tests."""
+# pylint: disable=no-self-use, protected-access
 import unittest
 
 from femnist.dataset.dataset import (
@@ -8,13 +10,17 @@ from femnist.dataset.dataset import (
 )
 from femnist.dataset.nist_preprocessor import NISTPreprocessor
 from femnist.dataset.nist_sampler import NistSampler
-from hamcrest import assert_that, contains_string, equal_to, is_
+from hamcrest import assert_that, equal_to, is_
 from sklearn import preprocessing
 from tests.utils import recreate_nist
 
 
 class TestDataset(unittest.TestCase):
+    """Test dataset."""
+
     def test_partitioning(self):
+        """Test if the full partitioning has the same number of writer as in
+        the preprocessed df."""
         temp_dir = recreate_nist()
         nist_preprocessor = NISTPreprocessor(temp_dir.name)
         nist_preprocessor.preprocess()
@@ -32,6 +38,7 @@ class TestDataset(unittest.TestCase):
         )
         temp_dir.cleanup()
 
+    # pylint: disable=too-many-locals
     def test_train_valid_test_div(self):
         """Test division of the already partitioned dataset into train test
         valid."""
@@ -51,8 +58,8 @@ class TestDataset(unittest.TestCase):
         test_fraction = 0.5
         (
             partitioned_train,
-            partitioned_validation,
-            partitioned_test,
+            _,
+            _,
         ) = train_valid_test_partition(
             partitioned_datasets,
             random_seed=42,

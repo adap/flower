@@ -1,3 +1,4 @@
+"""Utils module for tests."""
 import tempfile
 from pathlib import Path
 
@@ -7,6 +8,12 @@ from PIL import Image
 
 
 def recreate_nist():
+    """Recreate a small dataset in a structure resembling the NIST dataset.
+
+    There are two different writers and 13 images saved in a temporary
+    directory.
+    """
+    # pylint: disable=consider-using-with
     temp_dir = tempfile.TemporaryDirectory()
     raw_dir = Path(temp_dir.name) / "raw"
     (raw_dir / "by_write" / "hsf_0" / "a" / "c000_sth").mkdir(parents=True)
@@ -40,6 +47,7 @@ def recreate_nist():
 
 
 def create_random_image() -> PIL.Image:
+    """Create a single random image of size 128 by 128."""
     arr = np.random.randint(0, 255, size=(128, 128), dtype=np.uint8)
     img = Image.fromarray(arr)
     return img
