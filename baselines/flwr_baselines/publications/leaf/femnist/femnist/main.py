@@ -12,7 +12,7 @@ from fedavg_same_clients import FedAvgSameClients
 from flwr.common.logger import log
 from flwr.server.strategy import FedAvg
 from omegaconf import DictConfig
-from utils import create_pytorch_device, setup_seed, weighted_average
+from femnist_utils import create_pytorch_device, setup_seed, weighted_average
 
 
 @hydra.main(config_path="../conf", version_base=None)
