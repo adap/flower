@@ -3,7 +3,7 @@ name: Swift
 on:
   push:
     branches:
-      -main
+      - main
 	paths:
       - "src/swift/**"
   pull_request:
