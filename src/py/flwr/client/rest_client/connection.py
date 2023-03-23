@@ -19,7 +19,13 @@ from contextlib import contextmanager
 from logging import ERROR, INFO, WARN
 from typing import Callable, Dict, Iterator, Optional, Tuple
 
-import requests
+try:
+    import requests
+except ImportError as missing_dep:
+    raise ImportError(
+        "To use the REST API you must install the "
+        "extra dependencies by running `pip install flwr['rest']`."
+    ) from missing_dep
 
 from flwr.client.message_handler.task_handler import get_server_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH

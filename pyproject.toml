@@ -36,12 +36,8 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-packages = [
-    { include = "flwr", from = "src/py" },
-]
-exclude = [
-    "src/py/**/*_test.py",
-]
+packages = [{ include = "flwr", from = "src/py" }]
+exclude = ["src/py/**/*_test.py"]
 
 [tool.poetry.scripts]
 flower-driver-api = "flwr.server:run_driver_api"
@@ -60,11 +56,11 @@ iterators = "^0.0.2"
 # Optional dependencies (VCE)
 ray = { extras = ["default"], version = "~2.3.0", optional = true }
 # Optional dependencies (REST transport layer)
-requests = "^2.28.2"
-fastapi = "^0.92.0"
-starlette = "^0.25.0"
-uvicorn = {extras = ["standard"], version = "^0.20.0"}
-# Optional dependencies (xgboost)
+requests = { version = "^2.28.2", optional = true }
+fastapi = { version = "^0.92.0", optional = true }
+starlette = { version = "^0.25.0", optional = true }
+uvicorn = { extras = ["standard"], version = "^0.20.0", optional = true }
+# Optional dependency (xgboost)
 xgboost = { version = "^1.6.2", optional = true }
 
 [tool.poetry.extras]
@@ -121,30 +117,19 @@ disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import
 [tool.pytest.ini_options]
 minversion = "6.2"
 addopts = "-qq"
-testpaths = [
-    "src/py/flwr",
-    "src/py/flwr_tool",
-]
+testpaths = ["src/py/flwr", "src/py/flwr_tool"]
 
 [tool.mypy]
-plugins = [
-    "numpy.typing.mypy_plugin",
-]
+plugins = ["numpy.typing.mypy_plugin"]
 ignore_missing_imports = true
 strict = true
 
 [[tool.mypy.overrides]]
-module = [
-    "flwr_example.*",
-    "flwr_experimental.*",
-]
+module = ["flwr_example.*", "flwr_experimental.*"]
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = [
-    "importlib.metadata.*",
-    "importlib_metadata.*",
-]
+module = ["importlib.metadata.*", "importlib_metadata.*"]
 follow_imports = "skip"
 follow_imports_for_stubs = true
 disallow_untyped_calls = false

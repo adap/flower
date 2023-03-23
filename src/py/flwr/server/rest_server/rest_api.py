@@ -19,8 +19,14 @@ from logging import INFO
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import FastAPI, HTTPException, Request, Response
-from starlette.datastructures import Headers
+try:
+    from fastapi import FastAPI, HTTPException, Request, Response
+    from starlette.datastructures import Headers
+except ImportError as missing_dep:
+    raise ImportError(
+        "To use the REST API you must install the "
+        "extra dependencies by running `pip install flwr['rest']`."
+    ) from missing_dep
 
 from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
@@ -33,10 +39,10 @@ from flwr.proto.fleet_pb2 import (
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.state import State
 
-app = FastAPI()
+app: FastAPI = FastAPI()
 
 
-@app.post("/api/v0/fleet/pull-task-ins", response_class=Response)
+@app.post("/api/v0/fleet/pull-task-ins", response_class=Response)  # type: ignore
 async def pull_task_ins(request: Request) -> Response:
     """Pull TaskIns."""
     _check_headers(request.headers)
@@ -72,7 +78,7 @@ async def pull_task_ins(request: Request) -> Response:
     )
 
 
-@app.post("/api/v0/fleet/push-task-res", response_class=Response)
+@app.post("/api/v0/fleet/push-task-res", response_class=Response)  # type: ignore
 async def push_task_res(request: Request) -> Response:  # Check if token is needed here
     """Push TaskRes."""
     _check_headers(request.headers)
