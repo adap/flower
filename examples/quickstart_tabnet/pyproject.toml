@@ -3,13 +3,14 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "quickstart_tensorflow"
+name = "quickstart_tabnet"
 version = "0.1.0"
-description = "Keras Federated Learning Quickstart with Flower"
+description = "Tabnet Federated Learning Quickstart with Flower"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.11"
+python = ">=3.8,<3.11"
 flwr = "^1.0.0"
-tensorflow-cpu = "<=2.11.0"
-libclang = "<16.0.0"
+tensorflow-cpu = "^2.11.0"
+tensorflow_datasets = "^4.8.3"
+tabnet = "^0.1.6"
