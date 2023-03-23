@@ -26,6 +26,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.common.exception import RestImportError
 from flwr.common.logger import log
 from flwr.common.typing import (
     Code,
@@ -142,10 +143,7 @@ def start_client(
         try:
             from .rest_client.connection import http_request_response
         except ImportError as missing_dep:
-            raise ImportError(
-                "To use the REST API you must install the "
-                "extra dependencies by running `pip install flwr['rest']`."
-            ) from missing_dep
+            raise RestImportError() from missing_dep
         connection = http_request_response
     else:
         connection = grpc_connection
