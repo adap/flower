@@ -12,3 +12,4 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 python = ">=3.7,<3.11"
 flwr = { extras = ["simulation"], version = "^1.0.0" }
 tensorflow-cpu = "<=2.11.0"
+libclang = "<16.0.0"
