@@ -4,8 +4,11 @@ from logging import WARN
 from typing import Optional
 
 import pandas as pd
-from femnist.dataset.dataset_utils import _create_samples_division_list
 from flwr.common.logger import log
+
+from flwr_baselines.publications.leaf.femnist.femnist.dataset.dataset_utils import (
+    _create_samples_division_list,
+)
 
 
 # pylint: disable=bad-option-value, too-few-public-methods

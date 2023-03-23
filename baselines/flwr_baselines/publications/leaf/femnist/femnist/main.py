@@ -8,13 +8,21 @@ import flwr as fl
 import hydra
 import pandas as pd
 import torch
-from client import create_client
-from dataset.dataset import create_federated_dataloaders
-from fedavg_same_clients import FedAvgSameClients
-from femnist_utils import setup_seed, weighted_average
 from flwr.common.logger import log
 from flwr.server.strategy import FedAvg
 from omegaconf import DictConfig
+
+from flwr_baselines.publications.leaf.femnist.femnist.client import create_client
+from flwr_baselines.publications.leaf.femnist.femnist.dataset.dataset import (
+    create_federated_dataloaders,
+)
+from flwr_baselines.publications.leaf.femnist.femnist.fedavg_same_clients import (
+    FedAvgSameClients,
+)
+from flwr_baselines.publications.leaf.femnist.femnist.femnist_utils import (
+    setup_seed,
+    weighted_average,
+)
 
 
 # pylint: disable=too-many-locals

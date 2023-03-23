@@ -4,10 +4,14 @@ from logging import INFO, WARN
 from typing import Dict, Union
 
 import pandas as pd
-from femnist.dataset.dataset_utils import calculate_series_hashes, hex_decimal_to_char
 from flwr.common.logger import log
 from PIL import Image
 from tqdm import tqdm
+
+from flwr_baselines.publications.leaf.femnist.femnist.dataset.dataset_utils import (
+    calculate_series_hashes,
+    hex_decimal_to_char,
+)
 
 
 # pylint: disable=too-many-instance-attributes
