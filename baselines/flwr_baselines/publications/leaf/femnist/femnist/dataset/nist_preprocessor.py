@@ -1,3 +1,4 @@
+"""Module to preprocess the NIST Special Database 19 into FeMNIST/FEMNIST."""
 import pathlib
 from logging import INFO, WARN
 from typing import Dict, Union
@@ -9,6 +10,7 @@ from PIL import Image
 from tqdm import tqdm
 
 
+# pylint: disable=too-many-instance-attributes
 class NISTPreprocessor:
     """Preprocess NIST images from two directories divided by class and by
     writer.
@@ -55,9 +57,11 @@ class NISTPreprocessor:
         if self._processed_images_information_path.exists() and not overwrite:
             log(
                 WARN,
-                f"The preprocessed information already exists in {self._processed_images_information_path}. "
-                f"It's assumed that the preprocessed images exist too."
-                f"Specify 'overwrite' as True to preprocess the images and recreate the reference information.",
+                "The preprocessed information already exists in %s. "
+                "It's assumed that the preprocessed images exist too."
+                "Specify 'overwrite' as True to preprocess the images and recreate the reference "
+                "information.",
+                self._processed_images_information_path,
             )
             return
 
@@ -69,12 +73,14 @@ class NISTPreprocessor:
             self._df = self._merge_class_and_writer_information()
             log(
                 INFO,
-                f"Saving information about raw images to {self._raw_images_information_path} started",
+                "Saving information about raw images to %s started",
+                self._raw_images_information_path,
             )
             self._df.to_csv(self._raw_images_information_path)
             log(
                 INFO,
-                f"Saving information about raw images to {self._raw_images_information_path} done",
+                "Saving information about raw images to %s done",
+                self._raw_images_information_path,
             )
         else:
             self._df = pd.read_csv(self._raw_images_information_path, index_col=0)
@@ -82,23 +88,28 @@ class NISTPreprocessor:
         self._preprocessed_df = self._preprocess_images()
         log(
             INFO,
-            f"Saving information about raw images to {self._processed_images_information_path} started",
+            "Saving information about raw images to %s started",
+            self._processed_images_information_path,
         )
         self._preprocessed_df.to_csv(self._processed_images_information_path)
         log(
             INFO,
-            f"Saving information about raw images to {self._processed_images_information_path} done",
+            "Saving information about raw images to %s done",
+            self._processed_images_information_path,
         )
 
     def create_dir_structure(self):
+        """Create directory structure required for the dataset storage."""
         log(INFO, "Directory structure creation started")
         self._processed_dir.mkdir(exist_ok=True)
-        log(INFO, f"Created/already exist directory {self._processed_dir}")
+        log(INFO, "Created/already exist directory %s", self._processed_dir)
         self._processed_images_dir.mkdir(exist_ok=True)
-        log(INFO, f"Created/already exist directory {self._processed_images_dir}")
+        log(INFO, "Created/already exist directory %s", self._processed_images_dir)
         log(INFO, "Directory structure creation done")
 
     def _extract_writer_information(self):
+        """Extract writer id based on the path (directories) it was placed
+        in."""
         log(INFO, "Writer information preprocessing started")
         images_paths = self._by_writer_nist.glob("*/*/*/*")
         images_paths = list(images_paths)
@@ -110,6 +121,12 @@ class NISTPreprocessor:
         return writer_df
 
     def _extract_class_information(self):
+        """Extract class (label) based on the path (directories) it was placed
+        in.
+
+        It also transforms hexadecimal ascii information into readable
+        character.
+        """
         log(INFO, "Class information preprocessing started")
         hsf_and_train_dir = self._by_class_nist.glob("*/*")
         hsf_dirs = [path for path in hsf_and_train_dir if "train" not in str(path)]

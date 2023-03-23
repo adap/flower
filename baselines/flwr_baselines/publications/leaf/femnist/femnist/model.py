@@ -1,3 +1,4 @@
+"""Implementation of the model used for the FEMNIST experiments."""
 from logging import INFO
 from typing import Optional, Tuple
 
@@ -11,8 +12,9 @@ class Net(nn.Module):
     """Implementation of the model used in the LEAF paper for training on
     FEMNIST data."""
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, num_classes):
-        super(Net, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=5, padding="same")
         self.relu1 = nn.ReLU()
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -38,6 +40,7 @@ class Net(nn.Module):
         return x
 
 
+# pylint: disable=too-many-arguments, too-many-locals, no-member
 def train(
     net: nn.Module,
     trainloader: DataLoader,
@@ -57,11 +60,12 @@ def train(
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
     net.train()
+    # pylint: disable=R1705
     if epochs is not None:
         for epoch in range(epochs):
             correct, total, epoch_loss = 0, 0, 0.0
             for images, labels in trainloader:
-                correct, epoch_loss, total = inner_loop(
+                correct, epoch_loss, total = train_step(
                     correct,
                     criterion,
                     device,
@@ -78,7 +82,10 @@ def train(
             if verbose:
                 log(
                     INFO,
-                    f"Epoch {epoch + 1}: train loss {epoch_loss}, accuracy {epoch_acc}",
+                    "Epoch %s: train loss %s, accuracy %s",
+                    str(epoch + 1),
+                    str(epoch_loss),
+                    str(epoch_acc),
                 )
         train_loss, train_acc = test(net, trainloader, device)
         if len(valloader):
@@ -92,7 +99,7 @@ def train(
         for idx, (images, labels) in enumerate(trainloader):
             if idx == n_batches:
                 break
-            correct, epoch_loss, total = inner_loop(
+            correct, epoch_loss, total = train_step(
                 correct,
                 criterion,
                 device,
@@ -103,20 +110,23 @@ def train(
                 optimizer,
                 total,
             )
-        train_loss /= n_batches * images.size(0)
+        train_loss /= n_batches * next(iter(trainloader)).size(0)
         train_acc = correct / total
         if verbose:
             log(
                 INFO,
-                f"Batch len based training: train loss {train_loss}, accuracy {train_acc}",
+                "Batch len based training: train loss %s, accuracy %s",
+                str(train_loss),
+                str(train_acc),
             )
         val_loss, val_acc = test(net, valloader, device)
         return train_loss, train_acc, val_loss, val_acc
 
 
-def inner_loop(
+def train_step(
     correct, criterion, device, epoch_loss, images, labels, net, optimizer, total
 ):
+    """Single train step."""
     images = images.to(device)
     labels = labels.to(device)
     optimizer.zero_grad()
@@ -124,7 +134,6 @@ def inner_loop(
     loss = criterion(outputs, labels)
     loss.backward()
     optimizer.step()
-    # Metrics
     epoch_loss += loss
     total += labels.size(0)
     correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
@@ -134,11 +143,10 @@ def inner_loop(
 def test(
     net: nn.Module, dataloader: DataLoader, device: torch.device
 ) -> Tuple[float, float]:
-    """Calculate metrics on the given dataloader."""
+    """Test - calculate metrics on the given dataloader."""
     criterion = torch.nn.CrossEntropyLoss()
     if len(dataloader) == 0:
         raise ValueError("Dataloader can't be 0, exiting...")
-    # Validation loop
     correct, total, loss = 0, 0, 0.0
     net.eval()
     with torch.no_grad():

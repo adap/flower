@@ -1,13 +1,14 @@
+"""Module for sampling the reference data of FEMNIST."""
 import math
-import pathlib
-from logging import INFO, WARN
-from typing import Union
+from logging import WARN
+from typing import Optional
 
 import pandas as pd
 from femnist.dataset.dataset_utils import _create_samples_division_list
 from flwr.common.logger import log
 
 
+# pylint: disable=bad-option-value, too-few-public-methods
 class NistSampler:
     """
     Attributes
@@ -21,22 +22,40 @@ class NistSampler:
     def __init__(self, data_info_df: pd.DataFrame):
         self._data_info_df = data_info_df
 
+    # pylint: disable=too-many-locals
     def sample(
         self,
         sampling_type: str,
         frac: float,
-        n_clients: Union[int, None] = None,
+        n_clients: Optional[int] = None,
         random_seed: int = None,
     ) -> pd.DataFrame:
-        # n_clients is not used when niid
-        # The question is if that hold in memory
+        """Samples data reference stored in the self._data_info_df.
+
+        Parameters
+        ----------
+        sampling_type: str
+            "niid" or "iid"
+        frac: float
+            fraction of the total data that will be used for sampling
+        n_clients: Optional[int]
+            number of clients (effective only in the case of iid sampling, in niid the number of
+            clients is determined by the fraction only)
+        random_seed: int
+            random seed used for data shuffling
+
+        Returns
+        -------
+        sampled_data_info: pd.DataFrame
+            sampled according to the given params reference to the data
+        """
+        # pylint: disable=no-else-return
         if sampling_type == "iid":
             if n_clients is None:
                 raise ValueError("n_clients can not be None for idd training")
             idd_data_info_df = self._data_info_df.sample(
                 frac=frac, random_state=random_seed
             )
-            # add client ids (todo: maybe better in the index)
             idd_data_info_df["client_id"] = _create_samples_division_list(
                 idd_data_info_df.shape[0], n_clients, True
             )
@@ -49,9 +68,9 @@ class NistSampler:
                     "The number of clients is equal to the number of unique writers",
                 )
             # It uses the following sampling logic:
-            # Take N users with their full data till it doesn't exceed the total number of data that can be used
-            # Then take remaining M samples (from 1 or more users, probably only one) till the  total number of samples
-            # is reached
+            # Take N users with their full data till it doesn't exceed the total number of data
+            # that can be used. Then take remaining M samples (from 1 or more users, probably only
+            # one) till the  total number of samples is reached
             frac_samples = math.ceil(
                 frac * self._data_info_df.shape[0]
             )  # make it consistent with pd.DatFrame.sample()

@@ -1,3 +1,5 @@
+"""FEMNIST dataset creation module."""
+# pylint: disable=no-member
 import pathlib
 from logging import INFO
 from typing import List, Tuple
@@ -100,6 +102,7 @@ def partition_dataset(
     return subsets
 
 
+# pylint: disable=too-many-locals
 def train_valid_test_partition(
     partitioned_dataset: List[Dataset],
     train_split: float = 0.9,
@@ -118,6 +121,8 @@ def train_valid_test_partition(
         part of the data used for training
     validation_split: float
         part of the data used for validation
+    test_split: float
+        part of the data used for testing
     random_seed: int
         seed for data splitting
 
@@ -178,15 +183,35 @@ def transform_datasets_into_dataloaders(
     return dataloaders
 
 
+# pylint: disable=too-many-arguments
 def create_federated_dataloaders(
-    distribution_type: str,
+    sampling_type: str,
     dataset_fraction: float,
     batch_size: int,
     train_fraction: float,
     validation_fraction: float,
     test_fraction: float,
     random_seed: int,
-):
+) -> Tuple[List[DataLoader], List[DataLoader], List[DataLoader]]:
+    """Create the federated dataloaders by following all the preprocessing
+    steps and division.
+
+    Parameters
+    ----------
+    sampling_type: str
+        "niid" or "iid"
+    dataset_fraction: float
+        fraction of the total data that will be used for sampling
+    batch_size: int
+        batch size
+    train_fraction, validation_fraction, test_fraction: float
+        fraction of each local dataset used for training, validation, testing
+    random_seed: int
+        random seed for data shuffling
+
+    Returns
+    -------
+    """
     if train_fraction + validation_fraction + test_fraction != 1.0:
         raise ValueError(
             "The fraction of train, validation and test should add up to 1.0."
@@ -214,10 +239,10 @@ def create_federated_dataloaders(
     df_info = pd.read_csv(df_info_path, index_col=0)
     sampler = NistSampler(df_info)
     sampled_data_info = sampler.sample(
-        distribution_type, dataset_fraction, random_seed=random_seed
+        sampling_type, dataset_fraction, random_seed=random_seed
     )
     sampled_data_info_path = pathlib.Path(
-        f"data/processed_FeMNIST/{distribution_type}_sampled_images_to_labels.csv"
+        f"data/processed_FeMNIST/{sampling_type}_sampled_images_to_labels.csv"
     )
     sampled_data_info.to_csv(sampled_data_info_path)
     log(INFO, "Creation of the sampling information done")

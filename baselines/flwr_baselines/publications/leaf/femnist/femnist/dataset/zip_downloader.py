@@ -1,3 +1,5 @@
+"""Module for downloading the ZIP files, extracting them and removing the
+downloaded zip file."""
 import os
 import pathlib
 import shutil
@@ -8,6 +10,7 @@ import wget
 from flwr.common.logger import log
 
 
+# pylint: disable=too-few-public-methods
 class ZipDownloader:
     """Zip downloader that enable also unzip and remove the downloaded file."""
 
@@ -35,15 +38,18 @@ class ZipDownloader:
         ):
             log(
                 INFO,
-                f"Files from {self._url} are already downloaded and extracted from the zip file into {self._extract_path}. "
-                f"Skipping downloading and extracting.",
+                "Files from %s are already downloaded and extracted from the zip file "
+                "into %s. Skipping downloading and extracting.",
+                str(self._url),
+                str(self._extract_path),
             )
-            return None
+            return
         self._create_dir_structure()
         if self._save_path.exists():
             log(
                 INFO,
-                f"Zip file under {self._save_path} already exists. Skipping downloading.",
+                "Zip file under %s already exists. Skipping downloading.",
+                str(self._save_path),
             )
         else:
             wget.download(self._url, out=str(self._save_path))
@@ -54,9 +60,14 @@ class ZipDownloader:
         self._save_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _unzip(self):
-        log(INFO, f"Unzipping of {self._save_path} to {self._save_path.parent} started")
+        log(
+            INFO,
+            "Unzipping of %s to %s started",
+            str(self._save_path),
+            str(self._save_path.parent),
+        )
         shutil.unpack_archive(self._save_path, self._save_path.parent)
-        log(INFO, f"Unzipping of {self._save_path} done")
-        log(INFO, f"Removing zip file started: {self._save_path}")
+        log(INFO, "Unzipping of %s done", str(self._save_path))
+        log(INFO, "Removing zip file started: %s", str(self._save_path))
         os.remove(self._save_path)
-        log(INFO, f"Removing zip file done: {self._save_path}")
+        log(INFO, "Removing zip file done: %s", str(self._save_path))

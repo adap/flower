@@ -1,3 +1,4 @@
+"""Main module for running FEMNIST experiments."""
 import pathlib
 from functools import partial
 from logging import INFO
@@ -6,21 +7,25 @@ from typing import Type, Union
 import flwr as fl
 import hydra
 import pandas as pd
+import torch
 from client import create_client
 from dataset.dataset import create_federated_dataloaders
 from fedavg_same_clients import FedAvgSameClients
-from femnist_utils import create_pytorch_device, setup_seed, weighted_average
+from femnist_utils import setup_seed, weighted_average
 from flwr.common.logger import log
 from flwr.server.strategy import FedAvg
 from omegaconf import DictConfig
 
 
+# pylint: disable=too-many-locals
 @hydra.main(config_path="../conf", version_base=None)
 def main(cfg: DictConfig):
+    """Main function for running FEMNIST experiments."""
     # Ensure reproducibility
     setup_seed(cfg.random_seed)
     # Specify PyTorch device
-    device = create_pytorch_device(cfg.device)
+    # pylint: disable=no-member
+    device = torch.device(cfg.device)
     # Create datasets for federated learning
     trainloaders, valloaders, testloaders = create_federated_dataloaders(
         cfg.dataset.distribution_type,
@@ -65,7 +70,7 @@ def main(cfg: DictConfig):
         fraction_evaluate=0.001,
         min_evaluate_clients=cfg.training.num_clients_per_round,
         # evaluate_fn=None, #  Leave empty since it's responsible for the centralized evaluation
-        fit_metrics_aggregation_fn=weighted_average,  # todo: collect the fit metrics
+        fit_metrics_aggregation_fn=weighted_average,
         evaluate_metrics_aggregation_fn=weighted_average,
     )
     client_resources = None
@@ -96,15 +101,16 @@ def main(cfg: DictConfig):
         results_dir_path.mkdir(parents=True)
 
     pd_history_acc.to_csv(results_dir_path / "test_accuracy.csv")
-    ax = pd_history_acc["test_accuracy"].plot()
-    fig = ax.get_figure()
+    axis = pd_history_acc["test_accuracy"].plot()
+    fig = axis.get_figure()
     fig.savefig(results_dir_path / "test_accuracy.jpg", dpi=200)
 
     pd_history_loss.to_csv(results_dir_path / "train_loss.csv")
-    ax = pd_history_loss["test_loss"].plot()
-    fig = ax.get_figure()
+    axis = pd_history_loss["test_loss"].plot()
+    fig = axis.get_figure()
     fig.savefig(results_dir_path / "test_accuracy.jpg", dpi=200)
 
 
 if __name__ == "__main__":
+    # pylint: disable=no-value-for-parameter
     main()

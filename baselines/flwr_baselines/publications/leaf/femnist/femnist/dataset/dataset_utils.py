@@ -1,3 +1,4 @@
+"""Utilities used for the FEMNIST dataset creation."""
 import hashlib
 import pathlib
 
@@ -56,14 +57,16 @@ def calculate_series_hashes(paths: pd.Series) -> pd.Series:
     return series_hashes
 
 
-def _create_samples_division_list(n_samples, n_groups, keep_remainder=True):
+def _create_samples_division_list(n_samples, n_groups, keep_remainder=False):
+    """Create ids for clients such that it enables indexing."""
     group_size = n_samples // n_groups
     n_samples_in_full_groups = n_groups * group_size
     samples_division_list = []
     for i in range(n_groups):
         samples_division_list.extend([i] * group_size)
-    if n_samples_in_full_groups != n_samples:
-        # add remainder only if it is needed == remainder is not equal zero
-        remainder = n_samples - n_samples_in_full_groups
-        samples_division_list.extend([n_groups] * remainder)
+    if keep_remainder:
+        if n_samples_in_full_groups != n_samples:
+            # add remainder only if it is needed == remainder is not equal zero
+            remainder = n_samples - n_samples_in_full_groups
+            samples_division_list.extend([n_groups] * remainder)
     return samples_division_list

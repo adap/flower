@@ -1,7 +1,8 @@
+"""Client implementation for federated learning."""
+# pylint: disable=no-member
 from typing import Dict, List, Tuple
 
 import flwr as fl
-import numpy as np
 import torch
 from flwr.common.typing import NDArrays, Scalar
 from model import Net, test, train
@@ -25,6 +26,7 @@ class FlowerClient(fl.client.NumPyClient):
     """Flower client for training with train and validation loss and accuracy
     that enables having training time in epochs or in batches."""
 
+    # pylint: disable=R0902, R0913
     def __init__(
         self,
         net: torch.nn.Module,
@@ -98,6 +100,7 @@ class FlowerClient(fl.client.NumPyClient):
         return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
 
 
+# pylint: disable=too-many-arguments
 def create_client(
     cid: str,
     trainloaders: List[DataLoader],
