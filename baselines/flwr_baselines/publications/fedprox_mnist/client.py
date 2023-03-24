@@ -27,7 +27,7 @@ class FlowerClient(
         device: torch.device,
         num_epochs: int,
         learning_rate: float,
-        staggler_schedule: np.ndarray,
+        straggler_schedule: np.ndarray,
     ):  # pylint: disable=too-many-arguments
         self.net = net
         self.trainloader = trainloader
@@ -35,7 +35,7 @@ class FlowerClient(
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
-        self.staggler_schedule = staggler_schedule
+        self.straggler_schedule = straggler_schedule
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -53,10 +53,10 @@ class FlowerClient(
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
 
-        # At each round check if the client is a staggler,
+        # At each round check if the client is a straggler,
         # if so, train less epochs (to simulate partial work)
         if (
-            self.staggler_schedule[int(config["curr_round"]) - 1]
+            self.straggler_schedule[int(config["curr_round"]) - 1]
             and self.num_epochs > 1
         ):
             num_epochs = np.random.randint(1, self.num_epochs)
@@ -92,7 +92,7 @@ def gen_client_fn(
     num_epochs: int,
     batch_size: int,
     learning_rate: float,
-    stagglers: float,
+    stragglers: float,
 ) -> Tuple[
     Callable[[str], FlowerClient], DataLoader
 ]:  # pylint: disable=too-many-arguments
@@ -119,8 +119,8 @@ def gen_client_fn(
         The size of the local batches each client trains on.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
-    stagglers : float
-        Proportion of stagglers in the clients, between 0 and 1.
+    stragglers : float
+        Proportion of stragglers in the clients, between 0 and 1.
 
     Returns
     -------
@@ -133,11 +133,11 @@ def gen_client_fn(
     )
 
     # Defines a staggling schedule for each clients, i.e at which round will they
-    # be a staggler. This is done so at each round the proportion of staggling
+    # be a straggler. This is done so at each round the proportion of staggling
     # clients is respected
-    stagglers_mat = np.transpose(
+    stragglers_mat = np.transpose(
         np.random.choice(
-            [0, 1], size=(num_rounds, num_clients), p=[1 - stagglers, stagglers]
+            [0, 1], size=(num_rounds, num_clients), p=[1 - stragglers, stragglers]
         )
     )
 
@@ -160,7 +160,7 @@ def gen_client_fn(
             device,
             num_epochs,
             learning_rate,
-            stagglers_mat[int(cid)],
+            stragglers_mat[int(cid)],
         )
 
     return client_fn, testloader

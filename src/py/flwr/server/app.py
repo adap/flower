@@ -25,7 +25,6 @@ from types import FrameType
 from typing import List, Optional, Tuple
 
 import grpc
-import uvicorn
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.logger import log
@@ -40,7 +39,6 @@ from flwr.server.grpc_server.grpc_server import (
     start_grpc_server,
 )
 from flwr.server.history import History
-from flwr.server.rest_server.rest_api import app as fast_api_app
 from flwr.server.server import Server
 from flwr.server.state import StateFactory
 from flwr.server.strategy import FedAvg, Strategy
@@ -207,6 +205,7 @@ def _fl(
     # Fit model
     hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
+    log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
     log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
     log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
     log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
@@ -435,11 +434,22 @@ def _run_fleet_api_grpc_bidi(
     return fleet_grpc_server
 
 
+# pylint: disable=import-outside-toplevel
 def _run_fleet_api_rest(
     address: str,
     state_factory: StateFactory,
 ) -> None:
     """Run Driver API (REST-based)."""
+    try:
+        import uvicorn
+
+        from flwr.server.rest_server.rest_api import app as fast_api_app
+    except ImportError as missing_dep:
+        raise ImportError(
+            "To use the REST API you must install the "
+            "extra dependencies by running "
+            "`pip install flwr['rest']`."
+        ) from missing_dep
     log(INFO, "Starting Flower REST server")
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
