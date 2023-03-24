@@ -157,6 +157,6 @@ def test(
             _, predicted = output.max(1)
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
-        accuracy = 100.0 * correct / total
+        accuracy = correct / total
         loss /= float(len(dataloader))
     return accuracy, loss
