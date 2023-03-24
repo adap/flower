@@ -14,7 +14,7 @@
 # ==============================================================================
 """Flower client app."""
 
-
+import sys
 import time
 from logging import INFO
 from typing import Callable, Dict, Optional, Union
