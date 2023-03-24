@@ -158,7 +158,5 @@ def test(
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
         accuracy = correct / total
-        print(f"len(dataloader) {len(dataloader)}")
-        print(f"total {total}")
         loss /= total
     return loss, accuracy
