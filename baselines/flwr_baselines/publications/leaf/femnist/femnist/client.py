@@ -83,13 +83,13 @@ class FlowerClient(fl.client.NumPyClient):
         )
         return_dict: Dict[str, Scalar]
         if val_loss is None or val_acc is None:
-            return_dict = {"train_loss": train_loss, "train_acc": train_acc}
+            return_dict = {"train_loss": train_loss, "train_accuracy": train_acc}
         else:
             return_dict = {
                 "train_loss": train_loss,
-                "train_acc": train_acc,
+                "train_accuracy": train_acc,
                 "val_loss": val_loss,
-                "val_acc": val_acc,
+                "val_accuracy": val_acc,
             }
 
         return get_parameters(self.net), len(self.trainloader), return_dict
