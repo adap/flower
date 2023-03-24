@@ -40,7 +40,6 @@ from flwr.proto.fleet_pb2 import (
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.state import State
 
-
 app: FastAPI = FastAPI()
 
 
