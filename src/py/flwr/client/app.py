@@ -49,7 +49,6 @@ from .numpy_client import has_evaluate as numpyclient_has_evaluate
 from .numpy_client import has_fit as numpyclient_has_fit
 from .numpy_client import has_get_parameters as numpyclient_has_get_parameters
 from .numpy_client import has_get_properties as numpyclient_has_get_properties
-from .rest_client.connection import http_request_response
 
 EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT = """
 NumPyClient.fit did not return a tuple with 3 elements.
@@ -81,6 +80,7 @@ Example
 ClientLike = Union[Client, NumPyClient]
 
 
+# pylint: disable=import-outside-toplevel
 def start_client(
     *,
     server_address: str,
@@ -138,7 +138,17 @@ def start_client(
     event(EventType.START_CLIENT_ENTER)
 
     # Use either gRPC bidirectional streaming or REST request/response
-    connection = http_request_response if rest else grpc_connection
+    if rest:
+        try:
+            from .rest_client.connection import http_request_response
+        except ImportError as missing_dep:
+            raise ImportError(
+                "To use the REST API you must install the "
+                "extra dependencies by running `pip install flwr['rest']`."
+            ) from missing_dep
+        connection = http_request_response
+    else:
+        connection = grpc_connection
     while True:
         sleep_duration: int = 0
         with connection(
