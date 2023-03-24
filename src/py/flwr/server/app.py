@@ -28,7 +28,6 @@ import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.logger import log
-from flwr.common.exception import RestImportError
 from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
 from flwr.server.client_manager import ClientManager, SimpleClientManager
@@ -445,8 +444,11 @@ def _run_fleet_api_rest(
         import uvicorn
 
         from flwr.server.rest_server.rest_api import app as fast_api_app
-    except ImportError as missing_dep:
-        raise RestImportError() from missing_dep
+    except ModuleNotFoundError:
+        sys.exit(
+            "To use the REST API you must install "
+            "the extra dependencies by running `pip install flwr['rest']`."
+        )
     log(INFO, "Starting Flower REST server")
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance

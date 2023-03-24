@@ -21,7 +21,6 @@ from typing import Callable, Dict, Iterator, Optional, Tuple
 
 from flwr.client.message_handler.task_handler import get_server_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.exception import RestImportError
 from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
     PullTaskInsRequest,
@@ -35,8 +34,11 @@ from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 try:
     import requests
-except ImportError as missing_dep:
-    raise RestImportError() from missing_dep
+except ModuleNotFoundError:
+    sys.exit(
+        "To use the REST API you must install "
+        "the extra dependencies by running `pip install flwr['rest']`."
+    )
 
 PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
 PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
