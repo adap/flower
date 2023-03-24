@@ -10,6 +10,7 @@ import pandas as pd
 import torch
 from flwr.common.logger import log
 from flwr.server.strategy import FedAvg
+from matplotlib import pyplot as plt
 from omegaconf import DictConfig
 
 from flwr_baselines.publications.leaf.femnist.femnist.client import create_client
@@ -95,6 +96,7 @@ def main(cfg: DictConfig):
     )
 
     log(INFO, history)
+
     pd_history_acc = pd.DataFrame(
         history.metrics_distributed["accuracy"], columns=["round", "test_accuracy"]
     )
@@ -104,19 +106,37 @@ def main(cfg: DictConfig):
     print(pd_history_acc)
     print(pd_history_loss)
 
-    results_dir_path = pathlib.Path(cfg.results_dir_path)
+    results_dir_path = pathlib.Path(cfg.training.results_dir_path)
     if not results_dir_path.exists():
         results_dir_path.mkdir(parents=True)
 
-    pd_history_acc.to_csv(results_dir_path / "test_accuracy.csv")
-    axis = pd_history_acc["test_accuracy"].plot()
-    fig = axis.get_figure()
-    fig.savefig(results_dir_path / "test_accuracy.jpg", dpi=200)
+    distributed_history_dict = {}
+    for metric, round_value_tuple_list in history.metrics_distributed.items():
+        distributed_history_dict["distributed_test_" + metric] = [
+            val for _, val in round_value_tuple_list
+        ]
+    for metric, round_value_tuple_list in history.metrics_distributed_fit.items():
+        distributed_history_dict["distributed_" + metric] = [
+            val for _, val in round_value_tuple_list
+        ]
+    distributed_history_dict["distributed_test_loss"] = [
+        val for _, val in history.losses_distributed
+    ]
 
-    pd_history_loss.to_csv(results_dir_path / "train_loss.csv")
-    axis = pd_history_loss["test_loss"].plot()
-    fig = axis.get_figure()
-    fig.savefig(results_dir_path / "test_accuracy.jpg", dpi=200)
+    results_df = pd.DataFrame.from_dict(distributed_history_dict)
+    results_df.to_csv(results_dir_path / "history.csv")
+
+    fig, axis = plt.subplots()
+    results_df[["distributed_test_accuracy", "distributed_train_accuracy"]].plot(
+        ax=axis, kind="line", marker="o"
+    )
+    fig.savefig(results_dir_path / "accuracy.jpg", dpi=200)
+
+    fig, axis = plt.subplots()
+    results_df[["distributed_test_loss", "distributed_train_loss"]].plot(
+        ax=axis, kind="line", marker="o"
+    )
+    fig.savefig(results_dir_path / "loss.jpg", dpi=200)
 
 
 if __name__ == "__main__":
