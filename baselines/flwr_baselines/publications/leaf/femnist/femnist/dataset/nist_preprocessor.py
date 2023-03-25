@@ -1,6 +1,6 @@
 """Module to preprocess the NIST Special Database 19 into FeMNIST/FEMNIST."""
 import pathlib
-from logging import INFO, WARN
+from logging import DEBUG, INFO, WARN
 from typing import Dict, Union
 
 import pandas as pd
@@ -106,9 +106,11 @@ class NISTPreprocessor:
         """Create directory structure required for the dataset storage."""
         log(INFO, "Directory structure creation started")
         self._processed_dir.mkdir(exist_ok=True)
-        log(INFO, "Created/already exist directory %s", self._processed_dir)
+        log(INFO, "Directory %s got created/already existed", self._processed_dir)
         self._processed_images_dir.mkdir(exist_ok=True)
-        log(INFO, "Created/already exist directory %s", self._processed_images_dir)
+        log(
+            INFO, "Directory %s got created/already existed", self._processed_images_dir
+        )
         log(INFO, "Directory structure creation done")
 
     def _extract_writer_information(self):
@@ -121,6 +123,7 @@ class NISTPreprocessor:
         writer_df["writer_id"] = writer_df["path_by_writer"].map(
             lambda x: x.parent.parent.name
         )
+        log(DEBUG, "The created writer_df has shape %s", str(writer_df.shape))
         log(INFO, "Writer information preprocessing done")
         return writer_df
 
@@ -140,12 +143,18 @@ class NISTPreprocessor:
         class_df = pd.DataFrame(images_paths, columns=["path_by_class"])
         chars = class_df["path_by_class"].map(lambda x: x.parent.parent.name)
         class_df["character"] = chars.map(hex_decimal_to_char)
+        log(DEBUG, "The created class_df has shape %s", str(class_df.shape))
         log(INFO, "Class information preprocessing done")
         return class_df
 
     def _merge_class_and_writer_information(self) -> pd.DataFrame:
         log(INFO, "Merging of the class and writer information by hash values started")
         merged = pd.merge(self._writer_df, self._class_df, on="hash")
+        log(
+            DEBUG,
+            "The calculated new df merged based on hashes has shape %s",
+            str(self._df.shape),
+        )
         log(INFO, "Merging of the class and writer information by hash values done")
         return merged
 
@@ -199,6 +208,11 @@ class NISTPreprocessor:
             new_path = self._processed_images_dir / image_name
             gray.save(new_path)
             new_df.iloc[index, -1] = new_path
+        log(
+            DEBUG,
+            "The dataframe with the references to preprocessed data has shape %s",
+            str(new_df.shape),
+        )
         log(INFO, "Image preprocessing done")
         new_df = new_df.loc[:, ["path", "writer_id", "character"]]
         return new_df
