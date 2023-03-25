@@ -4,7 +4,7 @@ import os
 import pathlib
 import shutil
 from logging import INFO
-from typing import Optional
+from typing import Optional, Union
 
 import wget
 from flwr.common.logger import log
@@ -15,14 +15,21 @@ class ZipDownloader:
     """Zip downloader that enable also unzip and remove the downloaded file."""
 
     def __init__(
-        self, extract_path: str, url: str, save_path: Optional[pathlib.Path] = None
+        self,
+        extract_path: Union[str, pathlib.Path],
+        url: str,
+        save_path: Optional[pathlib.Path] = None,
     ) -> None:
-        self._extract_path = extract_path
+        self._extract_path = (
+            extract_path
+            if isinstance(extract_path, pathlib.Path)
+            else pathlib.Path(extract_path)
+        )
         self._url = url
         self._save_path = (
             save_path
             if save_path is not None
-            else pathlib.Path(f"{extract_path}" + ".zip")
+            else self._extract_path.parent / "download.zip"
         )
 
     def download(self, unzip: bool = True) -> None:
@@ -57,7 +64,7 @@ class ZipDownloader:
             self._unzip()
 
     def _create_dir_structure(self):
-        self._save_path.parent.mkdir(parents=True, exist_ok=True)
+        self._extract_path.mkdir(parents=True, exist_ok=True)
 
     def _unzip(self):
         log(
