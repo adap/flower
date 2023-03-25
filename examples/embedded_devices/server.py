@@ -110,7 +110,7 @@ def main() -> None:
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
-        eval_fn=get_eval_fn(testset),
+        evaluate_fn=get_eval_fn(testset),
         on_fit_config_fn=fit_config,
     )
     server = fl.server.Server(client_manager=client_manager, strategy=strategy)
