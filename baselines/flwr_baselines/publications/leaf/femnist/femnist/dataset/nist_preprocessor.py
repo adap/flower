@@ -167,7 +167,6 @@ class NISTPreprocessor:
         self._class_df["hash"] = calculate_series_hashes(
             self._class_df["path_by_class"]
         )
-        self._df = pd.merge(self._writer_df, self._class_df, on="hash")
         log(INFO, "Hashes calculation done")
 
     def _preprocess_images(self) -> pd.DataFrame:
