@@ -65,7 +65,7 @@ def main(cfg: DictConfig) -> None:
         f"_E={cfg.num_epochs}"
         f"_R={cfg.num_rounds}"
         f"_mu={cfg.mu}"
-        f"_stag={cfg.stragglers_fraction}"
+        f"_strag={cfg.stragglers_fraction}"
     )
 
     np.save(
