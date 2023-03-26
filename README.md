@@ -47,6 +47,10 @@ Meet the Flower community on [flower.dev](https://flower.dev)!
 
 Flower's goal is to make federated learning accessible to everyone. This series of tutorials introduces the fundamentals of federated learning and how to implement them in Flower.
 
+0. **What is Federated Learning?**
+
+   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial/Flower-0-What-is-FL.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/doc/source/tutorial/Flower-0-What-is-FL.ipynb))
+
 1. **An Introduction to Federated Learning**
 
    [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/doc/source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb))
@@ -84,11 +88,13 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 
 Flower Baselines is a collection of community-contributed experiments that reproduce the experiments performed in popular federated learning publications. Researchers can build on Flower Baselines to quickly evaluate new ideas:
 
-* [FedAvg](https://arxiv.org/pdf/1602.05629.pdf):
+* [FedAvg](https://arxiv.org/abs/1602.05629):
   * [MNIST](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/fedavg_mnist)
-* [FedBN: Federated Learning on non-IID Features via Local Batch Normalization](https://arxiv.org/pdf/2102.07623.pdf):
+* [FedProx](https://arxiv.org/abs/1812.06127):
+  * [MNIST](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/fedprox_mnist)
+* [FedBN: Federated Learning on non-IID Features via Local Batch Normalization](https://arxiv.org/abs/2102.07623):
   * [Convergence Rate](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/fedbn/convergence_rate)
-* [Adaptive Federated Optimization](https://arxiv.org/pdf/2003.00295.pdf):
+* [Adaptive Federated Optimization](https://arxiv.org/abs/2003.00295):
   * [CIFAR-10/100](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/adaptive_federated_optimization)
 
 Check the Flower documentation to learn more: [Using Baselines](https://flower.dev/docs/using-baselines.html)
@@ -137,7 +143,7 @@ If you publish work that uses Flower, please cite Flower as follows:
 ```bibtex
 @article{beutel2020flower,
   title={Flower: A Friendly Federated Learning Research Framework},
-  author={Beutel, Daniel J and Topal, Taner and Mathur, Akhil and Qiu, Xinchi and Parcollet, Titouan and Lane, Nicholas D},
+  author={Beutel, Daniel J and Topal, Taner and Mathur, Akhil and Qiu, Xinchi and Fernandez-Marques, Javier and Gao, Yan and Sani, Lorenzo and Kwing, Hei Li and Parcollet, Titouan and Gusmão, Pedro PB de and Lane, Nicholas D}, 
   journal={arXiv preprint arXiv:2007.14390},
   year={2020}
 }
