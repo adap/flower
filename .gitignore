@@ -160,3 +160,6 @@ dmypy.json
 # Poetry
 poetry.lock
 *.pkl
+
+# iOS
+xcuserdata/
