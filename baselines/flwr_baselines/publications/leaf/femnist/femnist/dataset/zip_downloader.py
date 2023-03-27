@@ -40,8 +40,8 @@ class ZipDownloader:
         unzip - whether to unzip the downloaded filed
         """
         if (
-            self._save_path.with_suffix("").exists()
-            and len(list(self._save_path.with_suffix("").glob("*"))) != 0
+            self._extract_path.exists()
+            and len(list(self._extract_path.glob("*"))) != 0
         ):
             log(
                 INFO,
@@ -71,9 +71,9 @@ class ZipDownloader:
             INFO,
             "Unzipping of %s to %s started",
             str(self._save_path),
-            str(self._save_path.parent),
+            str(self._extract_path),
         )
-        shutil.unpack_archive(self._save_path, self._save_path.parent)
+        shutil.unpack_archive(self._save_path, self._extract_path)
         log(INFO, "Unzipping of %s done", str(self._save_path))
         log(INFO, "Removing zip file started: %s", str(self._save_path))
         os.remove(self._save_path)
