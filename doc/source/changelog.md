@@ -8,7 +8,7 @@
 
 - **Delete delivered** `TaskIns/TaskRes` ([#1662](https://github.com/adap/flower/pull/1662))
 
-- **New Driver API (TO CHANGE MAYBE)** ([#1663](https://github.com/adap/flower/pull/1663), [#1666](https://github.com/adap/flower/pull/1666), [#1667](https://github.com/adap/flower/pull/1667), [#1664](https://github.com/adap/flower/pull/1664), [#1675](https://github.com/adap/flower/pull/1675), [#1676](https://github.com/adap/flower/pull/1676), [#1693](https://github.com/adap/flower/pull/1693), [#1594](https://github.com/adap/flower/pull/1594), [#1695](https://github.com/adap/flower/pull/1695))
+- **New Driver API** ([#1663](https://github.com/adap/flower/pull/1663), [#1666](https://github.com/adap/flower/pull/1666), [#1667](https://github.com/adap/flower/pull/1667), [#1664](https://github.com/adap/flower/pull/1664), [#1675](https://github.com/adap/flower/pull/1675), [#1676](https://github.com/adap/flower/pull/1676), [#1693](https://github.com/adap/flower/pull/1693), [#1594](https://github.com/adap/flower/pull/1594), [#1695](https://github.com/adap/flower/pull/1695))
 
 - **New REST API** ([#1690](https://github.com/adap/flower/pull/1690), [#1712](https://github.com/adap/flower/pull/1712))
 
