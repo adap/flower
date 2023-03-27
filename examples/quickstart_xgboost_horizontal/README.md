@@ -11,22 +11,8 @@ This example demonstrates a federated XGBoost using Flower with PyTorch. This is
 
 ## Project Setup
 
-This implementation can be easily run in Google Colab with the following file structure in Google Drive, * denotes folder:
-
-```shell
-—————————————————————————————————————————————————————————————————————
-My Drive
-  XGBoost*
-      |----- code.ipynb
-      dataset*
-          binary_classifications*
-              |----- dataset file 1
-              |----- dataset file 2
-          regression*
-              |----- dataset file 1
-              |----- dataset file 2 
-—————————————————————————————————————————————————————————————————————
-```
+This implementation can be easily run in Google Colab with the button at the top of the README or as a standalone Jupyter notebook,
+it will automatically download and extract the example data inside a `dataset` folder and `binary_classification` and `regression` sub-folders.
 
 ## Datasets
 

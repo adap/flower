@@ -4,13 +4,29 @@
 
 ### What's new?
 
-- **Add new "What is Federated Learning?" tutorial** ([#1657](https://github.com/adap/flower/pull/1657))
+- **Add new "What is Federated Learning?" tutorial** ([#1657](https://github.com/adap/flower/pull/1657), [#1721](https://github.com/adap/flower/pull/1721))
 
 - **Delete delivered** `TaskIns/TaskRes` ([#1662](https://github.com/adap/flower/pull/1662))
 
-- **General improvements** ([#1659](https://github.com/adap/flower/pull/1659))
+- **New Driver API** ([#1663](https://github.com/adap/flower/pull/1663), [#1666](https://github.com/adap/flower/pull/1666), [#1667](https://github.com/adap/flower/pull/1667), [#1664](https://github.com/adap/flower/pull/1664), [#1675](https://github.com/adap/flower/pull/1675), [#1676](https://github.com/adap/flower/pull/1676), [#1693](https://github.com/adap/flower/pull/1693), [#1594](https://github.com/adap/flower/pull/1594), [#1695](https://github.com/adap/flower/pull/1695))
 
-- **Introduce new Flower Baseline: FedProx MNIST** ([#1513](https://github.com/adap/flower/pull/1513))
+- **New REST API** ([#1690](https://github.com/adap/flower/pull/1690), [#1712](https://github.com/adap/flower/pull/1712))
+
+- **General improvements** ([#1659](https://github.com/adap/flower/pull/1659), [#1646](https://github.com/adap/flower/pull/1646), [#1647](https://github.com/adap/flower/pull/1647), [#1471](https://github.com/adap/flower/pull/1471), [#1648](https://github.com/adap/flower/pull/1648), [#1651](https://github.com/adap/flower/pull/1651), [#1652](https://github.com/adap/flower/pull/1652), [#1653](https://github.com/adap/flower/pull/1653), [#1659](https://github.com/adap/flower/pull/1659), [#1665](https://github.com/adap/flower/pull/1665), [#1670](https://github.com/adap/flower/pull/1670), [#1672](https://github.com/adap/flower/pull/1672), [#1677](https://github.com/adap/flower/pull/1677), [#1684](https://github.com/adap/flower/pull/1684), [#1683](https://github.com/adap/flower/pull/1683), [#1686](https://github.com/adap/flower/pull/1686), [#1682](https://github.com/adap/flower/pull/1682), [#1685](https://github.com/adap/flower/pull/1685), [#1692](https://github.com/adap/flower/pull/1692), [#1705](https://github.com/adap/flower/pull/1705), [#1708](https://github.com/adap/flower/pull/1708), [#1711](https://github.com/adap/flower/pull/1711), [#1713](https://github.com/adap/flower/pull/1713), [#1714](https://github.com/adap/flower/pull/1714), [#1718](https://github.com/adap/flower/pull/1718), [#1716](https://github.com/adap/flower/pull/1716), [#1723](https://github.com/adap/flower/pull/1723), [#1735](https://github.com/adap/flower/pull/1735))
+
+- **Introduce new Flower Baseline: FedProx MNIST** ([#1513](https://github.com/adap/flower/pull/1513), [#1680](https://github.com/adap/flower/pull/1680), [#1681](https://github.com/adap/flower/pull/1681), [#1679](https://github.com/adap/flower/pull/1679))
+
+- **Add new** `FedXGBoost` **strategy and example** ([#1694](https://github.com/adap/flower/pull/1694), [#1709](https://github.com/adap/flower/pull/1709), [#1715](https://github.com/adap/flower/pull/1715), [#1717](https://github.com/adap/flower/pull/1717))
+
+- **Fix the spilling issues related to Ray during simulations** ([#1698](https://github.com/adap/flower/pull/1698))
+
+- **Add new example using Flower and** `TabNet` ([#1725](https://github.com/adap/flower/pull/1725))
+
+- **Add new how-to guide for monitoring simulations** ([#1658](https://github.com/adap/flower/pull/1658))
+
+- **Add quickstart JAX example to docs** ([#1678](https://github.com/adap/flower/pull/1678))
+
+- **Add training metrics to** `History` **object during simulations** ([#1696](https://github.com/adap/flower/pull/1696))
 
 ### Incompatible changes
 
