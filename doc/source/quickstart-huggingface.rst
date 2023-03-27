@@ -168,16 +168,6 @@ Inversely, the :code:`set_parameters` function allows the server to send its par
 Finally, the :code:`fit` function trains the model locally for the client, 
 and the :code:`evaluate` function tests the model locally and returns the relevant metrics. 
 
-We can now start client instances using:
-
-.. code-block:: python
-
-    fl.client.start_numpy_client(
-        server_address="127.0.0.1:8080", 
-        client=IMDBClient()
-    )
-
-
 Starting the server
 ^^^^^^^^^^^^^^^^^^^
 
@@ -214,6 +204,18 @@ the clients (basically this allows us to display a nice average accuracy and los
 
 Putting everything together
 ---------------------------
+
+We can now start client instances using:
+
+.. code-block:: python
+
+    fl.client.start_numpy_client(
+        server_address="127.0.0.1:8080", 
+        client=IMDBClient()
+    )
+
+
+And they will be able to connect to the server and start the federated training.
 
 If you want to check out everything put together, 
 you should check out the full code example: 
