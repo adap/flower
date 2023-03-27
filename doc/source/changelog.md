@@ -4,6 +4,8 @@
 
 ### What's new?
 
+- **New iOS SDK** ([#1621](https://github.com/adap/flower/pull/1621))
+
 - **Add new "What is Federated Learning?" tutorial** ([#1657](https://github.com/adap/flower/pull/1657), [#1721](https://github.com/adap/flower/pull/1721))
 
 - **Delete delivered** `TaskIns/TaskRes` ([#1662](https://github.com/adap/flower/pull/1662))
