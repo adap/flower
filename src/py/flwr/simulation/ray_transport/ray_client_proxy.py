@@ -15,7 +15,7 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
-from logging import DEBUG
+from logging import ERROR
 from typing import Callable, Dict, Optional, cast
 
 import ray
@@ -52,7 +52,7 @@ class RayClientProxy(ClientProxy):
         try:
             res = ray.get(future_get_properties_res, timeout=timeout)
         except Exception as ex:
-            log(DEBUG, ex)
+            log(ERROR, ex)
             raise ex
         return cast(
             common.GetPropertiesRes,
@@ -69,7 +69,7 @@ class RayClientProxy(ClientProxy):
         try:
             res = ray.get(future_paramseters_res, timeout=timeout)
         except Exception as ex:
-            log(DEBUG, ex)
+            log(ERROR, ex)
             raise ex
         return cast(
             common.GetParametersRes,
@@ -84,7 +84,7 @@ class RayClientProxy(ClientProxy):
         try:
             res = ray.get(future_fit_res, timeout=timeout)
         except Exception as ex:
-            log(DEBUG, ex)
+            log(ERROR, ex)
             raise ex
         return cast(
             common.FitRes,
@@ -101,7 +101,7 @@ class RayClientProxy(ClientProxy):
         try:
             res = ray.get(future_evaluate_res, timeout=timeout)
         except Exception as ex:
-            log(DEBUG, ex)
+            log(ERROR, ex)
             raise ex
         return cast(
             common.EvaluateRes,
