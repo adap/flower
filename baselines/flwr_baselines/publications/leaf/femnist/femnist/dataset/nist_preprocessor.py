@@ -153,7 +153,7 @@ class NISTPreprocessor:
         log(
             DEBUG,
             "The calculated new df merged based on hashes has shape %s",
-            str(self._df.shape),
+            str(merged.shape),
         )
         log(INFO, "Merging of the class and writer information by hash values done")
         return merged
