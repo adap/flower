@@ -17,9 +17,9 @@ status: provisional
   - [Goals](#goals)
   - [Non-Goals](#non-goals)
 - [Proposal](#proposal)
-- [Drawbacks](#drawbacks)
+<!-- - [Drawbacks](#drawbacks)
 - [Alternatives Considered](#alternatives-considered)
-- [Appendix](#appendix)
+- [Appendix](#appendix) -->
 
 ## Summary
 
