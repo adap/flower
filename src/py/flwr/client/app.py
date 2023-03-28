@@ -15,6 +15,7 @@
 """Flower client app."""
 
 
+import sys
 import time
 from logging import INFO
 from typing import Callable, Dict, Optional, Union
@@ -26,6 +27,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.common.address import parse_address
 from flwr.common.logger import log
 from flwr.common.typing import (
     Code,
@@ -150,35 +152,40 @@ def start_client(
     else:
         connection = grpc_connection
     while True:
-        sleep_duration: int = 0
-        with connection(
-            server_address,
-            max_message_length=grpc_max_message_length,
-            root_certificates=root_certificates,
-        ) as conn:
-            receive, send = conn
+        parsed_address = parse_address(server_address)
+        if parsed_address:
+            host, port, _ = parsed_address
+            sleep_duration: int = 0
+            with connection(
+                f"{host}:{port}",
+                max_message_length=grpc_max_message_length,
+                root_certificates=root_certificates,
+            ) as conn:
+                receive, send = conn
 
-            while True:
-                server_message = receive()
-                if server_message is None:
-                    time.sleep(3)  # Wait for 3s before asking again
-                    continue
-                client_message, sleep_duration, keep_going = handle(
-                    client, server_message
-                )
-                send(client_message)
-                if not keep_going:
-                    break
-        if sleep_duration == 0:
-            log(INFO, "Disconnect and shut down")
-            break
-        # Sleep and reconnect afterwards
-        log(
-            INFO,
-            "Disconnect, then re-establish connection after %s second(s)",
-            sleep_duration,
-        )
-        time.sleep(sleep_duration)
+                while True:
+                    server_message = receive()
+                    if server_message is None:
+                        time.sleep(3)  # Wait for 3s before asking again
+                        continue
+                    client_message, sleep_duration, keep_going = handle(
+                        client, server_message
+                    )
+                    send(client_message)
+                    if not keep_going:
+                        break
+            if sleep_duration == 0:
+                log(INFO, "Disconnect and shut down")
+                break
+            # Sleep and reconnect afterwards
+            log(
+                INFO,
+                "Disconnect, then re-establish connection after %s second(s)",
+                sleep_duration,
+            )
+            time.sleep(sleep_duration)
+        else:
+            sys.exit(f"Client IP address ({server_address}) cannot be parsed.")
 
     event(EventType.START_CLIENT_LEAVE)
 
