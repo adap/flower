@@ -21,7 +21,9 @@ from typing import Tuple, Union
 
 def parse_address(address: str) -> Union[Tuple[str, int, bool], None]:
     try:
-        host, port = (lambda h, _, p: (h.translate({ord(i): None for i in "[]"}), int(p)))(*(address.rpartition(':')))
+        host, port = (
+            lambda h, _, p: (h.translate({ord(i): None for i in "[]"}), int(p))
+        )(*(address.rpartition(":")))
         return host, port, ip_address(host).version == 4
     except ValueError as error:
         return None
