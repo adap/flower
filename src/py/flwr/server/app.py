@@ -64,7 +64,7 @@ class ServerConfig:
     round_timeout: Optional[float] = None
 
 
-def start_server(  # pylint: disable=too-many-arguments
+def start_server(  # pylint: disable=too-many-arguments, too-many-locals
     *,
     server_address: str = ADDRESS_FLEET_API_GRPC_BIDI,
     server: Optional[Server] = None,
