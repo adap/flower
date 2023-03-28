@@ -99,7 +99,7 @@ def main():
         fraction_evaluate=0.2,
         min_fit_clients=2,
         min_evaluate_clients=2,
-        min_available_clients=10,
+        min_available_clients=2,
         evaluate_fn=get_evaluate_fn(model, args.toy),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
