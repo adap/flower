@@ -20,6 +20,22 @@ from typing import Tuple, Union
 
 
 def parse_address(address: str) -> Union[Tuple[str, int, bool], None]:
+    """Parses a string representing an IP address into a host, port and
+    version.
+
+    Parameters
+    ----------
+    address : str
+        The string representation of an IPv4 or IPV6 address with the port number.
+        For example, '127.0.0.1:8080', or [::1]:8080.
+
+    Returns
+    -------
+    Union[Tuple[str, int, bool], None]
+        If the string provided is not a correct IPv6 or IPv4, the function will return None,
+        otherwise it will return the host, as a string, the port number, as an int, and
+        a bool that is True if the address is IPv6 and False otherwise.
+    """
     try:
         raw_host, _, raw_port = address.rpartition(":")
         host, port = raw_host.translate({ord(i): None for i in "[]"}), int(raw_port)

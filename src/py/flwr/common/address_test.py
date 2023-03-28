@@ -52,7 +52,7 @@ def test_ipv4_incorrect() -> None:
         actual = parse_address(address)
 
         # Assert
-        assert actual == None
+        assert actual is None
 
 
 def test_ipv6_correct() -> None:
@@ -92,4 +92,4 @@ def test_ipv6_incorrect() -> None:
         actual = parse_address(address)
 
         # Assert
-        assert actual == None
+        assert actual is None
