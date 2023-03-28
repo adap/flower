@@ -21,8 +21,8 @@ from typing import Tuple, Union
 
 def parse_address(address: str) -> Union[Tuple[str, int, bool], None]:
     try:
-        host, _, port = address.rpartition(":")
-        host, port = host.translate({ord(i): None for i in "[]"}), int(port)
+        raw_host, _, raw_port = address.rpartition(":")
+        host, port = raw_host.translate({ord(i): None for i in "[]"}), int(raw_port)
         if port > 65535:
             raise ValueError("Port number is too high.")
         return host, port, ip_address(host).version == 6
