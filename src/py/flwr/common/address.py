@@ -18,6 +18,8 @@
 from ipaddress import ip_address
 from typing import Tuple, Union
 
+IPV6: int = 6
+
 
 def parse_address(address: str) -> Union[Tuple[str, int, bool], None]:
     """Parses a string representing an IP address into a host, port and
@@ -32,8 +34,9 @@ def parse_address(address: str) -> Union[Tuple[str, int, bool], None]:
     Returns
     -------
     Union[Tuple[str, int, bool], None]
-        If the string provided is not a correct IPv6 or IPv4, the function will return None,
-        otherwise it will return the host, as a string, the port number, as an int, and
+        If the string provided is not a correct IPv6 or IPv4,
+        the function will return None, otherwise it will return the host,
+        as a string, the port number, as an int, and
         a bool that is True if the address is IPv6 and False otherwise.
     """
     try:
@@ -41,6 +44,6 @@ def parse_address(address: str) -> Union[Tuple[str, int, bool], None]:
         host, port = raw_host.translate({ord(i): None for i in "[]"}), int(raw_port)
         if port > 65535:
             raise ValueError("Port number is too high.")
-        return host, port, ip_address(host).version == 6
-    except ValueError as _:
+        return host, port, (ip_address(host).version == IPV6)
+    except ValueError:
         return None
