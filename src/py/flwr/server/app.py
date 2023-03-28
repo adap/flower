@@ -152,12 +152,13 @@ def start_server(  # pylint: disable=too-many-arguments
     if parsed_address is None:
         sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
 
-    host, port, _ = parsed_address
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
     # Start gRPC server
     grpc_server = start_grpc_server(
         client_manager=initialized_server.client_manager(),
-        server_address=f"{host}:{port}",
+        server_address=address,
         max_message_length=grpc_max_message_length,
         certificates=certificates,
     )
@@ -235,10 +236,11 @@ def run_driver_api() -> None:
 
     parsed_address = parse_address(args.driver_api_address)
     if parsed_address:
-        host, port, _ = parsed_address
+        host, port, is_v6 = parsed_address
+        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
         # Start Driver API
         grpc_server: grpc.Server = _run_driver_api_grpc(
-            address=f"{host}:{port}",
+            address=address,
             state_factory=state_factory,
         )
 
@@ -286,9 +288,10 @@ def run_fleet_api() -> None:
     elif args.fleet_api_type == "grpc":
         parsed_address = parse_address(args.grpc_fleet_api_address)
         if parsed_address:
-            host, port, _ = parsed_address
+            host, port, is_v6 = parsed_address
+            address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
             fleet_server = _run_fleet_api_grpc_bidi(
-                address=f"{host}:{port}",
+                address=address,
                 state_factory=state_factory,
             )
             grpc_servers.append(fleet_server)
@@ -325,10 +328,11 @@ def run_server() -> None:
 
     parsed_address = parse_address(args.driver_api_address)
     if parsed_address:
-        host, port, _ = parsed_address
+        host, port, is_v6 = parsed_address
+        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
         # Start Driver API
         driver_server: grpc.Server = _run_driver_api_grpc(
-            address=f"{host}:{port}",
+            address=address,
             state_factory=state_factory,
         )
 
@@ -356,9 +360,10 @@ def run_server() -> None:
     elif args.fleet_api_type == "grpc":
         parsed_address = parse_address(args.grpc_fleet_api_address)
         if parsed_address:
-            host, port, _ = parsed_address
+            host, port, is_v6 = parsed_address
+            address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
             fleet_server = _run_fleet_api_grpc_bidi(
-                address=f"{host}:{port}",
+                address=address,
                 state_factory=state_factory,
             )
             grpc_servers.append(fleet_server)

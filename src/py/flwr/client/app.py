@@ -154,10 +154,11 @@ def start_client(
     while True:
         parsed_address = parse_address(server_address)
         if parsed_address:
-            host, port, _ = parsed_address
+            host, port, is_v6 = parsed_address
+            address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
             sleep_duration: int = 0
             with connection(
-                f"{host}:{port}",
+                address,
                 max_message_length=grpc_max_message_length,
                 root_certificates=root_certificates,
             ) as conn:
