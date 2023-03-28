@@ -34,6 +34,7 @@ def test_ipv4_correct() -> None:
         # Assert
         assert actual == expected
 
+
 def test_ipv4_incorrect() -> None:
     """Test if an incorrect IPv4 address returns None."""
 
@@ -61,8 +62,10 @@ def test_ipv6_correct() -> None:
     addresses = [
         ("[::1]:8080", ("::1", 8080, True)),
         ("[::]:12", ("::", 12, True)),
-        ("2001:db8:3333:4444:5555:6666:7777:8888:12", 
-            ("2001:db8:3333:4444:5555:6666:7777:8888", 12, True)),
+        (
+            "2001:db8:3333:4444:5555:6666:7777:8888:12",
+            ("2001:db8:3333:4444:5555:6666:7777:8888", 12, True),
+        ),
     ]
 
     for address, expected in addresses:
@@ -71,6 +74,7 @@ def test_ipv6_correct() -> None:
 
         # Assert
         assert actual == expected
+
 
 def test_ipv6_incorrect() -> None:
     """Test if an incorrect IPv6 address returns None."""
@@ -81,7 +85,7 @@ def test_ipv6_incorrect() -> None:
         "::1:12",
         "999999:db8:3333:4444:5555:6666:7777:8888:50",
         "2001:db8:3333:4444:5555:6666:7777:8888",
-        "2001:db8:3333:4444:5555:6666:7777:8888:9988898"
+        "2001:db8:3333:4444:5555:6666:7777:8888:9988898",
     ]
 
     for address in addresses:
