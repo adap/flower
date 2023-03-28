@@ -149,37 +149,37 @@ def start_server(  # pylint: disable=too-many-arguments
     )
 
     parsed_address = parse_address(server_address)
-    if parsed_address:
-        host, port, _ = parsed_address
-
-        # Start gRPC server
-        grpc_server = start_grpc_server(
-            client_manager=initialized_server.client_manager(),
-            server_address=f"{host}:{port}",
-            max_message_length=grpc_max_message_length,
-            certificates=certificates,
-        )
-        log(
-            INFO,
-            "Flower ECE: gRPC server running (%s rounds), SSL is %s",
-            initialized_config.num_rounds,
-            "enabled" if certificates is not None else "disabled",
-        )
-
-        # Start training
-        hist = _fl(
-            server=initialized_server,
-            config=initialized_config,
-        )
-
-        # Stop the gRPC server
-        grpc_server.stop(grace=1)
-
-        event(EventType.START_SERVER_LEAVE)
-
-        return hist
-    else:
+    if parsed_address is None:
         sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
+
+    host, port, _ = parsed_address
+
+    # Start gRPC server
+    grpc_server = start_grpc_server(
+        client_manager=initialized_server.client_manager(),
+        server_address=f"{host}:{port}",
+        max_message_length=grpc_max_message_length,
+        certificates=certificates,
+    )
+    log(
+        INFO,
+        "Flower ECE: gRPC server running (%s rounds), SSL is %s",
+        initialized_config.num_rounds,
+        "enabled" if certificates is not None else "disabled",
+    )
+
+    # Start training
+    hist = _fl(
+        server=initialized_server,
+        config=initialized_config,
+    )
+
+    # Stop the gRPC server
+    grpc_server.stop(grace=1)
+
+    event(EventType.START_SERVER_LEAVE)
+
+    return hist
 
 
 def _init_defaults(

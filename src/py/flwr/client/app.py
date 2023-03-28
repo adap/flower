@@ -82,7 +82,7 @@ Example
 ClientLike = Union[Client, NumPyClient]
 
 
-# pylint: disable=import-outside-toplevel
+# pylint: disable=import-outside-toplevel, too-many-locals
 def start_client(
     *,
     server_address: str,
