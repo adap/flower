@@ -75,6 +75,7 @@ target-version = ["py38", "py39"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
+good-names = "i,j,k,_,x,y,X,Y"
 
 [tool.pytest.ini_options]
 minversion = "6.2"
