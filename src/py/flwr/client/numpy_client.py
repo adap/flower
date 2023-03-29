@@ -137,3 +137,4 @@ def has_fit(client: NumPyClient) -> bool:
 def has_evaluate(client: NumPyClient) -> bool:
     """Check if NumPyClient implements evaluate."""
     return type(client).evaluate != NumPyClient.evaluate
+
