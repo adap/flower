@@ -39,10 +39,7 @@ class ZipDownloader:
         ----------
         unzip - whether to unzip the downloaded filed
         """
-        if (
-            self._extract_path.exists()
-            and len(list(self._extract_path.glob("*"))) != 0
-        ):
+        if self._extract_path.exists() and len(list(self._extract_path.glob("*"))) != 0:
             log(
                 INFO,
                 "Files from %s are already downloaded and extracted from the zip file "
