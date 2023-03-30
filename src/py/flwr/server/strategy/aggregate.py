@@ -134,13 +134,17 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
             distance_matrix[i, j] = norm**2
     return distance_matrix
 
-def aggregate_trimmed_avg(results: List[Tuple[NDArray, int]], proportiontocut: float) -> NDArray:
+
+def aggregate_trimmed_avg(
+    results: List[Tuple[NDArray, int]], proportiontocut: float
+) -> NDArray:
     """Compute trimmed average."""
     # Create a list of weights and ignore the number of examples
     weights = [weights for weights, _ in results]
 
     trimmed_w: NDArrays = [
-        stats.trim_mean(np.asarray(layer), axis=0, proportiontocut=proportiontocut) for layer in zip(*weights)
+        stats.trim_mean(np.asarray(layer), axis=0, proportiontocut=proportiontocut)
+        for layer in zip(*weights)
     ]
 
     return trimmed_w

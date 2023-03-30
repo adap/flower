@@ -26,7 +26,6 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 
 # flake8: noqa: E501
 class FedTrimmedAvg(FedAvg):
-
     # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
     def __init__(
         self,
