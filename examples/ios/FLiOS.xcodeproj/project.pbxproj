@@ -1,0 +1,837 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		19764EEA297D2B12009F3E5D /* BenchmarkInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19764EE9297D2B11009F3E5D /* BenchmarkInterceptor.swift */; };
+		19764EED297D3ABE009F3E5D /* BenchmarkModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19764EEC297D3ABE009F3E5D /* BenchmarkModel.swift */; };
+		19764EEF297D3AC9009F3E5D /* BenchmarkSuite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19764EEE297D3AC9009F3E5D /* BenchmarkSuite.swift */; };
+		21075DC929788ED400311461 /* FLiOSModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21075DC829788ED400311461 /* FLiOSModel.swift */; };
+		21A77AC32865B22B0062EBD8 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A6F2865B22A0062EBD8 /* Array+Extensions.swift */; };
+		21A77AC42865B22B0062EBD8 /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A702865B22A0062EBD8 /* Math.swift */; };
+		21A77AC52865B22B0062EBD8 /* UIImage+CVPixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A712865B22A0062EBD8 /* UIImage+CVPixelBuffer.swift */; };
+		21A77AC62865B22B0062EBD8 /* Predictions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A722865B22A0062EBD8 /* Predictions.swift */; };
+		21A77AC72865B22B0062EBD8 /* UIImage+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A732865B22A0062EBD8 /* UIImage+Extensions.swift */; };
+		21A77AC82865B22B0062EBD8 /* CGImagePropertyOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A742865B22A0062EBD8 /* CGImagePropertyOrientation.swift */; };
+		21A77AC92865B22B0062EBD8 /* UIImage+RawBytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A752865B22A0062EBD8 /* UIImage+RawBytes.swift */; };
+		21A77ACA2865B22B0062EBD8 /* MLMultiArray+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A762865B22A0062EBD8 /* MLMultiArray+Helpers.swift */; };
+		21A77ACB2865B22B0062EBD8 /* MLModel+Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A772865B22A0062EBD8 /* MLModel+Images.swift */; };
+		21A77ACC2865B22B0062EBD8 /* CoreML+Combine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A782865B22A0062EBD8 /* CoreML+Combine.swift */; };
+		21A77ACD2865B22B0062EBD8 /* CVPixelBuffer+Create.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A792865B22A0062EBD8 /* CVPixelBuffer+Create.swift */; };
+		21A77ACE2865B22B0062EBD8 /* CGImage+CVPixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A7A2865B22A0062EBD8 /* CGImage+CVPixelBuffer.swift */; };
+		21A77ACF2865B22B0062EBD8 /* NonMaxSuppression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A7B2865B22A0062EBD8 /* NonMaxSuppression.swift */; };
+		21A77AD02865B22B0062EBD8 /* CGImage+RawBytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A7C2865B22A0062EBD8 /* CGImage+RawBytes.swift */; };
+		21A77AD12865B22B0062EBD8 /* MLMultiArray+Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A7D2865B22A0062EBD8 /* MLMultiArray+Image.swift */; };
+		21A77AD22865B22B0062EBD8 /* CVPixelBuffer+Resize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A7E2865B22A0062EBD8 /* CVPixelBuffer+Resize.swift */; };
+		21A77AD32865B22B0062EBD8 /* CVPixelBuffer+Rotate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A7F2865B22A0062EBD8 /* CVPixelBuffer+Rotate.swift */; };
+		21A77AD42865B22B0062EBD8 /* WordTagger.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A812865B22B0062EBD8 /* WordTagger.pb.swift */; };
+		21A77AD52865B22B0062EBD8 /* Imputer.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A822865B22B0062EBD8 /* Imputer.proto */; };
+		21A77AD62865B22B0062EBD8 /* FeatureTypes.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A832865B22B0062EBD8 /* FeatureTypes.pb.swift */; };
+		21A77AD72865B22B0062EBD8 /* NeuralNetwork.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A842865B22B0062EBD8 /* NeuralNetwork.proto */; };
+		21A77AD82865B22B0062EBD8 /* Normalizer.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A852865B22B0062EBD8 /* Normalizer.pb.swift */; };
+		21A77AD92865B22B0062EBD8 /* FeatureVectorizer.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A862865B22B0062EBD8 /* FeatureVectorizer.proto */; };
+		21A77ADA2865B22B0062EBD8 /* AudioFeaturePrint.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A872865B22B0062EBD8 /* AudioFeaturePrint.proto */; };
+		21A77ADB2865B22B0062EBD8 /* SoundAnalysisPreprocessing.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A882865B22B0062EBD8 /* SoundAnalysisPreprocessing.pb.swift */; };
+		21A77ADC2865B22B0062EBD8 /* BayesianProbitRegressor.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A892865B22B0062EBD8 /* BayesianProbitRegressor.proto */; };
+		21A77ADD2865B22B0062EBD8 /* WordEmbedding.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A8A2865B22B0062EBD8 /* WordEmbedding.proto */; };
+		21A77ADE2865B22B0062EBD8 /* Gazetteer.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A8B2865B22B0062EBD8 /* Gazetteer.proto */; };
+		21A77ADF2865B22B0062EBD8 /* MIL.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A8C2865B22B0062EBD8 /* MIL.pb.swift */; };
+		21A77AE02865B22B0062EBD8 /* TreeEnsemble.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A8D2865B22B0062EBD8 /* TreeEnsemble.proto */; };
+		21A77AE12865B22B0062EBD8 /* Gazetteer.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A8E2865B22B0062EBD8 /* Gazetteer.pb.swift */; };
+		21A77AE22865B22B0062EBD8 /* VisionFeaturePrint.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A8F2865B22B0062EBD8 /* VisionFeaturePrint.pb.swift */; };
+		21A77AE32865B22B0062EBD8 /* Scaler.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A902865B22B0062EBD8 /* Scaler.proto */; };
+		21A77AE42865B22B0062EBD8 /* ArrayFeatureExtractor.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A912865B22B0062EBD8 /* ArrayFeatureExtractor.proto */; };
+		21A77AE52865B22B0062EBD8 /* GLMRegressor.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A922865B22B0062EBD8 /* GLMRegressor.pb.swift */; };
+		21A77AE62865B22B0062EBD8 /* NearestNeighbors.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A932865B22B0062EBD8 /* NearestNeighbors.pb.swift */; };
+		21A77AE72865B22B0062EBD8 /* MIL.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A942865B22B0062EBD8 /* MIL.proto */; };
+		21A77AE82865B22B0062EBD8 /* FeatureVectorizer.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A952865B22B0062EBD8 /* FeatureVectorizer.pb.swift */; };
+		21A77AE92865B22B0062EBD8 /* OneHotEncoder.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A962865B22B0062EBD8 /* OneHotEncoder.pb.swift */; };
+		21A77AEA2865B22B0062EBD8 /* CustomModel.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A972865B22B0062EBD8 /* CustomModel.proto */; };
+		21A77AEB2865B22B0062EBD8 /* NonMaximumSuppression.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A982865B22B0062EBD8 /* NonMaximumSuppression.pb.swift */; };
+		21A77AEC2865B22B0062EBD8 /* SVM.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A992865B22B0062EBD8 /* SVM.pb.swift */; };
+		21A77AED2865B22B0062EBD8 /* Normalizer.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A9A2865B22B0062EBD8 /* Normalizer.proto */; };
+		21A77AEE2865B22B0062EBD8 /* AudioFeaturePrint.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A9B2865B22B0062EBD8 /* AudioFeaturePrint.pb.swift */; };
+		21A77AEF2865B22B0062EBD8 /* Imputer.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A9C2865B22B0062EBD8 /* Imputer.pb.swift */; };
+		21A77AF02865B22B0062EBD8 /* NonMaximumSuppression.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A9D2865B22B0062EBD8 /* NonMaximumSuppression.proto */; };
+		21A77AF12865B22B0062EBD8 /* Identity.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A9E2865B22B0062EBD8 /* Identity.pb.swift */; };
+		21A77AF22865B22B0062EBD8 /* OneHotEncoder.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A9F2865B22B0062EBD8 /* OneHotEncoder.proto */; };
+		21A77AF32865B22B0062EBD8 /* LinkedModel.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AA02865B22B0062EBD8 /* LinkedModel.pb.swift */; };
+		21A77AF42865B22B0062EBD8 /* DictVectorizer.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AA12865B22B0062EBD8 /* DictVectorizer.proto */; };
+		21A77AF52865B22B0062EBD8 /* DataStructures.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AA22865B22B0062EBD8 /* DataStructures.proto */; };
+		21A77AF62865B22B0062EBD8 /* GLMClassifier.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AA32865B22B0062EBD8 /* GLMClassifier.pb.swift */; };
+		21A77AF72865B22B0062EBD8 /* ItemSimilarityRecommender.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AA42865B22B0062EBD8 /* ItemSimilarityRecommender.pb.swift */; };
+		21A77AF82865B22B0062EBD8 /* TreeEnsemble.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AA52865B22B0062EBD8 /* TreeEnsemble.pb.swift */; };
+		21A77AF92865B22B0062EBD8 /* FeatureTypes.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AA62865B22B0062EBD8 /* FeatureTypes.proto */; };
+		21A77AFA2865B22B0062EBD8 /* GLMRegressor.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AA72865B22B0062EBD8 /* GLMRegressor.proto */; };
+		21A77AFB2865B22B0062EBD8 /* TextClassifier.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AA82865B22B0062EBD8 /* TextClassifier.pb.swift */; };
+		21A77AFC2865B22B0062EBD8 /* ArrayFeatureExtractor.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AA92865B22B0062EBD8 /* ArrayFeatureExtractor.pb.swift */; };
+		21A77AFD2865B22B0062EBD8 /* SVM.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AAA2865B22B0062EBD8 /* SVM.proto */; };
+		21A77AFE2865B22B0062EBD8 /* Parameters.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AAB2865B22B0062EBD8 /* Parameters.proto */; };
+		21A77AFF2865B22B0062EBD8 /* VisionFeaturePrint.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AAC2865B22B0062EBD8 /* VisionFeaturePrint.proto */; };
+		21A77B002865B22B0062EBD8 /* Model.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AAD2865B22B0062EBD8 /* Model.proto */; };
+		21A77B012865B22B0062EBD8 /* TextClassifier.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AAE2865B22B0062EBD8 /* TextClassifier.proto */; };
+		21A77B022865B22B0062EBD8 /* BayesianProbitRegressor.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AAF2865B22B0062EBD8 /* BayesianProbitRegressor.pb.swift */; };
+		21A77B032865B22B0062EBD8 /* ItemSimilarityRecommender.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AB02865B22B0062EBD8 /* ItemSimilarityRecommender.proto */; };
+		21A77B042865B22B0062EBD8 /* Identity.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AB12865B22B0062EBD8 /* Identity.proto */; };
+		21A77B052865B22B0062EBD8 /* CustomModel.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AB22865B22B0062EBD8 /* CustomModel.pb.swift */; };
+		21A77B062865B22B0062EBD8 /* DictVectorizer.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AB32865B22B0062EBD8 /* DictVectorizer.pb.swift */; };
+		21A77B072865B22B0062EBD8 /* CategoricalMapping.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AB42865B22B0062EBD8 /* CategoricalMapping.pb.swift */; };
+		21A77B082865B22B0062EBD8 /* SoundAnalysisPreprocessing.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AB52865B22B0062EBD8 /* SoundAnalysisPreprocessing.proto */; };
+		21A77B092865B22B0062EBD8 /* Parameters.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AB62865B22B0062EBD8 /* Parameters.pb.swift */; };
+		21A77B0A2865B22B0062EBD8 /* CategoricalMapping.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AB72865B22B0062EBD8 /* CategoricalMapping.proto */; };
+		21A77B0B2865B22B0062EBD8 /* README.rst in Resources */ = {isa = PBXBuildFile; fileRef = 21A77AB82865B22B0062EBD8 /* README.rst */; };
+		21A77B0C2865B22B0062EBD8 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 21A77AB92865B22B0062EBD8 /* LICENSE.txt */; };
+		21A77B0D2865B22B0062EBD8 /* WordEmbedding.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77ABA2865B22B0062EBD8 /* WordEmbedding.pb.swift */; };
+		21A77B0E2865B22B0062EBD8 /* NearestNeighbors.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77ABB2865B22B0062EBD8 /* NearestNeighbors.proto */; };
+		21A77B0F2865B22B0062EBD8 /* LinkedModel.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77ABC2865B22B0062EBD8 /* LinkedModel.proto */; };
+		21A77B102865B22B0062EBD8 /* WordTagger.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77ABD2865B22B0062EBD8 /* WordTagger.proto */; };
+		21A77B112865B22B0062EBD8 /* GLMClassifier.proto in Sources */ = {isa = PBXBuildFile; fileRef = 21A77ABE2865B22B0062EBD8 /* GLMClassifier.proto */; };
+		21A77B122865B22B0062EBD8 /* DataStructures.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77ABF2865B22B0062EBD8 /* DataStructures.pb.swift */; };
+		21A77B132865B22B0062EBD8 /* Model.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AC02865B22B0062EBD8 /* Model.pb.swift */; };
+		21A77B142865B22B0062EBD8 /* NeuralNetwork.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AC12865B22B0062EBD8 /* NeuralNetwork.pb.swift */; };
+		21A77B152865B22B0062EBD8 /* Scaler.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77AC22865B22B0062EBD8 /* Scaler.pb.swift */; };
+		21A77B232865B3B10062EBD8 /* MLModelInspect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B202865B3B10062EBD8 /* MLModelInspect.swift */; };
+		21A77B292865B4CB0062EBD8 /* MNIST_Model.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */; };
+		21A77B2A2865B4CB0062EBD8 /* MNIST_train.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 21A77B272865B4CB0062EBD8 /* MNIST_train.csv.lzfse */; };
+		21A77B2B2865B4CB0062EBD8 /* MNIST_test.csv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 21A77B282865B4CB0062EBD8 /* MNIST_test.csv.lzfse */; };
+		21A77B36286EEC420062EBD8 /* MNIST_Model.mlmodel in CopyFiles */ = {isa = PBXBuildFile; fileRef = 21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */; };
+		21B540712865B14000185DEE /* FLiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B540702865B14000185DEE /* FLiOSApp.swift */; };
+		21B540732865B14000185DEE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B540722865B14000185DEE /* ContentView.swift */; };
+		21B540752865B14100185DEE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540742865B14100185DEE /* Assets.xcassets */; };
+		21B540782865B14100185DEE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B540772865B14100185DEE /* Preview Assets.xcassets */; };
+		50B5A2C6294C848000B0ABC6 /* flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 50B5A2C5294C848000B0ABC6 /* flwr */; };
+		50CDF0E1299D807300AEBD55 /* DataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50CDF0E0299D807300AEBD55 /* DataLoader.swift */; };
+		50EB97CA29AC9C94000AC771 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EB97C929AC9C94000AC771 /* Constants.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		21A77B35286EEC310062EBD8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				21A77B36286EEC420062EBD8 /* MNIST_Model.mlmodel in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		19764EE9297D2B11009F3E5D /* BenchmarkInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkInterceptor.swift; sourceTree = "<group>"; };
+		19764EEC297D3ABE009F3E5D /* BenchmarkModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkModel.swift; sourceTree = "<group>"; };
+		19764EEE297D3AC9009F3E5D /* BenchmarkSuite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkSuite.swift; sourceTree = "<group>"; };
+		21075DC829788ED400311461 /* FLiOSModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLiOSModel.swift; sourceTree = "<group>"; };
+		21A77A6F2865B22A0062EBD8 /* Array+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+Extensions.swift"; sourceTree = "<group>"; };
+		21A77A702865B22A0062EBD8 /* Math.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
+		21A77A712865B22A0062EBD8 /* UIImage+CVPixelBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImage+CVPixelBuffer.swift"; sourceTree = "<group>"; };
+		21A77A722865B22A0062EBD8 /* Predictions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Predictions.swift; sourceTree = "<group>"; };
+		21A77A732865B22A0062EBD8 /* UIImage+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImage+Extensions.swift"; sourceTree = "<group>"; };
+		21A77A742865B22A0062EBD8 /* CGImagePropertyOrientation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGImagePropertyOrientation.swift; sourceTree = "<group>"; };
+		21A77A752865B22A0062EBD8 /* UIImage+RawBytes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImage+RawBytes.swift"; sourceTree = "<group>"; };
+		21A77A762865B22A0062EBD8 /* MLMultiArray+Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MLMultiArray+Helpers.swift"; sourceTree = "<group>"; };
+		21A77A772865B22A0062EBD8 /* MLModel+Images.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MLModel+Images.swift"; sourceTree = "<group>"; };
+		21A77A782865B22A0062EBD8 /* CoreML+Combine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreML+Combine.swift"; sourceTree = "<group>"; };
+		21A77A792865B22A0062EBD8 /* CVPixelBuffer+Create.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CVPixelBuffer+Create.swift"; sourceTree = "<group>"; };
+		21A77A7A2865B22A0062EBD8 /* CGImage+CVPixelBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGImage+CVPixelBuffer.swift"; sourceTree = "<group>"; };
+		21A77A7B2865B22A0062EBD8 /* NonMaxSuppression.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NonMaxSuppression.swift; sourceTree = "<group>"; };
+		21A77A7C2865B22A0062EBD8 /* CGImage+RawBytes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGImage+RawBytes.swift"; sourceTree = "<group>"; };
+		21A77A7D2865B22A0062EBD8 /* MLMultiArray+Image.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MLMultiArray+Image.swift"; sourceTree = "<group>"; };
+		21A77A7E2865B22A0062EBD8 /* CVPixelBuffer+Resize.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CVPixelBuffer+Resize.swift"; sourceTree = "<group>"; };
+		21A77A7F2865B22A0062EBD8 /* CVPixelBuffer+Rotate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CVPixelBuffer+Rotate.swift"; sourceTree = "<group>"; };
+		21A77A812865B22B0062EBD8 /* WordTagger.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WordTagger.pb.swift; sourceTree = "<group>"; };
+		21A77A822865B22B0062EBD8 /* Imputer.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = Imputer.proto; sourceTree = "<group>"; };
+		21A77A832865B22B0062EBD8 /* FeatureTypes.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeatureTypes.pb.swift; sourceTree = "<group>"; };
+		21A77A842865B22B0062EBD8 /* NeuralNetwork.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = NeuralNetwork.proto; sourceTree = "<group>"; };
+		21A77A852865B22B0062EBD8 /* Normalizer.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Normalizer.pb.swift; sourceTree = "<group>"; };
+		21A77A862865B22B0062EBD8 /* FeatureVectorizer.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = FeatureVectorizer.proto; sourceTree = "<group>"; };
+		21A77A872865B22B0062EBD8 /* AudioFeaturePrint.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = AudioFeaturePrint.proto; sourceTree = "<group>"; };
+		21A77A882865B22B0062EBD8 /* SoundAnalysisPreprocessing.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SoundAnalysisPreprocessing.pb.swift; sourceTree = "<group>"; };
+		21A77A892865B22B0062EBD8 /* BayesianProbitRegressor.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = BayesianProbitRegressor.proto; sourceTree = "<group>"; };
+		21A77A8A2865B22B0062EBD8 /* WordEmbedding.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = WordEmbedding.proto; sourceTree = "<group>"; };
+		21A77A8B2865B22B0062EBD8 /* Gazetteer.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = Gazetteer.proto; sourceTree = "<group>"; };
+		21A77A8C2865B22B0062EBD8 /* MIL.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIL.pb.swift; sourceTree = "<group>"; };
+		21A77A8D2865B22B0062EBD8 /* TreeEnsemble.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = TreeEnsemble.proto; sourceTree = "<group>"; };
+		21A77A8E2865B22B0062EBD8 /* Gazetteer.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gazetteer.pb.swift; sourceTree = "<group>"; };
+		21A77A8F2865B22B0062EBD8 /* VisionFeaturePrint.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VisionFeaturePrint.pb.swift; sourceTree = "<group>"; };
+		21A77A902865B22B0062EBD8 /* Scaler.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = Scaler.proto; sourceTree = "<group>"; };
+		21A77A912865B22B0062EBD8 /* ArrayFeatureExtractor.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = ArrayFeatureExtractor.proto; sourceTree = "<group>"; };
+		21A77A922865B22B0062EBD8 /* GLMRegressor.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GLMRegressor.pb.swift; sourceTree = "<group>"; };
+		21A77A932865B22B0062EBD8 /* NearestNeighbors.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearestNeighbors.pb.swift; sourceTree = "<group>"; };
+		21A77A942865B22B0062EBD8 /* MIL.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = MIL.proto; sourceTree = "<group>"; };
+		21A77A952865B22B0062EBD8 /* FeatureVectorizer.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeatureVectorizer.pb.swift; sourceTree = "<group>"; };
+		21A77A962865B22B0062EBD8 /* OneHotEncoder.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OneHotEncoder.pb.swift; sourceTree = "<group>"; };
+		21A77A972865B22B0062EBD8 /* CustomModel.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = CustomModel.proto; sourceTree = "<group>"; };
+		21A77A982865B22B0062EBD8 /* NonMaximumSuppression.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NonMaximumSuppression.pb.swift; sourceTree = "<group>"; };
+		21A77A992865B22B0062EBD8 /* SVM.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SVM.pb.swift; sourceTree = "<group>"; };
+		21A77A9A2865B22B0062EBD8 /* Normalizer.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = Normalizer.proto; sourceTree = "<group>"; };
+		21A77A9B2865B22B0062EBD8 /* AudioFeaturePrint.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioFeaturePrint.pb.swift; sourceTree = "<group>"; };
+		21A77A9C2865B22B0062EBD8 /* Imputer.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Imputer.pb.swift; sourceTree = "<group>"; };
+		21A77A9D2865B22B0062EBD8 /* NonMaximumSuppression.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = NonMaximumSuppression.proto; sourceTree = "<group>"; };
+		21A77A9E2865B22B0062EBD8 /* Identity.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Identity.pb.swift; sourceTree = "<group>"; };
+		21A77A9F2865B22B0062EBD8 /* OneHotEncoder.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = OneHotEncoder.proto; sourceTree = "<group>"; };
+		21A77AA02865B22B0062EBD8 /* LinkedModel.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinkedModel.pb.swift; sourceTree = "<group>"; };
+		21A77AA12865B22B0062EBD8 /* DictVectorizer.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = DictVectorizer.proto; sourceTree = "<group>"; };
+		21A77AA22865B22B0062EBD8 /* DataStructures.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = DataStructures.proto; sourceTree = "<group>"; };
+		21A77AA32865B22B0062EBD8 /* GLMClassifier.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GLMClassifier.pb.swift; sourceTree = "<group>"; };
+		21A77AA42865B22B0062EBD8 /* ItemSimilarityRecommender.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemSimilarityRecommender.pb.swift; sourceTree = "<group>"; };
+		21A77AA52865B22B0062EBD8 /* TreeEnsemble.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeEnsemble.pb.swift; sourceTree = "<group>"; };
+		21A77AA62865B22B0062EBD8 /* FeatureTypes.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = FeatureTypes.proto; sourceTree = "<group>"; };
+		21A77AA72865B22B0062EBD8 /* GLMRegressor.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = GLMRegressor.proto; sourceTree = "<group>"; };
+		21A77AA82865B22B0062EBD8 /* TextClassifier.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextClassifier.pb.swift; sourceTree = "<group>"; };
+		21A77AA92865B22B0062EBD8 /* ArrayFeatureExtractor.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayFeatureExtractor.pb.swift; sourceTree = "<group>"; };
+		21A77AAA2865B22B0062EBD8 /* SVM.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = SVM.proto; sourceTree = "<group>"; };
+		21A77AAB2865B22B0062EBD8 /* Parameters.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = Parameters.proto; sourceTree = "<group>"; };
+		21A77AAC2865B22B0062EBD8 /* VisionFeaturePrint.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = VisionFeaturePrint.proto; sourceTree = "<group>"; };
+		21A77AAD2865B22B0062EBD8 /* Model.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = Model.proto; sourceTree = "<group>"; };
+		21A77AAE2865B22B0062EBD8 /* TextClassifier.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = TextClassifier.proto; sourceTree = "<group>"; };
+		21A77AAF2865B22B0062EBD8 /* BayesianProbitRegressor.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BayesianProbitRegressor.pb.swift; sourceTree = "<group>"; };
+		21A77AB02865B22B0062EBD8 /* ItemSimilarityRecommender.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = ItemSimilarityRecommender.proto; sourceTree = "<group>"; };
+		21A77AB12865B22B0062EBD8 /* Identity.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = Identity.proto; sourceTree = "<group>"; };
+		21A77AB22865B22B0062EBD8 /* CustomModel.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomModel.pb.swift; sourceTree = "<group>"; };
+		21A77AB32865B22B0062EBD8 /* DictVectorizer.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictVectorizer.pb.swift; sourceTree = "<group>"; };
+		21A77AB42865B22B0062EBD8 /* CategoricalMapping.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoricalMapping.pb.swift; sourceTree = "<group>"; };
+		21A77AB52865B22B0062EBD8 /* SoundAnalysisPreprocessing.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = SoundAnalysisPreprocessing.proto; sourceTree = "<group>"; };
+		21A77AB62865B22B0062EBD8 /* Parameters.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Parameters.pb.swift; sourceTree = "<group>"; };
+		21A77AB72865B22B0062EBD8 /* CategoricalMapping.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = CategoricalMapping.proto; sourceTree = "<group>"; };
+		21A77AB82865B22B0062EBD8 /* README.rst */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.rst; sourceTree = "<group>"; };
+		21A77AB92865B22B0062EBD8 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		21A77ABA2865B22B0062EBD8 /* WordEmbedding.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WordEmbedding.pb.swift; sourceTree = "<group>"; };
+		21A77ABB2865B22B0062EBD8 /* NearestNeighbors.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = NearestNeighbors.proto; sourceTree = "<group>"; };
+		21A77ABC2865B22B0062EBD8 /* LinkedModel.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = LinkedModel.proto; sourceTree = "<group>"; };
+		21A77ABD2865B22B0062EBD8 /* WordTagger.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = WordTagger.proto; sourceTree = "<group>"; };
+		21A77ABE2865B22B0062EBD8 /* GLMClassifier.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.protobuf; path = GLMClassifier.proto; sourceTree = "<group>"; };
+		21A77ABF2865B22B0062EBD8 /* DataStructures.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataStructures.pb.swift; sourceTree = "<group>"; };
+		21A77AC02865B22B0062EBD8 /* Model.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Model.pb.swift; sourceTree = "<group>"; };
+		21A77AC12865B22B0062EBD8 /* NeuralNetwork.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralNetwork.pb.swift; sourceTree = "<group>"; };
+		21A77AC22865B22B0062EBD8 /* Scaler.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scaler.pb.swift; sourceTree = "<group>"; };
+		21A77B202865B3B10062EBD8 /* MLModelInspect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLModelInspect.swift; sourceTree = "<group>"; };
+		21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = MNIST_Model.mlmodel; sourceTree = "<group>"; };
+		21A77B272865B4CB0062EBD8 /* MNIST_train.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = MNIST_train.csv.lzfse; sourceTree = "<group>"; };
+		21A77B282865B4CB0062EBD8 /* MNIST_test.csv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = MNIST_test.csv.lzfse; sourceTree = "<group>"; };
+		21B5406D2865B14000185DEE /* FLiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FLiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		21B540702865B14000185DEE /* FLiOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLiOSApp.swift; sourceTree = "<group>"; };
+		21B540722865B14000185DEE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		21B540742865B14100185DEE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		21B540772865B14100185DEE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		50B5A2C4294C841300B0ABC6 /* flwr */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = flwr; path = ../../src/swift/flwr; sourceTree = "<group>"; };
+		50CDF0E0299D807300AEBD55 /* DataLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataLoader.swift; sourceTree = "<group>"; };
+		50EB97C929AC9C94000AC771 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		21B5406A2865B14000185DEE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				50B5A2C6294C848000B0ABC6 /* flwr in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		19764EEB297D3AAE009F3E5D /* Benchmark */ = {
+			isa = PBXGroup;
+			children = (
+				19764EE9297D2B11009F3E5D /* BenchmarkInterceptor.swift */,
+				19764EEC297D3ABE009F3E5D /* BenchmarkModel.swift */,
+				19764EEE297D3AC9009F3E5D /* BenchmarkSuite.swift */,
+			);
+			path = Benchmark;
+			sourceTree = "<group>";
+		};
+		21A77A6E2865B22A0062EBD8 /* CoreMLHelpers */ = {
+			isa = PBXGroup;
+			children = (
+				21A77A6F2865B22A0062EBD8 /* Array+Extensions.swift */,
+				21A77A702865B22A0062EBD8 /* Math.swift */,
+				21A77A712865B22A0062EBD8 /* UIImage+CVPixelBuffer.swift */,
+				21A77A722865B22A0062EBD8 /* Predictions.swift */,
+				21A77A732865B22A0062EBD8 /* UIImage+Extensions.swift */,
+				21A77A742865B22A0062EBD8 /* CGImagePropertyOrientation.swift */,
+				21A77A752865B22A0062EBD8 /* UIImage+RawBytes.swift */,
+				21A77A762865B22A0062EBD8 /* MLMultiArray+Helpers.swift */,
+				21A77A772865B22A0062EBD8 /* MLModel+Images.swift */,
+				21A77A782865B22A0062EBD8 /* CoreML+Combine.swift */,
+				21A77A792865B22A0062EBD8 /* CVPixelBuffer+Create.swift */,
+				21A77A7A2865B22A0062EBD8 /* CGImage+CVPixelBuffer.swift */,
+				21A77A7B2865B22A0062EBD8 /* NonMaxSuppression.swift */,
+				21A77A7C2865B22A0062EBD8 /* CGImage+RawBytes.swift */,
+				21A77A7D2865B22A0062EBD8 /* MLMultiArray+Image.swift */,
+				21A77A7E2865B22A0062EBD8 /* CVPixelBuffer+Resize.swift */,
+				21A77A7F2865B22A0062EBD8 /* CVPixelBuffer+Rotate.swift */,
+			);
+			path = CoreMLHelpers;
+			sourceTree = "<group>";
+		};
+		21A77A802865B22B0062EBD8 /* CoreMLProto */ = {
+			isa = PBXGroup;
+			children = (
+				21A77A812865B22B0062EBD8 /* WordTagger.pb.swift */,
+				21A77A822865B22B0062EBD8 /* Imputer.proto */,
+				21A77A832865B22B0062EBD8 /* FeatureTypes.pb.swift */,
+				21A77A842865B22B0062EBD8 /* NeuralNetwork.proto */,
+				21A77A852865B22B0062EBD8 /* Normalizer.pb.swift */,
+				21A77A862865B22B0062EBD8 /* FeatureVectorizer.proto */,
+				21A77A872865B22B0062EBD8 /* AudioFeaturePrint.proto */,
+				21A77A882865B22B0062EBD8 /* SoundAnalysisPreprocessing.pb.swift */,
+				21A77A892865B22B0062EBD8 /* BayesianProbitRegressor.proto */,
+				21A77A8A2865B22B0062EBD8 /* WordEmbedding.proto */,
+				21A77A8B2865B22B0062EBD8 /* Gazetteer.proto */,
+				21A77A8C2865B22B0062EBD8 /* MIL.pb.swift */,
+				21A77A8D2865B22B0062EBD8 /* TreeEnsemble.proto */,
+				21A77A8E2865B22B0062EBD8 /* Gazetteer.pb.swift */,
+				21A77A8F2865B22B0062EBD8 /* VisionFeaturePrint.pb.swift */,
+				21A77A902865B22B0062EBD8 /* Scaler.proto */,
+				21A77A912865B22B0062EBD8 /* ArrayFeatureExtractor.proto */,
+				21A77A922865B22B0062EBD8 /* GLMRegressor.pb.swift */,
+				21A77A932865B22B0062EBD8 /* NearestNeighbors.pb.swift */,
+				21A77A942865B22B0062EBD8 /* MIL.proto */,
+				21A77A952865B22B0062EBD8 /* FeatureVectorizer.pb.swift */,
+				21A77A962865B22B0062EBD8 /* OneHotEncoder.pb.swift */,
+				21A77A972865B22B0062EBD8 /* CustomModel.proto */,
+				21A77A982865B22B0062EBD8 /* NonMaximumSuppression.pb.swift */,
+				21A77A992865B22B0062EBD8 /* SVM.pb.swift */,
+				21A77A9A2865B22B0062EBD8 /* Normalizer.proto */,
+				21A77A9B2865B22B0062EBD8 /* AudioFeaturePrint.pb.swift */,
+				21A77A9C2865B22B0062EBD8 /* Imputer.pb.swift */,
+				21A77A9D2865B22B0062EBD8 /* NonMaximumSuppression.proto */,
+				21A77A9E2865B22B0062EBD8 /* Identity.pb.swift */,
+				21A77A9F2865B22B0062EBD8 /* OneHotEncoder.proto */,
+				21A77AA02865B22B0062EBD8 /* LinkedModel.pb.swift */,
+				21A77AA12865B22B0062EBD8 /* DictVectorizer.proto */,
+				21A77AA22865B22B0062EBD8 /* DataStructures.proto */,
+				21A77AA32865B22B0062EBD8 /* GLMClassifier.pb.swift */,
+				21A77AA42865B22B0062EBD8 /* ItemSimilarityRecommender.pb.swift */,
+				21A77AA52865B22B0062EBD8 /* TreeEnsemble.pb.swift */,
+				21A77AA62865B22B0062EBD8 /* FeatureTypes.proto */,
+				21A77AA72865B22B0062EBD8 /* GLMRegressor.proto */,
+				21A77AA82865B22B0062EBD8 /* TextClassifier.pb.swift */,
+				21A77AA92865B22B0062EBD8 /* ArrayFeatureExtractor.pb.swift */,
+				21A77AAA2865B22B0062EBD8 /* SVM.proto */,
+				21A77AAB2865B22B0062EBD8 /* Parameters.proto */,
+				21A77AAC2865B22B0062EBD8 /* VisionFeaturePrint.proto */,
+				21A77AAD2865B22B0062EBD8 /* Model.proto */,
+				21A77AAE2865B22B0062EBD8 /* TextClassifier.proto */,
+				21A77AAF2865B22B0062EBD8 /* BayesianProbitRegressor.pb.swift */,
+				21A77AB02865B22B0062EBD8 /* ItemSimilarityRecommender.proto */,
+				21A77AB12865B22B0062EBD8 /* Identity.proto */,
+				21A77AB22865B22B0062EBD8 /* CustomModel.pb.swift */,
+				21A77AB32865B22B0062EBD8 /* DictVectorizer.pb.swift */,
+				21A77AB42865B22B0062EBD8 /* CategoricalMapping.pb.swift */,
+				21A77AB52865B22B0062EBD8 /* SoundAnalysisPreprocessing.proto */,
+				21A77AB62865B22B0062EBD8 /* Parameters.pb.swift */,
+				21A77AB72865B22B0062EBD8 /* CategoricalMapping.proto */,
+				21A77AB82865B22B0062EBD8 /* README.rst */,
+				21A77AB92865B22B0062EBD8 /* LICENSE.txt */,
+				21A77ABA2865B22B0062EBD8 /* WordEmbedding.pb.swift */,
+				21A77ABB2865B22B0062EBD8 /* NearestNeighbors.proto */,
+				21A77ABC2865B22B0062EBD8 /* LinkedModel.proto */,
+				21A77ABD2865B22B0062EBD8 /* WordTagger.proto */,
+				21A77ABE2865B22B0062EBD8 /* GLMClassifier.proto */,
+				21A77ABF2865B22B0062EBD8 /* DataStructures.pb.swift */,
+				21A77AC02865B22B0062EBD8 /* Model.pb.swift */,
+				21A77AC12865B22B0062EBD8 /* NeuralNetwork.pb.swift */,
+				21A77AC22865B22B0062EBD8 /* Scaler.pb.swift */,
+			);
+			path = CoreMLProto;
+			sourceTree = "<group>";
+		};
+		21A77B162865B23D0062EBD8 /* CoreMLClient */ = {
+			isa = PBXGroup;
+			children = (
+				50CDF0E0299D807300AEBD55 /* DataLoader.swift */,
+				21A77B202865B3B10062EBD8 /* MLModelInspect.swift */,
+				50EB97C929AC9C94000AC771 /* Constants.swift */,
+			);
+			path = CoreMLClient;
+			sourceTree = "<group>";
+		};
+		21A77B2E2865B5420062EBD8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		21B540642865B14000185DEE = {
+			isa = PBXGroup;
+			children = (
+				50B5A2C3294C841300B0ABC6 /* Packages */,
+				21B5406F2865B14000185DEE /* FLiOS */,
+				21B5406E2865B14000185DEE /* Products */,
+				21A77B2E2865B5420062EBD8 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		21B5406E2865B14000185DEE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				21B5406D2865B14000185DEE /* FLiOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		21B5406F2865B14000185DEE /* FLiOS */ = {
+			isa = PBXGroup;
+			children = (
+				50773985299D4C35001FD22F /* Scenarios */,
+				19764EEB297D3AAE009F3E5D /* Benchmark */,
+				21A77B162865B23D0062EBD8 /* CoreMLClient */,
+				21A77A6E2865B22A0062EBD8 /* CoreMLHelpers */,
+				21A77A802865B22B0062EBD8 /* CoreMLProto */,
+				21B540702865B14000185DEE /* FLiOSApp.swift */,
+				21075DC829788ED400311461 /* FLiOSModel.swift */,
+				21B540722865B14000185DEE /* ContentView.swift */,
+				21B540742865B14100185DEE /* Assets.xcassets */,
+				21B540762865B14100185DEE /* Preview Content */,
+			);
+			path = FLiOS;
+			sourceTree = "<group>";
+		};
+		21B540762865B14100185DEE /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				21B540772865B14100185DEE /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		50773985299D4C35001FD22F /* Scenarios */ = {
+			isa = PBXGroup;
+			children = (
+				50773986299D4C3E001FD22F /* MNIST */,
+			);
+			path = Scenarios;
+			sourceTree = "<group>";
+		};
+		50773986299D4C3E001FD22F /* MNIST */ = {
+			isa = PBXGroup;
+			children = (
+				21A77B272865B4CB0062EBD8 /* MNIST_train.csv.lzfse */,
+				21A77B282865B4CB0062EBD8 /* MNIST_test.csv.lzfse */,
+				21A77B252865B4CB0062EBD8 /* MNIST_Model.mlmodel */,
+			);
+			path = MNIST;
+			sourceTree = "<group>";
+		};
+		50B5A2C3294C841300B0ABC6 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				50B5A2C4294C841300B0ABC6 /* flwr */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		21B5406C2865B14000185DEE /* FLiOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 21B5407B2865B14100185DEE /* Build configuration list for PBXNativeTarget "FLiOS" */;
+			buildPhases = (
+				21B540692865B14000185DEE /* Sources */,
+				21B5406A2865B14000185DEE /* Frameworks */,
+				21B5406B2865B14000185DEE /* Resources */,
+				21A77B35286EEC310062EBD8 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				21A77B322865B55D0062EBD8 /* PBXTargetDependency */,
+			);
+			name = FLiOS;
+			packageProductDependencies = (
+				50B5A2C5294C848000B0ABC6 /* flwr */,
+			);
+			productName = FlowerCoreML;
+			productReference = 21B5406D2865B14000185DEE /* FLiOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		21B540652865B14000185DEE /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1330;
+				LastUpgradeCheck = 1330;
+				TargetAttributes = {
+					21B5406C2865B14000185DEE = {
+						CreatedOnToolsVersion = 13.3.1;
+					};
+				};
+			};
+			buildConfigurationList = 21B540682865B14000185DEE /* Build configuration list for PBXProject "FLiOS" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 21B540642865B14000185DEE;
+			packageReferences = (
+				09EDEEC8287FE30900D5E0A0 /* XCRemoteSwiftPackageReference "swift-protobuf" */,
+			);
+			productRefGroup = 21B5406E2865B14000185DEE /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				21B5406C2865B14000185DEE /* FLiOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		21B5406B2865B14000185DEE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21A77B0C2865B22B0062EBD8 /* LICENSE.txt in Resources */,
+				21A77B2A2865B4CB0062EBD8 /* MNIST_train.csv.lzfse in Resources */,
+				21A77B2B2865B4CB0062EBD8 /* MNIST_test.csv.lzfse in Resources */,
+				21B540782865B14100185DEE /* Preview Assets.xcassets in Resources */,
+				21A77B0B2865B22B0062EBD8 /* README.rst in Resources */,
+				21B540752865B14100185DEE /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		21B540692865B14000185DEE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21A77AF92865B22B0062EBD8 /* FeatureTypes.proto in Sources */,
+				21A77B0D2865B22B0062EBD8 /* WordEmbedding.pb.swift in Sources */,
+				21A77ACA2865B22B0062EBD8 /* MLMultiArray+Helpers.swift in Sources */,
+				21A77AF02865B22B0062EBD8 /* NonMaximumSuppression.proto in Sources */,
+				19764EEF297D3AC9009F3E5D /* BenchmarkSuite.swift in Sources */,
+				21A77ACC2865B22B0062EBD8 /* CoreML+Combine.swift in Sources */,
+				21A77B0A2865B22B0062EBD8 /* CategoricalMapping.proto in Sources */,
+				21B540732865B14000185DEE /* ContentView.swift in Sources */,
+				21A77AE62865B22B0062EBD8 /* NearestNeighbors.pb.swift in Sources */,
+				50CDF0E1299D807300AEBD55 /* DataLoader.swift in Sources */,
+				21A77AEE2865B22B0062EBD8 /* AudioFeaturePrint.pb.swift in Sources */,
+				21A77AE72865B22B0062EBD8 /* MIL.proto in Sources */,
+				21A77AE32865B22B0062EBD8 /* Scaler.proto in Sources */,
+				21A77AF62865B22B0062EBD8 /* GLMClassifier.pb.swift in Sources */,
+				21A77AFB2865B22B0062EBD8 /* TextClassifier.pb.swift in Sources */,
+				21A77AFA2865B22B0062EBD8 /* GLMRegressor.proto in Sources */,
+				21A77ADC2865B22B0062EBD8 /* BayesianProbitRegressor.proto in Sources */,
+				21A77ADE2865B22B0062EBD8 /* Gazetteer.proto in Sources */,
+				21A77ADB2865B22B0062EBD8 /* SoundAnalysisPreprocessing.pb.swift in Sources */,
+				21A77AC32865B22B0062EBD8 /* Array+Extensions.swift in Sources */,
+				21A77B152865B22B0062EBD8 /* Scaler.pb.swift in Sources */,
+				21A77B092865B22B0062EBD8 /* Parameters.pb.swift in Sources */,
+				21A77AEF2865B22B0062EBD8 /* Imputer.pb.swift in Sources */,
+				21A77B102865B22B0062EBD8 /* WordTagger.proto in Sources */,
+				21A77AD42865B22B0062EBD8 /* WordTagger.pb.swift in Sources */,
+				21A77AC82865B22B0062EBD8 /* CGImagePropertyOrientation.swift in Sources */,
+				21A77B132865B22B0062EBD8 /* Model.pb.swift in Sources */,
+				21A77AE22865B22B0062EBD8 /* VisionFeaturePrint.pb.swift in Sources */,
+				21A77AF22865B22B0062EBD8 /* OneHotEncoder.proto in Sources */,
+				21A77B142865B22B0062EBD8 /* NeuralNetwork.pb.swift in Sources */,
+				21A77ACB2865B22B0062EBD8 /* MLModel+Images.swift in Sources */,
+				21A77AFE2865B22B0062EBD8 /* Parameters.proto in Sources */,
+				21A77AF82865B22B0062EBD8 /* TreeEnsemble.pb.swift in Sources */,
+				21A77B292865B4CB0062EBD8 /* MNIST_Model.mlmodel in Sources */,
+				21A77AC52865B22B0062EBD8 /* UIImage+CVPixelBuffer.swift in Sources */,
+				21A77AEA2865B22B0062EBD8 /* CustomModel.proto in Sources */,
+				21A77B042865B22B0062EBD8 /* Identity.proto in Sources */,
+				21A77AEB2865B22B0062EBD8 /* NonMaximumSuppression.pb.swift in Sources */,
+				21A77ADD2865B22B0062EBD8 /* WordEmbedding.proto in Sources */,
+				21A77ACE2865B22B0062EBD8 /* CGImage+CVPixelBuffer.swift in Sources */,
+				21A77AD82865B22B0062EBD8 /* Normalizer.pb.swift in Sources */,
+				21A77B002865B22B0062EBD8 /* Model.proto in Sources */,
+				19764EEA297D2B12009F3E5D /* BenchmarkInterceptor.swift in Sources */,
+				21A77AD62865B22B0062EBD8 /* FeatureTypes.pb.swift in Sources */,
+				21A77AF52865B22B0062EBD8 /* DataStructures.proto in Sources */,
+				21A77AED2865B22B0062EBD8 /* Normalizer.proto in Sources */,
+				50EB97CA29AC9C94000AC771 /* Constants.swift in Sources */,
+				21A77AE02865B22B0062EBD8 /* TreeEnsemble.proto in Sources */,
+				21A77AD12865B22B0062EBD8 /* MLMultiArray+Image.swift in Sources */,
+				21A77AF12865B22B0062EBD8 /* Identity.pb.swift in Sources */,
+				21A77ADA2865B22B0062EBD8 /* AudioFeaturePrint.proto in Sources */,
+				21A77AE82865B22B0062EBD8 /* FeatureVectorizer.pb.swift in Sources */,
+				21A77AE92865B22B0062EBD8 /* OneHotEncoder.pb.swift in Sources */,
+				19764EED297D3ABE009F3E5D /* BenchmarkModel.swift in Sources */,
+				21A77AC72865B22B0062EBD8 /* UIImage+Extensions.swift in Sources */,
+				21B540712865B14000185DEE /* FLiOSApp.swift in Sources */,
+				21A77B022865B22B0062EBD8 /* BayesianProbitRegressor.pb.swift in Sources */,
+				21A77B032865B22B0062EBD8 /* ItemSimilarityRecommender.proto in Sources */,
+				21A77AD22865B22B0062EBD8 /* CVPixelBuffer+Resize.swift in Sources */,
+				21A77AFD2865B22B0062EBD8 /* SVM.proto in Sources */,
+				21A77AFF2865B22B0062EBD8 /* VisionFeaturePrint.proto in Sources */,
+				21A77AD02865B22B0062EBD8 /* CGImage+RawBytes.swift in Sources */,
+				21A77B232865B3B10062EBD8 /* MLModelInspect.swift in Sources */,
+				21A77AE42865B22B0062EBD8 /* ArrayFeatureExtractor.proto in Sources */,
+				21A77B072865B22B0062EBD8 /* CategoricalMapping.pb.swift in Sources */,
+				21A77B112865B22B0062EBD8 /* GLMClassifier.proto in Sources */,
+				21A77AC92865B22B0062EBD8 /* UIImage+RawBytes.swift in Sources */,
+				21A77AFC2865B22B0062EBD8 /* ArrayFeatureExtractor.pb.swift in Sources */,
+				21A77AC62865B22B0062EBD8 /* Predictions.swift in Sources */,
+				21A77B082865B22B0062EBD8 /* SoundAnalysisPreprocessing.proto in Sources */,
+				21A77B062865B22B0062EBD8 /* DictVectorizer.pb.swift in Sources */,
+				21A77B0E2865B22B0062EBD8 /* NearestNeighbors.proto in Sources */,
+				21A77AF32865B22B0062EBD8 /* LinkedModel.pb.swift in Sources */,
+				21A77AEC2865B22B0062EBD8 /* SVM.pb.swift in Sources */,
+				21075DC929788ED400311461 /* FLiOSModel.swift in Sources */,
+				21A77B122865B22B0062EBD8 /* DataStructures.pb.swift in Sources */,
+				21A77AD72865B22B0062EBD8 /* NeuralNetwork.proto in Sources */,
+				21A77AD52865B22B0062EBD8 /* Imputer.proto in Sources */,
+				21A77AF42865B22B0062EBD8 /* DictVectorizer.proto in Sources */,
+				21A77AF72865B22B0062EBD8 /* ItemSimilarityRecommender.pb.swift in Sources */,
+				21A77AD92865B22B0062EBD8 /* FeatureVectorizer.proto in Sources */,
+				21A77B012865B22B0062EBD8 /* TextClassifier.proto in Sources */,
+				21A77B0F2865B22B0062EBD8 /* LinkedModel.proto in Sources */,
+				21A77ADF2865B22B0062EBD8 /* MIL.pb.swift in Sources */,
+				21A77AE52865B22B0062EBD8 /* GLMRegressor.pb.swift in Sources */,
+				21A77ACD2865B22B0062EBD8 /* CVPixelBuffer+Create.swift in Sources */,
+				21A77B052865B22B0062EBD8 /* CustomModel.pb.swift in Sources */,
+				21A77AE12865B22B0062EBD8 /* Gazetteer.pb.swift in Sources */,
+				21A77AD32865B22B0062EBD8 /* CVPixelBuffer+Rotate.swift in Sources */,
+				21A77ACF2865B22B0062EBD8 /* NonMaxSuppression.swift in Sources */,
+				21A77AC42865B22B0062EBD8 /* Math.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		21A77B322865B55D0062EBD8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 21A77B312865B55D0062EBD8 /* Flower */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		21B540792865B14100185DEE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		21B5407A2865B14100185DEE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		21B5407C2865B14100185DEE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"FLiOS/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = flwr.Flower;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		21B5407D2865B14100185DEE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"FLiOS/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = flwr.Flower;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		21B540682865B14000185DEE /* Build configuration list for PBXProject "FLiOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21B540792865B14100185DEE /* Debug */,
+				21B5407A2865B14100185DEE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		21B5407B2865B14100185DEE /* Build configuration list for PBXNativeTarget "FLiOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21B5407C2865B14100185DEE /* Debug */,
+				21B5407D2865B14100185DEE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		09EDEEC8287FE30900D5E0A0 /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-protobuf.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		21A77B312865B55D0062EBD8 /* Flower */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Flower;
+		};
+		50B5A2C5294C848000B0ABC6 /* flwr */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = flwr;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 21B540652865B14000185DEE /* Project object */;
+}
