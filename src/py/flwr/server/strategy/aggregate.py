@@ -19,6 +19,7 @@ from functools import reduce
 from typing import List, Tuple
 
 import numpy as np
+from scipy import stats
 
 from flwr.common import NDArray, NDArrays
 
@@ -132,3 +133,14 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
             norm = np.linalg.norm(delta)  # type: ignore
             distance_matrix[i, j] = norm**2
     return distance_matrix
+
+def aggregate_trimmed_avg(results: List[Tuple[NDArray, int]], proportiontocut: float) -> NDArray:
+    """Compute trimmed average."""
+    # Create a list of weights and ignore the number of examples
+    weights = [weights for weights, _ in results]
+
+    trimmed_w: NDArrays = [
+        stats.trim_mean(np.asarray(layer), axis=0, proportiontocut=proportiontocut) for layer in zip(*weights)
+    ]
+
+    return trimmed_w

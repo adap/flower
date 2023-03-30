@@ -28,6 +28,7 @@ from .fedxgb_nn_avg import FedXgbNnAvg as FedXgbNnAvg
 from .fedyogi import FedYogi as FedYogi
 from .qfedavg import QFedAvg as QFedAvg
 from .strategy import Strategy as Strategy
+from .fedtrimmedavg import FedTrimmedAvg as FedTrimmedAvg
 
 __all__ = [
     "FaultTolerantFedAvg",
@@ -42,5 +43,6 @@ __all__ = [
     "FedYogi",
     "QFedAvg",
     "FedMedian",
+    "FedTrimmedAvg",
     "Strategy",
 ]

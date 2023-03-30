@@ -1,23 +1,3 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-"""Federated Median (FedMedian) [Yin et al., 2018] strategy.
-
-Paper: https://arxiv.org/pdf/1803.01498v1.pdf
-"""
-
-
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
@@ -33,7 +13,7 @@ from flwr.common import (
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate_median
+from .aggregate import aggregate_trimmed_avg
 from .fedavg import FedAvg
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
@@ -45,8 +25,7 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 
 
 # flake8: noqa: E501
-class FedMedian(FedAvg):
-    """Configurable FedAvg with Momentum strategy implementation."""
+class FedTrimmedAvg(FedAvg):
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
     def __init__(
@@ -69,10 +48,9 @@ class FedMedian(FedAvg):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        proportiontocut: float = 0.2,
     ) -> None:
-        """Configurable FedMedian strategy.
-
-        Implementation based on https://arxiv.org/pdf/1803.01498v1.pdf
+        """Configurable FedTrimmedAvg strategy.
 
         Parameters
         ----------
@@ -96,6 +74,8 @@ class FedMedian(FedAvg):
             Whether or not accept rounds containing failures. Defaults to True.
         initial_parameters : Parameters, optional
             Initial global model parameters.
+        proportiontocut : float, optional
+            Fraction to cut off of both tails of the distribution. Defaults to 0.2.
         """
 
         if (
@@ -118,12 +98,10 @@ class FedMedian(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        # TODO Aren't these two lines below redundant?
-        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
-        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
+        self.proportiontocut = proportiontocut
 
     def __repr__(self) -> str:
-        rep = f"FedMedian(accept_failures={self.accept_failures})"
+        rep = f"FedTrimmedAvg(accept_failures={self.accept_failures})"
         return rep
 
     def aggregate_fit(
@@ -145,7 +123,7 @@ class FedMedian(FedAvg):
             for _, fit_res in results
         ]
         parameters_aggregated = ndarrays_to_parameters(
-            aggregate_median(weights_results)
+            aggregate_trimmed_avg(weights_results, self.proportiontocut)
         )
 
         # Aggregate custom metrics if aggregation fn was provided
