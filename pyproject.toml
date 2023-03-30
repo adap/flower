@@ -68,8 +68,8 @@ uvicorn = { extras = ["standard"], version = "^0.20.0", optional = true }
 xgboost = { version = "^1.6.2", optional = true }
 # Optional dependency (fedtrimmedavg)
 scipy = [
-    {version = "<=1.6.3", python = "<3.8"},
-    {version = "^1.10.1", python = ">=3.8"}
+    {version = "<=1.6.3", markers = "python_version < '3.8'", optional = true},
+    {version = "^1.10.1", markers = "python_version >= '3.8'", optional = true}
 ]
 
 [tool.poetry.extras]
