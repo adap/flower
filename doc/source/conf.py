@@ -76,7 +76,7 @@ redirects = {
     "quickstart_pytorch": "quickstart-pytorch.html",
     "quickstart_tensorflow": "quickstart-tensorflow.html",
     "release_process": "release-process.html",
-    "saving-progress": "save-progress.html",
+    "saving-progress": "saving-progress.html",
     "writing-documentation": "write-documentation.html",
     "quickstart_scikitlearn": "quickstart-scikitlearn.html",
     # Deleted pages

@@ -68,7 +68,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    configure-clients
    strategies
    implementing-strategies
-   save-progress
+   saving-progress
    saving-and-loading-pytorch-checkpoints
    monitor-simulation
    ssl-enabled-connections
