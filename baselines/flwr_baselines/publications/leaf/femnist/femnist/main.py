@@ -95,17 +95,7 @@ def main(cfg: DictConfig):
         client_resources=client_resources,
     )
 
-    log(INFO, history)
-
-    pd_history_acc = pd.DataFrame(
-        history.metrics_distributed["accuracy"], columns=["round", "test_accuracy"]
-    )
-    pd_history_loss = pd.DataFrame(
-        history.losses_distributed, columns=["round", "test_loss"]
-    )
-    print(pd_history_acc)
-    print(pd_history_loss)
-
+    # Save the results
     results_dir_path = pathlib.Path(cfg.training.results_dir_path)
     if not results_dir_path.exists():
         results_dir_path.mkdir(parents=True)
