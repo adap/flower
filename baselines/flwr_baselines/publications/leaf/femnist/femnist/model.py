@@ -57,9 +57,10 @@ def train(
     n_batches is an alternative way of specifying the training length
     (instead of epochs)
     """
-    criterion = torch.nn.CrossEntropyLoss()
+    criterion = torch.nn.CrossEntropyLoss(reduction="sum")
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
     net.train()
+    epoch_loss, epoch_acc = 0.0, 0.0
     # pylint: disable=R1705
     if epochs is not None:
         for epoch in range(epochs):
@@ -76,7 +77,7 @@ def train(
                     optimizer,
                     total,
                 )
-            epoch_loss /= len(trainloader.dataset)
+            epoch_loss = epoch_loss / total
             epoch_acc = correct / total
 
             if verbose:
@@ -87,7 +88,7 @@ def train(
                     str(epoch_loss),
                     str(epoch_acc),
                 )
-        train_loss, train_acc = test(net, trainloader, device)
+        train_loss, train_acc = epoch_loss, epoch_acc
         if len(valloader):
             val_loss, val_acc = test(net, valloader, device)
         else:
@@ -96,8 +97,8 @@ def train(
     else:
         # Training time given in number of batches not epochs
         correct, total, train_loss = 0, 0, 0.0
-        for idx, (images, labels) in enumerate(trainloader):
-            if idx == n_batches:
+        for epoch_idx, (images, labels) in enumerate(trainloader):
+            if epoch_idx == n_batches:
                 break
             correct, epoch_loss, total = train_step(
                 correct,
@@ -110,7 +111,6 @@ def train(
                 optimizer,
                 total,
             )
-        train_loss /= n_batches * next(iter(trainloader)).size(0)
         train_acc = correct / total
         if verbose:
             log(
@@ -119,14 +119,22 @@ def train(
                 str(train_loss),
                 str(train_acc),
             )
-        val_loss, val_acc = test(net, valloader, device)
+        if len(valloader):
+            val_loss, val_acc = test(net, valloader, device)
+        else:
+            val_loss, val_acc = None, None
         return train_loss, train_acc, val_loss, val_acc
 
 
 def train_step(
     correct, criterion, device, epoch_loss, images, labels, net, optimizer, total
-):
-    """Single train step."""
+) -> Tuple[float, float, float]:
+    """Single train step.
+
+    Returns
+        correct, epoch_loss, total: Tuple[float, float, float]
+        Number of correctly predicted samples, sum of loss, total number of samples
+    """
     images = images.to(device)
     labels = labels.to(device)
     optimizer.zero_grad()
@@ -144,7 +152,7 @@ def test(
     net: nn.Module, dataloader: DataLoader, device: torch.device
 ) -> Tuple[float, float]:
     """Test - calculate metrics on the given dataloader."""
-    criterion = torch.nn.CrossEntropyLoss()
+    criterion = torch.nn.CrossEntropyLoss(reduction="sum")
     if len(dataloader) == 0:
         raise ValueError("Dataloader can't be 0, exiting...")
     correct, total, loss = 0, 0, 0.0
