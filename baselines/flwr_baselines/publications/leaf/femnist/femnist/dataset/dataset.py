@@ -227,8 +227,10 @@ def create_federated_dataloaders(
     log(INFO, "NIST data downloading started")
     nist_by_class_url = "https://s3.amazonaws.com/nist-srd/SD19/by_class.zip"
     nist_by_writer_url = "https://s3.amazonaws.com/nist-srd/SD19/by_write.zip"
-    nist_by_class_downloader = ZipDownloader("data/raw", nist_by_class_url)
-    nist_by_writer_downloader = ZipDownloader("data/raw", nist_by_writer_url)
+    nist_by_class_downloader = ZipDownloader("by_class", "data/raw", nist_by_class_url)
+    nist_by_writer_downloader = ZipDownloader(
+        "by_write", "data/raw", nist_by_writer_url
+    )
     nist_by_class_downloader.download()
     nist_by_writer_downloader.download()
     log(INFO, "NIST data downloading done")

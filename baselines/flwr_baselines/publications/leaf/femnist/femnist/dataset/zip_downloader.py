@@ -16,10 +16,12 @@ class ZipDownloader:
 
     def __init__(
         self,
+        dataset_name: str,
         extract_path: Union[str, pathlib.Path],
         url: str,
         save_path: Optional[pathlib.Path] = None,
     ) -> None:
+        self._dataset_name = dataset_name
         self._extract_path = (
             extract_path
             if isinstance(extract_path, pathlib.Path)
@@ -39,7 +41,9 @@ class ZipDownloader:
         ----------
         unzip - whether to unzip the downloaded filed
         """
-        if self._extract_path.exists() and len(list(self._extract_path.glob("*"))) != 0:
+        if (self._extract_path / self._dataset_name).exists() and len(
+            list(self._extract_path.glob("*"))
+        ) != 0:
             log(
                 INFO,
                 "Files from %s are already downloaded and extracted from the zip file "
