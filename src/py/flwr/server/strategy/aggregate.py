@@ -137,7 +137,7 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
 
 def aggregate_trimmed_avg(
     results: List[Tuple[NDArray, int]], proportiontocut: float
-) -> NDArray:
+) -> NDArrays:
     """Compute trimmed average."""
     # Create a list of weights and ignore the number of examples
     weights = [weights for weights, _ in results]
