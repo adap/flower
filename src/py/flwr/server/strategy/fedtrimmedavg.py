@@ -109,7 +109,7 @@ class FedTrimmedAvg(FedAvg):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate fit results using median."""
+        """Aggregate fit results using trimmed average."""
         if not results:
             return None, {}
         # Do not aggregate if there are failures and failures are not accepted
