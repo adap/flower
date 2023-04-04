@@ -97,10 +97,10 @@ def train(
     else:
         # Training time given in number of batches not epochs
         correct, total, train_loss = 0, 0, 0.0
-        for epoch_idx, (images, labels) in enumerate(trainloader):
-            if epoch_idx == n_batches:
+        for batch_idx, (images, labels) in enumerate(trainloader):
+            if batch_idx == n_batches:
                 break
-            correct, epoch_loss, total = train_step(
+            correct, train_loss, total = train_step(
                 correct,
                 criterion,
                 device,
@@ -128,12 +128,14 @@ def train(
 
 def train_step(
     correct, criterion, device, epoch_loss, images, labels, net, optimizer, total
-) -> Tuple[float, float, float]:
+) -> Tuple[int, float, int]:
     """Single train step.
 
     Returns
-        correct, epoch_loss, total: Tuple[float, float, float]
-        Number of correctly predicted samples, sum of loss, total number of samples
+    -------
+    correct, epoch_loss, total: Tuple[int, float, int]
+        number of correctly predicted samples, sum of loss, total number of
+        samples
     """
     images = images.to(device)
     labels = labels.to(device)
@@ -145,7 +147,7 @@ def train_step(
     epoch_loss += loss
     total += labels.size(0)
     correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-    return correct, epoch_loss, total
+    return correct, float(epoch_loss), total
 
 
 def test(
@@ -167,4 +169,4 @@ def test(
             correct += predicted.eq(labels).sum().item()
         accuracy = correct / total
         loss /= total
-    return loss, accuracy
+    return float(loss), accuracy
