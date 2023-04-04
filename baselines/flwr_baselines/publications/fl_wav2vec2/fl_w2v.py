@@ -19,7 +19,7 @@ import numpy as np
 from pathlib import Path
 from typing import Dict, Callable, Optional, Tuple
 from typing import List
-from flwr.common import parameters_to_weights, Weights, weights_to_parameters
+from flwr.common import parameters_to_ndarrays, ndarrays_to_parameters
 import logging
 from argparse import ArgumentParser
 import timeit
@@ -32,7 +32,6 @@ from collections import OrderedDict
 from math import exp
 import GPUtil
 import gc
-from flwr.common import parameters_to_weights, Weights, weights_to_parameters
 from flwr.server.strategy.aggregate import aggregate
 from typing import List
 import os
@@ -46,7 +45,7 @@ from sb_w2v2 import (
     set_weights,
     get_weights
 )
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, GetParametersRes, NDArrays
 
 
 parser = ArgumentParser()
@@ -83,18 +82,18 @@ class SpeechBrainClient(fl.client.Client):
         print("HOOOOO HEEYYYYEYEYEYYEYEYEYEYE")
 
 
-    def get_parameters(self) -> ParametersRes:
+    def get_parameters(self) -> GetParametersRes:
         print(f"Client {self.cid}: get_parameters")
 
-        weights: Weights = get_weights(self.modules)
-        parameters = fl.common.weights_to_parameters(weights)
+        weights: NDArrays = get_weights(self.modules)
+        parameters = ndarrays_to_parameters(weights)
         gc.collect()
-        return ParametersRes(parameters=parameters)
+        return GetParametersRes(parameters=parameters)
 
 
     def fit(self, ins: FitIns) -> FitRes:
         print(f"==============================Client {self.cid}: fit==============================")
-        weights: Weights = fl.common.parameters_to_weights(ins.parameters)
+        weights: NDArrays = fl.common.parameters_to_ndarrays(ins.parameters)
         config = ins.config
 
         # Read training configuration
@@ -136,7 +135,7 @@ class SpeechBrainClient(fl.client.Client):
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         print(f"Client {self.cid}: evaluate")
 
-        weights = fl.common.parameters_to_weights(ins.parameters)
+        weights = parameters_to_ndarrays(ins.parameters)
 
         # config = ins.config
         # epochs = int(config["epochs"])
@@ -225,7 +224,7 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
         rnd,
         results,
         failures,
-    ) -> Optional[fl.common.Weights]:
+    ) -> Optional[fl.common.NDArrays]:
 
         if not results:
             return None
@@ -239,14 +238,14 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
         #Define ratio merge
         if args.weight_strategy == 'num':
             weights_results = [
-                (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+                (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
                 for client, fit_res in results
             ]
             weights =  aggregate(weights_results)
 
         elif args.weight_strategy == 'loss' or args.weight_strategy == 'wer':
             weights_results = [
-                (parameters_to_weights(fit_res.parameters), fit_res.metrics[key_name])
+                (parameters_to_ndarrays(fit_res.parameters), fit_res.metrics[key_name])
                 for client, fit_res in results
             ]
             weights = aggregate(weights_results)
@@ -255,7 +254,7 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
         del results, weights_results
         torch.cuda.empty_cache()
         gc.collect()
-        return weights_to_parameters(weights), {}
+        return ndarrays_to_parameters(weights), {}
 
 
 # Define custom data procedure
@@ -471,7 +470,7 @@ def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
     return fit_config
 
 
-def evaluate(weights: fl.common.Weights):
+def evaluate(weights: fl.common.NDArrays):
 
     # int model
     asr_brain, dataset = int_model(19999,args.config_path, args.output, 
@@ -518,7 +517,7 @@ def pre_trained_point(path, save, hparams,device,parallel):
     
     asr_brain.modules.load_state_dict(state_dict)
     weights = get_weights(asr_brain.modules)
-    pre_trained = fl.common.weights_to_parameters(weights)
+    pre_trained = ndarrays_to_parameters(weights)
 
     #Free up space after initialized
     del asr_brain, weights
