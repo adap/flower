@@ -2,7 +2,7 @@
 
 This example demonstrates an advanced federated learning setup using Flower with PyTorch. It differs from the quickstart example in the following ways:
 
-- Each client holds a local dataset of 5000 training examples and 1000 test examples
+- Each client holds a local dataset of 5000 training examples and 1000 test examples (note that using the `run.sh` script will only select 10 datasamples by default, as the `--toy` argument is set).
 - Server-side model evaluation after parameter aggregation
 - Hyperparameter schedule using config functions
 - Custom return values
