@@ -310,7 +310,12 @@ def run_server() -> None:
     if args.fleet_api_type == "rest":
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state_factory),
+            args=(
+                args.rest_fleet_api_address,
+                args.ssl_keyfile,
+                args.ssl_certfile,
+                state_factory,
+            ),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
@@ -437,6 +442,8 @@ def _run_fleet_api_grpc_bidi(
 # pylint: disable=import-outside-toplevel
 def _run_fleet_api_rest(
     address: str,
+    ssl_keyfile: Optional[str],
+    ssl_certfile: Optional[str],
     state_factory: StateFactory,
 ) -> None:
     """Run Driver API (REST-based)."""
@@ -466,6 +473,8 @@ def _run_fleet_api_rest(
         reload=False,
         access_log=True,
         workers=1,
+        ssl_keyfile=ssl_keyfile,
+        ssl_certfile=ssl_certfile,
     )
 
 
@@ -555,4 +564,14 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "--rest-fleet-api-address",
         help=f"Fleet API REST server address. Default:'{ADDRESS_FLEET_API_REST}'",
         default=ADDRESS_FLEET_API_REST,
+    )
+    rest_group.add_argument(
+        "--ssl_certfile",
+        help="Fleet API REST SSL certificate file (as a path str). Default:None",
+        default=None,
+    )
+    rest_group.add_argument(
+        "--ssl_keyfile",
+        help="Fleet API REST SSL private key file (as a path str). Default:None",
+        default=None,
     )
