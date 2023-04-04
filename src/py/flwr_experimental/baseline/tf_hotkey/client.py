@@ -83,10 +83,7 @@ def main() -> None:
     model = keyword_cnn(input_shape=(80, 40, 1), seed=SEED)
 
     # Load local data partition
-    (
-        (xy_train_partitions, xy_test_partitions),
-        _,
-    ) = tf_hotkey_partitioned.load_data(
+    ((xy_train_partitions, xy_test_partitions), _,) = tf_hotkey_partitioned.load_data(
         iid_fraction=client_setting.iid_fraction,
         num_partitions=client_setting.num_clients,
     )
