@@ -1,14 +1,12 @@
 """Main module for running FEMNIST experiments."""
 import pathlib
 from functools import partial
-from logging import INFO
 from typing import Type, Union
 
 import flwr as fl
 import hydra
 import pandas as pd
 import torch
-from flwr.common.logger import log
 from flwr.server.strategy import FedAvg
 from matplotlib import pyplot as plt
 from omegaconf import DictConfig
@@ -105,7 +103,7 @@ def main(cfg: DictConfig):
         distributed_history_dict["distributed_test_" + metric] = [
             val for _, val in round_value_tuple_list
         ]
-    for metric, round_value_tuple_list in history.metrics_distributed_fit.items():
+    for metric, round_value_tuple_list in history.metrics_distributed_fit.items():  # type: ignore
         distributed_history_dict["distributed_" + metric] = [
             val for _, val in round_value_tuple_list
         ]
