@@ -8,7 +8,7 @@ from flwr.common.logger import log
 from PIL import Image
 from tqdm import tqdm
 
-from flwr_baselines.publications.leaf.femnist.femnist.dataset.dataset_utils import (
+from flwr_baselines.publications.leaf.femnist.femnist.dataset.utils import (
     calculate_series_hashes,
     hex_decimal_to_char,
 )
