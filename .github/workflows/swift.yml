@@ -1,0 +1,29 @@
+name: Swift
+
+on:
+  push:
+    branches: ['main']
+    paths: ['src/swift/**']
+  pull_request:
+    branches: ['main']
+    paths: ['src/swift/**']
+
+
+jobs:
+  build:
+    defaults:
+        run:
+            working-directory: src/swift/flwr
+    name: test_swift
+    strategy:
+      matrix:
+        os: [macos-latest]
+        swift: ["5"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: fwal/setup-swift@2040b795e5c453c3a05fcb8316496afc8a74f192
+        with:
+          swift-version: ${{ matrix.swift }}
+      - uses: actions/checkout@v3
+      - name: Run tests
+        run: arch -x86_64 xcodebuild test -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.2'

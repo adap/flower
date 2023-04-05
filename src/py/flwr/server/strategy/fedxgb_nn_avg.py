@@ -37,9 +37,6 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate
 from .fedavg import FedAvg
 
-# from xgboost import XGBClassifier, XGBRegressor  # pylint: disable=W0611
-
-
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
 `min_evaluate_clients` can cause the server to fail when there are too few clients
