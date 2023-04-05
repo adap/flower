@@ -51,7 +51,7 @@ poetry run ./run.sh
 
 The `run.sh` script starts processes in the background so that you don't have to open eleven terminal windows. If you experiment with the code example and something goes wrong, simply using `CTRL + C` on Linux (or `CMD + C` on macOS) wouldn't normally kill all these processes, which is why the script ends with `trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT` and `wait`. This simply allows you to stop the experiment using `CTRL + C` (or `CMD + C`). If you change the script and anything goes wrong you can still use `killall python` (or `killall python3`) to kill all background processes (or a more specific command if you have other Python processes running that you don't want to kill).
 
-By default `run.sh` uses 2 clients and only a subset of the data. To use the full data, remove the `--toy` argument or set it to False. To use more clients simple change the bash loop accordingly (for instance, for 10 clients you would do: ``for i in `seq 0 9`; do``).
+By default `run.sh` uses 2 clients and only a subset of the data. To use the full data, remove the `--toy` argument or set it to False. To use more clients simple change the bash loop accordingly (for instance, for 10 clients you would do: ``for i in `seq 0 9`; do`` instead of ``for i in `seq 0 1`; do``).
 
 ## Important / Warning
 
