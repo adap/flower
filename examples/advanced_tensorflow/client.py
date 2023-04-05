@@ -74,6 +74,7 @@ def main() -> None:
     # Parse command line argument `partition`
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument("--partition", type=int, choices=range(0, 10), required=True)
+    parser.add_argument("--toy", type=bool, default=False, required=False)
     args = parser.parse_args()
 
     # Load and compile Keras model
@@ -84,6 +85,12 @@ def main() -> None:
 
     # Load a subset of CIFAR-10 to simulate the local data partition
     (x_train, y_train), (x_test, y_test) = load_partition(args.partition)
+
+    if args.toy:
+        (x_train, y_train), (x_test, y_test) = (x_train[:10], y_train[:10]), (
+            x_test[:10],
+            y_test[:10],
+        )
 
     # Start Flower client
     client = CifarClient(model, x_train, y_train, x_test, y_test)
