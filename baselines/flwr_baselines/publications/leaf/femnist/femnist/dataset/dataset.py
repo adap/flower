@@ -27,25 +27,30 @@ from flwr_baselines.publications.leaf.femnist.femnist.dataset.zip_downloader imp
 class NISTLikeDataset(Dataset):
     """Dataset representing NIST or preprocessed variant of it."""
 
-    def __init__(self, image_paths, labels, transform=transforms.ToTensor()):
+    def __init__(
+        self,
+        image_paths: List[pathlib.Path],
+        labels: np.ndarray,
+        transform: transforms = transforms.ToTensor(),
+    ) -> None:
         self.image_paths = image_paths
         self.labels = labels
-        self.transform = transform
+        self.transform = transforms.ToTensor() if transform is None else transform
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.image_paths)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index) -> Tuple[torch.Tensor, torch.Tensor]:
         image_path = self.image_paths[index]
         label = self.labels[index]
         image = Image.open(image_path)
         if self.transform:
             image = self.transform(image)
-            label = torch.tensor(label)
+        label = torch.tensor(label)
         return image, label
 
 
-def create_dataset(df_info: pd.DataFrame, labels: np.ndarray):
+def create_dataset(df_info: pd.DataFrame, labels: np.ndarray) -> NISTLikeDataset:
     """Instantiate NISTLikeDataset.
 
     Parameters
