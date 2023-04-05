@@ -1,0 +1,10 @@
+defaults:
+  - _self_
+  - dataset: partial_FeMNIST_table2
+  - dataset.train_fraction: 0.6
+  - dataset.validation_fraction: 0.2
+  - dataset.test_fraction: 0.2
+  - training: table2_leaf_paper
+
+random_seed: 42
+device: cpu
