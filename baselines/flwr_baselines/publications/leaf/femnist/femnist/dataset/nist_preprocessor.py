@@ -102,7 +102,7 @@ class NISTPreprocessor:
             self._processed_images_information_path,
         )
 
-    def create_dir_structure(self):
+    def create_dir_structure(self) -> None:
         """Create directory structure required for the dataset storage."""
         log(INFO, "Directory structure creation started")
         self._processed_dir.mkdir(exist_ok=True)
@@ -113,7 +113,7 @@ class NISTPreprocessor:
         )
         log(INFO, "Directory structure creation done")
 
-    def _extract_writer_information(self):
+    def _extract_writer_information(self) -> pd.DataFrame:
         """Extract writer id based on the path (directories) it was placed
         in."""
         log(INFO, "Writer information preprocessing started")
@@ -127,7 +127,7 @@ class NISTPreprocessor:
         log(INFO, "Writer information preprocessing done")
         return writer_df
 
-    def _extract_class_information(self):
+    def _extract_class_information(self) -> pd.DataFrame:
         """Extract class (label) based on the path (directories) it was placed
         in.
 
@@ -158,7 +158,7 @@ class NISTPreprocessor:
         log(INFO, "Merging of the class and writer information by hash values done")
         return merged
 
-    def _calculate_hashes(self):
+    def _calculate_hashes(self) -> None:
         log(INFO, "Hashes calculation started")
         # Assumes that the class_df and writer_df are created
         self._writer_df["hash"] = calculate_series_hashes(
