@@ -79,6 +79,7 @@ redirects = {
     "saving-progress": "save-progress.html",
     "writing-documentation": "write-documentation.html",
     "quickstart_scikitlearn": "quickstart-scikitlearn.html",
+    "quickstart_xgboost": "quickstart-xgboost.html",
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",
