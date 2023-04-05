@@ -88,6 +88,7 @@ def train(
                     str(epoch_loss),
                     str(epoch_acc),
                 )
+        # Train loss reported is typically the last epoch loss
         train_loss, train_acc = epoch_loss, epoch_acc
         if len(valloader):
             val_loss, val_acc = test(net, valloader, device)
@@ -112,6 +113,7 @@ def train(
                 total,
             )
         train_acc = correct / total
+        train_loss = train_loss / total
         if verbose:
             log(
                 INFO,
@@ -144,7 +146,7 @@ def train_step(
     loss = criterion(outputs, labels)
     loss.backward()
     optimizer.step()
-    epoch_loss += loss
+    epoch_loss += loss.item()
     total += labels.size(0)
     correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     return correct, float(epoch_loss), total
