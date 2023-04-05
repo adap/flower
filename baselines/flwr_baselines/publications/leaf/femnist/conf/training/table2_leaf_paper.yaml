@@ -5,4 +5,4 @@ epochs_per_round: null
 batches_per_round: 5
 same_train_test_clients: True
 
-results_dir_path: "./results/table2_theory_partial_FeMNIST"
+results_dir_path: "./results/table2_leaf_paper_partial_FeMNIST"
