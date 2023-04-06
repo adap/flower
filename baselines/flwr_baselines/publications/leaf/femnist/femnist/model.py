@@ -5,6 +5,7 @@ from typing import Optional, Tuple
 import torch
 import torch.nn as nn
 from flwr.common.logger import log
+from torch import Tensor
 from torch.utils.data import DataLoader
 
 
@@ -13,7 +14,7 @@ class Net(nn.Module):
     FEMNIST data."""
 
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, num_classes):
+    def __init__(self, num_classes: int):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=5, padding="same")
         self.relu1 = nn.ReLU()
@@ -25,7 +26,7 @@ class Net(nn.Module):
         self.relu3 = nn.ReLU()
         self.fc2 = nn.Linear(2048, num_classes)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         """Forward step in training."""
         x = self.conv1(x)
         x = self.relu1(x)
@@ -129,7 +130,15 @@ def train(
 
 
 def train_step(
-    correct, criterion, device, epoch_loss, images, labels, net, optimizer, total
+    correct: int,
+    criterion: nn.CrossEntropyLoss,
+    device: torch.device,
+    epoch_loss: float,
+    images: Tensor,
+    labels: Tensor,
+    net: nn.Module,
+    optimizer: torch.optim.SGD,
+    total: int,
 ) -> Tuple[int, float, int]:
     """Single train step.
 
