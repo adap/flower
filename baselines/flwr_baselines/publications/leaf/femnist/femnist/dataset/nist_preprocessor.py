@@ -117,8 +117,7 @@ class NISTPreprocessor:
         """Extract writer id based on the path (directories) it was placed
         in."""
         log(INFO, "Writer information preprocessing started")
-        images_paths = self._by_writer_nist.glob("*/*/*/*")
-        images_paths = list(images_paths)
+        images_paths = list(self._by_writer_nist.glob("*/*/*/*"))
         writer_df = pd.DataFrame(images_paths, columns=["path_by_writer"])
         writer_df["writer_id"] = writer_df["path_by_writer"].map(
             lambda x: x.parent.parent.name
