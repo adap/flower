@@ -7,7 +7,7 @@ import PIL
 from PIL import Image
 
 
-def recreate_nist():
+def recreate_nist() -> tempfile.TemporaryDirectory:
     """Recreate a small dataset in a structure resembling the NIST dataset.
 
     There are two different writers and 13 images saved in a temporary

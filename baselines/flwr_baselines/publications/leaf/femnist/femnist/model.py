@@ -14,7 +14,7 @@ class Net(nn.Module):
     FEMNIST data."""
 
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, num_classes: int):
+    def __init__(self, num_classes: int) -> None:
         super().__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=5, padding="same")
         self.relu1 = nn.ReLU()

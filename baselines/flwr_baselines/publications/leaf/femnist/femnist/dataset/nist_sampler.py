@@ -22,7 +22,7 @@ class NistSampler:
 
     """
 
-    def __init__(self, data_info_df: pd.DataFrame):
+    def __init__(self, data_info_df: pd.DataFrame) -> None:
         self._data_info_df = data_info_df
 
     # pylint: disable=too-many-locals

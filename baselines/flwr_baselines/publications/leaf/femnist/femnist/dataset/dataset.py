@@ -40,7 +40,7 @@ class NISTLikeDataset(Dataset):
     def __len__(self) -> int:
         return len(self.image_paths)
 
-    def __getitem__(self, index) -> Tuple[torch.Tensor, torch.Tensor]:
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
         image_path = self.image_paths[index]
         label = self.labels[index]
         image = Image.open(image_path)
