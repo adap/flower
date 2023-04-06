@@ -41,7 +41,7 @@ class Net(nn.Module):
         return x
 
 
-# pylint: disable=too-many-arguments, too-many-locals, no-member, too-many-branches
+# pylint: disable=too-many-arguments, too-many-locals, too-many-branches
 def train(
     net: nn.Module,
     trainloader: DataLoader,

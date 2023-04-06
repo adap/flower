@@ -1,5 +1,4 @@
 """Client implementation for federated learning."""
-# pylint: disable=no-member
 from typing import Dict, List, Tuple
 
 import flwr as fl

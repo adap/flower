@@ -1,5 +1,4 @@
 """FEMNIST dataset creation module."""
-# pylint: disable=no-member
 import pathlib
 from logging import INFO
 from typing import List, Tuple
