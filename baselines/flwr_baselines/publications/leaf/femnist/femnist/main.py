@@ -18,7 +18,7 @@ from flwr_baselines.publications.leaf.femnist.femnist.dataset.dataset import (
 from flwr_baselines.publications.leaf.femnist.femnist.fedavg_same_clients import (
     FedAvgSameClients,
 )
-from flwr_baselines.publications.leaf.femnist.femnist.femnist_utils import (
+from flwr_baselines.publications.leaf.femnist.femnist.utils import (
     setup_seed,
     weighted_average,
 )
