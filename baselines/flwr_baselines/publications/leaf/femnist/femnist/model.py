@@ -41,7 +41,7 @@ class Net(nn.Module):
         return x
 
 
-# pylint: disable=too-many-arguments, too-many-locals, no-member
+# pylint: disable=too-many-arguments, too-many-locals, no-member, too-many-branches
 def train(
     net: nn.Module,
     trainloader: DataLoader,
@@ -62,8 +62,8 @@ def train(
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
     net.train()
     epoch_loss, epoch_acc = 0.0, 0.0
-    # pylint: disable=R1705
-    if epochs is not None:
+    # pylint: disable=no-else-return
+    if epochs:
         for epoch in range(epochs):
             correct, total, epoch_loss = 0, 0, 0.0
             for images, labels in trainloader:
@@ -96,7 +96,7 @@ def train(
         else:
             val_loss, val_acc = None, None
         return train_loss, train_acc, val_loss, val_acc
-    else:
+    elif n_batches:
         # Training time given in number of batches not epochs
         correct, total, train_loss = 0, 0, 0.0
         for batch_idx, (images, labels) in enumerate(trainloader):
@@ -127,6 +127,8 @@ def train(
         else:
             val_loss, val_acc = None, None
         return train_loss, train_acc, val_loss, val_acc
+    else:
+        raise ValueError("either n_epochs or n_batches should be specified ")
 
 
 def train_step(
