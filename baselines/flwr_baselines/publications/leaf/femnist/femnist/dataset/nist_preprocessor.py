@@ -76,13 +76,13 @@ class NISTPreprocessor:
             self._calculate_hashes()
             self._df = self._merge_class_and_writer_information()
             log(
-                INFO,
+                DEBUG,
                 "Saving information about raw images to %s started",
                 self._raw_images_information_path,
             )
             self._df.to_csv(self._raw_images_information_path)
             log(
-                INFO,
+                DEBUG,
                 "Saving information about raw images to %s done",
                 self._raw_images_information_path,
             )
@@ -91,39 +91,41 @@ class NISTPreprocessor:
         self.create_dir_structure()
         self._preprocessed_df = self._preprocess_images()
         log(
-            INFO,
+            DEBUG,
             "Saving information about raw images to %s started",
             self._processed_images_information_path,
         )
         self._preprocessed_df.to_csv(self._processed_images_information_path)
         log(
-            INFO,
+            DEBUG,
             "Saving information about raw images to %s done",
             self._processed_images_information_path,
         )
 
     def create_dir_structure(self) -> None:
         """Create directory structure required for the dataset storage."""
-        log(INFO, "Directory structure creation started")
+        log(DEBUG, "Directory structure creation started")
         self._processed_dir.mkdir(exist_ok=True)
-        log(INFO, "Directory %s got created/already existed", self._processed_dir)
+        log(DEBUG, "Directory %s got created/already existed", self._processed_dir)
         self._processed_images_dir.mkdir(exist_ok=True)
         log(
-            INFO, "Directory %s got created/already existed", self._processed_images_dir
+            DEBUG,
+            "Directory %s got created/already existed",
+            self._processed_images_dir,
         )
-        log(INFO, "Directory structure creation done")
+        log(DEBUG, "Directory structure creation done")
 
     def _extract_writer_information(self) -> pd.DataFrame:
         """Extract writer id based on the path (directories) it was placed
         in."""
-        log(INFO, "Writer information preprocessing started")
+        log(DEBUG, "Writer information preprocessing started")
         images_paths = list(self._by_writer_nist.glob("*/*/*/*"))
         writer_df = pd.DataFrame(images_paths, columns=["path_by_writer"])
         writer_df["writer_id"] = writer_df["path_by_writer"].map(
             lambda x: x.parent.parent.name
         )
         log(DEBUG, "The created writer_df has shape %s", str(writer_df.shape))
-        log(INFO, "Writer information preprocessing done")
+        log(DEBUG, "Writer information preprocessing done")
         return writer_df
 
     def _extract_class_information(self) -> pd.DataFrame:
@@ -133,7 +135,7 @@ class NISTPreprocessor:
         It also transforms hexadecimal ascii information into readable
         character.
         """
-        log(INFO, "Class information preprocessing started")
+        log(DEBUG, "Class information preprocessing started")
         hsf_and_train_dir = self._by_class_nist.glob("*/*")
         hsf_dirs = [path for path in hsf_and_train_dir if "train" not in str(path)]
         images_paths = []
@@ -143,22 +145,22 @@ class NISTPreprocessor:
         chars = class_df["path_by_class"].map(lambda x: x.parent.parent.name)
         class_df["character"] = chars.map(hex_decimal_to_char)
         log(DEBUG, "The created class_df has shape %s", str(class_df.shape))
-        log(INFO, "Class information preprocessing done")
+        log(DEBUG, "Class information preprocessing done")
         return class_df
 
     def _merge_class_and_writer_information(self) -> pd.DataFrame:
-        log(INFO, "Merging of the class and writer information by hash values started")
+        log(DEBUG, "Merging of the class and writer information by hash values started")
         merged = pd.merge(self._writer_df, self._class_df, on="hash")
         log(
             DEBUG,
             "The calculated new df merged based on hashes has shape %s",
             str(merged.shape),
         )
-        log(INFO, "Merging of the class and writer information by hash values done")
+        log(DEBUG, "Merging of the class and writer information by hash values done")
         return merged
 
     def _calculate_hashes(self) -> None:
-        log(INFO, "Hashes calculation started")
+        log(DEBUG, "Hashes calculation started")
         # Assumes that the class_df and writer_df are created
         self._writer_df["hash"] = calculate_series_hashes(
             self._writer_df["path_by_writer"]
@@ -166,7 +168,7 @@ class NISTPreprocessor:
         self._class_df["hash"] = calculate_series_hashes(
             self._class_df["path_by_class"]
         )
-        log(INFO, "Hashes calculation done")
+        log(DEBUG, "Hashes calculation done")
 
     def _preprocess_images(self) -> pd.DataFrame:
         """Preprocess images - resize to 28x28 and save them in the processed directory.
@@ -175,7 +177,7 @@ class NISTPreprocessor:
             preprocessed_df_info: pd.DataFrame
             dataframe with information about the path, writer_id, character(label)
         """
-        log(INFO, "Image preprocessing started")
+        log(DEBUG, "Image preprocessing started")
         writer_to_character_to_count: Dict[str, Dict[str, int]] = dict()
         resized_size = (28, 28)
         new_df = self._df.copy()
@@ -211,6 +213,6 @@ class NISTPreprocessor:
             "The dataframe with the references to preprocessed data has shape %s",
             str(new_df.shape),
         )
-        log(INFO, "Image preprocessing done")
+        log(DEBUG, "Image preprocessing done")
         new_df = new_df.loc[:, ["path", "writer_id", "character"]]
         return new_df

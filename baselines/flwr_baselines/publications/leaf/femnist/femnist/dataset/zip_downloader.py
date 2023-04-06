@@ -3,7 +3,7 @@ downloaded zip file."""
 import os
 import pathlib
 import shutil
-from logging import INFO
+from logging import DEBUG, INFO
 from typing import Optional, Union
 
 import wget
@@ -69,13 +69,13 @@ class ZipDownloader:
 
     def _unzip(self):
         log(
-            INFO,
+            DEBUG,
             "Unzipping of %s to %s started",
             str(self._save_path),
             str(self._extract_path),
         )
         shutil.unpack_archive(self._save_path, self._extract_path)
-        log(INFO, "Unzipping of %s done", str(self._save_path))
-        log(INFO, "Removing zip file started: %s", str(self._save_path))
+        log(DEBUG, "Unzipping of %s done", str(self._save_path))
+        log(DEBUG, "Removing zip file started: %s", str(self._save_path))
         os.remove(self._save_path)
-        log(INFO, "Removing zip file done: %s", str(self._save_path))
+        log(DEBUG, "Removing zip file done: %s", str(self._save_path))
