@@ -66,11 +66,6 @@ starlette = { version = "^0.25.0", optional = true }
 uvicorn = { extras = ["standard"], version = "^0.20.0", optional = true }
 # Optional dependency (xgboost)
 xgboost = { version = "^1.6.2", optional = true }
-# Optional dependency (fedtrimmedavg)
-scipy = [
-    {version = "<=1.6.3", markers = "python_version < '3.8'", optional = true},
-    {version = "^1.10.1", markers = "python_version >= '3.8' and python_version < '3.12'", optional = true}
-]
 
 [tool.poetry.extras]
 simulation = ["ray"]
