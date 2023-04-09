@@ -24,7 +24,14 @@ import torch
 import torchvision
 
 import flwr as fl
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
+from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    ParametersRes,
+    NDArrays,
+)
 
 from . import cifar
 
