@@ -42,7 +42,7 @@ from flwr.server.state import State
 app: FastAPI = FastAPI()
 
 
-@app.post("/api/v0/fleet/pull-task-ins", response_class=Response)
+@app.post("/api/v0/fleet/pull-task-ins", response_class=Response)  # type: ignore
 async def pull_task_ins(request: Request) -> Response:
     """Pull TaskIns."""
     _check_headers(request.headers)
@@ -78,7 +78,7 @@ async def pull_task_ins(request: Request) -> Response:
     )
 
 
-@app.post("/api/v0/fleet/push-task-res", response_class=Response)
+@app.post("/api/v0/fleet/push-task-res", response_class=Response)  # type: ignore
 async def push_task_res(request: Request) -> Response:  # Check if token is needed here
     """Push TaskRes."""
     _check_headers(request.headers)
