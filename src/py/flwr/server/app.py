@@ -571,7 +571,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         default=None,
     )
     rest_group.add_argument(
-        "--ssl_keyfile",
+        "--ssl-keyfile",
         help="Fleet API REST SSL private key file (as a path str). Default:None",
         default=None,
     )
