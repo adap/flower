@@ -103,6 +103,7 @@ Information-oriented API reference and other reference material.
    :caption: API reference
 
    flwr <apiref-flwr>
+   binaries <apiref-binaries>
 
 .. toctree::
    :maxdepth: 1
