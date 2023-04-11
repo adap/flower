@@ -566,7 +566,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         default=ADDRESS_FLEET_API_REST,
     )
     rest_group.add_argument(
-        "--ssl_certfile",
+        "--ssl-certfile",
         help="Fleet API REST SSL certificate file (as a path str). Default:None",
         default=None,
     )
