@@ -48,8 +48,8 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 def http_request_response(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates_path: Optional[str] = None,
     root_certificates: Optional[bytes] = None,  # pylint: disable=unused-argument
+    root_certificates_path: Optional[str] = None,
 ) -> Iterator[
     Tuple[Callable[[], Optional[ServerMessage]], Callable[[ClientMessage], None]]
 ]:
@@ -65,13 +65,12 @@ def http_request_response(
         on port 8080, then `server_address` would be `"[::]:8080"`.
     max_message_length : int
         Ignored, only present to preserve API-compatibility.
+    root_certificates : Optional[bytes] (default: None)
+        Ignored, for now.
     root_certificates_path : Optional[str] (default: None)
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to a SSL-enabled
         Flower server.
-
-    root_certificates : Optional[bytes] (default: None)
-        Ignored, for now.
 
     Returns
     -------
