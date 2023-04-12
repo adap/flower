@@ -15,9 +15,7 @@ from torch.utils.data import DataLoader, Dataset, Subset, random_split
 from flwr_baselines.publications.leaf.femnist.dataset.nist_preprocessor import (
     NISTPreprocessor,
 )
-from flwr_baselines.publications.leaf.femnist.dataset.nist_sampler import (
-    NistSampler,
-)
+from flwr_baselines.publications.leaf.femnist.dataset.nist_sampler import NistSampler
 from flwr_baselines.publications.leaf.femnist.dataset.zip_downloader import (
     ZipDownloader,
 )

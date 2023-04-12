@@ -15,13 +15,8 @@ from flwr_baselines.publications.leaf.femnist.client import create_client
 from flwr_baselines.publications.leaf.femnist.dataset.dataset import (
     create_federated_dataloaders,
 )
-from flwr_baselines.publications.leaf.femnist.strategy import (
-    FedAvgSameClients,
-)
-from flwr_baselines.publications.leaf.femnist.utils import (
-    setup_seed,
-    weighted_average,
-)
+from flwr_baselines.publications.leaf.femnist.strategy import FedAvgSameClients
+from flwr_baselines.publications.leaf.femnist.utils import setup_seed, weighted_average
 
 
 # pylint: disable=too-many-locals
