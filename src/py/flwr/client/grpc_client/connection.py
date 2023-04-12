@@ -43,6 +43,7 @@ def grpc_connection(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    root_certificates_path: Optional[str] = None,  # pylint: disable=unused-argument
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish a gRPC connection to a gRPC server.
 
@@ -64,6 +65,8 @@ def grpc_connection(
         The PEM-encoded root certificates as a byte string. If provided, a secure
         connection using the certificates will be established to a SSL-enabled
         Flower server.
+    root_certificates_path : Optional[str] (default: None)
+        Ignored, only present to preserve API-compatibility.
 
     Returns
     -------

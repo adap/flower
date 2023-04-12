@@ -48,6 +48,7 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 def http_request_response(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
+    root_certificates_path: Optional[str] = None,  # pylint: disable=unused-argument
     root_certificates: Optional[bytes] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[Callable[[], Optional[ServerMessage]], Callable[[ClientMessage], None]]
@@ -64,6 +65,11 @@ def http_request_response(
         on port 8080, then `server_address` would be `"[::]:8080"`.
     max_message_length : int
         Ignored, only present to preserve API-compatibility.
+    root_certificates_path : Optional[str] (default: None)
+        Path of the root certificate. If provided, a secure
+        connection using the certificates will be established to a SSL-enabled
+        Flower server.
+
     root_certificates : Optional[bytes] (default: None)
         Ignored, for now.
 
@@ -80,7 +86,11 @@ def http_request_response(
         """,
     )
 
-    base_url = f"http://{server_address}"
+    base_url = f"https://{server_address}"
+
+    verify = False
+    if root_certificates_path:
+        verify = root_certificates_path
 
     # Necessary state to link TaskRes to TaskIns
     state: Dict[str, Optional[TaskIns]] = {"current_task_ins": None}
@@ -106,6 +116,7 @@ def http_request_response(
                 "Content-Type": "application/protobuf",
             },
             data=pull_task_ins_req_bytes,
+            verify=verify,
         )
 
         # Check status code and headers
@@ -177,6 +188,7 @@ def http_request_response(
                 "Content-Type": "application/protobuf",
             },
             data=push_task_res_request_bytes,
+            verify=verify,
         )
 
         state["current_task_ins"] = None

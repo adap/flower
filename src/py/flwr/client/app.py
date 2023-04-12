@@ -87,9 +87,10 @@ def start_client(
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    root_certificates_path: Optional[str] = None,
     rest: bool = False,
 ) -> None:
-    """Start a Flower Client which connects to a gRPC server.
+    """Start a Flower Client which connects to a Flower server.
 
     Parameters
     ----------
@@ -107,8 +108,12 @@ def start_client(
         value. Note that the Flower server needs to be started with the
         same value (see `flwr.server.start_server`), otherwise it will not
         know about the increased limit and block larger messages.
-    root_certificates : bytes (default: None)
+    root_certificates : Optional[bytes] (default: None)
         The PEM-encoded root certificates as a byte string. If provided, a secure
+        connection using the certificates will be established to a
+        SSL-enabled Flower server.
+    root_certificates_path : Optional[str] (default: None)
+        The root certificates as a path string. If provided, a secure
         connection using the certificates will be established to a
         SSL-enabled Flower server.
     rest : bool (default: False)
@@ -118,14 +123,14 @@ def start_client(
 
     Examples
     --------
-    Starting a client with insecure server connection:
+    Starting a gRPC client with insecure server connection:
 
     >>> start_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting a SSL-enabled client:
+    Starting a SSL-enabled gRPC client:
 
     >>> from pathlib import Path
     >>> start_client(
@@ -155,6 +160,7 @@ def start_client(
             server_address,
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
+            root_certificates_path=root_certificates_path,
         ) as conn:
             receive, send = conn
 
