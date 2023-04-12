@@ -7,7 +7,7 @@ from hamcrest import assert_that, equal_to
 from flwr_baselines.publications.leaf.femnist.dataset.nist_preprocessor import (
     NISTPreprocessor,
 )
-from flwr_baselines.publications.leaf.femnist.test_utils import recreate_nist
+from dataset.test_utils import recreate_nist
 
 
 class NistPreprocessorTest(unittest.TestCase):

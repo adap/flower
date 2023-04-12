@@ -8,7 +8,7 @@ from flwr_baselines.publications.leaf.femnist.dataset.nist_preprocessor import (
     NISTPreprocessor,
 )
 from flwr_baselines.publications.leaf.femnist.dataset.nist_sampler import NistSampler
-from flwr_baselines.publications.leaf.femnist.test_utils import recreate_nist
+from dataset.test_utils import recreate_nist
 
 
 class TestNistSampler(unittest.TestCase):
