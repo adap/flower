@@ -44,7 +44,9 @@ def grpc_connection(
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
     root_certificates_path: Optional[str] = None,  # pylint: disable=unused-argument
-) -> Iterator[Tuple[Callable[[], Optional[ServerMessage]], Callable[[ClientMessage], None]]]:
+) -> Iterator[
+    Tuple[Callable[[], Optional[ServerMessage]], Callable[[ClientMessage], None]]
+]:
     """Establish a gRPC connection to a gRPC server.
 
     Parameters
@@ -99,9 +101,13 @@ def grpc_connection(
     )
     stub = FlowerServiceStub(channel)
 
-    server_message_iterator: Iterator[Optional[ServerMessage]] = stub.Join(iter(queue.get, None))
+    server_message_iterator: Iterator[Optional[ServerMessage]] = stub.Join(
+        iter(queue.get, None)
+    )
 
-    receive: Callable[[], Optional[ServerMessage]] = lambda: next(server_message_iterator)
+    receive: Callable[[], Optional[ServerMessage]] = lambda: next(
+        server_message_iterator
+    )
     send: Callable[[ClientMessage], None] = lambda msg: queue.put(msg, block=False)
 
     try:
