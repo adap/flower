@@ -8,7 +8,6 @@ import hydra
 import pandas as pd
 import torch
 from flwr.server.strategy import FedAvg
-from matplotlib import pyplot as plt
 from omegaconf import DictConfig
 
 from flwr_baselines.publications.leaf.femnist.client import create_client
