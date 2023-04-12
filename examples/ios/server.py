@@ -45,4 +45,3 @@ if __name__ == "__main__":
     )
     args = argParser.parse_args()
     hist = main(args.clients, args.rounds)
-
