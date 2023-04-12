@@ -17,7 +17,7 @@
 
 from contextlib import contextmanager
 from logging import ERROR, INFO, WARN
-from typing import Callable, Dict, Iterator, Optional, Tuple
+from typing import Callable, Dict, Iterator, Optional, Tuple, Union
 
 try:
     import requests
@@ -48,7 +48,7 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 def http_request_response(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates_path: Optional[str] = None,  # pylint: disable=unused-argument
+    root_certificates_path: Optional[str] = None,
     root_certificates: Optional[bytes] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[Callable[[], Optional[ServerMessage]], Callable[[ClientMessage], None]]
@@ -88,7 +88,7 @@ def http_request_response(
 
     base_url = f"https://{server_address}"
 
-    verify = False
+    verify: Union[bool, str] = False
     if root_certificates_path:
         verify = root_certificates_path
 
