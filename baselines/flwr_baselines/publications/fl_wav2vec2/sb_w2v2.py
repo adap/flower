@@ -1,24 +1,17 @@
-#!/usr/bin/env python3
-import sys
-import torch
+import gc
 import logging
-import speechbrain as sb
-import torchaudio
-from hyperpyyaml import load_hyperpyyaml
-from speechbrain.tokenizers.SentencePiece import SentencePiece
-from speechbrain.utils.data_utils import undo_padding
-from speechbrain.utils.distributed import run_on_main
-from tqdm.contrib import tqdm
-from speechbrain.utils.data_utils import undo_padding
-import flwr as fl
 import time
 from collections import OrderedDict
-import numpy as np
-from torch.utils.data import DataLoader
-from speechbrain.dataio.dataloader import LoopedLoader
-from speechbrain.utils.distributed import run_on_main
 from enum import Enum, auto
-import gc
+
+import flwr as fl
+import numpy as np
+import speechbrain as sb
+import torch
+from speechbrain.dataio.dataloader import LoopedLoader
+from torch.utils.data import DataLoader
+from tqdm.contrib import tqdm
+
 """Recipe for training a sequence-to-sequence ASR system with CommonVoice.
 The system employs a wav2vec2 encoder and a CTC decoder.
 Decoding is performed with greedy decoding (will be extended to beam search).
@@ -64,7 +57,7 @@ def set_weights(weights: fl.common.NDArrays, modules, evaluate, add_train, devic
 def get_weights(modules) -> fl.common.NDArrays:
     """Get model weights as a list of NumPy ndarrays."""
     w = []
-    for k, v in modules.state_dict().items():
+    for _, v in modules.state_dict().items():
         w.append(v.cpu().numpy())
     return w
 
