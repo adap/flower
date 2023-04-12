@@ -6,7 +6,7 @@ from typing import Optional
 import pandas as pd
 from flwr.common.logger import log
 
-from flwr_baselines.publications.leaf.femnist.femnist.dataset.utils import (
+from flwr_baselines.publications.leaf.femnist.dataset.utils import (
     _create_samples_division_list,
 )
 

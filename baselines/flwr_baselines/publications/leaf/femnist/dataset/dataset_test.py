@@ -5,19 +5,19 @@ import unittest
 from hamcrest import assert_that, equal_to, is_
 from sklearn import preprocessing
 
-from flwr_baselines.publications.leaf.femnist.femnist.dataset.dataset import (
+from flwr_baselines.publications.leaf.femnist.dataset.dataset import (
     create_dataset,
     create_partition_list,
     partition_dataset,
     train_valid_test_partition,
 )
-from flwr_baselines.publications.leaf.femnist.femnist.dataset.nist_preprocessor import (
+from flwr_baselines.publications.leaf.femnist.dataset.nist_preprocessor import (
     NISTPreprocessor,
 )
-from flwr_baselines.publications.leaf.femnist.femnist.dataset.nist_sampler import (
+from flwr_baselines.publications.leaf.femnist.dataset.nist_sampler import (
     NistSampler,
 )
-from flwr_baselines.publications.leaf.femnist.tests.utils import recreate_nist
+from flwr_baselines.publications.leaf.femnist.test_utils import recreate_nist
 
 
 class TestDataset(unittest.TestCase):

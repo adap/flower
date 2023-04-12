@@ -11,21 +11,21 @@ from flwr.server.strategy import FedAvg
 from matplotlib import pyplot as plt
 from omegaconf import DictConfig
 
-from flwr_baselines.publications.leaf.femnist.femnist.client import create_client
-from flwr_baselines.publications.leaf.femnist.femnist.dataset.dataset import (
+from flwr_baselines.publications.leaf.femnist.client import create_client
+from flwr_baselines.publications.leaf.femnist.dataset.dataset import (
     create_federated_dataloaders,
 )
-from flwr_baselines.publications.leaf.femnist.femnist.fedavg_same_clients import (
+from flwr_baselines.publications.leaf.femnist.strategy import (
     FedAvgSameClients,
 )
-from flwr_baselines.publications.leaf.femnist.femnist.utils import (
+from flwr_baselines.publications.leaf.femnist.utils import (
     setup_seed,
     weighted_average,
 )
 
 
 # pylint: disable=too-many-locals
-@hydra.main(config_path="../conf", version_base=None)
+@hydra.main(config_path="conf", version_base=None)
 def main(cfg: DictConfig):
     """Main function for running FEMNIST experiments."""
     # Ensure reproducibility

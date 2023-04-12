@@ -4,13 +4,13 @@ import unittest
 
 from hamcrest import assert_that, contains_string, equal_to, is_
 
-from flwr_baselines.publications.leaf.femnist.femnist.dataset.nist_preprocessor import (
+from flwr_baselines.publications.leaf.femnist.dataset.nist_preprocessor import (
     NISTPreprocessor,
 )
-from flwr_baselines.publications.leaf.femnist.femnist.dataset.nist_sampler import (
+from flwr_baselines.publications.leaf.femnist.dataset.nist_sampler import (
     NistSampler,
 )
-from flwr_baselines.publications.leaf.femnist.tests.utils import recreate_nist
+from flwr_baselines.publications.leaf.femnist.test_utils import recreate_nist
 
 
 class TestNistSampler(unittest.TestCase):
