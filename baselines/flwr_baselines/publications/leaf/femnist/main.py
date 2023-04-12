@@ -109,18 +109,6 @@ def main(cfg: DictConfig):
     results_df = pd.DataFrame.from_dict(distributed_history_dict)
     results_df.to_csv(results_dir_path / "history.csv")
 
-    fig, axis = plt.subplots()
-    results_df[["distributed_test_accuracy", "distributed_train_accuracy"]].plot(
-        ax=axis, kind="line", marker="o"
-    )
-    fig.savefig(results_dir_path / "accuracy.jpg", dpi=200)
-
-    fig, axis = plt.subplots()
-    results_df[["distributed_test_loss", "distributed_train_loss"]].plot(
-        ax=axis, kind="line", marker="o"
-    )
-    fig.savefig(results_dir_path / "loss.jpg", dpi=200)
-
 
 if __name__ == "__main__":
     # pylint: disable=no-value-for-parameter
