@@ -48,6 +48,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
+    "sphinxarg.ext",
     "myst_parser",
     "sphinx_copybutton",
     "sphinx_design",
