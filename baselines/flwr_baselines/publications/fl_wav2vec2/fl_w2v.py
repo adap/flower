@@ -24,11 +24,11 @@ import torch
 from client import SpeechBrainClient
 
 parser = ArgumentParser()
-parser.add_argument("--data_path", type=str, help="dataset path")
+parser.add_argument("--data_path", type=str, default="./.data/localscratch/cv-corpus-5.1-2020-06-22/fr", help="dataset path")
 parser.add_argument('--output', type=str, default="./results/fl_fusion/", help='output folder')
 parser.add_argument('--pre_train_model_path', type=str, default=None, help='path for pre-trained starting point')
 parser.add_argument('--label_path', type=str, default=None,help='path for label encoder file if want to ensure the same encode for every client')
-parser.add_argument('--config_path', type=str, default="./configs/", help='path to yaml file')
+parser.add_argument('--config_path', type=str, default="./configs/w2v2.yaml", help='path to yaml file')
 parser.add_argument('--running_type', type=str, default="cpu", help='running type of FL ')
 parser.add_argument("--min_fit_clients", type=int, default=10, help="minimum fit clients")
 parser.add_argument("--fraction_fit", type=int, default=10, help="ratio of total clients will be trained")
@@ -95,7 +95,7 @@ if __name__ == "__main__":
             fraction_fit=args.fraction_fit,
             min_fit_clients=args.min_fit_clients,
             min_available_clients=args.min_available_clients,
-            eval_fn=evaluate,
+            evaluate_fn=evaluate,
             on_fit_config_fn=get_on_fit_config_fn(),
             weight_strategy=args.weight_strategy,
         )
@@ -105,7 +105,7 @@ if __name__ == "__main__":
             fraction_fit=args.fraction_fit,
             min_fit_clients=args.min_fit_clients,
             min_available_clients=args.min_available_clients,
-            eval_fn=evaluate,
+            evaluate_fn=evaluate,
             on_fit_config_fn=get_on_fit_config_fn(),
             weight_strategy=args.weight_strategy,
         )
@@ -121,7 +121,7 @@ if __name__ == "__main__":
         client_fn=client_fn,
         num_clients=args.min_available_clients,
         client_resources=client_resources,
-        num_rounds=args.rounds,
+        config=fl.server.ServerConfig(num_rounds=args.rounds),
         strategy=strategy,
         ray_init_args=ray_config,
     )
