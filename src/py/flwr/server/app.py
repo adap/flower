@@ -221,7 +221,7 @@ def run_driver_api() -> None:
 
     log(INFO, "Starting Flower server (Driver API)")
     event(EventType.RUN_DRIVER_API_ENTER)
-    args = _parse_args_driver()
+    args = _parse_args_driver().parse_args()
 
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
@@ -248,7 +248,7 @@ def run_fleet_api() -> None:
 
     log(INFO, "Starting Flower server (Fleet API)")
     event(EventType.RUN_FLEET_API_ENTER)
-    args = _parse_args_fleet()
+    args = _parse_args_fleet().parse_args()
 
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
@@ -292,7 +292,7 @@ def run_server() -> None:
 
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SERVER_ENTER)
-    args = _parse_args_server()
+    args = _parse_args_server().parse_args()
 
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
@@ -469,7 +469,7 @@ def _run_fleet_api_rest(
     )
 
 
-def _parse_args_driver() -> argparse.Namespace:
+def _parse_args_driver() -> argparse.ArgumentParser:
     """Parse command line arguments for Driver API."""
     parser = argparse.ArgumentParser(
         description="Start Flower server (Driver API)",
@@ -478,10 +478,10 @@ def _parse_args_driver() -> argparse.Namespace:
     _add_args_common(parser=parser)
     _add_args_driver_api(parser=parser)
 
-    return parser.parse_args()
+    return parser
 
 
-def _parse_args_fleet() -> argparse.Namespace:
+def _parse_args_fleet() -> argparse.ArgumentParser:
     """Parse command line arguments for Fleet API."""
     parser = argparse.ArgumentParser(
         description="Start Flower server (Fleet API)",
@@ -490,10 +490,10 @@ def _parse_args_fleet() -> argparse.Namespace:
     _add_args_common(parser=parser)
     _add_args_fleet_api(parser=parser)
 
-    return parser.parse_args()
+    return parser
 
 
-def _parse_args_server() -> argparse.Namespace:
+def _parse_args_server() -> argparse.ArgumentParser:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
         description="Start Flower server (Driver API and Fleet API)",
@@ -503,7 +503,7 @@ def _parse_args_server() -> argparse.Namespace:
     _add_args_driver_api(parser=parser)
     _add_args_fleet_api(parser=parser)
 
-    return parser.parse_args()
+    return parser
 
 
 def _add_args_common(parser: argparse.ArgumentParser) -> None:
