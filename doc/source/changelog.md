@@ -8,7 +8,7 @@
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
-`Adam Narozniak`, `Charles Beauville`, `Chenyang Ma (Danny)`, `Daniel J. Beutel`, `Gautam Jajoo`, `Iacob-Alexandru-Andrei`, `Kunal Sarkhel`, `Max Kapsecker`, `Michał`, `Nic Lane`, `Nikolaos Episkopos`, `Semo Yang`, `Steve Laskaridis`, `Taner Topal`
+
 
 ### What's new?
 
