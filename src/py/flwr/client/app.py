@@ -82,7 +82,7 @@ Example
 ClientLike = Union[Client, NumPyClient]
 
 
-# pylint: disable=import-outside-toplevel, too-many-locals
+# pylint: disable=import-outside-toplevel,too-many-locals
 def start_client(
     *,
     server_address: str,
@@ -139,6 +139,14 @@ def start_client(
 
     event(EventType.START_CLIENT_ENTER)
 
+    # Parse IP address
+    parsed_address = parse_address(server_address)
+    if parsed_address:
+        host, port, is_v6 = parsed_address
+        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+    else:
+        sys.exit(f"Client IP address ({server_address}) cannot be parsed.")
+
     # Use either gRPC bidirectional streaming or REST request/response
     if rest:
         try:
@@ -152,41 +160,35 @@ def start_client(
     else:
         connection = grpc_connection
     while True:
-        parsed_address = parse_address(server_address)
-        if parsed_address:
-            host, port, is_v6 = parsed_address
-            address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-            sleep_duration: int = 0
-            with connection(
-                address,
-                max_message_length=grpc_max_message_length,
-                root_certificates=root_certificates,
-            ) as conn:
-                receive, send = conn
+        sleep_duration: int = 0
+        with connection(
+            address,
+            max_message_length=grpc_max_message_length,
+            root_certificates=root_certificates,
+        ) as conn:
+            receive, send = conn
 
-                while True:
-                    server_message = receive()
-                    if server_message is None:
-                        time.sleep(3)  # Wait for 3s before asking again
-                        continue
-                    client_message, sleep_duration, keep_going = handle(
-                        client, server_message
-                    )
-                    send(client_message)
-                    if not keep_going:
-                        break
-            if sleep_duration == 0:
-                log(INFO, "Disconnect and shut down")
-                break
-            # Sleep and reconnect afterwards
-            log(
-                INFO,
-                "Disconnect, then re-establish connection after %s second(s)",
-                sleep_duration,
-            )
-            time.sleep(sleep_duration)
-        else:
-            sys.exit(f"Client IP address ({server_address}) cannot be parsed.")
+            while True:
+                server_message = receive()
+                if server_message is None:
+                    time.sleep(3)  # Wait for 3s before asking again
+                    continue
+                client_message, sleep_duration, keep_going = handle(
+                    client, server_message
+                )
+                send(client_message)
+                if not keep_going:
+                    break
+        if sleep_duration == 0:
+            log(INFO, "Disconnect and shut down")
+            break
+        # Sleep and reconnect afterwards
+        log(
+            INFO,
+            "Disconnect, then re-establish connection after %s second(s)",
+            sleep_duration,
+        )
+        time.sleep(sleep_duration)
 
     event(EventType.START_CLIENT_LEAVE)
 

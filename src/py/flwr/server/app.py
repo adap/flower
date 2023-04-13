@@ -64,7 +64,7 @@ class ServerConfig:
     round_timeout: Optional[float] = None
 
 
-def start_server(  # pylint: disable=too-many-arguments, too-many-locals
+def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     *,
     server_address: str = ADDRESS_FLEET_API_GRPC_BIDI,
     server: Optional[Server] = None,
@@ -148,6 +148,7 @@ def start_server(  # pylint: disable=too-many-arguments, too-many-locals
         initialized_config,
     )
 
+    # Parse IP address
     parsed_address = parse_address(server_address)
     if parsed_address is None:
         sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
@@ -231,30 +232,32 @@ def run_driver_api() -> None:
     event(EventType.RUN_DRIVER_API_ENTER)
     args = _parse_args_driver().parse_args()
 
-    # Initialize StateFactory
-    state_factory = StateFactory(args.database)
-
+    # Parse IP address
     parsed_address = parse_address(args.driver_api_address)
     if parsed_address:
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-        # Start Driver API
-        grpc_server: grpc.Server = _run_driver_api_grpc(
-            address=address,
-            state_factory=state_factory,
-        )
-
-        # Graceful shutdown
-        _register_exit_handlers(
-            grpc_servers=[grpc_server],
-            bckg_threads=[],
-            event_type=EventType.RUN_DRIVER_API_LEAVE,
-        )
-
-        # Block
-        grpc_server.wait_for_termination()
     else:
         sys.exit(f"Driver IP address ({args.driver_api_address}) cannot be parsed.")
+
+    # Initialize StateFactory
+    state_factory = StateFactory(args.database)
+
+    # Start server
+    grpc_server: grpc.Server = _run_driver_api_grpc(
+        address=address,
+        state_factory=state_factory,
+    )
+
+    # Graceful shutdown
+    _register_exit_handlers(
+        grpc_servers=[grpc_server],
+        bckg_threads=[],
+        event_type=EventType.RUN_DRIVER_API_LEAVE,
+    )
+
+    # Block
+    grpc_server.wait_for_termination()
 
 
 def run_fleet_api() -> None:
@@ -264,23 +267,11 @@ def run_fleet_api() -> None:
     event(EventType.RUN_FLEET_API_ENTER)
     args = _parse_args_fleet().parse_args()
 
-    # Initialize StateFactory
-    state_factory = StateFactory(args.database)
-
-    grpc_servers = []
-    bckg_threads = []
-
-    # Start Fleet API
+    # Parse IP addresses
     if args.fleet_api_type == "rest":
         parsed_address = parse_address(args.rest_fleet_api_address)
         if parsed_address:
             host, port, _ = parsed_address
-            fleet_thread = threading.Thread(
-                target=_run_fleet_api_rest,
-                args=(host, port, state_factory),
-            )
-            fleet_thread.start()
-            bckg_threads.append(fleet_thread)
         else:
             sys.exit(
                 f"Fleet IP address ({args.rest_fleet_api_address}) cannot be parsed."
@@ -290,15 +281,33 @@ def run_fleet_api() -> None:
         if parsed_address:
             host, port, is_v6 = parsed_address
             address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-            fleet_server = _run_fleet_api_grpc_bidi(
-                address=address,
-                state_factory=state_factory,
-            )
-            grpc_servers.append(fleet_server)
         else:
             sys.exit(
                 f"Fleet IP address ({args.grpc_fleet_api_address}) cannot be parsed."
             )
+    else:
+        raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
+
+    # Initialize StateFactory
+    state_factory = StateFactory(args.database)
+
+    grpc_servers = []
+    bckg_threads = []
+
+    # Start Fleet API
+    if args.fleet_api_type == "rest":
+        fleet_thread = threading.Thread(
+            target=_run_fleet_api_rest,
+            args=(host, port, state_factory),
+        )
+        fleet_thread.start()
+        bckg_threads.append(fleet_thread)
+    elif args.fleet_api_type == "grpc":
+        fleet_server = _run_fleet_api_grpc_bidi(
+            address=address,
+            state_factory=state_factory,
+        )
+        grpc_servers.append(fleet_server)
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
@@ -323,23 +332,24 @@ def run_server() -> None:
     event(EventType.RUN_SERVER_ENTER)
     args = _parse_args_server().parse_args()
 
-    # Initialize StateFactory
-    state_factory = StateFactory(args.database)
-
+    # Parse IP address
     parsed_address = parse_address(args.driver_api_address)
     if parsed_address:
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-        # Start Driver API
-        driver_server: grpc.Server = _run_driver_api_grpc(
-            address=address,
-            state_factory=state_factory,
-        )
-
-        grpc_servers = [driver_server]
     else:
         sys.exit(f"Driver IP address ({args.driver_api_address}) cannot be parsed.")
 
+    # Initialize StateFactory
+    state_factory = StateFactory(args.database)
+
+    # Start Driver API
+    driver_server: grpc.Server = _run_driver_api_grpc(
+        address=address,
+        state_factory=state_factory,
+    )
+
+    grpc_servers = [driver_server]
     bckg_threads = []
 
     # Start Fleet API
