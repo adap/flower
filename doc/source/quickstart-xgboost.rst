@@ -2,7 +2,7 @@
 
 
 Quickstart XGBoost
-=================
+==================
 
 Let's build a horizontal federated learning system using XGBoost and Flower!
 
