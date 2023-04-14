@@ -1,0 +1,3 @@
+Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
+0,56780,SleepyManBanjoBoys_2013_59.34_60.8,1.46,59.34,60.8,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/SleepyManBanjoBoys_2013.sph,sph,,SleepyManBanjoBoys_2013,string,, and,string,,_ a n d,string,
+13,56793,SleepyManBanjoBoys_2013_349.08_350.08,1.0,349.08,350.08,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/SleepyManBanjoBoys_2013.sph,sph,,SleepyManBanjoBoys_2013,string,,play,string,,p l a y,string,

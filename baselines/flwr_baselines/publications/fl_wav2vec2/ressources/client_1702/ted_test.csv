@@ -1,0 +1,5 @@
+Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
+31,20462,JiHaePark_2013_484.94_488.34,3.4,484.94,488.34,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/JiHaePark_2013.sph,sph,,JiHaePark_2013,string,,but it 's now your turn ,string,,b u t _ i t _ ' s _ n o w _ y o u r _ t u r n _,string,
+36,20467,JiHaePark_2013_700_729.94,29.94,700.0,729.94,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/JiHaePark_2013.sph,sph,,JiHaePark_2013,string,,the,string,,t h e,string,
+21,20452,JiHaePark_2013_326.44_329.04,2.6,326.44,329.04,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/JiHaePark_2013.sph,sph,,JiHaePark_2013,string,,do you feel like you are all alone,string,,d o _ y o u _ f e e l _ l i k e _ y o u _ a r e _ a l l _ a l o n e,string,
+1,20432,JiHaePark_2013_50_79.94,29.94,50.0,79.94,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/JiHaePark_2013.sph,sph,,JiHaePark_2013,string,,the,string,,t h e,string,

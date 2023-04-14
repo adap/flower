@@ -1,18 +1,20 @@
 import gc
 import logging
-import timeit
 from math import exp
 
 import flwr as fl
 import speechbrain as sb
 import torch
 from flwr.common import (
+    Code,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
+    GetParametersIns,
     GetParametersRes,
     NDArrays,
+    Status,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
@@ -35,13 +37,14 @@ class SpeechBrainClient(fl.client.Client):
         print("HOOOOO HEEYYYYEYEYEYYEYEYEYEYE")
 
 
-    def get_parameters(self) -> GetParametersRes:
+    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         print(f"Client {self.cid}: get_parameters")
 
         weights: NDArrays = get_weights(self.modules)
         parameters = ndarrays_to_parameters(weights)
         gc.collect()
-        return GetParametersRes(parameters=parameters)
+        status = Status(code=Code.OK, message="Success")
+        return GetParametersRes(status=status, parameters=parameters)
 
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -58,8 +61,6 @@ class SpeechBrainClient(fl.client.Client):
         (
             _,
             num_examples,
-            num_examples_ceil,
-            fit_duration,
             avg_loss,
             avg_wer
         ) = self.train_speech_recogniser(
@@ -76,11 +77,12 @@ class SpeechBrainClient(fl.client.Client):
         torch.cuda.empty_cache()
         gc.collect()
 
+        status = Status(code=Code.OK, message="Success")
+
         return FitRes(
+            status=status,
             parameters=parameters,
             num_examples=num_examples,
-            num_examples_ceil=num_examples_ceil,
-            fit_duration=fit_duration,
             metrics=metrics
         )
 
@@ -101,9 +103,10 @@ class SpeechBrainClient(fl.client.Client):
         torch.cuda.empty_cache()
         gc.collect()
         
+        status = Status(code=Code.OK, message="Success")
         # Return the number of evaluation examples and the evaluation result (loss)
         return EvaluateRes(
-            num_examples=num_examples, loss=float(loss), accuracy=float(wer)
+                status=status, num_examples=num_examples, loss=float(loss), metrics={"accuracy": float(wer)}
         )
 
     def evaluate_train_speech_recogniser(self, server_params, epochs):
@@ -144,7 +147,6 @@ class SpeechBrainClient(fl.client.Client):
         train_data, valid_data, _ = self._setup_task(server_params, epochs, False, add_train)
 
         # Training
-        fit_begin = timeit.default_timer()
         count_sample, avg_loss, avg_wer = self.asr_brain.fit(
             self.params.epoch_counter,
             train_data,
@@ -162,8 +164,6 @@ class SpeechBrainClient(fl.client.Client):
         # retrieve the parameters to return
         params_list = get_weights(self.modules)
 
-        fit_duration = timeit.default_timer() - fit_begin
-
         # Manage when last batch isn't full w.r.t batch size
         train_set = sb.dataio.dataloader.make_dataloader(train_data, **self.params.dataloader_options)
         if count_sample > len(train_set) * self.params.batch_size * epochs:
@@ -175,8 +175,6 @@ class SpeechBrainClient(fl.client.Client):
         return (
             params_list,
             count_sample,
-            len(train_set) * self.params.batch_size * epochs,
-            fit_duration,
             avg_loss,
             avg_wer
         )

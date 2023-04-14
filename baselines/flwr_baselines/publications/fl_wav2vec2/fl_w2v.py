@@ -24,10 +24,10 @@ import torch
 from client import SpeechBrainClient
 
 parser = ArgumentParser()
-parser.add_argument("--data_path", type=str, default="./.data/localscratch/cv-corpus-5.1-2020-06-22/fr", help="dataset path")
+parser.add_argument("--data_path", type=str, default="./ressources/", help="dataset path")
 parser.add_argument('--output', type=str, default="./results/fl_fusion/", help='output folder')
 parser.add_argument('--pre_train_model_path', type=str, default=None, help='path for pre-trained starting point')
-parser.add_argument('--label_path', type=str, default=None,help='path for label encoder file if want to ensure the same encode for every client')
+parser.add_argument('--label_path', type=str, default="./material/label_encoder.txt", help='path for label encoder file if want to ensure the same encode for every client')
 parser.add_argument('--config_path', type=str, default="./configs/w2v2.yaml", help='path to yaml file')
 parser.add_argument('--running_type', type=str, default="cpu", help='running type of FL ')
 parser.add_argument("--min_fit_clients", type=int, default=10, help="minimum fit clients")
@@ -53,7 +53,7 @@ def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
     return fit_config
 
 
-def evaluate(weights: fl.common.NDArrays):
+def evaluate(server_round, weights: fl.common.NDArrays, config):
 
     # int model
     asr_brain, dataset = model.int_model(19999,args.config_path, args.output, 
@@ -79,8 +79,8 @@ if __name__ == "__main__":
 
     # Define resource per client
     client_resources = {
-        "num_cpus": 8,
-        "num_gpus": 1
+        "num_cpus": 64,
+        "num_gpus": 0, 
     } 
 
     ray_config = {"include_dashboard": False}

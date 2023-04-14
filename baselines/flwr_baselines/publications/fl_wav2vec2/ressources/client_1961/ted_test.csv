@@ -1,0 +1,3 @@
+Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
+12,250683,CarolineLavelleFARTHERTHANTHESUN_2005_300_319.77,19.77,300.0,319.77,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/CarolineLavelleFARTHERTHANTHESUN_2005.sph,sph,,CarolineLavelleFARTHERTHANTHESUN_2005,string,,the,string,,t h e,string,
+5,250676,CarolineLavelleFARTHERTHANTHESUN_2005_44.63_46.05,1.42,44.63,46.05,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/CarolineLavelleFARTHERTHANTHESUN_2005.sph,sph,,CarolineLavelleFARTHERTHANTHESUN_2005,string,,and,string,,a n d,string,

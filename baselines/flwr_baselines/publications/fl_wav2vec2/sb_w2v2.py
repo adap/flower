@@ -36,6 +36,8 @@ Authors
  * Titouan Parcollet 2021
 """
 
+DEVICE = "cpu" # "cuda"
+
 class Stage(Enum):
     """Simple enum to track stage of experiments."""
 
@@ -68,7 +70,7 @@ class ASR(sb.core.Brain):
     def compute_forward(self, batch, stage):
         """Forward computations from the waveform batches to the output probabilities."""
 
-        batch = batch.to("cuda")
+        batch = batch.to(DEVICE)
         wavs, wav_lens = batch.sig
         # Forward pass
         self.feats = self.modules.wav2vec2(wavs)
@@ -137,12 +139,12 @@ class ASR(sb.core.Brain):
     def fit_batch(self, batch):
         """Train the parameters given a single batch in input"""
         
-        batch = batch.to("cuda")
+        batch = batch.to(DEVICE)
         wavs, wav_lens = batch.sig
         chars, char_lens = batch.char_encoded
         ids = batch.id
 
-        wavs, wav_lens = wavs.to("cuda"), wav_lens.to("cuda")
+        wavs, wav_lens = wavs.to(DEVICE), wav_lens.to(DEVICE)
 
         stage = sb.Stage.TRAIN
 
@@ -161,7 +163,7 @@ class ASR(sb.core.Brain):
     def evaluate_batch(self, batch, stage):
         """Computations needed for validation/test batches"""
         # Get data.
-        batch = batch.to("cuda")
+        batch = batch.to(DEVICE)
         wavs, wav_lens = batch.sig
         chars, char_lens = batch.char_encoded
         ids = batch.id
@@ -301,7 +303,7 @@ class ASR(sb.core.Brain):
 
         if progressbar is None:
             progressbar = not self.noprogressbar
-        self.modules = self.modules.to("cuda")
+        self.modules = self.modules.to(DEVICE)
         torch.cuda.empty_cache()
         gc.collect()
         # Iterate epochs
@@ -447,7 +449,7 @@ class ASR(sb.core.Brain):
             test_set = self.make_dataloader(
                 test_set, sb.Stage.TEST, **test_loader_kwargs
             )
-        self.modules = self.modules.to("cuda")
+        self.modules = self.modules.to(DEVICE)
         torch.cuda.empty_cache()
         gc.collect()
         self.on_evaluate_start(max_key=max_key, min_key=min_key)

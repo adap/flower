@@ -1,0 +1,4 @@
+Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
+22,244100,XDRTB_2008_275_296.12,21.12,275.0,296.12,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/XDRTB_2008.sph,sph,,XDRTB_2008,string,,the,string,,t h e,string,
+20,244098,XDRTB_2008_200_229.97,29.97,200.0,229.97,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/XDRTB_2008.sph,sph,,XDRTB_2008,string,,the,string,,t h e,string,
+24,244102,XDRTB_2008_325_336.76,11.76,325.0,336.76,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/XDRTB_2008.sph,sph,,XDRTB_2008,string,,the,string,,t h e,string,

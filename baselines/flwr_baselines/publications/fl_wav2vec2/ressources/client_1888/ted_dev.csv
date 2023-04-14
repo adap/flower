@@ -1,0 +1,5 @@
+Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
+29,250682,CarolineLavelleFARTHERTHANTHESUN_2005_287.55_296.36,8.81,287.55,296.36,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/CarolineLavelleFARTHERTHANTHESUN_2005.sph,sph,,CarolineLavelleFARTHERTHANTHESUN_2005,string,, on,string,,_ o n,string,
+33,250686,CarolineLavelleFARTHERTHANTHESUN_2005_425_435.8,10.8,425.0,435.8,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/CarolineLavelleFARTHERTHANTHESUN_2005.sph,sph,,CarolineLavelleFARTHERTHANTHESUN_2005,string,,the,string,,t h e,string,
+13,81556,CarolineLavelle_FartherthantheSun_2005_300_319.5,19.5,300.0,319.5,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/CarolineLavelle_FartherthantheSun_2005.sph,sph,,CarolineLavelle_FartherthantheSun_2005,string,,the,string,,t h e,string,
+4,81547,CarolineLavelle_FartherthantheSun_2005_44.36_45.81,1.45,44.36,45.81,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/CarolineLavelle_FartherthantheSun_2005.sph,sph,,CarolineLavelle_FartherthantheSun_2005,string,,and,string,,a n d,string,
