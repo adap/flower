@@ -260,7 +260,7 @@ def run_fleet_api() -> None:
     if args.fleet_api_type == "rest":
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state_factory),
+            args=(args.rest_fleet_api_address, state_factory, args.workers),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
@@ -438,6 +438,7 @@ def _run_fleet_api_grpc_bidi(
 def _run_fleet_api_rest(
     address: str,
     state_factory: StateFactory,
+    workers: int,
 ) -> None:
     """Run Driver API (REST-based)."""
     try:
@@ -465,7 +466,7 @@ def _run_fleet_api_rest(
         host=host,
         reload=False,
         access_log=True,
-        workers=1,
+        workers=workers,
     )
 
 
@@ -556,3 +557,9 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help=f"Fleet API REST server address. Default:'{ADDRESS_FLEET_API_REST}'",
         default=ADDRESS_FLEET_API_REST,
     )
+    rest_group.add_argument(
+        "--rest-fleet-api-workers",
+        help=f"Number of workers for Fleet API REST server . Default:'{1}'",
+        default=1,
+    )
+
