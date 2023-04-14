@@ -85,7 +85,7 @@ def grpc_connection(
     >>>     # do something here
     >>>     send(client_message)
     """
-    if type(root_certificates) == str:
+    if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
 
     channel = create_channel(

@@ -90,11 +90,12 @@ def http_request_response(
     # Otherwise any server can fake its identity
     # Please refer to: https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
     verify: Union[bool, str] = True
-    if type(root_certificates) == str:
+    if isinstance(root_certificates, str):
         verify = root_certificates
-    elif type(root_certificates) == bytes:
-        log.ERROR(
-            "For the REST API, the root certificates must be provided as a string path to the client."
+    elif isinstance(root_certificates, bytes):
+        log(
+            ERROR,
+            "For the REST API, the root certificates must be provided as a string path to the client.",
         )
 
     # Necessary state to link TaskRes to TaskIns
