@@ -48,7 +48,9 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 def http_request_response(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[Union[bytes, str]] = None,  # pylint: disable=unused-argument
+    root_certificates: Optional[
+        Union[bytes, str]
+    ] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[Callable[[], Optional[ServerMessage]], Callable[[ClientMessage], None]]
 ]:
@@ -91,7 +93,9 @@ def http_request_response(
     if type(root_certificates) == str:
         verify = root_certificates
     elif type(root_certificates) == bytes:
-        log.ERROR("For the REST API, the root certificates must be provided as a string path to the client.")
+        log.ERROR(
+            "For the REST API, the root certificates must be provided as a string path to the client."
+        )
 
     # Necessary state to link TaskRes to TaskIns
     state: Dict[str, Optional[TaskIns]] = {"current_task_ins": None}

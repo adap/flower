@@ -148,7 +148,9 @@ def start_client(
                 "extra dependencies by running `pip install flwr['rest']`."
             ) from missing_dep
         if server_address[:4] != "http":
-            sys.exit("When using the REST API please provide `https://` or `http://` at the front of the server address (e.g. `http://127.0.0.1:8080`)")
+            sys.exit(
+                "When using the REST API please provide `https://` or `http://` at the front of the server address (e.g. `http://127.0.0.1:8080`)"
+            )
         connection = http_request_response
     else:
         connection = grpc_connection
