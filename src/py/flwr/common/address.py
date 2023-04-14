@@ -42,10 +42,10 @@ def parse_address(address: str) -> Union[Tuple[str, int, bool], None]:
     """
     try:
         raw_host, _, raw_port = address.rpartition(":")
-        if raw_host.count('.') in [1,2]:
+        if raw_host.count(".") in [1, 2]:
             raw_host = socket.gethostbyname(raw_host)
-        elif raw_host == 'localhost':
-            raw_host = '127.0.0.1'
+        elif raw_host == "localhost":
+            raw_host = "127.0.0.1"
         host, port = raw_host.translate({ord(i): None for i in "[]"}), int(raw_port)
         if port > 65535:
             raise ValueError("Port number is too high.")
