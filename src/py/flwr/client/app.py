@@ -109,9 +109,9 @@ def start_client(
         same value (see `flwr.server.start_server`), otherwise it will not
         know about the increased limit and block larger messages.
     root_certificates : Optional[Union[bytes, str]] (default: None)
-        The PEM-encoded root certificates as a byte string or a path string. If provided, a secure
-        connection using the certificates will be established to a
-        SSL-enabled Flower server.
+        The PEM-encoded root certificates as a byte string or a path string.
+        If provided, a secure connection using the certificates will be
+        established to a SSL-enabled Flower server.
     rest : bool (default: False)
         Defines whether or not the client is interacting with the server using the
         experimental REST API. This feature is experimental, it might change

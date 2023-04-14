@@ -62,9 +62,9 @@ def grpc_connection(
         increased limit and block larger messages.
         (default: 536_870_912, this equals 512MB)
     root_certificates : Optional[bytes] (default: None)
-        The PEM-encoded root certificates as a byte string or a path string. If provided, a secure
-        connection using the certificates will be established to a SSL-enabled
-        Flower server.
+        The PEM-encoded root certificates as a byte string or a path string.
+        If provided, a secure connection using the certificates will be 
+        established to a SSL-enabled Flower server.
 
     Returns
     -------
