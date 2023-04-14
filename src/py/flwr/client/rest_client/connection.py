@@ -48,8 +48,7 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 def http_request_response(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[bytes] = None,  # pylint: disable=unused-argument
-    root_certificates_path: Optional[str] = None,
+    root_certificates: Optional[Union[bytes, str]] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[Callable[[], Optional[ServerMessage]], Callable[[ClientMessage], None]]
 ]:
@@ -61,16 +60,14 @@ def http_request_response(
     Parameters
     ----------
     server_address : str
-        The IPv6 address of the server. If the Flower server runs on the same machine
-        on port 8080, then `server_address` would be `"[::]:8080"`.
+        The IPv6 address of the server with `http://` or `https://`. If the Flower server runs on the same machine
+        on port 8080, then `server_address` would be `"http://[::]:8080"`.
     max_message_length : int
         Ignored, only present to preserve API-compatibility.
-    root_certificates : Optional[bytes] (default: None)
-        Ignored, for now.
-    root_certificates_path : Optional[str] (default: None)
+    root_certificates : Optional[Union[bytes, str]] (default: None)
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to a SSL-enabled
-        Flower server.
+        Flower server. Bytes won't work for the REST API.
 
     Returns
     -------
@@ -85,11 +82,16 @@ def http_request_response(
         """,
     )
 
-    base_url = f"https://{server_address}"
+    base_url = server_address
 
-    verify: Union[bool, str] = False
-    if root_certificates_path:
-        verify = root_certificates_path
+    # NEVER SET VERIFY TO FALSE
+    # Otherwise any server can fake its identity
+    # Please refer to: https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
+    verify: Union[bool, str] = True
+    if type(root_certificates) == str:
+        verify = root_certificates
+    elif type(root_certificates) == bytes:
+        log.ERROR("For the REST API, the root certificates must be provided as a string path to the client.")
 
     # Necessary state to link TaskRes to TaskIns
     state: Dict[str, Optional[TaskIns]] = {"current_task_ins": None}
