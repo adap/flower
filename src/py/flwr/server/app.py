@@ -152,7 +152,6 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     parsed_address = parse_address(server_address)
     if not parsed_address:
         sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
-
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
@@ -274,11 +273,10 @@ def run_fleet_api() -> None:
 
     # Start Fleet API
     if args.fleet_api_type == "rest":
-        parsed_address = parse_address(args.rest_fleet_api_address)
+        address_arg = args.rest_fleet_api_address
+        parsed_address = parse_address(address_arg)
         if not parsed_address:
-            sys.exit(
-                f"Fleet IP address ({args.rest_fleet_api_address}) cannot be parsed."
-            )
+            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
         host, port, _ = parsed_address
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
@@ -287,11 +285,10 @@ def run_fleet_api() -> None:
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
     elif args.fleet_api_type == "grpc":
-        parsed_address = parse_address(args.grpc_fleet_api_address)
+        address_arg = args.grpc_fleet_api_address
+        parsed_address = parse_address(address_arg)
         if not parsed_address:
-            sys.exit(
-                f"Fleet IP address ({args.grpc_fleet_api_address}) cannot be parsed."
-            )
+            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
         fleet_server = _run_fleet_api_grpc_bidi(
@@ -344,11 +341,10 @@ def run_server() -> None:
 
     # Start Fleet API
     if args.fleet_api_type == "rest":
-        parsed_address = parse_address(args.rest_fleet_api_address)
+        address_arg = args.rest_fleet_api_address
+        parsed_address = parse_address(address_arg)
         if not parsed_address:
-            sys.exit(
-                f"Fleet IP address ({args.rest_fleet_api_address}) cannot be parsed."
-            )
+            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
         host, port, _ = parsed_address
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
@@ -357,11 +353,10 @@ def run_server() -> None:
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
     elif args.fleet_api_type == "grpc":
-        parsed_address = parse_address(args.grpc_fleet_api_address)
+        address_arg = args.grpc_fleet_api_address
+        parsed_address = parse_address(address_arg)
         if not parsed_address:
-            sys.exit(
-                f"Fleet IP address ({args.grpc_fleet_api_address}) cannot be parsed."
-            )
+            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
         fleet_server = _run_fleet_api_grpc_bidi(

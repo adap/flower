@@ -15,7 +15,6 @@
 """Flower IP address utils."""
 
 
-import socket
 from ipaddress import ip_address
 from typing import Tuple, Union
 
@@ -42,13 +41,18 @@ def parse_address(address: str) -> Union[Tuple[str, int, bool], None]:
     """
     try:
         raw_host, _, raw_port = address.rpartition(":")
-        if raw_host.count(".") in [1, 2]:
-            raw_host = socket.gethostbyname(raw_host)
-        elif raw_host == "localhost":
-            raw_host = "127.0.0.1"
-        host, port = raw_host.translate({ord(i): None for i in "[]"}), int(raw_port)
-        if port > 65535:
-            raise ValueError("Port number is too high.")
+
+        if raw_host.count(".") in [1, 2] or raw_host == "localhost":
+            host = raw_host
+        else:
+            host = raw_host.translate({ord(i): None for i in "[]"})
+
+        port = int(raw_port)
+
+        if port > 65535 or port < 0:
+            raise ValueError("Port number is invalid.")
+
         return host, port, (ip_address(host).version == IPV6)
+
     except ValueError:
         return None
