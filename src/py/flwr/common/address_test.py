@@ -15,6 +15,7 @@
 """Flower IP address utils."""
 
 
+import socket
 from .address import parse_address
 
 
@@ -25,6 +26,8 @@ def test_ipv4_correct() -> None:
     addresses = [
         ("127.0.0.1:8080", ("127.0.0.1", 8080, False)),
         ("0.0.0.0:12", ("0.0.0.0", 12, False)),
+        ("flower.dev:123", (socket.gethostbyname("flower.dev"), 123, False)),
+        ("localhost:123", ("127.0.0.1", 123, False)),
     ]
 
     for address, expected in addresses:
@@ -66,6 +69,13 @@ def test_ipv6_correct() -> None:
             "2001:db8:3333:4444:5555:6666:7777:8888:12",
             ("2001:db8:3333:4444:5555:6666:7777:8888", 12, True),
         ),
+        (
+            "[0000:0000:0000:0000:0000:0000:0000:0001]:443",
+            ("0000:0000:0000:0000:0000:0000:0000:0001", 443, True),
+        ),
+        ("[::]:123", ("::", 123, True)),
+        ("[0:0:0:0:0:0:0:1]:80", ("0:0:0:0:0:0:0:1", 80, True)),
+        ("[::1]:80", ("::1", 80, True)),
     ]
 
     for address, expected in addresses:
