@@ -62,7 +62,8 @@ def http_request_response(
     Parameters
     ----------
     server_address : str
-        The IPv6 address of the server with `http://` or `https://`. If the Flower server runs on the same machine
+        The IPv6 address of the server with `http://` or `https://`.
+        If the Flower server runs on the same machine
         on port 8080, then `server_address` would be `"http://[::]:8080"`.
     max_message_length : int
         Ignored, only present to preserve API-compatibility.
@@ -88,14 +89,16 @@ def http_request_response(
 
     # NEVER SET VERIFY TO FALSE
     # Otherwise any server can fake its identity
-    # Please refer to: https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
+    # Please refer to:
+    # https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
     verify: Union[bool, str] = True
     if isinstance(root_certificates, str):
         verify = root_certificates
     elif isinstance(root_certificates, bytes):
         log(
             ERROR,
-            "For the REST API, the root certificates must be provided as a string path to the client.",
+            "For the REST API, the root certificates "
+            "must be provided as a string path to the client.",
         )
 
     # Necessary state to link TaskRes to TaskIns
