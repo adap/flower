@@ -44,15 +44,17 @@ def parse_address(address: str) -> Union[Tuple[str, int, bool], None]:
 
         if raw_host.count(".") in [1, 2] or raw_host == "localhost":
             host = raw_host
+            version = False
         else:
             host = raw_host.translate({ord(i): None for i in "[]"})
+            version = ip_address(host).version == IPV6
 
         port = int(raw_port)
 
         if port > 65535 or port < 0:
             raise ValueError("Port number is invalid.")
 
-        return host, port, (ip_address(host).version == IPV6)
+        return host, port, version
 
     except ValueError:
         return None
