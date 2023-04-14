@@ -1,10 +1,20 @@
-from typing import List
+from typing import List, Tuple
 import random
 import time
 
 from flwr.driver import Driver
-from flwr.common import ServerMessage, FitIns, ndarrays_to_parameters, serde
+from flwr.common import (
+    ServerMessage,
+    FitIns,
+    ndarrays_to_parameters,
+    serde,
+    parameters_to_ndarrays,
+    ClientMessage,
+    NDArrays,
+    Code,
+)
 from flwr.proto import driver_pb2, task_pb2, node_pb2, transport_pb2
+from flwr.server.strategy.aggregate import aggregate
 
 from task import Net, get_parameters, set_parameters
 
@@ -13,9 +23,9 @@ driver = Driver(driver_service_address="0.0.0.0:9091", certificates=None)
 # -------------------------------------------------------------------------- Driver SDK
 
 anonymous_client_nodes = True
-num_client_nodes_per_round = 1
+num_client_nodes_per_round = 2
 sleep_time = 1
-num_rounds = 1
+num_rounds = 3
 parameters = ndarrays_to_parameters(get_parameters(net=Net()))
 
 # -------------------------------------------------------------------------- Driver SDK
@@ -90,7 +100,8 @@ for server_round in range(num_rounds):
                 ),
                 consumer=node_pb2.Node(
                     node_id=sampled_node_id,
-                    anonymous=anonymous_client_nodes,  # Must be True if we're working with anonymous clients
+                    anonymous=anonymous_client_nodes,
+                    # Must be True if we're working with anonymous clients
                 ),
                 legacy_server_message=server_message_proto,
             ),
@@ -137,9 +148,25 @@ for server_round in range(num_rounds):
         if len(all_task_res) == len(task_ids):
             break
 
-    # "Aggregate" results
-    node_messages = [task_res.task.legacy_client_message for task_res in all_task_res]
+    # Collect correct results
+    node_messages: List[ClientMessage] = []
+    for task_res in all_task_res:
+        if hasattr(task_res.task, "legacy_client_message"):
+            node_messages.append(task_res.task.legacy_client_message)
     print(f"Received {len(node_messages)} results")
+
+    weights_results: List[Tuple[NDArrays, int]] = []
+    for node_message in node_messages:
+        if hasattr(node_message, "fit_res"):
+            fit_res = node_message.fit_res
+            # Aggregate only if the status is OK
+            if fit_res.status.code == Code.OK.value:
+                weights_results.append(
+                    (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+                )
+    # Aggregate results - FedAvg
+    parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+    parameters = parameters_aggregated
 
     time.sleep(sleep_time)
 
@@ -148,3 +175,4 @@ for server_round in range(num_rounds):
 # -------------------------------------------------------------------------- Driver SDK
 driver.disconnect()
 # -------------------------------------------------------------------------- Driver SDK
+print("Driver disconnected")
