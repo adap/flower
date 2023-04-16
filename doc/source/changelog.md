@@ -4,43 +4,37 @@
 
 ### What's new?
 
-- **New iOS SDK** ([#1621](https://github.com/adap/flower/pull/1621), [#1764](https://github.com/adap/flower/pull/1764))
+- **Introduce support for XGBoost (**`FedXgbNnAvg` **strategy and example)** ([#1694](https://github.com/adap/flower/pull/1694), [#1709](https://github.com/adap/flower/pull/1709), [#1715](https://github.com/adap/flower/pull/1715), [#1717](https://github.com/adap/flower/pull/1717), [#1763](https://github.com/adap/flower/pull/1763))
 
-  This is a major update for anyone wanting to implement Federated Learning on iOS mobile devices. We now have a swift iOS SDK present under [src/swift/flwr](https://github.com/adap/flower/tree/main/src/swift/flwr) that will facilitate greatly the app creating process. To showcase its use, the [iOS example](https://github.com/adap/flower/tree/main/examples/ios) has also been updated! 
+  XGBoost is a tree-based ensemble machine learning algorithm that uses gradient boosting to improve model accuracy. We added a new `FedXgbNnAvg` [strategy](https://github.com/adap/flower/tree/main/src/py/flwr/server/strategy/fedxgb_nn_avg.py), and a [code example](https://github.com/adap/flower/tree/main/examples/quickstart_xgboost_horizontal) that demonstrates the usage of this new strategy in an XGBoost project. 
 
-- **Add new "What is Federated Learning?" tutorial** ([#1657](https://github.com/adap/flower/pull/1657), [#1721](https://github.com/adap/flower/pull/1721))
+- **Introduce iOS SDK (preview)** ([#1621](https://github.com/adap/flower/pull/1621), [#1764](https://github.com/adap/flower/pull/1764))
 
-  We added this entry level tutorial to our documentation because we think it is essential that people unfamiliar with Federated Learning are also able to start their journey with us.
+  This is a major update for anyone wanting to implement Federated Learning on iOS mobile devices. We now have a swift iOS SDK present under [src/swift/flwr](https://github.com/adap/flower/tree/main/src/swift/flwr) that will facilitate greatly the app creating process. To showcase its use, the [iOS example](https://github.com/adap/flower/tree/main/examples/ios) has also been updated!
 
-- **Delete delivered** `TaskIns/TaskRes` ([#1662](https://github.com/adap/flower/pull/1662))
+- **Introduce new "What is Federated Learning?" tutorial** ([#1657](https://github.com/adap/flower/pull/1657), [#1721](https://github.com/adap/flower/pull/1721))
 
-  Now tasks or results that have been delivered through the Driver API, will be deleted. This will greatly improve performance.
-
-- **Various improvements to the experimental Driver API** ([#1663](https://github.com/adap/flower/pull/1663), [#1666](https://github.com/adap/flower/pull/1666), [#1667](https://github.com/adap/flower/pull/1667), [#1664](https://github.com/adap/flower/pull/1664), [#1675](https://github.com/adap/flower/pull/1675), [#1676](https://github.com/adap/flower/pull/1676), [#1693](https://github.com/adap/flower/pull/1693))
-
-  The Driver API is still an experimental feature, but one of the main improvement is the introduction of an SQLite database to communicate between the driver and the fleet.
-
-- **New REST API (still experimental)** ([#1594](https://github.com/adap/flower/pull/1594), [#1690](https://github.com/adap/flower/pull/1690), [#1695](https://github.com/adap/flower/pull/1695), [#1712](https://github.com/adap/flower/pull/1712))
-
-  A new REST API has been introduced in order to replace the GRPC channel for communication. This feature is still experimental. 
-
-- **General improvements** ([#1659](https://github.com/adap/flower/pull/1659), [#1646](https://github.com/adap/flower/pull/1646), [#1647](https://github.com/adap/flower/pull/1647), [#1471](https://github.com/adap/flower/pull/1471), [#1648](https://github.com/adap/flower/pull/1648), [#1651](https://github.com/adap/flower/pull/1651), [#1652](https://github.com/adap/flower/pull/1652), [#1653](https://github.com/adap/flower/pull/1653), [#1659](https://github.com/adap/flower/pull/1659), [#1665](https://github.com/adap/flower/pull/1665), [#1670](https://github.com/adap/flower/pull/1670), [#1672](https://github.com/adap/flower/pull/1672), [#1677](https://github.com/adap/flower/pull/1677), [#1684](https://github.com/adap/flower/pull/1684), [#1683](https://github.com/adap/flower/pull/1683), [#1686](https://github.com/adap/flower/pull/1686), [#1682](https://github.com/adap/flower/pull/1682), [#1685](https://github.com/adap/flower/pull/1685), [#1692](https://github.com/adap/flower/pull/1692), [#1705](https://github.com/adap/flower/pull/1705), [#1708](https://github.com/adap/flower/pull/1708), [#1711](https://github.com/adap/flower/pull/1711), [#1713](https://github.com/adap/flower/pull/1713), [#1714](https://github.com/adap/flower/pull/1714), [#1718](https://github.com/adap/flower/pull/1718), [#1716](https://github.com/adap/flower/pull/1716), [#1723](https://github.com/adap/flower/pull/1723), [#1735](https://github.com/adap/flower/pull/1735), [#1678](https://github.com/adap/flower/pull/1678), [#1750](https://github.com/adap/flower/pull/1750), [#1753](https://github.com/adap/flower/pull/1753), [#1736](https://github.com/adap/flower/pull/1736), [#1766](https://github.com/adap/flower/pull/1766), [#1760](https://github.com/adap/flower/pull/1760))
-
-  Flower received many improvements under the hood, too many to list here.
+  A new [entry-level tutorial](https://flower.dev/docs/tutorial/Flower-0-What-is-FL.html) in our documentation explains the basics of Fedetated Learning. It enables anyone who's unfamiliar with Federated Learning to start their journey with Flower. Forward it to anyone who's interested in Federated Learning!
 
 - **Introduce new Flower Baseline: FedProx MNIST** ([#1513](https://github.com/adap/flower/pull/1513), [#1680](https://github.com/adap/flower/pull/1680), [#1681](https://github.com/adap/flower/pull/1681), [#1679](https://github.com/adap/flower/pull/1679))
 
-  This new baseline replicates the MNIST+CNN task from this [paper](https://arxiv.org/abs/1812.06127). It uses the `FedProx` strategy, which aims at making convergence more robust in heterogenous settings.
+  This new baseline replicates the MNIST+CNN task from the paper [Federated Optimization in Heterogeneous Networks (Li et al., 2018)](https://arxiv.org/abs/1812.06127). It uses the `FedProx` strategy, which aims at making convergence more robust in heterogenous settings.
 
-- **Add new** `FedXGBoost` **strategy and example** ([#1694](https://github.com/adap/flower/pull/1694), [#1709](https://github.com/adap/flower/pull/1709), [#1715](https://github.com/adap/flower/pull/1715), [#1717](https://github.com/adap/flower/pull/1717), [#1763](https://github.com/adap/flower/pull/1763))
+- **Introduce (experimental) REST API** ([#1594](https://github.com/adap/flower/pull/1594), [#1690](https://github.com/adap/flower/pull/1690), [#1695](https://github.com/adap/flower/pull/1695), [#1712](https://github.com/adap/flower/pull/1712))
 
-  XGBoost is a tree-based ensemble machine learning algorithm that uses gradient boosting to improve model accuracy. We added a new FedXGBoost [strategy](https://github.com/adap/flower/tree/main/src/py/flwr/server/strategy/fedxgb_nn_avg.py), and [example](https://github.com/adap/flower/tree/main/examples/quickstart_xgboost_horizontal)
+  A new REST API has been introduced as an alternative to the gRPC-based communication stack. In this initial version, the REST API only supports anonymous clients.
 
-- **Fix the spilling issues related to Ray during simulations** ([#1698](https://github.com/adap/flower/pull/1698))
+  Please note: The REST API is still experimental and will likely change significantly over time.
 
-  While doing long simulation, `ray` was sometimes spilling huge amounts of data that would make the training unable to continue. This is now fixed! 🎉
+- **Improve the (experimental) Driver API** ([#1663](https://github.com/adap/flower/pull/1663), [#1666](https://github.com/adap/flower/pull/1666), [#1667](https://github.com/adap/flower/pull/1667), [#1664](https://github.com/adap/flower/pull/1664), [#1675](https://github.com/adap/flower/pull/1675), [#1676](https://github.com/adap/flower/pull/1676), [#1693](https://github.com/adap/flower/pull/1693), [#1662](https://github.com/adap/flower/pull/1662))
 
-- **Add new example using Flower and** `TabNet` ([#1725](https://github.com/adap/flower/pull/1725))
+  The Driver API is still an experimental feature, but this release introduces some major upgrades. One of the main improvements is the introduction of an SQLite database to store server state on disk (instead of in-memory). Another improvement is that tasks (instructions or results) that have been delivered will now be deleted. This greatly improves the memory efficiency of a long-running Flower server.
+
+- **Fix spilling issues related to Ray during simulations** ([#1698](https://github.com/adap/flower/pull/1698))
+
+  While running long simulationa, `ray` was sometimes spilling huge amounts of data that would make the training unable to continue. This is now fixed! 🎉
+
+- **Add new example using** `TabNet` **and Flower** ([#1725](https://github.com/adap/flower/pull/1725))
 
   TabNet is a powerful and flexible framework for training machine learning models on tabular data. We now have a federated example using Flower: [https://github.com/adap/flower/tree/main/examples/tabnet](https://github.com/adap/flower/tree/main/examples/quickstart_tabnet).
 
@@ -50,7 +44,11 @@
 
 - **Add training metrics to** `History` **object during simulations** ([#1696](https://github.com/adap/flower/pull/1696))
 
-  The `fit_metrics_aggregation_fn` could be used to aggregate training metrics before, but the results were not saved in the `History` object during simulations. This is now the case!
+  The `fit_metrics_aggregation_fn` can be used to aggregate training metrics, but previous releases did not save the results in the `History` object. This is now the case!
+
+- **General improvements** ([#1659](https://github.com/adap/flower/pull/1659), [#1646](https://github.com/adap/flower/pull/1646), [#1647](https://github.com/adap/flower/pull/1647), [#1471](https://github.com/adap/flower/pull/1471), [#1648](https://github.com/adap/flower/pull/1648), [#1651](https://github.com/adap/flower/pull/1651), [#1652](https://github.com/adap/flower/pull/1652), [#1653](https://github.com/adap/flower/pull/1653), [#1659](https://github.com/adap/flower/pull/1659), [#1665](https://github.com/adap/flower/pull/1665), [#1670](https://github.com/adap/flower/pull/1670), [#1672](https://github.com/adap/flower/pull/1672), [#1677](https://github.com/adap/flower/pull/1677), [#1684](https://github.com/adap/flower/pull/1684), [#1683](https://github.com/adap/flower/pull/1683), [#1686](https://github.com/adap/flower/pull/1686), [#1682](https://github.com/adap/flower/pull/1682), [#1685](https://github.com/adap/flower/pull/1685), [#1692](https://github.com/adap/flower/pull/1692), [#1705](https://github.com/adap/flower/pull/1705), [#1708](https://github.com/adap/flower/pull/1708), [#1711](https://github.com/adap/flower/pull/1711), [#1713](https://github.com/adap/flower/pull/1713), [#1714](https://github.com/adap/flower/pull/1714), [#1718](https://github.com/adap/flower/pull/1718), [#1716](https://github.com/adap/flower/pull/1716), [#1723](https://github.com/adap/flower/pull/1723), [#1735](https://github.com/adap/flower/pull/1735), [#1678](https://github.com/adap/flower/pull/1678), [#1750](https://github.com/adap/flower/pull/1750), [#1753](https://github.com/adap/flower/pull/1753), [#1736](https://github.com/adap/flower/pull/1736), [#1766](https://github.com/adap/flower/pull/1766), [#1760](https://github.com/adap/flower/pull/1760))
+
+  Flower received many improvements under the hood, too many to list here.
 
 ### Incompatible changes
 
