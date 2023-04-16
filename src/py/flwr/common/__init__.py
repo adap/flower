@@ -15,7 +15,6 @@
 """Flower utilities shared between server and client."""
 
 
-from . import logger
 from .date import now as now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
 from .logger import log as log
@@ -66,7 +65,6 @@ __all__ = [
     "GetPropertiesRes",
     "GRPC_MAX_MESSAGE_LENGTH",
     "log",
-    "logger",
     "Metrics",
     "MetricsAggregationFn",
     "ndarray_to_bytes",
