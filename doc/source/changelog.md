@@ -2,14 +2,6 @@
 
 ## Unreleased
 
-## v1.4.0 (2023-03-31)
-
-### Thanks to our contributors
-
-We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
-
-
-
 ### What's new?
 
 - **New iOS SDK** ([#1621](https://github.com/adap/flower/pull/1621), [#1764](https://github.com/adap/flower/pull/1764))
