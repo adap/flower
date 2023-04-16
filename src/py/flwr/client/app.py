@@ -141,11 +141,10 @@ def start_client(
 
     # Parse IP address
     parsed_address = parse_address(server_address)
-    if parsed_address:
-        host, port, is_v6 = parsed_address
-        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-    else:
+    if not parsed_address:
         sys.exit(f"Server address ({server_address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
     # Use either gRPC bidirectional streaming or REST request/response
     if rest:
