@@ -15,6 +15,7 @@
 """Flower server."""
 
 
+from . import strategy
 from .app import ServerConfig as ServerConfig
 from .app import run_driver_api as run_driver_api
 from .app import run_fleet_api as run_fleet_api
@@ -35,4 +36,5 @@ __all__ = [
     "ServerConfig",
     "SimpleClientManager",
     "start_server",
+    "strategy",
 ]
