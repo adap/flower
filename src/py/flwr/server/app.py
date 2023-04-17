@@ -381,7 +381,6 @@ def run_server() -> None:
     )
 
     # Block
-    # TODO: Check if any is dead.
     while True:
         if bckg_threads:
             for thread in bckg_threads:
