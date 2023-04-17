@@ -18,7 +18,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from sb_w2v2 import get_weights, set_weights
+from model.sb_w2v2 import get_weights, set_weights
 
 
 class SpeechBrainClient(fl.client.Client):

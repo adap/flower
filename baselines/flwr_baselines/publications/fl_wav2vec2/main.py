@@ -18,9 +18,9 @@ from argparse import ArgumentParser
 from typing import Callable, Dict
 
 import flwr as fl
-import model
 import strategy
 import torch
+from model import model
 from client import SpeechBrainClient
 
 parser = ArgumentParser()
