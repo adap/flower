@@ -27,6 +27,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.common.address import parse_address
 from flwr.common.logger import log
 from flwr.common.typing import (
     Code,
@@ -81,7 +82,7 @@ Example
 ClientLike = Union[Client, NumPyClient]
 
 
-# pylint: disable=import-outside-toplevel
+# pylint: disable=import-outside-toplevel,too-many-locals
 def start_client(
     *,
     server_address: str,
@@ -138,6 +139,13 @@ def start_client(
 
     event(EventType.START_CLIENT_ENTER)
 
+    # Parse IP address
+    parsed_address = parse_address(server_address)
+    if not parsed_address:
+        sys.exit(f"Server address ({server_address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
     # Use either gRPC bidirectional streaming or REST request/response
     if rest:
         try:
@@ -158,7 +166,7 @@ def start_client(
     while True:
         sleep_duration: int = 0
         with connection(
-            server_address,
+            address,
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
         ) as conn:
