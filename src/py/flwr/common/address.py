@@ -15,10 +15,18 @@
 """Flower IP address utils."""
 
 
+import re
 from ipaddress import ip_address
 from typing import Optional, Tuple
 
 IPV6: int = 6
+
+DOMAIN_PATTERN: re.Pattern = re.compile(
+    r"^(localhost)|(([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|"
+    r"([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})|"
+    r"([a-zA-Z0-9][-_.a-zA-Z0-9]{0,61}[a-zA-Z0-9]))\."
+    r"([a-zA-Z]{2,13}|[a-zA-Z0-9-]{2,30}.[a-zA-Z]{2,3})$"
+)
 
 
 def parse_address(address: str) -> Optional[Tuple[str, int, bool]]:
@@ -27,7 +35,9 @@ def parse_address(address: str) -> Optional[Tuple[str, int, bool]]:
     Parameters
     ----------
     address : str
-        The string representation of an IPv4 or IPV6 address with the port number.
+        The string representation of a domain, an IPv4, or an IPV6 address
+        with the port number.
+
         For example, '127.0.0.1:8080', or [::1]:8080.
 
     Returns
@@ -41,7 +51,7 @@ def parse_address(address: str) -> Optional[Tuple[str, int, bool]]:
     try:
         raw_host, _, raw_port = address.rpartition(":")
 
-        if raw_host.count(".") in [1, 2] or raw_host == "localhost":
+        if DOMAIN_PATTERN.match(raw_host):
             host = raw_host
             version = False
         else:
