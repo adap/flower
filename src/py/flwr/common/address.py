@@ -16,14 +16,13 @@
 
 
 from ipaddress import ip_address
-from typing import Tuple, Union
+from typing import Optional, Tuple
 
 IPV6: int = 6
 
 
-def parse_address(address: str) -> Union[Tuple[str, int, bool], None]:
-    """Parses a string representing an IP address into a host, port and
-    version.
+def parse_address(address: str) -> Optional[Tuple[str, int, bool]]:
+    """Parses a string representing an IP address into a host, port and version.
 
     Parameters
     ----------
@@ -33,7 +32,7 @@ def parse_address(address: str) -> Union[Tuple[str, int, bool], None]:
 
     Returns
     -------
-    Union[Tuple[str, int, bool], None]
+    Optional[Tuple[str, int, bool]]
         If the string provided is not a correct IPv6 or IPv4,
         the function will return None, otherwise it will return the host,
         as a string, the port number, as an int, and
