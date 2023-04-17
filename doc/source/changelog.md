@@ -22,7 +22,7 @@
 
 - **Introduce new Flower Baseline: FedAvg FEMNIST** ([#1655](https://github.com/adap/flower/pull/1655)) 
 
-  This new baseline replicates an experiment evaluating the performance of the FedAvg algorithm on the FEMNIST dataset from the([LEAF paper](https://arxiv.org/abs/1812.01097)).
+  This new baseline replicates an experiment evaluating the performance of the FedAvg algorithm on the FEMNIST dataset from the paper [LEAF: A Benchmark for Federated Settings (Caldas et al., 2018)](https://arxiv.org/abs/1812.01097).
 
 - **Introduce (experimental) REST API** ([#1594](https://github.com/adap/flower/pull/1594), [#1690](https://github.com/adap/flower/pull/1690), [#1695](https://github.com/adap/flower/pull/1695), [#1712](https://github.com/adap/flower/pull/1712))
 
