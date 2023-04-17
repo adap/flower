@@ -26,6 +26,10 @@ def test_ipv4_correct() -> None:
         ("127.0.0.1:8080", ("127.0.0.1", 8080, False)),
         ("0.0.0.0:12", ("0.0.0.0", 12, False)),
         ("flower.dev:123", ("flower.dev", 123, False)),
+        ("flower.dev:123", ("flower.dev", 123, False)),
+        ("sub.flower.dev:123", ("sub.flower.dev", 123, False)),
+        ("sub2.sub1.flower.dev:123", ("sub2.sub1.flower.dev", 123, False)),
+        ("sub5.sub4.sub3.sub2.sub1.flower.dev:123", ("sub5.sub4.sub3.sub2.sub1.flower.dev", 123, False)),
         ("localhost:123", ("localhost", 123, False)),
     ]
 
