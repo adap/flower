@@ -4,12 +4,12 @@ import torchaudio
 
 # Define custom data procedure
 def dataio_prepare(hparams):
-
     # 1. Define datasets
     data_folder = hparams["data_folder"]
 
     train_data = sb.dataio.dataset.DynamicItemDataset.from_csv(
-        csv_path=hparams["train_csv"], replacements={"data_root": data_folder},
+        csv_path=hparams["train_csv"],
+        replacements={"data_root": data_folder},
     )
 
     if hparams["sorting"] == "ascending":
@@ -36,12 +36,11 @@ def dataio_prepare(hparams):
         pass
 
     else:
-        raise NotImplementedError(
-            "sorting must be random, ascending or descending"
-        )
+        raise NotImplementedError("sorting must be random, ascending or descending")
 
     valid_data = sb.dataio.dataset.DynamicItemDataset.from_csv(
-        csv_path=hparams["valid_csv"], replacements={"data_root": data_folder},
+        csv_path=hparams["valid_csv"],
+        replacements={"data_root": data_folder},
     )
     # We also sort the validation data so it is faster to validate
     valid_data = valid_data.filtered_sorted(
@@ -52,7 +51,8 @@ def dataio_prepare(hparams):
     )
 
     test_data = sb.dataio.dataset.DynamicItemDataset.from_csv(
-        csv_path=hparams["test_csv"], replacements={"data_root": data_folder},
+        csv_path=hparams["test_csv"],
+        replacements={"data_root": data_folder},
     )
     # We also sort the test data so it is faster to validate
     test_data = test_data.filtered_sorted(
@@ -66,7 +66,6 @@ def dataio_prepare(hparams):
 
     label_encoder = sb.dataio.encoder.CTCTextEncoder()
 
-
     # 2. Define audio pipeline:
     @sb.utils.data_pipeline.takes("wav", "start_seg", "end_seg")
     @sb.utils.data_pipeline.provides("sig")
@@ -75,23 +74,22 @@ def dataio_prepare(hparams):
         if end_seg != 0.002:
             start = int(float(start_seg) * hparams["sample_rate"])
             stop = int(float(end_seg) * hparams["sample_rate"])
-            speech_segment = {"file" : wav, "start" : start, "stop" : stop}
+            speech_segment = {"file": wav, "start": start, "stop": stop}
         else:
             speech_segment = {"file": wav}
         sig = sb.dataio.dataio.read_audio(speech_segment)
-        #resample to correct 16Hz if different or else remain the same
+        # resample to correct 16Hz if different or else remain the same
         resampled = torchaudio.transforms.Resample(
-           info.sample_rate, hparams["sample_rate"],
-       )(sig)
+            info.sample_rate,
+            hparams["sample_rate"],
+        )(sig)
         return resampled
 
     sb.dataio.dataset.add_dynamic_item(datasets, audio_pipeline)
 
     # 3. Define text pipeline:
     @sb.utils.data_pipeline.takes("char")
-    @sb.utils.data_pipeline.provides(
-        "char_list", "char_encoded"
-    )
+    @sb.utils.data_pipeline.provides("char_list", "char_encoded")
     def text_pipeline(char):
         char_list = char.strip().split()
         yield char_list
@@ -111,6 +109,7 @@ def dataio_prepare(hparams):
 
     # 4. Set output:
     sb.dataio.dataset.set_output_keys(
-        datasets, ["id", "sig", "char_encoded"],
+        datasets,
+        ["id", "sig", "char_encoded"],
     )
     return train_data, valid_data, test_data, label_encoder

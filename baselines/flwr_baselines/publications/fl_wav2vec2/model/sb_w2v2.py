@@ -36,7 +36,8 @@ Authors
  * Titouan Parcollet 2021
 """
 
-DEVICE = "cpu" # "cuda"
+DEVICE = "cpu"  # "cuda"
+
 
 class Stage(Enum):
     """Simple enum to track stage of experiments."""
@@ -45,7 +46,10 @@ class Stage(Enum):
     VALID = auto()
     TEST = auto()
 
-def set_weights(weights: fl.common.NDArrays, modules, evaluate, add_train, device) -> None:
+
+def set_weights(
+    weights: fl.common.NDArrays, modules, evaluate, add_train, device
+) -> None:
     """Set model weights from a list of NumPy ndarrays."""
     state_dict = OrderedDict()
     valid_keys = [k for k in modules.state_dict().keys()]
@@ -56,6 +60,7 @@ def set_weights(weights: fl.common.NDArrays, modules, evaluate, add_train, devic
 
     modules.load_state_dict(state_dict, strict=True)
 
+
 def get_weights(modules) -> fl.common.NDArrays:
     """Get model weights as a list of NumPy ndarrays."""
     w = []
@@ -65,6 +70,7 @@ def get_weights(modules) -> fl.common.NDArrays:
 
 
 logger = logging.getLogger(__name__)
+
 
 class ASR(sb.core.Brain):
     def compute_forward(self, batch, stage):
@@ -81,19 +87,18 @@ class ASR(sb.core.Brain):
 
         return p_ctc, wav_lens
 
-
     def compute_objectives(self, predictions, ids, batch, stage):
         """Computes the CTC loss given predictions and targets."""
 
         p_ctc, wav_lens = predictions
         chars, char_lens = batch.char_encoded
-        
-        loss = self.hparams.ctc_cost(
-                p_ctc, chars, wav_lens, char_lens
-            )
-        sequence= sb.decoders.ctc_greedy_decode(p_ctc, wav_lens, self.hparams.blank_index)
-        #========================================Add by Salima===============================================
-        #=========================================================================================================
+
+        loss = self.hparams.ctc_cost(p_ctc, chars, wav_lens, char_lens)
+        sequence = sb.decoders.ctc_greedy_decode(
+            p_ctc, wav_lens, self.hparams.blank_index
+        )
+        # ========================================Add by Salima===============================================
+        # =========================================================================================================
 
         if stage != sb.Stage.TRAIN:
             self.cer_metric.append(
@@ -101,29 +106,23 @@ class ASR(sb.core.Brain):
                 predict=sequence,
                 target=chars,
                 target_len=char_lens,
-                ind2lab=self.label_encoder.decode_ndim
+                ind2lab=self.label_encoder.decode_ndim,
             )
             self.coer_metric.append(
                 ids=ids,
                 predict=sequence,
                 target=chars,
                 target_len=char_lens,
-                ind2lab=self.label_encoder.decode_ndim
+                ind2lab=self.label_encoder.decode_ndim,
             )
             self.cver_metric.append(
                 ids=ids,
                 predict=sequence,
                 target=chars,
                 target_len=char_lens,
-                ind2lab=self.label_encoder.decode_ndim)
-            self.ctc_metric.append(
-                ids,
-                p_ctc,
-                chars,
-                wav_lens,
-                char_lens
+                ind2lab=self.label_encoder.decode_ndim,
             )
-            
+            self.ctc_metric.append(ids, p_ctc, chars, wav_lens, char_lens)
 
         return loss
 
@@ -138,7 +137,7 @@ class ASR(sb.core.Brain):
 
     def fit_batch(self, batch):
         """Train the parameters given a single batch in input"""
-        
+
         batch = batch.to(DEVICE)
         wavs, wav_lens = batch.sig
         chars, char_lens = batch.char_encoded
@@ -149,7 +148,7 @@ class ASR(sb.core.Brain):
         stage = sb.Stage.TRAIN
 
         predictions = self.compute_forward(batch, sb.Stage.TRAIN)
-        loss = self.compute_objectives(predictions,ids, batch, sb.Stage.TRAIN)
+        loss = self.compute_objectives(predictions, ids, batch, sb.Stage.TRAIN)
         loss.backward()
         if self.check_gradients(loss):
             self.wav2vec_optimizer.step()
@@ -170,19 +169,19 @@ class ASR(sb.core.Brain):
 
         predictions = self.compute_forward(batch, stage=stage)
         with torch.no_grad():
-            loss = self.compute_objectives(predictions,ids, batch, stage=stage)
+            loss = self.compute_objectives(predictions, ids, batch, stage=stage)
         return loss.detach()
 
     def on_stage_start(self, stage, epoch):
         """Gets called when a stage (either training, validation, test) starts."""
-        #self.ctc_metrics = self.hparams.ctc_stats()
+        # self.ctc_metrics = self.hparams.ctc_stats()
         if stage != sb.Stage.TRAIN:
             self.cer_metric = self.hparams.cer_computer()
             self.ctc_metric = self.hparams.ctc_computer()
             self.coer_metric = self.hparams.coer_computer()
             self.cver_metric = self.hparams.cver_computer()
             # self.wer_metric = self.hparams.error_rate_computer()
-    
+
     def on_stage_end(self, stage, stage_loss, epoch):
         """Gets called at the end of a stage."""
         # Compute/store important stats
@@ -200,20 +199,28 @@ class ASR(sb.core.Brain):
 
         # Perform end-of-iteration things, like annealing, logging, etc.
         if stage == sb.Stage.VALID:
-
-            old_lr_adam, new_lr_adam = self.hparams.lr_annealing_adam(stage_stats["loss"])
-            old_lr_wav2vec, new_lr_wav2vec = self.hparams.lr_annealing_wav2vec(stage_stats["loss"])
+            old_lr_adam, new_lr_adam = self.hparams.lr_annealing_adam(
+                stage_stats["loss"]
+            )
+            old_lr_wav2vec, new_lr_wav2vec = self.hparams.lr_annealing_wav2vec(
+                stage_stats["loss"]
+            )
             sb.nnet.schedulers.update_learning_rate(self.adam_optimizer, new_lr_adam)
-            sb.nnet.schedulers.update_learning_rate(self.wav2vec_optimizer, new_lr_wav2vec)
+            sb.nnet.schedulers.update_learning_rate(
+                self.wav2vec_optimizer, new_lr_wav2vec
+            )
 
             self.hparams.train_logger.log_stats(
-                stats_meta={"epoch": epoch, "lr_adam": old_lr_adam, "lr_wav2vec": old_lr_wav2vec},
+                stats_meta={
+                    "epoch": epoch,
+                    "lr_adam": old_lr_adam,
+                    "lr_wav2vec": old_lr_wav2vec,
+                },
                 train_stats={"loss": self.train_loss},
                 valid_stats=stage_stats,
             )
 
             return stage_stats["WER"]
-
 
         elif stage == sb.Stage.TEST:
             self.hparams.train_logger.log_stats(
@@ -235,8 +242,8 @@ class ASR(sb.core.Brain):
         train_set,
         valid_set=None,
         progressbar=None,
-        cid = None,
-        global_rounds = None,
+        cid=None,
+        global_rounds=None,
         train_loader_kwargs={},
         valid_loader_kwargs={},
     ):
@@ -282,15 +289,13 @@ class ASR(sb.core.Brain):
         """
 
         if not (
-            isinstance(train_set, DataLoader)
-            or isinstance(train_set, LoopedLoader)
+            isinstance(train_set, DataLoader) or isinstance(train_set, LoopedLoader)
         ):
             train_set = self.make_dataloader(
                 train_set, stage=sb.Stage.TRAIN, **train_loader_kwargs
             )
         if valid_set is not None and not (
-            isinstance(valid_set, DataLoader)
-            or isinstance(valid_set, LoopedLoader)
+            isinstance(valid_set, DataLoader) or isinstance(valid_set, LoopedLoader)
         ):
             valid_set = self.make_dataloader(
                 valid_set,
@@ -337,9 +342,7 @@ class ASR(sb.core.Brain):
                     loss = self.fit_batch(batch)
                     _, wav_lens = batch.sig
                     batch_count += wav_lens.shape[0]
-                    self.avg_train_loss = self.update_average(
-                        loss, self.avg_train_loss
-                    )
+                    self.avg_train_loss = self.update_average(loss, self.avg_train_loss)
                     t.set_postfix(train_loss=self.avg_train_loss)
 
                     # Debug mode only runs a few batches
@@ -380,9 +383,7 @@ class ASR(sb.core.Brain):
                     ):
                         self.step += 1
                         loss = self.evaluate_batch(batch, stage=sb.Stage.VALID)
-                        avg_valid_loss = self.update_average(
-                            loss, avg_valid_loss
-                        )
+                        avg_valid_loss = self.update_average(loss, avg_valid_loss)
 
                         # Debug mode only runs a few batches
                         if self.debug and self.step == self.debug_batches:
@@ -441,10 +442,7 @@ class ASR(sb.core.Brain):
         if progressbar is None:
             progressbar = not self.noprogressbar
 
-        if not (
-            isinstance(test_set, DataLoader)
-            or isinstance(test_set, LoopedLoader)
-        ):
+        if not (isinstance(test_set, DataLoader) or isinstance(test_set, LoopedLoader)):
             test_loader_kwargs["ckpt_prefix"] = None
             test_set = self.make_dataloader(
                 test_set, sb.Stage.TEST, **test_loader_kwargs
@@ -458,9 +456,7 @@ class ASR(sb.core.Brain):
         avg_test_loss = 0.0
         batch_count = 0
         with torch.no_grad():
-            for batch in tqdm(
-                test_set, dynamic_ncols=True, disable=not progressbar
-            ):
+            for batch in tqdm(test_set, dynamic_ncols=True, disable=not progressbar):
                 self.step += 1
                 _, wav_lens = batch.sig
                 batch_count += wav_lens.shape[0]
@@ -480,4 +476,3 @@ class ASR(sb.core.Brain):
         torch.cuda.empty_cache()
 
         return batch_count, avg_test_loss, cer
-
