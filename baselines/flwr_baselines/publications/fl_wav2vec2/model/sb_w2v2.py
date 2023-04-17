@@ -74,7 +74,8 @@ logger = logging.getLogger(__name__)
 
 class ASR(sb.core.Brain):
     def compute_forward(self, batch, stage):
-        """Forward computations from the waveform batches to the output probabilities."""
+        """Forward computations from the waveform batches to the output
+        probabilities."""
 
         batch = batch.to(DEVICE)
         wavs, wav_lens = batch.sig
@@ -136,7 +137,7 @@ class ASR(sb.core.Brain):
         )
 
     def fit_batch(self, batch):
-        """Train the parameters given a single batch in input"""
+        """Train the parameters given a single batch in input."""
 
         batch = batch.to(DEVICE)
         wavs, wav_lens = batch.sig
@@ -160,7 +161,7 @@ class ASR(sb.core.Brain):
         return loss.detach().cpu()
 
     def evaluate_batch(self, batch, stage):
-        """Computations needed for validation/test batches"""
+        """Computations needed for validation/test batches."""
         # Get data.
         batch = batch.to(DEVICE)
         wavs, wav_lens = batch.sig
@@ -173,7 +174,8 @@ class ASR(sb.core.Brain):
         return loss.detach()
 
     def on_stage_start(self, stage, epoch):
-        """Gets called when a stage (either training, validation, test) starts."""
+        """Gets called when a stage (either training, validation, test)
+        starts."""
         # self.ctc_metrics = self.hparams.ctc_stats()
         if stage != sb.Stage.TRAIN:
             self.cer_metric = self.hparams.cer_computer()
