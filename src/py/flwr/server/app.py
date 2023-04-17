@@ -18,6 +18,7 @@
 import argparse
 import sys
 import threading
+from os.path import isfile
 from dataclasses import dataclass
 from logging import INFO, WARN
 from signal import SIGINT, SIGTERM, signal
@@ -336,7 +337,13 @@ def run_server() -> None:
     )
 
     # Block
-    driver_server.wait_for_termination()
+    # TODO: Check if any is dead.
+    while True:
+        if bckg_threads:
+            for thread in bckg_threads:
+                if not thread.is_alive():
+                    sys.exit(1)
+        driver_server.wait_for_termination(timeout=1)
 
 
 def _register_exit_handlers(
@@ -464,6 +471,9 @@ def _run_fleet_api_rest(
 
     host, port_str = address.split(":")
     port = int(port_str)
+
+    if not isfile(ssl_keyfile) or not isfile(ssl_certfile):
+        raise FileNotFoundError("One of SSL Keyfile or Certfile is not an actual file.")
 
     uvicorn.run(
         # "flwr.server.rest_server.rest_api:app",
