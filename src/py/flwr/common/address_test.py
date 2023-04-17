@@ -29,7 +29,7 @@ def test_ipv4_correct() -> None:
         ("flower.dev:123", ("flower.dev", 123, False)),
         ("sub.flower.dev:123", ("sub.flower.dev", 123, False)),
         ("sub2.sub1.flower.dev:123", ("sub2.sub1.flower.dev", 123, False)),
-        ("sub5.sub4.sub3.sub2.sub1.flower.dev:123", ("sub5.sub4.sub3.sub2.sub1.flower.dev", 123, False)),
+        ("s5.s4.s3.s2.s1.flower.dev:123", ("s5.s4.s3.s2.s1.flower.dev", 123, False)),
         ("localhost:123", ("localhost", 123, False)),
     ]
 
