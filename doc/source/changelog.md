@@ -20,6 +20,10 @@
 
   This new baseline replicates the MNIST+CNN task from the paper [Federated Optimization in Heterogeneous Networks (Li et al., 2018)](https://arxiv.org/abs/1812.06127). It uses the `FedProx` strategy, which aims at making convergence more robust in heterogenous settings.
 
+- **Introduce new Flower Baseline: FedAvg FEMNIST** ([#1655](https://github.com/adap/flower/pull/1655)) 
+
+  This new baseline replicates an experiment evaluating the performance of the FedAvg algorithm on the FEMNIST dataset from the([LEAF paper](https://arxiv.org/abs/1812.01097)).
+
 - **Introduce (experimental) REST API** ([#1594](https://github.com/adap/flower/pull/1594), [#1690](https://github.com/adap/flower/pull/1690), [#1695](https://github.com/adap/flower/pull/1695), [#1712](https://github.com/adap/flower/pull/1712))
 
   A new REST API has been introduced as an alternative to the gRPC-based communication stack. In this initial version, the REST API only supports anonymous clients.
