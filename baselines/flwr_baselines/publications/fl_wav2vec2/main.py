@@ -25,10 +25,10 @@ from client import SpeechBrainClient
 
 parser = ArgumentParser()
 parser.add_argument("--data_path", type=str, default="./data/", help="dataset path")
-parser.add_argument('--output', type=str, default="./results/fl_fusion/", help='output folder')
+parser.add_argument('--output', type=str, default="./docs/results/fl_fusion/", help='output folder')
 parser.add_argument('--pre_train_model_path', type=str, default=None, help='path for pre-trained starting point')
-parser.add_argument('--label_path', type=str, default="./material/label_encoder.txt", help='path for label encoder file if want to ensure the same encode for every client')
-parser.add_argument('--config_path', type=str, default="./configs/w2v2.yaml", help='path to yaml file')
+parser.add_argument('--label_path', type=str, default="./docs/material/label_encoder.txt", help='path for label encoder file if want to ensure the same encode for every client')
+parser.add_argument('--config_path', type=str, default="./docs/configs/w2v2.yaml", help='path to yaml file')
 parser.add_argument('--running_type', type=str, default="cpu", help='running type of FL ')
 parser.add_argument("--min_fit_clients", type=int, default=10, help="minimum fit clients")
 parser.add_argument("--fraction_fit", type=int, default=10, help="ratio of total clients will be trained")

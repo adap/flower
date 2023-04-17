@@ -79,18 +79,18 @@ Due to the size of Wav2Vec 2.0 model and dataset, highly recommend to enavle dev
 
 Simply run this command below (example):
 ```bash
-python fl_w2v.py \
+python main.py \
   --data_path="./data" \
-  --config_path="./configs/w2v2.yaml" \
+  --config_path="./docs/configs/w2v2.yaml" \
   --min_fit_clients=2 \
   --running_type="cpu" \
   --min_available_clients=2 \
-  --output="./output/" \
+  --output="./docs/output/" \
   --fraction_fit=0.01 \
   --rounds=2 \
   --parallel_backend=True \
-  --pre_train_model_path="..../material/model.ckpt" \
-  --label_path="/users/tnguyen/Federated_learning/results/mcadam/1234/save/label_encoder.txt" \
+  --pre_train_model_path="docs/material/model.ckpt" \
+  --label_path="docs/material/label_encoder.txt" \
   --local_epochs=1
 
 where: 
@@ -112,13 +112,13 @@ where:
 This paper has inspect the performance of FL ASR based on Wav2Vec2 system at server level compare to common E2E system CRDNN pre-trained with CommonVoice dataset after 100 epochs. Wav2Vec2 showed its ability to overcome non-IID problem compare to classical E2E approach.
 
 <p align="center">
-      <img src="figure/FB_W2V.png" alt="SSL vs non-SSL performance with FL setting" width="400">
+      <img src="docs/figure/FB_W2V.png" alt="SSL vs non-SSL performance with FL setting" width="400">
 </p>
 
 We also analyze the performance at client level. With the figure below, the dotted line indicate that between these round, this client never involved in the training. With this figure, we can see that the global model contains relevant information for these speakers and does not bring any bias based on the number of participations.
 
 <p align="center">
-      <img src="figure/wer_contributed.png" alt="SSL vs non-SSL performance with FL setting" width="400">
+      <img src="docs/figure/wer_contributed.png" alt="SSL vs non-SSL performance with FL setting" width="400">
 </p>
 
 
@@ -126,7 +126,7 @@ Last but not least, we analyzed the ability to protect the speaker identity of F
 Our experiment used the EER metric for this analysis. The higher EER, the more secure system is. We found that, the more rounds FL passed, the better the security. 
 
 <p align="center">
-      <img src="figure/eer2.png" alt="SSL vs non-SSL performance with FL setting" width="400">
+      <img src="docs/figure/eer2.png" alt="SSL vs non-SSL performance with FL setting" width="400">
 </p>
 
 
