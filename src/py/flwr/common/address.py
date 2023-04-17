@@ -17,11 +17,11 @@
 
 import re
 from ipaddress import ip_address
-from typing import Optional, Tuple
+from typing import Optional, Pattern, Tuple
 
 IPV6: int = 6
 
-DOMAIN_PATTERN: re.Pattern = re.compile(
+DOMAIN_PATTERN: Pattern[str] = re.compile(
     r"^(localhost)|(([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|"
     r"([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})|"
     r"([a-zA-Z0-9][-_.a-zA-Z0-9]{0,61}[a-zA-Z0-9]))\."
@@ -60,7 +60,7 @@ def parse_address(address: str) -> Optional[Tuple[str, int, bool]]:
 
         port = int(raw_port)
 
-        if port > 65535 or port < 0:
+        if port > 65535 or port < 1:
             raise ValueError("Port number is invalid.")
 
         return host, port, version
