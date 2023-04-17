@@ -22,7 +22,7 @@ IPV6: int = 6
 
 
 def parse_address(address: str) -> Optional[Tuple[str, int, bool]]:
-    """Parses a string representing an IP address into a host, port and version.
+    """Parses an IP address into a host, port, and version.
 
     Parameters
     ----------
