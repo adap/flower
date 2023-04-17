@@ -1,3 +1,0 @@
-Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
-3,70896,TheAhnTrio_2010W_125_154.4,29.4,125.0,154.4,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/TheAhnTrio_2010W.sph,sph,,TheAhnTrio_2010W,string,,the,string,,t h e,string,
-14,70907,TheAhnTrio_2010W_425_444.14,19.14,425.0,444.14,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/TheAhnTrio_2010W.sph,sph,,TheAhnTrio_2010W,string,,the,string,,t h e,string,

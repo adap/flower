@@ -1,3 +1,0 @@
-Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
-7,241520,SaraRamirez_2015P_82.99_85.26,2.27,82.99,85.26,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/SaraRamirez_2015P.sph,sph,,SaraRamirez_2015P,string,,and they tell you you 're a queen,string,,a n d _ t h e y _ t e l l _ y o u _ y o u _ ' r e _ a _ q u e e n,string,
-10,241523,SaraRamirez_2015P_188.12_189.99,1.87,188.12,189.99,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/SaraRamirez_2015P.sph,sph,,SaraRamirez_2015P,string,, maybe i 'm just cynical,string,,_ m a y b e _ i _ ' m _ j u s t _ c y n i c a l,string,

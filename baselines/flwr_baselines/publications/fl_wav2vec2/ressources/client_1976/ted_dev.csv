@@ -1,3 +1,0 @@
-Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
-6,261146,KakiKing_2008_366.66_367.82,1.16,366.66,367.82,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/KakiKing_2008.sph,sph,,KakiKing_2008,string,, and,string,,_ a n d,string,
-1,261141,KakiKing_2008_29.27_34.8,5.53,29.27,34.8,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/KakiKing_2008.sph,sph,,KakiKing_2008,string,, if time could reach forwards and backwards infinitely doesn 't that mean that,string,,_ i f _ t i m e _ c o u l d _ r e a c h _ f o r w a r d s _ a n d _ b a c k w a r d s _ i n f i n i t e l y _ d o e s n _ ' t _ t h a t _ m e a n _ t h a t,string,

@@ -1,5 +1,0 @@
-Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
-35,20466,JiHaePark_2013_550_579.94,29.94,550.0,579.94,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/JiHaePark_2013.sph,sph,,JiHaePark_2013,string,,the,string,,t h e,string,
-0,20431,JiHaePark_2013_25_30.22,5.22,25.0,30.22,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/JiHaePark_2013.sph,sph,,JiHaePark_2013,string,,the,string,,t h e,string,
-16,20447,JiHaePark_2013_305.29_306.83,1.54,305.29,306.83,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/JiHaePark_2013.sph,sph,,JiHaePark_2013,string,,restored,string,,r e s t o r e d,string,
-12,20443,JiHaePark_2013_207.03_212.92,5.89,207.03,212.92,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/JiHaePark_2013.sph,sph,,JiHaePark_2013,string,,when i was just about to give everything up after years of suffering ,string,,w h e n _ i _ w a s _ j u s t _ a b o u t _ t o _ g i v e _ e v e r y t h i n g _ u p _ a f t e r _ y e a r s _ o f _ s u f f e r i n g _,string,

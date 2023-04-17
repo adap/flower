@@ -1,2 +1,0 @@
-Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
-3,223468,EddiReader_KiteflyersHill_2004_64.17_65.22,1.05,64.17,65.22,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/EddiReader_KiteflyersHill_2004.sph,sph,,EddiReader_KiteflyersHill_2004,string,, it 's,string,,_ i t _ ' s,string,

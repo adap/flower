@@ -1,3 +1,0 @@
-Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
-10,244088,XDRTB_2008_68.7_71.29,2.59,68.7,71.29,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/XDRTB_2008.sph,sph,,XDRTB_2008,string,,what happens at ground level,string,,w h a t _ h a p p e n s _ a t _ g r o u n d _ l e v e l,string,
-7,244085,XDRTB_2008_48.74_50.2,1.46,48.74,50.2,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/XDRTB_2008.sph,sph,,XDRTB_2008,string,,their pictures became,string,,t h e i r _ p i c t u r e s _ b e c a m e,string,

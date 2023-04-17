@@ -1,6 +1,0 @@
-Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
-2,212167,MayaBeiser_2011_100_129.94,29.94,100.0,129.94,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/MayaBeiser_2011.sph,sph,,MayaBeiser_2011,string,,the,string,,t h e,string,
-33,212198,MayaBeiser_2011_675_685.35,10.35,675.0,685.35,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/MayaBeiser_2011.sph,sph,,MayaBeiser_2011,string,,the,string,,t h e,string,
-27,212192,MayaBeiser_2011_548.59_554.04,5.45,548.59,554.04,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/MayaBeiser_2011.sph,sph,,MayaBeiser_2011,string,,my cello and my voice are layered to create this large sonic canvas,string,,m y _ c e l l o _ a n d _ m y _ v o i c e _ a r e _ l a y e r e d _ t o _ c r e a t e _ t h i s _ l a r g e _ s o n i c _ c a n v a s,string,
-20,212185,MayaBeiser_2011_505.29_508.09,2.8,505.29,508.09,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/MayaBeiser_2011.sph,sph,,MayaBeiser_2011,string,, resources there 's no reason,string,,_ r e s o u r c e s _ t h e r e _ ' s _ n o _ r e a s o n,string,
-40,212205,MayaBeiser_2011_850_877.21,27.21,850.0,877.21,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/MayaBeiser_2011.sph,sph,,MayaBeiser_2011,string,,the,string,,t h e,string,

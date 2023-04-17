@@ -60,9 +60,15 @@ def csv_path_audio():
     df_concat_dev = None
     df_concat_test = None
     for i in range(1983):
-        df_train = pd.read_csv(f"./ressources/client_{i}/ted_train.csv")
-        df_dev = pd.read_csv(f"./ressources/client_{i}/ted_dev.csv")
-        df_test = pd.read_csv(f"./ressources/client_{i}/ted_test.csv")
+        df_train = pd.read_csv(f"./data/client_{i}/ted_train.csv")
+        df_dev = pd.read_csv(f"./data/client_{i}/ted_dev.csv")
+        df_test = pd.read_csv(f"./data/client_{i}/ted_test.csv")
+        df_train["wav"] = df_train["wav"].str.replace("path", "./data/audio/TEDLIUM_release-3/legacy/train/sph/")
+        df_dev["wav"] = df_dev["wav"].str.replace("path", "./data/audio/TEDLIUM_release-3/legacy/train/sph/")
+        df_test["wav"] = df_test["wav"].str.replace("path", "./data/audio/TEDLIUM_release-3/legacy/train/sph/")
+        df_train.to_csv(f"./data/client_{i}/ted_train.csv",index = False)
+        df_dev.to_csv(f"./data/client_{i}/ted_dev.csv", index = False)
+        df_test.to_csv(f"./data/client_{i}/ted_test.csv", index = False)
         if df_concat_train is None:
             df_concat_train = df_train
         else:
@@ -76,15 +82,15 @@ def csv_path_audio():
         else:
             df_concat_test = pd.concat([df_concat_test, df_test], ignore_index=True)
 
-    df_concat_train.to_csv(f"./ressources/ted_train.csv",index = False)
-    df_concat_dev.to_csv(f"./ressources/ted_dev.csv", index = False)
-    df_concat_test.to_csv(f"./ressources/ted_test.csv", index = False)
+    df_concat_train.to_csv(f"./data/ted_train.csv",index = False)
+    df_concat_dev.to_csv(f"./data/ted_dev.csv", index = False)
+    df_concat_test.to_csv(f"./data/ted_test.csv", index = False)
 
 
 # CHANGE THE PATH CORESPOND TO YOUR PATH
 url = "https://projets-lium.univ-lemans.fr/wp-content/uploads/corpus/TED-LIUM/TEDLIUM_release-3.tgz"
-filename = "ressources/TEDLIUM_release-3.tgz"
-extract_path = "ressources/audio" # replace with the path to the directory where you want to extract the files
+filename = "data/TEDLIUM_release-3.tgz"
+extract_path = "data/audio" # replace with the path to the directory where you want to extract the files
 
 
 if not os.path.exists(extract_path):
@@ -95,5 +101,4 @@ if not os.path.exists(extract_path):
         delete_file(filename)
 
 csv_path_audio()
-
 

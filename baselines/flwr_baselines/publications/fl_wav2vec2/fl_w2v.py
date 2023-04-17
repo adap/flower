@@ -24,7 +24,7 @@ import torch
 from client import SpeechBrainClient
 
 parser = ArgumentParser()
-parser.add_argument("--data_path", type=str, default="./ressources/", help="dataset path")
+parser.add_argument("--data_path", type=str, default="./data/", help="dataset path")
 parser.add_argument('--output', type=str, default="./results/fl_fusion/", help='output folder')
 parser.add_argument('--pre_train_model_path', type=str, default=None, help='path for pre-trained starting point')
 parser.add_argument('--label_path', type=str, default="./material/label_encoder.txt", help='path for label encoder file if want to ensure the same encode for every client')

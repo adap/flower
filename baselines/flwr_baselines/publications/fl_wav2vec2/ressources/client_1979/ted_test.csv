@@ -1,2 +1,0 @@
-Unnamed: 0,index,ID,duration,start_seg,end_seg,wav,wav_format,wav_opts,spk_id,spk_id_format,spk_id_opts,wrd,wrd_format,wrd_opts,char,char_format,char_opts
-8,241521,SaraRamirez_2015P_133.44_137.45,4.01,133.44,137.45,./ressources/audio/TEDLIUM_release-3/legacy/train/sph/SaraRamirez_2015P.sph,sph,,SaraRamirez_2015P,string,,but lose your edge or lose your cool they will drop,string,,b u t _ l o s e _ y o u r _ e d g e _ o r _ l o s e _ y o u r _ c o o l _ t h e y _ w i l l _ d r o p,string,

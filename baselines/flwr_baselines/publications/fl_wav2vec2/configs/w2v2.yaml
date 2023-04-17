@@ -16,13 +16,13 @@ train_log: !ref <output_folder>/train_log.txt
 
 wav2vec2_hub: "facebook/wav2vec2-large-960h-lv60-self"
 # Data files
-data_folder:  ressources/audio/TEDLIUM_release-3/data
+data_folder:  data/audio/TEDLIUM_release-3/data
 
 accented_letters: False
 language: en # use 'it' for Italian, 'rw' for Kinyarwanda, 'en' for english
-train_csv: ressources/ted_train.csv
-valid_csv: ressources/ted_dev.csv
-test_csv: ressources/ted_test.csv
+train_csv: data/ted_train.csv
+valid_csv: data/ted_dev.csv
+test_csv: data/ted_test.csv
 skip_prep: False # Skip data preparation
 device: cpu
 # Training parameters
