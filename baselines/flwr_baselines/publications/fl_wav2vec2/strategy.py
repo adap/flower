@@ -1,9 +1,15 @@
 import gc
-from typing import Optional
+from typing import Dict, List, Optional, Tuple, Union
 
 import flwr as fl
 import torch
-from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
+from flwr.common import (
+    FitRes,
+    Parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
+from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate
 
 
@@ -14,14 +20,15 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
 
     def aggregate_fit(
         self,
-        results,
-        failures,
-    ) -> Optional[fl.common.NDArrays]:
+        server_round: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    ) -> Tuple[Optional[Parameters], Dict[str, Union[bool, bytes, float, int, str]]]:
         if not results:
-            return None
+            return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
-            return None
+            return None, {}
         # Convert results
         key_name = "train_loss" if self.weight_strategy == "loss" else "wer"
         weights = None
@@ -30,10 +37,9 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
         if self.weight_strategy == "num":
             weights_results = [
                 (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-                for client, fit_res in results
+                for _, fit_res in results
             ]
             weights = aggregate(weights_results)
-
         else:
             weights_results = [
                 (parameters_to_ndarrays(fit_res.parameters), fit_res.metrics[key_name])
