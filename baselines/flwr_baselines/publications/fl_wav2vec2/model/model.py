@@ -6,7 +6,7 @@ import torch
 from flwr.common import ndarrays_to_parameters
 from hyperpyyaml import load_hyperpyyaml
 
-from flwr_baselines.publications.fl_wav2vec2.dataset.data_loader import dataio_prepare
+from flwr_baselines.publications.fl_wav2vec2.preprocessing.data_loader import dataio_prepare
 from flwr_baselines.publications.fl_wav2vec2.model.sb_w2v2 import ASR, get_weights
 
 
