@@ -225,7 +225,7 @@ def start_numpy_client(
     root_certificates : bytes (default: None)
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
-        established to a SSL-enabled Flower server.
+        established to an SSL-enabled Flower server.
     rest : bool (default: False)
         Defines whether or not the client is interacting with the server using the
         experimental REST API. This feature is experimental, it might be change
