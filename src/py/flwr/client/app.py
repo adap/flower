@@ -157,7 +157,7 @@ def start_client(
             ) from missing_dep
         if server_address[:4] != "http":
             sys.exit(
-                "When using the REST API please provide `https://` or "
+                "When using the REST API, please provide `https://` or "
                 "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
             )
         connection = http_request_response
