@@ -48,11 +48,17 @@ The main motivation behind this FED is this Slack [discussion](https://friendly-
 
 Provide a hook which could receive the latest model, centralized and federated evaluation results and then could return a boolean to indicate to stop early. The strategy/hook author would then be responsible for handling and storing the best recent model.
 
-<!-- ## Drawbacks
+To implement this, we would need to add a `Callable` argument to the `fit` function of the `Server` class in `src/py/flwr/server/server.py`. 
 
-[TODO]
+This `Callable` would take as inputs `self.parameters` (the latest model), `res_cen` (the centralized evaluation results), and `res_fed` (the federated evaluation results). It would then return a `bool` that would indicate whether or not the training should be stopped.
 
-## Alternatives Considered
+This `Callable` argument would need to be passed to the `Server` object, via a `start_server` function argument, or as part of the `Strategy`.
+
+## Drawbacks
+
+Passing this as part of the `Strategy` means having to rewrite all the strategies to add this new optional attribute.
+
+<!-- ## Alternatives Considered
 
 ### [Alternative 1]
 
