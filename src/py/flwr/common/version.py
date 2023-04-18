@@ -1,6 +1,4 @@
 """Flower package version helper."""
-
-
 import sys
 from typing import Tuple
 
