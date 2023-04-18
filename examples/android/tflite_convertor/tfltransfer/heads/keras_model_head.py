@@ -13,6 +13,7 @@
 # limitations under the License.
 """Head model configuration for Keras models."""
 
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function

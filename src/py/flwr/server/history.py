@@ -14,6 +14,7 @@
 # ==============================================================================
 """Training history."""
 
+
 from functools import reduce
 from typing import Dict, List, Tuple
 
