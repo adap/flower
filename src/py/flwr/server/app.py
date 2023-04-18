@@ -510,10 +510,12 @@ def _run_fleet_api_rest(
     host, port_str = address.split(":")
     port = int(port_str)
 
-    missing_files = [file for file in [ssl_keyfile, ssl_certfile] if not isfile(file)]
-
-    if any(missing_files):
-        raise FileNotFoundError(f"The SSL files could not be found: {missing_files}")
+    ssl_files = [file for file in [ssl_keyfile, ssl_certfile] if file is not None]
+    missing_ssl_files = [file for file in ssl_files if not isfile(file)]
+    if any(missing_ssl_files):
+        raise FileNotFoundError(
+            f"The SSL files could not be found: {missing_ssl_files}"
+        )
 
     uvicorn.run(
         # "flwr.server.rest_server.rest_api:app",
