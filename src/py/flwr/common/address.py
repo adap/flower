@@ -22,14 +22,14 @@ from typing import Optional, Pattern, Tuple
 IPV6: int = 6
 
 DOMAIN_PATTERN: Pattern[str] = re.compile(
-    r"^(localhost)|(([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|"
+    r"^(https?:\/\/)?(localhost)|(([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|"
     r"([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})|"
     r"([a-zA-Z0-9][-_.a-zA-Z0-9]{0,61}[a-zA-Z0-9]))\."
     r"([a-zA-Z]{2,13}|[a-zA-Z0-9-]{2,30}.[a-zA-Z]{2,3})$"
 )
 
 
-def parse_address(address: str) -> Optional[Tuple[str, int, bool]]:
+def parse_address(address: str) -> Optional[Tuple[str, int, Optional[bool]]]:
     """Parses an IP address into a host, port, and version.
 
     Parameters
@@ -52,8 +52,9 @@ def parse_address(address: str) -> Optional[Tuple[str, int, bool]]:
         raw_host, _, raw_port = address.rpartition(":")
 
         if DOMAIN_PATTERN.match(raw_host):
+            print(raw_host)
             host = raw_host
-            version = False
+            version = None
         else:
             host = raw_host.translate({ord(i): None for i in "[]"})
             version = ip_address(host).version == IPV6
