@@ -510,18 +510,7 @@ def _run_fleet_api_rest(
     host, port_str = address.split(":")
     port = int(port_str)
 
-    validation_exceptions = []
-
-    if ssl_keyfile is not None and not isfile(ssl_keyfile):
-        msg = "Parameter `ssl_keyfile` is not a file. The path might be wrong."
-        log(ERROR, msg)
-        validation_exceptions.append(ValueError(msg))
-
-    if ssl_certfile is not None and not isfile(ssl_certfile):
-        msg = "Parameter `ssl_certfile` is not a file. The path might be wrong."
-        log(ERROR, msg)
-        validation_exceptions.append(ValueError(msg))
-
+    validation_exceptions = _validate_ssl_files(ssl_certfile, ssl_keyfile)
     if any(validation_exceptions):
         # Starting with 3.11 we can use ExceptionGroup but for now
         # this seems to be the reasonable approach.
@@ -538,6 +527,31 @@ def _run_fleet_api_rest(
         ssl_keyfile=ssl_keyfile,
         ssl_certfile=ssl_certfile,
     )
+
+
+def _validate_ssl_files(
+    ssl_keyfile: Optional[str], ssl_certfile: Optional[str]
+) -> List[Exception]:
+    validation_exceptions = []
+
+    if ssl_keyfile is not None and not isfile(ssl_keyfile):
+        msg = "Parameter `ssl_keyfile` is not a file. The path might be wrong."
+        log(ERROR, msg)
+        validation_exceptions.append(ValueError(msg))
+
+    if ssl_certfile is not None and not isfile(ssl_certfile):
+        msg = "Parameter `ssl_certfile` is not a file. The path might be wrong."
+        log(ERROR, msg)
+        validation_exceptions.append(ValueError(msg))
+
+    if not (bool(ssl_keyfile) == bool(ssl_certfile)):
+        msg = (
+            "When setting one of `ssl_keyfile` and `ssl_certfile` both have to be used."
+        )
+        log(ERROR, msg)
+        validation_exceptions.append(ValueError(msg))
+
+    return validation_exceptions
 
 
 def _parse_args_driver() -> argparse.ArgumentParser:
