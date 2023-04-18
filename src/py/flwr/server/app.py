@@ -18,9 +18,9 @@
 import argparse
 import sys
 import threading
-from os.path import isfile
 from dataclasses import dataclass
 from logging import INFO, WARN
+from os.path import isfile
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
 from typing import List, Optional, Tuple
