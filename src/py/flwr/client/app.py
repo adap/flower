@@ -91,7 +91,7 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     rest: bool = False,
 ) -> None:
-    """Start a Flower Client which connects to a Flower server.
+    """Start a Flower client node which connects to a Flower server.
 
     Parameters
     ----------
@@ -112,7 +112,7 @@ def start_client(
     root_certificates : Optional[Union[bytes, str]] (default: None)
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
-        established to a SSL-enabled Flower server.
+        established to an SSL-enabled Flower server.
     rest : bool (default: False)
         Defines whether or not the client is interacting with the server using the
         experimental REST API. This feature is experimental, it might change
@@ -120,14 +120,14 @@ def start_client(
 
     Examples
     --------
-    Starting a gRPC client with insecure server connection:
+    Starting a gRPC client with an insecure server connection:
 
     >>> start_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting a SSL-enabled gRPC client:
+    Starting an SSL-enabled gRPC client:
 
     >>> from pathlib import Path
     >>> start_client(
@@ -225,7 +225,7 @@ def start_numpy_client(
     root_certificates : bytes (default: None)
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
-        established to a SSL-enabled Flower server.
+        established to an SSL-enabled Flower server.
     rest : bool (default: False)
         Defines whether or not the client is interacting with the server using the
         experimental REST API. This feature is experimental, it might be change

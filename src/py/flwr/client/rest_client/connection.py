@@ -69,7 +69,7 @@ def http_request_response(
         Ignored, only present to preserve API-compatibility.
     root_certificates : Optional[Union[bytes, str]] (default: None)
         Path of the root certificate. If provided, a secure
-        connection using the certificates will be established to a SSL-enabled
+        connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
 
     Returns
