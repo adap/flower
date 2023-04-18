@@ -120,7 +120,7 @@ def start_client(
 
     Examples
     --------
-    Starting a gRPC client with insecure server connection:
+    Starting a gRPC client with an insecure server connection:
 
     >>> start_client(
     >>>     server_address=localhost:8080,
