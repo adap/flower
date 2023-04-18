@@ -48,6 +48,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
+    "sphinxarg.ext",
     "myst_parser",
     "sphinx_copybutton",
     "sphinx_design",
@@ -79,6 +80,7 @@ redirects = {
     "saving-progress": "save-progress.html",
     "writing-documentation": "write-documentation.html",
     "quickstart_scikitlearn": "quickstart-scikitlearn.html",
+    "quickstart_xgboost": "quickstart-xgboost.html",
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",
