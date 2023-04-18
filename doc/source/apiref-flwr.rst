@@ -187,3 +187,4 @@ common
 
 .. automodule:: flwr.common
   :members:
+  :exclude-members: event
