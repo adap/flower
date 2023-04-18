@@ -91,7 +91,7 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     rest: bool = False,
 ) -> None:
-    """Start a Flower Client which connects to a Flower server.
+    """Start a Flower client node which connects to a Flower server.
 
     Parameters
     ----------
