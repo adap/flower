@@ -19,7 +19,7 @@ import argparse
 import sys
 import threading
 from dataclasses import dataclass
-from logging import INFO, WARN
+from logging import ERROR, INFO, WARN
 from os.path import isfile
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
@@ -510,12 +510,22 @@ def _run_fleet_api_rest(
     host, port_str = address.split(":")
     port = int(port_str)
 
-    ssl_files = [file for file in [ssl_keyfile, ssl_certfile] if file is not None]
-    missing_ssl_files = [file for file in ssl_files if not isfile(file)]
-    if any(missing_ssl_files):
-        raise FileNotFoundError(
-            f"These SSL files could not be found: {missing_ssl_files}"
-        )
+    validation_exceptions = []
+
+    if ssl_keyfile is not None and not isfile(ssl_keyfile):
+        msg = "Parameter `ssl_keyfile` is not a file. The path might be wrong."
+        log(ERROR, msg)
+        validation_exceptions.append(ValueError(msg))
+
+    if ssl_certfile is not None and not isfile(ssl_certfile):
+        msg = "Parameter `ssl_certfile` is not a file. The path might be wrong."
+        log(ERROR, msg)
+        validation_exceptions.append(ValueError(msg))
+
+    if any(validation_exceptions):
+        # Starting with 3.11 we can use ExceptionGroup but for now
+        # this seems to be the reasonable approach.
+        raise ValueError(validation_exceptions)
 
     uvicorn.run(
         # "flwr.server.rest_server.rest_api:app",
