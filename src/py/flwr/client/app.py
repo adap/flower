@@ -127,7 +127,7 @@ def start_client(
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting a SSL-enabled gRPC client:
+    Starting an SSL-enabled gRPC client:
 
     >>> from pathlib import Path
     >>> start_client(
