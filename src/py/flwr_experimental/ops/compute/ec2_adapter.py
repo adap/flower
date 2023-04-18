@@ -14,6 +14,7 @@
 # ==============================================================================
 """Provides an Adapter implementation for AWS EC2."""
 
+
 import time
 from logging import INFO
 from typing import Dict, List, Optional, Tuple, Union
