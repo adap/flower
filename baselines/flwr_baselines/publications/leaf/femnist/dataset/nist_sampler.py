@@ -1,4 +1,6 @@
 """Module for sampling the reference data of FEMNIST."""
+
+
 import math
 from logging import WARN
 from typing import Optional

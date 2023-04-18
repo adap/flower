@@ -1,4 +1,6 @@
 """Module to preprocess the NIST Special Database 19 into FeMNIST/FEMNIST."""
+
+
 import pathlib
 from logging import DEBUG, WARN
 from typing import Dict, Union
