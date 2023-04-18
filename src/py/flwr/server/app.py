@@ -535,7 +535,7 @@ def _validate_ssl_files(
     validation_exceptions = []
 
     if ssl_keyfile is not None and not isfile(ssl_keyfile):
-        msg = "Parameter `ssl_keyfile` is not a file. The path might be wrong."
+        msg = "Path argument `--ssl-keyfile` does not point to a file."
         log(ERROR, msg)
         validation_exceptions.append(ValueError(msg))
 
