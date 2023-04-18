@@ -546,7 +546,7 @@ def _validate_ssl_files(
 
     if not (bool(ssl_keyfile) == bool(ssl_certfile)):
         msg = (
-            "When setting one of `ssl_keyfile` and `ssl_certfile` both have to be used."
+            "When setting one of `--ssl-keyfile` and `--ssl-certfile`, both have to be used."
         )
         log(ERROR, msg)
         validation_exceptions.append(ValueError(msg))
