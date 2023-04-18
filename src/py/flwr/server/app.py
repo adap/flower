@@ -540,7 +540,7 @@ def _validate_ssl_files(
         validation_exceptions.append(ValueError(msg))
 
     if ssl_certfile is not None and not isfile(ssl_certfile):
-        msg = "Parameter `ssl_certfile` is not a file. The path might be wrong."
+        msg = "Path argument `--ssl-certfile` does not point to a file."
         log(ERROR, msg)
         validation_exceptions.append(ValueError(msg))
 
