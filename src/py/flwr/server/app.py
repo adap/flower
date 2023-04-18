@@ -531,7 +531,7 @@ def _run_fleet_api_rest(
 
 def _validate_ssl_files(
     ssl_keyfile: Optional[str], ssl_certfile: Optional[str]
-) -> List[Exception]:
+) -> List[ValueError]:
     validation_exceptions = []
 
     if ssl_keyfile is not None and not isfile(ssl_keyfile):
