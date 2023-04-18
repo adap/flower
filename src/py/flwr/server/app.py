@@ -381,12 +381,7 @@ def run_server() -> None:
     )
 
     # Block
-    while True:
-        if bckg_threads:
-            for thread in bckg_threads:
-                if not thread.is_alive():
-                    sys.exit(1)
-        driver_server.wait_for_termination(timeout=1)
+    driver_server.wait_for_termination()
 
 
 def _register_exit_handlers(
