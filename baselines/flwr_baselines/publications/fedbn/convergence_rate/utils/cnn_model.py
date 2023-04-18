@@ -1,5 +1,6 @@
 """Define the model architecture."""
 
+
 from torch import nn
 
 
