@@ -1,4 +1,6 @@
 """Implementation of the model used for the FEMNIST experiments."""
+
+
 from logging import INFO
 from typing import Optional, Tuple
 
