@@ -260,7 +260,7 @@ def run_fleet_api() -> None:
     if args.fleet_api_type == "rest":
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state_factory, args.workers),
+            args=(args.rest_fleet_api_address, state_factory, args.args.rest_fleet_api_workers),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
@@ -310,7 +310,7 @@ def run_server() -> None:
     if args.fleet_api_type == "rest":
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state_factory),
+            args=(args.rest_fleet_api_address, state_factory, args.rest_fleet_api_workers),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
@@ -560,6 +560,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     rest_group.add_argument(
         "--rest-fleet-api-workers",
         help=f"Number of workers for Fleet API REST server . Default:'{1}'",
+        type=int,
         default=1,
     )
 
