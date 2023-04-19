@@ -14,6 +14,7 @@
 # ==============================================================================
 """Provide method to get the ip address of a network interface."""
 
+
 from subprocess import check_output
 
 
