@@ -16,12 +16,13 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
       - name: Build docs
         uses: actions/setup-python@v4
         with:
           python-version: 3.7.15
-          cache: "pip"
-          cache-dependency-path: "**/pyproject.toml"
+          cache: "poetry"
       - name: Install build tools
         run: |
           sudo apt install pandoc
@@ -44,12 +45,13 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
       - name: Deploy docs
         uses: actions/setup-python@v4
         with:
           python-version: 3.7.15
-          cache: "pip"
-          cache-dependency-path: "**/pyproject.toml"
+          cache: "poetry"
       - name: Install build tools
         run: |
           sudo apt install pandoc
