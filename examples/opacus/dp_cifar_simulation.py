@@ -51,8 +51,8 @@ def client_fn(cid: str) -> fl.client.Client:
 
 
 # Define an evaluation function for centralized evaluation (using whole CIFAR10 testset).
-def get_evaluate_fn() -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
-    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
+def get_evaluate_fn() -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
+    def evaluate(weights: fl.common.NDArrays) -> Optional[Tuple[float, float]]:
         transform = transforms.Compose(
             [
                 transforms.ToTensor(),

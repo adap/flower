@@ -103,10 +103,10 @@ def fit_config(server_round: int) -> Dict[str, fl.common.Scalar]:
 
 def get_evaluate_fn(
     testset: torchvision.datasets.CIFAR10,
-) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
+) -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
-    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(weights: fl.common.NDArrays) -> Optional[Tuple[float, float]]:
         """Use the entire CIFAR-10 test set for evaluation."""
         model = cifar.load_model()
         model.set_weights(weights)
