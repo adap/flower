@@ -36,7 +36,7 @@ def parse_address(address: str) -> Optional[Tuple[str, int, Optional[bool]]]:
     Optional[Tuple[str, int]]
         If the port provided is incorrect,
         the function will return None, otherwise it will return the host,
-        as a string, and the port number, as an int.
+        (str), port number (int), and version (bool).
     """
     try:
         raw_host, _, raw_port = address.rpartition(":")
