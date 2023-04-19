@@ -152,8 +152,8 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     parsed_address = parse_address(server_address)
     if not parsed_address:
         sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+    host, port = parsed_address
+    address = f"{host}:{port}"
 
     # Start gRPC server
     grpc_server = start_grpc_server(
@@ -235,8 +235,8 @@ def run_driver_api() -> None:
     parsed_address = parse_address(args.driver_api_address)
     if not parsed_address:
         sys.exit(f"Driver IP address ({args.driver_api_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+    host, port = parsed_address
+    address = f"{host}:{port}"
 
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
@@ -277,7 +277,7 @@ def run_fleet_api() -> None:
         parsed_address = parse_address(address_arg)
         if not parsed_address:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, _ = parsed_address
+        host, port = parsed_address
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
             args=(host, port, state_factory),
@@ -289,8 +289,8 @@ def run_fleet_api() -> None:
         parsed_address = parse_address(address_arg)
         if not parsed_address:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, is_v6 = parsed_address
-        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+        host, port = parsed_address
+        address = f"{host}:{port}"
         fleet_server = _run_fleet_api_grpc_bidi(
             address=address,
             state_factory=state_factory,
@@ -324,8 +324,8 @@ def run_server() -> None:
     parsed_address = parse_address(args.driver_api_address)
     if not parsed_address:
         sys.exit(f"Driver IP address ({args.driver_api_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+    host, port = parsed_address
+    address = f"{host}:{port}"
 
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
@@ -345,7 +345,7 @@ def run_server() -> None:
         parsed_address = parse_address(address_arg)
         if not parsed_address:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, _ = parsed_address
+        host, port = parsed_address
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
             args=(host, port, state_factory),
@@ -357,8 +357,8 @@ def run_server() -> None:
         parsed_address = parse_address(address_arg)
         if not parsed_address:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, is_v6 = parsed_address
-        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+        host, port = parsed_address
+        address = f"{host}:{port}"
         fleet_server = _run_fleet_api_grpc_bidi(
             address=address,
             state_factory=state_factory,
