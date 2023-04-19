@@ -33,7 +33,7 @@ def parse_address(address: str) -> Optional[Tuple[str, int, Optional[bool]]]:
 
     Returns
     -------
-    Optional[Tuple[str, int]]
+    Optional[Tuple[str, int, Optional[bool]]]
         If the port provided is incorrect,
         the function will return None, otherwise it will return the host,
         (str), port number (int), and version (bool).
@@ -53,7 +53,7 @@ def parse_address(address: str) -> Optional[Tuple[str, int, Optional[bool]]]:
             host = raw_host
             version = None
 
-        return raw_host, port, version
+        return host, port, version
 
     except ValueError:
         return None
