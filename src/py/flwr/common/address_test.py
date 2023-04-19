@@ -23,9 +23,9 @@ def test_ipv4_correct() -> None:
 
     # Prepare
     addresses = [
-        ("127.0.0.1:8080", ("127.0.0.1", 8080)),
-        ("0.0.0.0:12", ("0.0.0.0", 12)),
-        ("0.0.0.0:65535", ("0.0.0.0", 65535)),
+        ("127.0.0.1:8080", ("127.0.0.1", 8080, False)),
+        ("0.0.0.0:12", ("0.0.0.0", 12, False)),
+        ("0.0.0.0:65535", ("0.0.0.0", 65535, False)),
     ]
 
     for address, expected in addresses:
@@ -62,23 +62,23 @@ def test_ipv6_correct() -> None:
 
     # Prepare
     addresses = [
-        ("[::1]:8080", ("[::1]", 8080)),
-        ("[::]:12", ("[::]", 12)),
+        ("[::1]:8080", ("[::1]", 8080, True)),
+        ("[::]:12", ("[::]", 12, True)),
         (
             "2001:db8:3333:4444:5555:6666:7777:8888:12",
-            ("2001:db8:3333:4444:5555:6666:7777:8888", 12),
+            ("2001:db8:3333:4444:5555:6666:7777:8888", 12, True),
         ),
         (
             "2001:db8:3333:4444:5555:6666:7777:8888:65535",
-            ("2001:db8:3333:4444:5555:6666:7777:8888", 65535),
+            ("2001:db8:3333:4444:5555:6666:7777:8888", 65535, True),
         ),
         (
             "[0000:0000:0000:0000:0000:0000:0000:0001]:443",
-            ("[0000:0000:0000:0000:0000:0000:0000:0001]", 443),
+            ("[0000:0000:0000:0000:0000:0000:0000:0001]", 443, True),
         ),
-        ("[::]:123", ("[::]", 123)),
-        ("[0:0:0:0:0:0:0:1]:80", ("[0:0:0:0:0:0:0:1]", 80)),
-        ("[::1]:80", ("[::1]", 80)),
+        ("[::]:123", ("[::]", 123, True)),
+        ("[0:0:0:0:0:0:0:1]:80", ("[0:0:0:0:0:0:0:1]", 80, True)),
+        ("[::1]:80", ("[::1]", 80, True)),
     ]
 
     for address, expected in addresses:
@@ -114,14 +114,13 @@ def test_domain_correct() -> None:
 
     # Prepare
     addresses = [
-        ("flower.dev:123", ("flower.dev", 123)),
-        ("flower.dev:123", ("flower.dev", 123)),
-        ("sub.flower.dev:123", ("sub.flower.dev", 123)),
-        ("sub2.sub1.flower.dev:123", ("sub2.sub1.flower.dev", 123)),
-        ("s5.s4.s3.s2.s1.flower.dev:123", ("s5.s4.s3.s2.s1.flower.dev", 123)),
-        ("localhost:123", ("localhost", 123)),
-        ("https://localhost:123", ("https://localhost", 123)),
-        ("http://localhost:123", ("http://localhost", 123)),
+        ("flower.dev:123", ("flower.dev", 123, None)),
+        ("sub.flower.dev:123", ("sub.flower.dev", 123, None)),
+        ("sub2.sub1.flower.dev:123", ("sub2.sub1.flower.dev", 123, None)),
+        ("s5.s4.s3.s2.s1.flower.dev:123", ("s5.s4.s3.s2.s1.flower.dev", 123, None)),
+        ("localhost:123", ("localhost", 123, None)),
+        ("https://localhost:123", ("https://localhost", 123, None)),
+        ("http://localhost:123", ("http://localhost", 123, None)),
     ]
 
     for address, expected in addresses:

@@ -14,11 +14,13 @@
 # ==============================================================================
 """Flower IP address utils."""
 
-
+from ipaddress import ip_address
 from typing import Optional, Tuple
 
+IPV6: int = 6
 
-def parse_address(address: str) -> Optional[Tuple[str, int]]:
+
+def parse_address(address: str) -> Optional[Tuple[str, int, Optional[bool]]]:
     """Parses an IP address into a host and a port.
 
     Parameters
@@ -44,7 +46,14 @@ def parse_address(address: str) -> Optional[Tuple[str, int]]:
         if port > 65535 or port < 1:
             raise ValueError("Port number is invalid.")
 
-        return raw_host, port
+        try:
+            host = raw_host.translate({ord(i): None for i in "[]"})
+            version = ip_address(host).version == IPV6
+        except ValueError:
+            host = raw_host
+            version = None
+
+        return raw_host, port, version
 
     except ValueError:
         return None
