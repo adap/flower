@@ -17,6 +17,7 @@
 
 from typing import Optional, Tuple
 
+
 def parse_address(address: str) -> Optional[Tuple[str, int]]:
     """Parses an IP address into a host and a port.
 
