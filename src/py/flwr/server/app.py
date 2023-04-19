@@ -515,7 +515,9 @@ def _run_fleet_api_rest(
     host, port_str = address.split(":")
     port = int(port_str)
 
-    validation_exceptions = _validate_ssl_files(ssl_certfile, ssl_keyfile)
+    validation_exceptions = _validate_ssl_files(
+        ssl_certfile=ssl_certfile, ssl_keyfile=ssl_keyfile
+    )
     if any(validation_exceptions):
         # Starting with 3.11 we can use ExceptionGroup but for now
         # this seems to be the reasonable approach.
