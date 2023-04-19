@@ -50,13 +50,111 @@ Provide a hook which could receive the latest model, centralized and federated e
 
 To implement this, we would need to add a `Callable` argument to the `fit` function of the `Server` class in `src/py/flwr/server/server.py`. 
 
+```python
+class Server:
+    """Flower server."""
+
+    def __init__(
+        self,
+        *,
+        client_manager: ClientManager,
+        strategy: Optional[Strategy] = None,
+        callback: Optional[
+            Callable[
+                [
+                    Parameters,
+                    Tuple[float, Dict[str, Scalar]],
+                    Tuple[
+                        Optional[float], Dict[str, Scalar], EvaluateResultsAndFailures
+                    ],
+                ],
+                bool,
+            ]
+        ] = None,
+    ) -> None:
+        self._client_manager: ClientManager = client_manager
+        self.parameters: Parameters = Parameters(
+            tensors=[], tensor_type="numpy.ndarray"
+        )
+        self.strategy: Strategy = strategy if strategy is not None else FedAvg()
+        self.max_workers: Optional[int] = None
+        self.callback: Optional[
+            Callable[
+                [
+                    Parameters,
+                    Tuple[float, Dict[str, Scalar]],
+                    Tuple[
+                        Optional[float], Dict[str, Scalar], EvaluateResultsAndFailures
+                    ],
+                ],
+                bool,
+            ]
+        ] = callback
+
+    # Current server.py implementation skipped from line 67 to 80
+    def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
+        # Current server.py implementation skipped from line 82 to 103
+        for current_round in range(1, num_rounds + 1):
+            # Current server.py implementation skipped from line 105 to 142
+            if self.callback and self.callback(self.parameters, res_cen, res_fed):
+                end_time = timeit.default_timer()
+                elapsed = end_time - start_time
+                log(INFO, "FL finished in %s", elapsed)
+                return history
+
+        # Bookkeeping
+        end_time = timeit.default_timer()
+        elapsed = end_time - start_time
+        log(INFO, "FL finished in %s", elapsed)
+        return history
+```
+
 This `Callable` would take as inputs `self.parameters` (the latest model), `res_cen` (the centralized evaluation results), and `res_fed` (the federated evaluation results). It would then return a `bool` that would indicate whether or not the training should be stopped.
 
-This `Callable` argument would need to be passed to the `Server` object, via a `start_server` function argument, or as part of the `Strategy`.
+This `Callable` argument would need to be passed to the `Server` object, via a `start_server` function argument.
 
-## Drawbacks
+From a user perspective, we would need to define a new class holding a function that we will provide to the `start_server` function:
 
-Passing this as part of the `Strategy` means having to rewrite all the strategies to add this new optional attribute.
+```python
+class EarlyStop:
+    def __init__(self, patience: int):
+        self.best_parameters = None
+        self.best_accuracy = 0
+        self.count = 0
+        self.patience = patience
+
+    def callback(
+        self,
+        parameters: Parameters, 
+        res_cen: Tuple[float, Dict[str, Scalar]], 
+        res_fed: Tuple[Optional[float], Dict[str, Scalar], EvaluateResultsAndFailures]
+    ) -> bool:
+        curr_accuracy = res_cen[0]
+        if curr_accuracy > self.best_accuracy:
+            self.count = 0
+            self.best_parameters = parameters
+            self.best_accuracy = curr_accuracy
+        else:
+            self.count += 1
+        
+        if self.count > self.patience:
+            return True
+        else:
+            return False
+
+early_stopping = EarlyStop(patience=5)
+
+# Start Flower server
+flwr.server.start_server(
+    server_address="0.0.0.0:8080",
+    config=flwr.server.ServerConfig(num_rounds=3),
+    strategy=strategy,
+    callback=early_stopping.callback,
+)
+```
+
+<!-- ## Drawbacks -->
+
 
 <!-- ## Alternatives Considered
 
