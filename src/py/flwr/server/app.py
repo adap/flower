@@ -260,7 +260,11 @@ def run_fleet_api() -> None:
     if args.fleet_api_type == "rest":
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state_factory, args.rest_fleet_api_workers),
+            args=(
+                args.rest_fleet_api_address,
+                state_factory,
+                args.rest_fleet_api_workers,
+            ),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
@@ -310,7 +314,11 @@ def run_server() -> None:
     if args.fleet_api_type == "rest":
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state_factory, args.rest_fleet_api_workers),
+            args=(
+                args.rest_fleet_api_address,
+                state_factory,
+                args.rest_fleet_api_workers,
+            ),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
@@ -452,9 +460,11 @@ def _run_fleet_api_rest(
             "`pip install flwr['rest']`."
         ) from missing_dep
     if workers != 1:
-        raise ValueError(f"The supported number of workers for uvicorn server in fleet api rest is "
-                         f"1. Instead given {workers}. The functionality of >1 workers will be "
-                         f"added in the future releases.")
+        raise ValueError(
+            f"The supported number of workers for uvicorn server in fleet api rest is "
+            f"1. Instead given {workers}. The functionality of >1 workers will be "
+            f"added in the future releases."
+        )
     log(INFO, "Starting Flower REST server")
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
@@ -566,4 +576,3 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         type=int,
         default=1,
     )
-
