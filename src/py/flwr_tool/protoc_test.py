@@ -14,6 +14,7 @@
 # ==============================================================================
 """This module contains functions related to proto compilation."""
 
+
 from os import path
 
 from .protoc import IN_PATH, OUT_PATH, PROTO_FILES

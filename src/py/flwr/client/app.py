@@ -15,6 +15,7 @@
 """Flower client app."""
 
 
+import sys
 import time
 from logging import INFO
 from typing import Callable, Dict, Optional, Union
@@ -26,6 +27,8 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.common.address import parse_address
+from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
 from flwr.common.typing import (
     Code,
@@ -80,16 +83,16 @@ Example
 ClientLike = Union[Client, NumPyClient]
 
 
-# pylint: disable=import-outside-toplevel
+# pylint: disable=import-outside-toplevel,too-many-locals
 def start_client(
     *,
     server_address: str,
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificates: Optional[bytes] = None,
+    root_certificates: Optional[Union[bytes, str]] = None,
     rest: bool = False,
 ) -> None:
-    """Start a Flower Client which connects to a gRPC server.
+    """Start a Flower client node which connects to a Flower server.
 
     Parameters
     ----------
@@ -107,10 +110,10 @@ def start_client(
         value. Note that the Flower server needs to be started with the
         same value (see `flwr.server.start_server`), otherwise it will not
         know about the increased limit and block larger messages.
-    root_certificates : bytes (default: None)
-        The PEM-encoded root certificates as a byte string. If provided, a secure
-        connection using the certificates will be established to a
-        SSL-enabled Flower server.
+    root_certificates : Optional[Union[bytes, str]] (default: None)
+        The PEM-encoded root certificates as a byte string or a path string.
+        If provided, a secure connection using the certificates will be
+        established to an SSL-enabled Flower server.
     rest : bool (default: False)
         Defines whether or not the client is interacting with the server using the
         experimental REST API. This feature is experimental, it might change
@@ -118,14 +121,14 @@ def start_client(
 
     Examples
     --------
-    Starting a client with insecure server connection:
+    Starting a gRPC client with an insecure server connection:
 
     >>> start_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting a SSL-enabled client:
+    Starting an SSL-enabled gRPC client:
 
     >>> from pathlib import Path
     >>> start_client(
@@ -137,22 +140,31 @@ def start_client(
 
     event(EventType.START_CLIENT_ENTER)
 
+    # Parse IP address
+    parsed_address = parse_address(server_address)
+    if not parsed_address:
+        sys.exit(f"Server address ({server_address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
     # Use either gRPC bidirectional streaming or REST request/response
     if rest:
         try:
             from .rest_client.connection import http_request_response
-        except ImportError as missing_dep:
-            raise ImportError(
-                "To use the REST API you must install the "
-                "extra dependencies by running `pip install flwr['rest']`."
-            ) from missing_dep
+        except ModuleNotFoundError:
+            sys.exit(MISSING_EXTRA_REST)
+        if server_address[:4] != "http":
+            sys.exit(
+                "When using the REST API, please provide `https://` or "
+                "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
+            )
         connection = http_request_response
     else:
         connection = grpc_connection
     while True:
         sleep_duration: int = 0
         with connection(
-            server_address,
+            address,
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
         ) as conn:
@@ -209,9 +221,9 @@ def start_numpy_client(
         same value (see `flwr.server.start_server`), otherwise it will not
         know about the increased limit and block larger messages.
     root_certificates : bytes (default: None)
-        The PEM-encoded root certificates a byte string. If provided, a secure
-        connection using the certificates will be established to a
-        SSL-enabled Flower server.
+        The PEM-encoded root certificates as a byte string or a path string.
+        If provided, a secure connection using the certificates will be
+        established to an SSL-enabled Flower server.
     rest : bool (default: False)
         Defines whether or not the client is interacting with the server using the
         experimental REST API. This feature is experimental, it might be change

@@ -7,7 +7,7 @@ This page collects answers to commonly asked questions about Federated Learning 
 
     Yes, it can! Flower even comes with a few under-the-hood optimizations to make it work even better on Colab. Here's a quickstart example:
     
-    * `Flower Quickstart (TensorFlow/Keras) <https://colab.research.google.com/github/adap/flower/blob/main/examples/quickstart_simulation/sim.ipynb>`_
+    * `Flower Quickstart (TensorFlow/Keras) <https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation_tensorflow/sim.ipynb>`_
     * Flower Quickstart (PyTorch): coming soon (the TensorFlow/Keras example can easily be changed to make it work with PyTorch)
 
 .. dropdown:: :fa:`eye,mr-1` How can I run Federated Learning on a Raspberry Pi?

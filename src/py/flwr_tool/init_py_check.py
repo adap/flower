@@ -6,6 +6,7 @@ Example:
     python -m flwr_tool.init_py_check src/py/flwr
 """
 
+
 import os
 import re
 import sys

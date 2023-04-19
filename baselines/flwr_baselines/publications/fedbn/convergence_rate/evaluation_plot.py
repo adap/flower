@@ -1,6 +1,7 @@
 """This code takes the evalution results from the directory results/ and
 creates a plot to compare e.g. fedbn with fedavg."""
 
+
 import json
 
 import matplotlib.pyplot as plt  # type: ignore
