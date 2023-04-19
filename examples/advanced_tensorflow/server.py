@@ -18,9 +18,9 @@ def main() -> None:
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.3,
         fraction_evaluate=0.2,
-        min_fit_clients=2,
+        min_fit_clients=3,
         min_evaluate_clients=2,
-        min_available_clients=2,
+        min_available_clients=10,
         evaluate_fn=get_evaluate_fn(model),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
