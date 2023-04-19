@@ -513,7 +513,7 @@ def _run_fleet_api_rest(
         ) from missing_dep
     if workers != 1:
         raise ValueError(
-            f"The supported number of workers for uvicorn server in fleet api rest is "
+            f"The supported number of workers for the Fleet API (REST server) is "
             f"1. Instead given {workers}. The functionality of >1 workers will be "
             f"added in the future releases."
         )
