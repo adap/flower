@@ -23,6 +23,7 @@ jobs:
         with:
           python-version: 3.7.15
           cache: "poetry"
+          cache-dependency-path: "pyproject.toml"
       - name: Install build tools
         run: |
           sudo apt install pandoc
@@ -52,6 +53,7 @@ jobs:
         with:
           python-version: 3.7.15
           cache: "poetry"
+          cache-dependency-path: "pyproject.toml"
       - name: Install build tools
         run: |
           sudo apt install pandoc
