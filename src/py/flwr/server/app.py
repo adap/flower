@@ -19,7 +19,8 @@ import argparse
 import sys
 import threading
 from dataclasses import dataclass
-from logging import INFO, WARN
+from logging import ERROR, INFO, WARN
+from os.path import isfile
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
 from typing import List, Optional, Tuple
@@ -281,7 +282,12 @@ def run_fleet_api() -> None:
         host, port, _ = parsed_address
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(host, port, state_factory),
+            args=(
+                host,
+                port,
+                state_factory,
+                args.rest_fleet_api_workers,
+            ),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
@@ -349,7 +355,14 @@ def run_server() -> None:
         host, port, _ = parsed_address
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(host, port, state_factory),
+            args=(
+                host,
+                port,
+                args.ssl_keyfile,
+                args.ssl_certfile,
+                state_factory,
+                args.rest_fleet_api_workers,
+            ),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
@@ -484,11 +497,14 @@ def _run_fleet_api_grpc_bidi(
     return fleet_grpc_server
 
 
-# pylint: disable=import-outside-toplevel
+# pylint: disable=import-outside-toplevel,too-many-arguments
 def _run_fleet_api_rest(
     host: str,
     port: int,
+    ssl_keyfile: Optional[str],
+    ssl_certfile: Optional[str],
     state_factory: StateFactory,
+    workers: int,
 ) -> None:
     """Run Driver API (REST-based)."""
     try:
@@ -497,20 +513,61 @@ def _run_fleet_api_rest(
         from flwr.server.rest_server.rest_api import app as fast_api_app
     except ModuleNotFoundError:
         sys.exit(MISSING_EXTRA_REST)
+    if workers != 1:
+        raise ValueError(
+            f"The supported number of workers for the Fleet API (REST server) is "
+            f"1. Instead given {workers}. The functionality of >1 workers will be "
+            f"added in the future releases."
+        )
     log(INFO, "Starting Flower REST server")
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
     fast_api_app.state.STATE_FACTORY = state_factory
 
+    validation_exceptions = _validate_ssl_files(
+        ssl_certfile=ssl_certfile, ssl_keyfile=ssl_keyfile
+    )
+    if any(validation_exceptions):
+        # Starting with 3.11 we can use ExceptionGroup but for now
+        # this seems to be the reasonable approach.
+        raise ValueError(validation_exceptions)
+
     uvicorn.run(
-        # "flwr.server.rest_server.rest_api:app",
-        app=fast_api_app,
+        app="flwr.server.rest_server.rest_api:app",
         port=port,
         host=host,
         reload=False,
         access_log=True,
-        workers=1,
+        ssl_keyfile=ssl_keyfile,
+        ssl_certfile=ssl_certfile,
+        workers=workers,
     )
+
+
+def _validate_ssl_files(
+    ssl_keyfile: Optional[str], ssl_certfile: Optional[str]
+) -> List[ValueError]:
+    validation_exceptions = []
+
+    if ssl_keyfile is not None and not isfile(ssl_keyfile):
+        msg = "Path argument `--ssl-keyfile` does not point to a file."
+        log(ERROR, msg)
+        validation_exceptions.append(ValueError(msg))
+
+    if ssl_certfile is not None and not isfile(ssl_certfile):
+        msg = "Path argument `--ssl-certfile` does not point to a file."
+        log(ERROR, msg)
+        validation_exceptions.append(ValueError(msg))
+
+    if not bool(ssl_keyfile) == bool(ssl_certfile):
+        msg = (
+            "When setting one of `--ssl-keyfile` and "
+            + "`--ssl-certfile`, both have to be used."
+        )
+        log(ERROR, msg)
+        validation_exceptions.append(ValueError(msg))
+
+    return validation_exceptions
 
 
 def _parse_args_driver() -> argparse.ArgumentParser:
@@ -599,4 +656,20 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "--rest-fleet-api-address",
         help=f"Fleet API REST server address. Default:'{ADDRESS_FLEET_API_REST}'",
         default=ADDRESS_FLEET_API_REST,
+    )
+    rest_group.add_argument(
+        "--ssl-certfile",
+        help="Fleet API REST SSL certificate file (as a path str). Default:None",
+        default=None,
+    )
+    rest_group.add_argument(
+        "--ssl-keyfile",
+        help="Fleet API REST SSL private key file (as a path str). Default:None",
+        default=None,
+    )
+    rest_group.add_argument(
+        "--rest-fleet-api-workers",
+        help=f"Number of workers for Fleet API REST server. Default:'{1}'",
+        type=int,
+        default=1,
     )
