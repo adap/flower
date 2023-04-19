@@ -28,6 +28,7 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.address import parse_address
+from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
 from flwr.common.typing import (
     Code,
@@ -151,10 +152,7 @@ def start_client(
         try:
             from .rest_client.connection import http_request_response
         except ModuleNotFoundError:
-            sys.exit(
-                "To use the REST API you must install "
-                "the extra dependencies by running `pip install flwr['rest']`."
-            )
+            sys.exit(MISSING_EXTRA_REST)
         connection = http_request_response
     else:
         connection = grpc_connection
