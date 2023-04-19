@@ -20,13 +20,12 @@ from contextlib import contextmanager
 from logging import ERROR, INFO, WARN
 from typing import Callable, Dict, Iterator, Optional, Tuple
 
+from flwr.common.constant import MISSING_EXTRA_REST
+
 try:
     import requests
 except ModuleNotFoundError:
-    sys.exit(
-        "To use the REST API you must install "
-        "the extra dependencies by running `pip install flwr['rest']`."
-    )
+    sys.exit(MISSING_EXTRA_REST)
 
 from flwr.client.message_handler.task_handler import get_server_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
