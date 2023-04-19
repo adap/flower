@@ -460,8 +460,7 @@ def _run_fleet_api_rest(
     port = int(port_str)
 
     uvicorn.run(
-        # "flwr.server.rest_server.rest_api:app",
-        app=fast_api_app,
+        app="flwr.server.rest_server.rest_api:app",
         port=port,
         host=host,
         reload=False,
@@ -559,7 +558,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     )
     rest_group.add_argument(
         "--rest-fleet-api-workers",
-        help=f"Number of workers for Fleet API REST server . Default:'{1}'",
+        help=f"Number of workers for Fleet API REST server. Default:'{1}'",
         type=int,
         default=1,
     )
