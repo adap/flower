@@ -280,7 +280,12 @@ def run_fleet_api() -> None:
         host, port, _ = parsed_address
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(host, port, state_factory),
+            args=(
+                host,
+                port,
+                state_factory,
+                args.rest_fleet_api_workers,
+            ),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
@@ -348,7 +353,12 @@ def run_server() -> None:
         host, port, _ = parsed_address
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(host, port, state_factory),
+            args=(
+                host,
+                port,
+                state_factory,
+                args.rest_fleet_api_workers,
+            ),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
@@ -488,6 +498,7 @@ def _run_fleet_api_rest(
     host: str,
     port: int,
     state_factory: StateFactory,
+    workers: int,
 ) -> None:
     """Run Driver API (REST-based)."""
     try:
@@ -500,19 +511,24 @@ def _run_fleet_api_rest(
             "extra dependencies by running "
             "`pip install flwr['rest']`."
         ) from missing_dep
+    if workers != 1:
+        raise ValueError(
+            f"The supported number of workers for the Fleet API (REST server) is "
+            f"1. Instead given {workers}. The functionality of >1 workers will be "
+            f"added in the future releases."
+        )
     log(INFO, "Starting Flower REST server")
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
     fast_api_app.state.STATE_FACTORY = state_factory
 
     uvicorn.run(
-        # "flwr.server.rest_server.rest_api:app",
-        app=fast_api_app,
+        app="flwr.server.rest_server.rest_api:app",
         port=port,
         host=host,
         reload=False,
         access_log=True,
-        workers=1,
+        workers=workers,
     )
 
 
@@ -602,4 +618,10 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "--rest-fleet-api-address",
         help=f"Fleet API REST server address. Default:'{ADDRESS_FLEET_API_REST}'",
         default=ADDRESS_FLEET_API_REST,
+    )
+    rest_group.add_argument(
+        "--rest-fleet-api-workers",
+        help=f"Number of workers for Fleet API REST server. Default:'{1}'",
+        type=int,
+        default=1,
     )
