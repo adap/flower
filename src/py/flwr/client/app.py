@@ -28,6 +28,7 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.address import parse_address
+from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
 from flwr.common.typing import (
     Code,
@@ -150,11 +151,8 @@ def start_client(
     if rest:
         try:
             from .rest_client.connection import http_request_response
-        except ImportError as missing_dep:
-            raise ImportError(
-                "To use the REST API you must install the "
-                "extra dependencies by running `pip install flwr['rest']`."
-            ) from missing_dep
+        except ModuleNotFoundError:
+            sys.exit(MISSING_EXTRA_REST)
         if server_address[:4] != "http":
             sys.exit(
                 "When using the REST API, please provide `https://` or "
