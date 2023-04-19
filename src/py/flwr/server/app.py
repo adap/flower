@@ -496,7 +496,7 @@ def _run_fleet_api_grpc_bidi(
     return fleet_grpc_server
 
 
-# pylint: disable=import-outside-toplevel
+# pylint: disable=import-outside-toplevel,too-many-arguments
 def _run_fleet_api_rest(
     host: str,
     port: int,
