@@ -260,7 +260,7 @@ def run_fleet_api() -> None:
     if args.fleet_api_type == "rest":
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state_factory, args.args.rest_fleet_api_workers),
+            args=(args.rest_fleet_api_address, state_factory, args.rest_fleet_api_workers),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
