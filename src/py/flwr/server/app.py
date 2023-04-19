@@ -451,6 +451,10 @@ def _run_fleet_api_rest(
             "extra dependencies by running "
             "`pip install flwr['rest']`."
         ) from missing_dep
+    if workers != 1:
+        raise ValueError(f"The supported number of workers for uvicorn server in fleet api rest is "
+                         f"1. Instead given {workers}. The functionality of >1 workers will be "
+                         f"added in the future releases.")
     log(INFO, "Starting Flower REST server")
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
