@@ -20,8 +20,6 @@ from contextlib import contextmanager
 from logging import ERROR, INFO, WARN
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union
 
-from flwr.common.constant import MISSING_EXTRA_REST
-
 try:
     import requests
 except ModuleNotFoundError:
@@ -29,6 +27,7 @@ except ModuleNotFoundError:
 
 from flwr.client.message_handler.task_handler import get_server_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
     PullTaskInsRequest,

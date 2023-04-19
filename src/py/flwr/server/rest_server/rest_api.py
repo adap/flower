@@ -20,14 +20,13 @@ from logging import INFO
 from typing import List, Optional
 from uuid import UUID
 
-from flwr.common.constant import MISSING_EXTRA_REST
-
 try:
     from fastapi import FastAPI, HTTPException, Request, Response
     from starlette.datastructures import Headers
 except ModuleNotFoundError:
     sys.exit(MISSING_EXTRA_REST)
 
+from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
     PullTaskInsRequest,
