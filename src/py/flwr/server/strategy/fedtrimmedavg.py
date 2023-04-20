@@ -47,9 +47,11 @@ class FedTrimmedAvg(FedAvg):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        proportiontocut: float = 0.2,
+        beta: float = 0.2,
     ) -> None:
         """Configurable FedTrimmedAvg strategy.
+         
+        Implementation based on https://arxiv.org/pdf/1803.01498.pdf
 
         Parameters
         ----------
@@ -73,7 +75,7 @@ class FedTrimmedAvg(FedAvg):
             Whether or not accept rounds containing failures. Defaults to True.
         initial_parameters : Parameters, optional
             Initial global model parameters.
-        proportiontocut : float, optional
+        beta : float, optional
             Fraction to cut off of both tails of the distribution. Defaults to 0.2.
         """
 
@@ -97,7 +99,7 @@ class FedTrimmedAvg(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.proportiontocut = proportiontocut
+        self.beta = beta
 
     def __repr__(self) -> str:
         rep = f"FedTrimmedAvg(accept_failures={self.accept_failures})"
@@ -122,7 +124,7 @@ class FedTrimmedAvg(FedAvg):
             for _, fit_res in results
         ]
         parameters_aggregated = ndarrays_to_parameters(
-            aggregate_trimmed_avg(weights_results, self.proportiontocut)
+            aggregate_trimmed_avg(weights_results, self.beta)
         )
 
         # Aggregate custom metrics if aggregation fn was provided
