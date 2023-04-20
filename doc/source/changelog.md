@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### What's new?
+
+### Incompatible changes
+
+None
+
 ## v1.4.0 (2023-04-21)
 
 ### Thanks to our contributors
