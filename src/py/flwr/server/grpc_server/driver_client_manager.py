@@ -16,7 +16,7 @@
 
 
 import threading
-import uuid
+import random
 from typing import Dict, List, Optional, Set, Tuple
 
 from flwr.server.client_manager import ClientManager
@@ -72,7 +72,7 @@ class DriverClientManager(ClientManager):
             return False
 
         # Generate random integer ID
-        random_node_id: int = uuid.uuid1().int >> 64
+        random_node_id: int = random.randrange(9223372036854775806)
         client.node_id = random_node_id
 
         # Register node_id in with State
