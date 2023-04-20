@@ -8,7 +8,8 @@ import numpy as np
 import random
 from torch.utils.data import DataLoader
 
-from datasets import load_dataset, load_metric
+from datasets import load_dataset
+from evaluate import load as load_metric
 
 from transformers import AutoTokenizer, DataCollatorWithPadding
 from transformers import AutoModelForSequenceClassification
