@@ -50,7 +50,7 @@ class FedTrimmedAvg(FedAvg):
         beta: float = 0.2,
     ) -> None:
         """Configurable FedTrimmedAvg strategy.
-         
+
         Implementation based on https://arxiv.org/pdf/1803.01498.pdf
 
         Parameters
