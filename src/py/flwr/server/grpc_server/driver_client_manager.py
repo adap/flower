@@ -15,8 +15,8 @@
 """Flower DriverClientManager."""
 
 
-import threading
 import random
+import threading
 from typing import Dict, List, Optional, Set, Tuple
 
 from flwr.server.client_manager import ClientManager
