@@ -16,6 +16,7 @@
 
 
 import argparse
+import importlib.util
 import sys
 import threading
 from dataclasses import dataclass
@@ -275,6 +276,13 @@ def run_fleet_api() -> None:
 
     # Start Fleet API
     if args.fleet_api_type == "rest":
+        if (
+            importlib.util.find_spec("fastapi")
+            and importlib.util.find_spec("requests")
+            and importlib.util.find_spec("starlette")
+            and importlib.util.find_spec("uvicorn")
+        ) is None:
+            sys.exit(MISSING_EXTRA_REST)
         address_arg = args.rest_fleet_api_address
         parsed_address = parse_address(address_arg)
         if not parsed_address:
@@ -350,6 +358,13 @@ def run_server() -> None:
 
     # Start Fleet API
     if args.fleet_api_type == "rest":
+        if (
+            importlib.util.find_spec("fastapi")
+            and importlib.util.find_spec("requests")
+            and importlib.util.find_spec("starlette")
+            and importlib.util.find_spec("uvicorn")
+        ) is None:
+            sys.exit(MISSING_EXTRA_REST)
         address_arg = args.rest_fleet_api_address
         parsed_address = parse_address(address_arg)
         if not parsed_address:
