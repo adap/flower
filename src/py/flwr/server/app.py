@@ -285,6 +285,8 @@ def run_fleet_api() -> None:
             args=(
                 host,
                 port,
+                args.ssl_keyfile,
+                args.ssl_certfile,
                 state_factory,
                 args.rest_fleet_api_workers,
             ),
