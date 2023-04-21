@@ -36,14 +36,17 @@ Also, we would love to express our sincere thanks to [Laboratoire Informatique d
 * GPUs: mem >= 24Gb
 
 ## Data Structure
-Below is strucutre recommended to adapt the code. A data folder contains all processed csv files is provided for community to re-produce the result of paper. All audio files could be find at [TED-LIUM 3 website](https://projets-lium.univ-lemans.fr/ted-lium/release3/)  (Please change the path in csv file to your actual audio path)
 
-You can also run the provided script *data_prepare.py* to download audio and change the csv path
+Below is strucutre recommended to adapt the code. A data folder contains all processed csv files is provided for community to re-produce the result of paper. All audio files could be find at [TED-LIUM 3 website](https://projets-lium.univ-lemans.fr/ted-lium/release3/).
 
-For the csv files, please refer to this personal repository: [repo](https://github.com/tuanct1997/Federated-Learning-ASR-based-on-wav2vec-2.0)
+For the csv files, please refer to this personal repository: [repo](https://github.com/tuanct1997/Federated-Learning-ASR-based-on-wav2vec-2.0).
+
+You can run `setup.sh` in order to download the data, setup the folder structure (described below), and set the CSV paths.
 
 ```bash
-├── data (provided)
+├── data (created by `setup.sh`)
+│   ├── audio
+│   │   ├── ....
 │   ├── client_{cid}
 │   │   ├── ted_train.csv
 │   │   ├── ted_dev.csv
@@ -53,7 +56,13 @@ For the csv files, please refer to this personal repository: [repo](https://gith
 │   ├── ted_train.csv {all TED-LIUM 3 train set}
 │   ├── ted_dev.csv {all TED-LIUM 3 valid set}
 │   ├── ted_test.csv {all TED-LIUM 3 test set}
-├── output
+├── docs/material
+│   ├── label_encoder.txt {If use the same label encoder for all - provided}
+│   ├── pre-trained
+│   │   ├── model.ckpt
+│   ├── wav2vec checkpoint {Highly recommend to have own huggingface wav2vec2 checkpoint to avoid repeat download wav2vec2}
+│   │   ├── ....
+├── docs/results/fl_fusion
 │   ├── client_{cid}
 │   │   ├── log.txt
 │   │   ├── label_encoder.txt {if dont use the same label for each client and server, file will be generate for each client by Speechbrain}
@@ -63,21 +72,16 @@ For the csv files, please refer to this personal repository: [repo](https://gith
 │   │   ├── train_log.txt {where you can find performance per round}
 │   │   ├── label_encoder.txt {if dont use the same label for each client and server}
 │   │   ├── ....
-├── material
-│   ├── label_encoder.txt {If use the same label encoder for all - provided}
-│   ├── pre-trained
-│   │   ├── model.ckpt
-│   ├── wav2vec checkpoint {Highly recommend to have own huggingface wav2vec2 checkpoint to avoid repeat download wav2vec2}
-│   │   ├── ....
 
 ```
 
 ## Running flow
-Due to the size of Wav2Vec 2.0 model and dataset, highly recommend to enavle device as cpu so clients will be initialize and store at CPUs memory and only use GPUs memory when needed. 
+Due to the size of Wav2Vec 2.0 model and dataset, highly recommend to enable device as cpu so clients will be initialize and store at CPUs memory and only use GPUs memory when needed. 
 
 ## How to run
 
 Simply run this command below (example):
+
 ```bash
 python main.py \
   --data_path="./data" \
@@ -131,8 +135,11 @@ Our experiment used the EER metric for this analysis. The higher EER, the more s
 
 
 For more detail, you can find it in our paper.
+
 ## Citation
+
 Please citation for your upcoming works if used
+
 ```bash
 @misc{https://doi.org/10.48550/arxiv.2302.10790,
 doi = {10.48550/ARXIV.2302.10790},url = {https://arxiv.org/abs/2302.10790}, 
@@ -141,5 +148,4 @@ keywords = {Audio and Speech Processing (eess.AS), Machine Learning (cs.LG), Sou
 title = {Federated Learning for ASR based on Wav2vec 2.0}, 
 publisher = {arXiv},year = {2023},
 copyright = {Creative Commons Attribution 4.0 International}}
-
 ```
