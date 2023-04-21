@@ -13,58 +13,6 @@ import flwr_baselines.publications.wav2vec.tedlium.strategy as strategy
 from flwr_baselines.publications.wav2vec.tedlium.client import SpeechBrainClient
 from flwr_baselines.publications.wav2vec.tedlium.model import model
 
-parser = ArgumentParser()
-parser.add_argument("--data_path", type=str, default="./data/", help="dataset path")
-parser.add_argument(
-    "--output", type=str, default="./docs/results/fl_fusion/", help="output folder"
-)
-parser.add_argument(
-    "--pre_train_model_path",
-    type=str,
-    default=None,
-    help="path for pre-trained starting point",
-)
-parser.add_argument(
-    "--label_path",
-    type=str,
-    default="./docs/material/label_encoder.txt",
-    help="path for label encoder file if want to ensure the same encode for every client",
-)
-parser.add_argument(
-    "--config_path",
-    type=str,
-    default="./docs/configs/w2v2.yaml",
-    help="path to yaml file",
-)
-parser.add_argument(
-    "--running_type", type=str, default="cpu", help="running type of FL "
-)
-parser.add_argument(
-    "--min_fit_clients", type=int, default=10, help="minimum fit clients"
-)
-parser.add_argument(
-    "--fraction_fit",
-    type=int,
-    default=10,
-    help="ratio of total clients will be trained",
-)
-parser.add_argument(
-    "--min_available_clients", type=int, default=10, help="minmum available clients"
-)
-parser.add_argument("--rounds", type=int, default=30, help="global training rounds")
-parser.add_argument(
-    "--local_epochs", type=int, default=5, help="local epochs on each client"
-)
-parser.add_argument(
-    "--weight_strategy",
-    type=str,
-    default="num",
-    help="strategy of weighting clients in [num, loss, wer]",
-)
-parser.add_argument(
-    "--parallel_backend", type=bool, default=True, help="if using multi-gpus per client"
-)
-
 
 def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
     """Return a function which returns training configurations."""
@@ -107,8 +55,66 @@ def evaluate_fn(
     return lss, {"accuracy": acc}
 
 
+def _parse_arguments():
+    parser = ArgumentParser()
+    parser.add_argument("--data_path", type=str, default="./data/", help="dataset path")
+    parser.add_argument(
+        "--output", type=str, default="./docs/results/fl_fusion/", help="output folder"
+    )
+    parser.add_argument(
+        "--pre_train_model_path",
+        type=str,
+        default=None,
+        help="path for pre-trained starting point",
+    )
+    parser.add_argument(
+        "--label_path",
+        type=str,
+        default="./docs/material/label_encoder.txt",
+        help="path for label encoder file if want to ensure the same encode for every client",
+    )
+    parser.add_argument(
+        "--config_path",
+        type=str,
+        default="./docs/configs/w2v2.yaml",
+        help="path to yaml file",
+    )
+    parser.add_argument(
+        "--running_type", type=str, default="cpu", help="running type of FL "
+    )
+    parser.add_argument(
+        "--min_fit_clients", type=int, default=10, help="minimum fit clients"
+    )
+    parser.add_argument(
+        "--fraction_fit",
+        type=int,
+        default=10,
+        help="ratio of total clients will be trained",
+    )
+    parser.add_argument(
+        "--min_available_clients", type=int, default=10, help="minmum available clients"
+    )
+    parser.add_argument("--rounds", type=int, default=30, help="global training rounds")
+    parser.add_argument(
+        "--local_epochs", type=int, default=5, help="local epochs on each client"
+    )
+    parser.add_argument(
+        "--weight_strategy",
+        type=str,
+        default="num",
+        help="strategy of weighting clients in [num, loss, wer]",
+    )
+    parser.add_argument(
+        "--parallel_backend",
+        type=bool,
+        default=True,
+        help="if using multi-gpus per client",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    args = parser.parse_args()
+    args = _parse_arguments()
 
     # Define resource per client
     client_resources: Dict[str, float] = {
