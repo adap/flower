@@ -1,6 +1,26 @@
 # Changelog
 
-## Unreleased
+## v1.4.0 (2023-04-21)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Adam Narozniak`, `Alexander Viala Bellander`, `Charles Beauville`, `Chenyang Ma (Danny)`, `Daniel J. Beutel`, `Edoardo`, `Gautam Jajoo`, `Iacob-Alexandru-Andrei`, `JDRanpariya`, `Jean Charle Yaacoub`, `Kunal Sarkhel`, `L. Jiang`, `Lennart Behme`, `Max Kapsecker`, `Michał`, `Nic Lane`, `Nikolaos Episkopos`, `Ragy`, `Saurav Maheshkar`, `Semo Yang`, `Steve Laskaridis`, `Steven Hé (Sīchàng)`, `Taner Topal`
+
+### What's new?
+
+### Incompatible changes
+
+None
+
+## v1.4.0 (2023-04-21)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Adam Narozniak`, `Alexander Viala Bellander`, `Charles Beauville`, `Chenyang Ma (Danny)`, `Daniel J. Beutel`, `Edoardo`, `Gautam Jajoo`, `Iacob-Alexandru-Andrei`, `JDRanpariya`, `Jean Charle Yaacoub`, `Kunal Sarkhel`, `L. Jiang`, `Lennart Behme`, `Max Kapsecker`, `Michał`, `Nic Lane`, `Nikolaos Episkopos`, `Ragy`, `Saurav Maheshkar`, `Semo Yang`, `Steve Laskaridis`, `Steven Hé (Sīchàng)`, `Taner Topal`
 
 ### What's new?
 
