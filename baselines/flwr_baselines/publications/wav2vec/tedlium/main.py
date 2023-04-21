@@ -125,9 +125,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Define resource per client
-    client_resources = {
-        "num_cpus": 64,
-        "num_gpus": 0,
+    client_resources: Dict[str, float] = {
+        "num_cpus": 64.0,
+        "num_gpus": 0.0,
     }
 
     ray_config = {"include_dashboard": False}
@@ -155,7 +155,7 @@ if __name__ == "__main__":
         weight_strategy=args.weight_strategy,
     )
 
-    def client_fn(cid: int):
+    def client_fn(cid: str) -> fl.client.Client:
         """Function to generate the simulated clients."""
         asr_brain, dataset = model.int_model(
             cid,
@@ -166,7 +166,7 @@ if __name__ == "__main__":
             args.running_type,
             args.parallel_backend,
         )
-        return SpeechBrainClient(str(cid), asr_brain, dataset)
+        return SpeechBrainClient(cid, asr_brain, dataset)
 
     fl.simulation.start_simulation(
         client_fn=client_fn,
