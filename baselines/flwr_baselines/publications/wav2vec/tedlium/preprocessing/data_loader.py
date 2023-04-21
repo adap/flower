@@ -1,9 +1,14 @@
+"""Provides the datasets for the SpeechBrain training."""
+
+
 import speechbrain as sb
 import torchaudio
 
 
 # Define custom data procedure
 def dataio_prepare(hparams):
+    """Create Dataset objects from the CSV files."""
+
     # 1. Define datasets
     data_folder = hparams["data_folder"]
 

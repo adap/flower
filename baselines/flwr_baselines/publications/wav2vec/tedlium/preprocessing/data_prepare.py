@@ -1,3 +1,6 @@
+"""Functions to download and process CSV files."""
+
+
 import os
 import ssl
 import tarfile
@@ -6,14 +9,16 @@ import urllib.request
 import pandas as pd
 
 
-# Download the file and show a progress bar
-def download_file(url, filename):
+def _download_file(url, filename):
+    """Download the file and show a progress bar."""
+
     print(f"Downloading {url}...")
     retries = 3
     while retries > 0:
         try:
             with urllib.request.urlopen(
-                url, context=ssl._create_unverified_context()
+                url,
+                context=ssl._create_unverified_context(),  # pylint: disable=protected-access
             ) as response, open(filename, "wb") as out_file:
                 total_size = int(response.getheader("Content-Length"))
                 block_size = 1024 * 8
@@ -29,20 +34,20 @@ def download_file(url, filename):
                         f"\rDownloading: {percent}% [{count * block_size}/{total_size}]",
                         end="",
                     )
-                print(f"\nDownload complete.")
-                return
-        except Exception as e:
-            print(f"\nError occurred during download: {e}")
+                print("\nDownload complete.")
+        except Exception as error:  # pylint: disable=broad-except
+            print(f"\nError occurred during download: {error}")
             retries -= 1
             if retries > 0:
                 print(f"Retrying ({retries} retries left)...")
             else:
                 print("Download failed.")
-                raise e
+                raise error
 
 
-# Extract the contents and show a progress bar
-def extract_file(filename, extract_path):
+def _extract_file(filename, extract_path):
+    """Extract the contents and show a progress bar."""
+
     print(f"Extracting {filename}...")
     with tarfile.open(filename, "r:gz") as tar:
         members = tar.getmembers()
@@ -53,17 +58,19 @@ def extract_file(filename, extract_path):
             tar.extract(member, path=extract_path)
             percent = int(current_file * 100 / total_files)
             print(f"\rExtracting: {percent}% [{current_file}/{total_files}]", end="")
-        print(f"\nExtraction complete.")
+        print("\nExtraction complete.")
 
 
-# Delete the downloaded file
-def delete_file(filename):
+def _delete_file(filename):
+    """Delete the downloaded file."""
+
     os.remove(filename)
     print(f"Deleted {filename}.")
 
 
-# Change the path corespond to your actual path
-def csv_path_audio():
+def _csv_path_audio():
+    """Change the path corespond to your actual path."""
+
     df_concat_train = None
     df_concat_dev = None
     df_concat_test = None
@@ -96,22 +103,24 @@ def csv_path_audio():
         else:
             df_concat_test = pd.concat([df_concat_test, df_test], ignore_index=True)
 
-    df_concat_train.to_csv(f"./data/ted_train.csv", index=False)
-    df_concat_dev.to_csv(f"./data/ted_dev.csv", index=False)
-    df_concat_test.to_csv(f"./data/ted_test.csv", index=False)
+    df_concat_train.to_csv("./data/ted_train.csv", index=False)
+    df_concat_dev.to_csv("./data/ted_dev.csv", index=False)
+    df_concat_test.to_csv("./data/ted_test.csv", index=False)
 
 
-# CHANGE THE PATH CORESPOND TO YOUR PATH
-url = "https://projets-lium.univ-lemans.fr/wp-content/uploads/corpus/TED-LIUM/TEDLIUM_release-3.tgz"
-filename = "data/TEDLIUM_release-3.tgz"
-extract_path = "data/audio"  # replace with the path to the directory where you want to extract the files
+if __name__ == "__main__":
+    URL = (
+        "https://projets-lium.univ-lemans.fr"
+        "/wp-content/uploads/corpus/TED-LIUM/TEDLIUM_release-3.tgz"
+    )
+    FILENAME = "data/TEDLIUM_release-3.tgz"
+    EXTRACT_PATH = "data/audio"
 
+    if not os.path.exists(EXTRACT_PATH):
+        try:
+            _download_file(URL, FILENAME)
+            _extract_file(FILENAME, EXTRACT_PATH)
+        finally:
+            _delete_file(FILENAME)
 
-if not os.path.exists(extract_path):
-    try:
-        download_file(url, filename)
-        extract_file(filename, extract_path)
-    finally:
-        delete_file(filename)
-
-csv_path_audio()
+    _csv_path_audio()

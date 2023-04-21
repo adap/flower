@@ -12,16 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""Main module to run the Wav2Vec2.0 TED-LIUM 3 baseline."""
+
 
 import gc
 from argparse import ArgumentParser
 from typing import Callable, Dict
 
 import flwr as fl
-import strategy
 import torch
-from client import SpeechBrainClient
-from model import model
+from flwr.common import Scalar
+
+import flwr_baselines.publications.wav2vec.tedlium.strategy as strategy
+from flwr_baselines.publications.wav2vec.tedlium.client import SpeechBrainClient
+from flwr_baselines.publications.wav2vec.tedlium.model import model
 
 parser = ArgumentParser()
 parser.add_argument("--data_path", type=str, default="./data/", help="dataset path")
@@ -87,7 +91,11 @@ def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
     return fit_config
 
 
-def evaluate(server_round, weights: fl.common.NDArrays, config):
+def evaluate_fn(
+    server_round: int, weights: fl.common.NDArrays, config: Dict[str, Scalar]
+):
+    """Function for centralized evaluation."""
+    _ = (server_round, config)
     # int model
     asr_brain, dataset = model.int_model(
         19999,
@@ -127,36 +135,28 @@ if __name__ == "__main__":
     if args.pre_train_model_path is not None:
         print("PRETRAINED INITIALIZE")
 
-        pre_trained = model.pre_trained_point(
+        PRE_TRAINED = model.pre_trained_point(
             args.pre_train_model_path,
             args.output,
             args.config_path,
             args.running_type,
             args.parallel_backend,
         )
-
-        strategy = strategy.CustomFedAvg(
-            initial_parameters=pre_trained,
-            fraction_fit=args.fraction_fit,
-            min_fit_clients=args.min_fit_clients,
-            min_available_clients=args.min_available_clients,
-            evaluate_fn=evaluate,
-            on_fit_config_fn=get_on_fit_config_fn(),
-            weight_strategy=args.weight_strategy,
-        )
     else:
-        strategy = strategy.CustomFedAvg(
-            fraction_fit=args.fraction_fit,
-            min_fit_clients=args.min_fit_clients,
-            min_available_clients=args.min_available_clients,
-            evaluate_fn=evaluate,
-            on_fit_config_fn=get_on_fit_config_fn(),
-            weight_strategy=args.weight_strategy,
-        )
+        PRE_TRAINED = None
 
-    # pool_size = 600
+    strategy = strategy.CustomFedAvg(
+        initial_parameters=PRE_TRAINED,
+        fraction_fit=args.fraction_fit,
+        min_fit_clients=args.min_fit_clients,
+        min_available_clients=args.min_available_clients,
+        evaluate_fn=evaluate_fn,
+        on_fit_config_fn=get_on_fit_config_fn(),
+        weight_strategy=args.weight_strategy,
+    )
 
     def client_fn(cid: int):
+        """Function to generate the simulated clients."""
         asr_brain, dataset = model.int_model(
             cid,
             args.config_path,

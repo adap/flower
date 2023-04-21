@@ -1,3 +1,6 @@
+"""Defining a custom strategy to set a weight strategy."""
+
+
 import gc
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -14,13 +17,15 @@ from flwr.server.strategy.aggregate import aggregate
 
 
 class CustomFedAvg(fl.server.strategy.FedAvg):
+    """Custom strategy to aggregate using metrics instead of number of samples."""
+
     def __init__(self, *args, weight_strategy, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.weight_strategy = weight_strategy
 
     def aggregate_fit(
         self,
-        server_round: int,
+        _: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Union[bool, bytes, float, int, str]]]:
@@ -42,7 +47,10 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
             weights = aggregate(weights_results)
         else:
             weights_results = [
-                (parameters_to_ndarrays(fit_res.parameters), fit_res.metrics[key_name])
+                (
+                    parameters_to_ndarrays(fit_res.parameters),
+                    int(fit_res.metrics[key_name]),
+                )
                 for _, fit_res in results
             ]
             weights = aggregate(weights_results)

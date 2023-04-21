@@ -1,3 +1,6 @@
+"""Defining the Flower client for SpeechBrain."""
+
+
 import gc
 import logging
 from math import exp
@@ -18,10 +21,16 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from model.sb_w2v2 import get_weights, set_weights
+
+from flwr_baselines.publications.wav2vec.tedlium.model.sb_w2v2 import (
+    get_weights,
+    set_weights,
+)
 
 
 class SpeechBrainClient(fl.client.Client):
+    """Flower client for SpeechBrain."""
+
     def __init__(self, cid: str, asr_brain, dataset):
         self.cid = cid
         self.params = asr_brain.hparams
@@ -30,9 +39,8 @@ class SpeechBrainClient(fl.client.Client):
         self.dataset = dataset
 
         fl.common.logger.log(logging.DEBUG, "Starting client %s", cid)
-        print("HOOOOO HEEYYYYEYEYEYYEYEYEYEYE")
 
-    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
+    def get_parameters(self, _: GetParametersIns) -> GetParametersRes:
         print(f"Client {self.cid}: get_parameters")
 
         weights: NDArrays = get_weights(self.modules)
@@ -50,19 +58,18 @@ class SpeechBrainClient(fl.client.Client):
 
         # Read training configuration
         epochs = int(config["epochs"])
-        global_rounds = int(config["epoch_global"])
 
         print("Client {} start".format(self.cid))
 
-        (_, num_examples, avg_loss, avg_wer) = self.train_speech_recogniser(
-            weights, epochs, global_rounds=global_rounds
+        (_, num_examples, avg_loss, avg_wer) = self._train_speech_recogniser(
+            weights, epochs
         )
         print(
             f"==============================Client {self.cid}: end=============================="
         )
         metrics = {"train_loss": avg_loss, "wer": avg_wer}
 
-        parameters = self.get_parameters().parameters
+        parameters = self.get_parameters(GetParametersIns(config={})).parameters
         del self.asr_brain.modules
         torch.cuda.empty_cache()
         gc.collect()
@@ -102,8 +109,8 @@ class SpeechBrainClient(fl.client.Client):
         )
 
     def evaluate_train_speech_recogniser(self, server_params, epochs):
-        # Evaluate aggerate/server model
-        _, _, test_data = self._setup_task(server_params, epochs, True, False)
+        """Evaluate aggerate/server model"""
+        _, _, test_data = self._setup_task(server_params, epochs)
         self.params.wer_file = self.params.output_folder + "/wer_test.txt"
 
         batch_count, loss, wer = self.asr_brain.evaluate(
@@ -117,8 +124,6 @@ class SpeechBrainClient(fl.client.Client):
         self,
         server_params,
         epochs,
-        evaluate,
-        add_train=False,
     ):
         self.params.epoch_counter.limit = epochs
         self.params.epoch_counter.current = 0
@@ -126,25 +131,17 @@ class SpeechBrainClient(fl.client.Client):
         train_data, valid_data, test_data = self.dataset
         # Set the parameters to the ones given by the server
         if server_params is not None:
-            set_weights(
-                server_params, self.modules, evaluate, add_train, self.params.device
-            )
+            set_weights(server_params, self.modules, self.params.device)
         return train_data, valid_data, test_data
 
-    def train_speech_recogniser(
-        self, server_params, epochs, add_train=False, global_rounds=None
-    ):
-        train_data, valid_data, _ = self._setup_task(
-            server_params, epochs, False, add_train
-        )
+    def _train_speech_recogniser(self, server_params, epochs):
+        train_data, valid_data, _ = self._setup_task(server_params, epochs)
 
         # Training
         count_sample, avg_loss, avg_wer = self.asr_brain.fit(
             self.params.epoch_counter,
             train_data,
             valid_data,
-            cid=self.cid,
-            global_rounds=global_rounds,
             train_loader_kwargs=self.params.dataloader_options,
             valid_loader_kwargs=self.params.test_dataloader_options,
         )

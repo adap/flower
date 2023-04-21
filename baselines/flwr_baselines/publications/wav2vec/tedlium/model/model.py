@@ -1,3 +1,5 @@
+"""Provides function for using a SpeechBrain model."""
+
 import gc
 import os
 
@@ -6,13 +8,13 @@ import torch
 from flwr.common import ndarrays_to_parameters
 from hyperpyyaml import load_hyperpyyaml
 
-from flwr_baselines.publications.fl_wav2vec2.model.sb_w2v2 import ASR, get_weights
-from flwr_baselines.publications.fl_wav2vec2.preprocessing.data_loader import (
+from flwr_baselines.publications.wav2vec.tedlium.model.sb_w2v2 import ASR, get_weights
+from flwr_baselines.publications.wav2vec.tedlium.preprocessing.data_loader import (
     dataio_prepare,
 )
 
 
-def int_model(
+def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     cid,
     config_path,
     save_path,
@@ -22,6 +24,12 @@ def int_model(
     parallel=True,
     evaluate=False,
 ):
+    """Setting up the experiment.
+
+    Loading the hyperparameters from config files and
+    command-line overrides, setting the correct path for the
+    corresponding clients, and creating the model.
+    """
     # Load hyperparameters file with command-line overrides
     save_path = save_path + "client_" + str(cid)
     # Override with FLOWER PARAMS
@@ -42,20 +50,17 @@ def int_model(
     _, run_opts, _ = sb.parse_arguments(config_path)
     run_opts["device"] = device
     run_opts["data_parallel_backend"] = parallel
-    # run_opts = {'debug': False, 'debug_batches': 2, 'debug_epochs': 2, 'device': 'cpu', 'data_parallel_backend': True, 'distributed_launch': False, 'distributed_backend': 'nccl', 'find_unused_parameters': False}
 
     with open(config_path) as fin:
         params = load_hyperpyyaml(fin, overrides)
 
-    """
-    This logic follow the data_path is a path to csv folder file
-    All train/dev/test csv files are in the same name format for server and client
-    Example: 
-    server: /users/server/train.csv
-    client: /users/client_1/train.csv
+    # This logic follow the data_path is a path to csv folder file
+    # All train/dev/test csv files are in the same name format for server and client
+    # Example:
+    # server: /users/server/train.csv
+    # client: /users/client_1/train.csv
+    # Modify (if needed) the if else logic to fit with path format
 
-    Modify (if needed) the if else logic to fit with path format
-    """
     if int(cid) != 19999:
         params["data_folder"] = os.path.join(data_path, "client_" + str(cid))
     else:
@@ -84,7 +89,6 @@ def int_model(
         run_opts=run_opts,
         checkpointer=params["checkpointer"],
     )
-    print("ASR INITITITITITIT")
     asr_brain.label_encoder = label_encoder
     asr_brain.label_encoder.add_unk()
 
@@ -94,13 +98,10 @@ def int_model(
 
 
 def pre_trained_point(path, save, hparams, device, parallel):
+    """Returns a pre-trained model from a path and hyperparameters."""
     state_dict = torch.load(path)
 
     overrides = {"output_folder": save}
-    # start the starting point from CPU
-    # run_opts = {'debug': False, 'debug_batches': 2, 'debug_epochs': 2,
-    # 'device': device, 'data_parallel_backend': True, 'distributed_launch': False,
-    # 'distributed_backend': 'nccl', 'find_unused_parameters': False}
 
     _, run_opts, _ = sb.parse_arguments(hparams)
     with open(hparams) as fin:
