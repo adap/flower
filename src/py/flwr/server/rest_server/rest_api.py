@@ -15,19 +15,12 @@
 """REST API server."""
 
 
+import sys
 from logging import INFO
 from typing import List, Optional
 from uuid import UUID
 
-try:
-    from fastapi import FastAPI, HTTPException, Request, Response
-    from starlette.datastructures import Headers
-except ImportError as missing_dep:
-    raise ImportError(
-        "To use the REST API you must install the "
-        "extra dependencies by running `pip install flwr['rest']`."
-    ) from missing_dep
-
+from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
     PullTaskInsRequest,
@@ -38,6 +31,13 @@ from flwr.proto.fleet_pb2 import (
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.state import State
+
+try:
+    from fastapi import FastAPI, HTTPException, Request, Response
+    from starlette.datastructures import Headers
+except ModuleNotFoundError:
+    sys.exit(MISSING_EXTRA_REST)
+
 
 app: FastAPI = FastAPI()
 

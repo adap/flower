@@ -13,6 +13,7 @@
 # limitations under the License.
 """SGD optimizer implementation for transfer learning models."""
 
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
