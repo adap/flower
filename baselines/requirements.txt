@@ -16,6 +16,7 @@ scikit-image >= 0.18.1
 scikit-learn >= 0.24.2
 wget >= 3.2
 speechbrain >= 0.5.7
+transformers >= 4.28.1
 
 ##### dev-dependencies
 isort == 5.11.5

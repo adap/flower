@@ -1,16 +1,17 @@
 # Changelog
 
-## v1.4.0 (2023-04-21)
+## Unreleased
 
 ### Thanks to our contributors
 
-We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
-
-`Adam Narozniak`, `Alexander Viala Bellander`, `Charles Beauville`, `Chenyang Ma (Danny)`, `Daniel J. Beutel`, `Edoardo`, `Gautam Jajoo`, `Iacob-Alexandru-Andrei`, `JDRanpariya`, `Jean Charle Yaacoub`, `Kunal Sarkhel`, `L. Jiang`, `Lennart Behme`, `Max Kapsecker`, `Michał`, `Nic Lane`, `Nikolaos Episkopos`, `Ragy`, `Saurav Maheshkar`, `Semo Yang`, `Steve Laskaridis`, `Steven Hé (Sīchàng)`, `Taner Topal`
-
 ### What's new?
 
-### Incompatible changes
+- **Introduce new Flower Baseline: Wav2Vec 2.0 on the TED-LIUM 3.0 dataset** ([[#1771](https://github.com/adap/flower/pull/1771))
+
+  Adds a new Baseline replicating the TED-LIUM 3 experiment of this [paper](https://arxiv.org/abs/2302.10790) using Wav2Vec 2.0. 
+  Demonstrates Federated Learning for speech recognition tasks.
+
+### Incompatible chang*es
 
 None
 
