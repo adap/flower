@@ -13,7 +13,7 @@ python -c "import torch; torch.hub.load( \
 python server.py &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
-for i in `seq 0 1`; do
+for i in `seq 0 9`; do
     echo "Starting client $i"
     python client.py --partition=${i} --toy True &
 done
