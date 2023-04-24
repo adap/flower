@@ -26,12 +26,6 @@ def test_ipv4_correct() -> None:
         ("127.0.0.1:8080", ("127.0.0.1", 8080, False)),
         ("0.0.0.0:12", ("0.0.0.0", 12, False)),
         ("0.0.0.0:65535", ("0.0.0.0", 65535, False)),
-        ("flower.dev:123", ("flower.dev", 123, False)),
-        ("flower.dev:123", ("flower.dev", 123, False)),
-        ("sub.flower.dev:123", ("sub.flower.dev", 123, False)),
-        ("sub2.sub1.flower.dev:123", ("sub2.sub1.flower.dev", 123, False)),
-        ("s5.s4.s3.s2.s1.flower.dev:123", ("s5.s4.s3.s2.s1.flower.dev", 123, False)),
-        ("localhost:123", ("localhost", 123, False)),
     ]
 
     for address, expected in addresses:
@@ -47,9 +41,6 @@ def test_ipv4_incorrect() -> None:
 
     # Prepare
     addresses = [
-        "127.0.0.1::8080",
-        "0.0.0.0.0:12",
-        "1112.0.0.0:50",
         "127.0.0.1",
         "42.1.1.0:9988898",
         "0.0.0.0:-999999",
@@ -103,14 +94,50 @@ def test_ipv6_incorrect() -> None:
 
     # Prepare
     addresses = [
-        "2001:db8:3333:4444:5555:6666:7777:8888::8080",
-        "999999:db8:3333:4444:5555:6666:7777:8888:50",
-        "2001:db8:3333:4444:5555:6666:7777:8888",
         "2001:db8:3333:4444:5555:6666:7777:8888:9988898",
         "2001:db8:3333:4444:5555:6666:7777:8888:-9988898",
         "2001:db8:3333:4444:5555:6666:7777:8888:-1",
         "2001:db8:3333:4444:5555:6666:7777:8888:0",
         "2001:db8:3333:4444:5555:6666:7777:8888:65536",
+    ]
+
+    for address in addresses:
+        # Execute
+        actual = parse_address(address)
+
+        # Assert
+        assert actual is None
+
+
+def test_domain_correct() -> None:
+    """Test if a correct domain address is correctly parsed."""
+
+    # Prepare
+    addresses = [
+        ("flower.dev:123", ("flower.dev", 123, None)),
+        ("sub.flower.dev:123", ("sub.flower.dev", 123, None)),
+        ("sub2.sub1.flower.dev:123", ("sub2.sub1.flower.dev", 123, None)),
+        ("s5.s4.s3.s2.s1.flower.dev:123", ("s5.s4.s3.s2.s1.flower.dev", 123, None)),
+        ("localhost:123", ("localhost", 123, None)),
+        ("https://localhost:123", ("https://localhost", 123, None)),
+        ("http://localhost:123", ("http://localhost", 123, None)),
+    ]
+
+    for address, expected in addresses:
+        # Execute
+        actual = parse_address(address)
+
+        # Assert
+        assert actual == expected
+
+
+def test_domain_incorrect() -> None:
+    """Test if an incorrect domain address returns None."""
+
+    # Prepare
+    addresses = [
+        "flower.dev",
+        "flower.dev:65536",
     ]
 
     for address in addresses:

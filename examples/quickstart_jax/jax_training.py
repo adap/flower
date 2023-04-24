@@ -7,6 +7,7 @@ If you have any questions concerning the linear regression used with jax
 please read the JAX documentation or the mentioned tutorial.
 """
 
+
 from typing import Dict, List, Tuple, Callable
 import jax
 import jax.numpy as jnp
