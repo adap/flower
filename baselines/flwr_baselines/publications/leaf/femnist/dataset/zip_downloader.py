@@ -1,5 +1,7 @@
 """Module for downloading the ZIP files, extracting them and removing the
 downloaded zip file."""
+
+
 import os
 import pathlib
 import shutil

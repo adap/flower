@@ -14,23 +14,14 @@
 # ==============================================================================
 """Flower IP address utils."""
 
-
-import re
 from ipaddress import ip_address
-from typing import Optional, Pattern, Tuple
+from typing import Optional, Tuple
 
 IPV6: int = 6
 
-DOMAIN_PATTERN: Pattern[str] = re.compile(
-    r"^(localhost)|(([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|"
-    r"([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})|"
-    r"([a-zA-Z0-9][-_.a-zA-Z0-9]{0,61}[a-zA-Z0-9]))\."
-    r"([a-zA-Z]{2,13}|[a-zA-Z0-9-]{2,30}.[a-zA-Z]{2,3})$"
-)
 
-
-def parse_address(address: str) -> Optional[Tuple[str, int, bool]]:
-    """Parses an IP address into a host, port, and version.
+def parse_address(address: str) -> Optional[Tuple[str, int, Optional[bool]]]:
+    """Parses an IP address into host, port, and version.
 
     Parameters
     ----------
@@ -42,26 +33,25 @@ def parse_address(address: str) -> Optional[Tuple[str, int, bool]]:
 
     Returns
     -------
-    Optional[Tuple[str, int, bool]]
-        If the string provided is not a correct IPv6 or IPv4,
+    Optional[Tuple[str, int, Optional[bool]]]
+        If the port provided is incorrect,
         the function will return None, otherwise it will return the host,
-        as a string, the port number, as an int, and
-        a bool that is True if the address is IPv6 and False otherwise.
+        (str), port number (int), and version (bool).
     """
     try:
         raw_host, _, raw_port = address.rpartition(":")
-
-        if DOMAIN_PATTERN.match(raw_host):
-            host = raw_host
-            version = False
-        else:
-            host = raw_host.translate({ord(i): None for i in "[]"})
-            version = ip_address(host).version == IPV6
 
         port = int(raw_port)
 
         if port > 65535 or port < 1:
             raise ValueError("Port number is invalid.")
+
+        try:
+            host = raw_host.translate({ord(i): None for i in "[]"})
+            version = ip_address(host).version == IPV6
+        except ValueError:
+            host = raw_host
+            version = None
 
         return host, port, version
 
