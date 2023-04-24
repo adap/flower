@@ -34,18 +34,18 @@ def main() -> None:
             self.x_train, self.y_train = x_train, y_train
             self.x_test, self.y_test = x_test, y_test
 
-        def get_weights(self) -> fl.common.Weights:
-            return cast(fl.common.Weights, self.model.get_weights())
+        def get_weights(self) -> fl.common.NDArrays:
+            return cast(fl.common.NDArrays, self.model.get_weights())
 
         def fit(
-            self, weights: fl.common.Weights, config: Dict[str, fl.common.Scalar]
-        ) -> Tuple[fl.common.Weights, int, int]:
+            self, weights: fl.common.NDArrays, config: Dict[str, fl.common.Scalar]
+        ) -> Tuple[fl.common.NDArrays, int, int]:
             self.model.set_weights(weights)
             self.model.fit(self.x_train, self.y_train, epochs=5)
             return self.model.get_weights(), len(self.x_train), len(self.x_train)
 
         def evaluate(
-            self, weights: fl.common.Weights, config: Dict[str, fl.common.Scalar]
+            self, weights: fl.common.NDArrays, config: Dict[str, fl.common.Scalar]
         ) -> Tuple[int, float, float]:
             self.model.set_weights(weights)
             loss, accuracy = self.model.evaluate(self.x_test, self.y_test)

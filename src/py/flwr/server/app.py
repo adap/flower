@@ -16,10 +16,12 @@
 
 
 import argparse
+import importlib.util
 import sys
 import threading
 from dataclasses import dataclass
-from logging import INFO, WARN
+from logging import ERROR, INFO, WARN
+from os.path import isfile
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
 from typing import List, Optional, Tuple
@@ -27,6 +29,8 @@ from typing import List, Optional, Tuple
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
+from flwr.common.address import parse_address
+from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
 from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
@@ -63,7 +67,7 @@ class ServerConfig:
     round_timeout: Optional[float] = None
 
 
-def start_server(  # pylint: disable=too-many-arguments
+def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     *,
     server_address: str = ADDRESS_FLEET_API_GRPC_BIDI,
     server: Optional[Server] = None,
@@ -147,10 +151,17 @@ def start_server(  # pylint: disable=too-many-arguments
         initialized_config,
     )
 
+    # Parse IP address
+    parsed_address = parse_address(server_address)
+    if not parsed_address:
+        sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
     # Start gRPC server
     grpc_server = start_grpc_server(
         client_manager=initialized_server.client_manager(),
-        server_address=server_address,
+        server_address=address,
         max_message_length=grpc_max_message_length,
         certificates=certificates,
     )
@@ -221,14 +232,21 @@ def run_driver_api() -> None:
 
     log(INFO, "Starting Flower server (Driver API)")
     event(EventType.RUN_DRIVER_API_ENTER)
-    args = _parse_args_driver()
+    args = _parse_args_driver().parse_args()
+
+    # Parse IP address
+    parsed_address = parse_address(args.driver_api_address)
+    if not parsed_address:
+        sys.exit(f"Driver IP address ({args.driver_api_address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
 
     # Start server
     grpc_server: grpc.Server = _run_driver_api_grpc(
-        address=args.driver_api_address,
+        address=address,
         state_factory=state_factory,
     )
 
@@ -248,7 +266,7 @@ def run_fleet_api() -> None:
 
     log(INFO, "Starting Flower server (Fleet API)")
     event(EventType.RUN_FLEET_API_ENTER)
-    args = _parse_args_fleet()
+    args = _parse_args_fleet().parse_args()
 
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
@@ -258,15 +276,40 @@ def run_fleet_api() -> None:
 
     # Start Fleet API
     if args.fleet_api_type == "rest":
+        if (
+            importlib.util.find_spec("fastapi")
+            and importlib.util.find_spec("requests")
+            and importlib.util.find_spec("starlette")
+            and importlib.util.find_spec("uvicorn")
+        ) is None:
+            sys.exit(MISSING_EXTRA_REST)
+        address_arg = args.rest_fleet_api_address
+        parsed_address = parse_address(address_arg)
+        if not parsed_address:
+            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
+        host, port, _ = parsed_address
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state_factory),
+            args=(
+                host,
+                port,
+                args.ssl_keyfile,
+                args.ssl_certfile,
+                state_factory,
+                args.rest_fleet_api_workers,
+            ),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
     elif args.fleet_api_type == "grpc":
+        address_arg = args.grpc_fleet_api_address
+        parsed_address = parse_address(address_arg)
+        if not parsed_address:
+            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
+        host, port, is_v6 = parsed_address
+        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
         fleet_server = _run_fleet_api_grpc_bidi(
-            address=args.grpc_fleet_api_address,
+            address=address,
             state_factory=state_factory,
         )
         grpc_servers.append(fleet_server)
@@ -292,14 +335,21 @@ def run_server() -> None:
 
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SERVER_ENTER)
-    args = _parse_args_server()
+    args = _parse_args_server().parse_args()
+
+    # Parse IP address
+    parsed_address = parse_address(args.driver_api_address)
+    if not parsed_address:
+        sys.exit(f"Driver IP address ({args.driver_api_address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
 
     # Start Driver API
     driver_server: grpc.Server = _run_driver_api_grpc(
-        address=args.driver_api_address,
+        address=address,
         state_factory=state_factory,
     )
 
@@ -308,15 +358,40 @@ def run_server() -> None:
 
     # Start Fleet API
     if args.fleet_api_type == "rest":
+        if (
+            importlib.util.find_spec("fastapi")
+            and importlib.util.find_spec("requests")
+            and importlib.util.find_spec("starlette")
+            and importlib.util.find_spec("uvicorn")
+        ) is None:
+            sys.exit(MISSING_EXTRA_REST)
+        address_arg = args.rest_fleet_api_address
+        parsed_address = parse_address(address_arg)
+        if not parsed_address:
+            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
+        host, port, _ = parsed_address
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
-            args=(args.rest_fleet_api_address, state_factory),
+            args=(
+                host,
+                port,
+                args.ssl_keyfile,
+                args.ssl_certfile,
+                state_factory,
+                args.rest_fleet_api_workers,
+            ),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
     elif args.fleet_api_type == "grpc":
+        address_arg = args.grpc_fleet_api_address
+        parsed_address = parse_address(address_arg)
+        if not parsed_address:
+            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
+        host, port, is_v6 = parsed_address
+        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
         fleet_server = _run_fleet_api_grpc_bidi(
-            address=args.grpc_fleet_api_address,
+            address=address,
             state_factory=state_factory,
         )
         grpc_servers.append(fleet_server)
@@ -331,7 +406,12 @@ def run_server() -> None:
     )
 
     # Block
-    driver_server.wait_for_termination()
+    while True:
+        if bckg_threads:
+            for thread in bckg_threads:
+                if not thread.is_alive():
+                    sys.exit(1)
+        driver_server.wait_for_termination(timeout=1)
 
 
 def _register_exit_handlers(
@@ -434,42 +514,80 @@ def _run_fleet_api_grpc_bidi(
     return fleet_grpc_server
 
 
-# pylint: disable=import-outside-toplevel
+# pylint: disable=import-outside-toplevel,too-many-arguments
 def _run_fleet_api_rest(
-    address: str,
+    host: str,
+    port: int,
+    ssl_keyfile: Optional[str],
+    ssl_certfile: Optional[str],
     state_factory: StateFactory,
+    workers: int,
 ) -> None:
     """Run Driver API (REST-based)."""
     try:
         import uvicorn
 
         from flwr.server.rest_server.rest_api import app as fast_api_app
-    except ImportError as missing_dep:
-        raise ImportError(
-            "To use the REST API you must install the "
-            "extra dependencies by running "
-            "`pip install flwr['rest']`."
-        ) from missing_dep
+    except ModuleNotFoundError:
+        sys.exit(MISSING_EXTRA_REST)
+    if workers != 1:
+        raise ValueError(
+            f"The supported number of workers for the Fleet API (REST server) is "
+            f"1. Instead given {workers}. The functionality of >1 workers will be "
+            f"added in the future releases."
+        )
     log(INFO, "Starting Flower REST server")
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
     fast_api_app.state.STATE_FACTORY = state_factory
 
-    host, port_str = address.split(":")
-    port = int(port_str)
+    validation_exceptions = _validate_ssl_files(
+        ssl_certfile=ssl_certfile, ssl_keyfile=ssl_keyfile
+    )
+    if any(validation_exceptions):
+        # Starting with 3.11 we can use ExceptionGroup but for now
+        # this seems to be the reasonable approach.
+        raise ValueError(validation_exceptions)
 
     uvicorn.run(
-        # "flwr.server.rest_server.rest_api:app",
-        app=fast_api_app,
+        app="flwr.server.rest_server.rest_api:app",
         port=port,
         host=host,
         reload=False,
         access_log=True,
-        workers=1,
+        ssl_keyfile=ssl_keyfile,
+        ssl_certfile=ssl_certfile,
+        workers=workers,
     )
 
 
-def _parse_args_driver() -> argparse.Namespace:
+def _validate_ssl_files(
+    ssl_keyfile: Optional[str], ssl_certfile: Optional[str]
+) -> List[ValueError]:
+    validation_exceptions = []
+
+    if ssl_keyfile is not None and not isfile(ssl_keyfile):
+        msg = "Path argument `--ssl-keyfile` does not point to a file."
+        log(ERROR, msg)
+        validation_exceptions.append(ValueError(msg))
+
+    if ssl_certfile is not None and not isfile(ssl_certfile):
+        msg = "Path argument `--ssl-certfile` does not point to a file."
+        log(ERROR, msg)
+        validation_exceptions.append(ValueError(msg))
+
+    if not bool(ssl_keyfile) == bool(ssl_certfile):
+        msg = (
+            "When setting one of `--ssl-keyfile` and "
+            + "`--ssl-certfile`, both have to be used."
+        )
+        log(ERROR, msg)
+        validation_exceptions.append(ValueError(msg))
+
+    return validation_exceptions
+
+
+def _parse_args_driver() -> argparse.ArgumentParser:
     """Parse command line arguments for Driver API."""
     parser = argparse.ArgumentParser(
         description="Start Flower server (Driver API)",
@@ -478,10 +596,10 @@ def _parse_args_driver() -> argparse.Namespace:
     _add_args_common(parser=parser)
     _add_args_driver_api(parser=parser)
 
-    return parser.parse_args()
+    return parser
 
 
-def _parse_args_fleet() -> argparse.Namespace:
+def _parse_args_fleet() -> argparse.ArgumentParser:
     """Parse command line arguments for Fleet API."""
     parser = argparse.ArgumentParser(
         description="Start Flower server (Fleet API)",
@@ -490,10 +608,10 @@ def _parse_args_fleet() -> argparse.Namespace:
     _add_args_common(parser=parser)
     _add_args_fleet_api(parser=parser)
 
-    return parser.parse_args()
+    return parser
 
 
-def _parse_args_server() -> argparse.Namespace:
+def _parse_args_server() -> argparse.ArgumentParser:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
         description="Start Flower server (Driver API and Fleet API)",
@@ -503,7 +621,7 @@ def _parse_args_server() -> argparse.Namespace:
     _add_args_driver_api(parser=parser)
     _add_args_fleet_api(parser=parser)
 
-    return parser.parse_args()
+    return parser
 
 
 def _add_args_common(parser: argparse.ArgumentParser) -> None:
@@ -555,4 +673,20 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "--rest-fleet-api-address",
         help=f"Fleet API REST server address. Default:'{ADDRESS_FLEET_API_REST}'",
         default=ADDRESS_FLEET_API_REST,
+    )
+    rest_group.add_argument(
+        "--ssl-certfile",
+        help="Fleet API REST SSL certificate file (as a path str). Default:None",
+        default=None,
+    )
+    rest_group.add_argument(
+        "--ssl-keyfile",
+        help="Fleet API REST SSL private key file (as a path str). Default:None",
+        default=None,
+    )
+    rest_group.add_argument(
+        "--rest-fleet-api-workers",
+        help=f"Number of workers for Fleet API REST server. Default:'{1}'",
+        type=int,
+        default=1,
     )
