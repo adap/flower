@@ -102,8 +102,8 @@ Information-oriented API reference and other reference material.
    :maxdepth: 2
    :caption: API reference
 
-   flwr <apiref-flwr>
-   binaries <apiref-binaries>
+   flwr Python package <apiref-flwr>
+   Flower CLI commands <apiref-cli>
 
 .. toctree::
    :maxdepth: 1
