@@ -49,11 +49,11 @@ from .numpy_client import has_evaluate as numpyclient_has_evaluate
 from .numpy_client import has_fit as numpyclient_has_fit
 from .numpy_client import has_get_parameters as numpyclient_has_get_parameters
 from .numpy_client import has_get_properties as numpyclient_has_get_properties
-from .eth_clinet import eth_client
-from .eth_clinet.eth_client import has_get_parameters as ethclient_has_get_parameters
-from .eth_clinet.eth_client import has_get_parameters as ethclient_has_get_properties
-from .eth_clinet.eth_client import has_fit as ethclient_has_fit
-from .eth_clinet.eth_client import has_evaluate as ethclient_has_evaluate
+from .eth_client import eth_client
+from .eth_client.eth_client import has_get_parameters as ethclient_has_get_parameters
+from .eth_client.eth_client import has_get_parameters as ethclient_has_get_properties
+from .eth_client.eth_client import has_fit as ethclient_has_fit
+from .eth_client.eth_client import has_evaluate as ethclient_has_evaluate
 
 
 

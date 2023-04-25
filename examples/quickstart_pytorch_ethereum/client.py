@@ -132,5 +132,5 @@ class FlowerClient(fl.client.EthClient):
 # Start Flower client
 fl.client.start_eth_client(
     server_address="127.0.0.1:8081",
-    client=FlowerClient(cid=0),
+    client=FlowerClient(cid=1),
 )
