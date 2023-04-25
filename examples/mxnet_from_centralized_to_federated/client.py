@@ -1,5 +1,6 @@
 """Flower client example using MXNet for MNIST classification."""
 
+
 from typing import Dict, List, Tuple
 
 import flwr as fl

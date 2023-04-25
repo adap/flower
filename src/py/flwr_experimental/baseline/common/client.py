@@ -77,7 +77,7 @@ class VisionClassificationClient(fl.client.Client):
         return fl.common.ParametersRes(parameters=parameters)
 
     def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
-        weights: fl.common.Weights = fl.common.parameters_to_ndarrays(ins.parameters)
+        weights: fl.common.NDArrays = fl.common.parameters_to_ndarrays(ins.parameters)
         config = ins.config
         log(
             DEBUG,

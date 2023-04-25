@@ -5,7 +5,7 @@ batch_size: 10
 num_rounds: 10
 iid: False
 balance: True
-stagglers_fraction: 0.5
+stragglers_fraction: 0.5
 learning_rate: 0.1
 mu: 1
 save_path: "docs/results"

@@ -1,41 +1,41 @@
-# Flower iOS - A Flower SDK for iOS Devices with Example
-Flower iOS contains a Swift Package for Flower clients in iOS and an example that demonstrates a federated learning setup with iOS clients. The training is done on a MNIST dataset using CoreML with a updatable digit recognition model. 
+# FLiOS - A Flower SDK for iOS Devices with Example
+
+FLiOS is a sample application for testing and benchmarking the Swift implementation of Flower. The default scenario uses the MNIST dataset and the associated digit recognition model. The app includes the Swift package in `./src/swift` and allows extension for other benchmarking scenarios. The app guides the user through the steps of the machine learning process that would be executed in a normal production environment as a background task of the application. The app is therefore aimed at researchers and research institutions to test their hypotheses and perform performance analyses.
 
 ## Project Setup
 
-Requirements for setting up a server:
-- Conda for managing environment
-- Python3
-
-Requirements for setting up a client:
-- XCode
-
-To set up the project, start by cloning the ios folder. After that create a new conda environment.
+Project dependencies (`flwr`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
 ```shell
-conda create --name flower-ios
+poetry install
+poetry shell
 ```
 
-Activate the created conda enviroment
+Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
 
 ```shell
-conda activate flower-ios
+python3 -c "import flwr"
 ```
 
-Install flwr using pip3
-
-```shell
-pip3 install flwr
-```
+If you don't see any errors you're good to go!
 
 # Run Federated Learning on iOS Clients
 
 To start the server, write the following command in the terminal in the ios folder (with the conda environment created above):
 
 ```shell
-python3 run server.py
+python3 server.py
 ```
 
 Open the FlowerCoreML.xcodeproj with XCode, wait until the dependencies are fetched, then click build and run with iPhone 13 Pro Max as target, or you can deploy it in your own iOS device by connecting your Mac, where you run your XCode, and your iPhone.
 
 When the iOS app runs, load both the training and test dataset first. Then enter the hostname and port of your server in the TextField provided. Finally press `Start` which will start the federated training.
+
+# Adding further Scenarios
+
+If you want to add more scenarios beyond MNIST, do the following:
+
+- Open the _scneario.ipynb_ notebook and adapt it to your needs based on the existing structure
+- Open Xcode and add the dataset(s) and model to the sources of your project
+- Add the dataset(s) to _Copy Bundle Resources_ in the Build Phases settings of the project
+- Navigate to the _Constants.swift_ file and add your scenario so that it fits into the given structure

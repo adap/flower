@@ -32,7 +32,7 @@ def main(cfg: DictConfig) -> None:
         iid=cfg.iid,
         balance=cfg.balance,
         learning_rate=cfg.learning_rate,
-        stagglers=cfg.stagglers_fraction,
+        stragglers=cfg.stragglers_fraction,
     )
 
     evaluate_fn = utils.gen_evaluate_fn(testloader, DEVICE)
@@ -40,7 +40,7 @@ def main(cfg: DictConfig) -> None:
     strategy = fl.server.strategy.FedProx(
         fraction_fit=1.0,
         fraction_evaluate=0.0,
-        min_fit_clients=int(cfg.num_clients * (1 - cfg.stagglers_fraction)),
+        min_fit_clients=int(cfg.num_clients * (1 - cfg.stragglers_fraction)),
         min_evaluate_clients=0,
         min_available_clients=cfg.num_clients,
         on_fit_config_fn=lambda curr_round: {"curr_round": curr_round},
@@ -65,7 +65,7 @@ def main(cfg: DictConfig) -> None:
         f"_E={cfg.num_epochs}"
         f"_R={cfg.num_rounds}"
         f"_mu={cfg.mu}"
-        f"_stag={cfg.stagglers_fraction}"
+        f"_strag={cfg.stragglers_fraction}"
     )
 
     np.save(
