@@ -618,7 +618,8 @@ def _parse_args_fleet() -> argparse.ArgumentParser:
 def _parse_args_server() -> argparse.ArgumentParser:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
-        description="This will start a Flower server (meaning, a Driver API and a Fleet API), "
+        description="This will start a Flower server "
+        "(meaning, a Driver API and a Fleet API), "
         "that clients will be able to connect to.",
     )
 
@@ -632,8 +633,9 @@ def _parse_args_server() -> argparse.ArgumentParser:
 def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--database",
-        help="A string representing the path to the database file that will be opened."
-        "Note that passing ':memory:' will open a connection to a database that is in RAM, "
+        help="A string representing the path to the database "
+        "file that will be opened. Note that passing ':memory:' "
+        "will open a connection to a database that is in RAM, "
         "instead of on disk. If nothing is provided, "
         "Flower will just create a state in memory.",
         default=DATABASE,
@@ -643,7 +645,8 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
 def _add_args_driver_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--driver-api-address",
-        help="The driver API gRPC server address, which can be an IPv4, IPv6, or a domain name.",
+        help="The driver API gRPC server address, which can be an IPv4, "
+        "IPv6, or a domain name.",
         default=ADDRESS_DRIVER_API,
     )
 
@@ -672,7 +675,8 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     grpc_group = parser.add_argument_group("Fleet API gRPC server options", "")
     grpc_group.add_argument(
         "--grpc-fleet-api-address",
-        help="The fleet API gRPC server address, which can be an IPv4, IPv6, or a domain name.",
+        help="The fleet API gRPC server address, which can be an IPv4, "
+        "IPv6, or a domain name.",
         default=ADDRESS_FLEET_API_GRPC_RERE,
     )
 
@@ -680,7 +684,8 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     rest_group = parser.add_argument_group("Fleet API REST server options", "")
     rest_group.add_argument(
         "--rest-fleet-api-address",
-        help="The driver API REST server address, which can be an IPv4, IPv6, or a domain name.",
+        help="The driver API REST server address, which can be an IPv4, "
+        "IPv6, or a domain name.",
         default=ADDRESS_FLEET_API_REST,
     )
     rest_group.add_argument(
