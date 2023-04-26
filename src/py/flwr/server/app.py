@@ -591,8 +591,8 @@ def _parse_args_driver() -> argparse.ArgumentParser:
     """Parse command line arguments for Driver API."""
     parser = argparse.ArgumentParser(
         description="Starts a Flower driver API server. "
-                    "This server will be responsible of "
-                    "sending/receiving tasks to/from the Fleet.",
+        "This server will be responsible of "
+        "sending/receiving tasks to/from the Fleet.",
     )
 
     _add_args_common(parser=parser)
@@ -605,8 +605,8 @@ def _parse_args_fleet() -> argparse.ArgumentParser:
     """Parse command line arguments for Fleet API."""
     parser = argparse.ArgumentParser(
         description="Starts a Flower fleet API server."
-                    "This server will be responsible of "
-                    "sending/receiving tasks to/from the clients.",
+        "This server will be responsible of "
+        "sending/receiving tasks to/from the clients.",
     )
 
     _add_args_common(parser=parser)
@@ -619,7 +619,7 @@ def _parse_args_server() -> argparse.ArgumentParser:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
         description="This will start a Flower server (meaning, a Driver API and a Fleet API), "
-                    "that clients will be able to connect to.",
+        "that clients will be able to connect to.",
     )
 
     _add_args_common(parser=parser)
@@ -632,10 +632,10 @@ def _parse_args_server() -> argparse.ArgumentParser:
 def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--database",
-        help=f"A string representing the path to the database file that will be opened." 
-              "Note that passing ':memory:' will open a connection to a database that is in RAM, "
-              "instead of on disk. If nothing is provided, "
-              "Flower will just create a state in memory.",
+        help=f"A string representing the path to the database file that will be opened."
+        "Note that passing ':memory:' will open a connection to a database that is in RAM, "
+        "instead of on disk. If nothing is provided, "
+        "Flower will just create a state in memory.",
         default=DATABASE,
     )
 
@@ -685,19 +685,19 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     rest_group.add_argument(
         "--ssl-certfile",
         help="Fleet API REST server SSL certificate file (as a path str), "
-             "needed for using 'https'.",
+        "needed for using 'https'.",
         default=None,
     )
     rest_group.add_argument(
         "--ssl-keyfile",
         help="Fleet API REST server SSL private key file (as a path str), "
-             "needed for using 'https'.",
+        "needed for using 'https'.",
         default=None,
     )
     rest_group.add_argument(
         "--rest-fleet-api-workers",
         help=f"Sets the number of concurrent workers for the Fleet API REST server."
-              "Currently, only 1 concurrent worker is supported.",
+        "Currently, only 1 concurrent worker is supported.",
         type=int,
         default=1,
     )
