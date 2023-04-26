@@ -657,7 +657,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         dest="fleet_api_type",
         const="grpc",
         default="grpc",
-        help="Start a gRPC-based Fleet API server (which is the default if no argument is provided)",
+        help="Start a gRPC-based Fleet API server (which is the default if no argument is provided).",
     )
     ex_group.add_argument(
         "--rest",
@@ -696,7 +696,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     )
     rest_group.add_argument(
         "--rest-fleet-api-workers",
-        help=f"Sets the number of concurrent workers for the Fleet API REST server."
+        help=f"Sets the number of concurrent workers for the Fleet API REST server. "
               "Currently, only 1 concurrent worker is supported.",
         type=int,
         default=1,
