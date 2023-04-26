@@ -590,9 +590,12 @@ def _validate_ssl_files(
 def _parse_args_driver() -> argparse.ArgumentParser:
     """Parse command line arguments for Driver API."""
     parser = argparse.ArgumentParser(
-        description="Starts a Flower driver API server. "
+        description="Starts a Flower Driver API server. "
         "This server will be responsible of "
-        "sending/receiving tasks to/from the Fleet.",
+        "receiving TaskIns from the Driver script and "
+        "sending them to the Fleet API. Once the client nodes "
+        "are done, they will send the TaskRes back to this Driver API server (through"
+        " the Fleet API) which will then send them back to the Driver script.",
     )
 
     _add_args_common(parser=parser)
@@ -604,9 +607,12 @@ def _parse_args_driver() -> argparse.ArgumentParser:
 def _parse_args_fleet() -> argparse.ArgumentParser:
     """Parse command line arguments for Fleet API."""
     parser = argparse.ArgumentParser(
-        description="Starts a Flower fleet API server."
+        description="Starts a Flower Fleet API server."
         "This server will be responsible of "
-        "sending/receiving tasks to/from the clients.",
+        "sending TaskIns (received from the Driver API) to the client nodes "
+        "and of receiving TaskRes sent back from those same client nodes once "
+        "they are done. Then, this Fleet API server can send those "
+        "TaskRes back to the Driver API.",
     )
 
     _add_args_common(parser=parser)
@@ -645,7 +651,7 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
 def _add_args_driver_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--driver-api-address",
-        help="The driver API gRPC server address, which can be an IPv4, "
+        help="The Driver API gRPC server address, which can be an IPv4, "
         "IPv6, or a domain name.",
         default=ADDRESS_DRIVER_API,
     )
@@ -675,7 +681,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     grpc_group = parser.add_argument_group("Fleet API gRPC server options", "")
     grpc_group.add_argument(
         "--grpc-fleet-api-address",
-        help="The fleet API gRPC server address, which can be an IPv4, "
+        help="The Fleet API gRPC server address, which can be an IPv4, "
         "IPv6, or a domain name.",
         default=ADDRESS_FLEET_API_GRPC_RERE,
     )
@@ -684,7 +690,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     rest_group = parser.add_argument_group("Fleet API REST server options", "")
     rest_group.add_argument(
         "--rest-fleet-api-address",
-        help="The driver API REST server address, which can be an IPv4, "
+        help="The Driver API REST server address, which can be an IPv4, "
         "IPv6, or a domain name.",
         default=ADDRESS_FLEET_API_REST,
     )
@@ -702,8 +708,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     )
     rest_group.add_argument(
         "--rest-fleet-api-workers",
-        help="Sets the number of concurrent workers for the Fleet API REST server. "
-        "Currently, only 1 concurrent worker is supported.",
+        help="Sets the number of concurrent workers for the Fleet API REST server.",
         type=int,
         default=1,
     )
