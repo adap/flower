@@ -10,7 +10,6 @@ flower-driver-api
    :module: flwr.server.app
    :func: _parse_args_driver
    :prog: flower-driver-api
-   :nodefault:
 
 .. _flower-fleet-apiref:
 
@@ -21,7 +20,6 @@ flower-fleet-api
    :module: flwr.server.app
    :func:  _parse_args_fleet
    :prog: flower-fleet-api
-   :nodefault:
 
 .. _flower-server-apiref:
 
@@ -32,7 +30,6 @@ flower-server
    :module: flwr.server.app
    :func:  _parse_args_server
    :prog: flower-server
-   :nodefault:
 
 .. .. _flower-client-apiref:
 
