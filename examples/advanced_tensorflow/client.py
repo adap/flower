@@ -73,8 +73,23 @@ class CifarClient(fl.client.NumPyClient):
 def main() -> None:
     # Parse command line argument `partition`
     parser = argparse.ArgumentParser(description="Flower")
-    parser.add_argument("--partition", type=int, choices=range(0, 10), required=True)
-    parser.add_argument("--toy", type=bool, default=False, required=False)
+    parser.add_argument(
+        "--partition",
+        type=int,
+        default=0,
+        choices=range(0, 10),
+        required=True,
+        help="Specifies the artificial data partition of CIFAR10 to be used. "
+        "Picks partition 0 by default",
+    )
+    parser.add_argument(
+        "--toy",
+        type=bool,
+        default=False,
+        required=False,
+        help="Set to true to quicky run the client using only 10 datasamples. "
+        "Useful for testing purposes. Default: False",
+    )
     args = parser.parse_args()
 
     # Load and compile Keras model
