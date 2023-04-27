@@ -690,7 +690,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     rest_group = parser.add_argument_group("Fleet API REST server options", "")
     rest_group.add_argument(
         "--rest-fleet-api-address",
-        help="The Driver API REST server address, which can be an IPv4, "
+        help="The Fleet API REST server address, which can be an IPv4, "
         "IPv6, or a domain name.",
         default=ADDRESS_FLEET_API_REST,
     )
