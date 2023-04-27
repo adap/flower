@@ -87,10 +87,8 @@ def main() -> None:
     (x_train, y_train), (x_test, y_test) = load_partition(args.partition)
 
     if args.toy:
-        (x_train, y_train), (x_test, y_test) = (x_train[:10], y_train[:10]), (
-            x_test[:10],
-            y_test[:10],
-        )
+        x_train, y_train = x_train[:10], y_train[:10]
+        x_test, y_test = x_test[:10], y_test[:10]
 
     # Start Flower client
     client = CifarClient(model, x_train, y_train, x_test, y_test)
