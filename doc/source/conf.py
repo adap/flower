@@ -83,6 +83,7 @@ redirects = {
     "writing-documentation": "write-documentation.html",
     "quickstart_scikitlearn": "quickstart-scikitlearn.html",
     "quickstart_xgboost": "quickstart-xgboost.html",
+    "apiref-binaries": "apiref-cli.html",
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",
