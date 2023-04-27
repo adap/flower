@@ -591,7 +591,7 @@ def _parse_args_driver() -> argparse.ArgumentParser:
     """Parse command line arguments for Driver API."""
     parser = argparse.ArgumentParser(
         description="Start a Flower Driver API server. "
-        "This server will be responsible of "
+        "This server will be responsible for "
         "receiving TaskIns from the Driver script and "
         "sending them to the Fleet API. Once the client nodes "
         "are done, they will send the TaskRes back to this Driver API server (through"
