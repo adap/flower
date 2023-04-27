@@ -590,7 +590,7 @@ def _validate_ssl_files(
 def _parse_args_driver() -> argparse.ArgumentParser:
     """Parse command line arguments for Driver API."""
     parser = argparse.ArgumentParser(
-        description="Starts a Flower Driver API server. "
+        description="Start a Flower Driver API server. "
         "This server will be responsible of "
         "receiving TaskIns from the Driver script and "
         "sending them to the Fleet API. Once the client nodes "
@@ -607,7 +607,7 @@ def _parse_args_driver() -> argparse.ArgumentParser:
 def _parse_args_fleet() -> argparse.ArgumentParser:
     """Parse command line arguments for Fleet API."""
     parser = argparse.ArgumentParser(
-        description="Starts a Flower Fleet API server."
+        description="Start a Flower Fleet API server."
         "This server will be responsible of "
         "sending TaskIns (received from the Driver API) to the client nodes "
         "and of receiving TaskRes sent back from those same client nodes once "
@@ -708,7 +708,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     )
     rest_group.add_argument(
         "--rest-fleet-api-workers",
-        help="Sets the number of concurrent workers for the Fleet API REST server.",
+        help="Set the number of concurrent workers for the Fleet API REST server.",
         type=int,
         default=1,
     )
