@@ -73,6 +73,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    saving-and-loading-pytorch-checkpoints
    monitor-simulation
    ssl-enabled-connections
+   add-early-stopping
    example-walkthrough-pytorch-mnist
    example-pytorch-from-centralized-to-federated
    example-mxnet-walk-through
