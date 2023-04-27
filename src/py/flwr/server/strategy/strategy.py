@@ -164,7 +164,9 @@ class Strategy(ABC):
     @abstractmethod
     def evaluate(
         self, server_round: int, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    ) -> Optional[
+        Union[Tuple[float, Dict[str, Scalar]], Tuple[float, Dict[str, Scalar], bool]]
+    ]:
         """Evaluate the current model parameters.
 
         This function can be used to perform centralized (i.e., server-side) evaluation
@@ -179,7 +181,14 @@ class Strategy(ABC):
 
         Returns
         -------
-        evaluation_result : Optional[Tuple[float, Dict[str, Scalar]]]
+        evaluation_result : Optional[
+            Union[
+                Tuple[float, Dict[str, Scalar]], 
+                Tuple[float, Dict[str, Scalar], bool]
+            ]
+        ]
             The evaluation result, usually a Tuple containing loss and a
             dictionary containing task-specific metrics (e.g., accuracy).
+            But the Tuple can also contain a third value, a boolean, that
+            can, for instance, be used for early stopping.
         """

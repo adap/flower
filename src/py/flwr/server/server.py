@@ -115,7 +115,10 @@ class Server:
             # Evaluate model using strategy implementation
             res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
             if res_cen is not None:
-                loss_cen, metrics_cen = res_cen
+                if len(res_cen) == 3:
+                    loss_cen, metrics_cen, stop_training = res_cen
+                else:
+                    loss_cen, metrics_cen, stop_training = (*res_cen, False)
                 log(
                     INFO,
                     "fit progress: (%s, %s, %s, %s)",
@@ -128,6 +131,11 @@ class Server:
                 history.add_metrics_centralized(
                     server_round=current_round, metrics=metrics_cen
                 )
+                if stop_training:
+                    end_time = timeit.default_timer()
+                    elapsed = end_time - start_time
+                    log(INFO, "FL finished in %s", elapsed)
+                    return history
 
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
