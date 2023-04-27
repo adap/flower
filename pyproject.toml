@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.4.0"
+version = "1.5.0"
 description = "Flower: A Friendly Federated Learning Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
@@ -64,13 +64,10 @@ requests = { version = "^2.28.2", optional = true }
 fastapi = { version = "^0.95.0", optional = true }
 starlette = { version = "^0.26.1", optional = true }
 uvicorn = { version = "^0.21.1", extras = ["standard"], optional = true }
-# Optional dependency (xgboost)
-xgboost = { version = "^1.6.2", optional = true }
 
 [tool.poetry.extras]
 simulation = ["ray"]
 rest = ["fastapi", "requests", "starlette", "uvicorn"]
-xgboost = ["xgboost"]
 
 [tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.6"
@@ -101,6 +98,7 @@ furo = "==2022.12.7"
 sphinx-reredirects = "==0.1.1"
 nbsphinx = "==0.8.12"
 nbstripout = "==0.6.1"
+sphinx-argparse = "==0.4.0"
 
 [tool.isort]
 line_length = 88

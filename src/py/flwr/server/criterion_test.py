@@ -14,6 +14,7 @@
 # ==============================================================================
 """Tests for criterion sampling."""
 
+
 from unittest.mock import MagicMock
 
 from flwr.server.client_manager import SimpleClientManager

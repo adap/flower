@@ -14,6 +14,7 @@
 # ==============================================================================
 """Telemetry tests."""
 
+
 import time
 import unittest
 from typing import Callable
