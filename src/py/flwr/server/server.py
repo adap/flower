@@ -18,7 +18,7 @@
 import concurrent.futures
 import timeit
 from logging import DEBUG, INFO
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 from flwr.common import (
     Code,
@@ -116,9 +116,14 @@ class Server:
             res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
             if res_cen is not None:
                 if len(res_cen) == 3:
-                    loss_cen, metrics_cen, stop_training = res_cen
+                    loss_cen, metrics_cen, stop_training = cast(
+                        Tuple[float, Dict[str, Scalar], bool], res_cen
+                    )
                 else:
-                    loss_cen, metrics_cen, stop_training = (*res_cen, False)
+                    loss_cen, metrics_cen, stop_training = (
+                        *cast(Tuple[float, Dict[str, Scalar]], res_cen),
+                        False,
+                    )
                 log(
                     INFO,
                     "fit progress: (%s, %s, %s, %s)",

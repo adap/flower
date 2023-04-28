@@ -126,5 +126,7 @@ class DPFedAvgFixed(Strategy):
 
     def evaluate(
         self, server_round: int, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    ) -> Optional[
+        Union[Tuple[float, Dict[str, Scalar]], Tuple[float, Dict[str, Scalar], bool]]
+    ]:
         return self.strategy.evaluate(server_round, parameters)
