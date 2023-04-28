@@ -36,7 +36,7 @@ copyright = "2022 Adap GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.4.0"
+release = "1.5.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -83,6 +83,7 @@ redirects = {
     "writing-documentation": "write-documentation.html",
     "quickstart_scikitlearn": "quickstart-scikitlearn.html",
     "quickstart_xgboost": "quickstart-xgboost.html",
+    "apiref-binaries": "apiref-cli.html",
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",
