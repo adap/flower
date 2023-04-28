@@ -183,7 +183,7 @@ class Strategy(ABC):
         -------
         evaluation_result : Optional[
             Union[
-                Tuple[float, Dict[str, Scalar]], 
+                Tuple[float, Dict[str, Scalar]],
                 Tuple[float, Dict[str, Scalar], bool]
             ]
         ]
