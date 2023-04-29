@@ -1,5 +1,5 @@
-API Reference - flwr
-=========================
+API Reference - flwr (Python package)
+=====================================
 
 
 .. _flwr-client-apiref:
@@ -187,3 +187,4 @@ common
 
 .. automodule:: flwr.common
   :members:
+  :exclude-members: event

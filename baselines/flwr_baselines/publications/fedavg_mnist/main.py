@@ -1,5 +1,6 @@
 """Runs CNN federated learning for CIFAR10 dataset."""
 
+
 from pathlib import Path
 
 import flwr as fl
