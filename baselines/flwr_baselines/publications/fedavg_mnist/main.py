@@ -1,4 +1,4 @@
-"""Runs CNN federated learning for CIFAR10 dataset."""
+"""Runs CNN federated learning for MNIST dataset."""
 
 from pathlib import Path
 
@@ -10,7 +10,7 @@ from omegaconf import DictConfig
 
 from flwr_baselines.publications.fedavg_mnist import client, utils
 
-DEVICE: torch.device = torch.device("cuda")
+DEVICE: torch.device = torch.device("cpu")
 
 
 @hydra.main(config_path="docs/conf", config_name="config", version_base=None)
