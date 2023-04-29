@@ -16,7 +16,7 @@ from flwr.common.typing import NDArrays, Scalar
 from flwr.server.history import History
 from torch.utils.data import DataLoader
 
-import model
+from flwr_baselines.publications.fedavg_cifar10 import model
 
 
 def plot_metric_from_history(
@@ -42,15 +42,17 @@ def plot_metric_from_history(
         if metric_type == "centralized"
         else hist.metrics_distributed
     )
+
     rounds, values = zip(*metric_dict["accuracy"])
     
-    fig, axis = fig.add_subplots()
-    plt.plot(np.asarray(rounds), np.asarray(values), label="FedAvg")
+    fig, axis = plt.subplots()
+    plt.plot(np.asarray(rounds), np.asarray(values), c='b', label="FedAvg")
     
     # Set paper's results
     plt.axhline(
         y=max(values),
-        color="silver",
+        color="r",
+        linestyle ='dashed',
         label="Paper's baseline accuracy ",
     )
     
@@ -98,7 +100,8 @@ def plot_eval_loss_from_history(
     # Set paper's results
     plt.axhline(
         y=min(eval_loss),
-        color="silver",
+        color="b",
+        linestyle ='dashed',
         label="Paper's baseline loss ",
     )
 
