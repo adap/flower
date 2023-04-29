@@ -1,6 +1,6 @@
 """Used to test the model and the data partitionning."""
 
-import model
+from flwr_baselines.publications.fedavg_cifar10 import model
 
 
 def test_cnn_size_mnist() -> None:

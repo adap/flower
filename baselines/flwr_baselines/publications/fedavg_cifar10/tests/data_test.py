@@ -1,6 +1,6 @@
 """Used to test the model and the data partitionning."""
 
-import dataset
+from flwr_baselines.publications.fedavg_cifar10 import dataset
 
 
 def test_non_iid_partitionning(num_clients: int = 100) -> None:

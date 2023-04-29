@@ -12,7 +12,7 @@ import numpy as np
 import torch
 from omegaconf import DictConfig
 
-import client, utils
+from flwr_baselines.publications.fedavg_cifar10 import client, utils
 
 DEVICE: torch.device = torch.device("cpu")
 
