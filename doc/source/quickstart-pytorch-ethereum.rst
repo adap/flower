@@ -40,15 +40,17 @@ Lastly, let's install the necessary components to upload and download the model 
   $ sudo bash install.sh
 
 Smart Contract
-__________________
+______________
 Now begin deploying the smart contract for running the Flower example.
 
 First, run *IPFS* daemon to store the Model.
+
 .. code-block:: shell
 
   $ ipfs daemon
 
 Second, Run *Ganache*
+
 .. code-block:: shell
 
   $ ganache-cli --port 7545 --networkId 5777 -a 31 -d
