@@ -151,19 +151,21 @@ for server_round in range(num_rounds):
     # Collect correct results
     node_messages: List[ClientMessage] = []
     for task_res in all_task_res:
-        if hasattr(task_res.task, "legacy_client_message"):
+        if task_res.task.HasField("legacy_client_message"):
             node_messages.append(task_res.task.legacy_client_message)
     print(f"Received {len(node_messages)} results")
 
     weights_results: List[Tuple[NDArrays, int]] = []
     for node_message in node_messages:
-        if hasattr(node_message, "fit_res"):
-            fit_res = node_message.fit_res
-            # Aggregate only if the status is OK
-            if fit_res.status.code == Code.OK.value:
-                weights_results.append(
-                    (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-                )
+        if not node_message.fit_res:
+            continue
+        fit_res = node_message.fit_res
+        # Aggregate only if the status is OK
+        if fit_res.status.code != Code.OK.value:
+            continue
+        weights_results.append(
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+        )
     # Aggregate results - FedAvg
     parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
     parameters = parameters_aggregated
