@@ -117,6 +117,7 @@ Quickstart examples:
 * [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart_jax)
 * [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 * [Quickstart (TFLite on Android)](https://github.com/adap/flower/tree/main/examples/android)
+* [Quickstart (BlockChain-Ethereum based FederatedLearning with PyTorch)](https://github.com/EunsuGoh/flower/tree/main/examples/quickstart_pytorch_ethereum)
 
 Other [examples](https://github.com/adap/flower/tree/main/examples):
 

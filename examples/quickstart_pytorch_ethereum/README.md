@@ -35,7 +35,21 @@ python3 -c "import flwr"
 
 `ganache` installation is required to build Ethereum local environment.
 `truffle` installation is required to build Solidity.
-And then, `ipfs daemon` installation is required to save deep learning model history.
+
+```shell
+npm i -g ganache-cli
+npm i -g truffle
+```
+
+And then, `ipfs daemon` installation is required to save deep learning model history. before installation must install nvm.
+```shell
+wget https://dist.ipfs.tech/kubo/v0.15.0/kubo_v0.12.2_linux-amd64.tar.gz
+tar -xvzf kubo_v0.12.2_linux-amd64.tar.gz
+cd kubo
+sudo bash install.sh
+```
+
+
 
 If you don't see any errors you're good to go!
 
@@ -52,6 +66,7 @@ ganache-cli --port 7545 --networkId 5777 -a 31 -d
 Last, Deploy smart contract
 ```
 cd ~/flowr/py/flwr/client/eth_client
+npm i # first time only
 truffle migrate --network development --reset
 ```
 After deployment, you can get the result like below.
