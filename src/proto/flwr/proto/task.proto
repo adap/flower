@@ -27,6 +27,7 @@ message Task {
   string delivered_at = 4;
   string ttl = 5;
   repeated string ancestry = 6;
+  SecAggMsg sec_agg = 7;
 
   ServerMessage legacy_server_message = 101 [ deprecated = true ];
   ClientMessage legacy_client_message = 102 [ deprecated = true ];
@@ -44,4 +45,38 @@ message TaskRes {
   string group_id = 2;
   string workload_id = 3;
   Task task = 4;
+}
+
+message SecAggMsg {
+  message Arrays {
+    message Plural {
+      repeated bytes value = 1;
+    }
+    oneof value {
+      bytes singular = 1;
+      Plural plural = 2;
+    }
+  }
+  message Bytes {
+    message Plural {
+      repeated bytes value = 1;
+    }
+    oneof value {
+      bytes singular = 1;
+      Plural plural = 2;
+    }
+  }
+  message Scalars {
+    message Plural {
+      repeated Scalar value = 1;
+    }
+    oneof value {
+      Scalar singular = 1;
+      Plural plural = 2;
+    }
+  }
+
+  map<string, Arrays> named_arrays = 1;
+  map<string, Bytes> named_bytes = 2;
+  map<string, Scalars> named_scalars = 3;
 }
