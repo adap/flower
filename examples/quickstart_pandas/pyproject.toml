@@ -13,5 +13,5 @@ maintainers = ["The Flower Authors <hello@flower.dev>"]
 python = "^3.8"
 flwr = "^1.0.0"
 numpy = "^1.21.0"
-pandas = "^1.5.2"
+pandas = "^2.0.0"
 scikit-learn = "^1.1.1"

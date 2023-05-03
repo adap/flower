@@ -66,7 +66,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    :maxdepth: 1
    :caption: How-to guides
 
-   installation
+   install-flower
    configure-clients
    strategies
    implementing-strategies
@@ -103,8 +103,8 @@ Information-oriented API reference and other reference material.
    :maxdepth: 2
    :caption: API reference
 
-   flwr <apiref-flwr>
-   binaries <apiref-binaries>
+   flwr (Python package) <apiref-flwr>
+   Flower CLI commands <apiref-cli>
 
 .. toctree::
    :maxdepth: 1
