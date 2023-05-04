@@ -7,3 +7,4 @@ updates:
     allow:
       # Allow only updates for dev dependencies
       - dependency-type: "development"
+    open-pull-requests-limit: 3
