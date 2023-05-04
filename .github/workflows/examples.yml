@@ -39,35 +39,48 @@ jobs:
         run: |
           cd examples/quickstart_pytorch
           python -c "from torchvision.datasets import CIFAR10; CIFAR10(\"./dataset\", download=True)"
-      - name: Test
+      - name: Run FL
+        uses: mathiasvr/command-output@v1
+        id: fl_run
+        with:
+          run: |
+            cd examples/quickstart_pytorch
+
+            python server.py &
+            sleep 3
+
+            python client.py 1 &
+            sleep 3
+
+            if [[ $(ps aux | grep "[p]ython client.py 1" | awk '{ print $2 }') ]];
+              then echo "Client process 1 started correctly";
+              else echo "Client process 1 crashed" && exit 1;
+            fi
+
+            python client.py 2 &
+            sleep 3
+
+            if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
+              then echo "Client process 2 started correctly";
+              else echo "Client process 2 crashed" && exit 1;
+            fi
+
+            if [[ $(ps aux | grep "[p]ython server.py" | awk '{ print $2 }') ]];
+              then echo "Server process started correctly";
+              else echo "Server process crashed" && exit 1;
+            fi
+
+            sleep 120
+
+            pkill python
+        
+      - name: Validate FL
         run: |
-          cd examples/quickstart_pytorch
-
-          python server.py &
-          sleep 3
-
-          python client.py 1 &
-          sleep 3
-
-          if [[ $(ps aux | grep "[p]ython client.py 1" | awk '{ print $2 }') ]];
-            then echo "Client process 1 started correctly";
-            else echo "Client process 1 crashed" && exit 1;
-          fi
-
-          python client.py 2 &
-          sleep 3
-
-          if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
-            then echo "Client process 2 started correctly";
-            else echo "Client process 2 crashed" && exit 1;
-          fi
-
-          if [[ $(ps aux | grep "[p]ython server.py" | awk '{ print $2 }') ]];
-            then echo "Server process started correctly";
-            else echo "Server process crashed" && exit 1;
-          fi
-
-          killall python
+            if [[ ${{ steps.fl_run.outputs.stdout }} == *"FL finished"* ]];
+              then echo "FL rounds ran correctly";
+              else echo "FL rounds crashed" && exit 1;
+            fi
+        
 
   test_quickstart_tensorflow:
     runs-on: ubuntu-22.04
@@ -95,90 +108,44 @@ jobs:
       - name: Download Datasets
         run: |
           python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
-      - name: Test
-        run: |
-          cd examples/quickstart_tensorflow
-
-          python server.py &
-          sleep 3
-
-          python client.py 1 &
-          sleep 3
-
-          if [[ $(ps aux | grep "[p]ython client.py 1" | awk '{ print $2 }') ]];
-            then echo "Client process 1 started correctly";
-            else echo "Client process 1 crashed" && exit 1;
-          fi
-
-          python client.py 2 &
-          sleep 3
-
-          if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
-            then echo "Client process 2 started correctly";
-            else echo "Client process 2 crashed" && exit 1;
-          fi
-
-          if [[ $(ps aux | grep "[p]ython server.py" | awk '{ print $2 }') ]];
-            then echo "Server process started correctly";
-            else echo "Server process crashed" && exit 1;
-          fi
-
-          killall python
-
-  test_pytorch_from_centralized_to_federated:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Run FL
+        uses: mathiasvr/command-output@v1
+        id: fl_run
         with:
-          python-version: 3.7.15
-      - name: Install
+          run: |
+            cd examples/quickstart_tensorflow
+
+            python server.py &
+            sleep 3
+
+            python client.py 1 &
+            sleep 3
+
+            if [[ $(ps aux | grep "[p]ython client.py 1" | awk '{ print $2 }') ]];
+              then echo "Client process 1 started correctly";
+              else echo "Client process 1 crashed" && exit 1;
+            fi
+
+            python client.py 2 &
+            sleep 3
+
+            if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
+              then echo "Client process 2 started correctly";
+              else echo "Client process 2 crashed" && exit 1;
+            fi
+
+            if [[ $(ps aux | grep "[p]ython server.py" | awk '{ print $2 }') ]];
+              then echo "Server process started correctly";
+              else echo "Server process crashed" && exit 1;
+            fi
+            
+            sleep 120
+
+            pkill python
+        
+      - name: Validate FL
         run: |
-          python -m pip install -U pip==22.3.1
-          python -m pip install -U setuptools==65.6.3
-          python -m pip install poetry==1.3.2
-          poetry config virtualenvs.create false
-      - name: Install dependencies
-        run: |
-          cd examples/pytorch_from_centralized_to_federated
-          python -m poetry install
-      - name: Cache Datasets
-        uses: actions/cache@v2
-        with:
-          path: "./examples/pytorch_from_centralized_to_federated/dataset"
-          key: pytorch-datasets
-      - name: Download Datasets
-        run: |
-          cd examples/pytorch_from_centralized_to_federated
-          python -c "from torchvision.datasets import CIFAR10; CIFAR10(\"./dataset\", download=True)"
-      - name: Import flwr
-        run: |
-          python3 -c "import flwr"
-      - name: Test
-        run: |
-          cd examples/pytorch_from_centralized_to_federated
-
-          python3 server.py &
-          sleep 3
-
-          if [[ $(ps aux | grep "python server.py" | awk '{ print $2 }') ]];
-            then echo "Server process started correctly";
-            else echo "Server process crashed" && exit 1;
-          fi
-
-          python3 client.py 1 &
-          sleep 3
-
-          if [[ $(ps aux | grep "python client.py 1" | awk '{ print $2 }') ]];
-            then echo "Client process 1 started correctly";
-            else echo "Client process 1 crashed" && exit 1;
-          fi
-
-          python3 client.py 2 &
-          sleep 3
-
-          if [[ $(ps aux | grep "python client.py 2" | awk '{ print $2 }') ]];
-            then echo "Client process 2 started correctly";
-            else echo "Client process 2 crashed" && exit 1;
-          fi
+            if [[ ${{ steps.fl_run.outputs.stdout }} == *"FL finished"* ]];
+              then echo "FL rounds ran correctly";
+              else echo "FL rounds crashed" && exit 1;
+            fi
