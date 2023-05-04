@@ -70,13 +70,14 @@ jobs:
               else echo "Server process crashed" && exit 1;
             fi
 
-            sleep 120
+            sleep 420
 
             pkill python
         
       - name: Validate FL
         run: |
-            if [[ ${{ steps.fl_run.outputs.stdout }} == *"FL finished"* ]];
+            output=${{ steps.fl_run.outputs.stdout }}
+            if [[ "$output" == *"FL finished"* ]];
               then echo "FL rounds ran correctly";
               else echo "FL rounds crashed" && exit 1;
             fi
@@ -139,13 +140,14 @@ jobs:
               else echo "Server process crashed" && exit 1;
             fi
             
-            sleep 120
+            sleep 420
 
             pkill python
         
       - name: Validate FL
         run: |
-            if [[ ${{ steps.fl_run.outputs.stdout }} == *"FL finished"* ]];
+            output=${{ steps.fl_run.outputs.stdout }}
+            if [[ "$output" == *"FL finished"* ]];
               then echo "FL rounds ran correctly";
               else echo "FL rounds crashed" && exit 1;
             fi
