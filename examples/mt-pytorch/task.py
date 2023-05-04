@@ -64,6 +64,7 @@ def train(net, trainloader, valloader, epochs, device: str = "cpu"):
     }
     return results
 
+
 def test(net, testloader):
     """Validate the model on the test set."""
     criterion = torch.nn.CrossEntropyLoss()

@@ -22,7 +22,7 @@ trainloader, testloader = load_data()
 class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         return get_parameters(net)
-    
+
     def fit(self, parameters, config):
         set_parameters(net, parameters)
         results = train(net, trainloader, testloader, epochs=1)

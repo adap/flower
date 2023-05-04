@@ -7,10 +7,12 @@ from flwr.common import Metrics
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     examples = [num_examples for num_examples, _ in metrics]
-    
+
     # Multiply accuracy of each client by number of examples used
     train_losses = [num_examples * m["train_loss"] for num_examples, m in metrics]
-    train_accuracies = [num_examples * m["train_accuracy"] for num_examples, m in metrics]
+    train_accuracies = [
+        num_examples * m["train_accuracy"] for num_examples, m in metrics
+    ]
     val_losses = [num_examples * m["val_loss"] for num_examples, m in metrics]
     val_accuracies = [num_examples * m["val_accuracy"] for num_examples, m in metrics]
 

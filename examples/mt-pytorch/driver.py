@@ -24,10 +24,12 @@ from task import Net, get_parameters, set_parameters
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     examples = [num_examples for num_examples, _ in metrics]
-    
+
     # Multiply accuracy of each client by number of examples used
     train_losses = [num_examples * m["train_loss"] for num_examples, m in metrics]
-    train_accuracies = [num_examples * m["train_accuracy"] for num_examples, m in metrics]
+    train_accuracies = [
+        num_examples * m["train_accuracy"] for num_examples, m in metrics
+    ]
     val_losses = [num_examples * m["val_loss"] for num_examples, m in metrics]
     val_accuracies = [num_examples * m["val_accuracy"] for num_examples, m in metrics]
 
@@ -38,7 +40,6 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
         "val_loss": sum(val_losses) / sum(examples),
         "val_accuracy": sum(val_accuracies) / sum(examples),
     }
-
 
 
 # -------------------------------------------------------------------------- Driver SDK
@@ -191,7 +192,9 @@ for server_round in range(num_rounds):
         weights_results.append(
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
         )
-        metrics_results.append((fit_res.num_examples, serde.metrics_from_proto(fit_res.metrics)))
+        metrics_results.append(
+            (fit_res.num_examples, serde.metrics_from_proto(fit_res.metrics))
+        )
 
     # Aggregate parameters (FedAvg)
     parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
@@ -199,7 +202,9 @@ for server_round in range(num_rounds):
 
     # Aggregate metrics
     metrics_aggregated = weighted_average(metrics_results)
-    history.add_metrics_distributed_fit(server_round=server_round, metrics=metrics_aggregated)
+    history.add_metrics_distributed_fit(
+        server_round=server_round, metrics=metrics_aggregated
+    )
     print("Round ", server_round, " metrics: ", metrics_aggregated)
 
     # Slow down the start of the next round
