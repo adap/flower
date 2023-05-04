@@ -70,9 +70,9 @@ jobs:
               else echo "Server process crashed" && exit 1;
             fi
 
-            while [[ $(ps aux | grep "[p]ython server.py" | awk '{ print $2 }') ]];
-            do sleep 1;
-            done
+            wait
+
+            pkill python
         
       - name: Validate FL
         run: |
@@ -140,9 +140,9 @@ jobs:
               else echo "Server process crashed" && exit 1;
             fi
             
-            while [[ $(ps aux | grep "[p]ython server.py" | awk '{ print $2 }') ]];
-            do sleep 1;
-            done
+            wait
+
+            pkill python
         
       - name: Validate FL
         run: |
