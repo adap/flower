@@ -38,7 +38,7 @@ jobs:
       - name: Download Datasets
         run: |
           cd examples/quickstart_pytorch
-          python -c "from torchvision.datasets import CIFAR10; CIFAR10(\"./dataset\", download=True)"
+          python -c "from torchvision.datasets import CIFAR10; CIFAR10('./dataset', download=True)"
       - name: Run FL
         uses: mathiasvr/command-output@v1
         id: fl_run
@@ -70,9 +70,9 @@ jobs:
               else echo "Server process crashed" && exit 1;
             fi
 
-            sleep 420
-
-            pkill python
+            while [[ $(ps aux | grep "[p]ython server.py" | awk '{ print $2 }') ]];
+            do sleep 1;
+            done
         
       - name: Validate FL
         run: |
@@ -140,9 +140,9 @@ jobs:
               else echo "Server process crashed" && exit 1;
             fi
             
-            sleep 420
-
-            pkill python
+            while [[ $(ps aux | grep "[p]ython server.py" | awk '{ print $2 }') ]];
+            do sleep 1;
+            done
         
       - name: Validate FL
         run: |
