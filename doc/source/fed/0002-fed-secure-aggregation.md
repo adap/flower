@@ -3,7 +3,7 @@ fed-number: 0002
 title: secure aggregation
 authors: ["@FANTOME-PAN"]
 creation-date: 2023-04-25
-last-updated: 2023-04-27
+last-updated: 2023-05-04
 status: provisional
 ---
 
@@ -133,12 +133,53 @@ arbitrary rounds of communication in a single FL fit round.
 
 Example code as follows.
 
-User-facing classes:
 
+**user_messages.py** :
 ```python
+from dataclasses import dataclass
+from typing import List, Dict, Union, Optional
+
+import numpy as np
+
+from flwr.common import Scalar
+
+
+@dataclass
+class FitIns:
+    parameters: List[np.ndarray]
+    config: Dict[str, Scalar]
+
+
+@dataclass
+class FitRes:
+    parameters: List[np.ndarray]
+    num_examples: int
+    metrics: Dict[str, Scalar]
+
+
+@dataclass
+class EvaluateIns:
+    parameters: List[np.ndarray]
+    config: Dict[str, Scalar]
+
+
+@dataclass
+class EvaluateRes:
+    loss: float
+    num_examples: int
+    metrics: Dict[str, Scalar]
+
+
 @dataclass
 class ServerMessage:
-    fit_ins: FitIns = None
+    fit_ins: Optional[FitIns] = None
+    evaluate_ins: Optional[EvaluateIns] = None
+
+
+@dataclass
+class ClientMessage:
+    fit_res: Optional[FitRes] = None
+    evaluate_res: Optional[EvaluateRes] = None
 
 
 @dataclass
@@ -149,46 +190,83 @@ class SecureAggregationMessage:
 
 
 @dataclass
-class NodeTask:
-    legacy_server_message: ServerMessage = None
-    secure_aggregation_message: SecureAggregationMessage = None
+class Task:
+    legacy_server_message: Optional[ServerMessage] = None
+    legacy_client_message: Optional[ClientMessage] = None
+    secure_aggregation_message: Optional[SecureAggregationMessage] = None
 ```
 
-Workflows (generators):
 
+**workflows.py** :
 ```python
-def workflow_without_sec_agg(strategy: Strategy):
+from abc import abstractmethod
+from dataclasses import dataclass
+from typing import List, Union, Dict, Generator
+
+import user_messages as usr
+from flwr.common import Parameters
+
+
+class FlowerWorkflowGenerator:
+    def __init__(self, strategy: Strategy, num_rounds=1e9):
+        self.num_rounds = num_rounds
+        self.strategy = strategy
+
+    @abstractmethod
+    def configure_tasks(self, node_messages: Union[List[int], Dict[int, usr.Task]]) \
+            -> Dict[int, usr.Task]:
+        ...
+
+    @abstractmethod
+    def aggregate_tasks(self, node_messages: Dict[int, usr.Task]):
+        ...
+
+    def generate_workflow(self) \
+            -> Generator[Dict[int, usr.Task], Union[List[int], Dict[int, usr.Task]], None]:
+        node_messages = yield
+        for _ in range(self.num_rounds):
+            ins_dict = self.configure_tasks(node_messages)
+            if ins_dict is None:
+                break
+            yield ins_dict
+            node_messages = yield
+            self.aggregate_tasks(node_messages)
+
+
+def workflow_without_sec_agg(strategy: Strategy) \
+        -> Generator[Dict[int, usr.Task], Union[List[int], Dict[int, usr.Task]], None]:
     # configure fit
     sampled_node_ids: List[int] = yield
-    fit_ins: FitIns = FitIns(parameters=strategy.parameters, config={})
-    task = NodeTask(legacy_server_message=ServerMessage(fit_ins))
+    fit_ins = usr.FitIns(parameters=strategy.parameters, config={})
+    task = usr.Task(legacy_server_message=usr.ServerMessage(fit_ins=fit_ins))
     yield {node_id: task for node_id in sampled_node_ids}
 
     # aggregate fit
-    node_messages: Dict[int, NodeTask] = yield
+    node_messages: Dict[int, usr.Task] = yield
     print(f'updating parameters with received messages {node_messages}...')
     # todo
 
 
-def workflow_with_sec_agg(strategy: Strategy):
+def workflow_with_sec_agg(strategy: Strategy) \
+        -> Generator[Dict[int, usr.Task], Union[List[int], Dict[int, usr.Task]], None]:
     sampled_node_ids: List[int] = yield
 
     yield request_keys_ins(sampled_node_ids)
-    node_messages: Dict[int, NodeTask] = yield
+    node_messages: Dict[int, usr.Task] = yield
 
     yield share_keys_ins(node_messages)
-    node_messages: Dict[int, NodeTask] = yield
+    node_messages: Dict[int, usr.Task] = yield
 
     yield request_parameters_ins(node_messages)
-    node_messages: Dict[int, NodeTask] = yield
+    node_messages: Dict[int, usr.Task] = yield
 
     yield request_key_shares_ins(sampled_node_ids, node_messages)
-    node_messages: Dict[int, NodeTask] = yield
+    node_messages: Dict[int, usr.Task] = yield
     print(f'trying to decrypt and update parameters...')
     # todo
 ```
 
-Driver:
+**driver.py** :
 
 ```python
 import random
@@ -199,14 +277,15 @@ from flwr.common import ndarrays_to_parameters
 from flwr.driver import Driver
 from flwr.proto import driver_pb2, task_pb2, node_pb2
 from task import Net, get_parameters
-from workflows import workflow_with_sec_agg, NodeTask
+from workflows import workflow_with_sec_agg
+import user_messages as usr
 
 
-def user_task_to_proto(task: NodeTask) -> task_pb2.Task:
+def user_task_to_proto(task: usr.Task) -> task_pb2.Task:
     ...
 
 
-def user_task_from_proto(proto: task_pb2.Task) -> NodeTask:
+def user_task_from_proto(proto: task_pb2.Task) -> usr.Task:
     ...
 
 
@@ -277,8 +356,12 @@ for server_round in range(num_rounds):
 
     node_responses = sampled_node_ids
 
-    for _ in workflow:
-        ins: Dict[int, NodeTask] = workflow.send(node_responses)
+    while True:
+        try:
+            next(workflow)
+            ins: Dict[int, usr.Task] = workflow.send(node_responses)
+        except StopIteration:
+            break
         task_ins_list: List[task_pb2.TaskIns] = []
         # Schedule a task for all sampled nodes
         for node_id, user_task in ins.items():
@@ -339,7 +422,7 @@ for server_round in range(num_rounds):
             time.sleep(sleep_time)
 
             all_task_res += task_res_list
-            
+
             # in secure aggregation, this may changed to a timer:
             # when reaching time limit, the server will assume the nodes have lost connection.
             if len(all_task_res) == len(task_ids):
@@ -348,7 +431,7 @@ for server_round in range(num_rounds):
         # "Aggregate" results
         node_responses = {task_res.task.producer: user_task_from_proto(task_res.task) for task_res in all_task_res}
         print(f"Received {len(node_responses)} results")
-    
+
         time.sleep(sleep_time)
 
     # Repeat
@@ -356,7 +439,6 @@ for server_round in range(num_rounds):
 # -------------------------------------------------------------------------- Driver SDK
 driver.disconnect()
 # -------------------------------------------------------------------------- Driver SDK
-
 ```
 
 ### Client-side components
@@ -373,3 +455,111 @@ Then, it can independently encrypt its output.
 In the end of the fit round, it provides the server with necessary information that allows
 and only allows the server to decrypt aggregate output, learning nothing of individual outputs.
 
+Example code is as follows.
+
+**client_workflow.py**
+```python
+from abc import abstractmethod
+from typing import Generator
+
+import flwr as fl
+import user_messages as usr
+
+
+class ClientWorkflow:
+    def __init__(self):
+        self.wf = (_ for _ in range(0))
+
+    def handle(self, task: usr.Task) -> usr.Task:
+        try:
+            next(self.wf)
+        except StopIteration:
+            self.wf.close()
+            self.wf = self.workflow()
+            next(self.wf)
+        return self.wf.send(task)
+
+    @abstractmethod
+    def workflow(self) -> Generator[usr.Task, usr.Task, None]:
+        ...
+
+
+class FitEvalClientWorkflow(ClientWorkflow):
+
+    def workflow(self: fl.client.NumPyClient) -> Generator[usr.Task, usr.Task, None]:
+        # fit round
+        task: usr.Task = yield
+        fit_ins = task.legacy_server_message.fit_ins
+        yield usr.ClientMessage(fit_res=usr.FitRes(*self.fit(fit_ins.parameters, fit_ins.config)))
+
+        # eval round
+        task: usr.Task = yield
+        eval_ins = task.legacy_server_message.evaluate_ins
+        yield usr.ClientMessage(fit_res=usr.EvaluateRes(*self.evaluate(eval_ins.parameters, eval_ins.config)))
+
+
+class SecAggClientWorkFlow(ClientWorkflow):
+
+    def workflow(self: fl.client.NumPyClient) -> Generator[usr.Task, usr.Task, None]:
+        # setup configurations for SA and upload own public keys
+        task: usr.Task = yield
+        yield setup(self, task)
+
+        # receive other public keys and upload own secret key shares
+        task: usr.Task = yield
+        yield share_keys(self, task)
+
+        # receive other secret key shares, train the model, and upload masked updates
+        task: usr.Task = yield
+        # need training in parallel
+        fit_ins = task.legacy_server_message.fit_ins
+        self.fit(fit_ins.parameters, fit_ins.config)
+        yield ask_vectors(self, task)
+
+        # receive list of dropped clients and active clients and upload relevant info
+        task: usr.Task = yield
+        yield unmask_vectors(self, task)
+```
+
+**client.py**
+
+```python
+import flwr as fl
+
+from client_workflow import FitEvalClientWorkflow, SecAggClientWorkFlow
+from task import (
+    Net,
+    DEVICE,
+    load_data,
+    get_parameters,
+    set_parameters,
+    train,
+    test,
+)
+
+
+# Load model and data (simple CNN, CIFAR-10)
+net = Net().to(DEVICE)
+trainloader, testloader = load_data()
+
+
+# Define Flower client
+class FlowerClient(fl.client.NumPyClient, SecAggClientWorkFlow):
+    def fit(self, parameters, config):
+        set_parameters(net, parameters)
+        train(net, trainloader, epochs=1)
+        return get_parameters(net), len(trainloader.dataset), {}
+
+    def evaluate(self, parameters, config):
+        set_parameters(net, parameters)
+        loss, accuracy = test(net, testloader)
+        return loss, len(testloader.dataset), {"accuracy": accuracy}
+
+
+# Start Flower client
+fl.client.start_numpy_client(
+    server_address="0.0.0.0:9093",
+    client=FlowerClient(),
+    rest=True,
+)
+```
