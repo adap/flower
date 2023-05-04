@@ -590,7 +590,12 @@ def _validate_ssl_files(
 def _parse_args_driver() -> argparse.ArgumentParser:
     """Parse command line arguments for Driver API."""
     parser = argparse.ArgumentParser(
-        description="Start Flower server (Driver API)",
+        description="Start a Flower Driver API server. "
+        "This server will be responsible for "
+        "receiving TaskIns from the Driver script and "
+        "sending them to the Fleet API. Once the client nodes "
+        "are done, they will send the TaskRes back to this Driver API server (through"
+        " the Fleet API) which will then send them back to the Driver script.",
     )
 
     _add_args_common(parser=parser)
@@ -602,7 +607,12 @@ def _parse_args_driver() -> argparse.ArgumentParser:
 def _parse_args_fleet() -> argparse.ArgumentParser:
     """Parse command line arguments for Fleet API."""
     parser = argparse.ArgumentParser(
-        description="Start Flower server (Fleet API)",
+        description="Start a Flower Fleet API server."
+        "This server will be responsible for "
+        "sending TaskIns (received from the Driver API) to the client nodes "
+        "and of receiving TaskRes sent back from those same client nodes once "
+        "they are done. Then, this Fleet API server can send those "
+        "TaskRes back to the Driver API.",
     )
 
     _add_args_common(parser=parser)
@@ -614,7 +624,9 @@ def _parse_args_fleet() -> argparse.ArgumentParser:
 def _parse_args_server() -> argparse.ArgumentParser:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
-        description="Start Flower server (Driver API and Fleet API)",
+        description="This will start a Flower server "
+        "(meaning, a Driver API and a Fleet API), "
+        "that clients will be able to connect to.",
     )
 
     _add_args_common(parser=parser)
@@ -627,7 +639,11 @@ def _parse_args_server() -> argparse.ArgumentParser:
 def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--database",
-        help=f"Flower server database. Default: {DATABASE}",
+        help="A string representing the path to the database "
+        "file that will be opened. Note that passing ':memory:' "
+        "will open a connection to a database that is in RAM, "
+        "instead of on disk. If nothing is provided, "
+        "Flower will just create a state in memory.",
         default=DATABASE,
     )
 
@@ -635,7 +651,8 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
 def _add_args_driver_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--driver-api-address",
-        help=f"Driver API gRPC server address. Default: {ADDRESS_DRIVER_API}",
+        help="The Driver API gRPC server address, which can be an IPv4, "
+        "IPv6, or a domain name.",
         default=ADDRESS_DRIVER_API,
     )
 
@@ -649,7 +666,8 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         dest="fleet_api_type",
         const="grpc",
         default="grpc",
-        help="Start a gRPC-based Fleet API server",
+        help="Start a gRPC-based Fleet API server "
+        "(which is the default if no argument is provided).",
     )
     ex_group.add_argument(
         "--rest",
@@ -663,7 +681,8 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     grpc_group = parser.add_argument_group("Fleet API gRPC server options", "")
     grpc_group.add_argument(
         "--grpc-fleet-api-address",
-        help=f"Fleet API gRPC server address. Default:'{ADDRESS_FLEET_API_GRPC_RERE}'",
+        help="The Fleet API gRPC server address, which can be an IPv4, "
+        "IPv6, or a domain name.",
         default=ADDRESS_FLEET_API_GRPC_RERE,
     )
 
@@ -671,22 +690,25 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     rest_group = parser.add_argument_group("Fleet API REST server options", "")
     rest_group.add_argument(
         "--rest-fleet-api-address",
-        help=f"Fleet API REST server address. Default:'{ADDRESS_FLEET_API_REST}'",
+        help="The Fleet API REST server address, which can be an IPv4, "
+        "IPv6, or a domain name.",
         default=ADDRESS_FLEET_API_REST,
     )
     rest_group.add_argument(
         "--ssl-certfile",
-        help="Fleet API REST SSL certificate file (as a path str). Default:None",
+        help="Fleet API REST server SSL certificate file (as a path str), "
+        "needed for using 'https'.",
         default=None,
     )
     rest_group.add_argument(
         "--ssl-keyfile",
-        help="Fleet API REST SSL private key file (as a path str). Default:None",
+        help="Fleet API REST server SSL private key file (as a path str), "
+        "needed for using 'https'.",
         default=None,
     )
     rest_group.add_argument(
         "--rest-fleet-api-workers",
-        help=f"Number of workers for Fleet API REST server. Default:'{1}'",
+        help="Set the number of concurrent workers for the Fleet API REST server.",
         type=int,
         default=1,
     )

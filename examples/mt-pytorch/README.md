@@ -8,16 +8,36 @@ This example contains highly experimental code. Please consult the regular PyTor
 ./dev/venv-reset.sh
 ```
 
-## Exec
+## Run with Driver API
 
-Terminal 1: start Driver API server
+Terminal 1: start Flower Driver API server
 
 ```bash
 flower-server
 ```
 
-Terminal 2: run driver script
+Terminal 2+3: start two clients
+
+```bash
+python client.py
+```
+
+Terminal 4: run driver script
 
 ```bash
 python driver.py
+```
+
+## Run in legacy mode
+
+Terminal 1: start Flower server
+
+```bash
+python server.py
+```
+
+Terminal 2+3: start two clients
+
+```bash
+python client.py
 ```

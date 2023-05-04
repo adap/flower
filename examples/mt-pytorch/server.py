@@ -6,20 +6,36 @@ from flwr.common import Metrics
 
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
     examples = [num_examples for num_examples, _ in metrics]
 
+    # Multiply accuracy of each client by number of examples used
+    train_losses = [num_examples * m["train_loss"] for num_examples, m in metrics]
+    train_accuracies = [
+        num_examples * m["train_accuracy"] for num_examples, m in metrics
+    ]
+    val_losses = [num_examples * m["val_loss"] for num_examples, m in metrics]
+    val_accuracies = [num_examples * m["val_accuracy"] for num_examples, m in metrics]
+
     # Aggregate and return custom metric (weighted average)
-    return {"accuracy": sum(accuracies) / sum(examples)}
+    return {
+        "train_loss": sum(train_losses) / sum(examples),
+        "train_accuracy": sum(train_accuracies) / sum(examples),
+        "val_loss": sum(val_losses) / sum(examples),
+        "val_accuracy": sum(val_accuracies) / sum(examples),
+    }
 
 
 # Define strategy
-strategy = fl.server.strategy.FedAvg(evaluate_metrics_aggregation_fn=weighted_average)
+strategy = fl.server.strategy.FedAvg(
+    fraction_fit=1.0,  # Select all available clients
+    fraction_evaluate=0.0,  # Disable evaluation
+    min_available_clients=2,
+    fit_metrics_aggregation_fn=weighted_average,
+)
 
 # Start Flower server
 fl.server.start_server(
-    server_address="0.0.0.0:8080",
+    server_address="0.0.0.0:9092",
     config=fl.server.ServerConfig(num_rounds=3),
     strategy=strategy,
 )
