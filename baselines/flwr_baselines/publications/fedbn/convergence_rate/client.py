@@ -4,11 +4,11 @@
 import argparse
 import json
 from collections import OrderedDict
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 import flwr as fl
-import numpy as np
 import torch
+from flwr.common.typing import NDArrays, Scalar
 from torch import nn
 from torchvision import transforms
 
@@ -23,6 +23,7 @@ eval_list = []
 # pylint: disable=no-member
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
+
 
 # mypy: allow-any-generics
 # pylint: disable= too-many-arguments, too-many-locals, global-statement
@@ -43,7 +44,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.num_examples = num_examples
         self.mode = mode
 
-    def get_parameters(self, config) -> List[np.ndarray]:
+    def get_parameters(self, config) -> NDArrays:
         """Return model parameters as a list of NumPy ndarrays w or w/o using
         BN layers."""
         self.model.train()
@@ -59,7 +60,7 @@ class FlowerClient(fl.client.NumPyClient):
             # Return all model parameters as a list of NumPy ndarrays
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
-    def set_parameters(self, parameters: List[np.ndarray]) -> None:
+    def set_parameters(self, parameters: NDArrays) -> None:
         """Set model parameters from a list of NumPy ndarrays Exclude the bn
         layer if available."""
         self.model.train()
@@ -76,8 +77,8 @@ class FlowerClient(fl.client.NumPyClient):
         # pylint: enable=not-callable
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
-    ) -> Tuple[List[np.ndarray], int, Dict]:
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict]:
         """Set model parameters, train model, return updated model
         parameters."""
         self.set_parameters(parameters)
@@ -106,7 +107,7 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
     def evaluate(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
         """Set model parameters, evaluate model on local test dataset, return
         result."""

@@ -85,11 +85,11 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: SetupConfigIns
         deactivate P
-        P->>C2:
-        P->>C3:
+        P->>C2: 
+        P->>C3: 
         C1->>P: SetupConfigRes (empty)
-        C2->>P:
-        C3->>P:
+        C2->>P: 
+        C3->>P: 
         activate P
         P-->>S: None
         deactivate P
@@ -101,11 +101,11 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: AskKeysIns (empty)
         deactivate P
-        P->>C2:
-        P->>C3:
+        P->>C2: 
+        P->>C3: 
         C1->>P: AskKeysRes
-        C2->>P:
-        C3->>P:
+        C2->>P: 
+        C3->>P: 
         activate P
         P-->>S: public keys
         deactivate P
@@ -117,11 +117,11 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: ShareKeysIns
         deactivate P
-        P->>C2:
-        P->>C3:
+        P->>C2: 
+        P->>C3: 
         C1->>P: ShareKeysRes
-        C2->>P:
-        C3->>P:
+        C2->>P: 
+        C3->>P: 
         activate P
         P-->>S: encryted key shares
         deactivate P
@@ -133,10 +133,10 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: AskVectorsIns
         deactivate P
-        P->>C2:
-        P->>C3:
+        P->>C2: 
+        P->>C3: 
         C1->>P: AskVectorsRes
-        C2->>P:
+        C2->>P: 
         activate P
         P-->>S: masked vectors
         deactivate P
@@ -148,9 +148,9 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: UnmaskVectorsIns
         deactivate P
-        P->>C2:
+        P->>C2: 
         C1->>P: UnmaskVectorsRes
-        C2->>P:
+        C2->>P: 
         activate P
         P-->>S: key shares
         deactivate P
@@ -214,11 +214,11 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: LightSecAggSetupConfigIns
         deactivate P
-        P->>C2:
-        P->>C3:
+        P->>C2: 
+        P->>C3: 
         C1->>P: LightSecAggSetupConfigRes
-        C2->>P:
-        C3->>P:
+        C2->>P: 
+        C3->>P: 
         activate P
         P-->>S: public keys
         deactivate P
@@ -230,11 +230,11 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: AskEncryptedEncodedMasksIns
         deactivate P
-        P->>C2:
-        P->>C3:
+        P->>C2: 
+        P->>C3: 
         C1->>P: AskEncryptedEncodedMasksRes
-        C2->>P:
-        C3->>P:
+        C2->>P: 
+        C3->>P: 
         activate P
         P-->>S: forward packets
         deactivate P
@@ -246,10 +246,10 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: AskMaskedModelsIns
         deactivate P
-        P->>C2:
-        P->>C3:
+        P->>C2: 
+        P->>C3: 
         C1->>P: AskMaskedModelsRes
-        C2->>P:
+        C2->>P: 
         activate P
         P-->>S: masked local models
         deactivate P
@@ -261,9 +261,9 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: AskAggregatedEncodedMasksIns
         deactivate P
-        P->>C2:
+        P->>C2: 
         C1->>P: AskAggregatedEncodedMasksRes
-        C2->>P:
+        C2->>P: 
         activate P
         P-->>S: the aggregated model
         deactivate P

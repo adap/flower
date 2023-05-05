@@ -98,7 +98,7 @@ class FedAdagrad(FedOpt):
             Metrics aggregation function, optional.
         accept_failures : bool, optional
             Whether or not accept rounds containing failures. Defaults to True.
-        initial_parameters : Parameters, optional
+        initial_parameters : Parameters
             Initial global model parameters.
         eta : float, optional
             Server-side learning rate. Defaults to 1e-1.

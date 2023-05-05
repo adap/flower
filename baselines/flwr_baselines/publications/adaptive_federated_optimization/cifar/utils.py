@@ -1,4 +1,6 @@
 """Util functions for CIFAR10/100."""
+
+
 from collections import OrderedDict
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
@@ -72,6 +74,7 @@ cifar100_real_to_coarse = [
     18, 1, 2, 15, 6, 0, 17, 8, 14, 13,
 ]
 # fmt: on
+
 
 # transforms
 def get_transforms(num_classes: int = 10) -> Dict[str, Compose]:
@@ -454,7 +457,7 @@ def gen_on_fit_config_fn(
 
     def on_fit_config(server_round: int) -> Dict[str, Scalar]:
         """Return a configuration with specific client learning rate."""
-        local_config = {
+        local_config: Dict[str, Scalar] = {
             "epoch_global": server_round,
             "epochs": epochs_per_round,
             "batch_size": batch_size,

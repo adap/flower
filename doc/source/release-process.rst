@@ -10,7 +10,7 @@ Update the changelog (``changelog.md``) with all relevant changes that happened 
 
 `GitHub: Compare v1.2.0...main <https://github.com/adap/flower/compare/v1.2.0...main>`_
 
-Thank the authors who contributed since the last release. This command helps extract them: `git log --format='%aN' v1.1.0..HEAD | sort -u`. The command has the same order as `git shortlog`.
+Thank the authors who contributed since the last release. This command helps extract them: ``git log --format='%aN' v1.1.0..HEAD | sort -u``. The command has the same order as ``git shortlog``.
 
 
 During the release

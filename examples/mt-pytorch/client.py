@@ -1,4 +1,6 @@
+from typing import Dict
 import flwr as fl
+from flwr.common import NDArrays, Scalar
 
 from task import (
     Net,
@@ -15,15 +17,16 @@ from task import (
 net = Net().to(DEVICE)
 trainloader, testloader = load_data()
 
+
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
-    def get_parameters(self, config):
+    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         return get_parameters(net)
 
     def fit(self, parameters, config):
         set_parameters(net, parameters)
-        train(net, trainloader, epochs=1)
-        return get_parameters(net), len(trainloader.dataset), {}
+        results = train(net, trainloader, testloader, epochs=1)
+        return get_parameters(net), len(trainloader.dataset), results
 
     def evaluate(self, parameters, config):
         set_parameters(net, parameters)
@@ -33,6 +36,7 @@ class FlowerClient(fl.client.NumPyClient):
 
 # Start Flower client
 fl.client.start_numpy_client(
-    server_address="[::]:9092",
+    server_address="0.0.0.0:9092",
     client=FlowerClient(),
+    rest=False,
 )
