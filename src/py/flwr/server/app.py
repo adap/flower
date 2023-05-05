@@ -290,13 +290,13 @@ def run_fleet_api() -> None:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
         host, port, _ = parsed_address
         _run_fleet_api_rest(
-                host,
-                port,
-                args.ssl_keyfile,
-                args.ssl_certfile,
-                state_factory,
-                args.rest_fleet_api_workers,
-            )
+            host,
+            port,
+            args.ssl_keyfile,
+            args.ssl_certfile,
+            state_factory,
+            args.rest_fleet_api_workers,
+        )
     elif args.fleet_api_type == "grpc":
         address_arg = args.grpc_fleet_api_address
         parsed_address = parse_address(address_arg)
