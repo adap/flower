@@ -42,10 +42,11 @@ app: FastAPI = FastAPI()
 
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
+    """Set StateFactory as an attribute of the FastAPI app."""
     database = os.environ.get("DATABASE")
     if database is None:
-        raise KeyError(f"The DATABASE environment variable does not exist.")
+        raise KeyError("The DATABASE environment variable does not exist.")
     app.state.STATE_FACTORY = StateFactory(database)
 
 

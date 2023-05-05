@@ -273,7 +273,7 @@ def run_fleet_api() -> None:
     state_factory = StateFactory(args.database)
 
     grpc_servers = []
-    bckg_threads = []
+    bckg_threads: List[threading.Thread] = []
 
     # Start Fleet API
     if args.fleet_api_type == "rest":
@@ -350,7 +350,7 @@ def run_server() -> None:
     )
 
     grpc_servers = [driver_server]
-    bckg_threads = []
+    bckg_threads: List[threading.Thread] = []
 
     # Start Fleet API
     if args.fleet_api_type == "rest":
@@ -518,7 +518,6 @@ def _run_fleet_api_rest(
     try:
         import uvicorn
 
-        from flwr.server.rest_server.rest_api import app as fast_api_app
     except ModuleNotFoundError:
         sys.exit(MISSING_EXTRA_REST)
     log(INFO, "Starting Flower REST server")
