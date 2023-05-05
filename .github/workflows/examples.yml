@@ -46,7 +46,14 @@ jobs:
           run: |
             cd examples/quickstart_pytorch
 
-            python server.py &
+            # use existing value of TMPDIR if exists, else set it to /tmp
+            : ${TMPDIR:=/tmp}
+
+            # ensure temporary file will be deleted on interrupt or error:
+            trap "rm -f $TMPDIR/nfiles.$$; exit 1" 1 2 3 15
+
+            # run the first command in background and save output to a temporary file:
+            python server.py > $TMPDIR/nfiles.$$ &
             sleep 3
 
             python client.py 1 > /dev/null 2>&1 &
@@ -71,7 +78,12 @@ jobs:
             fi
 
             wait
-        
+
+            cat $TMPDIR/nfiles.$$
+
+            # remove the temp files on normal exit:
+            rm -f $TMPDIR/nfiles.$$
+
       - name: Validate FL
         run: |
           output="${{ steps.fl_run.outputs.stdout }}"
@@ -115,7 +127,14 @@ jobs:
           run: |
             cd examples/quickstart_tensorflow
 
-            python server.py &
+            # use existing value of TMPDIR if exists, else set it to /tmp
+            : ${TMPDIR:=/tmp}
+
+            # ensure temporary file will be deleted on interrupt or error:
+            trap "rm -f $TMPDIR/nfiles.$$; exit 1" 1 2 3 15
+
+            # run the first command in background and save output to a temporary file:
+            python server.py > $TMPDIR/nfiles.$$ &
             sleep 3
 
             python client.py 1 > /dev/null 2>&1 &
@@ -140,6 +159,11 @@ jobs:
             fi
             
             wait
+
+            cat $TMPDIR/nfiles.$$
+
+            # remove the temp files on normal exit:
+            rm -f $TMPDIR/nfiles.$$
         
       - name: Validate FL
         run: |
