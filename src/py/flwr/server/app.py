@@ -17,6 +17,7 @@
 
 import argparse
 import importlib.util
+import os
 import sys
 import threading
 from dataclasses import dataclass
@@ -288,19 +289,14 @@ def run_fleet_api() -> None:
         if not parsed_address:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
         host, port, _ = parsed_address
-        fleet_thread = threading.Thread(
-            target=_run_fleet_api_rest,
-            args=(
+        _run_fleet_api_rest(
                 host,
                 port,
                 args.ssl_keyfile,
                 args.ssl_certfile,
                 state_factory,
                 args.rest_fleet_api_workers,
-            ),
-        )
-        fleet_thread.start()
-        bckg_threads.append(fleet_thread)
+            )
     elif args.fleet_api_type == "grpc":
         address_arg = args.grpc_fleet_api_address
         parsed_address = parse_address(address_arg)
@@ -370,19 +366,14 @@ def run_server() -> None:
         if not parsed_address:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
         host, port, _ = parsed_address
-        fleet_thread = threading.Thread(
-            target=_run_fleet_api_rest,
-            args=(
-                host,
-                port,
-                args.ssl_keyfile,
-                args.ssl_certfile,
-                state_factory,
-                args.rest_fleet_api_workers,
-            ),
+        _run_fleet_api_rest(
+            host,
+            port,
+            args.ssl_keyfile,
+            args.ssl_certfile,
+            state_factory,
+            args.rest_fleet_api_workers,
         )
-        fleet_thread.start()
-        bckg_threads.append(fleet_thread)
     elif args.fleet_api_type == "grpc":
         address_arg = args.grpc_fleet_api_address
         parsed_address = parse_address(address_arg)
@@ -530,16 +521,10 @@ def _run_fleet_api_rest(
         from flwr.server.rest_server.rest_api import app as fast_api_app
     except ModuleNotFoundError:
         sys.exit(MISSING_EXTRA_REST)
-    if workers != 1:
-        raise ValueError(
-            f"The supported number of workers for the Fleet API (REST server) is "
-            f"1. Instead given {workers}. The functionality of >1 workers will be "
-            f"added in the future releases."
-        )
     log(INFO, "Starting Flower REST server")
 
-    # See: https://www.starlette.io/applications/#accessing-the-app-instance
-    fast_api_app.state.STATE_FACTORY = state_factory
+    # Set environment variable to enable state creation for the rest app
+    os.environ["DATABASE"] = state_factory.database
 
     validation_exceptions = _validate_ssl_files(
         ssl_certfile=ssl_certfile, ssl_keyfile=ssl_keyfile
