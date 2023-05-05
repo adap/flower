@@ -74,11 +74,11 @@ jobs:
         
       - name: Validate FL
         run: |
-            output=${{ steps.fl_run.outputs.stdout }}
-            if [[ "$output" == *"FL finished"* ]];
-              then echo "FL rounds ran correctly";
-              else echo "FL rounds crashed" && exit 1;
-            fi
+          output="${{ steps.fl_run.outputs.stdout }}"
+          if [[ "$output" == *"FL finished"* ]];
+            then echo "FL rounds ran correctly";
+            else echo "FL rounds crashed" && exit 1;
+          fi
         
 
   test_quickstart_tensorflow:
@@ -142,8 +142,8 @@ jobs:
         
       - name: Validate FL
         run: |
-            output=${{ steps.fl_run.outputs.stdout }}
-            if [[ "$output" == *"FL finished"* ]];
-              then echo "FL rounds ran correctly";
-              else echo "FL rounds crashed" && exit 1;
-            fi
+          output="${{ steps.fl_run.outputs.stdout }}"
+          if [[ "$output" == *"FL finished"* ]];
+            then echo "FL rounds ran correctly";
+            else echo "FL rounds crashed" && exit 1;
+          fi
