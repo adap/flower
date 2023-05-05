@@ -9,7 +9,7 @@ echo "Starting server"
 flower-server --rest &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
-for i in `seq 0 0`; do
+for i in `seq 0 1`; do
     echo "Starting client $i"
     python client.py &
 done
