@@ -41,7 +41,7 @@ except ModuleNotFoundError:
 app: FastAPI = FastAPI()
 
 
-@app.on_event("startup")
+@app.on_event("startup")  # type: ignore
 async def startup_event() -> None:
     """Set StateFactory as an attribute of the FastAPI app."""
     database = os.environ.get("DATABASE")
