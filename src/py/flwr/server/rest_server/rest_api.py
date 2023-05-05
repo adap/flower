@@ -13,8 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """REST API server."""
-
-
+import os
 import sys
 from logging import INFO
 from typing import List, Optional
@@ -30,7 +29,7 @@ from flwr.proto.fleet_pb2 import (
     Reconnect,
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes
-from flwr.server.state import State
+from flwr.server.state import State, StateFactory
 
 try:
     from fastapi import FastAPI, HTTPException, Request, Response
@@ -40,6 +39,14 @@ except ModuleNotFoundError:
 
 
 app: FastAPI = FastAPI()
+
+
+@app.on_event("startup")
+async def startup_event():
+    database = os.environ.get("DATABASE")
+    if database is None:
+        raise KeyError(f"The DATABASE environment variable does not exist.")
+    app.state.STATE_FACTORY = StateFactory(database)
 
 
 @app.post("/api/v0/fleet/pull-task-ins", response_class=Response)  # type: ignore
