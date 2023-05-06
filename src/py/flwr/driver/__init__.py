@@ -15,8 +15,9 @@
 """Flower driver SDK."""
 
 
-from .driver import Driver
+from .driver import start_driver, Driver
 
 __all__ = [
+    "start_driver",
     "Driver",
 ]

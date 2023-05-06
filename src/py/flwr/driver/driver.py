@@ -15,12 +15,14 @@
 """Flower driver service client."""
 
 
-from logging import ERROR, INFO, WARNING
+import sys
+from logging import ERROR, INFO, WARN, WARNING
 from typing import Optional, Tuple
 
 import grpc
 
 from flwr.common import EventType, event
+from flwr.common.address import parse_address
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.proto import driver_pb2, driver_pb2_grpc
@@ -45,16 +47,23 @@ methods.
 def start_driver(  # pylint: disable=too-many-arguments
     *,
     server_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
+    server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
+    client_manager: Optional[DriverClientManager] = None,
     certificates: Optional[bytes] = None,
 ) -> History:
-    """Start a Flower driver server.
+    """Start a Flower Driver API server.
 
     Parameters
     ----------
     server_address : Optional[str]
-        The IPv4 or IPv6 address of the server. Defaults to `"[::]:8080"`.
+        The IPv4 or IPv6 address of the Driver API server.
+        Defaults to `"[::]:8080"`.
+    server : Optional[flwr.server.Server] (default: None)
+        A server implementation, either `flwr.server.Server` or a subclass
+        thereof. If no instance is provided, then `start_driver` will create
+        one.
     config : Optional[ServerConfig] (default: None)
         Currently supported values are `num_rounds` (int, default: 1) and
         `round_timeout` in seconds (float, default: None).
@@ -62,6 +71,11 @@ def start_driver(  # pylint: disable=too-many-arguments
         An implementation of the abstract base class
         `flwr.server.strategy.Strategy`. If no strategy is provided, then
         `start_server` will use `flwr.server.strategy.FedAvg`.
+    client_manager : Optional[flwr.driver.DriverClientManager] (default: None)
+        An implementation of the class
+        `flwr.server.DriverClientManager`. If no implementation is provided, then
+        `start_driver` will use
+        `flwr.server.client_manager.DriverClientManager(anonymous=False)`.
     certificates : bytes (default: None)
         Tuple containing root certificate, server certificate, and private key
         to start a secure SSL-enabled server. The tuple is expected to have
@@ -88,15 +102,28 @@ def start_driver(  # pylint: disable=too-many-arguments
     >>>     certificates=Path("/crts/root.pem").read_bytes()
     >>> )
     """
-    driver = Driver(driver_service_address=server_address, certificates=certificates)
+    event(EventType.START_SERVER_ENTER)
 
-    client_manager = DriverClientManager(driver=driver, anonymous=False)
+    # Parse IP address
+    parsed_address = parse_address(server_address)
+    if not parsed_address:
+        sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-    # Initialize server and server config
+    # Create the Driver and DriverClientManager if None is provided
+    if client_manager is None:
+        driver = Driver(driver_service_address=address, certificates=certificates)
+        driver.connect()
+
+        client_manager = DriverClientManager(driver=driver, anonymous=False)
+
+    # Initialize the Driver API server and config
     initialized_server, initialized_config = _init_defaults(
-        client_manager=client_manager,
+        server=server,
         config=config,
         strategy=strategy,
+        client_manager=client_manager,
     )
     log(
         INFO,
@@ -104,28 +131,33 @@ def start_driver(  # pylint: disable=too-many-arguments
         initialized_config,
     )
 
-    driver.connect()
-
     # Start training
     hist = _fl(
         server=initialized_server,
         config=initialized_config,
     )
 
-    driver.disconnect()
+    # Stop the Driver API server
+    client_manager.driver.disconnect()
+
+    event(EventType.START_SERVER_LEAVE)
 
     return hist
 
 
 def _init_defaults(
-    client_manager: ClientManager,
+    server: Optional[Server],
     config: Optional[ServerConfig],
     strategy: Optional[Strategy],
+    client_manager: ClientManager,
 ) -> Tuple[Server, ServerConfig]:
     # Create server instance if none was given
-    if strategy is None:
-        strategy = FedAvg()
-    server = Server(client_manager=client_manager, strategy=strategy)
+    if server is None:
+        if strategy is None:
+            strategy = FedAvg()
+        server = Server(client_manager=client_manager, strategy=strategy)
+    elif strategy is not None:
+        log(WARN, "Both server and strategy were provided, ignoring strategy")
 
     # Set default config values
     if config is None:
@@ -141,6 +173,7 @@ def _fl(
     # Fit model
     hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
+    log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
     log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
     log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
     log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))

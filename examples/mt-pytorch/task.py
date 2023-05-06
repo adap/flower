@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cpu")
 
 
 class Net(nn.Module):
