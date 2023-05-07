@@ -70,6 +70,8 @@ jobs:
 
           wait
 
+          ls .
+
           if [[ "$(cat result)" = "SUCCESS" ]];
             then echo "Training worked correctly";
             else echo "Training had an issue" && exit 1;
@@ -131,6 +133,8 @@ jobs:
           fi
 
           wait
+
+          ls .
 
           if [[ "$(cat result)" = "SUCCESS" ]];
             then echo "Training worked correctly";
