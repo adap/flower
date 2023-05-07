@@ -47,7 +47,8 @@ jobs:
           timeout 2m python server.py &
           sleep 3
 
-          python client.py 1 > /dev/null 2>&1 &
+          # python client.py 1 > /dev/null 2>&1 &
+          python client.py 1 &
           sleep 3
 
           if [[ $(ps aux | grep "[p]ython client.py 1" | awk '{ print $2 }') ]];
@@ -55,7 +56,8 @@ jobs:
             else echo "Client process 1 crashed" && exit 1;
           fi
 
-          python client.py 2 > /dev/null 2>&1 &
+          # python client.py 2 > /dev/null 2>&1 &
+          python client.py 2 &
           sleep 3
 
           if [[ $(ps aux | grep "[p]ython client.py 2" | awk '{ print $2 }') ]];
@@ -69,8 +71,6 @@ jobs:
           fi
 
           wait
-
-          ls .
 
           if [[ "$(cat result)" = "SUCCESS" ]];
             then echo "Training worked correctly";
@@ -133,8 +133,6 @@ jobs:
           fi
 
           wait
-
-          ls .
 
           if [[ "$(cat result)" = "SUCCESS" ]];
             then echo "Training worked correctly";
