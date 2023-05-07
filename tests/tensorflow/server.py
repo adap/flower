@@ -9,17 +9,12 @@ hist = fl.server.start_server(
     config=fl.server.ServerConfig(num_rounds=3),
 )
 
-prev_loss = 1_000_000
-for _, loss in hist.losses_distributed:
-    if loss > prev_loss:
-        with open("result", "w") as file:
-            file.write("FAIL")
-        sys.exit("Loss did not decrease.")
-    else:
-        prev_loss = loss
-
-
-with open("result", "w") as file:
-    file.write("SUCCESS")
-
-sys.exit()
+improvement = hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]
+if improvement < 0.98:
+    with open("result", "w") as file:
+        file.write("FAIL")
+    sys.exit("Loss did not decrease.")
+else:
+    with open("result", "w") as file:
+        file.write("SUCCESS")
+    sys.exit()

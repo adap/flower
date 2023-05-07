@@ -3,7 +3,7 @@ import os
 import flwr as fl
 import tensorflow as tf
 
-SUBSET_SIZE=1000
+SUBSET_SIZE = 1000
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
