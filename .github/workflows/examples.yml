@@ -33,12 +33,12 @@ jobs:
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
-          path: "./tests/pytorch/dataset"
+          path: "./tests/pytorch/data"
           key: pytorch-datasets
       - name: Download Datasets
         run: |
           cd tests/pytorch
-          python -c "from torchvision.datasets import CIFAR10; CIFAR10('./dataset', download=True)"
+          python -c "from torchvision.datasets import CIFAR10; CIFAR10('./data', download=True)"
       - name: Run FL
         run: |
           cd tests/pytorch
