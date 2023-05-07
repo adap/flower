@@ -1,7 +1,6 @@
 import warnings
 from collections import OrderedDict
 
-import flwr as fl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -10,6 +9,7 @@ from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
+import flwr as fl
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -17,7 +17,8 @@ from tqdm import tqdm
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-SUBSET_SIZE = 10
+SUBSET_SIZE = 1000
+
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
@@ -71,7 +72,7 @@ def load_data():
     trainset = CIFAR10("./data", train=True, download=True, transform=trf)
     testset = CIFAR10("./data", train=False, download=True, transform=trf)
     trainset = Subset(trainset, range(SUBSET_SIZE))
-    testset = Subset(testset, range(SUBSET_SIZE))
+    testset = Subset(testset, range(10))
     return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
 
 

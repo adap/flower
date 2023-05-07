@@ -1,3 +1,4 @@
+import sys
 from typing import List, Tuple
 
 import flwr as fl
@@ -24,4 +25,14 @@ hist = fl.server.start_server(
     strategy=strategy,
 )
 
-print(hist)
+prev_loss = 1_000_000
+for _, loss in hist.losses_distributed:
+    if loss > prev_loss:
+        sys.exit("Loss did not decrease.")
+    else:
+        prev_loss = loss
+
+with open("result", "w") as file:
+    file.write("SUCCESS")
+
+sys.exit()

@@ -44,7 +44,7 @@ jobs:
           cd tests/pytorch
 
           # run the first command in background and save output to a temporary file:
-          python server.py &
+          timeout 30 python server.py &
           sleep 3
 
           python client.py 1 > /dev/null 2>&1 &
@@ -69,3 +69,9 @@ jobs:
           fi
 
           wait
+
+          if [[ "$(cat result)" = "SUCCESS" ]];
+            then echo "Training worked correctly";
+            else echo "Training had an issue" && exit 1;
+          fi
+
