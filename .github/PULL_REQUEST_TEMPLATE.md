@@ -1,7 +1,7 @@
 <!--
-Thank you for opening a pull request!
+Thank you for opening a pull request (PR)!
 
-Please ensure you have taken a look at the contribution guidelines: https://github.com/adap/flower/blob/main/CONTRIBUTING.md
+Contribution guidelines: https://github.com/adap/flower/blob/main/CONTRIBUTING.md
 -->
 
 ## Issue
@@ -9,15 +9,15 @@ Please ensure you have taken a look at the contribution guidelines: https://gith
 ### Description
 
 <!--
-Describe the problem or link to the issue(s) addressd by this PR.
+Describe the problem addressed by this PR.
 
 Example: The variable name `rnd` could be misinterpreted as an abbreviation of *random*, but it refers to the current server round.
 -->
 
-### Reference Issues/PRs
+### Related issues/PRs
 
 <!--
-Link issue(s) and/or other PRs related to this PR.
+Link issues and/or PRs that are related to this PR.
 
 Example: Fixes #123. See also #456 and #789.
 -->
@@ -27,9 +27,9 @@ Example: Fixes #123. See also #456 and #789.
 ### Explanation
 
 <!--
-Explain the changes and how they improve the issue(s) described above.
+Explain the changes and how they improve the issue described above.
 
-Example: The variable `rnd` was to `server_round` to improve readability.
+Example: The variable `rnd` was renamed to `server_round` to improve readability.
 -->
 
 ### Checklist
@@ -45,9 +45,11 @@ Example: The variable `rnd` was to `server_round` to improve readability.
 
 <!--
 Please be aware that it may take some time until the maintainers can review the PR.
-If you have an urgent request or question please use the Flower Slack channel.
-The Slack channel is very active and contributors respond pretty fast.
+Smaller PRs with good descriptions can be considered much more easily.
 
-We value your contribution and are aware of the time you put into this PR.
-Therefore, thank you for your contribution.
+If you have an urgent request or question, please use the Flower Slack:
+
+    https://flower.dev/join-slack/ (channel: #contributions)
+
+Thank you for contributing to Flower!
 -->
