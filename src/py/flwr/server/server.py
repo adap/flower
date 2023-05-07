@@ -131,9 +131,9 @@ class Server:
 
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
-            if res_fed:
+            if res_fed is not None:
                 loss_fed, evaluate_metrics_fed, _ = res_fed
-                if loss_fed:
+                if loss_fed is not None:
                     history.add_loss_distributed(
                         server_round=current_round, loss=loss_fed
                     )
