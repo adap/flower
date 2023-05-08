@@ -132,3 +132,44 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
             norm = np.linalg.norm(delta)  # type: ignore
             distance_matrix[i, j] = norm**2
     return distance_matrix
+
+
+def _trim_mean(a, proportiontocut, axis=0):
+    """
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.trim_mean.html
+    """
+    a = np.asarray(a)
+
+    if a.size == 0:
+        return np.nan
+
+    if axis is None:
+        a = a.ravel()
+        axis = 0
+
+    nobs = a.shape[axis]
+    lowercut = int(proportiontocut * nobs)
+    uppercut = nobs - lowercut
+    if lowercut > uppercut:
+        raise ValueError("Proportion too big.")
+
+    atmp = np.partition(a, (lowercut, uppercut - 1), axis)
+
+    sl = [slice(None)] * atmp.ndim
+    sl[axis] = slice(lowercut, uppercut)
+    return np.mean(atmp[tuple(sl)], axis=axis)
+
+
+def aggregate_trimmed_avg(
+    results: List[Tuple[NDArrays, int]], proportiontocut: float
+) -> NDArrays:
+    """Compute trimmed average."""
+    # Create a list of weights and ignore the number of examples
+    weights = [weights for weights, _ in results]
+
+    trimmed_w: NDArrays = [
+        _trim_mean(np.asarray(layer), axis=0, proportiontocut=proportiontocut)
+        for layer in zip(*weights)
+    ]
+
+    return trimmed_w
