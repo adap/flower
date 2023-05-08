@@ -97,8 +97,6 @@ class QFedAvg(FedAvg):
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[NDArrays] = None
-        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
-        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
         # pylint: disable=line-too-long
