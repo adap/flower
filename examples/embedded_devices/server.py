@@ -24,7 +24,7 @@ import numpy as np
 import torch
 import torchvision
 
-from . import utils
+import utils
 
 # pylint: disable=no-member
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -110,23 +110,23 @@ def main() -> None:
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
-        eval_fn=get_eval_fn(testset),
+        evaluate_fn=get_eval_fn(testset),
         on_fit_config_fn=fit_config,
     )
     server = fl.server.Server(client_manager=client_manager, strategy=strategy)
 
     # Run server
     fl.server.start_server(
-        args.server_address,
-        server,
-        config={"num_rounds": args.rounds},
+        server_address=args.server_address,
+        server=server,
+        config=fl.server.ServerConfig(num_rounds=args.rounds),
     )
 
 
-def fit_config(rnd: int) -> Dict[str, str]:
+def fit_config(server_round: int) -> Dict[str, fl.common.Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
     config = {
-        "epoch_global": str(rnd),
+        "epoch_global": str(server_round),
         "epochs": str(1),
         "batch_size": str(args.batch_size),
         "num_workers": str(args.num_workers),
@@ -135,11 +135,11 @@ def fit_config(rnd: int) -> Dict[str, str]:
     return config
 
 
-def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
+def set_weights(model: torch.nn.ModuleList, weights: fl.common.NDArrays) -> None:
     """Set model weights from a list of NumPy ndarrays."""
     state_dict = OrderedDict(
         {
-            k: torch.Tensor(np.atleast_1d(v))
+            k: torch.tensor(np.atleast_1d(v))
             for k, v in zip(model.state_dict().keys(), weights)
         }
     )
@@ -148,10 +148,10 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
 
 def get_eval_fn(
     testset: torchvision.datasets.CIFAR10,
-) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
+) -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
-    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(weights: fl.common.NDArrays) -> Optional[Tuple[float, float]]:
         """Use the entire CIFAR-10 test set for evaluation."""
 
         model = utils.load_model(args.model)
@@ -159,7 +159,8 @@ def get_eval_fn(
         model.to(DEVICE)
 
         testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
-        return utils.test(model, testloader, device=DEVICE)
+        loss, accuracy = utils.test(model, testloader, device=DEVICE)
+        return loss, {"accuracy": accuracy}
 
     return evaluate
 

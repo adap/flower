@@ -66,14 +66,14 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
-    def get_weights(self) -> fl.common.Weights:
+    def get_weights(self) -> fl.common.NDArrays:
         """Get model weights as a list of NumPy ndarrays."""
         return [val.cpu().numpy() for _, val in self.state_dict().items()]
 
-    def set_weights(self, weights: fl.common.Weights) -> None:
+    def set_weights(self, weights: fl.common.NDArrays) -> None:
         """Set model weights from a list of NumPy ndarrays."""
         state_dict = OrderedDict(
-            {k: torch.Tensor(v) for k, v in zip(self.state_dict().keys(), weights)}
+            {k: torch.tensor(v) for k, v in zip(self.state_dict().keys(), weights)}
         )
         self.load_state_dict(state_dict, strict=True)
 
@@ -93,7 +93,6 @@ def ResNet18():
 
 
 def load_model(model_name: str) -> nn.Module:
-
     if model_name == "Net":
         return Net()
     elif model_name == "ResNet18":
@@ -106,7 +105,10 @@ def load_model(model_name: str) -> nn.Module:
 def load_cifar(download=False) -> Tuple[datasets.CIFAR10, datasets.CIFAR10]:
     """Load CIFAR-10 (training and test set)."""
     transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ]
     )
     trainset = datasets.CIFAR10(
         root=DATA_ROOT / "cifar-10", train=True, download=download, transform=transform
@@ -161,16 +163,13 @@ def test(
 ) -> Tuple[float, float]:
     """Validate the network on the entire test set."""
     criterion = nn.CrossEntropyLoss()
-    correct = 0
-    total = 0
-    loss = 0.0
+    correct, loss = 0, 0.0
     with torch.no_grad():
         for data in testloader:
             images, labels = data[0].to(device), data[1].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)  # pylint: disable=no-member
-            total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    accuracy = correct / total
+    accuracy = correct / len(testloader.dataset)
     return loss, accuracy

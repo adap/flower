@@ -1,0 +1,13 @@
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "flwr_ios_coreml"
+version = "0.1.0"
+description = "Example Server for Flower iOS/CoreML"
+authors = ["The Flower Authors <hello@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = ">=3.7,<3.11"
+flwr = "^1.0.0"

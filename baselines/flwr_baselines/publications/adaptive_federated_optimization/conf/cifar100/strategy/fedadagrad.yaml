@@ -1,0 +1,8 @@
+---
+name: FedAdagrad
+expected_accuracy: 47.9
+init:
+  _target_: flwr.server.strategy.FedAdagrad
+  eta: 0.1
+  tau: 0.01
+eta_l: 0.1
