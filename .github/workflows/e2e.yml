@@ -1,4 +1,4 @@
-name: Examples
+name: E2E
 
 on:
   push:
@@ -39,7 +39,7 @@ jobs:
         run: |
           cd tests/pytorch
           python -c "from torchvision.datasets import CIFAR10; CIFAR10('./data', download=True)"
-      - name: Run FL
+      - name: Run tests
         run: |
           cd tests/pytorch
 
@@ -101,7 +101,7 @@ jobs:
       - name: Download Datasets
         run: |
           python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
-      - name: Run FL
+      - name: Run tests
         run: |
           cd tests/tensorflow
 
@@ -155,7 +155,7 @@ jobs:
         run: |
           cd tests/bare
           python -m poetry install
-      - name: Run FL
+      - name: Run tests
         run: |
           cd tests/bare
 
