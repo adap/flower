@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    allow:
+      # Allow only updates for dev dependencies
+      - dependency-type: "development"
+    ignore:
+      # Ignore updates to 'grpcio-tools'
+      - dependency-name: "grpcio-tools"
+    open-pull-requests-limit: 3
