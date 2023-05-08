@@ -14,6 +14,7 @@
 # ==============================================================================
 """Tests for module connection."""
 
+
 import concurrent.futures
 import socket
 from contextlib import closing
@@ -24,17 +25,17 @@ import grpc
 
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_insecure_grpc_server
+from flwr.server.grpc_server.grpc_server import start_grpc_server
 
-from .connection import insecure_grpc_connection
+from .connection import grpc_connection
 
 EXPECTED_NUM_SERVER_MESSAGE = 10
 
 SERVER_MESSAGE = ServerMessage()
-SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect=ServerMessage.Reconnect())
+SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect_ins=ServerMessage.ReconnectIns())
 
 CLIENT_MESSAGE = ClientMessage()
-CLIENT_MESSAGE_DISCONNECT = ClientMessage(disconnect=ClientMessage.Disconnect())
+CLIENT_MESSAGE_DISCONNECT = ClientMessage(disconnect_res=ClientMessage.DisconnectRes())
 
 
 def unused_tcp_port() -> int:
@@ -63,7 +64,7 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
 
         try:
             client_message = next(request_iterator)
-            if client_message.HasField("disconnect"):
+            if client_message.HasField("disconnect_res"):
                 break
         except StopIteration:
             break
@@ -82,7 +83,7 @@ def test_integration_connection() -> None:
     # Prepare
     port = unused_tcp_port()
 
-    server = start_insecure_grpc_server(
+    server = start_grpc_server(
         client_manager=SimpleClientManager(), server_address=f"[::]:{port}"
     )
 
@@ -91,7 +92,7 @@ def test_integration_connection() -> None:
     def run_client() -> int:
         messages_received: int = 0
 
-        with insecure_grpc_connection(server_address=f"[::]:{port}") as conn:
+        with grpc_connection(server_address=f"[::]:{port}") as conn:
             receive, send = conn
 
             # Setup processing loop
@@ -100,7 +101,7 @@ def test_integration_connection() -> None:
                 server_message = receive()
 
                 messages_received += 1
-                if server_message.HasField("reconnect"):
+                if server_message.HasField("reconnect_ins"):
                     send(CLIENT_MESSAGE_DISCONNECT)
                     break
 

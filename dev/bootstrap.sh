@@ -2,18 +2,16 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+# Setup environment variables for development
+./dev/setup-envs.sh
+
 # Remove caches
 ./dev/rm-caches.sh
 
 # Upgrade/install spcific versions of `pip`, `setuptools`, and `poetry`
-python -m pip install -U pip==21.0.1
-python -m pip install -U setuptools==49.3.1
-python -m pip install -U poetry==1.1.4
+python -m pip install -U pip==22.3.1
+python -m pip install -U setuptools==65.6.3
+python -m pip install -U poetry==1.3.2
 
 # Use `poetry` to install project dependencies
-python -m poetry install \
-  --extras "baseline" \
-  --extras "examples-pytorch" \
-  --extras "examples-tensorflow" \
-  --extras "http-logger" \
-  --extras "ops"
+python -m poetry install --all-extras

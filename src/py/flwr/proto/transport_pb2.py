@@ -4,6 +4,7 @@
 """Generated protocol buffer code."""
 from google.protobuf.internal import enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -14,56 +15,17 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='flwr/proto/transport.proto',
-  package='flower.transport',
-  syntax='proto3',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1a\x66lwr/proto/transport.proto\x12\x10\x66lower.transport\"2\n\nParameters\x12\x0f\n\x07tensors\x18\x01 \x03(\x0c\x12\x13\n\x0btensor_type\x18\x02 \x01(\t\"\xec\x05\n\rServerMessage\x12>\n\treconnect\x18\x01 \x01(\x0b\x32).flower.transport.ServerMessage.ReconnectH\x00\x12G\n\x0eget_parameters\x18\x02 \x01(\x0b\x32-.flower.transport.ServerMessage.GetParametersH\x00\x12\x39\n\x07\x66it_ins\x18\x03 \x01(\x0b\x32&.flower.transport.ServerMessage.FitInsH\x00\x12\x43\n\x0c\x65valuate_ins\x18\x04 \x01(\x0b\x32+.flower.transport.ServerMessage.EvaluateInsH\x00\x1a\x1c\n\tReconnect\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x0f\n\rGetParameters\x1a\xc7\x01\n\x06\x46itIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x42\n\x06\x63onfig\x18\x02 \x03(\x0b\x32\x32.flower.transport.ServerMessage.FitIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xd1\x01\n\x0b\x45valuateIns\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12G\n\x06\x63onfig\x18\x02 \x03(\x0b\x32\x37.flower.transport.ServerMessage.EvaluateIns.ConfigEntry\x1aG\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x42\x05\n\x03msg\"\x97\x07\n\rClientMessage\x12@\n\ndisconnect\x18\x01 \x01(\x0b\x32*.flower.transport.ClientMessage.DisconnectH\x00\x12G\n\x0eparameters_res\x18\x02 \x01(\x0b\x32-.flower.transport.ClientMessage.ParametersResH\x00\x12\x39\n\x07\x66it_res\x18\x03 \x01(\x0b\x32&.flower.transport.ClientMessage.FitResH\x00\x12\x43\n\x0c\x65valuate_res\x18\x04 \x01(\x0b\x32+.flower.transport.ClientMessage.EvaluateResH\x00\x1a\x36\n\nDisconnect\x12(\n\x06reason\x18\x01 \x01(\x0e\x32\x18.flower.transport.Reason\x1a\x41\n\rParametersRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x1a\x99\x02\n\x06\x46itRes\x12\x30\n\nparameters\x18\x01 \x01(\x0b\x32\x1c.flower.transport.Parameters\x12\x14\n\x0cnum_examples\x18\x02 \x01(\x03\x12\x1d\n\x11num_examples_ceil\x18\x03 \x01(\x03\x42\x02\x18\x01\x12\x18\n\x0c\x66it_duration\x18\x04 \x01(\x02\x42\x02\x18\x01\x12\x44\n\x07metrics\x18\x05 \x03(\x0b\x32\x33.flower.transport.ClientMessage.FitRes.MetricsEntry\x1aH\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x1a\xdc\x01\n\x0b\x45valuateRes\x12\x14\n\x0cnum_examples\x18\x01 \x01(\x03\x12\x0c\n\x04loss\x18\x02 \x01(\x02\x12\x14\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x02\x42\x02\x18\x01\x12I\n\x07metrics\x18\x04 \x03(\x0b\x32\x38.flower.transport.ClientMessage.EvaluateRes.MetricsEntry\x1aH\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\'\n\x05value\x18\x02 \x01(\x0b\x32\x18.flower.transport.Scalar:\x02\x38\x01\x42\x05\n\x03msg\"i\n\x06Scalar\x12\x10\n\x06\x64ouble\x18\x01 \x01(\x01H\x00\x12\x10\n\x06sint64\x18\x08 \x01(\x12H\x00\x12\x0e\n\x04\x62ool\x18\r \x01(\x08H\x00\x12\x10\n\x06string\x18\x0e \x01(\tH\x00\x12\x0f\n\x05\x62ytes\x18\x0f \x01(\x0cH\x00\x42\x08\n\x06scalar*[\n\x06Reason\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tRECONNECT\x10\x01\x12\x16\n\x12POWER_DISCONNECTED\x10\x02\x12\x14\n\x10WIFI_UNAVAILABLE\x10\x03\x12\x07\n\x03\x41\x43K\x10\x04\x32_\n\rFlowerService\x12N\n\x04Join\x12\x1f.flower.transport.ClientMessage\x1a\x1f.flower.transport.ServerMessage\"\x00(\x01\x30\x01\x62\x06proto3'
-)
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1a\x66lwr/proto/transport.proto\x12\nflwr.proto\"9\n\x06Status\x12\x1e\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x10.flwr.proto.Code\x12\x0f\n\x07message\x18\x02 \x01(\t\"2\n\nParameters\x12\x0f\n\x07tensors\x18\x01 \x03(\x0c\x12\x13\n\x0btensor_type\x18\x02 \x01(\t\"\xba\x08\n\rServerMessage\x12?\n\rreconnect_ins\x18\x01 \x01(\x0b\x32&.flwr.proto.ServerMessage.ReconnectInsH\x00\x12H\n\x12get_properties_ins\x18\x02 \x01(\x0b\x32*.flwr.proto.ServerMessage.GetPropertiesInsH\x00\x12H\n\x12get_parameters_ins\x18\x03 \x01(\x0b\x32*.flwr.proto.ServerMessage.GetParametersInsH\x00\x12\x33\n\x07\x66it_ins\x18\x04 \x01(\x0b\x32 .flwr.proto.ServerMessage.FitInsH\x00\x12=\n\x0c\x65valuate_ins\x18\x05 \x01(\x0b\x32%.flwr.proto.ServerMessage.EvaluateInsH\x00\x1a\x1f\n\x0cReconnectIns\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x1a\x9d\x01\n\x10GetPropertiesIns\x12\x46\n\x06\x63onfig\x18\x01 \x03(\x0b\x32\x36.flwr.proto.ServerMessage.GetPropertiesIns.ConfigEntry\x1a\x41\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\x1a\x9d\x01\n\x10GetParametersIns\x12\x46\n\x06\x63onfig\x18\x01 \x03(\x0b\x32\x36.flwr.proto.ServerMessage.GetParametersIns.ConfigEntry\x1a\x41\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\x1a\xb5\x01\n\x06\x46itIns\x12*\n\nparameters\x18\x01 \x01(\x0b\x32\x16.flwr.proto.Parameters\x12<\n\x06\x63onfig\x18\x02 \x03(\x0b\x32,.flwr.proto.ServerMessage.FitIns.ConfigEntry\x1a\x41\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\x1a\xbf\x01\n\x0b\x45valuateIns\x12*\n\nparameters\x18\x01 \x01(\x0b\x32\x16.flwr.proto.Parameters\x12\x41\n\x06\x63onfig\x18\x02 \x03(\x0b\x32\x31.flwr.proto.ServerMessage.EvaluateIns.ConfigEntry\x1a\x41\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\x42\x05\n\x03msg\"\xa0\t\n\rClientMessage\x12\x41\n\x0e\x64isconnect_res\x18\x01 \x01(\x0b\x32\'.flwr.proto.ClientMessage.DisconnectResH\x00\x12H\n\x12get_properties_res\x18\x02 \x01(\x0b\x32*.flwr.proto.ClientMessage.GetPropertiesResH\x00\x12H\n\x12get_parameters_res\x18\x03 \x01(\x0b\x32*.flwr.proto.ClientMessage.GetParametersResH\x00\x12\x33\n\x07\x66it_res\x18\x04 \x01(\x0b\x32 .flwr.proto.ClientMessage.FitResH\x00\x12=\n\x0c\x65valuate_res\x18\x05 \x01(\x0b\x32%.flwr.proto.ClientMessage.EvaluateResH\x00\x1a\x33\n\rDisconnectRes\x12\"\n\x06reason\x18\x01 \x01(\x0e\x32\x12.flwr.proto.Reason\x1a\xcd\x01\n\x10GetPropertiesRes\x12\"\n\x06status\x18\x01 \x01(\x0b\x32\x12.flwr.proto.Status\x12N\n\nproperties\x18\x02 \x03(\x0b\x32:.flwr.proto.ClientMessage.GetPropertiesRes.PropertiesEntry\x1a\x45\n\x0fPropertiesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\x1a\x62\n\x10GetParametersRes\x12\"\n\x06status\x18\x01 \x01(\x0b\x32\x12.flwr.proto.Status\x12*\n\nparameters\x18\x02 \x01(\x0b\x32\x16.flwr.proto.Parameters\x1a\xf2\x01\n\x06\x46itRes\x12\"\n\x06status\x18\x01 \x01(\x0b\x32\x12.flwr.proto.Status\x12*\n\nparameters\x18\x02 \x01(\x0b\x32\x16.flwr.proto.Parameters\x12\x14\n\x0cnum_examples\x18\x03 \x01(\x03\x12>\n\x07metrics\x18\x04 \x03(\x0b\x32-.flwr.proto.ClientMessage.FitRes.MetricsEntry\x1a\x42\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\x1a\xde\x01\n\x0b\x45valuateRes\x12\"\n\x06status\x18\x01 \x01(\x0b\x32\x12.flwr.proto.Status\x12\x0c\n\x04loss\x18\x02 \x01(\x02\x12\x14\n\x0cnum_examples\x18\x03 \x01(\x03\x12\x43\n\x07metrics\x18\x04 \x03(\x0b\x32\x32.flwr.proto.ClientMessage.EvaluateRes.MetricsEntry\x1a\x42\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\x42\x05\n\x03msg\"i\n\x06Scalar\x12\x10\n\x06\x64ouble\x18\x01 \x01(\x01H\x00\x12\x10\n\x06sint64\x18\x08 \x01(\x12H\x00\x12\x0e\n\x04\x62ool\x18\r \x01(\x08H\x00\x12\x10\n\x06string\x18\x0e \x01(\tH\x00\x12\x0f\n\x05\x62ytes\x18\x0f \x01(\x0cH\x00\x42\x08\n\x06scalar*\x8d\x01\n\x04\x43ode\x12\x06\n\x02OK\x10\x00\x12\"\n\x1eGET_PROPERTIES_NOT_IMPLEMENTED\x10\x01\x12\"\n\x1eGET_PARAMETERS_NOT_IMPLEMENTED\x10\x02\x12\x17\n\x13\x46IT_NOT_IMPLEMENTED\x10\x03\x12\x1c\n\x18\x45VALUATE_NOT_IMPLEMENTED\x10\x04*[\n\x06Reason\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tRECONNECT\x10\x01\x12\x16\n\x12POWER_DISCONNECTED\x10\x02\x12\x14\n\x10WIFI_UNAVAILABLE\x10\x03\x12\x07\n\x03\x41\x43K\x10\x04\x32S\n\rFlowerService\x12\x42\n\x04Join\x12\x19.flwr.proto.ClientMessage\x1a\x19.flwr.proto.ServerMessage\"\x00(\x01\x30\x01\x62\x06proto3')
 
-_REASON = _descriptor.EnumDescriptor(
-  name='Reason',
-  full_name='flower.transport.Reason',
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='UNKNOWN', index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='RECONNECT', index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='POWER_DISCONNECTED', index=2, number=2,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='WIFI_UNAVAILABLE', index=3, number=3,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ACK', index=4, number=4,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=1880,
-  serialized_end=1971,
-)
-_sym_db.RegisterEnumDescriptor(_REASON)
-
+_CODE = DESCRIPTOR.enum_types_by_name['Code']
+Code = enum_type_wrapper.EnumTypeWrapper(_CODE)
+_REASON = DESCRIPTOR.enum_types_by_name['Reason']
 Reason = enum_type_wrapper.EnumTypeWrapper(_REASON)
+OK = 0
+GET_PROPERTIES_NOT_IMPLEMENTED = 1
+GET_PARAMETERS_NOT_IMPLEMENTED = 2
+FIT_NOT_IMPLEMENTED = 3
+EVALUATE_NOT_IMPLEMENTED = 4
 UNKNOWN = 0
 RECONNECT = 1
 POWER_DISCONNECTED = 2
@@ -71,781 +33,76 @@ WIFI_UNAVAILABLE = 3
 ACK = 4
 
 
-
-_PARAMETERS = _descriptor.Descriptor(
-  name='Parameters',
-  full_name='flower.transport.Parameters',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='tensors', full_name='flower.transport.Parameters.tensors', index=0,
-      number=1, type=12, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='tensor_type', full_name='flower.transport.Parameters.tensor_type', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=48,
-  serialized_end=98,
-)
-
-
-_SERVERMESSAGE_RECONNECT = _descriptor.Descriptor(
-  name='Reconnect',
-  full_name='flower.transport.ServerMessage.Reconnect',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='seconds', full_name='flower.transport.ServerMessage.Reconnect.seconds', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=383,
-  serialized_end=411,
-)
-
-_SERVERMESSAGE_GETPARAMETERS = _descriptor.Descriptor(
-  name='GetParameters',
-  full_name='flower.transport.ServerMessage.GetParameters',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=413,
-  serialized_end=428,
-)
-
-_SERVERMESSAGE_FITINS_CONFIGENTRY = _descriptor.Descriptor(
-  name='ConfigEntry',
-  full_name='flower.transport.ServerMessage.FitIns.ConfigEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='flower.transport.ServerMessage.FitIns.ConfigEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='flower.transport.ServerMessage.FitIns.ConfigEntry.value', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=559,
-  serialized_end=630,
-)
-
-_SERVERMESSAGE_FITINS = _descriptor.Descriptor(
-  name='FitIns',
-  full_name='flower.transport.ServerMessage.FitIns',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='parameters', full_name='flower.transport.ServerMessage.FitIns.parameters', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='config', full_name='flower.transport.ServerMessage.FitIns.config', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_SERVERMESSAGE_FITINS_CONFIGENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=431,
-  serialized_end=630,
-)
-
-_SERVERMESSAGE_EVALUATEINS_CONFIGENTRY = _descriptor.Descriptor(
-  name='ConfigEntry',
-  full_name='flower.transport.ServerMessage.EvaluateIns.ConfigEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='flower.transport.ServerMessage.EvaluateIns.ConfigEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='flower.transport.ServerMessage.EvaluateIns.ConfigEntry.value', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=559,
-  serialized_end=630,
-)
-
-_SERVERMESSAGE_EVALUATEINS = _descriptor.Descriptor(
-  name='EvaluateIns',
-  full_name='flower.transport.ServerMessage.EvaluateIns',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='parameters', full_name='flower.transport.ServerMessage.EvaluateIns.parameters', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='config', full_name='flower.transport.ServerMessage.EvaluateIns.config', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_SERVERMESSAGE_EVALUATEINS_CONFIGENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=633,
-  serialized_end=842,
-)
-
-_SERVERMESSAGE = _descriptor.Descriptor(
-  name='ServerMessage',
-  full_name='flower.transport.ServerMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='reconnect', full_name='flower.transport.ServerMessage.reconnect', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='get_parameters', full_name='flower.transport.ServerMessage.get_parameters', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='fit_ins', full_name='flower.transport.ServerMessage.fit_ins', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='evaluate_ins', full_name='flower.transport.ServerMessage.evaluate_ins', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_SERVERMESSAGE_RECONNECT, _SERVERMESSAGE_GETPARAMETERS, _SERVERMESSAGE_FITINS, _SERVERMESSAGE_EVALUATEINS, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='msg', full_name='flower.transport.ServerMessage.msg',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=101,
-  serialized_end=849,
-)
-
-
-_CLIENTMESSAGE_DISCONNECT = _descriptor.Descriptor(
-  name='Disconnect',
-  full_name='flower.transport.ClientMessage.Disconnect',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='reason', full_name='flower.transport.ClientMessage.Disconnect.reason', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1136,
-  serialized_end=1190,
-)
-
-_CLIENTMESSAGE_PARAMETERSRES = _descriptor.Descriptor(
-  name='ParametersRes',
-  full_name='flower.transport.ClientMessage.ParametersRes',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='parameters', full_name='flower.transport.ClientMessage.ParametersRes.parameters', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1192,
-  serialized_end=1257,
-)
-
-_CLIENTMESSAGE_FITRES_METRICSENTRY = _descriptor.Descriptor(
-  name='MetricsEntry',
-  full_name='flower.transport.ClientMessage.FitRes.MetricsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='flower.transport.ClientMessage.FitRes.MetricsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='flower.transport.ClientMessage.FitRes.MetricsEntry.value', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1469,
-  serialized_end=1541,
-)
-
-_CLIENTMESSAGE_FITRES = _descriptor.Descriptor(
-  name='FitRes',
-  full_name='flower.transport.ClientMessage.FitRes',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='parameters', full_name='flower.transport.ClientMessage.FitRes.parameters', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='num_examples', full_name='flower.transport.ClientMessage.FitRes.num_examples', index=1,
-      number=2, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='num_examples_ceil', full_name='flower.transport.ClientMessage.FitRes.num_examples_ceil', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='fit_duration', full_name='flower.transport.ClientMessage.FitRes.fit_duration', index=3,
-      number=4, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='metrics', full_name='flower.transport.ClientMessage.FitRes.metrics', index=4,
-      number=5, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_CLIENTMESSAGE_FITRES_METRICSENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1260,
-  serialized_end=1541,
-)
-
-_CLIENTMESSAGE_EVALUATERES_METRICSENTRY = _descriptor.Descriptor(
-  name='MetricsEntry',
-  full_name='flower.transport.ClientMessage.EvaluateRes.MetricsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='flower.transport.ClientMessage.EvaluateRes.MetricsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='flower.transport.ClientMessage.EvaluateRes.MetricsEntry.value', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1469,
-  serialized_end=1541,
-)
-
-_CLIENTMESSAGE_EVALUATERES = _descriptor.Descriptor(
-  name='EvaluateRes',
-  full_name='flower.transport.ClientMessage.EvaluateRes',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='num_examples', full_name='flower.transport.ClientMessage.EvaluateRes.num_examples', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='loss', full_name='flower.transport.ClientMessage.EvaluateRes.loss', index=1,
-      number=2, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='accuracy', full_name='flower.transport.ClientMessage.EvaluateRes.accuracy', index=2,
-      number=3, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='metrics', full_name='flower.transport.ClientMessage.EvaluateRes.metrics', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_CLIENTMESSAGE_EVALUATERES_METRICSENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1544,
-  serialized_end=1764,
-)
-
-_CLIENTMESSAGE = _descriptor.Descriptor(
-  name='ClientMessage',
-  full_name='flower.transport.ClientMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='disconnect', full_name='flower.transport.ClientMessage.disconnect', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='parameters_res', full_name='flower.transport.ClientMessage.parameters_res', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='fit_res', full_name='flower.transport.ClientMessage.fit_res', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='evaluate_res', full_name='flower.transport.ClientMessage.evaluate_res', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_CLIENTMESSAGE_DISCONNECT, _CLIENTMESSAGE_PARAMETERSRES, _CLIENTMESSAGE_FITRES, _CLIENTMESSAGE_EVALUATERES, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='msg', full_name='flower.transport.ClientMessage.msg',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=852,
-  serialized_end=1771,
-)
-
-
-_SCALAR = _descriptor.Descriptor(
-  name='Scalar',
-  full_name='flower.transport.Scalar',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='double', full_name='flower.transport.Scalar.double', index=0,
-      number=1, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='sint64', full_name='flower.transport.Scalar.sint64', index=1,
-      number=8, type=18, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='bool', full_name='flower.transport.Scalar.bool', index=2,
-      number=13, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='string', full_name='flower.transport.Scalar.string', index=3,
-      number=14, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='bytes', full_name='flower.transport.Scalar.bytes', index=4,
-      number=15, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='scalar', full_name='flower.transport.Scalar.scalar',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=1773,
-  serialized_end=1878,
-)
-
-_SERVERMESSAGE_RECONNECT.containing_type = _SERVERMESSAGE
-_SERVERMESSAGE_GETPARAMETERS.containing_type = _SERVERMESSAGE
-_SERVERMESSAGE_FITINS_CONFIGENTRY.fields_by_name['value'].message_type = _SCALAR
-_SERVERMESSAGE_FITINS_CONFIGENTRY.containing_type = _SERVERMESSAGE_FITINS
-_SERVERMESSAGE_FITINS.fields_by_name['parameters'].message_type = _PARAMETERS
-_SERVERMESSAGE_FITINS.fields_by_name['config'].message_type = _SERVERMESSAGE_FITINS_CONFIGENTRY
-_SERVERMESSAGE_FITINS.containing_type = _SERVERMESSAGE
-_SERVERMESSAGE_EVALUATEINS_CONFIGENTRY.fields_by_name['value'].message_type = _SCALAR
-_SERVERMESSAGE_EVALUATEINS_CONFIGENTRY.containing_type = _SERVERMESSAGE_EVALUATEINS
-_SERVERMESSAGE_EVALUATEINS.fields_by_name['parameters'].message_type = _PARAMETERS
-_SERVERMESSAGE_EVALUATEINS.fields_by_name['config'].message_type = _SERVERMESSAGE_EVALUATEINS_CONFIGENTRY
-_SERVERMESSAGE_EVALUATEINS.containing_type = _SERVERMESSAGE
-_SERVERMESSAGE.fields_by_name['reconnect'].message_type = _SERVERMESSAGE_RECONNECT
-_SERVERMESSAGE.fields_by_name['get_parameters'].message_type = _SERVERMESSAGE_GETPARAMETERS
-_SERVERMESSAGE.fields_by_name['fit_ins'].message_type = _SERVERMESSAGE_FITINS
-_SERVERMESSAGE.fields_by_name['evaluate_ins'].message_type = _SERVERMESSAGE_EVALUATEINS
-_SERVERMESSAGE.oneofs_by_name['msg'].fields.append(
-  _SERVERMESSAGE.fields_by_name['reconnect'])
-_SERVERMESSAGE.fields_by_name['reconnect'].containing_oneof = _SERVERMESSAGE.oneofs_by_name['msg']
-_SERVERMESSAGE.oneofs_by_name['msg'].fields.append(
-  _SERVERMESSAGE.fields_by_name['get_parameters'])
-_SERVERMESSAGE.fields_by_name['get_parameters'].containing_oneof = _SERVERMESSAGE.oneofs_by_name['msg']
-_SERVERMESSAGE.oneofs_by_name['msg'].fields.append(
-  _SERVERMESSAGE.fields_by_name['fit_ins'])
-_SERVERMESSAGE.fields_by_name['fit_ins'].containing_oneof = _SERVERMESSAGE.oneofs_by_name['msg']
-_SERVERMESSAGE.oneofs_by_name['msg'].fields.append(
-  _SERVERMESSAGE.fields_by_name['evaluate_ins'])
-_SERVERMESSAGE.fields_by_name['evaluate_ins'].containing_oneof = _SERVERMESSAGE.oneofs_by_name['msg']
-_CLIENTMESSAGE_DISCONNECT.fields_by_name['reason'].enum_type = _REASON
-_CLIENTMESSAGE_DISCONNECT.containing_type = _CLIENTMESSAGE
-_CLIENTMESSAGE_PARAMETERSRES.fields_by_name['parameters'].message_type = _PARAMETERS
-_CLIENTMESSAGE_PARAMETERSRES.containing_type = _CLIENTMESSAGE
-_CLIENTMESSAGE_FITRES_METRICSENTRY.fields_by_name['value'].message_type = _SCALAR
-_CLIENTMESSAGE_FITRES_METRICSENTRY.containing_type = _CLIENTMESSAGE_FITRES
-_CLIENTMESSAGE_FITRES.fields_by_name['parameters'].message_type = _PARAMETERS
-_CLIENTMESSAGE_FITRES.fields_by_name['metrics'].message_type = _CLIENTMESSAGE_FITRES_METRICSENTRY
-_CLIENTMESSAGE_FITRES.containing_type = _CLIENTMESSAGE
-_CLIENTMESSAGE_EVALUATERES_METRICSENTRY.fields_by_name['value'].message_type = _SCALAR
-_CLIENTMESSAGE_EVALUATERES_METRICSENTRY.containing_type = _CLIENTMESSAGE_EVALUATERES
-_CLIENTMESSAGE_EVALUATERES.fields_by_name['metrics'].message_type = _CLIENTMESSAGE_EVALUATERES_METRICSENTRY
-_CLIENTMESSAGE_EVALUATERES.containing_type = _CLIENTMESSAGE
-_CLIENTMESSAGE.fields_by_name['disconnect'].message_type = _CLIENTMESSAGE_DISCONNECT
-_CLIENTMESSAGE.fields_by_name['parameters_res'].message_type = _CLIENTMESSAGE_PARAMETERSRES
-_CLIENTMESSAGE.fields_by_name['fit_res'].message_type = _CLIENTMESSAGE_FITRES
-_CLIENTMESSAGE.fields_by_name['evaluate_res'].message_type = _CLIENTMESSAGE_EVALUATERES
-_CLIENTMESSAGE.oneofs_by_name['msg'].fields.append(
-  _CLIENTMESSAGE.fields_by_name['disconnect'])
-_CLIENTMESSAGE.fields_by_name['disconnect'].containing_oneof = _CLIENTMESSAGE.oneofs_by_name['msg']
-_CLIENTMESSAGE.oneofs_by_name['msg'].fields.append(
-  _CLIENTMESSAGE.fields_by_name['parameters_res'])
-_CLIENTMESSAGE.fields_by_name['parameters_res'].containing_oneof = _CLIENTMESSAGE.oneofs_by_name['msg']
-_CLIENTMESSAGE.oneofs_by_name['msg'].fields.append(
-  _CLIENTMESSAGE.fields_by_name['fit_res'])
-_CLIENTMESSAGE.fields_by_name['fit_res'].containing_oneof = _CLIENTMESSAGE.oneofs_by_name['msg']
-_CLIENTMESSAGE.oneofs_by_name['msg'].fields.append(
-  _CLIENTMESSAGE.fields_by_name['evaluate_res'])
-_CLIENTMESSAGE.fields_by_name['evaluate_res'].containing_oneof = _CLIENTMESSAGE.oneofs_by_name['msg']
-_SCALAR.oneofs_by_name['scalar'].fields.append(
-  _SCALAR.fields_by_name['double'])
-_SCALAR.fields_by_name['double'].containing_oneof = _SCALAR.oneofs_by_name['scalar']
-_SCALAR.oneofs_by_name['scalar'].fields.append(
-  _SCALAR.fields_by_name['sint64'])
-_SCALAR.fields_by_name['sint64'].containing_oneof = _SCALAR.oneofs_by_name['scalar']
-_SCALAR.oneofs_by_name['scalar'].fields.append(
-  _SCALAR.fields_by_name['bool'])
-_SCALAR.fields_by_name['bool'].containing_oneof = _SCALAR.oneofs_by_name['scalar']
-_SCALAR.oneofs_by_name['scalar'].fields.append(
-  _SCALAR.fields_by_name['string'])
-_SCALAR.fields_by_name['string'].containing_oneof = _SCALAR.oneofs_by_name['scalar']
-_SCALAR.oneofs_by_name['scalar'].fields.append(
-  _SCALAR.fields_by_name['bytes'])
-_SCALAR.fields_by_name['bytes'].containing_oneof = _SCALAR.oneofs_by_name['scalar']
-DESCRIPTOR.message_types_by_name['Parameters'] = _PARAMETERS
-DESCRIPTOR.message_types_by_name['ServerMessage'] = _SERVERMESSAGE
-DESCRIPTOR.message_types_by_name['ClientMessage'] = _CLIENTMESSAGE
-DESCRIPTOR.message_types_by_name['Scalar'] = _SCALAR
-DESCRIPTOR.enum_types_by_name['Reason'] = _REASON
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
+_STATUS = DESCRIPTOR.message_types_by_name['Status']
+_PARAMETERS = DESCRIPTOR.message_types_by_name['Parameters']
+_SERVERMESSAGE = DESCRIPTOR.message_types_by_name['ServerMessage']
+_SERVERMESSAGE_RECONNECTINS = _SERVERMESSAGE.nested_types_by_name['ReconnectIns']
+_SERVERMESSAGE_GETPROPERTIESINS = _SERVERMESSAGE.nested_types_by_name['GetPropertiesIns']
+_SERVERMESSAGE_GETPROPERTIESINS_CONFIGENTRY = _SERVERMESSAGE_GETPROPERTIESINS.nested_types_by_name['ConfigEntry']
+_SERVERMESSAGE_GETPARAMETERSINS = _SERVERMESSAGE.nested_types_by_name['GetParametersIns']
+_SERVERMESSAGE_GETPARAMETERSINS_CONFIGENTRY = _SERVERMESSAGE_GETPARAMETERSINS.nested_types_by_name['ConfigEntry']
+_SERVERMESSAGE_FITINS = _SERVERMESSAGE.nested_types_by_name['FitIns']
+_SERVERMESSAGE_FITINS_CONFIGENTRY = _SERVERMESSAGE_FITINS.nested_types_by_name['ConfigEntry']
+_SERVERMESSAGE_EVALUATEINS = _SERVERMESSAGE.nested_types_by_name['EvaluateIns']
+_SERVERMESSAGE_EVALUATEINS_CONFIGENTRY = _SERVERMESSAGE_EVALUATEINS.nested_types_by_name['ConfigEntry']
+_CLIENTMESSAGE = DESCRIPTOR.message_types_by_name['ClientMessage']
+_CLIENTMESSAGE_DISCONNECTRES = _CLIENTMESSAGE.nested_types_by_name['DisconnectRes']
+_CLIENTMESSAGE_GETPROPERTIESRES = _CLIENTMESSAGE.nested_types_by_name['GetPropertiesRes']
+_CLIENTMESSAGE_GETPROPERTIESRES_PROPERTIESENTRY = _CLIENTMESSAGE_GETPROPERTIESRES.nested_types_by_name['PropertiesEntry']
+_CLIENTMESSAGE_GETPARAMETERSRES = _CLIENTMESSAGE.nested_types_by_name['GetParametersRes']
+_CLIENTMESSAGE_FITRES = _CLIENTMESSAGE.nested_types_by_name['FitRes']
+_CLIENTMESSAGE_FITRES_METRICSENTRY = _CLIENTMESSAGE_FITRES.nested_types_by_name['MetricsEntry']
+_CLIENTMESSAGE_EVALUATERES = _CLIENTMESSAGE.nested_types_by_name['EvaluateRes']
+_CLIENTMESSAGE_EVALUATERES_METRICSENTRY = _CLIENTMESSAGE_EVALUATERES.nested_types_by_name['MetricsEntry']
+_SCALAR = DESCRIPTOR.message_types_by_name['Scalar']
+Status = _reflection.GeneratedProtocolMessageType('Status', (_message.Message,), {
+  'DESCRIPTOR' : _STATUS,
+  '__module__' : 'flwr.proto.transport_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.Status)
+  })
+_sym_db.RegisterMessage(Status)
 
 Parameters = _reflection.GeneratedProtocolMessageType('Parameters', (_message.Message,), {
   'DESCRIPTOR' : _PARAMETERS,
   '__module__' : 'flwr.proto.transport_pb2'
-  # @@protoc_insertion_point(class_scope:flower.transport.Parameters)
+  # @@protoc_insertion_point(class_scope:flwr.proto.Parameters)
   })
 _sym_db.RegisterMessage(Parameters)
 
 ServerMessage = _reflection.GeneratedProtocolMessageType('ServerMessage', (_message.Message,), {
 
-  'Reconnect' : _reflection.GeneratedProtocolMessageType('Reconnect', (_message.Message,), {
-    'DESCRIPTOR' : _SERVERMESSAGE_RECONNECT,
+  'ReconnectIns' : _reflection.GeneratedProtocolMessageType('ReconnectIns', (_message.Message,), {
+    'DESCRIPTOR' : _SERVERMESSAGE_RECONNECTINS,
     '__module__' : 'flwr.proto.transport_pb2'
-    # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.Reconnect)
+    # @@protoc_insertion_point(class_scope:flwr.proto.ServerMessage.ReconnectIns)
     })
   ,
 
-  'GetParameters' : _reflection.GeneratedProtocolMessageType('GetParameters', (_message.Message,), {
-    'DESCRIPTOR' : _SERVERMESSAGE_GETPARAMETERS,
+  'GetPropertiesIns' : _reflection.GeneratedProtocolMessageType('GetPropertiesIns', (_message.Message,), {
+
+    'ConfigEntry' : _reflection.GeneratedProtocolMessageType('ConfigEntry', (_message.Message,), {
+      'DESCRIPTOR' : _SERVERMESSAGE_GETPROPERTIESINS_CONFIGENTRY,
+      '__module__' : 'flwr.proto.transport_pb2'
+      # @@protoc_insertion_point(class_scope:flwr.proto.ServerMessage.GetPropertiesIns.ConfigEntry)
+      })
+    ,
+    'DESCRIPTOR' : _SERVERMESSAGE_GETPROPERTIESINS,
     '__module__' : 'flwr.proto.transport_pb2'
-    # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.GetParameters)
+    # @@protoc_insertion_point(class_scope:flwr.proto.ServerMessage.GetPropertiesIns)
+    })
+  ,
+
+  'GetParametersIns' : _reflection.GeneratedProtocolMessageType('GetParametersIns', (_message.Message,), {
+
+    'ConfigEntry' : _reflection.GeneratedProtocolMessageType('ConfigEntry', (_message.Message,), {
+      'DESCRIPTOR' : _SERVERMESSAGE_GETPARAMETERSINS_CONFIGENTRY,
+      '__module__' : 'flwr.proto.transport_pb2'
+      # @@protoc_insertion_point(class_scope:flwr.proto.ServerMessage.GetParametersIns.ConfigEntry)
+      })
+    ,
+    'DESCRIPTOR' : _SERVERMESSAGE_GETPARAMETERSINS,
+    '__module__' : 'flwr.proto.transport_pb2'
+    # @@protoc_insertion_point(class_scope:flwr.proto.ServerMessage.GetParametersIns)
     })
   ,
 
@@ -854,12 +111,12 @@ ServerMessage = _reflection.GeneratedProtocolMessageType('ServerMessage', (_mess
     'ConfigEntry' : _reflection.GeneratedProtocolMessageType('ConfigEntry', (_message.Message,), {
       'DESCRIPTOR' : _SERVERMESSAGE_FITINS_CONFIGENTRY,
       '__module__' : 'flwr.proto.transport_pb2'
-      # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.FitIns.ConfigEntry)
+      # @@protoc_insertion_point(class_scope:flwr.proto.ServerMessage.FitIns.ConfigEntry)
       })
     ,
     'DESCRIPTOR' : _SERVERMESSAGE_FITINS,
     '__module__' : 'flwr.proto.transport_pb2'
-    # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.FitIns)
+    # @@protoc_insertion_point(class_scope:flwr.proto.ServerMessage.FitIns)
     })
   ,
 
@@ -868,21 +125,24 @@ ServerMessage = _reflection.GeneratedProtocolMessageType('ServerMessage', (_mess
     'ConfigEntry' : _reflection.GeneratedProtocolMessageType('ConfigEntry', (_message.Message,), {
       'DESCRIPTOR' : _SERVERMESSAGE_EVALUATEINS_CONFIGENTRY,
       '__module__' : 'flwr.proto.transport_pb2'
-      # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.EvaluateIns.ConfigEntry)
+      # @@protoc_insertion_point(class_scope:flwr.proto.ServerMessage.EvaluateIns.ConfigEntry)
       })
     ,
     'DESCRIPTOR' : _SERVERMESSAGE_EVALUATEINS,
     '__module__' : 'flwr.proto.transport_pb2'
-    # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage.EvaluateIns)
+    # @@protoc_insertion_point(class_scope:flwr.proto.ServerMessage.EvaluateIns)
     })
   ,
   'DESCRIPTOR' : _SERVERMESSAGE,
   '__module__' : 'flwr.proto.transport_pb2'
-  # @@protoc_insertion_point(class_scope:flower.transport.ServerMessage)
+  # @@protoc_insertion_point(class_scope:flwr.proto.ServerMessage)
   })
 _sym_db.RegisterMessage(ServerMessage)
-_sym_db.RegisterMessage(ServerMessage.Reconnect)
-_sym_db.RegisterMessage(ServerMessage.GetParameters)
+_sym_db.RegisterMessage(ServerMessage.ReconnectIns)
+_sym_db.RegisterMessage(ServerMessage.GetPropertiesIns)
+_sym_db.RegisterMessage(ServerMessage.GetPropertiesIns.ConfigEntry)
+_sym_db.RegisterMessage(ServerMessage.GetParametersIns)
+_sym_db.RegisterMessage(ServerMessage.GetParametersIns.ConfigEntry)
 _sym_db.RegisterMessage(ServerMessage.FitIns)
 _sym_db.RegisterMessage(ServerMessage.FitIns.ConfigEntry)
 _sym_db.RegisterMessage(ServerMessage.EvaluateIns)
@@ -890,17 +150,31 @@ _sym_db.RegisterMessage(ServerMessage.EvaluateIns.ConfigEntry)
 
 ClientMessage = _reflection.GeneratedProtocolMessageType('ClientMessage', (_message.Message,), {
 
-  'Disconnect' : _reflection.GeneratedProtocolMessageType('Disconnect', (_message.Message,), {
-    'DESCRIPTOR' : _CLIENTMESSAGE_DISCONNECT,
+  'DisconnectRes' : _reflection.GeneratedProtocolMessageType('DisconnectRes', (_message.Message,), {
+    'DESCRIPTOR' : _CLIENTMESSAGE_DISCONNECTRES,
     '__module__' : 'flwr.proto.transport_pb2'
-    # @@protoc_insertion_point(class_scope:flower.transport.ClientMessage.Disconnect)
+    # @@protoc_insertion_point(class_scope:flwr.proto.ClientMessage.DisconnectRes)
     })
   ,
 
-  'ParametersRes' : _reflection.GeneratedProtocolMessageType('ParametersRes', (_message.Message,), {
-    'DESCRIPTOR' : _CLIENTMESSAGE_PARAMETERSRES,
+  'GetPropertiesRes' : _reflection.GeneratedProtocolMessageType('GetPropertiesRes', (_message.Message,), {
+
+    'PropertiesEntry' : _reflection.GeneratedProtocolMessageType('PropertiesEntry', (_message.Message,), {
+      'DESCRIPTOR' : _CLIENTMESSAGE_GETPROPERTIESRES_PROPERTIESENTRY,
+      '__module__' : 'flwr.proto.transport_pb2'
+      # @@protoc_insertion_point(class_scope:flwr.proto.ClientMessage.GetPropertiesRes.PropertiesEntry)
+      })
+    ,
+    'DESCRIPTOR' : _CLIENTMESSAGE_GETPROPERTIESRES,
     '__module__' : 'flwr.proto.transport_pb2'
-    # @@protoc_insertion_point(class_scope:flower.transport.ClientMessage.ParametersRes)
+    # @@protoc_insertion_point(class_scope:flwr.proto.ClientMessage.GetPropertiesRes)
+    })
+  ,
+
+  'GetParametersRes' : _reflection.GeneratedProtocolMessageType('GetParametersRes', (_message.Message,), {
+    'DESCRIPTOR' : _CLIENTMESSAGE_GETPARAMETERSRES,
+    '__module__' : 'flwr.proto.transport_pb2'
+    # @@protoc_insertion_point(class_scope:flwr.proto.ClientMessage.GetParametersRes)
     })
   ,
 
@@ -909,12 +183,12 @@ ClientMessage = _reflection.GeneratedProtocolMessageType('ClientMessage', (_mess
     'MetricsEntry' : _reflection.GeneratedProtocolMessageType('MetricsEntry', (_message.Message,), {
       'DESCRIPTOR' : _CLIENTMESSAGE_FITRES_METRICSENTRY,
       '__module__' : 'flwr.proto.transport_pb2'
-      # @@protoc_insertion_point(class_scope:flower.transport.ClientMessage.FitRes.MetricsEntry)
+      # @@protoc_insertion_point(class_scope:flwr.proto.ClientMessage.FitRes.MetricsEntry)
       })
     ,
     'DESCRIPTOR' : _CLIENTMESSAGE_FITRES,
     '__module__' : 'flwr.proto.transport_pb2'
-    # @@protoc_insertion_point(class_scope:flower.transport.ClientMessage.FitRes)
+    # @@protoc_insertion_point(class_scope:flwr.proto.ClientMessage.FitRes)
     })
   ,
 
@@ -923,21 +197,23 @@ ClientMessage = _reflection.GeneratedProtocolMessageType('ClientMessage', (_mess
     'MetricsEntry' : _reflection.GeneratedProtocolMessageType('MetricsEntry', (_message.Message,), {
       'DESCRIPTOR' : _CLIENTMESSAGE_EVALUATERES_METRICSENTRY,
       '__module__' : 'flwr.proto.transport_pb2'
-      # @@protoc_insertion_point(class_scope:flower.transport.ClientMessage.EvaluateRes.MetricsEntry)
+      # @@protoc_insertion_point(class_scope:flwr.proto.ClientMessage.EvaluateRes.MetricsEntry)
       })
     ,
     'DESCRIPTOR' : _CLIENTMESSAGE_EVALUATERES,
     '__module__' : 'flwr.proto.transport_pb2'
-    # @@protoc_insertion_point(class_scope:flower.transport.ClientMessage.EvaluateRes)
+    # @@protoc_insertion_point(class_scope:flwr.proto.ClientMessage.EvaluateRes)
     })
   ,
   'DESCRIPTOR' : _CLIENTMESSAGE,
   '__module__' : 'flwr.proto.transport_pb2'
-  # @@protoc_insertion_point(class_scope:flower.transport.ClientMessage)
+  # @@protoc_insertion_point(class_scope:flwr.proto.ClientMessage)
   })
 _sym_db.RegisterMessage(ClientMessage)
-_sym_db.RegisterMessage(ClientMessage.Disconnect)
-_sym_db.RegisterMessage(ClientMessage.ParametersRes)
+_sym_db.RegisterMessage(ClientMessage.DisconnectRes)
+_sym_db.RegisterMessage(ClientMessage.GetPropertiesRes)
+_sym_db.RegisterMessage(ClientMessage.GetPropertiesRes.PropertiesEntry)
+_sym_db.RegisterMessage(ClientMessage.GetParametersRes)
 _sym_db.RegisterMessage(ClientMessage.FitRes)
 _sym_db.RegisterMessage(ClientMessage.FitRes.MetricsEntry)
 _sym_db.RegisterMessage(ClientMessage.EvaluateRes)
@@ -946,42 +222,76 @@ _sym_db.RegisterMessage(ClientMessage.EvaluateRes.MetricsEntry)
 Scalar = _reflection.GeneratedProtocolMessageType('Scalar', (_message.Message,), {
   'DESCRIPTOR' : _SCALAR,
   '__module__' : 'flwr.proto.transport_pb2'
-  # @@protoc_insertion_point(class_scope:flower.transport.Scalar)
+  # @@protoc_insertion_point(class_scope:flwr.proto.Scalar)
   })
 _sym_db.RegisterMessage(Scalar)
 
+_FLOWERSERVICE = DESCRIPTOR.services_by_name['FlowerService']
+if _descriptor._USE_C_DESCRIPTORS == False:
 
-_SERVERMESSAGE_FITINS_CONFIGENTRY._options = None
-_SERVERMESSAGE_EVALUATEINS_CONFIGENTRY._options = None
-_CLIENTMESSAGE_FITRES_METRICSENTRY._options = None
-_CLIENTMESSAGE_FITRES.fields_by_name['num_examples_ceil']._options = None
-_CLIENTMESSAGE_FITRES.fields_by_name['fit_duration']._options = None
-_CLIENTMESSAGE_EVALUATERES_METRICSENTRY._options = None
-_CLIENTMESSAGE_EVALUATERES.fields_by_name['accuracy']._options = None
-
-_FLOWERSERVICE = _descriptor.ServiceDescriptor(
-  name='FlowerService',
-  full_name='flower.transport.FlowerService',
-  file=DESCRIPTOR,
-  index=0,
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_start=1973,
-  serialized_end=2068,
-  methods=[
-  _descriptor.MethodDescriptor(
-    name='Join',
-    full_name='flower.transport.FlowerService.Join',
-    index=0,
-    containing_service=None,
-    input_type=_CLIENTMESSAGE,
-    output_type=_SERVERMESSAGE,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-])
-_sym_db.RegisterServiceDescriptor(_FLOWERSERVICE)
-
-DESCRIPTOR.services_by_name['FlowerService'] = _FLOWERSERVICE
-
+  DESCRIPTOR._options = None
+  _SERVERMESSAGE_GETPROPERTIESINS_CONFIGENTRY._options = None
+  _SERVERMESSAGE_GETPROPERTIESINS_CONFIGENTRY._serialized_options = b'8\001'
+  _SERVERMESSAGE_GETPARAMETERSINS_CONFIGENTRY._options = None
+  _SERVERMESSAGE_GETPARAMETERSINS_CONFIGENTRY._serialized_options = b'8\001'
+  _SERVERMESSAGE_FITINS_CONFIGENTRY._options = None
+  _SERVERMESSAGE_FITINS_CONFIGENTRY._serialized_options = b'8\001'
+  _SERVERMESSAGE_EVALUATEINS_CONFIGENTRY._options = None
+  _SERVERMESSAGE_EVALUATEINS_CONFIGENTRY._serialized_options = b'8\001'
+  _CLIENTMESSAGE_GETPROPERTIESRES_PROPERTIESENTRY._options = None
+  _CLIENTMESSAGE_GETPROPERTIESRES_PROPERTIESENTRY._serialized_options = b'8\001'
+  _CLIENTMESSAGE_FITRES_METRICSENTRY._options = None
+  _CLIENTMESSAGE_FITRES_METRICSENTRY._serialized_options = b'8\001'
+  _CLIENTMESSAGE_EVALUATERES_METRICSENTRY._options = None
+  _CLIENTMESSAGE_EVALUATERES_METRICSENTRY._serialized_options = b'8\001'
+  _CODE._serialized_start=2533
+  _CODE._serialized_end=2674
+  _REASON._serialized_start=2676
+  _REASON._serialized_end=2767
+  _STATUS._serialized_start=42
+  _STATUS._serialized_end=99
+  _PARAMETERS._serialized_start=101
+  _PARAMETERS._serialized_end=151
+  _SERVERMESSAGE._serialized_start=154
+  _SERVERMESSAGE._serialized_end=1236
+  _SERVERMESSAGE_RECONNECTINS._serialized_start=500
+  _SERVERMESSAGE_RECONNECTINS._serialized_end=531
+  _SERVERMESSAGE_GETPROPERTIESINS._serialized_start=534
+  _SERVERMESSAGE_GETPROPERTIESINS._serialized_end=691
+  _SERVERMESSAGE_GETPROPERTIESINS_CONFIGENTRY._serialized_start=626
+  _SERVERMESSAGE_GETPROPERTIESINS_CONFIGENTRY._serialized_end=691
+  _SERVERMESSAGE_GETPARAMETERSINS._serialized_start=694
+  _SERVERMESSAGE_GETPARAMETERSINS._serialized_end=851
+  _SERVERMESSAGE_GETPARAMETERSINS_CONFIGENTRY._serialized_start=626
+  _SERVERMESSAGE_GETPARAMETERSINS_CONFIGENTRY._serialized_end=691
+  _SERVERMESSAGE_FITINS._serialized_start=854
+  _SERVERMESSAGE_FITINS._serialized_end=1035
+  _SERVERMESSAGE_FITINS_CONFIGENTRY._serialized_start=626
+  _SERVERMESSAGE_FITINS_CONFIGENTRY._serialized_end=691
+  _SERVERMESSAGE_EVALUATEINS._serialized_start=1038
+  _SERVERMESSAGE_EVALUATEINS._serialized_end=1229
+  _SERVERMESSAGE_EVALUATEINS_CONFIGENTRY._serialized_start=626
+  _SERVERMESSAGE_EVALUATEINS_CONFIGENTRY._serialized_end=691
+  _CLIENTMESSAGE._serialized_start=1239
+  _CLIENTMESSAGE._serialized_end=2423
+  _CLIENTMESSAGE_DISCONNECTRES._serialized_start=1587
+  _CLIENTMESSAGE_DISCONNECTRES._serialized_end=1638
+  _CLIENTMESSAGE_GETPROPERTIESRES._serialized_start=1641
+  _CLIENTMESSAGE_GETPROPERTIESRES._serialized_end=1846
+  _CLIENTMESSAGE_GETPROPERTIESRES_PROPERTIESENTRY._serialized_start=1777
+  _CLIENTMESSAGE_GETPROPERTIESRES_PROPERTIESENTRY._serialized_end=1846
+  _CLIENTMESSAGE_GETPARAMETERSRES._serialized_start=1848
+  _CLIENTMESSAGE_GETPARAMETERSRES._serialized_end=1946
+  _CLIENTMESSAGE_FITRES._serialized_start=1949
+  _CLIENTMESSAGE_FITRES._serialized_end=2191
+  _CLIENTMESSAGE_FITRES_METRICSENTRY._serialized_start=2125
+  _CLIENTMESSAGE_FITRES_METRICSENTRY._serialized_end=2191
+  _CLIENTMESSAGE_EVALUATERES._serialized_start=2194
+  _CLIENTMESSAGE_EVALUATERES._serialized_end=2416
+  _CLIENTMESSAGE_EVALUATERES_METRICSENTRY._serialized_start=2125
+  _CLIENTMESSAGE_EVALUATERES_METRICSENTRY._serialized_end=2191
+  _SCALAR._serialized_start=2425
+  _SCALAR._serialized_end=2530
+  _FLOWERSERVICE._serialized_start=2769
+  _FLOWERSERVICE._serialized_end=2852
 # @@protoc_insertion_point(module_scope)

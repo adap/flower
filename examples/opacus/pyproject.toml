@@ -1,0 +1,17 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "flwr_opacus"
+version = "0.1.0"
+description = "Differentially Private Federated Learning with Opacus and Flower"
+authors = ["The Flower Authors <hello@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+flwr = "^0.17.0"
+# flwr = { path = "../../", develop = true }  # Development
+opacus = "~0.14.0"
+torch = "~1.7.0"
+torchvision = "~0.8.0"

@@ -1,0 +1,19 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "dp-sgd-mnist"
+version = "0.1.0"
+description = "Federated training with Tensorflow Privacy"
+authors = [
+    "The Flower Authors <hello@flower.dev>",
+    "Kaushik Amar Das <kaushik.das@iiitg.ac.in>"
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+flwr = "^1.0.0"
+# flwr = { path = "../../", develop = true }  # Development
+tensorflow = "^2.5.0"
+tensorflow-privacy = {git = "https://github.com/tensorflow/privacy", rev = "aaf4c25"}

@@ -1,6 +1,6 @@
 # Flower Example using PyTorch
 
-This introductory example to Flower uses PyTorch, but deep knowledge of PyToch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
+This introductory example to Flower uses PyTorch, but deep knowledge of PyTorch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
 Running this example in itself is quite easy.
 
 ## Project Setup
@@ -57,4 +57,4 @@ Start client 2 in the second terminal:
 python3 client.py
 ```
 
-You will see that PyTorch is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart_pytorch.html) for a detailed explanation.
+You will see that PyTorch is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart-pytorch.html) for a detailed explanation.

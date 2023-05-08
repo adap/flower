@@ -1,0 +1,10 @@
+---
+name: FedAdam
+expected_accuracy: 52.5
+init:
+  _target_: flwr.server.strategy.FedAdam
+  beta_1: 0.9
+  beta_2: 0.99
+  eta: 1.0
+  tau: 0.1
+eta_l: 0.03162

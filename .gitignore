@@ -1,8 +1,23 @@
-# Flower files
+# Flower
 .flower_ops
 data/
 doc/source/api_documentation
 doc/source/_build
+flwr_logs
+.cache
+
+# Node.js
+node_modules
+
+# Flower Examples
+examples/**/dataset/**
+examples/**/dev/*.sh
+
+# Flower Baselines
+baselines/datasets/leaf
+
+# macOS
+.DS_Store
 
 # Editor
 .vscode
@@ -35,6 +50,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+.srl
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -146,8 +162,5 @@ dmypy.json
 poetry.lock
 *.pkl
 
-# Examples
-examples/**/dataset/**
-
-# Datasets
-baselines/datasets/leaf
+# iOS
+xcuserdata/

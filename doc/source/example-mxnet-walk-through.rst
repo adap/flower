@@ -7,7 +7,7 @@ We will structure the example similar to our `PyTorch - From Centralized To Fede
 First, we build a centralized training approach based on the `Handwritten Digit Recognition <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_ tutorial.
 Then, we build upon the centralized training code to run the training in a federated fashion.
 
-Before we start setting up our MXNet example we install the :code:`mxnet` and :code:`flwr` packages:
+Before we start setting up our MXNet example, we install the :code:`mxnet` and :code:`flwr` packages:
 
 .. code-block:: shell
 
@@ -209,7 +209,7 @@ Next, we use the :code:`start_server` function to start a server and tell it to 
     import flwr as fl
 
     if __name__ == "__main__":
-        fl.server.start_server("0.0.0.0:8080", config={"num_rounds": 3})
+        fl.server.start_server(server_address="0.0.0.0:8080", config=fl.server.ServerConfig(num_rounds=3))
 
 We can already start the *server*:
 
@@ -275,7 +275,7 @@ We included type annotations to give you a better understanding of the data type
             self.val_data = val_data
             self.device = device
 
-        def get_parameters(self) -> List[np.ndarray]:
+        def get_parameters(self, config) -> List[np.ndarray]:
             # Return model parameters as a list of NumPy Arrays
             param = []
             for val in self.model.collect_params(".*weight").values():
@@ -299,7 +299,7 @@ We included type annotations to give you a better understanding of the data type
             self.model, self.train_data, epoch=2, device=self.device
             )
             results = {"accuracy": accuracy[1], "loss": loss[1]}
-            return self.get_parameters(), num_examples, results
+            return self.get_parameters(config={}), num_examples, results
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict[str, str]
@@ -338,7 +338,7 @@ Having defined data loading, model architecture, training, and evaluation we can
 
         # Start Flower client
         client = MNISTClient(model, train_data, val_data, DEVICE)
-        fl.client.start_numpy_client("0.0.0.0:8080", client)
+        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client)
 
 
     if __name__ == "__main__":

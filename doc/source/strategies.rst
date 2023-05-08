@@ -9,6 +9,7 @@ There are three ways to customize the way Flower orchestrates the learning proce
 * Customize an existing strategy with callback functions
 * Implement a novel strategy
 
+
 Use an existing strategy
 ------------------------
 
@@ -19,7 +20,7 @@ Flower comes with a number of popular federated learning strategies built-in. A 
     import flwr as fl
 
     strategy = fl.server.strategy.FedAvg()
-    fl.server.start_server(config={"num_rounds": 3}, strategy=strategy)
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3), strategy=strategy)
 
 This creates a strategy with all parameters left at their default values and passes it to the :code:`start_server` function. It is usually recommended to adjust a few parameters during instantiation:
 
@@ -32,7 +33,7 @@ This creates a strategy with all parameters left at their default values and pas
         min_fit_clients=10,  # Minimum number of clients to be sampled for the next round
         min_available_clients=80,  # Minimum number of clients that need to be connected to the server before a training round can start
     )
-    fl.server.start_server(config={"num_rounds": 3}, strategy=strategy)
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3), strategy=strategy)
 
 
 Customize an existing strategy with callback functions
@@ -53,7 +54,7 @@ It must return a dictionary of arbitraty configuration values  :code:`client.fit
     def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
         """Return a function which returns training configurations."""
 
-        def fit_config(rnd: int) -> Dict[str, str]:
+        def fit_config(server_round: int) -> Dict[str, str]:
             """Return a configuration with static batch size and (local) epochs."""
             config = {
                 "learning_rate": str(0.001),
@@ -69,7 +70,7 @@ It must return a dictionary of arbitraty configuration values  :code:`client.fit
         min_available_clients=80,
         on_fit_config_fn=get_on_fit_config_fn(),
     )
-    fl.server.start_server(config={"num_rounds": 3}, strategy=strategy)
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3), strategy=strategy)
 
 The :code:`on_fit_config_fn` can be used to pass arbitrary configuration values from server to client, and poetentially change these values each round, for example, to adjust the learning rate.
 The client will receive the dictionary returned by the :code:`on_fit_config_fn` in its own :code:`client.fit()` function.
@@ -79,7 +80,8 @@ Similar to :code:`on_fit_config_fn`, there is also :code:`on_evaluate_config_fn`
 Configuring server-side evaluation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Server-side evaluation can be enabled by passing an evaluation function to :code:`eval_fn`.
+Server-side evaluation can be enabled by passing an evaluation function to :code:`evaluate_fn`.
+
 
 Implement a novel strategy
 --------------------------
