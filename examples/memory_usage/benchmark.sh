@@ -18,10 +18,8 @@ do
     sleep 0.1
 done
 
-
 # This will allow you to use CTRL+C to stop all background processes
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
-sleep 259200
 
-
+wait
 
