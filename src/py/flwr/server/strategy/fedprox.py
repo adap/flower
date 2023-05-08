@@ -28,13 +28,6 @@ from flwr.server.client_proxy import ClientProxy
 
 from .fedavg import FedAvg
 
-WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
-Setting `min_available_clients` lower than `min_fit_clients` or
-`min_evaluate_clients` can cause the server to fail when there are too few clients
-connected to the server. `min_available_clients` must be set to a value larger
-than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
-"""
-
 
 # flake8: noqa: E501
 class FedProx(FedAvg):
@@ -132,13 +125,6 @@ class FedProx(FedAvg):
             regularization will be used (that is, the client parameters will need to be
             closer to the server parameters during training).
         """
-        super().__init__()
-
-        if (
-            min_fit_clients > min_available_clients
-            or min_evaluate_clients > min_available_clients
-        ):
-            log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
         super().__init__(
             fraction_fit=fraction_fit,
