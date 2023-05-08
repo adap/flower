@@ -1,0 +1,7 @@
+---
+name: FedAvg
+expected_accuracy: 72.8
+init:
+  _target_: flwr.server.strategy.FedAvg
+  initial_parameters: None
+eta_l: 0.3162 # client's learning rate

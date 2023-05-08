@@ -6,6 +6,7 @@ Example:
     python -m flwr_tool.init_py_check src/py/flwr
 """
 
+
 import os
 import re
 import sys
@@ -39,6 +40,6 @@ if __name__ == "__main__":
         raise Exception(
             "Please provide at least one directory path relative to your current working directory."
         )
-    for i in range(len(sys.argv)):
+    for i, _ in enumerate(sys.argv):
         abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
         check_missing_init_files(abs_path)

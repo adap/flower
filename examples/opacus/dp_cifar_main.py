@@ -65,16 +65,15 @@ def train(net, trainloader, privacy_engine, epochs):
 
 def test(net, testloader):
     criterion = torch.nn.CrossEntropyLoss()
-    correct, total, loss = 0, 0, 0.0
+    correct, loss = 0, 0.0
     with torch.no_grad():
         for data in testloader:
             images, labels = data[0].to(DEVICE), data[1].to(DEVICE)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    accuracy = correct / total
+    accuracy = correct / len(testloader.dataset)
     return loss, accuracy
 
 
@@ -94,7 +93,7 @@ class DPCifarClient(fl.client.NumPyClient):
             noise_multiplier=PRIVACY_PARAMS["noise_multiplier"],
         )
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_parameters(self, parameters):
@@ -108,7 +107,11 @@ class DPCifarClient(fl.client.NumPyClient):
             self.model, self.trainloader, self.privacy_engine, PARAMS["local_epochs"]
         )
         print(f"epsilon = {epsilon:.2f}")
-        return self.get_parameters(), len(self.trainloader), {"epsilon": epsilon}
+        return (
+            self.get_parameters(config={}),
+            len(self.trainloader),
+            {"epsilon": epsilon},
+        )
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)

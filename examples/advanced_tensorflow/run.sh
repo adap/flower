@@ -1,7 +1,14 @@
 #!/bin/bash
 
+./certificates/generate.sh
+
+echo "Starting server"
+
 python server.py &
-sleep 2 # Sleep for 2s to give the server enough time to start
+sleep 3  # Sleep for 3s to give the server enough time to start
+
+# Ensure that the Keras dataset used in client.py is already cached.
+python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
 
 for i in `seq 0 9`; do
     echo "Starting client $i"

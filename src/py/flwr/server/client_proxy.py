@@ -16,44 +16,68 @@
 
 
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from flwr.common import (
-    Disconnect,
+    DisconnectRes,
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
-    ParametersRes,
+    GetParametersIns,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
     Properties,
-    PropertiesIns,
-    PropertiesRes,
-    Reconnect,
+    ReconnectIns,
 )
 
 
 class ClientProxy(ABC):
     """Abstract base class for Flower client proxies."""
 
+    node_id: int
+
     def __init__(self, cid: str):
         self.cid = cid
         self.properties: Properties = {}
 
     @abstractmethod
-    def get_parameters(self) -> ParametersRes:
-        """Return the current local model parameters."""
-
-    @abstractmethod
-    def get_properties(self, ins: PropertiesIns) -> PropertiesRes:
+    def get_properties(
+        self,
+        ins: GetPropertiesIns,
+        timeout: Optional[float],
+    ) -> GetPropertiesRes:
         """Returns the client's properties."""
 
     @abstractmethod
-    def fit(self, ins: FitIns) -> FitRes:
-        """Refine the provided weights using the locally held dataset."""
+    def get_parameters(
+        self,
+        ins: GetParametersIns,
+        timeout: Optional[float],
+    ) -> GetParametersRes:
+        """Return the current local model parameters."""
 
     @abstractmethod
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        """Evaluate the provided weights using the locally held dataset."""
+    def fit(
+        self,
+        ins: FitIns,
+        timeout: Optional[float],
+    ) -> FitRes:
+        """Refine the provided parameters using the locally held dataset."""
 
     @abstractmethod
-    def reconnect(self, reconnect: Reconnect) -> Disconnect:
+    def evaluate(
+        self,
+        ins: EvaluateIns,
+        timeout: Optional[float],
+    ) -> EvaluateRes:
+        """Evaluate the provided parameters using the locally held dataset."""
+
+    @abstractmethod
+    def reconnect(
+        self,
+        ins: ReconnectIns,
+        timeout: Optional[float],
+    ) -> DisconnectRes:
         """Disconnect and (optionally) reconnect later."""

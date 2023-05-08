@@ -17,7 +17,7 @@
 
 from .client import VisionClassificationClient as VisionClassificationClient
 from .common import custom_fit as custom_fit
-from .common import get_eval_fn as get_eval_fn
+from .common import get_evaluate_fn as get_evaluate_fn
 from .common import get_lr_schedule as get_lr_schedule
 from .common import keras_evaluate as keras_evaluate
 from .common import keras_fit as keras_fit

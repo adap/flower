@@ -13,6 +13,7 @@
 # limitations under the License.
 """End-to-end tests that check model correctness."""
 
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -23,6 +24,7 @@ import unittest
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.compat import v1 as tfv1
 
 # pylint: disable=g-bad-import-order
 from tfltransfer import bases
@@ -148,7 +150,7 @@ class TransferModel(object):
         [x_in] = interpreter.get_input_details()
         [bottleneck_out] = interpreter.get_output_details()
 
-        for (x, y) in image_gen:
+        for x, y in image_gen:
             batch_size = x.shape[0]
             interpreter.resize_tensor_input(
                 x_in["index"], (batch_size, IMAGE_SIZE, IMAGE_SIZE, 3)
@@ -364,7 +366,7 @@ class ModelCorrectnessTest(unittest.TestCase):
             include_top=False,
             weights="imagenet",
         )
-        mobilenet_keras.save(mobilenet_dir, save_format="tf")
+        tfv1.keras.experimental.export_saved_model(mobilenet_keras, mobilenet_dir)
         cls.mobilenet_dir = mobilenet_dir
 
     def setUp(self):

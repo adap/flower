@@ -13,13 +13,15 @@
 # limitations under the License.
 # ==============================================================================
 """Flower Logger."""
+
+
 import logging
 from logging import LogRecord
 from logging.handlers import HTTPHandler
 from typing import Any, Dict, Optional, Tuple
 
 # Create logger
-LOGGER_NAME = "flower"
+LOGGER_NAME = "flwr"
 FLOWER_LOGGER = logging.getLogger(LOGGER_NAME)
 FLOWER_LOGGER.setLevel(logging.DEBUG)
 

@@ -1,25 +1,27 @@
-from collections import OrderedDict
 import warnings
+from collections import OrderedDict
 
 import flwr as fl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
+from torchvision.transforms import Compose, Normalize, ToTensor
+from tqdm import tqdm
 
+
+# #############################################################################
+# 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
+# #############################################################################
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-# #############################################################################
-# 1. PyTorch pipeline: model/train/test/dataloader
-# #############################################################################
-
-# Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
 class Net(nn.Module):
+    """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
+
     def __init__(self) -> None:
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
@@ -35,92 +37,74 @@ class Net(nn.Module):
         x = x.view(-1, 16 * 5 * 5)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+        return self.fc3(x)
 
 
 def train(net, trainloader, epochs):
-    """Train the network on the training set."""
+    """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-    net.train()
     for _ in range(epochs):
-        for images, labels in trainloader:
-            images, labels = images.to(DEVICE), labels.to(DEVICE)
+        for images, labels in tqdm(trainloader):
             optimizer.zero_grad()
-            loss = criterion(net(images), labels)
-            loss.backward()
+            criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
             optimizer.step()
 
 
 def test(net, testloader):
-    """Validate the network on the entire test set."""
+    """Validate the model on the test set."""
     criterion = torch.nn.CrossEntropyLoss()
-    correct, total, loss = 0, 0, 0.0
-    net.eval()
+    correct, loss = 0, 0.0
     with torch.no_grad():
-        for images, labels in testloader:
-            images, labels = images.to(DEVICE), labels.to(DEVICE)
-            outputs = net(images)
+        for images, labels in tqdm(testloader):
+            outputs = net(images.to(DEVICE))
+            labels = labels.to(DEVICE)
             loss += criterion(outputs, labels).item()
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-    loss /= len(testloader.dataset)
-    accuracy = correct / total
+            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+    accuracy = correct / len(testloader.dataset)
     return loss, accuracy
 
 
 def load_data():
     """Load CIFAR-10 (training and test set)."""
-    transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-    )
-    trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
-    testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
-    trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
-    testloader = DataLoader(testset, batch_size=32)
-    num_examples = {"trainset": len(trainset), "testset": len(testset)}
-    return trainloader, testloader, num_examples
+    trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    trainset = CIFAR10("./data", train=True, download=True, transform=trf)
+    testset = CIFAR10("./data", train=False, download=True, transform=trf)
+    return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
 
 
 # #############################################################################
 # 2. Federation of the pipeline with Flower
 # #############################################################################
 
-
-def main():
-    """Create model, load data, define Flower client, start Flower client."""
-
-    # Load model
-    net = Net().to(DEVICE)
-
-    # Load data (CIFAR-10)
-    trainloader, testloader, num_examples = load_data()
-
-    # Flower client
-    class CifarClient(fl.client.NumPyClient):
-        def get_parameters(self):
-            return [val.cpu().numpy() for _, val in net.state_dict().items()]
-
-        def set_parameters(self, parameters):
-            params_dict = zip(net.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-            net.load_state_dict(state_dict, strict=True)
-
-        def fit(self, parameters, config):
-            self.set_parameters(parameters)
-            train(net, trainloader, epochs=1)
-            return self.get_parameters(), num_examples["trainset"], {}
-
-        def evaluate(self, parameters, config):
-            self.set_parameters(parameters)
-            loss, accuracy = test(net, testloader)
-            return float(loss), num_examples["testset"], {"accuracy": float(accuracy)}
-
-    # Start client
-    fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+# Load model and data (simple CNN, CIFAR-10)
+net = Net().to(DEVICE)
+trainloader, testloader = load_data()
 
 
-if __name__ == "__main__":
-    main()
+# Define Flower client
+class FlowerClient(fl.client.NumPyClient):
+    def get_parameters(self, config):
+        return [val.cpu().numpy() for _, val in net.state_dict().items()]
+
+    def set_parameters(self, parameters):
+        params_dict = zip(net.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        net.load_state_dict(state_dict, strict=True)
+
+    def fit(self, parameters, config):
+        self.set_parameters(parameters)
+        train(net, trainloader, epochs=1)
+        return self.get_parameters(config={}), len(trainloader.dataset), {}
+
+    def evaluate(self, parameters, config):
+        self.set_parameters(parameters)
+        loss, accuracy = test(net, testloader)
+        return loss, len(testloader.dataset), {"accuracy": accuracy}
+
+
+# Start Flower client
+fl.client.start_numpy_client(
+    server_address="127.0.0.1:8080",
+    client=FlowerClient(),
+)

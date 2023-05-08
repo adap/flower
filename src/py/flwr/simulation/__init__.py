@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower simulation."""
 
+
 import importlib
 
 is_ray_installed = importlib.util.find_spec("ray") is not None
@@ -29,7 +30,7 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
 """
 
     def start_simulation(*args, **kwargs):  # type: ignore
-        """Print error stating that ray is missing."""
+        """Log error stating that module `ray` could not be imported."""
         raise ImportError(RAY_IMPORT_ERROR)
 
 

@@ -29,6 +29,7 @@ def train(net, trainloader, epochs):
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     for _ in range(epochs):
         for images, _ in trainloader:
+            images = images.to(DEVICE)
             optimizer.zero_grad()
             recon_images, mu, logvar = net(images)
             recon_loss = F.mse_loss(recon_images, images)
@@ -70,10 +71,11 @@ def generate(net, image):
 def main():
     # Load model and data
     net = Net()
+    net = net.to(DEVICE)
     trainloader, testloader = load_data()
 
     class CifarClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
         def set_parameters(self, parameters):
@@ -84,14 +86,14 @@ def main():
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             train(net, trainloader, epochs=1)
-            return self.get_parameters(), len(trainloader), {}
+            return self.get_parameters(config={}), len(trainloader), {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss = test(net, testloader)
             return float(loss), len(testloader), {}
 
-    fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=CifarClient())
 
 
 if __name__ == "__main__":

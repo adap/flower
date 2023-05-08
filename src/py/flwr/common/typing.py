@@ -16,11 +16,13 @@
 
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-import numpy as np
+import numpy.typing as npt
 
-Weights = List[np.ndarray]
+NDArray = npt.NDArray[Any]
+NDArrays = List[NDArray]
 
 # The following union type contains Python types corresponding to ProtoBuf types that
 # ProtoBuf considers to be "Scalar Value Types", even though some of them arguably do
@@ -29,9 +31,28 @@ Weights = List[np.ndarray]
 Scalar = Union[bool, bytes, float, int, str]
 
 Metrics = Dict[str, Scalar]
+MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]
 
 Config = Dict[str, Scalar]
 Properties = Dict[str, Scalar]
+
+
+class Code(Enum):
+    """Client status codes."""
+
+    OK = 0
+    GET_PROPERTIES_NOT_IMPLEMENTED = 1
+    GET_PARAMETERS_NOT_IMPLEMENTED = 2
+    FIT_NOT_IMPLEMENTED = 3
+    EVALUATE_NOT_IMPLEMENTED = 4
+
+
+@dataclass
+class Status:
+    """Client status."""
+
+    code: Code
+    message: str
 
 
 @dataclass
@@ -43,9 +64,17 @@ class Parameters:
 
 
 @dataclass
-class ParametersRes:
+class GetParametersIns:
+    """Parameters request for a client."""
+
+    config: Config
+
+
+@dataclass
+class GetParametersRes:
     """Response when asked to return parameters."""
 
+    status: Status
     parameters: Parameters
 
 
@@ -61,11 +90,10 @@ class FitIns:
 class FitRes:
     """Fit response from a client."""
 
+    status: Status
     parameters: Parameters
     num_examples: int
-    num_examples_ceil: Optional[int] = None  # Deprecated
-    fit_duration: Optional[float] = None  # Deprecated
-    metrics: Optional[Metrics] = None
+    metrics: Dict[str, Scalar]
 
 
 @dataclass
@@ -80,35 +108,56 @@ class EvaluateIns:
 class EvaluateRes:
     """Evaluate response from a client."""
 
+    status: Status
     loss: float
     num_examples: int
-    accuracy: Optional[float] = None  # Deprecated
-    metrics: Optional[Metrics] = None
+    metrics: Dict[str, Scalar]
 
 
 @dataclass
-class PropertiesIns:
-    """Properties requests for a client."""
+class GetPropertiesIns:
+    """Properties request for a client."""
 
     config: Config
 
 
 @dataclass
-class PropertiesRes:
+class GetPropertiesRes:
     """Properties response from a client."""
 
+    status: Status
     properties: Properties
 
 
 @dataclass
-class Reconnect:
-    """Reconnect message from server to client."""
+class ReconnectIns:
+    """ReconnectIns message from server to client."""
 
     seconds: Optional[int]
 
 
 @dataclass
-class Disconnect:
-    """Disconnect message from client to server."""
+class DisconnectRes:
+    """DisconnectRes message from client to server."""
 
     reason: str
+
+
+@dataclass
+class ServerMessage:
+    """ServerMessage is a container used to hold one instruction message."""
+
+    get_properties_ins: Optional[GetPropertiesIns] = None
+    get_parameters_ins: Optional[GetParametersIns] = None
+    fit_ins: Optional[FitIns] = None
+    evaluate_ins: Optional[EvaluateIns] = None
+
+
+@dataclass
+class ClientMessage:
+    """ClientMessage is a container used to hold one result message."""
+
+    get_properties_res: Optional[GetPropertiesRes] = None
+    get_parameters_res: Optional[GetParametersRes] = None
+    fit_res: Optional[FitRes] = None
+    evaluate_res: Optional[EvaluateRes] = None
