@@ -18,10 +18,9 @@ from __future__ import annotations
 
 import time
 from logging import DEBUG
-from typing import Callable, List, Optional, cast
+from typing import List, Optional, cast
 
 from flwr import common
-from flwr.client import ClientLike
 from flwr.common import serde
 from flwr.common.logger import log
 from flwr.proto import driver_pb2, node_pb2, task_pb2, transport_pb2
@@ -125,7 +124,7 @@ class DriverClientProxy(ClientProxy):
 
         if len(task_ids) == 0:
             raise ValueError("No task_ids")
-        elif len(task_ids) > 1:
+        if len(task_ids) > 1:
             raise ValueError("More than 1 task_id")
 
         if timeout:

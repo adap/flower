@@ -1,7 +1,6 @@
 import warnings
 from collections import OrderedDict
 
-import flwr as fl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -12,7 +11,7 @@ from tqdm import tqdm
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
-DEVICE = torch.device("cpu")
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Net(nn.Module):
@@ -36,7 +35,7 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
-def train(net, trainloader, valloader, epochs, device: str = "cpu"):
+def train(net, trainloader, valloader, epochs, device):
     """Train the model on the training set."""
     print("Starting training...")
     net.to(device)  # move model to GPU if available
@@ -50,8 +49,6 @@ def train(net, trainloader, valloader, epochs, device: str = "cpu"):
             loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
-
-    net.to("cpu")  # move model back to CPU
 
     train_loss, train_acc = test(net, trainloader)
     val_loss, val_acc = test(net, valloader)
@@ -67,6 +64,7 @@ def train(net, trainloader, valloader, epochs, device: str = "cpu"):
 
 def test(net, testloader):
     """Validate the model on the test set."""
+    net.to(DEVICE)
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
@@ -95,3 +93,4 @@ def set_parameters(net, parameters):
     params_dict = zip(net.state_dict().keys(), parameters)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
+
