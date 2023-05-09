@@ -153,7 +153,8 @@ def _trim_mean(array: NDArray, proportiontocut: float) -> NDArray:
 
     slice_list = [slice(None)] * atmp.ndim
     slice_list[axis] = slice(lowercut, uppercut)
-    return np.mean(atmp[tuple(slice_list)], axis=axis)
+    result: NDArray = np.mean(atmp[tuple(slice_list)], axis=axis)
+    return result
 
 
 def aggregate_trimmed_avg(
