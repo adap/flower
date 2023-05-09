@@ -1,3 +1,21 @@
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]
+
+Paper: https://arxiv.org/abs/1803.01498
+"""
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
@@ -16,17 +34,15 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate_trimmed_avg
 from .fedavg import FedAvg
 
-WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
-Setting `min_available_clients` lower than `min_fit_clients` or
-`min_evaluate_clients` can cause the server to fail when there are too few clients
-connected to the server. `min_available_clients` must be set to a value larger
-than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
-"""
-
 
 # flake8: noqa: E501
 class FedTrimmedAvg(FedAvg):
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
+    """Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]
+
+    Paper: https://arxiv.org/abs/1803.01498
+    """
+
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         *,
@@ -49,10 +65,7 @@ class FedTrimmedAvg(FedAvg):
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         beta: float = 0.2,
     ) -> None:
-        """Configurable FedTrimmedAvg strategy.
-
-        Implementation based on https://arxiv.org/pdf/1803.01498.pdf
-
+        """
         Parameters
         ----------
         fraction_fit : float, optional
@@ -65,7 +78,8 @@ class FedTrimmedAvg(FedAvg):
             Minimum number of clients used during validation. Defaults to 2.
         min_available_clients : int, optional
             Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
+        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],
+            Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
             Function used to configure training. Defaults to None.
@@ -78,12 +92,6 @@ class FedTrimmedAvg(FedAvg):
         beta : float, optional
             Fraction to cut off of both tails of the distribution. Defaults to 0.2.
         """
-
-        if (
-            min_fit_clients > min_available_clients
-            or min_evaluate_clients > min_available_clients
-        ):
-            log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
         super().__init__(
             fraction_fit=fraction_fit,
