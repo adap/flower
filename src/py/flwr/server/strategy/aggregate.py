@@ -134,30 +134,29 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
     return distance_matrix
 
 
-def _trim_mean(a, proportiontocut, axis=0):
-    """
-    https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.trim_mean.html
-    """
-    a = np.asarray(a)
+def _trim_mean(array: NDArray, proportiontocut: float) -> NDArray:
+    """Compute trimmed mean along axis=0.
 
-    if a.size == 0:
+     It is based on the scipy implementation.
+
+    https://docs.scipy.org/doc/scipy/reference/generated/
+    scipy.stats.trim_mean.html.
+    """
+    axis = 0
+    if array.size == 0:
         return np.nan
 
-    if axis is None:
-        a = a.ravel()
-        axis = 0
-
-    nobs = a.shape[axis]
+    nobs = array.shape[axis]
     lowercut = int(proportiontocut * nobs)
     uppercut = nobs - lowercut
     if lowercut > uppercut:
         raise ValueError("Proportion too big.")
 
-    atmp = np.partition(a, (lowercut, uppercut - 1), axis)
+    atmp = np.partition(array, (lowercut, uppercut - 1), axis)
 
-    sl = [slice(None)] * atmp.ndim
-    sl[axis] = slice(lowercut, uppercut)
-    return np.mean(atmp[tuple(sl)], axis=axis)
+    slice_list = [slice(None)] * atmp.ndim
+    slice_list[axis] = slice(lowercut, uppercut)
+    return np.mean(atmp[tuple(slice_list)], axis=axis)
 
 
 def aggregate_trimmed_avg(
@@ -168,7 +167,7 @@ def aggregate_trimmed_avg(
     weights = [weights for weights, _ in results]
 
     trimmed_w: NDArrays = [
-        _trim_mean(np.asarray(layer), axis=0, proportiontocut=proportiontocut)
+        _trim_mean(np.asarray(layer), proportiontocut=proportiontocut)
         for layer in zip(*weights)
     ]
 
