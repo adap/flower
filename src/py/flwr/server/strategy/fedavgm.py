@@ -132,8 +132,6 @@ class FedAvgM(FedAvg):
             self.server_learning_rate != 1.0
         )
         self.momentum_vector: Optional[NDArrays] = None
-        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
-        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
         rep = f"FedAvgM(accept_failures={self.accept_failures})"
