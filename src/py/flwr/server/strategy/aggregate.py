@@ -143,9 +143,6 @@ def _trim_mean(array: NDArray, proportiontocut: float) -> NDArray:
     scipy.stats.trim_mean.html.
     """
     axis = 0
-    if array.size == 0:
-        return np.nan
-
     nobs = array.shape[axis]
     lowercut = int(proportiontocut * nobs)
     uppercut = nobs - lowercut
