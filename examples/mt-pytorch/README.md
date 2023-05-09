@@ -24,8 +24,16 @@ python client.py
 
 Terminal 4: start Driver server
 
+Using:
+
 ```bash
 python start_driver.py
+```
+
+Or, alternatively:
+
+```bash
+python driver.py
 ```
 
 ## Run in legacy mode

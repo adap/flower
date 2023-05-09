@@ -128,6 +128,10 @@ class EventType(str, Enum):
     START_SERVER_ENTER = auto()
     START_SERVER_LEAVE = auto()
 
+    # Server
+    START_DRIVER_ENTER = auto()
+    START_DRIVER_LEAVE = auto()
+
     # Driver API
     RUN_DRIVER_API_ENTER = auto()
     RUN_DRIVER_API_LEAVE = auto()

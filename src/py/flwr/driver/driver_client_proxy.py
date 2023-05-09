@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import time
 from logging import DEBUG
-from typing import TYPE_CHECKING, Callable, List, Optional, cast
+from typing import Callable, List, Optional, cast
 
 from flwr import common
 from flwr.client import ClientLike
@@ -27,10 +27,7 @@ from flwr.common.logger import log
 from flwr.proto import driver_pb2, node_pb2, task_pb2, transport_pb2
 from flwr.server.client_proxy import ClientProxy
 
-if TYPE_CHECKING:
-    from .driver import Driver
-
-ClientFn = Callable[[str], ClientLike]
+from .driver import Driver
 
 SLEEP_TIME = 1
 
@@ -124,12 +121,12 @@ class DriverClientProxy(ClientProxy):
         )
         push_task_ins_req = driver_pb2.PushTaskInsRequest(task_ins_list=[task_ins])
         push_task_ins_res = self.driver.push_task_ins(req=push_task_ins_req)
-        time.sleep(SLEEP_TIME)
         task_ids = [task_id for task_id in push_task_ins_res.task_ids if task_id != ""]
-        all_task_res = []
 
         if len(task_ids) == 0:
             raise ValueError("No task_ids")
+        elif len(task_ids) > 1:
+            raise ValueError("More than 1 task_id")
 
         if timeout:
             start_time = time.time()
@@ -147,15 +144,15 @@ class DriverClientProxy(ClientProxy):
             )
             log(DEBUG, "Got %s results", len(task_res_list))
 
-            time.sleep(SLEEP_TIME)
+            if len(task_res_list) == 1:
+                task_res = task_res_list[0]
+                break
 
-            all_task_res += task_res_list
-
-            if timeout and time.time() > start_time + timeout:
+            if timeout is not None and time.time() > start_time + timeout:
                 raise RuntimeError("Timeout reached")
 
-            if len(all_task_res) == len(task_ids):
-                break
+            time.sleep(SLEEP_TIME)
+
         return serde.client_message_from_proto(  # type: ignore
-            all_task_res[0].task.legacy_client_message
+            task_res.task.legacy_client_message
         )
