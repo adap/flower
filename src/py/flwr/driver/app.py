@@ -22,7 +22,7 @@ from typing import Optional
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log
-from flwr.server.app import ServerConfig, _fl, _init_defaults
+from flwr.server.app import ServerConfig, run_fl, init_defaults
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import Strategy
@@ -115,7 +115,7 @@ def start_driver(  # pylint: disable=too-many-arguments
         client_manager = DriverClientManager(driver=driver, anonymous=False)
 
     # Initialize the Driver API server and config
-    initialized_server, initialized_config = _init_defaults(
+    initialized_server, initialized_config = init_defaults(
         server=server,
         config=config,
         strategy=strategy,
@@ -128,7 +128,7 @@ def start_driver(  # pylint: disable=too-many-arguments
     )
 
     # Start training
-    hist = _fl(
+    hist = run_fl(
         server=initialized_server,
         config=initialized_config,
     )
