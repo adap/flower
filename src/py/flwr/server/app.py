@@ -173,7 +173,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     )
 
     # Start training
-    hist = fl(
+    hist = run_fl(
         server=initialized_server,
         config=initialized_config,
     )
@@ -192,7 +192,7 @@ def init_defaults(
     strategy: Optional[Strategy],
     client_manager: Optional[ClientManager],
 ) -> Tuple[Server, ServerConfig]:
-    # Create server instance if none was given
+    """Create server instance if none was given."""
     if server is None:
         if client_manager is None:
             client_manager = SimpleClientManager()
@@ -209,11 +209,11 @@ def init_defaults(
     return server, config
 
 
-def fl(
+def run_fl(
     server: Server,
     config: ServerConfig,
 ) -> History:
-    # Fit model
+    """Train a model on the given server and return the History object."""
     hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
     log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
