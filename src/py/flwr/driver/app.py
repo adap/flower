@@ -22,7 +22,7 @@ from typing import Optional
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log
-from flwr.server.app import ServerConfig, run_fl, init_defaults
+from flwr.server.app import ServerConfig, init_defaults,run_fl
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import Strategy
