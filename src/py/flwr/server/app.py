@@ -139,7 +139,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     event(EventType.START_SERVER_ENTER)
 
     # Initialize server and server config
-    initialized_server, initialized_config = _init_defaults(
+    initialized_server, initialized_config = init_defaults(
         server=server,
         config=config,
         strategy=strategy,
@@ -173,7 +173,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     )
 
     # Start training
-    hist = _fl(
+    hist = fl(
         server=initialized_server,
         config=initialized_config,
     )
@@ -186,7 +186,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     return hist
 
 
-def _init_defaults(
+def init_defaults(
     server: Optional[Server],
     config: Optional[ServerConfig],
     strategy: Optional[Strategy],
@@ -209,7 +209,7 @@ def _init_defaults(
     return server, config
 
 
-def _fl(
+def fl(
     server: Server,
     config: ServerConfig,
 ) -> History:
