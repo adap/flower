@@ -3,10 +3,10 @@ name: Sync flower-swift
 on:
   push:
     branches: ['main']
-    paths: ['src/swift/**']
+    paths: ['src/swift/flwr/**']
   pull_request:
     branches: ['main']
-    paths: ['src/swift/**']
+    paths: ['src/swift/flwr/**']
 
 jobs:
   build:
@@ -18,6 +18,6 @@ jobs:
         env:
           SSH_DEPLOY_KEY: ${{ secrets.FLOWER_SWIFT_SSH }}
         with:
-          source-directory: 'src/swift/'
+          source-directory: 'src/swift/flwr'
           destination-github-username: 'adap'
           destination-repository-name: 'flower-swift'
