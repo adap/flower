@@ -25,7 +25,7 @@ from flwr.client import ClientLike
 from flwr.common import EventType, event
 from flwr.common.logger import log
 from flwr.server import Server
-from flwr.server.app import ServerConfig, run_fl, init_defaults
+from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
