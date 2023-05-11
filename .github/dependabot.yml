@@ -8,6 +8,8 @@ updates:
       # Allow only updates for dev dependencies
       - dependency-type: "development"
     ignore:
-      # Ignore updates to 'grpcio-tools'
+      # Ignore updates from certain packages
       - dependency-name: "grpcio-tools"
+      - dependency-name: "mypy-protobuf"
+      - dependency-name: "types-protobuf"
     open-pull-requests-limit: 3
