@@ -12,7 +12,7 @@ python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
 
 for i in `seq 0 9`; do
     echo "Starting client $i"
-    python client.py --partition=${i} &
+    python client.py --partition=${i} --toy True &
 done
 
 # This will allow you to use CTRL+C to stop all background processes
