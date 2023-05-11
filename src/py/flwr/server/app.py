@@ -550,7 +550,7 @@ def _run_fleet_api_rest(
         raise ValueError(validation_exceptions)
 
     uvicorn.run(
-        app="flwr.server.rest_server.rest_api:app",
+        app="flwr.server.fleet.rest_rere.rest_api:app",
         port=port,
         host=host,
         reload=False,
