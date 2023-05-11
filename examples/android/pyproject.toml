@@ -12,4 +12,5 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 python = ">=3.7,<3.11"
 flwr = "^1.0.0"
 # flwr = { path = "../../", develop = true }  # Development
-tensorflow-cpu = "^2.9.1, !=2.11.1"
+tensorflow-cpu = {version = "^2.9.1, !=2.11.1", markers="platform_machine == 'x86_64'"}
+tensorflow-macos = {version = "^2.9.1, !=2.11.1", markers="sys_platform == 'darwin' and platform_machine == 'arm64'"}
