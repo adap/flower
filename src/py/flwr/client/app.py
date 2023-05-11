@@ -46,6 +46,7 @@ from flwr.common.typing import (
 
 from .client import Client
 from .grpc_client.connection import grpc_connection
+from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
 from .numpy_client import NumPyClient
 from .numpy_client import has_evaluate as numpyclient_has_evaluate
@@ -91,6 +92,7 @@ def start_client(
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     rest: bool = False,
+    transport: Optional[str] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -147,8 +149,11 @@ def start_client(
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
+    if transport is None:
+        transport = "rest" if rest else "grpc-bidi"
+
     # Use either gRPC bidirectional streaming or REST request/response
-    if rest:
+    if transport == "rest":
         try:
             from .rest_client.connection import http_request_response
         except ModuleNotFoundError:
@@ -159,8 +164,13 @@ def start_client(
                 "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
             )
         connection = http_request_response
-    else:
+    elif transport == "grpc-rere":
+        connection = grpc_request_response
+    elif transport == "grpc-bidi":
         connection = grpc_connection
+    else:
+        raise ValueError(f"Unknown transport type: {transport}")
+
     while True:
         sleep_duration: int = 0
         with connection(
@@ -202,6 +212,7 @@ def start_numpy_client(
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
     rest: bool = False,
+    transport: Optional[str] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -255,6 +266,7 @@ def start_numpy_client(
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
         rest=rest,
+        transport=transport,
     )
 
 
