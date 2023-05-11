@@ -1,12 +1,21 @@
 {
   "pins" : [
     {
+      "identity" : "flower-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/adap/flower-swift.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "7cf52173d8d0e00554422c27afda0ee7739ef8bc"
+      }
+    },
+    {
       "identity" : "grpc-swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/grpc/grpc-swift.git",
       "state" : {
-        "revision" : "d772b688d718c2eb29f99b535fc4d92ebba031c5",
-        "version" : "1.8.1"
+        "revision" : "d114c5ec34015bab663b3b7afaa7d6197656e47e",
+        "version" : "1.9.0"
       }
     },
     {
@@ -15,7 +24,7 @@
       "location" : "https://github.com/kewlbear/NumPy-iOS.git",
       "state" : {
         "branch" : "main",
-        "revision" : "c27e79ea5485f5b727aaaf330635f7d423513100"
+        "revision" : "4d0f25e59ca6b9746ae447d6bb682d12a54cff13"
       }
     },
     {
@@ -23,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kewlbear/Python-iOS.git",
       "state" : {
-        "branch" : "3.8_kivy-ios",
-        "revision" : "f5333228b625560a90c17d9e2d3a9b2aac6967a9"
+        "revision" : "4f3ca2bc0cff1ef2511555eb6114f9eb12e50412",
+        "version" : "0.1.1-b20230423-090254"
       }
     },
     {
@@ -33,7 +42,25 @@
       "location" : "https://github.com/pvieito/PythonKit.git",
       "state" : {
         "branch" : "master",
-        "revision" : "81f621d094a7c8923207efe5178f50dba1b56c39"
+        "revision" : "060e1c8b0d14e4d241b3623fdbe83d0e3c81a993"
+      }
+    },
+    {
+      "identity" : "swift-atomics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-atomics.git",
+      "state" : {
+        "revision" : "6c89474e62719ddcc1e9614989fff2f68208fe10",
+        "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "swift-collections",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-collections.git",
+      "state" : {
+        "revision" : "937e904258d22af6e447a0b72c0bc67583ef64a2",
+        "version" : "1.0.4"
       }
     },
     {
@@ -41,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-log.git",
       "state" : {
-        "revision" : "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
-        "version" : "1.4.2"
+        "revision" : "32e8d724467f8fe623624570367e3d50c5638e46",
+        "version" : "1.5.2"
       }
     },
     {
@@ -50,8 +77,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "124119f0bb12384cef35aa041d7c3a686108722d",
-        "version" : "2.40.0"
+        "revision" : "2d8e6ca36fe3e8ed74b0883f593757a45463c34d",
+        "version" : "2.53.0"
       }
     },
     {
@@ -59,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-extras.git",
       "state" : {
-        "revision" : "a75e92bde3683241c15df3dd905b7a6dcac4d551",
-        "version" : "1.12.1"
+        "revision" : "0e0d0aab665ff1a0659ce75ac003081f2b1c8997",
+        "version" : "1.19.0"
       }
     },
     {
@@ -68,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-http2.git",
       "state" : {
-        "revision" : "108ac15087ea9b79abb6f6742699cf31de0e8772",
-        "version" : "1.22.0"
+        "revision" : "6d021a48483dbb273a9be43f65234bdc9185b364",
+        "version" : "1.26.0"
       }
     },
     {
@@ -77,8 +104,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-ssl.git",
       "state" : {
-        "revision" : "42436a25ff32c390465567f5c089a9a8ce8d7baf",
-        "version" : "2.20.0"
+        "revision" : "e866a626e105042a6a72a870c88b4c531ba05f83",
+        "version" : "2.24.0"
       }
     },
     {
@@ -86,8 +113,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-transport-services.git",
       "state" : {
-        "revision" : "2cb54f91ddafc90832c5fa247faf5798d0a7c204",
-        "version" : "1.13.0"
+        "revision" : "41f4098903878418537020075a4d8a6e20a0b182",
+        "version" : "1.17.0"
       }
     },
     {
