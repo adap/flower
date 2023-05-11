@@ -25,7 +25,7 @@ from flwr.client import ClientLike
 from flwr.common import EventType, event
 from flwr.common.logger import log
 from flwr.server import Server
-from flwr.server.app import ServerConfig, _fl, _init_defaults
+from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
@@ -137,7 +137,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     )
 
     # Initialize server and server config
-    initialized_server, initialized_config = _init_defaults(
+    initialized_server, initialized_config = init_defaults(
         server=server,
         config=config,
         strategy=strategy,
@@ -194,7 +194,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         initialized_server.client_manager().register(client=client_proxy)
 
     # Start training
-    hist = _fl(
+    hist = run_fl(
         server=initialized_server,
         config=initialized_config,
     )
