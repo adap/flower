@@ -23,7 +23,10 @@ from pathlib import Path
 from typing import Tuple, cast
 
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.fleet.grpc_bidi.grpc_server import start_grpc_server, valid_certificates
+from flwr.server.fleet.grpc_bidi.grpc_server import (
+    start_grpc_server,
+    valid_certificates,
+)
 
 root_dir = dirname(abspath(join(__file__, "../../../../../..")))
 
