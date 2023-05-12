@@ -1,5 +1,5 @@
-Installing Flower
-=================
+Install Flower
+==============
 
 
 Python Version
