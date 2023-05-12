@@ -332,6 +332,7 @@ def run_fleet_api() -> None:
         bckg_threads[0].join()
 
 
+# pylint: disable=too-many-branches
 def run_server() -> None:
     """Run Flower server (Driver API and Fleet API)."""
 
@@ -534,12 +535,7 @@ def _run_fleet_api_grpc_rere(
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
 
-    # DriverClientManager
-    driver_client_manager = DriverClientManager(
-        state_factory=state_factory,
-    )
-
-    # Create (legacy) Fleet API gRPC server
+    # Create Fleet API gRPC server
     fleet_servicer = FleetServicer(
         state=state_factory.state(),
     )

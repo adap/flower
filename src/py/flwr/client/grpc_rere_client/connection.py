@@ -16,23 +16,16 @@
 
 
 from contextlib import contextmanager
-from logging import DEBUG, ERROR, INFO, WARN
+from logging import DEBUG, ERROR, WARN
 from pathlib import Path
-from queue import Queue
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union
 
 from flwr.client.message_handler.task_handler import get_server_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.proto.fleet_pb2 import (
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
-)
-from flwr.proto.fleet_pb2_grpc import FleetStub, add_FleetServicer_to_server
+from flwr.proto.fleet_pb2 import PullTaskInsRequest, PushTaskResRequest
+from flwr.proto.fleet_pb2_grpc import FleetStub
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
