@@ -20,7 +20,7 @@ from threading import Thread
 from typing import List, Union
 
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
-from flwr.server.grpc_server.grpc_bridge import (
+from flwr.server.fleet.grpc_bidi.grpc_bridge import (
     GrpcBridge,
     GrpcBridgeClosed,
     InsWrapper,
