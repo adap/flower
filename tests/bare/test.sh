@@ -11,12 +11,11 @@ python client.py 1 > /dev/null 2>&1 &
 
 python client.py 2 > /dev/null 2>&1 &
 
-wait
-# wait $pid
-# res=$?
+wait $pid
+res=$?
 
-# if [[ "$res" = "0" ]];
-#   then echo "Training worked correctly";
-#   else echo "Training had an issue" && exit 1;
-# fi
+if [[ "$res" = "0" ]];
+  then echo "Training worked correctly";
+  else echo "Training had an issue" && exit 1;
+fi
 
