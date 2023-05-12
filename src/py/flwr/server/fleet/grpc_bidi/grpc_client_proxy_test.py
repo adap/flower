@@ -23,8 +23,8 @@ import numpy as np
 import flwr
 from flwr.common.typing import Config, GetParametersIns
 from flwr.proto.transport_pb2 import ClientMessage, Parameters, Scalar
-from flwr.server.grpc_server.grpc_bridge import ResWrapper
-from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
+from flwr.server.fleet.grpc_bidi.grpc_bridge import ResWrapper
+from flwr.server.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
 
 MESSAGE_PARAMETERS = Parameters(tensors=[], tensor_type="np")
 MESSAGE_FIT_RES = ClientMessage(
