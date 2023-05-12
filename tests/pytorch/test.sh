@@ -7,6 +7,7 @@ timeout 2m python server.py &
 sleep 3
 
 python client.py 1 > /dev/null 2>&1 &
+pid=$!
 sleep 3
 
 if [[ $(ps aux | grep "[p]ython client.py 1" | awk '{ print $2 }') ]];
@@ -31,10 +32,10 @@ fi
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM
 
 # Wait for all background processes to complete
-wait
+wait $pid
+res=$?
 
-if [[ "$(cat result)" = "SUCCESS" ]];
+if [[ "$res" = "0" ]];
   then echo "Training worked correctly";
   else echo "Training had an issue" && exit 1;
 fi
-

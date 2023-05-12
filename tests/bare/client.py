@@ -8,7 +8,7 @@ model_params = np.array([1])
 objective = 5
 
 # Define Flower client
-class DummyClient(fl.client.NumPyClient):
+class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
         return model_params
 
@@ -25,4 +25,4 @@ class DummyClient(fl.client.NumPyClient):
 
 
 # Start Flower client
-fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=DummyClient())
+fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient())

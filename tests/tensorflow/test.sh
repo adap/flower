@@ -31,10 +31,10 @@ fi
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM
 
 # Wait for all background processes to complete
-wait
+wait $pid
+res=$?
 
-if [[ "$(cat result)" = "SUCCESS" ]];
+if [[ "$res" = "0" ]];
   then echo "Training worked correctly";
   else echo "Training had an issue" && exit 1;
 fi
-
