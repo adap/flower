@@ -71,7 +71,7 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
 
 
 @patch(
-    "flwr.server.grpc_bidi.flower_service_servicer.FlowerServiceServicer.Join",
+    "flwr.server.fleet.grpc_bidi.flower_service_servicer.FlowerServiceServicer.Join",
     mock_join,
 )
 def test_integration_connection() -> None:
