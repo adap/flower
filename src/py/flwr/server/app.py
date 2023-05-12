@@ -37,13 +37,13 @@ from flwr.proto.fleet_pb2_grpc import add_FleetServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
 from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.driver.driver_servicer import DriverServicer
-from flwr.server.fleet.grpc_rere.fleet_servicer import FleetServicer
 from flwr.server.fleet.grpc_bidi.driver_client_manager import DriverClientManager
 from flwr.server.fleet.grpc_bidi.flower_service_servicer import FlowerServiceServicer
 from flwr.server.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
 )
+from flwr.server.fleet.grpc_rere.fleet_servicer import FleetServicer
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.state import StateFactory
