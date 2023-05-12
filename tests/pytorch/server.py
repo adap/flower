@@ -24,4 +24,4 @@ hist = fl.server.start_server(
     strategy=strategy,
 )
 
-assert (hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]) < 0.98
+assert (hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]) > 0.98
