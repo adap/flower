@@ -22,7 +22,7 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 
-from flwr_baselines.publications.wav2vec.tedlium.model.sb_w2v2 import (
+from flwr_baselines.publications.wav2vec2.tedlium.model.sb_w2v2 import (
     get_weights,
     set_weights,
 )
@@ -105,7 +105,7 @@ class SpeechBrainClient(fl.client.Client):
             status=status,
             num_examples=num_examples,
             loss=float(loss),
-            metrics={"accuracy": float(wer)},
+            metrics={"Error rate": float(wer)},
         )
 
     def evaluate_train_speech_recogniser(self, server_params, epochs):

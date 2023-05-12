@@ -9,9 +9,9 @@ import flwr as fl
 import torch
 from flwr.common import Scalar
 
-import flwr_baselines.publications.wav2vec.tedlium.strategy as strategy
-from flwr_baselines.publications.wav2vec.tedlium.client import SpeechBrainClient
-from flwr_baselines.publications.wav2vec.tedlium.model import model
+import flwr_baselines.publications.wav2vec2.tedlium.strategy as strategy
+from flwr_baselines.publications.wav2vec2.tedlium.client import SpeechBrainClient
+from flwr_baselines.publications.wav2vec2.tedlium.model import model
 
 
 def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
@@ -44,7 +44,7 @@ def evaluate_fn(
 
     client = SpeechBrainClient("19999", asr_brain, dataset)
 
-    _, lss, acc = client.evaluate_train_speech_recogniser(
+    _, lss, err = client.evaluate_train_speech_recogniser(
         server_params=weights,
         epochs=1,
     )
@@ -52,7 +52,7 @@ def evaluate_fn(
     del client, asr_brain, dataset
     torch.cuda.empty_cache()
     gc.collect()
-    return lss, {"accuracy": acc}
+    return lss, {"Error rate": err}
 
 
 def _parse_arguments():
@@ -88,7 +88,7 @@ def _parse_arguments():
     parser.add_argument(
         "--fraction_fit",
         type=int,
-        default=10,
+        default=1,
         help="ratio of total clients will be trained",
     )
     parser.add_argument(
