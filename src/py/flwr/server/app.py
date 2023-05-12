@@ -527,7 +527,7 @@ def _run_fleet_api_rest(
     try:
         import uvicorn
 
-        from flwr.server.rest_server.rest_api import app as fast_api_app
+        from flwr.server.fleet.rest_rere.rest_api import app as fast_api_app
     except ModuleNotFoundError:
         sys.exit(MISSING_EXTRA_REST)
     if workers != 1:
@@ -550,7 +550,7 @@ def _run_fleet_api_rest(
         raise ValueError(validation_exceptions)
 
     uvicorn.run(
-        app="flwr.server.rest_server.rest_api:app",
+        app="flwr.server.fleet.rest_rere.rest_api:app",
         port=port,
         host=host,
         reload=False,
