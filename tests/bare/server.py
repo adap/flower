@@ -10,10 +10,6 @@ hist = fl.server.start_server(
 )
 
 if hist.losses_distributed[-1][1] != 0:
-    with open("result", "w") as file:
-        file.write("FAIL")
-    sys.exit("Loss did not decrease.")
+    sys.exit(1)
 else:
-    with open("result", "w") as file:
-        file.write("SUCCESS")
     sys.exit()
