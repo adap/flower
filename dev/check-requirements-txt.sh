@@ -24,8 +24,9 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 # Regenerate requirements.txt
 pip install pipreqs
 
-for path in $(find . -type f -name '*pyproject*' | sed -E 's|/[^/]+$||' |sort -u)
+for path in $(find ./examples -type f -name 'pyproject.toml' | sed -E 's|/[^/]+$||' |sort -u)
 do
+    echo $path
     pipreqs $path
 done
 
