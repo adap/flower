@@ -30,8 +30,6 @@ do
     pipreqs $path
 done
 
-pip uninstall pipreqs
-
 # Fail if user forgot to recompile
 CHANGED=$(git diff --name-only HEAD examples)
 
