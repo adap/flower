@@ -316,7 +316,7 @@ A well-crafted PR title helps team members quickly understand the purpose and sc
 1. Keep it Short: Avoid lengthy titles for easy readability.
 1. Use Proper Capitalization and Punctuation: Follow grammar rules for clarity.
 
-Here are a few bad examples which do not provide any additional helpful information.
+Let's start with a few examples for titles that should be avoided because they do not provide meaningful information:
 
 * Implement Algorithm
 * Database
