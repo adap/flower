@@ -305,6 +305,32 @@ Open PR
 - Congrats! 🥳 You're now officially a Flower contributor!
 
 
+Examples for good vs bad PR titles
+----------------------------------
+
+A well-crafted PR title helps team members quickly understand the purpose and scope of the changes being proposed. Here's a guide to help you write a good GitHub PR title:
+
+1. Be Clear and Concise: Provide a clear summary of the changes in a concise manner.
+1. Use Actionable Verbs: Start with verbs like "Add," "Update," or "Fix" to indicate the purpose.
+1. Include Relevant Information: Mention the affected feature or module for context.
+1. Keep it Short: Avoid lengthy titles for easy readability.
+1. Use Proper Capitalization and Punctuation: Follow grammar rules for clarity.
+
+Here are a few bad examples which do not provide any additional helpful information.
+
+* Implement Algorithm
+* Database
+* Add my_new_file.py to codebase
+* Improve code in module
+* Change SomeModule
+
+Here are a few good examples which provide helpful information without repeating how they do it, as that is already visible in the "Files changed" section of the PR.
+
+* Update docs banner to mention Flower Summit 2023
+* Remove unnecessary XGBoost dependency
+* Remove redundant attributes in strategies subclassing FedAvg
+* Add CI job to deploy the staging system when the `main` branch changes
+* Add new amazing library which will be used to improve the simulation engine
 
 Next steps
 ----------
