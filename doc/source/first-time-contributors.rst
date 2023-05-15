@@ -324,7 +324,7 @@ Let's start with a few examples for titles that should be avoided because they d
 * Improve code in module
 * Change SomeModule
 
-Here are a few good examples which provide helpful information without repeating how they do it, as that is already visible in the "Files changed" section of the PR.
+Here are a few positive examples which provide helpful information without repeating how they do it, as that is already visible in the "Files changed" section of the PR:
 
 * Update docs banner to mention Flower Summit 2023
 * Remove unnecessary XGBoost dependency
