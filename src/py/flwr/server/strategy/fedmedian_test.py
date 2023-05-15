@@ -14,6 +14,7 @@
 # ==============================================================================
 """FedMedian tests."""
 
+
 from typing import List, Tuple
 from unittest.mock import MagicMock
 
@@ -29,7 +30,7 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
+from flwr.server.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
 
 from .fedmedian import FedMedian
 

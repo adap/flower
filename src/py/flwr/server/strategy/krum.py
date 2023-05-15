@@ -124,8 +124,6 @@ class Krum(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
-        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
         self.num_malicious_clients = num_malicious_clients
         self.num_clients_to_keep = num_clients_to_keep
 
