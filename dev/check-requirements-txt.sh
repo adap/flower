@@ -15,26 +15,16 @@
 # limitations under the License.
 # ==============================================================================
 
+./generate-requirements-txt.sh
+
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
-
-# Purpose of this script is to evaluate if the user changed the pyproject.toml definitions
-# but did not regenerate or commit the new requirements.txt files
-
-# Regenerate requirements.txt
-pip install pipreqs
-
-for path in $(find ./examples -type f -name 'pyproject.toml' | sed -E 's|/[^/]+$||' |sort -u)
-do
-    echo $path
-    pipreqs $path
-done
 
 # Fail if user forgot to recompile
 CHANGED=$(git diff --name-only HEAD examples)
 
 if [ -n "$CHANGED" ]; then
-    echo "Changes detected"
+    echo "Changes detected, please run the script dev/generate-requirements-txt"
     exit 1
 fi
 

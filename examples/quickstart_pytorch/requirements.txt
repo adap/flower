@@ -1,4 +1,4 @@
-flwr==1.4.0 ; python_version >= "3.7" and python_version < "4.0"
-torch==1.12.1 ; python_version >= "3.7" and python_version < "4.0"
-torchvision==0.13.1 ; python_version >= "3.7" and python_version < "4.0"
-tqdm==4.65.0 ; python_version >= "3.7" and python_version < "4.0"
+flwr==1.4.0
+torch==2.0.1
+torchvision==0.15.2
+tqdm==4.65.0
