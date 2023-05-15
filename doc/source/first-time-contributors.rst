@@ -305,8 +305,8 @@ Open PR
 - Congrats! 🥳 You're now officially a Flower contributor!
 
 
-Examples for good vs bad PR titles
-----------------------------------
+How to write a good PR title
+----------------------------
 
 A well-crafted PR title helps team members quickly understand the purpose and scope of the changes being proposed. Here's a guide to help you write a good GitHub PR title:
 
