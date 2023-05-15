@@ -14,6 +14,7 @@
 # ==============================================================================
 """FedAvgM tests."""
 
+
 from typing import List, Tuple, Union
 from unittest.mock import MagicMock
 
