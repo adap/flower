@@ -17,6 +17,7 @@ public protocol Client {
     func evaluate(ins: EvaluateIns) -> EvaluateRes
 }
 
+/// Extension to Client since per default GetPropertiesIns is not implemented.
 public extension Client {
     func getProperties(ins: GetPropertiesIns) -> GetPropertiesRes {
         return GetPropertiesRes(properties: [:], status: Status(code: .getPropertiesNotImplemented, message: String()))
