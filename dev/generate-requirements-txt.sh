@@ -19,9 +19,7 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 # Purpose of this script is to regenerate requirements.txt
-pip install pipreqs
-
 for path in $(find ./examples -type f -name 'pyproject.toml' | sed -E 's|/[^/]+$||' |sort -u)
 do
-    pipreqs --force $path
+    pipreqs --mode 'compat' --force $path
 done

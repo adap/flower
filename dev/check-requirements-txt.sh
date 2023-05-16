@@ -20,11 +20,11 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-# Fail if user forgot to recompile
+# Fail if user forgot to sync requirements.txt and pyproject.toml
 CHANGED=$(git diff --name-only HEAD examples)
 
 if [ -n "$CHANGED" ]; then
-    echo "Changes detected, please run the script dev/generate-requirements-txt"
+    echo "Changes detected, requirements.txt and pyproject.toml is not synced. Please run the script dev/generate-requirements-txt."
     exit 1
 fi
 

@@ -99,6 +99,7 @@ sphinx-reredirects = "==0.1.1"
 nbsphinx = "==0.8.12"
 nbstripout = "==0.6.1"
 sphinx-argparse = "==0.4.0"
+pipreqs = "==0.4.13"
 
 [tool.isort]
 line_length = 88
