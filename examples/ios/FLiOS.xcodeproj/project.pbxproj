@@ -11,6 +11,7 @@
 		19764EED297D3ABE009F3E5D /* BenchmarkModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19764EEC297D3ABE009F3E5D /* BenchmarkModel.swift */; };
 		19764EEF297D3AC9009F3E5D /* BenchmarkSuite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19764EEE297D3AC9009F3E5D /* BenchmarkSuite.swift */; };
 		21075DC929788ED400311461 /* FLiOSModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21075DC829788ED400311461 /* FLiOSModel.swift */; };
+		216A90382A0CBE5400E0B532 /* flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 216A90372A0CBE5400E0B532 /* flwr */; };
 		21A77AC32865B22B0062EBD8 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A6F2865B22A0062EBD8 /* Array+Extensions.swift */; };
 		21A77AC42865B22B0062EBD8 /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A702865B22A0062EBD8 /* Math.swift */; };
 		21A77AC52865B22B0062EBD8 /* UIImage+CVPixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A712865B22A0062EBD8 /* UIImage+CVPixelBuffer.swift */; };
@@ -218,7 +219,6 @@
 		21B540722865B14000185DEE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		21B540742865B14100185DEE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		21B540772865B14100185DEE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		50B5A2C4294C841300B0ABC6 /* flwr */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = flwr; path = ../../src/swift/flwr; sourceTree = "<group>"; };
 		50CDF0E0299D807300AEBD55 /* DataLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataLoader.swift; sourceTree = "<group>"; };
 		50EB97C929AC9C94000AC771 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -229,6 +229,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				50B5A2C6294C848000B0ABC6 /* flwr in Frameworks */,
+				216A90382A0CBE5400E0B532 /* flwr in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -362,7 +363,6 @@
 		21B540642865B14000185DEE = {
 			isa = PBXGroup;
 			children = (
-				50B5A2C3294C841300B0ABC6 /* Packages */,
 				21B5406F2865B14000185DEE /* FLiOS */,
 				21B5406E2865B14000185DEE /* Products */,
 				21A77B2E2865B5420062EBD8 /* Frameworks */,
@@ -420,14 +420,6 @@
 			path = MNIST;
 			sourceTree = "<group>";
 		};
-		50B5A2C3294C841300B0ABC6 /* Packages */ = {
-			isa = PBXGroup;
-			children = (
-				50B5A2C4294C841300B0ABC6 /* flwr */,
-			);
-			name = Packages;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -448,6 +440,7 @@
 			name = FLiOS;
 			packageProductDependencies = (
 				50B5A2C5294C848000B0ABC6 /* flwr */,
+				216A90372A0CBE5400E0B532 /* flwr */,
 			);
 			productName = FlowerCoreML;
 			productReference = 21B5406D2865B14000185DEE /* FLiOS.app */;
@@ -478,7 +471,7 @@
 			);
 			mainGroup = 21B540642865B14000185DEE;
 			packageReferences = (
-				09EDEEC8287FE30900D5E0A0 /* XCRemoteSwiftPackageReference "swift-protobuf" */,
+				216A90362A0CBE5400E0B532 /* XCRemoteSwiftPackageReference "flower-swift" */,
 			);
 			productRefGroup = 21B5406E2865B14000185DEE /* Products */;
 			projectDirPath = "";
@@ -812,17 +805,22 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		09EDEEC8287FE30900D5E0A0 /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
+		216A90362A0CBE5400E0B532 /* XCRemoteSwiftPackageReference "flower-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-protobuf.git";
+			repositoryURL = "https://github.com/adap/flower-swift.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
+				branch = main;
+				kind = branch;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		216A90372A0CBE5400E0B532 /* flwr */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 216A90362A0CBE5400E0B532 /* XCRemoteSwiftPackageReference "flower-swift" */;
+			productName = flwr;
+		};
 		21A77B312865B55D0062EBD8 /* Flower */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Flower;
