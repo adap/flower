@@ -34,6 +34,7 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
+
         # Convert results
         key_name = "train_loss" if self.weight_strategy == "loss" else "wer"
         weights = None

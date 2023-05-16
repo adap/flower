@@ -17,23 +17,21 @@ Also, we would love to express our sincere thanks to [Laboratoire Informatique d
 
 ## Requirements
 
-* Flower <=0.18.0, >= 0.17.0
+* Flower >= 1.0.0
 
-* Speechbrain
+* SpeechBrain >= 0.5.14
 
-* Pytorch >= 1.5.0
+* PyTorch >= 1.5.0
 
-* Python >=3.7.0
+* Python >= 3.7.0
 
-* Ray-proxy
+* Ray-Proxy
 
 * Torchaudio
 
 * Pandas
 
-*numpy <= 1.23.0
-
-* GPUs: mem >= 24Gb
+* NumPy <= 1.23.0
 
 ## Data Structure
 
@@ -93,8 +91,8 @@ python main.py \
   --fraction_fit=0.01 \
   --rounds=2 \
   --parallel_backend=True \
-  --pre_train_model_path="docs/material/model.ckpt" \
-  --label_path="docs/material/label_encoder.txt" \
+  --pre_train_model_path="./docs/material/model.ckpt" \
+  --label_path="./docs/material/label_encoder.txt" \
   --local_epochs=1
 
 where: 
