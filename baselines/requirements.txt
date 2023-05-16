@@ -6,7 +6,7 @@
 # Documentation: https://flower.dev
 
 ##### dependencies
-flwr >= 0.18.0
+flwr >= 1.0.0
 torch >= 1.10.1
 torchvision == 0.11.2
 numpy >= 1.20.0
@@ -15,7 +15,7 @@ matplotlib >= 3.5.0
 scikit-image >= 0.18.1
 scikit-learn >= 0.24.2
 wget >= 3.2
-speechbrain >= 0.5.7
+speechbrain >= 0.5.14
 transformers >= 4.28.1
 
 ##### dev-dependencies
