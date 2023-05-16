@@ -36,9 +36,9 @@ from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
 from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.driver.driver_servicer import DriverServicer
-from flwr.server.grpc_server.driver_client_manager import DriverClientManager
-from flwr.server.grpc_server.flower_service_servicer import FlowerServiceServicer
-from flwr.server.grpc_server.grpc_server import (
+from flwr.server.fleet.grpc_bidi.driver_client_manager import DriverClientManager
+from flwr.server.fleet.grpc_bidi.flower_service_servicer import FlowerServiceServicer
+from flwr.server.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
 )
@@ -139,7 +139,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     event(EventType.START_SERVER_ENTER)
 
     # Initialize server and server config
-    initialized_server, initialized_config = _init_defaults(
+    initialized_server, initialized_config = init_defaults(
         server=server,
         config=config,
         strategy=strategy,
@@ -173,7 +173,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     )
 
     # Start training
-    hist = _fl(
+    hist = run_fl(
         server=initialized_server,
         config=initialized_config,
     )
@@ -186,13 +186,13 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     return hist
 
 
-def _init_defaults(
+def init_defaults(
     server: Optional[Server],
     config: Optional[ServerConfig],
     strategy: Optional[Strategy],
     client_manager: Optional[ClientManager],
 ) -> Tuple[Server, ServerConfig]:
-    # Create server instance if none was given
+    """Create server instance if none was given."""
     if server is None:
         if client_manager is None:
             client_manager = SimpleClientManager()
@@ -209,11 +209,11 @@ def _init_defaults(
     return server, config
 
 
-def _fl(
+def run_fl(
     server: Server,
     config: ServerConfig,
 ) -> History:
-    # Fit model
+    """Train a model on the given server and return the History object."""
     hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
     log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
@@ -527,7 +527,7 @@ def _run_fleet_api_rest(
     try:
         import uvicorn
 
-        from flwr.server.rest_server.rest_api import app as fast_api_app
+        from flwr.server.fleet.rest_rere.rest_api import app as fast_api_app
     except ModuleNotFoundError:
         sys.exit(MISSING_EXTRA_REST)
     if workers != 1:
@@ -550,7 +550,7 @@ def _run_fleet_api_rest(
         raise ValueError(validation_exceptions)
 
     uvicorn.run(
-        app="flwr.server.rest_server.rest_api:app",
+        app="flwr.server.fleet.rest_rere.rest_api:app",
         port=port,
         host=host,
         reload=False,

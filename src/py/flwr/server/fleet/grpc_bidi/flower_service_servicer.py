@@ -27,8 +27,8 @@ from iterators import TimeoutIterator
 from flwr.proto import transport_pb2_grpc
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import ClientManager
-from flwr.server.grpc_server.grpc_bridge import GrpcBridge, InsWrapper, ResWrapper
-from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
+from flwr.server.fleet.grpc_bidi.grpc_bridge import GrpcBridge, InsWrapper, ResWrapper
+from flwr.server.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
 
 
 def default_bridge_factory() -> GrpcBridge:
