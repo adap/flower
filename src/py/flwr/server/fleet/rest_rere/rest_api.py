@@ -49,7 +49,7 @@ async def pull_task_ins(request: Request) -> Response:
 
     # Handle message
     pull_task_ins_response_proto = message_handler.pull_task_ins(
-        pull_task_ins_request=pull_task_ins_request_proto,
+        request=pull_task_ins_request_proto,
         state=state,
     )
 
@@ -79,7 +79,7 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
 
     # Handle message
     push_task_res_response_proto = message_handler.push_task_res(
-        push_task_res_request=push_task_res_request_proto,
+        request=push_task_res_request_proto,
         state=state,
     )
 
