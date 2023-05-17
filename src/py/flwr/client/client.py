@@ -49,6 +49,14 @@ class Client(ABC):
         GetPropertiesRes
             The current client properties.
         """
+        _ = (self, ins)
+        return GetPropertiesRes(
+            status=Status(
+                code=Code.GET_PROPERTIES_NOT_IMPLEMENTED,
+                message="Client does not implement `get_properties`",
+            ),
+            properties={},
+        )
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         """Return the current local model parameters.
@@ -64,6 +72,14 @@ class Client(ABC):
         GetParametersRes
             The current local model parameters.
         """
+        _ = (self, ins)
+        return GetParametersRes(
+            status=Status(
+                code=Code.GET_PARAMETERS_NOT_IMPLEMENTED,
+                message="Client does not implement `get_parameters`",
+            ),
+            parameters=Parameters(tensor_type="", tensors=[]),
+        )
 
     def fit(self, ins: FitIns) -> FitRes:
         """Refine the provided parameters using the locally held dataset.
@@ -81,6 +97,16 @@ class Client(ABC):
             The training result containing updated parameters and other details
             such as the number of local training examples used for training.
         """
+        _ = (self, ins)
+        return FitRes(
+            status=Status(
+                code=Code.FIT_NOT_IMPLEMENTED,
+                message="Client does not implement `fit`",
+            ),
+            parameters=Parameters(tensor_type="", tensors=[]),
+            num_examples=0,
+            metrics={},
+        )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset.
@@ -99,6 +125,16 @@ class Client(ABC):
             other details such as the number of local data examples used for
             evaluation.
         """
+        _ = (self, ins)
+        return EvaluateRes(
+            status=Status(
+                code=Code.EVALUATE_NOT_IMPLEMENTED,
+                message="Client does not implement `evaluate`",
+            ),
+            loss=0.0,
+            num_examples=0,
+            metrics={},
+        )
 
 
 def has_get_properties(client: Client) -> bool:
