@@ -1,7 +1,7 @@
-.. _quickstart-pytorch:
+.. _quickstart-ios:
 
 
-Quickstart PyTorch
+Quickstart iOS
 ==================
 
 In this tutorial we will learn how to train a Neural Network on MNIST using Flower and CoreML. 
@@ -29,10 +29,75 @@ Or simply install all dependencies using Poetry:
 Flower Client
 -------------
 
-Now that we have all our dependencies installed, let's run a simple distributed training.
-Please refer to the `full code example <https://github.com/adap/flower/tree/main/examples/ios>`_ to learn more.
+Now that we have all our dependencies installed, let's run a simple distributed training using CoreML as our local training pipeline and MNIST as our dataset.
+For simplicity reasons we will use the complete Flower client with CoreML, that has been implemented and stored inside the Swift SDK. The client implementation can be seen below:
+.. code-block:: swift
+  /// Parses the parameters from the local model and returns them as GetParametersRes struct
+  ///
+  /// - Returns: Parameters from the local model
+  public func getParameters() -> GetParametersRes {
+    let parameters = parameters.weightsToParameters()
+    let status = Status(code: .ok, message: String())
+        
+    return GetParametersRes(parameters: parameters, status: status)
+  }
+    
+  /// Calls the routine to fit the local model
+  ///
+  /// - Returns: The result from the local training, e.g., updated parameters
+  public func fit(ins: FitIns) -> FitRes {
+    let status = Status(code: .ok, message: String())
+    let result = runMLTask(configuration: parameters.parametersToWeights(parameters: ins.parameters), task: .train)
+    let parameters = parameters.weightsToParameters()
+        
+    return FitRes(parameters: parameters, numExamples: result.numSamples, status: status)
+    }
+    
+  /// Calls the routine to evaluate the local model
+  ///
+  /// - Returns: The result from the evaluation, e.g., loss
+  public func evaluate(ins: EvaluateIns) -> EvaluateRes {
+    let status = Status(code: .ok, message: String())
+    let result = runMLTask(configuration: parameters.parametersToWeights(parameters: ins.parameters), task: .test)
+        
+    return EvaluateRes(loss: Float(result.loss), numExamples: result.numSamples, status: status)
+  }
 
+Let's create a new application project in Xcode and add flwr as a dependency in your project. For our application, we will store the logic of our app in :code:`FLiOSModel.swift` and the UI elements in :code:`ContentView.swift`.
+We will focus more on :code:`FLiOSModel.swift` in this quickstart. Please refer to the `full code example <https://github.com/adap/flower/tree/main/examples/ios>`_ to learn more about the app.
 
+Import Flower and CoreML related packages in :code:`FLiOSModel.swift`:
+.. code-block:: swift
+
+  import Foundation
+  import CoreML
+  import flwr
+
+Then add the mlmodel to the project simply by drag-and-drop, the mlmodel will be bundled inside the application during deployment to your iOS device.
+We need to pass the url to access mlmodel and run CoreML machine learning processes, it can be retrieved by calling the function :code:`Bundle.main.url`.
+For the MNIST dataset, we need to preprocess it into :code:`MLBatchProvider` object. The preprocessing is done inside :code:`DataLoader.swift`.
+
+Since CoreML does not allow the model parameters to be seen before training, and accessing the model parameters during or after the training can only be done by specifying the layer name,
+we need to know this informations beforehand, through looking at the model specification, which are written as proto files. The implementation can be seen in :code:`MLModelInspect`.
+
+After we have all of the necessary informations, let's create our Flower client.
+.. code-block:: swift
+  let compiledModelUrl = try MLModel.compileModel(at: url)
+  let modelInspect = try MLModelInspect(serializedData: Data(contentsOf: url))
+  let layerWrappers = modelInspect.getLayerWrappers()
+  self.mlFlwrClient = MLFlwrClient(layerWrappers: layerWrappers,
+                                   dataLoader: dataLoader,
+                                   compiledModelUrl: compiledModelUrl)
+
+Then start the flower grpc client and start communicating to the server by passing our flower client to the function :code:`startFlwrGRPC`.
+
+.. code-block:: swift
+  self.flwrGRPC = FlwrGRPC(serverHost: hostname, serverPort: port)
+  self.flwrGRPC.startFlwrGRPC(client: self.mlFlwrClient)
+
+That's it for the client. We only have to implement :code:`Client` or call the provided
+:code:`MLFlwrClient` and call :code:`startFlwrGRPC()`. The attribute :code:`hostname` and :code:`port` tells the client which server to connect to. 
+This can be done by entering the hostname and port in the application before clicking the start button to start the federated learning process.
 Flower Server
 -------------
 
@@ -62,4 +127,4 @@ Build and run the client through your Xcode.
 
 Congratulations!
 You've successfully built and run your first federated learning system in your ios device.
-The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart_pytorch/client.py>`_ for this example can be found in :code:`examples/ios`.
+The full `source code <https://github.com/adap/flower/blob/main/examples/ios>`_ for this example can be found in :code:`examples/ios`.
