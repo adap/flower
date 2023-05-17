@@ -46,9 +46,7 @@ def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsRespo
     return response
 
 
-def push_task_res(
-    request: PushTaskResRequest, state: State
-) -> PushTaskResResponse:
+def push_task_res(request: PushTaskResRequest, state: State) -> PushTaskResResponse:
     """Push TaskRes handler."""
 
     # pylint: disable=no-member
