@@ -42,7 +42,7 @@ poetry run python3 -c "import flwr"
 
 If you don't see any errors you're good to go!
 
-#### Pip
+#### pip
 
 Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
 
