@@ -21,6 +21,7 @@ This will create a new directory called `advanced_tensorflow` containing the fol
 
 ```shell
 -- pyproject.toml
+-- requirements.txt
 -- client.py
 -- server.py
 -- README.md
@@ -28,7 +29,7 @@ This will create a new directory called `advanced_tensorflow` containing the fol
 ```
 
 ### Installing Dependencies
-Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml` and 'requirements.txt'. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
 #### Poetry
 ```shell

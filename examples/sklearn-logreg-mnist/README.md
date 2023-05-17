@@ -22,7 +22,7 @@ This will create a new directory called `sklearn-logreg-mnist` containing the fo
 -- README.md
 ```
 ### Installing Dependencies
-Project dependencies (such as `scikit-learn` and `flwr`) are defined in `pyproject.toml` and 'requirements.txt'. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+Project dependencies (such as `scikit-learn` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
 #### Poetry
 ```shell
