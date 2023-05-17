@@ -32,8 +32,9 @@ except ModuleNotFoundError:
 
 MISSING_EXTRA_TF = """
 Extra dependency required for using tensorboard are missing.
+The program will continue without tensorboard.
 
-To use tensorboard, install `tensorflow` with the following command:
+In order to use tensorboard, install `tensorflow` with the following command:
 
     `pip install tensorflow`.
 """
