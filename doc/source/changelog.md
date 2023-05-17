@@ -8,7 +8,7 @@
 
   The `mt-pytorch` example shows how to aggregate parameters when writing a driver script. The included `driver.py` and `server.py` have been aligned to demonstrate both the low-level way and the high-level way of building server-side logic.
 
-- **General improvements** ([#1872](https://github.com/adap/flower/pull/1872))
+- **General improvements** ([#1872](https://github.com/adap/flower/pull/1872), [#1866](https://github.com/adap/flower/pull/1866))
 
 ### Incompatible changes
 
