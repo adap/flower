@@ -29,13 +29,11 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.state import State
 
 
-def pull_task_ins(
-    pull_task_ins_request: PullTaskInsRequest, state: State
-) -> PullTaskInsResponse:
+def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:
     """Pull TaskIns handler."""
 
     # Get node_id if client node is not anonymous
-    node = pull_task_ins_request.node  # pylint: disable=no-member
+    node = request.node  # pylint: disable=no-member
     node_id: Optional[int] = None if node.anonymous else node.node_id
 
     # Retrieve TaskIns from State
@@ -48,21 +46,19 @@ def pull_task_ins(
     return pull_task_ins_response
 
 
-def push_task_res(
-    push_task_res_request: PushTaskResRequest, state: State
-) -> PushTaskResResponse:
+def push_task_res(request: PushTaskResRequest, state: State) -> PushTaskResResponse:
     """Push TaskRes handler."""
 
     # pylint: disable=no-member
-    task_res: TaskRes = push_task_res_request.task_res_list[0]
+    task_res: TaskRes = request.task_res_list[0]
     # pylint: enable=no-member
 
     # Store TaskRes in State
     task_id: Optional[UUID] = state.store_task_res(task_res=task_res)
 
     # Build response
-    push_task_res_response = PushTaskResResponse(
+    response = PushTaskResResponse(
         reconnect=Reconnect(reconnect=5),
         results={str(task_id): 0},
     )
-    return push_task_res_response
+    return response
