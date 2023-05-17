@@ -25,9 +25,11 @@ This will create a new directory called `dp-sgd-mnist` containing the following 
 -- README.md
 ```
 ### Installing Dependencies
+
 Project dependencies (such as `tensorflow` and `tensorflow-privacy`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
 #### Poetry
+
 ```shell
 poetry install
 poetry shell
@@ -41,8 +43,10 @@ poetry run python3 -c "import flwr"
 
 If you don't see any errors you're good to go!
 
-#### Pip
+#### pip
+
 Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+
 ```shell
 pip install -r requirements.txt
 ```
@@ -55,6 +59,7 @@ Afterwards you are ready to start the Flower server as well as the clients. You 
 # terminal 1
 poetry run python3 server.py
 ```
+
 Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminals and run the following command in each:
 
 ```shell
@@ -85,7 +90,6 @@ poetry run python3 client.py --num-clients 3 --partition 0 --dpsgd True &
 poetry run python3 client.py --num-clients 3 --partition 1 &
 poetry run python3 client.py --num-clients 3 --partition 2 --dpsgd True
 ```
-
 
 Additional training parameters for the client and server can be referenced by passing `--help` to either script.
 

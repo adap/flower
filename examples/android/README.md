@@ -17,9 +17,11 @@ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/and
 ```
 
 ### Installing Dependencies
+
 Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
 #### Poetry
+
 ```shell
 poetry install
 poetry shell
@@ -33,8 +35,10 @@ poetry run python3 -c "import flwr"
 
 If you don't see any errors you're good to go!
 
-#### Pip
+#### pip
+
 Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+
 ```shell
 pip install -r requirements.txt
 ```
