@@ -21,14 +21,17 @@ This will create a new directory called `advanced_pytorch` containing the follow
 
 ```shell
 -- pyproject.toml
+-- requirements.txt
 -- client.py
 -- server.py
 -- README.md
 -- run.sh
 ```
 
-Project dependencies (such as `pytorch` and `flwr`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+### Installing Dependencies
+Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and 'requirements.txt'. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
+#### Poetry
 ```shell
 poetry install
 poetry shell
@@ -41,6 +44,13 @@ poetry run python3 -c "import flwr"
 ```
 
 If you don't see any errors you're good to go!
+
+#### Pip
+Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+```shell
+pip install -r requirements.txt
+```
+
 
 # Run Federated Learning with PyTorch and Flower
 
