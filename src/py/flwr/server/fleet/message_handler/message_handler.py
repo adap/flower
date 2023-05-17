@@ -40,10 +40,10 @@ def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsRespo
     task_ins_list: List[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
 
     # Build response
-    pull_task_ins_response = PullTaskInsResponse(
+    response = PullTaskInsResponse(
         task_ins_list=task_ins_list,
     )
-    return pull_task_ins_response
+    return response
 
 
 def push_task_res(request: PushTaskResRequest, state: State) -> PushTaskResResponse:
