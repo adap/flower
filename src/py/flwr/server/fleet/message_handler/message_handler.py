@@ -29,9 +29,7 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.state import State
 
 
-def pull_task_ins(
-    request: PullTaskInsRequest, state: State
-) -> PullTaskInsResponse:
+def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:
     """Pull TaskIns handler."""
 
     # Get node_id if client node is not anonymous
