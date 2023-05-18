@@ -79,6 +79,7 @@ Example
     0.5, 10, {"accuracy": 0.95}
 
 """
+TRANSPORT_TYPES = ["grpc-bidi", "grpc-rere", "rest"]
 
 
 ClientLike = Union[Client, NumPyClient]
@@ -91,7 +92,7 @@ def start_client(
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
-    rest: bool = False,
+    rest: bool = False,  # Deprecated in favor of `transport`
     transport: Optional[str] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
@@ -117,9 +118,15 @@ def start_client(
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
     rest : bool (default: False)
+        DEPRECATED - USE 'transport' INSTEAD.
         Defines whether or not the client is interacting with the server using the
-        experimental REST API. This feature is experimental, it might change
+        experimental REST API. This feature is experimental, it might be change
         considerably in future versions of Flower.
+    transport : Optional[str] (default: None)
+        Configure the transport layer. Allowed values:
+        - 'grpc-bidi': gRPC, bidirectional streaming
+        - 'grpc-rere': gRPC, request-response (experimental)
+        - 'rest': HTTP (experimental)
 
     Examples
     --------
@@ -169,7 +176,9 @@ def start_client(
     elif transport == "grpc-bidi":
         connection = grpc_connection
     else:
-        raise ValueError(f"Unknown transport type: {transport}")
+        raise ValueError(
+            f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
+        )
 
     while True:
         sleep_duration: int = 0
@@ -211,7 +220,7 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
-    rest: bool = False,
+    rest: bool = False,  # Deprecated in favor of `transport`
     transport: Optional[str] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
@@ -236,9 +245,15 @@ def start_numpy_client(
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
     rest : bool (default: False)
+        DEPRECATED - USE 'transport' INSTEAD.
         Defines whether or not the client is interacting with the server using the
         experimental REST API. This feature is experimental, it might be change
         considerably in future versions of Flower.
+    transport : Optional[str] (default: None)
+        Configure the transport layer. Allowed values:
+        - 'grpc-bidi': gRPC, bidirectional streaming
+        - 'grpc-rere': gRPC, request-response (experimental)
+        - 'rest': HTTP (experimental)
 
     Examples
     --------
