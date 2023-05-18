@@ -15,8 +15,6 @@
 """Flower DriverClientManager."""
 
 
-from __future__ import annotations
-
 import random
 import time
 from logging import INFO
@@ -35,10 +33,9 @@ from .driver_client_proxy import DriverClientProxy
 class DriverClientManager(ClientManager):
     """Provides a pool of available clients."""
 
-    def __init__(self, driver: Driver, anonymous: bool) -> None:
-        self.clients: Dict[str, ClientProxy] = {}
+    def __init__(self, driver: Driver) -> None:
         self.driver = driver
-        self.anonymous = anonymous
+        self.clients: Dict[str, ClientProxy] = {}
 
     def __len__(self) -> int:
         """Return the number of available clients.
@@ -48,6 +45,7 @@ class DriverClientManager(ClientManager):
         num_available : int
             The number of currently available clients.
         """
+        self._update_nodes()
         return len(self.clients)
 
     def num_available(self) -> int:
@@ -73,7 +71,7 @@ class DriverClientManager(ClientManager):
             Indicating if registration was successful. False if ClientProxy is
             already registered or can not be registered for any reason.
         """
-        return True
+        raise NotImplementedError("DriverClientManager.register is not implemented")
 
     def unregister(self, client: ClientProxy) -> None:
         """Unregister Flower ClientProxy instance.
@@ -84,20 +82,17 @@ class DriverClientManager(ClientManager):
         ----------
         client : flwr.server.client_proxy.ClientProxy
         """
+        raise NotImplementedError("DriverClientManager.unregister is not implemented")
 
     def all(self) -> Dict[str, ClientProxy]:
+        self._update_nodes()
         return self.clients
 
     def wait_for(self, num_clients: int, timeout: int = 86400) -> bool:
         start_time = time.time()
         while time.time() < start_time + timeout:
-            get_nodes_res = self.driver.get_nodes(req=driver_pb2.GetNodesRequest())
-            all_node_ids = get_nodes_res.node_ids
-            if len(all_node_ids) >= num_clients:
-                for node_id in all_node_ids:
-                    self.clients[str(node_id)] = DriverClientProxy(
-                        node_id, self.driver, self.anonymous
-                    )
+            self._update_nodes()
+            if len(self.clients) >= num_clients:
                 return True
             time.sleep(1)
         return False
@@ -131,3 +126,13 @@ class DriverClientManager(ClientManager):
 
         sampled_cids = random.sample(available_cids, num_clients)
         return [self.clients[cid] for cid in sampled_cids]
+
+    def _update_nodes(self) -> None:
+        get_nodes_res = self.driver.get_nodes(req=driver_pb2.GetNodesRequest())
+        all_node_ids = get_nodes_res.node_ids
+        for node_id in all_node_ids:
+            self.clients[str(node_id)] = DriverClientProxy(
+                node_id=node_id,
+                driver=self.driver,
+                anonymous=False,
+            )

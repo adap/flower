@@ -112,7 +112,7 @@ def start_driver(  # pylint: disable=too-many-arguments
         driver = Driver(driver_service_address=address, certificates=certificates)
         driver.connect()
 
-        client_manager = DriverClientManager(driver=driver, anonymous=False)
+        client_manager = DriverClientManager(driver=driver)
 
     # Initialize the Driver API server and config
     initialized_server, initialized_config = init_defaults(
