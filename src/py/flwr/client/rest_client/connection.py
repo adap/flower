@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Contextmanager managing a REST request-response channel to the Flower server."""
+"""Contextmanager for a REST request-response channel to the Flower server."""
 
 
 import sys
@@ -38,6 +38,9 @@ try:
     import requests
 except ModuleNotFoundError:
     sys.exit(MISSING_EXTRA_REST)
+
+
+KEY_TASK_INS = "current_task_ins"
 
 
 PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
@@ -102,7 +105,7 @@ def http_request_response(
         )
 
     # Necessary state to link TaskRes to TaskIns
-    state: Dict[str, Optional[TaskIns]] = {"current_task_ins": None}
+    state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
 
     ###########################################################################
     # receive/send functions
@@ -153,13 +156,13 @@ def http_request_response(
         # Remember the current TaskIns
         task_ins_server_message_tuple = get_server_message(pull_task_ins_response_proto)
         if task_ins_server_message_tuple is None:
-            state["current_task_ins"] = None
+            state[KEY_TASK_INS] = None
             return None
 
         task_ins, server_message = task_ins_server_message_tuple
 
         # Remember `task_ins` until `task_res` is available
-        state["current_task_ins"] = task_ins
+        state[KEY_TASK_INS] = task_ins
 
         # Return the ServerMessage
         log(INFO, "[Node] POST /%s: success", PATH_PULL_TASK_INS)
@@ -168,7 +171,7 @@ def http_request_response(
     def send(client_message_proto: ClientMessage) -> None:
         """Send task result back to server."""
 
-        if state["current_task_ins"] is None:
+        if state[KEY_TASK_INS] is None:
             log(ERROR, "No current TaskIns")
             return
 
@@ -179,7 +182,7 @@ def http_request_response(
                 producer=Node(node_id=0, anonymous=True),
                 consumer=Node(node_id=0, anonymous=True),
                 legacy_client_message=client_message_proto,
-                ancestry=[state["current_task_ins"].task_id],
+                ancestry=[state[KEY_TASK_INS].task_id],
             ),
         )
 
@@ -200,7 +203,7 @@ def http_request_response(
             verify=verify,
         )
 
-        state["current_task_ins"] = None
+        state[KEY_TASK_INS] = None
 
         # Check status code and headers
         if res.status_code != 200:
