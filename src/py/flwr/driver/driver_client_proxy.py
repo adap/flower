@@ -14,15 +14,12 @@
 # ==============================================================================
 """Flower ClientProxy implementation for Driver API."""
 
-from __future__ import annotations
 
 import time
-from logging import DEBUG
 from typing import List, Optional, cast
 
 from flwr import common
 from flwr.common import serde
-from flwr.common.logger import log
 from flwr.proto import driver_pb2, node_pb2, task_pb2, transport_pb2
 from flwr.server.client_proxy import ClientProxy
 
@@ -76,7 +73,8 @@ class DriverClientProxy(ClientProxy):
             )
         )
         return cast(
-            common.FitRes, self._send_receive_msg(server_message_proto, timeout).fit_res
+            common.FitRes,
+            self._send_receive_msg(server_message_proto, timeout).fit_res,
         )
 
     def evaluate(
@@ -119,13 +117,16 @@ class DriverClientProxy(ClientProxy):
             ),
         )
         push_task_ins_req = driver_pb2.PushTaskInsRequest(task_ins_list=[task_ins])
-        push_task_ins_res = self.driver.push_task_ins(req=push_task_ins_req)
-        task_ids = [task_id for task_id in push_task_ins_res.task_ids if task_id != ""]
 
-        if len(task_ids) == 0:
-            raise ValueError("No task_ids")
-        if len(task_ids) > 1:
-            raise ValueError("More than 1 task_id")
+        # Send TaskIns to Driver API
+        push_task_ins_res = self.driver.push_task_ins(req=push_task_ins_req)
+
+        if len(push_task_ins_res.task_ids) != 1:
+            raise ValueError("Unexpected number of task_ids")
+
+        task_id = push_task_ins_res.task_ids[0]
+        if task_id == "":
+            raise ValueError(f"Failed to schedule task for node {self.node_id}")
 
         if timeout:
             start_time = time.time()
@@ -133,25 +134,21 @@ class DriverClientProxy(ClientProxy):
         while True:
             pull_task_res_req = driver_pb2.PullTaskResRequest(
                 node=node_pb2.Node(node_id=0, anonymous=True),
-                task_ids=task_ids,
+                task_ids=[task_id],
             )
 
+            # Ask Driver API for TaskRes
             pull_task_res_res = self.driver.pull_task_res(req=pull_task_res_req)
 
             task_res_list: List[task_pb2.TaskRes] = list(
                 pull_task_res_res.task_res_list
             )
-            log(DEBUG, "Got %s results", len(task_res_list))
-
             if len(task_res_list) == 1:
                 task_res = task_res_list[0]
-                break
+                return serde.client_message_from_proto(  # type: ignore
+                    task_res.task.legacy_client_message
+                )
 
             if timeout is not None and time.time() > start_time + timeout:
                 raise RuntimeError("Timeout reached")
-
             time.sleep(SLEEP_TIME)
-
-        return serde.client_message_from_proto(  # type: ignore
-            task_res.task.legacy_client_message
-        )
