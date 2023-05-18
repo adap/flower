@@ -121,7 +121,7 @@ def start_client(
     rest : bool (default: False)
         DEPRECATED - USE 'transport' INSTEAD.
         Defines whether or not the client is interacting with the server using the
-        experimental REST API. This feature is experimental, it might be change
+        experimental REST API. This feature is experimental, it might change
         considerably in future versions of Flower.
     transport : Optional[str] (default: None)
         Configure the transport layer. Allowed values:
