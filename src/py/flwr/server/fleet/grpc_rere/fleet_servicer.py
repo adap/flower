@@ -43,7 +43,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """Pull TaskIns."""
         log(INFO, "FleetServicer.PullTaskIns")
         return message_handler.pull_task_ins(
-            pull_task_ins_request=request,
+            request=request,
             state=self.state,
         )
 
@@ -53,6 +53,6 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """Push TaskRes."""
         log(INFO, "FleetServicer.PushTaskRes")
         return message_handler.push_task_res(
-            push_task_res_request=request,
+            request=request,
             state=self.state,
         )
