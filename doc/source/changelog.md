@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### What's new?
+-  **Add new `FedTrimmedMean` strategy** ([#1769](https://github.com/adap/flower/pull/1769), [#1853](https://github.com/adap/flower/pull/1853))
+
+  m-danilow contributes `FedTrimmedMean` that implements Trimmed Mean Strategy by [Dong Yin, 2018](https://arxiv.org/abs/1803.01498)
 
 - **Add parameter aggregation to** `mt-pytorch` **code example** ([#1785](https://github.com/adap/flower/pull/1785))
 
