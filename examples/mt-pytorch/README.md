@@ -10,7 +10,7 @@ This example contains highly experimental code. Please consult the regular PyTor
 
 ## Run with Driver API
 
-Terminal 1: start Flower Driver API server
+Terminal 1: start Flower server
 
 ```bash
 flower-server
@@ -22,7 +22,15 @@ Terminal 2+3: start two clients
 python client.py
 ```
 
-Terminal 4: run driver script
+Terminal 4: start Driver script
+
+Using:
+
+```bash
+python start_driver.py
+```
+
+Or, alternatively:
 
 ```bash
 python driver.py
