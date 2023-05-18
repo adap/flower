@@ -79,7 +79,6 @@ Example
     0.5, 10, {"accuracy": 0.95}
 
 """
-TRANSPORT_TYPES = ["grpc-bidi", "grpc-rere", "rest"]
 
 TRANSPORT_TYPES = ["grpc-bidi", "grpc-rere", "rest"]
 
