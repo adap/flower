@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Contextmanager managing a REST-based channel to the Flower server."""
+"""Contextmanager managing a gRPC request-response channel to the Flower server."""
 
 
 from contextlib import contextmanager

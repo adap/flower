@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Contextmanager managing a REST-based channel to the Flower server."""
+"""Contextmanager managing a REST request-response channel to the Flower server."""
 
 
 import sys
