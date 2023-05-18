@@ -22,7 +22,7 @@ Terminal 2+3: start two clients
 python client.py
 ```
 
-Terminal 4: start Driver server
+Terminal 4: start Driver script
 
 Using:
 
