@@ -303,7 +303,7 @@ def run_fleet_api() -> None:
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
-    elif args.fleet_api_type == "grpc":
+    elif args.fleet_api_type == "grpc-bidi":
         address_arg = args.grpc_fleet_api_address
         parsed_address = parse_address(address_arg)
         if not parsed_address:
@@ -311,6 +311,18 @@ def run_fleet_api() -> None:
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
         fleet_server = _run_fleet_api_grpc_bidi(
+            address=address,
+            state_factory=state_factory,
+        )
+        grpc_servers.append(fleet_server)
+    elif args.fleet_api_type == "grpc-rere":
+        address_arg = args.grpc_rere_fleet_api_address
+        parsed_address = parse_address(address_arg)
+        if not parsed_address:
+            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
+        host, port, is_v6 = parsed_address
+        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+        fleet_server = _run_fleet_api_grpc_rere(
             address=address,
             state_factory=state_factory,
         )
@@ -386,18 +398,6 @@ def run_server() -> None:
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
-    elif args.fleet_api_type == "grpc-rere":
-        address_arg = args.grpc_rere_fleet_api_address
-        parsed_address = parse_address(address_arg)
-        if not parsed_address:
-            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, is_v6 = parsed_address
-        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-        fleet_server = _run_fleet_api_grpc_rere(
-            address=address,
-            state_factory=state_factory,
-        )
-        grpc_servers.append(fleet_server)
     elif args.fleet_api_type == "grpc-bidi":
         address_arg = args.grpc_bidi_fleet_api_address
         parsed_address = parse_address(address_arg)
@@ -406,6 +406,18 @@ def run_server() -> None:
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
         fleet_server = _run_fleet_api_grpc_bidi(
+            address=address,
+            state_factory=state_factory,
+        )
+        grpc_servers.append(fleet_server)
+    elif args.fleet_api_type == "grpc-rere":
+        address_arg = args.grpc_rere_fleet_api_address
+        parsed_address = parse_address(address_arg)
+        if not parsed_address:
+            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
+        host, port, is_v6 = parsed_address
+        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+        fleet_server = _run_fleet_api_grpc_rere(
             address=address,
             state_factory=state_factory,
         )
