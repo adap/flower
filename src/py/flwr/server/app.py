@@ -138,6 +138,13 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     """
     event(EventType.START_SERVER_ENTER)
 
+    # Parse IP address
+    parsed_address = parse_address(server_address)
+    if not parsed_address:
+        sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
     # Initialize server and server config
     initialized_server, initialized_config = init_defaults(
         server=server,
@@ -150,13 +157,6 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
         "Starting Flower server, config: %s",
         initialized_config,
     )
-
-    # Parse IP address
-    parsed_address = parse_address(server_address)
-    if not parsed_address:
-        sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
     # Start gRPC server
     grpc_server = start_grpc_server(
