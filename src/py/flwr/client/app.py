@@ -81,6 +81,8 @@ Example
 """
 TRANSPORT_TYPES = ["grpc-bidi", "grpc-rere", "rest"]
 
+TRANSPORT_TYPES = ["grpc-bidi", "grpc-rere", "rest"]
+
 
 ClientLike = Union[Client, NumPyClient]
 
@@ -156,6 +158,7 @@ def start_client(
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
+    # Set the default transport layer
     if transport is None:
         transport = "rest" if rest else "grpc-bidi"
 
@@ -247,7 +250,7 @@ def start_numpy_client(
     rest : bool (default: False)
         DEPRECATED - USE 'transport' INSTEAD.
         Defines whether or not the client is interacting with the server using the
-        experimental REST API. This feature is experimental, it might be change
+        experimental REST API. This feature is experimental, it might change
         considerably in future versions of Flower.
     transport : Optional[str] (default: None)
         Configure the transport layer. Allowed values:

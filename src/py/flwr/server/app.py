@@ -690,8 +690,7 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
 def _add_args_driver_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--driver-api-address",
-        help="The Driver API gRPC server address, which can be an IPv4, "
-        "IPv6, or a domain name.",
+        help="Driver API (gRPC) server address (IPv4, IPv6, or a domain name)",
         default=ADDRESS_DRIVER_API,
     )
 
@@ -705,63 +704,58 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         dest="fleet_api_type",
         const="grpc-bidi",
         default="grpc-bidi",
-        help="Start a gRPC-based Fleet API server "
-        "(bidirectional streaming, the default if no argument is provided).",
+        help="Start a Fleet API server (gRPC-bidi)",
     )
     ex_group.add_argument(
         "--grpc-rere",
         action="store_const",
         dest="fleet_api_type",
         const="grpc-rere",
-        help="Start a gRPC-based Fleet API server " "(request-response).",
+        help="Start a Fleet API server (gRPC-rere)",
     )
     ex_group.add_argument(
         "--rest",
         action="store_const",
         dest="fleet_api_type",
         const="rest",
-        help="Start a REST-based Fleet API server",
+        help="Start a Fleet API server (REST, experimental)",
     )
 
-    # Fleet API gRPC (bidi) options
+    # Fleet API gRPC-bidi options
     grpc_bidi_group = parser.add_argument_group(
-        "Fleet API (bidi) gRPC server options", ""
+        "Fleet API (gRPC-bidi) server options", ""
     )
     grpc_bidi_group.add_argument(
         "--grpc-bidi-fleet-api-address",
-        help="The Fleet API gRPC server address, which can be an IPv4, "
-        "IPv6, or a domain name.",
-        default=ADDRESS_FLEET_API_GRPC_BIDI,
-    )
-
-    # Fleet API gRPC (rere) options
-    grpc_rere_group = parser.add_argument_group(
-        "Fleet API gRPC (rere) server options", ""
-    )
-    grpc_rere_group.add_argument(
-        "--grpc-rere-fleet-api-address",
-        help="The Fleet API gRPC server address, which can be an IPv4, "
-        "IPv6, or a domain name.",
+        help="Fleet API (gRPC-bidi) server address (IPv4, IPv6, or a domain name)",
         default=ADDRESS_FLEET_API_GRPC_RERE,
     )
 
+    # Fleet API gRPC-rere options
+    grpc_rere_group = parser.add_argument_group(
+        "Fleet API (gRPC-rere) server options", ""
+    )
+    grpc_rere_group.add_argument(
+        "--grpc-rere-fleet-api-address",
+        help="Fleet API (gRPC-rere) server address (IPv4, IPv6, or a domain name)",
+    )
+
     # Fleet API REST options
-    rest_group = parser.add_argument_group("Fleet API REST server options", "")
+    rest_group = parser.add_argument_group("Fleet API (REST) server options", "")
     rest_group.add_argument(
         "--rest-fleet-api-address",
-        help="The Fleet API REST server address, which can be an IPv4, "
-        "IPv6, or a domain name.",
+        help="Fleet API (REST) server address (IPv4, IPv6, or a domain name)",
         default=ADDRESS_FLEET_API_REST,
     )
     rest_group.add_argument(
         "--ssl-certfile",
-        help="Fleet API REST server SSL certificate file (as a path str), "
+        help="Fleet API (REST) server SSL certificate file (as a path str), "
         "needed for using 'https'.",
         default=None,
     )
     rest_group.add_argument(
         "--ssl-keyfile",
-        help="Fleet API REST server SSL private key file (as a path str), "
+        help="Fleet API (REST) server SSL private key file (as a path str), "
         "needed for using 'https'.",
         default=None,
     )
