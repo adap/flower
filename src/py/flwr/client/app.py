@@ -28,7 +28,12 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.address import parse_address
-from flwr.common.constant import MISSING_EXTRA_REST
+from flwr.common.constant import (
+    MISSING_EXTRA_REST,
+    TRANSPORT_TYPE_GRPC_BIDI,
+    TRANSPORT_TYPE_REST,
+    TRANSPORT_TYPES,
+)
 from flwr.common.logger import log
 from flwr.common.typing import (
     Code,
@@ -78,9 +83,6 @@ Example
     0.5, 10, {"accuracy": 0.95}
 
 """
-
-TRANSPORT_TYPES = ["grpc-bidi", "rest"]
-
 
 ClientLike = Union[Client, NumPyClient]
 
@@ -157,10 +159,10 @@ def start_client(
 
     # Set the default transport layer
     if transport is None:
-        transport = "rest" if rest else "grpc-bidi"
+        transport = TRANSPORT_TYPE_REST if rest else TRANSPORT_TYPE_GRPC_BIDI
 
     # Use either gRPC bidirectional streaming or REST request/response
-    if transport == "rest":
+    if transport == TRANSPORT_TYPE_REST:
         try:
             from .rest_client.connection import http_request_response
         except ModuleNotFoundError:
@@ -171,7 +173,7 @@ def start_client(
                 "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
             )
         connection = http_request_response
-    elif transport == "grpc-bidi":
+    elif transport == TRANSPORT_TYPE_GRPC_BIDI:
         connection = grpc_connection
     else:
         raise ValueError(

@@ -30,7 +30,11 @@ import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
-from flwr.common.constant import MISSING_EXTRA_REST
+from flwr.common.constant import (
+    MISSING_EXTRA_REST,
+    TRANSPORT_TYPE_GRPC_BIDI,
+    TRANSPORT_TYPE_REST,
+)
 from flwr.common.logger import log
 from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
@@ -275,7 +279,7 @@ def run_fleet_api() -> None:
     bckg_threads = []
 
     # Start Fleet API
-    if args.fleet_api_type == "rest":
+    if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
             importlib.util.find_spec("fastapi")
             and importlib.util.find_spec("requests")
@@ -301,7 +305,7 @@ def run_fleet_api() -> None:
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
-    elif args.fleet_api_type == "grpc-bidi":
+    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_BIDI:
         address_arg = args.grpc_fleet_api_address
         parsed_address = parse_address(address_arg)
         if not parsed_address:
@@ -357,7 +361,7 @@ def run_server() -> None:
     bckg_threads = []
 
     # Start Fleet API
-    if args.fleet_api_type == "rest":
+    if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
             importlib.util.find_spec("fastapi")
             and importlib.util.find_spec("requests")
@@ -383,7 +387,7 @@ def run_server() -> None:
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
-    elif args.fleet_api_type == "grpc-bidi":
+    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_BIDI:
         address_arg = args.grpc_fleet_api_address
         parsed_address = parse_address(address_arg)
         if not parsed_address:
@@ -663,15 +667,15 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "--grpc-bidi",
         action="store_const",
         dest="fleet_api_type",
-        const="grpc-bidi",
-        default="grpc-bidi",
+        const=TRANSPORT_TYPE_GRPC_BIDI,
+        default=TRANSPORT_TYPE_GRPC_BIDI,
         help="Start a Fleet API server (gRPC-bidi)",
     )
     ex_group.add_argument(
         "--rest",
         action="store_const",
         dest="fleet_api_type",
-        const="rest",
+        const=TRANSPORT_TYPE_REST,
         help="Start a Fleet API server (REST, experimental)",
     )
 
