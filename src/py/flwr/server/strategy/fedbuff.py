@@ -37,8 +37,8 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 from flwr.server.strategy import AsyncStrategy
+from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 
 
 # flake8: noqa: E501
