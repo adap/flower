@@ -74,14 +74,10 @@ class Strategy(ABC):
     def aggregate_fit(
         self,
         server_round: int,
-        results: Union[
-            List[Tuple[ClientProxy, FitRes]],
-            List[Tuple[int, Tuple[ClientProxy, FitRes]]],
-        ],
-        failures: Union[
-            List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-            List[Tuple[int, Union[Tuple[ClientProxy, FitRes], BaseException]]],
-        ],
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        results_cids: Optional[List[str]] = None,
+        failures_cids: Optional[List[str]] = None,
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results.
 
@@ -100,6 +96,12 @@ class Strategy(ABC):
         failures : List[Union[Tuple[ClientProxy, FitRes], BaseException]]
             Exceptions that occurred while the server was waiting for client
             updates.
+        results_cids : Optional[List[str]]
+            List of the cids of the clients that successfully returned results,
+            used for asynchronous FL. None by default.
+        failures_cids : Optional[List[str]]
+            List of the cids of the clients that failed to return results,
+            used for asynchronous FL. None by default.
 
         Returns
         -------

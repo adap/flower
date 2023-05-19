@@ -61,7 +61,7 @@ class FedBuff(Strategy):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         concurrency: int = 3,
         buffer_size: int = 2,
-        staleness_fn: Optional[Callable[int, float]] = None,
+        staleness_fn: Optional[Callable[[int], float]] = None,
     ) -> None:
         """Federated Buffering asynchronous aggregation strategy.
         NOTE: requires server to be in asynchronous mode
@@ -83,7 +83,7 @@ class FedBuff(Strategy):
             aggregation rounds, so there may be periods with fewer clients in use.
         buffer_size : int
             Number of client updates to collect before running aggregation.
-        staleness_fn : Optional[Callable[int, float]]
+        staleness_fn : Optional[Callable[[int], float]]
             Function that takes the age of an update in aggregation rounds (where 0 is no missed rounds) and outputs
             a multiplier used to scale the gradients from that update. Defaults to returning 1.0 for all inputs.
         """
@@ -103,7 +103,7 @@ class FedBuff(Strategy):
         else:
             self.staleness_fn = staleness_fn
 
-        self.busy_clients = {}  # dict from cid to server round
+        self.busy_clients: Dict[str, int] = {}  # dict from cid to server round
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -139,12 +139,13 @@ class FedBuff(Strategy):
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> Tuple[int, List[Tuple[ClientProxy, FitIns]]]:
+    ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(server_round)
+        config["buffer_size"] = self.buffer_size
         fit_ins = FitIns(parameters, config)
 
         # Save so can work out gradients
@@ -177,7 +178,7 @@ class FedBuff(Strategy):
         self.busy_clients.update({c.cid: server_round for c in clients})
 
         # Return client/config pairs
-        return self.buffer_size, [(client, fit_ins) for client in clients]
+        return [(client, fit_ins) for client in clients]
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -189,8 +190,10 @@ class FedBuff(Strategy):
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[int, Tuple[ClientProxy, FitRes]]],
-        failures: List[Tuple[int, Union[Tuple[ClientProxy, FitRes], BaseException]]],
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        results_cids: List[str],
+        failures_cids: List[str],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
@@ -199,22 +202,17 @@ class FedBuff(Strategy):
         if not self.accept_failures and failures:
             return None, {}
 
-        ## Split off IDs from results and failures
-        success_cids = [res[0] for res in results]
-        results = [res[1] for res in results]
         # How many rounds off each result is
-        staleness = [server_round - self.busy_clients[c] for c in success_cids]
+        staleness = [server_round - self.busy_clients[c] for c in results_cids]
 
         print(
-            f"These clients sent updates: {[(id,age) for id,age in zip(success_cids,staleness)]}"
+            f"These clients sent updates: {[(id,age) for id,age in zip(results_cids,staleness)]}"
         )
-        for c in success_cids:
+        for c in results_cids:
             self.busy_clients.pop(c)
 
-        fail_cids = [fail[0] for fail in failures]
-        failures = [fail[1] for fail in failures]
-        print(f"These clients failed: {fail_cids}")
-        for c in fail_cids:
+        print(f"These clients failed: {failures_cids}")
+        for c in failures_cids:
             self.busy_clients.pop(c)
 
         # Convert results to list of (delta,weight) tuples

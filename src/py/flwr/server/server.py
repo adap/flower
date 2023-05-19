@@ -42,10 +42,6 @@ FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
     List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 ]
-AsyncFitResultsAndFailures = Tuple[
-    List[Tuple[str, Tuple[ClientProxy, FitRes]]],
-    List[Tuple[str, Union[Tuple[ClientProxy, FitRes], BaseException]]],
-]
 EvaluateResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, EvaluateRes]],
     List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
@@ -111,7 +107,7 @@ class Server:
         start_time = timeit.default_timer()
 
         if self.asynchronous:
-            pending_fs = {}
+            pending_fs: Dict[concurrent.futures.Future, str] = {}
             executor = concurrent.futures.ThreadPoolExecutor()
         else:
             pending_fs = None
@@ -125,7 +121,6 @@ class Server:
                 executor=executor,
                 pending_fs=pending_fs,
             )
-            res_fit = self.fit_round(server_round=current_round, timeout=timeout)
             if res_fit is not None:
                 parameters_prime, fit_metrics, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
@@ -163,7 +158,7 @@ class Server:
                         server_round=current_round, metrics=evaluate_metrics_fed
                     )
 
-        if self.asynchronous:
+        if not executor is None:
             executor.shutdown(wait=True)
 
         # Bookkeeping
@@ -226,29 +221,22 @@ class Server:
         server_round: int,
         timeout: Optional[float],
         executor: Optional[concurrent.futures.ThreadPoolExecutor],
-        pending_fs: Optional[Dict[concurrent.futures.Future, str]],
+        pending_fs: Optional[Dict[concurrent.futures.Future, str]],  # type: ignore
     ) -> Optional[
         Tuple[
             Optional[Parameters],
             Dict[str, Scalar],
-            Union[FitResultsAndFailures, AsyncFitResultsAndFailures],
+            FitResultsAndFailures,
         ]
     ]:
         """Perform a single round of federated averaging."""
 
         # Get clients and their respective instructions from strategy
-        if self.asynchronous:
-            buffer_size, client_instructions = self.strategy.configure_fit(
-                server_round=server_round,
-                parameters=self.parameters,
-                client_manager=self._client_manager,
-            )
-        else:
-            client_instructions = self.strategy.configure_fit(
-                server_round=server_round,
-                parameters=self.parameters,
-                client_manager=self._client_manager,
-            )
+        client_instructions = self.strategy.configure_fit(
+            server_round=server_round,
+            parameters=self.parameters,
+            client_manager=self._client_manager,
+        )
 
         if not client_instructions:
             log(INFO, "fit_round %s: no clients selected, cancel", server_round)
@@ -263,13 +251,12 @@ class Server:
 
         # Collect `fit` results from all clients participating in this round
         if self.asynchronous:
-            results, failures = fit_clients_async(
+            results, failures, results_cids, failures_cids = fit_clients_async(
                 client_instructions=client_instructions,
                 max_workers=self.max_workers,
                 timeout=timeout,
                 executor=executor,
                 pending_fs=pending_fs,
-                buffer_size=buffer_size,
             )
         else:
             results, failures = fit_clients(
@@ -277,6 +264,7 @@ class Server:
                 max_workers=self.max_workers,
                 timeout=timeout,
             )
+            results_cids, failures_cids = None, None
         log(
             DEBUG,
             "fit_round %s received %s results and %s failures",
@@ -289,7 +277,13 @@ class Server:
         aggregated_result: Tuple[
             Optional[Parameters],
             Dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(server_round, results, failures)
+        ] = self.strategy.aggregate_fit(
+            server_round,
+            results,
+            failures,
+            results_cids,
+            failures_cids
+        )
 
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
@@ -432,14 +426,20 @@ def fit_clients_async(
     client_instructions: List[Tuple[ClientProxy, FitIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
-    executor: concurrent.futures.ThreadPoolExecutor,
-    pending_fs: Dict[concurrent.futures.Future, str],
-    buffer_size: int,
-) -> AsyncFitResultsAndFailures:
+    executor: Optional[concurrent.futures.ThreadPoolExecutor],
+    pending_fs: Optional[Dict[concurrent.futures.Future, str]],
+) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
 
-    results: List[Tuple[str, Tuple[ClientProxy, FitRes]]] = []
-    failures: List[Tuple[str, Union[Tuple[ClientProxy, FitRes], BaseException]]] = []
+    if executor is None or pending_fs is None:
+        raise ValueError(
+            "Executor or futures cannot be None in asynchronous setting"
+        )
+
+    results: List[Tuple[ClientProxy, FitRes]] = []
+    results_cids: List[str] = []
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
+    failures_cids: List[str] = []
 
     log(
         DEBUG,
@@ -460,11 +460,16 @@ def fit_clients_async(
     for future in finished_fs_it:
         finished_cid = pending_fs[future]
         _handle_finished_future_after_fit_async(
-            future=future, results=results, failures=failures, cid=finished_cid
+            future=future,
+            results=results,
+            results_cids=results_cids,
+            failures=failures,
+            failures_cids=failures_cids,
+            cid=finished_cid,
         )
         print(f"Client finshed: {finished_cid}")
         pending_fs.pop(future)
-        if len(results) >= buffer_size:
+        if len(results) >= int(client_instructions.config["buffer_size"]):
             break
 
     log(
@@ -472,13 +477,15 @@ def fit_clients_async(
         "Received enough responses from clients",
     )
 
-    return results, failures
+    return results, failures, results_cids, failures_cids
 
 
 def _handle_finished_future_after_fit_async(
     future: concurrent.futures.Future,  # type: ignore
-    results: List[Tuple[str, Tuple[ClientProxy, FitRes]]],
-    failures: List[Tuple[str, Union[Tuple[ClientProxy, FitRes], BaseException]]],
+    results: List[Tuple[ClientProxy, FitRes]],
+    results_cids: List[str],
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    failures_cids: List[str],
     cid: str,
 ) -> None:
     """Convert finished future into either a result or a failure."""
@@ -486,7 +493,8 @@ def _handle_finished_future_after_fit_async(
     # Check if there was an exception
     failure = future.exception()
     if failure is not None:
-        failures.append((cid, failure))
+        failures.append(failure)
+        failures_cids.append(cid)
         return
 
     # Successfully received a result from a client
@@ -495,11 +503,13 @@ def _handle_finished_future_after_fit_async(
 
     # Check result status code
     if res.status.code == Code.OK:
-        results.append((cid, result))
+        results.append(result)
+        results_cids.append(cid)
         return
 
     # Not successful, client returned a result where the status code is not OK
-    failures.append((cid, result))
+    failures.append(result)
+    failures_cids.append(cid)
 
 
 def evaluate_clients(
