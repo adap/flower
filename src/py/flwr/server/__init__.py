@@ -15,7 +15,6 @@
 """Flower server."""
 
 
-from . import strategy
 from .app import ServerConfig as ServerConfig
 from .app import run_driver_api as run_driver_api
 from .app import run_fleet_api as run_fleet_api
@@ -25,6 +24,7 @@ from .client_manager import ClientManager as ClientManager
 from .client_manager import SimpleClientManager as SimpleClientManager
 from .history import History as History
 from .server import Server as Server
+from .server import EthServer as EthServer
 
 __all__ = [
     "ClientManager",
@@ -33,8 +33,8 @@ __all__ = [
     "run_fleet_api",
     "run_server",
     "Server",
+    "EthServer",
     "ServerConfig",
     "SimpleClientManager",
     "start_server",
-    "strategy",
 ]

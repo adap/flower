@@ -15,7 +15,6 @@
 """Flower client app."""
 
 
-import sys
 import time
 from logging import INFO
 from typing import Callable, Dict, Optional, Union
@@ -27,8 +26,6 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from flwr.common.address import parse_address
-from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
 from flwr.common.typing import (
     Code,
@@ -52,6 +49,15 @@ from .numpy_client import has_evaluate as numpyclient_has_evaluate
 from .numpy_client import has_fit as numpyclient_has_fit
 from .numpy_client import has_get_parameters as numpyclient_has_get_parameters
 from .numpy_client import has_get_properties as numpyclient_has_get_properties
+from .eth_client import eth_client
+from .eth_client.eth_client import has_get_parameters as ethclient_has_get_parameters
+from .eth_client.eth_client import has_get_parameters as ethclient_has_get_properties
+from .eth_client.eth_client import has_fit as ethclient_has_fit
+from .eth_client.eth_client import has_evaluate as ethclient_has_evaluate
+
+
+
+from .rest_client.connection import http_request_response
 
 EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT = """
 NumPyClient.fit did not return a tuple with 3 elements.
@@ -83,16 +89,16 @@ Example
 ClientLike = Union[Client, NumPyClient]
 
 
-# pylint: disable=import-outside-toplevel,too-many-locals
+# pylint: disable=import-outside-toplevel
 def start_client(
     *,
     server_address: str,
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificates: Optional[Union[bytes, str]] = None,
+    root_certificates: Optional[bytes] = None,
     rest: bool = False,
 ) -> None:
-    """Start a Flower client node which connects to a Flower server.
+    """Start a Flower Client which connects to a gRPC server.
 
     Parameters
     ----------
@@ -110,10 +116,10 @@ def start_client(
         value. Note that the Flower server needs to be started with the
         same value (see `flwr.server.start_server`), otherwise it will not
         know about the increased limit and block larger messages.
-    root_certificates : Optional[Union[bytes, str]] (default: None)
-        The PEM-encoded root certificates as a byte string or a path string.
-        If provided, a secure connection using the certificates will be
-        established to an SSL-enabled Flower server.
+    root_certificates : bytes (default: None)
+        The PEM-encoded root certificates as a byte string. If provided, a secure
+        connection using the certificates will be established to a
+        SSL-enabled Flower server.
     rest : bool (default: False)
         Defines whether or not the client is interacting with the server using the
         experimental REST API. This feature is experimental, it might change
@@ -121,14 +127,14 @@ def start_client(
 
     Examples
     --------
-    Starting a gRPC client with an insecure server connection:
+    Starting a client with insecure server connection:
 
     >>> start_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting an SSL-enabled gRPC client:
+    Starting a SSL-enabled client:
 
     >>> from pathlib import Path
     >>> start_client(
@@ -140,31 +146,22 @@ def start_client(
 
     event(EventType.START_CLIENT_ENTER)
 
-    # Parse IP address
-    parsed_address = parse_address(server_address)
-    if not parsed_address:
-        sys.exit(f"Server address ({server_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-
     # Use either gRPC bidirectional streaming or REST request/response
     if rest:
         try:
             from .rest_client.connection import http_request_response
-        except ModuleNotFoundError:
-            sys.exit(MISSING_EXTRA_REST)
-        if server_address[:4] != "http":
-            sys.exit(
-                "When using the REST API, please provide `https://` or "
-                "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
-            )
+        except ImportError as missing_dep:
+            raise ImportError(
+                "To use the REST API you must install the "
+                "extra dependencies by running `pip install flwr['rest']`."
+            ) from missing_dep
         connection = http_request_response
     else:
         connection = grpc_connection
     while True:
         sleep_duration: int = 0
         with connection(
-            address,
+            server_address,
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
         ) as conn:
@@ -221,9 +218,9 @@ def start_numpy_client(
         same value (see `flwr.server.start_server`), otherwise it will not
         know about the increased limit and block larger messages.
     root_certificates : bytes (default: None)
-        The PEM-encoded root certificates as a byte string or a path string.
-        If provided, a secure connection using the certificates will be
-        established to an SSL-enabled Flower server.
+        The PEM-encoded root certificates a byte string. If provided, a secure
+        connection using the certificates will be established to a
+        SSL-enabled Flower server.
     rest : bool (default: False)
         Defines whether or not the client is interacting with the server using the
         experimental REST API. This feature is experimental, it might be change
@@ -257,6 +254,68 @@ def start_numpy_client(
         rest=rest,
     )
 
+def start_eth_client(
+    *,
+    server_address: str,
+    client: eth_client,
+    grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    root_certificates: Optional[bytes] = None,
+    rest: bool = False,
+) -> None:
+    """Start a Flower EthClient which connects to a gRPC server.
+
+    Parameters
+    ----------
+    server_address : str
+        The IPv4 or IPv6 address of the server. If the Flower server runs on
+        the same machine on port 8080, then `server_address` would be
+        `"[::]:8080"`.
+    client : flwr.client.NumPyClient
+        An implementation of the abstract base class `flwr.client.NumPyClient`.
+    grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
+        The maximum length of gRPC messages that can be exchanged with the
+        Flower server. The default should be sufficient for most models.
+        Users who train very large models might need to increase this
+        value. Note that the Flower server needs to be started with the
+        same value (see `flwr.server.start_server`), otherwise it will not
+        know about the increased limit and block larger messages.
+    root_certificates : bytes (default: None)
+        The PEM-encoded root certificates a byte string. If provided, a secure
+        connection using the certificates will be established to a
+        SSL-enabled Flower server.
+    rest : bool (default: False)
+        Defines whether or not the client is interacting with the server using the
+        experimental REST API. This feature is experimental, it might be change
+        considerably in future versions of Flower.
+
+    Examples
+    --------
+    Starting a client with an insecure server connection:
+
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client=FlowerClient(),
+    >>> )
+
+    Starting a SSL-enabled client:
+
+    >>> from pathlib import Path
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client=FlowerClient(),
+    >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
+    >>> )
+    """
+
+    # Start
+    start_client(
+        server_address=server_address,
+        client=_wrap_eth_client(client=client),
+        grpc_max_message_length=grpc_max_message_length,
+        root_certificates=root_certificates,
+        rest=rest,
+    )
+
 
 def to_client(client_like: ClientLike) -> Client:
     """Take any Client-like object and return it as a Client."""
@@ -265,13 +324,22 @@ def to_client(client_like: ClientLike) -> Client:
     return client_like
 
 
-def _constructor(self: Client, numpy_client: NumPyClient) -> None:
+def _constructor(self: Client, numpy_client) -> None:
     self.numpy_client = numpy_client  # type: ignore
 
+def _eth_constructor(self: Client, eth_client) -> None:
+    self.eth_client = eth_client  # type: ignore
 
 def _get_properties(self: Client, ins: GetPropertiesIns) -> GetPropertiesRes:
     """Return the current client properties."""
     properties = self.numpy_client.get_properties(config=ins.config)  # type: ignore
+    return GetPropertiesRes(
+        status=Status(code=Code.OK, message="Success"),
+        properties=properties,
+    )
+def _eth_get_properties(self: Client, ins: GetPropertiesIns) -> GetPropertiesRes:
+    """Return the current client properties."""
+    properties = self.eth_client.get_properties(ins=ins)  # type: ignore
     return GetPropertiesRes(
         status=Status(code=Code.OK, message="Success"),
         properties=properties,
@@ -281,6 +349,14 @@ def _get_properties(self: Client, ins: GetPropertiesIns) -> GetPropertiesRes:
 def _get_parameters(self: Client, ins: GetParametersIns) -> GetParametersRes:
     """Return the current local model parameters."""
     parameters = self.numpy_client.get_parameters(config=ins.config)  # type: ignore
+    parameters_proto = ndarrays_to_parameters(parameters)
+    return GetParametersRes(
+        status=Status(code=Code.OK, message="Success"), parameters=parameters_proto
+    )
+
+def _eth_get_parameters(self: Client, ins: GetParametersIns) -> GetParametersRes:
+    """Return the current local model parameters."""
+    parameters = self.eth_client.get_parameters(config=ins.config)  # type: ignore
     parameters_proto = ndarrays_to_parameters(parameters)
     return GetParametersRes(
         status=Status(code=Code.OK, message="Success"), parameters=parameters_proto
@@ -312,6 +388,32 @@ def _fit(self: Client, ins: FitIns) -> FitRes:
         num_examples=num_examples,
         metrics=metrics,
     )
+def _eth_fit(self: Client, ins: FitIns) -> FitRes:
+    """Refine the provided parameters using the locally held dataset."""
+
+    # Deconstruct FitIns
+    # parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
+
+    # Train
+    results = self.eth_client.fit(ins.config)  # type: ignore
+
+    if not (
+        len(results) == 3
+        and isinstance(results[0], list)
+        and isinstance(results[1], int)
+        and isinstance(results[2], dict)
+    ):
+        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
+
+    # Return FitRes
+    parameters_prime, num_examples, metrics = results
+    parameters_prime_proto = ndarrays_to_parameters(parameters_prime)
+    return FitRes(
+        status=Status(code=Code.OK, message="Success"),
+        parameters=parameters_prime_proto,
+        num_examples=num_examples,
+        metrics=metrics,
+    )
 
 
 def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
@@ -319,6 +421,27 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
     parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
 
     results = self.numpy_client.evaluate(parameters, ins.config)  # type: ignore
+    if not (
+        len(results) == 3
+        and isinstance(results[0], float)
+        and isinstance(results[1], int)
+        and isinstance(results[2], dict)
+    ):
+        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE)
+
+    # Return EvaluateRes
+    loss, num_examples, metrics = results
+    return EvaluateRes(
+        status=Status(code=Code.OK, message="Success"),
+        loss=loss,
+        num_examples=num_examples,
+        metrics=metrics,
+    )
+def _eth_evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
+    """Evaluate the provided parameters using the locally held dataset."""
+    parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
+
+    results = self.eth_client.evaluate(parameters, ins.config)  # type: ignore
     if not (
         len(results) == 3
         and isinstance(results[0], float)
@@ -362,6 +485,31 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
     # Create and return an instance of the newly created class
     return wrapper_class(numpy_client=client)  # type: ignore
 
+
+def _wrap_eth_client(client: eth_client) -> Client:
+    member_dict: Dict[str, Callable] = {  # type: ignore
+        "__init__": _eth_constructor,
+    }
+
+    # Add wrapper type methods (if overridden)
+
+    if ethclient_has_get_properties(client=client):
+        member_dict["get_properties"] = _eth_get_properties
+
+    if ethclient_has_get_parameters(client=client):
+        member_dict["get_parameters"] = _eth_get_parameters
+
+    if ethclient_has_fit(client=client):
+        member_dict["fit"] = _eth_fit
+
+    if ethclient_has_evaluate(client=client):
+        member_dict["evaluate"] = _eth_evaluate
+
+    # Create wrapper class
+    wrapper_class = type("EthClientWrapper", (Client,), member_dict)
+
+    # Create and return an instance of the newly created class
+    return wrapper_class(eth_client=client)  # type: ignore
 
 def run_client() -> None:
     """Run Flower client."""

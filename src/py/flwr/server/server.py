@@ -20,6 +20,7 @@ import timeit
 from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple, Union
 
+import flwr.common
 from flwr.common import (
     Code,
     DisconnectRes,
@@ -32,12 +33,12 @@ from flwr.common import (
     Scalar,
 )
 from flwr.common.logger import log
-from flwr.common.typing import GetParametersIns
+from flwr.common.typing import (GetParametersIns, GetPropertiesIns)
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import FedAvg, Strategy
-
+from flwr.client.eth_client.eth_client import EthClient
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
     List[Union[Tuple[ClientProxy, FitRes], BaseException]],
@@ -51,10 +52,8 @@ ReconnectResultsAndFailures = Tuple[
     List[Union[Tuple[ClientProxy, DisconnectRes], BaseException]],
 ]
 
-
 class Server:
     """Flower server."""
-
     def __init__(
         self, *, client_manager: ClientManager, strategy: Optional[Strategy] = None
     ) -> None:
@@ -172,7 +171,6 @@ class Server:
             len(client_instructions),
             self._client_manager.num_available(),
         )
-
         # Collect `evaluate` results from all clients participating in this round
         results, failures = evaluate_clients(
             client_instructions,
@@ -194,6 +192,7 @@ class Server:
         ] = self.strategy.aggregate_evaluate(server_round, results, failures)
 
         loss_aggregated, metrics_aggregated = aggregated_result
+        print(loss_aggregated,metrics_aggregated)
         return loss_aggregated, metrics_aggregated, (results, failures)
 
     def fit_round(
@@ -277,6 +276,132 @@ class Server:
         log(INFO, "Received initial parameters from one random client")
         return get_parameters_res.parameters
 
+class EthServer(Server):
+    def __init__(self, client_manager: ClientManager, strategy: Optional[Strategy] = None,
+    ) -> None:
+        super().__init__(client_manager=client_manager, strategy=strategy)
+        self.EthClient = EthClient('11')
+
+    def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
+        """Run federated averaging for a number of rounds."""
+        history = History()
+
+        # Run federated learning for num_rounds
+        log(INFO, "FL starting")
+        start_time = timeit.default_timer()
+
+        for current_round in range(1, num_rounds + 1):
+            # Train model and replace previous global model
+            res_fit = self.fit_round(server_round=current_round, timeout=timeout)
+
+            if res_fit:
+                parameters_prime, fit_metrics, _ = res_fit  # fit_metrics_aggregated
+                self.EthClient.IPFSClient.set_parameters(flwr.common.parameters_to_ndarrays(parameters_prime))
+                model_cid = self.EthClient.IPFSClient.add_model(self.EthClient.IPFSClient.model)
+                tx = self.EthClient.EthBase.saveGlobalmodel(model_cid, current_round + 1)
+                self.EthClient.EthBase.wait_for_tx(tx)
+                if parameters_prime:
+                    self.parameters = parameters_prime
+                history.add_metrics_distributed_fit(
+                    server_round=current_round, metrics=fit_metrics
+                )
+
+            # Evaluate model using strategy implementation
+            res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
+            if res_cen is not None:
+                loss_cen, metrics_cen = res_cen
+                log(
+                    INFO,
+                    "fit progress: (%s, %s, %s, %s)",
+                    current_round,
+                    loss_cen,
+                    metrics_cen,
+                    timeit.default_timer() - start_time,
+                )
+                history.add_loss_centralized(server_round=current_round, loss=loss_cen)
+                history.add_metrics_centralized(
+                    server_round=current_round, metrics=metrics_cen
+                )
+
+            round = self.EthClient.EthBase.currentRound()
+            while round == self.EthClient.EthBase.currentRound():
+                self.EthClient.EthBase.completeEval(round)
+                self.EthClient.skip_round()
+            # Evaluate model on a sample of available clients
+            res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
+            if res_fed:
+                loss_fed, evaluate_metrics_fed, _ = res_fed
+                if loss_fed:
+                    history.add_loss_distributed(
+                        server_round=current_round, loss=loss_fed
+                    )
+                    history.add_metrics_distributed(
+                        server_round=current_round, metrics=evaluate_metrics_fed
+                    )
+
+        # Bookkeeping
+        end_time = timeit.default_timer()
+        elapsed = end_time - start_time
+        log(INFO, "FL finished in %s", elapsed)
+        return history
+    def fit_round(
+        self,
+        server_round: int,
+        timeout: Optional[float],
+    ) -> Optional[
+        Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
+    ]:
+        """Perform a single round of federated averaging."""
+        # Get clients and their respective instructions from strategy
+        client_instructions = self.strategy.configure_fit(
+            server_round=server_round,
+            parameters=self.parameters,
+            client_manager=self._client_manager,
+        )
+
+        if not client_instructions:
+            log(INFO, "fit_round %s: no clients selected, cancel", server_round)
+            return None
+        log(
+            DEBUG,
+            "fit_round %s: strategy sampled %s clients (out of %s)",
+            server_round,
+            len(client_instructions),
+            self._client_manager.num_available(),
+        )
+
+        # Collect `fit` results from all clients participating in this round
+        results, failures = fit_clients(
+            client_instructions=client_instructions,
+            max_workers=self.max_workers,
+            timeout=timeout,
+        )
+        log(
+            DEBUG,
+            "fit_round %s received %s results and %s failures",
+            server_round,
+            len(results),
+            len(failures),
+        )
+        # get model architecture form IPFS
+        if server_round == 1:
+            arch_cid = self.EthClient.EthBase.getModelArchitecture()
+            self.EthClient.IPFSClient.load_architecture(arch_cid)
+        # get model weight from IPFS
+        for c, fit_res in results:
+            tmp = self.EthClient.IPFSClient.get_model(flwr.common.parameters_to_ndarrays(fit_res.parameters)[0].item())
+            fit_res.parameters = flwr.common.ndarrays_to_parameters(
+                [val.cpu().numpy() for _, val in tmp.state_dict().items()])
+
+        # Aggregate training results
+        aggregated_result: Tuple[
+            Optional[Parameters],
+            Dict[str, Scalar],
+        ] = self.strategy.aggregate_fit(server_round, results, failures)
+
+        parameters_aggregated, metrics_aggregated = aggregated_result
+        return parameters_aggregated, metrics_aggregated, (results, failures)
+
 
 def reconnect_clients(
     client_instructions: List[Tuple[ClientProxy, ReconnectIns]],
@@ -335,7 +460,6 @@ def fit_clients(
             fs=submitted_fs,
             timeout=None,  # Handled in the respective communication stack
         )
-
     # Gather results
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
@@ -370,7 +494,6 @@ def _handle_finished_future_after_fit(
     # Successfully received a result from a client
     result: Tuple[ClientProxy, FitRes] = future.result()
     _, res = result
-
     # Check result status code
     if res.status.code == Code.OK:
         results.append(result)
