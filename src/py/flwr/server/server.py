@@ -298,9 +298,7 @@ class Server:
 
             # Aggregate training results
             aggregated_result = self.strategy.aggregate_fit(
-                server_round,
-                results,
-                failures
+                server_round, results, failures
             )
 
         parameters_aggregated, metrics_aggregated = aggregated_result
