@@ -79,7 +79,7 @@ Example
 
 """
 
-TRANSPORT_TYPES = ["grpc-bidi", "grpc-rere", "rest"]
+TRANSPORT_TYPES = ["grpc-bidi", "rest"]
 
 
 ClientLike = Union[Client, NumPyClient]
