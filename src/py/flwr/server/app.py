@@ -30,7 +30,11 @@ import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
-from flwr.common.constant import MISSING_EXTRA_REST
+from flwr.common.constant import (
+    MISSING_EXTRA_REST,
+    TRANSPORT_TYPE_GRPC_BIDI,
+    TRANSPORT_TYPE_REST,
+)
 from flwr.common.logger import log
 from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
 from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
@@ -275,7 +279,7 @@ def run_fleet_api() -> None:
     bckg_threads = []
 
     # Start Fleet API
-    if args.fleet_api_type == "rest":
+    if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
             importlib.util.find_spec("fastapi")
             and importlib.util.find_spec("requests")
@@ -301,7 +305,7 @@ def run_fleet_api() -> None:
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
-    elif args.fleet_api_type == "grpc":
+    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_BIDI:
         address_arg = args.grpc_fleet_api_address
         parsed_address = parse_address(address_arg)
         if not parsed_address:
@@ -357,7 +361,7 @@ def run_server() -> None:
     bckg_threads = []
 
     # Start Fleet API
-    if args.fleet_api_type == "rest":
+    if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
             importlib.util.find_spec("fastapi")
             and importlib.util.find_spec("requests")
@@ -383,7 +387,7 @@ def run_server() -> None:
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
-    elif args.fleet_api_type == "grpc":
+    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_BIDI:
         address_arg = args.grpc_fleet_api_address
         parsed_address = parse_address(address_arg)
         if not parsed_address:
@@ -651,8 +655,7 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
 def _add_args_driver_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--driver-api-address",
-        help="The Driver API gRPC server address, which can be an IPv4, "
-        "IPv6, or a domain name.",
+        help="Driver API (gRPC) server address (IPv4, IPv6, or a domain name)",
         default=ADDRESS_DRIVER_API,
     )
 
@@ -661,48 +664,47 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     # Fleet API transport layer type
     ex_group = parser.add_mutually_exclusive_group()
     ex_group.add_argument(
-        "--grpc",
+        "--grpc-bidi",
         action="store_const",
         dest="fleet_api_type",
-        const="grpc",
-        default="grpc",
-        help="Start a gRPC-based Fleet API server "
-        "(which is the default if no argument is provided).",
+        const=TRANSPORT_TYPE_GRPC_BIDI,
+        default=TRANSPORT_TYPE_GRPC_BIDI,
+        help="Start a Fleet API server (gRPC-bidi)",
     )
     ex_group.add_argument(
         "--rest",
         action="store_const",
         dest="fleet_api_type",
-        const="rest",
-        help="Start a REST-based Fleet API server",
+        const=TRANSPORT_TYPE_REST,
+        help="Start a Fleet API server (REST, experimental)",
     )
 
-    # Fleet API gRPC options
-    grpc_group = parser.add_argument_group("Fleet API gRPC server options", "")
-    grpc_group.add_argument(
-        "--grpc-fleet-api-address",
-        help="The Fleet API gRPC server address, which can be an IPv4, "
-        "IPv6, or a domain name.",
+    # Fleet API gRPC-bidi options
+    grpc_bidi_group = parser.add_argument_group(
+        "Fleet API (gRPC-bidi) server options", ""
+    )
+    grpc_bidi_group.add_argument(
+        "--grpc-bidi-fleet-api-address",
+        help="Fleet API (gRPC-bidi) server address (IPv4, IPv6, or a domain name)",
         default=ADDRESS_FLEET_API_GRPC_RERE,
     )
 
     # Fleet API REST options
-    rest_group = parser.add_argument_group("Fleet API REST server options", "")
+    rest_group = parser.add_argument_group("Fleet API (REST) server options", "")
     rest_group.add_argument(
         "--rest-fleet-api-address",
-        help="The Fleet API REST server address, which can be an IPv4, "
-        "IPv6, or a domain name.",
+        help="Fleet API (REST) server address (IPv4, IPv6, or a domain name)",
         default=ADDRESS_FLEET_API_REST,
     )
     rest_group.add_argument(
         "--ssl-certfile",
-        help="Fleet API REST server SSL certificate file (as a path str), "
+        help="Fleet API (REST) server SSL certificate file (as a path str), "
         "needed for using 'https'.",
         default=None,
     )
     rest_group.add_argument(
         "--ssl-keyfile",
-        help="Fleet API REST server SSL private key file (as a path str), "
+        help="Fleet API (REST) server SSL private key file (as a path str), "
         "needed for using 'https'.",
         default=None,
     )
