@@ -65,4 +65,3 @@ class AsyncStrategy(Strategy, ABC):
             parameters, the updates received in this round are discarded, and
             the global model parameters remain the same.
         """
-
