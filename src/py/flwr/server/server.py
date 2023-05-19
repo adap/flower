@@ -36,7 +36,7 @@ from flwr.common.typing import GetParametersIns
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
-from flwr.server.strategy import FedAvg, Strategy
+from flwr.server.strategy import AsyncStrategy, FedAvg, FedBuff, Strategy
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -73,6 +73,7 @@ class Server:
             tensors=[], tensor_type="numpy.ndarray"
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
+        self.async_strategy: Optional[AsyncStrategy] = FedBuff() if asynchronous else None
         self.max_workers: Optional[int] = None
         self.asynchronous = asynchronous
 
@@ -272,16 +273,10 @@ class Server:
                 len(results),
                 len(failures),
             )
-
-            if not callable(getattr(self.strategy, "async_aggregate_fit", None)):
-                raise NotImplementedError(
-                    "Selected strategy has no async aggregation function."
-                )
-            else:
-                # Aggregate training results
-                aggregated_result = self.strategy.async_aggregate_fit(
-                    server_round, results, failures, results_cids, failures_cids
-                )
+            # Aggregate training results
+            aggregated_result = self.async_strategy.async_aggregate_fit(
+                server_round, results, failures, results_cids, failures_cids
+            )
         else:
             results, failures = fit_clients(
                 client_instructions=client_instructions,
