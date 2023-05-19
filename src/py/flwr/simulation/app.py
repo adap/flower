@@ -104,7 +104,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
         instance is provided, then `start_server` will create one.
     config: ServerConfig (default: None).
         Currently supported values are `num_rounds` (int, default: 1) and
-        `round_timeout` in seconds (float, default: None).
+        `round_timeout` in seconds (float, default: None) and `asynchronous`
+        (bool, default: False).
     strategy : Optional[flwr.server.Strategy] (default: None)
         An implementation of the abstract base class `flwr.server.Strategy`. If
         no strategy is provided, then `start_server` will use

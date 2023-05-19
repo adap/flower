@@ -49,7 +49,7 @@ from flwr.server.fleet.grpc_bidi.grpc_server import (
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.state import StateFactory
-from flwr.server.strategy import FedAvg, Strategy
+from flwr.server.strategy import FedAvg, FedBuff, Strategy
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
@@ -69,6 +69,7 @@ class ServerConfig:
 
     num_rounds: int = 1
     round_timeout: Optional[float] = None
+    asynchronous: bool = False
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -92,8 +93,9 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
         thereof. If no instance is provided, then `start_server` will create
         one.
     config : Optional[ServerConfig] (default: None)
-        Currently supported values are `num_rounds` (int, default: 1) and
-        `round_timeout` in seconds (float, default: None).
+        Currently supported values are `num_rounds` (int, default: 1),
+        `round_timeout` in seconds (float, default: None) and `asynchronous`
+        (bool, default: False).
     strategy : Optional[flwr.server.Strategy] (default: None).
         An implementation of the abstract base class
         `flwr.server.strategy.Strategy`. If no strategy is provided, then
@@ -197,18 +199,32 @@ def init_defaults(
     client_manager: Optional[ClientManager],
 ) -> Tuple[Server, ServerConfig]:
     """Create server instance if none was given."""
+    
+    # Set default config values
+    if config is None:
+        config = ServerConfig()
+
     if server is None:
         if client_manager is None:
             client_manager = SimpleClientManager()
         if strategy is None:
-            strategy = FedAvg()
-        server = Server(client_manager=client_manager, strategy=strategy)
+            if config.asynchronous:
+                strategy = FedBuff()
+            else:
+                strategy = FedAvg()
+        server = Server(
+            client_manager=client_manager,
+            strategy=strategy,
+            asynchronous=config.asynchronous,
+        )
     elif strategy is not None:
         log(WARN, "Both server and strategy were provided, ignoring strategy")
-
-    # Set default config values
-    if config is None:
-        config = ServerConfig()
+    
+    if config.asynchronous != server.asynchronous:
+        log(
+            WARN,
+            "Config and server disagree on whether server should be asynchronous, ignoring config",
+        )
 
     return server, config
 

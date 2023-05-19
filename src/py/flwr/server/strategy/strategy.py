@@ -47,7 +47,9 @@ class Strategy(ABC):
     @abstractmethod
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, FitIns]]:
+    ) -> Union[
+        Tuple[int, List[Tuple[ClientProxy, FitIns]]], List[Tuple[ClientProxy, FitIns]]
+    ]:
         """Configure the next round of training.
 
         Parameters
@@ -72,8 +74,8 @@ class Strategy(ABC):
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        results: Union[List[Tuple[ClientProxy, FitRes]], List[Tuple[int, Tuple[ClientProxy, FitRes]]]],
+        failures: Union[List[Union[Tuple[ClientProxy, FitRes], BaseException]], List[Tuple[int, Union[Tuple[ClientProxy, FitRes], BaseException]]]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results.
 
