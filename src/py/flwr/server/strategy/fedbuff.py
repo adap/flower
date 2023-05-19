@@ -192,6 +192,15 @@ class FedBuff(Strategy):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        """Aggregate fit results using weighted average."""
+        return None, {}
+
+    def async_aggregate_fit(
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
         results_cids: List[str],
         failures_cids: List[str],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:

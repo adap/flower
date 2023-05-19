@@ -42,6 +42,12 @@ FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
     List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 ]
+AsyncFitResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, FitRes]],
+    List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    List[str],
+    List[str],
+]
 EvaluateResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, EvaluateRes]],
     List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
@@ -106,8 +112,9 @@ class Server:
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
 
+        pending_fs: Optional[Dict[concurrent.futures.Future, str]]  # type: ignore
         if self.asynchronous:
-            pending_fs: Dict[concurrent.futures.Future, str] = {}
+            pending_fs = {}
             executor = concurrent.futures.ThreadPoolExecutor()
         else:
             pending_fs = None
@@ -258,28 +265,47 @@ class Server:
                 executor=executor,
                 pending_fs=pending_fs,
             )
+            log(
+                DEBUG,
+                "fit_round %s received %s results and %s failures",
+                server_round,
+                len(results),
+                len(failures),
+            )
+
+            if not callable(getattr(self.strategy, "async_aggregate_fit", None)):
+                raise NotImplementedError(
+                    "Selected strategy has no async aggregation function."
+                )
+            else:
+                # Aggregate training results
+                aggregated_result: Tuple[
+                    Optional[Parameters],
+                    Dict[str, Scalar],
+                ] = self.strategy.async_aggregate_fit(
+                    server_round, results, failures, results_cids, failures_cids
+                )
         else:
             results, failures = fit_clients(
                 client_instructions=client_instructions,
                 max_workers=self.max_workers,
                 timeout=timeout,
             )
-            results_cids, failures_cids = None, None
-        log(
-            DEBUG,
-            "fit_round %s received %s results and %s failures",
-            server_round,
-            len(results),
-            len(failures),
-        )
-
-        # Aggregate training results
-        aggregated_result: Tuple[
-            Optional[Parameters],
-            Dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(
-            server_round, results, failures, results_cids, failures_cids
-        )
+            log(
+                DEBUG,
+                "fit_round %s received %s results and %s failures",
+                server_round,
+                len(results),
+                len(failures),
+            )
+            
+            # Aggregate training results
+            aggregated_result: Tuple[
+                Optional[Parameters],
+                Dict[str, Scalar],
+            ] = self.strategy.aggregate_fit(
+                server_round, results, failures
+            )
 
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
@@ -423,8 +449,8 @@ def fit_clients_async(
     max_workers: Optional[int],
     timeout: Optional[float],
     executor: Optional[concurrent.futures.ThreadPoolExecutor],
-    pending_fs: Optional[Dict[concurrent.futures.Future, str]],
-) -> FitResultsAndFailures:
+    pending_fs: Optional[Dict[concurrent.futures.Future, str]],  # type: ignore
+) -> AsyncFitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
 
     if executor is None or pending_fs is None:
@@ -463,7 +489,7 @@ def fit_clients_async(
         )
         print(f"Client finshed: {finished_cid}")
         pending_fs.pop(future)
-        if len(results) >= int(client_instructions.config["buffer_size"]):
+        if len(results) >= int(client_instructions[0][0].config["buffer_size"]):
             break
 
     log(

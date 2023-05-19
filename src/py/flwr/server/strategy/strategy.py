@@ -47,9 +47,7 @@ class Strategy(ABC):
     @abstractmethod
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> Union[
-        Tuple[int, List[Tuple[ClientProxy, FitIns]]], List[Tuple[ClientProxy, FitIns]]
-    ]:
+    ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training.
 
         Parameters
@@ -76,8 +74,6 @@ class Strategy(ABC):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-        results_cids: Optional[List[str]] = None,
-        failures_cids: Optional[List[str]] = None,
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results.
 
@@ -96,12 +92,6 @@ class Strategy(ABC):
         failures : List[Union[Tuple[ClientProxy, FitRes], BaseException]]
             Exceptions that occurred while the server was waiting for client
             updates.
-        results_cids : Optional[List[str]]
-            List of the cids of the clients that successfully returned results,
-            used for asynchronous FL. None by default.
-        failures_cids : Optional[List[str]]
-            List of the cids of the clients that failed to return results,
-            used for asynchronous FL. None by default.
 
         Returns
         -------
