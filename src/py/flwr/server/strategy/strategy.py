@@ -74,8 +74,14 @@ class Strategy(ABC):
     def aggregate_fit(
         self,
         server_round: int,
-        results: Union[List[Tuple[ClientProxy, FitRes]], List[Tuple[int, Tuple[ClientProxy, FitRes]]]],
-        failures: Union[List[Union[Tuple[ClientProxy, FitRes], BaseException]], List[Tuple[int, Union[Tuple[ClientProxy, FitRes], BaseException]]]],
+        results: Union[
+            List[Tuple[ClientProxy, FitRes]],
+            List[Tuple[int, Tuple[ClientProxy, FitRes]]],
+        ],
+        failures: Union[
+            List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+            List[Tuple[int, Union[Tuple[ClientProxy, FitRes], BaseException]]],
+        ],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results.
 

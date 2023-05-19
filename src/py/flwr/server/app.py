@@ -199,7 +199,7 @@ def init_defaults(
     client_manager: Optional[ClientManager],
 ) -> Tuple[Server, ServerConfig]:
     """Create server instance if none was given."""
-    
+
     # Set default config values
     if config is None:
         config = ServerConfig()
@@ -219,7 +219,7 @@ def init_defaults(
         )
     elif strategy is not None:
         log(WARN, "Both server and strategy were provided, ignoring strategy")
-    
+
     if config.asynchronous != server.asynchronous:
         log(
             WARN,
