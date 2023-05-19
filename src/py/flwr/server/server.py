@@ -278,11 +278,7 @@ class Server:
             Optional[Parameters],
             Dict[str, Scalar],
         ] = self.strategy.aggregate_fit(
-            server_round,
-            results,
-            failures,
-            results_cids,
-            failures_cids
+            server_round, results, failures, results_cids, failures_cids
         )
 
         parameters_aggregated, metrics_aggregated = aggregated_result
@@ -432,9 +428,7 @@ def fit_clients_async(
     """Refine parameters concurrently on all selected clients."""
 
     if executor is None or pending_fs is None:
-        raise ValueError(
-            "Executor or futures cannot be None in asynchronous setting"
-        )
+        raise ValueError("Executor or futures cannot be None in asynchronous setting")
 
     results: List[Tuple[ClientProxy, FitRes]] = []
     results_cids: List[str] = []
