@@ -58,7 +58,7 @@ protobuf = "^3.19.0"
 importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
 iterators = "^0.0.2"
 # Optional dependencies (VCE)
-ray = { version = "^2.3.0", extras = ["default"], optional = true }
+ray = { version = "^2.4.0", extras = ["default"], optional = true }
 # Optional dependencies (REST transport layer)
 requests = { version = "^2.28.2", optional = true }
 fastapi = { version = "^0.95.0", optional = true }
@@ -73,8 +73,8 @@ rest = ["fastapi", "requests", "starlette", "uvicorn"]
 types-dataclasses = "==0.6.6"
 types-protobuf = "==3.19.18"
 types-requests = "==2.28.11.17"
-types-setuptools = "==57.4.14"
-clang-format = "==15.0.6"
+types-setuptools = "==67.7.0.1"
+clang-format = "==16.0.3"
 isort = "==5.11.5"
 black = "==23.1.0"
 docformatter = "==1.5.1"
@@ -86,14 +86,14 @@ pytest-cov = "==3.0.0"
 pytest-watch = "==4.2.0"
 grpcio-tools = "==1.48.2"
 mypy-protobuf = "==3.2.0"
-jupyterlab = "==3.5.3"
-rope = "==0.19.0"
+jupyterlab = "==3.6.3"
+rope = "==1.8.0"
 semver = "==2.13.0"
 sphinx = "==5.3.0"
-myst-parser = "==0.18.1"
+myst-parser = "==1.0.0"
 sphinx-design = "==0.3.0"
 sphinx-copybutton = "==0.5.1"
-sphinxcontrib-mermaid = "==0.7.1"
+sphinxcontrib-mermaid = "==0.8.1"
 furo = "==2022.12.7"
 sphinx-reredirects = "==0.1.1"
 nbsphinx = "==0.8.12"

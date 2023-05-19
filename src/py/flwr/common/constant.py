@@ -22,3 +22,10 @@ To use the REST API, install `flwr` with the `rest` extra:
 
     `pip install flwr[rest]`.
 """
+
+TRANSPORT_TYPE_GRPC_BIDI = "grpc-bido"
+TRANSPORT_TYPE_REST = "rest"
+TRANSPORT_TYPES = [
+    TRANSPORT_TYPE_GRPC_BIDI,
+    TRANSPORT_TYPE_REST,
+]

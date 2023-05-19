@@ -16,20 +16,10 @@
 
 
 import sys
-from logging import INFO
-from typing import List, Optional
-from uuid import UUID
 
 from flwr.common.constant import MISSING_EXTRA_REST
-from flwr.common.logger import log
-from flwr.proto.fleet_pb2 import (
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
-    Reconnect,
-)
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.fleet_pb2 import PullTaskInsRequest, PushTaskResRequest
+from flwr.server.fleet.message_handler import message_handler
 from flwr.server.state import State
 
 try:
@@ -57,20 +47,14 @@ async def pull_task_ins(request: Request) -> Response:
     # Get state from app
     state: State = app.state.STATE_FACTORY.state()
 
-    # Retrieve TaskIns from State
-    node = pull_task_ins_request_proto.node  # pylint: disable=no-member
-    node_id: Optional[int] = None if node.anonymous else node.node_id
-    task_ins_list: List[TaskIns] = state.get_task_ins(node_id=node_id, limit=1)
-    pull_task_ins_response_proto = PullTaskInsResponse(task_ins_list=task_ins_list)
+    # Handle message
+    pull_task_ins_response_proto = message_handler.pull_task_ins(
+        request=pull_task_ins_request_proto,
+        state=state,
+    )
 
     # Return serialized ProtoBuf
     pull_task_ins_response_bytes = pull_task_ins_response_proto.SerializeToString()
-
-    log(
-        INFO,
-        "POST - Returning PullTaskInsResponse %s",
-        [ins.task_id for ins in task_ins_list],
-    )
     return Response(
         status_code=200,
         content=pull_task_ins_response_bytes,
@@ -93,28 +77,14 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
     # Get state from app
     state: State = app.state.STATE_FACTORY.state()
 
-    # Store TaskRes in State
-
-    # pylint: disable=no-member
-    task_res: TaskRes = push_task_res_request_proto.task_res_list[0]
-    # pylint: enable=no-member
-
-    task_id: Optional[UUID] = state.store_task_res(task_res=task_res)
-
-    # Build response
-    push_task_res_response_proto = PushTaskResResponse(
-        reconnect=Reconnect(reconnect=5),
-        results={str(task_id): 0},
+    # Handle message
+    push_task_res_response_proto = message_handler.push_task_res(
+        request=push_task_res_request_proto,
+        state=state,
     )
 
     # Return serialized ProtoBuf
     push_task_res_response_bytes = push_task_res_response_proto.SerializeToString()
-
-    log(
-        INFO,
-        "POST - Returning PushTaskResResponse %s",
-        push_task_res_response_proto,
-    )
     return Response(
         status_code=200,
         content=push_task_res_response_bytes,

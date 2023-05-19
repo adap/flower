@@ -65,7 +65,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    :maxdepth: 1
    :caption: How-to guides
 
-   installation
+   install-flower
    configure-clients
    strategies
    implementing-strategies
