@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/
 
 # run the first command in background and save output to a temporary file:
 timeout 2m python server.py &
