@@ -28,20 +28,20 @@ jobs:
           poetry config virtualenvs.create false
       - name: Install dependencies
         run: |
-          cd tests/pytorch
+          cd e2e/pytorch
           python -m poetry install
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
-          path: "./tests/pytorch/data"
+          path: "./e2e/pytorch/data"
           key: pytorch-datasets
       - name: Download Datasets
         run: |
-          cd tests/pytorch
+          cd e2e/pytorch
           python -c "from torchvision.datasets import CIFAR10; CIFAR10('./data', download=True)"
       - name: Run tests
         run: |
-          cd tests/pytorch
+          cd e2e/pytorch
           ./test.sh
 
   tensorflow:
@@ -60,7 +60,7 @@ jobs:
           poetry config virtualenvs.create false
       - name: Install dependencies
         run: |
-          cd tests/tensorflow
+          cd e2e/tensorflow
           python -m poetry install
       - name: Cache Datasets
         uses: actions/cache@v2
@@ -72,7 +72,7 @@ jobs:
           python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
       - name: Run tests
         run: |
-          cd tests/tensorflow
+          cd e2e/tensorflow
           ./test.sh
 
 
@@ -92,10 +92,10 @@ jobs:
           poetry config virtualenvs.create false
       - name: Install dependencies
         run: |
-          cd tests/bare
+          cd e2e/bare
           python -m poetry install
       - name: Run tests
         run: |
-          cd tests/bare
+          cd e2e/bare
           ./test.sh
 
