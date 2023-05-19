@@ -226,7 +226,7 @@ class FedBuff(Strategy):
             self.busy_clients.pop(c)
 
         # Convert results to list of (delta,weight) tuples
-        deltas_results = [
+        deltas_results: List[Tuple[NDArrays, int]] = [
             (
                 # Need to do each layer separately as may be different sizes
                 [
