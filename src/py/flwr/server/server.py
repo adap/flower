@@ -255,7 +255,7 @@ class Server:
             len(client_instructions),
             self._client_manager.num_available(),
         )
-
+        aggregated_result: Tuple[Optional[Parameters], Dict[str, Scalar]]
         # Collect `fit` results from all clients participating in this round
         if self.asynchronous:
             results, failures, results_cids, failures_cids = fit_clients_async(
@@ -279,10 +279,7 @@ class Server:
                 )
             else:
                 # Aggregate training results
-                aggregated_result: Tuple[
-                    Optional[Parameters],
-                    Dict[str, Scalar],
-                ] = self.strategy.async_aggregate_fit(
+                aggregated_result = self.strategy.async_aggregate_fit(
                     server_round, results, failures, results_cids, failures_cids
                 )
         else:
@@ -300,10 +297,11 @@ class Server:
             )
 
             # Aggregate training results
-            aggregated_result: Tuple[
-                Optional[Parameters],
-                Dict[str, Scalar],
-            ] = self.strategy.aggregate_fit(server_round, results, failures)
+            aggregated_result = self.strategy.aggregate_fit(
+                server_round,
+                results,
+                failures
+            )
 
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
@@ -487,7 +485,7 @@ def fit_clients_async(
         )
         print(f"Client finshed: {finished_cid}")
         pending_fs.pop(future)
-        if len(results) >= int(client_instructions[0][0].config["buffer_size"]):
+        if len(results) >= int(client_instructions[0][1].config["buffer_size"]):
             break
 
     log(

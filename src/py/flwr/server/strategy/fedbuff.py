@@ -61,7 +61,7 @@ class FedBuff(Strategy):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         concurrency: int = 3,
         buffer_size: int = 2,
-        staleness_fn: Optional[Callable[[int], float]] = None,
+        staleness_fn: Optional[Callable[[int], int]] = None,
     ) -> None:
         """Federated Buffering asynchronous aggregation strategy.
         NOTE: requires server to be in asynchronous mode
@@ -97,9 +97,10 @@ class FedBuff(Strategy):
 
         self.concurrency = concurrency
         self.buffer_size = buffer_size
+        self.staleness_fn: Callable[[int], int]
 
         if staleness_fn is None:
-            self.staleness_fn = lambda x: 1.0
+            self.staleness_fn = lambda x: 1
         else:
             self.staleness_fn = staleness_fn
 
