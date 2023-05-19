@@ -260,7 +260,7 @@ class Server:
         )
         aggregated_result: Tuple[Optional[Parameters], Dict[str, Scalar]]
         # Collect `fit` results from all clients participating in this round
-        if self.asynchronous:
+        if self.async_strategy:
             results, failures, results_cids, failures_cids = fit_clients_async(
                 client_instructions=client_instructions,
                 max_workers=self.max_workers,
