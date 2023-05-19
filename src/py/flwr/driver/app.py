@@ -69,9 +69,9 @@ def start_driver(  # pylint: disable=too-many-arguments
         `start_server` will use `flwr.server.strategy.FedAvg`.
     client_manager : Optional[flwr.driver.DriverClientManager] (default: None)
         An implementation of the class
-        `flwr.server.DriverClientManager`. If no implementation is provided, then
-        `start_driver` will use
-        `flwr.server.client_manager.DriverClientManager(anonymous=False)`.
+        `flwr.driver.driver_client_manager.DriverClientManager`. If no
+        implementation is provided, then `start_driver` will use
+        `flwr.driver.driver_client_manager.DriverClientManager`.
     certificates : bytes (default: None)
         Tuple containing root certificate, server certificate, and private key
         to start a secure SSL-enabled server. The tuple is expected to have
@@ -88,11 +88,11 @@ def start_driver(  # pylint: disable=too-many-arguments
 
     Examples
     --------
-    Starting an insecure server:
+    Starting a driver that connects to an insecure server:
 
     >>> start_driver()
 
-    Starting an SSL-enabled server:
+    Starting a driver that connects to an SSL-enabled server:
 
     >>> start_driver(
     >>>     certificates=Path("/crts/root.pem").read_bytes()
