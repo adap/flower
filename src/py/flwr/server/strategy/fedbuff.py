@@ -223,7 +223,7 @@ class FedBuff(AsyncStrategy):
         print(f"These clients failed: {failures_cids}")
         for cid in failures_cids:
             self.busy_clients.pop(cid)
-        
+
         if self.current_params_ndarray is None:
             raise ValueError("Current parameters NDArray is None")
 
