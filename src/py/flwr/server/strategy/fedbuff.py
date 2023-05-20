@@ -94,7 +94,7 @@ class FedBuff(AsyncStrategy):
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
-        self.current_params_ndarray = None
+        self.current_params_ndarray: Optional[NDArrays] = None
 
         self.concurrency = concurrency
         self.buffer_size = buffer_size
@@ -114,7 +114,7 @@ class FedBuff(AsyncStrategy):
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Return the sample size and the required number of available
         clients."""
-        _ = num_additional_clients
+        _ = num_available_clients
         num_additional_clients = self.concurrency - len(self.busy_clients)
         return num_additional_clients, num_additional_clients
 
@@ -223,6 +223,9 @@ class FedBuff(AsyncStrategy):
         print(f"These clients failed: {failures_cids}")
         for cid in failures_cids:
             self.busy_clients.pop(cid)
+        
+        if self.current_params_ndarray is None:
+            raise ValueError("Current parameters NDArray is None")
 
         # Convert results to list of (delta,weight) tuples
         deltas_results: List[Tuple[NDArrays, int]] = [
@@ -250,8 +253,6 @@ class FedBuff(AsyncStrategy):
             )
         ]
 
-        if self.current_params_ndarray is None:
-            raise ValueError("Current params ndarray is None")
         parameters_aggregated = ndarrays_to_parameters(self.current_params_ndarray)
 
         # Aggregate custom metrics if aggregation fn was provided
