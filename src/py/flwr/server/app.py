@@ -223,7 +223,8 @@ def init_defaults(
     if config.asynchronous != server.asynchronous:
         log(
             WARN,
-            "Config and server disagree on whether server should be asynchronous, ignoring config",
+            "Config and server disagree on whether "
+            "server should be asynchronous, ignoring config",
         )
 
     return server, config

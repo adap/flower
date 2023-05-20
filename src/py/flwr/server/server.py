@@ -169,7 +169,7 @@ class Server:
                         server_round=current_round, metrics=evaluate_metrics_fed
                     )
 
-        if not executor is None:
+        if executor is not None:
             executor.shutdown(wait=True)
 
         # Bookkeeping
