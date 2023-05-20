@@ -37,8 +37,8 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-from flwr.server.strategy import AsyncStrategy
 from flwr.server.strategy.aggregate import aggregate
+from flwr.server.strategy.async_strategy import AsyncStrategy
 
 
 # flake8: noqa: E501
