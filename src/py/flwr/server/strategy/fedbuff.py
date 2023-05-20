@@ -250,6 +250,8 @@ class FedBuff(AsyncStrategy):
             )
         ]
 
+        if self.current_params_ndarray is None:
+            raise ValueError("Current params ndarray is None")
         parameters_aggregated = ndarrays_to_parameters(self.current_params_ndarray)
 
         # Aggregate custom metrics if aggregation fn was provided
