@@ -444,6 +444,8 @@ def fit_clients_async(
 ) -> AsyncFitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
 
+    _ = max_workers
+
     if executor is None or pending_fs is None:
         raise ValueError("Executor or futures cannot be None in asynchronous setting")
 
@@ -491,7 +493,7 @@ def fit_clients_async(
     return results, failures, results_cids, failures_cids
 
 
-def _handle_finished_future_after_fit_async(
+def _handle_finished_future_after_fit_async(  # pylint: disable=too-many-arguments
     future: concurrent.futures.Future,  # type: ignore
     results: List[Tuple[ClientProxy, FitRes]],
     results_cids: List[str],

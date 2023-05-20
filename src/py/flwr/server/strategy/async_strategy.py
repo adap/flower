@@ -19,7 +19,6 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import FitRes, Parameters, Scalar
-from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
 
@@ -28,7 +27,7 @@ class AsyncStrategy(Strategy, ABC):
     """Abstract base class for async server strategy implementations."""
 
     @abstractmethod
-    def async_aggregate_fit(
+    def async_aggregate_fit(  # pylint: disable=too-many-arguments
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],

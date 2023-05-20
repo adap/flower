@@ -38,7 +38,7 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
 from flwr.server.strategy import AsyncStrategy
-from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
+from flwr.server.strategy.aggregate import aggregate
 
 
 # flake8: noqa: E501
@@ -94,6 +94,7 @@ class FedBuff(AsyncStrategy):
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
+        self.current_params_ndarray = None
 
         self.concurrency = concurrency
         self.buffer_size = buffer_size
@@ -113,6 +114,7 @@ class FedBuff(AsyncStrategy):
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Return the sample size and the required number of available
         clients."""
+        _ = num_additional_clients
         num_additional_clients = self.concurrency - len(self.busy_clients)
         return num_additional_clients, num_additional_clients
 
@@ -166,8 +168,7 @@ class FedBuff(AsyncStrategy):
             """Criterion to select only non busy clients."""
 
             def select(self, client: ClientProxy) -> bool:
-                is_not_busy = True if client.cid not in occupied_clients else False
-                return is_not_busy
+                return client.cid not in occupied_clients
 
         clients = client_manager.sample(
             num_clients=sample_size,
@@ -216,14 +217,14 @@ class FedBuff(AsyncStrategy):
         staleness = [server_round - self.busy_clients[c] for c in results_cids]
 
         print(
-            f"These clients sent updates: {[(id,age) for id,age in zip(results_cids,staleness)]}"
+            f"These clients sent updates: {list(zip(results_cids,staleness))}"
         )
-        for c in results_cids:
-            self.busy_clients.pop(c)
+        for cid in results_cids:
+            self.busy_clients.pop(cid)
 
         print(f"These clients failed: {failures_cids}")
-        for c in failures_cids:
-            self.busy_clients.pop(c)
+        for cid in failures_cids:
+            self.busy_clients.pop(cid)
 
         # Convert results to list of (delta,weight) tuples
         deltas_results: List[Tuple[NDArrays, int]] = [
