@@ -216,9 +216,7 @@ class FedBuff(AsyncStrategy):
         # How many rounds off each result is
         staleness = [server_round - self.busy_clients[c] for c in results_cids]
 
-        print(
-            f"These clients sent updates: {list(zip(results_cids,staleness))}"
-        )
+        print(f"These clients sent updates: {list(zip(results_cids,staleness))}")
         for cid in results_cids:
             self.busy_clients.pop(cid)
 
