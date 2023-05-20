@@ -36,7 +36,8 @@ from flwr.common.typing import GetParametersIns
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
-from flwr.server.strategy import AsyncStrategy, FedAvg, FedBuff, Strategy
+from flwr.server.strategy import FedAvg, FedBuff, Strategy
+from flwr.server.strategy.async_strategy import AsyncStrategy
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
