@@ -102,6 +102,7 @@ def aggregate_bulyan(
     # Create a list of weights and ignore the number of examples
     weights = [weights for weights, _ in results]
     print(f"weights: {len(weights)}")
+    print(weights)
 
     theta = len(weights) - 2*num_malicious
     if theta <= 0:
@@ -113,27 +114,36 @@ def aggregate_bulyan(
     print("beta: ", beta)
     
     for _ in range(theta):
-        idx = aggregate_krum(
+        best_model = aggregate_krum(
             results, 
             num_malicious,
             to_keep=1
         )
 
-        # weights_results is ordered according to "cid"
-        S[tracker[idx]] = results[idx]
+        best_idx = None
+        for i, w in enumerate(weights):
+            if list(w[0]) == list(best_model[0]):
+                best_idx = i
+                break
+        print("best_idx ", best_idx)
+        S[tracker[best_idx]] = results[best_idx]
 
         # remove idx from tracker and weights_results
-        tracker = np.delete(tracker, idx)
-        results.pop(idx)
+        tracker = np.delete(tracker, best_idx)
+        results.pop(best_idx)
 
+    print("S: ", S)
+    print("tracker: ", tracker)
     # Compute median parameter vector across S
     median_vect = aggregate_median(S.values())
-
+    print("median_vect: ", median_vect)
     # Take the beta closest params to the median
     distances = {}
     for i in S.keys():
+        print("len w ", len(weights[0][0]))
+        print("S ", S[i][0][0])
         dist = [
-            np.abs(S[i][0][j] - median_vect[j]) for j in range(len(weights))
+            np.abs(S[i][0][0][j] - median_vect[0][j]) for j in range(len(weights[0][0]))
         ]
         norm_sums = 0
         for k in dist:

@@ -58,7 +58,6 @@ class Bulyan(FedAvg):
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
         num_malicious_clients: int = 0,
-        num_clients_to_keep: int = 0,
         evaluate_fn: Optional[
             Callable[
                 [int, NDArrays, Dict[str, Scalar]],
@@ -90,8 +89,6 @@ class Bulyan(FedAvg):
             Minimum number of total clients in the system. Defaults to 2.
         num_malicious_clients : int, optional
             Number of malicious clients in the system. Defaults to 0.
-        num_clients_to_keep : int, optional
-            Number of clients to keep before averaging (MultiKrum). Defaults to 0, in that case classical Krum is applied.
         evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
@@ -125,7 +122,6 @@ class Bulyan(FedAvg):
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
         self.num_malicious_clients = num_malicious_clients
-        self.num_clients_to_keep = num_clients_to_keep
 
     def __repr__(self) -> str:
         rep = f"Bulyan(accept_failures={self.accept_failures})"
@@ -146,14 +142,14 @@ class Bulyan(FedAvg):
         
         # Convert results
         weights_results = [
-            (parameters_to_ndarrays(fit_res.parameters), fit_res.metrics["cid"])
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
 
         # Aggregate weights
         parameters_aggregated = ndarrays_to_parameters(
             aggregate_bulyan(
-                weights_results, self.num_malicious_clients, self.num_clients_to_keep
+                weights_results, self.num_malicious_clients
             )
         )
 
