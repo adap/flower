@@ -19,11 +19,11 @@ import unittest
 from unittest.mock import MagicMock, call
 
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
-from flwr.server.grpc_server.flower_service_servicer import (
+from flwr.server.fleet.grpc_bidi.flower_service_servicer import (
     FlowerServiceServicer,
     register_client_proxy,
 )
-from flwr.server.grpc_server.grpc_bridge import InsWrapper, ResWrapper
+from flwr.server.fleet.grpc_bidi.grpc_bridge import InsWrapper, ResWrapper
 
 CLIENT_MESSAGE = ClientMessage()
 SERVER_MESSAGE = ServerMessage()

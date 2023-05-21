@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Machine Learning with Adversaries: Byzantine Tolerant Gradient Descent.
+"""Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]
 
-[Blanchard et al., 2017].
-
-Paper: https://proceedings.neurips.cc/paper/2017/file/f4b9ec30ad9f68f89b29639786cb62ef-Paper.pdf
+Paper: https://arxiv.org/abs/1803.01498
 """
-
-
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
@@ -35,22 +31,18 @@ from flwr.common import (
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate_krum
+from .aggregate import aggregate_trimmed_avg
 from .fedavg import FedAvg
-
-WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
-Setting `min_available_clients` lower than `min_fit_clients` or
-`min_evaluate_clients` can cause the server to fail when there are too few clients
-connected to the server. `min_available_clients` must be set to a value larger
-than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
-"""
 
 
 # flake8: noqa: E501
-class Krum(FedAvg):
-    """Configurable Krum strategy implementation."""
+class FedTrimmedAvg(FedAvg):
+    """Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
+    Paper: https://arxiv.org/abs/1803.01498
+    """
+
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         *,
@@ -59,8 +51,6 @@ class Krum(FedAvg):
         min_fit_clients: int = 2,
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        num_malicious_clients: int = 0,
-        num_clients_to_keep: int = 0,
         evaluate_fn: Optional[
             Callable[
                 [int, NDArrays, Dict[str, Scalar]],
@@ -73,9 +63,9 @@ class Krum(FedAvg):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        beta: float = 0.2,
     ) -> None:
-        """Configurable Krum strategy.
-
+        """
         Parameters
         ----------
         fraction_fit : float, optional
@@ -88,11 +78,8 @@ class Krum(FedAvg):
             Minimum number of clients used during validation. Defaults to 2.
         min_available_clients : int, optional
             Minimum number of total clients in the system. Defaults to 2.
-        num_malicious_clients : int, optional
-            Number of malicious clients in the system. Defaults to 0.
-        num_clients_to_keep : int, optional
-            Number of clients to keep before averaging (MultiKrum). Defaults to 0, in that case classical Krum is applied.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
+        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],
+            Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
             Function used to configure training. Defaults to None.
@@ -102,13 +89,9 @@ class Krum(FedAvg):
             Whether or not accept rounds containing failures. Defaults to True.
         initial_parameters : Parameters, optional
             Initial global model parameters.
+        beta : float, optional
+            Fraction to cut off of both tails of the distribution. Defaults to 0.2.
         """
-
-        if (
-            min_fit_clients > min_available_clients
-            or min_evaluate_clients > min_available_clients
-        ):
-            log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
         super().__init__(
             fraction_fit=fraction_fit,
@@ -124,11 +107,10 @@ class Krum(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.num_malicious_clients = num_malicious_clients
-        self.num_clients_to_keep = num_clients_to_keep
+        self.beta = beta
 
     def __repr__(self) -> str:
-        rep = f"Krum(accept_failures={self.accept_failures})"
+        rep = f"FedTrimmedAvg(accept_failures={self.accept_failures})"
         return rep
 
     def aggregate_fit(
@@ -137,7 +119,7 @@ class Krum(FedAvg):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate fit results using Krum."""
+        """Aggregate fit results using trimmed average."""
         if not results:
             return None, {}
         # Do not aggregate if there are failures and failures are not accepted
@@ -150,9 +132,7 @@ class Krum(FedAvg):
             for _, fit_res in results
         ]
         parameters_aggregated = ndarrays_to_parameters(
-            aggregate_krum(
-                weights_results, self.num_malicious_clients, self.num_clients_to_keep
-            )
+            aggregate_trimmed_avg(weights_results, self.beta)
         )
 
         # Aggregate custom metrics if aggregation fn was provided
