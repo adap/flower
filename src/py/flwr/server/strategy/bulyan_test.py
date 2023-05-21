@@ -159,11 +159,19 @@ def test_aggregate_fit() -> None:
     param_3: Parameters = ndarrays_to_parameters(
         [array([12.0, 12.0, 12.0, 12.0], dtype=float32)]
     )
+    param_4: Parameters = ndarrays_to_parameters(
+        [array([0.1, 0.1, 0.1, 0.1], dtype=float32)]
+    )
+    param_5: Parameters = ndarrays_to_parameters(
+        [array([0.1, 0.1, 0.1, 0.1], dtype=float32)]
+    )
     bridge = MagicMock()
     client_0 = GrpcClientProxy(cid="0", bridge=bridge)
     client_1 = GrpcClientProxy(cid="1", bridge=bridge)
     client_2 = GrpcClientProxy(cid="2", bridge=bridge)
     client_3 = GrpcClientProxy(cid="3", bridge=bridge)
+    client_4 = GrpcClientProxy(cid="4", bridge=bridge)
+    client_5 = GrpcClientProxy(cid="5", bridge=bridge)
     results: List[Tuple[ClientProxy, FitRes]] = [
         (
             client_0,
@@ -201,8 +209,26 @@ def test_aggregate_fit() -> None:
                 metrics={},
             ),
         ),
+        (
+            client_4,
+            FitRes(
+                status=Status(code=Code.OK, message="Success"),
+                parameters=param_4,
+                num_examples=5,
+                metrics={},
+            ),
+        ),
+        (
+            client_5,
+            FitRes(
+                status=Status(code=Code.OK, message="Success"),
+                parameters=param_5,
+                num_examples=5,
+                metrics={},
+            ),
+        ),
     ]
-    expected: NDArrays = [array([0.2, 0.2, 0.2, 0.2], dtype=float32)]
+    expected: NDArrays = [array([0.35, 0.35, 0.35, 0.35], dtype=float32)]
 
     # Execute
     actual_aggregated, _ = strategy.aggregate_fit(
@@ -211,7 +237,4 @@ def test_aggregate_fit() -> None:
     if actual_aggregated:
         actual_list = parameters_to_ndarrays(actual_aggregated)
         actual = actual_list[0]
-    print("actual: ", actual)
     assert (actual == expected[0]).all()
-
-test_aggregate_fit()
