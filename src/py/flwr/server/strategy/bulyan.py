@@ -139,7 +139,7 @@ class Bulyan(FedAvg):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-        
+
         # Convert results
         weights_results = [
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
@@ -148,9 +148,7 @@ class Bulyan(FedAvg):
 
         # Aggregate weights
         parameters_aggregated = ndarrays_to_parameters(
-            aggregate_bulyan(
-                weights_results, self.num_malicious_clients
-            )
+            aggregate_bulyan(weights_results, self.num_malicious_clients)
         )
 
         # Aggregate custom metrics if aggregation fn was provided

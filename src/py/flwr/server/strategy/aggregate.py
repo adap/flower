@@ -90,8 +90,9 @@ def aggregate_krum(
     # Return the index of the client which minimizes the score (Krum)
     return weights[np.argmin(scores)]
 
+
 def aggregate_bulyan(
-        results: List[Tuple[NDArrays, int]], num_malicious: int
+    results: List[Tuple[NDArrays, int]], num_malicious: int
 ) -> NDArrays:
     # S must be Dict[int, Tuple[NDArrays, int]] (selection set)
     S = {}
@@ -102,20 +103,16 @@ def aggregate_bulyan(
     # Create a list of weights and ignore the number of examples
     weights = [weights for weights, _ in results]
 
-    theta = len(weights) - 2*num_malicious
+    theta = len(weights) - 2 * num_malicious
     if theta <= 0:
         theta = 1
 
-    beta = theta - 2*num_malicious
+    beta = theta - 2 * num_malicious
     if beta <= 0:
         beta = 1
-    
+
     for _ in range(theta):
-        best_model = aggregate_krum(
-            results, 
-            num_malicious,
-            to_keep=0
-        )
+        best_model = aggregate_krum(results, num_malicious, to_keep=0)
 
         best_idx = None
         for idx, el in enumerate(results):
@@ -148,8 +145,7 @@ def aggregate_bulyan(
 
     # Apply FevAvg on M
     parameters_aggregated: NDArrays = [
-        reduce(np.add, layers) / beta
-        for layers in zip(*M)
+        reduce(np.add, layers) / beta for layers in zip(*M)
     ]
 
     return parameters_aggregated
