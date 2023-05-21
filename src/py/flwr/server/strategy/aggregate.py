@@ -91,7 +91,7 @@ def aggregate_krum(
     return weights[np.argmin(scores)]
 
 def aggregate_bulyan(
-        results: List[Tuple[NDArrays, int]], num_malicious: int, to_keep: int
+        results: List[Tuple[NDArrays, int]], num_malicious: int
 ) -> NDArrays:
     # S must be Dict[int, Tuple[NDArrays, int]] (selection set)
     S = {}
@@ -113,12 +113,14 @@ def aggregate_bulyan(
     print("beta: ", beta)
     
     for _ in range(theta):
-        _, idx, _, _ = aggregate_krum(
+        idx = aggregate_krum(
             results, 
             num_malicious,
-            to_keep
+            to_keep=1
         )
-        S[tracker[idx]] = results[idx]                                  # weights_results is ordered according to "cid"
+
+        # weights_results is ordered according to "cid"
+        S[tracker[idx]] = results[idx]
 
         # remove idx from tracker and weights_results
         tracker = np.delete(tracker, idx)
@@ -143,6 +145,7 @@ def aggregate_bulyan(
     print("selected ", closest_idx)
 
     # Apply FevAvg on M
+    # TODO: use aggregate() instead
     parameters_aggregated: NDArrays = [
         reduce(np.add, layers) / beta
         for layers in zip(*M)
