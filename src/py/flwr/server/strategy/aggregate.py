@@ -87,7 +87,7 @@ def aggregate_krum(
         best_results = [results[i] for i in best_indices]
         return aggregate(best_results)
 
-    # Return the model which minimizes the score (Krum)
+    # Return the model parameters that minimize the score (Krum)
     return weights[np.argmin(scores)]
 
 
