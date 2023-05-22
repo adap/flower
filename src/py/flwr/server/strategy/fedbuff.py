@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Learning with Buffered Asynchronous Aggregation (FedBuff) 
+"""Federated Learning with Buffered Asynchronous Aggregation (FedBuff)
+
 [Nguyen et al., 2021] strategy.
 
 Paper: https://arxiv.org/abs/2106.06639
@@ -38,8 +39,8 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-from flwr.server.strategy.aggregate import aggregate
 from flwr.server.strategy import FedAvg
+from flwr.server.strategy.aggregate import aggregate
 
 
 # flake8: noqa: E501
