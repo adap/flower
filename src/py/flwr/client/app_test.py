@@ -31,7 +31,7 @@ from flwr.common import (
     Scalar,
 )
 
-from .app import ClientLike, to_client
+from .app import ClientLike, start_client, start_numpy_client, to_client
 from .client import Client
 from .numpy_client import NumPyClient
 
@@ -102,3 +102,37 @@ def test_to_client_with_numpyclient() -> None:
 
     # Assert
     assert isinstance(actual, Client)
+
+
+def test_start_client_transport_invalid() -> None:
+    """Test start_client(..., transport=...)."""
+
+    # Prepare
+    client: Client = PlainClient()
+    invalid_transport = "invalid-transport-value"
+
+    # Execute
+    try:
+        start_client(
+            server_address="0.0.0.0:8080", client=client, transport=invalid_transport
+        )
+        assert False  # Fail the test if no exception was raised
+    except ValueError:
+        pass
+
+
+def test_start_numpy_client_transport_invalid() -> None:
+    """Test start_client(..., transport=...)."""
+
+    # Prepare
+    client: NumPyClient = NeedsWrappingClient()
+    invalid_transport = "invalid-transport-value"
+
+    # Execute
+    try:
+        start_numpy_client(
+            server_address="0.0.0.0:8080", client=client, transport=invalid_transport
+        )
+        assert False  # Fail the test if no exception was raised
+    except ValueError:
+        pass
