@@ -36,7 +36,7 @@ from flwr.common.typing import GetParametersIns
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
-from flwr.server.strategy import FedAvg, FedBuff, Strategy
+from flwr.server.strategy import FedAvg, Strategy
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -361,9 +361,11 @@ def fit_clients(
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
     if executor is None or pending_fs is None:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=max_workers
+        ) as sync_executor:
             submitted_fs = {
-                executor.submit(fit_client, client_proxy, ins, timeout)
+                sync_executor.submit(fit_client, client_proxy, ins, timeout)
                 for client_proxy, ins in client_instructions
             }
             finished_fs, _ = concurrent.futures.wait(

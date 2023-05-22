@@ -39,8 +39,9 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-from flwr.server.strategy import FedAvg
-from flwr.server.strategy.aggregate import aggregate
+
+from .aggregate import aggregate
+from .fedavg import FedAvg
 
 
 # flake8: noqa: E501
