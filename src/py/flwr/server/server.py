@@ -381,11 +381,11 @@ def fit_clients(
             DEBUG,
             "Sending instructions to clients",
         )
-        submitted_fs = dict(
-            (executor.submit(fit_client, client_proxy, ins, timeout), client_proxy.cid)
+        submitted_fs_it = {
+            executor.submit(fit_client, client_proxy, ins, timeout): client_proxy.cid
             for client_proxy, ins in client_instructions
-        )
-        pending_fs.update(submitted_fs)
+        }
+        pending_fs.update(submitted_fs_it)
 
         finished_fs_it = concurrent.futures.as_completed(
             fs=pending_fs.keys(),
