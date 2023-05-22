@@ -12,22 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower constants."""
-
-
-MISSING_EXTRA_REST = """
-Extra dependencies required for using the REST-based Fleet API are missing.
-
-To use the REST API, install `flwr` with the `rest` extra:
-
-    `pip install flwr[rest]`.
-"""
-
-TRANSPORT_TYPE_GRPC_BIDI = "grpc-bido"
-TRANSPORT_TYPE_GRPC_RERE = "grpc-rere"
-TRANSPORT_TYPE_REST = "rest"
-TRANSPORT_TYPES = [
-    TRANSPORT_TYPE_GRPC_BIDI,
-    TRANSPORT_TYPE_GRPC_RERE,
-    TRANSPORT_TYPE_REST,
-]
+"""Client-side part of the gRPC request-response transport layer."""
