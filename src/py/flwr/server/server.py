@@ -254,7 +254,6 @@ class Server:
             executor=executor,
             pending_fs=pending_fs,
         )
-
         log(
             DEBUG,
             "fit_round %s received %s results and %s failures",
@@ -402,7 +401,6 @@ def fit_clients(
             pending_fs.pop(future)
             if len(results) >= int(client_instructions[0][1].config["buffer_size"]):
                 break
-
         log(
             DEBUG,
             "Received enough responses from clients",
