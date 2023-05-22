@@ -360,7 +360,7 @@ def fit_clients(
     """Refine parameters concurrently on all selected clients."""
     results: List[Tuple[ClientProxy, FitRes]] = []
     failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
-    if executor is None and pending_fs is None:
+    if executor is None or pending_fs is None:
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             submitted_fs = {
                 executor.submit(fit_client, client_proxy, ins, timeout)
