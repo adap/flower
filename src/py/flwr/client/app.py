@@ -31,6 +31,7 @@ from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_BIDI,
+    TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
 )
@@ -51,6 +52,7 @@ from flwr.common.typing import (
 
 from .client import Client
 from .grpc_client.connection import grpc_connection
+from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
 from .numpy_client import NumPyClient
 from .numpy_client import has_evaluate as numpyclient_has_evaluate
@@ -87,7 +89,7 @@ Example
 ClientLike = Union[Client, NumPyClient]
 
 
-# pylint: disable=import-outside-toplevel,too-many-locals
+# pylint: disable=import-outside-toplevel,too-many-locals,too-many-branches
 def start_client(
     *,
     server_address: str,
@@ -127,6 +129,7 @@ def start_client(
     transport : Optional[str] (default: None)
         Configure the transport layer. Allowed values:
         - 'grpc-bidi': gRPC, bidirectional streaming
+        - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
 
     Examples
@@ -173,6 +176,8 @@ def start_client(
                 "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
             )
         connection = http_request_response
+    elif transport == TRANSPORT_TYPE_GRPC_RERE:
+        connection = grpc_request_response
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
         connection = grpc_connection
     else:
@@ -252,6 +257,7 @@ def start_numpy_client(
     transport : Optional[str] (default: None)
         Configure the transport layer. Allowed values:
         - 'grpc-bidi': gRPC, bidirectional streaming
+        - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
 
     Examples
