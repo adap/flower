@@ -1,7 +1,7 @@
 """Used to test the model and the data partitionning."""
 
 
-from flwr_baselines.publications.fedavg_mnist import model
+from flwr_baselines.publications.fedavg_mnist_2nn import model
 
 
 def test_2nn_size_mnist() -> None:
