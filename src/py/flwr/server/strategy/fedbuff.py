@@ -186,7 +186,11 @@ class FedBuff(FedAvg):
             return None, {}
 
         results_cids = [result[0].cid for result in results]
-        failures_cids = [failure[0].cid for failure in failures if not isinstance(failure, BaseException)]
+        failures_cids = [
+            failure[0].cid
+            for failure in failures
+            if not isinstance(failure, BaseException)
+        ]
 
         # How many rounds off each result is
         staleness = [server_round - self.busy_clients[c] for c in results_cids]
