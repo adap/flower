@@ -224,11 +224,7 @@ class Server:
         executor: Optional[concurrent.futures.ThreadPoolExecutor],
         pending_fs: Optional[Dict[concurrent.futures.Future, str]],  # type: ignore
     ) -> Optional[
-        Tuple[
-            Optional[Parameters],
-            Dict[str, Scalar],
-            FitResultsAndFailures,
-        ]
+        Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
         """Perform a single round of federated averaging."""
 
