@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Averaging (FedAvg) [McMahan et al., 2016] strategy.
+"""Federated Learning with Buffered Asynchronous Aggregation (FedBuff) 
+[Nguyen et al., 2021] strategy.
 
-Paper: https://arxiv.org/abs/1602.05629
+Paper: https://arxiv.org/abs/2106.06639
 """
 
 
@@ -38,12 +39,12 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
 from flwr.server.strategy.aggregate import aggregate
-from flwr.server.strategy.async_strategy import AsyncStrategy
+from flwr.server.strategy import FedAvg
 
 
 # flake8: noqa: E501
-class FedBuff(AsyncStrategy):
-    """Configurable FedAvg strategy implementation."""
+class FedBuff(FedAvg):
+    """Configurable FedBuff strategy implementation."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
     def __init__(
@@ -66,6 +67,8 @@ class FedBuff(AsyncStrategy):
         """Federated Buffering asynchronous aggregation strategy.
         NOTE: requires server to be in asynchronous mode
         Implementation based on https://arxiv.org/abs/2106.06639
+
+
         Parameters
         ----------
         evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
@@ -108,7 +111,7 @@ class FedBuff(AsyncStrategy):
         self.busy_clients: Dict[str, int] = {}  # dict from cid to server round
 
     def __repr__(self) -> str:
-        rep = f"FedAvg(accept_failures={self.accept_failures})"
+        rep = f"FedBuff(accept_failures={self.accept_failures})"
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
@@ -117,28 +120,6 @@ class FedBuff(AsyncStrategy):
         _ = num_available_clients
         num_additional_clients = self.concurrency - len(self.busy_clients)
         return num_additional_clients, num_additional_clients
-
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
-        """Initialize global model parameters."""
-        initial_parameters = self.initial_parameters
-        self.initial_parameters = None  # Don't keep initial parameters in memory
-        return initial_parameters
-
-    def evaluate(
-        self, server_round: int, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        """Evaluate model parameters using an evaluation function."""
-        if self.evaluate_fn is None:
-            # No evaluation function provided
-            return None
-        parameters_ndarrays = parameters_to_ndarrays(parameters)
-        eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {})
-        if eval_res is None:
-            return None
-        loss, metrics = eval_res
-        return loss, metrics
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -196,22 +177,15 @@ class FedBuff(AsyncStrategy):
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
-        return None, {}
 
-    def async_aggregate_fit(
-        self,
-        server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-        results_cids: List[str],
-        failures_cids: List[str],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
+
+        results_cids = [result[0].cid for result in results]
+        failures_cids = [failure[0].cid for failure in failures]
 
         # How many rounds off each result is
         staleness = [server_round - self.busy_clients[c] for c in results_cids]
