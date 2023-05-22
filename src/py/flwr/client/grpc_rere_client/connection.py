@@ -12,43 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Contextmanager for a REST request-response channel to the Flower server."""
+"""Contextmanager for a gRPC request-response channel to the Flower server."""
 
 
-import sys
 from contextlib import contextmanager
-from logging import ERROR, INFO, WARN
+from logging import DEBUG, ERROR, WARN
+from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
 from flwr.client.message_handler.task_handler import get_server_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import MISSING_EXTRA_REST
+from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.proto.fleet_pb2 import (
-    PullTaskInsRequest,
-    PullTaskInsResponse,
-    PushTaskResRequest,
-    PushTaskResResponse,
-)
+from flwr.proto.fleet_pb2 import PullTaskInsRequest, PushTaskResRequest
+from flwr.proto.fleet_pb2_grpc import FleetStub
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
-try:
-    import requests
-except ModuleNotFoundError:
-    sys.exit(MISSING_EXTRA_REST)
-
-
 KEY_TASK_INS = "current_task_ins"
 
 
-PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
-PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
+def on_channel_state_change(channel_connectivity: str) -> None:
+    """Log channel connectivity."""
+    log(DEBUG, channel_connectivity)
 
 
 @contextmanager
-def http_request_response(
+def grpc_request_response(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[
@@ -79,30 +70,24 @@ def http_request_response(
     -------
     receive, send : Callable, Callable
     """
+    if isinstance(root_certificates, str):
+        root_certificates = Path(root_certificates).read_bytes()
+
+    channel = create_channel(
+        server_address=server_address,
+        root_certificates=root_certificates,
+        max_message_length=max_message_length,
+    )
+    channel.subscribe(on_channel_state_change)
+    stub = FleetStub(channel)
 
     log(
         WARN,
         """
-        EXPERIMENTAL: `rest` is an experimental feature, it might change
+        EXPERIMENTAL: `grpc-rere` is an experimental transport layer, it might change
         considerably in future versions of Flower
         """,
     )
-
-    base_url = server_address
-
-    # NEVER SET VERIFY TO FALSE
-    # Otherwise any server can fake its identity
-    # Please refer to:
-    # https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
-    verify: Union[bool, str] = True
-    if isinstance(root_certificates, str):
-        verify = root_certificates
-    elif isinstance(root_certificates, bytes):
-        log(
-            ERROR,
-            "For the REST API, the root certificates "
-            "must be provided as a string path to the client.",
-        )
 
     # Necessary state to link TaskRes to TaskIns
     state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
@@ -114,47 +99,14 @@ def http_request_response(
     def receive() -> Optional[ServerMessage]:
         """Receive next task from server."""
 
-        # Serialize ProtoBuf to bytes
-        pull_task_ins_req_proto = PullTaskInsRequest(
+        # Request instructions (task) from server
+        request = PullTaskInsRequest(
             node=Node(node_id=0, anonymous=True),
         )
-        pull_task_ins_req_bytes: bytes = pull_task_ins_req_proto.SerializeToString()
-
-        # Request instructions (task) from server
-        res = requests.post(
-            url=f"{base_url}/{PATH_PULL_TASK_INS}",
-            headers={
-                "Accept": "application/protobuf",
-                "Content-Type": "application/protobuf",
-            },
-            data=pull_task_ins_req_bytes,
-            verify=verify,
-        )
-
-        # Check status code and headers
-        if res.status_code != 200:
-            return None
-        if "content-type" not in res.headers:
-            log(
-                WARN,
-                "[Node] POST /%s: missing header `Content-Type`",
-                PATH_PULL_TASK_INS,
-            )
-            return None
-        if res.headers["content-type"] != "application/protobuf":
-            log(
-                WARN,
-                "[Node] POST /%s: header `Content-Type` has wrong value",
-                PATH_PULL_TASK_INS,
-            )
-            return None
-
-        # Deserialize ProtoBuf from bytes
-        pull_task_ins_response_proto = PullTaskInsResponse()
-        pull_task_ins_response_proto.ParseFromString(res.content)
+        response = stub.PullTaskIns(request=request)
 
         # Remember the current TaskIns
-        task_ins_server_message_tuple = get_server_message(pull_task_ins_response_proto)
+        task_ins_server_message_tuple = get_server_message(response)
         if task_ins_server_message_tuple is None:
             state[KEY_TASK_INS] = None
             return None
@@ -165,7 +117,6 @@ def http_request_response(
         state[KEY_TASK_INS] = task_ins
 
         # Return the ServerMessage
-        log(INFO, "[Node] POST /%s: success", PATH_PULL_TASK_INS)
         return server_message
 
     def send(client_message_proto: ClientMessage) -> None:
@@ -191,51 +142,10 @@ def http_request_response(
         )
 
         # Serialize ProtoBuf to bytes
-        push_task_res_request_proto = PushTaskResRequest(task_res_list=[task_res])
-        push_task_res_request_bytes: bytes = (
-            push_task_res_request_proto.SerializeToString()
-        )
-
-        # Send ClientMessage to server
-        res = requests.post(
-            url=f"{base_url}/{PATH_PUSH_TASK_RES}",
-            headers={
-                "Accept": "application/protobuf",
-                "Content-Type": "application/protobuf",
-            },
-            data=push_task_res_request_bytes,
-            verify=verify,
-        )
+        request = PushTaskResRequest(task_res_list=[task_res])
+        _ = stub.PushTaskRes(request)
 
         state[KEY_TASK_INS] = None
-
-        # Check status code and headers
-        if res.status_code != 200:
-            return
-        if "content-type" not in res.headers:
-            log(
-                WARN,
-                "[Node] POST /%s: missing header `Content-Type`",
-                PATH_PUSH_TASK_RES,
-            )
-            return
-        if res.headers["content-type"] != "application/protobuf":
-            log(
-                WARN,
-                "[Node] POST /%s: header `Content-Type` has wrong value",
-                PATH_PUSH_TASK_RES,
-            )
-            return
-
-        # Deserialize ProtoBuf from bytes
-        push_task_res_response_proto = PushTaskResResponse()
-        push_task_res_response_proto.ParseFromString(res.content)
-        log(
-            INFO,
-            "[Node] POST /%s: success, created result %s",
-            PATH_PUSH_TASK_RES,
-            push_task_res_response_proto.results,  # pylint: disable=no-member
-        )
 
     # yield methods
     try:
