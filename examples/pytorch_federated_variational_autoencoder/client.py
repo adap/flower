@@ -1,6 +1,5 @@
 from collections import OrderedDict
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 import torchvision.transforms as transforms
@@ -30,6 +29,7 @@ def train(net, trainloader, epochs):
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     for _ in range(epochs):
         for images, _ in trainloader:
+            images = images.to(DEVICE)
             optimizer.zero_grad()
             recon_images, mu, logvar = net(images)
             recon_loss = F.mse_loss(recon_images, images)
@@ -71,28 +71,29 @@ def generate(net, image):
 def main():
     # Load model and data
     net = Net()
+    net = net.to(DEVICE)
     trainloader, testloader = load_data()
 
     class CifarClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
         def set_parameters(self, parameters):
             params_dict = zip(net.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             net.load_state_dict(state_dict, strict=True)
 
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             train(net, trainloader, epochs=1)
-            return self.get_parameters(), len(trainloader), {}
+            return self.get_parameters(config={}), len(trainloader), {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss = test(net, testloader)
-            return float(loss), len(testloader)
+            return float(loss), len(testloader), {}
 
-    fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=CifarClient())
 
 
 if __name__ == "__main__":

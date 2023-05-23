@@ -22,7 +22,7 @@ from typing import Callable, Dict, Optional
 
 import flwr as fl
 from flwr.common.logger import configure, log
-from flwr_experimental.baseline.common import get_eval_fn
+from flwr_experimental.baseline.common import get_evaluate_fn
 from flwr_experimental.baseline.dataset import tf_hotkey_partitioned
 from flwr_experimental.baseline.model import keyword_cnn
 from flwr_experimental.baseline.tf_hotkey.settings import SETTINGS, get_setting
@@ -70,7 +70,7 @@ def main() -> None:
     model = keyword_cnn(input_shape=(80, 40, 1), seed=SEED)
 
     # Strategy
-    eval_fn = get_eval_fn(model=model, num_classes=10, xy_test=(x_test, y_test))
+    evaluate_fn = get_evaluate_fn(model=model, num_classes=10, xy_test=(x_test, y_test))
     on_fit_config_fn = get_on_fit_config_fn(
         lr_initial=server_setting.lr_initial,
         timeout=server_setting.training_round_timeout,
@@ -82,7 +82,7 @@ def main() -> None:
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
         )
 
@@ -95,7 +95,7 @@ def main() -> None:
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
             importance_sampling=server_setting.importance_sampling,
             dynamic_timeout=server_setting.dynamic_timeout,
@@ -119,7 +119,7 @@ def main() -> None:
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
             r_fast=1,
             r_slow=1,
@@ -134,7 +134,7 @@ def main() -> None:
             fraction_fit=server_setting.sample_fraction,
             min_fit_clients=server_setting.min_sample_size,
             min_available_clients=server_setting.min_num_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
         )
 
@@ -151,10 +151,10 @@ def get_on_fit_config_fn(
 ) -> Callable[[int], Dict[str, fl.common.Scalar]]:
     """Return a function which returns training configurations."""
 
-    def fit_config(rnd: int) -> Dict[str, fl.common.Scalar]:
+    def fit_config(server_round: int) -> Dict[str, fl.common.Scalar]:
         """Return a configuration with static batch size and (local) epochs."""
         config: Dict[str, fl.common.Scalar] = {
-            "epoch_global": str(rnd),
+            "epoch_global": str(server_round),
             "epochs": str(5),
             "batch_size": str(32),
             "lr_initial": str(lr_initial),

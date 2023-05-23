@@ -35,7 +35,7 @@ poetry run python3 -c "import flwr"
 
 If you don't see any errors you're good to go!
 
-# Run Federated Learning with TensorFlow/Keras and Flower
+## Run Federated Learning with TensorFlow/Keras and Flower
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
@@ -57,4 +57,4 @@ poetry run python3 client.py &
 poetry run python3 client.py
 ```
 
-You will see that Keras is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart_tensorflow.html) for a detailed explanation. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).
+You will see that Keras is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart-tensorflow.html) for a detailed explanation. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).

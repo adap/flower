@@ -1,0 +1,123 @@
+apply plugin: 'com.google.protobuf'
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 33
+
+    defaultConfig {
+        applicationId "flwr.android_client"
+        // API level 14+ is required for TLS since Google Play Services v10.2
+        minSdkVersion 24
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        debug { minifyEnabled false }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+
+    dataBinding {
+        enabled = true
+    }
+
+
+    namespace 'flwr.android_client'
+    androidResources {
+        noCompress 'tflite'
+    }
+    lint {
+        disable 'GoogleAppIndexingWarning', 'HardcodedText', 'InvalidPackage'
+        textOutput file('stdout')
+        textReport true
+    }
+}
+
+def grpc_version = '1.43.0'
+
+protobuf {
+    protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
+    plugins {
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:$grpc_version"
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java { option 'lite' }
+            }
+            task.plugins {
+                grpc { // Options added to --grpc_out
+                    option 'lite' }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation project(path: ':transfer_api')
+
+    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly-SNAPSHOT'
+    // This dependency adds the necessary TF op support.
+    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:0.0.0-nightly-SNAPSHOT'
+
+    implementation "io.grpc:grpc-okhttp:$grpc_version"
+    implementation "io.grpc:grpc-protobuf-lite:$grpc_version"
+    implementation "io.grpc:grpc-stub:$grpc_version"
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+
+    def lifecycle_version = '2.2.0'
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+
+    implementation 'com.google.android.material:material:1.7.0'
+
+}
+
+def modelUrl = 'https://www.dropbox.com/s/tubgpepk2q6xiny/models.zip?dl=1'
+def modelArchivePath = "${buildDir}/model.zip"
+def modelTargetLocation = 'src/main/assets/model'
+
+
+def dataUrl = 'https://www.dropbox.com/s/coeixr4kh8ljw6o/cifar10.zip?dl=1'
+def dataArchivePath = "${buildDir}/data.zip"
+def dataTargetLocation = 'src/main/assets/data'
+
+task downloadModelAndData(type: DefaultTask) {
+    doFirst {
+        println "Downloading and unpacking the model..."
+        mkdir project.buildDir
+    }
+
+    doLast {
+        ant.mkdir(dir: modelTargetLocation)
+        ant.mkdir(dir: dataTargetLocation)
+
+        // If you want to use your own models rather than pre-built models,
+        // comment out the following three lines.
+        ant.get(src: modelUrl, dest: modelArchivePath)
+        ant.unzip(src: modelArchivePath, dest: modelTargetLocation)
+        ant.delete(file: modelArchivePath)
+
+        ant.get(src: dataUrl, dest: dataArchivePath)
+        ant.unzip(src: dataArchivePath, dest: dataTargetLocation)
+        ant.delete(file: dataArchivePath)
+
+    }
+}
+
+preBuild.dependsOn downloadModelAndData

@@ -14,12 +14,12 @@
 # ==============================================================================
 """Flower simulation."""
 
-import pkg_resources
 
-installed_packages = {pkg.key for pkg in list(pkg_resources.working_set)}
+import importlib
 
+is_ray_installed = importlib.util.find_spec("ray") is not None
 
-if "ray" in installed_packages:
+if is_ray_installed:
     from flwr.simulation.app import start_simulation
 else:
     RAY_IMPORT_ERROR: str = """Unable to import module `ray`.
@@ -30,7 +30,7 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
 """
 
     def start_simulation(*args, **kwargs):  # type: ignore
-        """Print error stating that ray is missing."""
+        """Log error stating that module `ray` could not be imported."""
         raise ImportError(RAY_IMPORT_ERROR)
 
 

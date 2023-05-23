@@ -1,69 +1,34 @@
-# Single-Machine Simulation of Federated Learning Systems
+# example_simulation_ray
 
-This example is part of a series of blog posts. It's recommended to read the [blog post](https://flower.dev/blog/2021-01-14-single-machine-simulation-of-federated-learning-systems) before reading further.
+This code splits CIFAR-10 dataset into `pool_size` partitions (user defined) and does a few rounds of CIFAR-10 training. In this example, we leverage [`Ray`](https://docs.ray.io/en/latest/index.html) to simulate Flower Clients participating in FL rounds in an resource-aware fashion. This is possible via the [`RayClientProxy`](https://github.com/adap/flower/blob/main/src/py/flwr/simulation/ray_transport/ray_client_proxy.py) which bridges a standard Flower server with standard Flower clients while excluding the gRPC communication protocol and the Client Manager in favour of Ray's scheduling and communication layers.
 
-## Quick Start
+## Requirements
 
-If you have docker on your machine you can execute this simulation using it. Start with building the container
+*    Flower 0.18.0
+*    A recent version of PyTorch. This example has been tested with Pytorch 1.7.1, 1.8.2 (LTS) and 1.10.2.
+*    A recent version of Ray. This example has been tested with Ray 1.4.1, 1.6 and 1.9.2.
 
-```shell
-docker build -t flower_federated_learning_simulation_pytorch .
+From a clean virtualenv or Conda environment with Python 3.7+, the following command will isntall all the dependencies needed:
+```bash
+$ pip install -r requirements.txt
 ```
 
-and afterwards simply start the simulation in docker using
+# How to run
 
-```shell
-docker run --ipc=host -it --rm flower_federated_learning_simulation_pytorch
+This example:
+
+1. Downloads CIFAR-10
+2. Partitions the dataset into N splits, where N is the total number of
+   clients. We refere to this as `pool_size`. The partition can be IID or non-IID
+4. Starts a Ray-based simulation where a % of clients are sample each round.
+   This example uses N=10, so 10 clients will be sampled each round.
+5. After the M rounds end, the global model is evaluated on the entire testset.
+   Also, the global model is evaluated on the valset partition residing in each
+   client. This is useful to get a sense on how well the global model can generalise
+   to each client's data.
+
+The command below will assign each client 2 CPU threads. If your system does not have 2xN(=10) = 20 threads to run all 10 clients in parallel, they will be queued but eventually run. The server will wait until all N clients have completed their local training stage before aggregating the results. After that, a new round will begin.
+
+```bash
+$ python main.py --num_client_cpus 2 # note that `num_client_cpus` should be <= the number of threads in your system.
 ```
-
-## Project Setup
-
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
-
-```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/simulation_pytorch . && rm -rf flower && cd simulation_pytorch
-```
-
-This will create a new directory called `simulation_pytorch` containing the following files:
-
-```shell
--- dataset.py
--- Dockerfile
--- pyproject.toml
--- README.md
--- run.sh
--- SimpleNet.py
--- simulation.py
-```
-
-Project dependencies (such as `numpy` and `flwr`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-```shell
-poetry install
-poetry shell
-```
-
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
-
-```shell
-python3 -c "import flwr"
-```
-
-If you don't see any errors you're good to go!
-
-## Simulate
-
-To start the simulation simply start the `simulation.py` with Python.
-
-```shell
-python3 simulation.py
-```
-
-It contains in the last line the following code which you might like to adjust.
-
-```python
-if __name__ == "__main__":
-    run_simulation(num_rounds=100, num_clients=10, fraction_fit=0.5)
-```
-
-If your machine is powerful enough you can try running a single machine simulation with e.g. 100 or even 1000 clients.

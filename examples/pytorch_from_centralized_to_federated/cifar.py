@@ -11,7 +11,7 @@ https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 # pylint: disable=W0223
 
 
-from typing import Tuple
+from typing import Tuple, Dict
 
 import torch
 import torch.nn as nn
@@ -22,6 +22,7 @@ from torch import Tensor
 from torchvision.datasets import CIFAR10
 
 DATA_ROOT = "./dataset"
+
 
 # pylint: disable=unsubscriptable-object
 class Net(nn.Module):
@@ -52,7 +53,9 @@ class Net(nn.Module):
         return x
 
 
-def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+def load_data() -> (
+    Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader, Dict]
+):
     """Load CIFAR-10 (training and test set)."""
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -61,7 +64,8 @@ def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoade
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True)
     testset = CIFAR10(DATA_ROOT, train=False, download=True, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
-    return trainloader, testloader
+    num_examples = {"trainset": len(trainset), "testset": len(testset)}
+    return trainloader, testloader, num_examples
 
 
 def train(
@@ -109,9 +113,7 @@ def test(
     """Validate the network on the entire test set."""
     # Define loss and metrics
     criterion = nn.CrossEntropyLoss()
-    correct = 0
-    total = 0
-    loss = 0.0
+    correct, loss = 0, 0.0
 
     # Evaluate the network
     net.to(device)
@@ -122,9 +124,8 @@ def test(
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)  # pylint: disable=no-member
-            total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    accuracy = correct / total
+    accuracy = correct / len(testloader.dataset)
     return loss, accuracy
 
 
@@ -132,7 +133,7 @@ def main():
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Centralized PyTorch training")
     print("Load data")
-    trainloader, testloader = load_data()
+    trainloader, testloader, _ = load_data()
     net = Net().to(DEVICE)
     net.eval()
     print("Start training")

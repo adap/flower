@@ -6,14 +6,14 @@ Example:
     python -m flwr_tool.init_py_check src/py/flwr
 """
 
+
 import os
 import re
 import sys
 
 
 def check_missing_init_files(absolute_path: str) -> None:
-    """Searches through the specified absolute_path and looks for missing __init__.py
-    files."""
+    """Search absolute_path and look for missing __init__.py files."""
     path = os.walk(absolute_path)
     warning_list = []
     ignore_list = ["__pycache__$", ".pytest_cache.*$", "dist", "flwr.egg-info$"]
@@ -40,6 +40,6 @@ if __name__ == "__main__":
         raise Exception(
             "Please provide at least one directory path relative to your current working directory."
         )
-    for i in range(len(sys.argv)):
+    for i, _ in enumerate(sys.argv):
         abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
         check_missing_init_files(abs_path)

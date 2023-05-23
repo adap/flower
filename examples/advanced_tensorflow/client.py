@@ -1,7 +1,7 @@
 import argparse
 import os
+from pathlib import Path
 
-import numpy as np
 import tensorflow as tf
 
 import flwr as fl
@@ -17,7 +17,11 @@ class CifarClient(fl.client.NumPyClient):
         self.x_train, self.y_train = x_train, y_train
         self.x_test, self.y_test = x_test, y_test
 
-    def get_parameters(self):
+    def get_properties(self, config):
+        """Get properties of client."""
+        raise Exception("Not implemented")
+
+    def get_parameters(self, config):
         """Get parameters of the local model."""
         raise Exception("Not implemented (server-side parameter initialization)")
 
@@ -69,7 +73,23 @@ class CifarClient(fl.client.NumPyClient):
 def main() -> None:
     # Parse command line argument `partition`
     parser = argparse.ArgumentParser(description="Flower")
-    parser.add_argument("--partition", type=int, choices=range(0, 10), required=True)
+    parser.add_argument(
+        "--partition",
+        type=int,
+        default=0,
+        choices=range(0, 10),
+        required=True,
+        help="Specifies the artificial data partition of CIFAR10 to be used. "
+        "Picks partition 0 by default",
+    )
+    parser.add_argument(
+        "--toy",
+        type=bool,
+        default=False,
+        required=False,
+        help="Set to true to quicky run the client using only 10 datasamples. "
+        "Useful for testing purposes. Default: False",
+    )
     args = parser.parse_args()
 
     # Load and compile Keras model
@@ -81,9 +101,18 @@ def main() -> None:
     # Load a subset of CIFAR-10 to simulate the local data partition
     (x_train, y_train), (x_test, y_test) = load_partition(args.partition)
 
+    if args.toy:
+        x_train, y_train = x_train[:10], y_train[:10]
+        x_test, y_test = x_test[:10], y_test[:10]
+
     # Start Flower client
     client = CifarClient(model, x_train, y_train, x_test, y_test)
-    fl.client.start_numpy_client("[::]:8080", client=client)
+
+    fl.client.start_numpy_client(
+        server_address="127.0.0.1:8080",
+        client=client,
+        root_certificates=Path(".cache/certificates/ca.crt").read_bytes(),
+    )
 
 
 def load_partition(idx: int):

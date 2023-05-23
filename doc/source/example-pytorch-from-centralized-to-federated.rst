@@ -12,14 +12,14 @@ Centralized Training
 We begin with a brief description of the centralized CNN training code.
 If you want a more in-depth explanation of what's going on then have a look at the official `PyTorch tutorial <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_.
 
-Let's create an new file called :code:`cifar.py` with all the components required for a traditional (centralized) training on CIFAR-10. 
+Let's create a new file called :code:`cifar.py` with all the components required for a traditional (centralized) training on CIFAR-10. 
 First, all required packages (such as :code:`torch` and :code:`torchvision`) need to be imported.
 You can see that we do not import any package for federated learning.
 You can keep all these imports as they are even when we add the federated learning components at a later point.
 
 .. code-block:: python
 
-    from typing import Tuple
+    from typing import Tuple, Dict
 
     import torch
     import torch.nn as nn
@@ -59,7 +59,7 @@ The :code:`load_data()` function loads the CIFAR-10 training and test sets. The 
 
     DATA_ROOT = "~/data/cifar-10"
 
-    def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+    def load_data() -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader, Dict]:
         """Load CIFAR-10 (training and test set)."""
         transform = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -68,11 +68,12 @@ The :code:`load_data()` function loads the CIFAR-10 training and test sets. The 
         trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True)
         testset = CIFAR10(DATA_ROOT, train=False, download=True, transform=transform)
         testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
-        return trainloader, testloader
+        num_examples = {"trainset" : len(trainset), "testset" : len(testset)}
+        return trainloader, testloader, num_examples
 
-We now need to define the training (function :code:`train()`) which loops over the training set, measures the the loss, backpropagetes it, and then takes one optimizer step for each batch of training examples.
+We now need to define the training (function :code:`train()`) which loops over the training set, measures the loss, backpropagates it, and then takes one optimizer step for each batch of training examples.
 
-The evalution of the model is defined in function :code:`test()`. The function loops over all test samples and measures the loss of the model based on the test dataset. 
+The evaluation of the model is defined in the function :code:`test()`. The function loops over all test samples and measures the loss of the model based on the test dataset. 
 
 .. code-block:: python
 
@@ -132,7 +133,7 @@ The evalution of the model is defined in function :code:`test()`. The function l
         accuracy = correct / total
         return loss, accuracy
 
-Having defined defining the data loading, model architecture, training, and evaluation we can put everything together and train our CNN on CIFAR-10.
+Having defined the data loading, model architecture, training, and evaluation we can put everything together and train our CNN on CIFAR-10.
 
 .. code-block:: python
 
@@ -140,11 +141,12 @@ Having defined defining the data loading, model architecture, training, and eval
         DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         print("Centralized PyTorch training")
         print("Load data")
-        trainloader, testloader = load_data()
+        trainloader, testloader, _ = load_data()
         print("Start training")
-        train(net=Net(), trainloader=trainloader, epochs=2, device=DEVICE)
+        net=Net().to(DEVICE)
+        train(net=net, trainloader=trainloader, epochs=2, device=DEVICE)
         print("Evaluate model")
-        loss, accuracy = test(net=Net(), testloader=testloader, device=DEVICE)
+        loss, accuracy = test(net=net, testloader=testloader, device=DEVICE)
         print("Loss: ", loss)
         print("Accuracy: ", accuracy)
 
@@ -158,15 +160,15 @@ You can now run your machine learning workload:
 
     python3 cifar.py
 
-So far this should all look fairly familiar if you've used PyTorch before.
+So far, this should all look fairly familiar if you've used PyTorch before.
 Let's take the next step and use what we've built to create a simple federated learning system consisting of one server and two clients.
 
 Federated Training
 ------------------
 
 The simple machine learning project discussed in the previous section trains the model on a single dataset (CIFAR-10), we call this centralized learning.
-This concept of centralized learning as shown in the previous section is probably known to most of you and many of you have used it previously.
-Normally, if you'd want to run machine learning workloads in a federated fashion then you'd have to change most of your code and set everything up from scratch. This can be a huge effort. 
+This concept of centralized learning, as shown in the previous section, is probably known to most of you, and many of you have used it previously.
+Normally, if you'd want to run machine learning workloads in a federated fashion, then you'd have to change most of your code and set everything up from scratch. This can be a considerable effort. 
 
 However, with Flower you can evolve your pre-existing code into a federated learning setup without the need for a major rewrite.
 
@@ -184,7 +186,7 @@ Next, we use the :code:`start_server` function to start a server and tell it to 
     import flwr as fl
 
     if __name__ == "__main__":
-        fl.server.start_server("0.0.0.0:8080", config={"num_rounds": 3})
+        fl.server.start_server(server_address="0.0.0.0:8080", config=fl.server.ServerConfig(num_rounds=3))
 
 We can already start the *server*:
 
@@ -242,36 +244,38 @@ We included type annotations to give you a better understanding of the data type
             model: cifar.Net,
             trainloader: torch.utils.data.DataLoader,
             testloader: torch.utils.data.DataLoader,
+            num_examples: Dict,
         ) -> None:
             self.model = model
             self.trainloader = trainloader
             self.testloader = testloader
+            self.num_examples = num_examples
 
-        def get_parameters(self) -> List[np.ndarray]:
+        def get_parameters(self, config) -> List[np.ndarray]:
             # Return model parameters as a list of NumPy ndarrays
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
         def set_parameters(self, parameters: List[np.ndarray]) -> None:
             # Set model parameters from a list of NumPy ndarrays
             params_dict = zip(self.model.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             self.model.load_state_dict(state_dict, strict=True)
 
         def fit(
             self, parameters: List[np.ndarray], config: Dict[str, str]
-        ) -> Tuple[List[np.ndarray], int]:
+        ) -> Tuple[List[np.ndarray], int, Dict]:
             # Set model parameters, train model, return updated model parameters
             self.set_parameters(parameters)
             cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
-            return self.get_parameters(), len(self.trainloader)
+            return self.get_parameters(config={}), self.num_examples["trainset"], {}
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict[str, str]
-        ) -> Tuple[int, float, float]:
+        ) -> Tuple[float, int, Dict]:
             # Set model parameters, evaluate model on local test dataset, return result
             self.set_parameters(parameters)
             loss, accuracy = cifar.test(self.model, self.testloader, device=DEVICE)
-            return len(self.testloader), float(loss), float(accuracy)
+            return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
 
 All that's left to do it to define a function that loads both model and data, creates a :code:`CifarClient`, and starts this client.
 You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient` with the function :code:`fl.client.start_numpy_client()` by pointing it at the same IP adress we used in :code:`server.py`: 
@@ -284,11 +288,11 @@ You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient
         # Load model and data
         model = cifar.Net()
         model.to(DEVICE)
-        trainloader, testloader = cifar.load_data()
+        trainloader, testloader, num_examples = cifar.load_data()
 
         # Start client
-        client = CifarClient(model, trainloader, testloader)
-        fl.client.start_numpy_client("0.0.0.0:8080", client)
+        client = CifarClient(model, trainloader, testloader, num_examples)
+        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client)
 
 
     if __name__ == "__main__":
@@ -300,11 +304,11 @@ And that's it. You can now open two additional terminal windows and run
 
     python3 client.py
 
-in each window (make sure that the server is still running before you do so) and see your (previously centralized) PyTorch project run federated learning across two clients. Congratulations!
+in each window (make sure that the server is running before you do so) and see your (previously centralized) PyTorch project run federated learning across two clients. Congratulations!
 
 Next Steps
 ----------
 
 The full source code for this example: `PyTorch: From Centralized To Federated (Code) <https://github.com/adap/flower/blob/main/examples/pytorch_from_centralized_to_federated>`_.
-Our example is of course somewhat over-simplified because both clients load the exact same dataset, which isn't realistic.
+Our example is, of course, somewhat over-simplified because both clients load the exact same dataset, which isn't realistic.
 You're now prepared to explore this topic further. How about using different subsets of CIFAR-10 on each client? How about adding more clients?

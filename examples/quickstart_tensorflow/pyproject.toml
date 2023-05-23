@@ -1,16 +1,15 @@
 [build-system]
-requires = [
-    "poetry==1.1.6",
-]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "quickstart_tensorflow"
 version = "0.1.0"
 description = "Keras Federated Learning Quickstart with Flower"
-authors = ["The Flower Authors <enquiries@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
-flwr = "^0.15.0"  # For development: { path = "../../", develop = true }
-tensorflow-cpu = "2.4.1"
+python = ">=3.8,<3.11"
+flwr = "^1.0.0"
+tensorflow-cpu = {version = "^2.9.1, !=2.11.1", markers="platform_machine == 'x86_64'"}
+tensorflow-macos = {version = "^2.9.1, !=2.11.1", markers="sys_platform == 'darwin' and platform_machine == 'arm64'"}
