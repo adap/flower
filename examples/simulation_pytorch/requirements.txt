@@ -1,5 +1,5 @@
 flwr~=1.4.0
-numpy~=1.21.1
+numpy~=1.24.3
 Pillow~=9.5.0
 ray~=2.4.0
 torch~=2.0.1
