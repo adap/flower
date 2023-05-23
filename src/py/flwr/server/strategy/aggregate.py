@@ -91,6 +91,66 @@ def aggregate_krum(
     return weights[np.argmin(scores)]
 
 
+def aggregate_bulyan(
+    results: List[Tuple[NDArrays, int]], num_malicious: int
+) -> NDArrays:
+    # S must be Dict[int, Tuple[NDArrays, int]] (selection set)
+    S = {}
+
+    # List of idx to keep track of the order of clients
+    tracker = np.arange(len(results))
+
+    # Create a list of weights and ignore the number of examples
+    weights = [weights for weights, _ in results]
+
+    theta = len(weights) - 2 * num_malicious
+    if theta <= 0:
+        theta = 1
+
+    beta = theta - 2 * num_malicious
+    if beta <= 0:
+        beta = 1
+
+    for _ in range(theta):
+        best_model = aggregate_krum(results, num_malicious, to_keep=0)
+
+        best_idx = None
+        for idx, el in enumerate(results):
+            if list(el[0][0]) == list(best_model[0]):
+                best_idx = idx
+                break
+
+        S[tracker[best_idx]] = results[best_idx]
+
+        # remove idx from tracker and weights_results
+        tracker = np.delete(tracker, best_idx)
+        results.pop(best_idx)
+
+    # Compute median parameter vector across S
+    median_vect = aggregate_median(S.values())
+
+    # Take the beta closest params to the median
+    distances = {}
+    for i in S.keys():
+        dist = [
+            np.abs(S[i][0][0][j] - median_vect[0][j]) for j in range(len(weights[0][0]))
+        ]
+        norm_sums = 0
+        for k in dist:
+            norm_sums += np.linalg.norm(k)
+        distances[i] = norm_sums
+
+    closest_idx = sorted(distances, key=distances.get)[:beta]
+    M = [S[i][0] for i in closest_idx]
+
+    # Apply FevAvg on M
+    parameters_aggregated: NDArrays = [
+        reduce(np.add, layers) / beta for layers in zip(*M)
+    ]
+
+    return parameters_aggregated
+
+
 def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
     """Aggregate evaluation results obtained from multiple clients."""
     num_total_evaluation_examples = sum([num_examples for num_examples, _ in results])
