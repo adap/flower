@@ -15,10 +15,11 @@
 # limitations under the License.
 # ==============================================================================
 
-./generate-requirements-txt.sh
-
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+
+# Regenerate requirements.txt files in case they changed
+./generate-requirements-txt.sh
 
 # Fail if user forgot to sync requirements.txt and pyproject.toml
 CHANGED=$(git diff --name-only HEAD examples)
