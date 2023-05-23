@@ -19,10 +19,12 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 # Regenerate requirements.txt files in case they changed
-./dev/generate-requirements-txt.sh
+./dev/generate-requirements-txt.sh 2> /dev/null
+
+pwd
 
 # Fail if user forgot to sync requirements.txt and pyproject.toml
-$(git diff --name-only HEAD examples)
+git diff --name-only HEAD examples
 CHANGED=$(git diff --name-only HEAD examples)
 
 if [ -n "$CHANGED" ]; then
