@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Fleet API servicer."""
+"""Fleet API gRPC request-response servicer."""
 
 
 from logging import INFO
@@ -27,6 +27,7 @@ from flwr.proto.fleet_pb2 import (
     PushTaskResRequest,
     PushTaskResResponse,
 )
+from flwr.server.fleet.message_handler import message_handler
 from flwr.server.state import State
 
 
@@ -39,15 +40,19 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     def PullTaskIns(
         self, request: PullTaskInsRequest, context: grpc.ServicerContext
     ) -> PullTaskInsResponse:
-        """."""
+        """Pull TaskIns."""
         log(INFO, "FleetServicer.PullTaskIns")
-
-        return PullTaskInsResponse(task_ins_list=[])
+        return message_handler.pull_task_ins(
+            request=request,
+            state=self.state,
+        )
 
     def PushTaskRes(
         self, request: PushTaskResRequest, context: grpc.ServicerContext
     ) -> PushTaskResResponse:
-        """."""
+        """Push TaskRes."""
         log(INFO, "FleetServicer.PushTaskRes")
-
-        return PushTaskResResponse(reconnect=None, results={})
+        return message_handler.push_task_res(
+            request=request,
+            state=self.state,
+        )
