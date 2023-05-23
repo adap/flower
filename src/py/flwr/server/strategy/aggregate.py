@@ -120,11 +120,13 @@ def aggregate_bulyan(
             if list(result[0][0]) == list(best_model[0]):
                 best_idx = idx
                 break
+        if best_idx is None:
+            raise ValueError("No matching model found in the results.")
 
         selected_models_set[tracker[best_idx]] = results[best_idx]
 
         # remove idx from tracker and weights_results
-        tracker = np.delete(tracker, best_idx)
+        tracker: NDArray = np.delete(tracker, best_idx)
         results.pop(best_idx)
 
     # Compute median parameter vector across selected_models_set
