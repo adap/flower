@@ -14,7 +14,7 @@
 # ==============================================================================
 """Bulyan [El Mhamdi et al., 2018] strategy.
 
-Paper: https://arxiv.org/pdf/1802.07927.pdf
+Paper: https://arxiv.org/abs/1802.07927
 """
 
 
