@@ -21,5 +21,7 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 # Purpose of this script is to regenerate requirements.txt
 for path in $(find ./examples -type f -name 'pyproject.toml' | sed -E 's|/[^/]+$||' |sort -u)
 do
+    echo -e "\nRunning pipreqs for example in ${path}"
+    ls $path 
     pipreqs --mode 'compat' --force --ignore .venv,poetry.lock $path
 done
