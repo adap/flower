@@ -139,6 +139,7 @@ def test_krum_num_evaluation_clients_minimum() -> None:
     assert expected == actual
 
 
+# pylint: disable=too-many-locals
 def test_aggregate_fit() -> None:
     """Tests if Bulyan is aggregating correctly."""
     # Prepare

@@ -16,7 +16,7 @@
 
 
 from functools import reduce
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 
@@ -56,7 +56,7 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
 def aggregate_krum(
     results: List[Tuple[NDArrays, int]], num_malicious: int, to_keep: int
 ) -> NDArrays:
-    """Choose one parameter vector according to the Krum fucntion.
+    """Choose one parameter vector according to the Krum function.
 
     If to_keep is not None, then MultiKrum is applied.
     """
@@ -91,11 +91,12 @@ def aggregate_krum(
     return weights[np.argmin(scores)]
 
 
+# pylint: disable=too-many-locals
 def aggregate_bulyan(
     results: List[Tuple[NDArrays, int]], num_malicious: int
 ) -> NDArrays:
-    # S must be Dict[int, Tuple[NDArrays, int]] (selection set)
-    S = {}
+    """Perform Bulyan aggregation."""
+    selected_models_set: Dict[int, Tuple[NDArrays, int]] = {}
 
     # List of idx to keep track of the order of clients
     tracker = np.arange(len(results))
@@ -115,37 +116,38 @@ def aggregate_bulyan(
         best_model = aggregate_krum(results, num_malicious, to_keep=0)
 
         best_idx = None
-        for idx, el in enumerate(results):
-            if list(el[0][0]) == list(best_model[0]):
+        for idx, result in enumerate(results):
+            if list(result[0][0]) == list(best_model[0]):
                 best_idx = idx
                 break
 
-        S[tracker[best_idx]] = results[best_idx]
+        selected_models_set[tracker[best_idx]] = results[best_idx]
 
         # remove idx from tracker and weights_results
         tracker = np.delete(tracker, best_idx)
         results.pop(best_idx)
 
-    # Compute median parameter vector across S
-    median_vect = aggregate_median(S.values())
+    # Compute median parameter vector across selected_models_set
+    median_vect = aggregate_median(list(selected_models_set.values()))
 
     # Take the beta closest params to the median
     distances = {}
-    for i in S.keys():
+    for idx, result in selected_models_set.items():
         dist = [
-            np.abs(S[i][0][0][j] - median_vect[0][j]) for j in range(len(weights[0][0]))
+            np.abs(result[0][0][j] - median_vect[0][j])
+            for j in range(len(weights[0][0]))
         ]
         norm_sums = 0
         for k in dist:
             norm_sums += np.linalg.norm(k)
-        distances[i] = norm_sums
+        distances[idx] = norm_sums
 
     closest_idx = sorted(distances, key=distances.get)[:beta]
-    M = [S[i][0] for i in closest_idx]
+    closest_models_to_median = [selected_models_set[i][0] for i in closest_idx]
 
-    # Apply FevAvg on M
+    # Apply FevAvg on closest_models_to_median
     parameters_aggregated: NDArrays = [
-        reduce(np.add, layers) / beta for layers in zip(*M)
+        reduce(np.add, layers) / beta for layers in zip(*closest_models_to_median)
     ]
 
     return parameters_aggregated
