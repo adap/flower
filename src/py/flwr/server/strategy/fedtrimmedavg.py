@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Averaging with Momentum (FedAvgM) [Hsu et al., 2019] strategy.
+"""Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]
 
-Paper: https://arxiv.org/pdf/1909.06335.pdf
+Paper: https://arxiv.org/abs/1803.01498
 """
-
-
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
@@ -31,18 +29,20 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.logger import log
-from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate
+from .aggregate import aggregate_trimmed_avg
 from .fedavg import FedAvg
 
 
 # flake8: noqa: E501
-class FedAvgM(FedAvg):
-    """Configurable FedAvg with Momentum strategy implementation."""
+class FedTrimmedAvg(FedAvg):
+    """Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
+    Paper: https://arxiv.org/abs/1803.01498
+    """
+
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         *,
@@ -63,13 +63,9 @@ class FedAvgM(FedAvg):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        server_learning_rate: float = 1.0,
-        server_momentum: float = 0.0,
+        beta: float = 0.2,
     ) -> None:
-        """Federated Averaging with Momentum strategy.
-
-        Implementation based on https://arxiv.org/pdf/1909.06335.pdf
-
+        """
         Parameters
         ----------
         fraction_fit : float, optional
@@ -82,7 +78,8 @@ class FedAvgM(FedAvg):
             Minimum number of clients used during validation. Defaults to 2.
         min_available_clients : int, optional
             Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
+        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],
+            Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
             Function used to configure training. Defaults to None.
@@ -92,11 +89,8 @@ class FedAvgM(FedAvg):
             Whether or not accept rounds containing failures. Defaults to True.
         initial_parameters : Parameters, optional
             Initial global model parameters.
-        server_learning_rate: float
-            Server-side learning rate used in server-side optimization.
-            Defaults to 1.0.
-        server_momentum: float
-            Server-side momentum factor used for FedAvgM. Defaults to 0.0.
+        beta : float, optional
+            Fraction to cut off of both tails of the distribution. Defaults to 0.2.
         """
 
         super().__init__(
@@ -113,22 +107,11 @@ class FedAvgM(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.server_learning_rate = server_learning_rate
-        self.server_momentum = server_momentum
-        self.server_opt: bool = (self.server_momentum != 0.0) or (
-            self.server_learning_rate != 1.0
-        )
-        self.momentum_vector: Optional[NDArrays] = None
+        self.beta = beta
 
     def __repr__(self) -> str:
-        rep = f"FedAvgM(accept_failures={self.accept_failures})"
+        rep = f"FedTrimmedAvg(accept_failures={self.accept_failures})"
         return rep
-
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
-        """Initialize global model parameters."""
-        return self.initial_parameters
 
     def aggregate_fit(
         self,
@@ -136,59 +119,21 @@ class FedAvgM(FedAvg):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate fit results using weighted average."""
+        """Aggregate fit results using trimmed average."""
         if not results:
             return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
+
         # Convert results
         weights_results = [
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-
-        fedavg_result = aggregate(weights_results)
-        # following convention described in
-        # https://pytorch.org/docs/stable/generated/torch.optim.SGD.html
-        if self.server_opt:
-            # You need to initialize the model
-            assert (
-                self.initial_parameters is not None
-            ), "When using server-side optimization, model needs to be initialized."
-            initial_weights = parameters_to_ndarrays(self.initial_parameters)
-
-            # remember that updates are the opposite of gradients
-            pseudo_gradient: NDArrays = [
-                x - y
-                for x, y in zip(
-                    parameters_to_ndarrays(self.initial_parameters), fedavg_result
-                )
-            ]
-            if self.server_momentum > 0.0:
-                if server_round > 1:
-                    assert (
-                        self.momentum_vector
-                    ), "Momentum should have been created on round 1."
-                    self.momentum_vector = [
-                        self.server_momentum * x + y
-                        for x, y in zip(self.momentum_vector, pseudo_gradient)
-                    ]
-                else:
-                    self.momentum_vector = pseudo_gradient
-
-                # No nesterov for now
-                pseudo_gradient = self.momentum_vector
-
-            # SGD
-            fedavg_result = [
-                x - self.server_learning_rate * y
-                for x, y in zip(initial_weights, pseudo_gradient)
-            ]
-            # Update current weights
-            self.initial_parameters = ndarrays_to_parameters(fedavg_result)
-
-        parameters_aggregated = ndarrays_to_parameters(fedavg_result)
+        parameters_aggregated = ndarrays_to_parameters(
+            aggregate_trimmed_avg(weights_results, self.beta)
+        )
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
