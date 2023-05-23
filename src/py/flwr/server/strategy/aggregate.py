@@ -126,7 +126,7 @@ def aggregate_bulyan(
         selected_models_set[tracker[best_idx]] = results[best_idx]
 
         # remove idx from tracker and weights_results
-        tracker = np.delete(tracker, best_idx) # type: ignore
+        tracker = np.delete(tracker, best_idx)  # type: ignore
         results.pop(best_idx)
 
     # Compute median parameter vector across selected_models_set
@@ -141,10 +141,10 @@ def aggregate_bulyan(
         ]
         norm_sums = 0
         for k in dist:
-            norm_sums += np.linalg.norm(k) # type: ignore
+            norm_sums += np.linalg.norm(k)  # type: ignore
         distances[idx] = norm_sums
 
-    closest_idx = sorted(distances, key= lambda idx: distances[idx])[:beta]
+    closest_idx = sorted(distances, key=lambda idx: distances[idx])[:beta]
     closest_models_to_median = [selected_models_set[i][0] for i in closest_idx]
 
     # Apply FevAvg on closest_models_to_median
