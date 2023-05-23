@@ -99,7 +99,7 @@ def aggregate_bulyan(
     selected_models_set: Dict[int, Tuple[NDArrays, int]] = {}
 
     # List of idx to keep track of the order of clients
-    tracker = np.arange(len(results))
+    tracker: NDArray = np.arange(len(results))
 
     # Create a list of weights and ignore the number of examples
     weights = [weights for weights, _ in results]
@@ -126,7 +126,7 @@ def aggregate_bulyan(
         selected_models_set[tracker[best_idx]] = results[best_idx]
 
         # remove idx from tracker and weights_results
-        tracker: NDArray = np.delete(tracker, best_idx)
+        tracker = np.delete(tracker, best_idx) # type: ignore
         results.pop(best_idx)
 
     # Compute median parameter vector across selected_models_set
@@ -141,10 +141,10 @@ def aggregate_bulyan(
         ]
         norm_sums = 0
         for k in dist:
-            norm_sums += np.linalg.norm(k)
+            norm_sums += np.linalg.norm(k) # type: ignore
         distances[idx] = norm_sums
 
-    closest_idx = sorted(distances, key=distances.get)[:beta]
+    closest_idx = sorted(distances, key= lambda idx: distances[idx])[:beta]
     closest_models_to_median = [selected_models_set[i][0] for i in closest_idx]
 
     # Apply FevAvg on closest_models_to_median
