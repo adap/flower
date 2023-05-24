@@ -36,11 +36,13 @@ The only requirement for the server is to have flower installed. You can do so b
 2. Extract the imgae (~14GB) and flash it onto the uSD card using Etcher (or equivalent).
 3. Follow [the instructions](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit) to setup the device.
 4. Installing Docker: Docker comes pre-installed with the Ubuntu image provided by NVIDIA. But for convinience we will create a new user group and add our user to it (with the idea of not having to use `sudo` for every command involving docker (e.g. `docker run`, `docker ps`, etc)). More details about what this entails can be found in the [Docker documentation](https://docs.docker.com/engine/install/linux-postinstall/). You can achieve this by doing:
+
     ``` bash
     $ sudo usermod -aG docker $USER
     # apply changes to current shell (or logout/reboot)
     $ newgrp docker
     ```
+
 5. The minimal installation to run this example only requires an additional package, `git`, in order to clone this repo. Install `git` by:
 
     ```bash
@@ -50,6 +52,7 @@ The only requirement for the server is to have flower installed. You can do so b
 6. (optional) additional packages:
         <img align="right" style="padding-top: 40px; padding-left: 15px" width="575" height="380" src="media/tmux_jtop_view.gif">
      * [jtop](https://github.com/rbonghi/jetson_stats),  to monitor CPU/GPU utilization, power consumption and, many more.
+
         ```bash
         # First we need to install pip3
         $ sudo apt-get install python3-pip -y 
@@ -58,7 +61,9 @@ The only requirement for the server is to have flower installed. You can do so b
         # finally, install jtop
         $ sudo -H pip3 install -U jetson-stats
         ```
+
      * [TMUX](https://github.com/tmux/tmux/wiki), a terminal multiplexer.
+
         ```bash
         # install tmux
         $ sudo apt-get install tmux -y
@@ -67,6 +72,7 @@ The only requirement for the server is to have flower installed. You can do so b
         ``` 
 
 7. Power modes: The Jetson devices can operate at different power modes, each making use of more or less CPU cores clocked at different freqencies. The right power mode might very much depend on the application and scenario. When power consumption is not a limiting factor, we could use the highest 15W mode using all 6 CPU cores. On the other hand, if the devices are battery-powered we might want to make use of a low power mode using 10W and 2 CPU cores. All the details regarding the different power modes of a Jetson Xavier-NX can be found [here](https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%2520Linux%2520Driver%2520Package%2520Development%2520Guide%2Fpower_management_jetson_xavier.html%23wwpID0E0NO0HA). For this demo we'll be setting the device to the high performance mode:
+
     ```bash
     $ sudo /usr/sbin/nvpmodel -m 2 # 15W with 6cpus @ 1.4GHz
     ```
@@ -76,6 +82,7 @@ The only requirement for the server is to have flower installed. You can do so b
 1. Install Ubuntu server 20.04 LTS 64-bit for Rapsberry Pi. You can do this by using one of the images provided [by Ubuntu](https://ubuntu.com/download/raspberry-pi) and then use Etcher. Alternativelly, astep-by-step installation guide, showing how to download and flash the image onto a uSD card and, go throught the first boot process, can be found [here](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi#1-overview). Please note that the first time you boot your RPi it will automatically update the system (which will lock `sudo` and prevent running the commands below for a few minutes)
 
 2. Install docker (+ post-installation steps as in [Docker Docs](https://docs.docker.com/engine/install/linux-postinstall/)):
+
     ```bash
     # make sure your OS is up-to-date
     $ sudo apt-get update
@@ -104,6 +111,7 @@ For this demo we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.h
 ## Server
 
 Launch the server and define the model you'd like to train. The current code (see `utils.py`) provides two models for CIFAR-10: a small CNN (more suitable for Raspberry Pi) and, a ResNet18, which will run well on the gpu. Each model can be specified using the `--model` flag with options `Net` or `ResNet18`. Launch a FL training setup with one client and doing three rounds as:
+
 ```bash
 # launch your server. It will be waiting until one client connects
 $ python server.py --server_address <YOUR_SERVER_IP:PORT> --rounds 3 --min_num_clients 1 --min_sample_size 1 --model ResNet18
