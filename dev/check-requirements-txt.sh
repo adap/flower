@@ -24,7 +24,7 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 pwd
 
 # Fail if user forgot to sync requirements.txt and pyproject.toml
-git diff --name-only HEAD examples
+git diff HEAD examples
 CHANGED=$(git diff --name-only HEAD examples)
 
 if [ -n "$CHANGED" ]; then
