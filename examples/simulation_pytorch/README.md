@@ -9,6 +9,7 @@ This code splits CIFAR-10 dataset into `pool_size` partitions (user defined) and
 *    A recent version of Ray. This example has been tested with Ray 1.4.1, 1.6 and 1.9.2.
 
 From a clean virtualenv or Conda environment with Python 3.7+, the following command will isntall all the dependencies needed:
+
 ```bash
 $ pip install -r requirements.txt
 ```
