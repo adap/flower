@@ -83,6 +83,7 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 * [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart_jax)
 * [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 * [Quickstart (TFLite on Android [code example])](https://github.com/adap/flower/tree/main/examples/android)
+* [Quickstart (iOS)](https://github.com/adap/flower/tree/main/examples/ios)
 
 ## Flower Baselines
 
