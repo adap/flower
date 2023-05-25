@@ -56,7 +56,10 @@ class Server:
     """Flower server."""
 
     def __init__(
-        self, *, client_manager: ClientManager, strategy: Optional[Strategy] = None
+        self,
+        *,
+        client_manager: ClientManager,
+        strategy: Optional[Strategy] = None,
     ) -> None:
         self._client_manager: ClientManager = client_manager
         self.parameters: Parameters = Parameters(
@@ -103,7 +106,10 @@ class Server:
 
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
-            res_fit = self.fit_round(server_round=current_round, timeout=timeout)
+            res_fit = self.fit_round(
+                server_round=current_round,
+                timeout=timeout,
+            )
             if res_fit is not None:
                 parameters_prime, fit_metrics, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
