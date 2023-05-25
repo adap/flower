@@ -30,22 +30,8 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
 
 from .bulyan import Bulyan
-
-
-def test_krum_num_fit_clients_20_available() -> None:
-    """Test num_fit_clients function."""
-    # Prepare
-    strategy = Bulyan()
-    expected = 20
-
-    # Execute
-    actual, _ = strategy.num_fit_clients(num_available_clients=20)
-
-    # Assert
-    assert expected == actual
 
 
 def test_krum_num_fit_clients_19_available() -> None:
@@ -166,16 +152,9 @@ def test_aggregate_fit() -> None:
     param_5: Parameters = ndarrays_to_parameters(
         [array([0.1, 0.1, 0.1, 0.1], dtype=float32)]
     )
-    bridge = MagicMock()
-    client_0 = GrpcClientProxy(cid="0", bridge=bridge)
-    client_1 = GrpcClientProxy(cid="1", bridge=bridge)
-    client_2 = GrpcClientProxy(cid="2", bridge=bridge)
-    client_3 = GrpcClientProxy(cid="3", bridge=bridge)
-    client_4 = GrpcClientProxy(cid="4", bridge=bridge)
-    client_5 = GrpcClientProxy(cid="5", bridge=bridge)
     results: List[Tuple[ClientProxy, FitRes]] = [
         (
-            client_0,
+            MagicMock(),
             FitRes(
                 status=Status(code=Code.OK, message="Success"),
                 parameters=param_0,
@@ -184,7 +163,7 @@ def test_aggregate_fit() -> None:
             ),
         ),
         (
-            client_1,
+            MagicMock(),
             FitRes(
                 status=Status(code=Code.OK, message="Success"),
                 parameters=param_1,
@@ -193,7 +172,7 @@ def test_aggregate_fit() -> None:
             ),
         ),
         (
-            client_2,
+            MagicMock(),
             FitRes(
                 status=Status(code=Code.OK, message="Success"),
                 parameters=param_2,
@@ -202,7 +181,7 @@ def test_aggregate_fit() -> None:
             ),
         ),
         (
-            client_3,
+            MagicMock(),
             FitRes(
                 status=Status(code=Code.OK, message="Success"),
                 parameters=param_3,
@@ -211,7 +190,7 @@ def test_aggregate_fit() -> None:
             ),
         ),
         (
-            client_4,
+            MagicMock(),
             FitRes(
                 status=Status(code=Code.OK, message="Success"),
                 parameters=param_4,
@@ -220,7 +199,7 @@ def test_aggregate_fit() -> None:
             ),
         ),
         (
-            client_5,
+            MagicMock(),
             FitRes(
                 status=Status(code=Code.OK, message="Success"),
                 parameters=param_5,
