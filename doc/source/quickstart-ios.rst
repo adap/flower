@@ -90,7 +90,8 @@ For the MNIST dataset, we need to preprocess it into :code:`MLBatchProvider` obj
   let testBatchProvider = DataLoader.testBatchProvider() { _ in }
             
   // load them together
-  let dataLoader = MLDataLoader(trainBatchProvider: trainBatchProvider, testBatchProvider: testBatchProvider)
+  let dataLoader = MLDataLoader(trainBatchProvider: trainBatchProvider, 
+                                testBatchProvider: testBatchProvider)
 
 Since CoreML does not allow the model parameters to be seen before training, and accessing the model parameters during or after the training can only be done by specifying the layer name,
 we need to know this informations beforehand, through looking at the model specification, which are written as proto files. The implementation can be seen in :code:`MLModelInspect`.
