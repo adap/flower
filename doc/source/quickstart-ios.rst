@@ -9,7 +9,7 @@ In this tutorial we will learn how to train a Neural Network on MNIST using Flow
 First of all, for running the Flower Python server, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_.
 For the Flower client implementation in iOS, it is recommended to use Xcode as our IDE.
 
-Our example consists of one Python *server* and iPhone *clients* that all have the same model. 
+Our example consists of one Python *server* and two iPhone *clients* that all have the same model. 
 
 *Clients* are responsible for generating individual weight updates for the model based on their local datasets. 
 These updates are then sent to the *server* which will aggregate them to produce a better model. Finally, the *server* sends this improved version of the model back to each *client*.
@@ -146,7 +146,8 @@ therefore have to start the server first:
     $ python server.py
 
 Once the server is running we can start the clients in different terminals.
-Build and run the client through your Xcode.
+Build and run the client through your Xcode, one through Xcode Simulator and the other by deploying it to your iPhone.
+To see more about how to deploy your app to iPhone or Simulator visit `here <https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device>`.
 
 Congratulations!
 You've successfully built and run your first federated learning system in your ios device.
