@@ -82,6 +82,7 @@ We need to pass the url to access mlmodel and run CoreML machine learning proces
 For the MNIST dataset, we need to preprocess it into :code:`MLBatchProvider` object. The preprocessing is done inside :code:`DataLoader.swift`.
 
 .. code-block:: swift
+  
   // prepare train dataset
   let trainBatchProvider = DataLoader.trainBatchProvider() { _ in }
             
