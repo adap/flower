@@ -147,7 +147,7 @@ therefore have to start the server first:
 
 Once the server is running we can start the clients in different terminals.
 Build and run the client through your Xcode, one through Xcode Simulator and the other by deploying it to your iPhone.
-To see more about how to deploy your app to iPhone or Simulator visit `here <https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device>`.
+To see more about how to deploy your app to iPhone or Simulator visit `here <https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device>`_.
 
 Congratulations!
 You've successfully built and run your first federated learning system in your ios device.
