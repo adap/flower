@@ -19,13 +19,13 @@ Now that we have a rough idea of what is going on, let's get started to setup ou
 
 .. code-block:: shell
 
-  $ pip install -r requirements.txt
+  $ pip install flwr
 
 Or Poetry:
 
 .. code-block:: shell
 
-  $ poetry install
+  $ poetry add flwr
 
 Flower Client
 -------------
