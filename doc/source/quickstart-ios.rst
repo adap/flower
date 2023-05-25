@@ -31,7 +31,9 @@ Flower Client
 
 Now that we have all our dependencies installed, let's run a simple distributed training using CoreML as our local training pipeline and MNIST as our dataset.
 For simplicity reasons we will use the complete Flower client with CoreML, that has been implemented and stored inside the Swift SDK. The client implementation can be seen below:
+
 .. code-block:: swift
+
   /// Parses the parameters from the local model and returns them as GetParametersRes struct
   ///
   /// - Returns: Parameters from the local model
@@ -67,6 +69,7 @@ Let's create a new application project in Xcode and add flwr as a dependency in 
 We will focus more on :code:`FLiOSModel.swift` in this quickstart. Please refer to the `full code example <https://github.com/adap/flower/tree/main/examples/ios>`_ to learn more about the app.
 
 Import Flower and CoreML related packages in :code:`FLiOSModel.swift`:
+
 .. code-block:: swift
 
   import Foundation
@@ -77,12 +80,28 @@ Then add the mlmodel to the project simply by drag-and-drop, the mlmodel will be
 We need to pass the url to access mlmodel and run CoreML machine learning processes, it can be retrieved by calling the function :code:`Bundle.main.url`.
 For the MNIST dataset, we need to preprocess it into :code:`MLBatchProvider` object. The preprocessing is done inside :code:`DataLoader.swift`.
 
+.. code-block:: swift
+  // prepare train dataset
+  let trainBatchProvider = DataLoader.trainBatchProvider() { _ in }
+            
+  // prepare test dataset
+  let testBatchProvider = DataLoader.testBatchProvider() { _ in }
+            
+  // load them together
+  let dataLoader = MLDataLoader(trainBatchProvider: trainBatchProvider, testBatchProvider: testBatchProvider)
+
 Since CoreML does not allow the model parameters to be seen before training, and accessing the model parameters during or after the training can only be done by specifying the layer name,
 we need to know this informations beforehand, through looking at the model specification, which are written as proto files. The implementation can be seen in :code:`MLModelInspect`.
 
 After we have all of the necessary informations, let's create our Flower client.
+
 .. code-block:: swift
+
   let compiledModelUrl = try MLModel.compileModel(at: url)
+
+  // inspect the model to be able to access the model parameters
+  // to access the model we need to know the layer name
+  // since the model parameters are stored as key value pairs
   let modelInspect = try MLModelInspect(serializedData: Data(contentsOf: url))
   let layerWrappers = modelInspect.getLayerWrappers()
   self.mlFlwrClient = MLFlwrClient(layerWrappers: layerWrappers,
@@ -92,12 +111,14 @@ After we have all of the necessary informations, let's create our Flower client.
 Then start the flower grpc client and start communicating to the server by passing our flower client to the function :code:`startFlwrGRPC`.
 
 .. code-block:: swift
+
   self.flwrGRPC = FlwrGRPC(serverHost: hostname, serverPort: port)
   self.flwrGRPC.startFlwrGRPC(client: self.mlFlwrClient)
 
 That's it for the client. We only have to implement :code:`Client` or call the provided
 :code:`MLFlwrClient` and call :code:`startFlwrGRPC()`. The attribute :code:`hostname` and :code:`port` tells the client which server to connect to. 
 This can be done by entering the hostname and port in the application before clicking the start button to start the federated learning process.
+
 Flower Server
 -------------
 
