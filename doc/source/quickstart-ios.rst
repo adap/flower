@@ -66,7 +66,7 @@ For simplicity reasons we will use the complete Flower client with CoreML, that 
     return EvaluateRes(loss: Float(result.loss), numExamples: result.numSamples, status: status)
   }
 
-Let's create a new application project in Xcode and add flwr as a dependency in your project. For our application, we will store the logic of our app in :code:`FLiOSModel.swift` and the UI elements in :code:`ContentView.swift`.
+Let's create a new application project in Xcode and add :code:`flwr` as a dependency in your project. For our application, we will store the logic of our app in :code:`FLiOSModel.swift` and the UI elements in :code:`ContentView.swift`.
 We will focus more on :code:`FLiOSModel.swift` in this quickstart. Please refer to the `full code example <https://github.com/adap/flower/tree/main/examples/ios>`_ to learn more about the app.
 
 Import Flower and CoreML related packages in :code:`FLiOSModel.swift`:
@@ -111,7 +111,7 @@ After we have all of the necessary informations, let's create our Flower client.
                                    dataLoader: dataLoader,
                                    compiledModelUrl: compiledModelUrl)
 
-Then start the Flower grpc client and start communicating to the server by passing our Flower client to the function :code:`startFlwrGRPC`.
+Then start the Flower gRPC client and start communicating to the server by passing our Flower client to the function :code:`startFlwrGRPC`.
 
 .. code-block:: swift
 
