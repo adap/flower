@@ -11,7 +11,7 @@ For the Flower client implementation in iOS, it is recommended to use Xcode as o
 
 Our example consists of one Python *server* and iPhone *clients* that all have the same model. 
 
-*Clients* are responsible for generating individual weight-updates for the model based on their local datasets. 
+*Clients* are responsible for generating individual weight updates for the model based on their local datasets. 
 These updates are then sent to the *server* which will aggregate them to produce a better model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of weight updates is called a *round*.
 
