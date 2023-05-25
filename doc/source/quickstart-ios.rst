@@ -6,8 +6,8 @@ Quickstart iOS
 
 In this tutorial we will learn how to train a Neural Network on MNIST using Flower and CoreML in iOS devices. 
 
-First of all, for running the flower Python server, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_.
-For the flower client implementation in iOS, it is recommended to use Xcode as our IDE.
+First of all, for running the Flower Python server, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_.
+For the Flower client implementation in iOS, it is recommended to use Xcode as our IDE.
 
 Our example consists of one Python *server* and iPhone *clients* that all have the same model. 
 
@@ -15,7 +15,7 @@ Our example consists of one Python *server* and iPhone *clients* that all have t
 These updates are then sent to the *server* which will aggregate them to produce a better model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of weight updates is called a *round*.
 
-Now that we have a rough idea of what is going on, let's get started to setup our flower server environment. We first need to install Flower. You can do this by using pip:
+Now that we have a rough idea of what is going on, let's get started to setup our Flower server environment. We first need to install Flower. You can do this by using pip:
 
 .. code-block:: shell
 
@@ -82,7 +82,7 @@ We need to pass the url to access mlmodel and run CoreML machine learning proces
 For the MNIST dataset, we need to preprocess it into :code:`MLBatchProvider` object. The preprocessing is done inside :code:`DataLoader.swift`.
 
 .. code-block:: swift
-  
+
   // prepare train dataset
   let trainBatchProvider = DataLoader.trainBatchProvider() { _ in }
             
@@ -110,7 +110,7 @@ After we have all of the necessary informations, let's create our Flower client.
                                    dataLoader: dataLoader,
                                    compiledModelUrl: compiledModelUrl)
 
-Then start the flower grpc client and start communicating to the server by passing our flower client to the function :code:`startFlwrGRPC`.
+Then start the Flower grpc client and start communicating to the server by passing our Flower client to the function :code:`startFlwrGRPC`.
 
 .. code-block:: swift
 
