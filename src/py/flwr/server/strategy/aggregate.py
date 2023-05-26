@@ -114,14 +114,8 @@ def aggregate_bulyan(
 
     for _ in range(theta):
         best_model = aggregate_krum(results, num_malicious, to_keep=0)
-
-        best_idx = None
-        for idx, result in enumerate(results):
-            if list(result[0][0]) == list(best_model[0]):
-                best_idx = idx
-                break
-        if best_idx is None:
-            raise ValueError("No matching model found in the results.")
+        list_of_weights = [weights for weights, num_samples in results]
+        best_idx = _find_reference_weights(best_model, list_of_weights)
 
         selected_models_set[tracker[best_idx]] = results[best_idx]
 
@@ -234,3 +228,40 @@ def aggregate_trimmed_avg(
     ]
 
     return trimmed_w
+
+
+def _check_weights_equality(weights1: NDArrays, weights2: NDArrays) -> bool:
+    """Check if weights are the same."""
+    return all(
+        np.array_equal(layer_weights1, layer_weights2)
+        for layer_weights1, layer_weights2 in zip(weights1, weights2)
+    )
+
+
+def _find_reference_weights(
+    reference_weights: NDArrays, list_of_weights: List[NDArrays]
+) -> int:
+    """Loop through the `list_of_weights` to find the reference weights, raise
+    Error if not found.
+
+    Parameters
+    ----------
+    reference_weights: NDArrays
+        Weights that will be searched for.
+    list_of_weights: List[NDArrays]
+        List of weights that will be searched through.
+
+    Returns
+    -------
+    index: int
+        The index of `reference_weights` in the `list_of_weights`.
+
+    Raises
+    ------
+    ValueError
+        If `reference_weights` is not found in `list_of_weights`.
+    """
+    for idx, weights in enumerate(list_of_weights):
+        if _check_weights_equality(reference_weights, weights):
+            return idx
+    raise ValueError("The reference weights not found in list_of_weights.")
