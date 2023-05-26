@@ -20,6 +20,7 @@ from typing import List, Tuple
 import numpy as np
 
 from .aggregate import (
+    _aggregate_n_closest_weights,
     _check_weights_equality,
     _find_reference_weights,
     aggregate,
@@ -109,3 +110,28 @@ def test_find_reference_weights() -> None:
 
     expected = 3
     assert result == expected
+
+
+def test_aggregate_n_closest_weights_mean() -> None:
+    beta_closest = 2
+    reference_weights = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
+
+    list_of_weights = [
+        [np.array([1, 2]), np.array([[1, 2], [3, 4]])],
+        [np.array([1.1, 2.1]), np.array([[1.1, 2.1], [3.1, 4.1]])],
+        [np.array([1.2, 2.2]), np.array([[1.2, 2.2], [3.2, 4.2]])],
+        [np.array([1.3, 2.3]), np.array([[0.9, 2.5], [3.4, 3.8]])],
+    ]
+    list_of_weights = [(weights, 0) for weights in list_of_weights]
+
+    beta_closest_weights = _aggregate_n_closest_weights(
+        reference_weights, list_of_weights, beta_closest=beta_closest
+    )
+    expected_averaged = [np.array([1.05, 2.05]), np.array([[0.95, 2.05], [3.05, 4.05]])]
+
+    assert all(
+        [
+            np.array_equal(expected, result)
+            for expected, result in zip(expected_averaged, beta_closest_weights)
+        ]
+    )
