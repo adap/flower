@@ -19,7 +19,12 @@ from typing import List, Tuple
 
 import numpy as np
 
-from .aggregate import _check_weights_equality, aggregate, weighted_loss_avg
+from .aggregate import (
+    _check_weights_equality,
+    _find_reference_weights,
+    aggregate,
+    weighted_loss_avg,
+)
 
 
 def test_aggregate() -> None:
@@ -83,9 +88,24 @@ def test_check_weights_equality_numeric_false() -> None:
     assert expected == results
 
 
-def test_check_weights_equality_various_legnth_false() -> None:
+def test_check_weights_equality_various_length_false() -> None:
     w1 = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
     w2 = [np.array([1, 2])]
     results = _check_weights_equality(w1, w2)
     expected = False
     assert expected == results
+
+
+def test_find_reference_weights() -> None:
+    reference_weights = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
+    list_of_weights = [
+        [np.array([2, 2]), np.array([[1, 2], [3, 4]])],
+        [np.array([3, 2]), np.array([[1, 2], [3, 4]])],
+        [np.array([3, 2]), np.array([[1, 2], [10, 4]])],
+        [np.array([1, 2]), np.array([[1, 2], [3, 4]])],
+    ]
+
+    result = _find_reference_weights(reference_weights, list_of_weights)
+
+    expected = 3
+    assert result == expected
