@@ -26,4 +26,3 @@ Run the server with `python server.py`. Then open two (or more) new terminals to
 Note: It is not possible to see the total privacy budget used with this example since the simulation creates clients from scratch every round.
 
 Run the simulation with `python dp_cifar_simulation.py`.
-
