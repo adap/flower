@@ -97,6 +97,7 @@ def aggregate_bulyan(
 ) -> NDArrays:
     """Perform Bulyan aggregation."""
     selected_models_set: Dict[int, Tuple[NDArrays, int]] = {}
+    # selected_models_set: List[Tuple[NDArrays, int]] = []
 
     # List of idx to keep track of the order of clients
     tracker: NDArray = np.arange(len(results))
@@ -126,26 +127,10 @@ def aggregate_bulyan(
     # Compute median parameter vector across selected_models_set
     median_vect = aggregate_median(list(selected_models_set.values()))
 
-    # Take the beta closest params to the median
-    distances = {}
-    for idx, result in selected_models_set.items():
-        dist = [
-            np.abs(result[0][0][j] - median_vect[0][j])
-            for j in range(len(weights[0][0]))
-        ]
-        norm_sums = 0
-        for k in dist:
-            norm_sums += np.linalg.norm(k)  # type: ignore
-        distances[idx] = norm_sums
-
-    closest_idx = sorted(distances, key=lambda idx: distances[idx])[:beta]
-    closest_models_to_median = [selected_models_set[i][0] for i in closest_idx]
-
-    # Apply FevAvg on closest_models_to_median
-    parameters_aggregated: NDArrays = [
-        reduce(np.add, layers) / beta for layers in zip(*closest_models_to_median)
-    ]
-
+    # Take the averaged beta parameters of the closest distance to the median (coordinate-wise)
+    parameters_aggregated = _aggregate_n_closest_weights(
+        median_vect, list(selected_models_set.values()), beta_closest=beta
+    )
     return parameters_aggregated
 
 
@@ -267,3 +252,47 @@ def _find_reference_weights(
         if _check_weights_equality(reference_weights, weights):
             return idx
     raise ValueError("The reference weights not found in list_of_weights.")
+
+
+def _aggregate_n_closest_weights(
+    reference_weights: NDArrays, results: List[Tuple[NDArrays, int]], beta_closest: int
+) -> NDArrays:
+    """It calculates element-wise mean of the `N` the closest values.
+
+    Note, each i-th coordinate of the result weight is the average of the beta_closest -ith
+    coordinates to the reference weights
+
+
+    Parameters
+    ----------
+    reference_weights: NDArrays
+        The weights from which the distances will be computed
+    results: List[Tuple[NDArrays, int]]
+        The weights from models
+    beta_closest: int
+        The number of the closest distance weights that will be averaged
+    Returns
+    -------
+    aggregated_weights: NDArrays
+        Averaged (element-wise) beta weights that have the closest distance to reference weights
+    """
+    list_of_weights = [weights for weights, num_examples in results]
+    aggregated_weights = []
+
+    for layer_id, layer_weights in enumerate(reference_weights):
+        other_weights_layer_list = []
+        for other_w in list_of_weights:
+            other_weights_layer = other_w[layer_id]
+            other_weights_layer_list.append(other_weights_layer)
+        other_weights_layer_np = np.array(other_weights_layer_list)
+        diff_np = np.abs(layer_weights - other_weights_layer_np)
+        # Create indices of the smallest differences
+        # We do not need  the exact order but just the beta closest weights
+        # therefore np.argpartition is used instead of np.argsort
+        indices = np.argpartition(diff_np, kth=beta_closest - 1, axis=0)
+        # Take the weights (coordinate-wise) corresponding to the beta of the closest distances
+        beta_closest_weights = np.take_along_axis(
+            other_weights_layer_np, indices=indices, axis=0
+        )[:beta_closest]
+        aggregated_weights.append(np.mean(beta_closest_weights, axis=0))
+    return aggregated_weights
