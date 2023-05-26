@@ -232,6 +232,8 @@ def aggregate_trimmed_avg(
 
 def _check_weights_equality(weights1: NDArrays, weights2: NDArrays) -> bool:
     """Check if weights are the same."""
+    if len(weights1) != len(weights2):
+        return False
     return all(
         np.array_equal(layer_weights1, layer_weights2)
         for layer_weights1, layer_weights2 in zip(weights1, weights2)
