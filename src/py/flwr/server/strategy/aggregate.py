@@ -96,11 +96,7 @@ def aggregate_bulyan(
     results: List[Tuple[NDArrays, int]], num_malicious: int
 ) -> NDArrays:
     """Perform Bulyan aggregation."""
-    selected_models_set: Dict[int, Tuple[NDArrays, int]] = {}
-    # selected_models_set: List[Tuple[NDArrays, int]] = []
-
-    # List of idx to keep track of the order of clients
-    tracker: NDArray = np.arange(len(results))
+    selected_models_set: List[Tuple[NDArrays, int]] = []
 
     # Create a list of weights and ignore the number of examples
     weights = [weights for weights, _ in results]
@@ -118,18 +114,17 @@ def aggregate_bulyan(
         list_of_weights = [weights for weights, num_samples in results]
         best_idx = _find_reference_weights(best_model, list_of_weights)
 
-        selected_models_set[tracker[best_idx]] = results[best_idx]
+        selected_models_set.append(results[best_idx])
 
         # remove idx from tracker and weights_results
-        tracker = np.delete(tracker, best_idx)  # type: ignore
         results.pop(best_idx)
 
     # Compute median parameter vector across selected_models_set
-    median_vect = aggregate_median(list(selected_models_set.values()))
+    median_vect = aggregate_median(selected_models_set)
 
     # Take the averaged beta parameters of the closest distance to the median (coordinate-wise)
     parameters_aggregated = _aggregate_n_closest_weights(
-        median_vect, list(selected_models_set.values()), beta_closest=beta
+        median_vect, selected_models_set, beta_closest=beta
     )
     return parameters_aggregated
 
