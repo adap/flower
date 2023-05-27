@@ -8,6 +8,14 @@ import grpc
 
 class FleetStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
+    NodeAvailable: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.NodeAvailableRequest,
+        flwr.proto.fleet_pb2.NodeAvailableResponse]
+
+    NodeUnavailable: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.NodeUnavailableRequest,
+        flwr.proto.fleet_pb2.NodeUnavailableResponse]
+
     PullTaskIns: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.PullTaskInsRequest,
         flwr.proto.fleet_pb2.PullTaskInsResponse]
@@ -26,6 +34,18 @@ class FleetStub:
 
 
 class FleetServicer(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def NodeAvailable(self,
+        request: flwr.proto.fleet_pb2.NodeAvailableRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fleet_pb2.NodeAvailableResponse: ...
+
+    @abc.abstractmethod
+    def NodeUnavailable(self,
+        request: flwr.proto.fleet_pb2.NodeUnavailableRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fleet_pb2.NodeUnavailableResponse: ...
+
     @abc.abstractmethod
     def PullTaskIns(self,
         request: flwr.proto.fleet_pb2.PullTaskInsRequest,

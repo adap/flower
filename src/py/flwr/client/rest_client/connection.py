@@ -237,8 +237,8 @@ def http_request_response(
             push_task_res_response_proto.results,  # pylint: disable=no-member
         )
 
-    # yield methods
     try:
-        yield (receive, send)
+        # Yield methods
+        yield (receive, send, None, None)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)

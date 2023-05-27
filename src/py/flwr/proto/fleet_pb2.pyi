@@ -13,6 +13,46 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
+class NodeAvailableRequest(google.protobuf.message.Message):
+    """NodeAvailable messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_FIELD_NUMBER: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
+    def __init__(self,
+        *,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node",b"node"]) -> None: ...
+global___NodeAvailableRequest = NodeAvailableRequest
+
+class NodeAvailableResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___NodeAvailableResponse = NodeAvailableResponse
+
+class NodeUnavailableRequest(google.protobuf.message.Message):
+    """NodeUnavailable messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_FIELD_NUMBER: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
+    def __init__(self,
+        *,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node",b"node"]) -> None: ...
+global___NodeUnavailableRequest = NodeUnavailableRequest
+
+class NodeUnavailableResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___NodeUnavailableResponse = NodeUnavailableResponse
+
 class PullTaskInsRequest(google.protobuf.message.Message):
     """PullTaskIns messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor

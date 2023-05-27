@@ -15,6 +15,7 @@
 """Contextmanager for a gRPC request-response channel to the Flower server."""
 
 
+import random
 from contextlib import contextmanager
 from logging import DEBUG, ERROR, WARN
 from pathlib import Path
@@ -24,7 +25,12 @@ from flwr.client.message_handler.task_handler import get_server_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.proto.fleet_pb2 import PullTaskInsRequest, PushTaskResRequest
+from flwr.proto.fleet_pb2 import (
+    NodeAvailableRequest,
+    NodeUnavailableRequest,
+    PullTaskInsRequest,
+    PushTaskResRequest,
+)
 from flwr.proto.fleet_pb2_grpc import FleetStub
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
@@ -92,16 +98,33 @@ def grpc_request_response(
     # Necessary state to link TaskRes to TaskIns
     state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
 
+    # Generate random node_id
+    random_node_id: int = random.randrange(9223372036854775808)
+
     ###########################################################################
     # receive/send functions
     ###########################################################################
+
+    def available() -> None:
+        """Set available."""
+        available_request = NodeAvailableRequest(
+            node=Node(node_id=random_node_id, anonymous=False)
+        )
+        stub.NodeAvailable(request=available_request)
+
+    def unavailable() -> None:
+        """Set unavailable."""
+        unavailable_request = NodeUnavailableRequest(
+            node=Node(node_id=random_node_id, anonymous=False)
+        )
+        stub.NodeUnavailable(request=unavailable_request)
 
     def receive() -> Optional[ServerMessage]:
         """Receive next task from server."""
 
         # Request instructions (task) from server
         request = PullTaskInsRequest(
-            node=Node(node_id=0, anonymous=True),
+            node=Node(node_id=random_node_id, anonymous=False),
         )
         response = stub.PullTaskIns(request=request)
 
@@ -134,7 +157,7 @@ def grpc_request_response(
             group_id=task_ins.group_id,
             workload_id=task_ins.workload_id,
             task=Task(
-                producer=Node(node_id=0, anonymous=True),
+                producer=Node(node_id=random_node_id, anonymous=False),
                 consumer=task_ins.task.producer,
                 legacy_client_message=client_message_proto,
                 ancestry=[task_ins.task_id],
@@ -147,8 +170,8 @@ def grpc_request_response(
 
         state[KEY_TASK_INS] = None
 
-    # yield methods
     try:
-        yield (receive, send)
+        # Yield methods
+        yield (receive, send, available, unavailable)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)

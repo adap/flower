@@ -21,6 +21,10 @@ import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
 
 service Fleet {
+  rpc NodeAvailable(NodeAvailableRequest) returns (NodeAvailableResponse) {}
+  rpc NodeUnavailable(NodeUnavailableRequest)
+      returns (NodeUnavailableResponse) {}
+
   // Retrieve one or more tasks, if possible
   //
   // HTTP API path: /api/v1/fleet/pull-task-ins
@@ -31,6 +35,14 @@ service Fleet {
   // HTTP API path: /api/v1/fleet/push-task-res
   rpc PushTaskRes(PushTaskResRequest) returns (PushTaskResResponse) {}
 }
+
+// NodeAvailable messages
+message NodeAvailableRequest { Node node = 1; }
+message NodeAvailableResponse {}
+
+// NodeUnavailable messages
+message NodeUnavailableRequest { Node node = 1; }
+message NodeUnavailableResponse {}
 
 // PullTaskIns messages
 message PullTaskInsRequest {

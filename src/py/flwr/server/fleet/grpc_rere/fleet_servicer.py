@@ -22,6 +22,10 @@ import grpc
 from flwr.common.logger import log
 from flwr.proto import fleet_pb2_grpc
 from flwr.proto.fleet_pb2 import (
+    NodeAvailableRequest,
+    NodeAvailableResponse,
+    NodeUnavailableRequest,
+    NodeUnavailableResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -36,6 +40,26 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
     def __init__(self, state: State) -> None:
         self.state = state
+
+    def NodeAvailable(
+        self, request: NodeAvailableRequest, context: grpc.ServicerContext
+    ) -> NodeAvailableResponse:
+        """."""
+        log(INFO, "FleetServicer.NodeAvailable")
+        return message_handler.node_available(
+            request=request,
+            state=self.state,
+        )
+
+    def NodeUnavailable(
+        self, request: NodeUnavailableRequest, context: grpc.ServicerContext
+    ) -> NodeUnavailableResponse:
+        """."""
+        log(INFO, "FleetServicer.NodeUnavailable")
+        return message_handler.node_unavailable(
+            request=request,
+            state=self.state,
+        )
 
     def PullTaskIns(
         self, request: PullTaskInsRequest, context: grpc.ServicerContext

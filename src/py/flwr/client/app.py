@@ -192,7 +192,11 @@ def start_client(
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
         ) as conn:
-            receive, send = conn
+            receive, send, available, unavailable = conn
+
+            # Tell server that client node is now available
+            if available is not None:
+                available()
 
             while True:
                 server_message = receive()
@@ -205,6 +209,11 @@ def start_client(
                 send(client_message)
                 if not keep_going:
                     break
+
+            # Tell server that client node is not available
+            if unavailable is not None:
+                unavailable()
+
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
             break

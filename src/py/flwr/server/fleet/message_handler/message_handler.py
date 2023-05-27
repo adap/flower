@@ -19,6 +19,10 @@ from typing import List, Optional
 from uuid import UUID
 
 from flwr.proto.fleet_pb2 import (
+    NodeAvailableRequest,
+    NodeAvailableResponse,
+    NodeUnavailableRequest,
+    NodeUnavailableResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -27,6 +31,34 @@ from flwr.proto.fleet_pb2 import (
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.state import State
+
+
+def node_available(
+    request: NodeAvailableRequest, state: State
+) -> NodeAvailableResponse:
+    """."""
+
+    # Validate node_id
+    if request.node.anonymous or request.node.node_id <= 0:
+        return NodeAvailableResponse()
+
+    # Update state
+    state.register_node(node_id=request.node.node_id)
+    return NodeAvailableResponse()
+
+
+def node_unavailable(
+    request: NodeUnavailableRequest, state: State
+) -> NodeUnavailableResponse:
+    """."""
+
+    # Validate node_id
+    if request.node.anonymous or request.node.node_id <= 0:
+        return NodeUnavailableResponse()
+
+    # Update state
+    state.unregister_node(node_id=request.node.node_id)
+    return NodeUnavailableResponse()
 
 
 def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:

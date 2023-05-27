@@ -16,16 +16,48 @@ from flwr.proto import node_pb2 as flwr_dot_proto_dot_node__pb2
 from flwr.proto import task_pb2 as flwr_dot_proto_dot_task__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x66lwr/proto/fleet.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/node.proto\x1a\x15\x66lwr/proto/task.proto\"F\n\x12PullTaskInsRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x10\n\x08task_ids\x18\x02 \x03(\t\"k\n\x13PullTaskInsResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12*\n\rtask_ins_list\x18\x02 \x03(\x0b\x32\x13.flwr.proto.TaskIns\"@\n\x12PushTaskResRequest\x12*\n\rtask_res_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskRes\"\xae\x01\n\x13PushTaskResResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12=\n\x07results\x18\x02 \x03(\x0b\x32,.flwr.proto.PushTaskResResponse.ResultsEntry\x1a.\n\x0cResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\"\x1e\n\tReconnect\x12\x11\n\treconnect\x18\x01 \x01(\x04\x32\xab\x01\n\x05\x46leet\x12P\n\x0bPullTaskIns\x12\x1e.flwr.proto.PullTaskInsRequest\x1a\x1f.flwr.proto.PullTaskInsResponse\"\x00\x12P\n\x0bPushTaskRes\x12\x1e.flwr.proto.PushTaskResRequest\x1a\x1f.flwr.proto.PushTaskResResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x66lwr/proto/fleet.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/node.proto\x1a\x15\x66lwr/proto/task.proto\"6\n\x14NodeAvailableRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\"\x17\n\x15NodeAvailableResponse\"8\n\x16NodeUnavailableRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\"\x19\n\x17NodeUnavailableResponse\"F\n\x12PullTaskInsRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x10\n\x08task_ids\x18\x02 \x03(\t\"k\n\x13PullTaskInsResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12*\n\rtask_ins_list\x18\x02 \x03(\x0b\x32\x13.flwr.proto.TaskIns\"@\n\x12PushTaskResRequest\x12*\n\rtask_res_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskRes\"\xae\x01\n\x13PushTaskResResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12=\n\x07results\x18\x02 \x03(\x0b\x32,.flwr.proto.PushTaskResResponse.ResultsEntry\x1a.\n\x0cResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\"\x1e\n\tReconnect\x12\x11\n\treconnect\x18\x01 \x01(\x04\x32\xe1\x02\n\x05\x46leet\x12V\n\rNodeAvailable\x12 .flwr.proto.NodeAvailableRequest\x1a!.flwr.proto.NodeAvailableResponse\"\x00\x12\\\n\x0fNodeUnavailable\x12\".flwr.proto.NodeUnavailableRequest\x1a#.flwr.proto.NodeUnavailableResponse\"\x00\x12P\n\x0bPullTaskIns\x12\x1e.flwr.proto.PullTaskInsRequest\x1a\x1f.flwr.proto.PullTaskInsResponse\"\x00\x12P\n\x0bPushTaskRes\x12\x1e.flwr.proto.PushTaskResRequest\x1a\x1f.flwr.proto.PushTaskResResponse\"\x00\x62\x06proto3')
 
 
 
+_NODEAVAILABLEREQUEST = DESCRIPTOR.message_types_by_name['NodeAvailableRequest']
+_NODEAVAILABLERESPONSE = DESCRIPTOR.message_types_by_name['NodeAvailableResponse']
+_NODEUNAVAILABLEREQUEST = DESCRIPTOR.message_types_by_name['NodeUnavailableRequest']
+_NODEUNAVAILABLERESPONSE = DESCRIPTOR.message_types_by_name['NodeUnavailableResponse']
 _PULLTASKINSREQUEST = DESCRIPTOR.message_types_by_name['PullTaskInsRequest']
 _PULLTASKINSRESPONSE = DESCRIPTOR.message_types_by_name['PullTaskInsResponse']
 _PUSHTASKRESREQUEST = DESCRIPTOR.message_types_by_name['PushTaskResRequest']
 _PUSHTASKRESRESPONSE = DESCRIPTOR.message_types_by_name['PushTaskResResponse']
 _PUSHTASKRESRESPONSE_RESULTSENTRY = _PUSHTASKRESRESPONSE.nested_types_by_name['ResultsEntry']
 _RECONNECT = DESCRIPTOR.message_types_by_name['Reconnect']
+NodeAvailableRequest = _reflection.GeneratedProtocolMessageType('NodeAvailableRequest', (_message.Message,), {
+  'DESCRIPTOR' : _NODEAVAILABLEREQUEST,
+  '__module__' : 'flwr.proto.fleet_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.NodeAvailableRequest)
+  })
+_sym_db.RegisterMessage(NodeAvailableRequest)
+
+NodeAvailableResponse = _reflection.GeneratedProtocolMessageType('NodeAvailableResponse', (_message.Message,), {
+  'DESCRIPTOR' : _NODEAVAILABLERESPONSE,
+  '__module__' : 'flwr.proto.fleet_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.NodeAvailableResponse)
+  })
+_sym_db.RegisterMessage(NodeAvailableResponse)
+
+NodeUnavailableRequest = _reflection.GeneratedProtocolMessageType('NodeUnavailableRequest', (_message.Message,), {
+  'DESCRIPTOR' : _NODEUNAVAILABLEREQUEST,
+  '__module__' : 'flwr.proto.fleet_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.NodeUnavailableRequest)
+  })
+_sym_db.RegisterMessage(NodeUnavailableRequest)
+
+NodeUnavailableResponse = _reflection.GeneratedProtocolMessageType('NodeUnavailableResponse', (_message.Message,), {
+  'DESCRIPTOR' : _NODEUNAVAILABLERESPONSE,
+  '__module__' : 'flwr.proto.fleet_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.NodeUnavailableResponse)
+  })
+_sym_db.RegisterMessage(NodeUnavailableResponse)
+
 PullTaskInsRequest = _reflection.GeneratedProtocolMessageType('PullTaskInsRequest', (_message.Message,), {
   'DESCRIPTOR' : _PULLTASKINSREQUEST,
   '__module__' : 'flwr.proto.fleet_pb2'
@@ -75,18 +107,26 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _PUSHTASKRESRESPONSE_RESULTSENTRY._options = None
   _PUSHTASKRESRESPONSE_RESULTSENTRY._serialized_options = b'8\001'
-  _PULLTASKINSREQUEST._serialized_start=84
-  _PULLTASKINSREQUEST._serialized_end=154
-  _PULLTASKINSRESPONSE._serialized_start=156
-  _PULLTASKINSRESPONSE._serialized_end=263
-  _PUSHTASKRESREQUEST._serialized_start=265
-  _PUSHTASKRESREQUEST._serialized_end=329
-  _PUSHTASKRESRESPONSE._serialized_start=332
-  _PUSHTASKRESRESPONSE._serialized_end=506
-  _PUSHTASKRESRESPONSE_RESULTSENTRY._serialized_start=460
-  _PUSHTASKRESRESPONSE_RESULTSENTRY._serialized_end=506
-  _RECONNECT._serialized_start=508
-  _RECONNECT._serialized_end=538
-  _FLEET._serialized_start=541
-  _FLEET._serialized_end=712
+  _NODEAVAILABLEREQUEST._serialized_start=84
+  _NODEAVAILABLEREQUEST._serialized_end=138
+  _NODEAVAILABLERESPONSE._serialized_start=140
+  _NODEAVAILABLERESPONSE._serialized_end=163
+  _NODEUNAVAILABLEREQUEST._serialized_start=165
+  _NODEUNAVAILABLEREQUEST._serialized_end=221
+  _NODEUNAVAILABLERESPONSE._serialized_start=223
+  _NODEUNAVAILABLERESPONSE._serialized_end=248
+  _PULLTASKINSREQUEST._serialized_start=250
+  _PULLTASKINSREQUEST._serialized_end=320
+  _PULLTASKINSRESPONSE._serialized_start=322
+  _PULLTASKINSRESPONSE._serialized_end=429
+  _PUSHTASKRESREQUEST._serialized_start=431
+  _PUSHTASKRESREQUEST._serialized_end=495
+  _PUSHTASKRESRESPONSE._serialized_start=498
+  _PUSHTASKRESRESPONSE._serialized_end=672
+  _PUSHTASKRESRESPONSE_RESULTSENTRY._serialized_start=626
+  _PUSHTASKRESRESPONSE_RESULTSENTRY._serialized_end=672
+  _RECONNECT._serialized_start=674
+  _RECONNECT._serialized_end=704
+  _FLEET._serialized_start=707
+  _FLEET._serialized_end=1060
 # @@protoc_insertion_point(module_scope)

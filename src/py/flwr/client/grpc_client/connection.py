@@ -106,7 +106,8 @@ def grpc_connection(
     send: Callable[[ClientMessage], None] = lambda msg: queue.put(msg, block=False)
 
     try:
-        yield (receive, send)
+        # Yield methods
+        yield (receive, send, None, None)
     finally:
         # Make sure to have a final
         channel.close()
