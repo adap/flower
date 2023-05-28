@@ -14,7 +14,7 @@
 # ==============================================================================
 """Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]
 
-Paper: https://arxiv.org/abs/1803.01498
+Paper: arxiv.org/abs/1803.01498
 """
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
