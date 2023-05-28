@@ -35,6 +35,7 @@ def _download_file(url, filename):
                         end="",
                     )
                 print("\nDownload complete.")
+                break
         except Exception as error:  # pylint: disable=broad-except
             print(f"\nError occurred during download: {error}")
             retries -= 1

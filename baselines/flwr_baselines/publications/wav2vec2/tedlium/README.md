@@ -39,7 +39,7 @@ Below is strucutre recommended to adapt the code. A data folder contains all pro
 
 For the csv files, please refer to this personal repository: [repo](https://github.com/tuanct1997/Federated-Learning-ASR-based-on-wav2vec-2.0).
 
-You can run `setup.sh` in order to download the data, setup the folder structure (described below), and set the CSV paths.
+You can run `setup.sh` in order to download the data (~51GB download, ~59GB after decompression), setup the folder structure (described below), and set the CSV paths.
 
 ```bash
 ├── data (created by `setup.sh`)

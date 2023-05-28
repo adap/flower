@@ -87,8 +87,8 @@ def _parse_arguments():
     )
     parser.add_argument(
         "--fraction_fit",
-        type=int,
-        default=1,
+        type=float,
+        default=0.01,
         help="ratio of total clients will be trained",
     )
     parser.add_argument(
