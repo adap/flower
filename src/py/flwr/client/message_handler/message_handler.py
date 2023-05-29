@@ -15,6 +15,7 @@
 """Client-side message handler."""
 
 
+import traceback
 from typing import Tuple
 
 from flwr.client.client import (
@@ -24,8 +25,8 @@ from flwr.client.client import (
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
-from flwr.common import serde
-from flwr.proto.task_pb2 import Task
+from flwr.common import serde, typing
+from flwr.proto.task_pb2 import SecAggMsg, Task
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 
@@ -71,7 +72,7 @@ def handle(
     raise UnknownServerMessage()
 
 
-def handle_task(
+def _handle_task(
     client: Client, task_msg: Task, handlers: dict
 ) -> Tuple[Task, int, bool]:
     """Handle incoming tasks.
@@ -93,6 +94,26 @@ def handle_task(
         return serde.task_msg_to_proto(usr_task), 0, True
 
     raise UnknownServerMessage()
+
+
+def handle_task(
+    client: Client, task_msg: Task, handlers: dict
+) -> Tuple[Task, int, bool]:
+    """Handle incoming tasks.
+
+    Temporary function, for testing Secure Aggregation only.
+    """
+    try:
+        return _handle_task(client, task_msg, handlers)
+    except Exception as e:
+        traceback.print_exc()
+        error_msg = typing.Task(
+            message_type="error",
+            secure_aggregation_message=typing.SecureAggregationMessage(
+                named_scalars={"error_message": str(e)}
+            ),
+        )
+        return serde.task_msg_to_proto(error_msg), 0, True
 
 
 def _reconnect(
