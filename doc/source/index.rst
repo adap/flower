@@ -53,8 +53,9 @@ A learning-oriented series of federated learning tutorials, the best place to st
    quickstart-mxnet
    quickstart-scikitlearn
    quickstart-xgboost
+   quickstart-ios
 
-QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <quickstart-tensorflow>` | :ref:`🤗 Transformers <quickstart-huggingface>` | :ref:`JAX <quickstart-jax>` | :ref:`Pandas <quickstart-pandas>` | :ref:`fastai <quickstart-fastai>` | :ref:`PyTorch Lightning <quickstart-pytorch-lightning>` | :ref:`MXNet <quickstart-mxnet>` | :ref:`scikit-learn <quickstart-scikitlearn>` | :ref:`XGBoost <quickstart-xgboost>`
+QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <quickstart-tensorflow>` | :ref:`🤗 Transformers <quickstart-huggingface>` | :ref:`JAX <quickstart-jax>` | :ref:`Pandas <quickstart-pandas>` | :ref:`fastai <quickstart-fastai>` | :ref:`PyTorch Lightning <quickstart-pytorch-lightning>` | :ref:`MXNet <quickstart-mxnet>` | :ref:`scikit-learn <quickstart-scikitlearn>` | :ref:`XGBoost <quickstart-xgboost>` | :ref:`iOS <quickstart-ios>`
 
 How-to guides
 ~~~~~~~~~~~~~
@@ -65,7 +66,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    :maxdepth: 1
    :caption: How-to guides
 
-   installation
+   install-flower
    configure-clients
    strategies
    implementing-strategies
@@ -103,8 +104,8 @@ Information-oriented API reference and other reference material.
    :maxdepth: 2
    :caption: API reference
 
-   flwr <apiref-flwr>
-   binaries <apiref-binaries>
+   flwr (Python package) <apiref-flwr>
+   Flower CLI commands <apiref-cli>
 
 .. toctree::
    :maxdepth: 1

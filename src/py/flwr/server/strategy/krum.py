@@ -16,7 +16,7 @@
 
 [Blanchard et al., 2017].
 
-Paper: https://proceedings.neurips.cc/paper/2017/file/f4b9ec30ad9f68f89b29639786cb62ef-Paper.pdf
+Paper: proceedings.neurips.cc/paper/2017/file/f4b9ec30ad9f68f89b29639786cb62ef-Paper.pdf
 """
 
 
@@ -37,13 +37,6 @@ from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate_krum
 from .fedavg import FedAvg
-
-WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
-Setting `min_available_clients` lower than `min_fit_clients` or
-`min_evaluate_clients` can cause the server to fail when there are too few clients
-connected to the server. `min_available_clients` must be set to a value larger
-than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
-"""
 
 
 # flake8: noqa: E501
@@ -104,12 +97,6 @@ class Krum(FedAvg):
             Initial global model parameters.
         """
 
-        if (
-            min_fit_clients > min_available_clients
-            or min_evaluate_clients > min_available_clients
-        ):
-            log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
-
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -124,8 +111,6 @@ class Krum(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
-        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
         self.num_malicious_clients = num_malicious_clients
         self.num_clients_to_keep = num_clients_to_keep
 

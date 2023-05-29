@@ -61,7 +61,7 @@ One the client side, we receive the configuration dictionary in ``fit``:
         def fit(parameters, config):
             print(config["batch_size"])  # Prints `32`
             print(config["current_round"])  # Prints `1`/`2`/`...`
-            print(config["batch_size"])  # Prints `2`
+            print(config["local_epochs"])  # Prints `2`
             # ... (rest of `fit` method)
 
 There is also an `on_evaluate_config_fn` to configure evaluation, which works the same way. They are separate functions because one might want to send different configuration values to `evaluate` (for example, to use a different batch size).

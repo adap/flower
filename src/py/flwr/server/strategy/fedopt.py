@@ -15,7 +15,7 @@
 """Adaptive Federated Optimization (FedOpt) [Reddi et al., 2020] abstract
 strategy.
 
-Paper: https://arxiv.org/abs/2003.00295
+Paper: arxiv.org/abs/2003.00295
 """
 
 
