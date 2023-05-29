@@ -20,7 +20,13 @@ def get_workflow_factory() -> (
     return _wrap_workflow_with_sec_agg
 
 
-_secure_aggregation_configuration = {"threshold": 2, "test_dropouts": 1}
+_secure_aggregation_configuration = {
+    "threshold": 2,
+    "test_dropouts": 1,
+    "clipping_range": 3,
+    "target_range": 1 << 16,
+    "mod_range": 1 << 24,
+}
 
 # def workflow_without_sec_agg(parameters: Parameters, sampled_node_ids: List[int]) \
 #         -> Generator[Dict[int, Task], Union[List[int], Dict[int, Task]], None]:
@@ -77,6 +83,9 @@ def workflow_with_sec_agg(
         "stage": stages[0],
         "share_num": len(sampled_node_ids),
         "threshold": sec_agg_config["threshold"],
+        "clipping_range": sec_agg_config["clipping_range"],
+        "target_range": sec_agg_config["target_range"],
+        "mod_range": sec_agg_config["mod_range"],
     }
     # randomly assign secure id to clients
     sids = [i for i in range(len(sampled_node_ids))]
@@ -163,6 +172,7 @@ def workflow_with_sec_agg(
     """
 
     # send encrypted secret key shares to clients (plus model parameters)
+    weights = parameters_to_ndarrays(parameters)
     yield {
         node_id: Task(
             message_type="sec_agg",
@@ -172,7 +182,7 @@ def workflow_with_sec_agg(
                     "srcs": fwd_srcs[nid2sid[node_id]],
                     "stage": stages[2],
                 },
-                named_arrays={"parameters": parameters_to_ndarrays(parameters)},
+                named_arrays={"parameters": weights},
             ),
         )
         for node_id in surviving_node_ids
@@ -186,7 +196,9 @@ def workflow_with_sec_agg(
     }
     surviving_node_ids = [node_id for node_id in node_messages]
     # Get shape of vector sent by first client
-    masked_vector = [np.array([0], dtype=int), np.zeros(10000, dtype=int)]
+    masked_vector = [np.array([0], dtype=int)] + weights_zero_generate(
+        [w.shape for w in weights]
+    )
     # Add all collected masked vectors and compuute available and dropout clients set
     dead_sids = [
         nid2sid[node_id]

@@ -81,6 +81,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     }
 
 
+print(get_parameters(net=Net()))
 # -------------------------------------------------------------------------- Driver SDK
 driver = Driver(driver_service_address="0.0.0.0:9091", certificates=None)
 # -------------------------------------------------------------------------- Driver SDK

@@ -83,9 +83,9 @@ def setup(self: FlowerClient, task: Task) -> Task:
     self.share_num = sec_agg_param_dict["share_num"]
     self.threshold = sec_agg_param_dict["threshold"]
     self.drop_flag = sec_agg_param_dict["test_drop"]
-    self.clipping_range = 3
-    self.target_range = 1 << 16
-    self.mod_range = 1 << 24
+    self.clipping_range = sec_agg_param_dict["clipping_range"]
+    self.target_range = sec_agg_param_dict["target_range"]
+    self.mod_range = sec_agg_param_dict["mod_range"]
 
     # key is the secure id of another client (int)
     # value is the secret share we possess that contributes to the client's secret (bytes)
