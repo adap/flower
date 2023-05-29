@@ -14,7 +14,7 @@
 # ==============================================================================
 """FAIR RESOURCE ALLOCATION IN FEDERATED LEARNING [Li et al., 2020] strategy.
 
-Paper: https://openreview.net/pdf?id=ByexElSYDr
+Paper: openreview.net/pdf?id=ByexElSYDr
 """
 
 

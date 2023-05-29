@@ -15,7 +15,7 @@
 """Federated Averaging (FedAvg) [McMahan et al., 2016] strategy with custom
 serialization for Android devices.
 
-Paper: https://arxiv.org/abs/1602.05629
+Paper: arxiv.org/abs/1602.05629
 """
 
 

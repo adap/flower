@@ -14,7 +14,7 @@
 # ==============================================================================
 """DP-FedAvg [McMahan et al., 2018] strategy.
 
-Paper: https://arxiv.org/pdf/1710.06963.pdf
+Paper: arxiv.org/pdf/1710.06963.pdf
 """
 
 
