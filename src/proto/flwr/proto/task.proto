@@ -27,7 +27,10 @@ message Task {
   string delivered_at = 4;
   string ttl = 5;
   repeated string ancestry = 6;
-  SecAggMsg sec_agg = 7;
+
+  string message_type = 7;
+
+  SecAggMsg sec_agg = 8;
 
   ServerMessage legacy_server_message = 101 [ deprecated = true ];
   ClientMessage legacy_client_message = 102 [ deprecated = true ];

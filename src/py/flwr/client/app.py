@@ -53,7 +53,8 @@ from flwr.common.typing import (
 from .client import Client
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
-from .message_handler.message_handler import handle
+from .message_handler.handler_registry import get_handlers
+from .message_handler.message_handler import handle, handle_task
 from .numpy_client import NumPyClient
 from .numpy_client import has_evaluate as numpyclient_has_evaluate
 from .numpy_client import has_fit as numpyclient_has_fit
@@ -185,45 +186,85 @@ def start_client(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
         )
 
-    while True:
-        sleep_duration: int = 0
-        with connection(
-            address,
-            max_message_length=grpc_max_message_length,
-            root_certificates=root_certificates,
-        ) as conn:
-            receive, send, available, unavailable = conn
+    if transport == TRANSPORT_TYPE_GRPC_RERE:
+        handlers = get_handlers(client)
+        while True:
+            sleep_duration: int = 0
+            with connection(
+                address,
+                max_message_length=grpc_max_message_length,
+                root_certificates=root_certificates,
+            ) as conn:
+                receive, send, available, unavailable = conn
 
-            # Tell server that client node is now available
-            if available is not None:
-                available()
+                # Tell server that client node is now available
+                if available is not None:
+                    available()
 
-            while True:
-                server_message = receive()
-                if server_message is None:
-                    time.sleep(3)  # Wait for 3s before asking again
-                    continue
-                client_message, sleep_duration, keep_going = handle(
-                    client, server_message
-                )
-                send(client_message)
-                if not keep_going:
-                    break
+                while True:
+                    recv_task = receive()
+                    if recv_task is None:
+                        time.sleep(3)  # Wait for 3s before asking again
+                        continue
+                    send_task, sleep_duration, keep_going = handle_task(
+                        client, recv_task, handlers
+                    )
+                    send(send_task)
+                    if not keep_going:
+                        break
 
-            # Tell server that client node is not available
-            if unavailable is not None:
-                unavailable()
+                # Tell server that client node is not available
+                if unavailable is not None:
+                    unavailable()
 
-        if sleep_duration == 0:
-            log(INFO, "Disconnect and shut down")
-            break
-        # Sleep and reconnect afterwards
-        log(
-            INFO,
-            "Disconnect, then re-establish connection after %s second(s)",
-            sleep_duration,
-        )
-        time.sleep(sleep_duration)
+            if sleep_duration == 0:
+                log(INFO, "Disconnect and shut down")
+                break
+            # Sleep and reconnect afterwards
+            log(
+                INFO,
+                "Disconnect, then re-establish connection after %s second(s)",
+                sleep_duration,
+            )
+            time.sleep(sleep_duration)
+    else:
+        while True:
+            sleep_duration: int = 0
+            with connection(
+                address,
+                max_message_length=grpc_max_message_length,
+                root_certificates=root_certificates,
+            ) as conn:
+                receive, send, available, unavailable = conn
+
+                # Tell server that client node is now available
+                if available is not None:
+                    available()
+
+                while True:
+                    recv_task = receive()
+                    if recv_task is None:
+                        time.sleep(3)  # Wait for 3s before asking again
+                        continue
+                    send_task, sleep_duration, keep_going = handle(client, recv_task)
+                    send(send_task)
+                    if not keep_going:
+                        break
+
+                # Tell server that client node is not available
+                if unavailable is not None:
+                    unavailable()
+
+            if sleep_duration == 0:
+                log(INFO, "Disconnect and shut down")
+                break
+            # Sleep and reconnect afterwards
+            log(
+                INFO,
+                "Disconnect, then re-establish connection after %s second(s)",
+                sleep_duration,
+            )
+            time.sleep(sleep_duration)
 
     event(EventType.START_CLIENT_LEAVE)
 
@@ -396,6 +437,10 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
 
     if numpyclient_has_evaluate(client=client):
         member_dict["evaluate"] = _evaluate
+
+    # TEMPORARY: Will be removed
+    if hasattr(client, "handle_secagg"):
+        member_dict["handle_secagg"] = type(client).handle_secagg
 
     # Create wrapper class
     wrapper_class = type("NumPyClientWrapper", (Client,), member_dict)

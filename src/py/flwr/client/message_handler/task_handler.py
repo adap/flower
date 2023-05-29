@@ -18,7 +18,7 @@
 from typing import Optional, Tuple
 
 from flwr.proto.fleet_pb2 import PullTaskInsResponse
-from flwr.proto.task_pb2 import TaskIns
+from flwr.proto.task_pb2 import Task, TaskIns
 from flwr.proto.transport_pb2 import ServerMessage
 
 
@@ -44,3 +44,23 @@ def get_server_message(
         return None
 
     return task_ins, task_ins.task.legacy_server_message
+
+
+def get_task_message(
+    pull_task_ins_response: PullTaskInsResponse,
+) -> Optional[Tuple[TaskIns, Task]]:
+    """Get the first ServerMessage, if available."""
+
+    # Extract a single ServerMessage from the response, if possible
+    if len(pull_task_ins_response.task_ins_list) == 0:
+        return None
+
+    # Only evaluate the first message
+    task_ins: TaskIns = pull_task_ins_response.task_ins_list[0]
+
+    # Discard the message if it is not in
+    # {GetPropertiesIns, GetParametersIns, FitIns, EvaluateIns}
+    if not task_ins.HasField("task"):
+        return None
+
+    return task_ins, task_ins.task

@@ -25,6 +25,7 @@ from flwr.client.client import (
     maybe_call_get_properties,
 )
 from flwr.common import serde
+from flwr.proto.task_pb2 import Task
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 
@@ -67,6 +68,30 @@ def handle(
         return _fit(client, server_msg.fit_ins), 0, True
     if field == "evaluate_ins":
         return _evaluate(client, server_msg.evaluate_ins), 0, True
+    raise UnknownServerMessage()
+
+
+def handle_task(
+    client: Client, task_msg: Task, handlers: dict
+) -> Tuple[Task, int, bool]:
+    """Handle incoming tasks.
+
+    Temporary function, for testing Secure Aggregation only.
+    """
+    if task_msg.HasField("legacy_server_message"):
+        print(f"handle_task: Legacy Server Message")
+        client_msg, sleep_duration, keep_going = handle(
+            client, task_msg.legacy_server_message
+        )
+        task_msg = Task(legacy_client_message=client_msg)
+        return task_msg, sleep_duration, keep_going
+
+    if task_msg.message_type in handlers:
+        print(f"handle_task: {task_msg.message_type}")
+        usr_task = serde.task_msg_from_proto(task_msg)
+        usr_task = getattr(client, handlers[task_msg.message_type])(usr_task)
+        return serde.task_msg_to_proto(usr_task), 0, True
+
     raise UnknownServerMessage()
 
 

@@ -16,7 +16,7 @@ from flwr.proto import node_pb2 as flwr_dot_proto_dot_node__pb2
 from flwr.proto import transport_pb2 as flwr_dot_proto_dot_transport__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x66lwr/proto/task.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/node.proto\x1a\x1a\x66lwr/proto/transport.proto\"\xbb\x02\n\x04Task\x12\"\n\x08producer\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\"\n\x08\x63onsumer\x18\x02 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x12\n\ncreated_at\x18\x03 \x01(\t\x12\x14\n\x0c\x64\x65livered_at\x18\x04 \x01(\t\x12\x0b\n\x03ttl\x18\x05 \x01(\t\x12\x10\n\x08\x61ncestry\x18\x06 \x03(\t\x12&\n\x07sec_agg\x18\x07 \x01(\x0b\x32\x15.flwr.proto.SecAggMsg\x12<\n\x15legacy_server_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ServerMessageB\x02\x18\x01\x12<\n\x15legacy_client_message\x18\x66 \x01(\x0b\x32\x19.flwr.proto.ClientMessageB\x02\x18\x01\"a\n\x07TaskIns\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08group_id\x18\x02 \x01(\t\x12\x13\n\x0bworkload_id\x18\x03 \x01(\t\x12\x1e\n\x04task\x18\x04 \x01(\x0b\x32\x10.flwr.proto.Task\"a\n\x07TaskRes\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08group_id\x18\x02 \x01(\t\x12\x13\n\x0bworkload_id\x18\x03 \x01(\t\x12\x1e\n\x04task\x18\x04 \x01(\x0b\x32\x10.flwr.proto.Task\"\xc9\x06\n\tSecAggMsg\x12<\n\x0cnamed_arrays\x18\x01 \x03(\x0b\x32&.flwr.proto.SecAggMsg.NamedArraysEntry\x12:\n\x0bnamed_bytes\x18\x02 \x03(\x0b\x32%.flwr.proto.SecAggMsg.NamedBytesEntry\x12>\n\rnamed_scalars\x18\x03 \x03(\x0b\x32\'.flwr.proto.SecAggMsg.NamedScalarsEntry\x1au\n\x06\x41rrays\x12\x12\n\x08singular\x18\x01 \x01(\x0cH\x00\x12\x35\n\x06plural\x18\x02 \x01(\x0b\x32#.flwr.proto.SecAggMsg.Arrays.PluralH\x00\x1a\x17\n\x06Plural\x12\r\n\x05value\x18\x01 \x03(\x0c\x42\x07\n\x05value\x1as\n\x05\x42ytes\x12\x12\n\x08singular\x18\x01 \x01(\x0cH\x00\x12\x34\n\x06plural\x18\x02 \x01(\x0b\x32\".flwr.proto.SecAggMsg.Bytes.PluralH\x00\x1a\x17\n\x06Plural\x12\r\n\x05value\x18\x01 \x03(\x0c\x42\x07\n\x05value\x1a\x9f\x01\n\x07Scalars\x12&\n\x08singular\x18\x01 \x01(\x0b\x32\x12.flwr.proto.ScalarH\x00\x12\x36\n\x06plural\x18\x02 \x01(\x0b\x32$.flwr.proto.SecAggMsg.Scalars.PluralH\x00\x1a+\n\x06Plural\x12!\n\x05value\x18\x01 \x03(\x0b\x32\x12.flwr.proto.ScalarB\x07\n\x05value\x1aP\n\x10NamedArraysEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12+\n\x05value\x18\x02 \x01(\x0b\x32\x1c.flwr.proto.SecAggMsg.Arrays:\x02\x38\x01\x1aN\n\x0fNamedBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12*\n\x05value\x18\x02 \x01(\x0b\x32\x1b.flwr.proto.SecAggMsg.Bytes:\x02\x38\x01\x1aR\n\x11NamedScalarsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12,\n\x05value\x18\x02 \x01(\x0b\x32\x1d.flwr.proto.SecAggMsg.Scalars:\x02\x38\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x66lwr/proto/task.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/node.proto\x1a\x1a\x66lwr/proto/transport.proto\"\xd1\x02\n\x04Task\x12\"\n\x08producer\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\"\n\x08\x63onsumer\x18\x02 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x12\n\ncreated_at\x18\x03 \x01(\t\x12\x14\n\x0c\x64\x65livered_at\x18\x04 \x01(\t\x12\x0b\n\x03ttl\x18\x05 \x01(\t\x12\x10\n\x08\x61ncestry\x18\x06 \x03(\t\x12\x14\n\x0cmessage_type\x18\x07 \x01(\t\x12&\n\x07sec_agg\x18\x08 \x01(\x0b\x32\x15.flwr.proto.SecAggMsg\x12<\n\x15legacy_server_message\x18\x65 \x01(\x0b\x32\x19.flwr.proto.ServerMessageB\x02\x18\x01\x12<\n\x15legacy_client_message\x18\x66 \x01(\x0b\x32\x19.flwr.proto.ClientMessageB\x02\x18\x01\"a\n\x07TaskIns\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08group_id\x18\x02 \x01(\t\x12\x13\n\x0bworkload_id\x18\x03 \x01(\t\x12\x1e\n\x04task\x18\x04 \x01(\x0b\x32\x10.flwr.proto.Task\"a\n\x07TaskRes\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08group_id\x18\x02 \x01(\t\x12\x13\n\x0bworkload_id\x18\x03 \x01(\t\x12\x1e\n\x04task\x18\x04 \x01(\x0b\x32\x10.flwr.proto.Task\"\xc9\x06\n\tSecAggMsg\x12<\n\x0cnamed_arrays\x18\x01 \x03(\x0b\x32&.flwr.proto.SecAggMsg.NamedArraysEntry\x12:\n\x0bnamed_bytes\x18\x02 \x03(\x0b\x32%.flwr.proto.SecAggMsg.NamedBytesEntry\x12>\n\rnamed_scalars\x18\x03 \x03(\x0b\x32\'.flwr.proto.SecAggMsg.NamedScalarsEntry\x1au\n\x06\x41rrays\x12\x12\n\x08singular\x18\x01 \x01(\x0cH\x00\x12\x35\n\x06plural\x18\x02 \x01(\x0b\x32#.flwr.proto.SecAggMsg.Arrays.PluralH\x00\x1a\x17\n\x06Plural\x12\r\n\x05value\x18\x01 \x03(\x0c\x42\x07\n\x05value\x1as\n\x05\x42ytes\x12\x12\n\x08singular\x18\x01 \x01(\x0cH\x00\x12\x34\n\x06plural\x18\x02 \x01(\x0b\x32\".flwr.proto.SecAggMsg.Bytes.PluralH\x00\x1a\x17\n\x06Plural\x12\r\n\x05value\x18\x01 \x03(\x0c\x42\x07\n\x05value\x1a\x9f\x01\n\x07Scalars\x12&\n\x08singular\x18\x01 \x01(\x0b\x32\x12.flwr.proto.ScalarH\x00\x12\x36\n\x06plural\x18\x02 \x01(\x0b\x32$.flwr.proto.SecAggMsg.Scalars.PluralH\x00\x1a+\n\x06Plural\x12!\n\x05value\x18\x01 \x03(\x0b\x32\x12.flwr.proto.ScalarB\x07\n\x05value\x1aP\n\x10NamedArraysEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12+\n\x05value\x18\x02 \x01(\x0b\x32\x1c.flwr.proto.SecAggMsg.Arrays:\x02\x38\x01\x1aN\n\x0fNamedBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12*\n\x05value\x18\x02 \x01(\x0b\x32\x1b.flwr.proto.SecAggMsg.Bytes:\x02\x38\x01\x1aR\n\x11NamedScalarsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12,\n\x05value\x18\x02 \x01(\x0b\x32\x1d.flwr.proto.SecAggMsg.Scalars:\x02\x38\x01\x62\x06proto3')
 
 
 
@@ -147,29 +147,29 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _SECAGGMSG_NAMEDSCALARSENTRY._options = None
   _SECAGGMSG_NAMEDSCALARSENTRY._serialized_options = b'8\001'
   _TASK._serialized_start=89
-  _TASK._serialized_end=404
-  _TASKINS._serialized_start=406
-  _TASKINS._serialized_end=503
-  _TASKRES._serialized_start=505
-  _TASKRES._serialized_end=602
-  _SECAGGMSG._serialized_start=605
-  _SECAGGMSG._serialized_end=1446
-  _SECAGGMSG_ARRAYS._serialized_start=804
-  _SECAGGMSG_ARRAYS._serialized_end=921
-  _SECAGGMSG_ARRAYS_PLURAL._serialized_start=889
-  _SECAGGMSG_ARRAYS_PLURAL._serialized_end=912
-  _SECAGGMSG_BYTES._serialized_start=923
-  _SECAGGMSG_BYTES._serialized_end=1038
-  _SECAGGMSG_BYTES_PLURAL._serialized_start=889
-  _SECAGGMSG_BYTES_PLURAL._serialized_end=912
-  _SECAGGMSG_SCALARS._serialized_start=1041
-  _SECAGGMSG_SCALARS._serialized_end=1200
-  _SECAGGMSG_SCALARS_PLURAL._serialized_start=1148
-  _SECAGGMSG_SCALARS_PLURAL._serialized_end=1191
-  _SECAGGMSG_NAMEDARRAYSENTRY._serialized_start=1202
-  _SECAGGMSG_NAMEDARRAYSENTRY._serialized_end=1282
-  _SECAGGMSG_NAMEDBYTESENTRY._serialized_start=1284
-  _SECAGGMSG_NAMEDBYTESENTRY._serialized_end=1362
-  _SECAGGMSG_NAMEDSCALARSENTRY._serialized_start=1364
-  _SECAGGMSG_NAMEDSCALARSENTRY._serialized_end=1446
+  _TASK._serialized_end=426
+  _TASKINS._serialized_start=428
+  _TASKINS._serialized_end=525
+  _TASKRES._serialized_start=527
+  _TASKRES._serialized_end=624
+  _SECAGGMSG._serialized_start=627
+  _SECAGGMSG._serialized_end=1468
+  _SECAGGMSG_ARRAYS._serialized_start=826
+  _SECAGGMSG_ARRAYS._serialized_end=943
+  _SECAGGMSG_ARRAYS_PLURAL._serialized_start=911
+  _SECAGGMSG_ARRAYS_PLURAL._serialized_end=934
+  _SECAGGMSG_BYTES._serialized_start=945
+  _SECAGGMSG_BYTES._serialized_end=1060
+  _SECAGGMSG_BYTES_PLURAL._serialized_start=911
+  _SECAGGMSG_BYTES_PLURAL._serialized_end=934
+  _SECAGGMSG_SCALARS._serialized_start=1063
+  _SECAGGMSG_SCALARS._serialized_end=1222
+  _SECAGGMSG_SCALARS_PLURAL._serialized_start=1170
+  _SECAGGMSG_SCALARS_PLURAL._serialized_end=1213
+  _SECAGGMSG_NAMEDARRAYSENTRY._serialized_start=1224
+  _SECAGGMSG_NAMEDARRAYSENTRY._serialized_end=1304
+  _SECAGGMSG_NAMEDBYTESENTRY._serialized_start=1306
+  _SECAGGMSG_NAMEDBYTESENTRY._serialized_end=1384
+  _SECAGGMSG_NAMEDSCALARSENTRY._serialized_start=1386
+  _SECAGGMSG_NAMEDSCALARSENTRY._serialized_end=1468
 # @@protoc_insertion_point(module_scope)
