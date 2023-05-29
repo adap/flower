@@ -1,0 +1,18 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "secagg-mt-pytorch"
+version = "0.1.0"
+description = "Multi-Tenant Secure Aggregation with Flower and PyTorch"
+authors = ["The Flower Authors <hello@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+flwr = { path = "../../", develop = true, extras = ["simulation", "rest"] }
+torch = "^1.12.0"
+torchvision = "^0.13.0"
+cryptography = "^40.0.2"
+pycryptodome = "^3.18.0"
+tqdm = "^4.63.0"
