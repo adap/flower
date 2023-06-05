@@ -37,7 +37,6 @@ from tqdm.contrib import tqdm
 # Authors
 #  * Titouan Parcollet 2021
 
-DEVICE = "cpu"  # "cuda"
 
 
 class Stage(Enum):
@@ -76,7 +75,7 @@ class ASR(sb.core.Brain):
         """Forward computations from the waveform batches to the output
         probabilities."""
 
-        batch = batch.to(DEVICE)
+        batch = batch.to(self.device)
         wavs, wav_lens = batch.sig
         # Forward pass
         self.feats = self.modules.wav2vec2(wavs)
@@ -139,10 +138,10 @@ class ASR(sb.core.Brain):
     def fit_batch(self, batch):
         """Train the parameters given a single batch in input."""
 
-        batch = batch.to(DEVICE)
+        batch = batch.to(self.device)
         wavs, wav_lens = batch.sig
 
-        wavs, wav_lens = wavs.to(DEVICE), wav_lens.to(DEVICE)
+        wavs, wav_lens = wavs.to(self.device), wav_lens.to(self.device)
 
         stage = sb.Stage.TRAIN
 
@@ -161,7 +160,7 @@ class ASR(sb.core.Brain):
     def evaluate_batch(self, batch, stage):
         """Computations needed for validation/test batches."""
         # Get data.
-        batch = batch.to(DEVICE)
+        batch = batch.to(self.device)
 
         predictions = self.compute_forward(batch, stage)
         with torch.no_grad():
@@ -301,8 +300,9 @@ class ASR(sb.core.Brain):
 
         if progressbar is None:
             progressbar = not self.noprogressbar
-        self.modules = self.modules.to(DEVICE)
-        torch.cuda.empty_cache()
+        self.modules = self.modules.to(self.device)
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         gc.collect()
         # Iterate epochs
         batch_count = 0
@@ -395,7 +395,8 @@ class ASR(sb.core.Brain):
         if self.device == "cpu":
             self.modules = self.modules.to("cpu")
         gc.collect()
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         return batch_count, avg_loss, valid_wer_last
 
     def evaluate(  # pylint: disable=W0102,R0913
@@ -441,8 +442,9 @@ class ASR(sb.core.Brain):
             test_set = self.make_dataloader(
                 test_set, sb.Stage.TEST, **test_loader_kwargs
             )
-        self.modules = self.modules.to(DEVICE)
-        torch.cuda.empty_cache()
+        self.modules = self.modules.to(self.device)
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         gc.collect()
         self.on_evaluate_start(max_key=max_key, min_key=min_key)
         self.on_stage_start(sb.Stage.TEST, None)
@@ -467,6 +469,7 @@ class ASR(sb.core.Brain):
         if self.device == "cpu":
             self.modules = self.modules.to("cpu")
         gc.collect()
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
         return batch_count, avg_test_loss, cer

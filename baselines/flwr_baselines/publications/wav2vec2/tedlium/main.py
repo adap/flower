@@ -9,9 +9,10 @@ import flwr as fl
 import torch
 from flwr.common import Scalar
 
-import flwr_baselines.publications.wav2vec2.tedlium.strategy as strategy
-from flwr_baselines.publications.wav2vec2.tedlium.client import SpeechBrainClient
-from flwr_baselines.publications.wav2vec2.tedlium.model import model
+from strategy import CustomFedAvg
+from client import SpeechBrainClient
+from model.model import int_model, pre_trained_point
+
 
 
 def get_on_fit_config_fn() -> Callable[[int], Dict[str, str]]:
@@ -31,13 +32,13 @@ def evaluate_fn(
     """Function for centralized evaluation."""
     _ = (server_round, config)
     # int model
-    asr_brain, dataset = model.int_model(
+    asr_brain, dataset = int_model(
         19999,
+        args.device,
         args.config_path,
         args.output,
         args.data_path,
         args.label_path,
-        args.running_type,
         args.parallel_backend,
         evaluate=True,
     )
@@ -50,7 +51,8 @@ def evaluate_fn(
     )
 
     del client, asr_brain, dataset
-    torch.cuda.empty_cache()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     gc.collect()
     return lss, {"Error rate": err}
 
@@ -80,7 +82,7 @@ def _parse_arguments():
         help="path to yaml file",
     )
     parser.add_argument(
-        "--running_type", type=str, default="cpu", help="running type of FL "
+        "--device", type=str, default="cpu", help="Device where simulation runs (either `cpu` or `cuda`)"
     )
     parser.add_argument(
         "--min_fit_clients", type=int, default=10, help="minimum fit clients"
@@ -118,8 +120,8 @@ if __name__ == "__main__":
 
     # Define resource per client
     client_resources: Dict[str, float] = {
-        "num_cpus": 64.0,
-        "num_gpus": 0.0,
+        "num_cpus": 8.0,
+        "num_gpus": 1.0,
     }
 
     ray_config = {"include_dashboard": False}
@@ -127,17 +129,17 @@ if __name__ == "__main__":
     if args.pre_train_model_path is not None:
         print("PRETRAINED INITIALIZE")
 
-        PRE_TRAINED = model.pre_trained_point(
+        PRE_TRAINED = pre_trained_point(
             args.pre_train_model_path,
             args.output,
             args.config_path,
-            args.running_type,
+            args.device,
             args.parallel_backend,
         )
     else:
         PRE_TRAINED = None
 
-    strategy = strategy.CustomFedAvg(
+    strategy = CustomFedAvg(
         initial_parameters=PRE_TRAINED,
         fraction_fit=args.fraction_fit,
         min_fit_clients=args.min_fit_clients,
@@ -149,13 +151,13 @@ if __name__ == "__main__":
 
     def client_fn(cid: str) -> fl.client.Client:
         """Function to generate the simulated clients."""
-        asr_brain, dataset = model.int_model(
+        asr_brain, dataset = int_model(
             cid,
+            args.device,
             args.config_path,
             args.output,
             args.data_path,
             args.label_path,
-            args.running_type,
             args.parallel_backend,
         )
         return SpeechBrainClient(cid, asr_brain, dataset)

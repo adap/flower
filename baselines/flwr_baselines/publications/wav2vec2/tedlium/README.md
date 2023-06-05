@@ -85,13 +85,12 @@ python main.py \
   --data_path="./data" \
   --config_path="./docs/configs/w2v2.yaml" \
   --min_fit_clients=2 \
-  --running_type="cpu" \
+  --device="cpu" \
   --min_available_clients=2 \
   --output="./docs/output/" \
   --fraction_fit=0.01 \
   --rounds=2 \
   --parallel_backend=True \
-  --pre_train_model_path="./docs/material/model.ckpt" \
   --label_path="./docs/material/label_encoder.txt" \
   --local_epochs=1
 
@@ -103,11 +102,17 @@ where:
  - svae_path_pre: output folder
  - rounds: Number of global round for FL
  - parallel_backend (default = True): If assign multiple GPUs per client
- - pre_train_model_path (optional): path to pre-trained starting point (in case of resume training or having pre-trained on ASR task as starting point)
  - label_path (optional):  path to label encoder files if ensure having same encoder for all
  - local_epochs : Number of local epoch for local/client side
- - device (default = "cpu" - recommended): If "cpu", all clients and server are initialized on CPU and only pump to GPUs if needed in order to ensure enough GPUs memmory. If dataset is small or on small scale, could switch to "cuda" which will be faster (to avoid switing GPU and CPU time).
+ - running_type (default = "cpu" - recommended): If "cpu", all clients and server are initialized on CPU and only pump to GPUs if needed in order to ensure enough GPUs memmory. If dataset is small or on small scale, could switch to "cuda" which will be faster (to avoid switing GPU and CPU time).
 ```
+
+If you have an checkpoint you'd like to resume your training from, you can pass it to the command above by appending:
+
+```bash
+  --pre_train_model_path="./docs/material/model.ckpt" \
+```
+
 
 ## Performance Result
 

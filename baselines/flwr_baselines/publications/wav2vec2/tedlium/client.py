@@ -22,10 +22,8 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 
-from flwr_baselines.publications.wav2vec2.tedlium.model.sb_w2v2 import (
-    get_weights,
-    set_weights,
-)
+
+from model.sb_w2v2 import get_weights, set_weights
 
 
 class SpeechBrainClient(fl.client.Client):
@@ -71,7 +69,8 @@ class SpeechBrainClient(fl.client.Client):
 
         parameters = self.get_parameters(GetParametersIns(config={})).parameters
         del self.asr_brain.modules
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         gc.collect()
 
         status = Status(code=Code.OK, message="Success")
@@ -96,7 +95,8 @@ class SpeechBrainClient(fl.client.Client):
             server_params=weights,
             epochs=1,
         )
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         gc.collect()
 
         status = Status(code=Code.OK, message="Success")
@@ -161,6 +161,7 @@ class SpeechBrainClient(fl.client.Client):
             count_sample = len(train_set) * self.params.batch_size * epochs
 
         del train_data, valid_data
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         gc.collect()
         return (params_list, count_sample, avg_loss, avg_wer)

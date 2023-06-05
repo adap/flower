@@ -8,19 +8,19 @@ import torch
 from flwr.common import ndarrays_to_parameters
 from hyperpyyaml import load_hyperpyyaml
 
-from flwr_baselines.publications.wav2vec2.tedlium.model.sb_w2v2 import ASR, get_weights
-from flwr_baselines.publications.wav2vec2.tedlium.preprocessing.data_loader import (
+from model.sb_w2v2 import ASR, get_weights
+from preprocessing.data_loader import (
     dataio_prepare,
 )
 
 
 def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     cid,
+    device,
     config_path,
     save_path,
     data_path,
     label_path=None,
-    device="cpu",
     parallel=True,
     evaluate=False,
 ):
@@ -50,6 +50,7 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     _, run_opts, _ = sb.parse_arguments(config_path)
     run_opts["device"] = device
     run_opts["data_parallel_backend"] = parallel
+    run_opts["noprogressbar"] = True # disable tqdm progress bar
 
     with open(config_path) as fin:
         params = load_hyperpyyaml(fin, overrides)
@@ -109,6 +110,7 @@ def pre_trained_point(path, save, hparams, device, parallel):
 
     run_opts["device"] = device
     run_opts["data_parallel_backend"] = parallel
+    run_opts["noprogressbar"] = True # disable tqdm progress bar
 
     asr_brain = ASR(
         modules=params["modules"],
@@ -124,5 +126,7 @@ def pre_trained_point(path, save, hparams, device, parallel):
     # Free up space after initialized
     del asr_brain, weights
     gc.collect()
-    torch.cuda.empty_cache()
+
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     return pre_trained

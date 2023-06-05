@@ -58,6 +58,7 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
 
         # Free memory for next round
         del results, weights_results
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         gc.collect()
         return ndarrays_to_parameters(weights), {}
