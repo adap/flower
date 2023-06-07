@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""gRPC-based Flower ClientProxy implementation."""
+"""Flower ClientProxy implementation using gRPC bidirectional streaming."""
 
 
 from typing import Optional

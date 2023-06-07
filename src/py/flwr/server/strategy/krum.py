@@ -16,7 +16,7 @@
 
 [Blanchard et al., 2017].
 
-Paper: https://proceedings.neurips.cc/paper/2017/file/f4b9ec30ad9f68f89b29639786cb62ef-Paper.pdf
+Paper: proceedings.neurips.cc/paper/2017/file/f4b9ec30ad9f68f89b29639786cb62ef-Paper.pdf
 """
 
 
@@ -37,13 +37,6 @@ from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate_krum
 from .fedavg import FedAvg
-
-WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
-Setting `min_available_clients` lower than `min_fit_clients` or
-`min_evaluate_clients` can cause the server to fail when there are too few clients
-connected to the server. `min_available_clients` must be set to a value larger
-than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
-"""
 
 
 # flake8: noqa: E501
@@ -103,12 +96,6 @@ class Krum(FedAvg):
         initial_parameters : Parameters, optional
             Initial global model parameters.
         """
-
-        if (
-            min_fit_clients > min_available_clients
-            or min_evaluate_clients > min_available_clients
-        ):
-            log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
         super().__init__(
             fraction_fit=fraction_fit,

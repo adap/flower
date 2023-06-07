@@ -14,7 +14,7 @@
 # ==============================================================================
 """DP-FedAvg [Andrew et al., 2019] with adaptive clipping.
 
-Paper: https://arxiv.org/pdf/1905.03871.pdf
+Paper: arxiv.org/pdf/1905.03871.pdf
 """
 
 
