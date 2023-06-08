@@ -82,7 +82,7 @@ def _parse_arguments():
         help="path to yaml file",
     )
     parser.add_argument(
-        "--device", type=str, default="cpu", help="Device where simulation runs (either `cpu` or `cuda`)"
+        "--device", type=str, default="cuda", help="Device where simulation runs (either `cpu` or `cuda`)"
     )
     parser.add_argument(
         "--min_fit_clients", type=int, default=10, help="minimum fit clients"
@@ -110,13 +110,16 @@ def _parse_arguments():
         "--parallel_backend",
         type=bool,
         default=True,
-        help="if using multi-gpus per client",
+        help="if using multi-gpus per client (disable if using CPU)",
     )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = _parse_arguments()
+
+    if args.device=='cpu':
+        assert not(args.parallel_backend), f"If device is CPU, please set --parallel_backend to False"
 
     # Define resource per client
     client_resources: Dict[str, float] = {
@@ -129,7 +132,7 @@ if __name__ == "__main__":
     if args.pre_train_model_path is not None:
         print("PRETRAINED INITIALIZE")
 
-        PRE_TRAINED = pre_trained_point(
+        pretrained = pre_trained_point(
             args.pre_train_model_path,
             args.output,
             args.config_path,
@@ -137,10 +140,10 @@ if __name__ == "__main__":
             args.parallel_backend,
         )
     else:
-        PRE_TRAINED = None
+        pretrained = None
 
     strategy = CustomFedAvg(
-        initial_parameters=PRE_TRAINED,
+        initial_parameters=pretrained,
         fraction_fit=args.fraction_fit,
         min_fit_clients=args.min_fit_clients,
         min_available_clients=args.min_available_clients,

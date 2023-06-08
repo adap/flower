@@ -12,8 +12,7 @@ Detailed descriptions of experiments and results are given in on our paper here 
 
 ## Acknowledgements
 
-We would love to express our gratitude toFrench National Research Agency (ANR) since the project was funded by them in the context of project DEEP-PRIVACY. 
-Also, we would love to express our sincere thanks to [Laboratoire Informatique d'Avignon](https://liavignon.fr) and Avignon Université for providing us with all necessary facilities to conduct the research.
+We would love to express our gratitude to the French National Research Agency (ANR) since the project was funded by them in the context of project DEEP-PRIVACY. Also, we would love to express our sincere thanks to [Laboratoire Informatique d'Avignon](https://liavignon.fr) and Avignon Université for providing us with all necessary facilities to conduct the research.
 
 ## Requirements
 
@@ -143,12 +142,13 @@ For more detail, you can find it in our paper.
 
 Please citation for your upcoming works if used
 
-```bash
+```
 @misc{https://doi.org/10.48550/arxiv.2302.10790,
-doi = {10.48550/ARXIV.2302.10790},url = {https://arxiv.org/abs/2302.10790}, 
-author = {Nguyen, Tuan and Mdhaffar, Salima and Tomashenko, Natalia and Bonastre, Jean-François and Estève, Yannick}, 
-keywords = {Audio and Speech Processing (eess.AS), Machine Learning (cs.LG), Sound (cs.SD), FOS: Electrical engineering, electronic engineering, information engineering, FOS: Electrical engineering, electronic engineering, information engineering, FOS: Computer and information sciences, FOS: Computer and information sciences},
-title = {Federated Learning for ASR based on Wav2vec 2.0}, 
-publisher = {arXiv},year = {2023},
-copyright = {Creative Commons Attribution 4.0 International}}
+      doi = {10.48550/ARXIV.2302.10790},url = {https://arxiv.org/abs/2302.10790}, 
+      author = {Nguyen, Tuan and Mdhaffar, Salima and Tomashenko, Natalia and Bonastre, Jean-François and Estève, Yannick}, 
+      keywords = {Audio and Speech Processing (eess.AS), Machine Learning (cs.LG), Sound (cs.SD), FOS: Electrical engineering, electronic engineering, information engineering, FOS: Electrical engineering, electronic engineering, information engineering, FOS: Computer and information sciences, FOS: Computer and information sciences},
+      title = {Federated Learning for ASR based on Wav2vec 2.0}, 
+      publisher = {arXiv},year = {2023},
+      copyright = {Creative Commons Attribution 4.0 International}
+}
 ```
