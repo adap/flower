@@ -39,11 +39,11 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         strategy: Strategy,
         num_sampled_clients: int,
         init_clip_norm: float = 0.1,
-        noise_multiplier: float = 1,
+        noise_multiplier: float = 1.0,
         server_side_noising: bool = True,
         clip_norm_lr: float = 0.2,
         clip_norm_target_quantile: float = 0.5,
-        clip_count_stddev: float = 0,
+        clip_count_stddev: Optional[float] = None,
     ) -> None:
         super().__init__(
             strategy=strategy,
@@ -54,10 +54,12 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         )
         self.clip_norm_lr = clip_norm_lr
         self.clip_norm_target_quantile = clip_norm_target_quantile
-        self.clip_count_stddev = clip_count_stddev
-        if self.clip_count_stddev == 0:
+
+        if clip_count_stddev is None:
+            clip_count_stddev = 0.0
             if noise_multiplier > 0:
-                self.clip_count_stddev = self.num_sampled_clients / 20.0
+                clip_count_stddev = self.num_sampled_clients / 20.0
+        self.clip_count_stddev: float = clip_count_stddev
 
         if noise_multiplier:
             self.noise_multiplier = (
