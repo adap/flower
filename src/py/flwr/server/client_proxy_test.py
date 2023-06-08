@@ -44,7 +44,6 @@ class CustomClientProxy(ClientProxy):
         timeout: Optional[float],
     ) -> GetPropertiesRes:
         """Returns the client's properties."""
-        _ = (ins, timeout)
         return GetPropertiesRes(status=Status(code=Code.OK, message=""), properties={})
 
     def get_parameters(
@@ -53,7 +52,6 @@ class CustomClientProxy(ClientProxy):
         timeout: Optional[float],
     ) -> GetParametersRes:
         """Return the current local model parameters."""
-        _ = (ins, timeout)
         return GetParametersRes(
             status=Status(code=Code.OK, message=""),
             parameters=Parameters(tensors=[], tensor_type=""),
@@ -65,7 +63,6 @@ class CustomClientProxy(ClientProxy):
         timeout: Optional[float],
     ) -> FitRes:
         """Refine the provided weights using the locally held dataset."""
-        _ = (ins, timeout)
         return FitRes(
             status=Status(Code.OK, message=""),
             parameters=Parameters(tensors=[], tensor_type=""),
@@ -79,7 +76,6 @@ class CustomClientProxy(ClientProxy):
         timeout: Optional[float],
     ) -> EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
-        _ = (ins, timeout)
         return EvaluateRes(
             status=Status(Code.OK, message=""), loss=0.0, num_examples=0, metrics={}
         )
@@ -90,7 +86,6 @@ class CustomClientProxy(ClientProxy):
         timeout: Optional[float],
     ) -> DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
-        _ = (ins, timeout)
         return DisconnectRes(reason="")
 
 
