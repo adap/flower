@@ -156,17 +156,6 @@ class Value(google.protobuf.message.Message):
             ) -> None: ...
         def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
 
-    class NDArrayList(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        VALS_FIELD_NUMBER: builtins.int
-        @property
-        def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
-        def __init__(self,
-            *,
-            vals: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
-            ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-
     DOUBLE_FIELD_NUMBER: builtins.int
     SINT64_FIELD_NUMBER: builtins.int
     BOOL_FIELD_NUMBER: builtins.int
