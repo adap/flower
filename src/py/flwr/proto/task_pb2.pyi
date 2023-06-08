@@ -21,7 +21,7 @@ class Task(google.protobuf.message.Message):
     DELIVERED_AT_FIELD_NUMBER: builtins.int
     TTL_FIELD_NUMBER: builtins.int
     ANCESTRY_FIELD_NUMBER: builtins.int
-    SEC_AGG_FIELD_NUMBER: builtins.int
+    SA_FIELD_NUMBER: builtins.int
     LEGACY_SERVER_MESSAGE_FIELD_NUMBER: builtins.int
     LEGACY_CLIENT_MESSAGE_FIELD_NUMBER: builtins.int
     @property
@@ -34,7 +34,7 @@ class Task(google.protobuf.message.Message):
     @property
     def ancestry(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     @property
-    def sec_agg(self) -> global___SecAggMsg: ...
+    def sa(self) -> global___SecureAggregation: ...
     @property
     def legacy_server_message(self) -> flwr.proto.transport_pb2.ServerMessage: ...
     @property
@@ -47,12 +47,12 @@ class Task(google.protobuf.message.Message):
         delivered_at: typing.Text = ...,
         ttl: typing.Text = ...,
         ancestry: typing.Optional[typing.Iterable[typing.Text]] = ...,
-        sec_agg: typing.Optional[global___SecAggMsg] = ...,
+        sa: typing.Optional[global___SecureAggregation] = ...,
         legacy_server_message: typing.Optional[flwr.proto.transport_pb2.ServerMessage] = ...,
         legacy_client_message: typing.Optional[flwr.proto.transport_pb2.ClientMessage] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["consumer",b"consumer","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer","sec_agg",b"sec_agg"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["ancestry",b"ancestry","consumer",b"consumer","created_at",b"created_at","delivered_at",b"delivered_at","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer","sec_agg",b"sec_agg","ttl",b"ttl"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["consumer",b"consumer","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer","sa",b"sa"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ancestry",b"ancestry","consumer",b"consumer","created_at",b"created_at","delivered_at",b"delivered_at","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer","sa",b"sa","ttl",b"ttl"]) -> None: ...
 global___Task = Task
 
 class TaskIns(google.protobuf.message.Message):
@@ -99,149 +99,144 @@ class TaskRes(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["group_id",b"group_id","task",b"task","task_id",b"task_id","workload_id",b"workload_id"]) -> None: ...
 global___TaskRes = TaskRes
 
-class SecAggMsg(google.protobuf.message.Message):
+class Value(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    class Arrays(google.protobuf.message.Message):
+    class DoubleList(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        class Plural(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor
-            VALUE_FIELD_NUMBER: builtins.int
-            @property
-            def value(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
-            def __init__(self,
-                *,
-                value: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
-                ) -> None: ...
-            def ClearField(self, field_name: typing_extensions.Literal["value",b"value"]) -> None: ...
-
-        SINGULAR_FIELD_NUMBER: builtins.int
-        PLURAL_FIELD_NUMBER: builtins.int
-        singular: builtins.bytes
+        VALS_FIELD_NUMBER: builtins.int
         @property
-        def plural(self) -> global___SecAggMsg.Arrays.Plural: ...
+        def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.float]: ...
         def __init__(self,
             *,
-            singular: builtins.bytes = ...,
-            plural: typing.Optional[global___SecAggMsg.Arrays.Plural] = ...,
+            vals: typing.Optional[typing.Iterable[builtins.float]] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["plural",b"plural","singular",b"singular","value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["plural",b"plural","singular",b"singular","value",b"value"]) -> None: ...
-        def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["singular","plural"]]: ...
+        def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
 
-    class Bytes(google.protobuf.message.Message):
+    class Sint64List(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        class Plural(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor
-            VALUE_FIELD_NUMBER: builtins.int
-            @property
-            def value(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
-            def __init__(self,
-                *,
-                value: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
-                ) -> None: ...
-            def ClearField(self, field_name: typing_extensions.Literal["value",b"value"]) -> None: ...
-
-        SINGULAR_FIELD_NUMBER: builtins.int
-        PLURAL_FIELD_NUMBER: builtins.int
-        singular: builtins.bytes
+        VALS_FIELD_NUMBER: builtins.int
         @property
-        def plural(self) -> global___SecAggMsg.Bytes.Plural: ...
+        def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
         def __init__(self,
             *,
-            singular: builtins.bytes = ...,
-            plural: typing.Optional[global___SecAggMsg.Bytes.Plural] = ...,
+            vals: typing.Optional[typing.Iterable[builtins.int]] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["plural",b"plural","singular",b"singular","value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["plural",b"plural","singular",b"singular","value",b"value"]) -> None: ...
-        def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["singular","plural"]]: ...
+        def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
 
-    class Scalars(google.protobuf.message.Message):
+    class BoolList(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        class Plural(google.protobuf.message.Message):
-            DESCRIPTOR: google.protobuf.descriptor.Descriptor
-            VALUE_FIELD_NUMBER: builtins.int
-            @property
-            def value(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.transport_pb2.Scalar]: ...
-            def __init__(self,
-                *,
-                value: typing.Optional[typing.Iterable[flwr.proto.transport_pb2.Scalar]] = ...,
-                ) -> None: ...
-            def ClearField(self, field_name: typing_extensions.Literal["value",b"value"]) -> None: ...
-
-        SINGULAR_FIELD_NUMBER: builtins.int
-        PLURAL_FIELD_NUMBER: builtins.int
+        VALS_FIELD_NUMBER: builtins.int
         @property
-        def singular(self) -> flwr.proto.transport_pb2.Scalar: ...
-        @property
-        def plural(self) -> global___SecAggMsg.Scalars.Plural: ...
+        def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bool]: ...
         def __init__(self,
             *,
-            singular: typing.Optional[flwr.proto.transport_pb2.Scalar] = ...,
-            plural: typing.Optional[global___SecAggMsg.Scalars.Plural] = ...,
+            vals: typing.Optional[typing.Iterable[builtins.bool]] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["plural",b"plural","singular",b"singular","value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["plural",b"plural","singular",b"singular","value",b"value"]) -> None: ...
-        def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["singular","plural"]]: ...
+        def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
 
-    class NamedArraysEntry(google.protobuf.message.Message):
+    class StringList(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        KEY_FIELD_NUMBER: builtins.int
-        VALUE_FIELD_NUMBER: builtins.int
-        key: typing.Text
+        VALS_FIELD_NUMBER: builtins.int
         @property
-        def value(self) -> global___SecAggMsg.Arrays: ...
+        def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
         def __init__(self,
             *,
-            key: typing.Text = ...,
-            value: typing.Optional[global___SecAggMsg.Arrays] = ...,
+            vals: typing.Optional[typing.Iterable[typing.Text]] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
 
-    class NamedBytesEntry(google.protobuf.message.Message):
+    class BytesList(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        KEY_FIELD_NUMBER: builtins.int
-        VALUE_FIELD_NUMBER: builtins.int
-        key: typing.Text
+        VALS_FIELD_NUMBER: builtins.int
         @property
-        def value(self) -> global___SecAggMsg.Bytes: ...
+        def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
         def __init__(self,
             *,
-            key: typing.Text = ...,
-            value: typing.Optional[global___SecAggMsg.Bytes] = ...,
+            vals: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
 
-    class NamedScalarsEntry(google.protobuf.message.Message):
+    class NDArrayList(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        KEY_FIELD_NUMBER: builtins.int
-        VALUE_FIELD_NUMBER: builtins.int
-        key: typing.Text
+        VALS_FIELD_NUMBER: builtins.int
         @property
-        def value(self) -> global___SecAggMsg.Scalars: ...
+        def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
         def __init__(self,
             *,
-            key: typing.Text = ...,
-            value: typing.Optional[global___SecAggMsg.Scalars] = ...,
+            vals: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
             ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
 
-    NAMED_ARRAYS_FIELD_NUMBER: builtins.int
-    NAMED_BYTES_FIELD_NUMBER: builtins.int
-    NAMED_SCALARS_FIELD_NUMBER: builtins.int
+    DOUBLE_FIELD_NUMBER: builtins.int
+    SINT64_FIELD_NUMBER: builtins.int
+    BOOL_FIELD_NUMBER: builtins.int
+    STRING_FIELD_NUMBER: builtins.int
+    BYTES_FIELD_NUMBER: builtins.int
+    DOUBLE_LIST_FIELD_NUMBER: builtins.int
+    SINT64_LIST_FIELD_NUMBER: builtins.int
+    BOOL_LIST_FIELD_NUMBER: builtins.int
+    STRING_LIST_FIELD_NUMBER: builtins.int
+    BYTES_LIST_FIELD_NUMBER: builtins.int
+    double: builtins.float
+    """Single element"""
+
+    sint64: builtins.int
+    bool: builtins.bool
+    string: typing.Text
+    bytes: builtins.bytes
     @property
-    def named_arrays(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___SecAggMsg.Arrays]: ...
+    def double_list(self) -> global___Value.DoubleList:
+        """List types"""
+        pass
     @property
-    def named_bytes(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___SecAggMsg.Bytes]: ...
+    def sint64_list(self) -> global___Value.Sint64List: ...
     @property
-    def named_scalars(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___SecAggMsg.Scalars]: ...
+    def bool_list(self) -> global___Value.BoolList: ...
+    @property
+    def string_list(self) -> global___Value.StringList: ...
+    @property
+    def bytes_list(self) -> global___Value.BytesList: ...
     def __init__(self,
         *,
-        named_arrays: typing.Optional[typing.Mapping[typing.Text, global___SecAggMsg.Arrays]] = ...,
-        named_bytes: typing.Optional[typing.Mapping[typing.Text, global___SecAggMsg.Bytes]] = ...,
-        named_scalars: typing.Optional[typing.Mapping[typing.Text, global___SecAggMsg.Scalars]] = ...,
+        double: builtins.float = ...,
+        sint64: builtins.int = ...,
+        bool: builtins.bool = ...,
+        string: typing.Text = ...,
+        bytes: builtins.bytes = ...,
+        double_list: typing.Optional[global___Value.DoubleList] = ...,
+        sint64_list: typing.Optional[global___Value.Sint64List] = ...,
+        bool_list: typing.Optional[global___Value.BoolList] = ...,
+        string_list: typing.Optional[global___Value.StringList] = ...,
+        bytes_list: typing.Optional[global___Value.BytesList] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["named_arrays",b"named_arrays","named_bytes",b"named_bytes","named_scalars",b"named_scalars"]) -> None: ...
-global___SecAggMsg = SecAggMsg
+    def HasField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","value",b"value"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","value",b"value"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","bool","string","bytes","double_list","sint64_list","bool_list","string_list","bytes_list"]]: ...
+global___Value = Value
+
+class SecureAggregation(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class NamedValuesEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        @property
+        def value(self) -> global___Value: ...
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Optional[global___Value] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+    NAMED_VALUES_FIELD_NUMBER: builtins.int
+    @property
+    def named_values(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Value]: ...
+    def __init__(self,
+        *,
+        named_values: typing.Optional[typing.Mapping[typing.Text, global___Value]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["named_values",b"named_values"]) -> None: ...
+global___SecureAggregation = SecureAggregation
