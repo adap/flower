@@ -114,21 +114,22 @@ def aggregate_bulyan(
     aggregated_parameters: NDArrays
         Aggregated parameters according to the Bulyan strategy.
     """
+    num_clients = len(results)
+    if num_clients < 4 * num_malicious + 3:
+        raise ValueError(
+            "The Bulyan aggregation requires then number of clients to be greater or equal to the "
+            "4 * num_malicious + 3. This is the assumption of this method. "
+            "It is needed to ensure that the method reduces the attacker's leeway to the one "
+            "proved in the paper.")
     selected_models_set: List[Tuple[NDArrays, int]] = []
 
     # Create a list of weights and ignore the number of examples
     weights = [weights for weights, _ in results]
 
     theta = len(weights) - 2 * num_malicious
-    if theta <= 0:
-        theta = 1
-
     beta = theta - 2 * num_malicious
-    if beta <= 0:
-        beta = 1
 
     for _ in range(theta):
-
         best_model = aggregation_rule(results=results, num_malicious=num_malicious, **aggregation_rule_kwargs)
         list_of_weights = [weights for weights, num_samples in results]
         # This group gives exact result
