@@ -97,6 +97,8 @@ BYZANTINE_RESILIENT_SINGLE_RET_MODEL_AGGREGATION = [
 BYZANTINE_RESILIENT_MANY_RETURN_MODELS_AGGREGATION = (
     []
 )  # Brute, Medoid (but not implemented yet)
+
+
 # pylint: disable=too-many-locals
 def aggregate_bulyan(
     results: List[Tuple[NDArrays, int]],
