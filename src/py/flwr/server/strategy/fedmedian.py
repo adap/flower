@@ -14,7 +14,7 @@
 # ==============================================================================
 """Federated Median (FedMedian) [Yin et al., 2018] strategy.
 
-Paper: https://arxiv.org/pdf/1803.01498v1.pdf
+Paper: arxiv.org/pdf/1803.01498v1.pdf
 """
 
 

@@ -755,6 +755,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     grpc_rere_group.add_argument(
         "--grpc-rere-fleet-api-address",
         help="Fleet API (gRPC-rere) server address (IPv4, IPv6, or a domain name)",
+        default=ADDRESS_FLEET_API_GRPC_RERE,
     )
 
     # Fleet API REST options
