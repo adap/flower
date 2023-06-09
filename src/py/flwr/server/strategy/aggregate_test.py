@@ -74,30 +74,34 @@ def test_weighted_loss_avg_multiple_values() -> None:
 
 
 def test_check_weights_equality_true() -> None:
-    w1 = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
-    w2 = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
-    results = _check_weights_equality(w1, w2)
+    """Check weights equality - the same weights."""
+    weights1 = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
+    weights2 = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
+    results = _check_weights_equality(weights1, weights2)
     expected = True
     assert expected == results
 
 
 def test_check_weights_equality_numeric_false() -> None:
-    w1 = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
-    w2 = [np.array([2, 2]), np.array([[1, 2], [3, 4]])]
-    results = _check_weights_equality(w1, w2)
+    """Check weights equality - different weights, same length."""
+    weights1 = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
+    weights2 = [np.array([2, 2]), np.array([[1, 2], [3, 4]])]
+    results = _check_weights_equality(weights1, weights2)
     expected = False
     assert expected == results
 
 
 def test_check_weights_equality_various_length_false() -> None:
-    w1 = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
-    w2 = [np.array([1, 2])]
-    results = _check_weights_equality(w1, w2)
+    """Check weights equality - the same first layer weights, different length."""
+    weights1 = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
+    weights2 = [np.array([1, 2])]
+    results = _check_weights_equality(weights1, weights2)
     expected = False
     assert expected == results
 
 
 def test_find_reference_weights() -> None:
+    """Check if the finding weights from list of weigths work."""
     reference_weights = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
     list_of_weights = [
         [np.array([2, 2]), np.array([[1, 2], [3, 4]])],
@@ -113,6 +117,7 @@ def test_find_reference_weights() -> None:
 
 
 def test_aggregate_n_closest_weights_mean() -> None:
+    """Check if aggregation of n closest weights to the reference works."""
     beta_closest = 2
     reference_weights = [np.array([1, 2]), np.array([[1, 2], [3, 4]])]
 
@@ -130,8 +135,8 @@ def test_aggregate_n_closest_weights_mean() -> None:
     expected_averaged = [np.array([1.05, 2.05]), np.array([[0.95, 2.05], [3.05, 4.05]])]
 
     assert all(
-        [
+        (
             np.array_equal(expected, result)
             for expected, result in zip(expected_averaged, beta_closest_weights)
-        ]
+        )
     )

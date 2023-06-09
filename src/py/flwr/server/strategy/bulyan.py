@@ -41,7 +41,7 @@ from .fedavg import FedAvg
 class Bulyan(FedAvg):
     """Configurable Bulyan strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long, too-many-locals
     def __init__(
         self,
         *,

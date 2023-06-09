@@ -113,7 +113,7 @@ def aggregate_bulyan(
     num_malicious: int
         The maximum number of malicious clients.
     aggregation_rule: Callable
-        Byzantine resilient aggregation rule that is used as the first step of the Bulyan
+        Byzantine resilient aggregation rule used as the first step of the Bulyan
     aggregation_rule_kwargs: Any
         The arguments to the aggregation rule.
     Returns
@@ -124,10 +124,10 @@ def aggregate_bulyan(
     num_clients = len(results)
     if num_clients < 4 * num_malicious + 3:
         raise ValueError(
-            "The Bulyan aggregation requires then number of clients to be greater or equal to the "
-            "4 * num_malicious + 3. This is the assumption of this method. "
-            "It is needed to ensure that the method reduces the attacker's leeway to the one "
-            "proved in the paper."
+            "The Bulyan aggregation requires then number of clients to be greater or "
+            "equal to the 4 * num_malicious + 3. This is the assumption of this method."
+            "It is needed to ensure that the method reduces the attacker's leeway to "
+            "the one proved in the paper."
         )
     selected_models_set: List[Tuple[NDArrays, int]] = []
 
@@ -145,9 +145,11 @@ def aggregate_bulyan(
         # This group gives exact result
         if aggregation_rule in BYZANTINE_RESILIENT_SINGLE_RET_MODEL_AGGREGATION:
             best_idx = _find_reference_weights(best_model, list_of_weights)
-        # This group requires finding the closest model to the returned one (weights distance wise)
+        # This group requires finding the closest model to the returned one
+        # (weights distance wise)
         elif aggregation_rule in BYZANTINE_RESILIENT_MANY_RETURN_MODELS_AGGREGATION:
-            # TODO: write a function to find the closest model
+            # when different aggregation strategies available
+            # write a function to find the closest model
             best_idx = 0
         else:
             raise ValueError(
@@ -163,7 +165,8 @@ def aggregate_bulyan(
     # Compute median parameter vector across selected_models_set
     median_vect = aggregate_median(selected_models_set)
 
-    # Take the averaged beta parameters of the closest distance to the median (coordinate-wise)
+    # Take the averaged beta parameters of the closest distance to the median
+    # (coordinate-wise)
     parameters_aggregated = _aggregate_n_closest_weights(
         median_vect, selected_models_set, beta_closest=beta
     )
@@ -295,8 +298,8 @@ def _aggregate_n_closest_weights(
 ) -> NDArrays:
     """It calculates element-wise mean of the `N` the closest values.
 
-    Note, each i-th coordinate of the result weight is the average of the beta_closest -ith
-    coordinates to the reference weights
+    Note, each i-th coordinate of the result weight is the average of the beta_closest
+    -ith coordinates to the reference weights
 
 
     Parameters
@@ -310,7 +313,8 @@ def _aggregate_n_closest_weights(
     Returns
     -------
     aggregated_weights: NDArrays
-        Averaged (element-wise) beta weights that have the closest distance to reference weights
+        Averaged (element-wise) beta weights that have the closest distance to
+         reference weights
     """
     list_of_weights = [weights for weights, num_examples in results]
     aggregated_weights = []
@@ -326,7 +330,8 @@ def _aggregate_n_closest_weights(
         # We do not need  the exact order but just the beta closest weights
         # therefore np.argpartition is used instead of np.argsort
         indices = np.argpartition(diff_np, kth=beta_closest - 1, axis=0)
-        # Take the weights (coordinate-wise) corresponding to the beta of the closest distances
+        # Take the weights (coordinate-wise) corresponding to the beta of the
+        # closest distances
         beta_closest_weights = np.take_along_axis(
             other_weights_layer_np, indices=indices, axis=0
         )[:beta_closest]
