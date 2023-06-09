@@ -118,6 +118,7 @@ def aggregate_bulyan(
         Byzantine resilient aggregation rule used as the first step of the Bulyan
     aggregation_rule_kwargs: Any
         The arguments to the aggregation rule.
+
     Returns
     -------
     aggregated_parameters: NDArrays

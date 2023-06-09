@@ -66,7 +66,7 @@ class Bulyan(FedAvg):
         first_aggregation_rule: Callable = aggregate_krum,
         **aggregation_rule_kwargs: Any,
     ) -> None:
-        """Configurable FedMedian strategy.
+        """Configurable Bulyan strategy.
 
         Implementation based on https://arxiv.org/pdf/1803.01498v1.pdf
 
@@ -95,7 +95,7 @@ class Bulyan(FedAvg):
         initial_parameters : Parameters, optional
             Initial global model parameters.
         first_aggregation_rule: Callable
-            Byzantine resilient aggregation rule that is used as the first step of the Bulyan e.g.krum
+            Byzantine resilient aggregation rule that is used as the first step of the Bulyan (e.g., Krum)
         **aggregation_rule_kwargs: Any
             arguments to the first_aggregation rule
         """
