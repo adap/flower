@@ -42,6 +42,7 @@ def test_aggregate_fit() -> None:
     strategy = Bulyan(
         initial_parameters=ndarrays_to_parameters(previous_weights),
         num_malicious_clients=1,
+        to_keep=0
     )
     param_0: Parameters = ndarrays_to_parameters(
         [array([0.2, 0.2, 0.2, 0.2], dtype=float32)]

@@ -16,7 +16,7 @@
 
 
 from functools import reduce
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Callable, Any
 
 import numpy as np
 
@@ -90,12 +90,30 @@ def aggregate_krum(
     # Return the model parameters that minimize the score (Krum)
     return weights[np.argmin(scores)]
 
-
+BYZANTINE_RESILIENT_SINGLE_RET_MODEL_AGGREGATION = [aggregate_krum] # also GeoMed (but not implemented yet)
+BYZANTINE_RESILIENT_MANY_RETURN_MODELS_AGGREGATION = [] # Brute, Medoid (but not implemented yet)
 # pylint: disable=too-many-locals
 def aggregate_bulyan(
-    results: List[Tuple[NDArrays, int]], num_malicious: int
+    results: List[Tuple[NDArrays, int]], num_malicious: int, aggregation_rule: Callable, **aggregation_rule_kwargs: Any
 ) -> NDArrays:
-    """Perform Bulyan aggregation."""
+    """
+    Perform Bulyan aggregation.
+
+    Parameters
+    ----------
+    results: List[Tuple[NDArrays, int]]
+        Weights and number of samples for each of the client.
+    num_malicious: int
+        The maximum number of malicious clients.
+    aggregation_rule: Callable
+        Byzantine resilient aggregation rule that is used as the first step of the Bulyan
+    aggregation_rule_kwargs: Any
+        The arguments to the aggregation rule.
+    Returns
+    -------
+    aggregated_parameters: NDArrays
+        Aggregated parameters according to the Bulyan strategy.
+    """
     selected_models_set: List[Tuple[NDArrays, int]] = []
 
     # Create a list of weights and ignore the number of examples
@@ -110,9 +128,19 @@ def aggregate_bulyan(
         beta = 1
 
     for _ in range(theta):
-        best_model = aggregate_krum(results, num_malicious, to_keep=0)
+
+        best_model = aggregation_rule(results=results, num_malicious=num_malicious, **aggregation_rule_kwargs)
         list_of_weights = [weights for weights, num_samples in results]
-        best_idx = _find_reference_weights(best_model, list_of_weights)
+        # This group gives exact result
+        if aggregation_rule in BYZANTINE_RESILIENT_SINGLE_RET_MODEL_AGGREGATION:
+            best_idx = _find_reference_weights(best_model, list_of_weights)
+        # This group requires finding the closest model to the returned one (weights distance wise)
+        elif aggregation_rule in BYZANTINE_RESILIENT_MANY_RETURN_MODELS_AGGREGATION:
+            # TODO: write a function to find the closest model
+            best_idx = 0
+        else:
+            raise ValueError("The given aggregation rule is not added as Byzantine resilient. "
+                             "Please choose from Byzantine resilient rules.")
 
         selected_models_set.append(results[best_idx])
 

@@ -19,7 +19,7 @@ Paper: https://arxiv.org/abs/1802.07927
 
 
 from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union, Any
 
 from flwr.common import (
     FitRes,
@@ -33,7 +33,7 @@ from flwr.common import (
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate_bulyan
+from .aggregate import aggregate_bulyan, aggregate_krum
 from .fedavg import FedAvg
 
 
@@ -63,6 +63,8 @@ class Bulyan(FedAvg):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        first_aggregation_rule: Callable = aggregate_krum,
+        **aggregation_rule_kwargs: Any,
     ) -> None:
         """Configurable FedMedian strategy.
 
@@ -92,6 +94,11 @@ class Bulyan(FedAvg):
             Whether or not accept rounds containing failures. Defaults to True.
         initial_parameters : Parameters, optional
             Initial global model parameters.
+        first_aggregation_rule: Callable
+            Byzantine resilient aggregation rule that is used as the first step of the Bulyan e.g.krum
+        **aggregation_rule_kwargs: Any
+            arguments to the first_aggregation rule
+
         """
         super().__init__(
             fraction_fit=fraction_fit,
@@ -108,6 +115,8 @@ class Bulyan(FedAvg):
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
         self.num_malicious_clients = num_malicious_clients
+        self.first_aggregation_rule = first_aggregation_rule
+        self.aggregation_rule_kwargs = aggregation_rule_kwargs
 
     def __repr__(self) -> str:
         rep = f"Bulyan(accept_failures={self.accept_failures})"
@@ -134,7 +143,7 @@ class Bulyan(FedAvg):
 
         # Aggregate weights
         parameters_aggregated = ndarrays_to_parameters(
-            aggregate_bulyan(weights_results, self.num_malicious_clients)
+            aggregate_bulyan(weights_results, self.num_malicious_clients, self.first_aggregation_rule, **self.aggregation_rule_kwargs)
         )
 
         # Aggregate custom metrics if aggregation fn was provided
