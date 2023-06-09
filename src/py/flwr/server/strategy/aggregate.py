@@ -16,7 +16,7 @@
 
 
 from functools import reduce
-from typing import Dict, List, Tuple, Callable, Any
+from typing import Any, Callable, List, Tuple
 
 import numpy as np
 
@@ -90,14 +90,21 @@ def aggregate_krum(
     # Return the model parameters that minimize the score (Krum)
     return weights[np.argmin(scores)]
 
-BYZANTINE_RESILIENT_SINGLE_RET_MODEL_AGGREGATION = [aggregate_krum] # also GeoMed (but not implemented yet)
-BYZANTINE_RESILIENT_MANY_RETURN_MODELS_AGGREGATION = [] # Brute, Medoid (but not implemented yet)
+
+BYZANTINE_RESILIENT_SINGLE_RET_MODEL_AGGREGATION = [
+    aggregate_krum
+]  # also GeoMed (but not implemented yet)
+BYZANTINE_RESILIENT_MANY_RETURN_MODELS_AGGREGATION = (
+    []
+)  # Brute, Medoid (but not implemented yet)
 # pylint: disable=too-many-locals
 def aggregate_bulyan(
-    results: List[Tuple[NDArrays, int]], num_malicious: int, aggregation_rule: Callable, **aggregation_rule_kwargs: Any
+    results: List[Tuple[NDArrays, int]],
+    num_malicious: int,
+    aggregation_rule: Callable,
+    **aggregation_rule_kwargs: Any,
 ) -> NDArrays:
-    """
-    Perform Bulyan aggregation.
+    """Perform Bulyan aggregation.
 
     Parameters
     ----------
@@ -120,7 +127,8 @@ def aggregate_bulyan(
             "The Bulyan aggregation requires then number of clients to be greater or equal to the "
             "4 * num_malicious + 3. This is the assumption of this method. "
             "It is needed to ensure that the method reduces the attacker's leeway to the one "
-            "proved in the paper.")
+            "proved in the paper."
+        )
     selected_models_set: List[Tuple[NDArrays, int]] = []
 
     # Create a list of weights and ignore the number of examples
@@ -130,7 +138,9 @@ def aggregate_bulyan(
     beta = theta - 2 * num_malicious
 
     for _ in range(theta):
-        best_model = aggregation_rule(results=results, num_malicious=num_malicious, **aggregation_rule_kwargs)
+        best_model = aggregation_rule(
+            results=results, num_malicious=num_malicious, **aggregation_rule_kwargs
+        )
         list_of_weights = [weights for weights, num_samples in results]
         # This group gives exact result
         if aggregation_rule in BYZANTINE_RESILIENT_SINGLE_RET_MODEL_AGGREGATION:
@@ -140,8 +150,10 @@ def aggregate_bulyan(
             # TODO: write a function to find the closest model
             best_idx = 0
         else:
-            raise ValueError("The given aggregation rule is not added as Byzantine resilient. "
-                             "Please choose from Byzantine resilient rules.")
+            raise ValueError(
+                "The given aggregation rule is not added as Byzantine resilient. "
+                "Please choose from Byzantine resilient rules."
+            )
 
         selected_models_set.append(results[best_idx])
 

@@ -19,7 +19,7 @@ Paper: https://arxiv.org/abs/1802.07927
 
 
 from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple, Union, Any
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
     FitRes,
@@ -98,7 +98,6 @@ class Bulyan(FedAvg):
             Byzantine resilient aggregation rule that is used as the first step of the Bulyan e.g.krum
         **aggregation_rule_kwargs: Any
             arguments to the first_aggregation rule
-
         """
         super().__init__(
             fraction_fit=fraction_fit,
@@ -143,7 +142,12 @@ class Bulyan(FedAvg):
 
         # Aggregate weights
         parameters_aggregated = ndarrays_to_parameters(
-            aggregate_bulyan(weights_results, self.num_malicious_clients, self.first_aggregation_rule, **self.aggregation_rule_kwargs)
+            aggregate_bulyan(
+                weights_results,
+                self.num_malicious_clients,
+                self.first_aggregation_rule,
+                **self.aggregation_rule_kwargs,
+            )
         )
 
         # Aggregate custom metrics if aggregation fn was provided
