@@ -95,7 +95,7 @@ def aggregate_krum(
 def aggregate_bulyan(
     results: List[Tuple[NDArrays, int]],
     num_malicious: int,
-    aggregation_rule: Callable,
+    aggregation_rule: Callable,  # type: ignore
     **aggregation_rule_kwargs: Any,
 ) -> NDArrays:
     """Perform Bulyan aggregation.
@@ -116,12 +116,10 @@ def aggregate_bulyan(
     aggregated_parameters: NDArrays
         Aggregated parameters according to the Bulyan strategy.
     """
-    byzantine_resilient_single_ret_model_aggregation = [
-        aggregate_krum
-    ]  # also GeoMed (but not implemented yet)
-    byzantine_resilient_many_return_models_aggregation = (
-        []
-    )  # Brute, Medoid (but not implemented yet)
+    byzantine_resilient_single_ret_model_aggregation = [aggregate_krum]
+    # also GeoMed (but not implemented yet)
+    byzantine_resilient_many_return_models_aggregation = []  # type: ignore
+    # Brute, Medoid (but not implemented yet)
 
     num_clients = len(results)
     if num_clients < 4 * num_malicious + 3:
@@ -334,8 +332,6 @@ def _aggregate_n_closest_weights(
         indices = np.argpartition(diff_np, kth=beta_closest - 1, axis=0)
         # Take the weights (coordinate-wise) corresponding to the beta of the
         # closest distances
-        beta_closest_weights = np.take_along_axis(
-            other_weights_layer_np, indices=indices, axis=0
-        )[:beta_closest]
+        beta_closest_weights = np.take_along_axis(other_weights_layer_np, indices=indices, axis=0)[:beta_closest]  # type: ignore[no-untyped-call]
         aggregated_weights.append(np.mean(beta_closest_weights, axis=0))
     return aggregated_weights

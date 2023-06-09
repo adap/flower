@@ -127,10 +127,10 @@ def test_aggregate_n_closest_weights_mean() -> None:
         [np.array([1.2, 2.2]), np.array([[1.2, 2.2], [3.2, 4.2]])],
         [np.array([1.3, 2.3]), np.array([[0.9, 2.5], [3.4, 3.8]])],
     ]
-    list_of_weights = [(weights, 0) for weights in list_of_weights]
+    list_of_weights_and_samples = [(weights, 0) for weights in list_of_weights]
 
     beta_closest_weights = _aggregate_n_closest_weights(
-        reference_weights, list_of_weights, beta_closest=beta_closest
+        reference_weights, list_of_weights_and_samples, beta_closest=beta_closest
     )
     expected_averaged = [np.array([1.05, 2.05]), np.array([[0.95, 2.05], [3.05, 4.05]])]
 

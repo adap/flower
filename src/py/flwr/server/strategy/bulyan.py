@@ -63,7 +63,7 @@ class Bulyan(FedAvg):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        first_aggregation_rule: Callable = aggregate_krum,
+        first_aggregation_rule: Callable = aggregate_krum,  # type: ignore
         **aggregation_rule_kwargs: Any,
     ) -> None:
         """Configurable Bulyan strategy.
