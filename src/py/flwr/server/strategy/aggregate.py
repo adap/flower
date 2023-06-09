@@ -91,14 +91,6 @@ def aggregate_krum(
     return weights[np.argmin(scores)]
 
 
-BYZANTINE_RESILIENT_SINGLE_RET_MODEL_AGGREGATION = [
-    aggregate_krum
-]  # also GeoMed (but not implemented yet)
-BYZANTINE_RESILIENT_MANY_RETURN_MODELS_AGGREGATION = (
-    []
-)  # Brute, Medoid (but not implemented yet)
-
-
 # pylint: disable=too-many-locals
 def aggregate_bulyan(
     results: List[Tuple[NDArrays, int]],
@@ -124,6 +116,13 @@ def aggregate_bulyan(
     aggregated_parameters: NDArrays
         Aggregated parameters according to the Bulyan strategy.
     """
+    byzantine_resilient_single_ret_model_aggregation = [
+        aggregate_krum
+    ]  # also GeoMed (but not implemented yet)
+    byzantine_resilient_many_return_models_aggregation = (
+        []
+    )  # Brute, Medoid (but not implemented yet)
+
     num_clients = len(results)
     if num_clients < 4 * num_malicious + 3:
         raise ValueError(
@@ -146,11 +145,11 @@ def aggregate_bulyan(
         )
         list_of_weights = [weights for weights, num_samples in results]
         # This group gives exact result
-        if aggregation_rule in BYZANTINE_RESILIENT_SINGLE_RET_MODEL_AGGREGATION:
+        if aggregation_rule in byzantine_resilient_single_ret_model_aggregation:
             best_idx = _find_reference_weights(best_model, list_of_weights)
         # This group requires finding the closest model to the returned one
         # (weights distance wise)
-        elif aggregation_rule in BYZANTINE_RESILIENT_MANY_RETURN_MODELS_AGGREGATION:
+        elif aggregation_rule in byzantine_resilient_many_return_models_aggregation:
             # when different aggregation strategies available
             # write a function to find the closest model
             best_idx = 0
