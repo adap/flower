@@ -15,7 +15,7 @@
 """Adaptive Federated Optimization using Yogi (FedYogi) [Reddi et al., 2020]
 strategy.
 
-Paper: https://arxiv.org/abs/2003.00295
+Paper: arxiv.org/abs/2003.00295
 """
 
 

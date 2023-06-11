@@ -14,7 +14,7 @@
 # ==============================================================================
 """Federated Averaging (FedAvg) [McMahan et al., 2016] strategy.
 
-Paper: https://arxiv.org/abs/1602.05629
+Paper: arxiv.org/abs/1602.05629
 """
 
 

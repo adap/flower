@@ -4,7 +4,11 @@ FLiOS is a sample application for testing and benchmarking the Swift implementat
 
 ## Project Setup
 
-Project dependencies (`flwr`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+### Installing Dependencies
+
+Project dependencies (`flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+
+#### Poetry
 
 ```shell
 poetry install
@@ -14,10 +18,18 @@ poetry shell
 Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
 
 ```shell
-python3 -c "import flwr"
+poetry run python3 -c "import flwr"
 ```
 
 If you don't see any errors you're good to go!
+
+#### pip
+
+Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+
+```shell
+pip install -r requirements.txt
+```
 
 # Run Federated Learning on iOS Clients
 
@@ -27,7 +39,7 @@ To start the server, write the following command in the terminal in the ios fold
 python3 server.py
 ```
 
-Open the FlowerCoreML.xcodeproj with XCode, wait until the dependencies are fetched, then click build and run with iPhone 13 Pro Max as target, or you can deploy it in your own iOS device by connecting your Mac, where you run your XCode, and your iPhone.
+Open the FLiOS.xcodeproj with XCode, wait until the dependencies are fetched, then click build and run with iPhone 13 Pro Max as target, or you can deploy it in your own iOS device by connecting your Mac, where you run your XCode, and your iPhone.
 
 When the iOS app runs, load both the training and test dataset first. Then enter the hostname and port of your server in the TextField provided. Finally press `Start` which will start the federated training.
 
