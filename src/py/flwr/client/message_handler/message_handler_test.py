@@ -25,6 +25,7 @@ from flwr.common import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
+    Parameters,
     serde,
     typing,
 )
@@ -37,13 +38,26 @@ class ClientWithoutProps(Client):
     """Client not implementing get_properties."""
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        pass
+        return GetParametersRes(
+            status=typing.Status(code=typing.Code.OK, message="Success"),
+            parameters=Parameters(tensors=[], tensor_type=""),
+        )
 
     def fit(self, ins: FitIns) -> FitRes:
-        pass
+        return FitRes(
+            status=typing.Status(code=typing.Code.OK, message="Success"),
+            parameters=Parameters(tensors=[], tensor_type=""),
+            num_examples=1,
+            metrics={},
+        )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        pass
+        return EvaluateRes(
+            status=typing.Status(code=typing.Code.OK, message="Success"),
+            loss=1.0,
+            num_examples=1,
+            metrics={},
+        )
 
 
 class ClientWithProps(Client):
@@ -56,13 +70,26 @@ class ClientWithProps(Client):
         )
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        pass
+        return GetParametersRes(
+            status=typing.Status(code=typing.Code.OK, message="Success"),
+            parameters=Parameters(tensors=[], tensor_type=""),
+        )
 
     def fit(self, ins: FitIns) -> FitRes:
-        pass
+        return FitRes(
+            status=typing.Status(code=typing.Code.OK, message="Success"),
+            parameters=Parameters(tensors=[], tensor_type=""),
+            num_examples=1,
+            metrics={},
+        )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        pass
+        return EvaluateRes(
+            status=typing.Status(code=typing.Code.OK, message="Success"),
+            loss=1.0,
+            num_examples=1,
+            metrics={},
+        )
 
 
 def test_client_without_get_properties() -> None:

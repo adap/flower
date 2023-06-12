@@ -17,21 +17,19 @@
 
 import os
 from datetime import datetime
-from typing import Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
+from typing import Callable, Dict, List, Optional, Tuple, Union, cast
+
+from flwr.common import EvaluateRes, Scalar
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.strategy import Strategy
 
 try:
     import tensorflow as tf
 except ImportError:
     tf = None
 
-from flwr.common import EvaluateRes, Scalar
-from flwr.server.client_proxy import ClientProxy
-from flwr.server.strategy import Strategy
 
-TBW = TypeVar("TBW")
-
-
-def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
+def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
     """TensorBoard logger for Flower strategies.
 
     It will log loss, num_examples and all metrics which are of type float or int.
@@ -71,7 +69,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
     run_id = run_id + "-" + datetime.now().strftime("%Y%m%dT%H%M%S")
     logdir_run = os.path.join(logdir, run_id)
 
-    def decorator(strategy_class: Strategy) -> TBW:
+    def decorator(strategy_class: Strategy) -> Strategy:
         """Return overloaded Strategy Wrapper."""
 
         class TBWrapper(strategy_class):  # type: ignore
@@ -136,6 +134,6 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
 
                 return loss_aggregated, config
 
-        return cast(TBW, TBWrapper)
+        return cast(Strategy, TBWrapper)
 
     return decorator
