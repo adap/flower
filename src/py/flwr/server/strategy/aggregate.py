@@ -131,10 +131,7 @@ def aggregate_bulyan(
         )
     selected_models_set: List[Tuple[NDArrays, int]] = []
 
-    # Create a list of weights and ignore the number of examples
-    weights = [weights for weights, _ in results]
-
-    theta = len(weights) - 2 * num_malicious
+    theta = len(results) - 2 * num_malicious
     beta = theta - 2 * num_malicious
 
     for _ in range(theta):
@@ -150,7 +147,11 @@ def aggregate_bulyan(
         elif aggregation_rule in byzantine_resilient_many_return_models_aggregation:
             # when different aggregation strategies available
             # write a function to find the closest model
-            best_idx = 0
+            raise NotImplementedError(
+                "aggregate_bulyan currently does not support the aggregation rules that"
+                " return many models as results. "
+                "Such aggregation rules are currently not available in Flower."
+            )
         else:
             raise ValueError(
                 "The given aggregation rule is not added as Byzantine resilient. "
@@ -296,7 +297,7 @@ def _find_reference_weights(
 def _aggregate_n_closest_weights(
     reference_weights: NDArrays, results: List[Tuple[NDArrays, int]], beta_closest: int
 ) -> NDArrays:
-    """It calculates element-wise mean of the `N` the closest values.
+    """Calculate element-wise mean of the `N` closest values.
 
     Note, each i-th coordinate of the result weight is the average of the beta_closest
     -ith coordinates to the reference weights

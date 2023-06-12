@@ -68,14 +68,14 @@ class Bulyan(FedAvg):
     ) -> None:
         """Configurable Bulyan strategy.
 
-        Implementation based on https://arxiv.org/pdf/1803.01498v1.pdf
+        Implementation based on arxiv.org/abs/1802.07927.
 
         Parameters
         ----------
         fraction_fit : float, optional
-            Fraction of clients used during training. Defaults to 0.1.
+            Fraction of clients used during training. Defaults to 1.0.
         fraction_evaluate : float, optional
-            Fraction of clients used during validation. Defaults to 0.1.
+            Fraction of clients used during validation. Defaults to 1.0.
         min_fit_clients : int, optional
             Minimum number of clients used during training. Defaults to 2.
         min_evaluate_clients : int, optional
