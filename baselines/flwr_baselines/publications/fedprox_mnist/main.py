@@ -8,13 +8,14 @@ import hydra
 import numpy as np
 import torch
 from omegaconf import DictConfig
+from hydra.utils import instantiate
 
 from flwr_baselines.publications.fedprox_mnist import client, utils
 
 DEVICE: str = torch.device("cpu")
 
 
-@hydra.main(config_path="docs/conf", config_name="config", version_base=None)
+@hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Main function to run CNN federated learning on MNIST.
 
@@ -33,21 +34,24 @@ def main(cfg: DictConfig) -> None:
         balance=cfg.balance,
         learning_rate=cfg.learning_rate,
         stragglers=cfg.stragglers_fraction,
+        model=cfg.model,
     )
 
-    evaluate_fn = utils.gen_evaluate_fn(testloader, DEVICE)
+    evaluate_fn = utils.gen_evaluate_fn(testloader, DEVICE, cfg.model)
 
-    strategy = fl.server.strategy.FedProx(
-        fraction_fit=1.0,
-        fraction_evaluate=0.0,
-        min_fit_clients=int(cfg.num_clients * (1 - cfg.stragglers_fraction)),
-        min_evaluate_clients=0,
-        min_available_clients=cfg.num_clients,
-        on_fit_config_fn=lambda curr_round: {"curr_round": curr_round},
-        evaluate_fn=evaluate_fn,
-        evaluate_metrics_aggregation_fn=utils.weighted_average,
-        proximal_mu=cfg.mu,
-    )
+
+
+    # instantiate strategy according to config. Here we pass other arguments
+    # that are only defined at run time.
+    strategy = instantiate(cfg.strategy,
+                           evaluate_fn=evaluate_fn,
+                           # function (in this case anonymous) that will be used to generate the config to be send
+                           # to clients to do fit(). Even though FedProx will always send them `proximal_mu`,
+                           # this is not the case with other strategies. Therefore we include it.
+                           #! Make sure mu is only non-zero for FedProx
+                           on_fit_config_fn=lambda curr_round: {"curr_round": curr_round, "proximal_mu": cfg.mu},
+                           evaluate_metrics_aggregation_fn=utils.weighted_average)
+
 
     # Start simulation
     history = fl.simulation.start_simulation(
@@ -68,8 +72,15 @@ def main(cfg: DictConfig) -> None:
         f"_strag={cfg.stragglers_fraction}"
     )
 
+    # ensure save directory exists
+    save_path = Path(cfg.save_path)
+    save_path.mkdir(exist_ok=True, parents=True)
+
+    print("................")
+    print(history)
+
     np.save(
-        Path(cfg.save_path) / Path(f"hist{file_suffix}"),
+        save_path / Path(f"hist{file_suffix}"),
         history,  # type: ignore
     )
 

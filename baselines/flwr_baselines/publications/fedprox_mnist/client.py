@@ -4,13 +4,16 @@
 from collections import OrderedDict
 from typing import Callable, Dict, Tuple
 
+from hydra.utils import instantiate
+from omegaconf import DictConfig
+
 import flwr as fl
 import numpy as np
 import torch
 from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import DataLoader
 
-from flwr_baselines.publications.fedprox_mnist import model
+from flwr_baselines.publications.fedprox_mnist.model import test, train
 from flwr_baselines.publications.fedprox_mnist.dataset import load_datasets
 
 
@@ -63,7 +66,7 @@ class FlowerClient(
         else:
             num_epochs = self.num_epochs
 
-        model.train(
+        train(
             self.net,
             self.trainloader,
             self.device,
@@ -79,7 +82,7 @@ class FlowerClient(
     ) -> Tuple[float, int, Dict]:
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
-        loss, accuracy = model.test(self.net, self.valloader, self.device)
+        loss, accuracy = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
 
@@ -93,6 +96,7 @@ def gen_client_fn(
     batch_size: int,
     learning_rate: float,
     stragglers: float,
+    model: DictConfig,
 ) -> Tuple[
     Callable[[str], FlowerClient], DataLoader
 ]:  # pylint: disable=too-many-arguments
@@ -145,7 +149,7 @@ def gen_client_fn(
         """Create a Flower client representing a single organization."""
 
         # Load model
-        net = model.Net().to(device)
+        net = instantiate(model).to(device)
 
         # Note: each client gets a different trainloader/valloader, so each client
         # will train and evaluate on their own unique data

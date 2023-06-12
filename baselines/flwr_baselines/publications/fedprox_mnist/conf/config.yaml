@@ -1,0 +1,19 @@
+---
+defaults:
+  - strategy: fedprox
+
+num_clients: 1000 # total number of clients
+num_epochs: 10 # number of local epochs
+batch_size: 10
+num_rounds: 100
+clients_per_round: 10
+iid: False
+balance: True
+stragglers_fraction: 0.9
+learning_rate: 0.03
+mu: 0.0
+save_path: "docs/results"
+
+model:
+  _target_: flwr_baselines.publications.fedprox_mnist.model.LogisticRegression
+  num_classes: 10

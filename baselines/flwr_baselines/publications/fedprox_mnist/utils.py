@@ -5,6 +5,8 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
 
+from hydra.utils import instantiate
+from omegaconf import DictConfig
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -13,7 +15,7 @@ from flwr.common.typing import NDArrays, Scalar
 from flwr.server.history import History
 from torch.utils.data import DataLoader
 
-from flwr_baselines.publications.fedprox_mnist import model
+from flwr_baselines.publications.fedprox_mnist.model import test
 
 
 def plot_metric_from_history(
@@ -39,10 +41,19 @@ def plot_metric_from_history(
         else hist.metrics_distributed
     )
     rounds, values = zip(*metric_dict["accuracy"])
-    plt.plot(np.asarray(rounds), np.asarray(values), label="FedProx")
-    plt.title(f"{metric_type.capitalize()} Validation - MNIST")
+
+    # let's extract centralised loss (main metric reported in FedProx paper)
+    rounds_loss, values_loss = zip(*hist.losses_centralized)
+
+    fig, axs = plt.subplots(nrows=2, ncols=1, sharex='row')
+    axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss), label="FedProx")
+    axs[1].plot(np.asarray(rounds_loss),  np.asarray(values), label="FedProx")
+
+    axs[0].set_ylabel("Loss")
+    axs[1].set_ylabel("Accuracy")
+
+    # plt.title(f"{metric_type.capitalize()} Validation - MNIST")
     plt.xlabel("Rounds")
-    plt.ylabel("Accuracy")
     plt.legend(loc="lower right")
 
     plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
@@ -71,7 +82,8 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 def gen_evaluate_fn(
-    testloader: DataLoader, device: torch.device
+    testloader: DataLoader, device: torch.device,
+    model: DictConfig,
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
 ]:
@@ -96,13 +108,13 @@ def gen_evaluate_fn(
         # pylint: disable=unused-argument
         """Use the entire CIFAR-10 test set for evaluation."""
         # determine device
-        net = model.Net()
+        net = instantiate(model)
         params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         net.load_state_dict(state_dict, strict=True)
         net.to(device)
 
-        loss, accuracy = model.test(net, testloader, device=device)
+        loss, accuracy = test(net, testloader, device=device)
         # return statistics
         return loss, {"accuracy": accuracy}
 

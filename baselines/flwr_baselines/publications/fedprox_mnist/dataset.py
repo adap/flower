@@ -54,7 +54,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
         ds_train, ds_val = random_split(
             dataset, lengths, torch.Generator().manual_seed(seed)
         )
-        trainloaders.append(DataLoader(ds_train, batch_size=batch_size, shuffle=True))
+        trainloaders.append(DataLoader(ds_train, batch_size=batch_size, shuffle=True, num_workers=2))
         valloaders.append(DataLoader(ds_val, batch_size=batch_size))
     return trainloaders, valloaders, DataLoader(testset, batch_size=batch_size)
 
