@@ -152,3 +152,6 @@ disallow_untyped_calls = false
 module = "torch.*"
 follow_imports = "skip"
 follow_imports_for_stubs = true
+
+[tool.docformatter]
+wrap-summaries = 88
