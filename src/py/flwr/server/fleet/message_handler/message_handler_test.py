@@ -26,7 +26,6 @@ from .message_handler import pull_task_ins, push_task_res
 
 def test_pull_task_ins() -> None:
     """Test pull_task_ins."""
-
     # Prepare
     request = PullTaskInsRequest(node=Node(node_id=1, anonymous=False))
     state = MagicMock()
@@ -43,7 +42,6 @@ def test_pull_task_ins() -> None:
 
 def test_push_task_res() -> None:
     """Test push_task_res."""
-
     # Prepare
     request = PushTaskResRequest(
         task_res_list=[

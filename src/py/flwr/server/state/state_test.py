@@ -41,7 +41,6 @@ class StateTest(unittest.TestCase):
 
     def test_get_task_ins_empty(self) -> None:
         """Validate that a new state has no TaskIns."""
-
         # Prepare
         state = self.state_factory()
 
@@ -53,7 +52,6 @@ class StateTest(unittest.TestCase):
 
     def test_get_task_res_empty(self) -> None:
         """Validate that a new state has no TaskRes."""
-
         # Prepare
         state = self.state_factory()
 
@@ -65,7 +63,6 @@ class StateTest(unittest.TestCase):
 
     def test_store_task_ins_one(self) -> None:
         """Test store_task_ins."""
-
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
@@ -105,7 +102,6 @@ class StateTest(unittest.TestCase):
 
     def test_store_and_delete_tasks(self) -> None:
         """Test delete_tasks."""
-
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
@@ -156,7 +152,6 @@ class StateTest(unittest.TestCase):
     # Init tests
     def test_init_state(self) -> None:
         """Test that state is initialized correctly."""
-
         # Execute
         state = self.state_factory()
 

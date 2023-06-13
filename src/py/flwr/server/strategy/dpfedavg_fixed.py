@@ -73,7 +73,6 @@ class DPFedAvgFixed(Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-
         additional_config = {"dpfedavg_clip_norm": self.clip_norm}
         if not self.server_side_noising:
             additional_config[
