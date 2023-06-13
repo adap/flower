@@ -46,15 +46,15 @@ def plot_metric_from_history(
     rounds_loss, values_loss = zip(*hist.losses_centralized)
 
     fig, axs = plt.subplots(nrows=2, ncols=1, sharex='row')
-    axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss), label="FedProx")
-    axs[1].plot(np.asarray(rounds_loss),  np.asarray(values), label="FedProx")
+    axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))
+    axs[1].plot(np.asarray(rounds_loss),  np.asarray(values))
 
     axs[0].set_ylabel("Loss")
     axs[1].set_ylabel("Accuracy")
 
     # plt.title(f"{metric_type.capitalize()} Validation - MNIST")
     plt.xlabel("Rounds")
-    plt.legend(loc="lower right")
+    # plt.legend(loc="lower right")
 
     plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
     plt.close()

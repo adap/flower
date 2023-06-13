@@ -58,11 +58,17 @@ class FlowerClient(
 
         # At each round check if the client is a straggler,
         # if so, train less epochs (to simulate partial work)
+        # if the client is told to be dropped (e.g. because not using
+        # FedProx in the server), the fit method returns.
         if (
             self.straggler_schedule[int(config["curr_round"]) - 1]
             and self.num_epochs > 1
         ):
             num_epochs = np.random.randint(1, self.num_epochs)
+
+            if config['drop_client']:
+                raise Exception("Client drops!!")
+
         else:
             num_epochs = self.num_epochs
 

@@ -7,7 +7,7 @@ import flwr as fl
 import hydra
 import numpy as np
 import torch
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
 
 from flwr_baselines.publications.fedprox_mnist import client, utils
@@ -40,16 +40,19 @@ def main(cfg: DictConfig) -> None:
     evaluate_fn = utils.gen_evaluate_fn(testloader, DEVICE, cfg.model)
 
 
+    def get_on_fit_config():
+        def fit_config_fn(server_round: int):
+            # resolve and convert to python dict
+            fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
+            fit_config['curr_round'] = server_round # add round info
+            return fit_config
+        return fit_config_fn
 
     # instantiate strategy according to config. Here we pass other arguments
     # that are only defined at run time.
     strategy = instantiate(cfg.strategy,
                            evaluate_fn=evaluate_fn,
-                           # function (in this case anonymous) that will be used to generate the config to be send
-                           # to clients to do fit(). Even though FedProx will always send them `proximal_mu`,
-                           # this is not the case with other strategies. Therefore we include it.
-                           #! Make sure mu is only non-zero for FedProx
-                           on_fit_config_fn=lambda curr_round: {"curr_round": curr_round, "proximal_mu": cfg.mu},
+                           on_fit_config_fn=get_on_fit_config(),
                            evaluate_metrics_aggregation_fn=utils.weighted_average)
 
 
@@ -61,7 +64,10 @@ def main(cfg: DictConfig) -> None:
         strategy=strategy,
     )
 
+    strategy_name = strategy.__class__.__name__
+
     file_suffix: str = (
+        f"_{strategy_name}"
         f"{'_iid' if cfg.iid else ''}"
         f"{'_balanced' if cfg.balance else ''}"
         f"_C={cfg.num_clients}"
