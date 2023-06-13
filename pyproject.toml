@@ -155,3 +155,4 @@ follow_imports_for_stubs = true
 
 [tool.docformatter]
 wrap-summaries = 88
+wrap-descriptions = 88
