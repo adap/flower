@@ -33,8 +33,7 @@ class DPFedAvgNumPyClient(NumPyClient):
         self.client = client
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
-        """
-        Get client properties using the given Numpy client.
+        """Get client properties using the given Numpy client.
 
         Parameters
         ----------
@@ -53,8 +52,7 @@ class DPFedAvgNumPyClient(NumPyClient):
         return self.client.get_properties(config)
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-        """
-        Return the current local model parameters.
+        """Return the current local model parameters.
 
         Parameters
         ----------

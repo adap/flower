@@ -131,12 +131,11 @@ class DriverClientManager(ClientManager):
         return [self.clients[cid] for cid in sampled_cids]
 
     def _update_nodes(self) -> None:
-        """
-        Update the nodes list in the client manager.
+        """Update the nodes list in the client manager.
 
-        This method communicates with the associated driver to get all node ids. Each node id
-        is then converted into a `DriverClientProxy` instance and stored in the `clients` dictionary
-        with node id as key.
+        This method communicates with the associated driver to get all node ids. Each
+        node id is then converted into a `DriverClientProxy` instance and stored in the
+        `clients` dictionary with node id as key.
         """
         get_nodes_res = self.driver.get_nodes(req=driver_pb2.GetNodesRequest())
         all_node_ids = get_nodes_res.node_ids
