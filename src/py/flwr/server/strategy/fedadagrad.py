@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et al.,
-2020] strategy.
+"""Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et al., 2020]
+strategy.
 
-Paper: https://arxiv.org/abs/2003.00295
+Paper: arxiv.org/abs/2003.00295
 """
 
 
@@ -39,8 +39,8 @@ from .fedopt import FedOpt
 
 # flake8: noqa: E501
 class FedAdagrad(FedOpt):
-    """Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et
-    al., 2020] strategy.
+    """Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et al., 2020]
+    strategy.
 
     Paper: https://arxiv.org/abs/2003.00295
     """

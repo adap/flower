@@ -14,7 +14,7 @@
 # ==============================================================================
 """Federated Optimization (FedProx) [Li et al., 2018] strategy.
 
-Paper: https://arxiv.org/abs/1812.06127
+Paper: arxiv.org/abs/1812.06127
 """
 
 

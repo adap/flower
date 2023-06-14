@@ -14,7 +14,7 @@
 # ==============================================================================
 """Federated Averaging with Momentum (FedAvgM) [Hsu et al., 2019] strategy.
 
-Paper: https://arxiv.org/pdf/1909.06335.pdf
+Paper: arxiv.org/pdf/1909.06335.pdf
 """
 
 

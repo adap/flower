@@ -66,8 +66,8 @@ DATABASE = ":flwr-in-memory-state:"
 class ServerConfig:
     """Flower server config.
 
-    All attributes have default values which allows users to configure
-    just the ones they care about.
+    All attributes have default values which allows users to configure just the ones
+    they care about.
     """
 
     num_rounds: int = 1
@@ -462,8 +462,8 @@ def _register_exit_handlers(
     ) -> None:
         """Exit handler to be registered with signal.signal.
 
-        When called will reset signal handler to original signal handler
-        from default_handlers.
+        When called will reset signal handler to original signal handler from
+        default_handlers.
         """
 
         # Reset to default handler
@@ -755,6 +755,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     grpc_rere_group.add_argument(
         "--grpc-rere-fleet-api-address",
         help="Fleet API (gRPC-rere) server address (IPv4, IPv6, or a domain name)",
+        default=ADDRESS_FLEET_API_GRPC_RERE,
     )
 
     # Fleet API REST options

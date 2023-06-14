@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Adaptive Federated Optimization (FedOpt) [Reddi et al., 2020] abstract
-strategy.
+"""Adaptive Federated Optimization (FedOpt) [Reddi et al., 2020] abstract strategy.
 
-Paper: https://arxiv.org/abs/2003.00295
+Paper: arxiv.org/abs/2003.00295
 """
 
 
