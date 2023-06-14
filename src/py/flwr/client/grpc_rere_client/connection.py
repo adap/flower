@@ -121,7 +121,6 @@ def grpc_request_response(
 
     def receive() -> Optional[ServerMessage]:
         """Receive next task from server."""
-
         # Request instructions (task) from server
         request = PullTaskInsRequest(
             node=Node(node_id=random_node_id, anonymous=False),
@@ -144,7 +143,6 @@ def grpc_request_response(
 
     def send(client_message_proto: ClientMessage) -> None:
         """Send task result back to server."""
-
         if state[KEY_TASK_INS] is None:
             log(ERROR, "No current TaskIns")
             return

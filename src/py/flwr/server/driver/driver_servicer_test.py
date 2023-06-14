@@ -22,7 +22,6 @@ from flwr.server.driver.driver_servicer import _raise_if
 
 def test_raise_if_false() -> None:
     """."""
-
     # Prepare
     validation_error = False
     detail = "test"
@@ -41,7 +40,6 @@ def test_raise_if_false() -> None:
 
 def test_raise_if_true() -> None:
     """."""
-
     # Prepare
     validation_error = True
     detail = "test"
