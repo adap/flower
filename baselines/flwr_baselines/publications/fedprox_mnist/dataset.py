@@ -3,6 +3,7 @@
 
 from typing import List, Optional, Tuple
 
+from omegaconf import DictConfig
 import numpy as np
 import torch
 import torchvision.transforms as transforms
@@ -11,9 +12,8 @@ from torchvision.datasets import MNIST
 
 
 def load_datasets(  # pylint: disable=too-many-arguments
-    num_clients: int = 10,
-    iid: Optional[bool] = True,
-    balance: Optional[bool] = True,
+    num_clients: int,
+    config: DictConfig,
     val_ratio: float = 0.1,
     batch_size: Optional[int] = 32,
     seed: Optional[int] = 42,
@@ -24,13 +24,8 @@ def load_datasets(  # pylint: disable=too-many-arguments
     ----------
     num_clients : int, optional
         The number of clients that hold a part of the data, by default 10
-    iid : bool, optional
-        Whether the data should be independent and identically distributed between the
-        clients or if the data should first be sorted by labels and distributed by chunks
-        to each client (used to test the convergence in a worst case scenario), by default True
-    balance : bool, optional
-        Whether the dataset should contain an equal number of samples in each class,
-        by default True
+    config: DictConfig
+        A config that parameterises how the dataset should be partitioned.
     val_ratio : float, optional
         The ratio of training data that will be used for validation (between 0 and 1),
         by default 0.1
@@ -44,7 +39,8 @@ def load_datasets(  # pylint: disable=too-many-arguments
     Tuple[DataLoader, DataLoader, DataLoader]
         The DataLoader for training, the DataLoader for validation, the DataLoader for testing.
     """
-    datasets, testset = _partition_data(num_clients, iid, balance, seed)
+    print(f"Dataset partitioned according to: {config = } and using {num_clients = }")
+    datasets, testset = _partition_data(num_clients, config.iid, config.power_law, config.balance, seed)
     # Split each partition into train/val and create DataLoader
     trainloaders = []
     valloaders = []
@@ -76,7 +72,7 @@ def _download_data() -> Tuple[Dataset, Dataset]:
 
 
 def _partition_data(
-    num_clients: int = 10,
+    num_clients,
     iid: Optional[bool] = False,
     power_law: Optional[bool] = True,
     balance: Optional[bool] = False,
@@ -87,15 +83,15 @@ def _partition_data(
 
     Parameters
     ----------
-    num_clients : int, optional
-        The number of clients that hold a part of the data, by default 10
+    num_clients : int
+        The number of clients that hold a part of the data
     iid : bool, optional
         Whether the data should be independent and identically distributed between
         the clients or if the data should first be sorted by labels and distributed by chunks
         to each client (used to test the convergence in a worst case scenario), by default False
     power_law: bool, optional
         Whether to follow a power-law distribution when assigning number of samples
-        for each client.
+        for each client, defaults to True
     balance : bool, optional
         Whether the dataset should contain an equal number of samples in each class,
         by default False

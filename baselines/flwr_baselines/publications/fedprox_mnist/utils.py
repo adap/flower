@@ -15,7 +15,7 @@ from flwr.common.typing import NDArrays, Scalar
 from flwr.server.history import History
 from torch.utils.data import DataLoader
 
-from flwr_baselines.publications.fedprox_mnist.model import test
+from flwr_baselines.publications.fedprox_mnist.models import test
 
 
 def plot_metric_from_history(

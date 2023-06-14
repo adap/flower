@@ -1,18 +1,18 @@
 ---
-defaults:
-  - strategy: fedavg
 
 num_clients: 1000 # total number of clients
 num_epochs: 10 # number of local epochs
 batch_size: 10
 num_rounds: 100
 clients_per_round: 10
-iid: False
-balance: True
 learning_rate: 0.03
 stragglers_fraction: 0.9
 mu: 0.0 # it should be zero always if not using FedProx
-save_path: "docs/results"
+
+dataset_config:
+  iid: false
+  balance: false
+  power_law: true
 
 # in FedAvg, stragglers should be dropped. So we tell clients FedAvg is being used
 # by passing flag `drop_client`=True
@@ -21,5 +21,13 @@ fit_config:
   drop_client: true
 
 model:
-  _target_: flwr_baselines.publications.fedprox_mnist.model.LogisticRegression
+  _target_: flwr_baselines.publications.fedprox_mnist.models.Net
   num_classes: 10
+
+strategy:
+  _target_: strategy.FedAvgWithStragglerDrop
+  fraction_fit: 0.00001 # because we want the number of clients to sample on each roudn to be solely defined by min_fit_clients
+  fraction_evaluate: 0.0
+  min_fit_clients: ${clients_per_round}
+  min_available_clients: ${clients_per_round}
+  min_evaluate_clients: 0

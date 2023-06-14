@@ -1,6 +1,6 @@
 """Runs CNN federated learning for MNIST dataset."""
 
-
+import os
 from pathlib import Path
 
 import flwr as fl
@@ -9,6 +9,7 @@ import numpy as np
 import torch
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
+from hydra.core.hydra_config import HydraConfig
 
 from flwr_baselines.publications.fedprox_mnist import client, utils
 
@@ -24,14 +25,14 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
+
     client_fn, testloader = client.gen_client_fn(
         num_epochs=cfg.num_epochs,
         batch_size=cfg.batch_size,
         device=DEVICE,
         num_clients=cfg.num_clients,
         num_rounds=cfg.num_rounds,
-        iid=cfg.iid,
-        balance=cfg.balance,
+        dataset_config=cfg.dataset_config,
         learning_rate=cfg.learning_rate,
         stragglers=cfg.stragglers_fraction,
         model=cfg.model,
@@ -68,8 +69,9 @@ def main(cfg: DictConfig) -> None:
 
     file_suffix: str = (
         f"_{strategy_name}"
-        f"{'_iid' if cfg.iid else ''}"
-        f"{'_balanced' if cfg.balance else ''}"
+        f"{'_iid' if cfg.dataset_config.iid else ''}"
+        f"{'_balanced' if cfg.dataset_config.balance else ''}"
+        f"{'_powerlaw' if cfg.dataset_config.power_law else ''}"
         f"_C={cfg.num_clients}"
         f"_B={cfg.batch_size}"
         f"_E={cfg.num_epochs}"
@@ -78,9 +80,9 @@ def main(cfg: DictConfig) -> None:
         f"_strag={cfg.stragglers_fraction}"
     )
 
-    # ensure save directory exists
-    save_path = Path(cfg.save_path)
-    save_path.mkdir(exist_ok=True, parents=True)
+    # Hydra automatically creates an output directory
+    # Let's retrieve it and save some results there
+    save_path = HydraConfig.get().runtime.output_dir
 
     print("................")
     print(history)
@@ -92,7 +94,7 @@ def main(cfg: DictConfig) -> None:
 
     utils.plot_metric_from_history(
         history,
-        cfg.save_path,
+        save_path,
         (file_suffix),
     )
 

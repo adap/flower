@@ -18,36 +18,42 @@ Note: If you use this implementation in your work, please remember to cite the o
 
 ## Training Setup
 
-### CNN Architecture
+### Models
 
-The CNN architecture is detailed in the paper and used to create the **FedProx MNIST** baseline.
-
-| Layer | Details|
-| ----- | ------ |
-| 1 | Conv2D(1, 32, 5, 1, 1) <br/> ReLU, MaxPool2D(2, 2, 1)  |
-| 2 | Conv2D(32, 64, 5, 1, 1) <br/> ReLU, MaxPool2D(2, 2, 1) |
-| 3 | FC(64 * 7 * 7, 512) <br/> ReLU |
-| 5 | FC(512, 10) |
+This baseline contains two models:
+    * A logistic regression model used in the FedProx paper for MNIST (see `models/LogisticRegression`). This is the model used by default.
+    * A two-layer CNN network as used in the FedAvg paper (see `modes/Net`)
 
 ### Training Paramaters
 
+The following is a summary of the key hyperparameters most relevant for this baseline (FedProx+MNIST). These are the current defaults, but you can change them for your setting. For a complete list of hyperparameters and settings, please refer to `conf/config.yaml` (which runs FedProx) and `conf/fedavg.yaml` (which runs FedAvg dropping stragglers)
+
 | Description | Value |
 | ----------- | ----- |
-| loss | cross entropy loss |
+| total clients | 1000 |
+| clients per round | 10 |
+| data partition | power law (2 classes per client) |
 | optimizer | SGD with proximal term |
-| learning rate | 0.03 (by default) |
-| local epochs | 5 (by default) |
-| local batch size | 10 (by default) |
+| proximal mu | 1.0 |
+| stragglers_fraction | 0.9 |
 
 ## Running experiments
 
-The `config.yaml` file containing all the tunable hyperparameters and the necessary variables can be found under the `conf` folder.
-[Hydra](https://hydra.cc/docs/tutorials/) is used to manage the different parameters experiments can be ran with. 
+The `conf/config.yaml` file containing all the tunable hyperparameters and the necessary variables. [Hydra](https://hydra.cc/docs/tutorials/) is used to manage configs. The outputs of each experiment as well as a log is created automatically by Hydra. The output directory will follow the structure: `outputs/<year>-<month>-<day>/<time>`.
 
-To run using the default parameters, just enter `python main.py`, if some parameters need to be overwritten, you can do it like in the following example: 
+To run FedPox as:
+```bash
+python main.py # this will run using the default settings in the `conf/config.yaml`
 
-```sh
-python main.py num_epochs=5 num_rounds=1000 iid=True
-``` 
+# you can override settings dirctly from the command line
+python main.py mu=1 num_rounds=200 # will set proximal mu to 1 and the number of rounds to 200
+```
 
-Results will be stored as timestamped folders inside either `outputs` or `multiruns`, depending on whether you perform single- or multi-runs. 
+To run using FedAvg:
+```bash
+# this will use a variation of FedAvg that drops the clients that were flagged as stragglers
+# This is done so to match the experimental setup in the FedProx paper
+python main.py --config-name fedavg
+
+# this config can also be overriden from the CLI
+```

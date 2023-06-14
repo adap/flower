@@ -53,7 +53,7 @@ class LogisticRegression(nn.Module):
     """A network for logistic regression using a
     single fully connected layer.
 
-    As described in Lin 202 paper :
+    As described in Lin 2020 paper :
 
     [Federated Optimization in Heterogeneous Networks]
     (https://arxiv.org/pdf/1812.06127.pdf)
@@ -110,12 +110,12 @@ def train(  # pylint: disable=too-many-arguments
     global_params = [val.detach().clone() for val in net.parameters()]
     net.train()
     for _ in range(epochs):
-        net = _training_loop(
+        net = _train_one_epoch(
             net, global_params, trainloader, device, criterion, optimizer, proximal_mu
         )
 
 
-def _training_loop(  # pylint: disable=too-many-arguments
+def _train_one_epoch(  # pylint: disable=too-many-arguments
     net: nn.Module,
     global_params: List[Parameter],
     trainloader: DataLoader,

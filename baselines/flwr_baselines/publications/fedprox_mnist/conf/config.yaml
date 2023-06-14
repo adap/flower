@@ -1,22 +1,31 @@
 ---
-defaults:
-  - strategy: fedprox
 
 num_clients: 1000 # total number of clients
 num_epochs: 10 # number of local epochs
 batch_size: 10
 num_rounds: 100
 clients_per_round: 10
-iid: False
-balance: True
 stragglers_fraction: 0.9
 learning_rate: 0.03
-mu: 0.5
-save_path: "docs/results"
+mu: 1.0 # it can be >= 0
+
+dataset_config:
+  iid: false
+  balance: false
+  power_law: true
 
 fit_config:
   drop_client: false # with FedProx, clients shouldn't be dropped even if they are stragglers
 
 model:
-  _target_: flwr_baselines.publications.fedprox_mnist.model.LogisticRegression
+  _target_: flwr_baselines.publications.fedprox_mnist.models.Net
   num_classes: 10
+
+strategy:
+  _target_: flwr.server.strategy.FedProx
+  fraction_fit: 0.00001 # because we want the number of clients to sample on each roudn to be solely defined by min_fit_clients
+  fraction_evaluate: 0.0
+  min_fit_clients: ${clients_per_round}
+  min_evaluate_clients: 0
+  min_available_clients: ${clients_per_round}
+  proximal_mu: ${mu}

@@ -13,7 +13,7 @@ import torch
 from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import DataLoader
 
-from flwr_baselines.publications.fedprox_mnist.model import test, train
+from flwr_baselines.publications.fedprox_mnist.models import test, train
 from flwr_baselines.publications.fedprox_mnist.dataset import load_datasets
 
 
@@ -59,7 +59,11 @@ class FlowerClient(
         # At each round check if the client is a straggler,
         # if so, train less epochs (to simulate partial work)
         # if the client is told to be dropped (e.g. because not using
-        # FedProx in the server), the fit method returns.
+        # FedProx in the server), the fit method returns without doing
+        # training. 
+        # This method always returns via the metrics (last argument being
+        # returned) whether the client is a straggler or not. This info
+        # is used by strategies other than FedProx to discard the update.
         if (
             self.straggler_schedule[int(config["curr_round"]) - 1]
             and self.num_epochs > 1
@@ -67,7 +71,10 @@ class FlowerClient(
             num_epochs = np.random.randint(1, self.num_epochs)
 
             if config['drop_client']:
-                raise Exception("Client drops!!")
+                # return without doing any training.
+                # The flag in the metric will be used to tell the strategy
+                # to discard the model upon aggregation
+                return self.get_parameters({}), len(self.trainloader), {'is_straggler': True}
 
         else:
             num_epochs = self.num_epochs
@@ -81,7 +88,7 @@ class FlowerClient(
             proximal_mu=config["proximal_mu"],
         )
 
-        return self.get_parameters({}), len(self.trainloader), {}
+        return self.get_parameters({}), len(self.trainloader), {'is_straggler': False}
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -94,8 +101,7 @@ class FlowerClient(
 
 def gen_client_fn(
     device: torch.device,
-    iid: bool,
-    balance: bool,
+    dataset_config: DictConfig,
     num_clients: int,
     num_rounds: int,
     num_epochs: int,
@@ -112,14 +118,8 @@ def gen_client_fn(
     ----------
     device : torch.device
         The device on which the the client will train on and test on.
-    iid : bool
-        The way to partition the data for each client, i.e. whether the data
-        should be independent and identically distributed between the clients
-        or if the data should first be sorted by labels and distributed by chunks
-        to each client (used to test the convergence in a worst case scenario)
-    balance : bool
-        Whether the dataset should contain an equal number of samples in each class,
-        by default True
+    dataset_config: DictConfig
+        A config that parameterises how the dataset should be partitioned.
     num_clients : int
         The number of clients present in the setup
     num_epochs : int
@@ -139,7 +139,7 @@ def gen_client_fn(
         the DataLoader that will be used for testing
     """
     trainloaders, valloaders, testloader = load_datasets(
-        iid=iid, balance=balance, num_clients=num_clients, batch_size=batch_size
+        config=dataset_config, num_clients=num_clients, batch_size=batch_size
     )
 
     # Defines a staggling schedule for each clients, i.e at which round will they
