@@ -159,7 +159,7 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     keepalive_time_ms: int = 210000,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
 ) -> grpc.Server:
-    """Generic function to create a gRPC server with a single servicer.
+    """Create a gRPC server with a single servicer.
 
     Parameters
     ----------
