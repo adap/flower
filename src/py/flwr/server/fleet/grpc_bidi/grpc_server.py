@@ -130,7 +130,6 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     >>>     ),
     >>> )
     """
-
     servicer = FlowerServiceServicer(client_manager)
     add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
 
@@ -210,7 +209,6 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     server : grpc.Server
         A non-running instance of a gRPC server.
     """
-
     # Deconstruct tuple into servicer and function
     servicer, add_servicer_to_server_fn = servicer_and_add_fn
 

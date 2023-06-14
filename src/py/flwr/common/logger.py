@@ -70,7 +70,6 @@ def configure(
     identifier: str, filename: Optional[str] = None, host: Optional[str] = None
 ) -> None:
     """Configure logging to file and/or remote log server."""
-
     # Create formatter
     string_to_input = f"{identifier} | %(levelname)s %(name)s %(asctime)s "
     string_to_input += "| %(filename)s:%(lineno)d | %(message)s"

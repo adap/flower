@@ -129,7 +129,6 @@ def start_simulation(  # pylint: disable=too-many-arguments
     hist : flwr.server.history.History
         Object containing metrics from training.
     """
-
     # pylint: disable-msg=too-many-locals
     event(
         EventType.START_SIMULATION_ENTER,

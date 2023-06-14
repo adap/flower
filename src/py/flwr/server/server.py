@@ -161,7 +161,6 @@ class Server:
         Tuple[Optional[float], Dict[str, Scalar], EvaluateResultsAndFailures]
     ]:
         """Validate current global model on a number of clients."""
-
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_evaluate(
             server_round=server_round,
@@ -210,7 +209,6 @@ class Server:
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
         """Perform a single round of federated averaging."""
-
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
             server_round=server_round,
@@ -266,7 +264,6 @@ class Server:
 
     def _get_initial_parameters(self, timeout: Optional[float]) -> Parameters:
         """Get initial parameters from one of the available clients."""
-
         # Server-side parameter initialization
         parameters: Optional[Parameters] = self.strategy.initialize_parameters(
             client_manager=self._client_manager
@@ -366,7 +363,6 @@ def _handle_finished_future_after_fit(
     failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 ) -> None:
     """Convert finished future into either a result or a failure."""
-
     # Check if there was an exception
     failure = future.exception()
     if failure is not None:
@@ -428,7 +424,6 @@ def _handle_finished_future_after_evaluate(
     failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
 ) -> None:
     """Convert finished future into either a result or a failure."""
-
     # Check if there was an exception
     failure = future.exception()
     if failure is not None:
