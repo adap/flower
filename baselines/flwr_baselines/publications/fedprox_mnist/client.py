@@ -2,7 +2,7 @@
 
 
 from collections import OrderedDict
-from typing import Callable, Dict, Tuple
+from typing import Callable, Dict, List, Tuple
 
 from hydra.utils import instantiate
 from omegaconf import DictConfig
@@ -100,12 +100,11 @@ class FlowerClient(
 
 
 def gen_client_fn(
-    device: torch.device,
-    dataset_config: DictConfig,
     num_clients: int,
     num_rounds: int,
     num_epochs: int,
-    batch_size: int,
+    trainloaders: List[DataLoader],
+    valloaders: List[DataLoader],
     learning_rate: float,
     stragglers: float,
     model: DictConfig,
@@ -116,17 +115,20 @@ def gen_client_fn(
 
     Parameters
     ----------
-    device : torch.device
-        The device on which the the client will train on and test on.
-    dataset_config: DictConfig
-        A config that parameterises how the dataset should be partitioned.
     num_clients : int
         The number of clients present in the setup
+    num_rounds: int
+        The number of rounds in the experiment. This is used to construct
+        the scheduling for stragglers
     num_epochs : int
         The number of local epochs each client should run the training for before
         sending it to the server.
-    batch_size : int
-        The size of the local batches each client trains on.
+    trainloaders: List[DataLoader]
+        A list of DataLoaders, each pointing to the dataset training partition 
+        belonging to a particular client.
+    valloaders: List[DataLoader]
+        A list of DataLoaders, each pointing to the dataset validation partition 
+        belonging to a particular client.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
     stragglers : float
@@ -138,9 +140,7 @@ def gen_client_fn(
         A tuple containing the client function that creates Flower Clients and
         the DataLoader that will be used for testing
     """
-    trainloaders, valloaders, testloader = load_datasets(
-        config=dataset_config, num_clients=num_clients, batch_size=batch_size
-    )
+
 
     # Defines a staggling schedule for each clients, i.e at which round will they
     # be a straggler. This is done so at each round the proportion of staggling
@@ -155,6 +155,7 @@ def gen_client_fn(
         """Create a Flower client representing a single organization."""
 
         # Load model
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = instantiate(model).to(device)
 
         # Note: each client gets a different trainloader/valloader, so each client
@@ -173,4 +174,4 @@ def gen_client_fn(
             stragglers_mat[int(cid)],
         )
 
-    return client_fn, testloader
+    return client_fn

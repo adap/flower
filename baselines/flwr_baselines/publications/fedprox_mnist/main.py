@@ -1,19 +1,16 @@
 """Runs CNN federated learning for MNIST dataset."""
 
-import os
 from pathlib import Path
 
 import flwr as fl
 import hydra
 import numpy as np
-import torch
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
 from hydra.core.hydra_config import HydraConfig
 
 from flwr_baselines.publications.fedprox_mnist import client, utils
-
-DEVICE: str = torch.device("cpu")
+from flwr_baselines.publications.fedprox_mnist.dataset import load_datasets
 
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
@@ -26,21 +23,28 @@ def main(cfg: DictConfig) -> None:
         An omegaconf object that stores the hydra config.
     """
 
-    client_fn, testloader = client.gen_client_fn(
-        num_epochs=cfg.num_epochs,
-        batch_size=cfg.batch_size,
-        device=DEVICE,
+    # partition dataset and get dataloaders
+    trainloaders, valloaders, testloader = load_datasets(
+        config=cfg.dataset_config, num_clients=cfg.num_clients, batch_size=cfg.batch_size
+    )
+
+    # prapare function that will be used to spawn each client
+    client_fn = client.gen_client_fn(
         num_clients=cfg.num_clients,
+        num_epochs=cfg.num_epochs,
+        trainloaders=trainloaders,
+        valloaders=valloaders,
         num_rounds=cfg.num_rounds,
-        dataset_config=cfg.dataset_config,
         learning_rate=cfg.learning_rate,
         stragglers=cfg.stragglers_fraction,
         model=cfg.model,
     )
 
-    evaluate_fn = utils.gen_evaluate_fn(testloader, DEVICE, cfg.model)
+    # get function that will executed by the strategy's evaluate() method
+    evaluate_fn = utils.gen_evaluate_fn(testloader, device='cpu', model=cfg.model)
 
-
+    # get a function that will be used to construct the config that the client's
+    # fit() method will received
     def get_on_fit_config():
         def fit_config_fn(server_round: int):
             # resolve and convert to python dict
@@ -62,9 +66,12 @@ def main(cfg: DictConfig) -> None:
         client_fn=client_fn,
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
+        client_resources={'num_cpus': 2, 'num_gpus': 0.0},
         strategy=strategy,
     )
 
+    # Experiment completed. Now we save the results and
+    # generate plots using the `history`
     strategy_name = strategy.__class__.__name__
 
     file_suffix: str = (
