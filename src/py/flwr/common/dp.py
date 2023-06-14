@@ -31,8 +31,7 @@ def _get_update_norm(update: NDArrays) -> float:
 
 
 def add_gaussian_noise(update: NDArrays, std_dev: float) -> NDArrays:
-    """Adds iid Gaussian noise of the given standard deviation to each floating
-    point value in the update."""
+    """Add iid Gaussian noise to each floating point value in the update."""
     update_noised = [
         layer + np.random.normal(0, std_dev, layer.shape) for layer in update
     ]

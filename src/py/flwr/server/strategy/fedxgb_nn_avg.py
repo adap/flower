@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated XGBoost in the horizontal setting based on building Neural Network
-and averaging on prediction outcomes [Ma et al., 2023].
+"""Federated XGBoost in the horizontal setting based on building Neural Network and
+averaging on prediction outcomes [Ma et al., 2023].
 
 Paper: Coming
 """

@@ -66,8 +66,8 @@ DATABASE = ":flwr-in-memory-state:"
 class ServerConfig:
     """Flower server config.
 
-    All attributes have default values which allows users to configure
-    just the ones they care about.
+    All attributes have default values which allows users to configure just the ones
+    they care about.
     """
 
     num_rounds: int = 1
@@ -462,8 +462,8 @@ def _register_exit_handlers(
     ) -> None:
         """Exit handler to be registered with signal.signal.
 
-        When called will reset signal handler to original signal handler
-        from default_handlers.
+        When called will reset signal handler to original signal handler from
+        default_handlers.
         """
 
         # Reset to default handler
