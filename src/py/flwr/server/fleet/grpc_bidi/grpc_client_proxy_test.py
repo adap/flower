@@ -57,7 +57,11 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         )
 
     def test_get_parameters(self) -> None:
-        """This test is currently quite simple and should be improved."""
+        """
+        Test get parameters.
+
+        Note that this test is currently quite simple and should be improved.
+        """
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
         get_parameters_ins = GetParametersIns(config={})
@@ -71,7 +75,11 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         assert not value.parameters.tensors
 
     def test_fit(self) -> None:
-        """This test is currently quite simple and should be improved."""
+        """
+        Test fit of a client.
+
+        Note that this test is currently quite simple and should be improved.
+        """
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
         parameters = flwr.common.ndarrays_to_parameters([np.ones((2, 2))])
@@ -86,7 +94,11 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         assert fit_res.num_examples == 10
 
     def test_evaluate(self) -> None:
-        """This test is currently quite simple and should be improved."""
+        """
+        Test evaluate.
+
+        Note that this test is currently quite simple and should be improved.
+        """
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock)
         parameters = flwr.common.Parameters(tensors=[], tensor_type="np")
@@ -102,7 +114,11 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         )
 
     def test_get_properties(self) -> None:
-        """This test is currently quite simple and should be improved."""
+        """
+        Test get properties.
+
+        Note that this test is currently quite simple and should be improved.
+        """
         # Prepare
         client = GrpcClientProxy(cid="1", bridge=self.bridge_mock_get_proprieties)
         request_properties: Config = {"tensor_type": "str"}
