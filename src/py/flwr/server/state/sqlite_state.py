@@ -471,8 +471,7 @@ def dict_factory(
 ) -> Dict[str, Any]:
     """Used to turn SQLite results into dicts.
 
-    Less efficent for retrival of large amounts of data but easier to
-    use.
+    Less efficent for retrival of large amounts of data but easier to use.
     """
     fields = [column[0] for column in cursor.description]
     return dict(zip(fields, row))
