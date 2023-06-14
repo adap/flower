@@ -82,8 +82,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
                 results: List[Tuple[ClientProxy, EvaluateRes]],
                 failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
             ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-                """Hooks into aggregate_evaluate for TensorBoard logging
-                purpose."""
+                """Hooks into aggregate_evaluate for TensorBoard logging purpose."""
                 # Execute decorated function and extract results for logging
                 # They will be returned at the end of this function but also
                 # used for logging

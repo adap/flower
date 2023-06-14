@@ -311,8 +311,7 @@ class StateTest(unittest.TestCase):
         assert len(retrieved_node_ids) == 0
 
     def test_num_task_ins(self) -> None:
-        """Test if num_tasks returns correct number of not delivered
-        task_ins."""
+        """Test if num_tasks returns correct number of not delivered task_ins."""
         # Prepare
         state: State = self.state_factory()
         task_0 = create_task_ins(consumer_node_id=0, anonymous=True)
@@ -329,8 +328,7 @@ class StateTest(unittest.TestCase):
         assert num == 2
 
     def test_num_task_res(self) -> None:
-        """Test if num_tasks returns correct number of not delivered
-        task_res."""
+        """Test if num_tasks returns correct number of not delivered task_res."""
         # Prepare
         state: State = self.state_factory()
         task_0 = create_task_res(producer_node_id=0, anonymous=True, ancestry=["1"])
