@@ -71,7 +71,7 @@ rest = ["fastapi", "requests", "starlette", "uvicorn"]
 
 [tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.6"
-types-protobuf = "==3.19.18"
+types-protobuf = "==4.23.0.1"
 types-requests = "==2.28.11.17"
 types-setuptools = "==67.7.0.1"
 clang-format = "==16.0.3"
