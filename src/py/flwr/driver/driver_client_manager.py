@@ -129,10 +129,10 @@ class DriverClientManager(ClientManager):
 
     def _update_nodes(self) -> None:
         get_nodes_res = self.driver.get_nodes(req=driver_pb2.GetNodesRequest())
-        all_node_ids = get_nodes_res.node_ids
-        for node_id in all_node_ids:
-            self.clients[str(node_id)] = DriverClientProxy(
-                node_id=node_id,
+        all_nodes = get_nodes_res.nodes
+        for node in all_nodes:
+            self.clients[str(node.node_id)] = DriverClientProxy(
+                node_id=node.node_id,
                 driver=self.driver,
                 anonymous=False,
             )

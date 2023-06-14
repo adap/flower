@@ -31,6 +31,7 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
+from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import TaskRes
 from flwr.server.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
@@ -49,7 +50,10 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         log(INFO, "DriverServicer.GetNodes")
         state: State = self.state_factory.state()
         all_ids: Set[int] = state.get_nodes()
-        return GetNodesResponse(node_ids=list(all_ids))
+        nodes: List[Node] = [
+            Node(node_id=node_id, anonymous=False) for node_id in all_ids
+        ]
+        return GetNodesResponse(nodes=nodes)
 
     def PushTaskIns(
         self, request: PushTaskInsRequest, context: grpc.ServicerContext
