@@ -21,8 +21,9 @@ Note: If you use this implementation in your work, please remember to cite the o
 ### Models
 
 This baseline contains two models:
-    * A logistic regression model used in the FedProx paper for MNIST (see `models/LogisticRegression`). This is the model used by default.
-    * A two-layer CNN network as used in the FedAvg paper (see `modes/Net`)
+
+* A logistic regression model used in the FedProx paper for MNIST (see `models/LogisticRegression`). This is the model used by default.
+* A two-layer CNN network as used in the FedAvg paper (see `models/Net`)
 
 ### Training Paramaters
 
@@ -39,7 +40,7 @@ The following is a summary of the key hyperparameters most relevant for this bas
 
 ## Running experiments
 
-The `conf/config.yaml` file containing all the tunable hyperparameters and the necessary variables. [Hydra](https://hydra.cc/docs/tutorials/) is used to manage configs. The outputs of each experiment as well as a log is created automatically by Hydra. The output directory will follow the structure: `outputs/<year>-<month>-<day>/<time>`.
+The `conf/config.yaml` file containing all the tunable hyperparameters and the necessary variables. [Hydra](https://hydra.cc/docs/tutorials/) is used to manage configs. The outputs of each experiment as well as a log is created automatically by Hydra. The output directory will follow the structure: `outputs/<date>/<time>`.
 
 To run FedPox as:
 ```bash
