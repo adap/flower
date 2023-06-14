@@ -40,7 +40,7 @@ class GrpcClientProxy(ClientProxy):
         ins: common.GetPropertiesIns,
         timeout: Optional[float],
     ) -> common.GetPropertiesRes:
-        """Requests client's set of internal properties."""
+        """Request client's set of internal properties."""
         get_properties_msg = serde.get_properties_ins_to_proto(ins)
         res_wrapper: ResWrapper = self.bridge.request(
             ins_wrapper=InsWrapper(
