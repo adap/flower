@@ -76,10 +76,11 @@ class History:
         """Create a representation of History.
 
         The representation consists of the following data (for each round) if present:
-        * distributed loss,
-        * centralized loss,
-        * distributed training metrics,
-        * distributed evaluation metrics,
+
+        * distributed loss.
+        * centralized loss.
+        * distributed training metrics.
+        * distributed evaluation metrics.
         * centralized metrics.
 
         Returns
