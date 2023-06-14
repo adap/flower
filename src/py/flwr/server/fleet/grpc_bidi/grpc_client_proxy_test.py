@@ -46,7 +46,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
     """Tests for GrpcClientProxy."""
 
     def setUp(self) -> None:
-        """Setup mocks for tests."""
+        """Set up mocks for tests."""
         self.bridge_mock = MagicMock()
         # Set return_value for usually blocking get_client_message method
         self.bridge_mock.request.return_value = RES_WRAPPER_FIT_RES

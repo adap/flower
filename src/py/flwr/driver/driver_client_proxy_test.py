@@ -35,7 +35,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
     """Tests for DriverClientProxy."""
 
     def setUp(self) -> None:
-        """Setup mocks for tests."""
+        """Set up mocks for tests."""
         self.driver = MagicMock()
         self.driver.get_nodes.return_value = driver_pb2.GetNodesResponse(node_ids=[1])
 
