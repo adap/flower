@@ -68,7 +68,7 @@ class SuccessClient(ClientProxy):
         )
 
     def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
-        """Simulate evaluate by returning a success EvaluateRes with loss 1.0"""
+        """Simulate evaluate by returning a success EvaluateRes with loss 1.0."""
         return EvaluateRes(
             status=Status(code=Code.OK, message="Success"),
             loss=1.0,
