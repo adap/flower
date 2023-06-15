@@ -33,7 +33,7 @@ class OverridingClient(NumPyClient):
 
     def get_properties(self, config: Config) -> Properties:
         """Get empty properties of the client."""
-        return Properties()
+        return {}
 
     def get_parameters(self, config: Config) -> NDArrays:
         """Get empty parameters of the client."""

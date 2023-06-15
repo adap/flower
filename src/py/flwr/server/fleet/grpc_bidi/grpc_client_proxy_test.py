@@ -57,7 +57,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         )
 
     def test_get_parameters(self) -> None:
-        """Test get parameters.
+        """Test the get_parameters method of the client class.
 
         Note that this test is currently quite simple and should be improved.
         """
@@ -74,7 +74,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         assert not value.parameters.tensors
 
     def test_fit(self) -> None:
-        """Test fit of a client.
+        """Test the fit method of the client class.
 
         Note that this test is currently quite simple and should be improved.
         """
@@ -92,7 +92,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         assert fit_res.num_examples == 10
 
     def test_evaluate(self) -> None:
-        """Test evaluate.
+        """Test the evaluate method of the client class.
 
         Note that this test is currently quite simple and should be improved.
         """
@@ -111,7 +111,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         )
 
     def test_get_properties(self) -> None:
-        """Test get properties.
+        """Test the get_properties method of the client class.
 
         Note that this test is currently quite simple and should be improved.
         """
