@@ -11,7 +11,7 @@ from hydra.core.hydra_config import HydraConfig
 
 from flwr_baselines.publications.fedprox_mnist import client, utils
 from flwr_baselines.publications.fedprox_mnist.dataset import load_datasets
-
+from flwr_baselines.publications.fedprox_mnist.utils import save_results_as_pickle
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -72,8 +72,20 @@ def main(cfg: DictConfig) -> None:
 
     # Experiment completed. Now we save the results and
     # generate plots using the `history`
-    strategy_name = strategy.__class__.__name__
+    print("................")
+    print(history)
 
+    # Hydra automatically creates an output directory
+    # Let's retrieve it and save some results there
+    save_path = HydraConfig.get().runtime.output_dir
+
+    # save results as a Python pickle using a file_path
+    # the directory created by Hydra for each run
+    save_results_as_pickle(history, file_path=save_path,
+                           extra_results={'hello': 123})
+
+   # plot results and include them in the readme
+    strategy_name = strategy.__class__.__name__
     file_suffix: str = (
         f"_{strategy_name}"
         f"{'_iid' if cfg.dataset_config.iid else ''}"
@@ -85,18 +97,6 @@ def main(cfg: DictConfig) -> None:
         f"_R={cfg.num_rounds}"
         f"_mu={cfg.mu}"
         f"_strag={cfg.stragglers_fraction}"
-    )
-
-    # Hydra automatically creates an output directory
-    # Let's retrieve it and save some results there
-    save_path = HydraConfig.get().runtime.output_dir
-
-    print("................")
-    print(history)
-
-    np.save(
-        save_path / Path(f"hist{file_suffix}"),
-        history,  # type: ignore
     )
 
     utils.plot_metric_from_history(
