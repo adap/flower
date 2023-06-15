@@ -49,9 +49,9 @@ class Net(nn.Module):
         output_tensor = self.fc2(output_tensor)
         return output_tensor
 
+
 class LogisticRegression(nn.Module):
-    """A network for logistic regression using a
-    single fully connected layer.
+    """A network for logistic regression using a single fully connected layer.
 
     As described in Lin 2020 paper :
 
@@ -61,7 +61,7 @@ class LogisticRegression(nn.Module):
 
     def __init__(self, num_classes: int) -> None:
         super().__init__()
-        self.fc = nn.Linear(28*28, num_classes)
+        self.fc = nn.Linear(28 * 28, num_classes)
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """Forward pass.
@@ -78,7 +78,7 @@ class LogisticRegression(nn.Module):
         """
         output_tensor = self.fc(torch.flatten(input_tensor, 1))
         return output_tensor
-    
+
 
 def train(  # pylint: disable=too-many-arguments
     net: nn.Module,

@@ -1,19 +1,19 @@
 """Contains utility functions for CNN FL on MNIST."""
 
 import pickle
-from secrets import token_hex
 from collections import OrderedDict
 from pathlib import Path
+from secrets import token_hex
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
-from hydra.utils import instantiate
-from omegaconf import DictConfig
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from flwr.common import Metrics
 from flwr.common.typing import NDArrays, Scalar
 from flwr.server.history import History
+from hydra.utils import instantiate
+from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
 from flwr_baselines.publications.fedprox_mnist.models import test
@@ -46,9 +46,9 @@ def plot_metric_from_history(
     # let's extract centralised loss (main metric reported in FedProx paper)
     rounds_loss, values_loss = zip(*hist.losses_centralized)
 
-    fig, axs = plt.subplots(nrows=2, ncols=1, sharex='row')
+    fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
     axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))
-    axs[1].plot(np.asarray(rounds_loss),  np.asarray(values))
+    axs[1].plot(np.asarray(rounds_loss), np.asarray(values))
 
     axs[0].set_ylabel("Loss")
     axs[1].set_ylabel("Accuracy")
@@ -83,7 +83,8 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 def gen_evaluate_fn(
-    testloader: DataLoader, device: torch.device,
+    testloader: DataLoader,
+    device: torch.device,
     model: DictConfig,
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
@@ -126,10 +127,10 @@ def save_results_as_pickle(
     history: History,
     file_path: Union[str, Path],
     extra_results: Optional[Dict] = {},
-    default_filename: Optional[str] = "results.pkl"
+    default_filename: Optional[str] = "results.pkl",
 ) -> None:
-    """ Saves results from simulation to pickle.
-    
+    """Saves results from simulation to pickle.
+
     Parameters
     ----------
     history: History
@@ -154,17 +155,17 @@ def save_results_as_pickle(
     path.mkdir(exist_ok=True, parents=True)
 
     def _add_random_suffix(path_: Path):
-        """Adds a randomly generated suffix to the
-        file name (so it doesn't overwrite the file)."""
+        """Adds a randomly generated suffix to the file name (so it doesn't overwrite
+        the file)."""
         print(f"File `{path_}` exists! ")
         suffix = token_hex(4)
         print(f"New results to be saved with suffix: {suffix}")
-        return path_.parent / (path_.stem + '_' + suffix + '.pkl')
-    
+        return path_.parent / (path_.stem + "_" + suffix + ".pkl")
+
     def _complete_path_with_default_name(path_: Path):
-        """Appends the default file name to the path"""
+        """Appends the default file name to the path."""
         print("Using default filename")
-        return path_ / default_filename        
+        return path_ / default_filename
 
     if path.is_dir():
         path = _complete_path_with_default_name(path)
@@ -175,8 +176,8 @@ def save_results_as_pickle(
 
     print(f"Results will be saved into: {path}")
 
-    data = {'history': history, **extra_results}
+    data = {"history": history, **extra_results}
 
     # save results to pickle
-    with open(str(path), 'wb') as handle:
+    with open(str(path), "wb") as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)

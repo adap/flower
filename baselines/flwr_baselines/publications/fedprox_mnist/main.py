@@ -5,13 +5,14 @@ from pathlib import Path
 import flwr as fl
 import hydra
 import numpy as np
-from omegaconf import DictConfig, OmegaConf
-from hydra.utils import instantiate
 from hydra.core.hydra_config import HydraConfig
+from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
 
 from flwr_baselines.publications.fedprox_mnist import client, utils
 from flwr_baselines.publications.fedprox_mnist.dataset import load_datasets
 from flwr_baselines.publications.fedprox_mnist.utils import save_results_as_pickle
+
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -25,7 +26,9 @@ def main(cfg: DictConfig) -> None:
 
     # partition dataset and get dataloaders
     trainloaders, valloaders, testloader = load_datasets(
-        config=cfg.dataset_config, num_clients=cfg.num_clients, batch_size=cfg.batch_size
+        config=cfg.dataset_config,
+        num_clients=cfg.num_clients,
+        batch_size=cfg.batch_size,
     )
 
     # prapare function that will be used to spawn each client
@@ -41,7 +44,7 @@ def main(cfg: DictConfig) -> None:
     )
 
     # get function that will executed by the strategy's evaluate() method
-    evaluate_fn = utils.gen_evaluate_fn(testloader, device='cpu', model=cfg.model)
+    evaluate_fn = utils.gen_evaluate_fn(testloader, device="cpu", model=cfg.model)
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
@@ -49,24 +52,26 @@ def main(cfg: DictConfig) -> None:
         def fit_config_fn(server_round: int):
             # resolve and convert to python dict
             fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
-            fit_config['curr_round'] = server_round # add round info
+            fit_config["curr_round"] = server_round  # add round info
             return fit_config
+
         return fit_config_fn
 
     # instantiate strategy according to config. Here we pass other arguments
     # that are only defined at run time.
-    strategy = instantiate(cfg.strategy,
-                           evaluate_fn=evaluate_fn,
-                           on_fit_config_fn=get_on_fit_config(),
-                           evaluate_metrics_aggregation_fn=utils.weighted_average)
-
+    strategy = instantiate(
+        cfg.strategy,
+        evaluate_fn=evaluate_fn,
+        on_fit_config_fn=get_on_fit_config(),
+        evaluate_metrics_aggregation_fn=utils.weighted_average,
+    )
 
     # Start simulation
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
-        client_resources={'num_cpus': 2, 'num_gpus': 0.0},
+        client_resources={"num_cpus": 2, "num_gpus": 0.0},
         strategy=strategy,
     )
 
@@ -81,10 +86,9 @@ def main(cfg: DictConfig) -> None:
 
     # save results as a Python pickle using a file_path
     # the directory created by Hydra for each run
-    save_results_as_pickle(history, file_path=save_path,
-                           extra_results={'hello': 123})
+    save_results_as_pickle(history, file_path=save_path, extra_results={"hello": 123})
 
-   # plot results and include them in the readme
+    # plot results and include them in the readme
     strategy_name = strategy.__class__.__name__
     file_suffix: str = (
         f"_{strategy_name}"

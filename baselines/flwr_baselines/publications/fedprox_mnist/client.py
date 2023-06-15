@@ -4,17 +4,16 @@
 from collections import OrderedDict
 from typing import Callable, Dict, List, Tuple
 
-from hydra.utils import instantiate
-from omegaconf import DictConfig
-
 import flwr as fl
 import numpy as np
 import torch
 from flwr.common.typing import NDArrays, Scalar
+from hydra.utils import instantiate
+from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from flwr_baselines.publications.fedprox_mnist.models import test, train
 from flwr_baselines.publications.fedprox_mnist.dataset import load_datasets
+from flwr_baselines.publications.fedprox_mnist.models import test, train
 
 
 class FlowerClient(
@@ -60,7 +59,7 @@ class FlowerClient(
         # if so, train less epochs (to simulate partial work)
         # if the client is told to be dropped (e.g. because not using
         # FedProx in the server), the fit method returns without doing
-        # training. 
+        # training.
         # This method always returns via the metrics (last argument being
         # returned) whether the client is a straggler or not. This info
         # is used by strategies other than FedProx to discard the update.
@@ -70,11 +69,15 @@ class FlowerClient(
         ):
             num_epochs = np.random.randint(1, self.num_epochs)
 
-            if config['drop_client']:
+            if config["drop_client"]:
                 # return without doing any training.
                 # The flag in the metric will be used to tell the strategy
                 # to discard the model upon aggregation
-                return self.get_parameters({}), len(self.trainloader), {'is_straggler': True}
+                return (
+                    self.get_parameters({}),
+                    len(self.trainloader),
+                    {"is_straggler": True},
+                )
 
         else:
             num_epochs = self.num_epochs
@@ -88,7 +91,7 @@ class FlowerClient(
             proximal_mu=config["proximal_mu"],
         )
 
-        return self.get_parameters({}), len(self.trainloader), {'is_straggler': False}
+        return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -124,10 +127,10 @@ def gen_client_fn(
         The number of local epochs each client should run the training for before
         sending it to the server.
     trainloaders: List[DataLoader]
-        A list of DataLoaders, each pointing to the dataset training partition 
+        A list of DataLoaders, each pointing to the dataset training partition
         belonging to a particular client.
     valloaders: List[DataLoader]
-        A list of DataLoaders, each pointing to the dataset validation partition 
+        A list of DataLoaders, each pointing to the dataset validation partition
         belonging to a particular client.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
@@ -140,7 +143,6 @@ def gen_client_fn(
         A tuple containing the client function that creates Flower Clients and
         the DataLoader that will be used for testing
     """
-
 
     # Defines a staggling schedule for each clients, i.e at which round will they
     # be a straggler. This is done so at each round the proportion of staggling

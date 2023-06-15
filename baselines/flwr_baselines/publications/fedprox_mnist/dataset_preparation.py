@@ -1,4 +1,3 @@
-
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -31,8 +30,8 @@ def _partition_data(
     balance: Optional[bool] = False,
     seed: Optional[int] = 42,
 ) -> Tuple[List[Dataset], Dataset]:
-    """Split training set into iid or non iid partitions to simulate the
-    federated setting.
+    """Split training set into iid or non iid partitions to simulate the federated
+    setting.
 
     Parameters
     ----------
@@ -64,9 +63,14 @@ def _partition_data(
     else:
         if power_law:
             trainset_sorted = _sort_by_class(trainset)
-            datasets = _power_law_split(trainset_sorted, num_partitions=num_clients,
-                                        num_labels_per_partition=2, min_data_per_partition=10,
-                                        mean=0.0, sigma=2.0)
+            datasets = _power_law_split(
+                trainset_sorted,
+                num_partitions=num_clients,
+                num_labels_per_partition=2,
+                min_data_per_partition=10,
+                mean=0.0,
+                sigma=2.0,
+            )
         else:
             if balance:
                 trainset = _balance_classes(trainset, seed)
@@ -77,7 +81,9 @@ def _partition_data(
             tmp = []
             for idx in range(num_clients * 2):
                 tmp.append(
-                    Subset(sorted_data, np.arange(shard_size * idx, shard_size * (idx + 1)))
+                    Subset(
+                        sorted_data, np.arange(shard_size * idx, shard_size * (idx + 1))
+                    )
                 )
             idxs_list = torch.randperm(
                 num_clients * 2, generator=torch.Generator().manual_seed(seed)
@@ -129,6 +135,7 @@ def _balance_classes(
 
     return shuffled
 
+
 def _sort_by_class(
     trainset: Dataset,
 ) -> Dataset:
@@ -145,19 +152,22 @@ def _sort_by_class(
         The sorted training dataset.
     """
     class_counts = np.bincount(trainset.targets)
-    idxs = trainset.targets.argsort() # sort targets in ascending order
+    idxs = trainset.targets.argsort()  # sort targets in ascending order
 
-    tmp = [] # create subset of smallest class
-    tmp_targets = [] # same for targets
-    
+    tmp = []  # create subset of smallest class
+    tmp_targets = []  # same for targets
+
     start = 0
     for count in np.cumsum(class_counts):
-        tmp.append(Subset(trainset, idxs[start : int(count + start)]))  # add rest of classes
+        tmp.append(
+            Subset(trainset, idxs[start : int(count + start)])
+        )  # add rest of classes
         tmp_targets.append(trainset.targets[idxs[start : int(count + start)]])
         start += count
-    sorted_dataset = ConcatDataset(tmp) # concat dataset    
-    sorted_dataset.targets = torch.cat(tmp_targets) # concat targets
+    sorted_dataset = ConcatDataset(tmp)  # concat dataset
+    sorted_dataset.targets = torch.cat(tmp_targets)  # concat targets
     return sorted_dataset
+
 
 def _power_law_split(
     sorted_trainset: Dataset,
@@ -165,12 +175,12 @@ def _power_law_split(
     num_labels_per_partition: int = 2,
     min_data_per_partition: int = 10,
     mean: float = 0.0,
-    sigma: float = 2.0, 
+    sigma: float = 2.0,
 ) -> Dataset:
     """Partitions the dataset following a power-law distribution. It
     follows the implementation of Li et al 2020: https://arxiv.org/abs/1812.06127
     with default values set accordingtly.
-    
+
     Parameters
     ----------
     sorted_trainset : Dataset
@@ -193,46 +203,63 @@ def _power_law_split(
     Dataset
         The partitioned training dataset.
     """
-    
+
     targets = sorted_trainset.targets
     full_idx = range(len(targets))
-    
+
     class_counts = np.bincount(sorted_trainset.targets)
     labels_cs = np.cumsum(class_counts)
     labels_cs = [0] + labels_cs[:-1].tolist()
-    
+
     partitions_idx = []
     num_classes = len(np.bincount(targets))
     hist = np.zeros(num_classes, dtype=np.int32)
-    
+
     # asign min_data_per_partition
-    min_data_per_class = int(min_data_per_partition/num_labels_per_partition)
+    min_data_per_class = int(min_data_per_partition / num_labels_per_partition)
     for u_id in range(num_partitions):
         partitions_idx.append([])
         for cls_idx in range(num_labels_per_partition):
             # label for the u_id-th client
             cls = (u_id + cls_idx) % num_classes
             # record minimum data
-            indices = list(full_idx[labels_cs[cls] + hist[cls]: labels_cs[cls] + hist[cls] + min_data_per_class])
+            indices = list(
+                full_idx[
+                    labels_cs[cls]
+                    + hist[cls] : labels_cs[cls]
+                    + hist[cls]
+                    + min_data_per_class
+                ]
+            )
             partitions_idx[-1].extend(indices)
             hist[cls] += min_data_per_class
 
     # add remaining images following power-law
-    probs = np.random.lognormal(mean, sigma, (num_classes, int(num_partitions/num_classes), num_labels_per_partition))
+    probs = np.random.lognormal(
+        mean,
+        sigma,
+        (num_classes, int(num_partitions / num_classes), num_labels_per_partition),
+    )
     remaining_per_class = class_counts - hist
     # obtain how many samples each partition should be assigned for each of the labels it contains
-    probs = remaining_per_class.reshape(-1,1,1) * probs/np.sum(probs,(1,2), keepdims=True)
+    probs = (
+        remaining_per_class.reshape(-1, 1, 1)
+        * probs
+        / np.sum(probs, (1, 2), keepdims=True)
+    )
 
     for u_id in range(num_partitions):
         for cls_idx in range(num_labels_per_partition):
             cls = (u_id + cls_idx) % num_classes
-            count = int(probs[cls, u_id//num_classes, cls_idx])
-            
+            count = int(probs[cls, u_id // num_classes, cls_idx])
+
             # add count of specific class to partition
-            indices = full_idx[labels_cs[cls] + hist[cls]: labels_cs[cls] + hist[cls] + count]
+            indices = full_idx[
+                labels_cs[cls] + hist[cls] : labels_cs[cls] + hist[cls] + count
+            ]
             partitions_idx[u_id].extend(indices)
-            hist[cls] += count            
-            
+            hist[cls] += count
+
     # construct subsets
     partitions = [Subset(sorted_trainset, p) for p in partitions_idx]
     return partitions
