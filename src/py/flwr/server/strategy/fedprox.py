@@ -65,7 +65,7 @@ class FedProx(FedAvg):
             \\frac{\\mu}{2} || w - w^t ||^2
 
         Where $w^t$ are the global parameters and $w$ are the local weights the function
-         will be optimized with.
+        will be optimized with.
 
         In PyTorch, for example, the loss would go from:
 
