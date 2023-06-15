@@ -158,9 +158,17 @@ class InMemoryState(State):
             del self.task_res_store[task_id]
 
     def num_task_ins(self) -> int:
+        """Calculate the number of task_ins in store.
+
+        This includes delivered but not yet deleted task_ins.
+        """
         return len(self.task_ins_store)
 
     def num_task_res(self) -> int:
+        """Calculate the number of task_res in store.
+
+        This includes delivered but not yet deleted task_res.
+        """
         return len(self.task_res_store)
 
     def register_node(self, node_id: int) -> None:
