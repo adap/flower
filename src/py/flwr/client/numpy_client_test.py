@@ -32,7 +32,7 @@ class OverridingClient(NumPyClient):
     """Client overriding `get_properties`."""
 
     def get_properties(self, config: Config) -> Properties:
-        return Properties()
+        return {}
 
     def get_parameters(self, config: Config) -> NDArrays:
         return []
