@@ -74,7 +74,6 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-
         additional_config = {"dpfedavg_adaptive_clip_enabled": True}
 
         client_instructions = super().configure_fit(

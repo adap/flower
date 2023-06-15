@@ -106,7 +106,6 @@ def test_to_client_with_numpyclient() -> None:
 
 def test_start_client_transport_invalid() -> None:
     """Test start_client(..., transport=...)."""
-
     # Prepare
     client: Client = PlainClient()
     invalid_transport = "invalid-transport-value"
@@ -123,7 +122,6 @@ def test_start_client_transport_invalid() -> None:
 
 def test_start_numpy_client_transport_invalid() -> None:
     """Test start_client(..., transport=...)."""
-
     # Prepare
     client: NumPyClient = NeedsWrappingClient()
     invalid_transport = "invalid-transport-value"
