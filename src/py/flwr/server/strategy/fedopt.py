@@ -126,5 +126,6 @@ class FedOpt(FedAvg):
         self.v_t: Optional[NDArrays] = None
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedOpt(accept_failures={self.accept_failures})"
         return rep

@@ -97,7 +97,6 @@ class FedAvgM(FedAvg):
         server_momentum: float
             Server-side momentum factor used for FedAvgM. Defaults to 0.0.
         """
-
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -120,6 +119,7 @@ class FedAvgM(FedAvg):
         self.momentum_vector: Optional[NDArrays] = None
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedAvgM(accept_failures={self.accept_failures})"
         return rep
 

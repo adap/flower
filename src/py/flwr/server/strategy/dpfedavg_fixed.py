@@ -56,6 +56,7 @@ class DPFedAvgFixed(Strategy):
         self.server_side_noising = server_side_noising
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = "Strategy with DP with Fixed Clipping enabled."
         return rep
 

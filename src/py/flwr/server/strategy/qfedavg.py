@@ -90,7 +90,7 @@ class QFedAvg(FedAvg):
         self.pre_weights: Optional[NDArrays] = None
 
     def __repr__(self) -> str:
-        # pylint: disable=line-too-long
+        """Compute a string representation of the strategy."""
         rep = f"QffedAvg(learning_rate={self.learning_rate}, "
         rep += f"q_param={self.q_param}, pre_weights={self.pre_weights})"
         return rep
