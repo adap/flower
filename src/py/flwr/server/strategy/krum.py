@@ -42,7 +42,7 @@ from .fedavg import FedAvg
 class Krum(FedAvg):
     """Configurable Krum strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         *,
@@ -85,8 +85,7 @@ class Krum(FedAvg):
         num_clients_to_keep : int, optional
             Number of clients to keep before averaging (MultiKrum). Defaults to 0, in
             that case classical Krum is applied.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],
-        Optional[Tuple[float, Dict[str, Scalar]]]]]
+        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
             Function used to configure training. Defaults to None.
