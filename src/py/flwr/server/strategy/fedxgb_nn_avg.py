@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated XGBoost in the horizontal setting based on building Neural Network and
-averaging on prediction outcomes [Ma et al., 2023].
+"""Federated XGBoost [Ma et al., 2023] strategy.
+
+Strategy in the horizontal setting based on building Neural Network and averaging on
+prediction outcomes.
 
 Paper: Coming
 """
@@ -34,6 +36,7 @@ class FedXgbNnAvg(FedAvg):
     """Configurable FedXgbNnAvg strategy implementation."""
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedXgbNnAvg(accept_failures={self.accept_failures})"
         return rep
 
