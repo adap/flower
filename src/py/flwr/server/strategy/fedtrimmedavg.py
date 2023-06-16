@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]
+"""Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021].
 
 Paper: arxiv.org/abs/1803.01498
 """
@@ -36,7 +36,7 @@ from .fedavg import FedAvg
 
 
 class FedTrimmedAvg(FedAvg):
-    """Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]
+    """Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021].
 
     Paper: https://arxiv.org/abs/1803.01498
     """
@@ -64,7 +64,8 @@ class FedTrimmedAvg(FedAvg):
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         beta: float = 0.2,
     ) -> None:
-        """
+        """Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021].
+
         Parameters
         ----------
         fraction_fit : float, optional
@@ -91,7 +92,6 @@ class FedTrimmedAvg(FedAvg):
         beta : float, optional
             Fraction to cut off of both tails of the distribution. Defaults to 0.2.
         """
-
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -109,6 +109,7 @@ class FedTrimmedAvg(FedAvg):
         self.beta = beta
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedTrimmedAvg(accept_failures={self.accept_failures})"
         return rep
 

@@ -37,8 +37,9 @@ from .fedopt import FedOpt
 
 
 class FedYogi(FedOpt):
-    """Adaptive Federated Optimization using Yogi (FedYogi) [Reddi et al., 2020]
-    strategy.
+    """FedYogi [Reddi et al., 2020] strategy.
+
+    Adaptive Federated Optimization using Yogi.
 
     Paper: https://arxiv.org/abs/2003.00295
     """
@@ -134,6 +135,7 @@ class FedYogi(FedOpt):
         )
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedYogi(accept_failures={self.accept_failures})"
         return rep
 
