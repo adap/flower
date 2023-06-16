@@ -30,7 +30,6 @@ from .aggregate import aggregate
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
 class FedXgbNnAvg(FedAvg):
     """Configurable FedXgbNnAvg strategy implementation."""
 
@@ -56,7 +55,7 @@ class FedXgbNnAvg(FedAvg):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Any], Dict[str, Scalar],]:
+    ) -> Tuple[Optional[Any], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
@@ -67,7 +66,7 @@ class FedXgbNnAvg(FedAvg):
         # Convert results
         weights_results = [
             (
-                parameters_to_ndarrays(fit_res.parameters[0].parameters),  # type: ignore
+                parameters_to_ndarrays(fit_res.parameters[0].parameters),  # type: ignore # noqa: E501 # pylint: disable=line-too-long
                 fit_res.num_examples,
             )
             for _, fit_res in results
@@ -75,7 +74,7 @@ class FedXgbNnAvg(FedAvg):
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
         # Aggregate XGBoost trees from all clients
-        trees_aggregated = [fit_res.parameters[1] for _, fit_res in results]  # type: ignore
+        trees_aggregated = [fit_res.parameters[1] for _, fit_res in results]  # type: ignore # noqa: E501 # pylint: disable=line-too-long
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
