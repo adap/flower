@@ -35,9 +35,15 @@
 ****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
 
 -----
+## **Environment Setup**
+
+:warning: _The Python environmet for all baselines should follow these guidelines: **TBD**. Specify the steps to create and activate the environment. If there are any external system-wide requirements please include instructions for them too. These instructions should be comprenhensive enough so anyone can run them (if non standard, describe them step-by-step)._
+
+
+-----
 ## **Running the Experiment**
 
-:warning: _Provide instructions on the steps to follow to run all the experiments.
+:warning: _Provide instructions on the steps to follow to run all the experiments._
 ```bash  
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
 
@@ -49,11 +55,11 @@ python dataset_preparation.py <optional arguments, but default should always run
 
 # It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
 
-* python main.py <override_some_hyperparameters>
+python main.py <override_some_hyperparameters>
 .
 .
 .
-* python main.py <override_some_hyperparameters>
+python main.py <override_some_hyperparameters>
 ```
 
 -----
