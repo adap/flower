@@ -35,7 +35,6 @@ from .aggregate import aggregate_trimmed_avg
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
 class FedTrimmedAvg(FedAvg):
     """Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]
 
