@@ -32,10 +32,10 @@ def test_raise_if_false() -> None:
 
         # Assert
         assert True
-    except ValueError:
-        raise AssertionError()
-    except Exception:
-        raise AssertionError()
+    except ValueError as err:
+        raise AssertionError() from err
+    except Exception as err:
+        raise AssertionError() from err
 
 
 def test_raise_if_true() -> None:
@@ -52,5 +52,5 @@ def test_raise_if_true() -> None:
         raise AssertionError()
     except ValueError as err:
         assert str(err) == "Malformed PushTaskInsRequest: test"
-    except Exception:
-        raise AssertionError()
+    except Exception as err:
+        raise AssertionError() from err
