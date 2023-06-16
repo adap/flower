@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Adaptive Federated Optimization (FedOpt) [Reddi et al., 2020] abstract
-strategy.
+"""Adaptive Federated Optimization (FedOpt) [Reddi et al., 2020] abstract strategy.
 
-Paper: https://arxiv.org/abs/2003.00295
+Paper: arxiv.org/abs/2003.00295
 """
 
 
@@ -32,11 +31,10 @@ from flwr.common import (
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
 class FedOpt(FedAvg):
     """Configurable FedAdagrad strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         *,
@@ -79,7 +77,8 @@ class FedOpt(FedAvg):
             Minimum number of clients used during validation. Defaults to 2.
         min_available_clients : int, optional
             Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
+        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],
+        Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
             Function used to configure training. Defaults to None.

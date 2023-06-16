@@ -109,14 +109,14 @@ class State(abc.ABC):
 
     @abc.abstractmethod
     def num_task_ins(self) -> int:
-        """Number of task_ins in store.
+        """Calculate the number of task_ins in store.
 
         This includes delivered but not yet deleted task_ins.
         """
 
     @abc.abstractmethod
     def num_task_res(self) -> int:
-        """Number of task_res in store.
+        """Calculate the number of task_res in store.
 
         This includes delivered but not yet deleted task_res.
         """

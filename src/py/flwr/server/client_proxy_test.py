@@ -18,6 +18,7 @@
 from typing import Optional
 
 from flwr.common import (
+    Code,
     DisconnectRes,
     EvaluateIns,
     EvaluateRes,
@@ -27,7 +28,9 @@ from flwr.common import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
+    Parameters,
     ReconnectIns,
+    Status,
 )
 from flwr.server.client_proxy import ClientProxy
 
@@ -40,7 +43,8 @@ class CustomClientProxy(ClientProxy):
         ins: GetPropertiesIns,
         timeout: Optional[float],
     ) -> GetPropertiesRes:
-        """Returns the client's properties."""
+        """Return the client's properties."""
+        return GetPropertiesRes(status=Status(code=Code.OK, message=""), properties={})
 
     def get_parameters(
         self,
@@ -48,6 +52,10 @@ class CustomClientProxy(ClientProxy):
         timeout: Optional[float],
     ) -> GetParametersRes:
         """Return the current local model parameters."""
+        return GetParametersRes(
+            status=Status(code=Code.OK, message=""),
+            parameters=Parameters(tensors=[], tensor_type=""),
+        )
 
     def fit(
         self,
@@ -55,6 +63,12 @@ class CustomClientProxy(ClientProxy):
         timeout: Optional[float],
     ) -> FitRes:
         """Refine the provided weights using the locally held dataset."""
+        return FitRes(
+            status=Status(Code.OK, message=""),
+            parameters=Parameters(tensors=[], tensor_type=""),
+            num_examples=0,
+            metrics={},
+        )
 
     def evaluate(
         self,
@@ -62,6 +76,9 @@ class CustomClientProxy(ClientProxy):
         timeout: Optional[float],
     ) -> EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
+        return EvaluateRes(
+            status=Status(Code.OK, message=""), loss=0.0, num_examples=0, metrics={}
+        )
 
     def reconnect(
         self,
@@ -69,6 +86,7 @@ class CustomClientProxy(ClientProxy):
         timeout: Optional[float],
     ) -> DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
+        return DisconnectRes(reason="")
 
 
 def test_cid() -> None:

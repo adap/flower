@@ -14,7 +14,7 @@
 # ==============================================================================
 """Federated Averaging with Momentum (FedAvgM) [Hsu et al., 2019] strategy.
 
-Paper: https://arxiv.org/pdf/1909.06335.pdf
+Paper: arxiv.org/pdf/1909.06335.pdf
 """
 
 
@@ -37,19 +37,11 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate
 from .fedavg import FedAvg
 
-WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
-Setting `min_available_clients` lower than `min_fit_clients` or
-`min_evaluate_clients` can cause the server to fail when there are too few clients
-connected to the server. `min_available_clients` must be set to a value larger
-than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
-"""
 
-
-# flake8: noqa: E501
 class FedAvgM(FedAvg):
     """Configurable FedAvg with Momentum strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         *,
@@ -89,7 +81,8 @@ class FedAvgM(FedAvg):
             Minimum number of clients used during validation. Defaults to 2.
         min_available_clients : int, optional
             Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
+        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],
+        Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
             Function used to configure training. Defaults to None.
@@ -105,12 +98,6 @@ class FedAvgM(FedAvg):
         server_momentum: float
             Server-side momentum factor used for FedAvgM. Defaults to 0.0.
         """
-
-        if (
-            min_fit_clients > min_available_clients
-            or min_evaluate_clients > min_available_clients
-        ):
-            log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
         super().__init__(
             fraction_fit=fraction_fit,
