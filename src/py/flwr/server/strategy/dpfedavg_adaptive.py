@@ -67,6 +67,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
             ) ** (-0.5)
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = "Strategy with DP with Adaptive Clipping enabled."
         return rep
 
@@ -113,6 +114,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        """Aggregate training results as in DPFedAvgFixed and update clip norms."""
         if failures:
             return None, {}
         new_global_model = super().aggregate_fit(server_round, results, failures)
