@@ -159,6 +159,7 @@ wrap-summaries = 88
 wrap-descriptions = 88
 
 [tool.ruff]
+target-version = "py37"
 select = ["E", "F", "W", "B"]
 fixable = ["E", "F", "W", "B"]
 ignore = ["B024", "B027"]
