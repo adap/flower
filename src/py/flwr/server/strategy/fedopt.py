@@ -31,11 +31,10 @@ from flwr.common import (
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
 class FedOpt(FedAvg):
     """Configurable FedAdagrad strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals, line-too-long
     def __init__(
         self,
         *,

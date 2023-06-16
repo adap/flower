@@ -35,7 +35,6 @@ from .aggregate import aggregate_median
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
 class FedMedian(FedAvg):
     """Configurable FedAvg with Momentum strategy implementation."""
 
