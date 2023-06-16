@@ -53,7 +53,7 @@ class FedProx(FedAvg):
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         proximal_mu: float,
     ) -> None:
-        """Federated Optimization strategy.
+        r"""Federated Optimization strategy.
 
         Implementation based on https://arxiv.org/abs/1812.06127
 
@@ -125,7 +125,6 @@ class FedProx(FedAvg):
             regularization will be used (that is, the client parameters will need to be
             closer to the server parameters during training).
         """
-
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -143,6 +142,7 @@ class FedProx(FedAvg):
         self.proximal_mu = proximal_mu
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedProx(accept_failures={self.accept_failures})"
         return rep
 

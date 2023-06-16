@@ -66,7 +66,7 @@ class Krum(FedAvg):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
-        """Configurable Krum strategy.
+        """Krum strategy.
 
         Parameters
         ----------
@@ -96,7 +96,6 @@ class Krum(FedAvg):
         initial_parameters : Parameters, optional
             Initial global model parameters.
         """
-
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -115,6 +114,7 @@ class Krum(FedAvg):
         self.num_clients_to_keep = num_clients_to_keep
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"Krum(accept_failures={self.accept_failures})"
         return rep
 
