@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Averaging (FedAvg) strategy with custom serialization for Android devices.
-
-[McMahan et al., 2016]
+"""FedAvg [McMahan et al., 2016] strategy with custom serialization for Android devices.
 
 Paper: arxiv.org/abs/1602.05629
 """
