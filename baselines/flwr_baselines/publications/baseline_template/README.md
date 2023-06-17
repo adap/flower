@@ -1,4 +1,6 @@
-# **:warning:***_Title of your baseline_*
+# :warning:*_Title of your baseline_*
+
+> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
 > :warning: Please follow the instructions carefully. First copy this directory and rename it with something meaningful about your baseline. Then add the code into the Python scripts provided, and edit all the fields in the readme that start with a :warning: symbols (and remove the comments as you start adding the information). You can see the [FedProx-Mnist baseline](~https://github.com/adap/flower/tree/fedprox_mnist_refresh/baselines/flwr_baselines/publications/fedprox_mnist~) as an example of a baseline that followed this guide.
 
@@ -11,9 +13,8 @@
 
 ****Abstract:**** :warning: *_add here the abstract of the paper you are implementing_*
 
---------
 
-## **About this baseline**
+## About this baseline
 
 ****What’s implemented:**** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
 
@@ -23,8 +24,8 @@
 
 ****Contributors:**** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
 
--------
-## **Experimental Setup**
+
+## Experimental Setup
 
 ****Task:**** :warning: *_what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them_*
 
@@ -34,14 +35,13 @@
 
 ****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
 
------
+
 ## **Environment Setup**
 
 :warning: _The Python environmet for all baselines should follow these guidelines: **TBD**. Specify the steps to create and activate the environment. If there are any external system-wide requirements please include instructions for them too. These instructions should be comprenhensive enough so anyone can run them (if non standard, describe them step-by-step)._
 
 
------
-## **Running the Experiment**
+## Running the Experiments
 
 :warning: _Provide instructions on the steps to follow to run all the experiments._
 ```bash  
@@ -62,8 +62,8 @@ python main.py <override_some_hyperparameters>
 python main.py <override_some_hyperparameters>
 ```
 
------
-## **Expected Results**
+
+## Expected Results
 
 :warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Pleas add command followed by results for all your experiments._
 
