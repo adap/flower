@@ -9,7 +9,7 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from flwr_baselines.publications.fedprox_mnist import client, utils
+from flwr_baselines.publications.fedprox_mnist import client, server, utils
 from flwr_baselines.publications.fedprox_mnist.dataset import load_datasets
 from flwr_baselines.publications.fedprox_mnist.utils import save_results_as_pickle
 
@@ -44,7 +44,7 @@ def main(cfg: DictConfig) -> None:
     )
 
     # get function that will executed by the strategy's evaluate() method
-    evaluate_fn = utils.gen_evaluate_fn(testloader, device="cpu", model=cfg.model)
+    evaluate_fn = server.gen_evaluate_fn(testloader, device="cpu", model=cfg.model)
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
@@ -63,7 +63,6 @@ def main(cfg: DictConfig) -> None:
         cfg.strategy,
         evaluate_fn=evaluate_fn,
         on_fit_config_fn=get_on_fit_config(),
-        evaluate_metrics_aggregation_fn=utils.weighted_average,
     )
 
     # Start simulation
@@ -86,7 +85,7 @@ def main(cfg: DictConfig) -> None:
 
     # save results as a Python pickle using a file_path
     # the directory created by Hydra for each run
-    save_results_as_pickle(history, file_path=save_path, extra_results={"hello": 123})
+    save_results_as_pickle(history, file_path=save_path, extra_results={})
 
     # plot results and include them in the readme
     strategy_name = strategy.__class__.__name__
