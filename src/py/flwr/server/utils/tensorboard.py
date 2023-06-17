@@ -73,8 +73,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
         """Return overloaded Strategy Wrapper."""
 
         class TBWrapper(strategy_class):  # type: ignore
-            """Strategy wrapper which hooks into some methods for TensorBoard
-            logging."""
+            """Strategy wrapper that hooks into some methods for TensorBoard logging."""
 
             def aggregate_evaluate(
                 self,
