@@ -161,8 +161,8 @@ wrap-descriptions = 88
 [tool.ruff]
 target-version = "py37"
 line-length = 88
-select = ["D", "E", "F", "W", "B"]
-fixable = ["D", "E", "F", "W", "B"]
+select = ["D", "E", "F", "W", "B", "ISC"]
+fixable = ["D", "E", "F", "W", "B", "ISC"]
 ignore = ["B024", "B027"]
 exclude = [
     ".bzr",
