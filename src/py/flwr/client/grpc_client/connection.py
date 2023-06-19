@@ -105,7 +105,7 @@ def grpc_connection(
     def receive() -> ServerMessage:
         return next(server_message_iterator)
 
-    def send(msg: ClientMessage):
+    def send(msg: ClientMessage) -> None:
         return queue.put(msg, block=False)
 
     try:
