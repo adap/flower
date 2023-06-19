@@ -3,7 +3,7 @@ fed-number: 0002
 title: secure aggregation
 authors: ["@FANTOME-PAN"]
 creation-date: 2023-04-25
-last-updated: 2023-05-04
+last-updated: 2023-06-19
 status: provisional
 ---
 
