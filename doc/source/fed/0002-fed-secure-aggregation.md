@@ -57,14 +57,12 @@ We now need to store them in the parameters field.
 
 
 Considering all above, if possible, I would suggest adding a more general dictionary field,
-i.e., Dict[str, Union[Dict[str, LScalar], LScalar]],
-where LScalar = Union[Scalar, List[Scalar]]
+i.e., `Dict[str, Value]`,
+where `Value` can be a scalar or a list of scalars.
+(As defined in `transport.proto`, Scalar means `Union[double, int, bool, str, bytes]`. 
+In the current design, flower users would need to manually convert model parameters to bytes, 
+as NDArrays is no longer a supported data type in this message.)
 
-Alternatively, we can have multiple dictionary fields in addition to the config/metrics dictionary, including:
-
-1. Dict[str, Union[np.ndarray, List[np.ndarray]]]
-2. Dict[str, Union[bytes, List[bytes]]]
-3. Dict[str, Scalar]
 
 Example code:
 
@@ -76,45 +74,37 @@ message Task {
   string delivered_at = 4;
   string ttl = 5;
   repeated string ancestry = 6;
-  SecAggMsg sec_agg = 7;
-  
+  SecureAggregation sa = 7;
+
   ServerMessage legacy_server_message = 101 [ deprecated = true ];
   ClientMessage legacy_client_message = 102 [ deprecated = true ];
 }
 
-message SecAggMsg {
-  message Arrays {
-    message Plural {
-      repeated bytes value = 1;
-    }
-    oneof value {
-      bytes singular = 1;
-      Plural plural = 2;
-    }
-  }
-  message Bytes {
-    message Plural {
-      repeated bytes value = 1;
-    }
-    oneof value {
-      bytes singular = 1;
-      Plural plural = 2;
-    }
-  }
-  message Scalars {
-    message Plural {
-      repeated Scalar value = 1;
-    }
-    oneof value {
-      Scalar singular = 1;
-      Plural plural = 2;
-    }
-  }
+message Value {
+  message DoubleList { repeated double vals = 1; }
+  message Sint64List { repeated sint64 vals = 1; }
+  message BoolList { repeated bool vals = 1; }
+  message StringList { repeated string vals = 1; }
+  message BytesList { repeated bytes vals = 1; }
 
-  map<string, Arrays> named_arrays = 1;
-  map<string, Bytes> named_bytes = 2;
-  map<string, Scalars> named_scalars = 3;
+  oneof value {
+    // Single element
+    double double = 1;
+    sint64 sint64 = 2;
+    bool bool = 3;
+    string string = 4;
+    bytes bytes = 5;
+
+    // List types
+    DoubleList double_list = 21;
+    Sint64List sint64_list = 22;
+    BoolList bool_list = 23;
+    StringList string_list = 24;
+    BytesList bytes_list = 25;
+  }
 }
+
+message SecureAggregation { map<string, Value> named_values = 1; }
 ```
 
 
