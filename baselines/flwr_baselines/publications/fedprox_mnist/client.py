@@ -165,7 +165,6 @@ def gen_client_fn(
         trainloader = trainloaders[int(cid)]
         valloader = valloaders[int(cid)]
 
-        # Create a  single Flower client representing a single organization
         return FlowerClient(
             net,
             trainloader,

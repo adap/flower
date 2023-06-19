@@ -2,6 +2,8 @@
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
+**Labels:** `image classification`, `cross-device`, `stragglers`, `mnist`
+
 **Paper:** https://arxiv.org/abs/1812.06127
 
 **Authors:** Tian Li, Anit Kumar Sahu, Manzil Zaheer, Maziar Sanjabi, Ameet Talwalkar and Virginia Smith.
@@ -14,7 +16,7 @@
 
 **Datasets:** MNIST from PyTorch's Torchvision
 
-**Hardware Setup:** These experiments were run on a desktop machine with 24 CPU threads. Any machine with 4 CPU cores of more would be able to run it in a reasonable amount of time.
+**Hardware Setup:** These experiments were run on a desktop machine with 24 CPU threads. Any machine with 4 CPU cores or more would be able to run it in a reasonable amount of time.
 
 **Contributors:** Charles Beauville and Javier Fernandez-Marques
 
