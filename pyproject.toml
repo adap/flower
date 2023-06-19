@@ -159,10 +159,11 @@ wrap-summaries = 88
 wrap-descriptions = 88
 
 [tool.ruff]
+target-version = "py37"
 line-length = 88
-select = ["D"]
-fixable = ["D"]
-
+select = ["D", "E", "F", "W", "B"]
+fixable = ["D", "E", "F", "W", "B"]
+ignore = ["B024", "B027"]
 exclude = [
     ".bzr",
     ".direnv",
@@ -189,3 +190,6 @@ exclude = [
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
+
+[tool.ruff.per-file-ignores]
+"src/py/flwr/server/strategy/*.py" = ["E501"]
