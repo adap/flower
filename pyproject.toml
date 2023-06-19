@@ -98,7 +98,7 @@ furo = "==2022.12.7"
 sphinx-reredirects = "==0.1.2"
 nbsphinx = "==0.9.2"
 nbstripout = "==0.6.1"
-ruff = "^0.0.254"
+ruff = "==0.0.272"
 sphinx-argparse = "==0.4.0"
 pipreqs = "==0.4.13"
 
@@ -159,14 +159,10 @@ wrap-summaries = 88
 wrap-descriptions = 88
 
 [tool.ruff]
-target-version = "py37"
-select = ["E", "F", "W", "B"]
-fixable = ["E", "F", "W", "B"]
-ignore = ["B024", "B027"]
-# ruff is less lenient than pylint and does not make any exceptions
-# (for docstrings, strings and comments in particular).
 line-length = 88
-# Exclude a variety of commonly ignored directories.
+select = ["D"]
+fixable = ["D"]
+
 exclude = [
     ".bzr",
     ".direnv",
@@ -190,3 +186,6 @@ exclude = [
     "venv",
     "proto",
 ]
+
+[tool.ruff.pydocstyle]
+convention = "numpy"

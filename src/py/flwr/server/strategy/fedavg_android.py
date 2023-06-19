@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Averaging (FedAvg) [McMahan et al., 2016] strategy with custom
-serialization for Android devices.
+"""FedAvg [McMahan et al., 2016] strategy with custom serialization for Android devices.
 
 Paper: arxiv.org/abs/1602.05629
 """
@@ -104,6 +103,7 @@ class FedAvgAndroid(Strategy):
         self.initial_parameters = initial_parameters
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedAvg(accept_failures={self.accept_failures})"
         return rep
 
