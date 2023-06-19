@@ -101,6 +101,7 @@ nbstripout = "==0.6.1"
 ruff = "==0.0.272"
 sphinx-argparse = "==0.4.0"
 pipreqs = "==0.4.13"
+twine = "==4.0.2"
 
 [tool.isort]
 line_length = 88
