@@ -459,7 +459,6 @@ def metrics_from_proto(proto: Any) -> typing.Metrics:
 
 def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
     """Serialize `Scalar` to ProtoBuf."""
-
     if isinstance(scalar, bool):
         return Scalar(bool=scalar)
 

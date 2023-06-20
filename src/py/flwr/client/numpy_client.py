@@ -25,7 +25,7 @@ class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
-        """Returns a client's set of properties.
+        """Return a client's set of properties.
 
         Parameters
         ----------
@@ -41,6 +41,8 @@ class NumPyClient(ABC):
             bool, bytes, float, int, or str. It can be used to communicate
             arbitrary property values back to the server.
         """
+        _ = (self, config)
+        return {}
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the current local model parameters.
@@ -57,6 +59,8 @@ class NumPyClient(ABC):
         parameters : NDArrays
             The local model parameters as a list of NumPy ndarrays.
         """
+        _ = (self, config)
+        return []
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -84,6 +88,8 @@ class NumPyClient(ABC):
             bool, bytes, float, int, or str. It can be used to communicate
             arbitrary values back to the server.
         """
+        _ = (self, parameters, config)
+        return [], 0, {}
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -117,6 +123,8 @@ class NumPyClient(ABC):
         extended format (int, float, float, Dict[str, Scalar]) have been
         deprecated and removed since Flower 0.19.
         """
+        _ = (self, parameters, config)
+        return 0.0, 0, {}
 
 
 def has_get_properties(client: NumPyClient) -> bool:

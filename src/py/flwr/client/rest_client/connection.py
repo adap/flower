@@ -79,7 +79,6 @@ def http_request_response(
     -------
     receive, send : Callable, Callable
     """
-
     log(
         WARN,
         """
@@ -113,7 +112,6 @@ def http_request_response(
 
     def receive() -> Optional[ServerMessage]:
         """Receive next task from server."""
-
         # Serialize ProtoBuf to bytes
         pull_task_ins_req_proto = PullTaskInsRequest(
             node=Node(node_id=0, anonymous=True),
@@ -170,7 +168,6 @@ def http_request_response(
 
     def send(client_message_proto: ClientMessage) -> None:
         """Send task result back to server."""
-
         if state[KEY_TASK_INS] is None:
             log(ERROR, "No current TaskIns")
             return

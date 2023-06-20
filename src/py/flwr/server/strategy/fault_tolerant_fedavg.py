@@ -79,6 +79,7 @@ class FaultTolerantFedAvg(FedAvg):
         self.completion_rate_evaluate = min_completion_rate_evaluate
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         return "FaultTolerantFedAvg()"
 
     def aggregate_fit(

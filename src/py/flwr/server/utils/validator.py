@@ -23,7 +23,6 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes
 # pylint: disable-next=too-many-branches
 def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str]:
     """Validate a TaskIns or TaskRes."""
-
     validation_errors = []
 
     if tasks_ins_res.task_id != "":
@@ -65,7 +64,7 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
             validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
 
         # Content check
-        content_fields = ["sec_agg", "legacy_server_message"]
+        content_fields = ["sa", "legacy_server_message"]
         has_set_fields = {
             field_name: tasks_ins_res.task.HasField(field_name)
             for field_name in content_fields
@@ -115,7 +114,7 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
             validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
 
         # Content check
-        content_fields = ["sec_agg", "legacy_client_message"]
+        content_fields = ["sa", "legacy_client_message"]
         has_set_fields = {
             field_name: tasks_ins_res.task.HasField(field_name)
             for field_name in content_fields

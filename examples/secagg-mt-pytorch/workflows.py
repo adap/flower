@@ -28,10 +28,10 @@ _secure_aggregation_configuration = {
     "mod_range": 1 << 24,
 }
 
+
 # def workflow_without_sec_agg(parameters: Parameters, sampled_node_ids: List[int]) \
-#         -> Generator[Dict[int, Task], Union[List[int], Dict[int, Task]], None]:
+#         -> Generator[Dict[int, Task], Dict[int, Task], None]:
 #     # configure fit
-#     sampled_node_ids: List[int] = yield
 #     fit_ins = FitIns(parameters=parameters, config={})
 #     task = Task(legacy_server_message=ServerMessage(fit_ins=fit_ins))
 #     yield {node_id: task for node_id in sampled_node_ids}
@@ -39,6 +39,25 @@ _secure_aggregation_configuration = {
 #     # aggregate fit
 #     node_messages: Dict[int, Task] = yield
 #     print(f'updating parameters with received messages {node_messages}...')
+#     # todo
+    
+    
+# def workflow_with_sec_agg(parameters: Parameters, sampled_node_ids: List[int]) \
+#         -> Generator[Dict[int, Task], Dict[int, Task], None]:
+            
+#     yield request_keys_ins(sampled_node_ids)
+    
+#     node_messages: Dict[int, Task] = yield
+#     yield share_keys_ins(node_messages)
+    
+#     node_messages: Dict[int, Task] = yield
+#     yield request_parameters_ins(node_messages)
+    
+#     node_messages: Dict[int, Task] = yield
+#     yield request_key_shares_ins(sampled_node_ids, node_messages)
+    
+#     node_messages: Dict[int, Task] = yield
+#     print(f'trying to decrypt and update parameters...')
 #     # todo
 
 

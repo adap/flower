@@ -123,7 +123,6 @@ def _call_client_proxy(
     client_proxy: ClientProxy, server_message: ServerMessage, timeout: Optional[float]
 ) -> ClientMessage:
     """."""
-
     # pylint: disable=too-many-locals
 
     field = server_message.WhichOneof("msg")
