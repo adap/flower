@@ -17,7 +17,7 @@
 
 from typing import Any, List, cast
 
-from flwr.proto.task_pb2 import SecAggMsg, Task
+from flwr.proto.task_pb2 import SecureAggregation, Task, Value
 from flwr.proto.transport_pb2 import (
     ClientMessage,
     Code,
@@ -28,7 +28,7 @@ from flwr.proto.transport_pb2 import (
     Status,
 )
 
-from . import parameter, typing
+from . import typing
 
 #  === ServerMessage message ===
 
@@ -486,65 +486,86 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
     return cast(typing.Scalar, scalar)
 
 
-# === SecAgg messages ===
+# === SecureAggregation messages ===
 
 
-def secagg_msg_to_proto(secagg_msg: typing.SecureAggregationMessage) -> SecAggMsg:
-    named_arrays = {}
-    for name, value in secagg_msg.named_arrays.items():
-        if isinstance(value, list):
-            value = [parameter.ndarray_to_bytes(o) for o in value]
-            value = SecAggMsg.Arrays(plural=SecAggMsg.Arrays.Plural(value=value))
-        else:
-            value = parameter.ndarray_to_bytes(value)
-            value = SecAggMsg.Arrays(singular=value)
-        named_arrays[name] = value
+__python_type_to_field_name = {
+    float: "double",
+    int: "sint64",
+    bool: "bool",
+    str: "string",
+    bytes: "bytes",
+}
 
-    named_bytes = {}
-    for name, value in secagg_msg.named_bytes.items():
-        if isinstance(value, list):
-            value = SecAggMsg.Bytes(plural=SecAggMsg.Bytes.Plural(value=value))
-        else:
-            value = SecAggMsg.Bytes(singular=value)
-        named_bytes[name] = value
 
-    named_scalars = {}
-    for name, value in secagg_msg.named_scalars.items():
-        if isinstance(value, list):
-            value = [scalar_to_proto(o) for o in value]
-            value = SecAggMsg.Scalars(plural=SecAggMsg.Scalars.Plural(value=value))
-        else:
-            value = scalar_to_proto(value)
-            value = SecAggMsg.Scalars(singular=value)
-        named_scalars[name] = value
+__python_list_type_to_message_and_field_name = {
+    float: (Value.DoubleList, "double_list"),
+    int: (Value.Sint64List, "sint64_list"),
+    bool: (Value.BoolList, "bool_list"),
+    str: (Value.StringList, "string_list"),
+    bytes: (Value.BytesList, "bytes_list"),
+}
 
-    return SecAggMsg(
-        named_arrays=named_arrays, named_bytes=named_bytes, named_scalars=named_scalars
+
+def __check_value(value: typing.Value):
+    if type(value) == list:
+        data_type = type(value[0])
+    else:
+        data_type = type(value)
+    if data_type not in __python_type_to_field_name:
+        raise TypeError(
+            f"Accepted types: {bool, bytes, float, int, str} or "
+            f"list of these types (but not {type(value)})"
+        )
+    if type(value) == list:
+        for element in value:
+            if type(element) == data_type:
+                continue
+            raise Exception(
+                f"Inconsistent type: the types of elements in the list must be the same"
+                f"(expect {data_type}, but get {type(element)})"
+            )
+
+
+def value_to_proto(value: typing.Value) -> Value:
+    if isinstance(value, (list, tuple)):
+        value = list(value)
+    __check_value(value)
+
+    arg = {}
+    if type(value) == list:
+        msg_class, field_name = __python_list_type_to_message_and_field_name[
+            type(value[0])
+        ]
+        arg[field_name] = msg_class(vals=value)
+    else:
+        arg[__python_type_to_field_name[type(value)]] = value
+    return Value(**arg)
+
+
+def value_from_proto(value_msg: Value) -> typing.Value:
+    value_field = cast(str, value_msg.WhichOneof("value"))
+    if value_field.endswith("list"):
+        value = list(getattr(value_msg, value_field).vals)
+    else:
+        value = getattr(value_msg, value_field)
+    return cast(typing.Value, value)
+
+
+def secagg_msg_to_proto(sa: typing.SecureAggregation) -> SecureAggregation:
+    return SecureAggregation(
+        named_values={
+            name: value_to_proto(value) for name, value in sa.named_values.items()
+        }
     )
 
 
-def secagg_msg_from_proto(secagg_msg: SecAggMsg) -> typing.SecureAggregationMessage:
-    ret = typing.SecureAggregationMessage()
-    for name, value in secagg_msg.named_arrays.items():
-        is_plural = value.WhichOneof("value") == "plural"
-        ret.named_arrays[name] = (
-            [parameter.bytes_to_ndarray(o) for o in value.plural.value]
-            if is_plural
-            else parameter.bytes_to_ndarray(value.singular)
-        )
-    for name, value in secagg_msg.named_bytes.items():
-        is_plural = value.WhichOneof("value") == "plural"
-        ret.named_bytes[name] = (
-            list(value.plural.value) if is_plural else value.singular
-        )
-    for name, value in secagg_msg.named_scalars.items():
-        is_plural = value.WhichOneof("value") == "plural"
-        ret.named_scalars[name] = (
-            [scalar_from_proto(o) for o in value.plural.value]
-            if is_plural
-            else scalar_from_proto(value.singular)
-        )
-    return ret
+def secagg_msg_from_proto(sa_msg: SecureAggregation) -> typing.SecureAggregation:
+    return typing.SecureAggregation(
+        named_values={
+            name: value_from_proto(value) for name, value in sa_msg.named_values.items()
+        }
+    )
 
 
 # === Task messages ===
@@ -572,7 +593,7 @@ def task_msg_from_proto(proto: Task) -> typing.Task:
     task = typing.Task(
         message_type=proto.message_type,
         secure_aggregation_message=secagg_msg_from_proto(proto.sec_agg)
-        if proto.HasField("sec_agg")
+        if proto.HasField("sa")
         else None,
         legacy_server_message=server_message_from_proto(proto.legacy_server_message)
         if proto.HasField("legacy_server_message")

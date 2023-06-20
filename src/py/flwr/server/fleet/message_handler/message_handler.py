@@ -37,7 +37,6 @@ def node_available(
     request: NodeAvailableRequest, state: State
 ) -> NodeAvailableResponse:
     """."""
-
     # Validate node_id
     if request.node.anonymous or request.node.node_id <= 0:
         return NodeAvailableResponse()
@@ -51,7 +50,6 @@ def node_unavailable(
     request: NodeUnavailableRequest, state: State
 ) -> NodeUnavailableResponse:
     """."""
-
     # Validate node_id
     if request.node.anonymous or request.node.node_id <= 0:
         return NodeUnavailableResponse()

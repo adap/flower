@@ -21,10 +21,7 @@ from logging import DEBUG, ERROR, WARN
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
-from flwr.client.message_handler.task_handler import (
-    get_server_message,
-    get_task_message,
-)
+from flwr.client.message_handler.task_handler import get_task_message
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
@@ -37,7 +34,6 @@ from flwr.proto.fleet_pb2 import (
 from flwr.proto.fleet_pb2_grpc import FleetStub
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 KEY_TASK_INS = "current_task_ins"
 

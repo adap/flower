@@ -26,7 +26,7 @@ from flwr.client.client import (
     maybe_call_get_properties,
 )
 from flwr.common import serde, typing
-from flwr.proto.task_pb2 import SecAggMsg, Task
+from flwr.proto.task_pb2 import Task
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 
@@ -80,7 +80,7 @@ def _handle_task(
     Temporary function, for testing Secure Aggregation only.
     """
     if task_msg.HasField("legacy_server_message"):
-        print(f"handle_task: Legacy Server Message")
+        print("handle_task: Legacy Server Message")
         client_msg, sleep_duration, keep_going = handle(
             client, task_msg.legacy_server_message
         )
@@ -109,8 +109,8 @@ def handle_task(
         traceback.print_exc()
         error_msg = typing.Task(
             message_type="error",
-            secure_aggregation_message=typing.SecureAggregationMessage(
-                named_scalars={"error_message": str(e)}
+            secure_aggregation_message=typing.SecureAggregation(
+                named_values={"error_message": str(e)}
             ),
         )
         return serde.task_msg_to_proto(error_msg), 0, True

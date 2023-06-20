@@ -29,6 +29,7 @@ NDArrays = List[NDArray]
 # not conform to other definitions of what a scalar is. Source:
 # https://developers.google.com/protocol-buffers/docs/overview#scalar
 Scalar = Union[bool, bytes, float, int, str]
+Value = Union[Scalar, List[bool], List[bytes], List[float], List[int], List[str]]
 
 Metrics = Dict[str, Scalar]
 MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]
@@ -164,13 +165,12 @@ class ClientMessage:
 
 
 @dataclass
-class SecureAggregationMessage:
-    """SecAggMessage is a container used to store Secure Aggregation-related
-    messages."""
+class SecureAggregation:
+    """SecureAggregation is a container used to store Secure Aggregation-related
+    messages.
+    """
 
-    named_arrays: Dict[str, Union[NDArray, NDArrays]] = field(default_factory=dict)
-    named_bytes: Dict[str, Union[bytes, List[bytes]]] = field(default_factory=dict)
-    named_scalars: Dict[str, Union[Scalar, List[Scalar]]] = field(default_factory=dict)
+    named_values: Dict[str, Value] = field(default_factory=dict)
 
 
 @dataclass
@@ -178,6 +178,6 @@ class Task:
     """Task is a container used to hold all messages."""
 
     message_type: Optional[str] = None
-    secure_aggregation_message: Optional[SecureAggregationMessage] = None
+    secure_aggregation_message: Optional[SecureAggregation] = None
     legacy_server_message: Optional[ServerMessage] = None
     legacy_client_message: Optional[ClientMessage] = None

@@ -3,7 +3,7 @@ import os
 import pickle
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import List, Tuple
 
 import numpy as np
 from Crypto.Protocol.SecretSharing import Shamir
@@ -62,7 +62,8 @@ def bytes_to_public_key(b: bytes) -> ec.EllipticCurvePublicKey:
 def generate_shared_key(
     sk: ec.EllipticCurvePrivateKey, pk: ec.EllipticCurvePublicKey
 ) -> bytes:
-    # Generate a 32 byte urlsafe(for fernet) shared key from own private key and another public key
+    # Generate a 32 byte urlsafe(for fernet) shared key
+    # from own private key and another public key
     sharedk = sk.exchange(ec.ECDH(), pk)
     derivedk = HKDF(
         algorithm=hashes.SHA256(),
@@ -73,7 +74,7 @@ def generate_shared_key(
     return base64.urlsafe_b64encode(derivedk)
 
 
-# Authenticated Encryption ================================================================
+# Authenticated Encryption =========================================================
 
 
 # Encrypt plaintext with Fernet. Key must be 32 bytes.
@@ -201,17 +202,26 @@ def reverse_quantize(
 """
 
 
-# Create shares with PyCryptodome. Each share must be processed to be a byte string with pickle for RPC
+"""
+Create shares with PyCryptodome.
+Each share must be processed to be a byte string with pickle for RPC
+"""
+
+
 def create_shares(secret: bytes, threshold: int, num: int) -> List[bytes]:
-    # return list of list for each user. Each sublist contains a share for a 16 byte chunk of the secret.
-    # The int part of the tuple represents the index of the share, not the index of the chunk it is representing.
+    """Return list of list for each user.
+
+    Each sublist contains a share for a 16 byte chunk of the secret. The int part of the
+    tuple represents the index of the share, not the index of the chunk it is
+    representing.
+    """
     secret_padded = pad(secret, 16)
     secret_padded_chunk = [
         (threshold, num, secret_padded[i : i + 16])
         for i in range(0, len(secret_padded), 16)
     ]
     share_list = []
-    for i in range(num):
+    for _i in range(num):
         share_list.append([])
 
     with ThreadPoolExecutor(max_workers=10) as executor:

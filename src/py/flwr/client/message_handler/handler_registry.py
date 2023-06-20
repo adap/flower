@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Handler registry for a gRPC request-response channel to connect message
-types to handlers."""
+
+"""Handler registry for a gRPC request-response channel to connect message types to
+handlers.
+"""
 
 
 from typing import Dict

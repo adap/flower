@@ -22,6 +22,7 @@ class Task(google.protobuf.message.Message):
     TTL_FIELD_NUMBER: builtins.int
     ANCESTRY_FIELD_NUMBER: builtins.int
     SA_FIELD_NUMBER: builtins.int
+    MESSAGE_TYPE_FIELD_NUMBER: builtins.int
     LEGACY_SERVER_MESSAGE_FIELD_NUMBER: builtins.int
     LEGACY_CLIENT_MESSAGE_FIELD_NUMBER: builtins.int
     @property
@@ -33,11 +34,9 @@ class Task(google.protobuf.message.Message):
     ttl: typing.Text
     @property
     def ancestry(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
-    message_type: typing.Text
-    @property
-    def sec_agg(self) -> global___SecAggMsg: ...
     @property
     def sa(self) -> global___SecureAggregation: ...
+    message_type: typing.Text
     @property
     def legacy_server_message(self) -> flwr.proto.transport_pb2.ServerMessage: ...
     @property
@@ -51,11 +50,12 @@ class Task(google.protobuf.message.Message):
         ttl: typing.Text = ...,
         ancestry: typing.Optional[typing.Iterable[typing.Text]] = ...,
         sa: typing.Optional[global___SecureAggregation] = ...,
+        message_type: typing.Text = ...,
         legacy_server_message: typing.Optional[flwr.proto.transport_pb2.ServerMessage] = ...,
         legacy_client_message: typing.Optional[flwr.proto.transport_pb2.ClientMessage] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["consumer",b"consumer","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer","sa",b"sa"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["ancestry",b"ancestry","consumer",b"consumer","created_at",b"created_at","delivered_at",b"delivered_at","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer","sa",b"sa","ttl",b"ttl"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ancestry",b"ancestry","consumer",b"consumer","created_at",b"created_at","delivered_at",b"delivered_at","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","message_type",b"message_type","producer",b"producer","sa",b"sa","ttl",b"ttl"]) -> None: ...
 global___Task = Task
 
 class TaskIns(google.protobuf.message.Message):
