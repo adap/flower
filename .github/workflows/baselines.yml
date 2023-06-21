@@ -13,7 +13,7 @@ env:
 
 defaults:
   run:
-    working-directory: baselines
+    working-directory: baselines/flwr_baselines
 
 jobs:
   test_baselines:
