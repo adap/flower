@@ -4,6 +4,10 @@
 
 ### What's new?
 
+- **Deprecate Python 3.7**
+
+  Since Python 3.7 reached its end of life (EOL), support for Python 3.7 is now deprecated and will be removed in the next release.
+
 -  **Add new** `FedTrimmedAvg` **strategy** ([#1769](https://github.com/adap/flower/pull/1769), [#1853](https://github.com/adap/flower/pull/1853))
 
   The new `FedTrimmedAvg` strategy implements Trimmed Mean by [Dong Yin, 2018](https://arxiv.org/abs/1803.01498)
