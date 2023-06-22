@@ -1,14 +1,12 @@
 """CIFAR10 dataset utilities for federated learning."""
 #pylint: disable=C0412
 
-from typing import List, Optional, Tuple
-
 import numpy as np
 import torch
-from torchvision import transforms as transforms
 from torch.utils.data import ConcatDataset, DataLoader, Dataset, Subset, random_split
+from torchvision import transforms as transforms
 from torchvision.datasets import CIFAR10
-
+from typing import List, Optional, Tuple
 
 def load_datasets(  # pylint: disable=too-many-arguments
     num_clients: int = 10,
