@@ -29,9 +29,7 @@ from .serde import (
 
 
 def test_serialisation_deserialisation() -> None:
-    """Test if after serialization/deserialisation the np.ndarray is
-    identical."""
-
+    """Test if the np.ndarray is identical after (de-)serialization."""
     # Prepare
     scalars = [True, b"bytestr", 3.14, 9000, "Hello"]
 
@@ -47,7 +45,6 @@ def test_serialisation_deserialisation() -> None:
 
 def test_status_to_proto() -> None:
     """Test status message (de-)serialization."""
-
     # Prepare
     code_msg = pb2.Code.OK
     status_msg = pb2.Status(code=code_msg, message="Success")
@@ -64,7 +61,6 @@ def test_status_to_proto() -> None:
 
 def test_status_from_proto() -> None:
     """Test status message (de-)serialization."""
-
     # Prepare
     code_msg = pb2.Code.OK
     status_msg = pb2.Status(code=code_msg, message="Success")

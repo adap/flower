@@ -54,15 +54,15 @@ def train(net, trainloader, epochs):
 def test(net, testloader):
     """Validate the model on the test set."""
     criterion = torch.nn.CrossEntropyLoss()
-    correct, total, loss = 0, 0, 0.0
+    correct, loss = 0, 0.0
     with torch.no_grad():
         for images, labels in tqdm(testloader):
             outputs = net(images.to(DEVICE))
             labels = labels.to(DEVICE)
             loss += criterion(outputs, labels).item()
-            total += labels.size(0)
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-    return loss / len(testloader.dataset), correct / total
+    accuracy = correct / len(testloader.dataset)
+    return loss, accuracy
 
 
 def load_data():
@@ -81,9 +81,10 @@ def load_data():
 net = Net().to(DEVICE)
 trainloader, testloader = load_data()
 
+
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
-    def get_parameters(self):
+    def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
     def set_parameters(self, parameters):
@@ -94,7 +95,7 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         self.set_parameters(parameters)
         train(net, trainloader, epochs=1)
-        return self.get_parameters(), len(trainloader.dataset), {}
+        return self.get_parameters(config={}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
@@ -103,4 +104,7 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 # Start Flower client
-fl.client.start_numpy_client("[::]:8080", client=FlowerClient())
+fl.client.start_numpy_client(
+    server_address="127.0.0.1:8080",
+    client=FlowerClient(),
+)

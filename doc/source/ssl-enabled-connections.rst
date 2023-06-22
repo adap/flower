@@ -1,5 +1,5 @@
-Guide: SSL-enabled Server and Client
-====================================
+SSL-enabled Server and Client
+=============================
 
 This guide describes how to a SSL-enabled secure Flower server can be started and
 how a Flower client can establish a secure connections to it.
@@ -10,6 +10,7 @@ A complete code example demonstrating a secure connection can be found
 The code example comes with a README.md file which will explain how to start it. Although it is
 already SSL-enabled, it might be less descriptive on how. Stick to this guide for a deeper
 introduction to the topic.
+
 
 Certificates
 ------------
@@ -35,6 +36,7 @@ sources regarding the issue of correctly generating certificates for production 
 In case you are a researcher you might be just fine using the self-signed certificates generated using
 the scripts which are part of this guide.
 
+
 Server
 ------
 
@@ -48,7 +50,7 @@ We are now going to show how to write a sever which uses the previously generate
   # Start server
   fl.server.start_server(
       server_address="0.0.0.0:8080",
-      config={"num_rounds": 4},
+      config=fl.server.ServerConfig(num_rounds=4),
       certificates=(
           Path(".cache/certificates/ca.crt").read_bytes(),
           Path(".cache/certificates/server.pem").read_bytes(),
@@ -57,6 +59,7 @@ We are now going to show how to write a sever which uses the previously generate
   )
 
 When providing certificates, the server expects a tuple of three certificates. :code:`Path` can be used to easily read the contents of those files into byte strings, which is the data type :code:`start_server` expects.
+
 
 Client
 ------
@@ -81,16 +84,18 @@ We are now going to show how to write a client which uses the previously generat
 When setting :code:`root_certificates`, the client expects the PEM-encoded root certificates as a byte string.
 We are again using :code:`Path` to simplify reading those as byte strings.
 
+
 Conclusion
 ----------
 
 You should now have learned how to generate self-signed certificates using the given script, start a
 SSL-enabled server, and have a client establish a secure connection to it.
 
+
 Additional Resources
 --------------------
 
 These additional sources might be relevant if you would like to dive deeper into the topic of certificates:
 
-* `Let's Encrypt <https://letsencrypt.org/docs/>_`
+* `Let's Encrypt <https://letsencrypt.org/docs/>`_
 * `certbot <https://certbot.eff.org/>`_

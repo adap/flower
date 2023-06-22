@@ -1,5 +1,5 @@
-Usage Examples
-==============
+Code examples
+=============
 
 Flower comes with a number of usage examples. The examples demonstrate how
 Flower can be used to federate different kinds of existing machine learning
@@ -9,7 +9,7 @@ pipelines, usually leveraging popular machine learning frameworks such as
 
 .. note::
    Flower usage examples used to be bundled with Flower in a package called
-   `flwr_example`. We are migrating those examples to standalone projects to
+   ``flwr_example``. We are migrating those examples to standalone projects to
    make them easier to use. All new examples are based in the directory
    `examples <https://github.com/adap/flower/tree/main/examples>`_.
 

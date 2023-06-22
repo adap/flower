@@ -1,4 +1,6 @@
-flwr==0.18.0
-ray==1.9.2
-torch==1.10.2
-torchvision==0.11.3
+flwr~=1.4.0
+numpy~=1.21.1
+Pillow~=9.5.0
+ray~=2.4.0
+torch~=2.0.1
+torchvision~=0.15.2

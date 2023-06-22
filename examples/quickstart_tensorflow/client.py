@@ -12,9 +12,10 @@ model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
 model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
+
 # Define Flower client
 class CifarClient(fl.client.NumPyClient):
-    def get_parameters(self):
+    def get_parameters(self, config):
         return model.get_weights()
 
     def fit(self, parameters, config):
@@ -29,4 +30,4 @@ class CifarClient(fl.client.NumPyClient):
 
 
 # Start Flower client
-fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=CifarClient())

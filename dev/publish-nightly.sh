@@ -15,6 +15,9 @@
 # limitations under the License.
 # ==============================================================================
 
+set -e
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+
 # This script will build and publish a nightly release of Flower under the condition
 # that at least one commit was made in the last 24 hours.
 # It will rename the the package name in the pyproject.toml to from "flwr" to "flwr-nightly".

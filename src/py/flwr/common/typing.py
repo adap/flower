@@ -17,11 +17,12 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-import numpy as np
+import numpy.typing as npt
 
-Weights = List[np.ndarray]
+NDArray = npt.NDArray[Any]
+NDArrays = List[NDArray]
 
 # The following union type contains Python types corresponding to ProtoBuf types that
 # ProtoBuf considers to be "Scalar Value Types", even though some of them arguably do
@@ -140,3 +141,23 @@ class DisconnectRes:
     """DisconnectRes message from client to server."""
 
     reason: str
+
+
+@dataclass
+class ServerMessage:
+    """ServerMessage is a container used to hold one instruction message."""
+
+    get_properties_ins: Optional[GetPropertiesIns] = None
+    get_parameters_ins: Optional[GetParametersIns] = None
+    fit_ins: Optional[FitIns] = None
+    evaluate_ins: Optional[EvaluateIns] = None
+
+
+@dataclass
+class ClientMessage:
+    """ClientMessage is a container used to hold one result message."""
+
+    get_properties_res: Optional[GetPropertiesRes] = None
+    get_parameters_res: Optional[GetParametersRes] = None
+    fit_res: Optional[FitRes] = None
+    evaluate_res: Optional[EvaluateRes] = None

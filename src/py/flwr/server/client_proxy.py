@@ -36,6 +36,8 @@ from flwr.common import (
 class ClientProxy(ABC):
     """Abstract base class for Flower client proxies."""
 
+    node_id: int
+
     def __init__(self, cid: str):
         self.cid = cid
         self.properties: Properties = {}
@@ -46,7 +48,7 @@ class ClientProxy(ABC):
         ins: GetPropertiesIns,
         timeout: Optional[float],
     ) -> GetPropertiesRes:
-        """Returns the client's properties."""
+        """Return the client's properties."""
 
     @abstractmethod
     def get_parameters(
@@ -62,7 +64,7 @@ class ClientProxy(ABC):
         ins: FitIns,
         timeout: Optional[float],
     ) -> FitRes:
-        """Refine the provided weights using the locally held dataset."""
+        """Refine the provided parameters using the locally held dataset."""
 
     @abstractmethod
     def evaluate(
@@ -70,7 +72,7 @@ class ClientProxy(ABC):
         ins: EvaluateIns,
         timeout: Optional[float],
     ) -> EvaluateRes:
-        """Evaluate the provided weights using the locally held dataset."""
+        """Evaluate the provided parameters using the locally held dataset."""
 
     @abstractmethod
     def reconnect(

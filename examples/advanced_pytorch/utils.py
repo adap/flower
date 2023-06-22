@@ -79,7 +79,7 @@ def test(net, testloader, steps: int = None, device: str = "cpu"):
     print("Starting evalutation...")
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss()
-    correct, total, loss = 0, 0, 0.0
+    correct, loss = 0, 0.0
     net.eval()
     with torch.no_grad():
         for batch_idx, (images, labels) in enumerate(testloader):
@@ -87,15 +87,10 @@ def test(net, testloader, steps: int = None, device: str = "cpu"):
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
             correct += (predicted == labels).sum().item()
             if steps is not None and batch_idx == steps:
                 break
-    if steps is None:
-        loss /= len(testloader.dataset)
-    else:
-        loss /= total
-    accuracy = correct / total
+    accuracy = correct / len(testloader.dataset)
     net.to("cpu")  # move model back to CPU
     return loss, accuracy
 
@@ -130,6 +125,6 @@ def load_efficientnet(entrypoint: str = "nvidia_efficientnet_b0", classes: int =
     return efficientnet
 
 
-def get_model_params(model: "PyTorch Model"):
+def get_model_params(model):
     """Returns a model's parameters."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]

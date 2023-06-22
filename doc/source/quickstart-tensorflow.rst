@@ -1,3 +1,6 @@
+.. _quickstart-tensorflow:
+
+
 Quickstart TensorFlow
 =====================
 
@@ -56,7 +59,7 @@ implemented in the following way:
 .. code-block:: python
 
     class CifarClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             return model.get_weights()
 
         def fit(self, parameters, config):
@@ -67,7 +70,7 @@ implemented in the following way:
         def evaluate(self, parameters, config):
             model.set_weights(parameters)
             loss, accuracy = model.evaluate(x_test, y_test)
-            return loss, len(x_test), {"accuracy": accuracy}
+            return loss, len(x_test), {"accuracy": float(accuracy)}
 
 
 We can now create an instance of our class :code:`CifarClient` and add one line
@@ -75,7 +78,7 @@ to actually run this client:
 
 .. code-block:: python
 
-     fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+     fl.client.start_numpy_client(server_address="[::]:8080", client=CifarClient())
 
 
 That's it for the client. We only have to implement :code:`Client` or
@@ -96,7 +99,7 @@ configuration possibilities at their default values. In a file named
 
     import flwr as fl
 
-    fl.server.start_server(config={"num_rounds": 3})
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3))
 
 
 Train the model, federated!

@@ -13,23 +13,23 @@
 # limitations under the License.
 # ==============================================================================
 """Flower TensorBoard utilities."""
+
+
 import os
 from datetime import datetime
-from typing import Callable, Dict, List, Optional, Tuple, TypeVar, cast
+from typing import Callable, Dict, List, Optional, Tuple, Union, cast
+
+from flwr.common import EvaluateRes, Scalar
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.strategy import Strategy
 
 try:
     import tensorflow as tf
 except ImportError:
     tf = None
 
-from flwr.common import EvaluateRes, Scalar
-from flwr.server.client_proxy import ClientProxy
-from flwr.server.strategy import Strategy
 
-TBW = TypeVar("TBW")
-
-
-def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
+def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
     """TensorBoard logger for Flower strategies.
 
     It will log loss, num_examples and all metrics which are of type float or int.
@@ -50,7 +50,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
     """
     print(
         "\n\t\033[32mStart TensorBoard with the following parameters"
-        + f"\n\t$ tensorboard --logdir {logdir}\033[39m\n"
+        f"\n\t$ tensorboard --logdir {logdir}\033[39m\n"
     )
     # Create logdir if it does not yet exist
     os.makedirs(logdir, exist_ok=True)
@@ -69,34 +69,27 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
     run_id = run_id + "-" + datetime.now().strftime("%Y%m%dT%H%M%S")
     logdir_run = os.path.join(logdir, run_id)
 
-    def decorator(strategy_class: Strategy) -> TBW:
+    def decorator(strategy_class: Strategy) -> Strategy:
         """Return overloaded Strategy Wrapper."""
 
         class TBWrapper(strategy_class):  # type: ignore
-            """Strategy wrapper which hooks into some methods for TensorBoard
-            logging."""
+            """Strategy wrapper that hooks into some methods for TensorBoard logging."""
 
             def aggregate_evaluate(
                 self,
-                rnd: int,
+                server_round: int,
                 results: List[Tuple[ClientProxy, EvaluateRes]],
-                failures: List[BaseException],
+                failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
             ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-                """Hooks into aggregate_evaluate for TensorBoard logging
-                purpose."""
+                """Hooks into aggregate_evaluate for TensorBoard logging purpose."""
                 # Execute decorated function and extract results for logging
                 # They will be returned at the end of this function but also
                 # used for logging
                 loss_aggregated, config = super().aggregate_evaluate(
-                    rnd,
+                    server_round,
                     results,
                     failures,
                 )
-
-                if rnd < 0:
-                    # rnd < 0 is currently planned to be removed and should not be
-                    # used but rather with backwards compatibility in mind ignored
-                    return loss_aggregated, config
 
                 # Server logs
                 writer = tf.summary.create_file_writer(
@@ -104,9 +97,11 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                 )
 
                 # Write aggregated loss
-                with writer.as_default(step=rnd):  # pylint: disable=not-context-manager
+                with writer.as_default(
+                    step=server_round
+                ):  # pylint: disable=not-context-manager
                     tf.summary.scalar(
-                        "server/loss_aggregated", loss_aggregated, step=rnd
+                        "server/loss_aggregated", loss_aggregated, step=server_round
                     )
                     writer.flush()
 
@@ -125,7 +120,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                         os.path.join(logdir_run, "clients", client.cid)
                     )
                     with writer.as_default(  # pylint: disable=not-context-manager
-                        step=rnd
+                        step=server_round
                     ):
                         tf.summary.scalar("clients/loss", loss)
                         tf.summary.scalar("clients/num_examples", num_examples)
@@ -137,6 +132,6 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
 
                 return loss_aggregated, config
 
-        return cast(TBW, TBWrapper)
+        return cast(Strategy, TBWrapper)
 
     return decorator

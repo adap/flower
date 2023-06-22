@@ -1,6 +1,7 @@
 Using Baselines
 ===============
 
+
 Structure
 ---------
 
@@ -24,6 +25,7 @@ Go to the baseline that you want to execute. The directories and files are struc
 
 The experiment area contains a :code:`README.md` covering the corresponding paper, its abstract, and goal as well as a detailed description of how to run the baseline. Please use the :code:`README.md` to see how to execute each individual baseline.
 
+
 Available Baselines
 -------------------
 
@@ -36,12 +38,15 @@ The following table lists all currently available baselines and the correspondin
     * - Paper
       - Experiment
       - Directory 
-    * - `FedBN <https://arxiv.org/pdf/2102.07623.pdf>`_
+    * - `FedAvg <https://arxiv.org/abs/1602.05629>`_
+      - MNIST
+      - :code:`flower/baselines/flwr_baselines/publications/fedavg_mnist/`
+    * - `FedProx <https://arxiv.org/abs/1812.06127>`_
+      - MNIST
+      - :code:`flower/baselines/flwr_baselines/publications/fedprox_mnist/`
+    * - `FedOpt <https://arxiv.org/abs/2003.00295>`_
+      - sparse gradient task
+      - :code:`flower/baselines/flwr_baselines/publications/adaptive_federated_optimization`
+    * - `FedBN <https://arxiv.org/abs/2102.07623>`_
       - convergence rate
       - :code:`flower/baselines/flwr_baselines/publications/fedbn/convergence_rate`
-    * - `FedOpt <https://arxiv.org/pdf/2003.00295.pdf>`_
-      - sparse gradient task
-      - :code:`flower/baselines/flwr_baselines/publications/fedopt/sparse_gradient_task`
-    * - `FedProx <https://arxiv.org/pdf/1812.06127.pdf>`_
-      - system heterogeneity
-      - :code:`flower/baselines/flwr_baselines/publications/fedprox/system_heterogeneity`

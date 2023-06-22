@@ -2,7 +2,7 @@ from ast import Bytes
 from collections import OrderedDict
 from io import BytesIO
 import struct
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple, Union
 
 import numpy as np
 
@@ -12,7 +12,7 @@ from flwr.common import (
     FitRes,
     Parameters,
     Scalar,
-    Weights,
+    NDArrays,
 )
 from typing import Optional
 from flwr.server.client_manager import ClientManager
@@ -25,12 +25,16 @@ class FedAvgCpp(FedAvg):
     def __init__(
         self,
         fraction_fit: float = 1.0,
-        fraction_eval: float = 1.0,
+        fraction_evaluate: float = 1.0,
         min_fit_clients: int = 2,
-        min_eval_clients: int = 2,
+        min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+        evaluate_fn: Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
+            # Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -39,11 +43,11 @@ class FedAvgCpp(FedAvg):
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
-            fraction_eval=fraction_eval,
+            fraction_evaluate=fraction_evaluate,
             min_fit_clients=min_fit_clients,
-            min_eval_clients=min_eval_clients,
+            min_evaluate_clients=min_evaluate_clients,
             min_available_clients=min_available_clients,
-            eval_fn=eval_fn,
+            evaluate_fn=evaluate_fn,
             on_fit_config_fn=on_fit_config_fn,
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
@@ -52,9 +56,9 @@ class FedAvgCpp(FedAvg):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
@@ -74,9 +78,9 @@ class FedAvgCpp(FedAvg):
 
     def aggregate_evaluate(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
         if not results:
@@ -116,7 +120,7 @@ def weights_to_parameters(weights) -> Parameters:
     return Parameters(tensors=tensors, tensor_type="cpp_double")
 
 
-def parameters_to_weights(parameters: Parameters) -> Weights:
+def parameters_to_weights(parameters: Parameters) -> NDArrays:
     """Convert parameters object to NumPy weights."""
     weights = [bytes_to_ndarray(tensor) for tensor in parameters.tensors]
     return weights

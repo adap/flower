@@ -31,31 +31,37 @@ implemented:
 
         @abstractmethod
         def configure_fit(
-            self, rnd: int, parameters: Parameters, client_manager: ClientManager
+            self,
+            server_round: int,
+            parameters: Parameters,
+            client_manager: ClientManager
         ) -> List[Tuple[ClientProxy, FitIns]]:
             """Configure the next round of training."""
 
         @abstractmethod
         def aggregate_fit(
             self,
-            rnd: int,
+            server_round: int,
             results: List[Tuple[ClientProxy, FitRes]],
-            failures: List[BaseException],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
         ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
             """Aggregate training results."""
 
         @abstractmethod
         def configure_evaluate(
-            self, rnd: int, parameters: Parameters, client_manager: ClientManager
+            self,
+            server_round: int,
+            parameters: Parameters,
+            client_manager: ClientManager
         ) -> List[Tuple[ClientProxy, EvaluateIns]]:
             """Configure the next round of evaluation."""
 
         @abstractmethod
         def aggregate_evaluate(
             self,
-            rnd: int,
+            server_round: int,
             results: List[Tuple[ClientProxy, EvaluateRes]],
-            failures: List[BaseException],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
         ) -> Tuple[Optional[float], Dict[str, Scalar]]:
             """Aggregate evaluation results."""
 
@@ -76,16 +82,16 @@ abstract methods:
         def initialize_parameters(self, client_manager):
             # Your implementation here
 
-        def configure_fit(self, rnd, parameters, client_manager):
+        def configure_fit(self, server_round, parameters, client_manager):
             # Your implementation here
 
-        def aggregate_fit(self, rnd, results, failures):
+        def aggregate_fit(self, server_round, results, failures):
             # Your implementation here
 
-        def configure_evaluate(self, rnd, parameters, client_manager):
+        def configure_evaluate(self, server_round, parameters, client_manager):
             # Your implementation here
 
-        def aggregate_evaluate(self, rnd, results, failures):
+        def aggregate_evaluate(self, server_round, results, failures):
             # Your implementation here
 
         def evaluate(self, parameters):
@@ -95,78 +101,78 @@ The Flower server calls these methods in the following order:
 
 .. mermaid::
 
-   sequenceDiagram
-      participant Strategy
-      participant S as Flower Server<br/>start_server
-      participant C1 as Flower Client
-      participant C2 as Flower Client
-      Note left of S: Get initial <br/>model parameters
-      S->>Strategy: initialize_parameters
-      activate Strategy
-      Strategy-->>S: Parameters
-      deactivate Strategy
-      
-      Note left of S: Federated<br/>Training
-      rect rgb(249, 219, 130)
+    sequenceDiagram
+        participant Strategy
+        participant S as Flower Server<br/>start_server
+        participant C1 as Flower Client
+        participant C2 as Flower Client
+        Note left of S: Get initial <br/>model parameters
+        S->>Strategy: initialize_parameters
+        activate Strategy
+        Strategy-->>S: Parameters
+        deactivate Strategy
 
-      S->>Strategy: configure_fit
-      activate Strategy
-      Strategy-->>S: List[Tuple[ClientProxy, FitIns]]
-      deactivate Strategy
-      
-      S->>C1: FitIns
-      activate C1
-      S->>C2: FitIns
-      activate C2
+        Note left of S: Federated<br/>Training
+        rect rgb(249, 219, 130)
 
-      C1-->>S: FitRes
-      deactivate C1
-      C2-->>S: FitRes
-      deactivate C2
+        S->>Strategy: configure_fit
+        activate Strategy
+        Strategy-->>S: List[Tuple[ClientProxy, FitIns]]
+        deactivate Strategy
 
-      S->>Strategy: aggregate_fit<br/>List[FitRes]
-      activate Strategy
-      Strategy-->>S: Aggregated model parameters
-      deactivate Strategy
-      
-      end
+        S->>C1: FitIns
+        activate C1
+        S->>C2: FitIns
+        activate C2
 
-      Note left of S: Federated<br/>Evaluation
-      rect rgb(249, 219, 130)
+        C1-->>S: FitRes
+        deactivate C1
+        C2-->>S: FitRes
+        deactivate C2
 
-      S->>Strategy: configure_evaluate
-      activate Strategy
-      Strategy-->>S: List[Tuple[ClientProxy, EvaluateIns]]
-      deactivate Strategy
-      
-      S->>C1: EvaluateIns
-      activate C1
-      S->>C2: EvaluateIns
-      activate C2
+        S->>Strategy: aggregate_fit<br/>List[FitRes]
+        activate Strategy
+        Strategy-->>S: Aggregated model parameters
+        deactivate Strategy
 
-      C1-->>S: EvaluateRes
-      deactivate C1
-      C2-->>S: EvaluateRes
-      deactivate C2
+        end
 
-      S->>Strategy: aggregate_evaluate<br/>List[EvaluateRes]
-      activate Strategy
-      Strategy-->>S: Aggregated evaluation results
-      deactivate Strategy
-      
-      end
-      
-      Note left of S: Centralized<br/>Evaluation
-      rect rgb(249, 219, 130)
+        Note left of S: Centralized<br/>Evaluation
+        rect rgb(249, 219, 130)
 
-      S->>Strategy: evaluate
-      activate Strategy
-      Strategy-->>S: Centralized evaluation result
-      deactivate Strategy
-      
-      end
+        S->>Strategy: evaluate
+        activate Strategy
+        Strategy-->>S: Centralized evaluation result
+        deactivate Strategy
 
-      Note left of S: Next round, continue<br/>with federated training
+        end
+
+        Note left of S: Federated<br/>Evaluation
+        rect rgb(249, 219, 130)
+
+        S->>Strategy: configure_evaluate
+        activate Strategy
+        Strategy-->>S: List[Tuple[ClientProxy, EvaluateIns]]
+        deactivate Strategy
+
+        S->>C1: EvaluateIns
+        activate C1
+        S->>C2: EvaluateIns
+        activate C2
+
+        C1-->>S: EvaluateRes
+        deactivate C1
+        C2-->>S: EvaluateRes
+        deactivate C2
+
+        S->>Strategy: aggregate_evaluate<br/>List[EvaluateRes]
+        activate Strategy
+        Strategy-->>S: Aggregated evaluation results
+        deactivate Strategy
+
+        end
+
+        Note left of S: Next round, continue<br/>with federated training
 
 The following sections describe each of those methods in more detail.
 
@@ -192,13 +198,13 @@ Built-in strategies return user-provided initial parameters. The following examp
     weights = model.get_weights()
 
     # Serialize ndarrays to `Parameters`
-    parameters = fl.common.weights_to_parameters(weights)
+    parameters = fl.common.ndarrays_to_parameters(weights)
 
     # Use the serialized parameters as the initial global parameters 
     strategy = fl.server.strategy.FedAvg(
         initial_parameters=parameters,
     )
-    fl.server.start_server(config={"num_rounds": 3}, strategy=strategy)
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3), strategy=strategy)
 
 The Flower server will call :code:`initialize_parameters`, which either returns the parameters that were passed to :code:`initial_parameters`, or :code:`None`. If no parameters are returned from :code:`initialize_parameters` (i.e., :code:`None`), the server will randomly select one client and ask it to provide its parameters. This is a convenience feature and not recommended in practice, but it can be useful for prototyping. In practice, it is recommended to always use server-side parameter initialization.
 
@@ -215,7 +221,10 @@ The :code:`configure_fit` method
 
     @abstractmethod
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
 
@@ -228,7 +237,7 @@ More sophisticated implementations can use :code:`configure_fit` to implement cu
 
 .. note::
 
-    The structure of this retun value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to train, for example, different models on different clients, or use different hyperparameters on different clients (via the :code:`config` dict).
+    The structure of this return value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to train, for example, different models on different clients, or use different hyperparameters on different clients (via the :code:`config` dict).
 
 The :code:`aggregate_fit` method
 --------------------------------
@@ -240,13 +249,13 @@ The :code:`aggregate_fit` method
     @abstractmethod
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results."""
 
-Of course, failures can happen, so there is no guarantee that the server will get results from all the clients it sent instructions to (via :code:`configure_fit`). :code:`aggregate_fit` therefore receives a list of :code:`results`, but also a list of :code:`failues`.
+Of course, failures can happen, so there is no guarantee that the server will get results from all the clients it sent instructions to (via :code:`configure_fit`). :code:`aggregate_fit` therefore receives a list of :code:`results`, but also a list of :code:`failures`.
 
 :code:`aggregate_fit` returns an optional :code:`Parameters` object and a dictionary of aggregated metrics. The :code:`Parameters` return value is optional because :code:`aggregate_fit` might decide that the results provided are not sufficient for aggregation (e.g., too many failures).
 
@@ -259,7 +268,10 @@ The :code:`configure_evaluate` method
 
     @abstractmethod
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
 
@@ -272,7 +284,7 @@ More sophisticated implementations can use :code:`configure_evaluate` to impleme
 
 .. note::
 
-    The structure of this retun value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to evaluate, for example, different models on different clients, or use differnt hyperparameters on different clients (via the :code:`config` dict).
+    The structure of this return value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom strategies to evaluate, for example, different models on different clients, or use different hyperparameters on different clients (via the :code:`config` dict).
 
 
 The :code:`aggregate_evaluate` method
@@ -285,13 +297,13 @@ The :code:`aggregate_evaluate` method
     @abstractmethod
     def aggregate_evaluate(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation results."""
 
-Of course, failures can happen, so there is no guarantee that the server will get results from all the clients it sent instructions to (via :code:`configure_evaluate`). :code:`aggregate_evaluate` therefore receives a list of :code:`results`, but also a list of :code:`failues`.
+Of course, failures can happen, so there is no guarantee that the server will get results from all the clients it sent instructions to (via :code:`configure_evaluate`). :code:`aggregate_evaluate` therefore receives a list of :code:`results`, but also a list of :code:`failures`.
 
 :code:`aggregate_evaluate` returns an optional :code:`float` (loss) and a dictionary of aggregated metrics. The :code:`float` return value is optional because :code:`aggregate_evaluate` might decide that the results provided are not sufficient for aggregation (e.g., too many failures).
 

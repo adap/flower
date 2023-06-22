@@ -1,3 +1,6 @@
+.. _quickstart-pytorch:
+
+
 Quickstart PyTorch
 ==================
 
@@ -55,7 +58,7 @@ We use PyTorch to load CIFAR10, a popular colored image classification dataset f
 .. code-block:: python
 
     def load_data():
-    """Load CIFAR-10 (training and test set)."""
+        """Load CIFAR-10 (training and test set)."""
         transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
         )
@@ -71,7 +74,7 @@ Define the loss and optimizer with PyTorch. The training of the dataset is done 
 .. code-block:: python
 
     def train(net, trainloader, epochs):
-    """Train the network on the training set."""
+        """Train the network on the training set."""
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
         for _ in range(epochs):
@@ -103,7 +106,7 @@ Define then the validation of the  machine learning network. We loop over the te
 
 After defining the training and testing of a PyTorch machine learning model, we use the functions for the Flower clients.
 
-The Flower clients will use a simle CNN adapted from 'PyTorch: A 60 Minute Blitz':
+The Flower clients will use a simple CNN adapted from 'PyTorch: A 60 Minute Blitz':
 
 .. code-block:: python
 
@@ -159,7 +162,7 @@ which can be implemented in the following way:
 .. code-block:: python
 
     class CifarClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
         def set_parameters(self, parameters):
@@ -170,7 +173,7 @@ which can be implemented in the following way:
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             train(net, trainloader, epochs=1)
-            return self.get_parameters(), num_examples["trainset"], {}
+            return self.get_parameters(config={}), num_examples["trainset"], {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
@@ -182,7 +185,7 @@ to actually run this client:
 
 .. code-block:: python
 
-     fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+     fl.client.start_numpy_client(server_address="[::]:8080", client=CifarClient())
 
 That's it for the client. We only have to implement :code:`Client` or
 :code:`NumPyClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
@@ -201,7 +204,7 @@ configuration possibilities at their default values. In a file named
 
     import flwr as fl
 
-    fl.server.start_server(config={"num_rounds": 3})
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3))
 
 Train the model, federated!
 ---------------------------

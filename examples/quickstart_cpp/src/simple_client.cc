@@ -18,7 +18,7 @@ SimpleFlwrClient::SimpleFlwrClient(std::string client_id,
  * Return the current local model parameters
  * Simple string are used for now to test communication, needs updates in the future
  */
-flwr::ParametersRes SimpleFlwrClient::get_parameters() {
+flwr_local::ParametersRes SimpleFlwrClient::get_parameters() {
     // Serialize
     std::vector<double> pred_weights = this->model.get_pred_weights();
     double pred_b = this->model.get_bias();
@@ -32,10 +32,10 @@ flwr::ParametersRes SimpleFlwrClient::get_parameters() {
     tensors.push_back(oss2.str());
 
     std::string tensor_str = "cpp_double";
-    return flwr::Parameters(tensors, tensor_str);
+    return flwr_local::Parameters(tensors, tensor_str);
 };
 
-void SimpleFlwrClient::set_parameters(flwr::Parameters params) {
+void SimpleFlwrClient::set_parameters(flwr_local::Parameters params) {
 
     std::list<std::string> s = params.getTensors();
     std::cout << "Received " << s.size() <<" Layers from server:" << std::endl;
@@ -64,9 +64,9 @@ void SimpleFlwrClient::set_parameters(flwr::Parameters params) {
 
 };
 
-flwr::PropertiesRes SimpleFlwrClient::get_properties(flwr::PropertiesIns ins) {
-    flwr::PropertiesRes p;
-    p.setPropertiesRes(static_cast<flwr::Properties>(ins.getPropertiesIns()));
+flwr_local::PropertiesRes SimpleFlwrClient::get_properties(flwr_local::PropertiesIns ins) {
+    flwr_local::PropertiesRes p;
+    p.setPropertiesRes(static_cast<flwr_local::Properties>(ins.getPropertiesIns()));
     return p;
 }
 
@@ -74,11 +74,11 @@ flwr::PropertiesRes SimpleFlwrClient::get_properties(flwr::PropertiesIns ins) {
  * Refine the provided weights using the locally held dataset
  * Simple settings are used for testing, needs updates in the future
  */
-flwr::FitRes SimpleFlwrClient::fit(flwr::FitIns ins) {
+flwr_local::FitRes SimpleFlwrClient::fit(flwr_local::FitIns ins) {
     std::cout << "Fitting..." << std::endl;
-    flwr::FitRes resp;
+    flwr_local::FitRes resp;
 
-    flwr::Parameters p = ins.getParameters();
+    flwr_local::Parameters p = ins.getParameters();
     this->set_parameters(p);
 
     std::tuple<size_t, float, double> result = this->model.train_SGD(this->training_dataset);
@@ -93,10 +93,10 @@ flwr::FitRes SimpleFlwrClient::fit(flwr::FitIns ins) {
  * Evaluate the provided weights using the locally held dataset
  * Needs updates in the future
  */
-flwr::EvaluateRes SimpleFlwrClient::evaluate(flwr::EvaluateIns ins) {
+flwr_local::EvaluateRes SimpleFlwrClient::evaluate(flwr_local::EvaluateIns ins) {
     std::cout << "Evaluating..." << std::endl;
-    flwr::EvaluateRes resp;
-    flwr::Parameters p = ins.getParameters();
+    flwr_local::EvaluateRes resp;
+    flwr_local::Parameters p = ins.getParameters();
     this->set_parameters(p);
 
     // Evaluation returns a number_of_examples, a loss and an "accuracy"
@@ -105,9 +105,9 @@ flwr::EvaluateRes SimpleFlwrClient::evaluate(flwr::EvaluateIns ins) {
     resp.setNum_example(std::get<0>(result));
     resp.setLoss(std::get<1>(result));
 
-    flwr::Scalar loss_metric = flwr::Scalar();
+    flwr_local::Scalar loss_metric = flwr_local::Scalar();
     loss_metric.setDouble(std::get<2>(result));
-    std::map<std::string, flwr::Scalar> metric = {{"loss", loss_metric}};
+    std::map<std::string, flwr_local::Scalar> metric = {{"loss", loss_metric}};
     resp.setMetrics(metric);
 
     return resp;

@@ -33,7 +33,7 @@ body:
     description: >
       Please paste or describe the expected results.
     placeholder: >
-      Example: The server aggregated the weights from all clients.
+      Example: The server aggregated the parameters from all clients.
   validations:
     required: true
 - type: textarea

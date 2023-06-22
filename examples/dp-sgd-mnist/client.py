@@ -51,7 +51,7 @@ class MnistClient(fl.client.NumPyClient):
         # Compile model with Keras
         model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         """Get parameters of the local model."""
         raise Exception("Not implemented (server-side parameter initialization)")
 
@@ -108,7 +108,7 @@ def main(args) -> None:
 
     # Start Flower client
     client = MnistClient(model, x_train, y_train, x_test, y_test, args)
-    fl.client.start_numpy_client("[::]:8080", client=client)
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
     if args.dpsgd:
         print("Privacy Loss: ", PRIVACY_LOSS)
 

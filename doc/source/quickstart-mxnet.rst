@@ -1,3 +1,6 @@
+.. _quickstart-mxnet:
+
+
 Quickstart MXNet
 ================
 
@@ -176,7 +179,7 @@ They can be implemented in the following way:
 .. code-block:: python
 
     class MNISTClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             param = []
             for val in model.collect_params(".*weight").values():
                 p = val.data()
@@ -192,7 +195,7 @@ They can be implemented in the following way:
             self.set_parameters(parameters)
             [accuracy, loss], num_examples = train(model, train_data, epoch=2)
             results = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
-            return self.get_parameters(), num_examples, results
+            return self.get_parameters(config={}), num_examples, results
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
@@ -206,7 +209,7 @@ to actually run this client:
 
 .. code-block:: python
 
-     fl.client.start_numpy_client("0.0.0.0:8080", client=MNISTClient())
+     fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=MNISTClient())
 
 That's it for the client. We only have to implement :code:`Client` or
 :code:`NumPyClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"0.0.0.0:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
@@ -225,7 +228,7 @@ configuration possibilities at their default values. In a file named
 
     import flwr as fl
 
-    fl.server.start_server(config={"num_rounds": 3})
+    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3))
 
 Train the model, federated!
 ---------------------------
