@@ -1,22 +1,31 @@
 # Flower Baselines
 
-## Project Setup
 
-Start by cloning the Flower Baselines project. We prepared a single-line command that you can copy into your shell which will clone the project for you:
+> Previous baselines can still be found in `flwr_baselines`. These will be gradually migrated to the new directory structure.
 
-```shell
-git clone --depth=1 https://github.com/adap/flower.git && cd baselines
-```
+## Running the baselines
 
-Project dependencies (such as `flwr` and `torch`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-Once inside your Python virtual environment containing `poetry`, go ahead and run:
+Each basline is self-contained in its own directory. Furthermore, each basline defines its own Python environment using [Poetry](https://python-poetry.org/docs/) via a `pyproject.toml` file. In order to run a baseline:
 
-```shell
-poetry install
-```
+1. Navigate inside the directory of the baseline you'd like to run
+2. Follow the `[Environment Setup]` instructions in the `README.md`. In most cases this will require you to just do:
+    ```bash
+    poetry install
+    ```
+3. Run the baseline as indicated in the `[Running the Experiments]` section in the `README.md`
 
-Poetry will install all your dependencies in a newly created virtual environment if you haven't create and/or activated one. To verify that everything works correctly you can run the following command:
 
-```shell
-poetry run python3 -c "import flwr_baselines"
-```
+## Contributing a new baseline
+
+Do you have a new federated learning paper and want to add a new baseline to Flower? Or do you want to add an experiment to an existing baseline paper? Great, we really appreciate your contribution !!
+
+The steps to follow are:
+
+1. Fork the Flower repo and clone it into your machine
+2. Navigate to the `baselines/` directory and from there run:
+    ```bash
+    # This will create a new directory with the same structure as `baseline_template`.
+    ./dev/create_baseline.sh <your_baseline_name>
+    ``` 
+3. Ensure you follow the step showing after running the script above. This will ensure that a Python project is properly constructed for your baseline.
+4. Then, go inside your basline directory and continue with the steps detailed in `EXTENDED_README.md` and `README.md`.

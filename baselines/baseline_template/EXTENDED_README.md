@@ -3,22 +3,26 @@
 
 > The baselines are expected to run in a machine running Ubuntu
 
-While `README.md` should include information about the baseline you implement and how to run it, this _extended_ readme provides info on what's the expected directory structure for a new baseline. Please follow closely these instructions. 
+While `README.md` should include information about the baseline you implement and how to run it, this _extended_ readme provides info on what's the expected directory structure for a new baseline. Please follow closely these instructions. It is likely that you have already completed steps 1-3.
 
-1. For the Flower repository.
-2. Clone the `basline_template` directory and rename it with a name that makes your baseline easily identifiable.
-3. Also rename with the same name the sub-directory that's by default assigned the `baseline_template` name.
-3. All your code and configs should go into a sub-directory with the same name as the name of your baseline.
+1. Fork the Flower repository and clone it.
+2. Navigate to the `baselines/` directory and from there run:
+    ```bash
+    # This will create a new directory with the same structure as this `baseline_template` directory.
+    ./dev/create_baseline.sh <your_baseline_name>
+    ``` 
+3. After running the command above, you'll be asked to rename the `name` field in the `pyproject.toml` using `your_baseline_name`.
+4. All your code and configs should go into a sub-directory with the same name as the name of your baseline.
     *    The sub-directory contains a series of Python scripts that you can edit. Please stick to these files and consult with us if you need additional ones.
     *    There is also a basic config structure in `<your_baseline_name>/conf` ready be parsed by [Hydra](https://hydra.cc/) when exectuing `<your_baseline_name>/main.py`.
-4. Therefore, the top-level directory should only include:
+5. Therefore, the top-level directory should only include:
     *    A directory where all your code+configs live
     *    A `README.md` describing your baseline. Plese follow the template in the provided `README.md`
     *    A `pyproject.toml` detailing the Python environment construction process via [Poetry](https://python-poetry.org/docs/)
         *    Make sure the variable `name` in `pyproject.toml` is set to the name of the sub-directory containing all your code.
-5. Add your dependencies to the `pyproject.toml` (See below a few examples on how to do it)
-6. Ensure that the Python environment for your basline can be created without errors by simply running: `poetry install`
-7. Ensure that your baseline runs with default argument by running `poetry run python -m <your_baseline_name>/main.py`. Then, follow the instructions provided in the `README.md` and detail the steps to follow in `Environment Setup` and in `Running the Experiments`.
+6. Add your dependencies to the `pyproject.toml` (See below a few examples on how to do it)
+7. Ensure that the Python environment for your basline can be created without errors by simply running: `poetry install`
+8. Ensure that your baseline runs with default argument by running `poetry run python -m <your_baseline_name>/main.py`. Then, follow the instructions provided in the `README.md` and detail the steps to follow in `Environment Setup` and in `Running the Experiments`.
 
 > Once you are happy to merge your baseline contribution, please delete this `EXTENDED_README.md` file.
 
