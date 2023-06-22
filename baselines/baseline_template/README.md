@@ -36,9 +36,9 @@
 ****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
 
 
-## **Environment Setup**
+## Environment Setup
 
-:warning: _The Python environmet for all baselines should follow these guidelines: **TBD**. Specify the steps to create and activate the environment. If there are any external system-wide requirements please include instructions for them too. These instructions should be comprenhensive enough so anyone can run them (if non standard, describe them step-by-step)._
+:warning: _The Python environmet for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements please include instructions for them too. These instructions should be comprenhensive enough so anyone can run them (if non standard, describe them step-by-step)._
 
 
 ## Running the Experiments
