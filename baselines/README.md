@@ -27,7 +27,7 @@ The steps to follow are:
 
     ```bash
     # This will create a new directory with the same structure as `baseline_template`.
-    ./dev/creat-_baseline.sh <your_baseline_name>
+    ./dev/create-baseline.sh <your_baseline_name>
     ``` 
 3. Ensure you follow the step showing after running the script above. This will ensure that a Python project is properly constructed for your baseline.
 4. Then, go inside your basline directory and continue with the steps detailed in `EXTENDED_README.md` and `README.md`.
