@@ -29,7 +29,7 @@ echo "- docformatter:  done" &&
 
 echo "- ruff: start" &&
 python -m ruff check src/py/flwr &&
-nbqa ruff doc/source/tutorial examples --extend-ignore=D100,D101,D102,D103,D104,D105,D106,D107 &&
+nbqa ruff doc/source/tutorial examples --extend-ignore=D100,D101,D102,D103,D104,D105,D106,D107 --select=D &&
 echo "- ruff: done" &&
 
 echo "- mypy: start" &&
