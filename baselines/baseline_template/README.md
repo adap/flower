@@ -77,7 +77,7 @@ poetry run -m <your_basline_name>.main  <override_some_hyperparameters>
 ```bash
 # it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
 
-python main.py --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
+poetry run -m <your_basline_name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
 # the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
 
 [Now show a figure/table displaying the results of the above command]
