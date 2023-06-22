@@ -2,6 +2,8 @@
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
+> :warning: Please follow the instructions in `EXTENDED_README.md`
+
 > :warning: Please follow the instructions carefully. First copy this directory and rename it with something meaningful about your baseline. Then add the code into the Python scripts provided, and edit all the fields in the readme that start with a :warning: symbols (and remove the comments as you start adding the information). You can see the [FedProx-Mnist baseline](~https://github.com/adap/flower/tree/fedprox_mnist_refresh/baselines/flwr_baselines/publications/fedprox_mnist~) as an example of a baseline that followed this guide.
 
 
