@@ -57,3 +57,11 @@ The steps to follow are:
     ``` 
 3. Ensure you follow the step showing after running the script above. This will ensure that a Python project is properly constructed for your baseline.
 4. Then, go inside your baseline directory and continue with the steps detailed in `EXTENDED_README.md` and `README.md`.
+5. Once you have your code is ready and you have checked that following the instructions in your `README.md` the Python environment can be created correctly and that running the code following your instructions can reproduce the experiments in the paper, you just need to create a Pull Request (PR). Then, the process to merge your baseline into the Flower repo will begin!
+
+
+Further resources:
+* [GitHub docs: About forks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/about-forks)
+* [GitHub docs: Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
+* [GitHub docs: Creating a pull request from a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork)
+

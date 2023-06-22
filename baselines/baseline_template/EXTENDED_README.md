@@ -23,6 +23,12 @@ While `README.md` should include information about the baseline you implement an
 6. Add your dependencies to the `pyproject.toml` (See below a few examples on how to do it)
 7. Ensure that the Python environment for your baseline can be created without errors by simply running: `poetry install`
 8. Ensure that your baseline runs with default argument by running `poetry run python -m <your_baseline_name>/main`. Then, follow the instructions provided in the `README.md` and detail the steps to follow in `Environment Setup` and in `Running the Experiments`.
+9. Once you have your code is ready and you have checked:
+    *    that following the instructions in your `README.md` the Python environment can be created correctly
+
+    *    that running the code following your instructions can reproduce the experiments in the paper
+   
+   , then you just need to create a Pull Request (PR) to kickstart the process of merging your baseline into the Flower repository.
 
 > Once you are happy to merge your baseline contribution, please delete this `EXTENDED_README.md` file.
 
