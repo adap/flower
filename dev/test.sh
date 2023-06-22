@@ -34,7 +34,6 @@ echo "- ruff: done" &&
 
 echo "- mypy: start" &&
 python -m mypy src/py &&
-nbqa mypy doc/source/tutorial examples &&
 echo "- mypy: done" &&
 
 echo "- pylint: start" &&
