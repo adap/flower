@@ -1,3 +1,9 @@
+---
+title: <title of the paper>
+url: <ulr to the paper page (not the pdf)>
+labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing")
+---
+
 # :warning:*_Title of your baseline_*
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
@@ -6,8 +12,7 @@
 
 > :warning: Please follow the instructions carefully. First copy this directory and rename it with something meaningful about your baseline. Then add the code into the Python scripts provided, and edit all the fields in the readme that start with a :warning: symbols (and remove the comments as you start adding the information). You can see the [FedProx-MNIST baseline](~https://github.com/adap/flower/tree/fedprox_mnist_refresh/baselines/flwr_baselines/publications/fedprox_mnist~) as an example of a baseline that followed this guide.
 
-
-****Labels:**** :warning: *_add a list of single-word (maybe two-words) terms that can be used to categorise this baseline. For example: `image classification`, `heterogeneous clients`, `personalisation`, `communication efficiency`. Please use between 4 and 10 labels._*
+> :warning: Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
 
 ****Paper:**** :warning: *_add the URL of the paper page (not to the .pdf). For instance if you link a paper on ArXiv, add here the URL to the abstract page (e.g. https://arxiv.org/abs/1512.03385). If your paper is in from a journal or conference proceedings, please follow the same logic._*
 
@@ -72,10 +77,10 @@ python main.py <override_some_hyperparameters>
 ```bash
 # it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
 
-python main.py --multirun num_client_per_roun=5,10,50 dataset=femnist,cifar10
+python main.py --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
 # the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
 
 [Now show a figure/table displaying the results of the above command]
 
-# ad more commands + plots for additional experiments.
+# add more commands + plots for additional experiments.
 ```
