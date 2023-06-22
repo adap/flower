@@ -67,6 +67,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
             ) ** (-0.5)
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = "Strategy with DP with Adaptive Clipping enabled."
         return rep
 

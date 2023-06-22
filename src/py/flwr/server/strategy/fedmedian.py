@@ -39,6 +39,7 @@ class FedMedian(FedAvg):
     """Configurable FedAvg with Momentum strategy implementation."""
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedMedian(accept_failures={self.accept_failures})"
         return rep
 

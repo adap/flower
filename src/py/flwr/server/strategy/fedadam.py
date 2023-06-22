@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Adaptive Federated Optimization using Adam (FedAdam) [Reddi et al., 2020] strategy.
+"""Adaptive Federated Optimization using Adam (FedAdam) strategy.
+
+[Reddi et al., 2020]
 
 Paper: arxiv.org/abs/2003.00295
 """
@@ -37,8 +39,7 @@ from .fedopt import FedOpt
 
 
 class FedAdam(FedOpt):
-    """Adaptive Federated Optimization using Adam (FedAdam) [Reddi et al., 2020]
-    strategy.
+    """FedAdam - Adaptive Federated Optimization using Adam.
 
     Paper: https://arxiv.org/abs/2003.00295
     """
@@ -132,6 +133,7 @@ class FedAdam(FedOpt):
         )
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedAdam(accept_failures={self.accept_failures})"
         return rep
 
