@@ -9,6 +9,7 @@ Each basline is self-contained in its own directory. Furthermore, each basline d
 
 1. Navigate inside the directory of the baseline you'd like to run
 2. Follow the `[Environment Setup]` instructions in the `README.md`. In most cases this will require you to just do:
+
     ```bash
     poetry install
     ```
