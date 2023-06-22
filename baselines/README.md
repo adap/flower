@@ -1,13 +1,39 @@
 # Flower Baselines
 
 
-> Previous baselines can still be found in `flwr_baselines`. These will be gradually migrated to the new directory structure.
+> We are changing the way we structure the Flower baselines. While we complete the transition to the new format, you can still find the existing baselines in the `flwr_baselines` directory. Currently, you can make use of baselines for [FedAvg](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist), [FedProx](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedprox_mnist), [FedOpt](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization), [FedBN](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedbn/convergence_rate), and [LEAF-FEMNIST](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/leaf/femnist). 
+
+> The documentation below has been updated to reflect the new way of using Flower baselines.
+
+
+## Structure
+
+Each baseline in this directory is fully self-contained in terms of source code it its own directory. In addition, each baseline uses its very own Python environment as designed by the contributors of such baseline in order to replicate the experiments in the paper. Each baseline directory contains the following structure:
+
+```bash
+flower/baselines/<baseline-name>/
+                      ├── README.md
+                      ├── pyproject.toml
+                      └── <baseline-name>
+                                  ├── *.py # several .py files including main.py and __init__.py
+                                  └── conf
+                                        └── *.yaml # one or more Hydra config files
+```
+Please note that some baselines might include additional files (e.g. a requirements.txt) or a hierarchy of .yaml files for [Hydra](https://hydra.cc/).
 
 ## Running the baselines
 
-Each basline is self-contained in its own directory. Furthermore, each basline defines its own Python environment using [Poetry](https://python-poetry.org/docs/) via a `pyproject.toml` file. In order to run a baseline:
+Each baseline is self-contained in its own directory. Furthermore, each baseline defines its own Python environment using [Poetry](https://python-poetry.org/docs/) via a `pyproject.toml` file. In order to run a baseline:
 
-1. Navigate inside the directory of the baseline you'd like to run
+0. First, ensure you have Poetry installed in your system. For Linux and macOS, installing Poetry can bd deon from a single command:
+
+    ```bash
+    curl -sSL https://install.python-poetry.org | python3 -
+    ```
+
+    To install Poetry on a different OS, to customise your installation, or to further integrate Poetry with your shell after installation, please check [the Poetry documentation](https://python-poetry.org/docs/#installing-with-the-official-installer).
+
+1. Navigate inside the directory of the baseline you'd like to run.
 2. Follow the `[Environment Setup]` instructions in the `README.md`. In most cases this will require you to just do:
 
     ```bash
@@ -30,4 +56,4 @@ The steps to follow are:
     ./dev/create-baseline.sh <your_baseline_name>
     ``` 
 3. Ensure you follow the step showing after running the script above. This will ensure that a Python project is properly constructed for your baseline.
-4. Then, go inside your basline directory and continue with the steps detailed in `EXTENDED_README.md` and `README.md`.
+4. Then, go inside your baseline directory and continue with the steps detailed in `EXTENDED_README.md` and `README.md`.
