@@ -14,15 +14,24 @@ While `README.md` should include information about the baseline you implement an
 3. After running the command above, you'll be asked to rename the `name` field in the `pyproject.toml` using `your_baseline_name`.
 4. All your code and configs should go into a sub-directory with the same name as the name of your baseline.
     *    The sub-directory contains a series of Python scripts that you can edit. Please stick to these files and consult with us if you need additional ones.
-    *    There is also a basic config structure in `<your_baseline_name>/conf` ready be parsed by [Hydra](https://hydra.cc/) when exectuing `<your_baseline_name>/main.py`.
-5. Therefore, the top-level directory should only include:
-    *    A directory where all your code+configs live
-    *    A `README.md` describing your baseline. Please follow the template in the provided `README.md`
-    *    A `pyproject.toml` detailing the Python environment construction process via [Poetry](https://python-poetry.org/docs/)
-        *    Make sure the variable `name` in `pyproject.toml` is set to the name of the sub-directory containing all your code.
-6. Add your dependencies to the `pyproject.toml` (See below a few examples on how to do it)
-7. Ensure that the Python environment for your baseline can be created without errors by simply running: `poetry install`
-8. Ensure that your baseline runs with default argument by running `poetry run python -m <your_baseline_name>/main`. Then, follow the instructions provided in the `README.md` and detail the steps to follow in `Environment Setup` and in `Running the Experiments`.
+    *    There is also a basic config structure in `<your_baseline_name>/conf` ready be parsed by [Hydra](https://hydra.cc/) when executing your `main.py`.
+5. Therefore, the directory structure in your baseline should look like:
+    ```bash
+    baselines/<baseline-name>
+                    ├── README.md
+                    ├── EXTENDED_README.md # to remove before creating your PR
+                    ├── pyproject.toml # details your Python environment
+                    └── <baseline-name>
+                                ├── *.py # several .py files including main.py and __init__.py
+                                └── conf
+                                     └── *.yaml # one or more Hydra config files
+
+    ```
+> Make sure the variable `name` in `pyproject.toml` is set to the name of the sub-directory containing all your code.
+
+6. Add your dependencies to the `pyproject.toml` (see below a few examples on how to do it)
+7. Ensure that the Python environment for your baseline can be created without errors by simply running `poetry install` and that this is properly described later when you complete the `Environment Setup` section in `README.md`.
+8. Ensure that your baseline runs with default argument by running `poetry run python -m <your_baseline_name>.main`. Then, describe this and other forms of running your code in the `Running the Experiments` section in `README.md`.
 9. Once you have your code is ready and you have checked:
     *    that following the instructions in your `README.md` the Python environment can be created correctly
 
