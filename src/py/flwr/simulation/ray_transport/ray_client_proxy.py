@@ -46,8 +46,8 @@ class RayClientProxy(ClientProxy):
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
-        future_get_properties_res = launch_and_get_properties.options(
-            **self.resources,
+        future_get_properties_res = _ray_actor_factory(
+            launch_and_get_properties, self.resources
         ).remote(self.client_fn, self.cid, ins)
         try:
             res = ray.get(future_get_properties_res, timeout=timeout)  # type: ignore
@@ -63,11 +63,12 @@ class RayClientProxy(ClientProxy):
         self, ins: common.GetParametersIns, timeout: Optional[float]
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-        future_paramseters_res = launch_and_get_parameters.options(
-            **self.resources,
+        future_parameters_res = _ray_actor_factory(
+            launch_and_get_parameters, self.resources
         ).remote(self.client_fn, self.cid, ins)
+
         try:
-            res = ray.get(future_paramseters_res, timeout=timeout)  # type: ignore
+            res = ray.get(future_parameters_res, timeout=timeout)  # type: ignore
         except Exception as ex:
             log(ERROR, ex)
             raise ex
@@ -78,8 +79,8 @@ class RayClientProxy(ClientProxy):
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
-        future_fit_res = launch_and_fit.options(
-            **self.resources,
+        future_fit_res = _ray_actor_factory(
+            launch_and_fit, self.resources
         ).remote(self.client_fn, self.cid, ins)
         try:
             res = ray.get(future_fit_res, timeout=timeout)  # type: ignore
@@ -95,8 +96,8 @@ class RayClientProxy(ClientProxy):
         self, ins: common.EvaluateIns, timeout: Optional[float]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-        future_evaluate_res = launch_and_evaluate.options(
-            **self.resources,
+        future_evaluate_res = _ray_actor_factory(
+            launch_and_evaluate, self.resources
         ).remote(self.client_fn, self.cid, ins)
         try:
             res = ray.get(future_evaluate_res, timeout=timeout)  # type: ignore
@@ -115,7 +116,6 @@ class RayClientProxy(ClientProxy):
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
 
 
-@ray.remote  # type: ignore
 def launch_and_get_properties(
     client_fn: ClientFn, cid: str, get_properties_ins: common.GetPropertiesIns
 ) -> common.GetPropertiesRes:
@@ -127,7 +127,6 @@ def launch_and_get_properties(
     )
 
 
-@ray.remote  # type: ignore
 def launch_and_get_parameters(
     client_fn: ClientFn, cid: str, get_parameters_ins: common.GetParametersIns
 ) -> common.GetParametersRes:
@@ -139,7 +138,6 @@ def launch_and_get_parameters(
     )
 
 
-@ray.remote  # type: ignore
 def launch_and_fit(
     client_fn: ClientFn, cid: str, fit_ins: common.FitIns
 ) -> common.FitRes:
@@ -151,7 +149,6 @@ def launch_and_fit(
     )
 
 
-@ray.remote  # type: ignore
 def launch_and_evaluate(
     client_fn: ClientFn, cid: str, evaluate_ins: common.EvaluateIns
 ) -> common.EvaluateRes:
@@ -167,3 +164,9 @@ def _create_client(client_fn: ClientFn, cid: str) -> Client:
     """Create a client instance."""
     client_like: ClientLike = client_fn(cid)
     return to_client(client_like=client_like)
+
+def _ray_actor_factory(base_fn, options: Dict[str, float]):
+    """
+        Dynamical decorate ray actor to set up `max_calls` parameters
+    """
+    return ray.remote(**options)(base_fn)
