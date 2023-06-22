@@ -24,6 +24,7 @@ The steps to follow are:
 
 1. Fork the Flower repo and clone it into your machine
 2. Navigate to the `baselines/` directory and from there run:
+
     ```bash
     # This will create a new directory with the same structure as `baseline_template`.
     ./dev/creat-_baseline.sh <your_baseline_name>
