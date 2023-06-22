@@ -31,11 +31,10 @@ def get_dataloader(
 
 
 def get_random_id_splits(total: int, val_ratio: float, shuffle: bool = True):
-    """Splits a list of length `total` into two following a
-    (1-val_ratio):val_ratio partitioning.
+    """Splits a list of length `total` into two following a (1-val_ratio):val_ratio
+    partitioning.
 
-    By default the indices are shuffled before creating the split and
-    returning.
+    By default the indices are shuffled before creating the split and returning.
     """
 
     if isinstance(total, int):
@@ -113,9 +112,8 @@ def cifar10Transformation():
 class TorchVision_FL(VisionDataset):
     """This is just a trimmed down version of torchvision.datasets.MNIST.
 
-    Use this class by either passing a path to a torch file (.pt)
-    containing (data, targets) or pass the data, targets directly
-    instead.
+    Use this class by either passing a path to a torch file (.pt) containing (data,
+    targets) or pass the data, targets directly instead.
     """
 
     def __init__(
@@ -160,8 +158,8 @@ class TorchVision_FL(VisionDataset):
 
 
 def get_cifar_10(path_to_data="./data"):
-    """Downloads CIFAR10 dataset and generates a unified training set (it will
-    be partitioned later using the LDA partitioning mechanism."""
+    """Downloads CIFAR10 dataset and generates a unified training set (it will be
+    partitioned later using the LDA partitioning mechanism."""
 
     # download dataset and load train set
     train_set = datasets.CIFAR10(root=path_to_data, train=True, download=True)

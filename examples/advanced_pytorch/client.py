@@ -24,8 +24,7 @@ class CifarClient(fl.client.NumPyClient):
         self.validation_split = validation_split
 
     def set_parameters(self, parameters):
-        """Loads a efficientnet model and replaces it parameters with the ones
-        given."""
+        """Loads a efficientnet model and replaces it parameters with the ones given."""
         model = utils.load_efficientnet(classes=10)
         params_dict = zip(model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
@@ -75,8 +74,7 @@ class CifarClient(fl.client.NumPyClient):
 
 
 def client_dry_run(device: str = "cpu"):
-    """Weak tests to check whether all client methods are working as
-    expected."""
+    """Weak tests to check whether all client methods are working as expected."""
 
     model = utils.load_efficientnet(classes=10)
     trainset, testset = utils.load_partition(0)

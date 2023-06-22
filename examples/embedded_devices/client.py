@@ -57,8 +57,7 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.NDArrays) -> None
 
 
 class CifarClient(fl.client.Client):
-    """Flower client implementing CIFAR-10 image classification using
-    PyTorch."""
+    """Flower client implementing CIFAR-10 image classification using PyTorch."""
 
     def __init__(
         self,
