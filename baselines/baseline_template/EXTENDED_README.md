@@ -1,7 +1,7 @@
 
 # Extended Readme
 
-> The baselines are expected to run in a machine running Ubuntu
+> The baselines are expected to run in a machine running Ubuntu 22.04
 
 While `README.md` should include information about the baseline you implement and how to run it, this _extended_ readme provides info on what's the expected directory structure for a new baseline. Please follow closely these instructions. It is likely that you have already completed steps 1-3.
 
@@ -9,7 +9,7 @@ While `README.md` should include information about the baseline you implement an
 2. Navigate to the `baselines/` directory and from there run:
     ```bash
     # This will create a new directory with the same structure as this `baseline_template` directory.
-    ./dev/create_baseline.sh <your_baseline_name>
+    ./dev/create-baseline.sh <your_baseline_name>
     ``` 
 3. After running the command above, you'll be asked to rename the `name` field in the `pyproject.toml` using `your_baseline_name`.
 4. All your code and configs should go into a sub-directory with the same name as the name of your baseline.
@@ -21,8 +21,8 @@ While `README.md` should include information about the baseline you implement an
     *    A `pyproject.toml` detailing the Python environment construction process via [Poetry](https://python-poetry.org/docs/)
         *    Make sure the variable `name` in `pyproject.toml` is set to the name of the sub-directory containing all your code.
 6. Add your dependencies to the `pyproject.toml` (See below a few examples on how to do it)
-7. Ensure that the Python environment for your basline can be created without errors by simply running: `poetry install`
-8. Ensure that your baseline runs with default argument by running `poetry run python -m <your_baseline_name>/main.py`. Then, follow the instructions provided in the `README.md` and detail the steps to follow in `Environment Setup` and in `Running the Experiments`.
+7. Ensure that the Python environment for your baseline can be created without errors by simply running: `poetry install`
+8. Ensure that your baseline runs with default argument by running `poetry run python -m <your_baseline_name>/main`. Then, follow the instructions provided in the `README.md` and detail the steps to follow in `Environment Setup` and in `Running the Experiments`.
 
 > Once you are happy to merge your baseline contribution, please delete this `EXTENDED_README.md` file.
 

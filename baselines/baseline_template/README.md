@@ -4,12 +4,12 @@
 
 > :warning: Please follow the instructions in `EXTENDED_README.md`
 
-> :warning: Please follow the instructions carefully. First copy this directory and rename it with something meaningful about your baseline. Then add the code into the Python scripts provided, and edit all the fields in the readme that start with a :warning: symbols (and remove the comments as you start adding the information). You can see the [FedProx-Mnist baseline](~https://github.com/adap/flower/tree/fedprox_mnist_refresh/baselines/flwr_baselines/publications/fedprox_mnist~) as an example of a baseline that followed this guide.
+> :warning: Please follow the instructions carefully. First copy this directory and rename it with something meaningful about your baseline. Then add the code into the Python scripts provided, and edit all the fields in the readme that start with a :warning: symbols (and remove the comments as you start adding the information). You can see the [FedProx-MNIST baseline](~https://github.com/adap/flower/tree/fedprox_mnist_refresh/baselines/flwr_baselines/publications/fedprox_mnist~) as an example of a baseline that followed this guide.
 
 
 ****Labels:**** :warning: *_add a list of single-word (maybe two-words) terms that can be used to categorise this baseline. For example: `image classification`, `heterogeneous clients`, `personalisation`, `communication efficiency`. Please use between 4 and 10 labels._*
 
-****Paper:**** :warning: *_add the URL of the paper._*
+****Paper:**** :warning: *_add the URL of the paper page (not to the .pdf). For instance if you link a paper on ArXiv, add here the URL to the abstract page (e.g. https://arxiv.org/abs/1512.03385). If your paper is in from a journal or conference proceedings, please follow the same logic._*
 
 ****Authors:**** :warning: *_list authors of the paper_*
 
@@ -40,7 +40,7 @@
 
 ## Environment Setup
 
-:warning: _The Python environmet for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements please include instructions for them too. These instructions should be comprenhensive enough so anyone can run them (if non standard, describe them step-by-step)._
+:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
 
 
 ## Running the Experiments

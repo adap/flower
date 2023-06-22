@@ -6,12 +6,12 @@
 dataset:
   # dataset config
 
-moodel:
+model:
   # model config
 
 strategy:
   _target_: #points to your startegy (either custom or exiting in Flower)
   # rest of strategy config
 
-clinet:
+client:
   # client config
