@@ -20,6 +20,6 @@ python -m docformatter -i -r examples
 nbqa black -q doc/source/tutorial examples
 nbqa docformatter -i -r doc/source/tutorial examples
 nbqa isort doc/source/tutorial examples
-nbqa ruff --fix doc/source/tutorial examples
+nbqa ruff --extend-ignore=D100,D101,D102,D103,D104,D105,D106,D107 --fix doc/source/tutorial examples
 KEYS="metadata.celltoolbar metadata.language_info metadata.toc metadata.notify_time metadata.varInspector metadata.accelerator metadata.vscode cell.metadata.id cell.metadata.heading_collapsed cell.metadata.hidden cell.metadata.code_folding cell.metadata.tags cell.metadata.init_cell cell.metadata.vscode"
 nbqa nbstripout --extra-keys "$KEYS" doc/source/tutorial examples
