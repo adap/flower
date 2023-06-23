@@ -166,9 +166,7 @@ class ClientMessage:
 
 @dataclass
 class SecureAggregation:
-    """SecureAggregation is a container used to store Secure Aggregation-related
-    messages.
-    """
+    """SecureAggregation supports SA-related communications."""
 
     named_values: Dict[str, Value] = field(default_factory=dict)
 

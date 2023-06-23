@@ -574,7 +574,7 @@ def secagg_msg_from_proto(sa_msg: SecureAggregation) -> typing.SecureAggregation
 def task_msg_to_proto(task: typing.Task, merge_from_proto: Task = None) -> Task:
     proto = Task(
         message_type=task.message_type,
-        sec_agg=secagg_msg_to_proto(task.secure_aggregation_message)
+        sa=secagg_msg_to_proto(task.secure_aggregation_message)
         if task.secure_aggregation_message
         else None,
         legacy_server_message=server_message_to_proto(task.legacy_server_message)
@@ -592,7 +592,7 @@ def task_msg_to_proto(task: typing.Task, merge_from_proto: Task = None) -> Task:
 def task_msg_from_proto(proto: Task) -> typing.Task:
     task = typing.Task(
         message_type=proto.message_type,
-        secure_aggregation_message=secagg_msg_from_proto(proto.sec_agg)
+        secure_aggregation_message=secagg_msg_from_proto(proto.sa)
         if proto.HasField("sa")
         else None,
         legacy_server_message=server_message_from_proto(proto.legacy_server_message)

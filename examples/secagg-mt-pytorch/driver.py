@@ -81,7 +81,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     }
 
 
-print(get_parameters(net=Net()))
+# print(get_parameters(net=Net()))
 # -------------------------------------------------------------------------- Driver SDK
 driver = Driver(driver_service_address="0.0.0.0:9091", certificates=None)
 # -------------------------------------------------------------------------- Driver SDK
@@ -205,7 +205,7 @@ for server_round in range(num_rounds):
 
         # Collect correct results
         node_messages = task_res_list_to_user_tasks(
-            [res for res in all_task_res if res.task.HasField("sec_agg")]
+            [res for res in all_task_res if res.task.HasField("sa")]
         )
     workflow.close()
 

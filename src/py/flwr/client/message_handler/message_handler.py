@@ -72,6 +72,10 @@ def handle(
     raise UnknownServerMessage()
 
 
+def general_preprocess(task: Task) -> Tuple:
+    ...
+
+
 def _handle_task(
     client: Client, task_msg: Task, handlers: dict
 ) -> Tuple[Task, int, bool]:

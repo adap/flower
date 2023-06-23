@@ -3,8 +3,8 @@ from logging import ERROR, WARNING, INFO, DEBUG
 
 import flwr as fl
 from flwr.client.message_handler.handler_registry import register_handler
-from flwr.common import FitIns, FitRes, NDArrays, Scalar
-from flwr.common.typing import Task, SecureAggregationMessage
+from flwr.common import FitIns, FitRes, NDArrays, Scalar, bytes_to_ndarray, ndarray_to_bytes
+from flwr.common.typing import Task, SecureAggregation
 from flwr.common.secure_aggregation.sec_agg_protocol import *
 from flwr.common.logger import log
 
@@ -43,7 +43,7 @@ class FlowerClient(fl.client.Client):
 
     @register_handler("sec_agg")
     def handle_secagg(self, task: Task) -> Task:
-        stage = task.secure_aggregation_message.named_scalars.pop("stage")
+        stage = task.secure_aggregation_message.named_values.pop("stage")
         if stage == "setup":
             if self.current_stage != "unmasking":
                 log(WARNING, "restart from setup stage")
@@ -74,7 +74,7 @@ class FlowerClient(fl.client.Client):
 
 def setup(self: FlowerClient, task: Task) -> Task:
     # Assigning parameter values to object fields
-    sec_agg_param_dict = task.secure_aggregation_message.named_scalars
+    sec_agg_param_dict = task.secure_aggregation_message.named_values
     self.sample_num = sec_agg_param_dict["share_num"]
     self.sid = sec_agg_param_dict["secure_id"]
     # self.sec_agg_id = sec_agg_param_dict["secure_id"]
@@ -102,14 +102,14 @@ def setup(self: FlowerClient, task: Task) -> Task:
     self.sk2, self.pk2 = private_key_to_bytes(self.sk2), public_key_to_bytes(self.pk2)
     log(INFO, f"Client {self.sid}: stage 0 completes. uploading public keys...")
     return Task(
-        secure_aggregation_message=SecureAggregationMessage(
-            named_scalars={"pk1": self.pk1, "pk2": self.pk2}
+        secure_aggregation_message=SecureAggregation(
+            named_values={"pk1": self.pk1, "pk2": self.pk2}
         )
     )
 
 
 def share_keys(self: FlowerClient, task: Task) -> Task:
-    key_dict = task.secure_aggregation_message.named_scalars
+    key_dict = task.secure_aggregation_message.named_values
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in key_dict.items()}
     log(INFO, f"Client {self.sid}: starting stage 1...")
     # Distribute shares for private mask seed and first private key
@@ -166,8 +166,8 @@ def share_keys(self: FlowerClient, task: Task) -> Task:
 
     log(INFO, f"Client {self.sid}: stage 1 completes. uploading key shares...")
     return Task(
-        secure_aggregation_message=SecureAggregationMessage(
-            named_scalars={"dsts": dsts, "ciphertexts": ciphertexts}
+        secure_aggregation_message=SecureAggregation(
+            named_values={"dsts": dsts, "ciphertexts": ciphertexts}
         )
     )
 
@@ -177,8 +177,8 @@ def collect_masked_input(self: FlowerClient, task: Task) -> Task:
     # Receive shares and fit model
     available_clients: List[int] = []
     msg = task.secure_aggregation_message
-    ciphertexts = msg.named_scalars["ciphertexts"]
-    srcs = msg.named_scalars["srcs"]
+    ciphertexts = msg.named_values["ciphertexts"]
+    srcs = msg.named_values["srcs"]
     assert isinstance(ciphertexts, list)
     if len(ciphertexts) + 1 < self.threshold:
         raise Exception("Available neighbours number smaller than threshold")
@@ -206,10 +206,11 @@ def collect_masked_input(self: FlowerClient, task: Task) -> Task:
         # log(ERROR, "Force dropout due to testing!!")
         raise Exception("Force dropout due to testing")
 
-    weights, weights_factor, _ = self.fit(msg.named_arrays["parameters"], {})
+    # weights = [bytes_to_ndarray(w) for w in msg.named_values["parameters"]]
+    # weights, weights_factor, _ = self.fit(weights, {})
 
-    # weights = [np.zeros(10000)]
-    # weights_factor = 1
+    weights = [np.zeros(10000)]
+    weights_factor = 1
 
     # Quantize weight update vector
     quantized_weights = quantize(weights, self.clipping_range, self.target_range)
@@ -241,8 +242,8 @@ def collect_masked_input(self: FlowerClient, task: Task) -> Task:
     # return ndarrays_to_parameters(quantized_weights)
     log(INFO, f"Client {self.sid}: stage 2 completes. uploading masked weights...")
     return Task(
-        secure_aggregation_message=SecureAggregationMessage(
-            named_arrays={"masked_weights": quantized_weights}
+        secure_aggregation_message=SecureAggregation(
+            named_values={"masked_weights": [ndarray_to_bytes(arr) for arr in quantized_weights]}
         )
     )
 
@@ -250,8 +251,8 @@ def collect_masked_input(self: FlowerClient, task: Task) -> Task:
 def unmasking(self: FlowerClient, task: Task) -> Task:
     msg = task.secure_aggregation_message
     active_sids, dead_sids = (
-        msg.named_scalars["active_sids"],
-        msg.named_scalars["dead_sids"],
+        msg.named_values["active_sids"],
+        msg.named_values["dead_sids"],
     )
     # Send private mask seed share for every avaliable client (including itclient)
     # Send first private key share for building pairwise mask for every dropped client
@@ -265,8 +266,8 @@ def unmasking(self: FlowerClient, task: Task) -> Task:
     shares += [self.sk1_share_dict[sid] for sid in dead_sids]
 
     return Task(
-        secure_aggregation_message=SecureAggregationMessage(
-            named_scalars={"sids": sids, "shares": shares}
+        secure_aggregation_message=SecureAggregation(
+            named_values={"sids": sids, "shares": shares}
         )
     )
 
