@@ -20,5 +20,6 @@ echo "Renaming sub-directory as '$name'"
 mv $name/$template $name/$name
 
 # adjusting package name in pyproject.toml
-echo "!!! Your directory for your baseline '$name' is almost ready"
-echo "!!! Now go to $name/pyproject.toml and ensure that 'name' under '[tool.poetry]' is set to: name = \"$name\""
+cd $name
+sed -i '' -e "s/<BASELINE_NAME>/$name/" pyproject.toml
+echo "!!! Your directory for your baseline '$name' is ready."

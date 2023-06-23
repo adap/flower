@@ -3,19 +3,18 @@
 
 > The baselines are expected to run in a machine running Ubuntu 22.04
 
-While `README.md` should include information about the baseline you implement and how to run it, this _extended_ readme provides info on what's the expected directory structure for a new baseline and more generally the instructions to follow before your baseline can be merged into the Flower repository. Please follow closely these instructions. It is likely that you have already completed steps 1-3.
+While `README.md` should include information about the baseline you implement and how to run it, this _extended_ readme provides info on what's the expected directory structure for a new baseline and more generally the instructions to follow before your baseline can be merged into the Flower repository. Please follow closely these instructions. It is likely that you have already completed steps 1-2.
 
 1. Fork the Flower repository and clone it.
 2. Navigate to the `baselines/` directory and from there run:
     ```bash
     # This will create a new directory with the same structure as this `baseline_template` directory.
-    ./dev/create-baseline.sh <your_baseline_name>
+    ./dev/create-baseline.sh <baseline-name>
     ``` 
-3. After running the command above, you'll be asked to rename the `name` field in the `pyproject.toml` using `your_baseline_name`.
-4. All your code and configs should go into a sub-directory with the same name as the name of your baseline.
+3. All your code and configs should go into a sub-directory with the same name as the name of your baseline.
     *    The sub-directory contains a series of Python scripts that you can edit. Please stick to these files and consult with us if you need additional ones.
-    *    There is also a basic config structure in `<your_baseline_name>/conf` ready be parsed by [Hydra](https://hydra.cc/) when executing your `main.py`.
-5. Therefore, the directory structure in your baseline should look like:
+    *    There is also a basic config structure in `<baseline-name>/conf` ready be parsed by [Hydra](https://hydra.cc/) when executing your `main.py`.
+4. Therefore, the directory structure in your baseline should look like:
     ```bash
     baselines/<baseline-name>
                     ├── README.md # describes your baseline and everything needed to use it
@@ -29,10 +28,10 @@ While `README.md` should include information about the baseline you implement an
     ```
 > :warning: Make sure the variable `name` in `pyproject.toml` is set to the name of the sub-directory containing all your code.
 
-6. Add your dependencies to the `pyproject.toml` (see below a few examples on how to do it)
-7. Ensure that the Python environment for your baseline can be created without errors by simply running `poetry install` and that this is properly described later when you complete the `Environment Setup` section in `README.md`. This is specially important if your environment requires additional steps after doing `poetry install`.
-8. Ensure that your baseline runs with default argument by running `poetry run python -m <your_baseline_name>.main`. Then, describe this and other forms of running your code in the `Running the Experiments` section in `README.md`.
-9. Once your code is ready and you have checked:
+5. Add your dependencies to the `pyproject.toml` (see below a few examples on how to do it)
+6. Ensure that the Python environment for your baseline can be created without errors by simply running `poetry install` and that this is properly described later when you complete the `Environment Setup` section in `README.md`. This is specially important if your environment requires additional steps after doing `poetry install`.
+7. Ensure that your baseline runs with default argument by running `poetry run python -m <baseline-name>.main`. Then, describe this and other forms of running your code in the `Running the Experiments` section in `README.md`.
+8. Once your code is ready and you have checked:
     *    that following the instructions in your `README.md` the Python environment can be created correctly
 
     *    that running the code following your instructions can reproduce the experiments in the paper

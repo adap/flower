@@ -53,11 +53,10 @@ The steps to follow are:
 
     ```bash
     # This will create a new directory with the same structure as `baseline_template`.
-    ./dev/create-baseline.sh <your_baseline_name>
+    ./dev/create-baseline.sh <baseline-name>
     ``` 
-3. Ensure you follow the step showing after running the script above. This will ensure that a Python project is properly constructed for your baseline.
-4. Then, go inside your baseline directory and continue with the steps detailed in `EXTENDED_README.md` and `README.md`.
-5. Once your code is ready and you have checked that following the instructions in your `README.md` the Python environment can be created correctly and that running the code following your instructions can reproduce the experiments in the paper, you just need to create a Pull Request (PR). Then, the process to merge your baseline into the Flower repo will begin!
+3. Then, go inside your baseline directory and continue with the steps detailed in `EXTENDED_README.md` and `README.md`.
+4. Once your code is ready and you have checked that following the instructions in your `README.md` the Python environment can be created correctly and that running the code following your instructions can reproduce the experiments in the paper, you just need to create a Pull Request (PR). Then, the process to merge your baseline into the Flower repo will begin!
 
 
 Further resources:
