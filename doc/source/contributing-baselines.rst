@@ -17,7 +17,7 @@ TL;DR: Adding a new Flower Baseline
 Let's say you want to contribute the code of your most recent Federated Learning publication, *FedAwesome*. There are only three steps necessary to create a new *FedAwesome* Flower Baseline:
 
 #. **Get the Flower source code on your machine**
-    #. Fork the Flower codebase: gt to the `Flower GitHub repo <https://github.com/adap/flower>`_ and fork the code (click the *Fork* button in the top-right corner and follow the instructions)
+    #. Fork the Flower codebase: go to the `Flower GitHub repo <https://github.com/adap/flower>`_ and fork the code (click the *Fork* button in the top-right corner and follow the instructions)
     #. Clone the (forked) Flower source code: :code:`git clone git@github.com:[your_github_username]/flower.git`
     #. Open the code in your favorite editor.
 #. **Create a directory for your baseline and add the FedAwesome code**
