@@ -14,10 +14,10 @@ All baselines are available in the directory `baselines <https://github.com/adap
 
 .. code-block:: shell
 
-    flower/baselines/<baseline-name>/
+    flower/baselines/<baseline_name>/
                           ├── README.md
                           ├── pyproject.toml
-                          └── <baseline-name>
+                          └── <baseline_name>
                                       ├── *.py # several .py files including main.py and __init__.py
                                       └── conf
                                             └── *.yaml # one or more Hydra config files
