@@ -21,8 +21,8 @@ Let's say you want to contribute the code of your most recent Federated Learning
     #. Clone the (forked) Flower source code: :code:`git clone git@github.com:[your_github_username]/flower.git`
     #. Open the code in your favorite editor.
 #. **Create a directory for your baseline and add the FedAwesome code**
-    #. Navigate to the baselines directory and run :code:`./dev/create-baseline.sh FedAwesome`
-    #. A new directory in :code:`baselines/FedAwesome` is created.
+    #. Navigate to the baselines directory and run :code:`./dev/create-baseline.sh fedawesome`
+    #. A new directory in :code:`baselines/fedawesome` is created.
     #. Follow the instructions in :code:`EXTENDED_README.md` and :code:`README.md` in :code:`baselines/FedAwesome/`. 
 #. **Open a pull request**
     #. Stage your changes: :code:`git add .`
