@@ -10,7 +10,7 @@ Before you start to work on a new baseline or experiment, please check the `Flow
 TL;DR: Adding a new Flower Baseline
 -----------------------------------
 .. warning::
-    We are in the process of changing how Flower Baselines are structured and updating the instructions for new contributors. Bear with us until we have finalise this transition. For now, follow the steps described below and reach out to us if something is not clear. We look forward to welcoming your baseline into Flower!!
+    We are in the process of changing how Flower Baselines are structured and updating the instructions for new contributors. Bear with us until we have finalised this transition. For now, follow the steps described below and reach out to us if something is not clear. We look forward to welcoming your baseline into Flower!!
 .. note::
     For a detailed set of steps to follow, check the `Baselines README on GitHub <https://github.com/adap/flower/tree/main/baselines>`_.
 
