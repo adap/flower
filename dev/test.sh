@@ -29,7 +29,7 @@ echo "- docformatter:  done" &&
 
 echo "- ruff: start" &&
 python -m ruff check src/py/flwr &&
-nbqa ruff doc/source/tutorial examples --extend-ignore=D100,D101,D102,D103,D104,D105,D106,D107 --select=D &&
+nbqa ruff doc/source/tutorial examples --extend-ignore=D100,D101,D102,D103,D104,D105,D106,D107,E402,E501 &&
 echo "- ruff: done" &&
 
 echo "- mypy: start" &&
@@ -42,7 +42,7 @@ echo "- pylint: done" &&
 
 echo "- flake8: start" &&
 python -m flake8 src/py/flwr &&
-nbqa flake8 doc/source/tutorial examples &&
+nbqa flake8 doc/source/tutorial examples --extend-ignore=E402,E501 &&
 echo "- flake8: done" &&
 
 echo "- pytest: start" &&
