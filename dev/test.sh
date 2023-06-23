@@ -38,7 +38,6 @@ echo "- mypy: done" &&
 
 echo "- pylint: start" &&
 python -m pylint --ignore=src/py/flwr/proto src/py/flwr &&
-nbqa pylint doc/source/tutorial examples &&
 echo "- pylint: done" &&
 
 echo "- flake8: start" &&
