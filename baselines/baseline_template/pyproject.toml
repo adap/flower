@@ -64,7 +64,7 @@ known_first_party = ["flwr_baselines"]
 
 [tool.black]
 line-length = 88
-target-version = ["py38", "py39"]
+target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
