@@ -10,7 +10,7 @@ model:
   # model config
 
 strategy:
-  _target_: #points to your startegy (either custom or exiting in Flower)
+  _target_: # points to your strategy (either custom or exiting in Flower)
   # rest of strategy config
 
 client:
