@@ -23,7 +23,7 @@ Let's say you want to contribute the code of your most recent Federated Learning
 #. **Create a directory for your baseline and add the FedAwesome code**
     #. Navigate to the baselines directory and run :code:`./dev/create-baseline.sh fedawesome`
     #. A new directory in :code:`baselines/fedawesome` is created.
-    #. Follow the instructions in :code:`EXTENDED_README.md` and :code:`README.md` in :code:`baselines/FedAwesome/`. 
+    #. Follow the instructions in :code:`EXTENDED_README.md` and :code:`README.md` in :code:`baselines/fedawesome/`. 
 #. **Open a pull request**
     #. Stage your changes: :code:`git add .`
     #. Commit & push: :code:`git commit -m "Create new FedAwesome baseline" ; git push`
