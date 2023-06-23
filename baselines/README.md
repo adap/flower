@@ -11,21 +11,21 @@
 Each baseline in this directory is fully self-contained in terms of source code it its own directory. In addition, each baseline uses its very own Python environment as designed by the contributors of such baseline in order to replicate the experiments in the paper. Each baseline directory contains the following structure:
 
 ```bash
-flower/baselines/<baseline-name>/
-                      ├── README.md
-                      ├── pyproject.toml
-                      └── <baseline-name>
-                                  ├── *.py # several .py files including main.py and __init__.py
-                                  └── conf
-                                        └── *.yaml # one or more Hydra config files
+baselines/<baseline-name>/
+                ├── README.md
+                ├── pyproject.toml
+                └── <baseline-name>
+                            ├── *.py # several .py files including main.py and __init__.py
+                            └── conf
+                                └── *.yaml # one or more Hydra config files
 ```
-Please note that some baselines might include additional files (e.g. a requirements.txt) or a hierarchy of .yaml files for [Hydra](https://hydra.cc/).
+Please note that some baselines might include additional files (e.g. a `requirements.txt`) or a hierarchy of `.yaml` files for [Hydra](https://hydra.cc/).
 
 ## Running the baselines
 
 Each baseline is self-contained in its own directory. Furthermore, each baseline defines its own Python environment using [Poetry](https://python-poetry.org/docs/) via a `pyproject.toml` file. In order to run a baseline:
 
-0. First, ensure you have Poetry installed in your system. For Linux and macOS, installing Poetry can bd deon from a single command:
+1. First, ensure you have Poetry installed in your system. For Linux and macOS, installing Poetry can be done from a single command:
 
     ```bash
     curl -sSL https://install.python-poetry.org | python3 -
@@ -33,13 +33,13 @@ Each baseline is self-contained in its own directory. Furthermore, each baseline
 
     To install Poetry on a different OS, to customise your installation, or to further integrate Poetry with your shell after installation, please check [the Poetry documentation](https://python-poetry.org/docs/#installing-with-the-official-installer).
 
-1. Navigate inside the directory of the baseline you'd like to run.
-2. Follow the `[Environment Setup]` instructions in the `README.md`. In most cases this will require you to just do:
+2. Navigate inside the directory of the baseline you'd like to run.
+3. Follow the `[Environment Setup]` instructions in the `README.md`. In most cases this will require you to just do:
 
     ```bash
     poetry install
     ```
-3. Run the baseline as indicated in the `[Running the Experiments]` section in the `README.md`
+4. Run the baseline as indicated in the `[Running the Experiments]` section in the `README.md`
 
 
 ## Contributing a new baseline
@@ -48,7 +48,7 @@ Do you have a new federated learning paper and want to add a new baseline to Flo
 
 The steps to follow are:
 
-1. Fork the Flower repo and clone it into your machine
+1. Fork the Flower repo and clone it into your machine.
 2. Navigate to the `baselines/` directory and from there run:
 
     ```bash
@@ -57,7 +57,7 @@ The steps to follow are:
     ``` 
 3. Ensure you follow the step showing after running the script above. This will ensure that a Python project is properly constructed for your baseline.
 4. Then, go inside your baseline directory and continue with the steps detailed in `EXTENDED_README.md` and `README.md`.
-5. Once you have your code is ready and you have checked that following the instructions in your `README.md` the Python environment can be created correctly and that running the code following your instructions can reproduce the experiments in the paper, you just need to create a Pull Request (PR). Then, the process to merge your baseline into the Flower repo will begin!
+5. Once your code is ready and you have checked that following the instructions in your `README.md` the Python environment can be created correctly and that running the code following your instructions can reproduce the experiments in the paper, you just need to create a Pull Request (PR). Then, the process to merge your baseline into the Flower repo will begin!
 
 
 Further resources:
