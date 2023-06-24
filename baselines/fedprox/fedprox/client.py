@@ -12,8 +12,8 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from flwr_baselines.publications.fedprox_mnist.dataset import load_datasets
-from flwr_baselines.publications.fedprox_mnist.models import test, train
+from fedprox.dataset import load_datasets
+from fedprox.models import test, train
 
 
 class FlowerClient(

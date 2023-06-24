@@ -1,17 +1,14 @@
 """Runs CNN federated learning for MNIST dataset."""
 
-from pathlib import Path
-
 import flwr as fl
 import hydra
-import numpy as np
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from flwr_baselines.publications.fedprox_mnist import client, server, utils
-from flwr_baselines.publications.fedprox_mnist.dataset import load_datasets
-from flwr_baselines.publications.fedprox_mnist.utils import save_results_as_pickle
+from fedprox import client, server, utils
+from fedprox.dataset import load_datasets
+from fedprox.utils import save_results_as_pickle
 
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)

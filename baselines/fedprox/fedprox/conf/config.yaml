@@ -18,7 +18,7 @@ fit_config:
   drop_client: false # with FedProx, clients shouldn't be dropped even if they are stragglers
 
 model:
-  _target_: flwr_baselines.publications.fedprox_mnist.models.LogisticRegression
+  _target_: fedprox.models.LogisticRegression
   num_classes: 10
 
 strategy:

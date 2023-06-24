@@ -21,7 +21,7 @@ fit_config:
   drop_client: true
 
 model:
-  _target_: flwr_baselines.publications.fedprox_mnist.models.LogisticRegression
+  _target_: fedprox.models.LogisticRegression
   num_classes: 10
 
 strategy:

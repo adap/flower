@@ -1,8 +1,13 @@
-# FedProx MNIST
+---
+title: Federated Optimization in Heterogeneous Networks
+url: https://arxiv.org/abs/1812.06127
+labels: [image classification, cross-device, stragglers] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
+dataset: [mnist] # list of datasets you include in your baseline
+---
+
+# FedProx: Federated Optimization in Heterogeneous Networks
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
-
-**Labels:** `image classification`, `cross-device`, `stragglers`, `mnist`
 
 **Paper:** https://arxiv.org/abs/1812.06127
 
@@ -12,7 +17,7 @@
 
 
 ## About this baseline
-**What's implemented:** The code in this directory replicates the experiments in *Federated Optimization in Heterogeneous Networks* (Li et al., 2018) for MNIST, which proposed the FedProx algorthim. Concretely, it replicates the results for MNIST in Figure 1 and 7.
+**What's implemented:** The code in this directory replicates the experiments in *Federated Optimization in Heterogeneous Networks* (Li et al., 2018) for MNIST, which proposed the FedProx algorithm. Concretely, it replicates the results for MNIST in Figure 1 and 7.
 
 **Datasets:** MNIST from PyTorch's Torchvision
 
@@ -21,11 +26,11 @@
 **Contributors:** Charles Beauville and Javier Fernandez-Marques
 
 
-## Experimenatl Setup
+## Experimental Setup
 
 **Task:** Image classification
 
-**Model:** This directory implementes two models:
+**Model:** This directory implements two models:
 * A logistic regression model used in the FedProx paper for MNIST (see `models/LogisticRegression`). This is the model used by default.
 * A two-layer CNN network as used in the FedAvg paper (see `models/Net`)
 
@@ -51,36 +56,48 @@ The following table shows the main hyperparameters for this baseline with their 
 
 ## Environment Setup
 
-**TBD**
+To construct the Python environment follow these steps:
+
+```bash
+# install the base Poetry environment
+poetry install
+
+# activate the environment
+poetry shell
+
+# install PyTorch
+pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
+
+```
 
 ## Running the Experiments
 
-Run this FedProx w/ MNIST baseline as:
+To run this FedProx with MNIST baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
-python main.py # this will run using the default settings in the `conf/config.yaml`
+python -m main # this will run using the default settings in the `conf/config.yaml`
 
-# you can override settings dirctly from the command line
-python main.py mu=1 num_rounds=200 # will set proximal mu to 1 and the number of rounds to 200
+# you can override settings directly from the command line
+python -m main mu=1 num_rounds=200 # will set proximal mu to 1 and the number of rounds to 200
 ```
 
 To run using FedAvg:
 ```bash
 # this will use a variation of FedAvg that drops the clients that were flagged as stragglers
 # This is done so to match the experimental setup in the FedProx paper
-python main.py --config-name fedavg
+python -m main --config-name fedavg
 
 # this config can also be overriden from the CLI
 ```
 
 ## Expected results
 
-With the following command we run both FedProx and FedAvg configurations while iterating through different values of `mu` and `stragglers_fraction`. We ran each experiment five times (this is achieved by artifially adding an extra element to the config but that it doesn't have an impact on the FL setting `'+repeat_num=range(5)'`)
+With the following command we run both FedProx and FedAvg configurations while iterating through different values of `mu` and `stragglers_fraction`. We ran each experiment five times (this is achieved by artificially adding an extra element to the config but that it doesn't have an impact on the FL setting `'+repeat_num=range(5)'`)
 
 ```bash
-python main.py --multirun mu=0.0,2.0 stragglers_fraction=0.0,0.5,0.9 '+repeat_num=range(5)'
+python -m main --multirun mu=0.0,2.0 stragglers_fraction=0.0,0.5,0.9 '+repeat_num=range(5)'
 # note that for FedAvg we don't want to change the proximal term mu since it should be kept at 0.0
-python main.py --config-name fedavg --multirun stragglers_fraction=0.0,0.5,0.9 '+repeat_num=range(5)'
+python -m main --config-name fedavg --multirun stragglers_fraction=0.0,0.5,0.9 '+repeat_num=range(5)'
 ```
 
 The above commands would generate results that look like:
