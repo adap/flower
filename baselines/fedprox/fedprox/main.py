@@ -5,6 +5,8 @@ import hydra
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
+import torch
+
 
 from fedprox import client, server, utils
 from fedprox.dataset import load_datasets
@@ -20,6 +22,9 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
+
+    # print config structured as YAML
+    print(OmegaConf.to_yaml(cfg))
 
     # partition dataset and get dataloaders
     trainloaders, valloaders, testloader = load_datasets(
@@ -41,7 +46,9 @@ def main(cfg: DictConfig) -> None:
     )
 
     # get function that will executed by the strategy's evaluate() method
-    evaluate_fn = server.gen_evaluate_fn(testloader, device="cpu", model=cfg.model)
+    # Set server's device
+    device = cfg.server_device
+    evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
@@ -67,7 +74,7 @@ def main(cfg: DictConfig) -> None:
         client_fn=client_fn,
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
-        client_resources={"num_cpus": 2, "num_gpus": 0.0},
+        client_resources={"num_cpus": cfg.client_resources.num_cpus, "num_gpus": cfg.client_resources.num_gpus},
         strategy=strategy,
     )
 

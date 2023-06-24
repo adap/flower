@@ -9,6 +9,12 @@ stragglers_fraction: 0.9
 learning_rate: 0.03
 mu: 1.0 # it can be >= 0
 
+client_resources:
+  num_cpus: 2
+  num_gpus: 0.0
+
+server_device: cpu
+
 dataset_config:
   iid: false
   balance: false
@@ -29,6 +35,6 @@ strategy:
   min_evaluate_clients: 0
   min_available_clients: ${clients_per_round}
   evaluate_metrics_aggregation_fn:
-    _target_: strategy.weighted_average
+    _target_: fedprox.strategy.weighted_average
     _partial_: true # we dont' want this function to be evaluated when instantiating the strategy, we treat it as a partial and evaluate it when the strategy actuallly calls the function (in aggregate_evaluate())
   proximal_mu: ${mu}
