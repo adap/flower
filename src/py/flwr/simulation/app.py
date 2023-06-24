@@ -129,7 +129,6 @@ def start_simulation(  # pylint: disable=too-many-arguments
     hist : flwr.server.history.History
         Object containing metrics from training.
     """
-
     # pylint: disable-msg=too-many-locals
     event(
         EventType.START_SIMULATION_ENTER,
@@ -172,15 +171,15 @@ def start_simulation(  # pylint: disable=too-many-arguments
         }
 
     # Shut down Ray if it has already been initialized (unless asked not to)
-    if ray.is_initialized() and not keep_initialised:  # type: ignore
-        ray.shutdown()  # type: ignore
+    if ray.is_initialized() and not keep_initialised:
+        ray.shutdown()
 
     # Initialize Ray
-    ray.init(**ray_init_args)  # type: ignore
+    ray.init(**ray_init_args)
     log(
         INFO,
         "Flower VCE: Ray initialized with resources: %s",
-        ray.cluster_resources(),  # type: ignore
+        ray.cluster_resources(),
     )
 
     # Register one RayClientProxy object for each client with the ClientManager

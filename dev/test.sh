@@ -24,6 +24,10 @@ echo "- docformatter: start" &&
 python -m docformatter -c -r src/py/flwr -e src/py/flwr/proto &&
 echo "- docformatter:  done" &&
 
+echo "- ruff: start" &&
+python -m ruff check src/py/flwr &&
+echo "- ruff: done" &&
+
 echo "- mypy: start" &&
 python -m mypy src/py &&
 echo "- mypy: done" &&

@@ -50,7 +50,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
     """
     print(
         "\n\t\033[32mStart TensorBoard with the following parameters"
-        + f"\n\t$ tensorboard --logdir {logdir}\033[39m\n"
+        f"\n\t$ tensorboard --logdir {logdir}\033[39m\n"
     )
     # Create logdir if it does not yet exist
     os.makedirs(logdir, exist_ok=True)
@@ -73,8 +73,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
         """Return overloaded Strategy Wrapper."""
 
         class TBWrapper(strategy_class):  # type: ignore
-            """Strategy wrapper which hooks into some methods for TensorBoard
-            logging."""
+            """Strategy wrapper that hooks into some methods for TensorBoard logging."""
 
             def aggregate_evaluate(
                 self,

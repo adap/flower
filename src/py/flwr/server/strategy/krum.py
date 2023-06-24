@@ -39,11 +39,10 @@ from .aggregate import aggregate_krum
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
 class Krum(FedAvg):
     """Configurable Krum strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         *,
@@ -67,7 +66,7 @@ class Krum(FedAvg):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
-        """Configurable Krum strategy.
+        """Krum strategy.
 
         Parameters
         ----------
@@ -84,7 +83,8 @@ class Krum(FedAvg):
         num_malicious_clients : int, optional
             Number of malicious clients in the system. Defaults to 0.
         num_clients_to_keep : int, optional
-            Number of clients to keep before averaging (MultiKrum). Defaults to 0, in that case classical Krum is applied.
+            Number of clients to keep before averaging (MultiKrum). Defaults to 0, in
+            that case classical Krum is applied.
         evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
@@ -96,7 +96,6 @@ class Krum(FedAvg):
         initial_parameters : Parameters, optional
             Initial global model parameters.
         """
-
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -115,6 +114,7 @@ class Krum(FedAvg):
         self.num_clients_to_keep = num_clients_to_keep
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"Krum(accept_failures={self.accept_failures})"
         return rep
 
