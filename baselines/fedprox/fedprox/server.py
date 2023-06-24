@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 
 from fedprox.models import test
 
+
 def gen_evaluate_fn(
     testloader: DataLoader,
     device: torch.device,

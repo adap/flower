@@ -30,8 +30,8 @@ def _partition_data(
     balance: Optional[bool] = False,
     seed: Optional[int] = 42,
 ) -> Tuple[List[Dataset], Dataset]:
-    """Split training set into iid or non iid partitions to simulate the federated
-    setting.
+    """Split training set into iid or non iid partitions to simulate the
+    federated setting.
 
     Parameters
     ----------
@@ -177,9 +177,9 @@ def _power_law_split(
     mean: float = 0.0,
     sigma: float = 2.0,
 ) -> Dataset:
-    """Partitions the dataset following a power-law distribution. It
-    follows the implementation of Li et al 2020: https://arxiv.org/abs/1812.06127
-    with default values set accordingtly.
+    """Partitions the dataset following a power-law distribution. It follows
+    the implementation of Li et al 2020: https://arxiv.org/abs/1812.06127 with
+    default values set accordingly.
 
     Parameters
     ----------
@@ -190,12 +190,12 @@ def _power_law_split(
     num_labels_per_partition: int
         Number of labels to have in each dataset partition. For
         example if set to two, this means all training examples in
-        a given parition will be long to the same two classes. default 2
+        a given partition will be long to the same two classes. default 2
     min_data_per_partition: int
         Minimum number of datapoints included in each partition, default 10
     mean: float
         Mean value for LogNormal distribution to construct power-law, default 0.0
-    sigman: float
+    sigma: float
         Sigma value for LogNormal distribution to construct power-law, default 2.0
 
     Returns
@@ -215,7 +215,7 @@ def _power_law_split(
     num_classes = len(np.bincount(targets))
     hist = np.zeros(num_classes, dtype=np.int32)
 
-    # asign min_data_per_partition
+    # assign min_data_per_partition
     min_data_per_class = int(min_data_per_partition / num_labels_per_partition)
     for u_id in range(num_partitions):
         partitions_idx.append([])

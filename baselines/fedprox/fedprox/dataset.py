@@ -5,11 +5,10 @@ from typing import Optional, Tuple
 
 import torch
 from omegaconf import DictConfig
-
 from torch.utils.data import DataLoader, random_split
 
-
 from fedprox.dataset_preparation import _partition_data
+
 
 def load_datasets(  # pylint: disable=too-many-arguments
     config: DictConfig,
@@ -40,11 +39,13 @@ def load_datasets(  # pylint: disable=too-many-arguments
         The DataLoader for training, the DataLoader for validation, the DataLoader for testing.
     """
     print(f"Dataset partitioning config: {config}")
-    datasets, testset = _partition_data(num_clients,
-                                        iid=config.iid,
-                                        balance=config.balance,
-                                        power_law=config.power_law,
-                                        seed=seed)
+    datasets, testset = _partition_data(
+        num_clients,
+        iid=config.iid,
+        balance=config.balance,
+        power_law=config.power_law,
+        seed=seed,
+    )
     # Split each partition into train/val and create DataLoader
     trainloaders = []
     valloaders = []

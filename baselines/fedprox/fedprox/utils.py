@@ -84,8 +84,8 @@ def save_results_as_pickle(
     path.mkdir(exist_ok=True, parents=True)
 
     def _add_random_suffix(path_: Path):
-        """Adds a randomly generated suffix to the file name (so it doesn't overwrite
-        the file)."""
+        """Adds a randomly generated suffix to the file name (so it doesn't
+        overwrite the file)."""
         print(f"File `{path_}` exists! ")
         suffix = token_hex(4)
         print(f"New results to be saved with suffix: {suffix}")

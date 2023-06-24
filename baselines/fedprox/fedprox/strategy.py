@@ -29,8 +29,8 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 class FedAvgWithStragglerDrop(FedAvg):
-    """My customised FedAvg strategy which discards updates sent by clients that were
-    flagged as stragglers."""
+    """My customised FedAvg strategy which discards updates sent by clients
+    that were flagged as stragglers."""
 
     def aggregate_fit(
         self,
@@ -38,8 +38,8 @@ class FedAvgWithStragglerDrop(FedAvg):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ):
-        """Here we discard all the models sent by the clients that were stragglers in
-        this round."""
+        """Here we discard all the models sent by the clients that were
+        stragglers in this round."""
 
         # Record which client was a straggler in this round
         stragglers_mask = [res.metrics["is_straggler"] for _, res in results]

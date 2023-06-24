@@ -5,8 +5,6 @@ import hydra
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
-import torch
-
 
 from fedprox import client, server, utils
 from fedprox.dataset import load_datasets
@@ -33,7 +31,7 @@ def main(cfg: DictConfig) -> None:
         batch_size=cfg.batch_size,
     )
 
-    # prapare function that will be used to spawn each client
+    # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
         num_clients=cfg.num_clients,
         num_epochs=cfg.num_epochs,
@@ -74,7 +72,10 @@ def main(cfg: DictConfig) -> None:
         client_fn=client_fn,
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
-        client_resources={"num_cpus": cfg.client_resources.num_cpus, "num_gpus": cfg.client_resources.num_gpus},
+        client_resources={
+            "num_cpus": cfg.client_resources.num_cpus,
+            "num_gpus": cfg.client_resources.num_gpus,
+        },
         strategy=strategy,
     )
 
