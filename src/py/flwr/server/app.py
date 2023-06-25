@@ -72,6 +72,7 @@ class ServerConfig:
 
     num_rounds: int = 1
     round_timeout: Optional[float] = None
+    is_simulation: bool = False
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals

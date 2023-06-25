@@ -17,6 +17,7 @@
 
 from logging import ERROR
 from typing import Callable, Dict, Optional, cast
+from time import sleep
 
 import ray
 
@@ -30,6 +31,7 @@ from flwr.client.client import (
 )
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
+from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActor
 
 ClientFn = Callable[[str], ClientLike]
 
@@ -100,6 +102,121 @@ class RayClientProxy(ClientProxy):
         ).remote(self.client_fn, self.cid, ins)
         try:
             res = ray.get(future_evaluate_res, timeout=timeout)
+        except Exception as ex:
+            log(ERROR, ex)
+            raise ex
+        return cast(
+            common.EvaluateRes,
+            res,
+        )
+
+    def reconnect(
+        self, ins: common.ReconnectIns, timeout: Optional[float]
+    ) -> common.DisconnectRes:
+        """Disconnect and (optionally) reconnect later."""
+        return common.DisconnectRes(reason="")  # Nothing to do here (yet)
+
+
+class RayClientProxyForActorPool(ClientProxy):
+    """Flower client proxy which delegates work using Ray."""
+
+    def __init__(self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActor):
+        super().__init__(cid)
+        self.client_fn = client_fn
+        self.actor_pool = actor_pool
+
+    def get_properties(
+        self, ins: common.GetPropertiesIns, timeout: Optional[float]
+    ) -> common.GetPropertiesRes:
+        """Return client's properties."""
+
+        def get_properties():
+            client: Client = _create_client(self.client_fn, self.cid)
+            return maybe_call_get_properties(client=client,
+                                             get_properties_ins=ins,
+                                             )
+        try:
+            self.actor_pool.submit(lambda a, v : a.run.remote(v, self.cid), get_properties)
+            while not(self.actor_pool.has_next()):
+                sleep(0.1)
+                continue
+            cid, res = self.actor_pool.get_next()
+
+            # print(cid, self.cid)
+
+        except Exception as ex:
+            log(ERROR, ex)
+            raise ex
+        return cast(
+            common.GetPropertiesRes,
+            res,
+        )
+
+    def get_parameters(
+        self, ins: common.GetParametersIns, timeout: Optional[float]
+    ) -> common.GetParametersRes:
+        """Return the current local model parameters."""
+
+        def get_parameters():
+            client: Client = _create_client(self.client_fn, self.cid)
+            return maybe_call_get_parameters(client=client,
+                                             get_parameters_ins=ins,
+                                             )
+        try:
+            self.actor_pool.submit(lambda a, v : a.run.remote(v, self.cid), get_parameters)
+            while not(self.actor_pool.has_next()):
+                sleep(0.1)
+                continue
+            cid, res = self.actor_pool.get_next()
+            # print(cid, self.cid)
+        except Exception as ex:
+            log(ERROR, ex)
+            raise ex
+        return cast(
+            common.GetParametersRes,
+            res,
+        )
+
+    def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
+        """Train model parameters on the locally held dataset."""
+        def fit():
+            client: Client = _create_client(self.client_fn, self.cid)
+            return maybe_call_fit(client=client,
+                                             fit_ins=ins,
+                                             )
+        try:
+            self.actor_pool.submit(lambda a, v : a.run.remote(v, self.cid), fit)
+            #! This is not ideal. A preferred solution would be to collect results from actor pool in server.fit_clients()
+            while not(self.actor_pool.has_next()):
+                sleep(0.1)
+                continue
+            cid, res = self.actor_pool.get_next()
+            # print(cid, self.cid)
+        except Exception as ex:
+            log(ERROR, ex)
+            raise ex
+        return cast(
+            common.FitRes,
+            res,
+        )
+
+    def evaluate(
+        self, ins: common.EvaluateIns, timeout: Optional[float]
+    ) -> common.EvaluateRes:
+        """Evaluate model parameters on the locally held dataset."""
+        def evaluate():
+            client: Client = _create_client(self.client_fn, self.cid)
+            #! This is not ideal. A preferred solution would be to collect results from actor pool in server.evaluate_clients()
+            return maybe_call_evaluate(client=client,
+                                             evaluate_ins=ins,
+                                             )
+        try:
+            self.actor_pool.submit(lambda a, v : a.run.remote(v, self.cid), evaluate)
+            while not(self.actor_pool.has_next()):
+                sleep(0.1)
+                continue
+            cid, res = self.actor_pool.get_next()
+            # print(cid, self.cid)
         except Exception as ex:
             log(ERROR, ex)
             raise ex

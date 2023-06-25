@@ -20,6 +20,7 @@ from logging import ERROR, INFO
 from typing import Any, Callable, Dict, List, Optional
 
 import ray
+from ray.util.actor_pool import ActorPool
 
 from flwr.client import ClientLike
 from flwr.common import EventType, event
@@ -29,7 +30,8 @@ from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
-from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
+from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy, RayClientProxyForActorPool
+from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActor
 
 INVALID_ARGUMENTS_START_SIMULATION = """
 INVALID ARGUMENTS ERROR
@@ -142,6 +144,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
         strategy=strategy,
         client_manager=client_manager,
     )
+    # Setting simulation ON for server
+    initialized_server.is_simulation = True
     log(
         INFO,
         "Starting Flower simulation, config: %s",
@@ -184,11 +188,26 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # Register one RayClientProxy object for each client with the ClientManager
     resources = client_resources if client_resources is not None else {}
+
+
+    # instantiate ActorPool
+    # Let's spawn a pool with as many actors as could be fit in the system
+    num_gpus = ray.cluster_resources()['GPU']
+    num_actors = int(num_gpus / resources['num_gpus'])
+    actors = [VirtualClientEngineActor.options(**resources).remote(i) for i in range(num_actors)]
+    log(
+        INFO,
+        "Flower VCE: creating ActorPool with %s actors",
+        len(actors)
+    )
+    
+    pool = ActorPool(actors)
+
     for cid in cids:
-        client_proxy = RayClientProxy(
+        client_proxy = RayClientProxyForActorPool(
             client_fn=client_fn,
             cid=cid,
-            resources=resources,
+            actor_pool=pool,
         )
         initialized_server.client_manager().register(client=client_proxy)
 
