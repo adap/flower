@@ -120,10 +120,36 @@ class RayClientProxy(ClientProxy):
 class RayClientProxyForActorPool(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActor):
+    def __init__(self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActor, cache: Dict):
         super().__init__(cid)
         self.client_fn = client_fn
         self.actor_pool = actor_pool
+        self.cache = cache
+
+
+    def _wait_for_client_result(self):
+        # TODO: can we do this without while+sleep?
+        # Wait until one result is ready
+        while not(self.actor_pool.has_next()):
+            sleep(0.1)
+            continue
+        # get result
+        cid, res = self.actor_pool.get_next()
+
+        # if it doesn't belong to this client
+        if cid != self.cid:
+            # add to cache
+            self.cache[cid] = res
+
+            # wait until this clientProxy's result is in the cache
+            while self.cid not in self.cache.keys():
+                sleep(0.1)
+            
+            # get this client's result
+            res = self.cache.pop(self.cid)
+
+        return res
+
 
     def get_properties(
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
@@ -137,12 +163,7 @@ class RayClientProxyForActorPool(ClientProxy):
                                              )
         try:
             self.actor_pool.submit(lambda a, v : a.run.remote(v, self.cid), get_properties)
-            while not(self.actor_pool.has_next()):
-                sleep(0.1)
-                continue
-            cid, res = self.actor_pool.get_next()
-
-            # print(cid, self.cid)
+            res = self._wait_for_client_result()
 
         except Exception as ex:
             log(ERROR, ex)
@@ -164,11 +185,8 @@ class RayClientProxyForActorPool(ClientProxy):
                                              )
         try:
             self.actor_pool.submit(lambda a, v : a.run.remote(v, self.cid), get_parameters)
-            while not(self.actor_pool.has_next()):
-                sleep(0.1)
-                continue
-            cid, res = self.actor_pool.get_next()
-            # print(cid, self.cid)
+            res = self._wait_for_client_result()
+
         except Exception as ex:
             log(ERROR, ex)
             raise ex
@@ -187,11 +205,8 @@ class RayClientProxyForActorPool(ClientProxy):
         try:
             self.actor_pool.submit(lambda a, v : a.run.remote(v, self.cid), fit)
             #! This is not ideal. A preferred solution would be to collect results from actor pool in server.fit_clients()
-            while not(self.actor_pool.has_next()):
-                sleep(0.1)
-                continue
-            cid, res = self.actor_pool.get_next()
-            # print(cid, self.cid)
+            res = self._wait_for_client_result()
+
         except Exception as ex:
             log(ERROR, ex)
             raise ex
@@ -212,11 +227,8 @@ class RayClientProxyForActorPool(ClientProxy):
                                              )
         try:
             self.actor_pool.submit(lambda a, v : a.run.remote(v, self.cid), evaluate)
-            while not(self.actor_pool.has_next()):
-                sleep(0.1)
-                continue
-            cid, res = self.actor_pool.get_next()
-            # print(cid, self.cid)
+            res = self._wait_for_client_result()
+
         except Exception as ex:
             log(ERROR, ex)
             raise ex

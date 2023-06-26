@@ -67,7 +67,6 @@ class Server:
         )
         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
         self.max_workers: Optional[int] = None
-        self.is_simulation: bool = False
 
     def set_max_workers(self, max_workers: Optional[int]) -> None:
         """Set the max_workers used by ThreadPoolExecutor."""
@@ -232,7 +231,6 @@ class Server:
         results, failures = fit_clients(
             client_instructions=client_instructions,
             max_workers=self.max_workers,
-            is_simulation=self.is_simulation,
             timeout=timeout,
         )
         log(
@@ -327,7 +325,6 @@ def reconnect_client(
 
 def fit_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]],
-    is_simulation: bool,
     max_workers: Optional[int],
     timeout: Optional[float],
 ) -> FitResultsAndFailures:
@@ -349,15 +346,6 @@ def fit_clients(
         _handle_finished_future_after_fit(
             future=future, results=results, failures=failures
         )
-
-    if is_simulation:
-        # because how the pool of actors and the client proxies interact
-        # a client w/ id A could have fetched the result of client w/ id B
-        # Therefore, we need to ensure each FiTRes is paired with its respective
-        # ClientProxy
-        print("Results from ActorPool might not be in order!")
-        # TODO
-
     return results, failures
 
 

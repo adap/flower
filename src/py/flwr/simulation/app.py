@@ -202,12 +202,17 @@ def start_simulation(  # pylint: disable=too-many-arguments
     )
     
     pool = ActorPool(actors)
+    # ClientProxies might be retrieving results from the ActorPool that belong to other clients
+    # when this happens, the client proxy will put that result in the cache. All clients check
+    # if their result is in the cache periodically.
+    results_cache = {}
 
     for cid in cids:
         client_proxy = RayClientProxyForActorPool(
             client_fn=client_fn,
             cid=cid,
             actor_pool=pool,
+            cache=results_cache,
         )
         initialized_server.client_manager().register(client=client_proxy)
 
