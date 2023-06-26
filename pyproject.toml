@@ -103,7 +103,8 @@ sphinx-argparse = "==0.4.0"
 pipreqs = "==0.4.13"
 mdformat-gfm = "==0.3.5"
 mdformat-frontmatter = "==2.0.1"
-mdformat-footnote = "==0.1.1"
+mdformat-beautysh = "==0.1.1"
+mdformat-myst = "==0.1.5"
 
 [tool.isort]
 line_length = 88

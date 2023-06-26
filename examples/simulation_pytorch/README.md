@@ -19,11 +19,11 @@ $ pip install -r requirements.txt
 This example:
 
 1. Downloads CIFAR-10
-1. Partitions the dataset into N splits, where N is the total number of
+2. Partitions the dataset into N splits, where N is the total number of
    clients. We refere to this as `pool_size`. The partition can be IID or non-IID
-1. Starts a Ray-based simulation where a % of clients are sample each round.
+3. Starts a Ray-based simulation where a % of clients are sample each round.
    This example uses N=10, so 10 clients will be sampled each round.
-1. After the M rounds end, the global model is evaluated on the entire testset.
+4. After the M rounds end, the global model is evaluated on the entire testset.
    Also, the global model is evaluated on the valset partition residing in each
    client. This is useful to get a sense on how well the global model can generalise
    to each client's data.

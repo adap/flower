@@ -19,7 +19,7 @@ You'll need CMake and Python.
 This example provides you with a `CMakeLists.txt` file to configure and build the client. Feel free to take a look inside it to see what is happening under the hood.
 
 ```bash
-cmake -S . -B build 
+cmake -S . -B build
 cmake --build build
 ```
 
@@ -30,7 +30,7 @@ python server.py
 ```
 
 ```bash
-build/flwr_client 0 127.0.0.1:8080 
+build/flwr_client 0 127.0.0.1:8080
 ```
 
 ```bash
