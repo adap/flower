@@ -101,6 +101,9 @@ nbstripout = "==0.6.1"
 ruff = "==0.0.272"
 sphinx-argparse = "==0.4.0"
 pipreqs = "==0.4.13"
+mdformat-gfm = "==0.3.5"
+mdformat-frontmatter = "==2.0.1"
+mdformat-footnote = "==0.1.1"
 
 [tool.isort]
 line_length = 88
