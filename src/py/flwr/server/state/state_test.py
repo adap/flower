@@ -127,7 +127,7 @@ class StateTest(unittest.TestCase):
         )
 
         _ = state.store_task_res(task_res=task_res_0)
-        _ = state.get_task_res(task_ids=set([task_id_0]), limit=None)
+        _ = state.get_task_res(task_ids={task_id_0}, limit=None)
 
         # Insert one TaskRes, but don't retrive it
         task_res_1: TaskRes = create_task_res(
@@ -143,7 +143,7 @@ class StateTest(unittest.TestCase):
         assert state.num_task_res() == 2
 
         # Execute
-        state.delete_tasks(task_ids=set([task_id_0, task_id_1, task_id_2]))
+        state.delete_tasks(task_ids={task_id_0, task_id_1, task_id_2})
 
         # Assert
         assert state.num_task_ins() == 2
@@ -259,7 +259,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         task_res_uuid = state.store_task_res(task_res)
-        task_res_list = state.get_task_res(task_ids=set([task_ins_id]), limit=None)
+        task_res_list = state.get_task_res(task_ids={task_ins_id}, limit=None)
 
         # Assert
         retrieved_task_res = task_res_list[0]
