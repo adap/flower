@@ -4,9 +4,9 @@ This code splits CIFAR-10 dataset into `pool_size` partitions (user defined) and
 
 ## Requirements
 
-*    Flower 0.18.0
-*    A recent version of PyTorch. This example has been tested with Pytorch 1.7.1, 1.8.2 (LTS) and 1.10.2.
-*    A recent version of Ray. This example has been tested with Ray 1.4.1, 1.6 and 1.9.2.
+- Flower 0.18.0
+- A recent version of PyTorch. This example has been tested with Pytorch 1.7.1, 1.8.2 (LTS) and 1.10.2.
+- A recent version of Ray. This example has been tested with Ray 1.4.1, 1.6 and 1.9.2.
 
 From a clean virtualenv or Conda environment with Python 3.7+, the following command will isntall all the dependencies needed:
 
@@ -21,9 +21,9 @@ This example:
 1. Downloads CIFAR-10
 2. Partitions the dataset into N splits, where N is the total number of
    clients. We refere to this as `pool_size`. The partition can be IID or non-IID
-4. Starts a Ray-based simulation where a % of clients are sample each round.
+3. Starts a Ray-based simulation where a % of clients are sample each round.
    This example uses N=10, so 10 clients will be sampled each round.
-5. After the M rounds end, the global model is evaluated on the entire testset.
+4. After the M rounds end, the global model is evaluated on the entire testset.
    Also, the global model is evaluated on the valset partition residing in each
    client. This is useful to get a sense on how well the global model can generalise
    to each client's data.

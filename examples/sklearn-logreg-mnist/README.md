@@ -71,4 +71,4 @@ poetry run python3 client.py &
 poetry run python3 client.py
 ```
 
-You will see that Flower is starting a federated training. 
+You will see that Flower is starting a federated training.

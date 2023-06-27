@@ -66,8 +66,8 @@ DATABASE = ":flwr-in-memory-state:"
 class ServerConfig:
     """Flower server config.
 
-    All attributes have default values which allows users to configure
-    just the ones they care about.
+    All attributes have default values which allows users to configure just the ones
+    they care about.
     """
 
     num_rounds: int = 1
@@ -253,7 +253,6 @@ def run_fl(
 
 def run_driver_api() -> None:
     """Run Flower server (Driver API)."""
-
     log(INFO, "Starting Flower server (Driver API)")
     event(EventType.RUN_DRIVER_API_ENTER)
     args = _parse_args_driver().parse_args()
@@ -287,7 +286,6 @@ def run_driver_api() -> None:
 
 def run_fleet_api() -> None:
     """Run Flower server (Fleet API)."""
-
     log(INFO, "Starting Flower server (Fleet API)")
     event(EventType.RUN_FLEET_API_ENTER)
     args = _parse_args_fleet().parse_args()
@@ -369,7 +367,6 @@ def run_fleet_api() -> None:
 # pylint: disable=too-many-branches
 def run_server() -> None:
     """Run Flower server (Driver API and Fleet API)."""
-
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SERVER_ENTER)
     args = _parse_args_server().parse_args()
@@ -479,10 +476,9 @@ def _register_exit_handlers(
     ) -> None:
         """Exit handler to be registered with signal.signal.
 
-        When called will reset signal handler to original signal handler
-        from default_handlers.
+        When called will reset signal handler to original signal handler from
+        default_handlers.
         """
-
         # Reset to default handler
         signal(signalnum, default_handlers[signalnum])
 
@@ -515,7 +511,6 @@ def _run_driver_api_grpc(
     state_factory: StateFactory,
 ) -> grpc.Server:
     """Run Driver API (gRPC, request-response)."""
-
     # Create Driver API gRPC server
     driver_servicer: grpc.Server = DriverServicer(
         state_factory=state_factory,
@@ -539,7 +534,6 @@ def _run_fleet_api_grpc_bidi(
     state_factory: StateFactory,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, bidirectional streaming)."""
-
     # DriverClientManager
     driver_client_manager = DriverClientManager(
         state_factory=state_factory,
@@ -568,7 +562,6 @@ def _run_fleet_api_grpc_rere(
     state_factory: StateFactory,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
-
     # Create Fleet API gRPC server
     fleet_servicer = FleetServicer(
         state=state_factory.state(),
@@ -652,7 +645,7 @@ def _validate_ssl_files(
     if not bool(ssl_keyfile) == bool(ssl_certfile):
         msg = (
             "When setting one of `--ssl-keyfile` and "
-            + "`--ssl-certfile`, both have to be used."
+            "`--ssl-certfile`, both have to be used."
         )
         log(ERROR, msg)
         validation_exceptions.append(ValueError(msg))
