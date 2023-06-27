@@ -18,7 +18,7 @@ Relevant knowledge for reading this modules code:
 - https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
 """
 
-
+import uuid
 from typing import Callable, Iterator
 
 import grpc
@@ -88,7 +88,11 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
           wrapping the actual message
         - The `Join` method is (pretty much) unaware of the protocol
         """
-        peer: str = context.peer()
+        # NOTE(aloga): this is a hack. when running flower behind a proxy, the peer can
+        # be the same for different clients (i.e. ip:port) so we use a uuid that is
+        # unique.
+        # peer: str = context.peer()
+        peer = uuid.uuid4().hex
         bridge = self.grpc_bridge_factory()
         client_proxy = self.client_proxy_factory(peer, bridge)
         is_success = register_client_proxy(self.client_manager, client_proxy, context)
