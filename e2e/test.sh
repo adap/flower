@@ -12,8 +12,6 @@ sleep 3
 python client.py > /dev/null 2>&1 &
 sleep 3
 
-trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM
-
 wait $pid
 res=$?
 
