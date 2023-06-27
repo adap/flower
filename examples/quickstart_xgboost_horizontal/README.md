@@ -6,7 +6,7 @@ This example demonstrates a federated XGBoost using Flower with PyTorch. This is
 
 - We aggregate and conduct federated learning on client tree’s prediction outcomes by sending clients' built XGBoost trees to the server and then sharing to the clients.
 - The exchange of privacy-sensitive information (gradients) is not needed.
-- The model is a CNN with 1D convolution kernel size = the number of XGBoost trees in the client tree ensembles. 
+- The model is a CNN with 1D convolution kernel size = the number of XGBoost trees in the client tree ensembles.
 - Using 1D convolution, we make the tree learning rate (a hyperparameter of XGBoost) learnable.
 
 ## Project Setup
