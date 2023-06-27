@@ -80,8 +80,7 @@ class GrpcBridge:
     def _transition(self, next_status: Status) -> None:
         """Validate status transition and set next status.
 
-        The caller of the transition method will have to aquire
-        conditional variable.
+        The caller of the transition method will have to aquire conditional variable.
         """
         if next_status == Status.CLOSED:
             self._status = next_status
