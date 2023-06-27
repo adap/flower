@@ -40,7 +40,7 @@ class DriverClientProxy(ClientProxy):
     def get_properties(
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
     ) -> common.GetPropertiesRes:
-        """Returns client's properties."""
+        """Return client's properties."""
         server_message_proto: transport_pb2.ServerMessage = (
             serde.server_message_to_proto(
                 server_message=common.ServerMessage(get_properties_ins=ins)
