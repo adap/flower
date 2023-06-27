@@ -1,2 +1,2 @@
-flwr[simulation]==1.0.0
-tensorflow-cpu==2.9.1
+flwr~=1.4.0
+tensorflow~=2.12.0

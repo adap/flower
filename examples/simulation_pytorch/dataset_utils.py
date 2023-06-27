@@ -11,7 +11,6 @@ from common import create_lda_partitions
 
 
 def get_dataset(path_to_data: Path, cid: str, partition: str):
-
     # generate path to cid's data
     path_to_data = path_to_data / cid / (partition + ".pt")
 
@@ -32,7 +31,7 @@ def get_dataloader(
 
 
 def get_random_id_splits(total: int, val_ratio: float, shuffle: bool = True):
-    """splits a list of length `total` into two following a
+    """Splits a list of length `total` into two following a
     (1-val_ratio):val_ratio partitioning.
 
     By default the indices are shuffled before creating the split and
@@ -76,7 +75,6 @@ def do_fl_partitioning(path_to_dataset, pool_size, alpha, num_classes, val_ratio
     Path.mkdir(splits_dir, parents=True)
 
     for p in range(pool_size):
-
         labels = partitions[p][1]
         image_idx = partitions[p][0]
         imgs = images[image_idx]
@@ -104,7 +102,6 @@ def do_fl_partitioning(path_to_dataset, pool_size, alpha, num_classes, val_ratio
 
 
 def cifar10Transformation():
-
     return transforms.Compose(
         [
             transforms.ToTensor(),

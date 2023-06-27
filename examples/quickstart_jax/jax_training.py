@@ -7,6 +7,7 @@ If you have any questions concerning the linear regression used with jax
 please read the JAX documentation or the mentioned tutorial.
 """
 
+
 from typing import Dict, List, Tuple, Callable
 import jax
 import jax.numpy as jnp
@@ -17,9 +18,9 @@ import numpy as np
 key = jax.random.PRNGKey(0)
 
 
-def load_data() -> Tuple[
-    List[np.ndarray], List[np.ndarray], List[np.ndarray], List[np.ndarray]
-]:
+def load_data() -> (
+    Tuple[List[np.ndarray], List[np.ndarray], List[np.ndarray], List[np.ndarray]]
+):
     # Load dataset
     X, y = make_regression(n_features=3, random_state=0)
     X, X_test, y, y_test = train_test_split(X, y)
@@ -42,7 +43,7 @@ def train(params, grad_fn, X, y) -> Tuple[np.array, float, int]:
     num_examples = X.shape[0]
     for epochs in range(50):
         grads = grad_fn(params, X, y)
-        params = jax.tree_multimap(lambda p, g: p - 0.05 * g, params, grads)
+        params = jax.tree_map(lambda p, g: p - 0.05 * g, params, grads)
         loss = loss_fn(params, X, y)
         if epochs % 10 == 0:
             print(f"For Epoch {epochs} loss {loss}")

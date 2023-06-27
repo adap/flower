@@ -4,7 +4,7 @@ import subprocess
 import tensorflow as tf
 import json
 
-from flwr.common import weights_to_parameters
+from flwr.common import ndarrays_to_parameters
 
 
 MODULE_PATH = os.path.abspath(__file__)
@@ -122,4 +122,4 @@ def get_model():
 def initial_parameters():
     """Return initial checkpoint parameters."""
     model = get_model()
-    return weights_to_parameters(model.get_weights())
+    return ndarrays_to_parameters(model.get_weights())

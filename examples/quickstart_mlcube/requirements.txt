@@ -1,6 +1,2 @@
-flwr==0.17.0
-tensorflow-cpu==2.6.2
-mlcube==0.0.4
-mlcube-docker==0.0.4
-cookiecutter==1.7.*
-tensorflow-estimator==2.6.0
+flwr~=1.4.0
+tensorflow~=2.12.0

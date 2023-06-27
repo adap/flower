@@ -110,7 +110,7 @@ def main() -> None:
         fraction_fit=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
-        eval_fn=get_eval_fn(testset),
+        evaluate_fn=get_eval_fn(testset),
         on_fit_config_fn=fit_config,
     )
     server = fl.server.Server(client_manager=client_manager, strategy=strategy)
@@ -119,7 +119,7 @@ def main() -> None:
     fl.server.start_server(
         server_address=args.server_address,
         server=server,
-        config={"num_rounds": args.rounds},
+        config=fl.server.ServerConfig(num_rounds=args.rounds),
     )
 
 
@@ -135,7 +135,7 @@ def fit_config(server_round: int) -> Dict[str, fl.common.Scalar]:
     return config
 
 
-def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
+def set_weights(model: torch.nn.ModuleList, weights: fl.common.NDArrays) -> None:
     """Set model weights from a list of NumPy ndarrays."""
     state_dict = OrderedDict(
         {
@@ -148,10 +148,10 @@ def set_weights(model: torch.nn.ModuleList, weights: fl.common.Weights) -> None:
 
 def get_eval_fn(
     testset: torchvision.datasets.CIFAR10,
-) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
+) -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
-    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(weights: fl.common.NDArrays) -> Optional[Tuple[float, float]]:
         """Use the entire CIFAR-10 test set for evaluation."""
 
         model = utils.load_model(args.model)

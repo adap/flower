@@ -1,4 +1,6 @@
 """Flower Client for CIFAR10/100."""
+
+
 from collections import OrderedDict
 from pathlib import Path
 from typing import Callable, Dict, Tuple
@@ -84,7 +86,7 @@ class RayClient(fl.client.NumPyClient):
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[float, int, Dict[str, float]]:
+    ) -> Tuple[float, int, Dict[str, Scalar]]:
         """Implements distributed evaluation for a given client.
 
         Args:

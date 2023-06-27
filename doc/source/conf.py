@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+
+
 import os
 import sys
 from sphinx.application import ConfigError
@@ -24,17 +26,17 @@ from sphinx.application import ConfigError
 
 
 # Fixing path issue for autodoc
-sys.path.insert(0, os.path.abspath('../../src/py'))
+sys.path.insert(0, os.path.abspath("../../src/py"))
 
 
 # -- Project information -----------------------------------------------------
 
-project = u"Flower"
-copyright = u"2022 Adap GmbH"
-author = u"The Flower Authors"
+project = "Flower"
+copyright = "2022 Adap GmbH"
+author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = u"1.1.0"
+release = "1.5.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -48,6 +50,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
+    "sphinxarg.ext",
     "myst_parser",
     "sphinx_copybutton",
     "sphinx_design",
@@ -68,6 +71,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # To prevent 404 errors and redirect to the new pages.
 redirects = {
     # Renamed pages
+    "installation": "install-flower.html",
+    "configuring-clients.html": "configure-clients.html",
     "quickstart_mxnet": "quickstart-mxnet.html",
     "quickstart_pytorch_lightning": "quickstart-pytorch-lightning.html",
     "example_walkthrough_pytorch_mnist": "example-walkthrough-pytorch-mnist.html",
@@ -75,7 +80,11 @@ redirects = {
     "quickstart_pytorch": "quickstart-pytorch.html",
     "quickstart_tensorflow": "quickstart-tensorflow.html",
     "release_process": "release-process.html",
+    "saving-progress": "save-progress.html",
+    "writing-documentation": "write-documentation.html",
     "quickstart_scikitlearn": "quickstart-scikitlearn.html",
+    "quickstart_xgboost": "quickstart-xgboost.html",
+    "apiref-binaries": "apiref-cli.html",
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",
@@ -95,7 +104,9 @@ html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.dev/docs/"
 
 html_theme_options = {
+    #
     # Sphinx Book Theme
+    #
     # https://sphinx-book-theme.readthedocs.io/en/latest/configure.html
     # "repository_url": "https://github.com/adap/flower",
     # "repository_branch": "main",
@@ -104,15 +115,16 @@ html_theme_options = {
     # "use_repository_button": True,
     # "use_issues_button": True,
     # "use_edit_page_button": True,
-
+    #
     # Furo
+    #
     # https://pradyunsg.me/furo/customisation/
     # "light_css_variables": {
     #     "color-brand-primary": "#292F36",
-    #     "color-brand-content": "#292F36",  
+    #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": "Flower Summit 2022 <a href=\"https://flower.dev/conf/flower-summit-2022/\">watch now</a>",
+    "announcement": 'Flower Summit 2023 <a href="https://flower.dev/conf/flower-summit-2023/">register now</a>',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -123,7 +135,7 @@ html_css_files = ["custom.css"]
 
 # -- Options for nbsphinx -------------------------------------------------
 
-nbsphinx_execute = 'never'
+nbsphinx_execute = "never"
 
 _open_in_colab_button = """
 .. raw:: html
@@ -135,3 +147,15 @@ _open_in_colab_button = """
 """
 nbsphinx_prolog = _open_in_colab_button
 nbsphinx_epilog = _open_in_colab_button
+
+# -- Options for sphinxcontrib-mermaid -------------------------------------
+# Don't load it automatically through the extension as we are loading it through the
+# theme (see base.html) as the inclusion of require.js by the extension `nbsphinx`
+# breaks the way mermaid is loaded. The solution is to load mermaid before the
+# require.js script added by `nbsphinx`. We can only enforce this in the theme
+# itself.
+mermaid_version = ""
+
+# -- Options for MyST config  -------------------------------------
+# Enable this option to link to headers (`#`, `##`, or `###`)
+myst_heading_anchors = 3

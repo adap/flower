@@ -14,12 +14,13 @@
 # ==============================================================================
 """Tests for criterion sampling."""
 
+
 from unittest.mock import MagicMock
 
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
+from flwr.server.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
 
 
 def test_criterion_applied() -> None:

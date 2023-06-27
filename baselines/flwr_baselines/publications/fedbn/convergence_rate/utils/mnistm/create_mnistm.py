@@ -3,6 +3,8 @@ https://github.com/pumpikano/tf-dann/blob/master/create_mnistm.py.
 
 It creatse the MNIST-M dataset based on MNIST
 """
+
+
 import tarfile
 from typing import Any
 
@@ -58,7 +60,6 @@ def create_mnistm(X: Any) -> Any:
 
     X_ = np.zeros([X.shape[0], 28, 28, 3], np.uint8)
     for i in range(X.shape[0]):
-
         if i % 1000 == 0:
             print("Processing example", i)
 

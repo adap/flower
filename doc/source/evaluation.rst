@@ -13,6 +13,10 @@ All built-in strategies support centralized evaluation by providing an evaluatio
 An evaluation function is any function that can take the current global model parameters as input and return evaluation results:
 
 .. code-block:: python
+    
+    from flwr.common import NDArrays, Scalar
+    
+    from typing import Dict, Optional, Tuple
 
     def get_evaluate_fn(model):
         """Return an evaluation function for server-side evaluation."""
@@ -24,8 +28,10 @@ An evaluation function is any function that can take the current global model pa
         x_val, y_val = x_train[45000:50000], y_train[45000:50000]
 
         # The `evaluate` function will be called after every round
-        def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, Dict]]:
-            model.set_weights(weights)  # Update model with the latest parameters
+        def evaluate(
+            server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
+        ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+            model.set_weights(parameters)  # Update model with the latest parameters
             loss, accuracy = model.evaluate(x_val, y_val)
             return loss, {"accuracy": accuracy}
 
@@ -45,7 +51,7 @@ An evaluation function is any function that can take the current global model pa
     )
 
     # Start Flower server for four rounds of federated learning
-    fl.server.start_server("[::]:8080", strategy=strategy)
+    fl.server.start_server(server_address="[::]:8080", strategy=strategy)
 
 Custom Strategies
 ~~~~~~~~~~~~~~~~~
@@ -70,7 +76,7 @@ Client-side evaluation happens in the :code:`Client.evaluate` method and can be 
             self.x_train, self.y_train = x_train, y_train
             self.x_test, self.y_test = x_test, y_test
 
-        def get_parameters(self):
+        def get_parameters(self, config):
             # ...
 
         def fit(self, parameters, config):
@@ -121,7 +127,7 @@ Federated evaluation can be configured from the server side. Built-in strategies
     )
 
     # Start Flower server for four rounds of federated learning
-    fl.server.start_server("[::]:8080", strategy=strategy)
+    fl.server.start_server(server_address="[::]:8080", strategy=strategy)
 
 
 Evaluating Local Model Updates During Training
@@ -137,7 +143,7 @@ Model parameters can also be evaluated during training. :code:`Client.fit` can r
             self.x_train, self.y_train = x_train, y_train
             self.x_test, self.y_test = x_test, y_test
 
-        def get_parameters(self):
+        def get_parameters(self, config):
             # ...
 
         def fit(self, parameters, config):

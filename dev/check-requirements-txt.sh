@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,17 +18,15 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-# Purpose of this script is to evaluate if the user changed the proto definitions
-# but did not recompile or commit the new proto python files
+# Regenerate requirements.txt files for examples in case they changed
+echo "Regenerate requirements.txt files in case they changed"
+./dev/generate-requirements-txt.sh 2> /dev/null
 
-# Recompile protos
-python -m flwr_tool.requirements
-
-# Fail if user forgot to recompile
+# Fail if user forgot to sync requirements.txt and pyproject.toml
 CHANGED=$(git diff --name-only HEAD examples)
 
 if [ -n "$CHANGED" ]; then
-    echo "Changes detected"
+    echo "Changes detected, requirements.txt and pyproject.toml is not synced. Please run the script dev/generate-requirements-txt."
     exit 1
 fi
 

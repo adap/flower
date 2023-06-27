@@ -1,6 +1,6 @@
 """Adapted from the PyTorch Lightning quickstart example.
 
-Source: https://pytorchlightning.ai/ (2021/02/04)
+Source: pytorchlightning.ai (2021/02/04)
 """
 
 
@@ -84,7 +84,7 @@ def main() -> None:
     model = LitAutoEncoder()
 
     # Train
-    trainer = pl.Trainer(max_epochs=5, progress_bar_refresh_rate=0)
+    trainer = pl.Trainer(max_epochs=5)
     trainer.fit(model, train_loader, val_loader)
 
     # Test

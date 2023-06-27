@@ -439,7 +439,6 @@ def create_lda_partitions(
     # Check if concentration is Inf, if so create uniform partitions
     partitions: List[XY] = [(_, _) for _ in range(num_partitions)]
     if float("inf") in concentration:
-
         partitions = create_partitions(
             unpartitioned_dataset=(x, y),
             iid_fraction=1.0,

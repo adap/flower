@@ -5,6 +5,7 @@ The code is generally adapted from:
 https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html
 """
 
+
 import flwr as fl
 import numpy as np
 import mxnet as mx
@@ -38,7 +39,7 @@ def main():
 
     # Flower Client
     class MNISTClient(fl.client.NumPyClient):
-        def get_parameters(self):
+        def get_parameters(self, config):
             param = []
             for val in model.collect_params(".*weight").values():
                 p = val.data()
@@ -54,7 +55,7 @@ def main():
             self.set_parameters(parameters)
             [accuracy, loss], num_examples = train(model, train_data, epoch=2)
             results = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
-            return self.get_parameters(), num_examples, results
+            return self.get_parameters(config={}), num_examples, results
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)

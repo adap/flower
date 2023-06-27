@@ -186,7 +186,7 @@ Next, we use the :code:`start_server` function to start a server and tell it to 
     import flwr as fl
 
     if __name__ == "__main__":
-        fl.server.start_server("0.0.0.0:8080", config=fl.server.ServerConfig(num_rounds=3))
+        fl.server.start_server(server_address="0.0.0.0:8080", config=fl.server.ServerConfig(num_rounds=3))
 
 We can already start the *server*:
 
@@ -251,7 +251,7 @@ We included type annotations to give you a better understanding of the data type
             self.testloader = testloader
             self.num_examples = num_examples
 
-        def get_parameters(self) -> List[np.ndarray]:
+        def get_parameters(self, config) -> List[np.ndarray]:
             # Return model parameters as a list of NumPy ndarrays
             return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
@@ -267,7 +267,7 @@ We included type annotations to give you a better understanding of the data type
             # Set model parameters, train model, return updated model parameters
             self.set_parameters(parameters)
             cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
-            return self.get_parameters(), self.num_examples["trainset"], {}
+            return self.get_parameters(config={}), self.num_examples["trainset"], {}
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict[str, str]
@@ -292,7 +292,7 @@ You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient
 
         # Start client
         client = CifarClient(model, trainloader, testloader, num_examples)
-        fl.client.start_numpy_client("0.0.0.0:8080", client)
+        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client)
 
 
     if __name__ == "__main__":

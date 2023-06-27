@@ -17,27 +17,31 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
 
 service Driver {
-  // Return a list of clients.
-  rpc GetClients(GetClientsRequest) returns (GetClientsResponse) {}
+  // Return a set of nodes
+  rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
 
   // Create one or more tasks
-  rpc CreateTasks(CreateTasksRequest) returns (CreateTasksResponse) {}
+  rpc PushTaskIns(PushTaskInsRequest) returns (PushTaskInsResponse) {}
 
   // Get task results
-  rpc GetResults(GetResultsRequest) returns (GetResultsResponse) {}
+  rpc PullTaskRes(PullTaskResRequest) returns (PullTaskResResponse) {}
 }
 
-// GetClients messages
-message GetClientsRequest {}
-message GetClientsResponse {}
+// GetNodes messages
+message GetNodesRequest {}
+message GetNodesResponse { repeated uint64 node_ids = 1; }
 
-// CreateTasks messages
-message CreateTasksRequest { repeated Task task = 1; }
-message CreateTasksResponse { repeated string task_ids = 1; }
+// PushTaskIns messages
+message PushTaskInsRequest { repeated TaskIns task_ins_list = 1; }
+message PushTaskInsResponse { repeated string task_ids = 2; }
 
-// GetResults messages
-message GetResultsRequest { repeated Result task_ids = 1; }
-message GetResultsResponse { repeated Result results = 1; }
+// PullTaskRes messages
+message PullTaskResRequest {
+  Node node = 1;
+  repeated string task_ids = 2;
+}
+message PullTaskResResponse { repeated TaskRes task_res_list = 1; }
