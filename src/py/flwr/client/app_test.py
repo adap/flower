@@ -115,7 +115,7 @@ def test_start_client_transport_invalid() -> None:
         start_client(
             server_address="0.0.0.0:8080", client=client, transport=invalid_transport
         )
-        assert False  # Fail the test if no exception was raised
+        raise AssertionError()  # Fail the test if no exception was raised
     except ValueError:
         pass
 
@@ -131,6 +131,6 @@ def test_start_numpy_client_transport_invalid() -> None:
         start_numpy_client(
             server_address="0.0.0.0:8080", client=client, transport=invalid_transport
         )
-        assert False  # Fail the test if no exception was raised
+        raise AssertionError()  # Fail the test if no exception was raised
     except ValueError:
         pass
