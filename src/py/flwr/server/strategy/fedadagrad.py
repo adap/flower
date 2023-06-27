@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et al.,
-2020] strategy.
+"""FedAdagrad [Reddi et al., 2020] strategy.
 
-Paper: https://arxiv.org/abs/2003.00295
+Adaptive Federated Optimization using Adagrad.
+
+Paper: arxiv.org/abs/2003.00295
 """
 
 
@@ -37,15 +38,13 @@ from flwr.server.client_proxy import ClientProxy
 from .fedopt import FedOpt
 
 
-# flake8: noqa: E501
 class FedAdagrad(FedOpt):
-    """Adaptive Federated Optimization using Adagrad (FedAdagrad) [Reddi et
-    al., 2020] strategy.
+    """FedAdagrad strategy - Adaptive Federated Optimization using Adagrad.
 
     Paper: https://arxiv.org/abs/2003.00295
     """
 
-    # pylint: disable=too-many-arguments,too-many-locals,too-many-instance-attributes,line-too-long
+    # pylint: disable=too-many-arguments,too-many-locals,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         *,
@@ -128,6 +127,7 @@ class FedAdagrad(FedOpt):
         )
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedAdagrad(accept_failures={self.accept_failures})"
         return rep
 

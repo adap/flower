@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Contextmanager managing a gRPC channel to the Flower server."""
+"""Contextmanager for a gRPC streaming channel to the Flower server."""
 
 
 from contextlib import contextmanager
@@ -102,8 +102,11 @@ def grpc_connection(
 
     server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
 
-    receive: Callable[[], ServerMessage] = lambda: next(server_message_iterator)
-    send: Callable[[ClientMessage], None] = lambda msg: queue.put(msg, block=False)
+    def receive() -> ServerMessage:
+        return next(server_message_iterator)
+
+    def send(msg: ClientMessage) -> None:
+        return queue.put(msg, block=False)
 
     try:
         yield (receive, send)

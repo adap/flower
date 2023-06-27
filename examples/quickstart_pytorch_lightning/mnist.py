@@ -1,6 +1,6 @@
 """Adapted from the PyTorch Lightning quickstart example.
 
-Source: https://pytorchlightning.ai/ (2021/02/04)
+Source: pytorchlightning.ai (2021/02/04)
 """
 
 

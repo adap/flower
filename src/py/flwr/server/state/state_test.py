@@ -41,7 +41,6 @@ class StateTest(unittest.TestCase):
 
     def test_get_task_ins_empty(self) -> None:
         """Validate that a new state has no TaskIns."""
-
         # Prepare
         state = self.state_factory()
 
@@ -53,7 +52,6 @@ class StateTest(unittest.TestCase):
 
     def test_get_task_res_empty(self) -> None:
         """Validate that a new state has no TaskRes."""
-
         # Prepare
         state = self.state_factory()
 
@@ -65,7 +63,6 @@ class StateTest(unittest.TestCase):
 
     def test_store_task_ins_one(self) -> None:
         """Test store_task_ins."""
-
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
@@ -105,7 +102,6 @@ class StateTest(unittest.TestCase):
 
     def test_store_and_delete_tasks(self) -> None:
         """Test delete_tasks."""
-
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
@@ -131,7 +127,7 @@ class StateTest(unittest.TestCase):
         )
 
         _ = state.store_task_res(task_res=task_res_0)
-        _ = state.get_task_res(task_ids=set([task_id_0]), limit=None)
+        _ = state.get_task_res(task_ids={task_id_0}, limit=None)
 
         # Insert one TaskRes, but don't retrive it
         task_res_1: TaskRes = create_task_res(
@@ -147,7 +143,7 @@ class StateTest(unittest.TestCase):
         assert state.num_task_res() == 2
 
         # Execute
-        state.delete_tasks(task_ids=set([task_id_0, task_id_1, task_id_2]))
+        state.delete_tasks(task_ids={task_id_0, task_id_1, task_id_2})
 
         # Assert
         assert state.num_task_ins() == 2
@@ -156,7 +152,6 @@ class StateTest(unittest.TestCase):
     # Init tests
     def test_init_state(self) -> None:
         """Test that state is initialized correctly."""
-
         # Execute
         state = self.state_factory()
 
@@ -264,7 +259,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         task_res_uuid = state.store_task_res(task_res)
-        task_res_list = state.get_task_res(task_ids=set([task_ins_id]), limit=None)
+        task_res_list = state.get_task_res(task_ids={task_ins_id}, limit=None)
 
         # Assert
         retrieved_task_res = task_res_list[0]
@@ -311,8 +306,7 @@ class StateTest(unittest.TestCase):
         assert len(retrieved_node_ids) == 0
 
     def test_num_task_ins(self) -> None:
-        """Test if num_tasks returns correct number of not delivered
-        task_ins."""
+        """Test if num_tasks returns correct number of not delivered task_ins."""
         # Prepare
         state: State = self.state_factory()
         task_0 = create_task_ins(consumer_node_id=0, anonymous=True)
@@ -329,8 +323,7 @@ class StateTest(unittest.TestCase):
         assert num == 2
 
     def test_num_task_res(self) -> None:
-        """Test if num_tasks returns correct number of not delivered
-        task_res."""
+        """Test if num_tasks returns correct number of not delivered task_res."""
         # Prepare
         state: State = self.state_factory()
         task_0 = create_task_res(producer_node_id=0, anonymous=True, ancestry=["1"])

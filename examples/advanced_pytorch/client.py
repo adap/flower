@@ -147,7 +147,7 @@ def main() -> None:
         # Start Flower client
         client = CifarClient(trainset, testset, device)
 
-        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=client)
+        fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
 
 
 if __name__ == "__main__":

@@ -31,7 +31,7 @@ def get_dataloader(
 
 
 def get_random_id_splits(total: int, val_ratio: float, shuffle: bool = True):
-    """splits a list of length `total` into two following a
+    """Splits a list of length `total` into two following a
     (1-val_ratio):val_ratio partitioning.
 
     By default the indices are shuffled before creating the split and

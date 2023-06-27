@@ -49,6 +49,14 @@ class Client(ABC):
         GetPropertiesRes
             The current client properties.
         """
+        _ = (self, ins)
+        return GetPropertiesRes(
+            status=Status(
+                code=Code.GET_PROPERTIES_NOT_IMPLEMENTED,
+                message="Client does not implement `get_properties`",
+            ),
+            properties={},
+        )
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         """Return the current local model parameters.
@@ -64,6 +72,14 @@ class Client(ABC):
         GetParametersRes
             The current local model parameters.
         """
+        _ = (self, ins)
+        return GetParametersRes(
+            status=Status(
+                code=Code.GET_PARAMETERS_NOT_IMPLEMENTED,
+                message="Client does not implement `get_parameters`",
+            ),
+            parameters=Parameters(tensor_type="", tensors=[]),
+        )
 
     def fit(self, ins: FitIns) -> FitRes:
         """Refine the provided parameters using the locally held dataset.
@@ -81,6 +97,16 @@ class Client(ABC):
             The training result containing updated parameters and other details
             such as the number of local training examples used for training.
         """
+        _ = (self, ins)
+        return FitRes(
+            status=Status(
+                code=Code.FIT_NOT_IMPLEMENTED,
+                message="Client does not implement `fit`",
+            ),
+            parameters=Parameters(tensor_type="", tensors=[]),
+            num_examples=0,
+            metrics={},
+        )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset.
@@ -99,6 +125,16 @@ class Client(ABC):
             other details such as the number of local data examples used for
             evaluation.
         """
+        _ = (self, ins)
+        return EvaluateRes(
+            status=Status(
+                code=Code.EVALUATE_NOT_IMPLEMENTED,
+                message="Client does not implement `evaluate`",
+            ),
+            loss=0.0,
+            num_examples=0,
+            metrics={},
+        )
 
 
 def has_get_properties(client: Client) -> bool:
@@ -125,7 +161,6 @@ def maybe_call_get_properties(
     client: Client, get_properties_ins: GetPropertiesIns
 ) -> GetPropertiesRes:
     """Call `get_properties` if the client overrides it."""
-
     # Check if client overrides `get_properties`
     if not has_get_properties(client=client):
         # If client does not override `get_properties`, don't call it
@@ -146,7 +181,6 @@ def maybe_call_get_parameters(
     client: Client, get_parameters_ins: GetParametersIns
 ) -> GetParametersRes:
     """Call `get_parameters` if the client overrides it."""
-
     # Check if client overrides `get_parameters`
     if not has_get_parameters(client=client):
         # If client does not override `get_parameters`, don't call it
@@ -165,7 +199,6 @@ def maybe_call_get_parameters(
 
 def maybe_call_fit(client: Client, fit_ins: FitIns) -> FitRes:
     """Call `fit` if the client overrides it."""
-
     # Check if client overrides `fit`
     if not has_fit(client=client):
         # If client does not override `fit`, don't call it
@@ -186,7 +219,6 @@ def maybe_call_fit(client: Client, fit_ins: FitIns) -> FitRes:
 
 def maybe_call_evaluate(client: Client, evaluate_ins: EvaluateIns) -> EvaluateRes:
     """Call `evaluate` if the client overrides it."""
-
     # Check if client overrides `evaluate`
     if not has_evaluate(client=client):
         # If client does not override `evaluate`, don't call it
