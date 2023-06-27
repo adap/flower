@@ -45,7 +45,7 @@ class RayClientProxy(ClientProxy):
     def get_properties(
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
     ) -> common.GetPropertiesRes:
-        """Returns client's properties."""
+        """Return client's properties."""
         future_get_properties_res = launch_and_get_properties.options(  # type: ignore
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)

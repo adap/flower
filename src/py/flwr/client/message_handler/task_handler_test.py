@@ -23,7 +23,6 @@ from flwr.proto.transport_pb2 import ServerMessage
 
 def test_get_server_message_empty() -> None:
     """Test get_server_message."""
-
     # Prepare
     res = PullTaskInsResponse(reconnect=None, task_ins_list=[])
 
@@ -36,7 +35,6 @@ def test_get_server_message_empty() -> None:
 
 def test_get_server_message_reconnect() -> None:
     """Test get_server_message."""
-
     # Prepare
     res = PullTaskInsResponse(reconnect=Reconnect(reconnect=42), task_ins_list=[])
 
@@ -49,7 +47,6 @@ def test_get_server_message_reconnect() -> None:
 
 def test_get_server_message_none_task() -> None:
     """Test get_server_message."""
-
     # Prepare
     res = PullTaskInsResponse(reconnect=None, task_ins_list=[TaskIns(task=None)])
 
@@ -62,7 +59,6 @@ def test_get_server_message_none_task() -> None:
 
 def test_get_server_message_none_legacy() -> None:
     """Test get_server_message."""
-
     # Prepare
     res = PullTaskInsResponse(
         reconnect=None, task_ins_list=[TaskIns(task=Task(legacy_server_message=None))]
@@ -77,7 +73,6 @@ def test_get_server_message_none_legacy() -> None:
 
 def test_get_server_message_legacy_reconnect() -> None:
     """Test get_server_message."""
-
     # Prepare
     res = PullTaskInsResponse(
         reconnect=None,
@@ -101,7 +96,6 @@ def test_get_server_message_legacy_reconnect() -> None:
 
 def test_get_server_message_legacy_valid() -> None:
     """Test get_server_message."""
-
     # Prepare
     expected = TaskIns(
         task=Task(

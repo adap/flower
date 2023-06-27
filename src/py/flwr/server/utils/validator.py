@@ -23,7 +23,6 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes
 # pylint: disable-next=too-many-branches
 def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str]:
     """Validate a TaskIns or TaskRes."""
-
     validation_errors = []
 
     if tasks_ins_res.task_id != "":

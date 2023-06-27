@@ -26,7 +26,6 @@ def get_server_message(
     pull_task_ins_response: PullTaskInsResponse,
 ) -> Optional[Tuple[TaskIns, ServerMessage]]:
     """Get the first ServerMessage, if available."""
-
     # Extract a single ServerMessage from the response, if possible
     if len(pull_task_ins_response.task_ins_list) == 0:
         return None

@@ -31,7 +31,6 @@ from flwr.server.state import State
 
 def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:
     """Pull TaskIns handler."""
-
     # Get node_id if client node is not anonymous
     node = request.node  # pylint: disable=no-member
     node_id: Optional[int] = None if node.anonymous else node.node_id
@@ -48,7 +47,6 @@ def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsRespo
 
 def push_task_res(request: PushTaskResRequest, state: State) -> PushTaskResResponse:
     """Push TaskRes handler."""
-
     # pylint: disable=no-member
     task_res: TaskRes = request.task_res_list[0]
     # pylint: enable=no-member
