@@ -21,3 +21,6 @@ python -m black --ipynb -q doc/source/tutorial
 KEYS="metadata.celltoolbar metadata.language_info metadata.toc metadata.notify_time metadata.varInspector metadata.accelerator metadata.vscode cell.metadata.id cell.metadata.heading_collapsed cell.metadata.hidden cell.metadata.code_folding cell.metadata.tags cell.metadata.init_cell cell.metadata.vscode"
 python -m nbstripout doc/source/tutorial/*.ipynb --extra-keys "$KEYS"
 python -m nbstripout examples/*/*.ipynb --extra-keys "$KEYS"
+
+# Markdown
+python -m mdformat --number doc/source/tutorial examples
