@@ -22,7 +22,7 @@ public protocol Client {
     /// Return the current local model parameters.
     func getParameters() -> GetParametersRes
     
-    /// Return set of client’s properties.
+    /// Return set of client properties.
     func getProperties(ins: GetPropertiesIns) -> GetPropertiesRes
     
     /// Refine the provided parameters using the locally held dataset.
