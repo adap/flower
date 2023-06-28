@@ -72,6 +72,7 @@ func disconnectFromProto(msg: Flwr_Proto_ClientMessage.DisconnectRes) -> Disconn
     }
 }
 
+func getParametersInsToProto(ins: )
 func getParametersToProto() -> Flwr_Proto_ServerMessage.GetParametersIns {
     return Flwr_Proto_ServerMessage.GetParametersIns()
 }

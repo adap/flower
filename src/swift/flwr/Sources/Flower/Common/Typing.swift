@@ -98,6 +98,14 @@ public struct Parameters: Equatable {
     }
 }
 
+public struct GetParametersIns: Equatable {
+    public var config: [String: Scalar]
+    
+    public init(config: [String : Scalar]) {
+        self.config = config
+    }
+}
+
 public struct GetParametersRes: Equatable {
     public var parameters: Parameters
     public var status: Status
