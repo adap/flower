@@ -24,12 +24,10 @@ mkdir -p SwiftDoc
 find ~/Library/Developer/Xcode/DerivedData -name "flwr.doccarchive" -exec rm -Rf {} \; || true
 
 # change directory to the swift sdk source code folder
-cd src/swift/flwr
-# generate api reference for swift sdk
+# Generate API reference for the Swift SDK by running `xcodebuild docbuild` in src directory
+cd src/swift/flwr && \
 arch -x86_64 xcodebuild docbuild -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.4'
 
-# go back to root folder
-cd ../../../
 # find the generated doccarchive file in Xcode derived data folder and copy it to the SwiftDoc directory
 find ~/Library/Developer/Xcode/DerivedData -name "flwr.doccarchive" -exec cp -R {} SwiftDoc \;
 # transform the doccarchive file to static html to SwiftDoc/html folder
