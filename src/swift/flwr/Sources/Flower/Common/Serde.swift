@@ -72,9 +72,14 @@ func disconnectFromProto(msg: Flwr_Proto_ClientMessage.DisconnectRes) -> Disconn
     }
 }
 
-func getParametersInsToProto(ins: )
-func getParametersToProto() -> Flwr_Proto_ServerMessage.GetParametersIns {
-    return Flwr_Proto_ServerMessage.GetParametersIns()
+func getParametersInsToProto(ins: GetParametersIns) -> Flwr_Proto_ServerMessage.GetParametersIns {
+    Flwr_Proto_ServerMessage.GetParametersIns.with { msg in
+        msg.config = propertiesToProto(properties: ins.config)
+    }
+}
+
+func getParametersInsFromProto(msg: Flwr_Proto_ServerMessage.GetParametersIns) -> GetParametersIns {
+    GetParametersIns(config: propertiesFromProto(proto: msg.config))
 }
 
 func parametersResToProto(res: GetParametersRes) -> Flwr_Proto_ClientMessage.GetParametersRes {
