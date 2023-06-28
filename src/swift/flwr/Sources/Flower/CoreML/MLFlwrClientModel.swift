@@ -41,7 +41,7 @@ struct MLResult {
     let accuracy: Double
 }
 
-/// A class that is responsible for loading and retrieving model parameters to and from CoreML model.
+/// A class responsible for loading and retrieving model parameters to and from the CoreML model.
 @available(iOS 14.0, *)
 public class MLParameter {
     private var parameterConverter = ParameterConverter.shared
