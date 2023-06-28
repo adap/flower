@@ -26,6 +26,7 @@ import os
 /// ### GetParameters
 ///
 /// - ``Parameters``
+/// - ``GetParametersIns``
 /// - ``GetParametersRes``
 ///
 /// ### GetProperties
