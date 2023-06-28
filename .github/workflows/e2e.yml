@@ -200,6 +200,7 @@ jobs:
       - name: Download Datasets
         run: |
           cd e2e/pandas
+          mkdir -p data
           python -c "from sklearn.datasets import load_iris; load_iris(as_frame=True)['data'].to_csv('./data/client.csv')"
       - name: Run tests
         run: |
