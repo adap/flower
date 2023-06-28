@@ -60,8 +60,8 @@ def load_mnist() -> Dataset:
     X = Xy[:, :-1]  # the last column contains labels
     y = Xy[:, -1]
     # First 60000 samples consist of the train set
-    x_train, y_train = X[:60000], y[:60000]
-    x_test, y_test = X[60000:], y[60000:]
+    x_train, y_train = X[:1000], y[:1000]
+    x_test, y_test = X[60000:62000], y[60000:62000]
     return (x_train, y_train), (x_test, y_test)
 
 
