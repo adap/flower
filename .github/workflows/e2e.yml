@@ -144,6 +144,11 @@ jobs:
         run: |
           cd e2e/mxnet
           python -m poetry install
+            - name: Cache Datasets
+      - name: Download Datasets
+        run: |
+          cd e2e/mxnet
+          python -c "import mxnet as mx; mx.test_utils.get_mnist()"
       - name: Run tests
         run: |
           cd e2e/mxnet
