@@ -31,39 +31,6 @@ def model():
     net.collect_params().initialize()
     return net
 
-train_data, val_data = load_data()
-
-model = model()
-init = nd.random.uniform(shape=(2, 784))
-model(init)
-
-# Flower Client
-class FlowerClient(fl.client.NumPyClient):
-    def get_parameters(self, config):
-        param = []
-        for val in model.collect_params(".*weight").values():
-            p = val.data()
-            param.append(p.asnumpy())
-        return param
-
-    def set_parameters(self, parameters):
-        params = zip(model.collect_params(".*weight").keys(), parameters)
-        for key, value in params:
-            model.collect_params().setattr(key, value)
-
-    def fit(self, parameters, config):
-        self.set_parameters(parameters)
-        [accuracy, loss], num_examples = train(model, train_data, epoch=2)
-        results = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
-        return self.get_parameters(config={}), num_examples, results
-
-    def evaluate(self, parameters, config):
-        self.set_parameters(parameters)
-        [accuracy, loss], num_examples = test(model, val_data)
-        print("Evaluation accuracy & loss", accuracy, loss)
-        return float(loss[1]), num_examples, {"accuracy": float(accuracy[1])}
-
-
 def load_data():
     print("Download Dataset")
     mnist = mx.test_utils.get_mnist()
@@ -128,6 +95,38 @@ def test(net, val_data):
         metrics.update(label, outputs)
     metrics.update(label, outputs)
     return metrics.get_name_value(), num_examples
+
+train_data, val_data = load_data()
+
+model = model()
+init = nd.random.uniform(shape=(2, 784))
+model(init)
+
+# Flower Client
+class FlowerClient(fl.client.NumPyClient):
+    def get_parameters(self, config):
+        param = []
+        for val in model.collect_params(".*weight").values():
+            p = val.data()
+            param.append(p.asnumpy())
+        return param
+
+    def set_parameters(self, parameters):
+        params = zip(model.collect_params(".*weight").keys(), parameters)
+        for key, value in params:
+            model.collect_params().setattr(key, value)
+
+    def fit(self, parameters, config):
+        self.set_parameters(parameters)
+        [accuracy, loss], num_examples = train(model, train_data, epoch=2)
+        results = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
+        return self.get_parameters(config={}), num_examples, results
+
+    def evaluate(self, parameters, config):
+        self.set_parameters(parameters)
+        [accuracy, loss], num_examples = test(model, val_data)
+        print("Evaluation accuracy & loss", accuracy, loss)
+        return float(loss[1]), num_examples, {"accuracy": float(accuracy[1])}
 
 
 if __name__ == "__main__":
