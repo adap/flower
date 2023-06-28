@@ -18,17 +18,20 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-# Create a directory to save generated API reference
+# Create a directory to save generated API reference.
 mkdir -p SwiftDoc
-# Make sure to start a clean build by deleting all potentially old artefacts
+# Make sure to start a clean build by deleting all potentially old artefacts.
 find ~/Library/Developer/Xcode/DerivedData -name "flwr.doccarchive" -exec rm -Rf {} \; || true
 
-# change directory to the swift sdk source code folder
-# Generate API reference for the Swift SDK by running `xcodebuild docbuild` in src directory
+# Change directory to the swift sdk source code folder.
+# Make sure you have XCode installed in your Mac to avoid xcode-select: error.
+# In case no XCode, please refer to: https://github.com/nodejs/node-gyp/issues/569.
+# Generate API reference for the Swift SDK by running `xcodebuild docbuild` in src directory.
 cd src/swift/flwr && \
 arch -x86_64 xcodebuild docbuild -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.4'
 
-# Find the generated `doccarchive` file in XCode's derived data folder and copy it to the SwiftDoc directory
+# Find the generated `doccarchive` file in XCode's derived data folder and copy it to the SwiftDoc directory.
 find ~/Library/Developer/Xcode/DerivedData -name "flwr.doccarchive" -exec cp -R {} SwiftDoc \;
-# Transform the `doccarchive` file to static HTML and store the output in the `SwiftDoc/html` folder
+# Transform the `doccarchive` file to static HTML and store the output in the `SwiftDoc/html` folder.
+# Path to the generated static HTML is configurable, right now the path is {baseURL}/documentation/flwr.
 $(xcrun --find docc) process-archive transform-for-static-hosting "SwiftDoc/flwr.doccarchive" --output-path "SwiftDoc/html" 
