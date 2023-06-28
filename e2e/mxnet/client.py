@@ -23,50 +23,45 @@ mx.random.seed(42)
 # Setup context to GPU or CPU
 DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
 
+def model():
+    net = nn.Sequential()
+    net.add(nn.Dense(256, activation="relu"))
+    net.add(nn.Dense(64, activation="relu"))
+    net.add(nn.Dense(10))
+    net.collect_params().initialize()
+    return net
 
-def main():
-    def model():
-        net = nn.Sequential()
-        net.add(nn.Dense(256, activation="relu"))
-        net.add(nn.Dense(64, activation="relu"))
-        net.add(nn.Dense(10))
-        net.collect_params().initialize()
-        return net
+train_data, val_data = load_data()
 
-    train_data, val_data = load_data()
+model = model()
+init = nd.random.uniform(shape=(2, 784))
+model(init)
 
-    model = model()
-    init = nd.random.uniform(shape=(2, 784))
-    model(init)
+# Flower Client
+class FlowerClient(fl.client.NumPyClient):
+    def get_parameters(self, config):
+        param = []
+        for val in model.collect_params(".*weight").values():
+            p = val.data()
+            param.append(p.asnumpy())
+        return param
 
-    # Flower Client
-    class FlowerClient(fl.client.NumPyClient):
-        def get_parameters(self, config):
-            param = []
-            for val in model.collect_params(".*weight").values():
-                p = val.data()
-                param.append(p.asnumpy())
-            return param
+    def set_parameters(self, parameters):
+        params = zip(model.collect_params(".*weight").keys(), parameters)
+        for key, value in params:
+            model.collect_params().setattr(key, value)
 
-        def set_parameters(self, parameters):
-            params = zip(model.collect_params(".*weight").keys(), parameters)
-            for key, value in params:
-                model.collect_params().setattr(key, value)
+    def fit(self, parameters, config):
+        self.set_parameters(parameters)
+        [accuracy, loss], num_examples = train(model, train_data, epoch=2)
+        results = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
+        return self.get_parameters(config={}), num_examples, results
 
-        def fit(self, parameters, config):
-            self.set_parameters(parameters)
-            [accuracy, loss], num_examples = train(model, train_data, epoch=2)
-            results = {"accuracy": float(accuracy[1]), "loss": float(loss[1])}
-            return self.get_parameters(config={}), num_examples, results
-
-        def evaluate(self, parameters, config):
-            self.set_parameters(parameters)
-            [accuracy, loss], num_examples = test(model, val_data)
-            print("Evaluation accuracy & loss", accuracy, loss)
-            return float(loss[1]), num_examples, {"accuracy": float(accuracy[1])}
-
-    # Start Flower client
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient())
+    def evaluate(self, parameters, config):
+        self.set_parameters(parameters)
+        [accuracy, loss], num_examples = test(model, val_data)
+        print("Evaluation accuracy & loss", accuracy, loss)
+        return float(loss[1]), num_examples, {"accuracy": float(accuracy[1])}
 
 
 def load_data():
@@ -136,4 +131,5 @@ def test(net, val_data):
 
 
 if __name__ == "__main__":
-    main()
+    # Start Flower client
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient())
