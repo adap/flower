@@ -162,7 +162,7 @@ public struct Status: Equatable {
     }
 }
 
-/// Parameters request for a client
+/// Parameters message.
 public struct Parameters: Equatable {
     public var tensors: [Data]
     public var tensorType: String
