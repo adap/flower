@@ -1,5 +1,3 @@
-import argparse
-
 import flwr as fl
 import numpy as np
 
@@ -26,19 +24,5 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, 1, {"accuracy": accuracy}
 
 
-parser = argparse.ArgumentParser(description="Flower")
-parser.add_argument(
-    "--rest",
-    type=bool,
-    default=False,
-    required=False,
-    help="Use the REST API",
-)
-args = parser.parse_args()
-
-server_address="127.0.0.1:8080"
-if args.rest:
-    server_address="http://127.0.0.1:9093"
-
 # Start Flower client
-fl.client.start_numpy_client(server_address=server_address, client=FlowerClient(), rest=args.rest)
+fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient())
