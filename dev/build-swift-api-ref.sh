@@ -18,7 +18,7 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-# create a directory to save generated api reference
+# Create a directory to save generated API reference
 mkdir -p SwiftDoc
 # making sure to start a clean build
 find ~/Library/Developer/Xcode/DerivedData -name "flwr.doccarchive" -exec rm -Rf {} \; || true
