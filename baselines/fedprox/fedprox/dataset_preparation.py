@@ -56,8 +56,13 @@ def _partition_data(
         A list of dataset for each client and a single dataset to be use for testing the model.
     """
     trainset, testset = _download_data()
+
+    if balance:
+        trainset = _balance_classes(trainset, seed)
+        
     partition_size = int(len(trainset) / num_clients)
     lengths = [partition_size] * num_clients
+
     if iid:
         datasets = random_split(trainset, lengths, torch.Generator().manual_seed(seed))
     else:
@@ -72,9 +77,6 @@ def _partition_data(
                 sigma=2.0,
             )
         else:
-            if balance:
-                trainset = _balance_classes(trainset, seed)
-                partition_size = int(len(trainset) / num_clients)
             shard_size = int(partition_size / 2)
             idxs = trainset.targets.argsort()
             sorted_data = Subset(trainset, idxs)

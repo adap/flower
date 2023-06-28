@@ -67,7 +67,6 @@ poetry shell
 
 # install PyTorch with GPU support. Please note this baseline is very lightweight so it can run fine on a CPU.
 pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
-
 ```
 
 ## Running the Experiments
@@ -105,6 +104,6 @@ python -m fedprox.main --multirun mu=0.0,2.0 stragglers_fraction=0.0,0.5,0.9 '+r
 python -m fedprox.main --config-name fedavg --multirun stragglers_fraction=0.0,0.5,0.9 '+repeat_num=range(5)'
 ```
 
-The above commands would generate results that look like:
+The above commands would generate results that you can plot and would look like:
 
 ![](docs/FedProx_mnist.png)
