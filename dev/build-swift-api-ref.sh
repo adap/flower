@@ -28,7 +28,7 @@ find ~/Library/Developer/Xcode/DerivedData -name "flwr.doccarchive" -exec rm -Rf
 cd src/swift/flwr && \
 arch -x86_64 xcodebuild docbuild -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.4'
 
-# find the generated doccarchive file in Xcode derived data folder and copy it to the SwiftDoc directory
+# Find the generated `doccarchive` file in XCode's derived data folder and copy it to the SwiftDoc directory
 find ~/Library/Developer/Xcode/DerivedData -name "flwr.doccarchive" -exec cp -R {} SwiftDoc \;
 # Transform the `doccarchive` file to static HTML and store the output in the `SwiftDoc/html` folder
 $(xcrun --find docc) process-archive transform-for-static-hosting "SwiftDoc/flwr.doccarchive" --output-path "SwiftDoc/html" 
