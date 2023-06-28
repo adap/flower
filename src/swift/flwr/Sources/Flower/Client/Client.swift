@@ -13,14 +13,14 @@ import Foundation
 ///
 /// ### Functionalities
 ///
-/// - ``getParameters()``
+/// - ``getParameters(ins:)``
 /// - ``getProperties(ins:)-4u0tf``
 /// - ``fit(ins:)``
 /// - ``evaluate(ins:)``
 public protocol Client {
     
     /// Return the current local model parameters.
-    func getParameters() -> GetParametersRes
+    func getParameters(ins: GetParametersIns) -> GetParametersRes
     
     /// Return set of client properties.
     func getProperties(ins: GetPropertiesIns) -> GetPropertiesRes

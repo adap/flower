@@ -22,7 +22,7 @@ func handle(client: Client, serverMsg: Flwr_Proto_ServerMessage) throws -> (Flwr
         let sleepDuration = tuple.1
         return (disconnectMsg, sleepDuration, false)
     case .getParametersIns:
-        return (getParameters(client: client), 0, true)
+        return (getParameters(client: client, parametersMsg: serverMsg.getParametersIns), 0, true)
     case .fitIns:
         return (fit(client: client, fitMsg: serverMsg.fitIns), 0, true)
     case .evaluateIns:
@@ -50,8 +50,9 @@ func reconnect(reconnectMsg: Flwr_Proto_ServerMessage.ReconnectIns) -> (Flwr_Pro
  }
 
 /// Handle for the server message that requests the local model parameters.
-func getParameters(client: Client) -> Flwr_Proto_ClientMessage {
-    let parametersRes = client.getParameters()
+func getParameters(client: Client, parametersMsg: Flwr_Proto_ServerMessage.GetParametersIns) -> Flwr_Proto_ClientMessage {
+    let getParametersIns = getParametersInsFromProto(msg: parametersMsg)
+    let parametersRes = client.getParameters(ins: getParametersIns)
     let parametersResProto = parametersResToProto(res: parametersRes)
     var ret = Flwr_Proto_ClientMessage()
     ret.getParametersRes = parametersResProto
