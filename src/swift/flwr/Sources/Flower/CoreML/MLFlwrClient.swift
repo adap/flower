@@ -24,7 +24,7 @@ public enum MLTask {
 /// ### Usage
 ///
 /// - ``init(layerWrappers:dataLoader:compiledModelUrl:)``
-/// - ``getParameters()``
+/// - ``getParameters(ins:)``
 /// - ``getProperties(ins:)``
 /// - ``fit(ins:)``
 /// - ``evaluate(ins:)``
