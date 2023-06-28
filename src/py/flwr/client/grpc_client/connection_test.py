@@ -77,8 +77,8 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
 def test_integration_connection() -> None:
     """Create a server and establish a connection to it.
 
-    Purpose of this integration test is to simulate multiple clients
-    with multiple roundtrips between server and client.
+    Purpose of this integration test is to simulate multiple clients with multiple
+    roundtrips between server and client.
     """
     # Prepare
     port = unused_tcp_port()

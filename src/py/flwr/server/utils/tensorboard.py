@@ -61,7 +61,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
     """
     print(
         "\n\t\033[32mStart TensorBoard with the following parameters"
-        + f"\n\t$ tensorboard --logdir {logdir}\033[39m\n"
+        f"\n\t$ tensorboard --logdir {logdir}\033[39m\n"
     )
     # Create logdir if it does not yet exist
     os.makedirs(logdir, exist_ok=True)
@@ -88,8 +88,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
             return strategy_class
 
         class TBWrapper(strategy_class):  # type: ignore
-            """Strategy wrapper which hooks into some methods for TensorBoard
-            logging."""
+            """Strategy wrapper that hooks into some methods for TensorBoard logging."""
 
             def aggregate_evaluate(
                 self,
@@ -97,8 +96,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
                 results: List[Tuple[ClientProxy, EvaluateRes]],
                 failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
             ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-                """Hooks into aggregate_evaluate for TensorBoard logging
-                purpose."""
+                """Hooks into aggregate_evaluate for TensorBoard logging purpose."""
                 # Execute decorated function and extract results for logging
                 # They will be returned at the end of this function but also
                 # used for logging

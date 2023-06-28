@@ -16,13 +16,18 @@ This will create a new directory called `quickstart_jax`, containing the followi
 
 ```shell
 -- pyproject.toml
+-- requirements.txt
 -- jax_training.py
 -- client.py
 -- server.py
 -- README.md
 ```
 
-Project dependencies (such as `jax` and `flwr`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+### Installing Dependencies
+
+Project dependencies (such as `jax` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+
+#### Poetry
 
 ```shell
 poetry install
@@ -32,10 +37,18 @@ poetry shell
 Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
 
 ```shell
-python3 -c "import flwr"
+poetry run python3 -c "import flwr"
 ```
 
 If you don't see any errors you're good to go!
+
+#### pip
+
+Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+
+```shell
+pip install -r requirements.txt
+```
 
 ## Run JAX Federated
 

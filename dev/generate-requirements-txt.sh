@@ -1,4 +1,6 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+#!/bin/bash
+
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,4 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Dataloaders."""
+
+set -e
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+
+# Purpose of this script is to regenerate requirements.txt
+for path in $(find ./examples -type f -name 'pyproject.toml' | sed -E 's|/[^/]+$||' |sort -u)
+do
+    echo -e "\nRunning pipreqs for example in ${path}"
+    pipreqs --mode 'compat' --force --ignore .venv,poetry.lock $path
+done

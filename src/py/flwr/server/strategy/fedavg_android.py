@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Averaging (FedAvg) [McMahan et al., 2016] strategy with custom
-serialization for Android devices.
+"""FedAvg [McMahan et al., 2016] strategy with custom serialization for Android devices.
 
-Paper: https://arxiv.org/abs/1602.05629
+Paper: arxiv.org/abs/1602.05629
 """
 
 
@@ -40,11 +39,10 @@ from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
 
-# flake8: noqa: E501
 class FedAvgAndroid(Strategy):
     """Configurable FedAvg strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         *,
@@ -80,7 +78,7 @@ class FedAvgAndroid(Strategy):
             Minimum number of clients used during validation. Defaults to 2.
         min_available_clients : Optional[int]
             Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],Optional[Tuple[float, Dict[str, Scalar]]]]]
+        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Optional[Callable[[int], Dict[str, Scalar]]]
             Function used to configure training. Defaults to None.
@@ -105,12 +103,12 @@ class FedAvgAndroid(Strategy):
         self.initial_parameters = initial_parameters
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedAvg(accept_failures={self.accept_failures})"
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available
-        clients."""
+        """Return the sample size and the required number of available clients."""
         num_clients = int(num_available_clients * self.fraction_fit)
         return max(num_clients, self.min_fit_clients), self.min_available_clients
 

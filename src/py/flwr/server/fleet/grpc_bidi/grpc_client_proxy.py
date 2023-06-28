@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""gRPC-based Flower ClientProxy implementation."""
+"""Flower ClientProxy implementation using gRPC bidirectional streaming."""
 
 
 from typing import Optional
@@ -40,7 +40,7 @@ class GrpcClientProxy(ClientProxy):
         ins: common.GetPropertiesIns,
         timeout: Optional[float],
     ) -> common.GetPropertiesRes:
-        """Requests client's set of internal properties."""
+        """Request client's set of internal properties."""
         get_properties_msg = serde.get_properties_ins_to_proto(ins)
         res_wrapper: ResWrapper = self.bridge.request(
             ins_wrapper=InsWrapper(

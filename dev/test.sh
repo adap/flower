@@ -4,6 +4,8 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 echo "=== test.sh ==="
 
+echo "- Start Python checks"
+
 echo "- clang-format:  start" &&
 clang-format --Werror --dry-run src/proto/flwr/proto/* &&
 echo "- clang-format:  done" &&
@@ -24,6 +26,10 @@ echo "- docformatter: start" &&
 python -m docformatter -c -r src/py/flwr -e src/py/flwr/proto &&
 echo "- docformatter:  done" &&
 
+echo "- ruff: start" &&
+python -m ruff check src/py/flwr &&
+echo "- ruff: done" &&
+
 echo "- mypy: start" &&
 python -m mypy src/py &&
 echo "- mypy: done" &&
@@ -41,3 +47,11 @@ python -m pytest --cov=src/py/flwr &&
 echo "- pytest: done" &&
 
 echo "- All Python checks passed"
+
+echo "- Start Markdown checks"
+
+echo "- mdformat: start" &&
+python -m mdformat --check --number doc/source/tutorial examples &&
+echo "- mdformat: done" &&
+
+echo "- All Markdown checks passed"
