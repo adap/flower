@@ -2,7 +2,7 @@
 set -e
 
 # run the first command in background and save output to a temporary file:
-timeout 3m python server.py &
+timeout 2m python server.py &
 pid=$!
 sleep 3
 
