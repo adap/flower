@@ -1,6 +1,7 @@
 import flwr as fl
 
 from client import FlowerClient
+from strategy import FedAnalytics
 
 def client_fn(cid):
     _ = cid
@@ -9,6 +10,30 @@ def client_fn(cid):
 hist = fl.simulation.start_simulation(
     client_fn=client_fn,
     num_clients=2,
-    config=fl.server.ServerConfig(num_rounds=3),
+    config=fl.server.ServerConfig(num_rounds=1),
+    strategy=FedAnalytics(),
 )
-assert (hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]) > 0.98
+assert hist.metrics_centralized["Aggregated histograms"][1][1] == [
+    "Length:",
+    "18",
+    "46",
+    "28",
+    "54",
+    "32",
+    "52",
+    "36",
+    "12",
+    "10",
+    "12",
+    "Width:",
+    "8",
+    "14",
+    "44",
+    "48",
+    "74",
+    "62",
+    "20",
+    "22",
+    "4",
+    "4",
+]
