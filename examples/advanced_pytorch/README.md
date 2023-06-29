@@ -57,8 +57,8 @@ pip install -r requirements.txt
 
 # Run Federated Learning with PyTorch and Flower
 
-The included `run.sh` will start the Flower server (using `server.py`), 
-sleep for 2 seconds to ensure that the server is up, and then start 10 Flower clients (using `client.py`) with only a small subset of the data (in order to run on any machine), 
+The included `run.sh` will start the Flower server (using `server.py`),
+sleep for 2 seconds to ensure that the server is up, and then start 10 Flower clients (using `client.py`) with only a small subset of the data (in order to run on any machine),
 but this can be changed by removing the `--toy True` argument in the script. You can simply start everything in a terminal as follows:
 
 ```shell
