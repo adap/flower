@@ -1,6 +1,6 @@
 flwr==1.0.0
 torch==1.13.1
 transformers==4.11.3
-datasets==1.12.1
+datasets>=2.0.0
 evaluate==0.4.0
 scikit-learn==1.0
