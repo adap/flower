@@ -1,3 +1,2 @@
-flwr~=1.4.0
-numpy~=1.21.1
-pandas~=2.0.1
+flwr>=1.0, <2.0
+pandas==2.0.0
