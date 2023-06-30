@@ -202,7 +202,6 @@ def init_defaults(
     client_manager: Optional[ClientManager],
 ) -> Tuple[Server, ServerConfig]:
     """Create server instance if none was given."""
-    # Set default config values
     if config is None:
         config = ServerConfig()
 
