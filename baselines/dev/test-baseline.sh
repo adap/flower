@@ -24,9 +24,9 @@ echo "- docformatter: start"
 python -m docformatter -c -r .
 echo "- docformatter:  done"
 
-#echo "- ruff: start"
-#python -m ruff check .
-#echo "- ruff: done"
+echo "- ruff: start"
+python -m ruff check .
+echo "- ruff: done"
 
 echo "- mypy: start"
 python -m mypy .
