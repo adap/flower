@@ -16,7 +16,9 @@
 
 [Nguyen et al., 2021] strategy.
 
-Paper: https://arxiv.org/abs/2106.06639
+Paper
+
+: https: //arxiv.org/abs/2106.06639
 """
 
 
@@ -117,8 +119,7 @@ class FedBuff(FedAvg):
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available
-        clients."""
+        """Return the sample size and the required number of available clients."""
         _ = num_available_clients
         num_additional_clients = self.concurrency - len(self.busy_clients)
         return num_additional_clients, num_additional_clients
