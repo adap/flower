@@ -82,7 +82,6 @@ def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
 
     def decorator(strategy_class: Strategy) -> Strategy:
         """Return overloaded Strategy Wrapper."""
-
         if TF is None:
             log(WARN, MISSING_EXTRA_TF)
             return strategy_class
