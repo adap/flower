@@ -1,6 +1,6 @@
 ---
-fed-number: 0000
-title: Client
+fed-number: 0003
+title: Client-side design based on Actor Model
 authors: ["@panh99", "@danieljanes"]
 creation-date: 2023-06-29
 last-updated: 2023-06-30
