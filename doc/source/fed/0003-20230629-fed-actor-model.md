@@ -13,13 +13,12 @@ status: provisional
 
 - [Table of Contents](#table-of-contents)
 - [Summary](#summary)
-- [Motivation](#motivation)
-  - [Goals](#goals)
-  - [Non-Goals](#non-goals)
+- [Goals](#goals)
 - [Proposal](#proposal)
-- [Drawbacks](#drawbacks)
-- [Alternatives Considered](#alternatives-considered)
-- [Appendix](#appendix)
+  - [Task](#task)
+  - [Client](#client)
+  - [Router](#router)
+  - [Example](#example)
 
 ## Summary
 
@@ -30,7 +29,7 @@ Thanks to [Daniel](https://github.com/danieljanes)'s idea, the solution to this 
 ![672bd1454270b082a1dd0f6a96a62cc7.png](https://imgtr.ee/images/2023/06/30/672bd1454270b082a1dd0f6a96a62cc7.png)
 
 
-### Goals
+## Goals
 
 1. Clients can be created by Lead Client in the runtime.
 2. Lead Client should call `PullTaskIns` periodically, e.g., once per sec.
@@ -38,11 +37,6 @@ Thanks to [Daniel](https://github.com/danieljanes)'s idea, the solution to this 
 4. Lead Client should wrap the client responses in `TaskRes` and send them back to the server as soon as they are produced.
 5. Clients managed by the same Lead Client should be able to run concurrently, and their message-handling functions should not block one another.
 6. As efficient as possible.
-
-
-### Non-Goals
-
-[TODO]
 
 ## Proposal
 
@@ -107,7 +101,7 @@ class Client:
                 print(e)
 ```
 
-#### Router (Lead Client)
+#### Router
 
 `Router` is the Lead Client which orchestrates the communication among clients and the server, as shown in the following code. It receives and sends `Task` messages in coroutines. Once a sec it checks its `inbox` and forwards the `Task` messages to the corresponding client, which simulates the process of calling `PullTaskIns`. Besides, it will send the client responses to the server as soon as they are put into the `outbox`.
 
