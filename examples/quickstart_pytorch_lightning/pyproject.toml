@@ -12,5 +12,5 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 python = "^3.7"
 flwr = ">=1.0,<2.0"
 # flwr = { path = "../../", develop = true }  # Development
-pytorch-lightning = "1.6.0"
+pytorch-lightning = "1.4.7"
 torchvision = "0.13.0"
