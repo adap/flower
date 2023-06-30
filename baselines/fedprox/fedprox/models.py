@@ -53,7 +53,7 @@ class Net(nn.Module):
 class LogisticRegression(nn.Module):
     """A network for logistic regression using a single fully connected layer.
 
-    As described in Lin 2020 paper :
+    As described in the Li et al., 2020 paper :
 
     [Federated Optimization in Heterogeneous Networks]
     (https://arxiv.org/pdf/1812.06127.pdf)
