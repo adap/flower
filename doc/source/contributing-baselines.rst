@@ -48,6 +48,6 @@ We are adopting `Hydra <https://hydra.cc/>`_ as the default mechanism to manage 
 Usability
 ---------
 
-Flower is known and loved for its usability. Therefore, make sure that your baseline or experiment can be executed with a single command such as :code:`conda run -m <your-baseline>.main` or :code:`python main.py` (when sourced into your environment). We provide you with a `template-baseline <https://github.com/adap/flower/tree/sor_template/baselines/flwr_baselines>`_ to use as guidance when contributing your baseline. Having all baselines follow a homogenous structure helps users to tryout many baselines without the overheads of having to understand each individual codebase. Similarly, by using Hydra throughout, users will immediately know how to parameterise your experiments directly from the command line.
+Flower is known and loved for its usability. Therefore, make sure that your baseline or experiment can be executed with a single command such as :code:`conda run -m <your-baseline>.main` or :code:`python main.py` (when sourced into your environment). We provide you with a `template-baseline <https://github.com/adap/flower/tree/main/baselines/baseline_template>`_ to use as guidance when contributing your baseline. Having all baselines follow a homogenous structure helps users to tryout many baselines without the overheads of having to understand each individual codebase. Similarly, by using Hydra throughout, users will immediately know how to parameterise your experiments directly from the command line.
 
 We look forward to your contribution!
