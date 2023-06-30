@@ -1,4 +1,4 @@
-flwr~=1.4.0
+numpy~=1.22flwr~=1.4.0
 numpy~=1.21.1
 tensorflow~=2.12.0
 tensorflow_privacy~=0.8.9

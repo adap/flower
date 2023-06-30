@@ -1,3 +1,3 @@
-flwr~=1.4.0
+numpy~=1.22flwr~=1.4.0
 mxnet~=1.9.1
 numpy~=1.21.1
