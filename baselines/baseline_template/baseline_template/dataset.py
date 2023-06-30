@@ -1,5 +1,4 @@
-"""
-Handle basic dataset creation.
+"""Handle basic dataset creation.
 
 In case of PyTorch it should return dataloaders for your dataset (for both the clients
 and the server). If you are using a custom dataset class, this module is the place to

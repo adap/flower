@@ -1,8 +1,9 @@
-"""
-Create and connect all the building blocks for your experiments; start the simulation.
+"""Create and connect all the building blocks for your experiments; start the
+simulation.
 
-It includes processioning the dataset, instantiate strategy, specify how the global
-model is going to be evaluated, etc. At the end, this script saves the results.
+It includes processioning the dataset, instantiate strategy, specify how
+the global model is going to be evaluated, etc. At the end, this script
+saves the results.
 """
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
