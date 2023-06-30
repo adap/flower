@@ -16,9 +16,9 @@
 
 [Nguyen et al., 2021] strategy.
 
-Paper
+Paper:
 
-: https: //arxiv.org/abs/2106.06639
+https://arxiv.org/abs/2106.06639
 """
 
 
