@@ -173,4 +173,5 @@ class DPFedAvgFixed(Strategy):
     ) -> Optional[
         Union[Tuple[float, Dict[str, Scalar]], Tuple[float, Dict[str, Scalar], bool]]
     ]:
+        """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
