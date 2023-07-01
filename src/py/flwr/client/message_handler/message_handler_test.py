@@ -25,6 +25,7 @@ from flwr.common import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
+    Parameters,
     serde,
     typing,
 )
@@ -37,32 +38,65 @@ class ClientWithoutProps(Client):
     """Client not implementing get_properties."""
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        pass
+        """Get empty parameters of the client with 'Success' status."""
+        return GetParametersRes(
+            status=typing.Status(code=typing.Code.OK, message="Success"),
+            parameters=Parameters(tensors=[], tensor_type=""),
+        )
 
     def fit(self, ins: FitIns) -> FitRes:
-        pass
+        """Simulate successful training, return no parameters, no metrics."""
+        return FitRes(
+            status=typing.Status(code=typing.Code.OK, message="Success"),
+            parameters=Parameters(tensors=[], tensor_type=""),
+            num_examples=1,
+            metrics={},
+        )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        pass
+        """Simulate successful evaluation, return no metrics."""
+        return EvaluateRes(
+            status=typing.Status(code=typing.Code.OK, message="Success"),
+            loss=1.0,
+            num_examples=1,
+            metrics={},
+        )
 
 
 class ClientWithProps(Client):
     """Client implementing get_properties."""
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
+        """Get fixed properties of the client with 'Success' status."""
         return GetPropertiesRes(
             status=typing.Status(code=typing.Code.OK, message="Success"),
             properties={"str_prop": "val", "int_prop": 1},
         )
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        pass
+        """Get empty parameters of the client with 'Success' status."""
+        return GetParametersRes(
+            status=typing.Status(code=typing.Code.OK, message="Success"),
+            parameters=Parameters(tensors=[], tensor_type=""),
+        )
 
     def fit(self, ins: FitIns) -> FitRes:
-        pass
+        """Simulate successful training, return no parameters, no metrics."""
+        return FitRes(
+            status=typing.Status(code=typing.Code.OK, message="Success"),
+            parameters=Parameters(tensors=[], tensor_type=""),
+            num_examples=1,
+            metrics={},
+        )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        pass
+        """Simulate successful evaluation, return no metrics."""
+        return EvaluateRes(
+            status=typing.Status(code=typing.Code.OK, message="Success"),
+            loss=1.0,
+            num_examples=1,
+            metrics={},
+        )
 
 
 def test_client_without_get_properties() -> None:

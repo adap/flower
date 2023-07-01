@@ -25,7 +25,7 @@ import grpc
 
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_grpc_server
+from flwr.server.fleet.grpc_bidi.grpc_server import start_grpc_server
 
 from .connection import grpc_connection
 
@@ -71,14 +71,14 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
 
 
 @patch(
-    "flwr.server.grpc_server.flower_service_servicer.FlowerServiceServicer.Join",
+    "flwr.server.fleet.grpc_bidi.flower_service_servicer.FlowerServiceServicer.Join",
     mock_join,
 )
 def test_integration_connection() -> None:
     """Create a server and establish a connection to it.
 
-    Purpose of this integration test is to simulate multiple clients
-    with multiple roundtrips between server and client.
+    Purpose of this integration test is to simulate multiple clients with multiple
+    roundtrips between server and client.
     """
     # Prepare
     port = unused_tcp_port()

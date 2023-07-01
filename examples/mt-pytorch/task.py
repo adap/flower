@@ -1,7 +1,6 @@
 import warnings
 from collections import OrderedDict
 
-import flwr as fl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -36,23 +35,36 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
-def train(net, trainloader, epochs):
+def train(net, trainloader, valloader, epochs, device):
     """Train the model on the training set."""
-    criterion = torch.nn.CrossEntropyLoss()
+    print("Starting training...")
+    net.to(device)  # move model to GPU if available
+    criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-    batch_count = 0
+    net.train()
     for _ in range(epochs):
-        for images, labels in tqdm(trainloader):
+        for images, labels in trainloader:
+            images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
-            criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
+            loss = criterion(net(images), labels)
+            loss.backward()
             optimizer.step()
-            batch_count += 1
-            if batch_count == 100:
-                break  # Just do a few batches
+
+    train_loss, train_acc = test(net, trainloader)
+    val_loss, val_acc = test(net, valloader)
+
+    results = {
+        "train_loss": train_loss,
+        "train_accuracy": train_acc,
+        "val_loss": val_loss,
+        "val_accuracy": val_acc,
+    }
+    return results
 
 
 def test(net, testloader):
     """Validate the model on the test set."""
+    net.to(DEVICE)
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
